@@ -1,14 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import {
   BaseSCM,
   GitBranch,
   GitCommit,
-  gitEntityCatalog,
+  GitDataService,
   GitHubSCM,
   GitRepo,
   GitSCM,
@@ -40,32 +40,23 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import {
-  ProjectDoesntExist,
-  SaveAppDetails,
-  SetAppSourceDetails,
-  SetBranch,
-  SetDeployBranch,
-} from '../../../../../../cloud-foundry/src/actions/deploy-applications.actions';
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import {
-  selectDeployAppState,
-  selectDeployBranchName,
-  selectNewProjectCommit,
-  selectPEProjectName,
-  selectProjectExists,
-  selectSourceType,
-} from '../../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
 import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { getCommitGuid } from '../../../../../../git/src/store/git-entity-factory';
-import { DeployApplicationState, SourceType } from '../../../../store/types/deploy-application.types';
+import { DeployApplicationState, ProjectExists, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
 import { GithubProjectExistsDirective } from '../github-project-exists.directive';
 import { DeployApplicationFsComponent } from './deploy-application-fs/deploy-application-fs.component';
+import { FileScannerInfo } from './deploy-application-fs/deploy-application-fs-scanner';
 
 
+
+// Access mode for the gitscm (GitHub / GitLab) source sub-form.
+//  public     — public host repo, no auth
+//  private    — host private repo, access token only (no base URL)
+//  enterprise — custom base URL (GitHub Enterprise / self-hosted GitLab) + token
+export type GitAccessMode = 'public' | 'private' | 'enterprise';
 
 @Component({
 selector: 'app-deploy-application-step2',
@@ -83,22 +74,29 @@ selector: 'app-deploy-application-step2',
 })
 export class DeployApplicationStep2Component
   implements OnInit, OnDestroy, AfterContentInit {
-  private store = inject<Store<CFAppState>>(Store);
   private route = inject(ActivatedRoute);
   private scmService = inject(GitSCMService);
   private httpClient = inject(HttpClient);
   private appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
+  private deployData = inject(CfDeployAppDataService);
+  private gitData = inject(GitDataService);
+  private deployState$ = toObservable(this.deployData.state);
+  private sourceType$$ = toObservable(this.deployData.sourceType);
+  private projectExists$ = toObservable(this.deployData.projectExists);
+  private deployBranchName$ = toObservable(this.deployData.deployBranchName);
+  private deployCommit$ = toObservable(this.deployData.newProjectCommit);
+  private peProjectName$ = toObservable(this.deployData.projectName);
 
 
   @Input() isRedeploy = false;
 
-  commitInfo: GitCommit;
+  commitInfo?: GitCommit;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$!: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
   validate!: Observable<boolean>;
 
-  stepperText$!: Observable<string>;
+  stepperText$!: Observable<string | null | undefined>;
 
   // Observables for source types
   sourceTypeGithub$!: Observable<boolean>;
@@ -107,8 +105,9 @@ export class DeployApplicationStep2Component
   canDeployType$!: Observable<boolean>;
   isLoading$!: Observable<boolean>;
 
-  // Local FS data when file or folder upload
-  // @Input('fsSourceData') fsSourceData;
+  // Local FS data when file or folder upload; bound via ngModel so the
+  // fsLocalSource control participates in form validation.
+  fsSourceData: FileScannerInfo | undefined;
 
   // ---- GIT ----------
   repositoryBranches$!: Observable<GitBranch[]>;
@@ -116,11 +115,15 @@ export class DeployApplicationStep2Component
   projectInfo$!: Observable<GitRepo>;
   commitSubscription!: Subscription;
 
-  sourceType: SourceType;
-  repositoryBranch: GitBranch = null;
-  repository: string;
+  // Set from the source-type stream in ngOnInit before any user action
+  // (Next button / template reads) can fire.
+  sourceType!: SourceType;
+  repositoryBranch?: GitBranch;
+  repository = '';
 
-  scm: GitSCM;
+  // Assigned in setupForGit's source-type subscription before repo/branch
+  // lookups run; reads are all downstream of that assignment.
+  scm!: GitSCM;
 
   cachedSuggestions = {};
 
@@ -129,8 +132,15 @@ export class DeployApplicationStep2Component
 
   // GitHub Enterprise / private repo support
   isInvalidGithubEnterpriseUrl = false;
-  githubEnterpriseUrl: string;
-  accessToken: string;
+  githubEnterpriseUrl = '';
+  accessToken = '';
+
+  // Active git access mode for the gitscm sub-form, driven by the
+  // Public / Private / Enterprise tab strip. Held as local component state —
+  // the store still sees only githubEnterpriseUrl + accessToken. Switching
+  // tabs clears the fields that don't belong to the new mode so a stale base
+  // URL / token is never carried into the deploy.
+  gitMode: GitAccessMode = 'public';
   // --------------
 
   // Git URL
@@ -139,12 +149,13 @@ export class DeployApplicationStep2Component
   // --------------
 
   // ---- Docker ----------
-  dockerAppName: string;
-  dockerImg: string;
-  dockerUsername: string;
+  dockerAppName = '';
+  dockerImg = '';
+  dockerUsername = '';
   // --------------
 
-  @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm: NgForm;
+  // strict: static @ViewChild, resolved by Angular before ngOnInit/ngAfterContentInit run.
+  @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm!: NgForm;
   subscriptions: Array<Subscription> = [];
 
   @ViewChild('fsChooser') fsChooser: any;
@@ -159,38 +170,40 @@ export class DeployApplicationStep2Component
   onNext: StepOnNextFunction = () => {
     // Set the details based on which source type is selected
     if (this.sourceType.group === 'gitscm') {
-      gitEntityCatalog.repo.store.getRepoInfo.getEntityService({
-        projectName: this.repository,
-        scm: this.scm,
-      }).waitForEntity$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
-        if (!repo) { return; }
-        this.store.dispatch(new SaveAppDetails({
+      const branch = this.repositoryBranch;
+      const endpointGuid = this.sourceType.endpointGuid;
+      this.gitData.getRepository(this.scm, this.repository)
+        .waitForValue$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
+        // A gitscm save needs a resolved repo, branch and endpoint; all three
+        // are populated by setupForGit before the step can validate.
+        if (!repo || !branch || !endpointGuid) { return; }
+        this.deployData.saveAppDetails({
           projectName: this.repository,
-          branch: this.repositoryBranch,
-          url: repo.entity.clone_url,
+          branch,
+          url: repo.clone_url,
           accessToken: this.accessToken,
-          commit: this.isRedeploy ? this.commitInfo.sha : undefined,
-          endpointGuid: this.sourceType.endpointGuid,
-        }, null));
+          commit: this.isRedeploy ? this.commitInfo?.sha : undefined,
+          endpointGuid,
+        }, null);
       });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
-      this.store.dispatch(new SaveAppDetails({
+      this.deployData.saveAppDetails({
         projectName: this.gitUrl,
         branch: {
           name: this.gitUrlBranchName,
-          guid: null,
-          projectName: null,
-          scmType: null,
-          endpointGuid: null,
+          guid: '',
+          projectName: '',
+          scmType: '',
+          endpointGuid: '',
         },
-        endpointGuid: null
-      }, null));
+        endpointGuid: ''
+      }, null);
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG) {
-      this.store.dispatch(new SaveAppDetails(null, {
+      this.deployData.saveAppDetails(null, {
         applicationName: this.dockerAppName,
         dockerImage: this.dockerImg,
         dockerUsername: this.dockerUsername,
-      }));
+      });
     }
     return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
   };
@@ -198,7 +211,7 @@ export class DeployApplicationStep2Component
   ngOnInit() {
     this.sourceType$ = combineLatest(
       this.appDeploySourceTypes.getAutoSelectedType(this.route),
-      this.store.select(selectSourceType),
+      this.sourceType$$,
       this.appDeploySourceTypes.types$.pipe(take(1), map(st => st[this.INITIAL_SOURCE_TYPE]))
     ).pipe(
       map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
@@ -224,9 +237,10 @@ export class DeployApplicationStep2Component
       })
     );
 
-    const cfGuid$ = this.store.select(selectDeployAppState).pipe(
-      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails),
-      map((appDetail: DeployApplicationState) => appDetail.cloudFoundryDetails.cloudFoundry)
+    const cfGuid$ = this.deployState$.pipe(
+      filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
+        !!appDetail && !!appDetail.cloudFoundryDetails),
+      map(appDetail => appDetail.cloudFoundryDetails.cloudFoundry)
     );
 
     this.canDeployType$ = combineLatest([
@@ -254,43 +268,41 @@ export class DeployApplicationStep2Component
       this.setupForGit();
     }
 
-    this.store.dispatch(new SetAppSourceDetails(sourceType));
+    this.deployData.setSourceType(sourceType);
   };
 
   ngAfterContentInit() {
-    this.validate = this.sourceSelectionForm.statusChanges.pipe(map(() => {
+    // strict: NgForm.statusChanges is non-null once the form exists, which is
+    // guaranteed by the time ngAfterContentInit runs for the static form.
+    this.validate = this.sourceSelectionForm.statusChanges!.pipe(map(() => {
       return this.sourceSelectionForm.valid || this.isRedeploy;
     }));
   }
 
   /* Git ------------------*/
   private setupForGit() {
-    this.projectInfo$ = this.store.select(selectProjectExists).pipe(
+    // Land the tab strip on the mode that matches any restored auth values.
+    this.gitMode = DeployApplicationStep2Component.deriveGitMode(this.githubEnterpriseUrl, this.accessToken);
+    this.projectInfo$ = this.projectExists$.pipe(
       filter(p => !!p),
       map(p => (!!p.exists && !!p.data) ? p.data : null),
       tap(p => {
         if (!!p && !this.isRedeploy) {
-          this.store.dispatch(new SetDeployBranch(p.default_branch));
+          this.deployData.setDeployBranch(p.default_branch);
         }
       })
     );
 
-    const deployBranchName$ = this.store.select(selectDeployBranchName);
-    const deployCommit$ = this.store.select(selectNewProjectCommit);
+    const deployBranchName$ = this.deployBranchName$;
+    const deployCommit$ = this.deployCommit$;
 
-    this.repositoryBranches$ = this.store
-      .select(selectProjectExists)
+    this.repositoryBranches$ = this.projectExists$
       .pipe(
         // Wait for a new project name change
-        filter(state => state && !state.checking && !state.error && state.exists),
+        filter((state): state is ProjectExists => !!state && !state.checking && !state.error && state.exists),
         distinctUntilChanged((x, y) => x.name.toLowerCase() === y.name.toLowerCase()),
-        // Convert project name into branches pagination observable
-        switchMap(state =>
-          gitEntityCatalog.branch.store.getPaginationService(null, null, {
-            scm: this.scm,
-            projectName: state.name
-          }).entities$
-        ),
+        // Convert project name into branches observable
+        switchMap(state => this.gitData.getBranches(this.scm, state.name)),
         // Find the specific branch we're interested in
         withLatestFrom(deployBranchName$),
         filter(([, branchName]) => !!branchName),
@@ -313,24 +325,20 @@ export class DeployApplicationStep2Component
       tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
         if (branch && !!projectInfo && branch.projectName === projectInfo.full_name) {
-          this.store.dispatch(new SetBranch(branch));
+          this.deployData.setBranch(branch);
 
           if (this.isRedeploy) {
-            const commitSha = commit || branch.commit.sha;
-            const commitGuid = getCommitGuid(this.scm.getType(), projectInfo.full_name, commitSha);
-            const commitEntityService = gitEntityCatalog.commit.store.getEntityService(commitGuid, null, {
-              projectName: projectInfo.full_name,
-              scm: this.scm, commitSha
-            });
+            const commitSha = commit || branch.commit?.sha;
 
             if (this.commitSubscription) {
               this.commitSubscription.unsubscribe();
             }
-            this.commitSubscription = commitEntityService.waitForEntity$.pipe(
-              take(1),
-              map(p => p.entity),
-              tap(p => this.commitInfo = p),
-            ).subscribe();
+            if (!commitSha) { return; }
+            this.commitSubscription = this.gitData.getCommit(this.scm, projectInfo.full_name, commitSha)
+              .waitForValue$.pipe(
+                take(1),
+                tap(p => this.commitInfo = p),
+              ).subscribe();
           }
         }
       })
@@ -338,31 +346,36 @@ export class DeployApplicationStep2Component
 
     this.subscriptions.push(updateBranchAndCommit.subscribe());
 
-    const setSourceTypeModel$ = this.store.select(selectSourceType).pipe(
+    const setSourceTypeModel$ = this.sourceType$$.pipe(
       filter(p => !!p),
       withLatestFrom(this.appDeploySourceTypes.types$),
       tap(([p, sourceTypes]) => {
-        this.sourceType = sourceTypes.find(s => s.id === p.id && (p.endpointGuid ? s.endpointGuid === p.endpointGuid : true));
+        const matched = sourceTypes.find(s => s.id === p.id && (p.endpointGuid ? s.endpointGuid === p.endpointGuid : true));
+        if (!matched) { return; }
+        this.sourceType = matched;
 
-        const newScm = this.scmService.getSCM(this.sourceType.id as GitSCMType, this.sourceType.endpointGuid);
+        const newScm = this.scmService.getSCM(matched.id as GitSCMType, matched.endpointGuid ?? '');
         if (newScm) {
           // User selected one of the SCM options
           if (this.scm && newScm.getType() !== this.scm.getType()) {
             // User changed the SCM type, so reset the project and branch
-            this.repository = null;
-            this.commitInfo = null;
-            this.repositoryBranch = null;
-            this.store.dispatch(new SetBranch(null));
-            this.store.dispatch(new ProjectDoesntExist(''));
-            this.store.dispatch(new SaveAppDetails({ projectName: '', branch: null, endpointGuid: this.sourceType.endpointGuid }, null));
+            this.repository = '';
+            this.commitInfo = undefined;
+            this.repositoryBranch = undefined;
+            this.deployData.setBranch(null);
+            this.deployData.projectDoesntExist('');
+            // Reset clears the project so canDeploy is false again; the branch
+            // has no meaning here (empty placeholder mirrors the cleared project).
+            const clearedBranch: GitBranch = { name: '', guid: '', projectName: '', scmType: '', endpointGuid: '' };
+            this.deployData.saveAppDetails({ projectName: '', branch: clearedBranch, endpointGuid: matched.endpointGuid ?? '' }, null);
           }
           this.scm = newScm;
         }
       })
     );
 
-    const setProjectName = this.store.select(selectPEProjectName).pipe(
-      filter(p => !!p),
+    const setProjectName = this.peProjectName$.pipe(
+      filter((p): p is string => !!p),
       take(1),
       tap(p => {
         this.repository = p;
@@ -372,7 +385,9 @@ export class DeployApplicationStep2Component
     this.subscriptions.push(setSourceTypeModel$.subscribe());
     this.subscriptions.push(setProjectName.subscribe());
 
-    this.suggestedRepos$ = this.sourceSelectionForm.valueChanges.pipe(
+    // strict: NgForm.valueChanges is non-null once the form is initialised,
+    // which holds by the time setupForGit runs after ngOnInit.
+    this.suggestedRepos$ = this.sourceSelectionForm.valueChanges!.pipe(
       tap(form => {
         this.applyGithubEnterpriseAndToken(form?.githubEnterpriseUrl, form?.githubAccessToken);
       }),
@@ -428,14 +443,43 @@ export class DeployApplicationStep2Component
     return observableTimer(500).pipe(
       take(1),
       switchMap(() => this.scm.getMatchingRepositories(this.httpClient, name)),
-      catchError(_e => observableOf(null)),
+      // A failed suggestion lookup yields no suggestions for the typeahead.
+      catchError(_e => observableOf([] as GitSuggestedRepo[])),
       tap(suggestions => (this.cachedSuggestions as { [key: string]: any })[cacheName] = suggestions),
     );
   }
 
   updateBranchName(branch: GitBranch) {
-    this.store.dispatch(new SetDeployBranch(branch.name));
+    this.deployData.setDeployBranch(branch.name);
   }
 
+  // Infer the opening access mode from restored values (redeploy / nav back),
+  // so the tab strip lands on the mode that matches what's already set. A base
+  // URL implies Enterprise even before its token is entered; a token alone
+  // (no URL) implies a Private host repo; neither implies Public.
+  static deriveGitMode(enterpriseUrl: string | undefined, accessToken: string | undefined): GitAccessMode {
+    if (enterpriseUrl) {
+      return 'enterprise';
+    }
+    if (accessToken) {
+      return 'private';
+    }
+    return 'public';
+  }
+
+  // Tab handler: switch the active access mode and clear the now-irrelevant
+  // auth fields (Public → drop URL + token; Private → drop URL, keep token;
+  // Enterprise → keep both), then re-sync the SCM so a cleared token/URL stops
+  // being applied to subsequent repo/branch lookups.
+  setGitMode(mode: GitAccessMode): void {
+    this.gitMode = mode;
+    if (mode === 'public') {
+      this.githubEnterpriseUrl = '';
+      this.accessToken = '';
+    } else if (mode === 'private') {
+      this.githubEnterpriseUrl = '';
+    }
+    this.applyGithubEnterpriseAndToken(this.githubEnterpriseUrl, this.accessToken);
+  }
 
 }

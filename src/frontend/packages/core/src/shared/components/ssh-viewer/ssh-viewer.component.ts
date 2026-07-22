@@ -5,6 +5,7 @@ import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
 
 import { EventWatcherService } from '../../../core/event-watcher/event-watcher.service';
+import { AppProgressBarComponent } from '../progress-bar/app-progress-bar.component';
 
 // Import Xterm and Xterm Fit Addon
 @Component({
@@ -14,7 +15,8 @@ import { EventWatcherService } from '../../../core/event-watcher/event-watcher.s
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule
+    CommonModule,
+    AppProgressBarComponent
   ]
 })
 export class SshViewerComponent implements OnInit, OnDestroy {
@@ -22,7 +24,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   private resizer = inject(EventWatcherService);
 
   @Input()
-  errorMessage: string;
+  errorMessage?: string;
 
   @Input()
   sshStream!: Observable<any>;
@@ -34,7 +36,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   public connectionStatus!: Observable<number>;
 
   public isConnected = false;
-  public isConnecting = false;
+  public attemptingConnection = false;
   private isDestroying = false;
 
   public message = '';
@@ -69,7 +71,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
         this.isConnected = (count !== 0);
         if (this.isConnected) {
           this.xterm.focus();
-          this.isConnecting = false;
+          this.attemptingConnection = false;
           this.resize();
         }
         if (!this.isDestroying) {
@@ -131,7 +133,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   }
 
   disconnect() {
-    this.isConnecting = false;
+    this.attemptingConnection = false;
     this.isConnected = false;
     this.errorMessage = undefined;
     if (this.msgSubscription && !this.msgSubscription.closed) {
@@ -140,7 +142,9 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   }
 
   reconnect() {
-    this.isConnecting = true;
+    this.disconnect();
+    this.attemptingConnection = true;
+    this.changeDetector.detectChanges();
     this.errorMessage = undefined;
     this.xterm.reset();
     this.msgSubscription = this.sshStream

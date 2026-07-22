@@ -1,25 +1,26 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take, filter, map, share, startWith, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction } from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { SaveAppOverrides } from '../../../../actions/deploy-applications.actions';
-import { CFAppState } from '../../../../cf-app-state';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
+import { NewAppCFDetails } from '../../../../store/types/create-application.types';
 import {
-  selectCfDetails,
-  selectDeployAppState,
-  selectSourceType } from '../../../../store/selectors/deploy-application.selector';
-import { OverrideAppDetails, SourceType } from '../../../../store/types/deploy-application.types';
-import { IDomain } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+  DeployApplicationSource,
+  DeployApplicationState,
+  DockerAppDetails,
+  OverrideAppDetails,
+  SourceType,
+} from '../../../../store/types/deploy-application.types';
 import {
   ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { StDomain, StDomainsResponse, StEnvVars, StStack, StStacksResponse } from '../../../../services/endpoint-data/stratos-types';
 import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 
 interface DeployOptionsForm {
@@ -58,21 +59,25 @@ interface DeployOptionsForm {
 })
 export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
-  private store = inject<Store<CFAppState>>(Store);
+  private http = inject(HttpClient);
   private appEnvVarsService = inject(ApplicationEnvVarsHelper);
   private activatedRoute = inject(ActivatedRoute);
+  private deployData = inject(CfDeployAppDataService);
+  private deployState$ = toObservable(this.deployData.state);
+  private deployCfDetails$ = toObservable(this.deployData.cfDetails);
+  private deploySourceType$ = toObservable(this.deployData.sourceType);
 
 
   valid$: Observable<boolean>;
-  domains$!: Observable<APIResource<IDomain>[]>;
-  stacks$!: Observable<APIResource<IDomain>[]>;
+  domains$!: Observable<StDomain[]>;
+  stacks$!: Observable<StStack[]>;
   deployOptionsForm: FormGroup<DeployOptionsForm>;
   subs: Subscription[] = [];
   appGuid!: string;
   stepOpts: any;
 
   public healthCheckTypes = ['http', 'port', 'process'];
-  public sourceType$!: Observable<SourceType>;
+  public sourceType$!: Observable<SourceType | undefined>;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
 
   constructor() {
@@ -109,10 +114,50 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     );
   }
 
+  // Guards the no_route / random_route mutual-exclusivity wiring against
+  // feedback loops: setValue/enable/disable on one control fires the
+  // other's valueChanges, which would otherwise recurse and undo the
+  // address-field state.
+  private syncingRoutes = false;
+
   private disableAddressFields() {
     this.deployOptionsForm.controls.host.disable();
     this.deployOptionsForm.controls.domain.disable();
     this.deployOptionsForm.controls.path.disable();
+  }
+
+  // no_route ("don't create a route") and random_route ("create a random
+  // route") are mutually exclusive — CF rejects `--no-route` together with
+  // `--random-route`. Checking either one CLEARS the other's value (so a
+  // stale flag isn't read out in formToObj and sent to cf push) and
+  // disables it; unchecking re-enables the other. random_route stays
+  // disabled on redeploy (appGuid present).
+  private syncRouteOptions(changed: 'no_route' | 'random_route', checked: boolean) {
+    if (this.syncingRoutes) {
+      return;
+    }
+    this.syncingRoutes = true;
+    try {
+      const controls = this.deployOptionsForm.controls;
+      const other = changed === 'no_route' ? controls.random_route : controls.no_route;
+      if (checked) {
+        // Clear the value FIRST so formToObj never reads a stale `true`,
+        // then lock the control.
+        if (other.value) {
+          other.setValue(false);
+        }
+        other.disable();
+        this.disableAddressFields();
+      } else {
+        const canEnable = other === controls.random_route ? !this.appGuid : true;
+        if (canEnable) {
+          other.enable();
+        }
+        this.enableAddressFields();
+      }
+    } finally {
+      this.syncingRoutes = false;
+    }
   }
 
   private enableAddressFields() {
@@ -122,11 +167,13 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit() {
-    this.sourceType$ = this.store.select(selectSourceType);
+    this.sourceType$ = this.deploySourceType$;
 
     // Set previously supplied docker values
-    this.subs.push(this.store.select(selectDeployAppState).pipe(
-      filter(deployAppState =>
+    this.subs.push(this.deployState$.pipe(
+      filter((deployAppState): deployAppState is DeployApplicationState & {
+        applicationSource: DeployApplicationSource & { dockerDetails: DockerAppDetails };
+      } =>
         !!deployAppState &&
         !!deployAppState.applicationSource &&
         !!deployAppState.applicationSource.dockerDetails &&
@@ -143,57 +190,46 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     const noRouteChanged$ = this.deployOptionsForm.controls.no_route.valueChanges.pipe(startWith(false));
     const randomRouteChanged$ = this.deployOptionsForm.controls.random_route.valueChanges.pipe(startWith(false));
 
-    const cfDetails$ = this.store.select(selectCfDetails).pipe(
-      filter(cfDetails => !!cfDetails && !!cfDetails.cloudFoundry)
+    const cfDetails$ = this.deployCfDetails$.pipe(
+      filter((cfDetails): cfDetails is NewAppCFDetails => !!cfDetails && !!cfDetails.cloudFoundry)
     );
 
-    // Create the domains list for the domains drop down
+    // Create the domains list for the domains drop down. cf push overrides
+    // do not support tcp routes (no way to specify port), so filter them out.
     this.domains$ = cfDetails$.pipe(
-      switchMap(cfDetails =>
-        cfEntityCatalog.domain.store.getOrganizationDomains.getPaginationService(cfDetails.org, cfDetails.cloudFoundry).entities$
-      ),
-      // cf push overrides do not support tcp routes (no way to specify port)
-      map(domains => domains.filter(domain => domain.entity.router_group_type !== 'tcp')),
+      switchMap(cfDetails => this.http.get<StDomainsResponse>(
+        `/pp/v1/cf/org/${cfDetails.cloudFoundry}/${cfDetails.org}/private_domains`,
+      )),
+      map(resp => (resp?.resources ?? []).filter(d => !d.supportedProtocols?.includes('tcp'))),
       share()
     );
 
     this.stacks$ = cfDetails$.pipe(
-      switchMap(cfDetails => cfEntityCatalog.stack.store.getPaginationService(null, cfDetails.cloudFoundry).entities$),
+      switchMap(cfDetails => this.http.get<StStacksResponse>(
+        `/pp/v1/cf/stacks/${cfDetails.cloudFoundry}`,
+      )),
+      map(resp => resp?.resources ?? []),
       share()
     );
 
-    // Ensure that when the no route + random route options are checked the host, domain and path fields are enabled/disabled
-    this.subs.push(noRouteChanged$.subscribe(value => {
-      if (value) {
-        this.disableAddressFields();
-        this.deployOptionsForm.controls.random_route.disable();
-      } else {
-        this.enableAddressFields();
-        if (!this.appGuid) {
-          // This can only be enabled if this is not a redeploy
-          this.deployOptionsForm.controls.random_route.enable();
-        }
-      }
-    }));
-    this.subs.push(combineLatest([
-      noRouteChanged$,
-      randomRouteChanged$
-    ]).subscribe(([noRoute, randomRoute]) => {
-      // control.valueChanges fires whenever the value ... or enabled/disabled state changes. This means whenever noRouteChanged$ changes
-      // randomRoute this also fires ... which undos the host+domain state
-      if (noRoute || randomRoute) {
-        this.disableAddressFields();
-      } else {
-        this.enableAddressFields();
-      }
-    }));
+    // Keep no_route / random_route mutually exclusive (two-way) and toggle
+    // the host/domain/path address fields. See syncRouteOptions for why the
+    // re-entrancy guard is needed.
+    this.subs.push(noRouteChanged$.subscribe(value => this.syncRouteOptions('no_route', !!value)));
+    this.subs.push(randomRouteChanged$.subscribe(value => this.syncRouteOptions('random_route', !!value)));
 
-    // Extract any existing values from the app's env var and assign to form
+    // Extract any existing values from the app's env var and assign to form.
+    // Redeploy path: the wizard was launched against an existing app and the
+    // STRATOS_PROJECT env var (written by a prior deploy step) carries the
+    // overrides we want to preseed.
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     if (this.appGuid) {
       combineLatest(this.domains$, cfDetails$).pipe(
-        switchMap(([, cfDetails]) => this.appEnvVarsService.createEnvVarsObs(this.appGuid, cfDetails.cloudFoundry).entities$),
-        map(applicationEnvVars => this.appEnvVarsService.FetchStratosProject(applicationEnvVars[0].entity)),
+        switchMap(([, cfDetails]) => this.http.get<StEnvVars>(
+          `/pp/v1/cf/apps/${cfDetails.cloudFoundry}/${this.appGuid}/env`,
+        )),
+        map(env => this.appEnvVarsService.FetchStratosProject(env?.environment)),
+        filter((proj): proj is NonNullable<typeof proj> => !!proj),
         take(1)
       ).subscribe(envVars => this.objToForm(envVars.deployOverrides));
     }
@@ -233,8 +269,8 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     controls.name.disable();
     controls.buildpack.setValue(overrides.buildpack);
     controls.instances.setValue(overrides.instances);
-    controls.disk_quota.setValue(parseInt(overrides.diskQuota.replace('MB', ''), 10));
-    controls.memory.setValue(parseInt(overrides.memQuota.replace('MB', ''), 10));
+    controls.disk_quota.setValue(overrides.diskQuota ? parseInt(overrides.diskQuota.replace('MB', ''), 10) : null);
+    controls.memory.setValue(overrides.memQuota ? parseInt(overrides.memQuota.replace('MB', ''), 10) : null);
     controls.no_start.setValue(overrides.doNotStart);
     controls.no_route.setValue(overrides.noRoute);
     // Random route has no affect on redeploy, so disable.
@@ -254,7 +290,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
   }
 
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SaveAppOverrides(this.formToObj(this.deployOptionsForm.controls)));
+    this.deployData.saveAppOverrides(this.formToObj(this.deployOptionsForm.controls));
     return observableOf({
       success: true, data: this.stepOpts
     });

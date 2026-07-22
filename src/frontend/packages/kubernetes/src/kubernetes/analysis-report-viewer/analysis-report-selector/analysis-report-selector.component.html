@@ -2,17 +2,17 @@
   @if (analyzers$ | async; as analyzers) {
     <div class="relative">
       @if (isMenuOpen) {
-        <div class="absolute top-full left-0 mt-1 bg-white border border-gray-200 rounded-md shadow-lg z-50 min-w-48">
+        <div class="absolute top-full left-0 mt-1 bg-content-bg border border-content-border rounded-md shadow-lg z-50 min-w-48">
           @for (analyzer of analyzers; track analyzer) {
             <button (click)="onSelected(analyzer); closeMenu()"
-              class="w-full text-left px-4 py-2 text-sm text-content-text hover:bg-gray-100 first:rounded-t-md"
+              class="w-full text-left px-4 py-2 text-sm text-content-text hover:bg-content-secondary first:rounded-t-md"
             >{{ analyzer.title }}</button>
           }
           @if (analyzers.length > 0) {
-            <div class="border-t border-gray-200 my-1"></div>
+            <div class="border-t border-content-border my-1"></div>
           }
           <button (click)="refreshReports($event); closeMenu()"
-          class="w-full text-left px-4 py-2 text-sm text-content-text hover:bg-gray-100 rounded-b-md">Refresh</button>
+          class="w-full text-left px-4 py-2 text-sm text-content-text hover:bg-content-secondary rounded-b-md">Refresh</button>
         </div>
       }
       <!--
@@ -21,7 +21,7 @@
       issues when arriving on an empty page and kicking off a run. The call to refresh the list returns too quickly and
       doesn't contain the new report. This leaves user with no way to see report/refresh reports list
       -->
-      <button (click)="toggleMenu()" class="flex items-center justify-between px-4 py-2 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500">
+      <button (click)="toggleMenu()" class="flex items-center justify-between px-4 py-2 bg-content-bg border border-content-border rounded-md shadow-sm hover:bg-content-secondary focus:outline-none focus:ring-2 focus:ring-primary">
         <span class="text-content-text">{{ prompt }}</span>
         @if (selection) {
           <span class="text-content-text">: {{ selection.title }}</span>

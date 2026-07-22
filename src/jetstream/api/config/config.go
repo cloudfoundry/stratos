@@ -6,7 +6,6 @@ import (
 	"bufio"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -17,8 +16,6 @@ import (
 	"github.com/govau/cf-common/env"
 	log "github.com/sirupsen/logrus"
 )
-
-const secretsDir = "/etc/secrets"
 
 // APIKeysConfigValue - special type for configuring whether API keys feature is enabled
 type APIKeysConfigValue string
@@ -190,11 +187,12 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 	case reflect.String:
 		apiKeysConfigType := reflect.TypeOf((*APIKeysConfigValue)(nil)).Elem()
 		userEndpointsConfigType := reflect.TypeOf((*UserEndpointsConfigValue)(nil)).Elem()
-		if typ == apiKeysConfigType {
+		switch typ {
+		case apiKeysConfigType:
 			newVal, err = parseAPIKeysConfigValue(val)
-		} else if typ == userEndpointsConfigType {
+		case userEndpointsConfigType:
 			newVal, err = parseUserEndpointsConfigValue(val)
-		} else {
+		default:
 			newVal = val
 		}
 	default:
@@ -218,11 +216,11 @@ func SetStructFieldValue(value reflect.Value, field reflect.Value, val string) e
 // in /etc/secrets/hello-there
 func NewSecretsDirLookup(secretsDir string) env.Lookup {
 	return func(name string) (string, bool) {
-		name = strings.ToLower(strings.Replace(name, "_", "-", -1))
+		name = strings.ToLower(strings.ReplaceAll(name, "_", "-"))
 		filename := filepath.Join(secretsDir, name)
 
 		if _, err := os.Stat(filename); err == nil {
-			contents, err := ioutil.ReadFile(filename)
+			contents, err := os.ReadFile(filename)
 			if err != nil {
 				log.Warnf("Error reading secrets file: %s, %s", filename, err)
 				return "", false
@@ -232,20 +230,6 @@ func NewSecretsDirLookup(secretsDir string) env.Lookup {
 		// File does not exist
 		return "", false
 	}
-}
-
-type notFoundErr string
-
-func isNotFoundErr(err error) bool {
-	if err == nil {
-		return false
-	}
-	_, ok := err.(notFoundErr)
-	return ok
-}
-
-func (n notFoundErr) Error() string {
-	return fmt.Sprintf("could not find secret file: %s", string(n))
 }
 
 // NewConfigFileLookup - Load the configuration values in the specified config file if it exists
@@ -261,7 +245,9 @@ func NewConfigFileLookup(path string) env.Lookup {
 		log.Warn("Error reading configuration file, ignoring this file: ", err)
 		return env.NoopLookup
 	}
-	defer file.Close()
+	defer func() {
+		_ = file.Close()
+	}()
 
 	loadedConfig := make(map[string]string)
 	scanner := bufio.NewScanner(file)

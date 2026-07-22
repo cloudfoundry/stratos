@@ -18,9 +18,17 @@ import { ApplicationTabsBaseComponent } from './application/application-tabs-bas
 import { BuildTabComponent } from './application/application-tabs-base/tabs/build-tab/build-tab.component';
 import { EventsTabComponent } from './application/application-tabs-base/tabs/events-tab/events-tab.component';
 import { GitSCMTabComponent } from './application/application-tabs-base/tabs/gitscm-tab/gitscm-tab.component';
-import { InstancesTabComponent } from './application/application-tabs-base/tabs/instances-tab/instances-tab.component';
 import { LogStreamTabComponent } from './application/application-tabs-base/tabs/log-stream-tab/log-stream-tab.component';
 import { MetricsTabComponent } from './application/application-tabs-base/tabs/metrics-tab/metrics-tab.component';
+import {
+  RevisionDetailComponent,
+} from './application/application-tabs-base/tabs/revisions-tab/revision-detail/revision-detail.component';
+import {
+  RevisionsCompareComponent,
+} from './application/application-tabs-base/tabs/revisions-tab/revisions-compare/revisions-compare.component';
+import {
+  RevisionsTabComponent,
+} from './application/application-tabs-base/tabs/revisions-tab/revisions-tab.component';
 import { RoutesTabComponent } from './application/application-tabs-base/tabs/routes-tab/routes-tab/routes-tab.component';
 import { ServicesTabComponent } from './application/application-tabs-base/tabs/services-tab/services-tab.component';
 import { VariablesTabComponent } from './application/application-tabs-base/tabs/variables-tab/variables-tab.component';
@@ -70,6 +78,16 @@ export const APPLICATIONS_ROUTES: Routes = [
       {
         path: ':endpointId/:id',
         component: ApplicationBaseComponent,
+        // Keep the app-detail shell alive while the user switches side tabs
+        // (Summary/Logs/Variables/...). Without this the CustomReuseStrategy
+        // tears down ApplicationBaseComponent on every tab click, re-running
+        // its eager data load — including the env-vars fetch that emits an
+        // audit.app.environment.show event each time. The strategy only
+        // reuses when the route params (:endpointId/:id) also match, so
+        // navigating to a different app still rebuilds. (#5519)
+        data: {
+          reuseRoute: ApplicationBaseComponent
+        },
         children: [
           {
             path: 'delete',
@@ -102,12 +120,35 @@ export const APPLICATIONS_ROUTES: Routes = [
             path: '',
             component: ApplicationTabsBaseComponent,
             data: {
-              extensionsActionsKey: StratosActionType.Application
+              extensionsActionsKey: StratosActionType.Application,
+              // Persist the tabs shell across tab switches too (see the
+              // parent route's reuseRoute note). Its path is empty so its
+              // params never change; it rebuilds only when the parent does
+              // (i.e. on navigation to a different app). (#5519)
+              reuseRoute: ApplicationTabsBaseComponent
             },
             children: [
-              { path: '', redirectTo: 'summary', pathMatch: 'full' },
+              // Function-form redirect so the ?breadcrumbs= query param
+              // (set by row links on scoped apps walls) survives the
+              // empty-path → summary hop. Default `redirectTo: 'summary'`
+              // strips query params, which broke the "back to CF-scoped
+              // applications" breadcrumb. RedirectFunction must return
+              // `string | UrlTree`, so we append the query string to the
+              // path manually.
+              {
+                path: '',
+                redirectTo: ({ queryParams }) => {
+                  const qs = Object.entries(queryParams)
+                    .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+                    .join('&');
+                  return qs ? `summary?${qs}` : 'summary';
+                },
+                pathMatch: 'full',
+              },
               { path: 'summary', component: BuildTabComponent },
-              { path: 'instances', component: InstancesTabComponent },
+              // Instances content now lives in an accordion on the Summary tab;
+              // redirect legacy deep links/bookmarks so they don't 404.
+              { path: 'instances', redirectTo: 'summary', pathMatch: 'full' },
               { path: 'routes', component: RoutesTabComponent },
               { path: 'log-stream', component: LogStreamTabComponent },
               { path: 'services', component: ServicesTabComponent },
@@ -115,6 +156,9 @@ export const APPLICATIONS_ROUTES: Routes = [
               { path: 'events', component: EventsTabComponent },
               { path: 'gitscm', component: GitSCMTabComponent },
               { path: 'metrics', component: MetricsTabComponent },
+              { path: 'revisions', component: RevisionsTabComponent },
+              { path: 'revisions/compare', component: RevisionsCompareComponent },
+              { path: 'revisions/:revisionGuid', component: RevisionDetailComponent },
               {
                 path: '**',
                 component: PageNotFoundComponentComponent,

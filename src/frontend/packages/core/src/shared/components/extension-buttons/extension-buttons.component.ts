@@ -1,9 +1,7 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
-import { Store } from '@ngrx/store';
-import { AppState } from '@stratosui/store';
 import { of } from 'rxjs';
 
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -26,8 +24,6 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ExtensionButtonsComponent implements OnInit {
-  private store = inject<Store<AppState>>(Store);
-
 
   public extensionActions: StratosActionMetadata[] = [];
 
@@ -36,7 +32,7 @@ export class ExtensionButtonsComponent implements OnInit {
   ngOnInit() {
     this.extensionActions = getActionsFromExtensions(this.type).map(value => ({
       ...value,
-      visible$: value.visible$ || value.visible ? value.visible(this.store) : of(true)
+      visible$: value.visible$ || of(true)
     }));
   }
 }

@@ -1,7 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, signal, Injector, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
+import { BrowserStandardEncoder, EndpointModel, entityCatalog } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -23,7 +22,6 @@ interface BackupRequest {
   providedIn: 'root'
 })
 export class BackupEndpointsService {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
   private http = inject(HttpClient);
   private injector = inject(Injector);
 
@@ -46,6 +44,9 @@ export class BackupEndpointsService {
   // State Related
   initialize(endpoints: EndpointModel[]) {
     endpoints.forEach((entity: EndpointModel) => {
+      if (!entity.guid) {
+        return;
+      }
       this.state[entity.guid] = {
         [BackupEndpointTypes.ENDPOINT]: false,
         [BackupEndpointTypes.CONNECT]: BackupEndpointConnectionTypes.NONE,
@@ -86,10 +87,13 @@ export class BackupEndpointsService {
     }
 
     // All other settings require endpoint to be backed up
-    if (!this.state[endpoint.guid] || !this.state[endpoint.guid][BackupEndpointTypes.ENDPOINT]) {
+    if (!endpoint.guid || !this.state[endpoint.guid] || !this.state[endpoint.guid][BackupEndpointTypes.ENDPOINT]) {
       return false;
     }
 
+    if (!endpoint.cnsi_type) {
+      return false;
+    }
     const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
     // The endpoint type supports connection details
     if (epType.unConnectable) {

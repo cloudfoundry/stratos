@@ -1,4 +1,4 @@
-import { stratosEndpointGuidKey } from '../entity-request-pipeline/pipeline.types';
+import { stratosEndpointGuidKey } from '../types/entity-pipeline.types';
 
 export const mergeState = (state: any, newState: any) => {
   const baseState = { ...state };
@@ -69,7 +69,7 @@ function shouldMerge(newState: any, baseState: any, entityKey: string) {
   return typeof newState[entityKey] !== 'string' && baseState[entityKey] && Object.keys(baseState[entityKey]);
 }
 
-export const pick = <O, K extends keyof O>(o: O, keys: string[]): Pick<O, K> => {
+export const pick = <O, K extends keyof O>(o: O, keys: string[]): Pick<O, K> | null => {
   const copy: any = {};
   if (!o) {
     return null;

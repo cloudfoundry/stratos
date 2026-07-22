@@ -18,7 +18,6 @@ import {
   IApp,
   IAppSummary,
   IBuildpack,
-  ICfV2Info,
   IDomain,
   IFeatureFlag,
   IOrganization,
@@ -37,12 +36,10 @@ import { AppSummaryActionBuilders } from './entity-action-builders/application-s
 import { ApplicationActionBuilders } from './entity-action-builders/application.action-builders';
 import { BuildpackActionBuilders } from './entity-action-builders/buildpack.action-builders';
 import { CfEventActionBuilders } from './entity-action-builders/cf-event.action-builders';
-import { CfInfoDefinitionActionBuilders } from './entity-action-builders/cf-info.action-builders';
 import { DomainActionBuilders } from './entity-action-builders/domin.action-builder';
 import { FeatureFlagActionBuilders } from './entity-action-builders/feature-flag.action-builder';
 import { OrganizationActionBuilders } from './entity-action-builders/organization.action-builders';
 import { QuotaDefinitionActionBuilder } from './entity-action-builders/quota-definition.action-builders';
-import { RoutesActionBuilders } from './entity-action-builders/routes.action-builder';
 import { SecurityGroupBuilders } from './entity-action-builders/security-groups.action-builder';
 import { ServiceBindingActionBuilders } from './entity-action-builders/service-binding.action-builders';
 import { ServiceBrokerActionBuilders } from './entity-action-builders/service-broker.entity-builders';
@@ -92,12 +89,6 @@ export class CfEntityCatalog {
   public privateDomain!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
     APIResource<IPrivateDomain>
-  >;
-
-  public cfInfo!: StratosBaseCatalogEntity<
-    IFavoriteMetadata,
-    APIResource<ICfV2Info>,
-    CfInfoDefinitionActionBuilders
   >;
 
   public appStats!: StratosBaseCatalogEntity<
@@ -174,8 +165,7 @@ export class CfEntityCatalog {
 
   public route!: StratosBaseCatalogEntity<
     IFavoriteMetadata,
-    APIResource<IRoute>,
-    RoutesActionBuilders
+    APIResource<IRoute>
   >;
 
   public stack!: StratosBaseCatalogEntity<
@@ -206,10 +196,6 @@ export class CfEntityCatalog {
     IFavoriteMetadata,
     APIResource<IOrganization>,
     OrganizationActionBuilders
-  >;
-
-  public metric!: StratosBaseCatalogEntity<
-    IFavoriteMetadata
   >;
 
   public userProvidedService!: StratosBaseCatalogEntity<

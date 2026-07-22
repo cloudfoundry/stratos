@@ -25,7 +25,7 @@ export class NoContentMessageComponent implements AfterViewInit {
   @Input() icon?: string;
   @Input() iconFont?: string;
   @Input() firstLine?: string;
-  @Input() secondLine?: NoContentMessageLine;
+  @Input() secondLine?: NoContentMessageLine | null;
   @Input() otherLines?: NoContentMessageLine[];
   @Input() toolbarLink?: {
     text: string;

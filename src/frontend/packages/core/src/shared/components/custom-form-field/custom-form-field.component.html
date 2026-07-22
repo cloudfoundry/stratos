@@ -18,19 +18,30 @@
   <div class="form-field-wrapper relative">
 
     <!-- Main form field flex container -->
-    <div class="form-field-flex flex items-baseline box-border w-full relative transition-all duration-200">
+    <div class="form-field-flex flex items-baseline box-border relative transition-all duration-200"
+         [class.w-full]="!fitContent"
+         [class.w-max]="fitContent"
+         [class.max-w-full]="fitContent">
 
       <!-- Prefix (optional) -->
       @if (hasPrefix) {
         <div class="form-field-prefix flex items-center pr-2 transition-colors duration-200"
-          >
+             [class]="prefixSuffixColorClasses">
           <ng-content select="[matPrefix], span[matPrefix]"></ng-content>
         </div>
       }
 
-      <!-- Input infix with floating label -->
-      <div class="form-field-infix block relative flex-auto min-w-0"
-        style="padding: 0.25em 0; min-width: 180px;">
+      <!-- Input infix with floating label.
+           Default flex-auto + 180px min-width gives a comfortable
+           input width inside a full-width form-field. fitContent mode
+           shrinks the infix to its content so the trigger fits the
+           value (e.g. select showing "run.adepttech.ca"). -->
+      <div class="form-field-infix block relative min-w-0"
+           [class.flex-auto]="!fitContent"
+           [class.flex-none]="fitContent"
+           [class.w-max]="fitContent"
+           [style.padding]="'0.25em 0'"
+           [style.min-width.px]="fitContent ? null : 180">
 
         <!-- Input content -->
         <ng-content select="input, textarea, select, app-select"></ng-content>
@@ -50,13 +61,14 @@
       </div>
 
       <!-- Suffix -->
-      <div class="form-field-suffix flex items-center pl-2 gap-1 transition-colors duration-200">
+      <div class="form-field-suffix flex items-center pl-2 gap-1 transition-colors duration-200"
+           [class]="prefixSuffixColorClasses">
         <ng-content select="[matSuffix], span[matSuffix]"></ng-content>
 
         <!-- Error icon indicator -->
         @if (isInvalid) {
           <svg
-            class="error-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200"
+            class="error-icon w-5 h-5 shrink-0 transition-opacity duration-200 text-danger"
             viewBox="0 0 20 20"
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
@@ -70,7 +82,7 @@
         <!-- Success icon indicator — only when there's an actual value -->
         @if (isValid && hasValue) {
           <svg
-            class="success-icon w-5 h-5 flex-shrink-0 transition-opacity duration-200"
+            class="success-icon w-5 h-5 shrink-0 transition-opacity duration-200 text-success"
             viewBox="0 0 20 20"
             fill="currentColor"
             xmlns="http://www.w3.org/2000/svg"
@@ -85,9 +97,11 @@
 
     <!-- Underline (for standard and legacy appearances) -->
     @if (appearance === 'standard' || appearance === 'legacy') {
-      <div class="form-field-underline relative w-full h-px transition-colors duration-200">
+      <div class="form-field-underline relative w-full h-px transition-colors duration-200"
+           [class]="underlineColorClasses">
       <span class="form-field-ripple absolute bottom-0 left-0 w-full h-0.5
-                   transform scale-x-0 origin-center transition-transform duration-300 ease-out"></span>
+                   transform origin-center transition-transform duration-300 ease-out"
+            [class]="rippleColorClasses"></span>
       </div>
     }
 
@@ -96,10 +110,10 @@
 
       <!-- Error Messages -->
       @if (isInvalid && errorMessage) {
-        <div class="form-field-error-wrapper flex items-start gap-1 animate-slideDown"
+        <div class="form-field-error-wrapper flex items-start gap-1 animate-slideDown text-danger"
           role="alert"
           aria-live="polite">
-          <svg class="w-4 h-4 flex-shrink-0 mt-0.5"
+          <svg class="w-4 h-4 shrink-0 mt-0.5"
             fill="currentColor"
             viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
@@ -118,8 +132,7 @@
 
       <!-- Hint Text (only shown when no errors) -->
       @if (!isInvalid && hintLabel) {
-        <div class="form-field-hint-wrapper flex justify-between gap-2"
-          >
+        <div class="form-field-hint-wrapper flex justify-between gap-2 text-content-muted">
           <div class="form-field-hint flex-1 text-xs leading-tight"
             [id]="inputId + '-hint'">
             {{ hintLabel }}

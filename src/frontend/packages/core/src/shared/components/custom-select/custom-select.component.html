@@ -1,6 +1,6 @@
 <div class="custom-select relative inline-block w-full min-w-[100px] font-inherit bg-[var(--input-bg)] text-[var(--input-text)] border-none rounded-md"
   [ngClass]="{
-    'opacity-60 pointer-events-none cursor-not-allowed': disabled,
+    'disabled opacity-60 pointer-events-none cursor-not-allowed': disabled,
     'open': isOpen,
     'invalid': invalid
   }"
@@ -16,21 +16,38 @@
     (click)="toggle()"
     (keydown.enter)="toggle()"
     (keydown.space)="toggle(); $event.preventDefault()">
-    <span class="flex-1"
-      [class.select-trigger-placeholder]="!displayValue || displayValue === ''"
-      [class.select-trigger-value]="displayValue && displayValue !== ''">
-      {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
-      @if (required && (!displayValue || displayValue === '')) {
-        <span class="text-red-500 dark:text-red-400 ml-0.5 font-medium" aria-label="required">*</span>
-      }
+    <!-- Trigger label area. Grid-stacks an invisible sizer (longest
+         option text) and the visible selected value in the same cell so
+         the trigger width matches the widest option once options arrive
+         and stays stable across selection changes. -->
+    <span class="flex-1 min-w-0 grid items-center">
+      <span class="invisible whitespace-nowrap col-start-1 row-start-1 pointer-events-none pr-1"
+            aria-hidden="true">{{ longestOptionText || ' ' }}</span>
+      <span class="col-start-1 row-start-1 truncate"
+        [class.select-trigger-placeholder]="!displayValue || displayValue === ''"
+        [class.select-trigger-value]="displayValue && displayValue !== ''">
+        {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
+        @if (required && (!displayValue || displayValue === '')) {
+          <span class="text-danger ml-0.5 font-medium" aria-label="required">*</span>
+        }
+      </span>
     </span>
     <div class="flex items-center gap-1 ml-2">
-      <div class="text-[var(--text-muted,#666)] flex items-center transition-transform duration-200"
-        [class.rotate-180]="isOpen">
-        <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </div>
+      @if (loading) {
+        <div class="text-[var(--text-muted,#666)] flex items-center" aria-label="Loading">
+          <svg class="animate-spin" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25"/>
+            <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </div>
+      } @else {
+        <div class="text-[var(--text-muted,#666)] flex items-center transition-transform duration-200"
+          [class.rotate-180]="isOpen">
+          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+      }
     </div>
   </div>
 
@@ -40,6 +57,20 @@
     [style.top]="dropdownTop"
     [style.left]="dropdownLeft"
     [style.min-width]="dropdownWidth">
+    <!-- Type-to-filter input. Shown when the option list is long enough
+         to be tedious to scan (>5 options). Filters case-insensitively
+         on each option's display text via showsOnly applied to wrapper
+         elements; selection logic is unchanged. -->
+    @if (showSearch) {
+      <div class="sticky top-0 z-10 bg-[var(--card-bg,white)] dark:bg-[var(--card-bg,#1e293b)] border-b border-[var(--content-border,#e5e7eb)] dark:border-[var(--content-border,#475569)] p-2">
+        <input #searchInput type="text" placeholder="Filter…" aria-label="Filter options"
+          class="w-full px-2 py-1 text-sm border border-[var(--input-border,#d1d5db)] rounded bg-[var(--input-bg)] text-[var(--input-text)] focus:outline-none focus:border-primary"
+          [value]="searchTerm"
+          (input)="onSearchInput($event)"
+          (click)="$event.stopPropagation()"
+          (keydown)="$event.stopPropagation()" />
+      </div>
+    }
     <div class="options-container" role="listbox" tabindex="-1"
       [id]="'select-listbox-' + (id || name)"
       (click)="onOptionsClick($event)"

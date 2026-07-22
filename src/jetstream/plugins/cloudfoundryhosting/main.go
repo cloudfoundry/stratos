@@ -37,8 +37,7 @@ func init() {
 
 // CFHosting is a plugin to configure Stratos when hosted in Cloud Foundry
 type CFHosting struct {
-	portalProxy  api.PortalProxy
-	endpointType string
+	portalProxy api.PortalProxy
 }
 
 // Package initialization
@@ -288,12 +287,16 @@ func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc 
 			if err != nil || guid == nil {
 				guid = uuid.NewV4().String()
 				session.Values[cfSessionCookieName] = guid
-				ch.portalProxy.SaveSession(c, session)
+				if err := ch.portalProxy.SaveSession(c, session); err != nil {
+					log.Warnf("Unable to save session for Cloud Foundry session affinity: %v", err)
+				}
 			}
 			sessionGUID := fmt.Sprintf("%s", guid)
 			// Set the JSESSIONID coolie for Cloud Foundry session affinity
 			w := c.Response().Writer
 			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
+			// CF hosting always terminates TLS (X-Forwarded-Proto is enforced above)
+			cookie.Secure = true
 			http.SetCookie(w, cookie)
 		}
 		return h(c)

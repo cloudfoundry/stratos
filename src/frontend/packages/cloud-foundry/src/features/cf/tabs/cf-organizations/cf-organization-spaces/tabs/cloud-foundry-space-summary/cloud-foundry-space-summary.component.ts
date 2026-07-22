@@ -1,20 +1,17 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map, pairwise, startWith, tap } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig, ConfirmationDialogService } from '@stratosui/core';
-import { RouterNav, AppState, entityCatalog, selectDeletionInfo } from '@stratosui/store';
-import { spaceEntityType } from '../../../../../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../../../../cf-types';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import { CfSpacesSignalConfigService } from '../../../../../../../shared/signal-list-configs/space/cf-spaces-signal-config.service';
 import {
   PageSubNavComponent,
   TileGridComponent,
@@ -54,11 +51,12 @@ export class CloudFoundrySpaceSummaryComponent {
   cfOrgService = inject(CloudFoundryOrganizationService);
   cfSpaceService = inject(CloudFoundrySpaceService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private store = inject<Store<AppState>>(Store);
   private snackBar = inject(TailwindSnackBarService);
+  private router = inject(Router);
+  private spacesConfig = inject(CfSpacesSignalConfigService);
 
   detailsLoading$: Observable<boolean>;
-  name$: Observable<string>;
+  name$?: Observable<string>;
   public permsSpaceEdit = CfCurrentUserPermissions.SPACE_EDIT;
   public permsSpaceDelete = CfCurrentUserPermissions.SPACE_DELETE;
 
@@ -68,7 +66,7 @@ export class CloudFoundrySpaceSummaryComponent {
 
     this.detailsLoading$ = combineLatest([
       // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
-      cfEndpointService.appsPagObs.fetchingEntities$.pipe(
+      cfEndpointService.appsLoading$.pipe(
         filter(loading => !loading)
       ),
       cfSpaceService.userProvidedServiceInstancesCount$
@@ -76,58 +74,48 @@ export class CloudFoundrySpaceSummaryComponent {
       map(() => false),
       startWith(true)
     );
-    this.name$ = cfSpaceService.space$.pipe(
-      map(space => space.entity.entity.name),
-      take(1)
-    );
   }
 
   deleteSpaceWarn = () => {
-    this.name$.pipe(
-      take(1)
-    ).subscribe(name => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Delete Space',
-        {
-          textToMatch: name
-        },
-        'Delete',
-        true,
-      );
-      this.confirmDialog.open(confirmation, this.deleteSpace);
-    });
+    const name = this.cfSpaceService.spaceDataService.space()?.name;
+    if (!name) return;
+    const confirmation = new ConfirmationDialogConfig(
+      'Delete Space',
+      { textToMatch: name },
+      'Delete',
+      true,
+    );
+    this.confirmDialog.open(confirmation, this.deleteSpace);
   }
 
-  deleteSpace = () => {
-    const spaceEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, spaceEntityType);
-    this.cfOrgService.deleteSpace(
-      this.cfSpaceService.spaceGuid,
-      this.cfSpaceService.orgGuid,
-      this.cfSpaceService.cfGuid
-    );
-
-    this.store.select(selectDeletionInfo(spaceEntity.entityKey, this.cfSpaceService.spaceGuid)).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      tap(([, newV]) => {
-        if (newV.deleted) {
-          this.redirectToOrgSpaces();
-        } else if (newV.error) {
-          this.snackBar.open(`Failed to delete space: ${newV.message}`, 'Close');
-        }
-      })
-    ).subscribe();
+  // Signal-native delete: drives the native DELETE
+  // /pp/v1/cf/spaces/{cnsi}/{spaceGuid} handler via
+  // CfSpacesSignalConfigService. The underlying refresh inside that
+  // call only re-fetches if a sibling consumer (the org-spaces L5
+  // list) has already initialized the singleton with this (cnsi, org)
+  // tuple — which is the only path that produces a visible row to act
+  // on anyway. After the write resolves we navigate back to the
+  // org-spaces list; on failure we surface a snackbar and stay on
+  // the page.
+  deleteSpace = async () => {
+    const cnsi = this.cfSpaceService.cfGuid;
+    const spaceGuid = this.cfSpaceService.spaceGuid;
+    try {
+      await this.spacesConfig.deleteSpace(cnsi, spaceGuid);
+      this.redirectToOrgSpaces();
+    } catch (err: any) {
+      const msg = err?.message ?? err;
+      this.snackBar.error(`Failed to delete space: ${msg}`, 'Close');
+    }
   }
 
   redirectToOrgSpaces() {
-    this.store.dispatch(new RouterNav({
-      path: [
-        'cloud-foundry',
-        this.cfSpaceService.cfGuid,
-        'organizations',
-        this.cfSpaceService.orgGuid,
-        'spaces'
-      ]
-    }));
+    this.router.navigate([
+      'cloud-foundry',
+      this.cfSpaceService.cfGuid,
+      'organizations',
+      this.cfSpaceService.orgGuid,
+      'spaces'
+    ]);
   }
 }

@@ -1,6 +1,12 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewEncapsulation, OnChanges, inject } from '@angular/core';
-import { ChartConfiguration, ChartEvent, ActiveElement } from 'chart.js';
+import { ChartConfiguration, ChartEvent } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
+
+import {
+  AppAutoscalerMetricDataLine,
+  AppAutoscalerMetricDataPoint,
+  AppAutoscalerMetricLegend,
+} from '../../../../../store/app-autoscaler.types';
 
 @Component({
   selector: 'app-autoscaler-combo-chart-component',
@@ -20,56 +26,40 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   @Input() width = 400;
   @Input() height = 300;
   @Input() legend = false;
+  @Input() xAxis = false;
+  @Input() yAxis = false;
+  @Input() showXAxisLabel = false;
+  @Input() showYAxisLabel = false;
+  @Input() showGridLines = true;
+  @Input() tooltipDisabled = false;
+  @Input() animations = true;
   @Input() xAxisLabel!: string;
   @Input() yAxisLabel!: string;
-  @Input() results: any[] = [];
-  @Input() lineChart: any[] = [];
+  // Name of the metric series; used as the bar dataset label (tooltips).
+  @Input() metricName!: string;
+  // Ensure the y axis extends at least this far, so trigger thresholds
+  // near the top of the range stay visible.
+  @Input() yScaleMax?: number;
+  // Flat time-bucket points — one bar per point.
+  @Input() results: AppAutoscalerMetricDataPoint[] = [];
+  // Trigger threshold mark-lines: one flat line series per scaling rule.
+  @Input() lineChart: AppAutoscalerMetricDataLine[] = [];
+  // Colour overrides matched by name: time-bucket names for the bars plus
+  // trigger names for the threshold lines (see buildMetricColorData).
+  @Input() customColors: AppAutoscalerMetricDataPoint[] = [];
+  // Informational legend entries (trigger threshold ranges) shown instead
+  // of the dataset labels, matching the legacy custom legend.
+  @Input() legendData: AppAutoscalerMetricLegend[] = [];
   @Input() colorSchemeLine: any;
   @Input() scheme: any;
 
+  // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped chart's (select) event under the same name
   @Output() select = new EventEmitter();
   @Output() activate = new EventEmitter();
   @Output() deactivate = new EventEmitter();
 
   public comboChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
-  public comboChartOptions: ChartConfiguration['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    interaction: {
-      intersect: false,
-    },
-    scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: ''
-        }
-      },
-      y: {
-        type: 'linear',
-        display: true,
-        position: 'left',
-        title: {
-          display: true,
-          text: ''
-        }
-      },
-      y1: {
-        type: 'linear',
-        display: true,
-        position: 'right',
-        grid: {
-          drawOnChartArea: false,
-        }
-      }
-    },
-    plugins: {
-      legend: {
-        display: true
-      }
-    }
-  };
+  public comboChartOptions: ChartConfiguration['options'] = this.buildOptions();
 
   ngOnChanges() {
     this.updateChartData();
@@ -77,71 +67,108 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   }
 
   private updateChartData() {
-    if (!this.results && !this.lineChart) {
-      this.comboChartData = { labels: [], datasets: [] };
-      return;
-    }
+    const results = this.results ?? [];
+    const lines = this.lineChart ?? [];
+    const colorByName = new Map<string, string>((this.customColors ?? []).map(item => [item.name, String(item.value)]));
 
-    // Get labels from the data
-    const labels = this.results && this.results.length > 0
-      ? this.results[0].series.map((item: any) => new Date(item.name).toLocaleDateString())
-      : [];
+    // Bars: one per pre-formatted time bucket, coloured by trigger state.
+    const barFallback: string = this.scheme?.domain?.[0] ?? '#01579b';
+    const datasets: ChartConfiguration['data']['datasets'] = [{
+      type: 'bar',
+      label: this.metricName,
+      data: results.map(point => Number(point.value)),
+      backgroundColor: results.map(point => colorByName.get(point.name) || barFallback),
+      yAxisID: 'y',
+    }];
 
-    const datasets: any[] = [];
-
-    // Add bar datasets
-    if (this.results) {
-      this.results.forEach((series: any, index: number) => {
-        datasets.push({
-          type: 'bar',
-          label: series.name,
-          data: series.series.map((item: any) => item.value),
-          backgroundColor: this.getColor(index, 'bar'),
-          yAxisID: 'y'
-        });
+    // Threshold mark-lines share the bars' unit and scale, so they render
+    // on the same axis; colours come from the trigger colour map.
+    const lineFallback: string[] = this.colorSchemeLine?.domain ?? ['#01579b'];
+    lines.forEach((series, index) => {
+      const color = colorByName.get(series.name) || lineFallback[index % lineFallback.length];
+      datasets.push({
+        type: 'line',
+        label: series.name,
+        data: series.series.map(point => Number(point.value)),
+        borderColor: color,
+        backgroundColor: color,
+        fill: false,
+        pointRadius: 0,
+        tension: 0,
+        yAxisID: 'y',
       });
-    }
+    });
 
-    // Add line datasets
-    if (this.lineChart) {
-      this.lineChart.forEach((series: any, index: number) => {
-        datasets.push({
-          type: 'line',
-          label: series.name,
-          data: series.series.map((item: any) => item.value),
-          borderColor: this.getColor(index, 'line'),
-          backgroundColor: this.getColor(index, 'line') + '20',
-          fill: false,
-          tension: 0.1,
-          yAxisID: 'y1'
-        });
-      });
-    }
-
-    this.comboChartData = { labels, datasets };
-
-    // Update axis labels
-    if (this.comboChartOptions?.scales?.x && 'title' in this.comboChartOptions.scales.x && this.comboChartOptions.scales.x.title) {
-      this.comboChartOptions.scales.x.title.text = this.xAxisLabel || '';
-    }
-    if (this.comboChartOptions?.scales?.y && 'title' in this.comboChartOptions.scales.y && this.comboChartOptions.scales.y.title) {
-      this.comboChartOptions.scales.y.title.text = this.yAxisLabel || '';
-    }
+    this.comboChartData = {
+      labels: results.map(point => point.name),
+      datasets,
+    };
+    this.comboChartOptions = this.buildOptions();
   }
 
-  private getColor(index: number, type: 'bar' | 'line'): string {
-    const barColors = ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'];
-    const lineColors = ['#FF7F0E', '#2CA02C', '#D62728', '#9467BD'];
-
-    const colors = type === 'bar' ? barColors : lineColors;
-    return colors[index % colors.length];
+  private buildOptions(): ChartConfiguration['options'] {
+    return {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: this.animations ? undefined : false,
+      interaction: {
+        intersect: false,
+      },
+      scales: {
+        x: {
+          display: this.xAxis,
+          grid: {
+            display: false,
+          },
+          title: {
+            display: this.showXAxisLabel && !!this.xAxisLabel,
+            text: this.xAxisLabel ?? '',
+          },
+        },
+        y: {
+          type: 'linear',
+          display: this.yAxis,
+          position: 'left',
+          beginAtZero: true,
+          suggestedMax: this.yScaleMax,
+          grid: {
+            display: this.showGridLines,
+          },
+          title: {
+            display: this.showYAxisLabel && !!this.yAxisLabel,
+            text: this.yAxisLabel ?? '',
+          },
+        },
+      },
+      plugins: {
+        legend: {
+          display: this.legend,
+          // The legend lists trigger threshold ranges (informational),
+          // not toggleable datasets — mirror the legacy custom legend.
+          ...(this.legendData?.length ? {
+            onClick: () => { /* informational entries — nothing to toggle */ },
+            labels: {
+              generateLabels: () => this.legendData.map(item => ({
+                text: item.name,
+                fillStyle: item.value,
+                strokeStyle: item.value,
+                lineWidth: 0,
+              })),
+            },
+          } : {}),
+        },
+        tooltip: {
+          enabled: !this.tooltipDisabled,
+        },
+      },
+    };
   }
 
-  onChartClick(event: ChartEvent, active: ActiveElement[]) {
+  onChartClick(event: ChartEvent | undefined, active: object[] | undefined) {
     this.select.emit({ event, active });
   }
 
-  onChartHover(event: ChartEvent, active: ActiveElement[]) {
+  onChartHover(event: ChartEvent, active: object[]) {
     this.activate.emit({ event, active });
   }
 }

@@ -1,0 +1,139 @@
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+
+import { firstValueFrom } from 'rxjs';
+
+import { ListStateStore } from '@stratosui/core';
+
+import { CnsiSecurityGroupsSource } from '../../../services/data-sources/cnsi-security-groups-source';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StSecurityGroup } from '../../../services/endpoint-data/stratos-types';
+
+// SecurityGroupSpaceBindLifecycle selects which CF lifecycle relationship a
+// bulk space-bind targets. CF models running and staging security-group
+// bindings as two distinct sub-resources; a bind names exactly one.
+export type SecurityGroupSpaceBindLifecycle = 'running' | 'staging';
+
+// SecurityGroupBindResult mirrors the backend response — the CF v3 to-many
+// relationship the bind endpoints return (POST .../relationships/{running,
+// staging}_spaces). `data` is the full post-bind space set for the group.
+export interface SecurityGroupBindResult {
+  data: { guid: string }[];
+}
+
+// CF Security Groups list config — single-CNSI, read-only. Drives the
+// per-CF /cloud-foundry/:cnsi/security-groups tab. Security groups are
+// foundation-level and may number in the dozens, so this service stays
+// simple: own the fetch, expose a securityGroups() signal, run it
+// through ViewPipeline. No writes — group create/edit/delete and space
+// bindings are platform-admin operations not surfaced here.
+@Injectable({ providedIn: 'root' })
+export class CfSecurityGroupsSignalConfigService {
+  private readonly http = inject(HttpClient);
+  private readonly injector = inject(Injector);
+
+  private cnsiGuid = '';
+  private source?: CnsiSecurityGroupsSource;
+
+  private readonly state = inject(ListStateStore).bind('cf-security-groups', {
+    viewMode: 'card',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
+  readonly filter: WritableSignal<(g: StSecurityGroup) => boolean> = signal(() => true);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StSecurityGroup>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
+  readonly nameFilter: WritableSignal<string> = signal('');
+  readonly viewMode = this.state.viewMode;
+
+  private readonly _securityGroups: WritableSignal<StSecurityGroup[]> = signal([]);
+  readonly securityGroups: Signal<StSecurityGroup[]> = this._securityGroups.asReadonly();
+
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+
+  private readonly _sortExtractors: WritableSignal<Map<string, (row: StSecurityGroup) => unknown>> = signal(new Map());
+
+  view!: ViewPipeline<StSecurityGroup>;
+
+  // Captured so a re-entry (root singleton, but initialize() runs per mount)
+  // destroys the prior filter effect instead of stacking one per navigation.
+  private filterEffect?: EffectRef;
+
+  initialize(cnsiGuid: string): void {
+    this.cnsiGuid = cnsiGuid;
+    this.source = new CnsiSecurityGroupsSource(cnsiGuid, this.http);
+    this.view = new ViewPipeline<StSecurityGroup>(
+      this.securityGroups,
+      this.filter,
+      this.sort,
+      this.pageSize,
+      this.pageIndex,
+      this._sortExtractors.asReadonly(),
+    );
+
+    this.filterEffect?.destroy();
+    runInInjectionContext(this.injector, () => {
+      this.filterEffect = effect(() => {
+        const q = this.nameFilter().trim().toLowerCase();
+        this.filter.set((g: StSecurityGroup) => {
+          if (!q) return true;
+          return (g.name ?? '').toLowerCase().includes(q);
+        });
+      });
+    });
+  }
+
+  async loadAll(): Promise<void> {
+    if (!this.source) return;
+    await this.source.load();
+    this._securityGroups.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
+  }
+
+  async refresh(): Promise<void> {
+    if (!this.source) return;
+    await this.source.refresh();
+    this._securityGroups.set([...this.source.items()]);
+    this._hasLoadedOnce.set(true);
+  }
+
+  clearFilters(): void {
+    this.nameFilter.set('');
+    this.sort.set({ field: 'name', direction: 'asc' });
+    this.pageIndex.set(0);
+  }
+
+  // Bulk-bind a security group to N spaces for one lifecycle. Wraps the
+  // backend POST /pp/v1/cf/security_groups/{cnsi}/{sg}/relationships/
+  // {running,staging}_spaces (body {"guids":[...]}), which forwards to CF v3's
+  // single batch relationship endpoint — one call binds every space at once.
+  // Refreshes the list on success so the affected group's running/staging
+  // space counts update. Running vs staging is purely the lifecycle argument;
+  // both share this one method to keep the two paths from drifting.
+  async bindSpaces(
+    cnsiGuid: string,
+    sgGuid: string,
+    spaceGuids: string[],
+    lifecycle: SecurityGroupSpaceBindLifecycle,
+  ): Promise<SecurityGroupBindResult> {
+    const rel = lifecycle === 'staging' ? 'staging_spaces' : 'running_spaces';
+    const result = await firstValueFrom(this.http.post<SecurityGroupBindResult>(
+      `/pp/v1/cf/security_groups/${cnsiGuid}/${sgGuid}/relationships/${rel}`,
+      { guids: spaceGuids },
+    ));
+    await this.refresh();
+    return result;
+  }
+
+  registerSortExtractor(fieldKey: string, extractor: (row: StSecurityGroup) => unknown): void {
+    this._sortExtractors.update(curr => {
+      const next = new Map(curr);
+      next.set(fieldKey, extractor);
+      return next;
+    });
+  }
+}

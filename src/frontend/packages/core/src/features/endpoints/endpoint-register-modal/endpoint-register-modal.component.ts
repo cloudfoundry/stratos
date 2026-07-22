@@ -1,17 +1,20 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
 import {
-  GeneralEntityAppState,
+  EndpointsDataService,
   entityCatalog,
-  selectSessionData,
 } from '@stratosui/store';
-import { map } from 'rxjs/operators';
 
+import { SessionSignalService } from '../../../core/signals/session-signal.service';
 import { ITileConfig } from '../../../shared/components/tile/tile-selector.types';
-import { BaseEndpointTileManager, ICreateEndpointTilesData } from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
+import {
+  BaseEndpointTileManager,
+  ICreateEndpointTilesData,
+  isCreateEndpointTile,
+} from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
 import { TileSelectorComponent } from '../../../shared/components/tile-selector/tile-selector.component';
 
 @Component({
@@ -26,27 +29,33 @@ import { TileSelectorComponent } from '../../../shared/components/tile-selector/
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EndpointRegisterModalComponent extends BaseEndpointTileManager implements OnInit, OnDestroy {
-  protected store: Store<GeneralEntityAppState>;
-  private injector = inject(Injector);
+  // Note: `injector` field name shadows the protected one in
+  // BaseEndpointTileManager — keep the same access level (protected)
+  // so TS doesn't flag the shadowed field as an incompatible base.
+  protected override injector = inject(Injector);
 
   @Output() closeModalEvent = new EventEmitter<void>();
   @Output() endpointRegistered = new EventEmitter<any>();
 
-  @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false }) 
-  endpointFormContainer: ViewContainerRef;
+  @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false })
+  // strict: ViewChild populated by Angular before loadEndpointRegistrationComponent runs.
+  endpointFormContainer!: ViewContainerRef;
 
   selectedEndpointInfo: ITileConfig<ICreateEndpointTilesData> | null = null;
-  componentRef: ComponentRef<any>;
+  componentRef: ComponentRef<any> | null = null;
+
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
-    const store = inject<Store<GeneralEntityAppState>>(Store);
+    const session = inject(SessionSignalService);
 
-    const types = store.select(selectSessionData()).pipe(
-      // Get a list of all known endpoint types
-      map(sessionData => entityCatalog.getAllEndpointTypes(sessionData.config.enableTechPreview || false))
+    // Tech-preview flag is sourced from the signal-native session projection;
+    // bridged to Observable<StratosCatalogEndpointEntity[]> for the legacy
+    // BaseEndpointTileManager constructor signature.
+    const types = toObservable(
+      computed(() => entityCatalog.getAllEndpointTypes(session.isTechPreview()))
     );
-    super(types, store);
-    this.store = store;
+    super(types, inject(EndpointsDataService), inject(Injector));
   }
 
   ngOnInit() {
@@ -68,21 +77,28 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     this.closeModal();
   }
 
-  onTileSelected(tile: ITileConfig<ICreateEndpointTilesData>) {
-    if (tile) {
-      console.log('Tile selected:', tile);
+  // The tile selector emits the base ITileConfig shape (or null on deselect);
+  // narrow before storing/loading the typed create-endpoint tile.
+  onTileSelected(tile: ITileConfig | null) {
+    if (isCreateEndpointTile(tile)) {
       this.selectedEndpointInfo = tile;
-      
-      // Load the endpoint registration component in the modal instead of navigating
-      setTimeout(() => {
-        this.loadEndpointRegistrationComponent(tile);
-      }, 100);
+      // Force the @if(selectedEndpointInfo) branch to render synchronously
+      // so the #endpointFormContainer ViewChild is available — then load
+      // the registration component in the same task. The previous code
+      // used setTimeout(..., 100) which left an empty form container
+      // visible for ~100ms, producing a visible blink between tile
+      // selection and the loaded form.
+      this.cdr.detectChanges();
+      this.loadEndpointRegistrationComponent(tile);
     }
   }
 
   private loadEndpointRegistrationComponent(tile: ITileConfig<ICreateEndpointTilesData>) {
     if (!this.endpointFormContainer) {
       console.error('endpointFormContainer not available');
+      return;
+    }
+    if (!tile.data) {
       return;
     }
 

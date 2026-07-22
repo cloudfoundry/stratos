@@ -1,0 +1,10 @@
+@if (display().length) {
+  <div class="flex gap-2 px-1 py-1 mt-1 rounded bg-warning-shade-50 text-xs"
+       role="status" aria-live="polite">
+    @for (s of display(); track s.code) {
+      <span [class]="classes(s)">
+        {{ glyph(s) }} {{ s.label || '...' }}
+      </span>
+    }
+  </div>
+}

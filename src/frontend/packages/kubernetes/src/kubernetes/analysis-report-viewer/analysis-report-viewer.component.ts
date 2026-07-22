@@ -21,13 +21,13 @@ export class AnalysisReportViewerComponent implements OnDestroy {
 
   // Component reference for the dynamically created auth form
   @ViewChild('reportViewer', { read: ViewContainerRef, static: true })
-  public container: ViewContainerRef;
-  private reportComponentRef: ComponentRef<IReportViewer>;
+  public container!: ViewContainerRef; // strict: static ViewChild resolved before lifecycle hooks
+  private reportComponentRef?: ComponentRef<IReportViewer>;
 
   private id!: string;
 
   @Input()
-  set report(report: AnalysisReport) {
+  set report(report: AnalysisReport | null) {
     if (report === null || report.id === this.id) {
       return;
     }

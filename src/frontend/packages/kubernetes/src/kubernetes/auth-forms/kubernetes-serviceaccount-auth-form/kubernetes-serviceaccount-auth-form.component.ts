@@ -11,10 +11,9 @@ interface ServiceAccountAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-serviceaccount-auth-form',
   templateUrl: './kubernetes-serviceaccount-auth-form.component.html',
-  styleUrls: ['./kubernetes-serviceaccount-auth-form.component.scss'],
   standalone: true,
   imports: [ReactiveFormsModule]
 })
 export class KubernetesSATokenAuthFormComponent implements IAuthForm {
-  @Input() formGroup: FormGroup<ServiceAccountAuthForm>;
+  @Input() formGroup!: FormGroup<ServiceAccountAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 }

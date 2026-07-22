@@ -1,6 +1,5 @@
 import { OrchestratedActionBuilders } from '../../../store/src/entity-catalog/action-orchestrator/action-orchestrator';
 import { AppMetadataTypes } from '../actions/app-metadata.actions';
-import { AssignRouteToApplication } from '../actions/application-service-routes.actions';
 import {
   CreateNewApplication,
   DeleteApplication,
@@ -18,7 +17,7 @@ export interface ApplicationActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetApplication;
   remove: (guid: string, endpointGuid: string) => DeleteApplication;
   create: (id: string, endpointGuid: string, application: IApp) => CreateNewApplication;
@@ -31,11 +30,10 @@ export interface ApplicationActionBuilders extends OrchestratedActionBuilders {
   ) => UpdateExistingApplication;
   getMultiple: (
     endpointGuid: string,
-    paginationKey?: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    paginationKey: string,
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetAllApplications;
   restage: (guid: string, endpointGuid: string) => RestageApplication;
-  assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => AssignRouteToApplication;
   getAllInSpace: (
     spaceGuid: string,
     endpointGuid: string,
@@ -63,15 +61,10 @@ export const applicationActionBuilder: ApplicationActionBuilders = {
   ) => new UpdateExistingApplication(guid, endpointGuid, updatedApplication, existingApplication, updateEntities),
   getMultiple: (
     endpointGuid: string,
-    paginationKey?: string,
+    paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllApplications(paginationKey, endpointGuid, includeRelations, populateMissing),
   restage: (guid: string, endpointGuid: string) => new RestageApplication(guid, endpointGuid),
-  assignRoute: (endpointGuid: string, routeGuid: string, applicationGuid: string) => new AssignRouteToApplication(
-    applicationGuid,
-    routeGuid,
-    endpointGuid
-  ),
   getAllInSpace: (
     spaceGuid: string,
     endpointGuid: string,

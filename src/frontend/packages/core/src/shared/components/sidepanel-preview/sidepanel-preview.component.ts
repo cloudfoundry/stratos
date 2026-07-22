@@ -10,7 +10,6 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 @Component({
   selector: 'app-sidepanel-preview',
   templateUrl: './sidepanel-preview.component.html',
-  styleUrls: ['./sidepanel-preview.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -23,11 +22,12 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 export class SidepanelPreviewComponent {
   public sidePanelService = inject(SidePanelService);
 
+  // Null while the caller is still deriving the title (e.g. markdown preview)
   @Input()
-  title!: string;
+  title!: string | null;
 
   @Input()
-  favorite!: UserFavorite<IFavoriteMetadata>;
+  favorite?: UserFavorite<IFavoriteMetadata>;
 
   @Input() header?: Portal<any>;
 }

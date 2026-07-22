@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"encoding/json"
 	"errors"
 	"math"
 	"net/http"
@@ -16,13 +15,16 @@ import (
 
 const (
 	noAuthUserID = "10000000-1111-2222-3333-444444444444"
+
+	// sessionNeverExpires marks sessions that have no expiry (no-auth and
+	// local-auth logins); session validation treats any future exp as valid,
+	// so MaxInt64 means the session never expires.
+	sessionNeverExpires int64 = math.MaxInt64
 )
 
 // More fields will be moved into here as global portalProxy struct is phased out
 type noAuth struct {
 	databaseConnectionPool *sql.DB
-	localUserScope         string
-	consoleAdminScope      string
 	p                      *portalProxy
 }
 
@@ -61,14 +63,16 @@ func (a *noAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 }
 
 func (a *noAuth) BeforeVerifySession(c echo.Context) {
-	var err error
-	var expiry int64 = math.MaxInt64
+	expiry := sessionNeverExpires
 
-	session, err := a.p.GetSession(c)
-	if err != nil {
+	if _, err := a.p.GetSession(c); err != nil {
 		// No session, so create one
-		session, err = a.p.NewSession(c)
-		a.p.SaveSession(c, session)
+		session, newErr := a.p.NewSession(c)
+		if newErr != nil {
+			log.Warnf("Unable to create session: %v", newErr)
+		} else if saveErr := a.p.SaveSession(c, session); saveErr != nil {
+			log.Warnf("Unable to save session: %v", saveErr)
+		}
 	}
 
 	sessionValues := make(map[string]interface{})
@@ -78,55 +82,17 @@ func (a *noAuth) BeforeVerifySession(c echo.Context) {
 	// Ensure that login disregards cookies from the request
 	req := c.Request()
 	req.Header.Set("Cookie", "")
-	if err = a.p.setSessionValues(c, sessionValues); err == nil {
+	if err := a.p.setSessionValues(c, sessionValues); err == nil {
 		//Makes sure the client gets the right session expiry time
-		a.p.handleSessionExpiryHeader(c)
+		if err := a.p.handleSessionExpiryHeader(c); err != nil {
+			log.Warnf("Unable to set session expiry header: %v", err)
+		}
 	}
 }
 
 // VerifySession for no authentication - always passes
 func (a *noAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
 	return nil
-}
-
-// generateLoginSuccessResponse
-func (a *noAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, username string) error {
-	log.Debug("generateLoginResponse")
-
-	var err error
-	var expiry int64 = math.MaxInt64
-
-	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = userGUID
-	sessionValues["exp"] = expiry
-
-	// Ensure that login disregards cookies from the request
-	req := c.Request()
-	req.Header.Set("Cookie", "")
-	if err = a.p.setSessionValues(c, sessionValues); err != nil {
-		return err
-	}
-
-	//Makes sure the client gets the right session expiry time
-	if err = a.p.handleSessionExpiryHeader(c); err != nil {
-		return err
-	}
-
-	resp := &api.LoginRes{
-		Account:     username,
-		TokenExpiry: expiry,
-		APIEndpoint: nil,
-		Admin:       true,
-	}
-
-	if jsonString, err := json.Marshal(resp); err == nil {
-		// Add XSRF Token
-		a.p.ensureXSRFToken(c)
-		c.Response().Header().Set("Content-Type", "application/json")
-		c.Response().Write(jsonString)
-	}
-
-	return err
 }
 
 // logout
@@ -136,7 +102,9 @@ func (a *noAuth) logout(c echo.Context) error {
 	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
-	a.p.unsetSessionValue(c, XSRFTokenSessionName)
+	if err := a.p.unsetSessionValue(c, XSRFTokenSessionName); err != nil {
+		log.Warnf("Unable to remove XSRF token from session: %v", err)
+	}
 
 	err := a.p.clearSession(c)
 	if err != nil {

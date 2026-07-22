@@ -206,6 +206,19 @@ export class ChartsService {
     );
   }
 
+  // Endpoint-aware variant of getVersions: lists every published version of
+  // a chart from a specific monocular/Artifact Hub endpoint by forwarding the
+  // `x-cap-cnsi-list` header (empty for the bundled stratos catalog). Mirrors
+  // getVersionFromEndpoint (singular) — the upgrade picker needs the full set.
+  getVersionsFromEndpoint(endpoint: string, repo: string, chartName: string): Observable<ChartVersion[]> {
+    const requestArgs = { headers: { 'x-cap-cnsi-list': endpoint !== stratosMonocularEndpointGuid ? endpoint : '' } };
+    return this.http.get<{ data: ChartVersion[] }>(
+      `${this.hostname}/v1/charts/${repo}/${chartName}/versions`, requestArgs).pipe(
+        map(r => this.extractData<ChartVersion[]>(r)),
+        catchError(this.handleError)
+      );
+  }
+
   getVersionFromEndpoint(endpoint: string, repo: string, chartName: string, version: string): Observable<ChartVersion> {
     const requestArgs = { headers: { 'x-cap-cnsi-list': endpoint !== stratosMonocularEndpointGuid ? endpoint : '' } };
     return this.http.get<{ data: ChartVersion }>(

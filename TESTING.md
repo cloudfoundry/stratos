@@ -126,6 +126,56 @@ If versions are incorrect, you'll see:
 - **Browsers**: Chromium, Firefox, WebKit
 - **Note**: ⚠️ E2E tests MUST NOT be run by Vitest!
 
+#### Dependent Tests
+
+Most e2e specs are self-contained and can run in any order, in parallel,
+across any subset of groups. `e2e/tests/dependent/` is the exception: it
+holds specs that mutate shared state other specs rely on — today, that's
+the endpoint registry (`clearAllEndpoints` / `removeEndpoint`). A spec in
+this group leaves that shared state in a different condition than it
+found it, so it must run after everything else, not alongside it.
+
+`scripts/e2e-run.mjs` enforces this automatically: whenever a selection
+(tier or group — including the impact scan a tier computes internally)
+includes both `dependent/` and non-`dependent/` specs, the runner splits
+it into two passes — everything else first, `dependent/` last —
+regardless of how the selection was built. A selection touching only
+one side still runs as a single pass.
+
+This exists because of a measured failure: in a full run, a failed
+endpoint-registry restore in `endpoints.spec.ts` cascaded into roughly
+200 downstream failures ("No CF endpoint found") in specs that assumed a
+registered CF endpoint. Running `dependent/` last, in its own pass,
+contains that blast radius instead of poisoning the rest of the suite.
+
+New specs belong in `dependent/` if they mutate state other specs
+depend on (endpoint registrations, shared orgs/spaces, etc.) and don't
+clean up reliably enough to run interleaved with the parallel pool.
+Everything else stays in its existing group directory.
+
+**This ordering is enforced only by the tiered runner** (`make test e2e
+TIER=…` / `make test e2e GROUP=…`, which delegates to
+`scripts/e2e-run.mjs`). A bare `npx playwright test` or `make test e2e`
+(with no `TIER`/`GROUP` set) runs the plain Playwright test-runner
+directly — `dependent/` is not ordered last and can interleave with the
+parallel pool, reintroducing the blast-radius risk above.
+
+`make check e2e` also bypasses the tiered runner: it scopes directly to
+`npx playwright test e2e/tests/core/`, so it no longer covers the
+endpoint lifecycle spec at all — `endpoints.spec.ts` lives in
+`dependent/`, outside that path.
+
+#### Session Expiry & Server Reuse
+
+`SESSION_STORE_EXPIRY` in `playwright.config.ts`'s `webServer` config only
+takes effect when the backend is actually spawned by Playwright. With
+`reuseExistingServer: true`, an already-running jetstream keeps whatever
+value it booted with until its next real boot — a stale process can be
+running with a stale expiry regardless of what the config file currently
+says. The `BACKEND BOOT MARKER` line printed by `global-setup.ts` at the
+start of each run reports fresh boot vs. reused, so check it there rather
+than assuming the config's value is live.
+
 ---
 
 ## Running Tests
@@ -457,6 +507,26 @@ bun run test:ui
 node --version && bun --version
 # Should be: v24.x.x and 1.2.13
 ```
+
+### 6. Keep E2E Specs in Sync When Changing Component DOM
+
+E2E specs bind to components through `data-test` hooks and element
+selectors. When you change a component's template or DOM structure:
+
+```bash
+# See which specs cover the files you changed
+git diff --name-only develop...HEAD | node scripts/e2e-impact.mjs
+
+# Or grep directly for the component's hooks / selector
+grep -rn 'data-test-value-or-selector' e2e/
+```
+
+Run the specs the script names (it prints a scoped `playwright test`
+command), and fix any spec your change breaks in the same PR — or file a
+follow-up issue if the fix is substantial. Never leave a spec silently
+binding to DOM that no longer exists; the lint guards
+(`bun run lint`) catch dead selectors and orphaned hooks, and CI posts
+the same impact report on every PR as an advisory job summary.
 
 ---
 

@@ -98,7 +98,7 @@ export class GitIgnoreFilter {
   }
 
   prepareRegexPattern(pattern: string) {
-    return this.escapeRegex(pattern).replace('**', '(.+)').replace('*', '([^\\/]+)');
+    return this.escapeRegex(pattern).replace(/\*\*/g, '(.+)').replace(/\*/g, '([^\\/]+)');
   }
 
   preparePartialRegex(pattern: string) {

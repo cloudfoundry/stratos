@@ -62,7 +62,9 @@ export interface KubeResourceEntityDefinition<
   type: string;
   getKubeCatalogEntity?: (entityDef: IStratosEntityDefinition) => StratosCatalogEntity<A, B, C>;
   getIsValid?: (fav: UserFavorite<A>) => Observable<boolean>;
-  listColumns?: SimpleKubeListColumn[];
+  // Columns are typed against the resource type B so a definition for a specific kube
+  // resource can read that resource's own fields in its column value getters.
+  listColumns?: SimpleKubeListColumn<B>[];
   // Should this entity be hidden in the auto-generated navigation?
   hidden?: boolean;
   // Name fo a list config that can be obtained from the list config service

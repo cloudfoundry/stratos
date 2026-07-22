@@ -16,16 +16,27 @@ import {
 } from '../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
-import { EntityInfo } from '../../../../store/src/types/api.types';
+import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
+import { MetricsRequest } from '../../../../store/src/services/metrics-data.service';
 import { ChartSeries, IMetricMatrixResult } from '../../../../store/src/types/base-metric.types';
-import { kubeEntityCatalog } from '../kubernetes-entity-generator';
+import { MetricQueryType } from '../../../../store/src/types/metric.types';
 import { formatAxisCPUTime, formatCPUTime } from '../kubernetes-metrics.helpers';
 import { IKubernetesMetric } from '../kubernetes-metric.types';
 import { BaseKubeGuid } from '../kubernetes-page.types';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../services/kubernetes.service';
-import { KubernetesPod } from '../store/kube.types';
-import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
+
+const KUBE_METRICS_BASE_URL = '/pp/v1/metrics/kubernetes';
+
+function buildPodMetricRequest(podName: string, endpointGuid: string, query: string): MetricsRequest {
+  return {
+    endpointGuid,
+    url: `${KUBE_METRICS_BASE_URL}/${podName}`,
+    query: new MetricQueryConfig(query),
+    queryType: MetricQueryType.QUERY,
+    windowValue: null,
+  };
+}
 
 @Component({
   selector: 'app-pod-metrics',
@@ -56,7 +67,6 @@ import { FetchKubernetesMetricsAction } from '../store/kubernetes.actions';
 })
 export class PodMetricsComponent {
   podName: string;
-  podEntity$: Observable<EntityInfo<KubernetesPod>>;
   namespaceName: string;
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
@@ -84,7 +94,7 @@ export class PodMetricsComponent {
     );
     this.instanceMetricConfigs = [
       chartConfigBuilder(
-        new FetchKubernetesMetricsAction(
+        buildPodMetricRequest(
           this.podName,
           this.kubeEndpointService.kubeGuid,
           `container_memory_usage_bytes{pod="${this.podName}",namespace="${namespace}"}`
@@ -98,11 +108,11 @@ export class PodMetricsComponent {
             return !!metadata.container && metadata.container !== 'POD';
           });
         },
-        null,
+        undefined,
         (value: string) => value + ' MB'
       ),
       cpuChartConfigBuilder(
-        new FetchKubernetesMetricsAction(
+        buildPodMetricRequest(
           this.podName,
           this.kubeEndpointService.kubeGuid,
           `container_cpu_usage_seconds_total{pod="${this.podName}",namespace="${namespace}"}`
@@ -119,27 +129,27 @@ export class PodMetricsComponent {
         (value: string) => formatCPUTime(value),
       ),
       networkChartConfigBuilder(
-        new FetchKubernetesMetricsAction(
+        buildPodMetricRequest(
           this.podName,
           this.kubeEndpointService.kubeGuid,
           `container_network_transmit_bytes_total{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data transmitted (MB)',
         ChartDataTypes.BYTES,
-        null,
-        null,
+        undefined,
+        undefined,
         (value: string) => value + ' MB'
       ),
       networkChartConfigBuilder(
-        new FetchKubernetesMetricsAction(
+        buildPodMetricRequest(
           this.podName,
           this.kubeEndpointService.kubeGuid,
           `container_network_receive_bytes_total{pod="${this.podName}",namespace="${namespace}"}`
         ),
         'Cumulative Data received (MB)',
         ChartDataTypes.BYTES,
-        null,
-        null,
+        undefined,
+        undefined,
         (value: string) => value + ' MB'
       )
     ];
@@ -184,10 +194,5 @@ export class PodMetricsComponent {
         }];
       })
     );
-    this.podEntity$ = kubeEntityCatalog.pod.store.getEntityService(this.podName, this.kubeEndpointService.kubeGuid, {
-      namespace: this.namespaceName
-    }).entityObs$;
-
-
   }
 }

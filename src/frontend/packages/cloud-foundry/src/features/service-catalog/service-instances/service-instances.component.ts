@@ -1,26 +1,235 @@
-import { DatePipe } from '@angular/common';
-import { Component , ChangeDetectionStrategy } from '@angular/core';
-
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
-import { ListConfig } from '../../../../../core/src/shared/components/list/list.component.types';
+import { CommonModule, DatePipe } from '@angular/common';
 import {
-  ServiceInstancesListConfigService,
-} from '../../../shared/components/list/list-types/service-instances/service-instances-list-config.service';
+  ChangeDetectionStrategy,
+  Component,
+  OnInit,
+  Signal,
+  WritableSignal,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
+import {
+  ConfirmationDialogService,
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListPillColor,
+  SignalListRowAction,
+  TailwindSnackBarService,
+} from '@stratosui/core';
+
+import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
+import {
+  CfServiceInstancesSignalConfigService,
+} from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
+import { boundAppSegments, renderBoundApps } from '../../../shared/signal-list-configs/bound-apps-cell';
+import { renderServiceKeyCount, serviceKeysLink } from '../../../shared/signal-list-configs/service-keys-count-cell';
+import { dashboardLink, renderDashboard } from '../../../shared/signal-list-configs/dashboard-link-cell';
+import { buildServiceInstanceRowActions } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+
+/**
+ * ServiceInstancesComponent — service-catalog Instances tab on a service
+ * offering detail page (/services/:endpointId/:serviceId/instances).
+ * Signal-native rewrite mirroring the Stage 9c RoutesTab/ServicesTab
+ * pattern, narrowed to the offering via
+ * CfServiceInstancesSignalConfigService.initializeForOffering(cnsi, offeringGuid).
+ *
+ * Uses the same singleton signal config that drives the Services Wall
+ * and the per-space tabs — extending it with a per-offering filter
+ * matched the existing per-space pattern and avoided a parallel service.
+ *
+ * Per-row actions: Edit / Detach / Delete. Edit + Detach navigate
+ * out to /services/{type}/{cnsi}/{guid}/{edit|detach}, reusing the
+ * existing AddServiceInstanceComponent (edit mode) and
+ * DetachServiceInstanceComponent. Delete confirms inline and calls
+ * instancesConfig.deleteServiceInstance.
+ */
 @Component({
   selector: 'app-service-instances',
   templateUrl: './service-instances.component.html',
-  providers: [
-    DatePipe,
-    {
-      provide: ListConfig,
-      useClass: ServiceInstancesListConfigService
-    }
-  ],
-  standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
   imports: [
-    ListComponent
-  ]
+    CommonModule,
+    SignalListComponent,
+  ],
+  providers: [DatePipe],
 })
-export class ServiceInstancesComponent { }
+export class ServiceInstancesComponent implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly confirmDialog = inject(ConfirmationDialogService);
+  private readonly snackBar = inject(TailwindSnackBarService);
+
+  private readonly cfGuid: string = getIdFromRoute(this.route, 'endpointId');
+  private readonly serviceGuid: string = getIdFromRoute(this.route, 'serviceId');
+
+  // Loading projection: the wall config wires per-CNSI loading via the
+  // orchestrator; for the per-offering single-CNSI variant the same
+  // `isAnyLoading` Signal applies. Errors map: per-CNSI keyed via
+  // orchestrator.errorsByCnsi.
+  private readonly _isAnyLoading: Signal<boolean> = computed(() =>
+    this.instancesConfig.orchestrator?.isAnyLoading() ?? false,
+  );
+  private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
+
+  listConfig: SignalListConfig<StServiceInstance> | undefined;
+
+  ngOnInit(): void {
+    this.instancesConfig.initializeForOffering(this.cfGuid, this.serviceGuid);
+
+    const renderType = (si: StServiceInstance): string =>
+      si.type === 'user-provided' ? 'User Provided' : 'Managed';
+
+    const renderPlan = (si: StServiceInstance): string =>
+      si.servicePlan?.name ?? '';
+
+    const renderTags = (si: StServiceInstance): string => {
+      const tags = si.tags ?? [];
+      return tags.length === 0 ? '—' : tags.join(', ');
+    };
+
+    const renderLastOp = (si: StServiceInstance): string =>
+      si.lastOperation?.state ?? '';
+
+    const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
+      const state = (si.lastOperation?.state ?? '').toLowerCase();
+      if (state === 'succeeded') return 'success';
+      if (state === 'in progress') return 'warning';
+      if (state === 'failed') return 'danger';
+      return 'neutral';
+    };
+
+    const renderCreated = (si: StServiceInstance): string => {
+      if (!si.createdAt) return '';
+      const d = new Date(si.createdAt);
+      if (Number.isNaN(d.getTime())) return si.createdAt;
+      return d.toLocaleString(undefined, {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: 'numeric', minute: '2-digit',
+      });
+    };
+
+    const columns: SignalListColumn<StServiceInstance>[] = [
+      {
+        header: 'Name', key: 'name', sortField: 'name',
+        kind: 'link',
+        // Link to the per-instance detail page (#5370); previously plain text.
+        link: (si) => {
+          const siType = si.type === 'user-provided' ? 'user-service' : 'service';
+          return ['/services', siType, si.cnsiGuid, si.guid];
+        },
+        render: (si) => si.name ?? '',
+        widthHint: '14rem',
+      },
+      {
+        header: 'Plan', key: 'plan', sortField: renderPlan,
+        render: renderPlan,
+        widthHint: '10rem',
+      },
+      {
+        header: 'Last Operation', key: 'lastOp', sortField: renderLastOp,
+        kind: 'pill',
+        pillColor: lastOpColor,
+        render: renderLastOp,
+        widthHint: '10rem',
+      },
+      {
+        header: 'Dashboard', key: 'dashboard', kind: 'link',
+        render: renderDashboard,
+        externalLink: dashboardLink,
+        widthHint: '8rem',
+      },
+      {
+        header: 'Attached Apps', key: 'boundApps', sortField: renderBoundApps,
+        kind: 'compound',
+        compound: boundAppSegments,
+        render: renderBoundApps,
+        widthHint: '14rem',
+      },
+      {
+        header: 'Service Keys', key: 'serviceKeys', kind: 'link',
+        render: (si) => renderServiceKeyCount(si, this.instancesConfig.serviceKeyCount(si.guid)),
+        link: serviceKeysLink,
+        widthHint: '8rem',
+      },
+      {
+        header: 'Tags', key: 'tags', sortField: renderTags,
+        render: renderTags,
+        widthHint: '14rem',
+      },
+      {
+        header: 'Created', key: 'createdAt', sortField: 'createdAt',
+        render: renderCreated,
+        widthHint: '12rem',
+      },
+      {
+        header: 'Type', key: 'type', sortField: renderType,
+        render: renderType,
+        widthHint: '8rem',
+      },
+      {
+        header: '', key: 'actions',
+        kind: 'actions',
+        actions: this.buildRowActions,
+        render: () => '',
+        widthHint: '3rem',
+      },
+    ];
+
+    this.listConfig = {
+      pagedItems: this.instancesConfig.view.pagedItems,
+      totalFilteredResults: this.instancesConfig.view.totalFilteredResults,
+      totalPages: this.instancesConfig.view.totalPages,
+      pageIndex: this.instancesConfig.pageIndex,
+      pageSize: this.instancesConfig.pageSize,
+      isAnyLoading: this._isAnyLoading,
+      errorsByCnsi: this._errorsByCnsi.asReadonly(),
+      columns,
+      getRowKey: (si) => `${si.cnsiGuid}:${si.guid}`,
+      emptyMessage: 'There are no service instances',
+      emptyFilterMessage: 'No service instances match the current filter',
+      loadingMessage: 'Loading service instances…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
+      nameFilter: this.instancesConfig.nameFilter,
+      onRefresh: () => this.instancesConfig.refresh(),
+      onClear: () => this.instancesConfig.clearFilters(),
+      viewMode: this.instancesConfig.viewMode,
+      sort: this.instancesConfig.sort,
+    };
+
+    this.instancesConfig.registerSortExtractor('plan', renderPlan);
+    this.instancesConfig.registerSortExtractor('lastOp', renderLastOp);
+    this.instancesConfig.registerSortExtractor('tags', renderTags);
+    this.instancesConfig.registerSortExtractor('type', renderType);
+    this.instancesConfig.registerFilterExtractor('name', (si) => si.name ?? '');
+
+    void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+  }
+
+  // Per-row Edit / Detach / Delete. Restores the V2-era listActionEdit
+  // / listActionDetach surfaced by CfServiceInstancesListConfigBase
+  // that the signal-native migration dropped (catalog 2026-05-26 row
+  // for service-catalog Instances tab). Delete already shipped; this
+  // pass adds Edit and Detach navigation. After Delete the
+  // writeWithJob settles, instancesConfig refreshes, and the row
+  // vanishes.
+  private readonly buildRowActions = (
+    si: StServiceInstance,
+  ): readonly SignalListRowAction<StServiceInstance>[] =>
+    buildServiceInstanceRowActions(si, {
+      router: this.router,
+      confirmDialog: this.confirmDialog,
+      snackBar: this.snackBar,
+      deleteServiceInstance: (cnsiGuid, guid) => this.instancesConfig.deleteServiceInstance(cnsiGuid, guid),
+      isOfferingBindable: (si) => this.instancesConfig.isOfferingBindable(si),
+    });
+}

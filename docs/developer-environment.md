@@ -34,9 +34,58 @@ configuration. For step-by-step setup, see the
 | OpenSSL | Generate dev certs and encryption keys | Included on macOS/Linux | First-time setup |
 | `zip` | Release packaging | `brew install zip` | `make release` |
 | `swag` | OpenAPI doc generation | `go install github.com/swaggo/swag/cmd/swag@latest` | API docs |
-| `gosec` | Go security scanner | `go install github.com/securego/gosec/v2/cmd/gosec@latest` | `make security` |
-| `trivy` | Vulnerability scanner | [aquasecurity/trivy](https://github.com/aquasecurity/trivy) | `make security` |
-| `govulncheck` | Go vuln database | `go install golang.org/x/vuln/cmd/govulncheck@latest` | `make security` |
+| `golangci-lint` | Go meta-linter (staticcheck, errcheck, unused, ineffassign) | [golangci-lint.run](https://golangci-lint.run/welcome/install/) | `make lint`, `make check` — lint hard-fails without it |
+| `gosec` | Go security scanner | `go install github.com/securego/gosec/v2/cmd/gosec@latest` | `make audit backend`, `make audit tests` |
+| `trivy` | Vulnerability + misconfig scanner | [aquasecurity/trivy](https://github.com/aquasecurity/trivy) | `make audit backend`, `make audit tree` |
+| `govulncheck` | Go vuln database | `go install golang.org/x/vuln/cmd/govulncheck@latest` | `make audit backend`, `make audit summary` |
+| `zizmor` | GitHub Actions workflow SAST | `brew install zizmor` | `make audit actions` |
+| `osv-scanner` | Multi-lockfile dependency scanner | `brew install osv-scanner` | `make audit packages`, `make audit licenses` |
+| `gitleaks` | Secret scanner | `brew install gitleaks` | `make audit secrets`, `make audit history` |
+| `gh` | GitHub CLI | [cli.github.com](https://cli.github.com/) | `make deps dependabot` |
+
+### Audit & dependency commands
+
+| Command | Purpose |
+|---------|---------|
+| `make audit` | Default scanner set: frontend + backend + actions + packages + secrets |
+| `make audit frontend` | `bun audit` (npm advisory DB) |
+| `make audit backend` | gosec + trivy + govulncheck on both Go modules (`src/jetstream`, `src/jetstream/api`) |
+| `make audit actions` | zizmor SAST over `.github/workflows/`; `ZIZMOR_FLAGS="--persona=auditor"` enables the strict rule set |
+| `make audit packages` | osv-scanner over every lockfile and `go.mod` in one pass |
+| `make audit secrets` | gitleaks scan of the working tree |
+| `make audit summary` | High/moderate/low totals only — fast triage |
+| `make audit tests` | gosec including `_test.go` files, plus a `#nosec` suppression report |
+| `make audit tree` | trivy over the whole repo — covers the Dockerfiles, helm chart, and manifests under `deploy/` |
+| `make audit history` | gitleaks over the full git history (~14k commits) |
+| `make audit licenses` | osv-scanner dependency license report |
+| `make outdated` | List outdated direct deps in both stacks |
+| `make outdated frontend` | `bun outdated` |
+| `make outdated backend` | `go list -m -u all` (filtered to upgradable) |
+| `make deps dependabot` | List open dependency PRs (requires `gh` auth) |
+
+#### Non-default audit modes
+
+`make audit` runs the five default scanners only. Four modes are deliberately
+kept off the default path:
+
+- **`tests`** — gosec findings inside `_test.go` files are advisory (test code
+  doesn't ship), so they would add triage noise to every default run. Run it
+  when auditing test hygiene or reviewing `#nosec` suppressions.
+- **`tree`** — scans the entire repository instead of `src/jetstream`. It
+  exists for the deployment surface (`deploy/` Dockerfiles, helm chart, CF
+  manifests) which the backend scan doesn't reach. It is slower than the
+  default set and its misconfig findings change rarely — run it when touching
+  anything under `deploy/` or before a release.
+- **`history`** — walks all ~14k commits (roughly 15 seconds, vs instant for
+  the working-tree scan). Historical findings are almost entirely pre-2020
+  test fixtures; this is a forensic tool, not an everyday guard. The default
+  `secrets` mode already catches anything you are about to commit.
+- **`licenses`** — a compliance report, not a vulnerability source. Nothing
+  in it is actionable on a normal development day.
+
+All audit recipes are report-only (`|| true`): they never fail the build, so
+scanner exit codes are informational. The lint/test gates are where failures
+block.
 
 ## Container Runtimes
 
@@ -171,8 +220,8 @@ GitHub Actions workflows:
 
 | Workflow | File | Trigger |
 |----------|------|---------|
-| Frontend tests | `.github/workflows/frontend_tests.yml` | Push/PR to develop/master |
-| Backend tests | `.github/workflows/backend_tests.yml` | Push/PR to develop/master |
+| Frontend tests | `.github/workflows/frontend_tests.yml` | Push/PR to develop/main |
+| Backend tests | `.github/workflows/backend_tests.yml` | Push/PR to develop/main |
 | Docker builds | `.github/workflows/docker.yml` | Release + manual dispatch |
 
 ### Known CI Drift
@@ -188,8 +237,6 @@ CI workflows use outdated tool versions. Tracked in
 | pr | Go | 1.21 | 1.24.2 |
 | release | Node.js | 24 | 24 (correct) |
 | release | Go | 1.21 | 1.24.2 |
-| documentation | Node.js | 12 | 24 |
-| documentation-versioning | Node.js | 12 | 24 |
 | All | Package manager | npm | bun |
 
 ## CF Release Build Process

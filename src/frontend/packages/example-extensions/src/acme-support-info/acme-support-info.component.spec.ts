@@ -18,7 +18,7 @@ describe('AcmeSupportInfoComponent', () => {
         CoreModule,
         SharedModule,
       ]
-    }),
+    })
     .compileComponents();
   });
 

@@ -1,11 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState, RouterNav } from '@stratosui/store';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { ITileConfig, ITileData } from '../../../../shared/components/tile/tile-selector.types';
 import { PageHeaderComponent } from '../../../../shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../../shared/components/stepper/step/step.component';
+import { StepComponent, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { TileSelectorComponent } from '../../../../shared/components/tile-selector/tile-selector.component';
 
 interface IAppTileData extends ITileData {
@@ -15,7 +14,6 @@ interface IAppTileData extends ITileData {
 @Component({
   selector: 'app-backup-restore-endpoints',
   templateUrl: './backup-restore-endpoints.component.html',
-  styleUrls: ['./backup-restore-endpoints.component.scss'],
   standalone: true,
   imports: [
     PageHeaderComponent,
@@ -26,16 +24,23 @@ interface IAppTileData extends ITileData {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BackupRestoreEndpointsComponent {
-  private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
 
 
   public serviceType!: string;
   public tileSelectorConfig: ITileConfig<IAppTileData>[];
 
-  set selectedTile(tile: ITileConfig<IAppTileData>) {
-    if (tile) {
+  // FWT-956: signal-native step handle. The tile selector is a confirmation-
+  // style step (no submission, Next button hidden); the constant `valid`
+  // signal exists so the step participates in the new contract identically
+  // to consumers that drive validity reactively.
+  signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
+
+  // The tile selector emits the base ITileConfig shape (or null on deselect).
+  set selectedTile(tile: ITileConfig | null) {
+    if (tile && tile.data) {
       const url = 'endpoints/backup-restore/' + tile.data.type;
-      this.store.dispatch(new RouterNav({ path: url }));
+      this.router.navigate(url.split('/'));
     }
   }
 

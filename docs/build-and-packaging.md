@@ -13,6 +13,17 @@ Single source of truth for building, testing, and packaging Stratos.
 | `zip` | any | CF and Windows release archives |
 | `swag` | optional | OpenAPI documentation generation |
 
+## Run make from the repository root
+
+All `make` commands must be invoked from the repository root. GNU make has no
+search path for locating its top-level makefile (`-I` only affects `include`
+directives inside makefiles), so invocations from subdirectories fail — and
+building components directly instead is unsafe: the root targets carry
+generated-file dependencies that ad-hoc builds skip. For example, running
+`go build` from `src/jetstream` omits the generated `extra_plugins.go`, which
+produces a backend without the Cloud Foundry plugin that crashes at startup
+when deployed as a Cloud Foundry application.
+
 ## Operations Reference
 
 ### Building
@@ -38,8 +49,8 @@ Single source of truth for building, testing, and packaging Stratos.
 
 | Command | What it does |
 |---------|-------------|
-| `make check` | Lint + gate (default — ESLint + go fmt/vet + Vitest) |
-| `make check lint` | Lint checks (ESLint + `go fmt` + `go vet`). Note: `go fmt` may modify files. |
+| `make check` | Lint + gate (default — ESLint + go fmt/vet + golangci-lint + Vitest) |
+| `make check lint` | Lint checks (ESLint + `go fmt` + `go vet` + `golangci-lint` on both Go modules). Requires `golangci-lint` installed. Note: `go fmt` may modify files. |
 | `make check gate` | Full pre-push quality gate — mirrors what CI runs on each PR (ESLint + Vitest frontend tests + Go unit tests). Run this before every push. |
 | `make check tests` | Unit tests only |
 | `make check coverage` | Frontend unit tests with coverage (Vitest). No Go coverage. |
@@ -122,6 +133,27 @@ artifact values produce clear errors from `playwright test` itself.
 | `make clean backend` | Remove backend binaries only (`dist/bin/`) |
 | `make clean dist` | Remove everything including `node_modules` |
 | `make clean repo` | Full reset — everything gitignored |
+
+### Security & Dependencies
+
+| Command | What it does |
+|---------|-------------|
+| `make audit` | `bun audit` + backend scans (gosec + trivy + govulncheck) |
+| `make audit frontend` | `bun audit` only — npm advisory DB |
+| `make audit backend` | gosec + trivy + govulncheck only |
+| `make audit summary` | High/moderate/low totals only — fast triage between full runs |
+| `make outdated` | List outdated direct deps in both stacks |
+| `make outdated frontend` | `bun outdated` |
+| `make outdated backend` | `go list -m -u all`, filtered to upgradable lines |
+| `make deps dependabot` | List open dependency PRs (requires `gh` auth + `dependencies` label) |
+
+These wrap the underlying scanners — they do not gate the build. Decide
+which findings to act on by reading the output. See `developer-environment.md`
+for tool installation.
+
+The bare `make security` target was retired in favour of `make audit backend`
+(combined gosec + trivy + govulncheck). The old name now prints a renamed-to
+message via `deprecated.mk`.
 
 ### Version Management
 
@@ -250,8 +282,9 @@ cf push -f dist/cf-package/manifest.yml -p dist/stratos-cf-{VERSION}.zip
 The `cf` modifier automatically sets `PLATFORM=linux/amd64` for backend
 compilation. The version can be overridden without editing `package.json`.
 
-Note: `cf push -p` does not read `manifest.yml` from inside the zip —
-the manifest must be passed separately with `-f` or be in the current directory.
+> [!IMPORTANT]
+> `cf push -p` does not read `manifest.yml` from inside the zip —
+> the manifest must be passed separately with `-f` or be in the current directory.
 
 **GitHub release (automated via CI):**
 
@@ -468,4 +501,59 @@ For CF deployments, set it in the manifest or via `cf set-env`:
 
 ```bash
 cf set-env console ENCRYPTION_KEY "$(openssl rand -hex 32)"
+```
+
+## Runtime tuning — CAPI pagination
+
+The native CF v3 list endpoints (`/pp/v1/cf/orgs/{cnsi}`, `/pp/v1/cf/apps/{cnsi}`,
+`/pp/v1/cf/spaces/{cnsi}`) drain every page of the CAPI list API to return the
+full set. Two environment variables tune how jetstream paginates against CAPI,
+in case your foundation's CAPI performance differs from the defaults.
+
+### `STRATOS_CF_PER_PAGE`
+
+- **Default:** `500`
+- **Effect:** page size (`per_page=<n>`) used when fetching every page of a
+  CAPI list endpoint.
+- **Why override:** Larger values reduce round-trip count; smaller values
+  complete each request faster. On adepttech, `/v3/spaces?per_page=5000`
+  clocked ~27s/request (just under the 30s CAPI client timeout);
+  `per_page=500` completes in ~6s. A faster foundation may tolerate larger
+  pages; a slower one may need smaller.
+
+### `STRATOS_CF_MAX_PARALLEL_PAGES`
+
+- **Default:** `5`
+- **Effect:** maximum concurrent CAPI page requests issued by the drain-all
+  helpers. Page 1 is fetched synchronously to learn `total_pages`; pages 2..N
+  are then fetched with this fan-out bound.
+- **Why override:** Raise for faster total drain when CAPI tolerates more
+  concurrent requests; lower if concurrent pressure stresses CAPI or the
+  gorouter connection pool.
+
+### Applying changes
+
+Both variables are read at jetstream startup. To change them at a CF deployment:
+
+```bash
+cf set-env console STRATOS_CF_PER_PAGE 1000
+cf set-env console STRATOS_CF_MAX_PARALLEL_PAGES 8
+cf restage console
+```
+
+> [!IMPORTANT]
+> `cf restart` preserves the environment variable set loaded when the
+> droplet was built and will NOT pick up `cf set-env` changes. Use `cf restage`.
+
+The resolved values are logged at startup:
+
+```
+INFO STRATOS_CF_PER_PAGE=1000 (overrides default 500)
+INFO STRATOS_CF_MAX_PARALLEL_PAGES=8 (overrides default 5)
+```
+
+To confirm what's currently set on a deployed instance:
+
+```bash
+cf env console | grep -E 'STRATOS_CF_PER_PAGE|STRATOS_CF_MAX_PARALLEL_PAGES'
 ```

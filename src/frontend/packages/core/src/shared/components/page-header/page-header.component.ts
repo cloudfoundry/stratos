@@ -1,27 +1,26 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   InternalEventSeverity,
   IFavoriteMetadata,
   UserFavorite,
-  AddRecentlyVisitedEntityAction,
+  RecentlyVisitedDataService,
   StratosStatus,
-  selectDashboardState,
-  ToggleSideNav,
-  AppState,
-  selectIsMobile,
   UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { getTime } from 'date-fns';
 import { combineLatest, firstValueFrom, Observable, shareReplay } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
-import { SnackBarService } from '../../services/snackbar.service';
+import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 
+import { StratosActionType } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
@@ -32,6 +31,7 @@ import { EndpointsService } from './../../../core/endpoints.service';
 import { environment } from './../../../environments/environment';
 import { BREADCRUMB_URL_PARAM, IHeaderBreadcrumb, IHeaderBreadcrumbLink } from './page-header.types';
 import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { ExtensionButtonsComponent } from '../extension-buttons/extension-buttons.component';
 import { RecentEntitiesComponent } from '../recent-entities/recent-entities.component';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
@@ -46,6 +46,7 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
   imports: [
     CommonModule,
     RouterModule,
+    CustomTooltipDirective,
     EntityFavoriteStarComponent,
     ExtensionButtonsComponent,
     RecentEntitiesComponent,
@@ -56,7 +57,7 @@ import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class PageHeaderComponent implements OnDestroy, AfterViewInit {
-  private store = inject<Store<AppState>>(Store);
+  private recents = inject(RecentlyVisitedDataService);
   private route = inject(ActivatedRoute);
   private tabNavService = inject(TabNavService);
   private router = inject(Router);
@@ -66,16 +67,22 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
+  private dashboardSignals = inject(DashboardSignalService);
+  private dashboardData = inject(DashboardDataService);
+  private viewContainerRef = inject(ViewContainerRef);
 
   public canAPIKeys$: Observable<boolean>;
-  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] = null;
-  private breadcrumbKey: string;
+  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] | null = null;
+  private breadcrumbKey: string | null;
+  // Last [breadcrumbs] input value, retained so the queryParamMap
+  // subscription can re-resolve the active breadcrumb after a key change.
+  private latestBreadcrumbs: IHeaderBreadcrumb[] | null = null;
   public eventSeverity = InternalEventSeverity;
   public pFavorite!: UserFavorite<IFavoriteMetadata>;
   private pTabs!: IPageSideNavTab[];
 
-  public isMobile$: Observable<boolean> = this.store.select(selectIsMobile);
+  public isMobile$: Observable<boolean> = toObservable(this.dashboardSignals.isMobile);
 
   public environment = environment;
 
@@ -138,24 +145,29 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   public events$: Observable<IGlobalEvent[]>;
   public unreadEventCount$: Observable<number>;
-  public eventPriorityStatus$: Observable<StratosStatus>;
+  public eventPriorityStatus$: Observable<StratosStatus | undefined>;
 
-  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
+  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata> | null) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
       if (favorite.canFavorite()) {
         this.pFavorite = favorite;
-        this.store.dispatch(new AddRecentlyVisitedEntityAction({
-          guid: favorite.guid,
-          date: getTime(new Date()),
-          entityType: favorite.entityType,
-          endpointType: favorite.endpointType,
-          entityId: favorite.entityId,
-          name: favorite.metadata.name,
-          routerLink: favorite.getLink(),
-          prettyType: favorite.getPrettyTypeName(),
-          endpointId: favorite.endpointId,
-          metadata: { name: favorite.metadata.name },
-        }));
+        // A recently-visited record genuinely requires an entityId, name and
+        // router link; only record entity favorites that carry all three.
+        if (favorite.entityId && favorite.metadata) {
+          const routerLink = favorite.getLink();
+          this.recents.add({
+            guid: favorite.guid,
+            date: getTime(new Date()),
+            entityType: favorite.entityType,
+            endpointType: favorite.endpointType,
+            entityId: favorite.entityId,
+            name: favorite.metadata.name,
+            routerLink: routerLink ?? undefined,
+            prettyType: favorite.getPrettyTypeName(),
+            endpointId: favorite.endpointId,
+            metadata: { name: favorite.metadata.name },
+          });
+        }
       }
     }
   }
@@ -168,10 +180,11 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public refreshToken$!: Observable<string>;
   public tokenExpiry$!: Observable<Date | null>;
 
-  public actionsKey: string;
+  public actionsKey: StratosActionType | null;
 
   @Input()
-  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[]) {
+  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[] | null) {
+    this.latestBreadcrumbs = breadcrumbs;
     this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
     this.cdr.markForCheck();
   }
@@ -179,7 +192,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
   @Input() logoutOnly?: boolean;
 
-  private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[]) {
+  private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[] | null) {
     if (!breadcrumbs || !breadcrumbs.length) {
       return [];
     }
@@ -200,7 +213,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   public toggleSidenav() {
-    this.store.dispatch(new ToggleSideNav());
+    this.dashboardData.toggleSideNav();
   }
 
   constructor() {
@@ -217,7 +230,22 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     this.eventPriorityStatus$ = eventService.priorityStratosStatus$;
 
     this.actionsKey = this.route.snapshot.data ? this.route.snapshot.data.extensionsActionsKey : null;
-    this.breadcrumbKey = route.snapshot.queryParams[BREADCRUMB_URL_PARAM] || null;
+    // Reactive breadcrumb key — re-resolves whenever the URL's
+    // ?breadcrumbs= query param changes. Snapshot-only reads broke on
+    // tab navigation that re-emits params, and on async query-param
+    // arrival when the route resolves before the param lands. Seed
+    // synchronously from snapshot so the initial render gets the key,
+    // then subscribe reactively when queryParamMap is available.
+    this.breadcrumbKey = route.snapshot?.queryParams?.[BREADCRUMB_URL_PARAM] || null;
+    if (route.queryParamMap) {
+      route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(qp => {
+        this.breadcrumbKey = qp.get(BREADCRUMB_URL_PARAM) || null;
+        if (this.latestBreadcrumbs) {
+          this.breadcrumbDefinitions = this.getBreadcrumb(this.latestBreadcrumbs);
+          this.cdr.markForCheck();
+        }
+      });
+    }
 
     this.user$ = this.userProfileService.userProfile$;
 
@@ -232,9 +260,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       })
     );
 
-    this.allowGravatar$ = this.store.select(selectDashboardState).pipe(
-      map(dashboardState => dashboardState.gravatarEnabled)
-    );
+    this.allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
     // Must be enabled and the user must have permission
     this.canAPIKeys$ = combineLatest([
@@ -299,7 +325,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     // Remember the current portal so we can hand it back in ngOnDestroy.
     this.previousPortal = this.tabNavService.pageHeader();
-    this.myPortal = new TemplatePortal(this.pageHeaderTmpl, undefined, {});
+    this.myPortal = new TemplatePortal(this.pageHeaderTmpl, this.viewContainerRef, {});
     this.tabNavService.setPageHeader(this.myPortal);
   }
 

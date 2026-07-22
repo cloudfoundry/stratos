@@ -54,7 +54,7 @@ test.describe('CF User Invite Configuration', () => {
       await configButton.click();
 
       // Verify configuration dialog opened
-      const dialog = page.locator('app-invite-configuration, mat-dialog-container');
+      const dialog = page.locator('app-invite-configuration, [role="dialog"]');
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -111,7 +111,7 @@ test.describe('CF User Invite Configuration', () => {
       await configButton.click();
 
       // Wait for dialog
-      const dialog = page.locator('mat-dialog-container').first();
+      const dialog = page.locator('[role="dialog"]').first();
       const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {

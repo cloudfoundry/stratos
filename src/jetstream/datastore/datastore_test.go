@@ -49,7 +49,7 @@ func TestDatastore(t *testing.T) {
 		if err != nil {
 			t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 		}
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 
 		Convey("when the database config is valid", func() {
 
@@ -255,7 +255,7 @@ func TestDatastore(t *testing.T) {
 		if err != nil {
 			t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 		}
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 
 		Convey("when the database config is valid", func() {
 
@@ -437,7 +437,7 @@ func TestDatastore(t *testing.T) {
 		if err != nil {
 			t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 		}
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 
 		Convey("when the cloudfoundry database config is present", func() {
 

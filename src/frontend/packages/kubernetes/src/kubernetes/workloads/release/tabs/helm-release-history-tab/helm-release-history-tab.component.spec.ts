@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 
 import { HelmReleaseGuidMock } from '../../../../../helm/helm-testing.module';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
@@ -19,7 +19,9 @@ describe('HelmReleaseHistoryTabComponent', () => {
       releaseTitle: 'test-release',
       endpointGuid: 'test-endpoint',
       namespace: 'test-namespace',
-      release$: of(null),
+      // Real release$ filters out null, so it never emits until a release
+      // resolves; EMPTY models "no release resolved" without fabricating one.
+      release$: EMPTY,
       hasUpgrade: vi.fn().mockReturnValue(of(null)),
       fetchReleaseHistory: vi.fn().mockReturnValue(of([])),
     };

@@ -3,13 +3,11 @@ import {
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
   StratosEndpointExtensionDefinition,
-  metricEntityType,
   APIResource,
   IFavoriteMetadata
 } from '@stratosui/store';
 import { AppAutoscalerEvent, AppAutoscalerHealth, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';
 import {
-  appAutoscalerAppMetricEntityType,
   appAutoscalerCredentialEntityType,
   appAutoscalerHealthEntityType,
   appAutoscalerInfoEntityType,
@@ -28,8 +26,10 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     icon: 'cloud_foundry',
     iconFont: 'stratos-icons',
     // No logoUrl for virtual endpoints - they don't appear in endpoint listings
-    // and don't need image-based branding. Use icon/iconFont instead.
-    logoUrl: null,
+    // and don't need image-based branding. logoUrl is a required string on the
+    // endpoint definition, so use an empty string sentinel; rendering is driven
+    // by icon/iconFont instead.
+    logoUrl: '',
     authTypes: [],
     // Autoscaler is a virtual endpoint type - it doesn't appear in the endpoints list
     // as it's a feature running on CF endpoints, not a separate connectable endpoint
@@ -45,8 +45,6 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     generatePolicyTriggerEntity(endpointDefinition),
     generateHealthEntity(endpointDefinition),
     generateScalingEntity(endpointDefinition),
-    generateAppMetricEntity(endpointDefinition),
-    generateMetricEntity(endpointDefinition),
     generateCredentialEntity(endpointDefinition),
   ];
 }
@@ -110,22 +108,4 @@ function generateScalingEntity(endpointDefinition: StratosEndpointExtensionDefin
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerEvent>>(definition);
 }
 
-function generateAppMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: appAutoscalerAppMetricEntityType,
-    schema: autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<any>>(definition);
-}
 
-function generateMetricEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: metricEntityType,
-    schema: autoscalerEntityFactory(metricEntityType),
-    label: 'Autoscaler Metric',
-    labelPlural: 'Autoscaler Metrics',
-    endpoint: endpointDefinition,
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<any>>(definition);
-}

@@ -44,7 +44,15 @@ export class CloudFoundrySpaceServiceMock {
   appCount$ = observableOf(0);
   serviceInstancesCount$ = observableOf(0);
   userProvidedServiceInstancesCount$ = observableOf(0);
-
+  routesCount$ = observableOf(0);
+  // Signal-native shim: card-cf-space-details and other space-detail consumers
+  // read scalar fields off cfSpaceService.spaceDataService.space() directly.
+  spaceDataService = {
+    space: () => null,
+    isLoading: () => false,
+    errors: () => [],
+    load: () => observableOf(undefined),
+  };
 }
 
 export const getCfSpaceServiceMock = {

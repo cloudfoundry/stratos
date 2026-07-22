@@ -1,0 +1,69 @@
+<app-page-header [breadcrumbs]="breadcrumbs">
+  {{ title() }}
+</app-page-header>
+
+<div class="px-6 py-4 space-y-4">
+  @if (errorMessage(); as err) {
+    <div class="rounded border border-danger-strong bg-danger-subtle px-3 py-2 text-danger-strong" role="alert">
+      {{ err }}
+    </div>
+  }
+
+  @if (loading()) {
+    <p class="text-content-muted">Loading route service…</p>
+  } @else if (showStepper()) {
+    <!-- Bind (or rebind) — pick a managed service instance in the route's space. -->
+    <app-steppers [cancel]="'/cloud-foundry/' + cfGuid + '/routes'">
+      <app-step title="Bind Service" [signalHandle]="bindStepHandle"
+        [finishButtonText]="busy() ? 'Binding…' : 'Bind'">
+        @if (serviceInstances().length === 0) {
+          <p class="text-content-muted">No managed service instances in this space to bind.</p>
+        } @else {
+          <p class="text-content-muted mb-2">Select a service instance to bind to this route:</p>
+          <div class="flex flex-col gap-1">
+            @for (si of serviceInstances(); track si.guid) {
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="radio" name="si" [value]="si.guid"
+                  [checked]="selectedSiGuid() === si.guid"
+                  (change)="selectedSiGuid.set(si.guid)" />
+                <span class="text-content-text">{{ si.name }}</span>
+                <span class="text-sm text-content-muted">{{ si.servicePlan?.serviceOffering?.name }}</span>
+              </label>
+            }
+          </div>
+        }
+      </app-step>
+    </app-steppers>
+  } @else if (binding(); as b) {
+    <!-- Bound — show the route service with Rebind / Unbind operations. -->
+    <section class="border border-content-border rounded-md p-4 space-y-3">
+      <div class="flex items-center justify-between">
+        <h2 class="font-medium text-content-text">Bound service</h2>
+        <div class="flex items-center gap-4">
+          <button type="button" class="text-link hover:underline disabled:opacity-50"
+            [disabled]="busy()" (click)="startRebind()">Rebind</button>
+          <button type="button" class="text-danger-strong hover:underline disabled:opacity-50"
+            [disabled]="busy()" (click)="unbind()">{{ busy() ? 'Unbinding…' : 'Unbind' }}</button>
+        </div>
+      </div>
+      <table class="text-left text-sm">
+        <tbody>
+          <tr>
+            <td class="py-1 pr-8 align-top text-content-muted">Service instance</td>
+            <td class="py-1 align-top font-mono">{{ boundInstanceName() }}</td>
+          </tr>
+          @if (b.routeServiceUrl) {
+            <tr>
+              <td class="py-1 pr-8 align-top text-content-muted">Route service URL</td>
+              <td class="py-1 align-top font-mono break-all">{{ b.routeServiceUrl }}</td>
+            </tr>
+          }
+          <tr>
+            <td class="py-1 pr-8 align-top text-content-muted">Last operation</td>
+            <td class="py-1 align-top">{{ b.lastOperationState || '—' }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  }
+</div>

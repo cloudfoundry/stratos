@@ -1,12 +1,11 @@
 import { HttpBackend } from '@angular/common/http';
 import { HttpTestingController } from '@angular/common/http/testing';
 
-import { CfUserService } from '../src/shared/data-services/cf-user.service';
 import { cfCurrentUserPermissionsService } from '../src/user-permissions/cf-user-permissions-checkers';
 
 
+// Legacy-named bundle: provides the test HttpBackend + CF permissions (the CfUserService it once provided was deleted).
 export const CfUserServiceTestProvider = [
-  CfUserService,
   {
     provide: HttpBackend,
     useClass: HttpTestingController

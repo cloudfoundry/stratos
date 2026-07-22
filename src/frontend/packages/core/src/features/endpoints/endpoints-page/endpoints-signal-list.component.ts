@@ -1,0 +1,299 @@
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
+
+import {
+  EndpointModel,
+  EndpointsDataService,
+  MenuItem,
+  UserFavorite,
+  UserFavoriteManager,
+  entityCatalog,
+  getFullEndpointApiUrl,
+} from '@stratosui/store';
+
+import {
+  ListSubNavAddAction,
+  ListSubNavComponent,
+} from '../../../shared/components/list-sub-nav/list-sub-nav.component';
+import {
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListPillColor,
+  SignalListRowAction,
+} from '../../../shared/components/signal-list/signal-list.component';
+import { SignalListCellTemplateDirective } from '../../../shared/components/signal-list/signal-list-cell-template.directive';
+import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
+import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
+import { EndpointAuthStateService } from '../../../shared/services/endpoint-auth-state.service';
+import { EndpointRowActionsService, isEndpointExpired } from '../endpoint-row-actions.service';
+import { EndpointsSignalConfigService } from './endpoints-signal-config.service';
+
+// Signal-native replacement for the inner <app-list> on /endpoints. Reuses
+// SignalListComponent + the column-kind vocabulary already exercised by the
+// app wall / orgs / spaces / routes pages so /endpoints adopts the same look
+// and feel. Only the inner list swaps — the surrounding EndpointsPageComponent
+// keeps its register modal, snackbar, health-check pulse, no-endpoints custom
+// hook, and backup/restore button (all rxjs-based and out of scope).
+@Component({
+  selector: 'app-endpoints-signal-list',
+  templateUrl: './endpoints-signal-list.component.html',
+  host: { class: 'flex flex-col flex-1 min-h-0' },
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [EndpointListHelper],
+  imports: [
+    CommonModule,
+    ListSubNavComponent,
+    SignalListComponent,
+    SignalListCellTemplateDirective,
+    EndpointCardComponent,
+    TableCellEndpointAddressComponent,
+  ],
+})
+export class EndpointsSignalListComponent {
+  private endpointsConfig = inject(EndpointsSignalConfigService);
+  private userFavoriteManager = inject(UserFavoriteManager);
+  private rowActions = inject(EndpointRowActionsService);
+  private authState = inject(EndpointAuthStateService);
+  private endpointsData = inject(EndpointsDataService);
+
+  /**
+   * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above
+   * the list. Provided by the parent <app-endpoints-page>, which owns the
+   * register-modal lifecycle (visibility gated on permission, invoke opens
+   * the modal). Optional so consumers without registration capability can
+   * mount the list with count-only.
+   */
+  @Input() addAction?: ListSubNavAddAction;
+
+  /** Reactive count for the L5 sub-nav row. Wired in the constructor —
+   *  `endpointsConfig.view` is built by initialize() and isn't available
+   *  at field-initializer time. */
+  readonly totalEndpoints!: Signal<number>;
+
+  // Endpoint favorites in rowKey format. Endpoints are top-level (no parent
+  // CNSI), so both the favorite endpointId and entityId are the endpoint guid
+  // itself; the rowKey reduces to `${guid}:${guid}`. Filter by entityType =
+  // 'endpoint' so other favorite types (apps / orgs / spaces / routes) don't
+  // pollute the set.
+  // Endpoint favorites live at the group level: the favorites store keys groups
+  // by endpoint guid, with an `endpoint` UserFavorite slot and an `ethereal`
+  // flag that's true when the group was auto-created (i.e. a child app/org/etc
+  // was favorited but the endpoint itself wasn't). A non-ethereal group means
+  // the endpoint was explicitly starred. We only care about that group-level
+  // record here — the entitiesIds list is for child favorites the app wall /
+  // orgs / etc. lists already track separately.
+  private readonly favoriteEndpointRowKeys: Signal<ReadonlySet<string>> = toSignal(
+    this.userFavoriteManager.getAllFavorites().pipe(
+      map(([groups]) => {
+        const out = new Set<string>();
+        if (!groups) return out;
+        for (const epFavGuid in groups) {
+          const g = groups[epFavGuid];
+          if (!g || g.ethereal) continue;
+          const ep = g.endpoint;
+          // Endpoint favorites have entityId omitted on the way in (see
+          // `toggleEndpointFavorite`), so we synthesize the row key from
+          // endpointId twice to match the table's getRowKey shape
+          // (`${ep.guid}:${ep.guid}`).
+          if (ep && ep.entityType === 'endpoint' && ep.endpointId) {
+            out.add(`${ep.endpointId}:${ep.endpointId}`);
+          }
+        }
+        return out;
+      }),
+    ),
+    { initialValue: new Set<string>() },
+  );
+
+  public listConfig: WritableSignal<SignalListConfig<EndpointModel> | undefined> = signal(undefined);
+
+  constructor() {
+    this.endpointsConfig.initialize();
+    (this as { totalEndpoints: Signal<number> }).totalEndpoints = this.endpointsConfig.view.totalItems;
+
+    const typeLabel = (ep: EndpointModel): string => {
+      const def = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
+      return def?.definition?.label ?? ep.cnsi_type ?? '';
+    };
+
+    const addressOf = (ep: EndpointModel): string => {
+      try {
+        return getFullEndpointApiUrl(ep) ?? '';
+      } catch {
+        return ep.api_endpoint?.Host ?? '';
+      }
+    };
+
+    const adminLabel = (ep: EndpointModel): string => {
+      // Surface the creator name only when the creator is admin — matches the
+      // legacy 'Creator' column behaviour, which reads creator.name. The em-dash
+      // placeholder lines up with how other signal-list pages render absent
+      // values, keeping the column scannable.
+      return ep.creator?.admin ? ep.creator.name : '—';
+    };
+
+    const userLabel = (ep: EndpointModel): string => ep.user?.name ?? '';
+
+    const statusLabel = (ep: EndpointModel): string => {
+      // 'connecting' is a transient overlay held while a connect/reconnect is in
+      // flight (EndpointsDataService.isConnecting); it outranks the settled
+      // states because an active operation is what the user most wants to see.
+      if (this.endpointsData.isConnecting(ep.guid ?? '')) {
+        return 'Connecting';
+      }
+      if (this.endpointsData.isDisconnecting(ep.guid ?? '')) {
+        return 'Disconnecting';
+      }
+      // 'expired' arrives computed on connectionStatus (Task 3, from wire
+      // data); the authState overlay catches 401s the interceptor witnessed
+      // THIS session, before the next info refetch reflects the
+      // server-side disposal - see isEndpointExpired in
+      // endpoint-row-actions.service.ts (shared with the action gate there).
+      if (isEndpointExpired(ep, this.authState.stale())) {
+        return 'Expired';
+      }
+      const s = ep.connectionStatus ?? 'unknown';
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    };
+
+    const statusColor = (ep: EndpointModel): SignalListPillColor => {
+      if (this.endpointsData.isConnecting(ep.guid ?? '') || this.endpointsData.isDisconnecting(ep.guid ?? '')) {
+        return 'warning';
+      }
+      if (isEndpointExpired(ep, this.authState.stale())) {
+        return 'warning';
+      }
+      const s = ep.connectionStatus;
+      if (s === 'connected') return 'success';
+      // disconnected / unknown / undefined all collapse to neutral. 'connecting'
+      // never reaches here — it's the overlay handled above, not a wire status.
+      return 'neutral';
+    };
+
+    this.listConfig.set({
+      pagedItems: this.endpointsConfig.view.pagedItems,
+      totalFilteredResults: this.endpointsConfig.view.totalFilteredResults,
+      totalPages: this.endpointsConfig.view.totalPages,
+      pageIndex: this.endpointsConfig.pageIndex,
+      pageSize: this.endpointsConfig.pageSize,
+      isAnyLoading: this.endpointsConfig.loading,
+      errorsByCnsi: signal(new Map()),
+      columns: [
+        {
+          header: 'Type', key: 'type', sortField: typeLabel,
+          kind: 'text',
+          render: typeLabel,
+          widthHint: '10rem',
+        },
+        {
+          header: 'Name', key: 'name', sortField: 'name',
+          kind: 'text',
+          render: (ep: EndpointModel) => ep.name ?? '',
+          widthHint: '16rem',
+        },
+        {
+          header: 'Address', key: 'address', sortField: addressOf,
+          // Cell projected via <ng-template appSignalListCell="address">
+          // in this component's HTML — restores the FWT-929 duplicate-URL
+          // warning that the signal-list migration dropped when it
+          // collapsed the Address column to plain text.
+          kind: 'template',
+          templateName: 'address',
+          render: addressOf,
+          widthHint: '24rem',
+        },
+        {
+          header: 'Admin', key: 'admin', sortField: adminLabel,
+          kind: 'text',
+          render: adminLabel,
+          widthHint: '12rem',
+        },
+        {
+          header: 'User', key: 'user', sortField: userLabel,
+          kind: 'text',
+          render: userLabel,
+          widthHint: '12rem',
+        },
+        {
+          header: 'Status', key: 'status', sortField: 'connectionStatus',
+          kind: 'dot',
+          pillColor: statusColor,
+          render: statusLabel,
+          widthHint: '8rem',
+        },
+        {
+          header: '', key: 'favorite',
+          kind: 'favorite',
+          favorite: {
+            keys: this.favoriteEndpointRowKeys,
+            toggle: (ep: EndpointModel) => this.toggleEndpointFavorite(ep),
+          },
+          render: () => '',
+          widthHint: '3rem',
+        } as SignalListColumn<EndpointModel>,
+        {
+          header: '', key: 'actions',
+          kind: 'actions',
+          actions: this.buildEndpointActions,
+          render: () => '',
+          widthHint: '3rem',
+        },
+      ],
+      getRowKey: (ep: EndpointModel) => `${ep.guid}:${ep.guid}`,
+      emptyMessage: 'There are no registered endpoints',
+      emptyFilterMessage: 'No endpoints match the current filters',
+      loadingMessage: 'Loading endpoints…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
+      nameFilter: this.endpointsConfig.nameFilter,
+      onRefresh: () => this.endpointsConfig.refresh(),
+      onClear: () => this.endpointsConfig.clearFilters(),
+      cardAccentColor: statusColor,
+      viewMode: this.endpointsConfig.viewMode,
+      sort: this.endpointsConfig.sort,
+    });
+
+    this.endpointsConfig.registerSortExtractor('type', typeLabel);
+    this.endpointsConfig.registerSortExtractor('address', addressOf);
+    this.endpointsConfig.registerSortExtractor('admin', adminLabel);
+    this.endpointsConfig.registerSortExtractor('user', userLabel);
+  }
+
+  // Card view projects the rich endpoint card; the kebab actions are the
+  // same ones the table rows use, adapted to the meta-card's MenuItem shape.
+  cardMenuFor = (ep: EndpointModel): MenuItem[] =>
+    this.buildEndpointActions(ep).map(a => ({
+      label: a.label,
+      icon: a.icon,
+      action: () => a.invoke(ep),
+    }));
+
+  private toggleEndpointFavorite(ep: EndpointModel): void {
+    if (!ep.guid || !ep.cnsi_type) {
+      return;
+    }
+    // Endpoints are top-level. The favorites-groups computation determines
+    // "this favorite IS the endpoint itself" via `!favorite.entityId`
+    // (`UserFavoritesDataService.addFavoriteToGroup`) — so we MUST omit
+    // entityId here. Passing the endpoint's guid as entityId steers it into
+    // the child-entity branch, which leaves `fg.endpoint` null and
+    // `fg.ethereal` true; the keys signal then skips the group, the
+    // star icon never updates, and the endpoint never shows up in the
+    // home-page favorites tile.
+    const fav = new UserFavorite(ep.guid, ep.cnsi_type, 'endpoint');
+    this.userFavoriteManager.toggleFavorite(fav);
+  }
+
+  // Per-row kebab menu (Connect / Disconnect / Edit / Unregister) - shared
+  // with the /cloud-foundry endpoint picker via EndpointRowActionsService so
+  // both surfaces offer the same endpoint management menu.
+  private buildEndpointActions = (ep: EndpointModel): readonly SignalListRowAction<EndpointModel>[] =>
+    this.rowActions.buildEndpointActions(ep);
+}

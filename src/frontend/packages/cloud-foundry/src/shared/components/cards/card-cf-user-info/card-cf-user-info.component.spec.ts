@@ -1,7 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
 import {
   MetadataItemComponent,
   CardWrapperComponent,
@@ -16,9 +15,9 @@ describe('CardCfUserInfoComponent', () => {
   let component: CardCfUserInfoComponent;
   let fixture: ComponentFixture<CardCfUserInfoComponent>;
 
-  // Mock CloudFoundryEndpointService
+  // Mock CloudFoundryEndpointService — template reads sync via endpoint() signal.
   const mockCfEndpointService = {
-    endpoint$: of({
+    endpoint: signal({
       entity: {
         user: {
           name: 'test-user',

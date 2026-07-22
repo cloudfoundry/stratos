@@ -27,8 +27,24 @@ type LogCacheLink struct {
 	Href string `json:"href"`
 }
 
+type ApiRootLink struct {
+	Href string `json:"href"`
+}
+
+type CloudControllerV3Link struct {
+	Href string `json:"href"`
+	Meta struct {
+		Version string `json:"version"`
+	} `json:"meta"`
+}
+
 type ApiRootLinks struct {
-	LogCache LogCacheLink `json:"log_cache"`
+	LogCache          LogCacheLink          `json:"log_cache"`
+	Login             ApiRootLink           `json:"login"`
+	Uaa               ApiRootLink           `json:"uaa"`
+	Logging           ApiRootLink           `json:"logging"`
+	Routing           ApiRootLink           `json:"routing"`
+	CloudControllerV3 CloudControllerV3Link `json:"cloud_controller_v3"`
 }
 
 type ApiRoot struct {
@@ -47,6 +63,26 @@ type V2Info struct {
 	RoutingEndpoint          string `json:"routing_endpoint"`
 	MinCLIVersion            string `json:"min_cli_version"`
 	MinRecommendedCLIVersion string `json:"min_recommended_cli_version"`
+}
+
+// V3Info is the response for the Cloud Foundry /v3/info API
+type V3Info struct {
+	Build string `json:"build"`
+	Name  string `json:"name"`
+	Links struct {
+		Self struct {
+			Href string `json:"href"`
+		} `json:"self"`
+	} `json:"links"`
+}
+
+// CFEndpointMetadata stores capability flags detected at registration time.
+// Assumed=true means both probes failed at registration; values are defaults
+// and will be confirmed when the user first connects.
+type CFEndpointMetadata struct {
+	SupportsV2 bool `json:"supportsV2"`
+	SupportsV3 bool `json:"supportsV3"`
+	Assumed    bool `json:"assumed"`
 }
 
 type EndpointInfo struct {
@@ -258,12 +294,14 @@ type Info struct {
 	PluginConfig  map[string]string                     `json:"plugin-config,omitempty"`
 	Diagnostics   *Diagnostics                          `json:"diagnostics,omitempty"`
 	Configuration struct {
-		TechPreview               bool   `json:"enableTechPreview"`
-		ListMaxSize               int64  `json:"listMaxSize,omitempty"`
-		ListAllowLoadMaxed        bool   `json:"listAllowLoadMaxed,omitempty"`
-		APIKeysEnabled            string `json:"APIKeysEnabled"`
-		HomeViewShowFavoritesOnly bool   `json:"homeViewShowFavoritesOnly"`
-		UserEndpointsEnabled      string `json:"userEndpointsEnabled"`
+		TechPreview                bool   `json:"enableTechPreview"`
+		ListMaxSize                int64  `json:"listMaxSize,omitempty"`
+		ListAllowLoadMaxed         bool   `json:"listAllowLoadMaxed,omitempty"`
+		APIKeysEnabled             string `json:"APIKeysEnabled"`
+		HomeViewShowFavoritesOnly  bool   `json:"homeViewShowFavoritesOnly"`
+		UserEndpointsEnabled       string `json:"userEndpointsEnabled"`
+		EndpointCardConcurrency    int    `json:"endpointCardConcurrency"`
+		EndpointRequestConcurrency int    `json:"endpointRequestConcurrency"`
 	} `json:"config"`
 }
 
@@ -274,6 +312,8 @@ type EndpointDetail struct {
 	User              *ConnectedUser    `json:"user"`
 	Creator           *CreatorInfo      `json:"creator"`
 	Metadata          map[string]string `json:"metadata,omitempty"`
+	TokenExpiry       int64             `json:"token_expiry,omitempty"`
+	TokenRenewable    bool              `json:"token_renewable,omitempty"`
 	TokenMetadata     string            `json:"-"`
 	SystemSharedToken bool              `json:"system_shared_token"`
 }
@@ -430,7 +470,13 @@ type PortalConfig struct {
 	CanMigrateDatabaseSchema           bool
 	APIKeysEnabled                     api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
 	HomeViewShowFavoritesOnly          bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	EndpointCardConcurrency            int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
+	EndpointRequestConcurrency         int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
 	UserEndpointsEnabled               api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
+	// DiagnosticsEnabled gates the admin-only /pp/v1/admin/diagnostics endpoint.
+	// Off by default in production; opt-in per deployment (dev, staging) via the
+	// DIAGNOSTICS_ENABLED env var. FWT-934.
+	DiagnosticsEnabled bool `configName:"DIAGNOSTICS_ENABLED"`
 	// CanMigrateDatabaseSchema indicates if we can safely perform migrations
 	// This depends on the deployment mechanism and the database config
 	// e.g. if running in Cloud Foundry with a shared DB, then only the 0-index application instance
@@ -464,7 +510,12 @@ type RegisterEndpointParams struct {
 }
 
 type UpdateEndpointParams struct {
-	ID            string `json:"id" form:"id" query:"id"`
+	// param:"id" binds the :id from the route path (POST /endpoints/:id) —
+	// the resource being POSTed to is the resource being updated. The
+	// form/json/query bindings remain because clients also send the id in
+	// the body to correlate parallel operations; a body id, when present,
+	// overrides the path value (echo binds path params before the body).
+	ID            string `json:"id" form:"id" query:"id" param:"id"`
 	Name          string `json:"name" form:"name" query:"name"`
 	SkipSSL       string `json:"skipSSL" form:"skipSSL" query:"skipSSL"`
 	SetClientInfo string `json:"setClientInfo" form:"setClientInfo" query:"setClientInfo"`

@@ -1,53 +1,47 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { importProvidersFrom } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { AppChipsComponent } from '@stratosui/core';
-import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
-import { createBasicStoreModule } from '@stratosui/store/testing';
-import { generateCFEntities } from '../../../../cf-entity-generator';
-import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
-import { CompactServiceInstanceCardComponent } from '../compact-service-instance-card/compact-service-instance-card.component';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import {
+  StServiceInstance,
+} from '../../../../services/endpoint-data/stratos-types';
 import { ServiceRecentInstancesCardComponent } from './service-recent-instances-card.component';
+
+class FakeEndpointDataService {
+  private readonly _serviceInstances = signal<StServiceInstance[]>([]);
+  serviceInstances = this._serviceInstances.asReadonly();
+  isLoadingServicesDetails = () => false;
+  servicesDetailsLastFetched = () => new Date();
+  loadServicesDetails = (): Promise<void> => Promise.resolve();
+  setInstances(rows: StServiceInstance[]): void { this._serviceInstances.set(rows); }
+}
+
+class FakeRegistry {
+  acquire(_guid: string): unknown { return new FakeEndpointDataService(); }
+  release(_guid: string): void { /* noop */ }
+}
 
 describe('ServiceRecentInstancesCardComponent', () => {
   let component: ServiceRecentInstancesCardComponent;
   let fixture: ComponentFixture<ServiceRecentInstancesCardComponent>;
 
-  beforeEach(() => {
-    TestBed.configureTestingModule({
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         NoopAnimationsModule,
         ServiceRecentInstancesCardComponent,
-        CompactServiceInstanceCardComponent,
-        AppChipsComponent,
-        {
-          ngModule: EntityCatalogTestModule,
-          providers: [
-            {
-              provide: TEST_CATALOGUE_ENTITIES,
-              useValue: [
-                ...generateCFEntities(),
-                ...generateStratosEntities(),
-              ]
-            }
-          ]
-        },
       ],
       providers: [
-        importProvidersFrom(createBasicStoreModule()),
+        provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
-        { provide: ServicesService, useClass: ServicesServiceMock },
-        provideZonelessChangeDetection()
-      ]
-    })
-      .compileComponents();
+        { provide: EndpointDataRegistry, useClass: FakeRegistry },
+      ],
+    }).compileComponents();
   });
 
   beforeEach(() => {

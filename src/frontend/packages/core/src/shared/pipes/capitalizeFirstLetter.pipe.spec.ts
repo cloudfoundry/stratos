@@ -13,9 +13,12 @@ describe('CapitalizeFirstPipe', () => {
   });
 
   it('should return same value if !text', () => {
-    expect(pipe.transform('')).toBe('');
-    expect(pipe.transform(null)).toBe(null);
-    expect(pipe.transform(undefined)).toBe(undefined);
+    // strict: the pipe is defensively null-safe by design (`if (!text) return text`);
+    // its declared `string` param understates the runtime contract these cases verify.
+    const transform = pipe.transform.bind(pipe) as (text: string | null | undefined) => string | null | undefined;
+    expect(transform('')).toBe('');
+    expect(transform(null)).toBe(null);
+    expect(transform(undefined)).toBe(undefined);
   });
 
   it('should return first capitalized string', () => {

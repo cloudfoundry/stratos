@@ -1,12 +1,6 @@
 import { BaseEndpointAuth } from '../../../core/src/core/endpoint-auth';
 import { urlValidationExpression } from '../../../core/src/core/utils.service';
 import {
-  DISCONNECT_ENDPOINTS_SUCCESS,
-  DisconnectEndpoint,
-  UNREGISTER_ENDPOINTS_SUCCESS,
-} from '../../../store/src/actions/endpoint.actions';
-import { IRequestEntityTypeState } from '../../../store/src/app-state';
-import {
   StratosBaseCatalogEntity,
   StratosCatalogEndpointEntity,
   StratosCatalogEntity,
@@ -18,42 +12,10 @@ import {
 import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
 import { GitEndpointDetailsComponent } from '../shared/components/git-endpoint-details/git-endpoint-details.component';
 import { GitRegistrationComponent } from '../shared/components/git-registration/git-registration.component';
-import {
-  GitBranchActionBuilders,
-  gitBranchActionBuilders,
-  GitCommitActionBuilders,
-  gitCommitActionBuilders,
-  GitRepoActionBuilders,
-  gitRepoActionBuilders,
-} from './git-action-builders';
 import { GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE, gitEntityFactory } from './git-entity-factory';
-import { GitBranch, GitCommit, GitEntity, GitRepo } from './git.public-types';
+import { GitBranch, GitCommit, GitRepo } from './git.public-types';
 import { gitBranchesEntityType, gitCommitEntityType, gitRepoEntityType } from './git.types';
 
-
-function endpointDisconnectRemoveEntitiesReducer() {
-  return (state: IRequestEntityTypeState<any>, action: DisconnectEndpoint) => {
-    switch (action.type) {
-      case DISCONNECT_ENDPOINTS_SUCCESS:
-      case UNREGISTER_ENDPOINTS_SUCCESS:
-        return deleteEndpointEntities(state, action.guid);
-    }
-    return state;
-  };
-}
-
-function deleteEndpointEntities(
-  state: IRequestEntityTypeState<GitEntity>,
-  endpointGuid: string
-) {
-  return Object.keys(state).reduce((newEntities: IRequestEntityTypeState<GitEntity>, guid: string) => {
-    const entity = state[guid];
-    if (entity.endpointGuid !== endpointGuid) {
-      newEntities[guid] = entity;
-    }
-    return newEntities;
-  }, {} as IRequestEntityTypeState<GitEntity>);
-}
 
 /**
  * A strongly typed collection of Git Catalog Entities.
@@ -65,20 +27,17 @@ class GitEntityCatalog {
 
   public commit: StratosBaseCatalogEntity<
     IFavoriteMetadata,
-    GitCommit,
-    GitCommitActionBuilders
+    GitCommit
   >;
 
   public repo: StratosBaseCatalogEntity<
     IFavoriteMetadata,
-    GitRepo,
-    GitRepoActionBuilders
+    GitRepo
   >;
 
   public branch: StratosBaseCatalogEntity<
     IFavoriteMetadata,
-    GitBranch,
-    GitBranchActionBuilders
+    GitBranch
   >;
 
   constructor() {
@@ -156,13 +115,9 @@ class GitEntityCatalog {
       //   };
       // },
     };
-    return new StratosCatalogEntity<IFavoriteMetadata, GitCommit, GitCommitActionBuilders>(
+    return new StratosCatalogEntity<IFavoriteMetadata, GitCommit>(
       definition,
       {
-        dataReducers: [
-          endpointDisconnectRemoveEntitiesReducer()
-        ],
-        actionBuilders: gitCommitActionBuilders,
         entityBuilder: {
           getMetadata: ent => ({
             name: ent.commit ? ent.commit.message || ent.sha : ent.sha,
@@ -184,16 +139,9 @@ class GitEntityCatalog {
     };
     return new StratosCatalogEntity<
       IFavoriteMetadata,
-      GitRepo,
-      GitRepoActionBuilders
+      GitRepo
     >(
-      definition,
-      {
-        dataReducers: [
-          endpointDisconnectRemoveEntitiesReducer()
-        ],
-        actionBuilders: gitRepoActionBuilders,
-      }
+      definition
     );
   }
 
@@ -205,14 +153,8 @@ class GitEntityCatalog {
       labelPlural: 'Git Branches',
       endpoint: endpointDefinition
     };
-    return new StratosCatalogEntity<IFavoriteMetadata, GitBranch, GitBranchActionBuilders>(
-      definition,
-      {
-        dataReducers: [
-          endpointDisconnectRemoveEntitiesReducer()
-        ],
-        actionBuilders: gitBranchActionBuilders,
-      }
+    return new StratosCatalogEntity<IFavoriteMetadata, GitBranch>(
+      definition
     );
   }
 

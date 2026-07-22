@@ -1,4 +1,4 @@
-import type { MetricsAPITargets, MetricsStratosInfo } from '../actions/metrics-api.actions';
+import type { MetricsAPITargets, MetricsStratosInfo } from './metrics-api.types';
 import type { EndpointType } from '../extension-types';
 
 export const endpointListKey = 'endpoint-list';
@@ -19,9 +19,50 @@ export interface IApiEndpointInfo {
   RawPath: string;
   RawQuery: string;
   Scheme: string;
-  User: object;
+  // Go url.Userinfo pointer: serializes to JSON null when no userinfo is present.
+  User: object | null;
 }
-export type endpointConnectionStatus = 'connected' | 'disconnected' | 'unknown' | 'checking';
+export type endpointConnectionStatus = 'connected' | 'expired' | 'disconnected' | 'unknown' | 'connecting' | 'disconnecting';
+
+// 'expired' = connected but past the connection time: a stored token exists
+// but is known-dead — past token_expiry with no refresh token to renew from.
+// Rejected refresh tokens are disposed server-side into exactly this shape
+// (refresh cleared, expiry floored), so one computation covers both the
+// predictable death and the witnessed one. A renewable token past expiry is
+// still 'connected' — jetstream mints a fresh one on use.
+//
+// 'connecting' is never returned here: it is a transient overlay applied while
+// a connect/reconnect is in flight (see withConnectingOverlay), not a state
+// derivable from the wire payload. The wire only ever yields the three settled
+// values below.
+export function computeConnectionStatus(info: {
+  user?: unknown; token_renewable?: boolean; token_expiry?: number;
+}): endpointConnectionStatus {
+  if (!info.user) {
+    return 'disconnected';
+  }
+  if (!info.token_renewable && !!info.token_expiry && info.token_expiry * 1000 <= Date.now()) {
+    return 'expired';
+  }
+  return 'connected';
+}
+
+// Overlay the transient 'connecting' / 'disconnecting' states onto a
+// wire-derived status while the operation is in flight for the endpoint. The
+// operation owns no stored status of its own — EndpointsDataService.connect()
+// (also the reconnect path) and disconnect() hold a busy state for the
+// duration, and this folds that signal onto the last settled status so display
+// surfaces can show it without the value being written into the endpoint model
+// (which getAll() would clobber on its next wholesale refresh).
+export function withConnectingOverlay(
+  status: endpointConnectionStatus | undefined,
+  isConnecting: boolean,
+  isDisconnecting = false,
+): endpointConnectionStatus {
+  if (isConnecting) return 'connecting';
+  if (isDisconnecting) return 'disconnecting';
+  return status ?? 'unknown';
+}
 export interface EndpointModel {
   api_endpoint?: IApiEndpointInfo;
   authorization_endpoint?: string;
@@ -46,6 +87,12 @@ export interface EndpointModel {
   };
   system_shared_token: boolean;
   sso_allowed: boolean;
+  // Expiry (epoch seconds) of this user's stored token; only present when the
+  // user has connected the endpoint. 0/absent means no expiry is known.
+  token_expiry?: number;
+  // True when jetstream holds a refresh token for this endpoint and can mint
+  // a fresh session on use — expiry of the access token is then harmless.
+  token_renewable?: boolean;
   // These are generated client side when we login
   connectionStatus?: endpointConnectionStatus;
   metricsAvailable: boolean;
@@ -70,12 +117,6 @@ export interface CreatorInfo {
   name: string;
   admin: boolean;
   system: boolean;
-}
-
-export interface EndpointState {
-  loading: boolean;
-  error: boolean;
-  message: string;
 }
 
 export interface StateUpdateAction {

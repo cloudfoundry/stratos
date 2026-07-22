@@ -4,19 +4,19 @@
       <app-card-header class="recent-apps-card__header">
         <app-card-title class="recent-apps-card__title">Recently updated applications</app-card-title>
         @if (canRefresh) {
-          <app-polling-indicator [manualPoll]="(loading$ | async) === false" [isPolling]="(loading$ | async)"
+          <app-polling-indicator [manualPoll]="(loading$ | async) === false" [isPolling]="(loading$ | async) ?? false"
           (poll)="refresh.emit()"></app-polling-indicator>
         }
       </app-card-header>
       @if (recentApps$ | async; as apps) {
-        <app-card-content class="recent-apps-card__content">
+        <app-card-content class="recent-apps-card__content custom-scrollbar">
           @if (apps.length === 0) {
             <div>
               There are no applications.
             </div>
           }
           @if (apps.length > 0) {
-            <div class="recent-apps-card__scroller">
+            <div class="recent-apps-card__scroller custom-scrollbar">
               @for (app of apps; track app.metadata.guid) {
                 <app-compact-app-card [showDate]="showDate" [dateMode]="dateMode" [endpoint]="endpoint" [app]="app"></app-compact-app-card>
               }
@@ -31,8 +31,8 @@
     <app-card-header class="recent-apps-card__header">
       <app-card-title class="recent-apps-card__title">Recently updated applications</app-card-title>
     </app-card-header>
-    <app-card-content class="recent-apps-card__content">
-      <div class="recent-apps-card__scroller">
+    <app-card-content class="recent-apps-card__content custom-scrollbar">
+      <div class="recent-apps-card__scroller custom-scrollbar">
         @for (app of placeholders; track app.metadata.guid) {
           <app-compact-app-card [showDate]="showDate" [dateMode]="dateMode" [endpoint]="endpoint" [app]="app"></app-compact-app-card>
         }

@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
-import { Edge, NgxGraphModule } from '@swimlane/ngx-graph';
+import { Edge, NgxGraphModule, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
@@ -19,6 +19,7 @@ import {
 import { ResourceAlert, ResourceAlertLevel } from '../../../../services/analysis-report.types';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import {
+  HelmReleaseGraph,
   HelmReleaseGraphLink,
   HelmReleaseGraphNode,
   HelmReleaseGraphNodeData,
@@ -27,6 +28,8 @@ import {
 import { getIcon } from '../../icon-helper';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 
+
+const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 interface Colors {
   bg: string;
@@ -55,7 +58,7 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   fill: string;
   text: string;
   icon: any;
-  alerts: [];
+  alerts: ResourceAlert[] | null;
   alertSummary: Record<string, unknown>;
 }
 
@@ -87,14 +90,16 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   private updateSignal: WritableSignal<boolean> = signal<boolean>(false);
   update$ = toObservable(this.updateSignal);
 
-  private fitSignal: WritableSignal<boolean> = signal<boolean>(false);
+  // ngx-graph zooms-to-fit on every emission; the options object matches
+  // the [zoomToFit$] input's Observable<NgxGraphZoomOptions> type.
+  private fitSignal: WritableSignal<NgxGraphZoomOptions> = signal<NgxGraphZoomOptions>({});
   fit$ = toObservable(this.fitSignal);
 
   public layout = 'dagre';
 
   public layoutIndex = 0;
 
-  private graph: Subscription;
+  private graph?: Subscription;
 
   private didInitialFit = false;
 
@@ -107,7 +112,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     publishReplay(1),
     refCount()
   );
-  private helper = inject(HelmReleaseHelperService);
+  protected helper = inject(HelmReleaseHelperService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
 
@@ -127,7 +132,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     this.graph = combineLatest(
       this.helper.fetchReleaseGraph(),
       this.analysisReportUpdated$
-    ).subscribe(([g, report]: [any, any]) => {
+    ).subscribe(([g, report]: [HelmReleaseGraph, any]) => {
       const newNodes: CustomHelmReleaseGraphNode[] = [];
       Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
         const colors = this.getColor(node.data.status);
@@ -176,7 +181,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   private applyAlertToNode(newNode: CustomHelmReleaseGraphNode, report: any) {
     if (report && report.alerts) {
-      Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
+      Object.values<ResourceAlert[]>(report.alerts).forEach((group: ResourceAlert[]) => {
         group.forEach(alert => {
           if (
             newNode.data.kind.toLowerCase() === alert.kind &&
@@ -197,14 +202,13 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   private alertLevelToColor(level: ResourceAlertLevel) {
-    // These colours need to come from theme - #420
     switch (level) {
       case ResourceAlertLevel.Info:
-        return '#42a5f5';
+        return cssVar('--color-info');
       case ResourceAlertLevel.Warning:
-        return '#ff9800';
+        return cssVar('--color-warning');
       case ResourceAlertLevel.Error:
-        return '#f44336';
+        return cssVar('--color-danger');
     }
   }
 
@@ -231,7 +235,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   }
 
   public fitGraph() {
-    this.fitSignal.set(true);
+    this.fitSignal.set({});
   }
 
   public toggleLayout() {
@@ -247,28 +251,28 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
     switch (status) {
       case 'error':
         return {
-          bg: 'red',
+          bg: cssVar('--color-danger'),
           fg: 'white'
         };
       case 'ok':
         return {
-          bg: 'green',
+          bg: cssVar('--color-success'),
           fg: 'white'
         };
       case 'warn':
         return {
-          bg: 'orange',
+          bg: cssVar('--color-warning'),
           fg: 'white'
         };
       default:
         return {
-          bg: '#5a9cb0',
+          bg: cssVar('--content-muted'),
           fg: 'white'
         };
     }
   }
 
-  private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource> {
+  private getResource(node: CustomHelmReleaseGraphNode): Observable<HelmReleaseResource | undefined> {
     return this.helper.fetchReleaseResources().pipe(
       filter((r: any) => !!r),
       map((r: HelmReleaseResources) => Object.values(r.data).find((res: any) =>

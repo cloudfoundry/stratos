@@ -1,7 +1,7 @@
 @if (connectable) {
   <app-form-field>
-    <app-select [(value)]="service.state[row.guid][backupType.CONNECT]"
-      [disabled]="!service.state[row.guid][backupType.ENDPOINT]">
+    <app-select [(value)]="service.state[row.guid ?? ''][backupType.CONNECT]"
+      [disabled]="!service.state[row.guid ?? ''][backupType.ENDPOINT]">
       <app-option [value]="connectionTypes.NONE">None</app-option>
       <app-option [value]="connectionTypes.CURRENT" [disabled]="!!userConnectionWarning"
       [matTooltip]="userConnectionWarning">Current User</app-option>

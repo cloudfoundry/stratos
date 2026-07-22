@@ -20,6 +20,7 @@ export class CustomButtonToggleComponent {
   @Input() disabled = false;
   @Input() checked = false;
 
+  // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle which emits (change)
   @Output() change = new EventEmitter<CustomButtonToggleComponent>();
 
   toggle() {
@@ -49,10 +50,21 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   @Input() vertical = false;
   @Input() name!: string;
 
+  // Material API parity: mat-button-toggle-group supports a plain [value] input
+  @Input()
+  set value(value: any) {
+    this.writeValue(value);
+  }
+  get value(): any {
+    return this.multiple ? this.selectedValues : this.selectedValues[0];
+  }
+
   @Output() valueChange = new EventEmitter<any>();
+  // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle-group which emits (change)
   @Output() change = new EventEmitter<MatButtonToggleChange>();
 
-  @ContentChildren(CustomButtonToggleComponent) toggles: QueryList<CustomButtonToggleComponent>;
+  // strict: @ContentChildren is populated by Angular before ngAfterContentInit
+  @ContentChildren(CustomButtonToggleComponent) toggles!: QueryList<CustomButtonToggleComponent>;
 
   selectedValues: any[] = [];
 
@@ -65,6 +77,8 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
         this.selectToggle(selectedToggle);
       });
     });
+    // Reflect any value written before the toggles were available
+    this.updateToggles();
   }
 
   selectToggle(toggle: CustomButtonToggleComponent) {
@@ -97,6 +111,10 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   }
 
   private updateToggles() {
+    if (!this.toggles) {
+      // writeValue can run before content children are resolved
+      return;
+    }
     this.toggles.forEach(toggle => {
       toggle.checked = this.selectedValues.includes(toggle.value);
     });

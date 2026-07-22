@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
@@ -19,7 +18,6 @@ describe('EditSpaceQuotaComponent', () => {
         EditSpaceQuotaComponent,
       ],
       providers: [
-        provideMockStore(),
         ...STORE_TEST_PROVIDERS,
         TabNavService,
         provideZonelessChangeDetection(),

@@ -25,19 +25,21 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
 
 
   markdownHtml!: string;
-  documentUrl!: string;
-  title: string = '';
+  private _documentUrl!: string;
+  // null is a sentinel meaning "title not yet derived from the document"
+  title: string | null = '';
 
-  @Input('documentUrl')
-  set setDocumentUrl(value: string) {
-    if (value && this.documentUrl !== value) {
-      this.documentUrl = value;
+  @Input()
+  set documentUrl(value: string) {
+    if (value && this._documentUrl !== value) {
+      this._documentUrl = value;
       this.title = null;
       this.loadDocument();
     }
   }
 
-  @ViewChild('markdown', { static: true }) public markdown: ElementRef;
+  // strict: static @ViewChild is available from ngOnInit onward
+  @ViewChild('markdown', { static: true }) public markdown!: ElementRef;
 
   private parseInline(tokens: any[]): string {
     return tokens.map((token: any) => {
@@ -49,11 +51,11 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   }
 
   setProps(props: { [key: string]: any, }) {
-    this.setDocumentUrl = props.documentUrl;
+    this.documentUrl = props.documentUrl;
   }
 
   private loadDocument() {
-    this.httpClient.get(this.documentUrl, { responseType: 'text' }).subscribe(
+    this.httpClient.get(this._documentUrl, { responseType: 'text' }).subscribe(
       (markText: string) => {
         if (markText && markText.length > 0) {
           // Basic sanitization - Note: marked no longer supports sanitize option
@@ -67,7 +69,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
           this.markdownHtml = typeof result === 'string' ? result : '';
         }
       },
-      (error: any) => console.warn(`Failed to fetch markdown with url ${this.documentUrl}: `, error));
+      (error: any) => console.warn(`Failed to fetch markdown with url ${this._documentUrl}: `, error));
   }
 
   public markdownRendered() {

@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, AfterContentInit,
   Output,
   ViewChild,
  } from '@angular/core';
-import { ReactiveFormsModule, Validators, FormControl } from '@angular/forms';
+import { ReactiveFormsModule, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent, AppErrorComponent, AppInputDirective } from '../../../components/custom-form-field/custom-form-field.component';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
 import { Observable, Subscription } from 'rxjs';
@@ -71,7 +71,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
       uniqueError: 'Email is not unique'
     }
   };
-  @Input() stateIn$!: Observable<StackedInputActionsState>;
+  @Input() stateIn$!: Observable<StackedInputActionsState | null>;
   @Input() position!: number;
   @Input() showRemove!: boolean;
   @Input() key!: number;
@@ -90,8 +90,8 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   @ViewChild('inputElement', { static: true }) inputElement!: ElementRef;
 
   public result = StackedInputActionResult;
-  public textFormControl = new FormControl<string>('', [Validators.required, this.uniqueValidator.bind(this)]);
-  public state!: StackedInputActionsState;
+  public textFormControl = new FormControl<string | null>('', [Validators.required, this.uniqueValidator.bind(this)]);
+  public state: StackedInputActionsState | null = null;
   private subs: Subscription[] = [];
   private otherValues!: string[];
 
@@ -100,7 +100,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     if (this.config.isEmailInput) {
       validators.push(Validators.email);
     }
-    this.textFormControl = new FormControl<string>('', validators);
+    this.textFormControl = new FormControl<string | null>('', validators);
 
     // Emit any changes of form state outwards.
     this.subs.push(this.textFormControl.valueChanges.subscribe((value) => {
@@ -124,7 +124,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     this.inputElement.nativeElement.focus();
   }
 
-  uniqueValidator(control: FormControl<string>) {
+  uniqueValidator(control: AbstractControl) {
     // custom unique validator that has quick access to the recently changed otherValues array
     if (!this.otherValues ||
       !this.otherValues.find(otherValue => otherValue === control.value)) {
@@ -146,7 +146,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     return a.filter((aString) => b.find(bString => aString === bString)).length === a.length;
   }
 
-  private handleStateIn(incState: StackedInputActionsState) {
+  private handleStateIn(incState: StackedInputActionsState | null) {
     if (!incState) {
       this.state = incState;
       this.textFormControl.enable();

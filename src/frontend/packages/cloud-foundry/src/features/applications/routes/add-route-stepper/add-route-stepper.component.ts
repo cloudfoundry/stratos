@@ -1,12 +1,33 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { AddRoutesComponent } from '../add-routes/add-routes.component';
+import { AppRouteActionsService } from '../../../../shared/services/app-route-actions.service';
+import {
+  CfMapRoutesSignalConfigService,
+} from '../../../../shared/signal-list-configs/app-route/cf-map-routes-signal-config.service';
 
+/**
+ * AddRouteStepperComponent — Slice 3.5 wires the signal-native page-route
+ * for /applications/{cnsi}/{app}/add-route.
+ *
+ * Providers are tab/page-scoped:
+ *   - AppRouteActionsService — separate instance from the Routes-tab one
+ *     (the stepper page is a sibling page-route, not a child of the tab).
+ *     Cross-page mutation continuity is handled by AppDetailDataService
+ *     which lives at the application detail tabs base.
+ *   - CfMapRoutesSignalConfigService — owns the picker's filter/sort/
+ *     selection state for the lifetime of this page-route.
+ *
+ * The legacy `{ provide: ListConfig, useClass: CfAppMapRoutesListConfigService }`
+ * provider has been retired with `MapRoutesComponent`; AddRoutesComponent
+ * now embeds `<app-signal-list>` directly with the config built from
+ * CfMapRoutesSignalConfigService.
+ */
 @Component({
-selector: 'app-add-route-stepper',
+  selector: 'app-add-route-stepper',
   templateUrl: './add-route-stepper.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -14,7 +35,17 @@ selector: 'app-add-route-stepper',
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
-    AddRoutesComponent
-]
+    AddRoutesComponent,
+  ],
+  providers: [
+    AppRouteActionsService,
+    CfMapRoutesSignalConfigService,
+  ],
+  // Establish a flex-column container that fills the routed view so the
+  // steppers wrapper's `flex: 1` actually has a constrained parent to
+  // expand into. Without this, the stepper can grow taller than the
+  // viewport and the Cancel / Map buttons in `.steppers-navigation`
+  // get pushed below the fold.
+  host: { class: 'flex flex-1 flex-col min-h-0 h-full' },
 })
 export class AddRouteStepperComponent { }

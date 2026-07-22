@@ -16,8 +16,8 @@ export interface MatSelectChange {
     [class.selected]="selected"
     [class.disabled]="disabled"
     [ngClass]="{
-      'bg-blue-50 text-blue-700 dark:bg-slate-800 dark:text-blue-400': selected,
-      'text-content-primary dark:text-slate-100 hover:bg-gray-100 dark:hover:bg-slate-700': !selected,
+      'bg-info-50 dark:bg-info-900/40 text-primary': selected,
+      'text-content-text hover:bg-content-secondary': !selected,
       'opacity-50 cursor-not-allowed hover:bg-transparent': disabled
     }"
     ><ng-content></ng-content></div>`,
@@ -46,7 +46,11 @@ export class CustomOptionComponent implements AfterViewInit {
   }
 
   get displayText(): string {
-    return this.label || this._displayText || this.value;
+    // Only fall back to `value` when it is itself a string: options may
+    // carry object values ([value]="domain"), and returning the object
+    // here crashed applyOptionFilter's .toLowerCase() the moment such an
+    // option had empty projected text.
+    return this.label || this._displayText || (typeof this.value === 'string' ? this.value : '');
   }
 }
 
@@ -78,6 +82,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Input() invalid = false;
   @Input() errorMessage = '';
   @Input() autoSelectSingleOption = true; // Auto-select when only one option exists
+  @Input({ transform: booleanAttribute }) loading = false;
 
   @Input()
   get value(): any {
@@ -90,13 +95,36 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   @Output() selectionChange = new EventEmitter<MatSelectChange>();
   @Output() valueChange = new EventEmitter<any>();
 
-  @ContentChildren(CustomOptionComponent) options: QueryList<CustomOptionComponent>;
+  // strict: @ContentChildren is populated by Angular before ngAfterContentInit
+  @ContentChildren(CustomOptionComponent) options!: QueryList<CustomOptionComponent>;
   @ViewChild('selectTrigger', { static: true }) selectTrigger!: ElementRef;
   @ViewChild('selectOptions', { static: true }) selectOptions!: ElementRef;
 
   isOpen = false;
   selectedValues: any[] = [];
   displayValue = '';
+  searchTerm = '';
+  // Show the type-to-filter input once the list crosses this length —
+  // a 5-option select stays clean without it; a 50-org list desperately
+  // needs it.
+  private readonly searchThreshold = 5;
+
+  /**
+   * Longest projected option text by character count. Rendered as an
+   * invisible sizer in the trigger so the trigger width stays stable
+   * once the option list is populated — picking a shorter value won't
+   * shrink the control. Char-count is a proxy for pixel-width: fine for
+   * proportional fonts when options are similar in style.
+   */
+  get longestOptionText(): string {
+    if (!this.options || this.options.length === 0) return '';
+    let longest = '';
+    this.options.forEach(opt => {
+      const t = opt.displayText ?? '';
+      if (t.length > longest.length) longest = t;
+    });
+    return longest;
+  }
   dropdownTop = '0px';
   dropdownLeft = '0px';
   dropdownWidth = '0px';
@@ -158,8 +186,39 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
     this.isOpen = !this.isOpen;
     this._interacting = this.isOpen && this.multiple;
+    if (!this.isOpen) {
+      // Clear filter on close so the next open shows the full list.
+      this.searchTerm = '';
+      this.applyOptionFilter();
+    }
     this._onTouched();
     this.cdr.markForCheck();
+  }
+
+  /** True once the option list crosses the threshold worth showing a
+   *  search input for. */
+  get showSearch(): boolean {
+    return (this.options?.length ?? 0) > this.searchThreshold;
+  }
+
+  onSearchInput(event: Event) {
+    this.searchTerm = (event.target as HTMLInputElement).value ?? '';
+    this.applyOptionFilter();
+  }
+
+  /** Hide each option whose displayText doesn't include the (case-
+   *  insensitive) search term. Operates directly on the option's wrapper
+   *  element so we don't need to re-render projected content — selection
+   *  / focus / visual state stay intact. */
+  private applyOptionFilter() {
+    if (!this.options) return;
+    const q = this.searchTerm.trim().toLowerCase();
+    this.options.forEach(opt => {
+      const el = opt.optionContent?.nativeElement as HTMLElement | undefined;
+      if (!el) return;
+      const text = (opt.displayText ?? '').toLowerCase();
+      el.style.display = !q || text.includes(q) ? '' : 'none';
+    });
   }
 
   /**
@@ -167,7 +226,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
    * Finds the clicked option by matching the DOM element to the
    * ContentChildren QueryList, bypassing subscription timing issues.
    */
-  onOptionsClick(event: MouseEvent) {
+  onOptionsClick(event: Event) {
     const clickTarget = event.target as HTMLElement;
     const target = clickTarget.closest('.custom-option-content');
     if (!target) return;

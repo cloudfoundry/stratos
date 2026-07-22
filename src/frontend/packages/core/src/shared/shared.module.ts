@@ -3,11 +3,9 @@ import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { InternalEventMonitorFactory } from '@stratosui/store';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -37,33 +35,17 @@ import { FileInputComponent } from './components/file-input/file-input.component
 import { FocusDirective } from './components/focus.directive';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
-import { listCardComponents } from './components/list/list-cards/card.types';
-import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { EntityListViewComponent } from './components/list/list-generics/entity-list-view/entity-list-view.component';
-import { ListHostDirective } from './components/list/list-generics/helpers/list-host.directive';
-import { ListViewComponent } from './components/list/list-generics/list-view/list-view.component';
-import {
-  } from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import {
-} from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
-import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
-import { listTableComponents } from './components/list/list-table/table-components';
-import { TableComponent } from './components/list/list-table/table.component';
-import { ApiKeyListConfigService } from './components/list/list-types/apiKeys/apiKey-list-config.service';
-import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
-import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
-import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
+import { MetaCardComponent } from './components/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from './components/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from './components/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardTitleComponent } from './components/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardValueComponent } from './components/meta-card/meta-card-value/meta-card-value.component';
+import { EndpointCardComponent } from './components/endpoint-list/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from './components/endpoint-list/endpoint-list.helpers';
 import {
   TableCellEndpointNameComponent,
-} from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
-import { TableCellEndpointStatusComponent } from './components/list/list-types/endpoint/table-cell-endpoint-status/table-cell-endpoint-status.component';
-import { ListComponent } from './components/list/list.component';
-import { ListConfig } from './components/list/list.component.types';
-import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component'; // Now standalone
+} from './components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { TableCellEndpointStatusComponent } from './components/endpoint-list/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
@@ -118,14 +100,10 @@ import { MetricsRangeSelectorService } from './services/metrics-range-selector.s
 import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
 import { TailwindSortDirective, TailwindSortHeaderDirective, TailwindSortService } from './services/tailwind-sort.service';
-import { TailwindSidenavService } from './services/tailwind-sidenav.service';
 import { TailwindPaginatorService } from './services/tailwind-paginator.service';
 import { TailwindSnackBarService } from './services/tailwind-snackbar.service';
 import { TailwindDialogService } from './services/tailwind-dialog.service';
-import { TailwindIconRegistry } from './services/tailwind-icon-registry.service';
 import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from './services/tailwind-error-state-matcher';
-import { TailwindJsonSchemaFormService } from './services/tailwind-json-schema-form.service';
-import { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './components/custom-expansion-panel/custom-expansion-panel.component';
 import { CustomFormFieldComponent, CustomFormFieldIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
 import { DisableRouterLinkDirective } from '../core/disable-router-link.directive';
@@ -206,10 +184,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MarkdownContentObserverDirective, // Now standalone - moved to imports
     JsonViewerComponent, // Now standalone - moved to imports
     SimpleUsageChartComponent, // Now standalone - moved to imports
-    MaxListMessageComponent, // Now standalone - moved to imports
     MetricsParentRangeSelectorComponent, // Now standalone - moved to imports
     AppActionMonitorIconComponent, // Now standalone - moved to imports
-    AppActionMonitorComponent, // Now standalone - moved to imports
     MetricsRangeSelectorComponent, // Now standalone - moved to imports
     ProfileSettingsComponent, // Now standalone - moved to imports
     StackedInputActionsComponent, // Now standalone - moved to imports
@@ -222,11 +198,9 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MetaCardItemComponent, // Now standalone - moved to imports
     MetaCardKeyComponent, // Now standalone - moved to imports
     MetaCardValueComponent, // Now standalone - moved to imports
-    TableComponent, // Now standalone - moved to imports
     DisableRouterLinkDirective, // Now standalone - moved to imports
     TableCellEndpointStatusComponent, // Now standalone - moved to imports
     TableCellEndpointNameComponent, // Now standalone - moved to imports
-    TableCellStatusDirective, // Now standalone - moved to imports
     // Standalone pipes
     PercentagePipe,
     ApplicationStateIconPipe,
@@ -241,19 +215,9 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     BlurDirective,
     UniqueDirective,
     UserPermissionDirective,
-    ListHostDirective,
     TailwindSortDirective,
     TailwindSortHeaderDirective,
-    // === Standalone Components ===
-    ListComponent,
-    ListViewComponent,
-    EntityListViewComponent,
-    // === Card/Table Component Arrays (all standalone) ===
-    ...listCardComponents,
-    ...listTableComponents,
     // === Custom Material Wrapper Components ===
-    CustomExpansionPanelComponent,
-    CustomExpansionPanelHeaderComponent,
     MatInputDirective,
     MatDatepickerDirective,
     CustomFormFieldComponent,
@@ -297,12 +261,10 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CapitalizeFirstPipe,
 
     // === Standalone Directives (imported above) ===
-    TableCellStatusDirective,
     FocusDirective,
     BlurDirective,
     UniqueDirective,
     UserPermissionDirective,
-    ListHostDirective,
     TailwindSortDirective,
     TailwindSortHeaderDirective,
     DisableRouterLinkDirective,
@@ -345,9 +307,6 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     MetadataItemComponent,
     UsageGaugeComponent,
     SnackBarReturnComponent,
-    ListComponent,
-    ListViewComponent,
-    EntityListViewComponent,
     FileInputComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
@@ -360,10 +319,8 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     StratosTitleComponent,
     IntroScreenComponent,
     UploadProgressIndicatorComponent,
-    AppActionMonitorComponent,
     AppActionMonitorIconComponent,
     BooleanIndicatorComponent,
-    TableComponent,
     RoutingIndicatorComponent,
     DateTimeComponent,
     StartEndDateComponent,
@@ -387,14 +344,11 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     TableCellEndpointNameComponent,
     EndpointCardComponent,
     CardProgressOverlayComponent,
-    MaxListMessageComponent,
     ProfileSettingsComponent,
     ProductNameComponent,
     NoContentMessageComponent,
 
     // === Custom Material Wrapper Components ===
-    CustomExpansionPanelComponent,
-    CustomExpansionPanelHeaderComponent,
     CustomCheckboxComponent,
     CustomFormFieldComponent,
     CustomFormFieldIconComponent,
@@ -422,25 +376,18 @@ import { UserAvatarComponent } from './components/user-avatar/user-avatar.compon
     CustomDatepickerToggleComponent,
   ],
   providers: [
-    ListConfig,
     EndpointListHelper,
-    EndpointsListConfigService,
-    ApiKeyListConfigService,
     ConfirmationDialogService,
-    InternalEventMonitorFactory,
     MetricsRangeSelectorService,
     LongRunningOperationsService,
     SessionService,
     TailwindSortService,
-    TailwindSidenavService,
     TailwindPaginatorService,
     TailwindSnackBarService,
     TailwindDialogService,
-    TailwindIconRegistry,
     TailwindErrorStateMatcher,
     TailwindDefaultErrorStateMatcher,
     TailwindShowOnDirtyErrorStateMatcher,
-    TailwindJsonSchemaFormService
   ]
 })
 export class SharedModule { }

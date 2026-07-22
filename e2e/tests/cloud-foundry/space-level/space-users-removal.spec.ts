@@ -120,7 +120,7 @@ test.describe('Space Users Removal', () => {
       await removeOption.click();
 
       // Verify confirmation dialog appears
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       const dialogExists = await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {

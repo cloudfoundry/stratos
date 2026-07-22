@@ -1,14 +1,14 @@
 import {  Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ReactiveFormsModule, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { CoreModule } from '../../../core/core.module';
 import { UnlimitedInputComponent } from './unlimited-input.component';
 
 @Component({
-  standalone: false,
+  imports: [ReactiveFormsModule, UnlimitedInputComponent],
   template: `
     <form [formGroup]="formGroup">
       <app-unlimited-input name="inputName"
@@ -18,7 +18,8 @@ import { UnlimitedInputComponent } from './unlimited-input.component';
 })
 class WrapperComponent {
   @ViewChild(UnlimitedInputComponent, { static: true })
-  unlimitedInput: UnlimitedInputComponent;
+  // strict: assigned by Angular's @ViewChild resolution before the test reads it
+  unlimitedInput!: UnlimitedInputComponent;
   formGroup: UntypedFormGroup;
 
   constructor() {
@@ -37,11 +38,11 @@ describe('UnlimitedInputComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
-      declarations: [WrapperComponent],
       imports: [
         BrowserAnimationsModule,
         CoreModule,
         UnlimitedInputComponent,
+        WrapperComponent,
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]
     });
@@ -74,49 +75,58 @@ describe('UnlimitedInputComponent', () => {
   });
 
   it('should disable input if checkbox checked', () => {
-    const input: HTMLInputElement = element.querySelector('input[type=number]');
-    const _checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
+    const input = element.querySelector<HTMLInputElement>('input[type=number]');
+    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    expect(input).toBeTruthy();
+    expect(_checkbox).toBeTruthy();
 
     // Toggle the unlimited flag and call onChange
     component.unlimited = true;
     component.onChange();
     fixture.detectChanges();
 
-    expect(input.disabled).toBeTruthy();
+    // strict: presence asserted above; the rendered template always has the number input
+    expect(input!.disabled).toBeTruthy();
   });
 
   it('should clear input when checkbox is checked', () => {
-    const input: HTMLInputElement = element.querySelector('input[type=number]');
-    const _checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
+    const input = element.querySelector<HTMLInputElement>('input[type=number]');
+    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    expect(input).toBeTruthy();
+    expect(_checkbox).toBeTruthy();
     component.formControl.setValue(2);
     fixture.detectChanges();
-    expect(input.value).toEqual('2');
+    // strict: presence asserted above; the rendered template always has the number input
+    expect(input!.value).toEqual('2');
 
     // Toggle to unlimited (clears the input),
     component.unlimited = true;
     component.onChange();
     fixture.detectChanges();
-    expect(input.value).toEqual('');
+    expect(input!.value).toEqual('');
   });
 
   it('should preserve the previous value when checking and unchecking', () => {
-    const input: HTMLInputElement = element.querySelector('input[type=number]');
-    const _checkbox: HTMLInputElement = element.querySelector('input[type=checkbox]');
+    const input = element.querySelector<HTMLInputElement>('input[type=number]');
+    const _checkbox = element.querySelector<HTMLInputElement>('input[type=checkbox]');
+    expect(input).toBeTruthy();
+    expect(_checkbox).toBeTruthy();
     component.formControl.setValue(2);
     fixture.detectChanges();
-    expect(input.value).toEqual('2');
+    // strict: presence asserted above; the rendered template always has the number input
+    expect(input!.value).toEqual('2');
 
     // Toggle to unlimited (disable input),
     component.unlimited = true;
     component.onChange();
     fixture.detectChanges();
-    expect(input.value).toEqual('');
+    expect(input!.value).toEqual('');
 
     // Toggle back from unlimited (enable input and restore value),
     component.unlimited = false;
     component.onChange();
     fixture.detectChanges();
-    expect(input.value).toEqual('2');
+    expect(input!.value).toEqual('2');
   });
 });
 

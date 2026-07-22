@@ -1,28 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Component, Injector, Input, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { filter, map, tap } from 'rxjs/operators';
 
-import { AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
-import {
-  APIResource,
-  endpointEntityType,
-  entityCatalog,
-  getPaginationObservables,
-  PaginationMonitorFactory
-} from '@stratosui/store';
-import { CreateOrganization } from '../../../../actions/organization.actions';
-import { IOrgQuotaDefinition } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { organizationEntityType } from '../../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../cf-types';
-import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
-import { selectCfRequestInfo } from '../../../../store/selectors/api.selectors';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, SignalStepHandle, TailwindSnackBarService } from '@stratosui/core';
+import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
+import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
 
 interface CreateOrganizationForm {
   orgName: FormControl<string>;
@@ -32,12 +21,13 @@ interface CreateOrganizationForm {
 @Component({
   selector: 'app-create-organization-step',
   templateUrl: './create-organization-step.component.html',
-  styleUrls: ['./create-organization-step.component.scss'],
+  host: { class: 'app-host-flex-1' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
@@ -46,22 +36,53 @@ interface CreateOrganizationForm {
   ]
 })
 export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
+  private http = inject(HttpClient);
+  private quotaData = inject(QuotaDataService);
+  private injector = inject(Injector);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private snackBar = inject(TailwindSnackBarService);
 
-  /** See QuotaDefinitionFormComponent — mirror form validity into a signal
-   *  so the parent AddOrganizationComponent (OnPush, off the ngTemplateOutlet
-   *  chain) re-evaluates [valid]="step1.validate()" automatically. */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
 
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const name = this.orgName.value;
+      const quotaGuid = this.quotaDefinition.value;
+      try {
+        // Route through CnsiOrgsSource so the new org is added to
+        // EndpointDataService._orgs immediately and org.create cascade
+        // fires. The previous OrgWriteService.createOrg path was a thin
+        // http.post that left the canonical cache stale — the new org
+        // didn't appear in the list until a hard reload.
+        const eds = this.endpointDataRegistry.acquire(this.cfGuid);
+        try {
+          const source = new CnsiOrgsSource(this.cfGuid, this.http, eds);
+          const org = await source.create({ name });
+          if (quotaGuid) {
+            await firstValueFrom(this.quotaData.applyOrgQuotaToOrgs(this.cfGuid, quotaGuid, [org.guid]));
+          }
+          this.snackBar.open(`Organization "${name}" created`);
+        } finally {
+          this.endpointDataRegistry.release(this.cfGuid);
+        }
+      } catch (err: unknown) {
+        throw new Error(`Failed to create organization: ${err instanceof Error ? err.message : String(err)}`);
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
+
   orgSubscription!: Subscription;
-  submitSubscription!: Subscription;
   cfGuid: string;
-  allOrgs!: string[];
+  allOrgs: string[] = [];
   orgs$!: Observable<string[]>;
-  quotaDefinitions$!: Observable<APIResource<IOrgQuotaDefinition>[]>;
   cfUrl!: string;
   addOrg!: FormGroup<CreateOrganizationForm>;
 
@@ -71,7 +92,6 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
 
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
-
     this.cfGuid = activatedRoute.snapshot.params.endpointId;
   }
 
@@ -84,68 +104,46 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
     this.formStatusSub = this.addOrg.statusChanges.subscribe(
       () => this.validSignal.set(this.addOrg.valid)
     );
-    const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
-    this.orgs$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          action.paginationKey,
-          entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType).getSchema(),
-          action.flattenPagination
-        )
-      },
-      action.flattenPagination
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allOrgs = o)
+
+    // V3-native: org-name list comes from the EndpointDataService signal.
+    const endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
+    endpointData.load().subscribe({ error: () => {} });
+    endpointData.loadDetails().subscribe({ error: () => {} });
+    this.orgs$ = toObservable(endpointData.orgs, { injector: this.injector }).pipe(
+      filter(orgs => !!orgs && orgs.length > 0),
+      map(orgs => orgs.map(o => o.name)),
+      tap(names => this.allOrgs = names),
     );
 
-    const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, this.cfGuid);
-    this.quotaDefinitions$ = cfEntityCatalog.quotaDefinition.store.getPaginationService(
-      quotaPaginationKey, this.cfGuid, { includeRelations: [] }
-    ).entities$.pipe(
-      filter(o => !!o),
-      tap(quotas => {
-        if (quotas.length === 1) {
-          this.addOrg.patchValue({
-            quotaDefinition: quotas[0].metadata.guid
-          });
+    // Quota dropdown source — pre-pick when there's only one option.
+    this.quotaSource = this.quotaData.orgQuotas(this.cfGuid);
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const quotas = this.quotaSource.value();
+        if (quotas.length === 1 && this.addOrg && !this.addOrg.value.quotaDefinition) {
+          this.addOrg.patchValue({ quotaDefinition: quotas[0].guid });
         }
-      })
-    );
+      });
+    });
 
     this.orgSubscription = this.orgs$.subscribe();
   }
 
+  // Exposed for the template's dropdown.
+  quotaSource!: SignalSource<StOrgQuota[]>;
+
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any, } =>
+    return (formField: AbstractControl): { [key: string]: any, } | null =>
       !this.validateNameTaken(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 
-  validateNameTaken = (value: string = null) => this.allOrgs ? this.allOrgs.indexOf(value || this.orgName.value) === -1 : true;
+  validateNameTaken = (value: string | null = null) => this.allOrgs.length === 0 ? true : this.allOrgs.indexOf(value || this.orgName.value) === -1;
 
   validate = () => this.validSignal();
 
-  submit: StepOnNextFunction = () => {
-    this.store.dispatch(new CreateOrganization(this.cfGuid, {
-      name: this.orgName.value,
-      quota_definition_guid: this.quotaDefinition.value ?? undefined
-    }));
-
-    return this.store.select(selectCfRequestInfo(organizationEntityType, this.orgName.value)).pipe(
-      filter(requestInfo => !!requestInfo && !requestInfo.creating),
-      map(requestInfo => ({
-        success: !requestInfo.error,
-        redirect: !requestInfo.error,
-        message: requestInfo.error ? `Failed to create organization: ${requestInfo.message}` : ''
-      }))
-    );
-  };
-
   ngOnDestroy() {
-    this.orgSubscription.unsubscribe();
+    this.orgSubscription?.unsubscribe();
     this.formStatusSub?.unsubscribe();
+    this.endpointDataRegistry.release(this.cfGuid);
   }
 }

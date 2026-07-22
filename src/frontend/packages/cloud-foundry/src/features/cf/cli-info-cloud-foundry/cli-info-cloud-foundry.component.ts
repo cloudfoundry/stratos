@@ -1,20 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 
 import { CustomTooltipDirective } from '@stratosui/core';
-import { Store } from '@ngrx/store';
+import { RoutingHistoryService } from '@stratosui/store';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf } from 'rxjs';
 import { take, map } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
 import { getFullEndpointApiUrl } from '../../../../../store/src/endpoint-utils';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { EntityInfo } from '../../../../../store/src/types/api.types';
 import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
-import { getPreviousRoutingState } from '../../../../../store/src/types/routing.type';
-import { IOrganization, ISpace } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
+import { StOrgDetail, StSpace } from '../../../services/endpoint-data/stratos-types';
 import { CliCommandComponent } from '../../../shared/components/cli-info/cli-command/cli-command.component';
 import { CFAppCLIInfoContext, CliInfoComponent } from '../../../shared/components/cli-info/cli-info.component';
 import { CfUserPermissionDirective } from '../../../shared/directives/cf-user-permission/cf-user-permission.directive';
@@ -51,11 +50,13 @@ import { CloudFoundrySpaceService } from '../services/cloud-foundry-space.servic
   ]
 })
 export class CliInfoCloudFoundryComponent implements OnInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
+  private routingHistory = inject(RoutingHistoryService);
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfOrgService = inject(CloudFoundryOrganizationService, { optional: true });
   private cfSpaceService = inject(CloudFoundrySpaceService, { optional: true });
+  private injector = inject(Injector);
 
 
   permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
@@ -76,8 +77,8 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   public endpointOrgSpace$!: Observable<[
     EntityInfo<EndpointModel>,
-    EntityInfo<APIResource<IOrganization>>,
-    EntityInfo<APIResource<ISpace>>
+    StOrgDetail | null,
+    StSpace | null
   ]>;
 
   constructor() {
@@ -115,7 +116,7 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   }
 
   private setupRouteObservable(defaultBackLink: string) {
-    this.route$ = this.store.select(getPreviousRoutingState).pipe(
+    this.route$ = this.routingHistory.previousState$.pipe(
       map(route => {
         return {
           url: route && route.state ? route.state.url : defaultBackLink,
@@ -127,8 +128,14 @@ export class CliInfoCloudFoundryComponent implements OnInit {
 
   private setupObservables() {
     const { orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
-    const org$ = orgGuid ? this.cfOrgService.org$ : observableOf(null);
-    const space$ = spaceGuid ? this.cfSpaceService.space$ : observableOf(null);
+    // V3-native org + space snapshots from the OrgDataService /
+    // SpaceDataService signals.
+    const org$ = orgGuid && this.cfOrgService
+      ? toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector })
+      : observableOf(null);
+    const space$ = spaceGuid && this.cfSpaceService
+      ? toObservable(this.cfSpaceService.spaceDataService.space, { injector: this.injector })
+      : observableOf(null);
     this.endpointOrgSpace$ = combineLatest(
       this.cfEndpointService.endpoint$,
       org$,
@@ -138,8 +145,11 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     this.context$ = this.endpointOrgSpace$.pipe(
       map(([cf, org, space]) => {
         return {
-          orgName: org ? org.entity.entity.name : null,
-          spaceName: space ? space.entity.entity.name : null,
+          // CFAppCLIInfoContext requires string org/space names; templates render
+          // falsy values as a '[...]' placeholder, so the empty-string "absent"
+          // marker is behaviourally identical to the prior null.
+          orgName: org ? org.name : '',
+          spaceName: space ? space.name : '',
           apiEndpoint: getFullEndpointApiUrl(cf.entity),
           username: cf.entity.user ? cf.entity.user.name : ''
         };
@@ -157,13 +167,13 @@ export class CliInfoCloudFoundryComponent implements OnInit {
         }];
         if (org) {
           breadcrumbs.push({
-            value: org.entity.entity.name,
-            routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.entity.metadata.guid}`
+            value: org.name,
+            routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}`
           });
           if (space) {
             breadcrumbs.push({
-              value: space.entity.entity.name,
-              routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.entity.metadata.guid}/spaces/${space.entity.metadata.guid}`
+              value: space.name,
+              routerLink: `/cloud-foundry/${cf.entity.guid}/organizations/${org.guid}/spaces/${space.guid}`
             });
           }
         }
@@ -174,10 +184,9 @@ export class CliInfoCloudFoundryComponent implements OnInit {
   }
 
   back() {
-    this.store.dispatch(new RouterNav({
-      path: this.previousUrl,
-      query: this.previousQueryParams
-    }
-    ));
+    // Direct Angular Router navigation, replacing the ngrx RouterNav dispatch
+    // (the RouterEffect did exactly this: split a string path into segments
+    // and pass query params through NavigationExtras).
+    this.router.navigate(this.previousUrl.split('/'), { queryParams: this.previousQueryParams });
   }
 }

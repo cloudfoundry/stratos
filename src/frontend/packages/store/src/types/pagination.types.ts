@@ -1,9 +1,9 @@
 import { HttpRequest } from '@angular/common/http';
-import type { Action } from '@ngrx/store';
+import type { Action } from './action.types';
 
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
 import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import type { ListActionState } from '../reducers/api-request-reducer/types';
+import type { ListActionState } from './entity-pipeline.types';
 import type { EntityRequestAction } from './request.types';
 
 
@@ -66,7 +66,7 @@ export class PaginationEntityState {
   isListPagination = false;
 }
 
-export function isPaginatedAction(obj: any): PaginatedAction {
+export function isPaginatedAction(obj: any): PaginatedAction | null {
   return obj && Object.keys(obj).indexOf('paginationKey') >= 0 && Object.keys(obj).indexOf('type') >= 0 ? obj as PaginatedAction : null;
 }
 
@@ -100,4 +100,43 @@ export interface PaginationEntityTypeState {
 
 export interface PaginationState {
   [entityKey: string]: PaginationEntityTypeState;
+}
+
+// --- Relocated from the deleted pagination-reducer/pagination-reducer-reset-pagination.ts ---
+// Still consumed by the test helper (default pagination entity state seed).
+
+export const defaultClientPaginationPageSize = 6;
+
+const defaultPaginationEntityState: PaginationEntityState = {
+  pageCount: 0,
+  currentPage: 1,
+  totalResults: 0,
+  ids: {},
+  pageRequests: {
+  },
+  params: {
+  },
+  clientPagination: {
+    pageSize: defaultClientPaginationPageSize,
+    currentPage: 1,
+    filter: {
+      string: '',
+      items: {}
+    },
+    totalResults: 0
+  },
+  maxedState: {
+    isMaxedMode: false
+  },
+  isListPagination: false
+};
+
+export function getDefaultPaginationEntityState(ignoreMaxed?: boolean): PaginationEntityState {
+  return {
+    ...defaultPaginationEntityState,
+    maxedState: {
+      ...defaultPaginationEntityState.maxedState,
+      ignoreMaxed
+    }
+  };
 }

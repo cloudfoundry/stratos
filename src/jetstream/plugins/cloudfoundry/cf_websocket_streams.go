@@ -3,6 +3,7 @@ package cloudfoundry
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -10,9 +11,9 @@ import (
 	"strings"
 	"time"
 
-	logcache "code.cloudfoundry.org/go-log-cache"
-	"code.cloudfoundry.org/go-log-cache/rpc/logcache_v1"
-	"code.cloudfoundry.org/go-loggregator/v8/rpc/loggregator_v2"
+	logcache "code.cloudfoundry.org/go-log-cache/v2"
+	"code.cloudfoundry.org/go-log-cache/v2/rpc/logcache_v1"
+	"code.cloudfoundry.org/go-loggregator/v9/rpc/loggregator_v2"
 	"github.com/cloudfoundry/noaa/v2/consumer"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -20,19 +21,6 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
-
-const (
-	// Time allowed to read the next pong message from the peer
-	pongWait = 30 * time.Second
-
-	// Send ping messages to peer with this period (must be less than pongWait)
-	pingPeriod = (pongWait * 9) / 10
-)
-
-// Allow connections from any Origin
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
 
 func (c *CloudFoundrySpecification) appStream(echoContext echo.Context) error {
 	return c.commonStreamHandler(echoContext, appStreamHandler)
@@ -42,22 +30,18 @@ func (c *CloudFoundrySpecification) firehose(echoContext echo.Context) error {
 	return c.commonStreamHandler(echoContext, firehoseStreamHandler)
 }
 
-func (c *CloudFoundrySpecification) appFirehose(echoContext echo.Context) error {
-	return c.commonStreamHandler(echoContext, appFirehoseStreamHandler)
-}
-
 func (c *CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context, bespokeStreamHandler func(echo.Context, *AuthorizedConsumer, *websocket.Conn) error) error {
 	ac, err := c.openNoaaConsumer(echoContext)
 	if err != nil {
 		return err
 	}
-	defer ac.consumer.Close()
+	defer func() { _ = ac.consumer.Close() }()
 
 	clientWebSocket, pingTicker, err := api.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		return err
 	}
-	defer clientWebSocket.Close()
+	defer func() { _ = clientWebSocket.Close() }()
 	defer pingTicker.Stop()
 
 	if err := bespokeStreamHandler(echoContext, ac, clientWebSocket); err != nil {
@@ -74,6 +58,26 @@ type AuthorizedConsumer struct {
 	logCacheClient *logcache.Client
 	authToken      string
 	refreshToken   func() error
+}
+
+// dopplerTLSConfig builds the TLS config for the Doppler/Noaa connection that
+// carries the user's CF OAuth bearer token. It honours the endpoint's
+// SkipSSLValidation setting and CA certificate instead of unconditionally
+// skipping verification (which exposed the bearer token to an on-path MITM),
+// mirroring how every other CF connection for this endpoint is built.
+func dopplerTLSConfig(cnsiRecord api.CNSIRecord) *tls.Config {
+	config := &tls.Config{InsecureSkipVerify: cnsiRecord.SkipSSLValidation}
+	if len(cnsiRecord.CACert) > 0 {
+		rootCAs, err := x509.SystemCertPool()
+		if rootCAs == nil || err != nil {
+			rootCAs = x509.NewCertPool()
+		}
+		if ok := rootCAs.AppendCertsFromPEM([]byte(cnsiRecord.CACert)); !ok {
+			log.Warn("Could not append the CA for the Doppler endpoint - using system certs only")
+		}
+		config.RootCAs = rootCAs
+	}
+	return config
 }
 
 // Refresh the Authorization token if needed and create a new Noaa consumer
@@ -120,7 +124,7 @@ func (c *CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (
 
 	// Open a Noaa consumer to the doppler endpoint
 	log.Debugf("Creating Noaa consumer for Doppler endpoint %s", dopplerAddress)
-	ac.consumer = consumer.New(dopplerAddress, &tls.Config{InsecureSkipVerify: true}, http.ProxyFromEnvironment)
+	ac.consumer = consumer.New(dopplerAddress, dopplerTLSConfig(cnsiRecord), http.ProxyFromEnvironment)
 
 	//Open a LogCache client to the log cache endpoint
 	logCacheUrl := strings.Replace(cnsiRecord.APIEndpoint.String(), "api.sys.", "log-cache.sys.", 1)
@@ -293,33 +297,5 @@ func firehoseStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, cli
 	})
 
 	log.Infof("Firehose connected and streaming for CNSI: %s - subscription ID: %s", cnsiGUID, firehoseSubscriptionId)
-	return nil
-}
-
-func appFirehoseStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWebSocket *websocket.Conn) error {
-	log.Debug("appFirehoseStreamHandler")
-
-	// Get the CNSI and app IDs from route parameters
-	cnsiGUID := echoContext.Param("cnsiGuid")
-	appGUID := echoContext.Param("appGuid")
-
-	log.Infof("Received request for log stream for App ID: %s - in CNSI: %s", appGUID, cnsiGUID)
-
-	msgChan, errorChan := ac.consumer.Stream(appGUID, ac.authToken)
-
-	// Process the app stream
-	go drainErrors(errorChan)
-	go drainFirehoseEvents(msgChan, func(msg *events.Envelope) {
-		if jsonMsg, err := json.Marshal(msg); err != nil {
-			log.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
-		} else {
-			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
-			if err != nil {
-				log.Errorf("Error writing data to WebSocket, %v", err)
-			}
-		}
-	})
-
-	log.Infof("Now streaming for App ID: %s - on CNSI: %s", appGUID, cnsiGUID)
 	return nil
 }

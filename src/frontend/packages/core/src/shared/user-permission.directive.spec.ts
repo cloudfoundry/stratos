@@ -7,17 +7,12 @@ import {
   createBasicStoreModule,
   STORE_TEST_PROVIDERS,
 } from '@stratosui/store/testing';
-import {
-  EntityCatalogTestModule,
-  EntityServiceFactory,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-} from '@stratosui/store';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
 import { UserPermissionDirective } from './user-permission.directive';
 import { CurrentUserPermissionsService } from '../core/permissions/current-user-permissions.service';
 
 @Component({
-  standalone: false,
+  imports: [UserPermissionDirective],
   template: `<div *appUserPermission="['test.permission']">Test Content</div>`
 })
 class TestUserPermissionComponent {
@@ -32,7 +27,6 @@ describe('UserPermissionDirective', () => {
       providers: [
         provideZonelessChangeDetection(),
         CurrentUserPermissionsService,
-        EntityServiceFactory,
         ...(STORE_TEST_PROVIDERS || []),
       ],
       imports: [
@@ -49,9 +43,9 @@ describe('UserPermissionDirective', () => {
         },
         createBasicStoreModule(),
         AppTestModule,
-        UserPermissionDirective
-      ],
-      declarations: [TestUserPermissionComponent]
+        UserPermissionDirective,
+        TestUserPermissionComponent
+      ]
     });
     fixture = TestBed.createComponent(TestUserPermissionComponent);
     component = fixture.componentInstance;

@@ -1,5 +1,5 @@
 @if (noContent$ | async; as message) {
-  <app-no-content-message [icon]="'settings_ethernet'" [hidden]="!message"
+  <app-no-content-message class="flex w-full relative overflow-visible" [icon]="'settings_ethernet'" [hidden]="!message"
     [firstLine]="message.firstLine" [secondLine]="showDirectToEndpointMessage ? message.secondLine : null"
     [toolbarLink]="message.toolbarLink" toolbarAlign="stratos-add-endpoint">
   </app-no-content-message>

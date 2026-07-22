@@ -2,9 +2,7 @@ package main
 
 import (
 	"database/sql"
-	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -26,7 +24,6 @@ const UAAAdminIdentifier = "stratos.admin"
 type uaaAuth struct {
 	databaseConnectionPool *sql.DB
 	p                      *portalProxy
-	skipSSLValidation      bool
 }
 
 func (a *uaaAuth) ShowConfig(config *api.ConsoleConfig) {
@@ -63,9 +60,9 @@ func (a *uaaAuth) Login(c echo.Context) error {
 	a.p.ensureXSRFToken(c)
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
+	_, err = c.Response().Write(jsonString)
 
-	return nil
+	return err
 }
 
 // Logout provides UAA-auth specific Stratos login
@@ -172,7 +169,9 @@ func (a *uaaAuth) logout(c echo.Context) error {
 	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
-	a.p.unsetSessionValue(c, XSRFTokenSessionName)
+	if err := a.p.unsetSessionValue(c, XSRFTokenSessionName); err != nil {
+		log.Warnf("Unable to remove XSRF token from session: %v", err)
+	}
 
 	err := a.p.clearSession(c)
 	if err != nil {
@@ -376,7 +375,7 @@ func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, clien
 		return nil, api.LogHTTPError(res, err)
 	}
 
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	var response api.UAAResponse
 
@@ -531,8 +530,7 @@ func (p *portalProxy) initSSOlogin(c echo.Context) error {
 	}
 
 	redirectURL := fmt.Sprintf("%s/oauth/authorize?response_type=code&client_id=%s&redirect_uri=%s", p.Config.ConsoleConfig.AuthorizationEndpoint, p.Config.ConsoleConfig.ConsoleClient, url.QueryEscape(getSSORedirectURI(state, state, "")))
-	c.Redirect(http.StatusTemporaryRedirect, redirectURL)
-	return nil
+	return c.Redirect(http.StatusTemporaryRedirect, redirectURL)
 }
 
 func validateSSORedirectState(state string, allowListStr string) error {
@@ -584,37 +582,4 @@ func getSSORedirectURI(base string, state string, endpointGUID string) string {
 		returnURL = fmt.Sprintf("%s&guid=%s", returnURL, endpointGUID)
 	}
 	return returnURL
-}
-
-//HTTP Basic
-
-// fetchHTTPBasicToken currently unused?
-func (p *portalProxy) fetchHTTPBasicToken(cnsiRecord api.CNSIRecord, c echo.Context) (*api.UAAResponse, *api.JWTUserTokenInfo, *api.CNSIRecord, error) {
-
-	uaaRes, u, err := p.loginHTTPBasic(c)
-
-	if err != nil {
-		return nil, nil, nil, api.NewHTTPShadowError(
-			http.StatusUnauthorized,
-			"Login failed",
-			"Login failed: %v", err)
-	}
-	return uaaRes, u, &cnsiRecord, nil
-}
-
-// fetchHTTPBasicToken currently unused?
-func (p *portalProxy) loginHTTPBasic(c echo.Context) (uaaRes *api.UAAResponse, u *api.JWTUserTokenInfo, err error) {
-	log.Debug("login")
-	username := c.FormValue("username")
-	password := c.FormValue("password")
-
-	if len(username) == 0 || len(password) == 0 {
-		return uaaRes, u, errors.New("needs username and password")
-	}
-
-	authString := fmt.Sprintf("%s:%s", username, password)
-	base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
-
-	uaaRes.AccessToken = fmt.Sprintf("Basic %s", base64EncodedAuthString)
-	return uaaRes, u, nil
 }

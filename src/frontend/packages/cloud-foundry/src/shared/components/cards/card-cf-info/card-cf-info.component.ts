@@ -1,91 +1,94 @@
-import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable, Subscription } from 'rxjs';
-import { map, tap } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
-import { fetchAutoscalerInfo } from '@stratosui/cf-autoscaler';
-import { EntityServiceFactory, APIResource, EntityInfo } from '@stratosui/store';
-import { ICfV2Info } from '../../../../cf-api.types';
+import { AutoscalerInfoDataService } from '@stratosui/cf-autoscaler';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
   UserInviteConfigurationDialogComponent,
 } from '../../../../features/cf/user-invites/configuration-dialog/user-invite-configuration-dialog.component';
 import { UserInviteConfigureService, UserInviteService } from '../../../../features/cf/user-invites/user-invite.service';
 
+/**
+ * CF endpoint summary card. The data path under `cfEndpointService.info$`
+ * already hits the V3-native `/pp/v1/cf/info/{cnsi}` handler — the wire
+ * shape is StratosCFInfo (snake_case for legacy compat) and is sourced
+ * from /v3/info + the unversioned API root. This component reads the
+ * already-V3 data through signal bridges instead of the legacy observable
+ * plumbing, so the Summary card renders directly off the signal graph
+ * without the ngrx EntityService middle-layer in the template.
+ */
 @Component({
   selector: 'app-card-cf-info',
   templateUrl: './card-cf-info.component.html',
-  styleUrls: ['./card-cf-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
-    MetadataItemComponent
-  ]
+    MetadataItemComponent,
+  ],
 })
-export class CardCfInfoComponent implements OnInit, OnDestroy {
-  public cfEndpointService = inject(CloudFoundryEndpointService);
-  public userInviteService = inject(UserInviteService);
-  public userInviteConfigureService = inject(UserInviteConfigureService);
+export class CardCfInfoComponent implements OnInit {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  userInviteService = inject(UserInviteService);
+  userInviteConfigureService = inject(UserInviteConfigureService);
   private dialog = inject(TailwindDialogService);
-  private esf = inject(EntityServiceFactory);
+  private autoscalerInfoData = inject(AutoscalerInfoDataService);
 
-  public apiUrl!: string;
-  private subs: Subscription[] = [];
-  public autoscalerVersion$!: Observable<string | null>;
+  // Signal bridges over the existing observables. The data they carry is
+  // already V3-native — `cfEndpointService.info$` is a toObservable() bridge
+  // over CfInfoDataService's signal, which fetches /pp/v1/cf/info/{cnsi}
+  // directly (W-e dropped the ngrx GetCFInfo effect intermediary). These
+  // are template-side signal reads, not a data-path migration.
+  readonly endpointInfo = this.cfEndpointService.endpoint;
+  readonly info = toSignal(this.cfEndpointService.info$, { initialValue: null as any });
+  readonly hasSSHAccess = toSignal(this.cfEndpointService.hasSSHAccess$, { initialValue: false });
+  readonly canConfigureInvites = toSignal(this.userInviteService.canConfigure$, { initialValue: false });
+  readonly invitesConfigured = toSignal(this.userInviteService.configured$, { initialValue: false });
 
-  description$!: Observable<string>;
+  // Autoscaler version comes from the cf-autoscaler signal-native data
+  // service. Wave-3 (A-effects-cleanup) replaced the legacy
+  // fetchAutoscalerInfo helper + AutoscalerEffects path with a direct
+  // injection of AutoscalerInfoDataService, dropping ngrx from the
+  // autoscaler package end-to-end. The fetch is still deferred to
+  // ngOnInit so test setups that don't pre-register autoscaler entities
+  // can still construct this component.
+  readonly autoscalerVersion = this.autoscalerInfoData.info(this.cfEndpointService.cfGuid);
+  private readonly autoscalerError = this.autoscalerInfoData.error(this.cfEndpointService.cfGuid);
 
-  ngOnInit() {
-    const obs$ = this.cfEndpointService.endpoint$.pipe(
-      tap(endpoint => {
-        this.apiUrl = this.getApiEndpointUrl(endpoint.entity.api_endpoint);
-      })
-    );
-    this.subs.push(obs$.subscribe());
-
-    this.description$ = this.cfEndpointService.info$.pipe(
-      map(entity => this.getDescription(entity))
-    );
-
-    // FIXME: CF should not depend on autoscaler. See #3916
-    // FIXME: Remove hard link between cf and autoscaler packages #4416
-    this.autoscalerVersion$ = fetchAutoscalerInfo(this.cfEndpointService.cfGuid, this.esf).pipe(
-      map(e => e.entityRequestInfo.error ?
-        null :
-        e.entity ? e.entity.entity.build : ''),
-    );
-  }
-
-  getApiEndpointUrl(apiEndpoint: any) {
+  /** API endpoint URL, formatted for display. */
+  readonly apiUrl = computed((): string => {
+    const ep = this.endpointInfo();
+    if (!ep?.entity?.api_endpoint) return '';
+    const apiEndpoint = ep.entity.api_endpoint;
     const path = apiEndpoint.Path ? `/${apiEndpoint.Path}` : '';
     return `${apiEndpoint.Scheme}://${apiEndpoint.Host}${path}`;
-  }
+  });
 
-  ngOnDestroy(): void {
-    this.subs.forEach(s => s.unsubscribe());
-  }
+  /** Endpoint description, falling back to '-' when absent. */
+  readonly description = computed((): string => {
+    const metadata = this.info()?.entity?.entity;
+    if (!metadata) return '-';
+    if (!metadata.description) return '-';
+    return metadata.description + (metadata.build ? ` (${metadata.build})` : '');
+  });
 
-  private getMetadataFromInfo(entity: EntityInfo<APIResource<ICfV2Info>>) {
-    return entity && entity.entity && entity.entity.entity ? entity.entity.entity : null;
-  }
+  /** Autoscaler build version, '' for empty entity, null for error/missing. */
+  readonly autoscalerVersionLabel = computed((): string | null => {
+    if (this.autoscalerError()) return null;
+    const info = this.autoscalerVersion();
+    if (!info) return null;
+    return info.build ?? '';
+  });
 
-  private getDescription(entity: EntityInfo<APIResource<ICfV2Info>>): string {
-    const metadata = this.getMetadataFromInfo(entity);
-    if (metadata) {
-      if (metadata.description) {
-        return metadata.description + (metadata.build ? ` (${metadata.build})` : '');
-      }
-    }
-    return '-';
+  ngOnInit(): void {
+    void this.autoscalerInfoData.load(this.cfEndpointService.cfGuid);
   }
 
   configureUserInvites() {
     this.dialog.open(UserInviteConfigurationDialogComponent, {
-      data: {
-        guid: this.cfEndpointService.cfGuid
-      }
+      data: { guid: this.cfEndpointService.cfGuid },
     });
   }
 

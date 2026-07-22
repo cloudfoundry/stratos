@@ -3,49 +3,78 @@
 @if (mode === 'schema') {
   <div class="schema-form">
     <div class="flex gap-4 mb-4">
-      <label class="inline-flex items-center cursor-pointer">
-        <input type="radio" [(ngModel)]="schemaView" value="schemaForm" (change)="onSchemaViewChanged()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+      <label class="inline-flex items-center cursor-pointer" for="schema-view-form">
+        <input id="schema-view-form" type="radio" [ngModel]="schemaView()" (ngModelChange)="schemaView.set($event)" value="schemaForm" (change)="onSchemaViewChanged()" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-1 focus:ring-primary">
         <span class="ml-2 text-sm font-medium text-content-text">Form</span>
       </label>
-      <label class="inline-flex items-center cursor-pointer">
-        <input type="radio" [(ngModel)]="schemaView" value="schemaJson" (change)="onSchemaViewChanged()" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 focus:ring-2">
+      <label class="inline-flex items-center cursor-pointer" for="schema-view-json">
+        <input id="schema-view-json" type="radio" [ngModel]="schemaView()" (ngModelChange)="schemaView.set($event)" value="schemaJson" (change)="onSchemaViewChanged()" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-1 focus:ring-primary">
         <span class="ml-2 text-sm font-medium text-content-text">JSON</span>
       </label>
     </div>
-    @if (schemaView === 'schemaForm') {
+    @if (renderError()) {
+      <div data-testid="render-error-notice" class="mb-3 p-3 rounded-md border border-warning-400 dark:border-warning-600 bg-warning-50 dark:bg-warning-900/30 text-warning-900 dark:text-warning-100 text-sm">
+        @if (schemaTitle) {
+          <strong class="block font-semibold mb-1">{{ schemaTitle }}</strong>
+        }
+        @if (schemaDescription) {
+          <p class="mb-1">{{ schemaDescription }}</p>
+        }
+        {{ renderError() }}
+      </div>
+    }
+    @if (schemaView() === 'schemaForm') {
       <div class="schema-form__form">
-        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (validationErrors)="onFormValidationErrors($event)" (onChanges)="onFormChange($event)">
+        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema ?? {}" [framework]="'material-design'" [data]="formInitialData" [warnings]="warnings()" (changes)="onFormChange($event)" (renderError)="onRenderError($event)">
         </json-schema-form>
-        @if (!!formValidationErrorsStr) {
-          <div class="schema-form__form--data-bad" [innerHTML]="formValidationErrorsStr"></div>
+        @if (warnings().length) {
+          <ul class="mt-2 text-sm text-warning list-disc pl-5">
+            @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+          </ul>
         }
       </div>
     } @else {
-      <form [formGroup]="jsonForm">
-        <app-form-field class="schema-form__raw">
-          <textarea appInput placeholder="JSON" rows="10"
-            class="w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
-            formControlName="json"></textarea>
-          @if (jsonForm.controls.json.hasError('notValidJson')) {
-            <app-error>
-              Not valid JSON. Please specify a valid JSON Object
-            </app-error>
-          }
-        </app-form-field>
-      </form>
+      <div class="flex justify-end mb-1">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
+          {{ isMinified() ? 'Format' : 'Minify' }}
+        </button>
+      </div>
+      <div class="h-[200px] min-h-[200px] min-w-[16rem] resize overflow-hidden border border-content-border rounded-md">
+        <app-monaco-editor
+          [model]="{ language: 'json', value: jsonText }"
+          [options]="monacoOptions"
+          (editorInit)="onMonacoInit($event)">
+        </app-monaco-editor>
+      </div>
+      @if (!parseValid()) {
+        <div class="mt-1 text-sm text-warning-shade-500">Not valid JSON. Please specify a valid JSON object.</div>
+      }
+      @if (warnings().length) {
+        <ul class="mt-2 text-sm text-warning list-disc pl-5">
+          @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+        </ul>
+      }
     }
   </div>
 } @else {
-  <form [formGroup]="jsonForm">
-    <app-form-field class="schema-form__raw">
-      <textarea appInput placeholder="JSON" rows="10"
-        class="w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
-        formControlName="json"></textarea>
-      @if (jsonForm.controls.json.hasError('notValidJson')) {
-        <app-error>
-          Not valid JSON. Please specify a valid JSON Object
-        </app-error>
-      }
-    </app-form-field>
-  </form>
+  <div class="flex justify-end mb-1">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
+      {{ isMinified() ? 'Format' : 'Minify' }}
+    </button>
+  </div>
+  <div class="h-[200px] min-h-[200px] min-w-[16rem] resize overflow-hidden border border-content-border rounded-md">
+    <app-monaco-editor
+      [model]="{ language: 'json', value: jsonText }"
+      [options]="monacoOptions"
+      (editorInit)="onMonacoInit($event)">
+    </app-monaco-editor>
+  </div>
+  @if (!parseValid()) {
+    <div class="mt-1 text-sm text-warning-shade-500">Not valid JSON. Please specify a valid JSON object.</div>
+  }
+  @if (warnings().length) {
+    <ul class="mt-2 text-sm text-warning list-disc pl-5">
+      @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+    </ul>
+  }
 }

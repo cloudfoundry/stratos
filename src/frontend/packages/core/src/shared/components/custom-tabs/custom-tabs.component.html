@@ -4,6 +4,7 @@
       @for (tab of getTabsArray(); track $index; let i = $index) {
         <div
           class="tab-label"
+          [attr.data-test]="'custom-tab-' + (tab.label || tab.textLabel)"
           role="tab" tabindex="0"
           [attr.aria-selected]="tab.isActive"
           [class.active]="tab.isActive"

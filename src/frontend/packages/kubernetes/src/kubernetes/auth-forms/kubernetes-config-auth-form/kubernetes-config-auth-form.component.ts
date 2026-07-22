@@ -19,7 +19,7 @@ interface ConfigAuthForm {
   ]
 })
 export class KubernetesConfigAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: FormGroup<ConfigAuthForm>;
+  @Input() formGroup!: FormGroup<ConfigAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
     return { kubeconfig: (values?.kubeconfig as string) ?? '' };

@@ -17,7 +17,7 @@ export class ApplicationPageRoutesTab extends ApplicationBasePage {
 
     this.listComponent = page.locator('app-list');
     this.addRouteButton = page.locator('button').filter({ hasText: /add.*route|create.*route/i });
-    this.mapRouteButton = page.locator('button').filter({ hasText: /map.*route/i });
+    this.mapRouteButton = page.locator('button').filter({ hasText: /add.*route/i }); // mapping now lives on the Add Route page
   }
 
   /**
@@ -138,14 +138,14 @@ export class ApplicationPageRoutesTab extends ApplicationBasePage {
    * Click add route button
    */
   async clickAddRoute(): Promise<void> {
-    await this.addRouteButton.first().click();
+    await this.addRouteButton.first().click({ timeout: 60000 }); // outlast the loading overlay (CF-latency bound)
   }
 
   /**
    * Click map route button
    */
   async clickMapRoute(): Promise<void> {
-    await this.mapRouteButton.first().click();
+    await this.mapRouteButton.first().click({ timeout: 60000 }); // outlast the loading overlay (CF-latency bound)
   }
 
   /**

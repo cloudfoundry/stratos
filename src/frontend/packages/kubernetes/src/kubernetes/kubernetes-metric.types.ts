@@ -36,6 +36,5 @@ export interface IKubernetesMetric {
 /**
  * Extended ChartSeries metadata for Kubernetes metrics
  */
-export interface IKubernetesChartMetadata extends IKubernetesMetric {
-  // Metadata can include all metric properties
-}
+// Metadata can include all metric properties
+export type IKubernetesChartMetadata = IKubernetesMetric;

@@ -21,8 +21,12 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kat-co/vala"
 
-	// Sqlite driver
-	_ "github.com/mattn/go-sqlite3"
+	// Sqlite driver — pure-Go (sqlite compiled to wasm, run on wazero), so
+	// the driver works under CGO_ENABLED=0. mattn/go-sqlite3 is cgo-only and
+	// silently became a runtime stub in the CGO_ENABLED=0 release binaries.
+	// Registers under the name "sqlite3", so datastore, goose, and the
+	// nwmac/sqlitestore session store all keep working unchanged.
+	_ "github.com/ncruces/go-sqlite3/driver"
 
 	"github.com/pressly/goose"
 )
@@ -143,14 +147,15 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		return dc, err
 	}
 
-	if dc.DatabaseProvider == PGSQL {
+	switch dc.DatabaseProvider {
+	case PGSQL:
 		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
 			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 			return dc, nil
 		}
 		// Invalid SSL mode
 		return dc, fmt.Errorf("invalid SSL mode: %s", dc.SSLMode)
-	} else if dc.DatabaseProvider == MYSQL {
+	case MYSQL:
 		// Map default of disabled to false for MySQL
 		if dc.SSLMode == "disable" {
 			dc.SSLMode = "false"
@@ -161,7 +166,8 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		// Invalid SSL mode
 		return dc, fmt.Errorf("invalid SSL mode: %s", dc.SSLMode)
 	}
-	return dc, fmt.Errorf("invalid provider %v", dc)
+	// Only name the provider — dc holds the database password
+	return dc, fmt.Errorf("invalid database provider %q", dc.DatabaseProvider)
 }
 
 func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
@@ -200,7 +206,9 @@ func GetInMemorySQLLiteConnection() (*sql.DB, error) {
 		return nil, err
 	}
 
-	goose.SetDialect("sqlite3")
+	if err := goose.SetDialect("sqlite3"); err != nil {
+		return nil, err
+	}
 
 	err = ApplyMigrations(db)
 	if err != nil {
@@ -215,13 +223,14 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 	var openStr, name string
 
-	if dc.DatabaseProvider == PGSQL {
+	switch dc.DatabaseProvider {
+	case PGSQL:
 		name = "postgres"
 		openStr = buildConnectionString(dc)
-	} else if dc.DatabaseProvider == MYSQL {
+	case MYSQL:
 		name = "mysql"
 		openStr = buildConnectionStringForMysql(dc)
-	} else {
+	default:
 		name = "sqlite3"
 		sqlDbDir := env.String("SQLITE_DB_DIR", ".")
 		openStr = path.Join(sqlDbDir, SQLiteDatabaseFile)
@@ -229,11 +238,15 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 		log.Infof("SQLite Database file: %s", openStr)
 
 		if !sqliteKeepDB {
-			os.Remove(openStr)
+			if err := os.Remove(openStr); err != nil && !os.IsNotExist(err) {
+				log.Warnf("Unable to remove SQLite database file %s: %v", openStr, err)
+			}
 		}
 	}
 
-	goose.SetDialect(name)
+	if err := goose.SetDialect(name); err != nil {
+		return nil, err
+	}
 	db, err := sql.Open(name, openStr)
 
 	return db, err
@@ -242,7 +255,7 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 func buildConnectionString(dc DatabaseConfig) string {
 	log.Debug("buildConnectionString")
 	escapeStr := func(in string) string {
-		return strings.Replace(in, `'`, `\'`, -1)
+		return strings.ReplaceAll(in, `'`, `\'`)
 	}
 
 	connStr := fmt.Sprintf("user='%s' password='%s' dbname='%s' host='%s' port=%d connect_timeout=%d",
@@ -281,7 +294,7 @@ func buildConnectionString(dc DatabaseConfig) string {
 func buildConnectionStringForMysql(dc DatabaseConfig) string {
 	log.Debug("buildConnectionStringForMysql")
 	escapeStr := func(in string) string {
-		return strings.Replace(in, `'`, `\'`, -1)
+		return strings.ReplaceAll(in, `'`, `\'`)
 	}
 
 	connStr := fmt.Sprintf("%s:%%s@tcp(%s:%d)/%s?parseTime=true",

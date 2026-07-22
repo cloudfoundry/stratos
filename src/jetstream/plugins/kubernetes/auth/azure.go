@@ -3,6 +3,7 @@ package auth
 import (
 	"encoding/base64"
 	"errors"
+	"fmt"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -35,6 +36,9 @@ func (p *AzureKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (
 	}
 
 	kubeConfig, err := config.ParseKubeConfig([]byte(body))
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to parse kubeconfig: %v", err)
+	}
 
 	kubeConfigUser, err := kubeConfig.GetUserForCluster(cnsiRecord.APIEndpoint.String())
 	if err != nil {

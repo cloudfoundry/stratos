@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectorRef, Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { ActivatedRoute, Router } from '@angular/router';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -9,15 +10,10 @@ import {
   Subscription } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
 
-import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, SnackBarService } from '@stratosui/core';
-import { RouterNav } from '@stratosui/store';
-import { CFAppState } from '@stratosui/cloud-foundry';
-import { DeleteDeployAppSection } from '../../../../actions/deploy-applications.actions';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { spaceEntityType } from '../../../../cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
-import { CfAppsDataSource } from '../../../../shared/components/list/list-types/app/cf-apps-data-source';
+import { safeUnsubscribe, LogViewerComponent, StepOnNextFunction, TailwindSnackBarService } from '@stratosui/core';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import type { StApp, StAppsResponse } from '../../../../services/endpoint-data/stratos-types';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
 
 @Component({
@@ -35,11 +31,14 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
   ]
 })
 export class DeployApplicationStep3Component implements OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
-  private snackBarService = inject(SnackBarService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private deployData = inject(CfDeployAppDataService);
+  private snackBarService = inject(TailwindSnackBarService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
   private injector = inject(Injector);
   private cdr = inject(ChangeDetectorRef);
+  private http = inject(HttpClient);
 
 
   @Input() appGuid!: string;
@@ -91,7 +90,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
     this.subscriptions.push(
       status$.pipe(filter(status => status.error))
-        .subscribe(status => this.snackBarService.show(status.errorMsg, 'Dismiss'))
+        .subscribe(status => this.snackBarService.show(status.errorMsg ?? 'Application deployment failed', 'Dismiss'))
     );
 
     const appGuid$ = this.deployer.applicationGuid$.asObservable().pipe(
@@ -103,13 +102,11 @@ export class DeployApplicationStep3Component implements OnDestroy {
       appGuid$.subscribe(guid => {
         this.validSubject.next(!!guid);
         this.appGuid = guid;
-
-        // Update the root app wall list
-        cfEntityCatalog.application.api.getMultiple(undefined, CfAppsDataSource.paginationKey, {
-          includeRelations: CfAppsDataSource.includeRelations });
-
-        // Pre-fetch the app env vars
-        cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
+        // Pre-fetches the app wall + env vars used to live here to warm
+        // the legacy ngrx state. AppDetailDataService and
+        // CfAppsSignalConfigService both fetch fresh on next mount, so
+        // dropping the pre-fetches is functionally a no-op modulo a
+        // one-time HTTP saved.
       })
     );
 
@@ -157,16 +154,17 @@ export class DeployApplicationStep3Component implements OnDestroy {
           const appName = this.deployer.appData.Name;
           const cfGuid = this.deployer.cfGuid;
           const spaceGuid = this.deployer.spaceGuid;
-          const paginationKey = createEntityRelationPaginationKey(spaceEntityType, spaceGuid);
-          return cfEntityCatalog.application.store.getAllInSpace
-            .getPaginationService(spaceGuid, cfGuid, paginationKey)
-            .entities$.pipe(
-              filter(apps => Array.isArray(apps) && apps.length > 0),
-              map(apps => apps.find(a => a.entity?.name === appName)),
-              filter(app => !!app),
-              map(app => app.metadata.guid),
-              take(1),
-            );
+          // Native handler returns apps for the space; client-side filter
+          // for the just-deployed name. Single HTTP call replaces the
+          // legacy ngrx pagination that walked the space-apps list.
+          return this.http.get<StAppsResponse>(
+            `/pp/v1/cf/apps/${cfGuid}?space_guids=${encodeURIComponent(spaceGuid)}`,
+          ).pipe(
+            map(resp => (resp?.resources ?? []).find((a: StApp) => a.name === appName)),
+            filter((app): app is StApp => !!app),
+            map(app => app.guid),
+            take(1),
+          );
         }),
       ).subscribe(guid => {
         this.deployer.applicationGuid$.next(guid);
@@ -180,7 +178,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   }
 
   ngOnDestroy() {
-    this.store.dispatch(new DeleteDeployAppSection());
+    this.deployData.resetState();
     this.destroyDeployer();
     if (this.deployer) {
       if (!this.deployer.deploying) {
@@ -197,7 +195,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
       take(1)
     ).subscribe(status => {
       if (status.error) {
-        this.snackBarService.show(status.errorMsg, 'Dismiss');
+        this.snackBarService.show(status.errorMsg ?? 'Application deployment failed', 'Dismiss');
       } else {
         const ref = this.snackBarService.show('Application deployment complete', 'View', 10000, true);
         ref.onAction().subscribe(() => { this.goToAppSummary(); });
@@ -207,11 +205,28 @@ export class DeployApplicationStep3Component implements OnDestroy {
   }
 
   onEnter = (fsDeployer: DeployApplicationDeployer) => {
+    // Re-entry after Previous: tear down the prior deployer's subscriptions
+    // and websocket so its stale status$ cannot replay the earlier error
+    // snackbar on top of the fresh attempt.
+    this.destroyDeployer();
+    if (this.deployer && this.deployer !== fsDeployer) {
+      this.deployer.close();
+    }
+
+    // Reset UI state so buttons reflect "deploy not yet started" rather
+    // than carrying over the prior attempt's terminal state (e.g. "Go to
+    // App Summary" staying active from a previous successful push).
+    this.validSubject.next(false);
+    this.closeableSubject.next(false);
+    this.showOverlaySubject.next(false);
+    this.disablePreviousSubject.next(true);
+    this.error.set(false);
+
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {
       this.deployer = fsDeployer;
     } else {
-      this.deployer = new DeployApplicationDeployer(this.store, this.cfOrgSpaceService, this.injector);
+      this.deployer = new DeployApplicationDeployer(this.cfOrgSpaceService, this.injector);
     }
 
     this.initDeployer();
@@ -231,25 +246,26 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   onNext: StepOnNextFunction = () => {
     // Delete Deploy App Section
-    this.store.dispatch(new DeleteDeployAppSection());
+    this.deployData.resetState();
     this.goToAppSummary();
     return observableOf({ success: true });
   };
 
   goToAppSummary() {
-    // Take user to applications
+    // Take user to applications. AppDetailDataService on the destination
+    // page fetches app entity + env vars fresh on mount — the legacy
+    // pre-fetches that used to live here were warming ngrx state that
+    // nothing reads anymore.
     const { cfGuid } = this.deployer;
     if (this.appGuid) {
-      cfEntityCatalog.appEnvVar.api.getMultiple(this.appGuid, this.deployer.cfGuid);
-
-      // Ensure the application package_state is correct
-      cfEntityCatalog.application.api.get(
-        this.appGuid,
-        cfGuid,
-        { includeRelations: [], populateMissing: false }
+      // When deployed from a CF-scoped wall, tag the app detail with
+      // ?breadcrumbs=cf so its "Applications" breadcrumb returns to that wall.
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'];
+      const cfScoped = typeof returnUrl === 'string' && returnUrl.startsWith('/cloud-foundry/');
+      this.router.navigate(
+        ['applications', cfGuid, this.appGuid],
+        cfScoped ? { queryParams: { breadcrumbs: 'cf' } } : undefined,
       );
-      // this.store.dispatch(new GetApplication(this.appGuid, cfGuid));
-      this.store.dispatch(new RouterNav({ path: ['applications', cfGuid, this.appGuid] }));
     }
   }
 }

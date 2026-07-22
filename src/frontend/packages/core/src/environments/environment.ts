@@ -1,4 +1,4 @@
-import { cfAPIVersion, proxyAPIVersion } from '@stratosui/store';
+import { proxyAPIVersion } from '@stratosui/store';
 
 // The file contents for the current environment will overwrite these during build.
 // The build system defaults to the dev environment which uses `environment.ts`, but if you do
@@ -8,7 +8,6 @@ import { cfAPIVersion, proxyAPIVersion } from '@stratosui/store';
 export const environment = {
   production: false,
   proxyAPIVersion,
-  cfAPIVersion,
   showObsDebug: false,
   disablePolling: false,
   desktopMode: false,

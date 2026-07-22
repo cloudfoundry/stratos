@@ -1,0 +1,268 @@
+import type { LeverValue, Facets, FacetValue, Layer, ContentFormat } from '@/metadata/types';
+import type { EditorView } from 'codemirror';
+import { effect } from '@preact/signals-core';
+import { setBrandingAsset, assetRefFor } from '@/state/branding-assets';
+import { brandingModel, nodeFor } from '@/state/branding';
+import { mountCssEditor } from '@/ui/css-editor';
+import { mountFacetTree } from '@/ui/facet-tree';
+import { positionInPreviewGutter, positionAbovePanes, makeDraggable } from '@/ui/popover';
+import { previewDark, compareMode } from '@/state/scene';
+
+export interface OpenLeverEditorOptions {
+  previewHost: HTMLElement;
+  snapshotId: string;
+  onChange: (next: LeverValue) => void;
+  onClose?: () => void;
+  visibilityCompanion?: { shown: boolean; onChange: (shown: boolean) => void };
+  scopedBlock?: string | undefined;
+  onScopedBlockChange?: (css: string) => void;
+  facets: Facets;
+  facetsDark?: Facets;
+  onFacetEdit?: (key: string, value: FacetValue) => void;
+  onFacetEditDark?: (key: string, value: FacetValue) => void;
+  /** Revert one value to "snapshot decides" (picker Clear), light / dark legs. */
+  onFacetClear?: (key: string) => void;
+  onFacetClearDark?: (key: string) => void;
+  /** Discard ALL edits on this element (Reset button) — close ≠ delete. */
+  onResetNode?: () => void;
+  /** Forwarded to the facet tree: a full-bleed backdrop child owns this element's visible background. */
+  backdropHint?: { name: string; onJump: () => void };
+  /** Per-row "derive dark from light" — caller computes deriveDarkOklch and routes it through its own dark-edit path. */
+  deriveDark?: (key: string) => void;
+  /** 'background' is addable but deliberately not removable — see the matching note in facet-tree.ts. */
+  onAddGroup?: (g: 'text' | 'surface' | 'spacing' | 'background') => void;
+  onRemoveGroup?: (g: 'text' | 'surface' | 'spacing') => void;
+  tokenForKey?: (key: string) => string | null;
+  resolveLiteral?: (key: string, token: string) => FacetValue;
+  /** Live color-format accessor, forwarded to the facet tree's color pickers. */
+  colorFormat?: () => import('@/color/format').ColorFormat;
+  /** Background composite (Task 8/9), forwarded to the facet tree's background stack editor. */
+  onBackstop?: (value: FacetValue) => void;
+  onAddLayer?: (layer: Layer) => void;
+  onSetLayer?: (index: number, layer: Layer) => void;
+  /** Dark-mode counterpart of onSetLayer, forwarded to the facet tree's gradient-stop dark axis. */
+  onSetLayerDark?: (index: number, layer: Layer) => void;
+  onRemoveLayer?: (index: number) => void;
+  onReorderLayer?: (from: number, to: number) => void;
+  /** Font-family fallback list (Task 10), forwarded to the facet tree's ordered-list editor. */
+  onAddFont?: (value: FacetValue) => void;
+  onSetFont?: (index: number, value: FacetValue) => void;
+  onRemoveFont?: (index: number) => void;
+  onReorderFont?: (from: number, to: number) => void;
+  /** Spacing composite (Task 11), forwarded to the facet tree's T/R/B/L + row/column tuple editor. */
+  onSetSide?: (group: 'padding' | 'margin', side: 'top' | 'right' | 'bottom' | 'left', value: FacetValue) => void;
+  onSetGap?: (slot: 'row' | 'column', value: FacetValue) => void;
+}
+
+export function contentValue(text: string, format?: ContentFormat): LeverValue {
+  // 'plain'/absent carries no format key — plain content stays byte-identical
+  return format === 'subset' ? { kind: 'content', text, format } : { kind: 'content', text };
+}
+export function assetValue(filename: string): LeverValue {
+  return { kind: 'asset', ref: filename };
+}
+
+let openPanel: HTMLElement | null = null;
+let openScopedEditor: EditorView | null = null;
+let openFacetTree: { destroy(): void } | null = null;
+let openTreeEffect: (() => void) | null = null;
+let openDarkEffect: (() => void) | null = null;
+
+// --- panel placement memory ---
+// selectElement tears the panel down and rebuilds it on every selection;
+// without memory each rebuild snaps back to the computed initial position,
+// discarding the user's drag/resize. Once the user has dragged (drag-end on
+// the handle) or resized (size delta at close vs. mount), the rect is
+// remembered module-level and reused — clamped to the viewport, the window
+// may have shrunk — on the next open. Size is only re-applied when it was a
+// real user resize, so an untouched panel keeps its CSS-driven intrinsic size.
+interface RememberedRect { left: number; top: number; width?: number; height?: number }
+let rememberedRect: RememberedRect | null = null;
+let openedSize: { width: number; height: number } | null = null;
+let draggedSinceOpen = false;
+// One-line policy (Norm 2026-07-01): the dragged position persists across an
+// explicit Close — re-placing the editor every time would irritate. Broader
+// editor-session memory (open/isolated groups, unsaved values, …) is deferred
+// until it demonstrably bothers users; position is just its first property.
+const CLEAR_MEMORY_ON_CLOSE = false;
+
+/** Forget the remembered panel rect (Close policy; exported for tests). */
+export function clearRememberedPanelRect(): void { rememberedRect = null; }
+
+function capturePanelRect(): void {
+  if (!openPanel) return;
+  const r = openPanel.getBoundingClientRect();
+  const resized = openedSize !== null && (r.width !== openedSize.width || r.height !== openedSize.height);
+  if (!draggedSinceOpen && !resized) return; // no user placement intent this open — keep prior memory
+  rememberedRect = { left: r.left, top: r.top, ...(resized ? { width: r.width, height: r.height } : {}) };
+}
+
+function applyRememberedRect(panel: HTMLElement, r: RememberedRect): void {
+  panel.style.position = 'absolute';
+  if (r.width !== undefined) panel.style.width = `${r.width}px`;
+  if (r.height !== undefined) panel.style.height = `${r.height}px`;
+  const w = r.width ?? panel.offsetWidth;
+  const h = r.height ?? panel.offsetHeight;
+  const left = Math.min(Math.max(0, r.left), Math.max(0, window.innerWidth - w));
+  const top = Math.min(Math.max(0, r.top), Math.max(0, window.innerHeight - h));
+  panel.style.left = `${left + window.scrollX}px`;
+  panel.style.top = `${top + window.scrollY}px`;
+}
+
+function closeOpen(): void {
+  capturePanelRect();
+  if (openDarkEffect) { openDarkEffect(); openDarkEffect = null; }
+  if (openTreeEffect) { openTreeEffect(); openTreeEffect = null; }
+  if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
+  if (openScopedEditor) { openScopedEditor.destroy(); openScopedEditor = null; }
+  if (openPanel) { openPanel.remove(); openPanel = null; }
+}
+
+export function openLeverEditor(opts: OpenLeverEditorOptions): void {
+  closeOpen();
+  const panel = document.createElement('div');
+  panel.className = 'stb-lever-editor';
+
+  // Title bar: name what's being edited (the popover is decoupled from the
+  // tree selection, so without this you can't tell which element it targets).
+  const titledNode = nodeFor(opts.snapshotId);
+  const title = document.createElement('div');
+  title.className = 'stb-lever-title';
+  title.textContent = titledNode?.name ?? opts.snapshotId;
+  if (titledNode?.description) title.title = titledNode.description;
+  panel.appendChild(title);
+
+  if (opts.visibilityCompanion) {
+    const c = opts.visibilityCompanion;
+    const label = document.createElement('label');
+    label.className = 'stb-lever-companion';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.className = 'stb-lever-companion-toggle';
+    cb.checked = c.shown;
+    cb.addEventListener('change', (e) => c.onChange((e.target as HTMLInputElement).checked));
+    label.appendChild(cb);
+    label.append(' show');
+    panel.appendChild(label);
+  }
+
+  if (opts.onScopedBlockChange) {
+    const section = document.createElement('div');
+    section.className = 'stb-lever-scoped-block';
+    const label = document.createElement('div');
+    label.className = 'stb-lever-scoped-block-label';
+    label.textContent = 'Scoped CSS';
+    section.appendChild(label);
+    const editorHost = document.createElement('div');
+    section.appendChild(editorHost);
+    panel.appendChild(section);
+    openScopedEditor = mountCssEditor(editorHost, opts.scopedBlock ?? '', opts.onScopedBlockChange);
+  }
+
+  const treeHost = document.createElement('div');
+  panel.appendChild(treeHost);
+
+  function renderTree(): void {
+    if (openFacetTree) { openFacetTree.destroy(); openFacetTree = null; }
+    const node = nodeFor(opts.snapshotId);
+    const liveFacets = node?.facets ?? opts.facets;
+    const liveFacetsDark = node?.facetsDark ?? opts.facetsDark ?? {};
+    openFacetTree = mountFacetTree(treeHost, {
+      facets: liveFacets,
+      darkFacets: liveFacetsDark,
+      previewHost: opts.previewHost,
+      onEdit: opts.onFacetEdit ?? (() => {}),
+      onDarkEdit: opts.onFacetEditDark ?? (() => {}),
+      ...(opts.onFacetClear ? { onClearEdit: opts.onFacetClear } : {}),
+      ...(opts.onFacetClearDark ? { onClearEditDark: opts.onFacetClearDark } : {}),
+      ...(opts.backdropHint ? { backdropHint: opts.backdropHint } : {}),
+      // Structural edits + token promote/detach + content/asset live on the light bundle only.
+      ...(opts.deriveDark ? { deriveDark: opts.deriveDark } : {}),
+      ...(opts.onAddGroup ? { onAddGroup: opts.onAddGroup } : {}),
+      ...(opts.onRemoveGroup ? { onRemoveGroup: opts.onRemoveGroup } : {}),
+      ...(opts.tokenForKey ? { tokenForKey: opts.tokenForKey } : {}),
+      ...(opts.resolveLiteral ? { resolveLiteral: opts.resolveLiteral } : {}),
+      ...(opts.colorFormat ? { colorFormat: opts.colorFormat } : {}),
+      ...(opts.onBackstop ? { onBackstop: opts.onBackstop } : {}),
+      ...(opts.onAddLayer ? { onAddLayer: opts.onAddLayer } : {}),
+      ...(opts.onSetLayer ? { onSetLayer: opts.onSetLayer } : {}),
+      ...(opts.onSetLayerDark ? { onSetLayerDark: opts.onSetLayerDark } : {}),
+      ...(opts.onRemoveLayer ? { onRemoveLayer: opts.onRemoveLayer } : {}),
+      ...(opts.onReorderLayer ? { onReorderLayer: opts.onReorderLayer } : {}),
+      ...(opts.onAddFont ? { onAddFont: opts.onAddFont } : {}),
+      ...(opts.onSetFont ? { onSetFont: opts.onSetFont } : {}),
+      ...(opts.onRemoveFont ? { onRemoveFont: opts.onRemoveFont } : {}),
+      ...(opts.onReorderFont ? { onReorderFont: opts.onReorderFont } : {}),
+      ...(opts.onSetSide ? { onSetSide: opts.onSetSide } : {}),
+      ...(opts.onSetGap ? { onSetGap: opts.onSetGap } : {}),
+      onContentEdit: (text: string, format?: ContentFormat) => opts.onChange(contentValue(text, format)),
+      onAssetEdit: (file: File) => { setBrandingAsset(assetRefFor(file.name), file, file.name); opts.onChange(assetValue(assetRefFor(file.name))); },
+    });
+  }
+  openTreeEffect = effect(() => {
+    void brandingModel.value;                         // subscribe to model changes
+    // Don't yank focus from an in-flight TYPED edit (text input / textarea).
+    // A focused button (e.g. the derive-dark ↓) must NOT suppress the re-render,
+    // or its own swatch would keep the stale value it just changed. Same for a
+    // file input: it holds no in-flight text but keeps focus after the native
+    // dialog, and its row label must refresh with the chosen ref.
+    const ae = document.activeElement;
+    const typing = ae && treeHost.contains(ae) &&
+      (ae.tagName === 'TEXTAREA' || (ae.tagName === 'INPUT' && (ae as HTMLInputElement).type !== 'file'));
+    if (typing) return;
+    renderTree();
+  });
+
+  // Close ≠ delete: Close only puts the panel away (every edit is already
+  // committed live). Reset is the delete — discard all edits on this element.
+  if (opts.onResetNode) {
+    const reset = document.createElement('button');
+    reset.className = 'stb-lever-reset';
+    reset.textContent = 'Reset';
+    reset.title = 'Discard all edits on this element — back to the snapshot defaults';
+    reset.addEventListener('click', () => opts.onResetNode?.());
+    panel.appendChild(reset);
+  }
+
+  const close = document.createElement('button');
+  close.className = 'stb-lever-close';
+  close.textContent = 'Close';
+  close.addEventListener('click', () => {
+    closeOpen();
+    if (CLEAR_MEMORY_ON_CLOSE) clearRememberedPanelRect();
+    opts.onClose?.();
+  });
+  panel.appendChild(close);
+
+  const drag = document.createElement('div');
+  drag.className = 'stb-lever-drag';
+  drag.textContent = '⠿';
+  drag.title = 'Drag to move';
+  panel.prepend(drag);
+
+  document.body.appendChild(panel);
+  // Remembered rect wins over initial placement (gutter / above-panes-in-compare)
+  if (rememberedRect) applyRememberedRect(panel, rememberedRect);
+  else if (compareMode.value) positionAbovePanes(panel, opts.previewHost);
+  else positionInPreviewGutter(panel, opts.previewHost);
+  makeDraggable(panel, drag);
+  // Drag-end marks the placement as user-chosen; capturePanelRect reads the
+  // final rect at close-time (the dragged inline position is still live then).
+  drag.addEventListener('mousedown', () => {
+    window.addEventListener('mouseup', () => { draggedSinceOpen = true; }, { once: true });
+  });
+  openPanel = panel;
+  const mounted = panel.getBoundingClientRect();
+  openedSize = { width: mounted.width, height: mounted.height };
+  draggedSinceOpen = false;
+
+  // Flag the active preview mode on the panel so CSS can mute the inactive
+  // (dark) column — editing a dark value while the preview is in light mode
+  // otherwise reads as "no change". In compare mode previewDark is pinned
+  // false (the live dark pane sits alongside the light one), so gate on
+  // compareMode too — otherwise the dark column reads as inactive when a
+  // dark pane is visibly on-screen.
+  openDarkEffect = effect(() => {
+    panel.classList.toggle('stb-preview-dark', previewDark.value || compareMode.value);
+  });
+}

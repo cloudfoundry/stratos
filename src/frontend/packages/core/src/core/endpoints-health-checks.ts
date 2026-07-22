@@ -13,6 +13,9 @@ export class EndpointHealthChecks {
   }
 
   public checkEndpoint(endpoint: EndpointModel) {
+    if (!endpoint.cnsi_type) {
+      return; // Skip health check if endpoint has no type to match against
+    }
     const catalogEntity = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type);
     if (!catalogEntity || !catalogEntity.definition) {
       return; // Skip health check if endpoint type not registered in catalog

@@ -1,15 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
-import { AbstractControl, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { AfterContentInit, Component, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
-import { Store } from '@ngrx/store';
 import {
   combineLatest as observableCombineLatest,
+  from,
   Observable,
-  of as observableOf,
   Subscription,
 } from 'rxjs';
 import {
@@ -26,31 +26,24 @@ import {
   tap,
 } from 'rxjs/operators';
 
-import {
-  SetCreateServiceInstanceOrg,
-  SetServiceInstanceGuid,
-} from '../../../../../../cloud-foundry/src/actions/create-service-instance.actions';
-import { pathGet, safeStringToObj } from '../../../../../../core/src/core/utils.service';
+import { safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { getDefaultRequestState, RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource, NormalizedResponse } from '../../../../../../store/src/types/api.types';
-import { UpdateServiceInstance } from '../../../../actions/service-instances.actions';
-import { IServiceInstance, IServicePlan } from '../../../../cf-api-svc.types';
-import { CFAppState } from '../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { serviceInstancesEntityType } from '../../../../cf-entity-types';
-import { selectCfRequestInfo, selectCfUpdateInfo } from '../../../../store/selectors/api.selectors';
-import {
-  selectCreateServiceInstance,
-  selectCreateServiceInstanceSpaceGuid,
-} from '../../../../store/selectors/create-service-instance.selectors';
-import { CreateServiceInstanceState } from '../../../../store/types/create-service-instance.types';
-import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
+import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
+import { AsyncJobResult, StratosJobError } from '../../../../services/async-jobs/async-job.types';
+import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
+import { CsiState, CsiStateService } from '../csi-state.service';
+
+// Local view of the schema-form config while it is being assembled: the
+// broker schema may not have arrived (or may not exist for the plan).
+// SchemaFormComponent.config tolerates an absent schema.
+type SchemaFormConfigState = Omit<SchemaFormConfig, 'schema'> & { schema?: object };
 
 @Component({
   selector: 'app-specify-details-step',
@@ -62,6 +55,7 @@ import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     MatLabelComponent,
@@ -71,18 +65,26 @@ import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
   ]
 })
 export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
-  private store = inject<Store<CFAppState>>(Store);
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private csiGuidsService = inject(CsiGuidsService);
+  private csiState = inject(CsiStateService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
   modeService = inject(CsiModeService);
-  longRunningOpService = inject(LongRunningCfOperationsService);
-
+  private http = inject(HttpClient);
+  private snackBar = inject(TailwindSnackBarService);
+  // toObservable() must run inside an injection context — lift to a class
+  // field. Reused by selectCreateInstance$ and onNext below.
+  private csiState$ = toObservable(this.csiState.state);
 
   serviceInstancesInit$: Observable<boolean>;
   hasInstances$: Observable<boolean>;
   serviceInstanceName!: string;
-  serviceInstanceGuid!: string;
-  selectCreateInstance$: Observable<CreateServiceInstanceState>;
+  // Only populated in edit mode (from the wizard state, which may carry a
+  // null/undefined guid until the SI is resolved).
+  serviceInstanceGuid?: string | null;
+  selectCreateInstance$: Observable<CsiState & {
+    servicePlanGuid: string; spaceGuid: string; cfGuid: string; serviceGuid: string;
+  }>;
   formModes = [
     {
       label: 'Create and Bind to a new Service Instance',
@@ -98,7 +100,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   @Input() appId!: string;
 
-  formMode!: CreateServiceFormMode;
+  // Signal (not a plain field): the stepper delivers onEnter after this
+  // component's activating render, outside change detection. The first
+  // render happens with formMode unset (every @if false), so under
+  // zoneless+OnPush a plain-field write in onEnter would never re-render
+  // the template — the step stayed empty in app-bind mode.
+  formMode = signal<CreateServiceFormMode | undefined>(undefined);
 
   selectExistingInstanceForm!: FormGroup<{
     serviceInstance: FormControl<string>;
@@ -110,10 +117,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     params: FormControl<object>;
     tags: FormControl<string[]>;
   }>;
-  serviceInstances$: Observable<APIResource<IServiceInstance>[]>;
-  bindableServiceInstances$: Observable<APIResource<IServiceInstance>[]>;
+  serviceInstances$: Observable<StServiceInstance[]>;
+  bindableServiceInstances$: Observable<StServiceInstance[]>;
   cSIHelperService!: CreateServiceInstanceHelper;
-  allServiceInstances$!: Observable<APIResource<IServiceInstance>[]>;
+  allServiceInstances$!: Observable<StServiceInstance[]>;
   private _validate = signal<boolean>(false);
   validate = toObservable(this._validate);
   allServiceInstanceNames!: string[];
@@ -128,19 +135,31 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private _serviceParamsValid = signal<boolean>(false);
   serviceParamsValid = toObservable(this._serviceParamsValid);
   serviceParams: object = {};
-  schemaFormConfig!: SchemaFormConfig;
+  // Signal (not a plain field): the schema arrives async from the
+  // details-tier plan fetch below, and under zoneless+OnPush a plain
+  // field reassignment would never reach the <app-schema-form> input.
+  // schema is optional at this layer: a plan with no broker-advertised
+  // parameter schema degrades the form to the JSON textbox, and
+  // SchemaFormComponent.config already treats `schema` as absent-tolerant.
+  schemaFormConfig = signal<SchemaFormConfigState | undefined>(undefined);
+  // The selected plan's details-tier fetch. The wizard's plan list is
+  // summary-tier, which omits `schemas` — without this second fetch the
+  // schema-driven parameter form always degraded to the JSON textbox.
+  private detailedPlanSource = signal<SignalSource<StServicePlan | null> | null>(null);
 
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any, } =>
+    return (formField: AbstractControl): ValidationErrors | null =>
       !this.checkName(formField.value) ? { nameTaken: { value: formField.value } } : null;
   };
 
   constructor() {
     this.setupForms();
 
-    this.selectCreateInstance$ = this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid && !!p.serviceGuid),
+    this.selectCreateInstance$ = this.csiState$.pipe(
+      filter((p): p is CsiState & {
+        servicePlanGuid: string; spaceGuid: string; cfGuid: string; serviceGuid: string;
+      } => !!p && !!p.servicePlanGuid && !!p.spaceGuid && !!p.cfGuid && !!p.serviceGuid),
       share(),
     );
     this.serviceInstances$ = this.selectCreateInstance$.pipe(
@@ -149,11 +168,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       }),
       switchMap(guids => {
         this.cSIHelperService = this.cSIHelperServiceFactory.create(guids.cfGuid, guids.serviceGuid);
-        return this.cSIHelperService.getServiceInstancesForService(
-          guids.servicePlanGuid,
-          guids.spaceGuid,
-          guids.cfGuid
-        );
+        return this.cSIHelperService.serviceInstances$(guids.servicePlanGuid, guids.spaceGuid);
       }),
       publishReplay(1),
       refCount(),
@@ -169,78 +184,121 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       map(p => p.length > 0),
     );
 
-    this.bindableServiceInstances$ = this.serviceInstances$.pipe(
-      map(svcs => {
-        if (!this.appId) {
-          return svcs;
-        } else {
-          const updated: APIResource<IServiceInstance>[] = [];
-          svcs.forEach(svc => {
-            const alreadyBound = !!svc.entity.service_bindings.find(binding => binding.entity.app_guid === this.appId);
-            if (alreadyBound) {
-              const updatedSvc: APIResource<IServiceInstance> = {
-                entity: { ...svc.entity },
-                metadata: { ...svc.metadata }
-              };
-              updatedSvc.entity.name += ' (Already bound)';
-              updatedSvc.metadata.guid = null;
-              updated.push(updatedSvc);
-            } else {
-              updated.push(svc);
-            }
-          });
-          return updated;
-        }
-      })
-    );
+    // V3 StServiceInstance doesn't carry inline service_bindings (bindings
+    // are loaded per-app via /cf/apps/:cnsiGuid/:appGuid/service_bindings).
+    // The legacy "(Already bound)" annotation is dropped here; the bind
+    // call surfaces a clear error if the user picks an instance that is
+    // already bound. Re-introduce the annotation when this stepper
+    // integrates with the bindings-per-app signal.
+    this.bindableServiceInstances$ = this.serviceInstances$;
+
+    // Graft the details-tier schema onto the form config once the plan
+    // fetch kicked off in onEnter lands. Preserves any initialData the
+    // edit-mode seeding set in the meantime.
+    effect(() => {
+      const src = this.detailedPlanSource();
+      if (!src || src.isLoading()) {
+        return;
+      }
+      const schema = this.planSchema(src.value() ?? undefined);
+      if (!schema) {
+        return;
+      }
+      this.schemaFormConfig.update(cfg => ({ ...(cfg ?? {}), schema }));
+    });
   }
 
-  onEnter = (selectedServicePlan: APIResource<IServicePlan>) => {
-    const schema = this.modeService.isEditServiceInstanceMode() ?
-      pathGet('entity.schemas.service_instance.update.parameters', selectedServicePlan) :
-      pathGet('entity.schemas.service_instance.create.parameters', selectedServicePlan);
+  // The schema driving the parameter form — create or update flavor
+  // depending on the wizard mode.
+  private planSchema(plan?: StServicePlan): object | undefined {
+    return this.modeService.isEditServiceInstanceMode() ?
+      plan?.schemas?.serviceInstance?.update?.parameters :
+      plan?.schemas?.serviceInstance?.create?.parameters;
+  }
 
-    if (!this.schemaFormConfig) {
-      // Create new config
-      this.schemaFormConfig = {
-        schema
-      };
-    } else {
+  // onEnter can run before the serviceInstances$ chain above (whose
+  // switchMap lazily constructs the helper on first subscription) has
+  // emitted — entering the step then dereferenced an undefined helper
+  // and threw. Build it deterministically from the wizard state instead.
+  private ensureHelper(): CreateServiceInstanceHelper | undefined {
+    if (!this.cSIHelperService) {
+      const state = this.csiState.state();
+      if (state?.cfGuid && state?.serviceGuid) {
+        this.cSIHelperService = this.cSIHelperServiceFactory.create(state.cfGuid, state.serviceGuid);
+      }
+    }
+    return this.cSIHelperService;
+  }
+
+  onEnter = (selectedServicePlan: StServicePlan) => {
+    const schema = this.planSchema(selectedServicePlan);
+
+    const current = this.schemaFormConfig();
+    this.schemaFormConfig.set(current
       // Update existing config (retaining any existing config)
-      this.schemaFormConfig = {
-        ...this.schemaFormConfig,
-        initialData: this.serviceParams,
-        schema
-      };
+      ? { ...current, initialData: this.serviceParams, schema }
+      : { schema });
+
+    // The plan handed over by the select-plan step comes from the
+    // summary-tier list cache, which omits `schemas` — fetch the
+    // selected plan at details so a broker-advertised parameter schema
+    // can drive the form (the constructor effect grafts it on). The
+    // stepper only relays the plan into the *next* step's onEnter, so
+    // when the bind-app step sits in between this step enters with no
+    // arg — fall back to the wizard state for the plan/cnsi guids.
+    if (!schema) {
+      const state = this.csiState.state();
+      const planGuid = selectedServicePlan?.guid || state?.servicePlanGuid;
+      const cnsiGuid = selectedServicePlan?.cnsiGuid || state?.cfGuid;
+      if (planGuid && cnsiGuid) {
+        this.detailedPlanSource.set(this.serviceCatalog.servicePlan(cnsiGuid, planGuid));
+      }
     }
 
-    this.formMode = CreateServiceFormMode.CreateServiceInstance;
-    this.allServiceInstances$ = this.cSIHelperService.getServiceInstancesForService(null, null, this.csiGuidsService.cfGuid);
+    this.formMode.set(CreateServiceFormMode.CreateServiceInstance);
+    const helper = this.ensureHelper();
+    if (helper) {
+      this.allServiceInstances$ = helper.serviceInstances$();
+      this.subscriptions.push(this.setupFormValidatorData());
+    }
     if (this.modeService.isEditServiceInstanceMode()) {
-      this.store.select(selectCreateServiceInstance).pipe(
+      this.csiState$.pipe(
         take(1),
         tap(state => {
           this.createNewInstanceForm.controls.name.setValue(state.name);
 
-          this.schemaFormConfig.initialData = safeStringToObj(state.parameters) || this.serviceParams;
+          this.schemaFormConfig.update(cfg => ({
+            ...(cfg ?? { schema }),
+            initialData: (state.parameters ? safeStringToObj(state.parameters) : null) || this.serviceParams,
+          }));
 
           this.serviceInstanceGuid = state.serviceInstanceGuid;
           this.serviceInstanceName = state.name;
           this.createNewInstanceForm.updateValueAndValidity();
           if (state.tags) {
-            this.tags = [].concat(state.tags);
+            this.tags = [...state.tags];
           }
         })
       ).subscribe();
     }
-    this.subscriptions.push(this.setupFormValidatorData());
   };
 
   setServiceParams(data: any) {
-    this.serviceParams = data;
+    // schema-form emits `null`/`undefined` when the JSON editor is empty,
+    // and buildWriteBody later runs `Object.keys(params)` which throws
+    // "Cannot convert undefined or null to object" on a nullish value.
+    // Coerce to {} so the no-params path is the same as an empty object.
+    this.serviceParams = data ?? {};
   }
 
   setParamsValid(valid: boolean) {
+    // The schema-form wrapper's validChange/pValidChange now signals parse
+    // validity only: true when the JSON editor is empty or contains valid
+    // JSON, false when the user has typed unparseable JSON. We trust that
+    // signal unconditionally — empty params are always parse-valid (true),
+    // so the Create button is never blocked by an untouched editor.
+    // Unparseable JSON blocks the step regardless of whether the plan has
+    // a broker-advertised schema.
     this._serviceParamsValid.set(valid);
   }
 
@@ -258,22 +316,18 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   private setupFormValidatorData(): Subscription {
     return this.allServiceInstances$.pipe(
-      combineLatest(this.store.select(selectCreateServiceInstance)),
-      switchMap(([instances, state]) => {
-        return this.store.select(selectCreateServiceInstanceSpaceGuid).pipe(
-          filter(p => !!p),
-          map(spaceGuid => instances.filter(s => {
-            let filterSelf = false;
-            if (this.modeService.isEditServiceInstanceMode()) {
-              filterSelf = s.entity.name === state.name;
-            }
-            return (s.entity.space_guid === spaceGuid) && !filterSelf;
-
-          }
-          )), tap(o => {
-            this.allServiceInstanceNames = o.map(s => s.entity.name);
-          }));
-      })
+      combineLatest(this.csiState$),
+      filter(([, state]) => !!state.spaceGuid),
+      map(([instances, state]) => instances.filter(s => {
+        let filterSelf = false;
+        if (this.modeService.isEditServiceInstanceMode()) {
+          filterSelf = s.name === state.name;
+        }
+        return s.space?.guid === state.spaceGuid && !filterSelf;
+      })),
+      tap(o => {
+        this.allServiceInstanceNames = o.map(s => s.name);
+      }),
     ).subscribe();
   }
 
@@ -290,7 +344,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     });
   }
 
-  setOrg = (guid: string) => this.store.dispatch(new SetCreateServiceInstanceOrg(guid));
+  setOrg = (guid: string) => this.csiState.setOrg(guid);
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
@@ -300,87 +354,27 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.setupValidate();
   }
 
-  private handleUpdateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
-    const updatingInfo = request.updating[UpdateServiceInstance.updateServiceInstance];
-    if (!updatingInfo) {
-      // This isn't an update
-    } else if (this.longRunningOpService.isLongRunning(updatingInfo)) {
-      // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
-      this.longRunningOpService.handleLongRunningUpdateService(state.serviceInstanceGuid, state.cfGuid);
-    } else if (updatingInfo.error) {
-      // The request has errored, report this back
-      return observableOf({ success: false, message: `Failed to update service instance: ${updatingInfo.message}` });
-    }
-  }
-
-  private handleCreateServiceResult(request: RequestInfoState, state: CreateServiceInstanceState): Observable<StepOnNextResult> {
-    const bindApp = !!state.bindAppGuid;
-
-    if (this.longRunningOpService.isLongRunning(request)) {
-      // This request has taken too long for the browser/jetstream and is on going. Treat this as a success
-      this.longRunningOpService.handleLongRunningCreateService(bindApp);
-      // Return to app page instead of falling through to service page
-      if (bindApp) {
-        return observableOf(this.routeToServices());
-      }
-    } else if (request.error) {
-      // The request has errored, report this back
-      return observableOf({ success: false, message: `Failed to create service instance: ${request.message}` });
-    } else if (bindApp) {
-      // The request has succeeded and we now need to bind an app to the new service instance
-      const serviceInstanceGuid = this.setServiceInstanceGuid(request);
-      this.store.dispatch(new SetServiceInstanceGuid(serviceInstanceGuid));
-      return this.modeService.createApplicationServiceBinding(
-        serviceInstanceGuid,
-        state.cfGuid,
-        state.bindAppGuid,
-        state.bindAppParams
-      ).pipe(
-        map(req => {
-          if (!req.success) {
-            return req;
-          } else {
-            // Refetch env vars for app, since they have been changed by CF
-            cfEntityCatalog.appEnvVar.api.getMultiple(state.bindAppGuid, state.cfGuid);
-            return this.routeToServices();
-          }
-        })
-      );
-    }
-  }
-
+  // Single signal-native write path: POST or PATCH /pp/v1/cf/service_instances
+  // wrapped in writeWithJob. Replaces the prior ngrx
+  // cfEntityCatalog.serviceInstance.actions.create/update pipeline plus the
+  // separate LongRunningCfOperationsService handoff — writeWithJob's
+  // fast-path-then-poll contract is the long-running mechanism now.
   onNext = (): Observable<StepOnNextResult> => {
-    return this.store.select(selectCreateServiceInstance).pipe(
+    return this.csiState$.pipe(
       filter(p => !!p),
-      switchMap(p => {
-        if (this.bindExistingInstance) {
-          // Binding an existing instance, therefore, skip creation by returning a dummy response
-          return observableOf<RequestInfoState>(getDefaultRequestState());
-        } else {
-          return this.createServiceInstance(p);
-        }
-      }),
-      filter(s => !s.creating && !s.fetching),
-      combineLatest(this.store.select(selectCreateServiceInstance)),
       take(1),
-      switchMap(([request, state]) => {
-
-        const handleEditServiceResult = this.handleUpdateServiceResult(request, state);
-        if (handleEditServiceResult) {
-          return handleEditServiceResult;
-        }
-
-        const handleCreateServiceResult = this.handleCreateServiceResult(request, state);
-        if (handleCreateServiceResult) {
-          return handleCreateServiceResult;
-        }
-
-        return observableOf(this.routeToServices());
-      }),
+      switchMap(state => from(this.executeWrite(state))),
     );
   };
 
-  routeToServices = (): StepOnNextResult => {
+  routeToServices = (successMessage?: string): StepOnNextResult => {
+    if (successMessage) {
+      // Stepper redirects on success but doesn't surface a confirmation;
+      // without this snackbar the user sees the wizard "blink" back to
+      // the marketplace with no feedback that the instance / binding
+      // actually succeeded.
+      this.snackBar.open(successMessage, 'Dismiss', { duration: 4000 });
+    }
     return {
       success: true,
       // We should always go back to where we came from, aka 'cancel' location.
@@ -388,8 +382,104 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     };
   };
 
-  private setServiceInstanceGuid = (request: RequestInfoState): string | undefined =>
-    this.bindExistingInstance ? this.selectExistingInstanceForm.controls.serviceInstance.value : request.response?.result?.[0];
+  private async executeWrite(state: CsiState): Promise<StepOnNextResult> {
+    // "Bind to existing instance" branch: skip the SI write entirely; the
+    // selected instance already exists. Just trigger the bind flow.
+    if (this.bindExistingInstance) {
+      const existingGuid = this.selectExistingInstanceForm.controls.serviceInstance.value;
+      return this.bindAppIfRequested(existingGuid, state);
+    }
+
+    const isEditMode = this.modeService.isEditServiceInstanceMode();
+    const verb = isEditMode ? 'update' : 'create';
+    const body = this.buildWriteBody(state, isEditMode);
+
+    const url = isEditMode
+      ? `/pp/v1/cf/service_instances/${state.cfGuid}/${state.serviceInstanceGuid}`
+      : `/pp/v1/cf/service_instances/${state.cfGuid}`;
+    const call = isEditMode
+      ? this.http.patch(url, body, { observe: 'response' as const })
+      : this.http.post(url, body, { observe: 'response' as const });
+
+    let result: AsyncJobResult<unknown>;
+    try {
+      result = await writeWithJob<unknown>(this.http, call);
+    } catch (err: unknown) {
+      return {
+        success: false,
+        message: `Failed to ${verb} service instance: ${extractErrorMessage(err)}`,
+      };
+    }
+
+    if (isEditMode) {
+      return this.routeToServices(`Service instance "${state.name}" updated.`);
+    }
+
+    // Create path: try to extract the new SI's guid for the bind-after-create
+    // follow-up. UNKNOWN (HA-degradation) and slow-async paths without a
+    // resource link both leave the guid undefined — in that case the SI will
+    // appear in the services wall once CF settles and the user binds manually.
+    const newGuid = extractCreatedSiGuid(result);
+    if (newGuid) {
+      this.csiState.setServiceInstanceGuid(newGuid);
+    }
+    return this.bindAppIfRequested(newGuid, state);
+  }
+
+  private async bindAppIfRequested(siGuid: string | undefined, state: CsiState): Promise<StepOnNextResult> {
+    const siName = state.name || 'Service instance';
+    if (!state.bindAppGuid || !siGuid) {
+      return this.routeToServices(`Service instance "${siName}" created.`);
+    }
+    const bindResult = await this.modeService.createApplicationServiceBinding(
+      siGuid,
+      // strict: a service instance can only be created/bound within a CF
+      // context, so cfGuid is always set by the time a bind is requested.
+      state.cfGuid!,
+      state.bindAppGuid,
+      state.bindAppParams,
+    ).pipe(take(1)).toPromise() as { success: boolean; message?: string };
+    if (!bindResult?.success) {
+      return {
+        success: false,
+        message: `Failed to create service instance binding: ${bindResult?.message ?? 'unknown error'}`,
+      };
+    }
+    // CF mutated VCAP_SERVICES on the bound app. We routeToServices below
+    // (away from any app-detail route), so the legacy ngrx prefetch was
+    // priming state nothing on this navigation reads. The app's env-vars
+    // tab fetches fresh on next mount via AppDetailDataService —
+    // dropping the prefetch is functionally a no-op.
+    return this.routeToServices(`Service instance "${siName}" created and bound.`);
+  }
+
+  private buildWriteBody(state: CsiState, isEditMode: boolean): Record<string, unknown> {
+    const name = this.createNewInstanceForm.controls.name.value;
+    const params = this.serviceParams;
+    const tags = this.tags.length > 0 ? [...this.tags] : [];
+
+    if (isEditMode) {
+      // PATCH: only include fields the user can edit. Plan/space relations
+      // stay fixed via the v3 PATCH semantics on managed instances.
+      const body: Record<string, unknown> = { name };
+      if (Object.keys(params).length > 0) body.parameters = params;
+      body.tags = tags;
+      return body;
+    }
+
+    // POST: managed-instance v3 shape.
+    const body: Record<string, unknown> = {
+      type: 'managed',
+      name,
+      relationships: {
+        space: { data: { guid: state.spaceGuid } },
+        service_plan: { data: { guid: state.servicePlanGuid } },
+      },
+    };
+    if (Object.keys(params).length > 0) body.parameters = params;
+    if (tags.length > 0) body.tags = tags;
+    return body;
+  }
 
   private setupValidate() {
     // For a new service instance the step is valid if the form and service params are both valid
@@ -407,105 +497,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     ).subscribe());
   }
 
-  private getNewServiceGuid(name: string, spaceGuid: string, servicePlanGuid: string) {
-    if (!this.modeService.isEditServiceInstanceMode()) {
-      return name + spaceGuid + servicePlanGuid;
-    } else {
-      return this.serviceInstanceGuid;
-    }
-  }
-
-  private getUpdateObservable(isEditMode: boolean, newServiceInstanceGuid: string) {
-    if (!isEditMode) {
-      return observableOf(null);
-    }
-    const actionState = selectCfUpdateInfo(serviceInstancesEntityType,
-      newServiceInstanceGuid,
-      UpdateServiceInstance.updateServiceInstance
-    );
-    return this.store.select(actionState).pipe(
-      filter(i => !i.busy)
-    );
-  }
-
-  private getAction(
-    cfGuid: string,
-    newServiceInstanceGuid: string,
-    name: string,
-    servicePlanGuid: string,
-    spaceGuid: string,
-    params: {},
-    tagsStr: string[],
-    isEditMode: boolean
-  ) {
-    if (isEditMode) {
-      return cfEntityCatalog.serviceInstance.actions.update(
-        newServiceInstanceGuid,
-        cfGuid,
-        { name, servicePlanGuid, spaceGuid, params, tags: tagsStr }
-      );
-    }
-    return cfEntityCatalog.serviceInstance.actions.create(
-      newServiceInstanceGuid,
-      cfGuid,
-      { name, servicePlanGuid, spaceGuid, params, tags: tagsStr }
-    );
-  }
-
-  private getIdFromResponseGetter(cfGuid: string, newId: string, isEditMode: boolean) {
-    return (response: NormalizedResponse) => {
-      if (!isEditMode) {
-        // We need to re-fetch the Service Instance in case of creation because the entity returned is incomplete
-        const guid = response.result[0];
-        cfEntityCatalog.serviceInstance.api.get(guid, cfGuid);
-        return guid;
-      }
-      return newId;
-    };
-  }
-
-  createServiceInstance(createServiceInstance: CreateServiceInstanceState): Observable<RequestInfoState> {
-
-    const name = this.createNewInstanceForm.controls.name.value;
-    const { spaceGuid, cfGuid } = createServiceInstance;
-    const servicePlanGuid = createServiceInstance.servicePlanGuid;
-    const params = this.serviceParams;
-    const tagsStr: string[] = this.tags.length > 0 ? this.tags : [];
-
-    const newServiceInstanceGuid = this.getNewServiceGuid(name, spaceGuid, servicePlanGuid);
-
-    const isEditMode = this.modeService.isEditServiceInstanceMode();
-    const checkUpdate$ = this.getUpdateObservable(isEditMode, newServiceInstanceGuid);
-    const action = this.getAction(cfGuid, newServiceInstanceGuid, name, servicePlanGuid, spaceGuid, params, tagsStr, isEditMode);
-
-    const create$ = this.store.select(selectCfRequestInfo(serviceInstancesEntityType, newServiceInstanceGuid));
-    const getIdFromResponse = this.getIdFromResponseGetter(cfGuid, newServiceInstanceGuid, isEditMode);
-
-    this.store.dispatch(action);
-    return checkUpdate$.pipe(
-      switchMap(_o => create$),
-      filter(a => !a.creating),
-      switchMap(a => {
-        const updating = a.updating ? a.updating[UpdateServiceInstance.updateServiceInstance] : null;
-        if ((isEditMode && !!updating && updating.error) || (a.error)) {
-          return create$;
-        }
-
-        const guid = getIdFromResponse(a.response as NormalizedResponse);
-
-        return this.store.select(selectCfRequestInfo(serviceInstancesEntityType, guid)).pipe(
-          map(ri => ({
-            ...ri,
-            response: {
-              result: [guid]
-            }
-          }))
-        );
-      })
-    );
-  }
-
-  addTagFromInput(event: KeyboardEvent): void {
+  // (keydown.*) template events are typed as plain Event by the compiler
+  addTagFromInput(event: Event): void {
     event.preventDefault();
     const input = event.target as HTMLInputElement;
     const value = input.value;
@@ -531,7 +524,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.createNewInstanceForm.controls.tags.markAsTouched();
   }
 
-  checkName = (value: string = null) => {
+  checkName = (value: string | null = null) => {
     if (this.allServiceInstanceNames) {
       const specifiedName = value || this.createNewInstanceForm.controls.name.value;
       if (this.modeService.isEditServiceInstanceMode() && specifiedName === this.serviceInstanceName) {
@@ -542,4 +535,49 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     return true;
   };
 
+}
+
+// Pulls the new service-instance guid out of writeWithJob's terminal result.
+// translateCFJobResult emits `links.service_instance: '/v3/service_instances/<guid>'`
+// on managed creates; writeWithJob normalises both fast-path and polled
+// shapes to that bare-result level. UNKNOWN status / missing links return
+// undefined and the caller skips auto-bind.
+function extractCreatedSiGuid(result: AsyncJobResult<unknown>): string | undefined {
+  if (result.status !== 'COMPLETE' || !result.state) return undefined;
+  const links = (result.state as { links?: Record<string, string> }).links;
+  const href = links?.service_instance;
+  if (!href) return undefined;
+  const m = href.match(/\/([^/]+)\/?$/);
+  return m?.[1];
+}
+
+function extractErrorMessage(err: unknown): string {
+  if (err instanceof StratosJobError) return err.message;
+  if (err instanceof HttpErrorResponse) {
+    const body = err.error;
+    if (body && typeof body === 'object') {
+      // Backend can respond with three shapes:
+      //  - CF passthrough: { errors: [{ detail, title, code }] }
+      //  - Stratos job envelope: { state, errors: [{ message, code, detail }] }
+      //  - handleCapiError fallback: { error: "..." }
+      // Walk all three so the user sees what actually broke instead of
+      // Angular's generic "Http failure response for ... 502 OK".
+      const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
+      const first = errors?.[0];
+      if (first) {
+        if (typeof first.detail === 'string' && first.detail) return first.detail;
+        if (first.title) return first.title;
+        if (first.message) return first.message;
+      }
+      const top = body as { message?: string; error?: string };
+      if (top.message) return top.message;
+      if (top.error) return top.error;
+    }
+    if (typeof body === 'string' && body) return body;
+    return err.statusText && err.statusText !== 'OK'
+      ? `HTTP ${err.status} ${err.statusText}`
+      : `HTTP ${err.status}`;
+  }
+  if (err instanceof Error) return err.message;
+  return 'unknown error';
 }

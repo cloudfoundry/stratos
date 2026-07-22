@@ -1,5 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { flattenPagination } from '@stratosui/store';
+import { Injector } from '@angular/core';
+import { EndpointsDataService, flattenPagination } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
@@ -16,17 +17,30 @@ import { GitSCM, SCMIcon } from './scm';
 import { BaseSCM, GitApiRequest } from './scm-base';
 import { GitSCMType } from './scm.service';
 
+// No-op ActionDispatcher: flattenPagination only invokes the dispatcher when a
+// maxCount is supplied, and these call sites never supply one, so the dispatcher
+// is never called. Used in place of the former `null` argument under strict.
+const noopActionDispatcher = () => { /* never called — no maxCount supplied */ };
+
 export class GitHubSCM extends BaseSCM implements GitSCM {
 
   // Optional per-request options carrying an Authorization header when a PAT
   // has been supplied. Stored on the instance so all downstream API calls
   // (repos, branches, commits, search) pick it up without threading the token
   // through every method signature.
-  private options: HttpOptions;
+  private options?: HttpOptions;
 
-  constructor(gitHubURL: string, endpointGuid: string, accessToken?: string) {
+  constructor(
+    gitHubURL: string,
+    endpointGuid: string,
+    accessToken?: string,
+    endpointsData?: EndpointsDataService,
+    injector?: Injector,
+  ) {
     super(gitHubURL);
     this.endpointGuid = endpointGuid;
+    this.endpointsData = endpointsData;
+    this.injector = injector;
     if (accessToken && accessToken.trim() !== '') {
       this.setAccessToken(accessToken);
     }
@@ -77,7 +91,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
         const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url, api.requestArgs);
         const firstRequest = config.fetch(...config.buildFetchParams(1));
         return flattenPagination(
-          null,
+          noopActionDispatcher,
           firstRequest,
           config
         );
@@ -130,7 +144,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
         const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url, api.requestArgs);
         const firstRequest = config.fetch(...config.buildFetchParams(1));
         return flattenPagination(
-          null,
+          noopActionDispatcher,
           firstRequest,
           config
         );

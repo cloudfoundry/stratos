@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
-import { ActivatedRoute } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
@@ -22,7 +21,6 @@ import {
 } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { AppAutoscalerInvalidPolicyError, AppAutoscalerPolicyLocal } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
-import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 
 interface EditTriggerForm {
   metric_type: FormControl<string>;
@@ -38,7 +36,6 @@ interface EditTriggerForm {
 @Component({
   selector: 'app-edit-autoscaler-policy-step2',
   templateUrl: './edit-autoscaler-policy-step2.component.html',
-  styleUrls: ['./edit-autoscaler-policy-step2.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher }
@@ -69,10 +66,16 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
   public declare currentPolicy: AppAutoscalerPolicyLocal;
   public testing = false;
-  private editIndex = -1;
-  private editMetricType = '';
-  private editScaleType = 'upper';
-  private editAdjustmentType = 'value';
+  // FWT-959 Part 2: editIndex backed by a BehaviorSubject so the parent
+  // orchestrator can bridge editIndex changes into a signal for its
+  // signal-step handle (valid / disablePrevious). Templates still read
+  // `editIndex` (now via getter), call-sites still write `this.editIndex = N`.
+  readonly editIndex$ = new BehaviorSubject<number>(-1);
+  get editIndex(): number { return this.editIndex$.value; }
+  set editIndex(v: number) { this.editIndex$.next(v); }
+  protected editMetricType = '';
+  protected editScaleType = 'upper';
+  protected editAdjustmentType = 'value';
   private subs: Subscription[] = [];
 
   constructor() {
@@ -96,7 +99,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
 
     this.metricUnit$ = this.metricUnitSubject.asObservable();
 
-    this.subs.push(this.editTriggerForm.get('metric_type').valueChanges.pipe(
+    this.subs.push(this.editTriggerForm.controls.metric_type.valueChanges.pipe(
       map((value: string) => this.getMetricUnit(value)),
     ).subscribe((unit: string) => {
       this.metricUnitSubject.next(unit);
@@ -167,7 +170,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerMetricType(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -182,7 +185,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerOperator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (this.editTriggerForm) {
         this.editScaleType = getScaleType(control.value);
         this.editTriggerForm.controls.threshold.updateValueAndValidity();
@@ -192,7 +195,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerThreshold(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -212,7 +215,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerAdjustment(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (!this.editTriggerForm) {
         return null;
       }
@@ -226,7 +229,7 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
   }
 
   validateTriggerAdjustmentType(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any, } => {
+    return (control: AbstractControl): ValidationErrors | null => {
       if (this.editTriggerForm) {
         this.editAdjustmentType = control.value;
         this.editTriggerForm.controls.adjustment.updateValueAndValidity();

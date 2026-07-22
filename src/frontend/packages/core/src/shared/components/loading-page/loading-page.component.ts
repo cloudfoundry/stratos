@@ -1,9 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { EntitySchema, EntityMonitor, EntityMonitorFactory } from '@stratosui/store';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Component, Input, OnInit, ChangeDetectionStrategy } from '@angular/core';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 @Component({
 selector: 'app-loading-page',
@@ -26,8 +24,10 @@ selector: 'app-loading-page',
   ]
 })
 export class LoadingPageComponent implements OnInit {
-  private entityMonitorFactory = inject(EntityMonitorFactory);
-
+  // Caller supplies a loading stream directly. The ngrx EntityMonitor-driven
+  // path (entityId/entitySchema → isFetching/isDeleting) was removed: the
+  // detail pages that used it now pass their signal-native isLoading, and the
+  // delete flow navigates away rather than painting a "deleting" overlay here.
   @Input()
   isLoading!: Observable<boolean>;
 
@@ -35,49 +35,11 @@ export class LoadingPageComponent implements OnInit {
   text = 'Retrieving your data';
 
   @Input()
-  deleteText = 'Deleting data';
-
-  @Input()
   alert = '';
 
-  @Input()
-  entityId!: string;
-
-  @Input()
-  entitySchema!: EntitySchema;
-
-  public isDeleting!: Observable<boolean>;
-
-  public text$!: Observable<string>;
-
   ngOnInit() {
-    if (this.isLoading) {
-      // isLoading is already provided as an input
-      this.isDeleting = new BehaviorSubject(false);
-    } else if (this.entityId && this.entitySchema) {
-      this.buildFromMonitor(this.entityMonitorFactory.create(this.entityId, this.entitySchema));
-    } else {
+    if (!this.isLoading) {
       this.isLoading = new BehaviorSubject(false);
-      this.isDeleting = new BehaviorSubject(false);
     }
-
-    this.text$ = combineLatest([
-      this.isLoading,
-      this.isDeleting
-    ]).pipe(
-      map(([isLoading, isDeleting]) => {
-        if (isDeleting) {
-          return this.deleteText;
-        } else if (isLoading) {
-          return this.text;
-        }
-        return '';
-      })
-    );
-  }
-
-  private buildFromMonitor(monitor: EntityMonitor) {
-    this.isDeleting = monitor.isDeletingEntity$;
-    this.isLoading = monitor.isFetchingEntity$;
   }
 }

@@ -41,7 +41,7 @@
   "login": {
     "showLogo": true,
     "showTitle": true,
-    "backgroundImage": "/core/assets/login-bg.jpg",
+    "backgroundImage": "/core/assets/login-bg.webp",
     "backgroundColor": "#f1f5f9",
     "cardBackground": "#ffffff"
   }

@@ -18,7 +18,7 @@
 
   &.invalid {
     .checkbox-frame {
-      border-color: var(--color-danger, #ef4444);
+      border-color: var(--color-danger, oklch(63.683% 0.2078 25.33));
       border-width: 2px;
     }
   }
@@ -45,7 +45,7 @@
   position: relative;
   width: 18px;
   height: 18px;
-  border: 2px solid var(--input-border, #666);
+  border: 2px solid var(--input-border, oklch(51.028% 0 none));
   border-radius: 2px;
   background-color: transparent;
   transition: all 0.2s ease;
@@ -54,39 +54,39 @@
   justify-content: center;
 
   .custom-checkbox:hover:not(.disabled) & {
-    border-color: var(--input-focus-border, #333);
+    border-color: var(--input-focus-border, oklch(32.109% 0 none));
   }
 
   .checked & {
-    background-color: var(--color-primary, #2196f3);
-    border-color: var(--color-primary, #2196f3);
+    background-color: var(--color-primary, oklch(65.816% 0.169 248.81));
+    border-color: var(--color-primary, oklch(65.816% 0.169 248.81));
   }
 
   .indeterminate & {
-    background-color: var(--color-primary, #2196f3);
-    border-color: var(--color-primary, #2196f3);
+    background-color: var(--color-primary, oklch(65.816% 0.169 248.81));
+    border-color: var(--color-primary, oklch(65.816% 0.169 248.81));
   }
 
   .color-primary.checked &,
   .color-primary.indeterminate & {
-    background-color: var(--color-primary, #2196f3);
-    border-color: var(--color-primary, #2196f3);
+    background-color: var(--color-primary, oklch(65.816% 0.169 248.81));
+    border-color: var(--color-primary, oklch(65.816% 0.169 248.81));
   }
 
   .color-accent.checked &,
   .color-accent.indeterminate & {
-    background-color: var(--color-accent, #ff4081);
-    border-color: var(--color-accent, #ff4081);
+    background-color: var(--color-accent, oklch(67.204% 0.2281 5.73));
+    border-color: var(--color-accent, oklch(67.204% 0.2281 5.73));
   }
 
   .color-warn.checked &,
   .color-warn.indeterminate & {
-    background-color: var(--color-warning, #f44336);
-    border-color: var(--color-warning, #f44336);
+    background-color: var(--color-warning, oklch(64.265% 0.2153 28.81));
+    border-color: var(--color-warning, oklch(64.265% 0.2153 28.81));
   }
 
   .invalid:not(.checked) & {
-    border-color: var(--color-danger, #ef4444);
+    border-color: var(--color-danger, oklch(63.683% 0.2078 25.33));
   }
 }
 
@@ -127,7 +127,7 @@
   padding: 4px 0;
   font-size: 0.75rem;
   line-height: 1.25;
-  color: var(--color-danger, #ef4444);
+  color: var(--color-danger, oklch(63.683% 0.2078 25.33));
   animation: slideDown 0.3s ease-out;
 
   div {

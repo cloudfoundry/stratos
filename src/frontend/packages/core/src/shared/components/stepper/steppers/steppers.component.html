@@ -2,12 +2,20 @@
   @if (steps && steps.length) {
     <div class="steppers">
       <div class="steppers-inner">
+        <!-- Context summary — surfaces in-progress selections (e.g.
+             "Creating service instance in {CF} / {Org} / {Space}") so
+             later steps don't lose track of what's being built. -->
+        @if (contextSummary) {
+          <div class="steppers-context-summary mb-4 px-3 py-2 rounded border border-content-border bg-content-bg-alt text-sm text-content-muted">
+            <ng-container *ngTemplateOutlet="contextSummary"></ng-container>
+          </div>
+        }
         <!-- Step headers -->
         @if (steps.length > 1) {
           <div class="steppers-headers flex flex-wrap sm:flex-nowrap items-center justify-center mb-8 gap-2 overflow-x-auto">
             @for (step of steps; track $index; let i = $index; let isLast = $last) {
               <div
-                class="steppers-header flex items-center flex-shrink-0 min-w-0"
+                class="steppers-header flex items-center shrink-0 min-w-0"
              [ngClass]="{
                'steppers-header--active': step.active,
                'steppers-header--busy': step.blocked || step.showBusy
@@ -15,7 +23,7 @@
                 @if (steps.length !== 1) {
                   <div class="steppers-header-inner flex items-center min-w-0">
                     <!-- Step indicator -->
-                    <div class="steppers-header-indicator relative flex items-center justify-center flex-shrink-0">
+                    <div class="steppers-header-indicator relative flex items-center justify-center shrink-0">
                       <!-- Loading spinner -->
                       @if ((step.blocked || step.showBusy)) {
                         <div
@@ -55,7 +63,7 @@
                 <!-- Connector line -->
                 @if (!isLast) {
                   <div
-                    class="steppers-header-connector w-8 sm:w-12 h-0.5 mx-2 sm:mx-4 flex-shrink-0 hidden sm:block"
+                    class="steppers-header-connector w-8 sm:w-12 h-0.5 mx-2 sm:mx-4 shrink-0 hidden sm:block"
                [ngClass]="{
                  'steppers-header-connector--complete': step.complete,
                  'steppers-header-connector--incomplete': !step.complete
@@ -68,7 +76,7 @@
         }
         <!-- Step content -->
         <div class="steppers-contents mb-8">
-          <span *ngTemplateOutlet="steps[currentIndex].content"></span>
+          <span *ngTemplateOutlet="steps[currentIndex()].content"></span>
         </div>
         <!-- Navigation buttons -->
         <div class="steppers-navigation flex items-center justify-between border-t pt-6">
@@ -76,42 +84,42 @@
             @if (steps.length !== 1 || basePreviousRedirect) {
               <button id="stepper_previous"
                 class="btn btn-secondary"
-                (click)="setActive(currentIndex - 1)"
-                [disabled]="!canGoto(currentIndex - 1) || steps[currentIndex].disablePrevious">
+                (click)="setActive(currentIndex() - 1)"
+                [disabled]="!canGoto(currentIndex() - 1) || steps[currentIndex()].disablePrevious">
                 Previous
               </button>
             }
           </div>
           <div class="steppers-navigation-right flex items-center space-x-3">
             <!-- Cancel button -->
-            @if (!steps[currentIndex].hideCloseButton && cancel) {
+            @if (!steps[currentIndex()].hideCloseButton && cancel) {
               <button id="stepper_cancel"
                 class="btn btn-secondary"
-                [routerLink]="cancel$ | async"
-                [queryParams]="cancelQueryParams$ | async"
-                [disabled]="!canCancel(currentIndex)"
-                (click)="steps[currentIndex].onLeave(false)">
-                {{ this.getCancelButtonText(currentIndex) }}
+                [routerLink]="cancelReload ? null : (cancel$ | async)"
+                [queryParams]="cancelReload ? null : (cancelQueryParams$ | async)"
+                [disabled]="!canCancel(currentIndex())"
+                (click)="onCancel(currentIndex())">
+                {{ this.getCancelButtonText(currentIndex()) }}
               </button>
             }
             <!-- Next/Submit button -->
-            @if (!steps[currentIndex].hideNextButton) {
+            @if (!steps[currentIndex()].hideNextButton) {
               <button id="stepper_next"
                 class="steppers-navigation-right-next btn flex items-center space-x-2"
                   [ngClass]="{
-                    'btn-danger': steps[currentIndex].destructiveStep,
-                    'btn-primary': !steps[currentIndex].destructiveStep
+                    'btn-danger': steps[currentIndex()].destructiveStep,
+                    'btn-primary': !steps[currentIndex()].destructiveStep
                   }"
                 type="submit"
-                (click)="goNext(currentIndex)"
-                [disabled]="steps[currentIndex].busy || steps[currentIndex].blocked || !canGoNext(currentIndex)">
+                (click)="goNext()"
+                [disabled]="steps[currentIndex()].busy || steps[currentIndex()].blocked || !canGoNext(currentIndex())">
                 <!-- Loading spinner -->
                 @if (showNextButtonProgress) {
                   <div
                     class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
                   </div>
                 } @else {
-                  <span>{{ this.getNextButtonText(currentIndex) }}</span>
+                  <span>{{ this.getNextButtonText(currentIndex()) }}</span>
                 }
                 <!-- Button text -->
               </button>

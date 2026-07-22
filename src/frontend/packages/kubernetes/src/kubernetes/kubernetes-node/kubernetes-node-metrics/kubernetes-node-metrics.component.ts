@@ -10,12 +10,26 @@ import {
 import { MetricsParentRangeSelectorComponent } from '../../../../../core/src/shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
 import { TileComponent } from '../../../../../core/src/shared/components/tile/tile/tile.component';
 import { TileGroupComponent } from '../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { MetricQueryConfig } from '../../../../../store/src/actions/metrics.actions';
+import { MetricsRequest } from '../../../../../store/src/services/metrics-data.service';
 import { ChartSeries, IMetricMatrixResult } from '../../../../../store/src/types/base-metric.types';
+import { MetricQueryType } from '../../../../../store/src/types/metric.types';
 import { formatAxisCPUTime, formatCPUTime } from '../../kubernetes-metrics.helpers';
 import { IKubernetesMetric } from '../../kubernetes-metric.types';
 import { KubeNodeMetric, KubernetesNodeService } from '../../services/kubernetes-node.service';
-import { FetchKubernetesChartMetricsAction } from '../../store/kubernetes.actions';
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card/kubernetes-node-metric-stats-card.component';
+
+const KUBE_METRICS_BASE_URL = '/pp/v1/metrics/kubernetes';
+
+function buildKubeChartRequest(nodeName: string, endpointGuid: string, metric: string): MetricsRequest {
+  return {
+    endpointGuid,
+    url: `${KUBE_METRICS_BASE_URL}/${nodeName}`,
+    query: new MetricQueryConfig(metric),
+    queryType: MetricQueryType.RANGE_QUERY,
+    windowValue: null,
+  };
+}
 
 @Component({
   selector: 'app-kubernetes-node-metrics',
@@ -33,8 +47,9 @@ import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric
 export class KubernetesNodeMetricsComponent implements OnInit {
   memoryMetric: KubeNodeMetric;
   cpuMetric: KubeNodeMetric;
-  memoryUnit: string;
-  cpuUnit: string;
+  // Never assigned by this component; the stats-card derives its own unit
+  memoryUnit?: string;
+  cpuUnit?: string;
 
   public instanceMetricConfigs: [
     MetricsConfig<IMetricMatrixResult<IKubernetesMetric>>,
@@ -76,7 +91,7 @@ export class KubernetesNodeMetricsComponent implements OnInit {
 
     this.instanceMetricConfigs = [
       chartConfigBuilder(
-        new FetchKubernetesChartMetricsAction(
+        buildKubeChartRequest(
           this.kubeNodeService.nodeName,
           this.kubeNodeService.kubeGuid,
           `${KubeNodeMetric.MEMORY}{instance="${this.kubeNodeService.nodeName}"}`
@@ -89,11 +104,11 @@ export class KubernetesNodeMetricsComponent implements OnInit {
             return s.name.indexOf('/') !== 0 && !!metadata.container && metadata.container !== 'POD';
           });
         },
-        null,
+        undefined,
         (value: string) => value + ' MB'
       ),
       chartConfigBuilder(
-        new FetchKubernetesChartMetricsAction(
+        buildKubeChartRequest(
           this.kubeNodeService.nodeName,
           this.kubeNodeService.kubeGuid,
           `${KubeNodeMetric.CPU}{instance="${this.kubeNodeService.nodeName}"}`

@@ -3,14 +3,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
-import { StoreModule, Store } from '@ngrx/store';
 
 import { authGuard } from './auth-guard.service';
-import { appReducers } from '@stratosui/store';
-import { InternalAppState } from '@stratosui/store';
 
 describe('authGuard', () => {
-  let _store: Store<InternalAppState>;
   let _router: Router;
 
   beforeEach(() => {
@@ -18,10 +14,8 @@ describe('authGuard', () => {
       providers: [provideZonelessChangeDetection()],
       imports: [
         RouterTestingModule,
-        StoreModule.forRoot(appReducers),
       ]
     });
-    _store = TestBed.inject(Store);
     _router = TestBed.inject(Router);
   });
 

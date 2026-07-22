@@ -1,13 +1,13 @@
 import { provideHttpClient } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 import { ActivatedRoute } from '@angular/router';
-import { StoreModule } from '@ngrx/store';
 
-import { EntityMonitorFactory, PaginationMonitorFactory, EntityServiceFactory, appReducers, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities, CfUserServiceTestProvider } from '@test-framework/cf';
 
@@ -44,14 +44,8 @@ describe('UsersRolesConfirmComponent', () => {
         provideNoopAnimations(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          }),
           CloudFoundryReducersModule
         ),
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EntityCatalogHelper,
         ...CfUserServiceTestProvider,
         CfRolesService,
@@ -86,7 +80,7 @@ describe('UsersRolesConfirmComponent', () => {
     component = fixture.componentInstance;
 
     // Mock the changes$ observable to avoid initialization issues
-    component.changes$ = vi.fn(() => []) as any;
+    component.changes$ = of([]);
 
     fixture.detectChanges();
   });

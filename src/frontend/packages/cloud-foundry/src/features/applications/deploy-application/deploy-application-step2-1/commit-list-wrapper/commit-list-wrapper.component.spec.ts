@@ -3,13 +3,10 @@ import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideMockStore } from '@ngrx/store/testing';
-import { Store } from '@ngrx/store';
 
 import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCfTopLevelStoreEntities } from "@test-framework/cloud-foundry-endpoint-service.helper";
-import { SetAppSourceDetails } from '../../../../../actions/deploy-applications.actions';
+import { CfDeployAppDataService } from '../../../../../services/domain-data/cf-deploy-app-data.service';
 import { CommitListWrapperComponent } from "./commit-list-wrapper.component";
 
 describe('CommitListWrapperComponent', () => {
@@ -22,9 +19,6 @@ describe('CommitListWrapperComponent', () => {
         CommitListWrapperComponent,
       ],
       providers: [
-        provideMockStore({
-          initialState: generateCfTopLevelStoreEntities()
-        }),
         ...STORE_TEST_PROVIDERS,
         provideHttpClient(),
         provideZonelessChangeDetection(),
@@ -34,11 +28,10 @@ describe('CommitListWrapperComponent', () => {
       ]
     }).compileComponents();
 
-    const store = TestBed.inject(Store);
-    store.dispatch(new SetAppSourceDetails({
+    TestBed.inject(CfDeployAppDataService).setSourceType({
       id: 'id',
-      name: 'name'
-    }));
+      name: 'name',
+    });
 
     fixture = TestBed.createComponent(CommitListWrapperComponent);
     component = fixture.componentInstance;

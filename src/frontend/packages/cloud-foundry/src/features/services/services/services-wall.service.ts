@@ -1,42 +1,21 @@
-import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
 
-import { endpointEntityType, APIResource } from '@stratosui/store';
-import { IService } from '../../../cf-api-svc.types';
-import { serviceEntityType } from '../../../cf-entity-types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import { createEntityRelationPaginationKey } from '../../../entity-relations/entity-relations.types';
+import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
+import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 
+/**
+ * Lists the service offerings reachable from a given (cnsi, space). Thin
+ * pass-through over `ServiceCatalogDataService.serviceOfferingsInSpace`,
+ * kept as its own service so consumers can be provider-injected with a
+ * mockable seam in tests.
+ */
 @Injectable({
   providedIn: 'root'
 })
 export class ServicesWallService {
-  services$: Observable<APIResource<IService>[]>;
+  private serviceCatalog = inject(ServiceCatalogDataService);
 
-  constructor() {
-    this.services$ = this.initServicesObservable();
+  getServicesInSpaceSource(cfGuid: string, spaceGuid: string): SignalSource<StServiceOffering[]> {
+    return this.serviceCatalog.serviceOfferingsInSpace(cfGuid, spaceGuid);
   }
-
-  initServicesObservable = () => {
-    const paginationKey = createEntityRelationPaginationKey(endpointEntityType);
-    return cfEntityCatalog.service.store.getPaginationService(null, paginationKey, {}).entities$;
-  };
-
-  getServicesInCf = (cfGuid: string) => this.services$.pipe(
-    filter(p => !!p && p.length > 0),
-    map(services => services.filter(s => s.entity.cfGuid === cfGuid)),
-    filter(p => !!p),
-    publishReplay(1),
-    refCount()
-  );
-
-  getSpaceServicePagKey(cfGuid: string, spaceGuid: string) {
-    return createEntityRelationPaginationKey(serviceEntityType, `${cfGuid}-${spaceGuid}`);
-  }
-
-  getServicesInSpace = (cfGuid: string, spaceGuid: string) => {
-    const paginationKey = this.getSpaceServicePagKey(cfGuid, spaceGuid);
-    return cfEntityCatalog.service.store.getAllInSpace.getPaginationService(cfGuid, paginationKey, spaceGuid).entities$;
-  };
 }

@@ -4,14 +4,16 @@ import { NavigationCancel, NavigationEnd, NavigationStart, Router } from '@angul
 import { interval, Observable, of as observableOf } from 'rxjs';
 import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
 
+import { AppProgressBarComponent } from '../progress-bar/app-progress-bar.component';
+
 @Component({
   selector: 'app-routing-indicator',
   templateUrl: './routing-indicator.component.html',
-  styleUrls: ['./routing-indicator.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule
+    CommonModule,
+    AppProgressBarComponent
   ]
 })
 export class RoutingIndicatorComponent {

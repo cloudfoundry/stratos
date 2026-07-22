@@ -1,0 +1,87 @@
+name: STB Tests
+
+# Gate for the Stratos Theme Builder (tools/stb). It is a standalone npm
+# project outside the Angular workspace, so the frontend/backend workflows
+# never exercise it. The real gate runs only when stb itself changes.
+#
+# STB Tests is a REQUIRED status check on develop/main. A required check that is
+# `paths`-filtered at the trigger level never reports on PRs that don't touch
+# its paths, leaving those PRs stuck forever on "Expected — Waiting for status
+# to be reported". So we always trigger and gate the real work with a job-level
+# `if:`: a job skipped by `if:` reports success and satisfies the required
+# check, without spinning a runner. See #5528.
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+      - 'angular**'
+  push:
+    branches:
+      - develop
+      - main
+    paths:
+      - 'tools/stb/**'
+
+# pull-requests: read is required by dorny/paths-filter, which lists a
+# PR's changed files through the API.
+permissions:
+  contents: read
+  pull-requests: read
+
+env:
+  NODE_VERSION: '24'
+
+jobs:
+  # Does this PR touch stb? The gate job gates on this output.
+  changes:
+    name: Detect stb changes
+    runs-on: ubuntu-latest
+    outputs:
+      stb: ${{ steps.filter.outputs.stb }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3.0.3
+        id: filter
+        with:
+          filters: |
+            stb:
+              - 'tools/stb/**'
+
+  test:
+    name: STB Tests
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.stb == 'true'
+    defaults:
+      run:
+        working-directory: tools/stb
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # No package-lock.json in tools/stb, so install (not ci).
+      - run: npm install
+
+      # The integration suite runs in real browsers (vite.config.ts defines
+      # integration-chromium/firefox/webkit projects); CI has no browser
+      # binaries by default. NOTE: installs all three to keep CI == local
+      # `npm test`; narrow to chromium if the gate gets slow.
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Unit + integration tests
+        run: npm test

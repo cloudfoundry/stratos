@@ -1,4 +1,4 @@
-import { EntitySchema, metricEntityType, APIResource } from '@stratosui/store';
+import { EntitySchema, APIResource } from '@stratosui/store';
 import {
   CFApplicationEntitySchema,
   CFEntitySchema,
@@ -16,7 +16,6 @@ import {
   appSummaryEntityType,
   buildpackEntityType,
   cfEventEntityType,
-  cfInfoEntityType,
   cfUserEntityType,
   domainEntityType,
   featureFlagEntityType,
@@ -40,8 +39,9 @@ import {
   stackEntityType,
   userProvidedServiceInstanceEntityType,
 } from './cf-entity-types';
-import { getAPIResourceGuid } from './store/selectors/api.selectors';
-import { CfUser, CfUserRoleParams, OrgUserRoleNames, SpaceUserRoleNames } from './store/types/cf-user.types';
+import { getCFCompositeEntityId } from './store/selectors/api.selectors';
+import { CfUser, CfUserRoleParams } from './store/types/cf-user.types';
+import { ORG_ROLE_DEFS, SPACE_ROLE_DEFS } from './roles/role-registry';
 
 const entityCache: {
   [key: string]: EntitySchema;
@@ -53,20 +53,17 @@ entityCache[appSummaryEntityType] = AppSummarySchema;
 const AppStatSchema = new CFEntitySchema(appStatsEntityType, {}, { idAttribute: 'guid' });
 entityCache[appStatsEntityType] = AppStatSchema;
 
-const AppEnvVarSchema = new CFEntitySchema(appEnvVarsEntityType, {}, { idAttribute: getAPIResourceGuid });
+const AppEnvVarSchema = new CFEntitySchema(appEnvVarsEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[appEnvVarsEntityType] = AppEnvVarSchema;
 
-const CFInfoSchema = new CFEntitySchema(cfInfoEntityType);
-entityCache[cfInfoEntityType] = CFInfoSchema;
-
-const EventSchema = new CFEntitySchema(cfEventEntityType, {}, { idAttribute: getAPIResourceGuid });
+const EventSchema = new CFEntitySchema(cfEventEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[cfEventEntityType] = EventSchema;
 
-const StackSchema = new CFEntitySchema(stackEntityType, {}, { idAttribute: getAPIResourceGuid });
+const StackSchema = new CFEntitySchema(stackEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[stackEntityType] = StackSchema;
 
 const DomainSchema = new CFEntitySchema(domainEntityType, {}, {
-  idAttribute: getAPIResourceGuid,
+  idAttribute: getCFCompositeEntityId,
   // Work around for an issue where router_group_type can come back null from one API call but
   // for shared_domains call it is correctly populated - the null values can overwrite the
   // correct values - so remove them to avoid this
@@ -85,24 +82,21 @@ entityCache[domainEntityType] = DomainSchema;
 
 const ServiceSchema = new CFEntitySchema(serviceEntityType, {
   entity: {
-    service_plans: [new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getAPIResourceGuid })]
+    service_plans: [new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getCFCompositeEntityId })]
   }
-}, { idAttribute: getAPIResourceGuid });
+}, { idAttribute: getCFCompositeEntityId });
 const ServiceNoPlansSchema = new CFEntitySchema(serviceEntityType, {
-}, { idAttribute: getAPIResourceGuid });
+}, { idAttribute: getCFCompositeEntityId });
 entityCache[serviceEntityType] = ServiceSchema;
 
-const MetricSchema = new CFEntitySchema(metricEntityType);
-entityCache[metricEntityType] = MetricSchema;
-
-const SpaceQuotaSchema = new CFEntitySchema(spaceQuotaEntityType, {}, { idAttribute: getAPIResourceGuid });
+const SpaceQuotaSchema = new CFEntitySchema(spaceQuotaEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[spaceQuotaEntityType] = SpaceQuotaSchema;
 
 const ServicePlanSchema = new CFEntitySchema(servicePlanEntityType, {
   entity: {
     service: ServiceSchema
   }
-}, { idAttribute: getAPIResourceGuid });
+}, { idAttribute: getCFCompositeEntityId });
 entityCache[servicePlanEntityType] = ServicePlanSchema;
 
 const ServiceBindingsSchema = new CFServiceBindingEntitySchema({
@@ -113,8 +107,8 @@ const ServiceBindingsSchema = new CFServiceBindingEntitySchema({
         service_bindings: [
           new CFEntitySchema(serviceBindingEntityType, {
             app: new CFApplicationEntitySchema(),
-          }, { idAttribute: getAPIResourceGuid })],
-        service: new CFEntitySchema(serviceEntityType, {}, { idAttribute: getAPIResourceGuid }),
+          }, { idAttribute: getCFCompositeEntityId })],
+        service: new CFEntitySchema(serviceEntityType, {}, { idAttribute: getCFCompositeEntityId }),
         service_plan: ServicePlanSchema,
       },
     })
@@ -127,8 +121,8 @@ const ServiceBindingsNoBindingsSchema = new CFServiceBindingEntitySchema({
     app: new CFApplicationEntitySchema(),
     service_instance: new CFServiceInstanceEntitySchema({
       entity: {
-        service: new CFEntitySchema(serviceEntityType, {}, { idAttribute: getAPIResourceGuid }),
-        service_plan: new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getAPIResourceGuid }),
+        service: new CFEntitySchema(serviceEntityType, {}, { idAttribute: getCFCompositeEntityId }),
+        service_plan: new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getCFCompositeEntityId }),
       },
     }),
     service: ServiceNoPlansSchema
@@ -144,7 +138,7 @@ const ServiceInstancesSchema = new CFServiceInstanceEntitySchema({
 });
 entityCache[serviceInstancesEntityType] = ServiceInstancesSchema;
 
-const BuildpackSchema = new CFEntitySchema(buildpackEntityType, {}, { idAttribute: getAPIResourceGuid });
+const BuildpackSchema = new CFEntitySchema(buildpackEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[buildpackEntityType] = BuildpackSchema;
 
 const RouteSchema = new CFRouteEntitySchema({
@@ -162,7 +156,7 @@ const RouteNoAppsSchema = new CFRouteEntitySchema({
   }
 });
 
-const QuotaDefinitionSchema = new CFEntitySchema(quotaDefinitionEntityType, {}, { idAttribute: getAPIResourceGuid });
+const QuotaDefinitionSchema = new CFEntitySchema(quotaDefinitionEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[quotaDefinitionEntityType] = QuotaDefinitionSchema;
 
 const ApplicationWithoutSpaceEntitySchema = new CFApplicationEntitySchema(
@@ -186,7 +180,7 @@ const CFUserSchema = new CFUserEntitySchema({
     audited_spaces: [createUserOrgSpaceSchema(spaceEntityType, {}, CfUserRoleParams.AUDITED_SPACES)],
   }
 }, {
-  idAttribute: getAPIResourceGuid,
+  idAttribute: getCFCompositeEntityId,
   processStrategy: (user: APIResource<CfUser>) => {
     if (user.entity.username) {
       return user;
@@ -206,14 +200,16 @@ const CFUserSchema = new CFUserEntitySchema({
 });
 entityCache[cfUserEntityType] = CFUserSchema;
 
+// @internal — exported only for spec introspection (parity test); not public API
+export const spaceRoleSchemaParams = Object.fromEntries(
+  SPACE_ROLE_DEFS.map(d => [d.stratos, [CFUserSchema]])
+);
 const coreSpaceSchemaParams = {
   routes: [RouteSchema],
   domains: [DomainSchema],
   space_quota_definition: SpaceQuotaSchema,
   service_instances: [ServiceInstancesSchema],
-  [SpaceUserRoleNames.DEVELOPER]: [CFUserSchema],
-  [SpaceUserRoleNames.MANAGER]: [CFUserSchema],
-  [SpaceUserRoleNames.AUDITOR]: [CFUserSchema]
+  ...spaceRoleSchemaParams,
 };
 const SpaceSchema = new CFSpaceEntitySchema({
   entity: {
@@ -223,7 +219,7 @@ const SpaceSchema = new CFSpaceEntitySchema({
 });
 entityCache[spaceEntityType] = SpaceSchema;
 
-const PrivateDomainsSchema = new CFEntitySchema(privateDomainsEntityType, {}, { idAttribute: getAPIResourceGuid });
+const PrivateDomainsSchema = new CFEntitySchema(privateDomainsEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[privateDomainsEntityType] = PrivateDomainsSchema;
 
 const coreOrgSchemaParams = {
@@ -238,14 +234,15 @@ const OrganizationsWithoutSpaces = new CFOrgEntitySchema({
   }
 });
 
+// @internal — exported only for spec introspection (parity test); not public API
+export const orgRoleSchemaParams = Object.fromEntries(
+  ORG_ROLE_DEFS.map(d => [d.stratos, [CFUserSchema]])
+);
 const OrganizationSchema = new CFOrgEntitySchema({
   entity: {
     ...coreOrgSchemaParams,
     spaces: [SpaceSchema],
-    [OrgUserRoleNames.USER]: [CFUserSchema],
-    [OrgUserRoleNames.MANAGER]: [CFUserSchema],
-    [OrgUserRoleNames.BILLING_MANAGERS]: [CFUserSchema],
-    [OrgUserRoleNames.AUDITOR]: [CFUserSchema]
+    ...orgRoleSchemaParams,
   }
 });
 entityCache[organizationEntityType] = OrganizationSchema;
@@ -271,8 +268,8 @@ entityCache[serviceInstancesWithSpaceEntityType] = ServiceInstancesWithSpaceSche
 
 const ServiceInstancesWithNoBindingsSchema = new CFServiceInstanceEntitySchema({
   entity: {
-    service_plan: [new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getAPIResourceGuid })],
-    service: [new CFEntitySchema(serviceEntityType, {}, { idAttribute: getAPIResourceGuid })],
+    service_plan: [new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getCFCompositeEntityId })],
+    service: [new CFEntitySchema(serviceEntityType, {}, { idAttribute: getCFCompositeEntityId })],
     space: SpaceSchema
   }
 });
@@ -281,9 +278,9 @@ entityCache[serviceInstancesWithNoBindingsEntityType] = ServiceInstancesWithNoBi
 const ServicePlanVisibilitySchema = new CFEntitySchema(servicePlanVisibilityEntityType, {
   entity: {
     organization: OrganizationSchema,
-    service_plan: new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getAPIResourceGuid }),
+    service_plan: new CFEntitySchema(servicePlanEntityType, {}, { idAttribute: getCFCompositeEntityId }),
   }
-}, { idAttribute: getAPIResourceGuid });
+}, { idAttribute: getCFCompositeEntityId });
 entityCache[servicePlanVisibilityEntityType] = ServicePlanVisibilitySchema;
 
 const ApplicationEntitySchema = new CFApplicationEntitySchema(
@@ -308,17 +305,17 @@ const SecurityGroupSchema = new CFEntitySchema(securityGroupEntityType, {
   entity: {
     spaces: [SpaceSchema]
   }
-}, { idAttribute: getAPIResourceGuid });
+}, { idAttribute: getCFCompositeEntityId });
 entityCache[securityGroupEntityType] = SecurityGroupSchema;
 
 const FeatureFlagSchema = new CFEntitySchema(featureFlagEntityType, {}, { idAttribute: 'name' });
 entityCache[featureFlagEntityType] = FeatureFlagSchema;
 
-const ServiceBrokerSchema = new CFEntitySchema(serviceBrokerEntityType, {}, { idAttribute: getAPIResourceGuid });
+const ServiceBrokerSchema = new CFEntitySchema(serviceBrokerEntityType, {}, { idAttribute: getCFCompositeEntityId });
 entityCache[serviceBrokerEntityType] = ServiceBrokerSchema;
 
 function createUserOrgSpaceSchema(schemaKey: string, entity: any, relationKey: string): EntitySchema {
-  return new CFEntitySchema(schemaKey, entity, { idAttribute: getAPIResourceGuid }, relationKey);
+  return new CFEntitySchema(schemaKey, entity, { idAttribute: getCFCompositeEntityId }, relationKey);
 }
 
 
@@ -329,8 +326,8 @@ const UserProvidedServiceInstanceSchema = new CFEntitySchema(userProvidedService
     routes: [RouteSchema]
   }
 },
-  { idAttribute: getAPIResourceGuid },
-  null,
+  { idAttribute: getCFCompositeEntityId },
+  undefined,
   [
     servicePlanEntityType,
     // Service bindings

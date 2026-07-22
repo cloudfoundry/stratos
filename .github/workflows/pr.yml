@@ -1,37 +1,208 @@
 name: Pull Request Tests
 
+# tools/stb is a standalone project with its own gate (stb_tests.yml). We must
+# NOT skip this workflow for stb-only changes via a trigger-level `paths`
+# filter: these jobs are REQUIRED status checks, and a required check that is
+# path-filtered at the trigger never reports — leaving stb-only PRs stuck on
+# "Expected — waiting for status". Instead we always trigger and skip each job
+# with a `changes`-gated `if:`; a job skipped by `if:` reports success and so
+# satisfies the required check without running the Stratos build. See #5528.
 on:
   pull_request:
     branches:
-      - master
+      - main
       - develop
       - 'angular**'
   push:
     branches:
       - develop
-      - master
+      - main
+
+# One live run per ref: a push to a PR branch (or develop/main) cancels the
+# in-flight run for the same ref, so overlapping runs never contend for
+# runners and only the newest commit is gated.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# pull-requests: read is required by dorny/paths-filter, which lists a
+# PR's changed files through the API.
+permissions:
+  contents: read
+  pull-requests: read
 
 env:
   NODE_OPTIONS: --max-old-space-size=5500
   NODE_VERSION: '24'
-  GO_VERSION: '1.25'
-  BUN_VERSION: 'latest'
+  GO_VERSION: '1.26'
+  BUN_VERSION: '1.3.14'
 
 jobs:
+  # Decide whether this PR touches anything outside tools/stb. All the real
+  # jobs below gate on `non_stb` so stb-only PRs skip them (→ success) while
+  # every other PR runs the full suite. Always runs; cheap.
+  changes:
+    name: Detect non-stb changes
+    runs-on: ubuntu-latest
+    outputs:
+      non_stb: ${{ steps.filter.outputs.non_stb }}
+      docs: ${{ steps.filter.outputs.docs }}
+      website: ${{ steps.filter.outputs.website }}
+      booklets: ${{ steps.filter.outputs.booklets }}
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: dorny/paths-filter@d1c1ffe0248fe513906c8e24db8ea791d46f8590 # v3.0.3
+        id: filter
+        with:
+          # A file counts only if it matches EVERY pattern — required for the
+          # '!' exclusions below; the default 'some' lets '**' match anything,
+          # making the exclusions dead letters.
+          predicate-quantifier: 'every'
+          filters: |
+            # non_stb = the code path: skip the heavy suite when a PR only
+            # touches stb tooling, docs/, or website/ (each has its own gate).
+            non_stb:
+              - '**'
+              - '!tools/stb/**'
+              - '!docs/**'
+              - '!docs-build/**'
+              - '!website/**'
+              - '!README.md'
+            docs:
+              - 'docs/**'
+            website:
+              - 'website/**'
+            booklets:
+              - 'docs-build/**'
+
+  # Enforce the GFM-intersection markdown subset on docs/ so every page
+  # renders identically on GitHub and in the website generator. Not a
+  # required check yet; job-level `if:` keeps it green-when-skipped if it
+  # ever becomes one (same pattern as the stb gate above).
+  docs-lint:
+    name: Docs Lint
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - run: node scripts/lint-docs.mjs
+
+  # The website previously had no PR coverage on develop: the legacy docs
+  # workflow (since removed) only triggered on master, so a website change
+  # (e.g. a dependency bump with a stale bun.lock) could merge green
+  # without ever being built. Frozen-lockfile install + full build
+  # catches both.
+  website-build:
+    name: Website Build
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.website == 'true'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+      - name: Install dependencies
+        run: cd website && bun install --frozen-lockfile
+      - name: Build website
+        run: cd website && bun run build
+
+  # Booklets are offline epub/PDF renderings of docs/ (see docs-build/).
+  # Rendered on any docs or docs-build change; the outputs are uploaded
+  # as a PR artifact for eyeballing, not published anywhere.
+  booklets-build:
+    name: Booklets Build
+    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.docs == 'true' || needs.changes.outputs.booklets == 'true'
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+      - uses: quarto-dev/quarto-actions/setup@8a96df13519ee81fd526f2dfca5962811136661b # v2.2.0
+        with:
+          version: 1.9.38
+      # Mermaid diagrams render through chrome-headless-shell; without it
+      # preinstalled, quarto render blocks on an interactive install
+      # prompt and the job hangs until the timeout.
+      - name: Install chrome-headless-shell
+        run: quarto install chrome-headless-shell --no-prompt
+      - name: Render booklets
+        run: docs-build/render.sh
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: booklets
+          path: |
+            dist/booklets/
+            !dist/booklets/.work/**
+          retention-days: 14
+
+  # Advisory: names the e2e specs that cover the components a PR changes,
+  # derived from data-test hooks and element selectors (scripts/
+  # e2e-impact.mjs). Never gates — the e2e suite needs a live CF endpoint,
+  # so it cannot run here; this puts the scoped-run command in the job
+  # summary so reviewers know exactly which specs the change touches.
+  e2e-impact:
+    name: E2E Impact (advisory)
+    runs-on: ubuntu-latest
+    needs: changes
+    if: github.event_name == 'pull_request' && needs.changes.outputs.non_stb == 'true'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Report covering specs
+        env:
+          BASE: ${{ github.base_ref }}
+          # Lets the impact script harvest tokens of components DELETED in
+          # the PR from the base ref, so their stranded specs still surface.
+          IMPACT_BASE: origin/${{ github.base_ref }}
+        run: |
+          # pipefail: a failing git diff must fail the job, not feed node an
+          # empty stdin that reads as a green "no frontend changes".
+          set -o pipefail
+          {
+            echo '```'
+            git diff --name-only "origin/${BASE}...HEAD" | node scripts/e2e-impact.mjs
+            echo '```'
+          } | tee -a "${GITHUB_STEP_SUMMARY}"
+
   lint:
     name: Lint Check
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.non_stb == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
@@ -41,15 +212,15 @@ jobs:
         run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
 
       - name: Cache Bun dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.bun-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Run linting
         run: bun run lint
@@ -57,72 +228,91 @@ jobs:
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
+    needs: changes
+    # Gate at STEP level, not job level: the per-package names below are
+    # required status checks, and a job-level skip collapses the matrix so
+    # those contexts never report ("expected" forever). With step-level
+    # gating each shard still spins up, no-ops, and reports success.
     strategy:
       fail-fast: false
       matrix:
         package: [core, store, cloud-foundry, kubernetes, git, shared, extension]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        if: needs.changes.outputs.non_stb == 'true'
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        if: needs.changes.outputs.non_stb == 'true'
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        if: needs.changes.outputs.non_stb == 'true'
+        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Get Bun cache directory
+        if: needs.changes.outputs.non_stb == 'true'
         id: bun-cache-dir
         shell: bash
         run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
 
       - name: Cache Bun dependencies
-        uses: actions/cache@v4
+        if: needs.changes.outputs.non_stb == 'true'
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.bun-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
       - name: Install dependencies
-        run: bun install
+        if: needs.changes.outputs.non_stb == 'true'
+        run: bun install --frozen-lockfile
 
       - name: Generate build info
+        if: needs.changes.outputs.non_stb == 'true'
         run: make stamp frontend
 
       - name: Run ${{ matrix.package }} tests
+        if: needs.changes.outputs.non_stb == 'true'
         # TODO: Remove --dangerouslyIgnoreUnhandledErrors once test mocks are fixed (FWT-872)
         run: bun run vitest run --dangerouslyIgnoreUnhandledErrors --project=${{ matrix.package }} --passWithNoTests
 
   test-backend:
     name: Backend Tests
     runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.non_stb == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: src/jetstream/go.sum
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Create extra_plugins.go
         run: |
@@ -145,23 +335,26 @@ jobs:
   build-check:
     name: Build Check
     runs-on: ubuntu-latest
-    needs: [lint, test-frontend, test-backend]
+    needs: [changes, lint, test-frontend, test-backend]
+    if: needs.changes.outputs.non_stb == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: ${{ env.NODE_VERSION }}
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
           bun-version: ${{ env.BUN_VERSION }}
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: ${{ env.GO_VERSION }}
           cache-dependency-path: src/jetstream/go.sum
@@ -172,15 +365,15 @@ jobs:
         run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
 
       - name: Cache Bun dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
         with:
           path: ${{ steps.bun-cache-dir.outputs.dir }}
-          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lockb') }}
+          key: ${{ runner.os }}-bun-${{ hashFiles('**/bun.lock') }}
           restore-keys: |
             ${{ runner.os }}-bun-
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Create extra_plugins.go
         run: |
@@ -204,14 +397,14 @@ jobs:
         run: make build backend
 
       - name: Upload frontend artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: frontend-dist
           path: dist/
           retention-days: 1
 
       - name: Upload backend artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: backend-binary
           path: dist/bin/jetstream
@@ -220,16 +413,23 @@ jobs:
   pr-success:
     name: PR Quality Gate
     runs-on: ubuntu-latest
-    needs: [lint, test-frontend, test-backend, build-check]
+    needs: [lint, test-frontend, test-backend, build-check, website-build, booklets-build]
     if: always()
     steps:
       - name: Check all jobs
+        # A stb-only PR skips every job above; "skipped" is an acceptable
+        # outcome here (the Stratos suite is genuinely N/A), only "failure"
+        # or "cancelled" should fail the gate.
         run: |
-          if [ "${{ needs.lint.result }}" != "success" ] || \
-             [ "${{ needs.test-frontend.result }}" != "success" ] || \
-             [ "${{ needs.test-backend.result }}" != "success" ] || \
-             [ "${{ needs.build-check.result }}" != "success" ]; then
-            echo "❌ One or more required checks failed"
-            exit 1
-          fi
+          for res in "${{ needs.lint.result }}" \
+                     "${{ needs.test-frontend.result }}" \
+                     "${{ needs.test-backend.result }}" \
+                     "${{ needs.build-check.result }}" \
+                     "${{ needs.website-build.result }}" \
+                     "${{ needs.booklets-build.result }}"; do
+            if [ "$res" != "success" ] && [ "$res" != "skipped" ]; then
+              echo "❌ One or more required checks failed (result: $res)"
+              exit 1
+            fi
+          done
           echo "✅ All PR checks passed!"

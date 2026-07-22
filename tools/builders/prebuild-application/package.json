@@ -10,9 +10,9 @@
     "src/schema.json"
   ],
   "dependencies": {
-    "@angular-devkit/architect": "^0.2102.7",
-    "@angular-devkit/core": "^21.2.7",
-    "@angular-devkit/build-angular": "^21.2.7",
+    "@angular-devkit/architect": "^0.2200.1",
+    "@angular-devkit/core": "^22.0.1",
+    "@angular-devkit/build-angular": "^22.0.1",
     "rxjs": "^7.8.2",
     "glob": "^11.0.0"
   },

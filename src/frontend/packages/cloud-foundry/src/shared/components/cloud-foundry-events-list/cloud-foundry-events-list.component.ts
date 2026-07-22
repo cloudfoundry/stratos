@@ -1,249 +1,254 @@
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, Input, OnChanges, OnInit, SimpleChanges, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
 
-import { Component, Input, OnDestroy, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
-import { Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
+import { SignalListCellTemplateDirective, SignalListComponent, SignalListConfig, SignalListDropdown, TailwindDialogService } from '@stratosui/core';
 
-import {
-  arraysEqual,
-  valueOrCommonFalsy,
-  CustomFormFieldComponent,
-  AppInputDirective,
-  CustomSelectComponent,
-  CustomOptionComponent,
-  ListComponent,
-  ListConfig,
-  safeUnsubscribe
-} from '@stratosui/core';
-import { APIResource } from '@stratosui/store';
-import { CfEventsConfigService } from '../list/list-types/cf-events/cf-events-config.service';
+import { CfAuditEventsSignalConfigService } from '../../signal-list-configs/cf-events/cf-audit-events-signal-config.service';
+import { CloudFoundryEndpointService } from '../../../features/cf/services/cloud-foundry-endpoint.service';
+import type { StAuditEvent } from '../../../services/endpoint-data/stratos-types';
+import { EventDetailComponent, hasEventMetadata, parseEventData } from './event-detail/event-detail.component';
 
-/**
- * Typed form interface for CF Events list filters
- */
-interface EventsFilterForm {
-  actee: FormControl<string | null>;
-  type: FormControl<string[] | null>;
-}
-
+// Signal-native shared events list component. Used by four page
+// consumers — the foundation-wide CF Events tab plus the org / space /
+// app event tabs — each setting different scoping inputs. Drives a
+// SignalListComponent backed by CfAuditEventsSignalConfigService;
+// scope inputs map onto the service's basePredicate.
+//
+// Scope inputs are mutually-cumulative (orgGuid AND spaceGuid AND
+// targetGuid AND typeMustContain). The legacy server-side query-param
+// scoping (organization_guids, space_guids, target_guids) is replaced
+// by client-side filtering against the foundation-wide event stream.
+// The handler caps at 25k events so deep historical retrieval will
+// need a future detail-screen / search feature.
 @Component({
   selector: 'app-cloud-foundry-events-list',
   templateUrl: './cloud-foundry-events-list.component.html',
-  styleUrls: ['./cloud-foundry-events-list.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'flex flex-col flex-1 min-h-0' },
   imports: [
-    ReactiveFormsModule,
-    CustomFormFieldComponent,
-    CustomSelectComponent,
-    CustomOptionComponent,
-    AppInputDirective,
-    ListComponent
-]
+    CommonModule,
+    SignalListComponent,
+    SignalListCellTemplateDirective,
+  ],
 })
-export class CloudFoundryEventsListComponent implements OnInit, OnDestroy {
+export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
+  @Input() orgGuid?: string;
+  @Input() spaceGuid?: string;
+  @Input() targetGuid?: string;
+  // Restricts visible events to those whose `type` contains this
+  // substring. App tabs set this to `'audit.app'` so platform-level
+  // events (org/space CRUD) don't bleed into the app event log.
+  @Input() typeMustContain?: string;
+
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  private eventsConfig = inject(CfAuditEventsSignalConfigService);
+  private dialog = inject(TailwindDialogService);
+
+  /** Whether the event carries metadata worth a details popup (data !== {}). */
+  hasDetails(e: StAuditEvent): boolean {
+    return hasEventMetadata(e.data);
+  }
+
+  /** Open the event-detail dialog, titled with the event type. */
+  openEventDetails(e: StAuditEvent): void {
+    this.dialog.open(EventDetailComponent, {
+      data: { type: e.type, metadata: parseEventData(e.data) },
+    });
+  }
 
   /**
-   * Values in the `event` filter mist contain this value, for instance `audit.app`
+   * Global expand/collapse of the inline metadata shown beneath each event type
+   * (the v4.9.2 key/value view) — all rows at once, never a per-row control. The
+   * Type cell template reads this signal, so flipping it re-renders every cell.
    */
-  @Input() typeMustContain!: string;
+  readonly detailsExpanded = signal(false);
 
-  filtersFormGroup: FormGroup<EventsFilterForm>;
-  // Full list from CF API v3 docs — sorted alphabetically
-  // Source: https://docs.cloudfoundry.org/running/managing-cf/audit-events.html
-  typeValues: string[] = [
-    'app.crash',
-    'audit.app.apply_manifest',
-    'audit.app.build.create',
-    'audit.app.copy-bits',
-    'audit.app.create',
-    'audit.app.delete-request',
-    'audit.app.deployment.cancel',
-    'audit.app.deployment.create',
-    'audit.app.droplet.create',
-    'audit.app.droplet.delete',
-    'audit.app.droplet.download',
-    'audit.app.droplet.mapped',
-    'audit.app.droplet.upload',
-    'audit.app.environment.show',
-    'audit.app.environment_variables.show',
-    'audit.app.map-route',
-    'audit.app.package.create',
-    'audit.app.package.delete',
-    'audit.app.package.download',
-    'audit.app.package.upload',
-    'audit.app.process.crash',
-    'audit.app.process.create',
-    'audit.app.process.delete',
-    'audit.app.process.not-ready',
-    'audit.app.process.ready',
-    'audit.app.process.rescheduling',
-    'audit.app.process.scale',
-    'audit.app.process.terminate_instance',
-    'audit.app.process.update',
-    'audit.app.restart',
-    'audit.app.restage',
-    'audit.app.revision.create',
-    'audit.app.revision.environment_variables.show',
-    'audit.app.ssh-authorized',
-    'audit.app.ssh-unauthorized',
-    'audit.app.start',
-    'audit.app.stop',
-    'audit.app.task.cancel',
-    'audit.app.task.create',
-    'audit.app.unmap-route',
-    'audit.app.update',
-    'audit.app.upload-bits',
-    'audit.organization.create',
-    'audit.organization.delete-request',
-    'audit.organization.update',
-    'audit.route.create',
-    'audit.route.delete-request',
-    'audit.route.share',
-    'audit.route.transfer-owner',
-    'audit.route.unshare',
-    'audit.route.update',
-    'audit.service.create',
-    'audit.service.delete',
-    'audit.service.update',
-    'audit.service_binding.create',
-    'audit.service_binding.delete',
-    'audit.service_binding.show',
-    'audit.service_binding.start_create',
-    'audit.service_binding.start_delete',
-    'audit.service_binding.update',
-    'audit.service_broker.create',
-    'audit.service_broker.delete',
-    'audit.service_broker.update',
-    'audit.service_dashboard_client.create',
-    'audit.service_dashboard_client.delete',
-    'audit.service_instance.bind_route',
-    'audit.service_instance.create',
-    'audit.service_instance.delete',
-    'audit.service_instance.purge',
-    'audit.service_instance.share',
-    'audit.service_instance.show',
-    'audit.service_instance.start_create',
-    'audit.service_instance.start_delete',
-    'audit.service_instance.start_update',
-    'audit.service_instance.unbind_route',
-    'audit.service_instance.unshare',
-    'audit.service_instance.update',
-    'audit.service_key.create',
-    'audit.service_key.delete',
-    'audit.service_key.show',
-    'audit.service_key.start_create',
-    'audit.service_key.start_delete',
-    'audit.service_key.update',
-    'audit.service_plan.create',
-    'audit.service_plan.delete',
-    'audit.service_plan.update',
-    'audit.service_plan_visibility.create',
-    'audit.service_plan_visibility.delete',
-    'audit.service_plan_visibility.update',
-    'audit.service_route_binding.create',
-    'audit.service_route_binding.delete',
-    'audit.service_route_binding.start_create',
-    'audit.service_route_binding.start_delete',
-    'audit.service_route_binding.update',
-    'audit.space.create',
-    'audit.space.delete-request',
-    'audit.space.update',
-    'audit.user.organization_auditor_add',
-    'audit.user.organization_auditor_remove',
-    'audit.user.organization_billing_manager_add',
-    'audit.user.organization_billing_manager_remove',
-    'audit.user.organization_manager_add',
-    'audit.user.organization_manager_remove',
-    'audit.user.organization_user_add',
-    'audit.user.organization_user_remove',
-    'audit.user.space_auditor_add',
-    'audit.user.space_auditor_remove',
-    'audit.user.space_developer_add',
-    'audit.user.space_developer_remove',
-    'audit.user.space_manager_add',
-    'audit.user.space_manager_remove',
-    'audit.user.space_supporter_add',
-    'audit.user.space_supporter_remove',
-    'audit.user_provided_service_instance.create',
-    'audit.user_provided_service_instance.delete',
-    'audit.user_provided_service_instance.show',
-    'audit.user_provided_service_instance.update',
-    'blob.remove_orphan',
-  ];
-  showActee = false;
-  private subs: Subscription[] = [];
-  private config: CfEventsConfigService;
-  private initialSet = false;
-  public hasActeeFilter = false;
+  toggleDetails(): void {
+    this.detailsExpanded.update(v => !v);
+    // The Type cell template lives in the signal-list's view, so flipping the
+    // signal alone won't re-render its cells. Re-set the config (same columns,
+    // new object) to force the list to re-render — the cell then re-reads
+    // detailsExpanded() and shows/hides the inline metadata for every row.
+    this.listConfig.set(this.buildListConfig());
+  }
+
+  /** Parsed metadata entries for the inline view under the event type. */
+  entriesFor(e: StAuditEvent): [string, unknown][] {
+    return Object.entries(parseEventData(e.data));
+  }
+
+  /** Inline value rendering — strings as-is, everything else as JSON. */
+  formatValue(value: unknown): string {
+    if (value == null) return '';
+    return typeof value === 'string' ? value : JSON.stringify(value);
+  }
+
+  // V3 audit events carry only the org/space GUID, not the name, so the
+  // backend's spaceName/organizationName come through empty. Resolve them
+  // against the org/space maps the toolbar already loads (endpointData), so
+  // the columns show names instead of "—". Computed → the cell re-renders
+  // when the maps finish loading.
+  private readonly orgNameByGuid = computed(() =>
+    new Map((this.eventsConfig.endpointData?.orgs() ?? []).map(o => [o.guid, o.name] as [string, string])),
+  );
+  private readonly spaceNameByGuid = computed(() =>
+    new Map((this.eventsConfig.endpointData?.spaces() ?? []).map(s => [s.guid, s.name] as [string, string])),
+  );
+
+  spaceName(e: StAuditEvent): string {
+    return e.spaceName || this.spaceNameByGuid().get(e.spaceGuid) || '—';
+  }
+
+  orgName(e: StAuditEvent): string {
+    return e.organizationName || this.orgNameByGuid().get(e.organizationGuid) || '—';
+  }
+
+  public listConfig: WritableSignal<SignalListConfig<StAuditEvent> | undefined> = signal(undefined);
 
   constructor() {
-    const listConfig = inject<ListConfig<APIResource>>(ListConfig);
+    const cfGuid = this.cfEndpointService.cfGuid;
+    this.eventsConfig.initialize(cfGuid);
 
-    this.filtersFormGroup = new FormGroup<EventsFilterForm>({
-      actee: new FormControl<string | null>(null),
-      type: new FormControl<string[] | null>(null),
-    });
-    this.config = (listConfig as any as CfEventsConfigService);
-
-    // Store → form sync with deep comparison to prevent feedback loops.
-    // After init, only sync when the store clears filters (reset button).
-    this.subs.push(
-      this.config.getEventFilters().pipe(
-        distinctUntilChanged((a, b) =>
-          arraysEqual(a.type, b.type) &&
-          valueOrCommonFalsy(a.actee) === valueOrCommonFalsy(b.actee)
-        )
-      ).subscribe(params => {
-        if (!this.initialSet) {
-          this.updateType(params.type);
-          this.updateActee(params.actee);
-          this.initialSet = true;
-        } else {
-          const storeCleared = (!params.type || params.type.length === 0) && !params.actee;
-          if (storeCleared) {
-            this.updateType(params.type);
-            this.updateActee(params.actee);
-          }
+    // Org/space names load asynchronously (and the orgs map lands after the
+    // first render). The Space/Org cell renders read those maps, but the
+    // signal-list doesn't re-render on external signals — so re-publish the
+    // config when the maps change to refresh the resolved names.
+    effect(() => {
+      this.orgNameByGuid();
+      this.spaceNameByGuid();
+      untracked(() => {
+        if (this.listConfig()) {
+          this.listConfig.set(this.buildListConfig());
         }
-      })
-    );
-
-    this.subs.push(
-      this.filtersFormGroup.valueChanges.pipe(
-        debounceTime(250)
-      ).subscribe(values => {
-        this.config.setEventFilters(values as { actee: string; type: string[] });
-        this.hasActeeFilter = !!values.actee;
-      })
-    );
-
-    // If we have an actee there's no need to show the actee guid selector
-    this.showActee = !this.config.acteeGuid;
+      });
+    });
   }
 
-  ngOnInit() {
-    if (this.typeMustContain) {
-      this.typeValues = this.typeValues.filter(type => type.indexOf(this.typeMustContain) >= 0);
-    }
+  // @Input() values are not bound at constructor time. Building the
+  // listConfig here (with inputs guaranteed bound) lets us conditionally
+  // include the Org / Space dropdowns only on the foundation-wide page
+  // (no scope inputs). The sub-pages pin scope via basePredicate; adding
+  // dropdowns there would let users pick mismatched org/space values
+  // that the predicate then clamps — confusing UX.
+  ngOnInit(): void {
+    this.applyBasePredicate();
+    this.listConfig.set(this.buildListConfig());
+    void this.eventsConfig.loadAll();
   }
 
-  ngOnDestroy() {
-    safeUnsubscribe(...this.subs);
+  private buildListConfig(): SignalListConfig<StAuditEvent> {
+    const isFoundationWide = !this.orgGuid && !this.spaceGuid && !this.targetGuid;
+    const filterDropdowns: SignalListDropdown[] = isFoundationWide
+      ? [
+        {
+          label: 'Organization',
+          options: this.eventsConfig.orgOptions,
+          selected: this.eventsConfig.selectedOrg,
+          loading: this.eventsConfig.isLoadingOrgs,
+        },
+        {
+          label: 'Space',
+          options: this.eventsConfig.spaceOptions,
+          selected: this.eventsConfig.selectedSpace,
+          loading: this.eventsConfig.isLoadingSpaces,
+        },
+      ]
+      : [];
+
+    return {
+      pagedItems: this.eventsConfig.view.pagedItems,
+      totalFilteredResults: this.eventsConfig.view.totalFilteredResults,
+      totalPages: this.eventsConfig.view.totalPages,
+      pageIndex: this.eventsConfig.pageIndex,
+      pageSize: this.eventsConfig.pageSize,
+      isAnyLoading: computed(() => !this.eventsConfig.hasLoadedOnce()),
+      errorsByCnsi: signal(new Map()),
+      columns: [
+        {
+          header: 'Time', key: 'createdAt', sortField: 'createdAt',
+          render: (e: StAuditEvent) => CloudFoundryEventsListComponent.formatDate(e.createdAt),
+          widthHint: '12rem',
+        },
+        {
+          // The type is the event's identity and the drill-in: rendered as a
+          // link (when the event carries metadata) that opens the details
+          // dialog, titled with the type. See the `type` cell template.
+          header: 'Type', key: 'type', sortField: 'type',
+          kind: 'template', templateName: 'type',
+          render: (e: StAuditEvent) => e.type,
+          widthHint: '20rem',
+        },
+        {
+          header: 'Actor', key: 'actorName', sortField: 'actorName',
+          kind: 'text',
+          render: (e: StAuditEvent) => `${e.actorName || '—'} (${e.actorType || 'unknown'})`,
+          widthHint: '14rem',
+        },
+        {
+          header: 'Target', key: 'targetName', sortField: 'targetName',
+          kind: 'text',
+          render: (e: StAuditEvent) => `${e.targetName || '—'} (${e.targetType || 'unknown'})`,
+          widthHint: '14rem',
+        },
+        {
+          header: 'Space', key: 'spaceName', sortField: 'spaceName',
+          kind: 'text',
+          render: (e: StAuditEvent) => this.spaceName(e),
+          widthHint: '10rem',
+        },
+        {
+          header: 'Organization', key: 'organizationName', sortField: 'organizationName',
+          kind: 'text',
+          render: (e: StAuditEvent) => this.orgName(e),
+          widthHint: '10rem',
+        },
+      ],
+      getRowKey: (e: StAuditEvent) => `${e.cnsiGuid}:${e.guid}`,
+      emptyMessage: 'There are no events to display',
+      emptyFilterMessage: 'No events match the current filters',
+      loadingMessage: 'Loading events…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
+      nameFilter: this.eventsConfig.nameFilter,
+      filterDropdowns,
+      onRefresh: () => this.eventsConfig.refresh(),
+      onClear: () => this.eventsConfig.clearFilters(),
+      viewMode: this.eventsConfig.viewMode,
+      sort: this.eventsConfig.sort,
+    };
   }
 
-  public clearActeeFilter() {
-    this.filtersFormGroup.patchValue({ actee: '' });
+  // Re-apply the base predicate when scope inputs change (Angular
+  // re-binds the same component instance when navigating between
+  // org/space/app pages without a full re-mount).
+  ngOnChanges(_changes: SimpleChanges): void {
+    this.applyBasePredicate();
   }
 
-  private updateType(type: string[]) {
-    this.filtersFormGroup.get('type')?.setValue(type, { emitEvent: false });
+  private applyBasePredicate(): void {
+    const orgGuid = this.orgGuid;
+    const spaceGuid = this.spaceGuid;
+    const targetGuid = this.targetGuid;
+    const typeMustContain = this.typeMustContain;
+    this.eventsConfig.basePredicate.set((e: StAuditEvent) => {
+      if (orgGuid && e.organizationGuid !== orgGuid) return false;
+      if (spaceGuid && e.spaceGuid !== spaceGuid) return false;
+      if (targetGuid && e.targetGuid !== targetGuid) return false;
+      if (typeMustContain && !(e.type ?? '').includes(typeMustContain)) return false;
+      return true;
+    });
   }
 
-  private updateActee(actee: string) {
-    this.filtersFormGroup.get('actee')?.setValue(actee, { emitEvent: false });
-    this.hasActeeFilter = !!actee;
+  static formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit', second: '2-digit',
+    });
   }
-
 }

@@ -6,6 +6,7 @@ import { take, map, startWith } from 'rxjs/operators';
 
 import { PageHeaderComponent } from '@stratosui/core';
 import { LoadingPageComponent } from '@stratosui/core';
+import { naturalCompare } from '@stratosui/core';
 import { StratosBaseCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { UserFavoriteEndpoint } from '../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../store/src/user-favorite-manager';
@@ -49,9 +50,10 @@ export class KubernetesTabBaseComponent implements OnInit {
 
   tabLinks: Array<{ link: string; label: string; icon?: string; iconFont?: string; hidden$?: Observable<boolean> }> = [];
 
-  public isFetching$: Observable<boolean>;
-  public favorite$: Observable<UserFavoriteEndpoint>;
-  public endpointIds$: Observable<string[]>;  public kubeEndpointService = inject(KubernetesEndpointService);
+  // strict: assigned in ngOnInit before the template binds these streams
+  public isFetching$!: Observable<boolean>;
+  public favorite$!: Observable<UserFavoriteEndpoint | null>;
+  public endpointIds$!: Observable<string[]>;  public kubeEndpointService = inject(KubernetesEndpointService);
   public userFavoriteManager = inject(UserFavoriteManager);
   public analysisService = inject(KubernetesAnalysisService);
   private route = inject(ActivatedRoute);
@@ -85,7 +87,7 @@ export class KubernetesTabBaseComponent implements OnInit {
         if (defn.apiNamespaced === namespaced && !defn.hidden) {
           tabsFromRouterConfig.push({
             link: `resource/${catalogEntity.type}`,
-            label: defn.labelTab || defn.labelPlural,
+            label: defn.labelTab || defn.labelPlural || defn.label,
             icon: defn.icon,
             iconFont: defn.iconFont,
           });
@@ -93,7 +95,7 @@ export class KubernetesTabBaseComponent implements OnInit {
       }
     });
 
-    tabsFromRouterConfig.sort((a: { label: string }, b: { label: string }) => a.label.localeCompare(b.label));
+    tabsFromRouterConfig.sort((a: { label: string }, b: { label: string }) => naturalCompare(a.label, b.label));
     return tabsFromRouterConfig;
   }
 

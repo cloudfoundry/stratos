@@ -31,6 +31,19 @@ export interface TailwindDialogConfig<D = any> {
   panelClass?: string | string[];
   backdropClass?: string | string[];
   disableClose?: boolean;
+  /** Let the user drag the bottom-right corner to resize the panel. The panel
+   *  is pinned to a fixed viewport position so the grip tracks the cursor 1:1
+   *  (a flex-centered panel would re-center and grow at half speed). */
+  resizable?: boolean;
+  /** Let the user move the panel by dragging an element marked with
+   *  `data-dialog-drag-handle` (e.g. the dialog header). Defaults to true —
+   *  every dialog is movable; pass false to opt out. A template with no
+   *  drag-handle element simply isn't movable. */
+  draggable?: boolean;
+  /** Keep the dim backdrop visually but let pointer events pass through it,
+   *  so the page behind stays visible AND interactive while the dialog is
+   *  open. The panel itself remains interactive. */
+  modeless?: boolean;
   position?: DialogPosition;
   customPosition?: DialogPositionConfig;
   ariaLabel?: string;
@@ -154,6 +167,11 @@ export class TailwindDialogService {
     setTimeout(() => {
       this.setupFocusTrap(dialogContainer);
       this.focusFirstElement(dialogContainer);
+      // Resize/drag are wired here (after first layout) so the panel can be
+      // measured and pinned to a fixed viewport position.
+      if (config?.resizable || config?.draggable !== false) {
+        this.setupResizableDraggable(dialogContainer, config ?? {});
+      }
       dialogRef._emitOpened();
       // ZONELESS: Trigger change detection after dialog is fully opened
       this.appRef.tick();
@@ -226,6 +244,12 @@ export class TailwindDialogService {
     overlay.className = backdropClasses.join(' ');
     overlay.style.zIndex = zIndex.toString();
 
+    // Modeless: the dim stays, but clicks fall through to the page beneath.
+    // The panel re-enables pointer events for itself below.
+    if (config?.modeless) {
+      overlay.style.pointerEvents = 'none';
+    }
+
     // Start with transparent backdrop for fade-in animation
     overlay.style.backgroundColor = 'rgba(0, 0, 0, 0)';
 
@@ -237,11 +261,17 @@ export class TailwindDialogService {
     // Dialog panel
     const dialog = document.createElement('div');
 
-    // Base classes - only include essentials, let config override sizing/overflow
+    // Base classes - only include essentials, let config override sizing/overflow.
+    // Note: deliberately NO `transform` / `scale-95` here. A non-`none` transform
+    // on the panel creates a CSS containing block, which causes any
+    // `position: fixed` overlay inside the dialog (e.g. CustomSelect's option
+    // dropdown) to resolve coordinates against the dialog rather than the
+    // viewport — breaking the dropdown's getBoundingClientRect-based
+    // positioning. Open animation is opacity-only as a result.
     let panelClasses = [
       'bg-content-bg', 'rounded-lg', 'shadow-xl',
-      'transform', 'transition-all', 'duration-300', 'ease-out',
-      'scale-95', 'opacity-0'
+      'transition-opacity', 'duration-300', 'ease-out',
+      'opacity-0'
     ];
 
     // Add default sizing only if not provided in config
@@ -266,7 +296,10 @@ export class TailwindDialogService {
 
     // Accessibility attributes
     dialog.setAttribute('role', 'dialog');
-    dialog.setAttribute('aria-modal', 'true');
+    dialog.setAttribute('aria-modal', config?.modeless ? 'false' : 'true');
+    if (config?.modeless) {
+      dialog.style.pointerEvents = 'auto';
+    }
 
     if (config?.id) {
       dialog.setAttribute('id', config.id);
@@ -307,9 +340,9 @@ export class TailwindDialogService {
       if (pos.bottom) dialog.style.bottom = pos.bottom;
     }
 
-    // Trigger scale-in and fade-in animation
+    // Trigger opacity fade-in. Scale animation deliberately omitted; see
+    // panelClasses note above re: containing-block side-effect.
     requestAnimationFrame(() => {
-      dialog.style.transform = 'scale(1)';
       dialog.style.opacity = '1';
     });
 
@@ -328,12 +361,21 @@ export class TailwindDialogService {
     config?: TailwindDialogConfig
   ): void {
     if (!config?.disableClose) {
-      // Close on backdrop click
+      // Close on backdrop click — but only a genuine one. A drag that starts
+      // inside the dialog (resize grip, text selection) and releases on the
+      // backdrop makes the browser synthesize a `click` whose target resolves
+      // to the common ancestor (this overlay), which would wrongly dismiss the
+      // dialog. Require the press to have ALSO started on the backdrop.
+      let pressedOnBackdrop = false;
+      const pointerDownListener = (event: MouseEvent) => {
+        pressedOnBackdrop = event.target === dialogContainer;
+      };
       const backdropClickListener = (event: MouseEvent) => {
-        if (event.target === dialogContainer) {
+        if (event.target === dialogContainer && pressedOnBackdrop) {
           dialogRef.close();
         }
       };
+      dialogContainer.addEventListener('mousedown', pointerDownListener);
       dialogContainer.addEventListener('click', backdropClickListener);
 
       // Close on Escape key
@@ -351,7 +393,110 @@ export class TailwindDialogService {
       // Clean up listeners when dialog closes
       dialogRef.afterClosed().subscribe(() => {
         document.removeEventListener('keydown', escapeListener);
+        dialogContainer.removeEventListener('mousedown', pointerDownListener);
         dialogContainer.removeEventListener('click', backdropClickListener);
+      });
+    }
+  }
+
+  /**
+   * Pin the panel to a fixed viewport position and (optionally) make it
+   * resizable from the bottom-right corner and movable by a drag handle.
+   *
+   * Fixed positioning is the key: the panel normally flex-centers over the
+   * backdrop, so resizing re-centers it and the grip drifts from the cursor.
+   * Anchoring it to its current spot makes the native CSS resize grip — and
+   * the drag — track the pointer 1:1, and stops a resize-drag that ends on the
+   * backdrop from re-centering.
+   *
+   * ponytail: hand-rolled mouse-drag rather than @angular/cdk's cdkDrag — the
+   * panel is created imperatively (document.createElement), so an Angular
+   * directive can't decorate it. Mouse events (not pointer) keep it testable
+   * in jsdom, which lacks setPointerCapture.
+   */
+  private setupResizableDraggable(dialogContainer: HTMLElement, config: TailwindDialogConfig): void {
+    const panel = dialogContainer.querySelector('[role="dialog"]') as HTMLElement;
+    if (!panel) return;
+
+    // Drag is on unless explicitly disabled, but only takes effect when the
+    // template marks a handle. A dialog with neither resize nor a handle is
+    // left flex-centered (pinning it would cost re-centering for nothing).
+    const handle = config.draggable !== false
+      ? panel.querySelector('[data-dialog-drag-handle]') as HTMLElement
+      : null;
+    if (!config.resizable && !handle) return;
+
+    // Pin to current position so resize/drag have a stable origin. The panel
+    // was flex-centered; reuse that measured rect as the fixed start point.
+    const rect = panel.getBoundingClientRect();
+    panel.style.position = 'fixed';
+    panel.style.margin = '0';
+    panel.style.left = `${rect.left}px`;
+    panel.style.top = `${rect.top}px`;
+
+    // Cap resize at the viewport edge from the panel's current top-left. Native
+    // CSS resize grows down-right from the anchored corner, so a plain
+    // `max-height: 90vh` still lets `top + height` spill past the bottom of the
+    // viewport. Tying the max to (viewport − position) keeps the bottom-right
+    // on-screen. Recomputed after a move (below), since the anchor changes.
+    const clampSizeToViewport = () => {
+      if (!config.resizable) return;
+      const r = panel.getBoundingClientRect();
+      panel.style.maxWidth = `${Math.max(0, window.innerWidth - r.left)}px`;
+      panel.style.maxHeight = `${Math.max(0, window.innerHeight - r.top)}px`;
+    };
+
+    if (config.resizable) {
+      panel.style.resize = 'both';
+      panel.style.overflow = 'hidden';
+      panel.style.minWidth = '20rem';
+      panel.style.minHeight = '16rem';
+      // Fill the panel so the content (e.g. a Monaco editor) grows with it.
+      panel.style.display = 'flex';
+      panel.style.flexDirection = 'column';
+      // Make the whole chain fill: the content wrapper AND the component's own
+      // host element (an extra layer between .dialog-content and the component
+      // template root). The component template's root just needs `flex-1`.
+      const fill = (el: HTMLElement | null) => {
+        if (!el) return;
+        el.style.flex = '1';
+        el.style.minHeight = '0';
+        el.style.display = 'flex';
+        el.style.flexDirection = 'column';
+      };
+      const content = panel.querySelector('.dialog-content') as HTMLElement;
+      fill(content);
+      fill(content?.firstElementChild as HTMLElement);
+    }
+
+    clampSizeToViewport();
+
+    if (handle) {
+      handle.style.cursor = 'move';
+      handle.style.userSelect = 'none';
+      handle.addEventListener('mousedown', (e: MouseEvent) => {
+        const start = panel.getBoundingClientRect();
+        const startX = e.clientX;
+        const startY = e.clientY;
+        const onMove = (m: MouseEvent) => {
+          // Clamp to the viewport so the panel (and its action buttons) can
+          // never be dragged off-screen — it's position:fixed/overflow:hidden,
+          // so anything past the edge would be unreachable.
+          const maxLeft = Math.max(0, window.innerWidth - panel.offsetWidth);
+          const maxTop = Math.max(0, window.innerHeight - panel.offsetHeight);
+          const left = Math.min(Math.max(0, start.left + m.clientX - startX), maxLeft);
+          const top = Math.min(Math.max(0, start.top + m.clientY - startY), maxTop);
+          panel.style.left = `${left}px`;
+          panel.style.top = `${top}px`;
+          clampSizeToViewport();
+        };
+        const onUp = () => {
+          document.removeEventListener('mousemove', onMove);
+          document.removeEventListener('mouseup', onUp);
+        };
+        document.addEventListener('mousemove', onMove);
+        document.addEventListener('mouseup', onUp);
+        e.preventDefault();
       });
     }
   }

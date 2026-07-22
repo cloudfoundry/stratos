@@ -1,28 +1,27 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { KubeAnalysisDataService } from '../../../../services/domain-data/kube-analysis-data.service';
 import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
-import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { KubernetesAnalysisReportComponent } from './kubernetes-analysis-report.component';
 
 describe('KubernetesAnalysisReportComponent', () => {
   let component: KubernetesAnalysisReportComponent;
   let fixture: ComponentFixture<KubernetesAnalysisReportComponent>;
-  let mockAnalysisService: any;
+  let mockAnalysisData: { reportById: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
-    // Create mock analysis service with getByID method that returns mock data
-    mockAnalysisService = {
-      getByID: vi.fn().mockReturnValue(of({
+    mockAnalysisData = {
+      reportById: vi.fn().mockReturnValue(of({
         id: 'test-id',
         name: 'Test Analysis Report',
         type: 'popeye',
         report: { sections: [] },
-        created: new Date().toISOString()
-      }))
+        created: new Date().toISOString(),
+      })),
     };
 
     await TestBed.configureTestingModule({
@@ -33,9 +32,9 @@ describe('KubernetesAnalysisReportComponent', () => {
       providers: [
         provideRouter([]),
         KubeBaseGuidMock,
-        { provide: KubernetesAnalysisService, useValue: mockAnalysisService },
+        { provide: KubeAnalysisDataService, useValue: mockAnalysisData },
         provideZonelessChangeDetection(),
-      ]
+      ],
     }).compileComponents();
   });
 

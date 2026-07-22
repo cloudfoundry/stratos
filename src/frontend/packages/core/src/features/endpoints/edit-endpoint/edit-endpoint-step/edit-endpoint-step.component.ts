@@ -1,22 +1,23 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
+import { ActivatedRoute, Router } from '@angular/router';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '../../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import {
   EndpointModel,
+  EndpointsDataService,
   getFullEndpointApiUrl,
   EntityCatalogSchemas,
   IStratosEndpointDefinition,
-  stratosEntityCatalog,
   entityCatalog,
   ActionState } from '@stratosui/store';
-import { Observable, Subscription } from 'rxjs';
-import { take, filter, map, pairwise, switchMap } from 'rxjs/operators';
+import { Observable, Subscription, firstValueFrom, from } from 'rxjs';
+import { take, filter, map, switchMap } from 'rxjs/operators';
 
-import { StepOnNextFunction, StepComponent, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
+import { StepOnNextFunction, StepComponent, StepOnNextResult, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
@@ -47,6 +48,7 @@ interface EditEndpointForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomCheckboxComponent,
@@ -65,7 +67,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   endpointTypeSupportsSSO = false;
   validate: Observable<boolean>;
   existingEndpoints: Observable<EndpointModelMap>;
-  endpoint$: Observable<EndpointModel>;
+  endpoint$: Observable<EndpointModel | undefined>;
   definition$: Observable<IStratosEndpointDefinition<EntityCatalogSchemas>>;
   existingEndpointNames$: Observable<string[]>;
   formChangeSub: Subscription;
@@ -73,6 +75,13 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   show = false;
   showCACertField = false;
   lastSkipSSLValue = false;
+
+  // Signal-handle exposed to the parent stepper template (FWT-957)
+  signalHandle: SignalStepHandle;
+
+  private router = inject(Router);
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
 
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
@@ -91,11 +100,32 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
 
     this.validate = this.editEndpoint.statusChanges.pipe(map(() => this.editEndpoint.valid));
 
+    const validSignal = toSignal(this.validate, { initialValue: this.editEndpoint.valid });
+    this.signalHandle = {
+      valid: validSignal,
+      submit: async () => {
+        const result = await firstValueFrom(this.onNext(0, undefined as unknown as StepComponent));
+        if (!result.success) {
+          throw new Error(result.message || 'Failed to update endpoint');
+        }
+        // Replace legacy `redirect: true` with explicit navigation back
+        // to the endpoints page (matches the stepper cancel target).
+        await this.router.navigate(['/endpoints']);
+      },
+    };
+
     this.endpointID = getIdFromRoute(activatedRoute, 'id');
 
-    this.existingEndpoints = stratosEntityCatalog.endpoint.store.getAll.getPaginationMonitor().currentPage$.pipe(
+    // W36-B Wave 3: source the existing-endpoints map from the
+    // signal-native EndpointsDataService instead of the legacy
+    // pagination monitor's currentPage$. The service's `endpointsList`
+    // is computed off the same underlying state, so callers see the
+    // same set of records.
+    this.existingEndpoints = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       map(endpoints => endpoints.reduce((res: EndpointModelMap, endpoint) => {
-        res[endpoint.guid] = endpoint;
+        if (endpoint.guid) {
+          res[endpoint.guid] = endpoint;
+        }
         return res;
       }, {} as EndpointModelMap))
     );
@@ -110,25 +140,27 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     );
 
     this.definition$ = this.endpoint$.pipe(
-      map(entity => entityCatalog.getEndpoint(entity.cnsi_type, entity.sub_type)),
+      filter((entity): entity is EndpointModel => !!entity && !!entity.cnsi_type),
+      // strict: the filter above guarantees cnsi_type is set on every emission.
+      map(entity => entityCatalog.getEndpoint(entity.cnsi_type!, entity.sub_type)),
       map(d => d.definition)
     );
 
     // Fill the form in with the endpoint data
     this.endpoint$.pipe(
-      filter(ep => !!ep),
+      filter((ep): ep is EndpointModel => !!ep),
       take(1)
     ).subscribe(endpoint => {
       this.setAdvancedFields(endpoint);
-      this.lastSkipSSLValue = endpoint.skip_ssl_validation;
+      this.lastSkipSSLValue = endpoint.skip_ssl_validation ?? false;
       this.showCACertField = !!endpoint.caCert;
       this.updateSSLFieldCheckbox();
       this.editEndpoint.setValue({
         name: endpoint.name,
         url: getFullEndpointApiUrl(endpoint),
-        skipSSL: endpoint.skip_ssl_validation,
+        skipSSL: endpoint.skip_ssl_validation ?? false,
         setClientInfo: false,
-        clientID: endpoint.client_id,
+        clientID: endpoint.client_id ?? '',
         clientSecret: '',
         allowSSO: endpoint.sso_allowed,
         caCert: endpoint.caCert || '' });
@@ -146,9 +178,10 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     });
   }
 
-  get name() { return this.editEndpoint.get('name'); }
+  // Typed controls (get('name') would return AbstractControl | null).
+  get name() { return this.editEndpoint.controls.name; }
 
-  get clientID() { return this.editEndpoint.get('clientID'); }
+  get clientID() { return this.editEndpoint.controls.clientID; }
 
   updateControls() {
     if (!this.setClientInfo) {
@@ -167,22 +200,20 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       switchMap(endpoint => {
         const caCert = this.showCACertField ? this.editEndpoint.value.caCert : undefined;
         const skipSSL = this.showCACertField ? false : this.editEndpoint.value.skipSSL ?? false;
-        return ((stratosEntityCatalog.endpoint.api as any).update(
-          this.endpointID,
-          this.endpointID, {
-          endpointType: endpoint.cnsi_type,
-          id: this.endpointID,
+        // W36-B Wave 3: dispatch the update via EndpointsDataService.
+        // The service returns Promise<ActionState> with the resolved
+        // final state — the previous pairwise+busy-edge dance over the
+        // legacy ngrx update Observable collapses to a single await.
+        return from(this.endpointsData.update(this.endpointID, {
+          endpointType: endpoint.cnsi_type ?? '',
           name: this.editEndpoint.value.name ?? '',
           skipSSL,
           setClientInfo: this.editEndpoint.value.setClientInfo ?? false,
           clientID: this.editEndpoint.value.clientID ?? '',
           clientSecret: this.editEndpoint.value.clientSecret ?? '',
           allowSSO: this.editEndpoint.value.allowSSO ?? false,
-          caCert }
-        ) as Observable<ActionState>).pipe(
-          pairwise(),
-          filter(([oldV, newV]) => oldV.busy && !newV.busy),
-          map(([, newV]) => newV),
+          caCert,
+        })).pipe(
           map((o: ActionState): StepOnNextResult => {
             return {
               success: !o.error,

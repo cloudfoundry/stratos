@@ -36,6 +36,7 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
   @Input() invalid = false;
   @Input() errorMessage = '';
 
+  // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-slide-toggle which emits (change)
   @Output() change = new EventEmitter<MatSlideToggleChange>();
 
   private _onChange = (_value: any) => {};

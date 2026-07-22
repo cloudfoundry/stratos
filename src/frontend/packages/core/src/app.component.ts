@@ -1,40 +1,49 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, VerifySession } from '@stratosui/store';
+import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { RoutingHistoryService } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
 import { StratosBrandingService } from '../../theme/stratos-branding.service';
 
+import { AuthSignalService } from './core/signals/auth-signal.service';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss'],
+  host: { class: 'flex flex-col flex-1 h-screen min-h-0' },
+  // eslint-disable-next-line @angular-eslint/prefer-standalone -- declared and bootstrapped in NgModule AppModule (app.module.ts, out of scope); standalone migration tracked separately
   standalone: false,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
   private loggedInService = inject(LoggedInService);
-  private store = inject<Store<AuthOnlyAppState>>(Store);
+  // Eagerly instantiated at bootstrap so it starts recording route history
+  // from the first navigation (before any wizard/error route is reached).
+  // Without this providedIn:root would lazily create it on first consumer
+  // inject, missing the navigation that landed the user on that route and
+  // breaking the Cancel/back destination.
+  private routingHistory = inject(RoutingHistoryService);
+  private authSignals = inject(AuthSignalService);
   branding = inject(StratosBrandingService);
   private document = inject<Document>(DOCUMENT);
 
 
   @HostBinding('@.disabled')
   public animationsDisabled = false;
-  public userId$: Observable<string>;
+  public userId$: Observable<string | null>;
 
   constructor() {
-    // Dispatch initial session verification BEFORE routing starts
+    // Trigger initial session verification BEFORE routing starts
     // This prevents the authGuard from blocking indefinitely waiting for verifying=false
-    this.store.dispatch(new VerifySession());
+    this.authSignals.verifySession(true, true);
 
     // We use the username to key the session storage. We could replace this with the users id?
-    this.userId$ = this.store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
+    // Sourced from AuthSignalService rather than a direct store.select.
+    this.userId$ = toObservable(computed(() => this.authSignals.sessionData()?.user?.name ?? null));
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();

@@ -5,7 +5,7 @@
         <h1 class="edit-endpoint__section-title text-base font-medium mb-4" style="color: var(--content-text);">{{definition.label}} Information</h1>
         <app-form-field>
           <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="name" name="name" formControlName="name" required placeholder="Name"
-            [appUnique]="(existingEndpoinNames$ | async)">
+            [appUnique]="(existingEndpointNames$ | async) ?? []">
           @if (name.errors && name.errors.required) {
             <app-error>Name is required</app-error>
           }
@@ -18,7 +18,7 @@
         </app-form-field>
         <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSL">Skip SSL validation for the endpoint
         </app-checkbox>
-        <app-checkbox appInput id="useCACert" checked="showCACertField" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
+        <app-checkbox appInput id="useCACert" [checked]="showCACertField" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
         <div [ngClass]="{'edit-endpoint__shown': showCACertField}" class="edit-endpoint__advanced" spellcheck=false>
           <span class="edit-endpoint__cacert-title text-sm font-medium" style="color: var(--content-text);">Specify CA Certificate:</span>
           <textarea rows="10" class="edit-endpoint__cacert input font-mono text-sm" style="background-color: var(--input-bg); border-color: var(--input-border); color: var(--input-text);" appInput formControlName="caCert" name="caCert"></textarea>

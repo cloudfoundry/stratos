@@ -2,16 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  EntityServiceFactory,
-  EntityMonitorFactory,
-  PaginationMonitorFactory,
-  EntityCatalogTestModule,
-  generateStratosEntities,
-  TEST_CATALOGUE_ENTITIES,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CF_BASE_TEST_PROVIDERS } from '@test-framework/cf';
 import { generateCFEntities } from '../../../cf-entity-generator';
@@ -40,9 +31,6 @@ describe('ServicesWallService', () => {
         EntityCatalogHelper,
         ...CF_BASE_TEST_PROVIDERS,
         ServicesWallService,
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         provideZonelessChangeDetection(),
       ],
     });

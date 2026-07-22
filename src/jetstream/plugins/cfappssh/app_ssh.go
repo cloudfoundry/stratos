@@ -26,17 +26,9 @@ const (
 	// Time allowed to write a message to the peer.
 	writeWait = 10 * time.Second
 
-	// Inactivity timeout
-	inActivityTimeout = 10 * time.Second
-
 	md5FingerprintLength          = 47 // inclusive of space between bytes
 	base64Sha256FingerprintLength = 43
 )
-
-// Allow connections from any Origin
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool { return true },
-}
 
 // KeyCode - JSON object that is passed from the front-end to notify of a key press or a term resize
 type KeyCode struct {
@@ -89,16 +81,26 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		host = cfInfo.AppSSHEndpoint
 	}
 
-	// Build the Username
-	// cf:APP-GUID/APP-INSTANCE-INDEX@SSH-ENDPOINT
-	username := fmt.Sprintf("cf:%s/%s@%s", appGUID, appInstance, host)
-
 	// Need to get SSH Code
 	// Refresh token first - makes sure it will be valid when we make the request to get the code
 	refreshedTokenRec, err := p.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, userGUID, cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint)
 	if err != nil {
 		return sendSSHError("Couldn't get refresh token for CNSI with GUID %s", cnsiRecord.GUID)
 	}
+
+	// CF SSH proxy requires the process GUID, not the app GUID. When an app is first
+	// created they are identical, but they diverge if the process is ever recreated
+	// (e.g. via cf scale with a disk change). Fetch the actual web process GUID so
+	// SSH works regardless of how long the app has been running.
+	processGUID, err := getWebProcessGUID(apiEndpoint.String(), appGUID, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
+	if err != nil {
+		log.Warnf("Could not get web process GUID for app %s, falling back to app GUID: %s", appGUID, err)
+		processGUID = appGUID
+	}
+
+	// Build the Username
+	// cf:PROCESS-GUID/APP-INSTANCE-INDEX@SSH-ENDPOINT
+	username := fmt.Sprintf("cf:%s/%s@%s", processGUID, appInstance, host)
 
 	code, err := getSSHCode(cnsiRecord.TokenEndpoint, cfInfo.AppSSHOauthCLient, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
 	if err != nil {
@@ -123,14 +125,14 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		return fmt.Errorf("Failed to create session: %s", err)
 	}
 
-	defer connection.Close()
+	defer func() { _ = connection.Close() }()
 
 	// Upgrade the web socket
 	ws, pingTicker, err := api.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}
-	defer ws.Close()
+	defer func() { _ = ws.Close() }()
 	defer pingTicker.Stop()
 
 	modes := ssh.TerminalModes{
@@ -140,7 +142,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 
 	// NB: rows, cols
 	if err := session.RequestPty("xterm", 84, 80, modes); err != nil {
-		session.Close()
+		_ = session.Close()
 		return fmt.Errorf("request for pseudo terminal failed: %s", err)
 	}
 
@@ -154,11 +156,15 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		return fmt.Errorf("Unable to setup stdout for session: %v", err)
 	}
 
-	defer session.Close()
+	defer func() { _ = session.Close() }()
 
 	stdoutDone := make(chan struct{})
 	go pumpStdout(ws, stdout, stdoutDone)
-	go session.Shell()
+	go func() {
+		if err := session.Shell(); err != nil {
+			log.Errorf("App SSH failed to start shell: %v", err)
+		}
+	}()
 
 	// Read the input from the web socket and pipe it to the SSH client
 	for {
@@ -170,10 +176,15 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 		}
 
 		res := KeyCode{}
-		json.Unmarshal(r, &res)
+		if err := json.Unmarshal(r, &res); err != nil {
+			log.Warnf("App SSH: could not parse message from web socket: %+v", err)
+			continue
+		}
 
 		if res.Cols == 0 {
-			stdin.Write([]byte(res.Key))
+			if _, err := stdin.Write([]byte(res.Key)); err != nil {
+				log.Errorf("App SSH: error writing to session stdin: %v", err)
+			}
 		} else {
 			// Terminal resize request
 			if err := windowChange(session, res.Rows, res.Cols); err != nil {
@@ -241,18 +252,64 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 			if err != io.EOF {
 				log.Errorf("App SSH encountered an error reading from stdout; %v", err)
 			}
-			ws.Close()
+			_ = ws.Close()
 			break
 		}
 
-		ws.SetWriteDeadline(time.Now().Add(writeWait))
+		_ = ws.SetWriteDeadline(time.Now().Add(writeWait))
 		bytes := fmt.Sprintf("% x\n", buffer[:len])
 		if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
 			log.Error("App SSH Failed to write nessage")
-			ws.Close()
+			_ = ws.Close()
 			break
 		}
 	}
+}
+
+type v3ProcessesResponse struct {
+	Resources []struct {
+		GUID string `json:"guid"`
+		Type string `json:"type"`
+	} `json:"resources"`
+}
+
+func getWebProcessGUID(apiEndpoint, appGUID, token string, skipSSLValidation bool) (string, error) {
+	processURL := fmt.Sprintf("%s/v3/apps/%s/processes?types=web", apiEndpoint, appGUID)
+	req, err := http.NewRequest("GET", processURL, nil)
+	if err != nil {
+		return "", err
+	}
+	req.Header.Add("Authorization", "Bearer "+token)
+
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+		Transport: &http.Transport{
+			TLSClientConfig:     &tls.Config{InsecureSkipVerify: skipSSLValidation},
+			Proxy:               http.ProxyFromEnvironment,
+			TLSHandshakeTimeout: 10 * time.Second,
+		},
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("failed to get processes: %v", err)
+	}
+	defer func() { _ = resp.Body.Close() }()
+
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("processes API returned status %d", resp.StatusCode)
+	}
+
+	var result v3ProcessesResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return "", fmt.Errorf("failed to parse processes response: %v", err)
+	}
+
+	if len(result.Resources) == 0 {
+		return "", fmt.Errorf("no web process found for app %s", appGUID)
+	}
+
+	return result.Resources[0].GUID, nil
 }
 
 // ErrPreventRedirect - Error to indicate a redirect - used to make a redirect that we want to prevent later

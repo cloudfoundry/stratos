@@ -13,7 +13,7 @@ describe('CreateApplicationStep1Component', () => {
   let component: CreateApplicationStep1Component;
   let fixture: ComponentFixture<CreateApplicationStep1Component>;
 
-  beforeEach(async () => {
+  async function setup(endpointGuid: string | null) {
     await TestBed.configureTestingModule({
       imports: [
         CreateApplicationStep1Component,
@@ -30,7 +30,7 @@ describe('CreateApplicationStep1Component', () => {
           useValue: {
             root: {
               snapshot: {
-                queryParams: { endpointGuid: null },
+                queryParams: { endpointGuid },
               }
             }
           }
@@ -41,9 +41,21 @@ describe('CreateApplicationStep1Component', () => {
     fixture = TestBed.createComponent(CreateApplicationStep1Component);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  }
+
+  it('should be created', async () => {
+    await setup(null);
+    expect(component).toBeTruthy();
   });
 
-  it('should be created', () => {
-    expect(component).toBeTruthy();
+  it('does not lock the CF dropdown when not scoped to an endpoint', async () => {
+    await setup(null);
+    expect(component.endpointScoped).toBe(false);
+  });
+
+  it('pre-selects and locks the CF dropdown when scoped to an endpoint', async () => {
+    await setup('cf-endpoint-guid');
+    expect(component.endpointScoped).toBe(true);
+    expect(component.cfOrgSpaceService.cf.select()).toBe('cf-endpoint-guid');
   });
 });

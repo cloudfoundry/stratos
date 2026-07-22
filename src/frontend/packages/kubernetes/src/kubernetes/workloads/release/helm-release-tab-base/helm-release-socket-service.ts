@@ -1,18 +1,18 @@
 import { Injectable, OnDestroy, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { of, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, map, share, switchMap } from 'rxjs/operators';
+import { catchError, share, switchMap } from 'rxjs/operators';
 
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
-import { AppState, entityCatalog, WrapperRequestActionSuccess } from '../../../../../../store/src/public-api';
-import { EntityRequestAction } from '../../../../../../store/src/types/request.types';
-import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
-import { KubernetesPodExpandedStatusHelper } from '../../../services/kubernetes-expanded-state';
-import { BasicKubeAPIResource, KubernetesPod } from '../../../store/kube.types';
-import { KubePaginationAction } from '../../../store/kubernetes.actions';
-import { HelmReleaseGraph, HelmReleasePod, HelmReleaseService } from '../../workload.types';
-import { workloadsEntityCatalog } from '../../workloads-entity-catalog';
+import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import {
+  KubeJobDataService, KubePersistentVolumeClaimDataService, KubeReplicaSetDataService,
+  KubeRoleDataService, KubeSecretDataService, KubeServiceAccountDataService,
+} from '../../../../services/domain-data/kube-generic-resource-data.services';
+import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
+import { KubeServiceDataService } from '../../../../services/domain-data/kube-service-data.service';
+import { BasicKubeAPIResource } from '../../../store/kube.types';
+import { HelmReleaseGraph, HelmReleaseResources } from '../../workload.types';
+import { HelmReleaseDataService } from '../helm-release-data.service';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 
 
@@ -28,11 +28,19 @@ interface SocketMessage {
 @Injectable()
 export class HelmReleaseSocketService implements OnDestroy {
   private helmReleaseHelper = inject(HelmReleaseHelperService);
-  private store = inject<Store<AppState>>(Store);
-  private snackbarService = inject(SnackBarService);
+  private releaseData = inject(HelmReleaseDataService);
+  private snackbarService = inject(TailwindSnackBarService);
+  private podData = inject(KubePodDataService);
+  private serviceData = inject(KubeServiceDataService);
+  private jobData = inject(KubeJobDataService);
+  private secretData = inject(KubeSecretDataService);
+  private pvcData = inject(KubePersistentVolumeClaimDataService);
+  private replicaSetData = inject(KubeReplicaSetDataService);
+  private roleData = inject(KubeRoleDataService);
+  private serviceAccountData = inject(KubeServiceAccountDataService);
 
 
-  private sub: Subscription;
+  private sub?: Subscription;
   private sendToSocket = new Subject<any>();
   public isPaused = false;
 
@@ -59,9 +67,10 @@ export class HelmReleaseSocketService implements OnDestroy {
 
     const messages = socket$.pipe(
       switchMap((getResponses: GetWebSocketResponses) => {
+        // getResponses emits the raw WebSocket payload (string | ArrayBuffer
+        // | Blob); the JSON.parse path below only handles string frames.
         return getResponses(this.sendToSocket);
       }),
-      map((message: string) => message),
       catchError((e: any): import('rxjs').Observable<never> => {
         console.error('Workload WS error: ', e);
         return of([]) as unknown as import('rxjs').Observable<never>;
@@ -69,11 +78,12 @@ export class HelmReleaseSocketService implements OnDestroy {
     );
 
     let prefix = '';
-    this.sub = messages.subscribe((jsonString: string) => {
+    this.sub = messages.subscribe((message) => {
       // Guard against empty, invalid, or non-string data
-      if (!jsonString || typeof jsonString !== 'string' || jsonString.trim() === '') {
+      if (!message || typeof message !== 'string' || message.trim() === '') {
         return;
       }
+      const jsonString: string = message;
       let messageObj;
       try {
         messageObj = JSON.parse(jsonString);
@@ -85,11 +95,7 @@ export class HelmReleaseSocketService implements OnDestroy {
         if (messageObj.kind === 'ReleasePrefix') {
           prefix = messageObj.data;
         } else if (messageObj.kind === 'Graph') {
-          const graph: HelmReleaseGraph = messageObj.data;
-          graph.endpointId = this.helmReleaseHelper.endpointGuid;
-          graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
-          const releaseGraphAction = workloadsEntityCatalog.graph.actions.get(graph.releaseTitle, graph.endpointId);
-          this.addResource(releaseGraphAction, graph);
+          this.writeReleaseGraph(messageObj.data);
         } else if (messageObj.kind === 'Manifest' || messageObj.kind === 'Resources') {
           // Store all of the services
           const manifest = messageObj.data;
@@ -107,33 +113,11 @@ export class HelmReleaseSocketService implements OnDestroy {
               }
             });
 
-            Object.entries(resources).forEach(([entityType, resourcesOfType]) => {
-              let action: KubePaginationAction;
-              if (entityType === 'pod') {
-                resourcesOfType = resourcesOfType || [];
-                resourcesOfType = (resourcesOfType as any[]).map((pod: KubernetesPod) =>
-                  KubernetesPodExpandedStatusHelper.updatePodWithExpandedStatus(pod)
-                ) as BasicKubeAPIResource[];
-              }
-              action = (kubeEntityCatalog as any)[entityType].actions.getInWorkload(
-                this.helmReleaseHelper.endpointGuid,
-                this.helmReleaseHelper.namespace,
-                this.helmReleaseHelper.releaseTitle
-              );
-              this.populateList(action, resourcesOfType);
-            });
+            this.writeManifestResources(resources);
           }
 
-          // const resources = { ...manifest };
           // kind === 'Resources' is an array, really they should go into a pagination section
-          messageObj.endpointId = this.helmReleaseHelper.endpointGuid;
-          messageObj.releaseTitle = this.helmReleaseHelper.releaseTitle;
-
-          const releaseResourceAction = workloadsEntityCatalog.resource.actions.get(
-            this.helmReleaseHelper.releaseTitle,
-            this.helmReleaseHelper.endpointGuid,
-          );
-          this.addResource(releaseResourceAction, messageObj);
+          this.writeReleaseResources(messageObj);
         } else if (messageObj.kind === 'ManifestErrors') {
           if (messageObj.data) {
             this.snackbarService.show('Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss');
@@ -174,7 +158,7 @@ export class HelmReleaseSocketService implements OnDestroy {
   public stop() {
     if (this.sub) {
       this.sub.unsubscribe();
-      this.sub = null;
+      this.sub = undefined;
     }
   }
 
@@ -207,43 +191,50 @@ export class HelmReleaseSocketService implements OnDestroy {
     this.snackbarService.hide();
   }
 
-  private addResource(action: EntityRequestAction, data: any) {
-    const catalogEntity = entityCatalog.getEntity(action);
-    const response: any = {
-      entities: {
-        [catalogEntity.entityKey]: {
-          [action.guid as string]: data
-        }
-      },
-      result: [
-        action.guid
-      ]
-    };
-    const successWrapper = new WrapperRequestActionSuccess(response, action);
-    this.store.dispatch(successWrapper);
+  // Write the socket-streamed release graph into the signal data service
+  // (replaces the legacy `WrapperRequestActionSuccess` dispatch into the
+  // ngrx `graph` entity-catalog).
+  protected writeReleaseGraph(data: any): void {
+    const graph: HelmReleaseGraph = data;
+    graph.endpointId = this.helmReleaseHelper.endpointGuid;
+    graph.releaseTitle = this.helmReleaseHelper.releaseTitle;
+    this.releaseData.setGraph(this.helmReleaseHelper.guid, graph);
   }
 
-  private populateList(action: KubePaginationAction, resources: any[]) {
-    const entity = entityCatalog.getEntity(action);
-    const newResources: any = {};
-    resources.forEach((resource: any) => {
-      const newResource: HelmReleasePod | HelmReleaseService = {
-        endpointId: action.kubeGuid,
-        releaseTitle: this.helmReleaseHelper.releaseTitle,
-        ...resource
-      };
-      newResource.metadata.kubeId = action.kubeGuid;
-      // The service entity from manifest is missing this, but apply here to ensure any others are caught
-      newResource.metadata.namespace = this.helmReleaseHelper.namespace;
-      const entityId = (action.entity as any)[0].getId(resource);
-      newResources[entityId] = newResource;
-    });
+  // Write the socket-streamed release resources message into the signal data
+  // service (replaces the legacy `resource` entity-catalog dispatch).
+  protected writeReleaseResources(messageObj: any): void {
+    messageObj.endpointId = this.helmReleaseHelper.endpointGuid;
+    messageObj.releaseTitle = this.helmReleaseHelper.releaseTitle;
+    this.releaseData.setResources(this.helmReleaseHelper.guid, messageObj as HelmReleaseResources);
+  }
 
-    const releasePods = {
-      entities: { [entity.entityKey]: newResources },
-      result: Object.keys(newResources)
-    };
-    const successWrapper = new WrapperRequestActionSuccess(releasePods, action, 'fetch', releasePods.result.length, 1);
-    this.store.dispatch(successWrapper);
+  // Push each manifest resource group into the matching signal-native
+  // domain service under the release's workload scope. Replaces the legacy
+  // per-type ngrx `getInWorkload` pagination dispatch.
+  protected writeManifestResources(resources: { [type: string]: BasicKubeAPIResource[] }): void {
+    const guid = this.helmReleaseHelper.endpointGuid;
+    const ns = this.helmReleaseHelper.namespace;
+    const rel = this.helmReleaseHelper.releaseTitle;
+    Object.entries(resources).forEach(([type, list]) => {
+      // Stamp the release namespace onto every row — manifest entities
+      // (notably Services) often omit metadata.namespace, and all release
+      // resources live in the release's namespace. (Restores the stamp the
+      // legacy populateList performed.)
+      const items = (list ?? []).map((r: any) => ({
+        ...r,
+        metadata: { ...(r?.metadata ?? {}), namespace: ns },
+      }));
+      switch (type) {
+        case 'pod': this.podData.setWorkloadPods(guid, ns, rel, items); break;
+        case 'service': this.serviceData.setWorkloadServices(guid, ns, rel, items); break;
+        case 'job': this.jobData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'secrets': this.secretData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'pvc': this.pvcData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'replicaSet': this.replicaSetData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'role': this.roleData.setWorkloadItems(guid, ns, rel, items); break;
+        case 'serviceAccount': this.serviceAccountData.setWorkloadItems(guid, ns, rel, items); break;
+      }
+    });
   }
 }

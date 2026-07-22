@@ -17,9 +17,9 @@ export interface IFavoriteTypeInfo<T= IFavoriteMetadata> {
   guid: string;
   endpointType: string;
   entityType: string;
-  entityId: string;
+  entityId?: string;
   endpointId: string;
-  metadata: T;
+  metadata?: T;
 }
 
 export interface IFavoriteMetadata {
@@ -53,8 +53,8 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
   private catalogEntity: StratosBaseCatalogEntity;
   private entityBuilder: IStratosEntityBuilder<IEntityMetadata>;
 
-  public entityId: string;
-  public metadata: T;
+  public entityId?: string;
+  public metadata?: T;
 
   constructor(
     public endpointId: string,
@@ -66,7 +66,8 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     entityId?: string,
     metadata?: T
   ) {
-    // Make sure these default to undefined
+    // Both are genuinely optional: endpoint favorites carry no entityId, and
+    // some construction paths build a favorite before metadata is resolved.
     this.entityId = entityId;
     this.metadata = metadata;
 
@@ -80,7 +81,7 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
     }
   }
 
-  static getEntityGuidFromFavoriteGuid(favoriteGuid: string): string {
+  static getEntityGuidFromFavoriteGuid(favoriteGuid: string): string | null {
     const parts = favoriteGuid.split(favoriteGuidSeparator);
     if (parts.length < 3) {
       console.error('Failed to determine entity guid from favorite guid: ', parts);
@@ -113,13 +114,15 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
   }
 
   // Get the link to navigate to the view for the given entity backing this user favorite
-  public getLink(): string {
+  public getLink(): string | null {
     return this.entityBuilder.getLink ? this.entityBuilder.getLink(this) : null;
   }
 
   // Get the type name, e.g. 'Application'
   public getPrettyTypeName(): string {
-    return this.catalogEntity && this.catalogEntity.definition ? this.catalogEntity.definition.label : 'Unknown';
+    return this.catalogEntity && this.catalogEntity.definition && this.catalogEntity.definition.label
+      ? this.catalogEntity.definition.label
+      : 'Unknown';
   }
 
   // Get icon data for the favorite
@@ -132,7 +135,7 @@ export class UserFavorite<T extends IEntityMetadata = IEntityMetadata> implement
   }
 
   private buildFavoriteStoreEntityGuid() {
-    this.guid = [this.entityId, this.endpointId, this.entityType, this.endpointType].reduce((newArray, value) => {
+    this.guid = [this.entityId, this.endpointId, this.entityType, this.endpointType].reduce((newArray: string[], value) => {
       if (value) {
         return [ ...newArray, value ];
       }

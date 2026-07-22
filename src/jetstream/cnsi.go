@@ -14,8 +14,7 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
-	"crypto/sha1"
-	"encoding/base64"
+	"github.com/google/uuid"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
@@ -28,17 +27,17 @@ func isSSLRelatedError(err error) (bool, string) {
 	var urlError *url.Error
 	if errors.As(err, &urlError) {
 		var (
-			certInvalidError      *x509.CertificateInvalidError
-			unknownAuthorityError *x509.UnknownAuthorityError
-			hostnameError         *x509.HostnameError
+			certInvalidError      x509.CertificateInvalidError
+			unknownAuthorityError x509.UnknownAuthorityError
+			hostnameError         x509.HostnameError
 		)
-		if errors.As(urlError.Err, unknownAuthorityError) {
+		if errors.As(urlError.Err, &unknownAuthorityError) {
 			return true, unknownAuthorityError.Error()
 		}
-		if errors.As(urlError.Err, hostnameError) {
+		if errors.As(urlError.Err, &hostnameError) {
 			return true, hostnameError.Error()
 		}
-		if errors.As(urlError.Err, certInvalidError) {
+		if errors.As(urlError.Err, &certInvalidError) {
 			return true, certInvalidError.Error()
 		}
 	}
@@ -97,8 +96,7 @@ func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo api.InfoFunc) e
 		return err
 	}
 
-	c.JSON(http.StatusCreated, newCNSI)
-	return nil
+	return c.JSON(http.StatusCreated, newCNSI)
 }
 
 func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, createSystemEndpoint bool, caCert string, fetchInfo api.InfoFunc) (api.CNSIRecord, error) {
@@ -136,58 +134,9 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 		isAdmin = currentCreator.Admin
 	}
 
-	if p.GetConfig().UserEndpointsEnabled == config.UserEndpointsConfigEnum.Disabled {
-		// check if we've already got this endpoint in the DB
-		ok := p.adminCNSIRecordExists(apiEndpoint)
-		if ok {
-			// a record with the same api endpoint was found
-			return api.CNSIRecord{}, api.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Can not register same endpoint multiple times",
-				"Can not register same endpoint multiple times",
-			)
-		}
-	} else {
-		// get all endpoints determined by the APIEndpoint
-		duplicateEndpoints, err := p.listCNSIByAPIEndpoint(apiEndpoint)
-		if err != nil {
-			return api.CNSIRecord{}, api.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Failed to check other endpoints",
-				"Failed to check other endpoints: %v",
-				err)
-		}
-		// check if we've already got this APIEndpoint in this DB
-		for _, duplicate := range duplicateEndpoints {
-			// cant create same system endpoint
-			if len(duplicate.Creator) == 0 && isAdmin && createSystemEndpoint {
-				return api.CNSIRecord{}, api.NewHTTPShadowError(
-					http.StatusBadRequest,
-					"Can not register same system endpoint multiple times",
-					"Can not register same system endpoint multiple times",
-				)
-			}
-
-			// cant create same user endpoint
-			if duplicate.Creator == userId {
-				return api.CNSIRecord{}, api.NewHTTPShadowError(
-					http.StatusBadRequest,
-					"Can not register same endpoint multiple times",
-					"Can not register same endpoint multiple times",
-				)
-			}
-		}
-	}
-
-	h := sha1.New()
-	// see why its generated this way in Issue #4753 / #3031
-	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled && (!isAdmin || (isAdmin && !createSystemEndpoint)) {
-		// Make the new guid unique per api url AND user id
-		h.Write([]byte(apiEndpointURL.String() + userId))
-	} else {
-		h.Write([]byte(apiEndpointURL.String()))
-	}
-	guid := base64.RawURLEncoding.EncodeToString(h.Sum(nil))
+	// Multiple registrations of the same URL are permitted — each gets a unique GUID.
+	// A follow-on ticket (FWT-TBD) adds UX warning when a duplicate URL is detected.
+	guid := uuid.New().String()
 
 	newCNSI, _, err := fetchInfo(apiEndpoint, skipSSLValidation, caCert)
 	if err != nil {
@@ -263,13 +212,18 @@ func (p *portalProxy) unregisterCluster(c echo.Context) error {
 func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
 	log.Debug("doUnregisterCluster")
 
-	// Should check for errors?
-	p.unsetCNSIRecord(cnsiGUID)
+	if err := p.unsetCNSIRecord(cnsiGUID); err != nil {
+		return err
+	}
 
-	p.unsetCNSITokenRecords(cnsiGUID)
+	if err := p.unsetCNSITokenRecords(cnsiGUID); err != nil {
+		log.Warnf("Unable to remove tokens for unregistered endpoint %s: %v", cnsiGUID, err)
+	}
 
 	ufe := userfavoritesendpoints.Constructor(p, cnsiGUID)
-	ufe.RemoveFavorites()
+	if err := ufe.RemoveFavorites(); err != nil {
+		log.Warnf("Unable to remove favorites for unregistered endpoint %s: %v", cnsiGUID, err)
+	}
 
 	return nil
 }
@@ -426,47 +380,8 @@ func (p *portalProxy) listCNSIs(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
-}
-
-func (p *portalProxy) listRegisteredCNSIs(c echo.Context) error {
-	log.Debug("listRegisteredCNSIs")
-	userGUIDIntf, err := p.GetSessionValue(c, "user_id")
-	if err != nil {
-		return api.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"User session could not be found",
-			"User session could not be found: %v", err,
-		)
-	}
-	userGUID := userGUIDIntf.(string)
-
-	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
-	if err != nil {
-		return fmt.Errorf("listRegisteredCNSIs: %s", err)
-	}
-
-	var jsonString []byte
-	var clusterList []*api.ConnectedEndpoint
-
-	clusterList, err = cnsiRepo.ListByUser(userGUID)
-	if err != nil {
-		return api.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to retrieve list of clusters",
-			"Failed to retrieve list of clusters: %v", err,
-		)
-	}
-
-	jsonString, err = marshalClusterList(clusterList)
-	if err != nil {
-		return err
-	}
-
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 func marshalCNSIlist(cnsiList []*api.CNSIRecord) ([]byte, error) {
@@ -477,19 +392,6 @@ func marshalCNSIlist(cnsiList []*api.CNSIRecord) ([]byte, error) {
 			http.StatusBadRequest,
 			"Failed to retrieve list of CNSIs",
 			"Failed to retrieve list of CNSIs: %v", err,
-		)
-	}
-	return jsonString, nil
-}
-
-func marshalClusterList(clusterList []*api.ConnectedEndpoint) ([]byte, error) {
-	log.Debug("marshalClusterList")
-	jsonString, err := json.Marshal(clusterList)
-	if err != nil {
-		return nil, api.NewHTTPShadowError(
-			http.StatusBadRequest,
-			"Failed to retrieve list of clusters",
-			"Failed to retrieve list of clusters: %v", err,
 		)
 	}
 	return jsonString, nil
@@ -556,13 +458,6 @@ func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (api.CNSIRec
 	rec.APIEndpoint.Path = strings.TrimRight(rec.APIEndpoint.Path, "/")
 
 	return *rec, nil
-}
-
-func (p *portalProxy) adminCNSIRecordExists(apiEndpoint string) bool {
-	log.Debug("adminCNSIRecordExists")
-
-	_, err := p.GetAdminCNSIRecordByEndpoint(apiEndpoint)
-	return err == nil
 }
 
 func (p *portalProxy) setCNSIRecord(guid string, c api.CNSIRecord) error {

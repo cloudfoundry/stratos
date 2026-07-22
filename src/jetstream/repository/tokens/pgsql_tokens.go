@@ -24,7 +24,7 @@ var insertAuthToken = `INSERT INTO tokens (cnsi_guid, token_guid, user_guid, tok
 									VALUES ('STRATOS', $1, $2, $3, $4, $5, $6)`
 
 var updateAuthToken = `UPDATE tokens
-									SET auth_token = $1, refresh_token = $2, token_expiry = $3
+									SET auth_token = $1, refresh_token = $2, token_expiry = $3, last_updated = CURRENT_TIMESTAMP
 									WHERE cnsi_guid = 'STRATOS' AND user_guid = $4 AND token_type = $5`
 
 var getToken = `SELECT token_guid, auth_token, refresh_token, token_expiry, disconnected, auth_type, meta_data, user_guid, linked_token, enabled
@@ -59,7 +59,7 @@ var insertCNSIToken = `INSERT INTO tokens (token_guid, cnsi_guid, user_guid, tok
 										VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)`
 
 var updateCNSIToken = `UPDATE tokens
-										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5, linked_token = $6
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3, disconnected = $4, meta_data = $5, linked_token = $6, last_updated = CURRENT_TIMESTAMP
 										WHERE cnsi_guid = $7 AND user_guid = $8 AND token_type = $9 AND auth_type = $10`
 var deleteCNSIToken = `DELETE FROM tokens
 										WHERE token_type = 'cnsi' AND cnsi_guid = $1 AND user_guid = $2`
@@ -67,7 +67,7 @@ var deleteCNSITokens = `DELETE FROM tokens
 											WHERE token_type = 'cnsi' AND cnsi_guid = $1`
 
 var updateToken = `UPDATE tokens
-										SET auth_token = $1, refresh_token = $2, token_expiry = $3
+										SET auth_token = $1, refresh_token = $2, token_expiry = $3, last_updated = CURRENT_TIMESTAMP
 										WHERE token_guid = $4 AND user_guid = $5`
 
 // PgsqlTokenRepository is a PostgreSQL-backed token repository
@@ -342,7 +342,7 @@ func (p *PgsqlTokenRepository) ListAllEnabledConnectedCNSITokens(encryptionKey [
 		return make([]api.BackupTokenRecord, 0), fmt.Errorf(msg, err)
 	}
 
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	btrs := make([]api.BackupTokenRecord, 0)
 
@@ -434,7 +434,7 @@ func (p *PgsqlTokenRepository) FindAllCNSITokenBackup(cnsiGUID string, encryptio
 		return make([]api.BackupTokenRecord, 0), fmt.Errorf(msg, err)
 	}
 
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	btrs := make([]api.BackupTokenRecord, 0)
 	for rows.Next() {
@@ -667,11 +667,14 @@ func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr api.TokenReco
 		return errors.New(msg)
 	}
 
-	if tr.RefreshToken == "" {
-		msg := "Unable to save Token without a valid Refresh Token."
-		log.Debug(msg)
-		return errors.New(msg)
-	}
+	// Deliberately no "RefreshToken must be non-empty" guard here: the
+	// rejected-token disposal write (RefreshOAuthToken, oauth_requests.go)
+	// calls this with an intentionally empty RefreshToken to record that
+	// UAA rejected it. Both AuthToken and RefreshToken are always encrypted
+	// below (even when empty) so the write never leaves a nil ciphertext —
+	// crypto.Decrypt errors ("ciphertext too short") on a nil/short byte
+	// slice, so a nil ciphertext would break every future FindCNSIToken
+	// read of this row, not just its renewability.
 
 	var ciphertextAuthToken, ciphertextRefreshToken []byte
 	var err error
@@ -685,11 +688,6 @@ func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr api.TokenReco
 		tokenGUID = tr.LinkedGUID
 	}
 
-	if tr.RefreshToken == "" {
-		msg := "Unable to save Token without a valid Token GUID"
-		return errors.New(msg)
-	}
-
 	log.Infof("Updating token %s", tokenGUID)
 
 	log.Debug("Encrypting Auth Token")
@@ -697,12 +695,10 @@ func (p *PgsqlTokenRepository) UpdateTokenAuth(userGUID string, tr api.TokenReco
 	if err != nil {
 		return err
 	}
-	if tr.RefreshToken != "" {
-		log.Debug("Encrypting Refresh Token")
-		ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
-		if err != nil {
-			return err
-		}
+	log.Debug("Encrypting Refresh Token")
+	ciphertextRefreshToken, err = crypto.EncryptToken(encryptionKey, tr.RefreshToken)
+	if err != nil {
+		return err
 	}
 
 	result, err := p.db.Exec(updateToken, ciphertextAuthToken, ciphertextRefreshToken, tr.TokenExpiry, tokenGUID, userGUID)

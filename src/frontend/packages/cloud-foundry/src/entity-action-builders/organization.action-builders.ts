@@ -12,15 +12,17 @@ export interface OrganizationActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetOrganization;
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetAllOrganizations;
   remove: (guid: string, endpointGuid: string) => DeleteOrganization;
-  update: (guid: string, endpointGuid: string, updatedOrg: IUpdateOrganization) => UpdateOrganization;
+  // updatedOrg optional only to stay assignable to the loose core builder
+  // floor (extraArgs?); real dispatch always supplies it.
+  update: (guid: string, endpointGuid: string, updatedOrg?: IUpdateOrganization) => UpdateOrganization;
 }
 
 export const organizationActionBuilders: OrganizationActionBuilders = {
@@ -35,9 +37,11 @@ export const organizationActionBuilders: OrganizationActionBuilders = {
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllOrganizations(paginationKey, endpointGuid, includeRelations, populateMissing),
   remove: (guid: string, endpointGuid: string) => new DeleteOrganization(guid, endpointGuid),
-  update: (guid: string, endpointGuid: string, updatedOrg: IUpdateOrganization) => new UpdateOrganization(
+  update: (guid: string, endpointGuid: string, updatedOrg?: IUpdateOrganization) => new UpdateOrganization(
     guid,
     endpointGuid,
-    updatedOrg
+    // strict: updatedOrg optional only for floor-compatibility; the update
+    // action is never dispatched without an organization payload.
+    updatedOrg!
   )
 };

@@ -17,8 +17,11 @@ on:
 env:
   NODE_OPTIONS: --max-old-space-size=5500
   NODE_VERSION: '24'
-  GO_VERSION: '1.21'
-  BUN_VERSION: 'latest'
+  GO_VERSION: '1.26'
+  BUN_VERSION: '1.3.14'
+
+permissions:
+  contents: read
 
 jobs:
   validate-version:
@@ -30,9 +33,13 @@ jobs:
     steps:
       - name: Get version from tag or input
         id: get-version
+        # Expressions pass through env rather than interpolating into the
+        # script, so a crafted tag or input can't inject shell.
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            VERSION="${{ inputs.version }}"
+          if [ "${GITHUB_EVENT_NAME}" == "workflow_dispatch" ]; then
+            VERSION="${INPUT_VERSION}"
           else
             VERSION="${GITHUB_REF#refs/tags/}"
           fi
@@ -41,8 +48,9 @@ jobs:
 
       - name: Check if prerelease
         id: check-prerelease
+        env:
+          VERSION: ${{ steps.get-version.outputs.version }}
         run: |
-          VERSION="${{ steps.get-version.outputs.version }}"
           if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
             echo "🧪 This is a pre-release"
@@ -57,33 +65,41 @@ jobs:
     needs: validate-version
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           fetch-depth: 0  # Full history for git archive
+          persist-credentials: false
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        # setup-node only caches when the `cache:` input is set, which it
+        # is not here, so there is no cache to poison on this release path.
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0 # zizmor: ignore[cache-poisoning]
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      # Caching is off in this job: restoring a cache that a lower-privilege
+      # workflow could have seeded would let poisoned content flow into
+      # published release artifacts.
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
+        uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
           bun-version: ${{ env.BUN_VERSION }}
+          no-cache: true
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: ${{ env.GO_VERSION }}
-          cache-dependency-path: src/jetstream/go.sum
+          cache: false
 
       - name: Install dependencies
-        run: bun install
+        run: bun install --frozen-lockfile
 
       - name: Build all (frontend + cross-compile backends)
-        run: make build all VERSION=${{ needs.validate-version.outputs.version }}
         env:
           NODE_ENV: production
+          VERSION: ${{ needs.validate-version.outputs.version }}
+        run: make build VERSION="$VERSION"
 
       - name: Verify binaries
         run: |
@@ -93,10 +109,21 @@ jobs:
           done
 
       - name: Package release archives
-        run: make release github VERSION=${{ needs.validate-version.outputs.version }}
+        env:
+          VERSION: ${{ needs.validate-version.outputs.version }}
+        run: |
+          # cf first (writes dist/stratos-cf-*.zip), then github (rebuilds
+          # dist/release/), then aio (stages dist/aio-package for the docker
+          # image, reusing the same release-built jetstream + ui). Stage the
+          # cf-pushable zip into dist/release so it is checksummed and
+          # published alongside the platform archives.
+          make release cf github aio VERSION="$VERSION"
+          cp dist/stratos-cf-*.zip dist/release/
 
       - name: Generate checksums
-        run: ./build/create-checksums.sh ${{ needs.validate-version.outputs.version }}
+        env:
+          VERSION: ${{ needs.validate-version.outputs.version }}
+        run: ./build/create-checksums.sh "$VERSION"
 
       - name: Verify release artifacts
         run: |
@@ -107,11 +134,81 @@ jobs:
           cat dist/release/SHA256SUMS
 
       - name: Upload release artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release-artifacts
           path: dist/release/*
           retention-days: 30
+
+      - name: Upload all-in-one image payload
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: aio-package
+          path: dist/aio-package/**
+          retention-days: 30
+          include-hidden-files: true
+
+  build-all-in-one-image:
+    name: Build All-in-One Image
+    runs-on: ubuntu-latest
+    needs: [validate-version, build-release]
+    permissions:
+      contents: read
+      packages: write
+    env:
+      IMAGE: ghcr.io/${{ github.repository_owner }}/stratos
+    steps:
+      # No source checkout — the image is built entirely from the staged
+      # payload (release-built jetstream + ui), so there is nothing to build
+      # from the tree here.
+      - name: Download all-in-one payload
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
+        with:
+          name: aio-package
+          path: aio-package
+
+      - name: Fetch the all-in-one Dockerfile
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REF: ${{ needs.validate-version.outputs.version }}
+        run: |
+          # Only the Dockerfile is needed from the tree; the build context is
+          # the downloaded payload. Pull it at the released ref.
+          gh api "repos/${GITHUB_REPOSITORY}/contents/deploy/all-in-one/Dockerfile?ref=${REF}" \
+            --jq '.content' | base64 -d > aio-package/Dockerfile
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract metadata
+        id: meta
+        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=semver,pattern={{version}},value=${{ needs.validate-version.outputs.version }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ needs.validate-version.outputs.version }}
+            type=raw,value=latest,enable=${{ needs.validate-version.outputs.is_prerelease == 'false' }}
+
+      # Built and pushed for prereleases too (unlike the k8s component images
+      # in docker.yml) so rc/alpha/beta tags get a runnable all-in-one image.
+      # linux/amd64 only for now — the staged jetstream is amd64.
+      - name: Build and push all-in-one image
+        uses: docker/build-push-action@ca052bb54ab0790a636c9b5f226502c73d547a25 # v5.4.0
+        with:
+          context: aio-package
+          file: aio-package/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
   create-github-release:
     name: Create GitHub Release
@@ -121,19 +218,21 @@ jobs:
       contents: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          persist-credentials: false
 
       - name: Download release artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: release-artifacts
           path: dist/release/
 
       - name: Extract changelog for version
         id: changelog
+        env:
+          VERSION: ${{ needs.validate-version.outputs.version }}
         run: |
-          VERSION="${{ needs.validate-version.outputs.version }}"
-
           # Try to extract version-specific changelog
           if [ -f CHANGELOG.md ]; then
             # Extract section between this version and next version header
@@ -149,24 +248,32 @@ jobs:
 
           echo "📝 Release notes prepared"
 
+      # gh release create replaces softprops/action-gh-release: same
+      # capability, one less third-party action on the release path.
+      # --verify-tag makes a workflow_dispatch with a typo'd version fail
+      # instead of minting a new tag from the default branch.
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: ${{ needs.validate-version.outputs.version }}
-          name: Stratos ${{ needs.validate-version.outputs.version }}
-          body_path: /tmp/release-notes.md
-          prerelease: ${{ needs.validate-version.outputs.is_prerelease == 'true' }}
-          files: |
-            dist/release/*.tar.gz
-            dist/release/*.zip
-            dist/release/SHA256SUMS
-          draft: false
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.validate-version.outputs.version }}
+          IS_PRERELEASE: ${{ needs.validate-version.outputs.is_prerelease }}
+        run: |
+          PRERELEASE_FLAG=""
+          if [ "$IS_PRERELEASE" == "true" ]; then
+            PRERELEASE_FLAG="--prerelease"
+          fi
+          gh release create "$VERSION" \
+            --title "Stratos $VERSION" \
+            --notes-file /tmp/release-notes.md \
+            --verify-tag \
+            $PRERELEASE_FLAG \
+            dist/release/*.tar.gz dist/release/*.zip dist/release/SHA256SUMS
 
       - name: Release summary
+        env:
+          VERSION: ${{ needs.validate-version.outputs.version }}
         run: |
-          echo "# 🎉 Release ${{ needs.validate-version.outputs.version }} Published!" >> $GITHUB_STEP_SUMMARY
+          echo "# 🎉 Release ${VERSION} Published!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "## 📦 Release Artifacts" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -177,7 +284,7 @@ jobs:
           for file in *.tar.gz *.zip; do
             if [ -f "$file" ]; then
               SIZE=$(ls -lh "$file" | awk '{print $5}')
-              echo "| ${file#stratos-${{ needs.validate-version.outputs.version }}-} | $file | $SIZE |" >> $GITHUB_STEP_SUMMARY
+              echo "| ${file#stratos-${VERSION}-} | $file | $SIZE |" >> $GITHUB_STEP_SUMMARY
             fi
           done
 
@@ -195,18 +302,16 @@ jobs:
     runs-on: ubuntu-latest
     needs: [validate-version, create-github-release]
     if: needs.validate-version.outputs.is_prerelease == 'false'
+    permissions:
+      actions: write
     steps:
+      # gh workflow run replaces actions/github-script: no third-party
+      # code and no expression interpolation into a script body.
       - name: Trigger Docker workflow
-        uses: actions/github-script@v7
-        with:
-          script: |
-            await github.rest.actions.createWorkflowDispatch({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              workflow_id: 'docker.yml',
-              ref: '${{ needs.validate-version.outputs.version }}',
-              inputs: {
-                version: '${{ needs.validate-version.outputs.version }}'
-              }
-            });
-            console.log('🐳 Docker build triggered for ${{ needs.validate-version.outputs.version }}');
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.validate-version.outputs.version }}
+        run: |
+          gh workflow run docker.yml --repo "$GITHUB_REPOSITORY" \
+            --ref "$VERSION" -f version="$VERSION"
+          echo "🐳 Docker build triggered for ${VERSION}"

@@ -92,6 +92,8 @@ func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 	if err != nil {
 		errInfo, ok := err.(api.ErrHTTPRequest)
 		if ok {
+			// Status 0 means no HTTP response was received (transport or
+			// certificate failure), not a real HTTP status code.
 			if errInfo.Status == 0 {
 				var certError *x509.CertificateInvalidError
 				if errors.As(err, certError) {
@@ -120,8 +122,7 @@ func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
 			"Failed to authenticate with UAA due to %s", err)
 	}
 
-	c.JSON(http.StatusOK, userTokenInfo)
-	return nil
+	return c.JSON(http.StatusOK, userTokenInfo)
 }
 
 func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
@@ -163,7 +164,8 @@ func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleCo
 }
 
 func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
-	log.Debugf("Saving ConsoleConfig: %+v", consoleConfig)
+	// Don't dump the whole struct — it contains the client secret
+	log.Debugf("Saving ConsoleConfig for UAA endpoint: %v", consoleConfig.UAAEndpoint)
 
 	if err := consoleRepo.SetValue(systemGroupName, "UAA_ENDPOINT", consoleConfig.UAAEndpoint.String()); err != nil {
 		return err
@@ -229,17 +231,20 @@ func (p *portalProxy) setupSaveConfig(c echo.Context) error {
 		consoleConfig.LocalUser = "admin"
 		if consoleConfig.IsSetupComplete() {
 			p.GetConfig().ConsoleConfig.AuthEndpointType = "local"
-			p.InitStratosAuthService(api.Local)
+			if err := p.InitStratosAuthService(api.Local); err != nil {
+				return err
+			}
 			c.Request().Form.Add("username", "admin")
 			c.Request().Form.Add("password", consoleConfig.LocalUserPassword)
 			c.Request().RequestURI = "/pp/v1/login"
-			setupInitialiseLocalUsersConfiguration(consoleConfig, p)
+			if err := setupInitialiseLocalUsersConfiguration(consoleConfig, p); err != nil {
+				return err
+			}
 			return p.consoleLogin(c)
 		}
 	}
 
-	c.NoContent(http.StatusOK)
-	return nil
+	return c.NoContent(http.StatusOK)
 }
 
 func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.ConsoleConfig, error) {
@@ -258,15 +263,16 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.Conso
 
 	val, endpointTypeSupported := api.AuthEndpointTypes[consoleConfig.AuthEndpointType]
 	if endpointTypeSupported {
-		if val == api.AuthNone {
+		switch val {
+		case api.AuthNone:
 			return consoleConfig, nil
-		} else if val == api.Local {
+		case api.Local:
 			//Auth endpoint type is set to "local", so load the local user config
 			err := initialiseLocalUsersConfiguration(consoleConfig, p)
 			if err != nil {
 				return consoleConfig, err
 			}
-		} else if val == api.Remote {
+		case api.Remote:
 			// Auth endpoint type is set to "remote", so need to load local user config vars
 			// Default authorization endpoint to be UAA endpoint
 			if consoleConfig.AuthorizationEndpoint == nil {
@@ -274,7 +280,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.Conso
 				consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
 				log.Debugf("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
 			}
-		} else {
+		default:
 			//Auth endpoint type has been set to an invalid value
 			return consoleConfig, errors.New("AUTH_ENDPOINT_TYPE must be set to either \"local\" or \"remote\"")
 		}
@@ -389,7 +395,7 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 			// Request is not a setup request, refuse backend requests and allow all others
 			isBackendRequest, _ := regexp.MatchString(backendRequestRegex, requestURLPath)
 			isAPIRequest, _ := regexp.MatchString(apiRequestRegex, requestURLPath)
-			if !(isBackendRequest || isAPIRequest) {
+			if !isBackendRequest && !isAPIRequest {
 				return h(c)
 			}
 
@@ -409,7 +415,9 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 	}
 
 	// This will reload the env config
-	console_config.InitializeConfEnvProvider(consoleRepo)
+	if err := console_config.InitializeConfEnvProvider(consoleRepo); err != nil {
+		log.Warnf("Unable to initialize config environment provider: %v", err)
+	}
 
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
 	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env())
@@ -424,7 +432,9 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 		portalProxy.Config.ConsoleConfig = consoleConfig
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType
-		portalProxy.InitStratosAuthService(api.AuthEndpointTypes[consoleConfig.AuthEndpointType])
+		if err := portalProxy.InitStratosAuthService(api.AuthEndpointTypes[consoleConfig.AuthEndpointType]); err != nil {
+			log.Errorf("Unable to initialise Stratos auth service: %v", err)
+		}
 	}
 
 	return consoleConfig.IsSetupComplete()

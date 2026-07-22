@@ -21,6 +21,7 @@ export interface FileScannerInfo {
   summaryItem: any;
   manifestFile: any;
   cfIgnoreFile: any;
+  rootFolderName?: string;
 }
 
 export class DeployApplicationFSScanner implements FileScannerInfo {
@@ -69,7 +70,7 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
     }
   }
 
-  folder(context: FileScannerFolderContext, name: string, fullName: string): FileScannerFolderContext {
+  folder(context: FileScannerFolderContext, name: string, fullName: string): FileScannerFolderContext | undefined {
     if (context.folders[name]) {
       return context.folders[name];
     }
@@ -97,17 +98,18 @@ export class DeployApplicationFSScanner implements FileScannerInfo {
   addFile(file: any) {
     // Make the folder for the file
     const fileParts = file.webkitRelativePath.split('/');
-    let context = this.root;
+    let context: FileScannerFolderContext = this.root;
     let fullPath = '';
     if (fileParts.length > 1) {
       for (let i = 0; i < fileParts.length - 1; i++) {
         if (!(this.rootFolderName && i === 0 && fileParts[i] === this.rootFolderName)) {
           fullPath += '/' + fileParts[i];
-          context = this.folder(context, fileParts[i], fullPath);
-          if (!context) {
+          const nextContext = this.folder(context, fileParts[i], fullPath);
+          if (!nextContext) {
             // Ignored folder
             return this;
           }
+          context = nextContext;
         }
       }
     }

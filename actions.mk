@@ -17,19 +17,31 @@
 # ── Modifier-to-flag mapping ────────────────────────────────
 $(_HIDE)FLAG_frontend    := $($(_HIDE)WANT_FRONTEND)
 $(_HIDE)FLAG_backend     := $($(_HIDE)WANT_BACKEND)
+$(_HIDE)FLAG_website     := $($(_HIDE)WANT_WEBSITE)
+$(_HIDE)FLAG_booklets    := $($(_HIDE)WANT_BOOKLETS)
 $(_HIDE)FLAG_cf          := $($(_HIDE)WANT_CF)
+$(_HIDE)FLAG_korifi      := $($(_HIDE)WANT_KORIFI)
 $(_HIDE)FLAG_github      := $($(_HIDE)WANT_GITHUB)
+$(_HIDE)FLAG_aio         := $($(_HIDE)WANT_AIO)
+$(_HIDE)FLAG_pages       := $($(_HIDE)WANT_PAGES)
 $(_HIDE)FLAG_e2e         := $($(_HIDE)WANT_E2E)
 $(_HIDE)FLAG_dist        := $($(_HIDE)WANT_CLEAN_DIST)
 $(_HIDE)FLAG_version     := $($(_HIDE)WANT_VERSION)
 $(_HIDE)FLAG_actions     := $($(_HIDE)WANT_ACTIONS)
+$(_HIDE)FLAG_packages    := $($(_HIDE)WANT_PACKAGES)
+$(_HIDE)FLAG_secrets     := $($(_HIDE)WANT_SECRETS)
 $(_HIDE)FLAG_lint        := $($(_HIDE)WANT_LINT)
 $(_HIDE)FLAG_gate        := $($(_HIDE)WANT_GATE)
 $(_HIDE)FLAG_tests       := $($(_HIDE)WANT_TESTS)
 $(_HIDE)FLAG_coverage    := $($(_HIDE)WANT_COVERAGE)
+$(_HIDE)FLAG_summary     := $($(_HIDE)WANT_SUMMARY)
+$(_HIDE)FLAG_dependabot  := $($(_HIDE)WANT_DEPENDABOT)
+$(_HIDE)FLAG_tree        := $($(_HIDE)WANT_TREE)
+$(_HIDE)FLAG_history     := $($(_HIDE)WANT_HISTORY)
+$(_HIDE)FLAG_licenses    := $($(_HIDE)WANT_LICENSES)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend cf github e2e dist version actions lint gate tests coverage
+$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist version actions packages secrets lint gate tests coverage summary dependabot tree history licenses
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=

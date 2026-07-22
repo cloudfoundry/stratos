@@ -90,7 +90,7 @@ export function insertEmptyMetrics(
   return data;
 }
 
-function buildSingleMetricData(timestamp: number, value: number | string, timezone: string): AppAutoscalerMetricDataPoint {
+function buildSingleMetricData(timestamp: number, value: number | string, timezone?: string): AppAutoscalerMetricDataPoint {
   const name = (() => {
     if (timezone) {
       return formatInTimeZone(new Date(timestamp * 1000), timezone, AutoscalerConstants.MomentFormateTimeS);
@@ -110,7 +110,7 @@ function transformMetricData(
   interval: number,
   startTime: number,
   endTime: number,
-  timezone: string): AppAutoscalerMetricDataPoint[] {
+  timezone?: string): AppAutoscalerMetricDataPoint[] {
   if (source.length === 0) {
     return [];
   }
@@ -135,7 +135,11 @@ function transformMetricData(
       sourceIndex++;
     }
   }
-  return insertEmptyMetrics(target, target[targetIndex].time + interval, endTime, interval, timezone);
+  const lastTarget = target[targetIndex];
+  // strict: lastTarget is created via buildSingleMetricData in this loop, which
+  // always sets a numeric `time`; the loop guarantees index targetIndex was filled.
+  const lastTime = lastTarget?.time ?? targetTimestamp;
+  return insertEmptyMetrics(target, lastTime + interval, endTime, interval, timezone);
 }
 
 function buildMetricColorData(metricData: AppAutoscalerMetricDataPoint[], trigger: AppScalingTrigger): AppAutoscalerMetricDataPoint[] {
@@ -159,7 +163,7 @@ function buildSingleColor(lineChartSeries: AppAutoscalerMetricDataPoint[], ul: A
   ul.forEach((item) => {
     const lineData = {
       name: buildTriggerName(item),
-      value: item.color
+      value: item.color ?? ''
     };
     lineChartSeries.push(lineData);
   });
@@ -175,7 +179,7 @@ function buildTriggerName(item: AppScalingRule): string {
 }
 
 function buildSingleMarkLine(metricData: AppAutoscalerMetricDataPoint[], ul: AppScalingRule[]) {
-  return ul.reduce((lineChartSeries, item) => {
+  return ul.reduce<AppAutoscalerMetricDataLine[]>((lineChartSeries, item) => {
     const lineData = {
       name: buildTriggerName(item),
       series: metricData.map((data) => {

@@ -73,6 +73,7 @@
               "src/frontend/packages/core/src/polyfills.ts"
             ],
             "allowedCommonJsDependencies": [
+              "ajv",
               "deepmerge",
               "xterm",
               "xterm-addon-fit",
@@ -82,13 +83,20 @@
               "expect-type"
             ],
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
+            "loader": {
+              ".ttf": "file"
+            },
             "assets": [
               {
                 "glob": "**/*",
                 "input": "src/frontend/packages/core/assets",
                 "output": "/core/assets"
               },
-              "src/frontend/packages/core/favicon.ico",
+              {
+                "glob": "favicon.ico",
+                "input": "src/frontend/packages/core/src",
+                "output": "/"
+              },
               {
                 "glob": "**/*",
                 "input": "custom-src/frontend/assets/custom",
@@ -101,22 +109,13 @@
                 "output": "/kubernetes/assets"
               },
               {
-                "glob": "**/*",
-                "input": "node_modules/monaco-editor/min/vs",
-                "output": "/core/assets/monaco/vs"
-              },
-              {
-                "glob": "**/*",
-                "input": "node_modules/@cfstratos/monaco-yaml/lib",
-                "output": "/core/assets/monaco/vs/language/yaml"
-              },
-              {
                 "glob": "company-config.json",
                 "input": "src/frontend/packages/theme",
                 "output": "/assets"
               }
             ],
             "styles": [
+              "src/frontend/packages/theme/styles/tailwind.css",
               "src/frontend/packages/theme/styles/main.scss",
               "src/frontend/packages/theme/theme-transitions.scss",
               "src/frontend/packages/core/src/styles.scss",
@@ -137,7 +136,11 @@
               "namedChunks": true
             },
             "production": {
-              "optimization": true,
+              "optimization": {
+                "scripts": true,
+                "styles": { "minify": true, "inlineCritical": false },
+                "fonts": true
+              },
               "outputHashing": "all",
               "sourceMap": false,
               "extractLicenses": true,

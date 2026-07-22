@@ -1,0 +1,648 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
+import { Subscription, combineLatest } from 'rxjs';
+import { map } from 'rxjs/operators';
+
+import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
+import { APIResource } from '../../../../../store/src/types/api.types';
+import { IOrganization } from '../../../cf-api.types';
+import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
+import { StUser } from '../../../services/endpoint-data/stratos-types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
+import { CfRoleChange, CfUserRolesSelected } from '../../../store/types/users-roles.types';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { ORG_ROLE_DEFS, SPACE_ROLE_DEFS, shortLabelOfScoped } from '../../../roles/role-registry';
+import { RoleTristateCheckboxComponent } from './role-tristate-checkbox.component';
+import {
+  RoleSelection,
+  computeChecked,
+  diffToChanges,
+} from './role-tristate';
+
+interface OrgDef {
+  name: OrgUserRoleNames;
+  label: string;
+}
+
+interface SpaceDef {
+  name: SpaceUserRoleNames;
+  label: string;
+}
+
+interface SpaceEntry {
+  guid: string;
+  name: string;
+}
+
+/** Layout for the picked-org role editor. */
+export type RoleAssignmentViewMode = 'accordion' | 'split';
+
+/**
+ * localStorage key for the persisted view-mode choice. Mirrors the list view
+ * toggle convention (stratos.<feature>.<state>.v<n>) so the choice survives
+ * across sessions, the same way the signal-list card/table toggle does.
+ */
+export const ROLE_ASSIGNMENT_VIEW_MODE_KEY = 'stratos.role-assignment.view-mode.v1';
+
+function readPersistedViewMode(): RoleAssignmentViewMode {
+  if (typeof localStorage === 'undefined') {
+    return 'accordion';
+  }
+  try {
+    const raw = localStorage.getItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY);
+    return raw === 'split' || raw === 'accordion' ? raw : 'accordion';
+  } catch {
+    return 'accordion';
+  }
+}
+
+@Component({
+  selector: 'app-role-assignment',
+  standalone: true,
+  templateUrl: './role-assignment.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [RoleTristateCheckboxComponent, NgTemplateOutlet],
+})
+export class RoleAssignmentComponent implements OnInit, OnDestroy {
+  @Input({ required: true }) cfGuid!: string;
+  readonly users = input<StUser[]>([]);
+  readonly baseline = input<CfUserRolesSelected>({});
+  /** True while the host is still resolving existing roles (existingRoles$). */
+  readonly loading = input<boolean>(false);
+  @Input() lockedOrg?: { guid: string; name: string };
+
+  @Output() changeSet = new EventEmitter<CfRoleChange[]>();
+
+  // --- Role definitions ---
+
+  /** Exposed for template: enum-safe reference used to disable the org-user checkbox */
+  protected readonly orgUserRole = OrgUserRoleNames.USER;
+
+  readonly orgRoleDefs: OrgDef[] = ORG_ROLE_DEFS.map(d => ({
+    name: d.stratos as OrgUserRoleNames,
+    label: shortLabelOfScoped(d.stratos),
+  }));
+
+  readonly spaceRoleDefs: SpaceDef[] = SPACE_ROLE_DEFS.map(d => ({
+    name: d.stratos as SpaceUserRoleNames,
+    label: shortLabelOfScoped(d.stratos),
+  }));
+
+  // --- Injected services ---
+  private readonly cfRolesService = inject(CfRolesService);
+  private readonly userPerms = inject(CurrentUserPermissionsService);
+
+  // --- Internal signals ---
+  /** All orgs fetched (before permission filter) */
+  private readonly allOrgs = signal<APIResource<IOrganization>[]>([]);
+
+  /** True until the org list fetch resolves (drives the picker spinner). */
+  readonly orgsLoading = signal(true);
+
+  /** Orgs whose per-org space fetch is in flight (drives per-section spinner). */
+  private readonly spacesLoading = signal<Set<string>>(new Set());
+  spacesLoadingFor(orgGuid: string): boolean {
+    return this.spacesLoading().has(orgGuid);
+  }
+
+  /** Permission map: orgGuid → can edit */
+  private readonly canEditByOrg = signal<Record<string, boolean>>({});
+
+  /** Orgs the picker offers.
+   *
+   * fetchOrgs already applies the broadened filter (ORGANIZATION_CHANGE_ROLES OR
+   * SPACE_CHANGE_ROLES on any space within the org), so allOrgs is the correct
+   * admissible set.  We do NOT re-narrow here by canEditByOrg — that would
+   * exclude space-manager-only users whose org-level check is false.
+   * canEditByOrg is still used for org-cell gating (concern #1).
+   */
+  readonly allowedOrgs = computed(() => this.allOrgs());
+
+  /** Per-space permission map: `${orgGuid}:${spaceGuid}` → can change space roles */
+  private readonly canChangeSpaceByKey = signal<Record<string, boolean>>({});
+
+  /** The orgs the user has selected (or the locked org) */
+  readonly pickedOrgs = signal<APIResource<IOrganization>[]>([]);
+
+  /** Accordion open/closed per orgGuid — presentational, never affects selection */
+  private readonly expandedByOrg = signal<Set<string>>(new Set());
+
+  /** Layout for the picked-org editor: stacked accordion or two-pane master/detail. */
+  readonly viewMode = signal<RoleAssignmentViewMode>(readPersistedViewMode());
+
+  /** In split view, the org whose roles are shown in the detail pane. */
+  readonly activeOrg = signal<string | null>(null);
+
+  /** The picked-org resource for the active org (split detail pane), or null. */
+  readonly activeOrgResource = computed(() => {
+    const guid = this.activeOrg();
+    return guid ? this.pickedOrgs().find(o => o.metadata.guid === guid) ?? null : null;
+  });
+
+  /** Space filter text per orgGuid — presentational only */
+  private readonly spaceFilterByOrg = signal<Record<string, string>>({});
+
+  /** Spaces loaded per orgGuid */
+  private readonly spacesByOrg = signal<Record<string, SpaceEntry[]>>({});
+
+  /** The user's explicit role edits (overlay on baseline) */
+  private readonly selection = signal<RoleSelection>({});
+
+  /** Org search text for the multi-select picker */
+  readonly orgSearchText = signal('');
+
+  /** Orgs visible in the picker (allowed + search filter) */
+  readonly filteredAllowedOrgs = computed(() => {
+    const search = this.orgSearchText().toLowerCase();
+    if (!search) {
+      return this.allowedOrgs();
+    }
+    return this.allowedOrgs().filter(o => o.entity.name.toLowerCase().includes(search));
+  });
+
+  private subs = new Subscription();
+
+  /** Guard so the baseline seed runs once — user add/remove must not be re-overridden. */
+  private baselineSeeded = false;
+
+  constructor() {
+    // Seed the accordion with the user's existing-role orgs (from baseline) so
+    // current roles are visible on open without manually re-picking each org.
+    // Reactive: baseline (existingRoles$) resolves async and arrives after the
+    // org list. Seeds collapsed; spaces load lazily on expand. lockedOrg flows
+    // own their seeding (seedLockedOrg).
+    effect(() => {
+      const orgs = this.allOrgs();
+      const baseline = this.baseline();
+      if (this.baselineSeeded || this.lockedOrg || orgs.length === 0) {
+        return;
+      }
+      const orgGuids = new Set<string>();
+      for (const userGuid of Object.keys(baseline)) {
+        for (const orgGuid of Object.keys(baseline[userGuid] ?? {})) {
+          orgGuids.add(orgGuid);
+        }
+      }
+      if (orgGuids.size === 0) {
+        return; // baseline not resolved yet — wait for it to arrive
+      }
+      const toSeed = orgs.filter(o => orgGuids.has(o.metadata.guid));
+      if (toSeed.length) {
+        this.pickedOrgs.update(list => {
+          const have = new Set(list.map(p => p.metadata.guid));
+          return [...toSeed.filter(o => !have.has(o.metadata.guid)), ...list];
+        });
+      }
+      this.baselineSeeded = true;
+    });
+
+    // Persist the view-mode choice (mirrors the list view toggle) so it
+    // survives across sessions. Writes the initial value too — harmless.
+    effect(() => {
+      const mode = this.viewMode();
+      if (typeof localStorage === 'undefined') {
+        return;
+      }
+      try {
+        localStorage.setItem(ROLE_ASSIGNMENT_VIEW_MODE_KEY, mode);
+      } catch {
+        // Storage disabled / quota — the in-memory signal still drives the UI.
+      }
+    });
+  }
+
+  // --- Lifecycle ---
+
+  ngOnInit(): void {
+    // Fetch all orgs, then resolve permissions per org
+    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid).subscribe(orgs => {
+      this.allOrgs.set(orgs);
+      this.resolvePermissions(orgs);
+      this.orgsLoading.set(false);
+    });
+    this.subs.add(orgsSub);
+
+    // lockedOrg: seed pickedOrgs from it once orgs load (or immediately if lockedOrg is set)
+    if (this.lockedOrg) {
+      // We create a minimal APIResource shape from the lockedOrg hint
+      // We'll wait for allOrgs to fill so we get the real entity, or use stub
+      this.seedLockedOrg();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.subs.unsubscribe();
+  }
+
+  // --- Permission resolution ---
+
+  private resolvePermissions(orgs: APIResource<IOrganization>[]): void {
+    if (!orgs.length) {
+      return;
+    }
+    // Build one combineLatest over all per-org observables, resolve once
+    const obs = orgs.map(o =>
+      this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, o.metadata.guid).pipe(
+        map(can => ({ guid: o.metadata.guid, can })),
+      ),
+    );
+
+    const permSub = combineLatest(obs).subscribe(results => {
+      const map: Record<string, boolean> = {};
+      for (const { guid, can } of results) {
+        map[guid] = can;
+      }
+      this.canEditByOrg.set(map);
+
+      // If lockedOrg is set, seed from real org list once permissions resolved
+      if (this.lockedOrg && this.pickedOrgs().length === 0) {
+        this.seedLockedOrg();
+      }
+    });
+    this.subs.add(permSub);
+  }
+
+  // --- Locked org seeding ---
+
+  private seedLockedOrg(): void {
+    if (!this.lockedOrg) {
+      return;
+    }
+    const existing = this.allOrgs().find(o => o.metadata.guid === this.lockedOrg!.guid);
+    if (existing) {
+      this.pickedOrgs.set([existing]);
+      this.loadSpacesFor(existing.metadata.guid);
+      this.expandedByOrg.update(set => { const next = new Set(set); next.add(existing.metadata.guid); return next; });
+    } else {
+      // Org not yet loaded — create a stub so the UI can render
+      const stub: APIResource<IOrganization> = {
+        metadata: {
+          guid: this.lockedOrg.guid,
+          created_at: '',
+          updated_at: '',
+          url: '',
+        },
+        entity: { name: this.lockedOrg.name },
+      };
+      this.pickedOrgs.set([stub]);
+      this.loadSpacesFor(this.lockedOrg.guid);
+      this.expandedByOrg.update(set => { const next = new Set(set); next.add(this.lockedOrg!.guid); return next; });
+    }
+  }
+
+  // --- Org picker actions ---
+
+  pickOrg(org: APIResource<IOrganization>): void {
+    const already = this.pickedOrgs().some(o => o.metadata.guid === org.metadata.guid);
+    if (already) {
+      return;
+    }
+    // Prepend so the most-recent pick sits at the top of the accordion (less scrolling).
+    this.pickedOrgs.update(list => [org, ...list]);
+    this.loadSpacesFor(org.metadata.guid);
+    this.expandedByOrg.update(set => { const next = new Set(set); next.add(org.metadata.guid); return next; });
+  }
+
+  removePickedOrg(orgGuid: string): void {
+    this.pickedOrgs.update(list => list.filter(o => o.metadata.guid !== orgGuid));
+    this.expandedByOrg.update(set => { const next = new Set(set); next.delete(orgGuid); return next; });
+  }
+
+  toggleExpanded(orgGuid: string): void {
+    const willExpand = !this.expandedByOrg().has(orgGuid);
+    this.expandedByOrg.update(set => {
+      const next = new Set(set);
+      if (next.has(orgGuid)) {
+        next.delete(orgGuid);
+      } else {
+        next.add(orgGuid);
+      }
+      return next;
+    });
+    // Lazy-load this org's spaces on first expand (seeded orgs aren't loaded up
+    // front). Idempotent — loadSpacesFor no-ops if already loaded.
+    if (willExpand) {
+      this.loadSpacesFor(orgGuid);
+    }
+  }
+
+  isExpanded(orgGuid: string): boolean {
+    return this.expandedByOrg().has(orgGuid);
+  }
+
+  // --- View mode (accordion ↔ split) ---
+
+  /**
+   * Switch layout and reconcile the differing "what's open" state between the
+   * two views: the accordion can have many orgs expanded; split shows exactly
+   * one (activeOrg).
+   *  - → split: adopt an active org (keep the current one, else the top of the
+   *    picked list) and ensure its spaces are loaded.
+   *  - → accordion: focus where the user was — expand only the active org.
+   */
+  setViewMode(mode: RoleAssignmentViewMode): void {
+    if (mode === 'split') {
+      const active = this.activeOrg()
+        ?? this.pickedOrgs()[0]?.metadata.guid
+        ?? null;
+      if (active) {
+        this.setActiveOrg(active);
+      }
+    } else if (this.activeOrg()) {
+      const active = this.activeOrg()!;
+      this.expandedByOrg.set(new Set([active]));
+    }
+    this.viewMode.set(mode);
+  }
+
+  setActiveOrg(orgGuid: string): void {
+    this.activeOrg.set(orgGuid);
+    this.loadSpacesFor(orgGuid);
+  }
+
+  // --- Space loading ---
+
+  private loadSpacesFor(orgGuid: string): void {
+    if (this.spacesByOrg()[orgGuid]) {
+      return; // already loaded
+    }
+    this.spacesLoading.update(s => { const next = new Set(s); next.add(orgGuid); return next; });
+    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe(spaces => {
+      this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
+      this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
+      this.resolveSpacePermissions(orgGuid, spaces);
+    });
+    this.subs.add(spaceSub);
+  }
+
+  /** Resolve SPACE_CHANGE_ROLES per loaded space and write into canChangeSpaceByKey. */
+  private resolveSpacePermissions(orgGuid: string, spaces: SpaceEntry[]): void {
+    if (!spaces.length) {
+      return;
+    }
+    const obs = spaces.map(space =>
+      this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid, orgGuid, space.guid).pipe(
+        map(can => ({ key: `${orgGuid}:${space.guid}`, can })),
+      ),
+    );
+    const permSub = combineLatest(obs).subscribe(results => {
+      this.canChangeSpaceByKey.update(current => {
+        const next = { ...current };
+        for (const { key, can } of results) {
+          next[key] = can;
+        }
+        return next;
+      });
+    });
+    this.subs.add(permSub);
+  }
+
+  spacesFor(orgGuid: string): SpaceEntry[] {
+    return this.spacesByOrg()[orgGuid] ?? [];
+  }
+
+  // --- Space filter ---
+
+  setSpaceFilter(orgGuid: string, text: string): void {
+    this.spaceFilterByOrg.update(m => ({ ...m, [orgGuid]: text }));
+  }
+
+  spaceFilterFor(orgGuid: string): string {
+    return this.spaceFilterByOrg()[orgGuid] ?? '';
+  }
+
+  filteredSpacesFor(orgGuid: string): SpaceEntry[] {
+    const text = this.spaceFilterFor(orgGuid).toLowerCase();
+    const spaces = this.spacesFor(orgGuid);
+    if (!text) {
+      return spaces;
+    }
+    return spaces.filter(s => s.name.toLowerCase().includes(text));
+  }
+
+  // --- Role checked state ---
+
+  checkedForOrg(orgGuid: string, role: OrgUserRoleNames): boolean | null {
+    return computeChecked(role, this.users(), this.baseline(), this.selection(), orgGuid);
+  }
+
+  checkedForSpace(orgGuid: string, spaceGuid: string, role: SpaceUserRoleNames): boolean | null {
+    return computeChecked(role, this.users(), this.baseline(), this.selection(), orgGuid, spaceGuid);
+  }
+
+  // --- Org-USER auto-disable rule ---
+  // Org USER checkbox is disabled when any other org or space role is set for this org.
+  // Ported from CfRoleCheckboxComponent.isDisabled / hasOrgSpaceRole (lines 336-367).
+  //
+  // Memoized: recomputes when selection, spacesByOrg, users, or baseline changes (all signals).
+  // Cost is bounded: the dialog has low CD frequency and Add User operates on 1 user.
+  private readonly orgUserDisabledMap = computed<Record<string, boolean>>(() => {
+    const sel = this.selection();
+    const spacesByOrg = this.spacesByOrg();
+    const users = this.users();
+    const baseline = this.baseline();
+    const result: Record<string, boolean> = {};
+
+    for (const orgGuid of Object.keys(sel).concat(Object.keys(spacesByOrg))) {
+      if (orgGuid in result) {
+        continue;
+      }
+      result[orgGuid] = this._computeOrgUserDisabled(orgGuid, sel, spacesByOrg, users, baseline);
+    }
+    return result;
+  });
+
+  private _computeOrgUserDisabled(
+    orgGuid: string,
+    sel: RoleSelection,
+    spacesByOrg: Record<string, SpaceEntry[]>,
+    users: StUser[],
+    baseline: CfUserRolesSelected,
+  ): boolean {
+    const selOrg = sel[orgGuid];
+
+    // Check org roles other than USER
+    const otherOrgRoles = [OrgUserRoleNames.MANAGER, OrgUserRoleNames.BILLING_MANAGERS, OrgUserRoleNames.AUDITOR];
+    for (const role of otherOrgRoles) {
+      const checked = computeChecked(role, users, baseline, sel, orgGuid);
+      if (checked !== false) {
+        return true;
+      }
+    }
+
+    // Check all space roles across loaded spaces (computeChecked reads baseline + selection)
+    const spaces = spacesByOrg[orgGuid] ?? [];
+    for (const space of spaces) {
+      for (const def of this.spaceRoleDefs) {
+        const checked = computeChecked(def.name, users, baseline, sel, orgGuid, space.guid);
+        if (checked !== false) {
+          return true;
+        }
+      }
+    }
+
+    // Check selection's explicit space-role overrides for spaces not yet loaded
+    if (selOrg?.spaces) {
+      for (const [, spaceEntry] of Object.entries(selOrg.spaces)) {
+        for (const [, val] of Object.entries(spaceEntry.roles)) {
+          if (val === true) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
+  }
+
+  isOrgUserDisabled(orgGuid: string): boolean {
+    return this.orgUserDisabledMap()[orgGuid] ?? false;
+  }
+
+  roleCountForOrg(orgGuid: string): number {
+    let n = 0;
+    for (const def of this.orgRoleDefs) {
+      if (this.checkedForOrg(orgGuid, def.name) === true) { n++; }
+    }
+    // Enumerate this org's space GUIDs from baseline + selection rather than from
+    // loaded spaces, so the collapsed summary is accurate WITHOUT fetching spaces
+    // (seeded orgs stay cheap; spaces load lazily only on expand).
+    const spaceGuids = new Set<string>();
+    const baseline = this.baseline();
+    for (const userGuid of Object.keys(baseline)) {
+      const spaces = baseline[userGuid]?.[orgGuid]?.spaces;
+      if (spaces) {
+        for (const sg of Object.keys(spaces)) { spaceGuids.add(sg); }
+      }
+    }
+    const selSpaces = this.selection()[orgGuid]?.spaces;
+    if (selSpaces) {
+      for (const sg of Object.keys(selSpaces)) { spaceGuids.add(sg); }
+    }
+    for (const sg of spaceGuids) {
+      for (const def of this.spaceRoleDefs) {
+        if (this.checkedForSpace(orgGuid, sg, def.name) === true) { n++; }
+      }
+    }
+    return n;
+  }
+
+  /**
+   * Count of this org's roles that are indeterminate (held by some, but not
+   * all, of the selected users) — i.e. computeChecked returns null. Surfaced
+   * alongside roleCountForOrg so a multi-user org with divergent roles doesn't
+   * read as empty in the collapsed summary. Enumerated from baseline + selection
+   * (same as roleCountForOrg) so it stays accurate without loading spaces.
+   */
+  mixedRoleCountForOrg(orgGuid: string): number {
+    let n = 0;
+    for (const def of this.orgRoleDefs) {
+      if (this.checkedForOrg(orgGuid, def.name) === null) { n++; }
+    }
+    const spaceGuids = new Set<string>();
+    const baseline = this.baseline();
+    for (const userGuid of Object.keys(baseline)) {
+      const spaces = baseline[userGuid]?.[orgGuid]?.spaces;
+      if (spaces) {
+        for (const sg of Object.keys(spaces)) { spaceGuids.add(sg); }
+      }
+    }
+    const selSpaces = this.selection()[orgGuid]?.spaces;
+    if (selSpaces) {
+      for (const sg of Object.keys(selSpaces)) { spaceGuids.add(sg); }
+    }
+    for (const sg of spaceGuids) {
+      for (const def of this.spaceRoleDefs) {
+        if (this.checkedForSpace(orgGuid, sg, def.name) === null) { n++; }
+      }
+    }
+    return n;
+  }
+
+  canEditOrg(orgGuid: string): boolean {
+    return this.canEditByOrg()[orgGuid] ?? false;
+  }
+
+  /** Returns true if the logged-in user may change roles in the given space.
+   * Resolves to true for org managers (ORGANIZATION_CHANGE_ROLES arm) and
+   * space managers of that specific space (SPACE_MANAGER arm).
+   * Defaults to false until the space-permission observable fires.
+   */
+  canChangeSpaceRoles(orgGuid: string, spaceGuid: string): boolean {
+    return this.canChangeSpaceByKey()[`${orgGuid}:${spaceGuid}`] ?? false;
+  }
+
+  // --- Toggle handlers ---
+
+  private ensureOrgInSelection(org: APIResource<IOrganization>): void {
+    const orgGuid = org.metadata.guid;
+    this.selection.update(sel => {
+      if (!sel[orgGuid]) {
+        return {
+          ...sel,
+          [orgGuid]: {
+            orgGuid,
+            orgName: org.entity.name,
+            orgRoles: {},
+            spaces: {},
+          },
+        };
+      }
+      return sel;
+    });
+  }
+
+  onToggleOrgRole(org: APIResource<IOrganization>, role: OrgUserRoleNames, value: boolean): void {
+    const orgGuid = org.metadata.guid;
+    this.ensureOrgInSelection(org);
+    this.selection.update(sel => ({
+      ...sel,
+      [orgGuid]: {
+        ...sel[orgGuid],
+        orgRoles: {
+          ...sel[orgGuid].orgRoles,
+          [role]: value,
+        },
+      },
+    }));
+    this.changeSet.emit(diffToChanges(this.users(), this.baseline(), this.selection()));
+  }
+
+  onToggleSpaceRole(org: APIResource<IOrganization>, space: SpaceEntry, role: SpaceUserRoleNames, value: boolean): void {
+    const orgGuid = org.metadata.guid;
+    this.ensureOrgInSelection(org);
+    this.selection.update(sel => {
+      const existingSpaces = sel[orgGuid].spaces;
+      return {
+        ...sel,
+        [orgGuid]: {
+          ...sel[orgGuid],
+          spaces: {
+            ...existingSpaces,
+            [space.guid]: {
+              spaceName: space.name,
+              roles: {
+                ...(existingSpaces[space.guid]?.roles ?? {}),
+                [role]: value,
+              },
+            },
+          },
+        },
+      };
+    });
+    this.changeSet.emit(diffToChanges(this.users(), this.baseline(), this.selection()));
+  }
+}

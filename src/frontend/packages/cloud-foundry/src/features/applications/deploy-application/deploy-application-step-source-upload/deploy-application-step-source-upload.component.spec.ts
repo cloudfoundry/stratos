@@ -4,7 +4,6 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { provideMockStore } from '@ngrx/store/testing';
 
 import { CATALOGUE_ENTITIES, entityCatalog, generateStratosEntities, TestEntityCatalog } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -35,7 +34,6 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
         provideNoopAnimations(),
         provideRouter([]),
         provideHttpClient(),
-        provideMockStore(),
         ...STORE_TEST_PROVIDERS,
         {
           provide: CATALOGUE_ENTITIES,

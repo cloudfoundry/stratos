@@ -1,28 +1,19 @@
 import { Injectable, OnDestroy, signal, WritableSignal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { naturalCompare, safeUnsubscribe } from '@stratosui/core';
-import {
-  AppState,
-  connectedEndpointsOfTypesSelector,
-  EndpointModel,
-  getCurrentPageRequestInfo
-} from '@stratosui/store';
+import { EndpointsSignalService, naturalCompare, safeUnsubscribe } from '@stratosui/core';
+import { EndpointModel } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
-  filter,
   first,
   map,
-  publishReplay,
-  refCount,
   startWith,
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
-import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
-import { KubernetesNamespace } from '../../store/kube.types';
+import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
+import { KubeNamespace } from '../../../services/endpoint-data/kube-types';
 
 // Helper function to create a signal wrapper compatible with IListMultiFilterConfig
 // The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
@@ -57,8 +48,11 @@ function createSignalWrapper<T>(initialValue: T) {
 export interface KubernetesNamespacesFilterItem<T = any> {
   list$: Observable<T[]>;
   loading$: Observable<boolean>;
-  select: ReturnType<typeof createSignalWrapper<string>>;
+  select: ReturnType<typeof createSignalWrapper<string | undefined>>;
 }
+
+// NB: `KubeNamespace` carries `metadata.kubeId` (stamped by the endpoint
+// data service), which the namespace filter keys off below.
 
 /**
  * This service relies on OnDestroy, so must be `provided` by a component
@@ -67,20 +61,40 @@ export interface KubernetesNamespacesFilterItem<T = any> {
   providedIn: 'root'
 })
 export class KubernetesNamespacesFilterService implements OnDestroy {
-  private store = inject<Store<AppState>>(Store);
+  private endpointsSignals = inject(EndpointsSignalService);
+  private namespaceData = inject(KubeNamespaceDataService);
 
   public kube: KubernetesNamespacesFilterItem<EndpointModel>;
-  public namespace: KubernetesNamespacesFilterItem<KubernetesNamespace>;
+  public namespace: KubernetesNamespacesFilterItem<KubeNamespace>;
 
   private subs: Subscription[] = [];
   private injector = inject(Injector);
 
-  private allNamespaces = this.getNamespacesObservable();
-  private allNamespacesLoading$ = this.allNamespaces.pagination$.pipe(map(
-    pag => getCurrentPageRequestInfo(pag).busy
-  ));
+  // Connected K8s endpoints (reactive). Replaces the legacy
+  // `connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)` read; the
+  // legacy selector gated on cnsi_type === KUBERNETES + connected status,
+  // mirrored here by filtering the already-connected list.
+  private connectedKubeEndpoints = computed(() =>
+    this.endpointsSignals.connectedEndpoints()
+      .filter(ep => ep?.cnsi_type === KUBERNETES_ENDPOINT_TYPE)
+      .sort((a, b) => naturalCompare(a.name, b.name)),
+  );
+
+  // All namespaces across the connected kube endpoints, from the signal
+  // data service (replaces the legacy getPaginationService(null) read).
+  private allNamespacesSig = computed(() =>
+    this.namespaceData.allNamespacesAcrossEndpoints(
+      this.connectedKubeEndpoints().map(ep => ep.guid).filter((g): g is string => !!g)
+    )()
+  );
+
+  // Loading mirrors the legacy pagination `busy` gate: true while the initial
+  // cross-endpoint namespace refresh is in flight.
+  private namespacesLoading = signal<boolean>(true);
+  private allNamespacesLoading$ = toObservable(this.namespacesLoading);
 
   constructor() {
+    void this.refreshNamespaces();
     this.kube = this.createKube();
     this.namespace = this.createNamespace();
 
@@ -88,33 +102,33 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     this.namespace.list$.pipe(first(undefined, [])).subscribe(() => this.setupAutoSelectors());
   }
 
-  private getNamespacesObservable() {
-    return kubeEntityCatalog.namespace.store.getPaginationService(null);
+  // Prime the per-endpoint namespace caches for every connected kube, then
+  // drop the loading flag so dependent filters render.
+  private async refreshNamespaces(): Promise<void> {
+    const guids = this.connectedKubeEndpoints().map(ep => ep.guid).filter((g): g is string => !!g);
+    this.namespacesLoading.set(true);
+    await Promise.all(guids.map(g => this.namespaceData.refresh({ kubeGuid: g })));
+    this.namespacesLoading.set(false);
   }
 
   private createKube(): KubernetesNamespacesFilterItem<EndpointModel> {
-    const list$ = this.store.select(connectedEndpointsOfTypesSelector(KUBERNETES_ENDPOINT_TYPE)).pipe(
-      // Ensure we have endpoints
-      filter(endpoints => endpoints && !!Object.keys(endpoints).length),
-      publishReplay(1),
-      refCount(),
-    );
-
-    // Create signal wrapper within injection context
-    return runInInjectionContext(this.injector, () => ({
-      list$: list$.pipe(
-        map(endpoints => Object.values(endpoints)),
-        first(undefined, []), // Provide default empty array to prevent EmptyError
-        map((endpoints: EndpointModel[]) => {
-          return Object.values(endpoints).sort((a: EndpointModel, b: EndpointModel) => naturalCompare(a.name, b.name));
-        }),
-      ),
-      loading$: list$.pipe(map(kubes => !kubes)),
-      select: createSignalWrapper<string>(undefined)
-    }));
+    return runInInjectionContext(this.injector, () => {
+      const list$ = toObservable(this.connectedKubeEndpoints);
+      return {
+        // Match legacy `first(undefined, [])` semantics so downstream
+        // auto-selectors don't EmptyError on init when no endpoints exist.
+        list$: list$.pipe(first(undefined, [])),
+        // Loading mirrors the legacy "we don't have a list yet" gate. The
+        // signal projection always produces an array so loading flips to
+        // false on first read; matches the legacy `!kubes` semantics
+        // because the signal never emits null.
+        loading$: list$.pipe(map(kubes => !kubes)),
+        select: createSignalWrapper<string | undefined>(undefined)
+      };
+    });
   }
 
-  private createNamespace(): KubernetesNamespacesFilterItem<KubernetesNamespace> {
+  private createNamespace(): KubernetesNamespacesFilterItem<KubeNamespace> {
     // Convert observables to signals within injection context
     return runInInjectionContext(this.injector, () => {
       const kubeSelectSignal = toSignal(
@@ -122,19 +136,15 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
         { initialValue: '' }
       );
 
-      const allNamespacesSignal = toSignal(
-        this.allNamespaces.entities$,
-        { initialValue: [] as KubernetesNamespace[] }
-      );
-
-      // Use computed for derived list
+      // Use computed for derived list — filter the cross-endpoint namespace
+      // signal down to the selected kube.
       const namespaceListComputed = computed(() => {
         const selectedKubeId = kubeSelectSignal();
-        const entities = allNamespacesSignal();
+        const entities = this.allNamespacesSig();
         if (selectedKubeId && entities) {
-          return (entities as KubernetesNamespace[])
-            .filter((namespace: KubernetesNamespace) => namespace.metadata?.kubeId === selectedKubeId)
-            .sort((a: KubernetesNamespace, b: KubernetesNamespace) => naturalCompare(a.metadata?.name ?? '', b.metadata?.name ?? ''));
+          return entities
+            .filter((namespace: KubeNamespace) => namespace.metadata?.kubeId === selectedKubeId)
+            .sort((a: KubeNamespace, b: KubeNamespace) => naturalCompare(a.metadata?.name ?? '', b.metadata?.name ?? ''));
         }
         return [];
       });
@@ -145,7 +155,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
       return {
         list$: namespaceList$,
         loading$: this.allNamespacesLoading$,
-        select: createSignalWrapper<string>(undefined)
+        select: createSignalWrapper<string | undefined>(undefined)
       };
     });
   }
@@ -169,7 +179,7 @@ export class KubernetesNamespacesFilterService implements OnDestroy {
     this.subs.push(namespaceResetSub);
   }
 
-  private selectSet(selectWrapper: ReturnType<typeof createSignalWrapper<string>>, newValue: string) {
+  private selectSet(selectWrapper: ReturnType<typeof createSignalWrapper<string | undefined>>, newValue: string | undefined) {
     if (selectWrapper() !== newValue) {
       selectWrapper.set(newValue);
     }

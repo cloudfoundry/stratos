@@ -27,15 +27,12 @@ describe('EditSpaceComponent', () => {
     cfGuid: 'test-cf-guid',
     orgGuid: 'test-org-guid',
     spaceGuid: 'test-space-guid',
-    space$: of({
-      entity: {
-        entity: {
-          name: 'test-space',
-          allow_ssh: true,
-          space_quota_definition_guid: null
-        }
-      }
-    })
+    spaceDataService: {
+      space: () => null,
+      isLoading: () => false,
+      errors: () => [],
+      load: () => of(undefined),
+    },
   };
 
   beforeEach(() => {

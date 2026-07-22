@@ -5,7 +5,7 @@
         <app-custom-icon class="monitor-icon__error">error</app-custom-icon>
       }
       @if (!state.error && state.busy) {
-        <app-progress-spinner diameter="20" mode="indeterminate"></app-progress-spinner>
+        <app-progress-spinner [diameter]="20" mode="indeterminate"></app-progress-spinner>
       }
       @if (!state.error && !state.busy && state.completed) {
         <app-custom-icon class="monitor-icon__done">done</app-custom-icon>

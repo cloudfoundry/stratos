@@ -1,13 +1,10 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import { CFAppState } from '@stratosui/cloud-foundry';
-import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, ITileData, TileSelectorComponent } from '@stratosui/core';
-import { RouterNav } from '@stratosui/store';
+import { PageHeaderComponent, StepComponent, SteppersComponent, BASE_REDIRECT_QUERY, ITileConfig, ITileData, TileSelectorComponent, SignalStepHandle } from '@stratosui/core';
 import {
   ApplicationDeploySourceTypes,
   AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM,
@@ -15,18 +12,28 @@ import {
 } from '../deploy-application/deploy-application-steps.types';
 
 export const AUTO_SELECT_CF_URL_PARAM = 'auto-select-endpoint';
+// Query param carrying where a create/deploy flow should return on cancel /
+// success — set to the CF-scoped wall when launched from one, else absent
+// (callers fall back to the global wall). Shared by the create, deploy and
+// add-service-instance flows.
+export const RETURN_URL_PARAM = 'returnUrl';
 
 
-export interface IAppTileData extends ITileData {
+// Intersection rather than `interface extends` so the optional deploy-only
+// fields are allowed: ITileData's index is `string | number` (no undefined),
+// which an `interface` member of type `string | undefined` would violate
+// (TS2411). The intersection keeps IAppTileData assignable to ITileData for
+// the ITileConfig<T extends ITileData> consumers while modelling the create
+// tile (which omits subType/endpointGuid).
+export type IAppTileData = ITileData & {
   type: string;
   subType?: string;
   endpointGuid?: string;
-}
+};
 
 @Component({
   selector: 'app-new-application-base-step',
   templateUrl: './new-application-base-step.component.html',
-  styleUrls: ['./new-application-base-step.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -41,34 +48,48 @@ export interface IAppTileData extends ITileData {
   ]
 })
 export class NewApplicationBaseStepComponent {
-  private store = inject<Store<CFAppState>>(Store);
+  private router = inject(Router);
   private activatedRoute = inject(ActivatedRoute);
 
 
   public serviceType!: string;
   public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
 
-  set selectedTile(tile: ITileConfig<IAppTileData>) {
-    if (tile) {
+  // FWT-957: signal-native step handle. Tile-selector confirmation step
+  // (no submission, Next hidden); navigation happens via the tile
+  // selectionChange handler calling router.navigate.
+  signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
+
+  // The selector's (selection) output is typed against the base ITileConfig
+  // (and emits null on deselect); the tiles are built in this component with
+  // IAppTileData, so the narrowing here is sound.
+  set selectedTile(tile: ITileConfig | null) {
+    const data = tile?.data as IAppTileData | undefined;
+    if (data) {
       const baseUrl = 'applications';
-      const type = tile.data.type;
+      const type = data.type;
       const query: { [key: string]: string } = {
         [BASE_REDIRECT_QUERY]: `${baseUrl}/new`
       };
-      if (tile.data.subType) {
-        query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
-        query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid;
+      if (data.subType) {
+        query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = data.subType;
+        // endpointGuid is only present for deploy tiles auto-selected from a
+        // specific CF; when absent the param is omitted (router drops undefined
+        // params anyway, so this matches the prior behavior).
+        if (data.endpointGuid) {
+          query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = data.endpointGuid;
+        }
       }
       const endpoint = this.activatedRoute.snapshot.params.endpointId;
       if (endpoint) {
         query[AUTO_SELECT_CF_URL_PARAM] = endpoint;
         query[BASE_REDIRECT_QUERY] += `/${endpoint}`;
+        // Launched from a CF-scoped Applications wall — return there (cancel /
+        // success) instead of the global wall.
+        query[RETURN_URL_PARAM] = `/cloud-foundry/${endpoint}/applications`;
       }
 
-      this.store.dispatch(new RouterNav({
-        path: `${baseUrl}/${type}`,
-        query
-      }));
+      this.router.navigate(`${baseUrl}/${type}`.split('/'), { queryParams: query });
     }
   }
 
@@ -81,8 +102,10 @@ export class NewApplicationBaseStepComponent {
           ...types.map(type =>
             new ITileConfig<IAppTileData>(
               type.name,
-              type.graphic,
-              { type: 'deploy', subType: type.id, endpointGuid: type.endpointGuid },
+              // strict: every deploy SourceType in the catalog defines a graphic
+              // (optional on the shared SourceType type only).
+              type.graphic!,
+              { type: 'deploy', subType: type.id, ...(type.endpointGuid ? { endpointGuid: type.endpointGuid } : {}) },
             ),
           ),
           new ITileConfig<IAppTileData>(

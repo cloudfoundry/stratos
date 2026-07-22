@@ -1,0 +1,50 @@
+{
+  "cf.applications.page": {
+    "name": "Applications page",
+    "facets": { "background": { "color": { "literal": { "l": 0.97, "c": 0.01, "h": 250 } } } }
+  },
+  "cf.applications.nav": {
+    "name": "Navigation bar",
+    "facets": { "background": { "color": { "literal": { "l": 0.22, "c": 0.01, "h": 250 } } } }
+  },
+  "cf.applications.heading": {
+    "name": "Page heading",
+    "facets": { "content": { "text": "Applications" } }
+  },
+  "cf.applications.app-card-1": {
+    "name": "App card 1",
+    "facets": { "background": { "color": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
+  },
+  "cf.applications.app-card-1.heading": {
+    "name": "App name",
+    "facets": { "content": { "text": "Demo App 1" } }
+  },
+  "cf.applications.app-card-1.status": {
+    "name": "Status (running)",
+    "facets": { "text": { "color": { "literal": { "l": 0.7, "c": 0.17, "h": 145 } } } }
+  },
+  "cf.applications.app-card-2": {
+    "name": "App card 2",
+    "facets": { "background": { "color": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
+  },
+  "cf.applications.app-card-2.heading": {
+    "name": "App name",
+    "facets": { "content": { "text": "Demo App 2" } }
+  },
+  "cf.applications.app-card-2.status": {
+    "name": "Status (stopped)",
+    "facets": { "text": { "color": { "literal": { "l": 0.8, "c": 0.16, "h": 85 } } } }
+  },
+  "cf.applications.app-card-3": {
+    "name": "App card 3",
+    "facets": { "background": { "color": { "literal": { "l": 1, "c": 0, "h": 0 } } } }
+  },
+  "cf.applications.app-card-3.heading": {
+    "name": "App name",
+    "facets": { "content": { "text": "Demo App 3" } }
+  },
+  "cf.applications.app-card-3.status": {
+    "name": "Status (crashed)",
+    "facets": { "text": { "color": { "literal": { "l": 0.63, "c": 0.23, "h": 25 } } } }
+  }
+}

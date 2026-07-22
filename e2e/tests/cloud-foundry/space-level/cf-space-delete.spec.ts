@@ -105,7 +105,7 @@ test.describe('CF Space Delete', () => {
         await deleteOption.click();
 
         // Verify confirmation dialog appears
-        const confirmDialog = page.locator('app-confirm-dialog, mat-dialog-container');
+        const confirmDialog = page.locator('app-dialog-confirm');
         await confirmDialog.waitFor({ state: 'visible' });
 
         // Verify dialog has confirm/delete button
@@ -160,7 +160,7 @@ test.describe('CF Space Delete', () => {
           await deleteButton.click();
 
           // Confirm deletion
-          const confirmDialog = page.locator('mat-dialog-container, app-confirm-dialog');
+          const confirmDialog = page.locator('app-dialog-confirm');
           await confirmDialog.waitFor({ state: 'visible', timeout: 5000 });
 
           const confirmButton = confirmDialog.locator('button').filter({ hasText: /delete|confirm|yes/i });

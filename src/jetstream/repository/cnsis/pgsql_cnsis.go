@@ -37,10 +37,10 @@ var saveCNSI = `INSERT INTO cnsis (guid, name, cnsi_type, api_endpoint, auth_end
 var deleteCNSI = `DELETE FROM cnsis WHERE guid = $1`
 
 // Update some of the endpoint metadata
-var updateCNSI = `UPDATE cnsis SET name = $1, skip_ssl_validation = $2, sso_allowed = $3, client_id = $4, client_secret = $5, ca_cert = $6 WHERE guid = $7`
+var updateCNSI = `UPDATE cnsis SET name = $1, skip_ssl_validation = $2, sso_allowed = $3, client_id = $4, client_secret = $5, ca_cert = $6, last_updated = CURRENT_TIMESTAMP WHERE guid = $7`
 
 // Update the metadata
-var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1 WHERE guid = $2`
+var updateCNSIMetadata = `UPDATE cnsis SET meta_data = $1, last_updated = CURRENT_TIMESTAMP WHERE guid = $2`
 
 var countCNSI = `SELECT COUNT(*) FROM cnsis WHERE guid=$1`
 
@@ -76,7 +76,7 @@ func (p *PostgresCNSIRepository) List(encryptionKey []byte) ([]*api.CNSIRecord, 
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var cnsiList []*api.CNSIRecord
 	cnsiList = make([]*api.CNSIRecord, 0)
@@ -144,7 +144,7 @@ func (p *PostgresCNSIRepository) ListByUser(userGUID string) ([]*api.ConnectedEn
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var clusterList []*api.ConnectedEndpoint
 	clusterList = make([]*api.ConnectedEndpoint, 0)
@@ -214,7 +214,7 @@ func (p *PostgresCNSIRepository) listBy(query string, match string, encryptionKe
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve CNSI records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var cnsiList []*api.CNSIRecord
 	cnsiList = make([]*api.CNSIRecord, 0)
@@ -351,8 +351,8 @@ func (p *PostgresCNSIRepository) Save(guid string, cnsi api.CNSIRecord, encrypti
 	if err != nil {
 		return err
 	}
-	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, fmt.Sprintf("%s", cnsi.CNSIType),
-		fmt.Sprintf("%s", cnsi.APIEndpoint), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
+	if _, err := p.db.Exec(saveCNSI, guid, cnsi.Name, cnsi.CNSIType,
+		cnsi.APIEndpoint.String(), cnsi.AuthorizationEndpoint, cnsi.TokenEndpoint, cnsi.DopplerLoggingEndpoint, cnsi.SkipSSLValidation,
 		cnsi.ClientId, cipherTextClientSecret, cnsi.SSOAllowed, cnsi.SubType, cnsi.Metadata, cnsi.Creator, cnsi.CACert); err != nil {
 		return fmt.Errorf("Unable to Save CNSI record: %v", err)
 	}
@@ -388,7 +388,10 @@ func (p *PostgresCNSIRepository) Update(endpoint api.CNSIRecord, encryptionKey [
 		return err
 	}
 
-	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, cipherTextClientSecret, endpoint.GUID, endpoint.CACert)
+	// Arg order must match updateCNSI: ... ca_cert = $6 WHERE guid = $7.
+	// These were swapped once (guid landed in ca_cert, WHERE matched the
+	// cert) and every update failed with "no rows were updated".
+	result, err := p.db.Exec(updateCNSI, endpoint.Name, endpoint.SkipSSLValidation, endpoint.SSOAllowed, endpoint.ClientId, cipherTextClientSecret, endpoint.CACert, endpoint.GUID)
 	if err != nil {
 		msg := "Unable to UPDATE endpoint: %v"
 		log.Debugf(msg, err)

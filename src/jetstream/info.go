@@ -63,6 +63,15 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 	s.Configuration.APIKeysEnabled = string(p.Config.APIKeysEnabled)
 	s.Configuration.HomeViewShowFavoritesOnly = p.Config.HomeViewShowFavoritesOnly
 	s.Configuration.UserEndpointsEnabled = string(p.Config.UserEndpointsEnabled)
+	s.Configuration.EndpointCardConcurrency = p.Config.EndpointCardConcurrency
+	s.Configuration.EndpointRequestConcurrency = p.Config.EndpointRequestConcurrency
+
+	if s.Configuration.EndpointCardConcurrency == 0 {
+		s.Configuration.EndpointCardConcurrency = 2
+	}
+	if s.Configuration.EndpointRequestConcurrency == 0 {
+		s.Configuration.EndpointRequestConcurrency = 3
+	}
 
 	// Only add diagnostics information if the user is an admin
 	if uaaUser.Admin {
@@ -96,6 +105,10 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 		cnsiUser, token, ok := p.GetCNSIUserAndToken(cnsi.GUID, userGUID)
 		if ok {
 			endpoint.User = cnsiUser
+			endpoint.TokenExpiry = token.TokenExpiry
+			// A refresh token means jetstream can mint a fresh session on use,
+			// so an expired access token does not make the endpoint dead.
+			endpoint.TokenRenewable = token.RefreshToken != ""
 			endpoint.TokenMetadata = token.Metadata
 			endpoint.SystemSharedToken = token.SystemShared
 		}
@@ -148,7 +161,9 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 func marshalEndpointMetadata(metadata string) interface{} {
 	if len(metadata) > 2 && strings.Index(metadata, "{") == 0 {
 		var anyJSON map[string]interface{}
-		json.Unmarshal([]byte(metadata), &anyJSON)
+		if err := json.Unmarshal([]byte(metadata), &anyJSON); err != nil {
+			return metadata
+		}
 		return anyJSON
 	} else {
 		return metadata

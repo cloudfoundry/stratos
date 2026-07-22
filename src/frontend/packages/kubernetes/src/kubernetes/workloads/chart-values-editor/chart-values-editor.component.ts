@@ -9,8 +9,9 @@ import { catchError, debounceTime, filter, map, startWith, tap } from 'rxjs/oper
 
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { TailwindJsonSchemaFormComponent } from '../../../../../core/src/shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
+import { SchemaWidgetRendererComponent } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-widget-renderer.component';
 import { MonacoEditorComponent } from '../../../../../core/src/shared/components/monaco-editor/monaco-editor.component';
+import { configureYaml } from '../../../../../core/src/monaco-loader';
 import { StratosBrandingService } from '@stratosui/theme';
 import { diffObjects } from './diffvalues';
 import { generateJsonSchemaFromObject } from './json-schema-generator';
@@ -19,8 +20,8 @@ import { mergeObjects } from './merge';
 
 export interface ChartValuesConfig {
 
-  // URL of the JSON Schema for the chart values
-  schemaUrl: string;
+  // URL of the JSON Schema for the chart values (null when the chart has no schema)
+  schemaUrl: string | null;
 
   // URL of the Chart Values
   valuesUrl: string;
@@ -48,7 +49,7 @@ enum EditorMode {
     CommonModule,
     FormsModule,
     MonacoEditorComponent,
-    TailwindJsonSchemaFormComponent
+    SchemaWidgetRendererComponent
   ]
 })
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {
@@ -62,9 +63,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     }
   }
 
-  schemaUrl!: string;
+  schemaUrl: string | null = null;
   valuesUrl!: string;
-  releaseValues!: string;
+  releaseValues?: string;
 
   // Model for the editor - we set this once when the YAML support has been loaded
   public model: any;
@@ -110,22 +111,23 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Monaco editor
   public editor: any;
 
-  // Observable - are we still loading resources?
-  public loading$: Observable<boolean>;
+  // Observable - are we still loading resources? Assigned in init() once a
+  // config is provided via the @Input setter.
+  public loading$!: Observable<boolean>;
 
   public initing = true;
 
   // Signal for tracking if the Monaco editor has loaded
   private monacoLoaded = signal<boolean>(false);
 
-  private resizeSub: Subscription;
-  private themeSub: Subscription;
+  private resizeSub?: Subscription;
+  private themeSub?: Subscription;
 
   // Track whether the user changes the code in the text editor
   private codeOnEnter!: string;
 
   // Reference to the editor, so we can adjust its size to fit
-  @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor: ElementRef;
+  @ViewChild('monacoEditor', { read: ElementRef, static: false }) monacoEditor!: ElementRef; // strict: @ViewChild populated by Angular after view init
 
   @ViewChild('schemaForm', { static: false }) schemaForm: any;
 
@@ -169,8 +171,12 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   private init() {
     // Observabled for loading schema and values for the Chart
-    const schema$ = this.httpClient.get(this.schemaUrl).pipe(catchError((_e: any) => of(null)));
-    const values$: Observable<string> = this.httpClient.get(this.valuesUrl, { responseType: 'text' }).pipe(
+    // No schema URL means the chart ships no JSON Schema — skip the fetch and
+    // emit null so the editor falls back to an auto-generated schema.
+    const schema$ = this.schemaUrl
+      ? this.httpClient.get(this.schemaUrl).pipe(catchError((_e: any) => of(null)))
+      : of(null);
+    const values$: Observable<string | null> = this.httpClient.get(this.valuesUrl, { responseType: 'text' }).pipe(
       catchError((_e: any) => of(null))
     );
 
@@ -293,13 +299,11 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
       return;
     }
 
-    // Load the YAML Language support - require is available as it will have been loaded by the Monaco vs loader
-    const req = (window as any).require;
-    req(['vs/language/yaml/monaco.contribution'], () => {
-      // Set the model now that YAML support is loaded - this will update the editor correctly
-      this.updateModel();
-      this.monacoLoaded.set(true);
-    });
+    // YAML language support is registered by the ESM loader (monaco-yaml)
+    // before any editor exists — no AMD contribution load needed. Set the
+    // model directly; its uri matches the schema's fileMatch entry.
+    this.updateModel();
+    this.monacoLoaded.set(true);
 
     // Watch for theme changes - set light/dark theme in the monaco editor as the Stratos theme changes
     this.themeSub = this.isDarkMode$.subscribe((isDark: boolean) => {
@@ -354,16 +358,18 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     return `https://stratos.app/schemas${this.schemaUrl}`;
   }
 
-  // Register the schema with the Monaco editor
-  // Reference: https://github.com/pengx17/monaco-yaml/blob/master/examples/umd/index.html#L69
+  // Register the schema with the Monaco editor (monaco-yaml v5 configures
+  // through a handle owned by the loader, not per-call yamlDefaults).
+  // Global registration, last writer wins — same semantics as the old
+  // per-call yamlDefaults surface.
   registerSchema(schema: any) {
-    const monaco = (window as any).monaco;
-    monaco.languages.yaml.yamlDefaults.setDiagnosticsOptions({
+    configureYaml({
       enableSchemaRequest: true,
       hover: true,
       completion: true,
       validate: true,
-      format: true,
+      // monaco-yaml v5 takes formatter options, not a boolean; {} = defaults.
+      format: {},
       schemas: [
         {
           uri: this.getSchemaUri(),
@@ -371,6 +377,10 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
           schema
         }
       ]
+    }).catch((err) => {
+      // The editor still works without schema hints; surface the loss
+      // instead of letting it vanish as an unhandled rejection.
+      console.error('Failed to register chart values schema', err);
     });
   }
 
@@ -414,7 +424,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Copy the release values into either the form or the code editor, depending on the current mode
   private doCopyReleaseValues() {
     if (this.mode === EditorMode.JSonSchemaForm) {
-      this.initialFormData = this.releaseValues;
+      if (this.releaseValues !== undefined) {
+        this.initialFormData = this.releaseValues;
+      }
     } else {
       this.code = yaml.dump(this.releaseValues);
     }

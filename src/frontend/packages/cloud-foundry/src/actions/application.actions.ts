@@ -49,7 +49,7 @@ export class GetAllApplications extends CFStartAction implements PaginatedAction
     super();
     this.options = new HttpRequest(
       'GET',
-      'apps'
+      `/pp/v1/cf/apps/${endpointGuid}`
     );
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey('cf', endpointGuid);
   }
@@ -89,6 +89,10 @@ export class CreateNewApplication extends CFStartAction implements ICFAction {
     application: IApp
   ) {
     super();
+    // FLAG (A6): URL not swapped to /pp/v1/cf/apps/${endpointGuid} because
+    // backend createNativeApp expects v3 capi.AppCreateRequest body
+    // ({name, relationships:{space:{data:{guid}}}, ...}); current body is
+    // legacy V2 {name, space_guid}. Body-shape transform required before swap.
     this.options = new HttpRequest(
       'POST',
       'apps',
@@ -161,7 +165,7 @@ export class DeleteApplication extends CFStartAction implements ICFAction {
     super();
     this.options = new HttpRequest(
       'DELETE',
-      `apps/${guid}`,
+      `/pp/v1/cf/apps/${endpointGuid}/${guid}`,
       null,
       {
         params: new HttpParams({
@@ -188,7 +192,7 @@ export class DeleteApplicationInstance extends CFStartAction
     super();
     this.options = new HttpRequest(
       'DELETE',
-      `apps/${appGuid}/instances/${index}`,
+      `/pp/v1/cf/apps/${endpointGuid}/${appGuid}/instances/${index}`,
       null
     );
     this.guid = `${appGuid}-${index}`;

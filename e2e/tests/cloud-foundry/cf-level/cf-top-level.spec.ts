@@ -40,7 +40,7 @@ test.describe('CF Top Level', () => {
       await cfPage.waitForPage();
 
       // Check page header
-      const header = page.locator('app-page-header, h1, .page-header').first();
+      const header = page.locator('h1, .page-header').first();
       await expect(header).toBeVisible();
 
       const headerText = await header.textContent() || '';
@@ -138,7 +138,7 @@ test.describe('CF Top Level', () => {
       await cfPage.navigateTo();
       await cfPage.waitForPage();
 
-      const header = page.locator('app-page-header, h1, .page-header').first();
+      const header = page.locator('h1, .page-header').first();
       await expect(header).toBeVisible();
 
       const headerText = await header.textContent() || '';
@@ -200,7 +200,7 @@ test.describe('CF Top Level', () => {
       await addButton.click();
 
       // Verify stepper dialog opened
-      const stepper = page.locator('app-create-organization-stepper, app-stepper-dialog, mat-dialog-container');
+      const stepper = page.locator('app-create-organization-stepper, app-stepper-dialog, [role="dialog"]');
       const stepperExists = await stepper.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (stepperExists) {
@@ -334,7 +334,7 @@ test.describe('CF Top Level', () => {
       await addButton.click();
 
       // Verify stepper dialog opened
-      const stepper = page.locator('app-create-quota-stepper, app-stepper-dialog, mat-dialog-container');
+      const stepper = page.locator('app-create-quota-stepper, app-stepper-dialog, [role="dialog"]');
       const stepperExists = await stepper.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (stepperExists) {
@@ -537,7 +537,7 @@ test.describe('CF Top Level', () => {
       await inviteConfigButton.click();
 
       // Look for configuration form or dialog
-      const configForm = page.locator('form, mat-dialog-container, .invite-config');
+      const configForm = page.locator('form, [role="dialog"], .invite-config');
       const formExists = await configForm.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (formExists) {
@@ -579,7 +579,7 @@ test.describe('CF Top Level', () => {
       await inviteConfigButton.click();
 
       // Look for enable/disable toggle
-      const configDialog = page.locator('mat-dialog-container, form, .invite-config').first();
+      const configDialog = page.locator('[role="dialog"], form, .invite-config').first();
       const dialogExists = await configDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {

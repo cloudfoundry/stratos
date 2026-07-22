@@ -1,25 +1,22 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, Injector, Input, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { Observable, Subscription } from 'rxjs';
-import { filter, map, pairwise, take, tap } from 'rxjs/operators';
+import { Router } from '@angular/router';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
+import { filter, map, take, tap } from 'rxjs/operators';
 
-import { AppInputDirective, CustomFormFieldComponent, safeUnsubscribe, FocusDirective, StepOnNextFunction, CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { endpointEntityType, PaginationMonitorFactory, ActionState, getPaginationObservables, APIResource } from '@stratosui/store';
-import { IOrganization, IOrgQuotaDefinition } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { cfEntityFactory } from '../../../../cf-entity-factory';
-import { organizationEntityType } from '../../../../cf-entity-types';
-import { createEntityRelationPaginationKey } from '../../../../entity-relations/entity-relations.types';
+import { HttpClient } from '@angular/common/http';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomOptionComponent, CustomSelectComponent, FocusDirective, SignalStepHandle, safeUnsubscribe } from '@stratosui/core';
+import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-source';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
+import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
-import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
-
 
 const enum OrgStatus {
   ACTIVE = 'active',
@@ -34,7 +31,7 @@ interface EditOrganizationForm {
 @Component({
   selector: 'app-edit-organization-step',
   templateUrl: './edit-organization-step.component.html',
-  styleUrls: ['./edit-organization-step.component.scss'],
+  host: { class: 'app-host-flex-1' },
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     CloudFoundryOrganizationService,
@@ -45,6 +42,7 @@ interface EditOrganizationForm {
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
@@ -53,27 +51,73 @@ interface EditOrganizationForm {
   ]
 })
 export class EditOrganizationStepComponent implements OnInit, OnDestroy {
-  private store = inject<Store<CFAppState>>(Store);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private cfOrgService = inject(CloudFoundryOrganizationService);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
+  private http = inject(HttpClient);
+  private quotaData = inject(QuotaDataService);
+  private injector = inject(Injector);
   private fb = inject(FormBuilder);
+  private router = inject(Router);
 
-  /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
 
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const newName = this.orgName.value;
+      const newQuotaGuid = this.quotaDefinition.value;
+      // Route the org PATCH through CnsiOrgsSource so the canonical
+      // EndpointDataService._orgs row updates immediately and the
+      // org.update cascade fires. The previous OrgWriteService.updateOrg
+      // path was a thin http.patch that left the canonical cache stale.
+      const eds = this.endpointDataRegistry.acquire(this.cfGuid);
+      try {
+        const source = new CnsiOrgsSource(this.cfGuid, this.http, eds);
+        await source.update(this.orgGuid, {
+          name: newName,
+          suspended: !this.status,
+        });
+        if (newQuotaGuid && newQuotaGuid !== this.originalQuotaGuid) {
+          await firstValueFrom(this.quotaData.applyOrgQuotaToOrgs(this.cfGuid, newQuotaGuid, [this.orgGuid]));
+          // org_quotas isn't cached on EDS but the org row's quotaGuid
+          // is the source of truth for the displayed quota — mark stale
+          // so the orgs list re-fetches.
+          eds.applyCascade('org.update');
+        }
+        // Patch the OrgDataService cache so the auto-navigate to /summary
+        // shows the new values without a hard reload — CnsiOrgsSource only
+        // updates the EndpointData _orgs list, not the detail signal that
+        // the summary view reads from.
+        this.cfOrgService.orgDataService.patch({
+          name: newName,
+          ...(newQuotaGuid !== this.originalQuotaGuid ? { quotaGuid: newQuotaGuid ?? undefined } : {}),
+        });
+      } catch (err: unknown) {
+        throw new Error(`Failed to update organization: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        this.endpointDataRegistry.release(this.cfGuid);
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
+
   fetchOrgsSub!: Subscription;
-  allOrgsInEndpoint: string[];
+  allOrgsInEndpoint: string[] = [];
   allOrgsInEndpoint$!: Observable<string[]>;
   orgSubscription!: Subscription;
   currentStatus!: string;
   originalName!: string;
-  org$: Observable<IOrganization>;
+  originalQuotaGuid: string | null = null;
+  org$: Observable<{ name: string; status: string; quota_definition_guid: string | undefined }>;
   editOrgName: FormGroup<EditOrganizationForm>;
   status: boolean;
   cfGuid: string;
   orgGuid: string;
-  quotaDefinitions$!: Observable<APIResource<IOrgQuotaDefinition>[]>;
+  quotaSource!: SignalSource<StOrgQuota[]>;
 
   get orgName(): FormControl<string> { return this.editOrgName ? this.editOrgName.get('orgName') as FormControl<string> : new FormControl('', { nonNullable: true }); }
 
@@ -85,16 +129,21 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     this.orgGuid = cfOrgService.orgGuid;
     this.cfGuid = cfOrgService.cfGuid;
     this.status = false;
-    this.allOrgsInEndpoint = [];
     this.editOrgName = this.fb.group<EditOrganizationForm>({
       orgName: new FormControl('', { nonNullable: true, validators: [Validators.required, this.nameTakenValidator()] }),
       quotaDefinition: new FormControl<string | null>(null),
     });
-    this.org$ = this.cfOrgService.org$.pipe(
-      map(o => o.entity.entity),
+    this.org$ = toObservable(this.cfOrgService.orgDataService.org, { injector: this.injector }).pipe(
+      filter((o): o is NonNullable<typeof o> => !!o),
+      map(o => ({
+        name: o.name,
+        status: o.status,
+        quota_definition_guid: o.quotaGuid || undefined,
+      })),
       take(1),
       tap(n => {
         this.originalName = n.name;
+        this.originalQuotaGuid = n.quota_definition_guid ?? null;
         this.status = n.status === OrgStatus.ACTIVE ? true : false;
         this.currentStatus = n.status;
 
@@ -109,51 +158,40 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   }
 
   nameTakenValidator = (): ValidatorFn => {
-    return (formField: AbstractControl): { [key: string]: any } => {
+    return (formField: AbstractControl): { [key: string]: any } | null => {
       const nameValid = this.isNameUnique(formField.value);
       return !nameValid ? { nameTaken: { value: formField.value } } : null;
     };
   }
 
   ngOnInit() {
-    // Mirror editOrgName.valid && dirty into a signal so the parent
-    // page component re-evaluates [valid] automatically. Dirty check
-    // keeps the Update button disabled until the user actually edits.
     this.validSignal.set(this.editOrgName.valid && this.editOrgName.dirty);
     this.formStatusSub = this.editOrgName.statusChanges.subscribe(
       () => this.validSignal.set(this.editOrgName.valid && this.editOrgName.dirty)
     );
 
-    const action = CloudFoundryEndpointService.createGetAllOrganizations(this.cfGuid);
-    this.allOrgsInEndpoint$ = getPaginationObservables<APIResource>(
-      {
-        store: this.store,
-        action,
-        paginationMonitor: this.paginationMonitorFactory.create(
-          action.paginationKey,
-          cfEntityFactory(organizationEntityType),
-          action.flattenPagination
-        )
-      },
-      action.flattenPagination
-    ).entities$.pipe(
-      filter(o => !!o),
-      map(o => o.map(org => org.entity.name)),
-      tap((o) => this.allOrgsInEndpoint = o)
+    const endpointData = this.endpointDataRegistry.acquire(this.cfGuid);
+    endpointData.load().subscribe({ error: () => {} });
+    endpointData.loadDetails().subscribe({ error: () => {} });
+    this.allOrgsInEndpoint$ = toObservable(endpointData.orgs, { injector: this.injector }).pipe(
+      filter(orgs => !!orgs && orgs.length > 0),
+      map(orgs => orgs.map(o => o.name)),
+      tap(names => this.allOrgsInEndpoint = names),
     );
     this.fetchOrgsSub = this.allOrgsInEndpoint$.subscribe();
 
-    const quotaPaginationKey = createEntityRelationPaginationKey(endpointEntityType, this.cfGuid);
-    this.quotaDefinitions$ = cfEntityCatalog.quotaDefinition.store.getPaginationService(
-      quotaPaginationKey, this.cfGuid, { includeRelations: [] }
-    ).entities$.pipe(
-      filter(o => !!o),
-    );
+    this.quotaSource = this.quotaData.orgQuotas(this.cfGuid);
+    // Trigger initial fetch so the SignalSource populates.
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        // Reading value() registers the dependency so the signal stays live.
+        this.quotaSource.value();
+      });
+    });
   }
 
-  /** Name uniqueness check used by the reactive form validator. */
-  isNameUnique = (value: string = null): boolean => {
-    if (this.allOrgsInEndpoint) {
+  isNameUnique = (value: string | null = null): boolean => {
+    if (this.allOrgsInEndpoint && this.editOrgName) {
       return this.allOrgsInEndpoint
         .filter((o: string) => o !== this.originalName)
         .indexOf(value ? value : this.orgName.value) === -1;
@@ -161,28 +199,11 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
     return true;
   }
 
-  /** Form-level validity gate for the Update button. Reads the signal. */
   validate = () => this.validSignal();
-
-  submit: StepOnNextFunction = () => {
-    return cfEntityCatalog.org.api.update<ActionState>(this.orgGuid, this.cfGuid, {
-      name: this.orgName.value,
-      quota_definition_guid: this.quotaDefinition.value,
-      status: this.status ? OrgStatus.ACTIVE : OrgStatus.SUSPENDED
-    }).pipe(
-      pairwise(),
-      filter(([oldS, newS]) => oldS.busy && !newS.busy),
-      map(([, newS]) => newS),
-      map(o => ({
-        success: !o.error,
-        redirect: !o.error,
-        message: !o.error ? '' : `Failed to update organization: ${o.message}`
-      }))
-    );
-  }
 
   ngOnDestroy(): void {
     safeUnsubscribe(this.fetchOrgsSub, this.orgSubscription);
     this.formStatusSub?.unsubscribe();
+    this.endpointDataRegistry.release(this.cfGuid);
   }
 }

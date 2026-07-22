@@ -1,18 +1,20 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, Directive  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, Directive, booleanAttribute  } from '@angular/core';
 
 // Custom Icon Component
 @Component({
   selector: 'app-custom-icon',
-  template: `<i [class]="fontSet + ' custom-icon'" [class.inline]="inline" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>`,
+  template: `<i [class]="(fontSet || 'material-icons') + ' custom-icon'" [class.inline]="inline" [attr.aria-label]="ariaLabel"><ng-content></ng-content></i>`,
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomIconComponent {
-  @Input() fontSet = 'material-icons';
+  // Undefined falls back to material-icons so callers can bind optional fonts
+  @Input() fontSet: string | undefined = 'material-icons';
   @Input() fontIcon = '';
   @Input() svgIcon = '';
-  @Input() inline = false;
+  // Attribute form (inline / inline="true") coerces like mat-icon did
+  @Input({ transform: booleanAttribute }) inline = false;
   @Input() ariaLabel = '';
 }
 

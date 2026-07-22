@@ -1,12 +1,6 @@
 import { EntitySchema } from './entity-schema';
 
-export const userFavouritesEntityType = 'userFavorites';
 export const endpointEntityType = 'endpoint';
-export const userProfileEntityType = 'userProfile';
-export const systemInfoEntityType = 'systemInfo';
-export const apiKeyEntityType = 'apiKey';
-
-export const metricEntityType = 'metrics';
 
 export const STRATOS_ENDPOINT_TYPE = 'stratos';
 
@@ -20,23 +14,8 @@ class StratosEntitySchema extends EntitySchema {
   }
 }
 
-const UserFavouritesSchema = new StratosEntitySchema(userFavouritesEntityType, 'guid');
-entityCache[userFavouritesEntityType] = UserFavouritesSchema;
-
-const SystemInfoSchema = new StratosEntitySchema(systemInfoEntityType, 'guid');
-entityCache[systemInfoEntityType] = SystemInfoSchema;
-
 const EndpointSchema = new StratosEntitySchema(endpointEntityType, 'guid');
 entityCache[endpointEntityType] = EndpointSchema;
-
-const UserProfileInfoSchema = new StratosEntitySchema(userProfileEntityType, 'id');
-entityCache[userProfileEntityType] = UserProfileInfoSchema;
-
-const ApiKeySchema = new StratosEntitySchema(apiKeyEntityType, 'guid');
-entityCache[apiKeyEntityType] = ApiKeySchema;
-
-const MetricSchema = new StratosEntitySchema(metricEntityType, 'guid');
-entityCache[metricEntityType] = MetricSchema;
 
 export function stratosEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];

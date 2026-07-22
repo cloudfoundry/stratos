@@ -17,7 +17,6 @@ interface UserInviteStepperLink {
 @Component({
   selector: 'app-cloud-foundry-invite-user-link',
   templateUrl: './cloud-foundry-invite-user-link.component.html',
-  styleUrls: ['./cloud-foundry-invite-user-link.component.scss'],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -46,7 +45,7 @@ export class CloudFoundryInviteUserLinkComponent implements OnInit {
     this.router.navigate([stepperUrl]);
   }
 
-  createInviteUserDetails(cfGuid: string, orgGuid: string, spaceGuid?: string): Observable<UserInviteStepperLink> {
+  createInviteUserDetails(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<UserInviteStepperLink | null> {
     return this.userInviteService.canShowInviteUser(cfGuid, orgGuid, spaceGuid).pipe(
       take(1),
       map(canInvite => canInvite ? {

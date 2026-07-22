@@ -1,14 +1,9 @@
 import { Injector, signal, WritableSignal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subject, Subscription } from 'rxjs';
+import { Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
-import { take, catchError, combineLatest, filter, map, mergeMap, share, switchMap, tap } from 'rxjs/operators';
+import { take, catchError, filter, map, share, switchMap, tap } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { organizationEntityType, spaceEntityType } from '../../../../../cloud-foundry/src/cf-entity-types';
-import { selectCfEntity } from '../../../../../cloud-foundry/src/store/selectors/api.selectors';
-import { selectDeployAppState } from '../../../../../cloud-foundry/src/store/selectors/deploy-application.selector';
 import {
   AppData,
   DeployApplicationSource,
@@ -16,6 +11,7 @@ import {
   OverrideAppDetails,
   SocketEventTypes } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { environment } from '../../../../../core/src/environments/environment.prod';
+import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
@@ -76,8 +72,8 @@ interface DeploySource {
 interface GitSCMSourceInfo extends DeploySource {
   project: string;
   branch: string;
-  url: string;
-  commit: string;
+  url?: string;
+  commit?: string;
   scm: string;
   endpointGuid: string;
   accessToken?: string;
@@ -93,7 +89,7 @@ interface GitUrlSourceInfo extends DeploySource {
 interface DockerImageSourceInfo extends DeploySource {
   applicationName: string;
   dockerImage: string;
-  dockerUsername: string;
+  dockerUsername?: string;
 }
 
 interface FolderSourceInfo extends DeploySource {
@@ -109,7 +105,8 @@ export class DeployApplicationDeployer {
   updateSub!: Subscription;
   msgSub!: Subscription;
   streamTitle = 'Preparing...';
-  appData: AppData;
+  // strict: populated from the MANIFEST websocket event before any read
+  appData!: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
   cfGuid!: string;
   orgGuid!: string;
@@ -143,7 +140,6 @@ export class DeployApplicationDeployer {
   private currentFileTransfer: any;
 
   constructor(
-    private store: Store<CFAppState>,
     public cfOrgSpaceService: CfOrgSpaceDataService,
     private injector: Injector,
   ) {
@@ -191,33 +187,41 @@ export class DeployApplicationDeployer {
       () => true :
       (appDetail: DeployApplicationState) => {
         if (!appDetail.applicationSource || !appDetail.applicationOverrides) {
-          return;
+          return false;
         }
         return (!!appDetail.applicationSource.gitDetails && !!appDetail.applicationSource.gitDetails.projectName) ||
           (!!appDetail.applicationSource.dockerDetails && !!appDetail.applicationSource.dockerDetails.dockerImage);
 
       };
     this.isOpen = true;
-    this.connectSub = this.store.select(selectDeployAppState).pipe(
-      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
-      mergeMap(appDetails => {
-        const orgSubscription = this.store.select(selectCfEntity(organizationEntityType, appDetails.cloudFoundryDetails.org));
-        const spaceSubscription = this.store.select(selectCfEntity(spaceEntityType, appDetails.cloudFoundryDetails.space));
-        return observableOf(appDetails).pipe(combineLatest(orgSubscription, spaceSubscription));
-      }),
+    const deployData = this.injector.get(CfDeployAppDataService);
+    const deployState$ = toObservable(deployData.state, { injector: this.injector });
+    this.connectSub = deployState$.pipe(
+      filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
+        !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       take(1),
-      tap(([appDetail, org, space]) => {
+      tap((appDetail) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
         this.orgGuid = appDetail.cloudFoundryDetails.org;
         this.spaceGuid = appDetail.cloudFoundryDetails.space;
         this.applicationSource = appDetail.applicationSource;
-        this.applicationOverrides = appDetail.applicationOverrides;
+        if (appDetail.applicationOverrides) {
+          this.applicationOverrides = appDetail.applicationOverrides;
+        }
+        // Resolve org / space names from the signal-native picker — it
+        // already loaded both lists when the user made their selection,
+        // so the lookup is synchronous. Replaces the legacy ngrx
+        // `selectCfEntity` selectors that the V3 signal-native cutover
+        // stopped populating for org / space, which was causing the
+        // deployer to crash here on `undefined.entity.name`.
+        const orgName = this.cfOrgSpaceService.orgList().find(o => o.guid === this.orgGuid)?.name ?? '';
+        const spaceName = this.cfOrgSpaceService.spaceList().find(s => s.guid === this.spaceGuid)?.name ?? '';
         const host = window.location.host;
         const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
         const appId = this.isRedeploy ? `&app=${this.isRedeploy}` : '';
         const streamUrl = (
           `${protocol}://${host}/pp/${this.proxyAPIVersion}/${this.cfGuid}/${this.orgGuid}/${this.spaceGuid}/deploy` +
-          `?org=${org.entity.name}&space=${space.entity.name}${appId}`
+          `?org=${encodeURIComponent(orgName)}&space=${encodeURIComponent(spaceName)}${appId}`
         );
 
         this.inputStream = new Subject<string>();
@@ -253,10 +257,12 @@ export class DeployApplicationDeployer {
     ).subscribe();
 
     // Watch for updates to the app overrides - use case is app overrides being set after source file/folder upload
-    this.updateSub = this.store.select(selectDeployAppState).pipe(
-      filter((appDetail: DeployApplicationState) => !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
+    this.updateSub = deployState$.pipe(
+      filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       tap((appDetail) => {
-        this.applicationOverrides = appDetail.applicationOverrides;
+        if (appDetail.applicationOverrides) {
+          this.applicationOverrides = appDetail.applicationOverrides;
+        }
       })
     ).subscribe();
   }
@@ -294,15 +300,19 @@ export class DeployApplicationDeployer {
   };
 
   sendGitSCMSourceMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.group === 'gitscm',
+    // which the source-type selection guarantees populates gitDetails.
+    const gitDetails = appSource.gitDetails!;
     const gitscm: GitSCMSourceInfo = {
-      project: appSource.gitDetails.projectName,
-      branch: appSource.gitDetails.branch.name,
-      type: appSource.type.group,
-      commit: appSource.gitDetails.commit,
-      url: appSource.gitDetails.url,
+      project: gitDetails.projectName,
+      branch: gitDetails.branch.name,
+      // strict: gitscm branch guarantees type.group === 'gitscm'
+      type: appSource.type.group!,
+      commit: gitDetails.commit,
+      url: gitDetails.url,
       scm: appSource.type.id,
-      endpointGuid: appSource.gitDetails.endpointGuid,
-      accessToken: appSource.gitDetails.accessToken,
+      endpointGuid: gitDetails.endpointGuid,
+      accessToken: gitDetails.accessToken,
     };
 
     const msg = {
@@ -314,9 +324,12 @@ export class DeployApplicationDeployer {
   };
 
   sendGitUrlSourceMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.id === GIT_URL,
+    // which the source-type selection guarantees populates gitDetails.
+    const gitDetails = appSource.gitDetails!;
     const gitUrl: GitUrlSourceInfo = {
-      url: appSource.gitDetails.projectName,
-      branch: appSource.gitDetails.branch.name,
+      url: gitDetails.projectName,
+      branch: gitDetails.branch.name,
       type: appSource.type.id
     };
 
@@ -329,10 +342,13 @@ export class DeployApplicationDeployer {
   };
 
   sendDockerImageMetadata = (appSource: DeployApplicationSource) => {
+    // strict: only reached via sendProjectInfo when type.id === DOCKER_IMG,
+    // which the source-type selection guarantees populates dockerDetails.
+    const dockerDetails = appSource.dockerDetails!;
     const dockerInfo: DockerImageSourceInfo = {
-      applicationName: appSource.dockerDetails.applicationName,
-      dockerImage: appSource.dockerDetails.dockerImage,
-      dockerUsername: appSource.dockerDetails.dockerUsername,
+      applicationName: dockerDetails.applicationName,
+      dockerImage: dockerDetails.dockerImage,
+      dockerUsername: dockerDetails.dockerUsername,
       type: appSource.type.id
     };
 
@@ -465,7 +481,7 @@ export class DeployApplicationDeployer {
     }
   }
 
-  private onClose(log: any, title: string, error: any) {
+  private onClose(log: any, title: string | null, error: any) {
     if (title) {
       this.streamTitle = title;
     }
@@ -512,7 +528,7 @@ export class DeployApplicationDeployer {
   }
 
   // Flatten files and folders
-  collectFoldersAndFiles(metadata: any, base: string, folder: any) {
+  collectFoldersAndFiles(metadata: any, base: string | null, folder: any) {
     if (folder.files) {
       folder.files.forEach((file: any) => {
         file.fullPath = base ? base + '/' + file.name : file.name;

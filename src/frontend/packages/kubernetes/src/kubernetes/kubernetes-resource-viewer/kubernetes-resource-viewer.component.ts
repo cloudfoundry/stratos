@@ -20,15 +20,21 @@ import { JsonViewerComponent } from '../../../../core/src/shared/components/json
 import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
 import { SidepanelPreviewComponent } from '../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
 import { PreviewableComponent } from '../../../../core/src/shared/previewable-component';
-import { SnackBarService } from '../../../../core/src/shared/services/snackbar.service';
-import { StratosCatalogEntity } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
-import { entityDeleted } from '../../../../store/src/operators';
-import { DeleteActionState } from '../../../../store/src/reducers/api-request-reducer/types';
+import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
+import { EntityDeleteCleanupService } from '../../../../store/src/services/entity-delete-cleanup.service';
 import { IFavoriteMetadata, UserFavorite } from '../../../../store/src/types/user-favorites.types';
+import {
+  KubeJobDataService, KubePersistentVolumeClaimDataService, KubeReplicaSetDataService,
+  KubeRoleDataService, KubeSecretDataService, KubeServiceAccountDataService,
+} from '../../services/domain-data/kube-generic-resource-data.services';
+import { KubePodDataService } from '../../services/domain-data/kube-pod-data.service';
+import { KubeServiceDataService } from '../../services/domain-data/kube-service-data.service';
+import {
+  ResourceAlertViewComponent,
+} from '../analysis-report-viewer/resource-alert-preview/resource-alert-view/resource-alert-view.component';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
 import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
-import { KubeResourceActionBuilders } from '../store/action-builders/kube-resource.action-builder';
-import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition, KubeStatus } from '../store/kube.types';
+import { BasicKubeAPIResource, KubeAPIResource, KubeResourceEntityDefinition } from '../store/kube.types';
 import { ConfirmationDialogService } from './../../../../core/src/shared/components/confirmation-dialog.service';
 import { SidePanelService } from './../../../../core/src/shared/services/side-panel.service';
 import { entityCatalog } from './../../../../store/src/entity-catalog/entity-catalog';
@@ -63,7 +69,6 @@ interface KubernetesResourceViewerResource {
 @Component({
 selector: 'app-kubernetes-resource-viewer',
   templateUrl: './kubernetes-resource-viewer.component.html',
-  styleUrls: ['./kubernetes-resource-viewer.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -74,6 +79,7 @@ selector: 'app-kubernetes-resource-viewer',
     SidepanelPreviewComponent,
     MetadataItemComponent,
     JsonViewerComponent,
+    ResourceAlertViewComponent,
   ]
 })
 export class KubernetesResourceViewerComponent implements PreviewableComponent, OnDestroy, AfterViewInit {
@@ -83,19 +89,35 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   private viewContainerRef = inject(ViewContainerRef);
   private confirmDialog = inject(ConfirmationDialogService);
   private sidePanelService = inject(SidePanelService);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   private cdr = inject(ChangeDetectorRef);
 
-  public title: string;
-  public resource$: Observable<KubernetesResourceViewerResource>;
+  // Signal-native delete: resolve the resource's data service by catalog type
+  // and route favorites/recents cleanup through the shared store helper.
+  private deleteCleanup = inject(EntityDeleteCleanupService);
+  private deleteServices: Record<string, { delete: (kubeGuid: string, name: string, namespace?: string) => Promise<void> }> = {
+    pod: inject(KubePodDataService),
+    service: inject(KubeServiceDataService),
+    job: inject(KubeJobDataService),
+    secrets: inject(KubeSecretDataService),
+    pvc: inject(KubePersistentVolumeClaimDataService),
+    replicaSet: inject(KubeReplicaSetDataService),
+    role: inject(KubeRoleDataService),
+    serviceAccount: inject(KubeServiceAccountDataService),
+  };
 
-  public hasPodMetrics$: Observable<boolean>;
-  public podRouterLink$: Observable<string[]>;
+  // strict: the following are assigned by setProps, the previewable-component
+  // entry point the framework invokes before the template renders them.
+  public title!: string;
+  public resource$!: Observable<KubernetesResourceViewerResource>;
+
+  public hasPodMetrics$!: Observable<boolean>;
+  public podRouterLink$!: Observable<string[]>;
 
   private analysis: any;
   public alerts: any;
 
-  public favorite: UserFavorite<IFavoriteMetadata>;
+  public favorite?: UserFavorite<IFavoriteMetadata>;
 
   // Custom component
   @ViewChild('customComponent', { read: ViewContainerRef, static: false }) customComponentContainer: ViewContainerRef | undefined;
@@ -103,10 +125,11 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   component: any;
 
-  data: KubernetesResourceViewerComponentConfig;
+  data!: KubernetesResourceViewerComponentConfig; // strict: assigned in setProps before deleteWarn can fire
 
-  @ViewChild('header', { static: false }) templatePortalContent: TemplateRef<unknown>;
-  headerContent: Portal<any>;
+  // strict: static:false ViewChild resolved by ngAfterViewInit, where headerContent is built
+  @ViewChild('header', { static: false }) templatePortalContent!: TemplateRef<unknown>;
+  headerContent!: Portal<any>;
 
   ngOnDestroy(): void {
     this.removeCustomComponent();
@@ -141,7 +164,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
     this.resource$ = props.resource$.pipe(
       filter(item => !!item),
-      map((item: (KubeAPIResource | KubeStatus)) => {
+      map((item: BasicKubeAPIResource) => {
         const resource: KubernetesResourceViewerResource = {} as KubernetesResourceViewerResource;
         const newItem: Record<string, any> = {};
         const itemWithDynamicProps = item as Record<string, any>;
@@ -162,21 +185,23 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         resource.creationTimestamp = ts;
 
         if (item.metadata && item.metadata.labels) {
+          const labels = item.metadata.labels;
           resource.labels = [];
-          Object.keys(item.metadata.labels || {}).forEach(labelName => {
+          Object.keys(labels).forEach(labelName => {
             resource.labels.push({
               name: labelName,
-              value: item.metadata.labels[labelName]
+              value: labels[labelName]
             });
           });
         }
 
         if (item.metadata && item.metadata.annotations) {
+          const annotations = item.metadata.annotations;
           resource.annotations = [];
-          Object.keys(item.metadata.annotations || {}).forEach(labelName => {
+          Object.keys(annotations).forEach(labelName => {
             resource.annotations.push({
               name: labelName,
-              value: item.metadata.annotations![labelName]
+              value: annotations[labelName]
             });
           });
         }
@@ -207,7 +232,10 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
     this.hasPodMetrics$ = props.resourceKind === 'pod' ?
       this.resource$.pipe(
-        switchMap(resource => this.endpointsService.hasMetrics(this.getEndpointId(resource.raw))),
+        switchMap(resource => {
+          const endpointId = this.getEndpointId(resource.raw);
+          return endpointId ? this.endpointsService.hasMetrics(endpointId) : of(false);
+        }),
         take(1),
       ) :
       of(false);
@@ -256,7 +284,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
       const entityDefn = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, defn.type);
       const canFav = this.userFavoriteManager.canFavoriteEntityType(entityDefn);
       if (canFav) {
-        this.favorite = this.userFavoriteManager.getFavorite(item, defn.type, KUBERNETES_ENDPOINT_TYPE);
+        this.favorite = this.userFavoriteManager.getFavorite(item, defn.type, KUBERNETES_ENDPOINT_TYPE) ?? undefined;
       }
     }
   }
@@ -275,21 +303,36 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     );
     this.confirmDialog.openWithCancel(confirmation,
       () => {
-        const catalogEntity = entityCatalog.getEntityFromKey(entityCatalog.getEntityKey(KUBERNETES_ENDPOINT_TYPE, defn.type)) as
-          StratosCatalogEntity<IFavoriteMetadata, any, KubeResourceActionBuilders>;
-        catalogEntity.api.deleteResource(
-          this.data.resource,
-          this.data.endpointId,
-          this.data.resource.metadata.name,
-          this.data.resource.metadata.namespace
-        ).pipe(
-          entityDeleted(),
-          take(1)
-        ).subscribe((result: DeleteActionState) => {
-          const msg = result.error ? `Could not delete resource: ${result.message}` : `Deleted resource '${this.data.resource.metadata.name}'`;
-          this.snackBarService.show(msg);
+        const name = this.data.resource.metadata.name;
+        const namespace = this.data.resource.metadata.namespace;
+        const dataService = this.deleteServices[defn.type];
+        if (!dataService) {
+          this.snackBarService.show(`Delete not supported for ${defn.label}`);
+          return;
         }
-        );
+        const endpointId = this.data.endpointId;
+        if (!endpointId) {
+          this.snackBarService.show(`Could not delete resource: missing endpoint`);
+          return;
+        }
+        // Signal-native delete (replaces the ngrx deleteResource pipeline).
+        // On success drop the favorite/recent the legacy EntityDeleteComplete
+        // path used to clean up, then surface the same snackbar.
+        dataService.delete(endpointId, name, namespace)
+          .then(() => {
+            if (this.favorite && this.favorite.entityId) {
+              this.deleteCleanup.removeFavoriteAndRecent(
+                this.favorite.endpointId,
+                this.favorite.endpointType,
+                this.favorite.entityType,
+                this.favorite.entityId,
+              );
+            }
+            this.snackBarService.show(`Deleted resource '${name}'`);
+          })
+          .catch((err: unknown) => {
+            this.snackBarService.show(`Could not delete resource: ${(err as Error)?.message ?? String(err)}`);
+          });
       },
       () => {
         this.sidePanelService.open();

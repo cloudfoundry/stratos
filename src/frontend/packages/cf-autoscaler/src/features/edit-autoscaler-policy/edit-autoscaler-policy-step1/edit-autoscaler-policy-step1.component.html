@@ -8,9 +8,9 @@
         <input id="instance_min_count" name="instance_min_count"
           formControlName="instance_min_count" type="number" required class="input"
           placeholder="Minimum Instance Count">
-        @if (editLimitForm.get('instance_min_count').hasError('alertInvalidPolicyMinimumRange')) {
+        @if (editLimitForm.get('instance_min_count')?.hasError('alertInvalidPolicyMinimumRange')) {
           <div
-            class="text-red-600 text-sm mt-1">
+            class="text-danger text-sm mt-1">
             {{policyAlert.alertInvalidPolicyMinimumRange}}
           </div>
         }
@@ -20,9 +20,9 @@
         <input id="instance_max_count" name="instance_max_count"
           formControlName="instance_max_count" type="number" required class="input"
           placeholder="Maximum Instance Count">
-        @if (editLimitForm.get('instance_max_count').hasError('alertInvalidPolicyMaximumRange')) {
+        @if (editLimitForm.get('instance_max_count')?.hasError('alertInvalidPolicyMaximumRange')) {
           <div
-            class="text-red-600 text-sm mt-1">
+            class="text-danger text-sm mt-1">
             {{policyAlert.alertInvalidPolicyMaximumRange}}
           </div>
         }

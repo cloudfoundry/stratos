@@ -1,9 +1,9 @@
 @if ((endpointsService.disablePersistenceFeatures$ | async) === false) {
-  <div class="favorite-star" role="button" tabindex="0"
+  <div class="flex items-center cursor-pointer" role="button" tabindex="0"
     (click)="toggleFavorite($event)"
     (keydown.enter)="toggleFavorite($event)"
     (keydown.space)="toggleFavorite($event); $event.preventDefault()"
-    [ngClass]="{'favorite-star__small': small}">
+    [ngClass]="small ? 'h-5 w-5' : 'h-6 w-6'">
     @switch (isFavorite$ | async) {
       @case (true) {
         <app-custom-icon matTooltip="Unset as favorite" aria-label="Set as Favorite">star</app-custom-icon>

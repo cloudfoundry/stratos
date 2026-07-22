@@ -8,10 +8,22 @@
 // Import Tailwind animations for custom components
 @use './shared/styles/tailwind-animations.scss';
 
+@reference 'tailwindcss';
+
 // Base styles are handled by Tailwind in main.css
-// Override font family to match existing design
+// The interface face. Inter led this list but was never vendored, so it only
+// ever rendered on machines that happened to have it installed; everyone else
+// fell through to Lato. Lato ships no 500 or 600, which are the two weights the
+// templates ask for most, so both resolved to a face that says nothing —
+// font-medium rendered as font-normal, font-semibold as font-bold.
 body {
-  font-family: 'Inter', 'Lato', sans-serif;
+  font-family: 'IBM Plex Sans', sans-serif;
+  // Plex's stylistic alternates: dotted zero, single-storey a, simple g.
+  // The dotted zero disambiguates 0 from O without colliding with ø the
+  // way a slashed zero (the `zero` feature) would for Danish/Norwegian
+  // text. Inherits everywhere the family reaches; requires the upstream
+  // font files — Google-pipeline subsets strip the salt feature.
+  font-feature-settings: 'salt' 1;
 }
 
 // Angular 20 breaking change: [hidden] attribute support removed
@@ -32,4 +44,13 @@ body {
 // Theme feature flags
 .dark-theme-supported {
   @apply hidden;
+}
+
+// Host-element layout utilities. Applied via `host: { class: '...' }` in
+// component decorators to eliminate single-rule :host stylesheets.
+.app-host-fill {
+  @apply block h-full min-h-0;
+}
+.app-host-flex-1 {
+  @apply flex-1;
 }

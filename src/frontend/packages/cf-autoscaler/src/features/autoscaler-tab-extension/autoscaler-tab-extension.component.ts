@@ -1,11 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, inject } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 
-import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, distinctUntilChanged, filter, map, pairwise, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { combineLatest, Observable, of } from 'rxjs';
+import { catchError, map, publishReplay, refCount, switchMap, take } from 'rxjs/operators';
 
 import {
   TailwindSnackBarService,
@@ -13,7 +14,6 @@ import {
   StratosTab,
   StratosTabType,
   CurrentUserPermissionsService,
-  safeUnsubscribe,
   ConfirmationDialogConfig,
   ConfirmationDialogService,
   CustomIconComponent,
@@ -26,48 +26,38 @@ import {
   TileGroupComponent
 } from '@stratosui/core';
 import {
-  cfEntityCatalog,
-  applicationEntityType,
-  organizationEntityType,
-  spaceEntityType,
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
   ApplicationMonitorService,
   ApplicationService,
   getGuids,
   CfCurrentUserPermissions,
-  CardAppUsageComponent
+  CardAppUsageComponent,
+  StApp,
 } from '@stratosui/cloud-foundry';
-import {
-  RouterNav,
-  AppState,
-  entityCatalog,
-  EntityService,
-  EntityServiceFactory,
-  PaginationMonitorFactory,
-  ActionState,
-  getPaginationObservables,
-  getCurrentPageRequestInfo,
-  PaginationObservables,
-  selectDeletionInfo,
-  APIResource
-} from '@stratosui/store';
-import { fetchAutoscalerInfo, isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
+import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
+import { buildMetricData } from '../../core/autoscaler-helpers/autoscaler-transform-metric';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
-import {
-  AutoscalerPaginationParams,
-  DetachAppAutoscalerPolicyAction,
-  GetAppAutoscalerAppMetricAction,
-  GetAppAutoscalerPolicyAction,
-  GetAppAutoscalerScalingHistoryAction } from '../../store/app-autoscaler.actions';
+import { AutoscalerInfoDataService } from '../../services/domain-data/autoscaler-info-data.service';
+import { AutoscalerMetricDataService, AutoscalerMetricQueryParams } from '../../services/domain-data/autoscaler-metric-data.service';
+import { AutoscalerPolicyDataService } from '../../services/domain-data/autoscaler-policy-data.service';
+import { AutoscalerScalingHistoryDataService } from '../../services/domain-data/autoscaler-scaling-history-data.service';
 import {
   AppAutoscaleMetricChart,
   AppAutoscalerEvent,
-  AppAutoscalerMetricData,
+  AppAutoscalerMetricDataLocal,
   AppAutoscalerPolicyLocal,
   AppScalingTrigger } from '../../store/app-autoscaler.types';
-import { appAutoscalerAppMetricEntityType, autoscalerEntityFactory } from '../../store/autoscaler-entity-factory';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
+
+// Re-typed pagination param shape kept locally so the template / handlers
+// don't have to import the legacy AutoscalerPaginationParams from the
+// actions module (those actions are being deleted in the same slice).
+interface AutoscalerTabPaginationParams {
+  'start-time': string;
+  'end-time': string;
+  page: string;
+  'results-per-page': string;
+  'order-direction': 'asc' | 'desc';
+}
 
 @StratosTab({
   type: StratosTabType.Application,
@@ -75,28 +65,25 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
   link: 'autoscale',
   icon: 'meter',
   iconFont: 'stratos-icons',
-  hidden: (store: Store<AppState>, esf: EntityServiceFactory, activatedRoute: ActivatedRoute, cups: CurrentUserPermissionsService) => {
+  hidden: (
+    activatedRoute: ActivatedRoute,
+    cups: CurrentUserPermissionsService,
+    http: HttpClient,
+  ) => {
     const endpointGuid = getGuids('cf')(activatedRoute) || window.location.pathname.split('/')[2];
     const appGuid = getGuids()(activatedRoute) || window.location.pathname.split('/')[3];
-    const appEntService = cfEntityCatalog.application.store.getEntityService(appGuid, endpointGuid, {
-      includeRelations: [
-        createEntityRelationKey(applicationEntityType, spaceEntityType),
-        createEntityRelationKey(spaceEntityType, organizationEntityType),
-      ],
-      populateMissing: true
-    });
 
-    const canEditApp$ = appEntService.waitForEntity$.pipe(
+    // Native app detail returns StApp with spaceGuid + orgGuid stitched
+    // server-side (composeStAppWithSpaceOrg). Replaces the legacy
+    // cfEntityCatalog.application.store.getEntityService + includeRelations
+    // app→space→org chain.
+    const canEditApp$ = http.get<StApp>(`/pp/v1/cf/apps/${endpointGuid}/${appGuid}`).pipe(
       switchMap(app => {
-        // Null safety: ensure all nested properties exist before accessing
-        const orgGuid = app?.entity?.entity?.space?.entity?.organization_guid;
-        const spaceGuid = app?.entity?.entity?.space?.metadata?.guid;
-
-        // If required data isn't available, deny permission (hide tab)
+        const orgGuid = app?.orgGuid;
+        const spaceGuid = app?.spaceGuid;
         if (!orgGuid || !spaceGuid) {
           return of(false);
         }
-
         return cups.can(
           CfCurrentUserPermissions.APPLICATION_EDIT,
           endpointGuid,
@@ -104,9 +91,10 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
           spaceGuid
         );
       }),
+      catchError(() => of(false)),
     );
 
-    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, esf);
+    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid);
 
     return canEditApp$.pipe(
       switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
@@ -117,7 +105,6 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
 @Component({
   selector: 'app-autoscaler-tab-extension',
   templateUrl: './autoscaler-tab-extension.component.html',
-  styleUrls: ['./autoscaler-tab-extension.component.scss'],
   providers: [
     ApplicationMonitorService
   ],
@@ -139,16 +126,23 @@ import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-def
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
-  private store = inject<Store<AppState>>(Store);
   private applicationService = inject(ApplicationService);
-  private entityServiceFactory = inject(EntityServiceFactory);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
   private appAutoscalerPolicySnackBar = inject(TailwindSnackBarService);
   private appAutoscalerScalingHistorySnackBar = inject(TailwindSnackBarService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private autoscalerInfoData = inject(AutoscalerInfoDataService);
+  private policyData = inject(AutoscalerPolicyDataService);
+  private metricData = inject(AutoscalerMetricDataService);
+  private scalingHistoryData = inject(AutoscalerScalingHistoryDataService);
+  private router = inject(Router);
+  private injector = inject(Injector);
 
 
-  canManageCredentials$!: Observable<boolean>;
+  // Signal-native replacement for the legacy `canManageCredentials$`
+  // Observable. Bound directly in the template via `canManageCredentials()`.
+  // Source data comes from the per-endpoint cache populated by load()
+  // in ngOnInit.
+  canManageCredentials!: Signal<boolean>;
 
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
@@ -156,11 +150,18 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   scalingHistoryColumns: string[] = ['event', 'trigger', 'date', 'error'];
   metricTypes: string[] = AutoscalerConstants.MetricTypes;
 
-  appAutoscalerPolicyService!: EntityService<APIResource<AppAutoscalerPolicyLocal>>;
-  public appAutoscalerScalingHistoryService!: PaginationObservables<APIResource<AppAutoscalerEvent>>;
-  appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal>;
-  appAutoscalerPolicySafe$!: Observable<AppAutoscalerPolicyLocal>;
+  // FWT-959 Track A wave-3 (A-effects-cleanup):
+  // - Policy fetch + detach now flow through AutoscalerPolicyDataService;
+  //   the legacy GetAppAutoscalerPolicyAction / DetachAppAutoscalerPolicyAction
+  //   dispatches and the `selectDeletionInfo` chain are gone.
+  // - Metric history reads now flow through AutoscalerMetricDataService;
+  //   the legacy GetAppAutoscalerAppMetricAction dispatch is gone.
+  // - Templates still bind via `*$ | async`, so the markup is unchanged —
+  //   we bridge the data-service signals into Observables locally.
+  appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal | null>;
+  appAutoscalerPolicySafe$!: Observable<AppAutoscalerPolicyLocal | null>;
   appAutoscalerScalingHistory$!: Observable<AppAutoscalerEvent[]>;
+  scalingHistoryLoading$!: Observable<boolean>;
   appAutoscalerAppMetricNames$!: Observable<AppAutoscaleMetricChart[]>;
 
   public showNoPolicyMessage$!: Observable<boolean>;
@@ -171,22 +172,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     text: 'To create a policy click the + icon above'
   };
 
-  private appAutoscalerPolicyErrorSub!: Subscription;
-  private appAutoscalerScalingHistoryErrorSub!: Subscription;
   private appAutoscalerPolicySnackBarRef!: TailwindSnackBarRef<any>;
   private appAutoscalerScalingHistorySnackBarRef!: TailwindSnackBarRef<any>;
-  private scalingHistoryAction!: GetAppAutoscalerScalingHistoryAction;
 
-  appAutoscalerAppMetrics = {};
+  appAutoscalerAppMetrics: Record<string, Observable<{ entity: AppAutoscalerMetricDataLocal }[]>> = {};
 
-  paramsMetrics: AutoscalerPaginationParams = {
+  paramsMetrics: AutoscalerTabPaginationParams = {
     'start-time': ((new Date()).getTime() - 60000).toString() + '000000',
     'end-time': (new Date()).getTime().toString() + '000000',
     page: '1',
     'results-per-page': '1',
     'order-direction': 'desc'
   };
-  paramsHistory: AutoscalerPaginationParams = {
+  paramsHistory: AutoscalerTabPaginationParams = {
     'start-time': '0',
     'end-time': (new Date()).getTime().toString() + '000000',
     page: '1',
@@ -201,48 +199,38 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     if (this.appAutoscalerScalingHistorySnackBarRef) {
       this.appAutoscalerScalingHistorySnackBarRef.dismiss();
     }
-    safeUnsubscribe(this.appAutoscalerPolicyErrorSub, this.appAutoscalerScalingHistoryErrorSub);
   }
 
   ngOnInit() {
 
-    this.canManageCredentials$ = fetchAutoscalerInfo(
-      this.applicationService.cfGuid,
-      this.entityServiceFactory
-    ).pipe(
-      map(info => {
-        // If autoscaler is not available (404 error), return false
-        if (!info || info.entityRequestInfo.error || !info.entity || !info.entity.entity) {
-          return false;
-        }
-        const build = info.entity.entity.build;
-        // Null safety: ensure build exists and can be split
-        if (!build || typeof build !== 'string') {
-          return false;
-        }
-        const buildParts = build.split('.');
-        if (buildParts.length === 0) {
-          return false;
-        }
-        return Number.parseInt(buildParts[0], 10) >= 3;
-      })
-    );
+    // Trigger autoscaler info fetch via the signal-native data service
+    // (replaces the legacy fetchAutoscalerInfo helper + Store/Effects
+    // path). canManageCredentials() reads the cached per-endpoint
+    // signal — its value reflects whether the autoscaler build is
+    // >= 3.x and credential management is exposed.
+    const cfGuid = this.applicationService.cfGuid;
+    const appGuid = this.applicationService.appGuid;
+    this.autoscalerInfoData.load(cfGuid);
+    this.canManageCredentials = this.autoscalerInfoData.canManageCredentials(cfGuid);
 
-    this.appAutoscalerPolicyService = this.entityServiceFactory.create(
-      this.applicationService.appGuid,
-      new GetAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid)
-    );
-    this.appAutoscalerPolicy$ = this.appAutoscalerPolicyService.entityObs$.pipe(
-      filter(({ entityRequestInfo }) => entityRequestInfo && !entityRequestInfo.fetching),
-      map(({ entity }) => entity ? entity.entity : null),
+    // Policy fetch via the signal-native data service. The two Observable
+    // wrappers preserve the legacy semantic split:
+    //   appAutoscalerPolicy$     emits null while loading/no-policy and
+    //                            the policy local form when loaded.
+    //   appAutoscalerPolicySafe$ used to wait for entity (waitForEntity$);
+    //                            here we filter out the in-flight state so
+    //                            downstream scaling-rule mapping only fires
+    //                            once we have a settled value. With the
+    //                            data service that's the same observable —
+    //                            it emits null until load() resolves and
+    //                            then the policy.
+    void this.policyData.load(cfGuid, appGuid);
+    const policySig = this.policyData.policy(cfGuid, appGuid);
+    this.appAutoscalerPolicy$ = toObservable(policySig, { injector: this.injector }).pipe(
       publishReplay(1),
-      refCount()
+      refCount(),
     );
-    this.appAutoscalerPolicySafe$ = this.appAutoscalerPolicyService.waitForEntity$.pipe(
-      map(({ entity }) => entity && entity.entity),
-      publishReplay(1),
-      refCount()
-    );
+    this.appAutoscalerPolicySafe$ = this.appAutoscalerPolicy$;
 
     this.loadLatestMetricsUponPolicy();
 
@@ -262,26 +250,19 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       }),
     );
 
-    this.scalingHistoryAction = new GetAppAutoscalerScalingHistoryAction(
-      createEntityRelationPaginationKey(applicationEntityType, this.applicationService.appGuid, 'latest'),
-      this.applicationService.appGuid,
-      this.applicationService.cfGuid,
-      false,
-      this.paramsHistory
-    );
-    this.appAutoscalerScalingHistoryService = getPaginationObservables({
-      store: this.store,
-      action: this.scalingHistoryAction,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        this.scalingHistoryAction.paginationKey,
-        this.scalingHistoryAction,
-        true
-      ) }, true);
-    this.appAutoscalerScalingHistory$ = this.appAutoscalerScalingHistoryService.entities$.pipe(
-      map(entities => entities.map(entity => entity.entity)),
-      publishReplay(1),
-      refCount()
-    );
+    // Signal-native history wiring. fetchScalingHistory() refreshes
+    // paramsHistory.end-time and triggers load(); the data service caches
+    // results per (cnsi, app). The polling indicator binds via
+    // scalingHistoryLoading$.
+    this.appAutoscalerScalingHistory$ = toObservable(
+      this.scalingHistoryData.events(cfGuid, appGuid),
+      { injector: this.injector },
+    ).pipe(publishReplay(1), refCount());
+    this.scalingHistoryLoading$ = toObservable(
+      this.scalingHistoryData.loading(cfGuid, appGuid),
+      { injector: this.injector },
+    ).pipe(publishReplay(1), refCount());
+    this.fetchScalingHistory();
     this.initErrorSub();
 
     this.showAutoscalerHistory$ = combineLatest([
@@ -303,19 +284,48 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     );
   }
 
-  getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerPaginationParams) {
-    const action = new GetAppAutoscalerAppMetricAction(this.applicationService.appGuid,
-      this.applicationService.cfGuid, metricName, true, trigger, params);
-    this.store.dispatch(action);
-    return getPaginationObservables<AppAutoscalerMetricData>({
-      store: this.store,
-      action,
-      paginationMonitor: this.paginationMonitorFactory.create(
-        action.paginationKey,
-        autoscalerEntityFactory(appAutoscalerAppMetricEntityType),
-        true
-      )
-    }, true).entities$;
+  getAppMetric(metricName: string, trigger: AppScalingTrigger, params: AutoscalerTabPaginationParams): Observable<{ entity: AppAutoscalerMetricDataLocal }[]> {
+    const cfGuid = this.applicationService.cfGuid;
+    const appGuid = this.applicationService.appGuid;
+    const queryParams: AutoscalerMetricQueryParams = {
+      'start-time': params['start-time'],
+      'end-time': params['end-time'],
+      page: params.page,
+      'results-per-page': params['results-per-page'],
+      'order-direction': params['order-direction'],
+    };
+
+    // Trigger the fetch (fire-and-forget); the metric data service caches
+    // the raw resources and we transform them into the chartable local
+    // form via buildMetricData here on the consumer side. This mirrors
+    // the legacy effect-side `addMetric` / buildMetricData call without
+    // routing through ngrx.
+    void this.metricData.load(cfGuid, appGuid, metricName, queryParams);
+
+    const rawSig = this.metricData.metrics(cfGuid, appGuid, metricName);
+    const localSig = computed<{ entity: AppAutoscalerMetricDataLocal }[]>(() => {
+      const resources = rawSig();
+      if (!resources || resources.length === 0) {
+        // Match the legacy "no metric data" emission so the template's
+        // `@if (appAutoscalerAppMetrics[metric.name] | async; as metricData)`
+        // branch stays inert until at least one sample lands.
+        return [];
+      }
+      const local = buildMetricData(
+        metricName,
+        { resources, total_results: resources.length, total_pages: 1 } as any,
+        parseInt(params['start-time'], 10),
+        parseInt(params['end-time'], 10),
+        true, // skipFormat — same flag the legacy dispatch passed
+        trigger,
+      );
+      return [{ entity: local }];
+    });
+
+    return toObservable(localSig, { injector: this.injector }).pipe(
+      publishReplay(1),
+      refCount(),
+    );
   }
 
   loadLatestMetricsUponPolicy() {
@@ -329,7 +339,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
       this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
       if (appAutoscalerPolicy.scaling_rules_map) {
-        this.appAutoscalerAppMetrics = Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, any>, metricName: string) => {
+        this.appAutoscalerAppMetrics = Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, Observable<{ entity: AppAutoscalerMetricDataLocal }[]>>, metricName: string) => {
           metricMap[metricName] = this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
           return metricMap;
         }, {});
@@ -338,59 +348,56 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   initErrorSub() {
-    if (this.appAutoscalerPolicyErrorSub) {
-      this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
-    }
+    const cfGuid = this.applicationService.cfGuid;
+    const appGuid = this.applicationService.appGuid;
 
-    this.appAutoscalerPolicyErrorSub = this.appAutoscalerPolicyService.entityMonitor.entityRequest$.pipe(
-      filter(response => {
-        // Filter out expected errors (no policy, autoscaler unavailable)
-        if (!response.error) {
-          return false;
-        }
-        // Don't show error if policy simply doesn't exist (404 with noPolicy flag)
-        if (response.response?.noPolicy) {
-          return false;
-        }
-        // Don't show error if autoscaler is unavailable (expected when URL not configured)
-        const isAutoscalerUnavailable = response.message?.includes('Autoscaler not available') ||
-                                        response.message?.includes('Autoscaler plugin not available');
-        if (isAutoscalerUnavailable) {
-          return false;
-        }
-        return true;
-      }),
-      map(response => response.message),
-      distinctUntilChanged(),
-    ).subscribe(errorMessage => {
+    // Signal-native policy error surfacing. Replaces the legacy
+    // EntityService.entityMonitor.entityRequest$ subscription. The data
+    // service distinguishes "no policy" (404 → noPolicy=true, error=null)
+    // from real failures (error message), so we only need to surface
+    // real errors here. The "Autoscaler not available" / "plugin not
+    // available" filter from the legacy code is preserved.
+    let lastPolicyError: string | null = null;
+    effect(() => {
+      const errorMessage = this.policyData.error(cfGuid, appGuid)();
+      if (!errorMessage || errorMessage === lastPolicyError) {
+        return;
+      }
+      const isAutoscalerUnavailable = errorMessage.includes('Autoscaler not available') ||
+                                      errorMessage.includes('Autoscaler plugin not available');
+      lastPolicyError = errorMessage;
+      if (isAutoscalerUnavailable) {
+        return;
+      }
       if (this.appAutoscalerPolicySnackBarRef) {
         this.appAutoscalerPolicySnackBarRef.dismiss();
       }
       this.appAutoscalerPolicySnackBarRef = this.appAutoscalerPolicySnackBar.open(errorMessage, 'Dismiss');
-    });
+    }, { injector: this.injector });
 
-    if (this.appAutoscalerScalingHistoryErrorSub) {
-      this.appAutoscalerScalingHistoryErrorSub.unsubscribe();
-    }
-    this.appAutoscalerScalingHistoryErrorSub = this.appAutoscalerScalingHistoryService.pagination$.pipe(
-      map(pagination => getCurrentPageRequestInfo(pagination)),
-      filter(request => {
-        // Filter out expected autoscaler unavailability errors
-        if (!request.error) {
-          return false;
-        }
-        const isAutoscalerUnavailable = request.message?.includes('Autoscaler not available') ||
-                                        request.message?.includes('Autoscaler plugin not available');
-        return !isAutoscalerUnavailable;
-      }),
-      map(request => request.message),
-      distinctUntilChanged(),
-    ).subscribe(errorMessage => {
+    // Signal-native scaling-history error surfacing. Effect re-runs whenever
+    // the data-service error signal changes; mirrors the legacy
+    // distinctUntilChanged + isAutoscalerUnavailable filter.
+    let lastHistoryError: string | null = null;
+    effect(() => {
+      const errorMessage = this.scalingHistoryData
+        .error(cfGuid, appGuid)();
+      if (!errorMessage || errorMessage === lastHistoryError) {
+        return;
+      }
+      const isAutoscalerUnavailable = errorMessage.includes('Autoscaler not available') ||
+                                      errorMessage.includes('Autoscaler plugin not available');
+      if (isAutoscalerUnavailable) {
+        lastHistoryError = errorMessage;
+        return;
+      }
+      lastHistoryError = errorMessage;
       if (this.appAutoscalerScalingHistorySnackBarRef) {
         this.appAutoscalerScalingHistorySnackBarRef.dismiss();
       }
-      this.appAutoscalerScalingHistorySnackBarRef = this.appAutoscalerScalingHistorySnackBar.open(errorMessage, 'Dismiss');
-    });
+      this.appAutoscalerScalingHistorySnackBarRef =
+        this.appAutoscalerScalingHistorySnackBar.open(errorMessage, 'Dismiss');
+    }, { injector: this.injector });
   }
 
   disableAutoscaler() {
@@ -401,69 +408,65 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       true
     );
     this.confirmDialog.open(confirmation, () => {
-      this.detachPolicy().pipe(
-        take(1),
-      ).subscribe(actionState => {
-        if (actionState.error) {
-          this.appAutoscalerPolicySnackBarRef =
-            this.appAutoscalerPolicySnackBar.open(`Failed to detach policy: ${actionState.message}`, 'Dismiss');
-        }
+      const cfGuid = this.applicationService.cfGuid;
+      const appGuid = this.applicationService.appGuid;
+      // Wave-3 (A-effects-cleanup): replaces the dispatch + selectDeletionInfo
+      // pairwise watcher with a direct await on the data service's detach
+      // promise. Failure surfacing matches the legacy snackbar UX —
+      // deletionError() carries the same message extractAutoscalerError()
+      // would have produced.
+      this.policyData.detach(cfGuid, appGuid).catch(() => {
+        // Success path: data service has cleared the cached policy +
+        // flipped noPolicy(); the template re-renders via the policy
+        // signal bridge automatically. Failure path: surface the
+        // deletion error message in the same snackbar style as the
+        // legacy ActionState.message.
+        const message = this.policyData.deletionError(cfGuid, appGuid)() ?? 'unknown error';
+        this.appAutoscalerPolicySnackBarRef =
+          this.appAutoscalerPolicySnackBar.open(`Failed to detach policy: ${message}`, 'Dismiss');
       });
     });
   }
 
-  detachPolicy(): Observable<ActionState> {
-    const action = new DetachAppAutoscalerPolicyAction(this.applicationService.appGuid, this.applicationService.cfGuid);
-    this.store.dispatch(action);
-    const entityKey = entityCatalog.getEntityKey(action);
-
-    return this.store.select(selectDeletionInfo(entityKey, this.applicationService.appGuid)).pipe(
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      map(([, newV]) => newV)
-    );
-  }
-
   updatePolicyPage = (isCreate = false) => {
-    const query = isCreate ? {
-      create: isCreate
-    } : {};
-    this.store.dispatch(new RouterNav({
-      path: [
+    const queryParams = isCreate ? { create: isCreate } : {};
+    void this.router.navigate(
+      [
         'autoscaler',
         this.applicationService.cfGuid,
         this.applicationService.appGuid,
-        'edit-autoscaler-policy'
+        'edit-autoscaler-policy',
       ],
-      query
-    }));
+      { queryParams },
+    );
   };
 
   metricChartPage() {
-    this.store.dispatch(new RouterNav({
-      path: [
-        'autoscaler',
-        this.applicationService.cfGuid,
-        this.applicationService.appGuid,
-        'app-autoscaler-metric-page'
-      ]
-    }));
+    void this.router.navigate([
+      'autoscaler',
+      this.applicationService.cfGuid,
+      this.applicationService.appGuid,
+      'app-autoscaler-metric-page',
+    ]);
   }
 
   scaleHistoryPage() {
-    this.store.dispatch(new RouterNav({
-      path: [
-        'autoscaler',
-        this.applicationService.cfGuid,
-        this.applicationService.appGuid,
-        'app-autoscaler-scale-history-page'
-      ]
-    }));
+    void this.router.navigate([
+      'autoscaler',
+      this.applicationService.cfGuid,
+      this.applicationService.appGuid,
+      'app-autoscaler-scale-history-page',
+    ]);
   }
 
   fetchScalingHistory() {
     this.paramsHistory['end-time'] = (new Date()).getTime().toString() + '000000';
-    this.store.dispatch(this.scalingHistoryAction);
+    // Fire-and-forget; errors surface via the data-service error signal.
+    void this.scalingHistoryData.load(
+      this.applicationService.cfGuid,
+      this.applicationService.appGuid,
+      { ...this.paramsHistory },
+    );
   }
 
   getMetricUnit(metricType: string, unit?: string) {
@@ -471,14 +474,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   }
 
   manageCredentialPage = () => {
-    this.store.dispatch(new RouterNav({
-      path: [
-        'autoscaler',
-        this.applicationService.cfGuid,
-        this.applicationService.appGuid,
-        'edit-autoscaler-credential'
-      ]
-    }));
+    void this.router.navigate([
+      'autoscaler',
+      this.applicationService.cfGuid,
+      this.applicationService.appGuid,
+      'edit-autoscaler-credential',
+    ]);
   };
 
   public gaugeOptions = {
@@ -507,13 +508,15 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     const max = entity.chartMaxValue;
     const remaining = max - current;
 
+    const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
     return {
       labels: ['Current', 'Remaining'],
       datasets: [{
         data: [current, remaining],
         backgroundColor: [
-          entity.latest.colorTarget?.[0] || '#2196F3', // Fallback color if missing
-          '#E0E0E0'
+          entity.latest.colorTarget?.[0] || cssVar('--color-info'), // Fallback color if missing
+          cssVar('--content-border')
         ]
       }]
     };

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import {
+  AppInputDirective,
   CoreModule,
   CustomizationService,
   CustomizationsMetadata,
@@ -20,6 +21,7 @@ const AcmeCustomizations: CustomizationsMetadata = {
 
 @NgModule({
   imports: [
+    AppInputDirective,
     CoreModule,
     SharedModule,
     MDAppModule,

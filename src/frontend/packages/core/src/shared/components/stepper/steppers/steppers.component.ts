@@ -1,14 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Input, OnDestroy, OnInit, QueryList, ViewEncapsulation, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Injector, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { getPreviousRoutingState, IRouterNavPayload, RouterNav, AppState } from '@stratosui/store';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { RoutingHistoryService } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 import { take, catchError, defaultIfEmpty, finalize, map, switchMap } from 'rxjs/operators';
 
-import { BASE_REDIRECT_QUERY } from '../stepper.types';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
+import { BASE_REDIRECT_QUERY, StepperRedirectPayload } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
 import { DotContentComponent } from '../../../../core/dot-content/dot-content.component';
@@ -25,14 +23,21 @@ import { DotContentComponent } from '../../../../core/dot-content/dot-content.co
     RouterModule,
     DotContentComponent
   ],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  // The internal `.steppers-wrapper` uses `flex: 1; min-height: 0` to fill
+  // the host and let `.steppers-contents` overflow-y:auto scroll while the
+  // navigation row stays pinned. Establishing a flex column on the host
+  // gives that wrapper a constrained parent to expand into.
+  host: { class: 'flex flex-1 flex-col min-h-0' },
 })
 export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private steppersService = inject(SteppersService);
-  private store = inject<Store<AppState>>(Store);
+  private router = inject(Router);
+  private routingHistory = inject(RoutingHistoryService);
   private snackBar = inject(TailwindSnackBarService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
+  private injector = inject(Injector);
 
 
   private nextSub!: Subscription;
@@ -40,11 +45,20 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   @ContentChildren(StepComponent) stepComponents!: QueryList<StepComponent>;
 
-  @Input() cancel: string = null;
+  @Input() cancel?: string;
+  // When true the Cancel button does a full-page load to `cancel` instead of a
+  // router navigation. Needed by first-run setup, which has no in-app
+  // destination and wants Cancel to hard-refresh back to the flow's start.
+  @Input() cancelReload = false;
   @Input() nextButtonProgress = true;
-  @Input() basePreviousRedirect: IRouterNavPayload = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
+  @Input() basePreviousRedirect: StepperRedirectPayload | null = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
   } : null;
+  // Optional context summary rendered above the step headers. Hosts pass
+  // a TemplateRef that surfaces the user's in-progress selections (CF /
+  // Org / Space / offering / plan / name) so the wizard always shows
+  // "what am I creating?" as later steps navigate away from the picker.
+  @Input() contextSummary?: TemplateRef<unknown>;
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];
@@ -52,19 +66,30 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   hiddenSubs: Subscription[] = [];
 
-  stepValidateSub: Subscription = null;
+  stepValidateSub: Subscription | null = null;
 
   private enterData: any;
   private snackBarRef!: TailwindSnackBarRef<any>;
+  // First-step unblock poller (see setActive). Held as a field so destroy can
+  // clear it — a local timer kept ticking after teardown and then called
+  // afterNextRender against a destroyed injector (NG0205).
+  private firstStepTimer?: ReturnType<typeof setInterval>;
+  private isDestroyed = false;
 
-  currentIndex = 0;
+  // Signal (read directly in the template as currentIndex()) so the action
+  // buttons' [disabled]/text bindings re-render under zoneless CD when the
+  // step changes. The step transition completes inside an async submit
+  // continuation (a Promise resolved by signal-handle.submit); a plain
+  // property + markForCheck there did not flush, leaving the finish/Apply
+  // button stale on the final step. A signal write reliably triggers
+  // zoneless CD, and a direct template read establishes the dependency
+  // (a getter-wrapped read does not track for signal-driven CD).
+  readonly currentIndex = signal(0);
   cancelQueryParams$: Observable<{
     [key: string]: string;
   }>;
   constructor() {
-    const store = this.store;
-
-    const previousRoute$ = store.select(getPreviousRoutingState).pipe(take(1));
+    const previousRoute$ = this.routingHistory.previousState$.pipe(take(1));
     this.cancel$ = previousRoute$.pipe(
       map(previousState => {
         // If we have a previous state, and that previous state was not login (i.e. we've come from afresh), go to whatever the default
@@ -83,6 +108,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnInit() { }
 
   ngOnDestroy() {
+    this.isDestroyed = true;
+    clearInterval(this.firstStepTimer);
     this.hiddenSubs.forEach(sub => sub.unsubscribe());
     this.unsubscribeNext();
     if (this.snackBarRef) {
@@ -95,7 +122,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.setActive(0);
 
     this.allSteps.forEach((step => {
-      this.hiddenSubs.push(step.onHidden.subscribe((_hidden) => {
+      this.hiddenSubs.push(step.hiddenChange.subscribe((_hidden) => {
         this.filterSteps();
       }));
       // Listen for validation/canClose/disablePrevious changes to trigger
@@ -105,13 +132,19 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       // template bindings that read from `this.steps[i].canClose` etc.
       // Without these markForCheck calls the Previous/Close button
       // disabled state stays frozen at the initial bind state.
-      this.hiddenSubs.push(step.onValidChange.subscribe(() => {
+      this.hiddenSubs.push(step.validChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
-      this.hiddenSubs.push(step.onCanCloseChange.subscribe(() => {
+      // busy gates the Next/Apply [disabled] binding; its mutations (e.g.
+      // the destructive-entry delay timer in StepComponent.pOnEnter) happen
+      // outside this component's CD scope. See StepComponent.busy.
+      this.hiddenSubs.push(step.busyChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
-      this.hiddenSubs.push(step.onDisablePreviousChange.subscribe(() => {
+      this.hiddenSubs.push(step.canCloseChange.subscribe(() => {
+        this.cdr.markForCheck();
+      }));
+      this.hiddenSubs.push(step.disablePreviousChange.subscribe(() => {
         this.cdr.markForCheck();
       }));
     }));
@@ -120,6 +153,12 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   private filterSteps() {
     this.steps = this.allSteps.filter((step => !step.hidden));
+    // Under zoneless CD, reassigning this.steps doesn't mark the view
+    // dirty. Without markForCheck the template keeps rendering the step
+    // list as it was at ngAfterContentInit, so steps whose [hidden]
+    // later flips to false (e.g. Routes once fetch resolves) never
+    // appear in the stepper bar.
+    this.cdr.markForCheck();
   }
 
   goNext(): void {
@@ -128,28 +167,27 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.snackBar.dismiss();
     }
     this.unsubscribeNext();
-    if (this.currentIndex < this.steps.length) {
-      const step = this.steps[this.currentIndex];
+    if (this.currentIndex() < this.steps.length) {
+      const step = this.steps[this.currentIndex()];
       step.busy = true;
 
-      // Defensive: step.onNext may throw synchronously (runtime error before
-      // it returns an observable). Without a try/catch, the throw escapes
-      // goNext, step.busy stays true, and the Next/Finish button is stuck
-      // as a spinner forever. Catch, surface via snackbar, reset busy.
+      // Defensive: step.invokeNext may throw synchronously (runtime error
+      // before it returns an observable, or signal-handle.submit() throwing
+      // sync). Without a try/catch, the throw escapes goNext, step.busy
+      // stays true, and the Next/Finish button is stuck as a spinner
+      // forever. Catch, surface via snackbar, reset busy.
       let obs$: Observable<StepOnNextResult> | unknown;
       try {
-        obs$ = step.onNext(this.currentIndex, step);
+        obs$ = step.invokeNext(this.currentIndex());
       } catch (err) {
         console.error('Stepper onNext threw synchronously:', err);
         step.busy = false;
         this.showNextButtonProgress = false;
-        this.snackBarRef = this.snackBar.open(
+        this.cdr.markForCheck();
+        this.snackBarRef = this.snackBar.error(
           `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
           'Dismiss',
-          // duration: 0 means "stay open until user clicks Dismiss" (no
-          // auto-dismiss). Matches reference console481 behavior; the
-          // default 4s auto-dismiss hid errors before users could read them.
-          { panelClass: 'stepper-snack-bar', duration: 0 }
+          { panelClass: 'stepper-snack-bar' },
         );
         return;
       }
@@ -160,19 +198,20 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       // at true even though navigation was effectively complete/no-op.
       if (!(obs$ instanceof Observable)) {
         step.busy = false;
+        this.cdr.markForCheck();
         return;
       }
 
       this.showNextButtonProgress = this.nextButtonProgress;
       this.nextSub = obs$.pipe(
         take(1),
-        defaultIfEmpty({ success: false, message: 'No response from step', data: {}, redirect: false, redirectPayload: null, ignoreSuccess: false } as StepOnNextResult),
+        defaultIfEmpty({ success: false, message: 'No response from step', data: {}, redirect: false, redirectPayload: undefined, ignoreSuccess: false } as StepOnNextResult),
         catchError(err => {
           console.warn('Stepper failed: ', err);
           return observableOf({
             success: false,
             message: err || 'Failed',
-            redirectPayload: null,
+            redirectPayload: undefined,
             redirect: false,
             data: {},
             ignoreSuccess: false
@@ -182,20 +221,24 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
           this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
+          // OnPush + zoneless: bare assignments don't mark the stepper view
+          // dirty, so the Connect/Next button stays in its spinner state and
+          // remains disabled after a failed submit. Without this the user
+          // can't retry — bad creds path leaves the dialog frozen.
+          this.cdr.markForCheck();
           this.enterData = data;
           if (success && !ignoreSuccess) {
             if (redirect) {
               // Must sub to this
               return this.redirect(redirectPayload);
             } else {
-              this.setActive(this.currentIndex + 1);
+              this.setActive(this.currentIndex() + 1);
             }
           } else if (!success && message) {
-            this.snackBarRef = this.snackBar.open(
+            this.snackBarRef = this.snackBar.error(
               message,
               'Dismiss',
-              // duration: 0 — stay open until user clicks Dismiss.
-              { panelClass: 'stepper-snack-bar', duration: 0 }
+              { panelClass: 'stepper-snack-bar' },
             );
           }
           return observableOf(undefined);
@@ -208,44 +251,64 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         finalize(() => {
           step.busy = false;
           this.showNextButtonProgress = false;
+          this.cdr.markForCheck();
         })
       ).subscribe();
     }
   }
 
-  redirect(redirectPayload?: IRouterNavPayload): Observable<void> {
+  redirect(redirectPayload?: StepperRedirectPayload): Observable<void> {
     if (redirectPayload) {
-      return observableOf(this.dispatchRedirect(redirectPayload));
+      return observableOf(this.navigate(redirectPayload));
     }
     return combineLatest([
       this.cancel$,
       this.cancelQueryParams$
     ]).pipe(
       map(([path, params]) => {
-        this.dispatchRedirect({ path, query: params });
+        this.navigate({ path, query: params });
       })
     );
   }
 
-  private dispatchRedirect(redirectPayload: IRouterNavPayload): void {
-    this.store.dispatch(new RouterNav(redirectPayload));
+  // Direct Angular Router navigation, replacing the ngrx RouterNav dispatch +
+  // RouterEffect (which did exactly this). String paths are split into route
+  // segments and query params are merged into NavigationExtras.
+  private navigate(redirectPayload: StepperRedirectPayload): void {
+    const { path, query: queryParams, extras = {} } = redirectPayload;
+    const commands = typeof path === 'string' ? path.split('/') : path;
+    this.router.navigate(commands, { ...extras, queryParams });
   }
 
   setActive(index: number): void {
     if (this.basePreviousRedirect && index < 0) {
-      this.dispatchRedirect(this.basePreviousRedirect);
+      this.navigate(this.basePreviousRedirect);
     }
     if (!this.canGoto(index)) {
       if (index === 0) {
         if (this.allSteps && this.allSteps.length > 0) {
-          // Execute `onEnter` for the first step as soon as step is unblocked
-          const timer = setInterval(() => {
+          // Execute `onEnter` for the first step as soon as step is unblocked.
+          // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
+          // wizards) receive the enter callback — the legacy onEnter @Input
+          // defaults to a no-op so a raw step.onEnter call swallows
+          // signalHandle.onEnter.
+          clearInterval(this.firstStepTimer);
+          this.firstStepTimer = setInterval(() => {
+            if (this.isDestroyed) {
+              clearInterval(this.firstStepTimer);
+              return;
+            }
             if (this.allSteps[index].blocked === false) {
-              this.allSteps[index].active = true;
-              if (this.allSteps[index].onEnter) {
-                this.allSteps[index].onEnter(this.enterData);
-              }
-              clearInterval(timer);
+              const step = this.allSteps[index];
+              step.active = true;
+              // Same deferred delivery as setActive's main path below: the
+              // first step's content may not have rendered yet when this
+              // interval fires, so a synchronous pOnEnter races the child
+              // instantiation. markForCheck guarantees the render that
+              // afterNextRender waits on.
+              this.cdr.markForCheck();
+              afterNextRender(() => step.pOnEnter(this.enterData), { injector: this.injector });
+              clearInterval(this.firstStepTimer);
             }
           }, 5);
         }
@@ -254,8 +317,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
 
     // 1) Leave the previous step (with an indication if this is a Next or Previous transition)
-    const isNextDirection = index > this.currentIndex;
-    this.steps[this.currentIndex].onLeave(isNextDirection);
+    const isNextDirection = index > this.currentIndex();
+    this.steps[this.currentIndex()].invokeLeave(isNextDirection);
 
     // 2) Determine if the required step is ok (and if not find the next/previous valid step)
     index = this.findValidStep(index, isNextDirection);
@@ -268,11 +331,27 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       s.complete = i < index;
       s.active = i === index;
     });
-    this.currentIndex = index;
-    if (this.steps[this.currentIndex].onEnter) {
-      this.steps[this.currentIndex].onEnter(this.enterData);
-    }
+    this.currentIndex.set(index);
+    // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
+    // wizards) receive the enter callback — see comment above for rationale.
+    //
+    // Delivery is deferred to after the NEXT render: the entering step's
+    // content is only instantiated by the ngTemplateOutlet on currentIndex
+    // during that render, so a synchronous pOnEnter here runs before any
+    // @ViewChild the handle's onEnter body dereferences exists — the enter
+    // callback was silently dropped for every step after the first (#5600:
+    // specify-details-step never received onEnter, so its formMode was
+    // never set and the step rendered empty).
+    const enteringStep = this.steps[index];
+    const enterData = this.enterData;
     this.enterData = undefined;
+    afterNextRender(() => {
+      // A further transition can land before this render callback fires —
+      // only deliver if the step is still the active one.
+      if (enteringStep.active) {
+        enteringStep.pOnEnter(enterData);
+      }
+    }, { injector: this.injector });
 
     // Trigger change detection for OnPush strategy
     this.cdr.markForCheck();
@@ -306,17 +385,17 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (index < 0 && this.basePreviousRedirect) {
       return true;
     }
-    const step = this.steps[this.currentIndex];
+    const step = this.steps[this.currentIndex()];
     if (!step || step.busy || step.disablePrevious || step.skip) {
       return false;
     }
-    if (index === this.currentIndex) {
+    if (index === this.currentIndex()) {
       return true;
     }
     if (index < 0 || index >= this.steps.length) {
       return false;
     }
-    if (index < this.currentIndex) {
+    if (index < this.currentIndex()) {
       return true;
     } else if (step.error) {
       return false;
@@ -349,7 +428,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     return true;
   }
 
-  getIconLigature(_step: StepComponent, _index: number): string {
+  getIconLigature(): string {
     return 'done';
   }
 
@@ -361,6 +440,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   getCancelButtonText(currentIndex: number): string {
     return this.steps[currentIndex].cancelButtonText;
+  }
+
+  onCancel(index: number) {
+    this.steps[index].onLeave(false);
+    if (this.cancelReload && this.cancel) {
+      // Full page load restarts the wizard from a clean state; the template
+      // drops routerLink when cancelReload so this is the only navigation.
+      window.location.assign(this.cancel);
+    }
   }
   private unsubscribeNext() {
     if (this.nextSub) {

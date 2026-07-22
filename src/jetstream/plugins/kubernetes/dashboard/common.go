@@ -56,7 +56,7 @@ func getKubeDashboardPod(p api.PortalProxy, cnsiGUID, userGUID string, labelSele
 		return nil, errors.New("Could not fetch pod list")
 	}
 
-	ok, list, err := tryDecodePodList(response.Response)
+	ok, list, _ := tryDecodePodList(response.Response)
 	if !ok {
 		return nil, errors.New("Kube dashboard not installed - could not decode pod list")
 	}
@@ -84,7 +84,7 @@ func getKubeDashboardService(p api.PortalProxy, cnsiGUID, userGUID string, label
 		return info, errors.New("Could not fetch service list")
 	}
 
-	ok, list, err := tryDecodeServiceList(response.Response)
+	ok, list, _ := tryDecodeServiceList(response.Response)
 	if !ok {
 		return info, errors.New("Kube dashboard not installed - could not decode service list")
 	}
@@ -133,7 +133,7 @@ func getKubeDashboardServiceAccount(p api.PortalProxy, cnsiGUID, userGUID string
 		return nil, errors.New("Could not fetch service account list")
 	}
 
-	ok, list, err := tryDecodeServiceAccountList(response.Response)
+	ok, list, _ := tryDecodeServiceAccountList(response.Response)
 	if !ok {
 		return nil, errors.New("Could not find service account for Kubernetes dashboard")
 	}
@@ -168,7 +168,7 @@ func getKubeDashboardSecretToken(p api.PortalProxy, cnsiGUID, userGUID string, s
 		return "", errors.New("Could not find secrets for Kubernetes dashboard")
 	}
 
-	ok, secrets, err := tryDecodeSecrets(response.Response)
+	ok, secrets, _ := tryDecodeSecrets(response.Response)
 	if !ok {
 		return "", errors.New("Could not find secrets for Kubernetes dashboard")
 	}

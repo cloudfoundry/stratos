@@ -118,7 +118,7 @@ func KubeDashboardProxy(c echo.Context, p api.PortalProxy, config *rest.Config) 
 	proxy.Transport = transport
 	proxy.FlushInterval = defaultFlushInterval
 	proxy.ModifyResponse = func(response *http.Response) error {
-		log.Debugf("Got proxy response for: %s (Status: %s)", loc.String(), response.StatusCode)
+		log.Debugf("Got proxy response for: %s (Status: %d)", loc.String(), response.StatusCode)
 		// For the root page, set the session cookie so that the user is automatically logged in from
 		// the login we did manually
 		if len(path) == 0 {

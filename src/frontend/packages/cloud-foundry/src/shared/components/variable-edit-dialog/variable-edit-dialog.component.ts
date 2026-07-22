@@ -1,0 +1,213 @@
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Signal,
+  WritableSignal,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { FormsModule } from '@angular/forms';
+
+import {
+  MAT_DIALOG_DATA,
+  MonacoEditorComponent,
+  MonacoEditorModel,
+  MonacoEditorOptions,
+  TailwindDialogRef,
+} from '@stratosui/core';
+
+import {
+  jsonModeWarning,
+  looksLikeJson,
+  validateVariableName,
+} from './variable-edit-dialog.validation';
+
+/** Input to the dialog. `existingNames` is the set the new name must NOT
+ *  collide with — the caller pre-excludes the row's own name when editing. */
+export interface VariableEditDialogData {
+  mode: 'add' | 'edit';
+  name?: string;
+  value?: string;
+  existingNames?: string[];
+}
+
+/** Result returned via dialogRef.close(). undefined = cancelled. Rename vs
+ *  update routing is the caller's job (compare against the original name). */
+export interface VariableEditDialogResult {
+  name: string;
+  value: string;
+}
+
+/**
+ * VariableEditDialogComponent — popup editor for a single app environment
+ * variable. Serves Add, Edit, and Rename (editing the Name = rename).
+ *
+ * Layout: full-width Name on top, multiline Monaco value editor below
+ * (vertical stack — Name never truncated, Value gets full width). The value
+ * is ALWAYS a string: opened verbatim, saved verbatim. "JSON mode" only sets
+ * Monaco's language (highlight/validate/format) — it never reformats the
+ * stored text. Auto-detected on open; a JSON/Plain toggle overrides.
+ *
+ * Validation (see variable-edit-dialog.validation): CF's real name rules are
+ * hard errors that block Save; the stricter shell-safe pattern and invalid
+ * JSON are advisory warnings that still allow Save.
+ */
+@Component({
+  selector: 'app-variable-edit-dialog',
+  templateUrl: './variable-edit-dialog.component.html',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, MonacoEditorComponent],
+})
+export class VariableEditDialogComponent {
+  private dialogRef = inject<TailwindDialogRef<VariableEditDialogComponent, VariableEditDialogResult>>(TailwindDialogRef);
+  private data = inject<VariableEditDialogData>(MAT_DIALOG_DATA);
+
+  /** Names the new key must not collide with (caller excludes self). */
+  private readonly existingNames: string[];
+
+  readonly name: WritableSignal<string>;
+  readonly value: WritableSignal<string>;
+  readonly jsonMode: WritableSignal<boolean>;
+
+  readonly title: string;
+
+  /** Monaco editor options — auto-layout so it fills its sized container;
+   *  no minimap/line numbers for a compact value editor. */
+  readonly editorOptions: MonacoEditorOptions = {
+    automaticLayout: true,
+    contextmenu: false,
+    minimap: { enabled: false },
+    lineNumbers: 'off',
+    scrollBeyondLastLine: false,
+    wordWrap: 'on',
+    tabSize: 2,
+    // Larger than Monaco's compact default so values stay easy to read.
+    fontSize: 16,
+  };
+
+  /** Captured Monaco editor instance (undefined until editorInit fires; never
+   *  fires in unit tests, where Monaco isn't loaded). */
+  private editor: any;
+
+  private readonly nameValidation = computed(() => validateVariableName(this.name(), this.existingNames));
+  readonly nameError: Signal<string | null> = computed(() => this.nameValidation().hardError);
+  readonly nameWarning: Signal<string | null> = computed(() => this.nameValidation().warning);
+
+  /** The name field starts untouched so a freshly-opened create dialog does
+   *  not show "Name is required" before the user has typed. Set on first
+   *  input / blur. */
+  readonly nameTouched: WritableSignal<boolean> = signal(false);
+
+  /** Validation messages are surfaced only once the field is touched; the
+   *  underlying nameError still gates canSave regardless of display. */
+  readonly visibleNameError: Signal<string | null> = computed(() => this.nameTouched() ? this.nameError() : null);
+  readonly visibleNameWarning: Signal<string | null> = computed(() => this.nameTouched() ? this.nameWarning() : null);
+
+  /** JSON warning only applies while editing in JSON mode. */
+  readonly jsonWarning: Signal<string | null> = computed(() =>
+    this.jsonMode() ? jsonModeWarning(this.value()) : null,
+  );
+
+  /** Save is gated solely by hard name errors — warnings never block. */
+  readonly canSave: Signal<boolean> = computed(() => !this.nameValidation().hardError);
+
+  /** Format/Minify is offered only in JSON mode and only when the text
+   *  parses — reformatting non-JSON makes no sense. */
+  readonly canFormat: Signal<boolean> = computed(() => {
+    if (!this.jsonMode()) {
+      return false;
+    }
+    try {
+      JSON.parse(this.value());
+      return true;
+    } catch {
+      return false;
+    }
+  });
+
+  /** Whether the value is already canonical-minified JSON — drives the
+   *  Format ↔ Minify toggle's label and direction. */
+  readonly isMinified: Signal<boolean> = computed(() => {
+    try {
+      return this.value() === JSON.stringify(JSON.parse(this.value()));
+    } catch {
+      return false;
+    }
+  });
+
+  /** Monaco model — initial language reflects the auto-detected mode. Live
+   *  toggles are applied via setModelLanguage in the effect below. */
+  readonly model: Signal<MonacoEditorModel> = computed(() => ({
+    language: this.jsonMode() ? 'json' : 'plaintext',
+  }));
+
+  constructor() {
+    this.existingNames = this.data.existingNames ?? [];
+    this.name = signal(this.data.name ?? '');
+    this.value = signal(this.data.value ?? '');
+    this.jsonMode = signal(looksLikeJson(this.data.value ?? ''));
+    this.title = this.data.mode === 'add' ? 'Add Variable' : 'Edit Variable';
+
+    // Apply live language switches to the running editor when the user
+    // toggles JSON/Plain. Guarded so it's a no-op before the editor exists.
+    effect(() => {
+      const language = this.jsonMode() ? 'json' : 'plaintext';
+      const monaco = (window as any).monaco;
+      if (this.editor && monaco) {
+        monaco.editor.setModelLanguage(this.editor.getModel(), language);
+      }
+    });
+  }
+
+  onEditorInit(editor: any): void {
+    this.editor = editor;
+  }
+
+  toggleJsonMode(): void {
+    this.jsonMode.update((v) => !v);
+  }
+
+  /**
+   * Toggle the editor text between pretty-printed (jq-style, 2-space) and
+   * canonical minified JSON. Pure editing aid: because save() always
+   * re-minifies valid JSON, this never changes the stored value. No-op on
+   * invalid JSON.
+   */
+  toggleFormat(): void {
+    try {
+      const parsed = JSON.parse(this.value());
+      const minified = JSON.stringify(parsed);
+      this.value.set(this.value() === minified ? JSON.stringify(parsed, null, 2) : minified);
+    } catch {
+      // Invalid JSON — leave the text as-is (the warning already shows).
+    }
+  }
+
+  save(): void {
+    if (!this.canSave()) {
+      return;
+    }
+    this.dialogRef.close({ name: this.name().trim(), value: this.canonicalValue() });
+  }
+
+  cancel(): void {
+    this.dialogRef.close();
+  }
+
+  /**
+   * Value as stored: valid JSON is always minified to its canonical compact
+   * form (independent of how it was displayed/edited); anything else — plain
+   * strings, empty string — is stored verbatim. Empty stays "" (never null).
+   */
+  private canonicalValue(): string {
+    const v = this.value();
+    try {
+      return JSON.stringify(JSON.parse(v));
+    } catch {
+      return v;
+    }
+  }
+}

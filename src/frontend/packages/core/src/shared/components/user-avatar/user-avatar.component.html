@@ -1,11 +1,11 @@
-<div class="user-avatar" [ngClass]="{'user-avatar__large': size === 'large'}">
+<div class="flex items-center justify-center" [ngClass]="size === 'large' ? 'h-16 w-16' : ''">
   @if (!initials && !gravatar) {
-    <span class="material-icons user-avatar__placeholder">account_circle</span>
+    <span class="material-icons" [ngClass]="size === 'large' ? 'text-[64px] h-16 w-16' : 'text-[36px] h-9 w-9 leading-[initial]'">account_circle</span>
   }
   @if (initials) {
-    <div [ngClass]="{'user-avatar__header': color === 'header'}" class="user-avatar__initials">{{ initials }}</div>
+    <div [ngClass]="size === 'large' ? 'rounded-full text-center text-[26px] h-[60px] w-[60px] leading-[60px]' : 'rounded-full text-center text-sm h-[30px] w-[30px] leading-[30px]'" [class.user-avatar__header]="color === 'header'">{{ initials }}</div>
   }
   @if (gravatar) {
-    <img class="user-avatar__gravatar" [src]="gravatar" alt="">
+    <img class="rounded-full" [ngClass]="size === 'large' ? 'h-16 w-16' : 'h-9 w-9'" [src]="gravatar" alt="">
   }
 </div>

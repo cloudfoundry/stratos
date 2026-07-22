@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component} from '@angular/core';
 
 import { PreviewableComponent } from '../../../../../core/src/shared/previewable-component';
 import { SidepanelPreviewComponent } from '../../../../../core/src/shared/components/sidepanel-preview/sidepanel-preview.component';
+import { ResourceAlertViewComponent } from './resource-alert-view/resource-alert-view.component';
 
 @Component({
 changeDetection: ChangeDetectionStrategy.OnPush,
@@ -9,7 +10,8 @@ changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './resource-alert-preview.component.html',
   standalone: true,
   imports: [
-    SidepanelPreviewComponent
+    SidepanelPreviewComponent,
+    ResourceAlertViewComponent
   ]
 })
 export class ResourceAlertPreviewComponent implements PreviewableComponent {

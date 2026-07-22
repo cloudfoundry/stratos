@@ -1,13 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { take, catchError, map, switchMap, tap } from 'rxjs/operators';
 import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
-import { CFAppState } from '@stratosui/cloud-foundry';
 import { IApp } from '../../../cf-api.types';
 import { ApplicationService } from '../application.service';
 
@@ -27,7 +25,6 @@ import { ApplicationService } from '../application.service';
 })
 export class SshApplicationComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
-  private store = inject<Store<CFAppState>>(Store);
   private applicationService = inject(ApplicationService);
 
 
@@ -49,16 +46,20 @@ export class SshApplicationComponent implements OnInit {
 
   public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
-  @ViewChild('sshViewer', { static: true }) sshViewer: SshViewerComponent;
+  // strict: populated by Angular's @ViewChild query (static query resolves
+  // before ngOnInit).
+  @ViewChild('sshViewer', { static: true }) sshViewer!: SshViewerComponent;
 
   private getBreadcrumbs(
     application: IApp,
+    cfGuid: string,
+    appGuid: string,
   ) {
     return [
       {
         breadcrumbs: [
           { value: 'Applications', routerLink: '/applications' },
-          { value: application.name, routerLink: `/applications/${application.cfGuid}/${application.guid}/instances` }
+          { value: application.name, routerLink: `/applications/${cfGuid}/${appGuid}/summary` }
         ]
       },
     ];
@@ -71,7 +72,7 @@ export class SshApplicationComponent implements OnInit {
     this.instanceId = routeParams.index;
 
     this.appInstanceLink = (
-      `/applications/${cfGuid}/${appGuid}/instances`
+      `/applications/${cfGuid}/${appGuid}/summary`
     );
 
     if (!cfGuid || !appGuid || !this.instanceId) {
@@ -98,7 +99,7 @@ export class SshApplicationComponent implements OnInit {
         }));
 
       this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
-        map(app => this.getBreadcrumbs(app.entity.entity)),
+        map(app => this.getBreadcrumbs(app.entity.entity, cfGuid, appGuid)),
         take(1)
       );
     }

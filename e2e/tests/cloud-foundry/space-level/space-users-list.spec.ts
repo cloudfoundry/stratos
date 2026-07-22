@@ -149,7 +149,7 @@ test.describe('Space Users List', () => {
       await manageRolesOption.click();
 
       // Verify role management dialog/page opened
-      const roleDialog = page.locator('app-manage-space-user-roles, mat-dialog-container');
+      const roleDialog = page.locator('app-manage-space-user-roles, [role="dialog"]');
       const dialogExists = await roleDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (dialogExists) {

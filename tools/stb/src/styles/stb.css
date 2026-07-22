@@ -1,0 +1,295 @@
+body {
+  font-family: system-ui, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+#app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Top bar: status line + global ops (dark toggle, presets, export, assets, format) */
+.stb-topbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  flex-shrink: 0;
+}
+
+/* Actions host flows its controls inline within the topbar */
+.stb-light-dark-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+/* Status host is its own full-width row under the actions row (flex-basis:100%
+   wraps it onto its own line). The inner .stb-status-spacer (flex:1) then spans
+   the full width: completeness message pinned left, Color-format pinned right —
+   so the message no longer drifts with the actions cluster or its own length. */
+.stb-topbar .stb-statusbar-host {
+  flex-basis: 100%;
+  padding: 0.4rem 0 0;
+  border: none;
+  border-top: 1px solid var(--border, #e5e7eb);
+  background: transparent;
+}
+
+/* Navigator band: full-width, bounded height, navigator + CSS editor side by side */
+.stb-nav-band {
+  display: flex;
+  overflow: hidden;
+  max-height: 40vh;
+  border-bottom: 1px solid var(--border, #e5e7eb);
+  flex-shrink: 0;
+}
+
+.stb-nav-band .stb-sidebar-host {
+  flex: 1;
+  min-width: 0;
+  overflow: auto;
+}
+
+/* Persistent scrollbar so tall views (Tokens/Tree) read as scrollable —
+   macOS overlay scrollbars auto-hide and made the lower rows look clipped. */
+.stb-nav-band .stb-sidebar-host::-webkit-scrollbar { width: 10px; }
+.stb-nav-band .stb-sidebar-host::-webkit-scrollbar-thumb {
+  background: var(--border, #cbd5e1); border-radius: 5px;
+  border: 2px solid var(--card, #fff);
+}
+.stb-nav-band .stb-sidebar-host::-webkit-scrollbar-track { background: transparent; }
+
+.stb-nav-band .stb-editor-host {
+  flex: 0 0 400px;
+  overflow: auto;
+  border-left: 1px solid var(--border, #e5e7eb);
+}
+
+/* Preview takes all remaining height. Panes sit side by side (compare mode
+   shows two: light left, dark right) with a minimal gap; single mode shows
+   one, which flex:1 stretches to the full width — no layout flip needed. */
+.stb-preview-host {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  gap: 4px;
+}
+.stb-preview-pane { flex: 1 1 0; min-width: 0; }
+/* belt-and-braces vs the .stb-view [hidden] trap if a display rule is ever added */
+.stb-preview-pane[hidden] { display: none; }
+
+.stb-sidebar { padding: 0.5rem; overflow-y: auto; border-right: 1px solid var(--border, #ddd); }
+.stb-group h3 { font-size: 0.85rem; text-transform: uppercase; color: var(--muted-foreground, #666); margin: 0.75rem 0 0.25rem; }
+.stb-token-row { display: grid; grid-template-columns: 1.5rem 1fr auto; gap: 0.5rem; align-items: center; padding: 0.15rem 0.25rem; }
+.stb-token-row:hover { background-color: var(--accent, #f0f0f0); }
+.stb-swatch { width: 1.25rem; height: 1.25rem; border: 1px solid var(--border, #ccc); border-radius: 3px; cursor: pointer; padding: 0; }
+.stb-token-name { background: none; border: none; padding: 0; cursor: pointer; font: inherit; font-family: var(--font-mono, monospace); font-size: 0.78rem; text-align: left; color: inherit; }
+.stb-token-value { font-family: var(--font-mono, monospace); font-size: 0.75rem; color: var(--muted-foreground, #666); }
+
+/* One consistent editor popover surface for both element levers and tokens:
+   opaque + firm border + strong shadow so it never blends into the light
+   nav-band / preview; stretchable for larger / multi-paragraph content. */
+/* Sizes to content by default (no fixed width/height set anywhere) and grows
+   as sections are added (background layers, font fallbacks, ...), capped at
+   a viewport margin so it can never run off-screen — past that the panel
+   body scrolls instead of growing further. `resize: both` remains available
+   for a manual override; once dragged, the browser pins an inline
+   width/height on the element which then wins over further auto-growth
+   (v1: auto-grow until first manual resize — a per-drag "unpin" affordance
+   is deferred as disproportionate to this pass). */
+.stb-lever-editor, .stb-color-picker {
+  background: var(--card, #fff); border: 1px solid var(--border, #cbd5e1);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); padding: 0.6rem; border-radius: 8px;
+  z-index: 1000; min-width: 240px; max-width: min(640px, 92vw); max-height: calc(100vh - 2rem);
+  resize: both; overflow: auto;
+}
+/* drag handle: a grab bar spanning the popover top, overrides auto-placement */
+.stb-lever-drag {
+  cursor: move; user-select: none; text-align: center; line-height: 1;
+  color: var(--text-muted, #94a3b8); padding: 2px 0 4px;
+  margin: -0.6rem -0.6rem 0.4rem; border-bottom: 1px solid var(--border, #e5e7eb);
+  border-radius: 8px 8px 0 0;
+}
+.stb-lever-title { font-weight: 600; font-size: 0.9rem; margin: 0 0 0.4rem; color: var(--text, #0f172a); }
+.stb-lever-text { display: block; width: 100%; min-height: 5rem; resize: both; box-sizing: border-box; font: inherit; }
+/* the scoped-CSS editor fills the popover width and grows with it (resize: both) */
+.stb-lever-scoped-block { width: 100%; }
+.stb-lever-scoped-block-label { font-size: 0.8rem; color: var(--text-muted, #64748b); margin: 0.3rem 0 0.2rem; }
+.stb-lever-scoped-block .cm-editor { width: 100%; max-height: 12rem; border: 1px solid var(--border, #cbd5e1); border-radius: 4px; }
+.stb-color-picker__row { display: flex; gap: 0.5rem; align-items: center; margin: 0.25rem 0; }
+.stb-color-native { width: 3rem; height: 2rem; padding: 0; border: 1px solid var(--border, #ccc); }
+.stb-color-text { flex: 1; padding: 0.25rem; font-family: var(--font-mono, monospace); }
+.stb-close { padding: 0.25rem 0.5rem; margin-left: auto; }
+
+/* Facet tree (element lever editor): label column + value control(s) per row.
+   Fixed-width label so the light/dark swatch columns line up across rows and
+   under the dual header. */
+.stb-facet-bar { display: flex; flex-wrap: wrap; gap: 0.25rem; margin-bottom: 0.4rem; }
+.stb-facet-bar button, .stb-facet-add { font-size: 0.72rem; padding: 0.15rem 0.4rem; }
+.stb-facet-group { display: flex; align-items: center; gap: 0.3rem; font-weight: 600; font-size: 0.78rem; padding: 0.35rem 0 0.15rem; cursor: pointer; color: var(--foreground, #1e293b); }
+.stb-facet-group::before { content: '▾'; font-size: 0.65rem; color: var(--text-muted, #94a3b8); }
+.stb-facet-group.stb-facet-collapsed::before { content: '▸'; }
+.stb-facet-remove { margin-left: auto; border: none; background: none; cursor: pointer; color: var(--text-muted, #94a3b8); font-size: 0.9rem; line-height: 1; padding: 0 0.2rem; }
+.stb-facet-leaves { display: flex; flex-direction: column; gap: 0.15rem; }
+/* the flex rule above outranks [hidden]'s UA display:none, so collapse never hid
+   the leaves — this 2-selector rule wins back (same trap as .stb-view[hidden]) */
+.stb-facet-leaves[hidden] { display: none; }
+.stb-facet-leaf { display: flex; align-items: center; gap: 0.35rem; padding: 0.05rem 0; }
+.stb-facet-leaf-label { flex: 0 0 5.5rem; color: var(--text-muted, #64748b); font-size: 0.74rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stb-facet-leaf select, .stb-facet-leaf input[type="text"] { flex: 1; min-width: 0; font: inherit; font-size: 0.75rem; padding: 0.1rem 0.25rem; }
+.stb-facet-leaf textarea { flex: 1; min-width: 0; min-height: 2.5rem; font: inherit; font-size: 0.75rem; }
+.stb-facet-leaf input[type="file"] { flex: 1; min-width: 0; font-size: 0.7rem; }
+/* light + dark color swatches, side by side, followed by the derive button */
+.stb-facet-swatch, .stb-facet-swatch-dark, .stb-facet-derive-dark { flex: 0 0 auto; width: 1.4rem; height: 1.4rem; padding: 0; border: 1px solid var(--border, #cbd5e1); border-radius: 3px; cursor: pointer; }
+.stb-facet-derive-dark { display: inline-flex; align-items: center; justify-content: center; line-height: 1; background: var(--content-secondary, #f8fafc); color: var(--text-muted, #64748b); font-size: 0.8rem; }
+.stb-facet-derive-dark:disabled { opacity: 0.35; cursor: default; }
+/* empty dark swatch = "inherits the snapshot's built-in dark" — a neutral hatch, not a color */
+.stb-facet-swatch-empty { background: repeating-linear-gradient(45deg, var(--card, #fff), var(--card, #fff) 3px, var(--border, #e2e8f0) 3px, var(--border, #e2e8f0) 6px); }
+/* column header aligned over the two swatches (label width + row gap) */
+.stb-facet-dual-header { display: flex; gap: 0.35rem; padding-left: 5.85rem; font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted, #94a3b8); margin-bottom: 0.1rem; }
+.stb-facet-dual-header-light, .stb-facet-dual-header-dark { flex: 0 0 1.4rem; text-align: center; }
+.stb-facet-shared { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.03em; color: var(--warning, #d97706); }
+.stb-facet-detach, .stb-facet-promote { font-size: 0.68rem; padding: 0.05rem 0.3rem; cursor: pointer; }
+/* When the preview is in light mode the dark column is inactive (dark values
+   only render under Dark preview) — mute it so editing it doesn't read as
+   "no change". The panel gains .stb-preview-dark while Dark preview is on. */
+.stb-lever-editor:not(.stb-preview-dark) .stb-facet-swatch-dark,
+.stb-lever-editor:not(.stb-preview-dark) .stb-facet-derive-dark,
+.stb-lever-editor:not(.stb-preview-dark) .stb-facet-dual-header-dark { opacity: 0.4; }
+
+/* Background composite: each row (color base, then each layer) gets visible
+   separation — a bordered, tinted card — so the stack reads as distinct rows
+   rather than a run-on list. Layer rows are indented + left-rule to show they
+   sit ON TOP of the color base, matching the bottom-up authoring order. */
+.stb-facet-bg-row {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem;
+  padding: 0.3rem 0.4rem; margin: 0.2rem 0; border-radius: 4px;
+  border: 1px solid var(--border, #e5e7eb); background: var(--content-secondary, #f8fafc);
+}
+.stb-facet-bg-row[data-stb-bg-row="layer"] {
+  margin-left: 0.85rem; border-left: 3px solid var(--border, #cbd5e1);
+}
+/* Kind label ("color" / "image — ..." / "gradient — ...") — same visual
+   weight as a leaf label, but not width-locked to the leaf grid since
+   gradient/image subtitles run longer than a css-prop name. */
+.stb-facet-bg-subtitle {
+  flex: 1 1 100%; color: var(--text-muted, #64748b); font-size: 0.74rem;
+  font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stb-facet-bg-row[data-stb-bg-row="color"] .stb-facet-bg-subtitle { flex: 0 0 5.5rem; }
+/* Covered-backstop note — the color paints beneath the layer stack, so a color
+   edit is invisible until the layers above are removed/transparent. Say so. */
+.stb-facet-bg-covered-note {
+  flex: 0 0 auto; font-size: 0.68rem; font-style: italic;
+  color: var(--text-muted, #94a3b8); cursor: help;
+}
+/* Backdrop hint — a full-bleed child (e.g. login's Background overlay) owns
+   the page's visible background; background edits on the page are painted
+   over by it. Note + jump link at the top of the background group. */
+.stb-facet-bg-backdrop-hint {
+  font-size: 0.7rem; font-style: italic; color: var(--text-muted, #64748b);
+  padding: 0.25rem 0.4rem; margin: 0.2rem 0;
+}
+.stb-facet-bg-backdrop-jump {
+  font-size: 0.7rem; padding: 0 0.3rem; cursor: pointer;
+}
+/* Live paint-stack summary — the CSS the background group emits right now,
+   paint order (image layers left-to-right = top-to-bottom, color beneath). */
+.stb-facet-bg-css {
+  margin: 0.2rem 0; padding: 0.3rem 0.4rem; border-radius: 4px;
+  background: var(--content-tertiary, #f1f5f9); border: 1px dashed var(--border, #e2e8f0);
+  font-size: 0.66rem; line-height: 1.5; color: var(--text-muted, #475569);
+  white-space: pre-wrap; word-break: break-all; cursor: help;
+}
+/* MDN help link — one per gradient layer, sits beside the subtitle. */
+.stb-facet-bg-gradient-help {
+  flex: 0 0 auto; font-size: 0.7rem; line-height: 1; width: 1.1rem; height: 1.1rem;
+  display: inline-flex; align-items: center; justify-content: center; border-radius: 50%;
+  border: 1px solid var(--border, #cbd5e1); color: var(--text-muted, #64748b); text-decoration: none;
+}
+.stb-facet-bg-gradient {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 0.3rem; flex: 1 1 100%; min-width: 0;
+}
+/* Inline field labels ("type" / "angle" / "position") — visible text, not
+   placeholder-only, so the label survives once the control is filled. */
+.stb-facet-bg-gradient-field-label {
+  font-size: 0.7rem; color: var(--text-muted, #64748b); white-space: nowrap;
+}
+.stb-facet-bg-gradient-type, .stb-facet-bg-gradient-pos { font-size: 0.75rem; padding: 0.1rem 0.25rem; }
+.stb-facet-bg-gradient-stops {
+  display: flex; flex-direction: column; gap: 0.25rem; flex: 1 1 100%; margin-top: 0.15rem;
+}
+/* Column header for the stops list — one labeled header rather than a label
+   per row; aligned to the stop-position input via the same trailing flex slot. */
+.stb-facet-bg-gradient-stops-header {
+  display: flex; justify-content: flex-end; padding: 0 0.3rem;
+}
+.stb-facet-bg-gradient-stops-header-pos {
+  flex: 1; min-width: 0; font-size: 0.68rem; color: var(--text-muted, #64748b);
+}
+.stb-facet-bg-gradient-stop {
+  display: flex; align-items: center; gap: 0.3rem; padding: 0.15rem 0.3rem;
+  border-radius: 3px; background: var(--card, #fff); border: 1px solid var(--border, #e5e7eb);
+}
+.stb-facet-bg-gradient-stop-pos { flex: 1; min-width: 0; font-size: 0.72rem; padding: 0.1rem 0.25rem; }
+.stb-facet-bg-footer { display: flex; gap: 0.35rem; margin: 0.2rem 0 0.4rem; }
+.stb-facet-bg-footer button, .stb-facet-bg-add-stop,
+.stb-facet-bg-move-up, .stb-facet-bg-move-down, .stb-facet-bg-remove,
+.stb-facet-bg-gradient-stop-remove { font-size: 0.72rem; padding: 0.1rem 0.35rem; }
+
+.stb-flash { background-color: var(--warning, #ffeaa7); transition: background-color 0.3s; }
+
+.stb-status-bar { display: flex; padding: 0.4rem 0.75rem; border-top: 1px solid var(--border, #ddd); border-bottom: 1px solid var(--border, #ddd); background: var(--card, white); font-size: 0.85rem; gap: 1rem; align-items: center; }
+.stb-status-spacer { flex: 1; }
+.stb-status-completeness.warn { color: var(--warning, #d97706); }
+
+/* sidebar view flip: meaningful element tree vs raw token list */
+/* A hidden view must stay hidden: .stb-cols sets display:flex, which ties
+   specificity with [hidden] and would otherwise win — so the columns view
+   never hid and overlapped the others. .stb-view[hidden] (2 selectors) wins. */
+.stb-view[hidden] { display: none; }
+.stb-view-toggle { display: flex; gap: 0; padding: 0.4rem 0.5rem; border-bottom: 1px solid var(--border, #e5e7eb); position: sticky; top: 0; background: var(--card, #fff); z-index: 1; }
+.stb-view-btn { flex: 1; padding: 0.25rem 0.5rem; border: 1px solid var(--border, #d1d5db); background: none; cursor: pointer; font: inherit; font-size: 0.8rem; color: var(--text-muted, #64748b); }
+.stb-view-btn:first-child { border-radius: 4px 0 0 4px; }
+.stb-view-btn:last-child { border-radius: 0 4px 4px 0; border-left: none; }
+.stb-view-btn.active { background: var(--color-primary, #2196f3); color: #fff; border-color: var(--color-primary, #2196f3); }
+
+.stb-tree { padding: 0.25rem 0; }
+.stb-tree-empty { padding: 1rem; color: var(--text-muted, #94a3b8); font-style: italic; }
+.stb-tree-group-name { margin: 0.5rem 0.5rem 0.15rem; font-size: 0.7rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-muted, #94a3b8); }
+.stb-tree-row { display: flex; align-items: center; gap: 0.5rem; padding: 0.25rem 0.6rem; cursor: pointer; font-size: 0.82rem; }
+.stb-tree-row:hover { background: color-mix(in srgb, var(--color-primary, #2196f3) 12%, transparent); }
+.stb-tree-swatch { width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid var(--border, #d1d5db); flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--text-muted, #64748b); }
+.stb-tree-swatch-kind { background: var(--content-secondary, #f1f5f9); }
+.stb-tree-name { flex: 0 1 auto; color: var(--foreground, #1e293b); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stb-tree-val { color: var(--text-muted, #94a3b8); font-family: ui-monospace, monospace; font-size: 0.7rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 8rem; }
+
+/* R3 PROTOTYPE — Miller columns (Finder drilldown) with collapse-to-rail */
+.stb-cols { display: flex; align-items: stretch; gap: 0; overflow-x: auto; height: 100%; }
+.stb-col { flex: 0 0 170px; border-right: 1px solid var(--border, #e5e7eb); overflow-y: auto; }
+.stb-col-row { display: flex; align-items: center; gap: 0.45rem; padding: 0.3rem 0.5rem; cursor: pointer; font-size: 0.82rem; }
+.stb-col-row:hover { background: color-mix(in srgb, var(--color-primary, #2196f3) 12%, transparent); }
+.stb-col-row.active { background: color-mix(in srgb, var(--color-primary, #2196f3) 22%, transparent); }
+.stb-col-swatch { width: 0.9rem; height: 0.9rem; border-radius: 3px; border: 1px solid var(--border, #d1d5db); flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; font-size: 0.65rem; color: var(--text-muted, #64748b); }
+.stb-col-swatch-glyph { background: var(--content-secondary, #f1f5f9); }
+.stb-col-name { flex: 0 1 auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--foreground, #1e293b); }
+.stb-col-caret { color: var(--text-muted, #94a3b8); flex: 0 0 auto; }
+.stb-col-kind { flex: 0 0 auto; margin-left: auto; padding-left: 0.4rem; color: var(--text-muted, #94a3b8); font-size: 0.85em; }
+/* collapsed rail: thin vertical strip = breadcrumb; click to re-expand */
+/* vertical-rl + rotate(180deg) so the label reads bottom-to-top; text-align:end
+   (under the 180° rotation) anchors the text block at the TOP of the rail. */
+.stb-col-rail { flex: 0 0 1.6rem; border-right: 1px solid var(--border, #e5e7eb); writing-mode: vertical-rl; text-orientation: mixed; transform: rotate(180deg); text-align: end; padding: 0.4rem 0.1rem; cursor: pointer; font-size: 0.72rem; color: var(--text-muted, #64748b); background: var(--content-secondary, #f8fafc); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.stb-col-rail:hover { color: var(--color-primary, #2196f3); }
+.stb-col-crumb { position: sticky; bottom: 0; flex: 0 0 100%; align-self: flex-end; padding: 0.2rem 0.5rem; font-size: 0.68rem; color: var(--text-muted, #94a3b8); background: var(--card, #fff); border-top: 1px solid var(--border, #eee); }
+
+/* token view: lead with the authored meaning, raw id as secondary detail */
+.stb-token-name { display: flex; flex-direction: column; align-items: flex-start; gap: 0; border: none; background: none; cursor: pointer; font: inherit; padding: 0; text-align: left; }
+.stb-token-label { font-size: 0.82rem; color: var(--foreground, #1e293b); }
+.stb-token-id { font-family: ui-monospace, monospace; font-size: 0.68rem; color: var(--text-muted, #94a3b8); }

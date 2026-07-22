@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-base';
 
 test.describe('Metrics Registration', () => {
-  test('should check metrics availability', async ({ connectedEndpointsAdminPage }) => {
+  test('should check metrics availability', { tag: '@smoke' }, async ({ connectedEndpointsAdminPage }) => {
     const { page } = connectedEndpointsAdminPage;
     await page.goto('/');
     const url = page.url();
@@ -19,21 +19,10 @@ test.describe('Metrics Registration', () => {
 
       // Look for register/connect endpoint button
       const registerButton = page.locator('button').filter({ hasText: /register|connect.*endpoint/i }).first();
-      const buttonExists = await registerButton.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!buttonExists) {
-        test.skip('Register endpoint button not found');
-      }
-
       await registerButton.click();
 
       // Look for metrics endpoint type option
       const metricsOption = page.locator('[value="metrics"], mat-option, button').filter({ hasText: /metrics/i }).first();
-      const metricsExists = await metricsOption.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!metricsExists) {
-        test.skip('Metrics endpoint option not available');
-      }
 
       // Verify metrics option is available (don't actually register)
       await expect(metricsOption).toBeVisible();
@@ -54,26 +43,12 @@ test.describe('Metrics Registration', () => {
       await page.goto(`/cloud-foundry/${cfGuid}/metrics`);
       await page.waitForLoadState('networkidle');
 
-      const url = page.url();
-
-      // Check if metrics page loaded or if we need metrics endpoint
-      const metricsContent = page.locator('app-metrics, .metrics-container');
-      const contentExists = await metricsContent.first().isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (contentExists) {
-        // Metrics page exists
-        await expect(metricsContent.first()).toBeVisible();
-      } else {
-        // May require metrics endpoint registration
-        const noMetricsMessage = page.locator('.no-metrics, .empty-message, app-no-content-message');
-        const hasMessage = await noMetricsMessage.isVisible({ timeout: 5000 }).catch(() => false);
-
-        if (hasMessage) {
-          await expect(noMetricsMessage).toBeVisible();
-        } else {
-          test.skip('Metrics display requires metrics endpoint registration');
-        }
-      }
+      // Metrics page should show either live content or an explicit
+      // "no data yet" placeholder.
+      const metricsContent = page.locator(
+        'app-metrics, .metrics-container, .no-metrics, .empty-message, app-no-content-message'
+      );
+      await expect(metricsContent.first()).toBeVisible();
     });
   });
 });

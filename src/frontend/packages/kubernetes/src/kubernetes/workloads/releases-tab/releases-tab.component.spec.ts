@@ -41,12 +41,12 @@ describe('ReleasesTabComponent', () => {
     kube: {
       list$: of([]),
       loading$: of(false),
-      select: createMockSignalWrapper<string>(undefined)
+      select: createMockSignalWrapper<string | undefined>(undefined)
     },
     namespace: {
       list$: of([]),
       loading$: of(false),
-      select: createMockSignalWrapper<string>(undefined)
+      select: createMockSignalWrapper<string | undefined>(undefined)
     },
     ngOnDestroy: vi.fn(),
     destroy: vi.fn()

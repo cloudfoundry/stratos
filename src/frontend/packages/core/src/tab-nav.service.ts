@@ -14,7 +14,8 @@ import { IHeaderBreadcrumbLink } from './shared/components/page-header/page-head
 export class TabNavService {
   private router = inject(Router);
 
-  static TabsNoLinkValue: string = null;
+  // Sentinel for a tab with no navigable link; null at runtime.
+  static TabsNoLinkValue: string | null = null;
 
   private _tabNavs = signal<IPageSideNavTab[] | undefined>(undefined);
   public readonly tabNavs: Signal<IPageSideNavTab[] | undefined> = this._tabNavs.asReadonly();
@@ -80,12 +81,13 @@ export class TabNavService {
     );
   }
 
-  private getCurrentTabHeader = (tabs: IPageSideNavTab[]) => {
+  private getCurrentTabHeader = (tabs: IPageSideNavTab[] | undefined) => {
     if (!tabs) {
       return null;
     }
     const activeTab = tabs
-      .filter(tab => tab.link !== TabNavService.TabsNoLinkValue)
+      .filter((tab): tab is IPageSideNavTab & { link: string; } =>
+        tab.link !== TabNavService.TabsNoLinkValue && tab.link != null)
       .find(tab => this.router.isActive(tab.link, false));
 
     if (!activeTab) {

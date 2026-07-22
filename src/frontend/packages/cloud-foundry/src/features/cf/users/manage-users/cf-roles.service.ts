@@ -1,54 +1,71 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of as observableOf } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest, EMPTY, from, Observable, of as observableOf, of } from 'rxjs';
 import { take,
+  catchError,
   combineLatest as combineLatestOperators,
   distinctUntilChanged,
+  expand,
   filter,
   map,
+  mergeMap,
   publishReplay,
+  reduce,
   refCount,
+  shareReplay,
   startWith,
   switchMap,
 } from 'rxjs/operators';
 
+import { naturalCompare } from '@stratosui/core';
+
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { endpointEntityType } from '../../../../../../store/src/helpers/stratos-entity-factory';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
-import { UsersRolesSetChanges } from '../../../../actions/users-roles.actions';
 import { IOrganization, ISpace } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { organizationEntityType, spaceEntityType } from '../../../../cf-entity-types';
-import {
-  createEntityRelationKey,
-  createEntityRelationPaginationKey,
-} from '../../../../entity-relations/entity-relations.types';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../store/reducers/cf-users-roles.reducer';
-import {
-  selectCfUsersRolesCf,
-  selectCfUsersRolesPicked,
-  selectCfUsersRolesRoles,
-} from '../../../../store/selectors/cf-users-roles.selector';
-import { CfUser, IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
+import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
+import { StOrg, StOrgDetail, StSpace, StUser } from '../../../../services/endpoint-data/stratos-types';
+import { orgRolesFromStUser, spaceRolesFromStUser } from '../../../../shared/data-services/st-user-roles';
+import { createDefaultOrgRoles, createDefaultSpaceRoles } from '../../../../services/domain-data/cf-users-roles-data.service';
+import { IUserPermissionInOrg, OrgUserRoleNames, SpaceUserRoleNames, UserRoleInOrg, UserRoleInSpace } from '../../../../store/types/cf-user.types';
 import { CfRoleChange, CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { CfUserPermissionsChecker } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { canUpdateOrgSpaceRoles } from '../../cf.helpers';
+
+function adaptOrgToApiResource(org: StOrg | StOrgDetail): APIResource<IOrganization> {
+  return {
+    metadata: {
+      guid: org.guid,
+      url: '',
+      created_at: org.createdAt ?? '',
+      updated_at: org.updatedAt ?? '',
+    },
+    entity: {
+      name: org.name,
+      guid: org.guid,
+      cfGuid: org.cnsiGuid,
+    } as IOrganization,
+  };
+}
 
 @Injectable({
   providedIn: 'root'
 })
 export class CfRolesService {
-  private store = inject<Store<CFAppState>>(Store);
-  private cfUserService = inject(CfUserService);
   private userPerms = inject(CurrentUserPermissionsService);
+  private rolesData = inject(CfUsersRolesDataService);
+  private http = inject(HttpClient);
 
 
   existingRoles$: Observable<CfUserRolesSelected>;
   newRoles$: Observable<IUserPermissionInOrg>;
   loading$: Observable<boolean>;
   cfOrgs: { [cfGuid: string]: Observable<APIResource<IOrganization>[]>, } = {};
+  private cfOrgNames: { [cfGuid: string]: Observable<StOrg[]>, } = {};
+  // Per-org space cache (keyed `${cfGuid}:${orgGuid}`). Survives re-subscription
+  // (shareReplay, no refCount) so re-expanding a section reuses the result.
+  private cfOrgSpaces: { [key: string]: Observable<{ guid: string; name: string }[]>, } = {};
+  private users$: Observable<StUser[]>;
 
   /**
    * Given a list of orgs or spaces remove those that the connected user cannot edit roles in.
@@ -56,7 +73,8 @@ export class CfRolesService {
   static filterEditableOrgOrSpace<T extends IOrganization | ISpace>(
     userPerms: CurrentUserPermissionsService,
     isOrg: boolean,
-    orgOrSpaces$: Observable<APIResource<T>[]>
+    orgOrSpaces$: Observable<APIResource<T>[]>,
+    cfGuid: string,
   ): Observable<APIResource<T>[]> {
     return orgOrSpaces$.pipe(
       // Create an observable containing the original list of organisations and a corresponding list of whether an org can be edited
@@ -66,13 +84,18 @@ export class CfRolesService {
           combineLatest(orgsOrSpaces.map(orgOrSpace => CfRolesService.canEditOrgOrSpace(
             userPerms,
             orgOrSpace.metadata.guid,
-            orgOrSpace.entity.cfGuid,
-            isOrg ? orgOrSpace.metadata.guid : (orgOrSpace as APIResource<ISpace>).entity.organization_guid,
+            // entity.cfGuid is typed optional on IOrganization/ISpace; the cnsi
+            // is always known by the caller, so fall back to it.
+            orgOrSpace.entity.cfGuid ?? cfGuid,
+            isOrg ? orgOrSpace.metadata.guid : ((orgOrSpace as APIResource<ISpace>).entity.organization_guid),
             isOrg ? CfUserPermissionsChecker.ALL_SPACES : orgOrSpace.metadata.guid,
           ))));
       }),
       // Filter out orgs than the current user cannot edit
-      map(([orgs, canEdit]) => orgs.filter(org => canEdit.find(canEditOrgOrSpace => canEditOrgOrSpace.guid === org.metadata.guid).canEdit)),
+      map(([orgs, canEdit]) => orgs.filter(org => {
+        const entry = canEdit.find(canEditOrgOrSpace => canEditOrgOrSpace.guid === org.metadata.guid);
+        return !!entry && entry.canEdit;
+      })),
     );
   }
 
@@ -92,15 +115,16 @@ export class CfRolesService {
   }
 
   constructor() {
-    this.existingRoles$ = this.store.select(selectCfUsersRolesPicked).pipe(
-      combineLatestOperators(this.store.select(selectCfUsersRolesCf)),
+    this.users$ = toObservable(this.rolesData.users);
+    this.existingRoles$ = this.users$.pipe(
+      combineLatestOperators(toObservable(this.rolesData.cfGuid)),
       filter(([_users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
       publishReplay(1),
       refCount()
     );
-    this.newRoles$ = this.store.select(selectCfUsersRolesRoles).pipe(
+    this.newRoles$ = toObservable(this.rolesData.newRoles).pipe(
       distinctUntilChanged(),
       publishReplay(1),
       refCount()
@@ -117,30 +141,40 @@ export class CfRolesService {
    * Take the structure that cf stores user roles in (per user and flat) and convert into a format that's easier to use and compare with
    * (easier to access at specific levels, easier to parse pieces around)
    */
-  populateRoles(cfGuid: string, selectedUsers: CfUser[]): Observable<CfUserRolesSelected> {
+  populateRoles(cfGuid: string, selectedUsers: StUser[]): Observable<CfUserRolesSelected> {
     if (!cfGuid || !selectedUsers || selectedUsers.length === 0) {
       return observableOf({});
     }
 
-    const userGuids = selectedUsers.map(user => user.guid);
-    return this.cfUserService.getUsers(cfGuid).pipe(
-      map(users => {
-        const roles = {};
-        // For each user (excluding those that are not selected)....
-        users.forEach(user => {
-          if (userGuids.indexOf(user.metadata.guid) >= 0) {
-            this.populateUserRoles(user, roles);
-          }
-        });
+    // The picked users are already the fully-drained StUser rows (org/space
+    // role buckets carry the prefix-stripped role names per scope), so there's
+    // no per-user re-fetch. Space *names* now ride in on the space buckets
+    // (resolved server-side from the /v3/roles include=space block), so the
+    // wizard no longer drains the whole /pp/v1/cf/spaces list — that drain was
+    // the dominant cost of "Loading existing roles…". Org names still come from
+    // the bounded native org list (fetchOrgNames), which deliberately bypasses
+    // fetchOrgs' editability filter — display-name resolution isn't where role
+    // editability belongs, and filtering would leave existingRoles$ never
+    // emitting for empty/non-editable org lists.
+    return this.fetchOrgNames(cfGuid).pipe(
+      take(1),
+      map(orgs => {
+        const orgNameByGuid = new Map<string, string>(orgs.map(o => [o.guid, o.name]));
+        const roles: CfUserRolesSelected = {};
+        selectedUsers.forEach(user => this.populateUserRoles(user, roles, orgNameByGuid));
         return roles;
       }),
     );
   }
 
-  private populateUserRoles(user: APIResource<CfUser>, roles: CfUserRolesSelected) {
+  private populateUserRoles(
+    user: StUser,
+    roles: CfUserRolesSelected,
+    orgNameByGuid: Map<string, string>,
+  ) {
     const mappedUser: { [orgGuid: string]: IUserPermissionInOrg, } = {};
-    const orgRoles = this.cfUserService.getOrgRolesFromUser(user.entity);
-    const spaceRoles = this.cfUserService.getSpaceRolesFromUser(user.entity);
+    const orgRoles = orgRolesFromStUser(user, orgNameByGuid);
+    const spaceRoles = spaceRolesFromStUser(user, orgNameByGuid);
     // ... populate org roles ...
     orgRoles.forEach(org => {
       mappedUser[org.orgGuid] = {
@@ -153,14 +187,20 @@ export class CfRolesService {
       if (!mappedUser[space.orgGuid]) {
         mappedUser[space.orgGuid] = createDefaultOrgRoles(space.orgGuid, space.orgName);
       }
-      if (!space.orgName && mappedUser[space.orgGuid]) {
-        space.orgName = mappedUser[space.orgGuid].name;
+      const orgEntry = mappedUser[space.orgGuid];
+      if (!space.orgName) {
+        space.orgName = orgEntry.name;
       }
-      mappedUser[space.orgGuid].spaces[space.spaceGuid] = {
+      // Both construction paths above (the org-roles loop and
+      // createDefaultOrgRoles) initialise `spaces` to {}; guard so TS sees it.
+      if (!orgEntry.spaces) {
+        orgEntry.spaces = {};
+      }
+      orgEntry.spaces[space.spaceGuid] = {
         ...space
       };
     });
-    roles[user.metadata.guid] = mappedUser;
+    roles[user.guid] = mappedUser;
   }
 
   /**
@@ -170,7 +210,7 @@ export class CfRolesService {
     return this.existingRoles$.pipe(
       combineLatestOperators(
         this.newRoles$,
-        this.store.select(selectCfUsersRolesPicked),
+        this.users$,
       ),
       take(1),
       map(([existingRoles, newRoles, pickedUsers]) => {
@@ -180,7 +220,7 @@ export class CfRolesService {
         pickedUsers.forEach(user => {
           changes.push(...this.createRolesUserDiff(existingRoles, newRoles, changes, user, orgGuid));
         });
-        this.store.dispatch(new UsersRolesSetChanges(changes));
+        this.rolesData.setChanges(changes);
         return changes;
       })
     );
@@ -190,7 +230,7 @@ export class CfRolesService {
     existingRoles: CfUserRolesSelected,
     newRoles: IUserPermissionInOrg,
     changes: CfRoleChange[],
-    user: CfUser,
+    user: StUser,
     orgGuid: string
   ): CfRoleChange[] {
     const existingUserRoles = existingRoles[user.guid] || {};
@@ -202,23 +242,25 @@ export class CfRolesService {
       userGuid: user.guid,
       orgGuid,
       orgName: newRoles.name,
-      add: false,
-      role: null
     },
       existingOrgRoles.permissions, newRoles.permissions));
 
     // Compare space roles
-    Object.keys(newRoles.spaces).forEach(spaceGuid => {
-      const newSpace = newRoles.spaces[spaceGuid];
-      const oldSpace = existingOrgRoles.spaces[spaceGuid] || createDefaultSpaceRoles(orgGuid, newRoles.name, spaceGuid, newSpace.name);
+    const newSpaces = newRoles.spaces;
+    const existingSpaces = existingOrgRoles.spaces;
+    if (!newSpaces) {
+      return newChanges;
+    }
+    Object.keys(newSpaces).forEach(spaceGuid => {
+      const newSpace = newSpaces[spaceGuid];
+      const oldSpace = (existingSpaces && existingSpaces[spaceGuid]) ||
+        createDefaultSpaceRoles(orgGuid, newRoles.name, spaceGuid, newSpace.name);
       newChanges.push(...this.comparePermissions({
         userGuid: user.guid,
         orgGuid,
         orgName: newRoles.name,
         spaceGuid,
         spaceName: newSpace.name,
-        add: false,
-        role: null
       },
         oldSpace.permissions, newSpace.permissions));
     });
@@ -226,32 +268,57 @@ export class CfRolesService {
     return newChanges;
   }
 
-  fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization>>> {
-    return cfEntityCatalog.org.store.getEntityService(orgGuid, cfGuid, { includeRelations: [], populateMissing: false })
-      .waitForEntity$;
+  // V2-shape adapter — manage-users UI was written against ngrx EntityInfo /
+  // APIResource<IOrganization>. Bridging the native StOrg payload into that
+  // shape here keeps the UI files unchanged; a future cleanup can lift the
+  // native shape through the consumers.
+  fetchOrg(cfGuid: string, orgGuid: string): Observable<EntityInfo<APIResource<IOrganization> | null>> {
+    const fetching: EntityInfo<APIResource<IOrganization> | null> = {
+      entity: null,
+      entityRequestInfo: {
+        fetching: true,
+        error: false,
+        deleting: { busy: false, deleted: false, error: false, message: '' },
+      } as any,
+    };
+    return this.http.get<StOrgDetail>(`/pp/v1/cf/org/${cfGuid}/${orgGuid}`).pipe(
+      map(detail => ({
+        entity: adaptOrgToApiResource(detail),
+        entityRequestInfo: {
+          fetching: false,
+          error: false,
+          deleting: { busy: false, deleted: false, error: false, message: '' },
+        } as any,
+      }) as EntityInfo<APIResource<IOrganization> | null>),
+      startWith(fetching),
+      catchError(() => of({
+        entity: null,
+        entityRequestInfo: {
+          fetching: false,
+          error: true,
+          deleting: { busy: false, deleted: false, error: false, message: '' },
+        } as any,
+      } as EntityInfo<APIResource<IOrganization> | null>)),
+    );
   }
 
   fetchOrgEntity(cfGuid: string, orgGuid: string): Observable<APIResource<IOrganization>> {
     return this.fetchOrg(cfGuid, orgGuid).pipe(
-      filter(entityInfo => !!entityInfo.entity),
+      filter((entityInfo): entityInfo is EntityInfo<APIResource<IOrganization>> => !!entityInfo.entity),
       map(entityInfo => entityInfo.entity),
     );
   }
 
   fetchOrgs(cfGuid: string): Observable<APIResource<IOrganization>[]> {
     if (!this.cfOrgs[cfGuid]) {
-      const paginationKey = createEntityRelationPaginationKey(endpointEntityType, cfGuid);
-      const orgs$ = cfEntityCatalog.org.store.getPaginationService(
-        cfGuid,
-        paginationKey,
-        {
-          includeRelations: [
-            createEntityRelationKey(organizationEntityType, spaceEntityType)
-          ], populateMissing: true
-        }
-      ).entities$;
-      this.cfOrgs[cfGuid] = CfRolesService.filterEditableOrgOrSpace<IOrganization>(this.userPerms, true, orgs$).pipe(
-        map(orgs => orgs.sort((a, b) => a.entity.name.localeCompare(b.entity.name))),
+      const orgs$ = this.http.get<{ resources: StOrg[]; totalResults: number }>(
+        `/pp/v1/cf/orgs/${cfGuid}?per_page=500`,
+      ).pipe(
+        map(resp => (resp?.resources ?? []).map(adaptOrgToApiResource)),
+        catchError(() => of([] as APIResource<IOrganization>[])),
+      );
+      this.cfOrgs[cfGuid] = CfRolesService.filterEditableOrgOrSpace<IOrganization>(this.userPerms, true, orgs$, cfGuid).pipe(
+        map(orgs => orgs.sort((a, b) => naturalCompare(a.entity.name, b.entity.name))),
         publishReplay(1),
         refCount()
       );
@@ -260,10 +327,109 @@ export class CfRolesService {
   }
 
   /**
+   * Native org list used purely as a guid→name lookup when mapping a user's
+   * StUser org-role buckets into the wizard's `existingRoles` shape. Unlike
+   * fetchOrgs this is not editable-filtered (and so always emits) — it only
+   * supplies display names; role editability is enforced downstream where the
+   * changes are applied.
+   */
+  private fetchOrgNames(cfGuid: string): Observable<StOrg[]> {
+    if (!this.cfOrgNames[cfGuid]) {
+      this.cfOrgNames[cfGuid] = this.drainCfList<StOrg>(`/pp/v1/cf/orgs/${cfGuid}`).pipe(
+        catchError(() => of([] as StOrg[])),
+        publishReplay(1),
+        refCount(),
+      );
+    }
+    return this.cfOrgNames[cfGuid];
+  }
+
+  // Drains EVERY page of a native /pp/v1/cf list endpoint into one array. The
+  // native handler is a single-CAPI-page passthrough (forwards per_page/page),
+  // so a name lookup must page through all results — a single per_page=500 call
+  // would silently miss orgs/spaces past the first 500 on large foundations.
+  //
+  // Two strategies depending on the response envelope:
+  //
+  // 1. totalResults present (e.g. orgs endpoint): compute totalPages from it,
+  //    fan out remaining pages at concurrency 4 (fast path, mirrors
+  //    EndpointDataService / CfUsersPagedDataService drains).
+  //
+  // 2. totalResults absent (e.g. spaces endpoint): paginate sequentially using
+  //    expand until a page returns fewer than perPage resources (short-page
+  //    sentinel), accumulating all resources across pages. This avoids the
+  //    truncation bug where lack of totalResults caused page-count=1 and only
+  //    the first 500 spaces were returned on large foundations (>500 spaces).
+  private drainCfList<T>(urlBase: string): Observable<T[]> {
+    const perPage = 500;
+    const fetchPage = (page: number) =>
+      this.http.get<{ resources: T[]; totalResults?: number }>(`${urlBase}?per_page=${perPage}&page=${page}`).pipe(
+        map(resp => ({ resources: resp?.resources ?? [], totalResults: resp?.totalResults })),
+      );
+    return fetchPage(1).pipe(
+      switchMap(first => {
+        if (first.totalResults !== undefined) {
+          // Fast path: totalResults present — compute pages and fan out.
+          const totalPages = Math.max(1, Math.ceil(first.totalResults / perPage));
+          if (totalPages <= 1) {
+            return of(first.resources);
+          }
+          const rest = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+          return from(rest).pipe(
+            mergeMap(page => fetchPage(page).pipe(map(r => r.resources)), 4),
+            reduce((acc, res) => [...acc, ...res], [...first.resources]),
+          );
+        }
+
+        // Slow path: totalResults absent — expand pages until a short page.
+        // expand() recursively subscribes to the returned observable; returning
+        // EMPTY stops the recursion. State carries { page, resources } for the
+        // current page so reduce can accumulate across all emitted states.
+        type PageState = { page: number; resources: T[] };
+        const seed: PageState = { page: 1, resources: first.resources };
+        return of(seed).pipe(
+          expand(state =>
+            state.resources.length < perPage
+              ? EMPTY
+              : fetchPage(state.page + 1).pipe(
+                  map(resp => ({ page: state.page + 1, resources: resp.resources })),
+                ),
+          ),
+          reduce((acc: T[], state: PageState) => [...acc, ...state.resources], []),
+        );
+      }),
+    );
+  }
+
+  /**
+   * Public guid→name list of the spaces belonging to a single org, sorted by
+   * name. Used by the Add User dialog's role picker to render space-role
+   * checkboxes for the chosen org. Reuses the cached native space drain (not
+   * editable-filtered — grant editability is enforced when changes are
+   * applied), so callers get spaces without the wizard's StUser-mapping coupling.
+   */
+  fetchSpacesForOrg(cfGuid: string, orgGuid: string): Observable<{ guid: string; name: string }[]> {
+    // Fetch ONLY this org's spaces server-side (jetstream getNativeOrgSpaces →
+    // /v3/spaces?organization_guids={org}) instead of draining the whole
+    // endpoint's spaces and filtering client-side. Cached per org and shared
+    // (no refCount) so the role-assignment widget never re-drains on re-expand.
+    const key = `${cfGuid}:${orgGuid}`;
+    if (!this.cfOrgSpaces[key]) {
+      this.cfOrgSpaces[key] = this.drainCfList<StSpace>(`/pp/v1/cf/org/${cfGuid}/${orgGuid}/spaces`).pipe(
+        map(spaces => spaces
+          .map(s => ({ guid: s.guid, name: s.name }))
+          .sort((a, b) => naturalCompare(a.name, b.name))),
+        shareReplay({ bufferSize: 1, refCount: false }),
+      );
+    }
+    return this.cfOrgSpaces[key];
+  }
+
+  /**
    * Compare a set of org or space permissions and return the differences
    */
   private comparePermissions(
-    template: CfRoleChange,
+    template: Omit<CfRoleChange, 'add' | 'role'>,
     oldPerms: UserRoleInOrg | UserRoleInSpace,
     newPerms: UserRoleInOrg | UserRoleInSpace)
     : CfRoleChange[] {

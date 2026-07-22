@@ -10,7 +10,7 @@ export enum QParamJoiners {
 
 export class QParam {
   static fromString(qString: string) {
-    const qParamComponents = Object.values(QParamJoiners).reduce((split, joiner) => {
+    const qParamComponents = Object.values(QParamJoiners).reduce<string[] | null>((split, joiner) => {
       if (split) {
         return split;
       }
@@ -18,7 +18,8 @@ export class QParam {
       if (testSplit.length === 2) {
         return [testSplit[0], testSplit[1], joiner];
       }
-    }, null as []);
+      return split;
+    }, null);
     if (qParamComponents && qParamComponents.length === 3) {
       const legitJoiner = Object.values(QParamJoiners).find(joiner => joiner === qParamComponents[2]);
       if (legitJoiner) {
@@ -36,9 +37,11 @@ export class QParam {
     return qStrings.map(qString => QParam.fromString(qString)).filter(qObject => !!qObject);
   }
 
-  static keyFromString(qParamString: string): string {
+  static keyFromString(qParamString: string): string | null {
     const match = qParamString.match(/(>=|<=|<|>| IN |,|:|=)/);
-    return match.index >= 0 ? qParamString.substring(0, match.index) : null;
+    return match && match.index !== undefined && match.index >= 0
+      ? qParamString.substring(0, match.index)
+      : null;
   }
 
   constructor(

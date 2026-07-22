@@ -2,6 +2,25 @@
   <h1>Services Marketplace</h1>
 </app-page-header>
 <app-cf-endpoints-missing></app-cf-endpoints-missing>
-@if (!!(cloudFoundryService.hasRegisteredCFEndpoints$ | async) && !!(cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
-  <app-list class="marketplace"></app-list>
+
+<!-- Show loading indicator while endpoints resolve -->
+@if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
+  <div class="flex items-center justify-center p-8">
+    <div class="flex items-center space-x-3 text-content-muted">
+      <div class="spinner spinner-primary"></div>
+      <span>Loading services…</span>
+    </div>
+  </div>
+}
+
+@if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
+  <app-duplicate-url-banner nounPlural="Service offerings"></app-duplicate-url-banner>
+  @if (listConfig(); as cfg) {
+    <app-list-sub-nav title="Total Service Offerings"
+                      [count]="totalServiceOfferings"
+                      [addAction]="createServiceInstanceAction"></app-list-sub-nav>
+    <div class="flex-1 min-h-0 p-4 flex flex-col">
+      <app-signal-list [config]="cfg"></app-signal-list>
+    </div>
+  }
 }

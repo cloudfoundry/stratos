@@ -1,10 +1,8 @@
 // Replaced Angular Material sort with custom type
 export type SortDirection = 'asc' | 'desc' | '';
-import { Action } from '@ngrx/store';
 import { getActions } from '@stratosui/store';
 import { ApiRequestTypes } from '@stratosui/store';
 
-import { MetricQueryConfig, MetricsAction, MetricsChartAction } from '../../../../store/src/actions/metrics.actions';
 import { getPaginationKey } from '../../../../store/src/actions/pagination.actions';
 import { PaginatedAction, PaginationParam } from '../../../../store/src/types/pagination.types';
 import { EntityRequestAction } from '../../../../store/src/types/request.types';
@@ -83,18 +81,14 @@ export const GET_KUBE_DASHBOARD = '[KUBERNETES Endpoint] Get K8S Dashboard Info'
 export const GET_KUBE_DASHBOARD_SUCCESS = '[KUBERNETES Endpoint] Get Dashboard Success';
 export const GET_KUBE_DASHBOARD_FAILURE = '[KUBERNETES Endpoint] Get Dashboard Failure';
 
-export const SET_CURRENT_NAMESPACE = '[Kubernetes] Set Current Namespace';
+// SET_CURRENT_NAMESPACE / SetCurrentNamespaceAction removed in
+// wave-3.5 — KubeCurrentNamespaceService is the signal-native
+// replacement for the per-endpoint selection state.
 
 const defaultSortParams = {
   'order-direction': 'desc' as SortDirection,
   'order-direction-field': 'name'
 };
-
-// Set the current namespace fo the given endpoint
-export class SetCurrentNamespaceAction implements Action {
-  constructor(public endpoint: string, public namespace: string) { }
-  type = SET_CURRENT_NAMESPACE;
-}
 
 export interface KubeAction extends EntityRequestAction {
   kubeGuid: string;
@@ -350,33 +344,3 @@ export class GetKubernetesDashboard implements KubeSingleEntityAction {
   guid: string;
 }
 
-function getKubeMetricsAction(guid: string): string {
-  return `${MetricsAction.getBaseMetricsURL()}/kubernetes/${guid}`;
-}
-
-export class FetchKubernetesMetricsAction extends MetricsAction {
-  constructor(guid: string, cfGuid: string, metricQuery: string) {
-    super(
-      guid,
-      cfGuid,
-      new MetricQueryConfig(metricQuery),
-      getKubeMetricsAction(guid),
-      undefined,
-      undefined,
-      undefined,
-      KUBERNETES_ENDPOINT_TYPE
-    );
-  }
-}
-
-export class FetchKubernetesChartMetricsAction extends MetricsChartAction {
-  constructor(guid: string, cfGuid: string, metricQuery: string) {
-    super(
-      guid,
-      cfGuid,
-      new MetricQueryConfig(metricQuery),
-      getKubeMetricsAction(guid),
-      KUBERNETES_ENDPOINT_TYPE
-    );
-  }
-}

@@ -2,7 +2,6 @@ import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
@@ -10,7 +9,7 @@ import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import { CfUserPermissionDirective } from './cf-user-permission.directive';
 
 @Component({
-  standalone: false,
+  imports: [CfUserPermissionDirective],
   template: `
     <div *appCfUserPermission="permission">
       Test Content
@@ -30,14 +29,11 @@ describe('CfUserPermissionDirective', () => {
       imports: [
         NoopAnimationsModule,
         CfUserPermissionDirective,
-      ],
-      declarations: [
         TestUserPermissionComponent,
       ],
       providers: [
         provideZonelessChangeDetection(),
         provideRouter([]),
-        provideMockStore({}),
         ...cfCurrentUserPermissionsService,
       ]
     });

@@ -8,7 +8,6 @@ import {
   generateStratosEntities,
   EntityCatalogHelper,
   EntityCatalogHelpers,
-  InternalEventMonitorFactory
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 import { ErrorPageComponent } from './error-page.component';
@@ -31,7 +30,6 @@ describe('ErrorPageComponent', () => {
         ErrorPageComponent,
       ],
       providers: [
-        InternalEventMonitorFactory,
         ...STORE_TEST_PROVIDERS,
         provideZonelessChangeDetection(),
       ]

@@ -23,7 +23,7 @@ func (k *KubeTerminal) cleanup() {
 	// Use a random initial wait before cleaning up
 	// If we had more than one backend, this helps to ensure they are not all trying to cleanup at the same time
 	wait := rand.Intn(30)
-	log.Debug("Kubernetes Terminal cleanup will start in %d minutes", wait)
+	log.Debugf("Kubernetes Terminal cleanup will start in %d minutes", wait)
 
 	for {
 		time.Sleep(time.Duration(wait) * time.Minute)

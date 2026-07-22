@@ -40,7 +40,7 @@ function createMockEndpointEntity(endpointType: string, label: string): StratosC
     type: endpointType,
     label,
     labelPlural: label,
-    logoUrl: null,
+    logoUrl: '',
     authTypes: [],
     icon: '',
     iconFont: '',
@@ -63,7 +63,7 @@ function createMockEndpointEntity(endpointType: string, label: string): StratosC
 
   return new StratosCatalogEndpointEntity(
     endpointEntityDef,
-    (): string | null => null
+    (): string => ''
   );
 }
 
@@ -82,7 +82,7 @@ function createMockEntity(
     labelPlural: `${entityType}s`,
     endpoint: {
       type: endpointType,
-      logoUrl: null,
+      logoUrl: '',
       authTypes: [],
     },
   };

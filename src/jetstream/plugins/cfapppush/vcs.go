@@ -14,12 +14,23 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// Separators before substituted user-controlled values force git to treat
+// them as positional arguments, not options — closing the CVE-2017-1000117
+// class (argv option-smuggling). The correct separator differs by argument
+// kind:
+//   - clone's {repo}/{dir} are PATHS, so "--" applies.
+//   - reset --hard's {commit} is a REVISION, not a path; "--" makes git read
+//     it as a pathspec and "--hard" rejects paths ("Cannot do hard reset with
+//     paths", exit 128). "--end-of-options" (git 2.24+) stops option parsing
+//     while still treating the value as a revision.
+//
+// See FWT-922.
 var vcsGit = &vcsCmd{
 	name:             "Git",
 	cmd:              "git",
 	accessToken:      "",
-	createCmd:        []string{"clone -c http.sslVerify={sslVerify} -b {branch} {repo} {dir} "},
-	resetToCommitCmd: []string{"reset --hard {commit}"},
+	createCmd:        []string{"clone -c http.sslVerify={sslVerify} -b {branch} -- {repo} {dir} "},
+	resetToCommitCmd: []string{"reset --hard --end-of-options {commit}"},
 	checkoutCmd:      []string{"checkout refs/remotes/origin/{branch}"},
 	headCmd:          []string{"rev-parse HEAD"},
 }

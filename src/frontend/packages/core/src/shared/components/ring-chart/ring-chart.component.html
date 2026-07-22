@@ -20,8 +20,8 @@
           (keydown.enter)="onClick(item)"
           (keydown.space)="onClick(item); $event.preventDefault()">
           <div class="legend-color" [style.background-color]="getItemColor(i)"></div>
-          <span class="legend-label">{{ nameFormatting ? nameFormatting(item.name) : item.name }}</span>
-          <span class="legend-value">{{ valueFormatting ? valueFormatting(item.value) : item.value }}</span>
+          <span class="legend-label">{{ nameFormatting(item.name) }}</span>
+          <span class="legend-value">{{ valueFormatting(item.value) }}</span>
         </div>
       }
     </div>

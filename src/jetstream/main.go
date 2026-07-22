@@ -31,7 +31,7 @@ import (
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/nwmac/sqlitestore"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/sqlitestore"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -156,7 +156,9 @@ func main() {
 
 	if isUpgrading {
 		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
-		start(portalConfig, &portalProxy{env: envLookup}, false, true, envLookup)
+		if err := start(portalConfig, &portalProxy{env: envLookup}, false, true, envLookup); err != nil {
+			log.Warnf("Unable to start upgrade web server instance: %v", err)
+		}
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
@@ -200,7 +202,7 @@ func main() {
 	}
 	defer func() {
 		log.Info(`... Closing database connection pool`)
-		databaseConnectionPool.Close()
+		_ = databaseConnectionPool.Close()
 	}()
 	log.Info("Database connection pool created.")
 
@@ -301,7 +303,7 @@ func main() {
 
 		// Database connection pool
 		log.Info(`... Closing database connection pool`)
-		databaseConnectionPool.Close()
+		_ = databaseConnectionPool.Close()
 
 		// Session store
 		log.Info(`... Closing session store`)
@@ -539,6 +541,9 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 	if databaseProvider == datastore.PGSQL {
 		log.Info("Creating Postgres session store")
 		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
+		if err != nil {
+			return nil, nil, err
+		}
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
@@ -546,12 +551,15 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 		if len(domain) > 0 {
 			sessionStore.Options.Domain = domain
 		}
-		return sessionStore, sessionStore.Options, err
+		return sessionStore, sessionStore.Options, nil
 	}
 	// Store depends on the DB Type
 	if databaseProvider == datastore.MYSQL {
 		log.Info("Creating MySQL session store")
 		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+		if err != nil {
+			return nil, nil, err
+		}
 		// Setup cookie-store options
 		sessionStore.Options.MaxAge = sessionExpiry
 		sessionStore.Options.HttpOnly = true
@@ -559,11 +567,14 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 		if len(domain) > 0 {
 			sessionStore.Options.Domain = domain
 		}
-		return sessionStore, sessionStore.Options, err
+		return sessionStore, sessionStore.Options, nil
 	}
 
 	log.Info("Creating SQLite session store")
 	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+	if err != nil {
+		return nil, nil, err
+	}
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
@@ -571,7 +582,7 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 	if len(domain) > 0 {
 		sessionStore.Options.Domain = domain
 	}
-	return sessionStore, sessionStore.Options, err
+	return sessionStore, sessionStore.Options, nil
 }
 
 func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, error) {
@@ -675,7 +686,7 @@ func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessi
 	domain := pc.CookieDomain
 	if len(domain) > 0 && domain != "-" {
 		h := sha1.New()
-		io.WriteString(h, domain)
+		_, _ = io.WriteString(h, domain)
 		hash := fmt.Sprintf("%x", h.Sum(nil))
 		cookieName = fmt.Sprintf("%s-%s", jetstreamSessionName, hash[0:10])
 	}
@@ -815,6 +826,10 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		go stopEchoWhenUpgraded(e, p.Env())
 	}
 
+	if !isUpgrade {
+		p.reportDeadTokensAtBoot()
+	}
+
 	if p.Config.AutoRefreshCNSITokens {
 		if err := p.startCNSITokenRefreshRoutines(); err != nil {
 			return err
@@ -935,6 +950,32 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	pp := e.Group("/pp")
 
 	pp.Use(p.setSecureCacheContentMiddleware)
+
+	// WU 0 — Track 2 wire-transfer optimization. Gzip compresses JSON API
+	// responses (~3-5x on typical tabular payloads). Skipper bypasses:
+	//   - WebSocket upgrades (log-stream / firehose / cfapppush / cfappssh)
+	//   - CF passthrough routes (/pp/v1/proxy/...) — historical issue #2925
+	//     showed gzip on passthrough responses corrupted Content-Type for
+	//     Firefox. Keep gzip scoped to Stratos-shape native endpoints only.
+	// MinLength=1024 skips compression for small polling responses where the
+	// CPU cost would outweigh the byte savings.
+	pp.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Skipper:   ppMiddlewareSkipper,
+		Level:     6,
+		MinLength: 1024,
+	}))
+
+	// WU 0 — wire-size instrumentation. Emits X-Stratos-Wire-Sizes on JSON
+	// responses (when DIAGNOSTICS_ENABLED) with raw bytes split into
+	// keys / values / structural plus the resources array length and handler
+	// duration_ms. Feeds empirical measurement for whether further format
+	// optimization (MessagePack, columnar tiers) would help beyond gzip.
+	// Must come AFTER Gzip so it buffers the uncompressed body before gzip
+	// compresses the outbound bytes. Shares the same skipper as gzip —
+	// passthrough responses aren't Stratos-shape so aren't the target of
+	// this instrumentation, and skipping also avoids the extra memory
+	// allocation per passthrough request.
+	pp.Use(p.wireSizeMiddleware)
 
 	// Add middleware to block requests if unconfigured
 	if needSetupMiddleware {
@@ -1064,8 +1105,6 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		stableEndpointAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
 	}
 
-	// sessionGroup.DELETE("/cnsis", p.removeCluster)
-
 	// Serve up static resources
 	if staticDirErr == nil {
 		e.Use(p.setStaticCacheContentMiddleware)
@@ -1119,7 +1158,9 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
 		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
-			c.File(path.Join(staticDir, "index.html"))
+			if fileErr := c.File(path.Join(staticDir, "index.html")); fileErr != nil {
+				log.Warnf("Unable to serve index.html: %v", fileErr)
+			}
 			// Let the default handler handle it
 			defaultHandler(err, c)
 		} else {
@@ -1149,10 +1190,14 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 
 	// Send response
 	if !c.Response().Committed {
+		var writeErr error
 		if c.Request().Method == http.MethodHead { // Issue #608
-			c.NoContent(code)
+			writeErr = c.NoContent(code)
 		} else {
-			c.String(code, msg)
+			writeErr = c.String(code, msg)
+		}
+		if writeErr != nil {
+			c.Logger().Error(writeErr)
 		}
 	}
 
@@ -1200,7 +1245,9 @@ func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
 		time.Sleep(1 * time.Second)
 	}
 	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
-	e.Close()
+	if err := e.Close(); err != nil {
+		log.Warnf("Unable to shut down Upgrade web server instance: %v", err)
+	}
 }
 
 // GetStoreFactory gets the store factory

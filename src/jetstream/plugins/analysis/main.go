@@ -3,7 +3,7 @@ package analysis
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -115,7 +115,9 @@ func (analysis *Analysis) OnEndpointNotification(action api.EndpointAction, endp
 		// An endpoint was unregistered, so remove all reports
 		dbStore, err := store.NewAnalysisDBStore(analysis.portalProxy.GetDatabaseConnection())
 		if err == nil {
-			dbStore.DeleteForEndpoint(endpoint.GUID)
+			if err := dbStore.DeleteForEndpoint(endpoint.GUID); err != nil {
+				log.Errorf("Failed deleting reports for endpoint %s: %v", endpoint.GUID, err)
+			}
 
 			// Now ask the analysis engine to to delete all files on disk
 			deleteURL := fmt.Sprintf("%s/api/v1/report/%s", analysis.analysisServer, endpoint.GUID)
@@ -132,8 +134,8 @@ func (analysis *Analysis) OnEndpointNotification(action api.EndpointAction, endp
 			}
 
 			if rsp.Body != nil {
-				defer rsp.Body.Close()
-				_, err = ioutil.ReadAll(rsp.Body)
+				defer func() { _ = rsp.Body.Close() }()
+				_, err = io.ReadAll(rsp.Body)
 				if err != nil {
 					log.Errorf("Could not read response: %v", err)
 				}

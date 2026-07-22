@@ -1,14 +1,12 @@
 import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal, inject } from '@angular/core';
 
 import { NgModel } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import { format } from 'date-fns';
 import { EMPTY, NEVER, Observable, Subject, of, timer } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, debounceTime, map, share, startWith, switchMap, tap, retryWhen, delayWhen, take } from 'rxjs/operators';
 
 import { AnsiColorizer, LogViewerComponent } from '@stratosui/core';
-import { CFAppState } from '@stratosui/cloud-foundry';
 import { ApplicationService } from '../../../../application.service';
 
 
@@ -29,7 +27,7 @@ interface ConnectionError {
 @Component({
   selector: 'app-log-stream-tab',
   templateUrl: './log-stream-tab.component.html',
-  styleUrls: ['./log-stream-tab.component.scss'],
+  host: { class: 'flex flex-col flex-1 min-h-0 w-full' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -38,7 +36,6 @@ interface ConnectionError {
 })
 export class LogStreamTabComponent implements OnInit, OnDestroy {
   private applicationService = inject(ApplicationService);
-  private store = inject<Store<CFAppState>>(Store);
   private cdr = inject(ChangeDetectorRef);
 
   public messages!: Observable<string>;
@@ -53,7 +50,8 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   // Signal for connection status tracking
   connectionStatusSignal = signal<number>(0);
 
-  @ViewChild('searchFilter', { static: false }) searchFilter: NgModel;
+  // strict: populated by Angular's @ViewChild query after view init.
+  @ViewChild('searchFilter', { static: false }) searchFilter!: NgModel;
 
   filter;
 
@@ -92,7 +90,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
 
       console.log('WebSocket connection URL:', streamUrl);
 
-      const socket$ = makeWebSocketObservable(streamUrl).pipe(
+      const socket$ = makeWebSocketObservable<string>(streamUrl).pipe(
         tap(() => {
           // Reset connection tracking on successful connection
           this.connectionAttempts = 0;
@@ -160,7 +158,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
       );
 
       this.messages = socket$.pipe(
-        switchMap((getResponses: GetWebSocketResponses | null) => {
+        switchMap((getResponses: GetWebSocketResponses<string> | null) => {
           if (!getResponses) {
             console.warn('WebSocket getResponses is null');
             return EMPTY;
@@ -259,9 +257,11 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
         return;
       }
 
-      let msgColour;
-      let sourceColour;
-      let bold;
+      // Defaults preserve the legacy behavior: an empty colour string and
+      // bold=false take colorize's no-style branch just as undefined did.
+      let msgColour = '';
+      let sourceColour: string;
+      let bold = false;
 
       // CF timestamps are in nanoseconds
       const msStamp = Math.round(messageObj.timestamp / 1000000);

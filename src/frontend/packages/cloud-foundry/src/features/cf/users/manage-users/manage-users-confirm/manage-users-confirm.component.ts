@@ -1,84 +1,47 @@
 import { CommonModule } from '@angular/common';
 import { AfterContentInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, Subject } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 
+import { naturalCompare } from '@stratosui/core';
+import { CfUsersRolesDataService, RoleChangeApplyState } from '../../../../../services/domain-data/cf-users-roles-data.service';
 import {
-  AppActionMonitorComponent,
-  AppMonitorComponentTypes,
-  ITableColumn,
-  ITableCellRequestMonitorIconConfig } from '@stratosui/core';
-import { entityCatalog, APIResource } from '@stratosui/store';
-import { UsersRolesClearUpdateState } from '../../../../../actions/users-roles.actions';
-import { ChangeCfUserRole } from '../../../../../actions/users.actions';
-import { CFAppState } from '../../../../../cf-app-state';
-import { cfEntityFactory } from '../../../../../cf-entity-factory';
-import { cfUserEntityType, organizationEntityType, spaceEntityType } from '../../../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
+  TableCellConfirmOrgSpaceComponent } from './table-cell-confirm-org-space/table-cell-confirm-org-space.component';
 import {
-  TableCellConfirmOrgSpaceComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-org-space/table-cell-confirm-org-space.component';
-import {
-  TableCellConfirmRoleAddRemComponent } from '../../../../../shared/components/list/list-types/cf-confirm-roles/table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
-import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import { selectCfUsersRoles, selectCfUsersRolesChangedRoles } from '../../../../../store/selectors/cf-users-roles.selector';
-import { CfUser, OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
+  TableCellConfirmRoleAddRemComponent } from './table-cell-confirm-role-add-rem/table-cell-confirm-role-add-rem.component';
+import { CfUsersPagedDataService } from '../../../../../shared/data-services/cf-users-paged-data.service';
+import { StUser } from '../../../../../services/endpoint-data/stratos-types';
+import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../../../store/types/cf-user.types';
 import { CfRoleChangeWithNames, UserRoleLabels } from '../../../../../store/types/users-roles.types';
 import { ManageUsersSetUsernamesHelper } from '../manage-users-set-usernames/manage-users-set-usernames.component';
 
 @Component({
   selector: 'app-manage-users-confirm',
   templateUrl: './manage-users-confirm.component.html',
-  styleUrls: ['./manage-users-confirm.component.scss'],
+  host: { class: 'flex-1 pr-2.5' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
     CommonModule,
-    AppActionMonitorComponent
+    TableCellConfirmRoleAddRemComponent,
+    TableCellConfirmOrgSpaceComponent,
   ]
 })
 export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
-  private store = inject(Store<CFAppState>);
-  private cfUserService = inject(CfUserService);
+  private usersData = inject(CfUsersPagedDataService);
+  private rolesData = inject(CfUsersRolesDataService);
+  // Cached toObservable bridges so handlers can use them outside the
+  // injection context.
+  private state$ = toObservable(this.rolesData.state);
+  private changedRoles$ = toObservable(this.rolesData.changedRoles);
 
   @Input() setUsernames = false;
 
-  columns: ITableColumn<CfRoleChangeWithNames>[] = [
-    {
-      headerCell: () => 'User',
-      columnId: 'user',
-      cellDefinition: {
-        valuePath: 'username'
-      },
-      cellFlex: '1'
-    },
-    {
-      headerCell: () => 'Action',
-      columnId: 'action',
-      cellComponent: TableCellConfirmRoleAddRemComponent,
-      cellFlex: '1'
-    },
-    {
-      headerCell: () => 'Role',
-      columnId: 'role',
-      cellDefinition: {
-        valuePath: 'roleName'
-      },
-      cellFlex: '1'
-    },
-    {
-      headerCell: () => 'Target',
-      columnId: 'target',
-      cellComponent: TableCellConfirmOrgSpaceComponent,
-      cellFlex: '1'
-    }
-  ];
   changes$!: Observable<CfRoleChangeWithNames[]>;
-  public userCatalogEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, cfUserEntityType);
 
-  monitorState = AppMonitorComponentTypes.UPDATE;
-  private cfGuid$: Observable<string>;
-  public orgName$: Observable<string>;
+  private cfGuid$!: Observable<string>; // strict: assigned in ngOnInit via createCfObs
+  public orgName$!: Observable<string>; // strict: assigned in ngAfterContentInit
 
   private updateChanges = new Subject();
   private nameCache: {
@@ -88,17 +51,14 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
       role: {}
     };
 
-  public getCellConfig(row: CfRoleChangeWithNames): ITableCellRequestMonitorIconConfig {
-    const isSpace = !!row.spaceGuid;
-    const schema = isSpace ? cfEntityFactory(spaceEntityType) : cfEntityFactory(organizationEntityType);
-    const guid = isSpace ? row.spaceGuid : row.orgGuid;
-    return {
-      entityKey: entityCatalog.getEntityKey(schema),
-      schema,
-      monitorState: AppMonitorComponentTypes.UPDATE,
-      updateKey: ChangeCfUserRole.generateUpdatingKey(row.role, row.userGuid),
-      getId: () => guid
-    };
+  // Per-row apply status (busy → done/error), driven by the service's
+  // executeChanges. Replaces the legacy entity-update monitor column.
+  statusOf(row: CfRoleChangeWithNames): RoleChangeApplyState | undefined {
+    return this.rolesData.applyStatus()[CfUsersRolesDataService.changeKey(row)];
+  }
+
+  rowKey(row: CfRoleChangeWithNames): string {
+    return CfUsersRolesDataService.changeKey(row);
   }
 
   ngOnInit() {
@@ -118,20 +78,19 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   }
 
   onEnter = () => {
-    // Kick off an update
+    // Rebuild the change list for display when the step is entered.
     this.updateChanges.next(new Date().getTime());
-    // Ensure that any entity we're going to show the state for is clear of any previous or unrelated errors
-    this.store.select(selectCfUsersRoles).pipe(
-      take(1),
-    ).subscribe(usersRoles => this.store.dispatch(new UsersRolesClearUpdateState(usersRoles.changedRoles)));
   };
 
-  fetchUsername = (userGuid: string, users: APIResource<CfUser>[]): string => {
+  fetchUsername = (userGuid: string, users: StUser[]): string => {
     let res = this.nameCache.user[userGuid];
     if (res) {
       return res;
     }
-    res = users.find(user => user.metadata.guid === userGuid).entity.username;
+    // getUsers now yields the drained StUser[] (guid is the identity); fall
+    // back to the guid when a user isn't in the set so the confirm row still
+    // renders rather than throwing (the legacy .find(...).entity would crash).
+    res = users.find(user => user.guid === userGuid)?.username || userGuid;
     this.nameCache.user[userGuid] = res;
     return res;
   };
@@ -143,8 +102,8 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   };
 
   private createCfObs() {
-    this.cfGuid$ = this.store.select(selectCfUsersRoles).pipe(
-      map(mu => mu.cfGuid),
+    this.cfGuid$ = this.state$.pipe(
+      map(mu => mu?.cfGuid),
       filter(cfGuid => !!cfGuid),
       distinctUntilChanged(),
     );
@@ -152,20 +111,20 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
 
   private createChangesObs() {
     const changesViaUsername = this.updateChanges.pipe(
-      switchMap(() => this.store.select(selectCfUsersRolesChangedRoles)),
+      switchMap(() => this.changedRoles$),
       map(changes => changes
         .map(change => ({
           ...change,
           username: ManageUsersSetUsernamesHelper.usernameFromGuid(change.userGuid),
           roleName: this.fetchRoleName(change.role, !change.spaceGuid)
         }))
-        .sort((a, b) => a.username.localeCompare(b.username)),
+        .sort((a, b) => naturalCompare(a.username, b.username)),
       )
     );
     const changesViaUserGuid = this.updateChanges.pipe(
       withLatestFrom(this.cfGuid$),
-      mergeMap(([, cfGuid]) => this.cfUserService.getUsers(cfGuid)),
-      withLatestFrom(this.store.select(selectCfUsersRolesChangedRoles)),
+      mergeMap(([, cfGuid]) => this.usersData.getUsers(cfGuid)),
+      withLatestFrom(this.changedRoles$),
       map(([users, changes]) =>
         changes
           .map(change => ({
@@ -173,7 +132,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
             username: this.fetchUsername(change.userGuid, users),
             roleName: this.fetchRoleName(change.role, !change.spaceGuid)
           }))
-          .sort((a, b) => a.username.localeCompare(b.username))
+          .sort((a, b) => naturalCompare(a.username, b.username))
       )
     );
     this.changes$ = this.setUsernames ? changesViaUsername : changesViaUserGuid;

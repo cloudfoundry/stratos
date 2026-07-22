@@ -1,4 +1,6 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Injector } from '@angular/core';
+import { EndpointsDataService } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { Md5 } from 'ts-md5';
@@ -14,9 +16,15 @@ const GITLAB_PER_PAGE_PARAM_VALUE = 100;
 
 export class GitLabSCM extends BaseSCM implements GitSCM {
 
-  constructor(endpointGuid: string) {
+  constructor(
+    endpointGuid: string,
+    endpointsData?: EndpointsDataService,
+    injector?: Injector,
+  ) {
     super(gitLabAPIUrl);
     this.endpointGuid = endpointGuid;
+    this.endpointsData = endpointsData;
+    this.injector = injector;
   }
 
   getType(): GitSCMType {
@@ -37,7 +45,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     const parts = projectName.split('/');
 
-    const obs$ = parts.length !== 2 ?
+    const obs$: Observable<unknown> = parts.length !== 2 ?
       observableOf(null) :
       this.getAPI().pipe(switchMap(api => httpClient.get(`${api.url}/projects/${parts.join('%2F')}`, api.requestArgs)));
 
@@ -232,7 +240,12 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
       projectName: commitData.projectName,
       scmType: commitData.scmType,
       endpointGuid: null,
-    };
+      // strict: GitLab commits carry no GitHub-style user identity (id/login/
+      // html_url are null) and the endpointGuid is backfilled later by the
+      // caller. GitUser/GitEntity in the store package model these as
+      // non-nullable, so an external-API boundary conversion is required here —
+      // matching convertProject() above which converts the same way.
+    } as unknown as GitCommit;
   }
 
   parseErrorAsString(error: unknown): string {

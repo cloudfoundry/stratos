@@ -7,12 +7,13 @@ import {
   CardTitleComponent,
   CardContentComponent
 } from '@stratosui/core';
+import { EndpointUser } from '@stratosui/store';
+
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 
 @Component({
   selector: 'app-card-cf-user-info',
   templateUrl: './card-cf-user-info.component.html',
-  styleUrls: ['./card-cf-user-info.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -29,7 +30,7 @@ export class CardCfUserInfoComponent implements OnInit {
 
   ngOnInit() { }
 
-  isAdmin(user) {
+  isAdmin(user: EndpointUser | undefined) {
     return user && user.admin ? 'Yes' : 'No';
   }
 }

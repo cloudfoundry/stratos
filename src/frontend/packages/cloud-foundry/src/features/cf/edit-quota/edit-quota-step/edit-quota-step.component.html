@@ -1,6 +1,6 @@
 <div class="edit-quota">
   <div>Specify the parameters of the quota</div>
-  @if (quota) {
-    <app-quota-definition-form [quota]="quota" #form></app-quota-definition-form>
+  @if (quota(); as q) {
+    <app-quota-definition-form [quota]="q" #form></app-quota-definition-form>
   }
 </div>

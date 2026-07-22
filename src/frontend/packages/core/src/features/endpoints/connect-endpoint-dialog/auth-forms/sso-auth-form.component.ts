@@ -4,9 +4,8 @@ import { IAuthForm } from '@stratosui/store';
 
 import { ProductNameComponent } from '../../../../shared/components/product-name.ccomponent';
 
-interface SsoAuthFormValues {
-  // SSO form has an empty authValues group - no additional fields required
-}
+// SSO form has an empty authValues group - no additional fields required
+type SsoAuthFormValues = Record<string, never>;
 
 interface SsoAuthForm {
   authValues: FormGroup<SsoAuthFormValues>;
@@ -15,7 +14,6 @@ interface SsoAuthForm {
 @Component({
   selector: 'app-sso-auth-form',
   templateUrl: './sso-auth-form.component.html',
-  styleUrls: ['./sso-auth-form.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,

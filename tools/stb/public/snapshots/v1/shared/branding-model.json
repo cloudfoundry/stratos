@@ -1,0 +1,149 @@
+{
+  "scene": "shared",
+  "nodes": [
+    {
+      "snapshotId": "shared.confirm-dialog",
+      "role": "dialog",
+      "name": "Confirm dialog",
+      "description": "surface/background colour for the shared confirmation dialog",
+      "facets": {
+        "background": {
+          "color": {
+            "literal": {
+              "l": 1,
+              "c": 0,
+              "h": 0
+            }
+          }
+        }
+      },
+      "roledescription": "dialog"
+    },
+    {
+      "snapshotId": "shared.confirm-dialog.title",
+      "role": "heading",
+      "name": "Dialog title",
+      "description": "title text for the shared confirmation dialog",
+      "facets": {
+        "content": {
+          "text": "Are you sure?"
+        }
+      }
+    },
+    {
+      "snapshotId": "shared.confirm-dialog.message",
+      "role": "paragraph",
+      "name": "Dialog message",
+      "description": "message text for the shared confirmation dialog",
+      "facets": {
+        "content": {
+          "text": "This action cannot be undone.",
+          "format": "subset"
+        }
+      }
+    },
+    {
+      "snapshotId": "shared.confirm-dialog.cancel",
+      "role": "button",
+      "name": "Cancel button",
+      "description": "cancel button colour for the shared confirmation dialog",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      }
+    },
+    {
+      "snapshotId": "shared.confirm-dialog.confirm",
+      "role": "button",
+      "name": "Confirm button",
+      "description": "confirm button colour for the shared confirmation dialog",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.55,
+              "c": 0.15,
+              "h": 250
+            }
+          }
+        }
+      }
+    },
+    {
+      "snapshotId": "shared.stepper",
+      "role": "group",
+      "name": "Stepper",
+      "description": "surface/background colour for the shared stepper wizard",
+      "facets": {
+        "background": {
+          "color": {
+            "literal": {
+              "l": 0.98,
+              "c": 0.005,
+              "h": 250
+            }
+          }
+        }
+      },
+      "roledescription": "stepper"
+    },
+    {
+      "snapshotId": "shared.stepper.cancel",
+      "role": "button",
+      "name": "Cancel button",
+      "description": "cancel button colour for the shared stepper",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      }
+    },
+    {
+      "snapshotId": "shared.stepper.previous",
+      "role": "button",
+      "name": "Previous button",
+      "description": "previous button colour for the shared stepper",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      }
+    },
+    {
+      "snapshotId": "shared.stepper.next",
+      "role": "button",
+      "name": "Next button",
+      "description": "next/submit button colour for the shared stepper",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.55,
+              "c": 0.15,
+              "h": 250
+            }
+          }
+        }
+      }
+    }
+  ]
+}

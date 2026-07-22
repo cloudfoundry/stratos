@@ -2,7 +2,9 @@
 
 This document describes how the Stratos theme system works, how CSS
 variables flow through the application, and how to use semantic tokens
-correctly in templates and styles.
+correctly in templates and styles. For Tailwind v4 mechanics — the
+CSS-first configuration, cascade layers, dark-mode rules, and `@apply`
+gotchas — see [tailwind-usage.md](tailwind-usage.md).
 
 ## System Overview
 
@@ -10,25 +12,22 @@ The theme system has five layers that work together. For the
 service-level architecture and four-layer preference cascade, see
 [branding-architecture.md](branding-architecture.md).
 
-```
-┌─────────────────────────────────────────────────────┐
-│  StratosBrandingService (Angular)                   │
-│  Unified service: loads company-config.json,        │
-│  applies branding/colors/login, manages dark/light  │
-│  mode, persists preferences to localStorage         │
-├─────────────────────────────────────────────────────┤
-│  main.scss (:root / .dark-theme)                    │
-│  Defines all CSS custom properties                  │
-│  Dark overrides via .dark-theme selector on <body>  │
-├─────────────────────────────────────────────────────┤
-│  tailwind.config.js                                 │
-│  Maps CSS variables to semantic Tailwind tokens     │
-│  e.g. text-content-text → var(--content-text)       │
-├─────────────────────────────────────────────────────┤
-│  Component templates                                │
-│  Use semantic tokens: bg-content-bg, text-primary   │
-│  NOT raw colors: bg-white, text-gray-500            │
-└─────────────────────────────────────────────────────┘
+```mermaid
+flowchart TD
+    svc["StratosBrandingService (Angular)
+    Unified service: loads company-config.json, applies
+    branding/colors/login, manages dark/light mode,
+    persists preferences to localStorage"]
+    scss["main.scss (:root / .dark-theme)
+    Defines all CSS custom properties
+    Dark overrides via .dark-theme selector on body"]
+    tw["tailwind.css (@theme block)
+    Maps CSS variables to semantic Tailwind tokens
+    e.g. text-content-text = var(--content-text)"]
+    tpl["Component templates
+    Use semantic tokens: bg-content-bg, text-primary
+    NOT raw colors: bg-white, text-gray-500"]
+    svc --> scss --> tw --> tpl
 ```
 
 ## Key Files
@@ -40,7 +39,7 @@ service-level architecture and four-layer preference cascade, see
 | `src/frontend/packages/theme/theme.config.ts` | Light/dark theme definitions (StratosTheme interface) |
 | `src/frontend/packages/theme/styles/main.scss` | CSS custom properties (:root defaults, .dark-theme overrides), component base styles |
 | `src/frontend/packages/theme/theme-transitions.scss` | FOUC prevention, smooth transitions, reduced-motion support |
-| `tailwind.config.js` | Semantic color tokens mapping CSS variables to Tailwind classes |
+| `src/frontend/packages/theme/styles/tailwind.css` | Tailwind v4 CSS-first config — `@theme` tokens mapping CSS variables to Tailwind classes |
 | `src/frontend/packages/core/src/shared/components/theme-toggle/` | Toggle button UI |
 | `src/frontend/packages/core/src/features/login/login-page/` | Login page component (themed via signals) |
 
@@ -295,6 +294,7 @@ Theme styles are included globally via `angular.json`:
 
 ```json
 "styles": [
+  "src/frontend/packages/theme/styles/tailwind.css",
   "src/frontend/packages/theme/styles/main.scss",
   "src/frontend/packages/theme/theme-transitions.scss",
   "src/frontend/packages/core/src/styles.scss",
@@ -302,8 +302,11 @@ Theme styles are included globally via `angular.json`:
 ]
 ```
 
-Order matters — `main.scss` defines CSS variables first, then
-transitions, then component styles.
+Order matters — `tailwind.css` must be processed first (PostCSS
+before SCSS), then `main.scss` defines the runtime CSS variables,
+then transitions, then component styles. See
+[tailwind-usage.md](tailwind-usage.md) for why the split is
+deliberate.
 
 ## Adding a New CSS Variable
 
@@ -313,8 +316,9 @@ transitions, then component styles.
 4. Add to `darkTheme` in `theme.config.ts` (must match `.dark-theme`)
 5. If needed as inline style, add `root.style.setProperty()` call in
    `applyTheme()` in `stratos-branding.service.ts`
-6. Optionally add a semantic Tailwind token in `tailwind.config.js`
-   under `theme.extend.colors`
+6. Optionally add a semantic Tailwind token in the `@theme` block of
+   `src/frontend/packages/theme/styles/tailwind.css` as a var
+   reference: `--color-<name>: var(--<name>)`
 
 ## Company Branding
 

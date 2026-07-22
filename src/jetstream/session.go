@@ -27,8 +27,6 @@ const (
 	sessionExpiresOnHeader = "X-Cap-Session-Expires-On"
 	// ClientRequestDateHeader Custom header for getting date form client
 	clientRequestDateHeader = "X-Cap-Request-Date"
-	// XSRFTokenCookie - XSRF Token Cookie name
-	xSRFTokenCookie = "XSRF-TOKEN"
 	// Default cookie name/cookie name prefix
 	jetstreamSessionName              = "console-session"
 	jetStreamSessionContextKey        = "jetstream-session"
@@ -244,7 +242,9 @@ func (p *portalProxy) ensureXSRFToken(c echo.Context) {
 		}
 		sessionValues := make(map[string]interface{})
 		sessionValues[XSRFTokenSessionName] = token
-		p.setSessionValues(c, sessionValues)
+		if err := p.setSessionValues(c, sessionValues); err != nil {
+			log.Warnf("Unable to save XSRF token to session: %v", err)
+		}
 	}
 
 	if len(token) > 0 {

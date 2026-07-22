@@ -327,4 +327,27 @@ describe('Autoscaler Transform Policy Helper', () => {
     mapPolicy.scaling_rules_form = [];
     expect(isEqual(arrayPolicy, autoscalerTransformMapToArray(mapPolicy))).toBe(true);
   });
+
+  it('preserves cool_down_secs distinct from breach_duration_secs (regression)', () => {
+    const local = {
+      instance_min_count: 1,
+      instance_max_count: 5,
+      scaling_rules_form: [
+        {
+          metric_type: 'memoryused',
+          breach_duration_secs: 600,
+          cool_down_secs: 120,
+          threshold: 30,
+          operator: '>=',
+          adjustment: '+1'
+        }
+      ]
+    } as AppAutoscalerPolicyLocal;
+
+    const rule = autoscalerTransformMapToArray(local).scaling_rules?.[0];
+    // Previously cool_down_secs was serialized from breach_duration_secs,
+    // silently discarding the user's entered cooldown.
+    expect(rule?.cool_down_secs).toBe(120);
+    expect(rule?.breach_duration_secs).toBe(600);
+  });
 });

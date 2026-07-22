@@ -1,25 +1,27 @@
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject } from 'rxjs';
 
 import { ApplicationServiceMock, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper, populateStoreWithTestEndpoint } from '@test-framework/cf';
-import {ApplicationService, CFAppState} from '@stratosui/cloud-foundry';
-import { EndpointModel, endpointEntitiesSelector, UserFavoriteManager } from '@stratosui/store';
+import {ApplicationService} from '@stratosui/cloud-foundry';
+import { EndpointModel, EndpointsDataService, UserFavoriteManager } from '@stratosui/store';
 import {
   EndpointsService,
   CurrentUserPermissionsService
 } from '@stratosui/core';
 import { GitSCMService } from '@stratosui/git';
 import { ApplicationTabsBaseComponent } from './application-tabs-base.component';
+import { AppLifecycleStateService } from '../../app-lifecycle-state.service';
+import { AppDetailDataService } from '../../app-detail-data.service';
+import { AppApplicationActionsService } from '../../../../shared/services/application-actions.service';
+import { AppLifecycleProgressService } from '../../../../shared/components/app-lifecycle-progress/app-lifecycle-progress.service';
 
 describe('ApplicationTabsBaseComponent', () => {
   let component: ApplicationTabsBaseComponent;
   let fixture: ComponentFixture<ApplicationTabsBaseComponent>;
-  let store: Store<CFAppState>;
   let applicationServiceMock: ApplicationServiceMock;
 
   beforeEach(async () => {
@@ -51,11 +53,9 @@ describe('ApplicationTabsBaseComponent', () => {
       getFavorite: vi.fn().mockReturnValue(null)
     };
 
-    // The issue is that observableOf() completes immediately after emitting,
-    // which causes withLatestFrom to miss values. We need observables that
-    // emit but don't complete immediately.
-
-    // Create mock endpoint data for store selector
+    // Wave 2 (W36-B): mock `EndpointsDataService` instead of overriding
+    // `store.select(endpointEntitiesSelector)`. Endpoint entity reads now
+    // come from the data service's signal surface.
     const mockEndpoint: EndpointModel = {
       guid: 'mockCfGuid',
       name: 'Mock CF',
@@ -69,8 +69,7 @@ describe('ApplicationTabsBaseComponent', () => {
         RawPath: '',
         ForceQuery: false,
         RawQuery: '',
-        Fragment: '',
-        RawFragment: ''
+        Fragment: ''
       },
       authorization_endpoint: '',
       token_endpoint: '',
@@ -86,12 +85,21 @@ describe('ApplicationTabsBaseComponent', () => {
       sso_allowed: false,
       sub_type: '',
       metadata: {},
-      logged_in_as_admin: false
+      metricsAvailable: false,
+      creator: { name: 'test-user', admin: false, system: false }
     };
 
-    const endpointsSubject = new BehaviorSubject<{ [guid: string]: EndpointModel }>({
-      mockCfGuid: mockEndpoint
-    });
+    const endpointsMap: WritableSignal<Map<string, EndpointModel>> = signal(
+      new Map([['mockCfGuid', mockEndpoint]])
+    );
+    const mockEndpointsDataService = {
+      endpoints: endpointsMap,
+      whenReady: () => Promise.resolve(),
+      waitFor: (guid: string) => {
+        const ep = endpointsMap().get(guid);
+        return ep ? Promise.resolve(ep) : Promise.reject(new Error(`Endpoint ${guid} not found`));
+      },
+    };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -102,29 +110,28 @@ describe('ApplicationTabsBaseComponent', () => {
       providers: [
         { provide: ApplicationService, useValue: applicationServiceMock },
         { provide: EndpointsService, useValue: mockEndpointsService },
+        { provide: EndpointsDataService, useValue: mockEndpointsDataService },
         { provide: CurrentUserPermissionsService, useValue: mockCurrentUserPermissionsService },
         { provide: GitSCMService, useValue: mockGitSCMService },
         { provide: UserFavoriteManager, useValue: mockUserFavoriteManager },
         ApplicationStateService,
         ApplicationEnvVarsHelper,
+        // Slice 1 fallback providers — these used to be supplied at the
+        // tabs-base level itself; they now live on ApplicationBaseComponent
+        // (the parent), so the bare component test must wire them up.
+        AppLifecycleStateService,
+        AppApplicationActionsService,
+        AppLifecycleProgressService,
+        // AppApplicationActionsService injects AppDetailDataService for
+        // the post-op refresh fan-out. Provide a no-op stub so the test
+        // doesn't need to thread the full HTTP-backed service.
+        { provide: AppDetailDataService, useValue: { refresh: () => Promise.resolve(), app: signal(undefined), updating: signal(false) } },
         provideRouter([]),
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 
-    store = TestBed.inject(Store);
     populateStoreWithTestEndpoint();
-
-    // Override store.select to return our mocked endpoints observable
-    const originalSelect = store.select.bind(store);
-    store.select = vi.fn().mockImplementation((selector: any) => {
-      // Return mocked endpoints for the endpoint selector
-      if (selector === endpointEntitiesSelector) {
-        return endpointsSubject.asObservable();
-      }
-      // Fall back to original select for other selectors
-      return originalSelect(selector);
-    }) as any;
 
     fixture = TestBed.createComponent(ApplicationTabsBaseComponent);
     component = fixture.componentInstance;
@@ -134,5 +141,21 @@ describe('ApplicationTabsBaseComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // GUARD: an app-detail error bounce must stay CF-scoped when the app was
+  // opened from the per-CF applications tab (?breadcrumbs=cf), not dump the
+  // user on the global cross-CF wall. Mirrors the delete flow's scoping.
+  describe('appErrorRedirect', () => {
+    it('returns the CF-scoped apps tab when opened from it (breadcrumbs=cf)', () => {
+      expect(ApplicationTabsBaseComponent.appErrorRedirect('cf', 'cf-1'))
+        .toEqual(['/cloud-foundry', 'cf-1', 'applications']);
+    });
+
+    it('returns the global wall for any other source', () => {
+      expect(ApplicationTabsBaseComponent.appErrorRedirect(undefined, 'cf-1')).toEqual(['applications']);
+      expect(ApplicationTabsBaseComponent.appErrorRedirect('org', 'cf-1')).toEqual(['applications']);
+      expect(ApplicationTabsBaseComponent.appErrorRedirect(null, 'cf-1')).toEqual(['applications']);
+    });
   });
 });

@@ -12,7 +12,7 @@ export interface QuotaDefinitionActionBuilder extends OrchestratedActionBuilders
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetQuotaDefinition;
   create: (
     id: string,
@@ -27,7 +27,7 @@ export interface QuotaDefinitionActionBuilder extends OrchestratedActionBuilders
   getMultiple: (
     paginationKey: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetQuotaDefinitions;
 }
 
@@ -35,7 +35,7 @@ export const quotaDefinitionActionBuilder: QuotaDefinitionActionBuilder = {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetQuotaDefinition(guid, endpointGuid, includeRelations, populateMissing),
   create: (
     id: string,

@@ -15,9 +15,15 @@ export class GetServiceBrokers extends CFStartAction implements PaginatedAction 
     public populateMissing = true
   ) {
     super();
+    // V3-native: drives /pp/v1/cf/service_brokers/{cnsi} (handler in
+    // native_service_brokers_reads.go). Returns StratosPagedResponse
+    // shape so the standard v3PaginationConfig applies. Field renames
+    // alias `url`→`broker_url`, `spaceGuid`→`space_guid`,
+    // `authUsername`→`auth_username` so V2 consumers continue to read
+    // snake_case keys.
     this.options = new HttpRequest(
       'GET',
-      'service_brokers'
+      `/pp/v1/cf/service_brokers/${endpointGuid}`
     );
   }
   actions = getActions('Service Brokers', 'Get all');
@@ -40,9 +46,14 @@ export class GetServiceBroker extends CFStartAction implements EntityRequestActi
     public populateMissing = true
   ) {
     super();
+    // V3-native single-resource: drives
+    // /pp/v1/cf/service_brokers/{cnsi}/{guid} (getNativeServiceBrokerDetail).
+    // Backend returns a flat StServiceBroker (no APIResource wrapper); the
+    // global successfulRequestDataMapper stamps cfGuid+guid and the
+    // tolerant v3EntitiesFromResponse adapter on the entity wraps it.
     this.options = new HttpRequest(
       'GET',
-      `service_brokers/${guid}`
+      `/pp/v1/cf/service_brokers/${endpointGuid}/${guid}`
     );
   }
   actions = getActions('Service Brokers', 'Get specific by ID');

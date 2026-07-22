@@ -1,64 +1,269 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, importProvidersFrom, APP_INITIALIZER } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { provideZonelessChangeDetection, signal, computed, WritableSignal } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { of } from 'rxjs';
+import { describe, it, expect, vi } from 'vitest';
 
-import {
-  ConfirmationDialogService,
-  
-  TailwindSnackBarService
-} from '@stratosui/core';
-import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import { EntityCatalogHelper, EntityCatalogHelpers, PaginationMonitorFactory } from '@stratosui/store';
-import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
-import { ApplicationServiceMock } from '@test-framework/application-service-helper';
-import { CloudFoundryTestingModule, CF_BASE_TEST_PROVIDERS } from '@test-framework/cloud-foundry-endpoint-service.helper';
-import { ApplicationService } from '../../../../features/applications/application.service';
-import { ApplicationStateService } from '../../../services/application-state.service';
+import { ConfirmationDialogService, CurrentUserPermissionsService, TailwindSnackBarService } from '@stratosui/core';
+
 import { CardAppInstancesComponent } from './card-app-instances.component';
+import { ApplicationService } from '../../../../features/applications/application.service';
+import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
+import { CfAppsSignalConfigService } from '../../../signal-list-configs/app/cf-apps-signal-config.service';
+
+interface DataStubOpts {
+  desired?: number;
+  running?: number;
+  total?: number;
+  appState?: string;
+  loadingApp?: boolean;
+}
+
+function makeDataStub(opts: DataStubOpts = {}) {
+  const desired = opts.desired ?? 2;
+  const runningN = opts.running ?? 2;
+  const totalN = opts.total ?? runningN;
+  const stateLabel = opts.appState ?? 'STARTED';
+
+  const stats = Array.from({ length: totalN }, (_, i) => ({
+    state: i < runningN ? 'RUNNING' : 'CRASHED',
+  }));
+
+  const appSig: WritableSignal<any> = signal({ entity: { state: stateLabel, instances: desired } });
+  const statsSig: WritableSignal<any[]> = signal(stats);
+  const loadingSig: WritableSignal<{ app: boolean }> = signal({ app: opts.loadingApp ?? false });
+
+  return {
+    app: appSig.asReadonly(),
+    stats: statsSig.asReadonly(),
+    state: computed(() => ({ label: stateLabel, indicator: null, actions: {} })),
+    running: computed(() => stateLabel === 'STARTED'),
+    loading: loadingSig.asReadonly(),
+    // Writable refs for tests to mutate.
+    _appSig: appSig,
+    _statsSig: statsSig,
+    _loadingSig: loadingSig,
+  };
+}
+
+function makeAppServiceStub() {
+  return {
+    cfGuid: 'cf-1',
+    appGuid: 'app-1',
+    appOrg$: of({ guid: 'org-1' }),
+    appSpace$: of({ guid: 'space-1' }),
+  };
+}
+
+function makeAppsStub() {
+  return {
+    scaleApp: vi.fn().mockResolvedValue(undefined),
+  };
+}
+
+function makeCupsStub(canResult = true) {
+  return {
+    can: vi.fn().mockReturnValue(of(canResult)),
+  };
+}
+
+function setup(opts: DataStubOpts & { showActions?: boolean; canEdit?: boolean } = {}) {
+  const dataStub = makeDataStub(opts);
+  const appStub = makeAppServiceStub();
+  const appsStub = makeAppsStub();
+  const cupsStub = makeCupsStub(opts.canEdit ?? true);
+  const confirmStub = { open: vi.fn((_cfg: any, fn: () => void) => fn()) };
+  const snackStub = { open: vi.fn(), error: vi.fn(), warn: vi.fn(), info: vi.fn() };
+
+  TestBed.configureTestingModule({
+    imports: [CardAppInstancesComponent],
+    providers: [
+      provideZonelessChangeDetection(),
+      provideRouter([]),
+      { provide: AppDetailDataService, useValue: dataStub },
+      { provide: ApplicationService, useValue: appStub },
+      { provide: CfAppsSignalConfigService, useValue: appsStub },
+      { provide: CurrentUserPermissionsService, useValue: cupsStub },
+      { provide: ConfirmationDialogService, useValue: confirmStub },
+      { provide: TailwindSnackBarService, useValue: snackStub },
+    ],
+  });
+
+  const fixture: ComponentFixture<CardAppInstancesComponent> = TestBed.createComponent(CardAppInstancesComponent);
+  fixture.componentRef.setInput('showActions', opts.showActions ?? false);
+  fixture.detectChanges();
+  return { fixture, dataStub, appStub, appsStub, cupsStub, confirmStub, snackStub };
+}
+
 describe('CardAppInstancesComponent', () => {
-  let component: CardAppInstancesComponent;
-  let fixture: ComponentFixture<CardAppInstancesComponent>;
-
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      imports: [
-        CardAppInstancesComponent,
-      ],
-      providers: [
-        ...CF_BASE_TEST_PROVIDERS,
-        ...STORE_TEST_PROVIDERS,
-        importProvidersFrom(
-          NoopAnimationsModule,
-          CloudFoundryTestingModule,
-          createBasicStoreModule(),
-        ),
-        EntityCatalogHelper,
-        {
-          provide: APP_INITIALIZER,
-          useFactory: (ech: EntityCatalogHelper) => () => EntityCatalogHelpers.SetEntityCatalogHelper(ech),
-          deps: [EntityCatalogHelper],
-          multi: true
-        },
-        { provide: ApplicationService, useClass: ApplicationServiceMock },
-        ApplicationStateService,
-        ConfirmationDialogService,
-        ...cfCurrentUserPermissionsService,
-        PaginationMonitorFactory,
-        TailwindSnackBarService,
-        provideZonelessChangeDetection(),
-      ]
-    })
-      .compileComponents();
+  it('creates', () => {
+    const { fixture } = setup();
+    expect(fixture.componentInstance).toBeTruthy();
   });
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(CardAppInstancesComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+  describe('counts', () => {
+    it('reads runningCount and desiredCount from signals', () => {
+      const { fixture } = setup({ desired: 3, running: 2, total: 3 });
+      const c = fixture.componentInstance;
+      expect(c.runningCount()).toBe(2);
+      expect(c.desiredCount()).toBe(3);
+    });
+
+    it('renders explicit Running and Desired labels with counts when not editing', () => {
+      const { fixture } = setup({ desired: 3, running: 1, total: 3 });
+      const text: string = fixture.nativeElement.textContent;
+      expect(text).toContain('Running');
+      expect(text).toContain('Desired');
+      expect(text).toContain('1');
+      expect(text).toContain('3');
+    });
+
+    it('reactively updates when stats change', () => {
+      const { fixture, dataStub } = setup({ desired: 2, running: 0, total: 2 });
+      expect(fixture.componentInstance.runningCount()).toBe(0);
+      dataStub._statsSig.set([{ state: 'RUNNING' }, { state: 'RUNNING' }]);
+      expect(fixture.componentInstance.runningCount()).toBe(2);
+    });
+
+    it('reactively updates desiredCount when app entity changes', () => {
+      const { fixture, dataStub } = setup({ desired: 2 });
+      expect(fixture.componentInstance.desiredCount()).toBe(2);
+      dataStub._appSig.set({ entity: { state: 'STARTED', instances: 5 } });
+      expect(fixture.componentInstance.desiredCount()).toBe(5);
+    });
+
+    it('returns 0 desired when app entity is null', () => {
+      const { fixture, dataStub } = setup();
+      dataStub._appSig.set(null);
+      expect(fixture.componentInstance.desiredCount()).toBe(0);
+    });
+
+    it('returns 0 running when stats are empty', () => {
+      const { fixture, dataStub } = setup();
+      dataStub._statsSig.set([]);
+      expect(fixture.componentInstance.runningCount()).toBe(0);
+    });
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  describe('actions row visibility', () => {
+    it('hides actions when showActions=false', () => {
+      const { fixture } = setup({ showActions: false });
+      const buttons = fixture.nativeElement.querySelectorAll('button');
+      expect(buttons.length).toBe(0);
+    });
+
+    it('renders edit/scaleDown/scaleUp when showActions=true and app is running', () => {
+      const { fixture } = setup({ showActions: true, appState: 'STARTED' });
+      const html: string = fixture.nativeElement.innerHTML;
+      expect(html).toContain('edit');
+      expect(html).toContain('remove_circle_outline');
+      expect(html).toContain('add_circle_outline');
+    });
+
+    it('renders scale buttons when app is stopped (scaling is valid in any state)', () => {
+      // CF accepts scaling a stopped app — it sets the expected instance count,
+      // applied on next start. v4.9.2 wrongly gated these on the app running;
+      // show them whenever the user can edit, running or stopped.
+      const { fixture } = setup({ showActions: true, appState: 'STOPPED' });
+      const html: string = fixture.nativeElement.innerHTML;
+      expect(html).toContain('edit');
+      expect(html).toContain('remove_circle_outline');
+      expect(html).toContain('add_circle_outline');
+    });
+
+    it('hides actions when canEdit is false', () => {
+      const { fixture } = setup({ showActions: true, canEdit: false });
+      const buttons = fixture.nativeElement.querySelectorAll('button');
+      expect(buttons.length).toBe(0);
+    });
+  });
+
+  describe('button disabled state', () => {
+    it('disables scale buttons while loading.app is true', () => {
+      const { fixture } = setup({ showActions: true, loadingApp: true });
+      const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+      expect(buttons.length).toBeGreaterThan(0);
+      for (const b of buttons) {
+        expect(b.disabled).toBe(true);
+      }
+    });
+
+    it('enables scale buttons when not loading', () => {
+      const { fixture } = setup({ showActions: true, loadingApp: false });
+      const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
+      expect(buttons.length).toBeGreaterThan(0);
+      for (const b of buttons) {
+        expect(b.disabled).toBe(false);
+      }
+    });
+  });
+
+  describe('scale actions', () => {
+    it('scaleUp invokes apps.scaleApp with desired+1', () => {
+      const { fixture, appsStub } = setup({ showActions: true, desired: 2 });
+      fixture.componentInstance.scaleUp();
+      expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 3 });
+    });
+
+    it('scaleDown invokes apps.scaleApp with desired-1', () => {
+      const { fixture, appsStub } = setup({ showActions: true, desired: 3 });
+      fixture.componentInstance.scaleDown();
+      expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 2 });
+    });
+
+    it('opens the confirm dialog when scaling to zero', () => {
+      const { fixture, confirmStub, appsStub } = setup({ showActions: true, desired: 1 });
+      fixture.componentInstance.scaleDown();
+      expect(confirmStub.open).toHaveBeenCalled();
+      // confirm stub auto-confirms, so scaleApp also fires
+      expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 0 });
+    });
+
+    it('scaleDown floors at 0 — never requests a negative instance count', () => {
+      const { fixture, appsStub, confirmStub } = setup({ showActions: true, desired: 0 });
+      fixture.componentInstance.scaleDown();
+      // 0 routes through the scale-to-zero confirmation (auto-confirmed by the stub).
+      expect(confirmStub.open).toHaveBeenCalled();
+      expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 0 });
+      // Crucially, it must never request a negative count.
+      for (const call of appsStub.scaleApp.mock.calls) {
+        expect(call[2].instances).toBeGreaterThanOrEqual(0);
+      }
+    });
+
+    it('scaleUp from 0 requests 1', () => {
+      const { fixture, appsStub } = setup({ showActions: true, desired: 0 });
+      fixture.componentInstance.scaleUp();
+      expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 1 });
+    });
+  });
+
+  describe('edit flow', () => {
+    it('edit() sets editValue from desiredCount and switches to editing', () => {
+      const { fixture } = setup({ showActions: true, desired: 4 });
+      fixture.componentInstance.edit();
+      expect(fixture.componentInstance.isEditing).toBe(true);
+      expect(fixture.componentInstance.editValue).toBe(4);
+    });
+
+    it('finishEdit(true) commits the edited value', () => {
+      const { fixture, appsStub } = setup({ showActions: true, desired: 2 });
+      const c = fixture.componentInstance;
+      c.edit();
+      c.editValue = '7';
+      c.finishEdit(true);
+      expect(c.isEditing).toBe(false);
+      expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 7 });
+    });
+
+    it('finishEdit(false) discards the edit', () => {
+      const { fixture, appsStub } = setup({ showActions: true });
+      const c = fixture.componentInstance;
+      c.edit();
+      c.editValue = '99';
+      c.finishEdit(false);
+      expect(c.isEditing).toBe(false);
+      expect(appsStub.scaleApp).not.toHaveBeenCalled();
+    });
   });
 });

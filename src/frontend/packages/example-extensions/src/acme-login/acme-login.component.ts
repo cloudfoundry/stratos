@@ -1,7 +1,5 @@
 import { Component, ViewEncapsulation } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { CustomizationService, CustomizationsMetadata, LoginPageComponent, StratosLoginComponent } from '@stratosui/core';
-import { AppState } from '@stratosui/store';
 
 @StratosLoginComponent()
 @Component({
@@ -16,10 +14,9 @@ export class AcmeLoginComponent extends LoginPageComponent {
   config: CustomizationsMetadata;
 
   constructor(
-    store: Store<AppState>,
     cs: CustomizationService,
   ) {
-    super(store);
+    super();
     this.config = cs.get();
   }
 }

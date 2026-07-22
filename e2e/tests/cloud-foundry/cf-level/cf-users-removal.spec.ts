@@ -76,7 +76,7 @@ test.describe('CF Users Removal', () => {
         await removeOption.click();
 
         // Check if dialog has "remove from all spaces" option
-        const dialog = page.locator('mat-dialog-container');
+        const dialog = page.locator('[role="dialog"]');
         const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
         if (dialogExists) {
@@ -150,7 +150,7 @@ test.describe('CF Users Removal', () => {
         await removeOption.click();
 
         // Check if dialog has "remove from all orgs" option
-        const dialog = page.locator('mat-dialog-container');
+        const dialog = page.locator('[role="dialog"]');
         const dialogExists = await dialog.isVisible({ timeout: 5000 }).catch(() => false);
 
         if (dialogExists) {
@@ -215,7 +215,7 @@ test.describe('CF Users Removal', () => {
       await removeOption.click();
 
       // Verify confirmation dialog appears
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       const dialogExists = await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {
@@ -284,7 +284,7 @@ test.describe('CF Users Removal', () => {
       await removeOption.click();
 
       // Verify confirmation dialog appears
-      const confirmDialog = page.locator('mat-dialog-container');
+      const confirmDialog = page.locator('[role="dialog"]');
       const dialogExists = await confirmDialog.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!dialogExists) {

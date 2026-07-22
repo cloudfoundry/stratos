@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"time"
 
@@ -75,8 +75,8 @@ func (c *Analysis) checkStatus() error {
 		return fmt.Errorf("Failed getting status from Analyzer service: %d", rsp.StatusCode)
 	}
 
-	defer rsp.Body.Close()
-	response, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	response, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		log.Errorf("Could not read response: %v", err)
 		return fmt.Errorf("Could not read response: %v", err)

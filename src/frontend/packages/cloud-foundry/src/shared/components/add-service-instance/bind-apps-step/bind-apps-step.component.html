@@ -13,9 +13,9 @@
       </app-select>
     </app-form-field>
     @if (stepperForm.controls.apps.value) {
-      <div class="stepper-form__params">
+      <div class="pt-5">
         <div>Binding Parameters</div>
-        <app-schema-form [config]="schemaFormConfig" (dataChange)="setBindingParams($event)" (validChange)="setParamValid($event)"></app-schema-form>
+        <app-schema-form [config]="schemaFormConfig()" (dataChange)="setBindingParams($event)" (validChange)="setParamValid($event)"></app-schema-form>
       </div>
     }
   </form>

@@ -1,9 +1,9 @@
 @if ((inviteUserDetails$ | async); as inviteUserDetails) {
-  <app-card class="invite-user-details">
+  <app-card class="mb-3 px-6 py-1.5">
     <app-card-content>
-      <div class="invite-user-details__content">
-        <div class="invite-user-details__text">{{inviteUserDetails.text}}</div>
-        <button class="btn btn-ghost invite-user-details__button"
+      <div class="flex items-baseline">
+        <div class="pr-[5px]">{{inviteUserDetails.text}}</div>
+        <button class="btn btn-ghost"
           (click)="inviteUser(inviteUserDetails.url)">Invite
         Users</button>
       </div>

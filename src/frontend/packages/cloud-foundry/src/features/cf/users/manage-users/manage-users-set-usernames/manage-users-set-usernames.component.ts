@@ -2,11 +2,11 @@ import { Component, OnInit, signal, ChangeDetectionStrategy, inject } from '@ang
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { take, defaultIfEmpty, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
 
 import {
+  AppInputDirective,
   CustomFormFieldComponent,
   PermissionConfig,
   CurrentUserPermissionsService,
@@ -16,14 +16,10 @@ import {
   StackedInputActionsUpdate,
   StepOnNextFunction,
 } from '@stratosui/core';
-import {
-  UsersRolesSetIsRemove,
-  UsersRolesSetIsSetByUsername,
-  UsersRolesSetUsers,
-} from '../../../../../actions/users-roles.actions';
 import { CFFeatureFlagTypes } from '../../../../../cf-api.types';
-import { CFAppState } from '../../../../../cf-app-state';
-import { CfUser } from '../../../../../store/types/cf-user.types';
+import { CfUsersRolesDataService } from '../../../../../services/domain-data/cf-users-roles-data.service';
+import { StUser } from '../../../../../services/endpoint-data/stratos-types';
+import { CfCurrentUserRolesSignalService } from '../../../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfPermissionTypes } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { waitForCFPermissions } from '../../../cf.helpers';
@@ -48,12 +44,13 @@ export class ManageUsersSetUsernamesHelper {
   imports: [
     CommonModule,
     FormsModule,
+    AppInputDirective,
     CustomFormFieldComponent,
     StackedInputActionsComponent
   ]
 })
 export class ManageUsersSetUsernamesComponent implements OnInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private rolesData = inject(CfUsersRolesDataService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
 
@@ -79,20 +76,20 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   public stateIn$: Observable<StackedInputActionsState[]>;
 
   constructor() {
-    const store = this.store;
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+    const cfRoles = inject(CfCurrentUserRolesSignalService);
     const userPerms = inject(CurrentUserPermissionsService);
 
     this.stateIn$ = toObservable(this.stateIn);
     const ffSetPermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username);
     const ffRemovePermConfig = new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.unset_roles_by_username);
-    this.canAdd$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+    this.canAdd$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
       take(1),
       publishReplay(1),
       refCount()
     );
-    this.canRemove$ = waitForCFPermissions(store, activeRouteCfOrgSpace.cfGuid).pipe(
+    this.canRemove$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
       take(1),
       publishReplay(1),
@@ -116,7 +113,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.store.dispatch(new UsersRolesSetIsSetByUsername(true));
+    this.rolesData.setIsSetByUsername(true);
     // When we add username validation the processing state should be used to show validation progress and result
     const processingState: StackedInputActionsState[] = [];
     // Object.keys(this.users.values).forEach(key => {
@@ -134,18 +131,25 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
   }
 
   setIsRemove(event: {source: any, value: boolean}) {
-    this.store.dispatch(new UsersRolesSetIsRemove(event.value));
+    this.rolesData.setIsRemove(event.value);
     this.currentValue = event.value;
   }
 
   onNext: StepOnNextFunction = () => {
-    const users: CfUser[] = Object.values(this.usernames.values).map(username => {
+    // Set-by-username seeds synthetic StUser rows: the username is the real
+    // identity and `guid` is the composite (username/cfGuid/orgGuid) the
+    // executeChanges payload keys off. There's no fetched CF user yet, so the
+    // role buckets / metadata are empty placeholders.
+    const users: StUser[] = Object.values(this.usernames.values).map(username => {
       return {
         username,
-        guid: ManageUsersSetUsernamesHelper.createGuid(username, this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid)
-      } as CfUser;
+        guid: ManageUsersSetUsernamesHelper.createGuid(username, this.activeRouteCfOrgSpace.cfGuid, this.activeRouteCfOrgSpace.orgGuid),
+        cnsiGuid: this.activeRouteCfOrgSpace.cfGuid,
+        orgRoles: [],
+        spaceRoles: [],
+      } as StUser;
     });
-    this.store.dispatch(new UsersRolesSetUsers(this.activeRouteCfOrgSpace.cfGuid, users, this.origin));
+    this.rolesData.setUsers(this.activeRouteCfOrgSpace.cfGuid, users, this.origin);
     return of({
       success: true
     });

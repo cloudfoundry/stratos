@@ -5,8 +5,8 @@
         class="material-icons text-lg"
       [ngClass]="{
         'text-content-muted': booleanOutput.subtle,
-        'text-success-500': booleanOutput.isTrue && !booleanOutput.subtle,
-        'text-danger-500': !booleanOutput.isTrue && !booleanOutput.subtle
+        'text-success-shade-500': booleanOutput.isTrue && !booleanOutput.subtle,
+        'text-danger-shade-500': !booleanOutput.isTrue && !booleanOutput.subtle
       }">
         {{ booleanOutput.icon }}
       </span>

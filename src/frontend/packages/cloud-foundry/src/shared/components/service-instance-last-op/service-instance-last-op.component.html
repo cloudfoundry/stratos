@@ -1,16 +1,16 @@
 @if (serviceInstance.entity.last_operation; as lo) {
-  <div class="last-op" [ngClass]="{ 'align-right': alignRight}">
-    <div class="last-op--row1">
+  <div>
+    <div class="items-center flex pb-[5px]" [ngClass]="alignRight ? 'justify-end' : 'justify-start'">
       {{lo.type | titlecase }}
       @if (lo.state==='in progress') {
-        <app-boolean-indicator class="last-op--item" [isTrue]="true"
+        <app-boolean-indicator [ngClass]="alignRight ? 'pl-[5px] pr-0' : 'pr-[5px]'" [isTrue]="true"
         type="progress-progress" [subtle]="false" [showText]="false"></app-boolean-indicator>
       } @else {
-        <app-boolean-indicator class="last-op--item" [isTrue]="lo.state==='succeeded'" type="yes-no" [subtle]="false"
+        <app-boolean-indicator [ngClass]="alignRight ? 'pl-[5px] pr-0' : 'pr-[5px]'" [isTrue]="lo.state==='succeeded'" type="yes-no" [subtle]="false"
           [showText]="false">
         </app-boolean-indicator>
       }
     </div>
-    <div class="last-op--row2">{{ lo.updated_at | date:'medium' }}</div>
+    <div>{{ lo.updated_at | date:'medium' }}</div>
   </div>
 }

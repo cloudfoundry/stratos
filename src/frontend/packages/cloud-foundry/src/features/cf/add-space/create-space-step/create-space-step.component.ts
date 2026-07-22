@@ -1,18 +1,19 @@
 import { CommonModule } from '@angular/common';
-import { AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal } from '@angular/core';
-import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
+import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, Input } from '@angular/core';
+import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Subscription } from 'rxjs';
-import { filter, map, pairwise } from 'rxjs/operators';
+import { ActivatedRoute, Router } from '@angular/router';
+import { firstValueFrom, from, Observable, Subscription, throwError } from 'rxjs';
+import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { RequestInfoState } from '../../../../../../store/src/reducers/api-request-reducer/types';
-import { CFAppState } from '../../../../cf-app-state';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { SignalStepHandle, StepOnNextFunction, StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { CnsiSpacesSource } from '../../../../services/data-sources/cnsi-spaces-source';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
+import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
 import { AddEditSpaceStepBase } from '../../add-edit-space-step-base';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 
@@ -25,12 +26,13 @@ interface CreateSpaceForm {
 @Component({
   selector: 'app-create-space-step',
   templateUrl: './create-space-step.component.html',
-  styleUrls: ['./create-space-step.component.scss'],
+  host: { class: 'app-host-flex-1' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     ReactiveFormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
@@ -40,14 +42,36 @@ interface CreateSpaceForm {
 })
 export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
+  private router = inject(Router);
+  private http = inject(HttpClient);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
 
   /** See QuotaDefinitionFormComponent for rationale. */
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
 
+  /** FWT-957: post-success navigation target supplied by parent. */
+  @Input() redirectUrl!: string;
+
+  /**
+   * FWT-957: signal-native step handle. Reads validity from validSignal,
+   * dispatches space create, and navigates to the parent-supplied
+   * redirectUrl on success. Replaces legacy onNext + redirect: true.
+   */
+  signalHandle: SignalStepHandle = {
+    valid: this.validSignal.asReadonly(),
+    submit: async () => {
+      const result = await firstValueFrom(this.runCreate());
+      if (!result.success) {
+        throw new Error(result.message ?? 'Failed to create space');
+      }
+      await this.router.navigateByUrl(this.redirectUrl);
+    },
+  };
+
   cfUrl!: string;
   createSpaceForm!: FormGroup<CreateSpaceForm>;
-  quotaSubscription!: Subscription;
+  private injector = inject(Injector);
 
   get spaceName(): FormControl<string> {
     return this.createSpaceForm ? this.createSpaceForm.get('spaceName') as FormControl<string> : new FormControl('', { nonNullable: true });
@@ -65,11 +89,12 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   }
 
   constructor() {
-    const store = inject<Store<CFAppState>>(Store);
     const activatedRoute = inject(ActivatedRoute);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const orgRegistry = inject(OrgDataRegistry);
+    const quotaData = inject(QuotaDataService);
 
-    super(store, activatedRoute, activeRouteCfOrgSpace);
+    super(activatedRoute, activeRouteCfOrgSpace, orgRegistry, quotaData);
   }
 
   ngOnInit() {
@@ -82,41 +107,78 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       () => this.validSignal.set(this.createSpaceForm.valid)
     );
 
-    this.quotaSubscription = this.quotaDefinitions$.subscribe((quotas => {
-      if (quotas.length > 0) {
-        this.createSpaceForm.patchValue({
-          quotaDefinition: 0
-        });
-      }
-    }));
+    // Auto-pick the placeholder ("None") option once the base's quota
+    // signal populates. Guarded so we only patch once — re-patching on
+    // every quota-list re-emit would stomp the user's manual selection.
+    let patched = false;
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        if (patched) return;
+        if (this.quotaDefinitions().length > 0) {
+          patched = true;
+          this.createSpaceForm.patchValue({ quotaDefinition: 0 });
+        }
+      });
+    });
   }
 
-  isNameUnique = (spaceName: string = null) => {
-    return this.allSpacesInOrg ? this.allSpacesInOrg.indexOf(spaceName || this.spaceName.value) === -1 : true;
+  isNameUnique = (spaceName: string | null = null) => {
+    const names = this.allSpacesInOrg();
+    // Signal returns [] before the org-data load completes. Treat as "no
+    // siblings yet, name is OK" so the validator doesn't false-positive
+    // during the initial pass that fires before the form is built.
+    if (!names || names.length === 0) {
+      return true;
+    }
+    return names.indexOf(spaceName || this.spaceName.value) === -1;
   };
 
   validate = () => this.validSignal();
 
-  submit: StepOnNextFunction = () => {
-    const id = `${this.orgGuid}-${this.spaceName.value}`;
+  submit: StepOnNextFunction = () => this.runCreate();
+
+  // Routes the V3-native space create through CnsiSpacesSource so the
+  // new space lands in EndpointDataService._spaces and fires the
+  // space.create cascade — direct http.post bypassed the cache and the
+  // new row didn't appear in the spaces list until a hard reload.
+  // Quota-apply still uses a raw http.post; space_quotas don't have an
+  // EDS cache to patch, so the cascade alone is enough to invalidate
+  // any consumer reading quota_guid off the space.
+  private runCreate(): Observable<StepOnNextResult> {
     const quotaValue = this.quotaDefinition.value;
-    return cfEntityCatalog.space.api.create<RequestInfoState>(id, this.cfGuid, {
-      createSpace: {
-        name: this.spaceName.value,
-        organization_guid: this.orgGuid,
-        space_quota_definition_guid: quotaValue ? String(quotaValue) : undefined as any
-      },
-      orgGuid: this.orgGuid
-    }).pipe(
-      pairwise(),
-      filter(([oldS, newS]) => oldS.creating && !newS.creating),
-      map(([, newS]) => newS),
-      this.map('Failed to create space: ')
+    const quotaGuid = quotaValue ? String(quotaValue) : null;
+    const eds = this.endpointDataRegistry.acquire(this.cfGuid);
+    const source = new CnsiSpacesSource(this.cfGuid, this.http, eds);
+    return from(source.create({
+      name: this.spaceName.value,
+      relationships: { organization: { data: { guid: this.orgGuid } } },
+    })).pipe(
+      // The org's sticky detail cache (summary "Spaces" tile, the
+      // name-unique validator) has no staleness mechanism — patch it
+      // directly so the new space shows without a hard reload.
+      tap(space => this.orgRegistry.peek(this.cfGuid, this.orgGuid)?.applySpaceCreated(space)),
+      switchMap(space => {
+        if (!quotaGuid) {
+          return [space];
+        }
+        return this.http.post(
+          `/pp/v1/cf/space_quotas/${this.cfGuid}/${quotaGuid}/relationships/spaces`,
+          { space_guids: [space.guid] },
+        ).pipe(map(() => space));
+      }),
+      map(() => ({ success: true })),
+      catchError(err => {
+        const message = err?.error?.error || err?.message || `Failed to create space`;
+        return throwError(() => ({ success: false, message } as StepOnNextResult));
+      }),
+      // Convert throwError to a successful emit of the failure result so
+      // the stepper's pipeline can read it without rxjs error semantics.
+      catchError((result: StepOnNextResult) => [result]),
+      tap(() => this.endpointDataRegistry.release(this.cfGuid)),
     );
-  };
+  }
 
   ngOnDestroy() {
-    this.quotaSubscription.unsubscribe();
     this.formStatusSub?.unsubscribe();
     this.destroy();
   }

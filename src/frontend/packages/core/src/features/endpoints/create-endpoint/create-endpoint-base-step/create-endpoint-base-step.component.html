@@ -2,8 +2,8 @@
   <h1>Register Endpoint</h1>
 </app-page-header>
 <app-steppers [cancel]="'/endpoints'">
-  <app-step [hideNextButton]="true">
-    <div class="select-step">
+  <app-step [hideNextButton]="true" [signalHandle]="signalHandle">
+    <div class="w-full">
       <h3>Select the type of the endpoint to register</h3>
       <!--
       <p class="select-step__help">
@@ -12,8 +12,8 @@
         the 'Connecting' process. To do this return to the Endpoints page.
       </p>
     -->
-      <app-tile-selector [options]="tileSelectorConfig$ | async" [dynamicSmallerTiles]="6"
-        (selection)="selectedTile = $event">
+      <app-tile-selector [options]="(tileSelectorConfig$ | async) ?? []" [dynamicSmallerTiles]="6"
+        (selection)="onTileSelected($event)">
       </app-tile-selector>
     </div>
   </app-step>

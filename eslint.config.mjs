@@ -2,15 +2,19 @@
 import eslint from "@eslint/js";
 import tseslint from "typescript-eslint";
 import angular from "angular-eslint";
+import stratos from "./tools/eslint-rules/index.mjs";
+import { E2E_LEGACY_FILES } from "./tools/eslint-rules/e2e-legacy-files.mjs";
 
 export default tseslint.config(
   {
     linterOptions: {
       reportUnusedDisableDirectives: "warn",
     },
+    plugins: { stratos },
   },
   {
     files: ["**/*.ts"],
+    ignores: ["e2e/**"],
     extends: [
       eslint.configs.recommended,
       ...tseslint.configs.recommended,
@@ -61,10 +65,15 @@ export default tseslint.config(
       "no-irregular-whitespace": "warn",
       "no-duplicate-case": "warn",
       "@typescript-eslint/no-unsafe-function-type": "warn",
+
+      // A snackbar service injected but never called is dead weight that
+      // misleads readers about what the component can do (#5603).
+      "stratos/no-unused-snackbar-service": "error",
     },
   },
   {
     files: ["**/*.spec.ts", "**/test-setup.ts"],
+    ignores: ["e2e/**"],
     rules: {
       "@typescript-eslint/no-unused-vars": [
         "warn",
@@ -94,5 +103,32 @@ export default tseslint.config(
       "@angular-eslint/template/label-has-associated-control": "warn",
       "@angular-eslint/template/elements-content": "warn",
     },
-  }
+  },
+  // e2e specs get only the drift guards (#5619), not the app ruleset: the
+  // goal is that DOM drift and can't-fail assertions turn red on the PR
+  // that introduces them.
+  {
+    files: ["e2e/**/*.ts"],
+    languageOptions: {
+      parser: tseslint.parser,
+    },
+    rules: {
+      "stratos/no-dead-material-selectors": "error",
+      "stratos/no-hollow-assertions": "error",
+    },
+  },
+  // Ratchet: files that predate the guards keep their existing violations
+  // until they are modernised; new files and cleaned files gate red.
+  // Remove entries as files are fixed — never add to this list.
+  ...(E2E_LEGACY_FILES.length
+    ? [
+        {
+          files: E2E_LEGACY_FILES,
+          rules: {
+            "stratos/no-dead-material-selectors": "off",
+            "stratos/no-hollow-assertions": "off",
+          },
+        },
+      ]
+    : [])
 );

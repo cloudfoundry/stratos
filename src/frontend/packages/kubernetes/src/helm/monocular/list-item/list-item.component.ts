@@ -23,10 +23,10 @@ import { Chart } from '../shared/models/chart';
 export class ListItemComponent implements OnInit {
 
   @Input() height = 'default';
-  @Input() public artifactHubAndHelmRepoTypes$: Observable<boolean>;
+  @Input() public artifactHubAndHelmRepoTypes$?: Observable<boolean>;
   @Input() chart!: Chart;
 
-  @Input() public detailUrl: string;
+  @Input() public detailUrl!: string; // strict: required @Input, always bound by the parent template
   public showArtifactHub$!: Observable<boolean>;
 
   ngOnInit() {

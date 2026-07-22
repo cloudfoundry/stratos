@@ -12,7 +12,7 @@ function wrapSchema(definition: Schema) {
 
 export class StratosEntitySchema extends schema.Entity {
   constructor(
-    public definition?: Schema
+    public definition: Schema = {}
   ) {
     super('stratosWrappedEntity', wrapSchema(definition));
   }
@@ -27,7 +27,7 @@ export class StratosEntitySchema extends schema.Entity {
  */
 export class EntitySchema extends schema.Entity implements EntityCatalogEntityConfig {
   schema: Schema;
-  schemaKey: string;
+  schemaKey?: string;
   public declare getId: (input: unknown, parent?: unknown, key?: string) => string;
   /**
    * @param entityKey As per schema.Entity ctor

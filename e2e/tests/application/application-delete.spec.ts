@@ -148,7 +148,7 @@ test.describe('Application Delete', () => {
       await page.waitForURL(new RegExp(`/applications/${testApp.cfGuid}/${testApp.app.guid}/(summary|$)`), { timeout: 10000 });
 
       // Verify we're on the app summary page
-      const appPage = page.locator('app-application-page, app-page-header');
+      const appPage = page.locator('app-page-side-nav');
       await expect(appPage).toBeVisible();
     });
 
@@ -167,7 +167,7 @@ test.describe('Application Delete', () => {
       await page.waitForURL(new RegExp(`/applications/${testApp.cfGuid}/[^/]*$`), { timeout: 30000 });
 
       // Verify we're on the applications page
-      const appsPage = page.locator('app-applications-list, app-page-header');
+      const appsPage = page.locator('app-application-wall');
       await expect(appsPage.first()).toBeVisible({ timeout: 15000 });
 
       // Verify app is actually deleted

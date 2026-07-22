@@ -7,12 +7,12 @@ export interface ServiceActionBuilders extends OrchestratedActionBuilders {
   get: (
     guid: string,
     endpointGuid: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetService;
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetAllServices;
   getAllInSpace: (
     endpointGuid: string,

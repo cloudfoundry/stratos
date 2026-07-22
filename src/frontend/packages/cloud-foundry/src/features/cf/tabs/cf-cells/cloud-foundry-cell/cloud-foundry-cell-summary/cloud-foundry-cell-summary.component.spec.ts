@@ -4,7 +4,6 @@ import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/co
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of as observableOf } from 'rxjs';
 
@@ -16,18 +15,9 @@ import {
 import {
   MetricsChartHelpers,
 } from '@stratosui/core';
-import {
-  EntityServiceFactory,
-  MetricQueryConfig,
-  MetricQueryType,
-  appReducers,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogTestModule
-} from '@stratosui/store';
+import { MetricQueryConfig, MetricQueryType, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogTestModule } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { generateCFEntities } from '@test-framework/cf';
-import { FetchCFCellMetricsAction } from '../../../../../../actions/cf-metrics.actions';
 import { ActiveRouteCfCell } from '../../../../cf-page.types';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellSummaryComponent } from './cloud-foundry-cell-summary.component';
@@ -38,7 +28,6 @@ class MockCloudFoundryCellService {
   cellMetric$ = observableOf(null);
 
   healthy$ = observableOf(null);
-  healthyMetricId = null;
   cpus$ = observableOf(null);
 
   usageContainers$ = observableOf(null);
@@ -56,12 +45,13 @@ class MockCloudFoundryCellService {
   buildMetricConfig = (queryString: string, queryRange: MetricQueryType): MetricsConfig<any> => ({
     getSeriesName: (result: any) => `${result}`,
     mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
-    metricsAction: new FetchCFCellMetricsAction(
-      'guid',
-      'cellId',
-      new MetricQueryConfig(queryString, {}),
-      queryRange,
-      ),
+    request: {
+      endpointGuid: 'cfGuid',
+      url: '/pp/v1/metrics/cf/cells',
+      query: new MetricQueryConfig(queryString, {}),
+      queryType: queryRange,
+      windowValue: null,
+    },
   })
   buildChartConfig = (yAxisLabel: string): MetricsLineChartConfig => ({
     chartType: MetricsChartTypes.LINE,
@@ -86,9 +76,6 @@ describe('CloudFoundryCellSummaryComponent', () => {
         provideNoopAnimations(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          }),
           EntityCatalogTestModule
         ),
         {
@@ -98,7 +85,6 @@ describe('CloudFoundryCellSummaryComponent', () => {
             ...generateCFEntities()
           ]
         },
-        EntityServiceFactory,
         {
           provide: CloudFoundryCellService,
           useValue: new MockCloudFoundryCellService(),

@@ -1,15 +1,13 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-
-import { AppState } from '../../../../../store/src/app-state';
-import { EntityServiceFactory } from '../../../../../store/src/entity-service-factory.service';
-import { selectIsMobile } from '../../../../../store/src/selectors/dashboard.selectors';
 import { StratosTabMetadata } from '../../../core/extension/extension-service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { IBreadcrumb } from '../../../shared/components/breadcrumbs/breadcrumbs.types';
 import { TabNavService } from '../../../tab-nav.service';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -34,10 +32,10 @@ export interface IPageSideNavTab extends StratosTabMetadata {
 })
 export class PageSideNavComponent implements OnInit {
   tabNavService = inject(TabNavService);
-  private store = inject<Store<AppState>>(Store);
-  private esf = inject(EntityServiceFactory);
   private activatedRoute = inject(ActivatedRoute);
   private cups = inject(CurrentUserPermissionsService);
+  private http = inject(HttpClient);
+  private dashboardSignals = inject(DashboardSignalService);
 
 
   pTabs: IPageSideNavTab[] = [];
@@ -51,20 +49,22 @@ export class PageSideNavComponent implements OnInit {
     }
     this.pTabs = tabs.map(tab => ({
       ...tab,
-      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.store, this.esf, this.activatedRoute, this.cups) : of(false))
+      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.activatedRoute, this.cups, this.http) : of(false))
     }));
   }
   get tabs(): IPageSideNavTab[] {
     return this.pTabs;
   }
 
+  // Bound from async-piped streams that may emit null/undefined before the
+  // header resolves; interpolation renders those as an empty string.
   @Input()
-  public header!: string;
+  public header: string | null | undefined;
   public activeTab$!: Observable<string>;
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;
   constructor() {
-    this.isMobile$ = this.store.select(selectIsMobile);
+    this.isMobile$ = toObservable(this.dashboardSignals.isMobile);
   }
 
   ngOnInit() {

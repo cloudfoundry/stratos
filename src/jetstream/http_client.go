@@ -3,8 +3,10 @@ package main
 import (
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"net"
 	"net/http"
+	"syscall"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -21,7 +23,6 @@ var (
 	defaultHTTPClientTimeout           int64
 	defaultHTTPClientMutatingTimeout   int64
 	defaultHTTPClientConnectionTimeout int64
-	defaultDialer                      net.Dialer
 )
 
 func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeout int64) {
@@ -78,6 +79,50 @@ func createTransport(tlsConfig *tls.Config) *http.Transport {
 
 func (p *portalProxy) GetHttpClient(skipSSLValidation bool, caCert string) http.Client {
 	return p.getHttpClient(skipSSLValidation, caCert, false)
+}
+
+// guardedDialControl refuses connections to loopback and link-local
+// addresses (link-local covers the 169.254.169.254 cloud metadata
+// endpoint). It runs after DNS resolution on the concrete IP about to be
+// dialed, so a hostname that rebinds to a blocked address is still caught.
+func guardedDialControl(network, address string, _ syscall.RawConn) error {
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		return err
+	}
+	ip := net.ParseIP(host)
+	if ip == nil {
+		return fmt.Errorf("refusing to dial unresolvable address %q", address)
+	}
+	if ip.IsLoopback() || ip.IsLinkLocalUnicast() || ip.IsLinkLocalMulticast() {
+		return fmt.Errorf("refusing to connect to blocked address %s", ip)
+	}
+	return nil
+}
+
+// GetGuardedHttpClient returns an Http Client that refuses to connect to
+// loopback or link-local addresses. Use it wherever the backend fetches a
+// URL supplied by the caller (Kube API cert probe, Helm chart download) so
+// an operator cannot turn the request into SSRF against internal or cloud
+// metadata services. Private (RFC1918) ranges are deliberately allowed —
+// Kubernetes API servers legitimately live there.
+func (p *portalProxy) GetGuardedHttpClient(skipSSLValidation bool) http.Client {
+	dialer := &net.Dialer{
+		Timeout:   time.Duration(defaultHTTPClientConnectionTimeout) * time.Second,
+		KeepAlive: 30 * time.Second,
+		Control:   guardedDialControl,
+	}
+	tr := &http.Transport{
+		Proxy:               http.ProxyFromEnvironment,
+		DialContext:         dialer.DialContext,
+		TLSHandshakeTimeout: 10 * time.Second,
+		TLSClientConfig:     &tls.Config{InsecureSkipVerify: skipSSLValidation},
+		MaxIdleConnsPerHost: 20,
+	}
+	return http.Client{
+		Transport: tr,
+		Timeout:   time.Duration(defaultHTTPClientTimeout) * time.Second,
+	}
 }
 
 // GetHttpClientForRequest returns an Http Client for the giving request

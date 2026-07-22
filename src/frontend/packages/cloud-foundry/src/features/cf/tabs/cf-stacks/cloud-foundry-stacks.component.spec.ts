@@ -3,11 +3,9 @@ import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/co
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import {
-  appReducers,
   TEST_CATALOGUE_ENTITIES,
   generateStratosEntities,
   EntityCatalogTestModule,
@@ -17,7 +15,6 @@ import {
 import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
 import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
-import { CfStacksListConfigService } from '../../../../shared/components/list/list-types/cf-stacks/cf-stacks-list-config.service';
 import { CloudFoundryStacksComponent } from "./cloud-foundry-stacks.component";
 
 describe('CloudFoundryStacksComponent', () => {
@@ -36,9 +33,6 @@ describe('CloudFoundryStacksComponent', () => {
         provideNoopAnimations(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
-          StoreModule.forRoot(appReducers, {
-            runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-          }),
           EntityCatalogTestModule
         ),
         {
@@ -57,7 +51,6 @@ describe('CloudFoundryStacksComponent', () => {
             spaceGuid: testSCFEndpointGuid
           }
         },
-        CfStacksListConfigService,
       ]
     }).compileComponents();
 

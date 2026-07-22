@@ -33,9 +33,11 @@ describe('KubeConfigTableUserSelectComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigTableUserSelectComponent);
     component = fixture.componentInstance;
+    // ngOnInit only reads _user and _users; an intentionally partial cluster
+    // is enough to drive this creation test.
     component.row = {
       _users: []
-    } as KubeConfigFileCluster;
+    } as Partial<KubeConfigFileCluster> as KubeConfigFileCluster;
     fixture.detectChanges();
   });
 

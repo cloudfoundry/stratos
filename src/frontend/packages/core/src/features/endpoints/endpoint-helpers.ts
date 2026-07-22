@@ -1,19 +1,28 @@
 import { Type } from '@angular/core';
-import { Store } from '@ngrx/store';
 import {
-  AppState,
-  EndpointOnlyAppState,
-  endpointEntitiesSelector,
-  endpointsEntityRequestDataSelector,
   EndpointModel,
+  EndpointsDataService,
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { filter, map, take } from 'rxjs/operators';
+import { Observable, defer, from } from 'rxjs';
+import { map, take } from 'rxjs/operators';
 
-import { EndpointListDetailsComponent } from '../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointListDetailsComponent } from '../../shared/components/endpoint-list/endpoint-list.helpers';
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';
+}
+
+// An endpoint is only effectively connected while its stored token is still
+// usable. An expired token must read as Disconnected rather than a broken
+// card — e.g. korifi pasted tokens have no refresh, so every session ends in
+// expiry (#5588). This expiry math now lives in `computeConnectionStatus`
+// (store package, endpoint.types.ts) and is baked into `connectionStatus` at
+// hydration time — the manual token_renewable/token_expiry check that used
+// to live here is redundant with that computed status. Sole caller is the
+// home-page endpoint card's Connect-prompt gate, where treating 'expired'
+// the same as 'disconnected' (i.e. offering Connect) is correct.
+export function isEndpointConnected(endpoint: EndpointModel): boolean {
+  return endpoint.connectionStatus === 'connected';
 }
 
 export const DEFAULT_ENDPOINT_TYPE = 'cf';
@@ -26,18 +35,32 @@ export interface EndpointIcon {
 // Any initial endpointTypes listDetailsComponent should be added here
 export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponent>[] = [];
 
-export function endpointHasMetrics(endpointGuid: string, store: Store<EndpointOnlyAppState>): Observable<boolean> {
-  return store.select(endpointEntitiesSelector).pipe(
-    take(1),
-    map(state => !!state[endpointGuid].metadata && !!state[endpointGuid].metadata.metrics)
+/**
+ * Wave 2 (W36-B): reads endpoint via {@link EndpointsDataService} signal
+ * surface instead of `store.select(endpointEntitiesSelector)`.
+ *
+ * Returns `Observable<boolean>` to preserve consumer signatures (rxjs
+ * pipelines in `app.effects.ts`). The observable defers until the service
+ * has hydrated so callers behave the same as the legacy `take(1)` over a
+ * BehaviorSubject-shaped selector.
+ */
+export function endpointHasMetrics(endpointGuid: string, endpointsService: EndpointsDataService): Observable<boolean> {
+  return defer(() => from(endpointsService.whenReady())).pipe(
+    map(() => {
+      const endpoint = endpointsService.endpoints().get(endpointGuid);
+      return !!endpoint?.metadata && !!endpoint.metadata.metrics;
+    }),
+    take(1)
   );
 }
 
 // There are two different methods for checking if an endpoint has metrics. Need to understand use cases
-export function endpointHasMetricsByAvailable(store: Store<AppState>, endpointId: string): Observable<boolean> {
-  return store.select(endpointsEntityRequestDataSelector(endpointId)).pipe(
-    filter(endpoint => !!endpoint),
-    map(endpoint => endpoint.metricsAvailable),
+export function endpointHasMetricsByAvailable(endpointsService: EndpointsDataService, endpointId: string): Observable<boolean> {
+  return defer(() => from(endpointsService.whenReady())).pipe(
+    map(() => {
+      const endpoint = endpointsService.endpoints().get(endpointId);
+      return !!endpoint && !!endpoint.metricsAvailable;
+    }),
     take(1)
   );
 }

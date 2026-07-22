@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindSnackBarService } from '@stratosui/core';
-import { Store } from '@ngrx/store';
+import { AuthDataService } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
@@ -9,8 +10,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/src/core/perm
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { CFAppState } from '../../../cf-app-state';
+import { CfCurrentUserRolesSignalService } from '../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
@@ -69,7 +69,6 @@ export class UserInviteConfigureService {
     const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
     const obs$ = this.http.post(url, formData).pipe(
       map(_v => {
-        stratosEntityCatalog.systemInfo.api.getSystemInfo();
         return {
           error: false
         };
@@ -98,7 +97,6 @@ export class UserInviteConfigureService {
       const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
       this.http.delete(url).pipe(
         map(_v => {
-          stratosEntityCatalog.systemInfo.api.getSystemInfo();
           return {
             error: false,
             errorMessage: ''
@@ -116,7 +114,7 @@ export class UserInviteConfigureService {
         })
       ).subscribe(res => {
         if (res.error) {
-          this.snackBar.open(res.errorMessage, 'Close');
+          this.snackBar.error(res.errorMessage, 'Close');
         }
       });
     });
@@ -127,7 +125,8 @@ export class UserInviteConfigureService {
   providedIn: 'root'
 })
 export class UserInviteService {
-  private store = inject<Store<CFAppState>>(Store);
+  private authData = inject(AuthDataService);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
   private http = inject(HttpClient);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
@@ -143,16 +142,16 @@ export class UserInviteService {
     this.configured$ = cfEndpointService.endpoint$.pipe(
       filter(v => !!v && !!v.entity),
       // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
-      map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
+      map(v => !!v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
     );
 
     this.canConfigure$ = combineLatest(
-      waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid),
-      this.store.select('auth')
+      waitForCFPermissions(this.cfRoles, this.activeRouteCfOrgSpace.cfGuid),
+      toObservable(this.authData.sessionData)
     ).pipe(
-      map(([cf, auth]) =>
+      map(([cf, sessionData]) =>
         cf.global.isAdmin &&
-        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
+        !!sessionData?.['plugin-config'] && sessionData['plugin-config'].userInvitationsEnabled === 'true')
     );
   }
 
@@ -160,7 +159,7 @@ export class UserInviteService {
 
   canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
     // Can only invite someone to an org or space and user must be admin or org manager
-    return !orgGuid ? observableOf(false) : waitForCFPermissions(this.store, cfGuid).pipe(
+    return !orgGuid ? observableOf(false) : waitForCFPermissions(this.cfRoles, cfGuid).pipe(
       switchMap(() => combineLatest(
         this.configured$,
         this.currentUserPermissionsService.can(
@@ -179,12 +178,10 @@ export class UserInviteService {
     const users: UserInviteSend = {
       org: orgGuid,
       space: spaceGuid,
-      spaceRoles: {
-        [spaceRole]: true
-      },
+      spaceRoles: spaceRole ? { [spaceRole]: true } : {},
       emails
     };
-    return this.http.post(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(
+    return this.http.post<UserInviteResponseUaa>(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(
       map((response: UserInviteResponseUaa) => ({
         error: response.failed_invites.length > 0,
         ...response

@@ -43,16 +43,15 @@ func TestDoOauthFlowRequestWithValidToken(t *testing.T) {
 				return
 			}
 
-			if "/v2/info" != r.URL.Path {
+			if r.URL.Path != "/v2/info" {
 				t.Errorf("Wanted path '/v2/info', got path '%s'", r.URL.Path)
 			}
-			if "GET" != r.Method {
+			if r.Method != "GET" {
 				t.Errorf("Wanted method 'GET', got method '%s'", r.Method)
 			}
 			w.WriteHeader(http.StatusOK)
 			io.WriteString(w, "hi")
 			numReqs++
-			return
 		})) // end of mockCF
 
 		defer mockCF.Close()
@@ -156,16 +155,15 @@ func TestDoOauthFlowRequestWithExpiredToken(t *testing.T) {
 				return
 			}
 
-			if "/v2/info" != r.URL.Path {
+			if r.URL.Path != "/v2/info" {
 				t.Errorf("Wanted path '/v2/info', got path '%s'", r.URL.Path)
 			}
-			if "GET" != r.Method {
+			if r.Method != "GET" {
 				t.Errorf("Wanted method 'GET', got method '%s'", r.Method)
 			}
 			w.WriteHeader(http.StatusOK)
 			io.WriteString(w, "hi")
 			numReqs++
-			return
 		})) // end of mockCF
 
 		// close this explicitly here so we can thread-safely check the bool
@@ -288,16 +286,15 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 				return
 			}
 
-			if "/v2/info" != r.URL.Path {
+			if r.URL.Path != "/v2/info" {
 				t.Errorf("Wanted path '/v2/info', got path '%s'", r.URL.Path)
 			}
-			if "GET" != r.Method {
+			if r.Method != "GET" {
 				t.Errorf("Wanted method 'GET', got method '%s'", r.Method)
 			}
 			w.WriteHeader(http.StatusOK)
 			io.WriteString(w, "hi")
 			numReqs++
-			return
 		})) // end of mockCF
 
 		// do a GET against the CF mock server
@@ -420,16 +417,15 @@ func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
 				return
 			}
 
-			if "/v2/info" != r.URL.Path {
+			if r.URL.Path != "/v2/info" {
 				t.Errorf("Wanted path '/v2/info', got path '%s'", r.URL.Path)
 			}
-			if "GET" != r.Method {
+			if r.Method != "GET" {
 				t.Errorf("Wanted method 'GET', got method '%s'", r.Method)
 			}
 			w.WriteHeader(http.StatusOK)
 			io.WriteString(w, "hi")
 			numReqs++
-			return
 		})) // end of mockCF
 
 		req, _ := http.NewRequest("GET", mockCF.URL+"/v2/info", nil)
@@ -516,16 +512,15 @@ func TestRefreshTokenWithDatabaseErrorOnSave(t *testing.T) {
 				return
 			}
 
-			if "/v2/info" != r.URL.Path {
+			if r.URL.Path != "/v2/info" {
 				t.Errorf("Wanted path '/v2/info', got path '%s'", r.URL.Path)
 			}
-			if "GET" != r.Method {
+			if r.Method != "GET" {
 				t.Errorf("Wanted method 'GET', got method '%s'", r.Method)
 			}
 			w.WriteHeader(http.StatusOK)
 			io.WriteString(w, "hi")
 			numReqs++
-			return
 		})) // end of mockCF
 
 		// do a GET against the CF mock server

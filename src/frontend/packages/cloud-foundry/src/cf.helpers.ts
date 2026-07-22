@@ -8,7 +8,7 @@ export function getStartedAppInstanceCount(apps: APIResource<IApp>[]): number {
   }
   return apps
     .filter(app => app.entity.state === CfApplicationState.STARTED)
-    .map(app => app.entity.instances)
+    .map(app => app.entity.instances ?? 0)
     .reduce((x, sum) => x + sum, 0);
 }
 

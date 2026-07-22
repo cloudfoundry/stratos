@@ -75,6 +75,10 @@ make test              # run all tests
 make test frontend     # frontend tests only (Vitest)
 make test backend      # backend tests only (Go)
 make lint              # check code style
+make audit             # security scan (frontend + backend)
+make audit summary     # high/moderate/low totals only
+make outdated          # list outdated direct deps
+make deps dependabot   # show open dependency PRs (gh)
 make dump version      # show current version info
 ```
 
@@ -92,7 +96,7 @@ Browse [open issues](https://github.com/cloudfoundry/stratos/issues):
 ### 2. Create a Feature Branch
 
 All changes go to feature branches off `develop`. Never push directly to
-`develop` or `master`.
+`develop` or `main`.
 
 ```bash
 git checkout develop
@@ -268,6 +272,25 @@ make release cf           # package for Cloud Foundry
 
 See `docs/build-and-packaging.md` for full details.
 
+### Documentation Booklets
+
+Curated slices of `docs/` also render as offline epub/PDF booklets via
+[Quarto](https://quarto.org) (see `docs-build/README.md`):
+
+```bash
+make build booklets       # render all booklets to dist/booklets/
+```
+
+For a live drafting loop on one booklet, render once, then preview its
+assembled work directory:
+
+```bash
+quarto preview dist/booklets/.work/theming
+```
+
+Booklet chapters are normal `docs/` pages and must pass the docs lint
+(`node scripts/lint-docs.mjs`), which CI enforces.
+
 ---
 
 ## Styling
@@ -352,6 +375,30 @@ Before submitting a PR:
 - [ ] PR description is clear with testing notes
 - [ ] No sensitive data in commits (.env, credentials, keys)
 - [ ] AI usage acknowledged if applicable
+
+---
+
+## Reporting Issues
+
+If you find a problem with Stratos, report it using
+[GitHub issues](https://github.com/cloudfoundry/stratos/issues/new).
+
+Before reporting a new issue, check whether it has already been
+[reported](https://github.com/cloudfoundry/stratos/issues). If it has:
+
+- Read the comments to confirm it's the same issue you're having.
+- Subscribe to the issue rather than adding "+1" comments.
+- Comment only if you can add information not already in the discussion.
+
+When creating a new issue, include:
+
+1. As much detail as possible about your setup/environment
+2. Steps to reproduce the issue
+3. What you expected to happen
+4. What happened instead
+
+If an issue already has an assignee, contact them before starting work on
+it; for unassigned issues, add a comment so work isn't duplicated.
 
 ---
 

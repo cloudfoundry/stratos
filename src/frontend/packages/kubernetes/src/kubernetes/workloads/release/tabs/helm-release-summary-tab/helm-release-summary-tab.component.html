@@ -29,7 +29,7 @@
           Upgrade available: {{ upgrade }}
         </div>
       }
-      <app-entity-summary-title [imagePath]="release.chart.metadata.icon" [title]="release.name"
+      <app-entity-summary-title [imagePath]="release.chart.metadata.icon ?? null" [title]="release.name"
         [subText]="release.chart.metadata.description" [subTitle]="release.chart.metadata.name"
         [fallBackIcon]="'workloads'" [fallBackIconFont]="'stratos-icons'">
         <div class="summary">
@@ -98,8 +98,8 @@
           <div class="flex justify-center">
             <div class="mt-12">
               Updating Resource Information
-              <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden mt-4">
-                <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
+              <div class="progress-bar w-full h-1 bg-content-secondary rounded overflow-hidden mt-4">
+                <div class="progress-bar-fill h-full bg-brand-500 animate-pulse"></div>
               </div>
             </div>
           </div>
@@ -109,8 +109,8 @@
       <div class="flex justify-center">
         <div class="mt-12">
           Loading resources
-          <div class="progress-bar w-full h-1 bg-gray-200 rounded overflow-hidden mt-4">
-            <div class="progress-bar-fill h-full bg-primary-500 animate-pulse"></div>
+          <div class="progress-bar w-full h-1 bg-content-secondary rounded overflow-hidden mt-4">
+            <div class="progress-bar-fill h-full bg-brand-500 animate-pulse"></div>
           </div>
         </div>
       </div>

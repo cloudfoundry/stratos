@@ -17,7 +17,6 @@ export default defineConfig({
       deps: {
         inline: [
           /^@angular\//,  // Force all Angular packages through vitest's transform pipeline
-          /^@ngrx\//,     // Same for NgRx — prevents split module instances of _not_found-chunk
           /^@analogjs\//,
           'ng2-charts',   // Angular-dependent library — must share Angular core instance
         ],
@@ -79,6 +78,6 @@ export default defineConfig({
     ],
   },
   ssr: {
-    noExternal: ['@angular/**', '@analogjs/**', '@ngrx/**', 'ng2-charts']
+    noExternal: ['@angular/**', '@analogjs/**', 'ng2-charts']
   },
 });

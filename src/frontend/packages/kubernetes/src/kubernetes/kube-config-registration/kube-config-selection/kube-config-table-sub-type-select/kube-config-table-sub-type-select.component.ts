@@ -2,7 +2,7 @@ import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/cor
 import { FormsModule } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../core/src/shared/components/signal-list/cell-base';
 import { KubeConfigAuthHelper } from '../../kube-config-auth.helper';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
@@ -21,7 +21,8 @@ selector: 'app-kube-config-table-sub-type-select',
 })
 export class KubeConfigTableSubTypeSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
 
-  selected: string;
+  // strict: assigned in ngOnInit before the template reads it
+  selected!: string;
 
   subTypes: Array<{ id: string; name: string }>;
   private helper = inject(KubeConfigHelper);

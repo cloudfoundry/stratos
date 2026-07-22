@@ -54,7 +54,7 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${guid}`
+      `/pp/v1/cf/org/${endpointGuid}/${guid}`
     );
   }
   actions = [
@@ -79,7 +79,7 @@ export class GetAllOrganizationSpaces extends CFStartAction implements Paginated
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${orgGuid}/spaces`
+      `/pp/v1/cf/org/${endpointGuid}/${orgGuid}/spaces`
     );
     this.parentGuid = orgGuid;
   }
@@ -107,7 +107,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
   constructor(
     public orgGuid: string,
     public endpointGuid: string,
-    public paginationKey: string = null,
+    public paginationKey: string = '',
     public includeRelations: string[] = [],
     public populateMissing = true
   ) {
@@ -117,7 +117,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
     }
     this.options = new HttpRequest(
       'GET',
-      `organizations/${orgGuid}/domains`
+      `/pp/v1/cf/org/${endpointGuid}/${orgGuid}/private_domains`
     );
     this.parentGuid = orgGuid;
   }
@@ -138,7 +138,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
 export class GetAllOrganizations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
-    public endpointGuid: string = null,
+    public endpointGuid?: string,
     public includeRelations: string[] = [],
     public populateMissing = true
   ) {
@@ -197,7 +197,8 @@ export class CreateOrganization extends CFStartAction implements ICFAction {
       'organizations',
       createOrg
     );
-    this.guid = createOrg.name;
+    // strict: create-org payload always carries a name (form validation requires it)
+    this.guid = createOrg.name!;
   }
   actions = getActions('Organizations', 'Create Org');
   entity = [cfEntityFactory(organizationEntityType)];
@@ -235,7 +236,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${guid}/users`
+      `/pp/v1/cf/users/${endpointGuid}`
     );
     // Only admin's can use the url supplied by cf to fetch missing params. These are used by validation and fail for non-admins
     this.skipValidation = !isAdmin;

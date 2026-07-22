@@ -1,14 +1,19 @@
 import { ChangeDetectionStrategy, AfterViewInit,
   Component,
+  effect,
   ElementRef,
   EventEmitter,
   forwardRef,
+  inject,
   Input,
   OnDestroy,
   Output,
   ViewChild,
  } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
+
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
+import { loadMonacoEditor } from '../../../monaco-loader';
 
 declare const monaco: typeof import('monaco-editor');
 
@@ -34,7 +39,7 @@ export interface MonacoEditorOptions {
 @Component({
   selector: 'app-monaco-editor',
   templateUrl: './monaco-editor.component.html',
-  styleUrls: ['./monaco-editor.component.scss'],
+  host: { class: 'block w-full h-full' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
@@ -50,20 +55,46 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
   @Input() options: MonacoEditorOptions = {};
   @Input() model?: MonacoEditorModel;
-  @Output() onInit = new EventEmitter<any>();
+  @Output() editorInit = new EventEmitter<any>();
 
+  private branding = inject(StratosBrandingService);
   private editor: any;
+
+  constructor() {
+    // Monaco's theme is process-global (monaco.editor.setTheme), so one
+    // editor following the app theme re-skins every editor on the page.
+    // Callers that pin options.theme opt out of the sync.
+    effect(() => {
+      const dark = this.branding.isDarkMode();
+      if (!this.editor || this.options.theme || typeof monaco === 'undefined') {
+        return;
+      }
+      monaco.editor.setTheme(dark ? 'vs-dark' : 'vs');
+    });
+  }
   private value = '';
   private onChange: (value: string) => void = () => {};
   private onTouched: () => void = () => {};
   private disabled = false;
   private resizeObserver?: ResizeObserver;
+  private destroyed = false;
 
-  ngAfterViewInit(): void {
+  async ngAfterViewInit(): Promise<void> {
+    try {
+      // Monaco is loaded on demand (not at bootstrap); idempotent across editors
+      await loadMonacoEditor();
+    } catch (error) {
+      console.error('Failed to load Monaco Editor:', error);
+      return;
+    }
+    if (this.destroyed) {
+      return;
+    }
     this.initMonaco();
   }
 
   ngOnDestroy(): void {
+    this.destroyed = true;
     this.destroyEditor();
   }
 
@@ -77,7 +108,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     const editorOptions = {
       value: this.value,
       language: this.model?.language || 'plaintext',
-      theme: this.options.theme || 'vs',
+      theme: this.options.theme || (this.branding.isDarkMode() ? 'vs-dark' : 'vs'),
       automaticLayout: false,
       readOnly: this.disabled,
       ...this.options,
@@ -122,7 +153,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     }
 
     // Emit initialization event
-    this.onInit.emit(this.editor);
+    this.editorInit.emit(this.editor);
   }
 
   private setupResizeObserver(): void {

@@ -1,5 +1,7 @@
+@use 'sass:color';
+
 :host {
-  border: 1px solid #ccc;
+  border: 1px solid oklch(84.522% 0 none);
   display: block;
   padding: 0 12px;
 
@@ -57,8 +59,8 @@
   }
 }
 
-$ph-bg:                   #fff !default;
-$ph-color:                #ced4da !default;
+$ph-bg:                   oklch(100% 0 none) !default;
+$ph-color:                oklch(86.707% 0.0106 247.95) !default;
 $ph-border-radius:        2px !default;
 
 $ph-gutter:               30px !default;
@@ -70,13 +72,21 @@ $ph-animation-duration: 0.8s !default;
 
 .ph-item {
   height: 14px;
-  background-color: #d8d8d8;
+  background-color: oklch(88.224% 0 none);
   overflow: hidden;
   position: relative;
 
+  // Dark theme: the light placeholder bars flash bright on the dark card.
+  // Mirror the dark border treatment above with a subtle light-on-dark fill.
+  :host-context(.dark) & {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+
   &::before {
     animation: phAnimation $ph-animation-duration linear infinite;
-    background: linear-gradient(to right, rgba($ph-bg, 0) 46%, rgba($ph-bg, .35) 50%, rgba($ph-bg, 0) 54%) 50% 50%;
+    /* color.change instead of legacy rgba(): sass rejects non-RGB spaces
+       there, and $ph-bg is OKLCH now. Emits oklch(... / alpha). */
+    background: linear-gradient(to right, color.change($ph-bg, $alpha: 0) 46%, color.change($ph-bg, $alpha: 0.35) 50%, color.change($ph-bg, $alpha: 0) 54%) 50% 50%;
     content: '';
     top: 0;
     right: 0;

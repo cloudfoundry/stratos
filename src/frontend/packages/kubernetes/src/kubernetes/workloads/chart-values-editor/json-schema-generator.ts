@@ -19,7 +19,7 @@ const BUILT_IN_TYPES = [
 
 const toString = ({}).toString;
 
-function isBuiltIn(constructor: Function): boolean {
+function isBuiltIn(constructor: new (...args: any[]) => any): boolean {
   for (const bit of BUILT_IN_TYPES) {
     if (bit === constructor) {
       return true;
@@ -29,7 +29,7 @@ function isBuiltIn(constructor: Function): boolean {
 }
 
 function of(obj: unknown): (new (...args: any[]) => any) | null | undefined {
-  if ((obj === null) || (obj === undefined)) {
+  if (obj == null) {
     return obj as null | undefined;
   } else {
     return (obj as any).constructor as (new (...args: any[]) => any);

@@ -1,6 +1,8 @@
-import { Injectable, signal, Injector, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { StratosStatus, GeneralEntityAppState } from '@stratosui/store';
+import { Injectable, computed, signal, Injector, inject } from '@angular/core';
+import {
+  StratosStatus, GeneralEntityAppState,
+  EndpointsDataService, EndpointErrorEventsService,
+} from '@stratosui/store';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, publishReplay, refCount, startWith } from 'rxjs/operators';
@@ -52,6 +54,13 @@ export interface IGlobalEvent extends IGlobalEventType {
   key: string;
   stratosStatus?: StratosStatus;
   read?: boolean;
+  // Optional structured fields used by signal-published endpoint errors
+  // so the banner / events page can render endpoint identifier as a
+  // title and the error detail as the body. Falls back to the flat
+  // `message` field when these aren't populated (legacy ngrx events).
+  endpointName?: string;
+  endpointId?: string;
+  detail?: string;
 }
 @Injectable({
   providedIn: 'root'
@@ -69,13 +78,70 @@ export class GlobalEventService {
   private _readEvents = signal<Map<string, IGlobalEvent>>(new Map<string, IGlobalEvent>());
   public readEvents = this._readEvents.asReadonly();
 
+  // Endpoint-error banner events, derived from the signal-native
+  // EndpointErrorEventsService (the single source for per-endpoint error
+  // history, fed centrally from the signal data layer). Replaces both the
+  // former imperative publishEndpointErrors/_signalEvents channel and the
+  // ngrx app.module addEventConfig that read internalEventStateSelector.
+  // One event per endpoint with ≥1 backend (5xx) error; links to the
+  // /errors/:id history page.
+  private readonly _endpointErrorEvents = computed<IGlobalEvent[]>(() => {
+    const byEndpoint = this.endpointErrorEvents.eventsByEndpoint();
+    const names = this.endpointsData.endpoints();
+    const events: IGlobalEvent[] = [];
+    byEndpoint.forEach((errs, guid) => {
+      const backendErrors = errs.filter(e => parseInt(e.eventCode, 10) >= 500);
+      if (!backendErrors.length) { return; }
+      const name = names.get(guid)?.name ?? guid;
+      events.push({
+        key: `${endpointEventKey}-${guid}`,
+        message: backendErrors.length > 1
+          ? `There are ${backendErrors.length} errors associated with the endpoint '${name}'`
+          : `There is an error associated with the endpoint '${name}'`,
+        endpointName: name,
+        endpointId: guid,
+        detail: backendErrors[0].message,
+        link: `/errors/${guid}`,
+        type: 'error',
+        stratosStatus: this.eventTypeToStratosStatus('error'),
+      });
+    });
+    return events;
+  });
+
+  // Per-key static events published from signal-driven sources (e.g.
+  // app.module's timeout-session / polling-disabled banners that used to
+  // observe `state.dashboard.*` via ngrx). Each entry is keyed; setting
+  // `null` removes that key. Merged into `events$` alongside the ngrx-
+  // driven and endpoint-error channels.
+  private _staticEvents = signal<ReadonlyMap<string, IGlobalEvent>>(new Map());
+
   public events$: Observable<IGlobalEvent[]>;
-  public priorityType$: Observable<GlobalEventTypes>;
-  public priorityStratosStatus$: Observable<StratosStatus>;
+  public priorityType$: Observable<GlobalEventTypes | null>;
+  public priorityStratosStatus$: Observable<StratosStatus | undefined>;
 
   public addEventConfig<SelectedState, EventState = SelectedState>(event: IGlobalEventConfig<SelectedState, EventState>) {
     this.eventConfigs.push(event);
     this.eventConfigsSubject.next(this.eventConfigs);
+  }
+
+  /**
+   * Publish (or clear) a static global event keyed by `key`. Pass an
+   * `event` to set it, `null` to remove it. Used by app.module to
+   * surface signal-derived warnings (timeout-session disabled, polling
+   * disabled) that previously read from the ngrx `state.dashboard`
+   * slice.
+   */
+  public setStaticEvent(key: string, event: IGlobalEvent | null): void {
+    this._staticEvents.update(current => {
+      const next = new Map(current);
+      if (event) {
+        next.set(key, { ...event, key });
+      } else {
+        next.delete(key);
+      }
+      return next;
+    });
   }
 
   public updateEventReadState(event: IGlobalEvent, read: boolean) {
@@ -96,7 +162,10 @@ export class GlobalEventService {
     );
   }
 
-  public eventTypeToStratosStatus(eventType: GlobalEventTypes) {
+  // The 'complete' event type (and the no-priority null case) has no
+  // associated StratosStatus, so this is genuinely sometimes-absent.
+  // Callers treat the absent case as "no status".
+  public eventTypeToStratosStatus(eventType: GlobalEventTypes | null): StratosStatus | undefined {
     switch (eventType) {
       case ('warning'):
         return StratosStatus.WARNING;
@@ -105,15 +174,32 @@ export class GlobalEventService {
       case ('error'):
         return StratosStatus.ERROR;
       default:
-        return null;
+        return undefined;
     }
   }
 
   // Get the event from the event config and event data.
   private getEvent(eventData: any, config: IGlobalEventConfig<any>, appState: GeneralEntityAppState): IGlobalEvent {
-    const message = typeof config.message === 'function' ? config.message(eventData, appState) : config.message;
-    const link = typeof config.link === 'function' ? config.link(eventData, appState) : config.link;
-    const key = typeof config.key === 'function' ? config.key(eventData, appState) : config.key || config.message;
+    // User-supplied callbacks can crash when eventData is undefined — e.g.
+    // an endpoint-error event whose entity never resolved. Treat any
+    // throw as "no link/message" so the event still emits its key/type
+    // and the row template's `@if (event.link)` guard hides the View
+    // button cleanly.
+    const safe = <T>(fn: () => T, fallback: T): T => {
+      try { return fn(); } catch { return fallback; }
+    };
+    const messageFn = config.message;
+    const linkFn = config.link;
+    const keyFn = config.key;
+    const message = typeof messageFn === 'function'
+      ? safe(() => messageFn(eventData, appState), '')
+      : messageFn;
+    const link = typeof linkFn === 'function'
+      ? safe(() => linkFn(eventData, appState), '')
+      : linkFn;
+    const key = typeof keyFn === 'function'
+      ? safe(() => keyFn(eventData, appState), '')
+      : keyFn || config.message;
     const type = config.type || 'warning';
     return {
       message,
@@ -130,18 +216,23 @@ export class GlobalEventService {
     selectedState: any,
     config: IGlobalEventConfig<any>,
     appState: GeneralEntityAppState
-  ) {
+  ): IGlobalEvent[] {
     if (Array.isArray(eventData)) {
       if (eventData.length) {
         return eventData.map((data) => this.getEvent(data.data || selectedState, config, appState));
       }
+      // Empty trigger array -> no events (previously fell through to
+      // undefined, which callers already coerced via `newEvents && ...`).
+      return [];
     } else {
       return [this.getEvent(eventData.data || selectedState, config, appState)];
     }
   }
 
   // Will get the highest priority event type as dictated by eventTypePriority (0 index is highest priority)
-  private getHighestPriorityEventType(eventTypes: IGlobalEventType[]): GlobalEventTypes {
+  // Returns null when none of the supplied events carry a recognised type
+  // (the accumulator starts empty and may never be assigned).
+  private getHighestPriorityEventType(eventTypes: IGlobalEventType[]): GlobalEventTypes | null {
     return eventTypes.reduce((currentPriority, nextType) => {
       if (
         currentPriority.priority !== 0 &&
@@ -157,7 +248,7 @@ export class GlobalEventService {
         }
       }
       return currentPriority;
-    }, { eventType: null, priority: null } as { eventType: GlobalEventTypes, priority: number }).eventType;
+    }, { eventType: null, priority: null } as { eventType: GlobalEventTypes | null, priority: number | null }).eventType;
   }
 
   // We cache the event results by keying them by the selectedState object.
@@ -198,42 +289,52 @@ export class GlobalEventService {
   }
 
   private getEventsAndPriorityType() {
-    return combineLatest(
-      this.eventConfigsSubject.asObservable().pipe(
-        startWith(this.eventConfigs)
-      ),
-      this.store
-    ).pipe(
+    // The legacy ngrx event-config channel: configs evaluated a `selector`
+    // against the root store state. The store is gone (#5413) and there are
+    // no live `addEventConfig` callers, so `appState` is null — configs (if
+    // ever registered) see what an empty store gave. Live banner events come
+    // from the signal channels (_endpointErrorEvents / _staticEvents).
+    return this.eventConfigsSubject.asObservable().pipe(
+      startWith(this.eventConfigs),
       debounceTime(100),
-      map(([configs, appState]) => {
+      map((configs) => {
+        const appState = null as unknown as GeneralEntityAppState;
         return configs.reduce((eventsAndPriority, config) => {
           const newEvents = this.getNewTriggeredEventsOrCached(config, appState);
           if (newEvents && newEvents.length) {
             const newHighestPriority = this.getHighestPriorityEventType([
-              { type: eventsAndPriority[1] },
+              { type: eventsAndPriority[1] ?? undefined },
               ...newEvents,
             ]);
             eventsAndPriority[0] = [...eventsAndPriority[0], ...newEvents];
             eventsAndPriority[1] = newHighestPriority;
           }
           return eventsAndPriority;
-        }, [[], null] as [IGlobalEvent[], GlobalEventTypes]);
+        }, [[], null] as [IGlobalEvent[], GlobalEventTypes | null]);
       }),
       publishReplay(1),
       refCount(),
     );
   }
 
-  private store = inject(Store<GeneralEntityAppState>);
   private injector = inject(Injector);
+  private endpointErrorEvents = inject(EndpointErrorEventsService);
+  private endpointsData = inject(EndpointsDataService);
 
   constructor() {
+    const endpointErrorEvents$ = toObservable(this._endpointErrorEvents, { injector: this.injector });
+    const staticEvents$ = toObservable(this._staticEvents, { injector: this.injector });
     const eventsAndPriority$ = combineLatest([
       this.getEventsAndPriorityType(),
-      toObservable(this._readEvents, { injector: this.injector })
+      toObservable(this._readEvents, { injector: this.injector }),
+      endpointErrorEvents$,
+      staticEvents$,
     ]).pipe(
-      map(([[events, types], readEvents]) => {
-        // Apply read state. We can't do this in cache as list is recreated on state change
+      map(([[ngrxEvents, types], readEvents, endpointErrors, staticEvents]) => {
+        // Merge ngrx-derived events with the signal-native endpoint-error
+        // events. Apply read state to all so the page-header banner's
+        // dismiss control works the same regardless of source.
+        const events = [...ngrxEvents, ...endpointErrors, ...Array.from(staticEvents.values())];
         events.forEach(event => {
           event.read = !!readEvents.get(event.key);
         });
@@ -248,7 +349,7 @@ export class GlobalEventService {
             });
           }
         });
-        return [events, types] as [IGlobalEvent[], GlobalEventTypes];
+        return [events, types] as [IGlobalEvent[], GlobalEventTypes | null];
       })
     );
 

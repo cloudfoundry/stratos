@@ -33,5 +33,8 @@ func (m *MetricsSpecification) getPodMetrics(c echo.Context) error {
 	// Construct the metadata for proxying
 	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, "", false)
 	responses, err := m.portalProxy.DoProxyRequest(requests)
+	if err != nil {
+		return err
+	}
 	return m.portalProxy.SendProxiedResponse(c, responses)
 }

@@ -14,8 +14,8 @@ beforeEach(() => {
 });
 
 /**
- * Bump up the Jasmine timeout from 5 seconds
+ * Bump up the default test timeout from 5 seconds
  */
 beforeAll(() => {
-  jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
+  vi.setConfig({ testTimeout: 10000 });
 });

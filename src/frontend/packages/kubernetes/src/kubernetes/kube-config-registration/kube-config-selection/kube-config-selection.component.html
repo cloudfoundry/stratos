@@ -1,18 +1,62 @@
-@if ((helper.clusters$ | async) === false) {
+@if ((helper.clusters$ | async)) {
+  <div class="flex-1">
+    <app-signal-list [config]="listConfig">
+      <ng-template appSignalListCell="name" let-row>
+        @if (editRowId() === row._id) {
+          <div class="flex items-center gap-1">
+            <input
+              class="flex-1 min-w-0 px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text"
+              [value]="editRowName()"
+              (click)="$event.stopPropagation()"
+              (input)="editRowName.set($any($event.target).value)"
+              (blur)="saveEdit(row)"
+              (keyup.enter)="saveEdit(row)"
+              (keyup.escape)="cancelEdit()" />
+            <button id="kube-config-name-edit-done" type="button" title="Save"
+              class="inline-flex items-center justify-center p-0.5 text-success hover:text-success/80"
+              (mousedown)="$event.preventDefault()"
+              (click)="$event.stopPropagation(); saveEdit(row)">
+              <span class="material-icons text-base leading-none">done</span>
+            </button>
+            <button id="kube-config-name-edit-cancel" type="button" title="Cancel"
+              class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-content-text"
+              (mousedown)="$event.preventDefault()"
+              (click)="$event.stopPropagation(); cancelEdit()">
+              <span class="material-icons text-base leading-none">clear</span>
+            </button>
+          </div>
+        } @else {
+          <div class="flex items-center gap-1">
+            <span class="flex-1 min-w-0 truncate" [attr.title]="row.name">{{ row.name }}</span>
+            <button type="button" title="Edit name"
+              class="inline-flex items-center justify-center p-0.5 text-content-muted hover:text-accent opacity-60 hover:opacity-100"
+              (click)="$event.stopPropagation(); startEdit(row)">
+              <span class="material-icons text-base leading-none">edit</span>
+            </button>
+          </div>
+        }
+      </ng-template>
+      <ng-template appSignalListCell="type" let-row>
+        <app-kube-config-table-sub-type-select [row]="row"></app-kube-config-table-sub-type-select>
+      </ng-template>
+      <ng-template appSignalListCell="user" let-row>
+        <app-kube-config-table-user-select [row]="row"></app-kube-config-table-user-select>
+      </ng-template>
+      <ng-template appSignalListCell="cert" let-row>
+        <app-kube-config-table-cert [row]="row"></app-kube-config-table-cert>
+      </ng-template>
+    </app-signal-list>
+  </div>
+} @else {
   <div class="flex flex-1 items-center justify-center">
     <div class="text-center">
       <app-custom-icon class="text-[96px] h-24 w-24 opacity-70">insert_drive_file</app-custom-icon>
       <h1 class="text-2xl text-center">Select a Kube Config file to import clusters</h1>
       <div class="kube-config-auth__form">
-        <app-file-input placeholder="kubeconfig" (onFileData)="clustersParse($event)"
+        <app-file-input placeholder="kubeconfig" (fileData)="clustersParse($event)"
           buttonLabel="Select Kube Config file">
         </app-file-input>
       </div>
     </div>
   </div>
-} @else {
-  <div class="flex-1">
-    <app-table [dataSource]="dataSource" [columns]="columns" minRowHeight="57px"></app-table>
-  </div>
 }
-

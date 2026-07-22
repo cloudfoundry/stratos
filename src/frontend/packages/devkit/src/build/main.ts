@@ -16,7 +16,7 @@ const __dirname = dirname(__filename);
  */
 
 class StratosBuilder {
-  constructor(public webpackConfig, public options) {}
+  constructor(public webpackConfig: any, public options: any) {}
 
   public run() {
     const dir = this.webpackConfig.context || __dirname;
@@ -47,7 +47,7 @@ crypto.createHash = (algorithm) =>
   cryptoOrigCreateHash(algorithm == "md4" ? "sha256" : algorithm);
 
 // Apply the Stratos customizations to the webpack configuration
-const runBuilder = (config, options) => {
+const runBuilder = (config: any, options: any) => {
   const builder = new StratosBuilder(config, options);
   builder.run();
   // TODO: also remove with update to webpack v5

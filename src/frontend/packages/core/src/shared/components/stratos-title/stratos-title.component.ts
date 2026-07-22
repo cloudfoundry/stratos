@@ -10,7 +10,6 @@ import { StratosBrandingService } from "../../../../../theme/stratos-branding.se
 @Component({
   selector: "app-stratos-title",
   templateUrl: "./stratos-title.component.html",
-  styleUrls: ["./stratos-title.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [],

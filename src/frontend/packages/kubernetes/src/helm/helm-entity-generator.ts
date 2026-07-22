@@ -1,36 +1,23 @@
-import { Store } from '@ngrx/store';
+import { EnvironmentInjector, Injector, inject, runInInjectionContext } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, of } from 'rxjs';
-import { take, catchError, filter, map } from 'rxjs/operators';
+import { filter, map } from 'rxjs/operators';
+
+import { KubeHelmDataService } from '../services/endpoint-data/kube-helm-data.service';
 
 import { urlValidationExpression } from '../../../core/src/core/utils.service';
-import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
-import { AppState } from '../../../store/src/app-state';
+import { IListAction } from '../../../core/src/shared/components/signal-list/list-action.types';
 import {
   StratosBaseCatalogEntity,
-  StratosCatalogEndpointEntity,
-  StratosCatalogEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
+  StratosCatalogEndpointEntity } from '../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { StratosEndpointExtensionDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../store/src/public-api';
-import { stratosEntityCatalog } from '../../../store/src/stratos-entity-catalog';
-import { IFavoriteMetadata } from '../../../store/src/types/user-favorites.types';
+import { AuthDataService, EndpointModel, EndpointsDataService } from '../../../store/src/public-api';
 import { helmEntityCatalog } from './helm-entity-catalog';
 import {
   HELM_ENDPOINT_TYPE,
   HELM_HUB_ENDPOINT_TYPE,
-  HELM_REPO_ENDPOINT_TYPE,
-  helmEntityFactory,
-  helmVersionsEntityType,
-  monocularChartsEntityType,
-  monocularChartVersionsEntityType } from './helm-entity-factory';
+  HELM_REPO_ENDPOINT_TYPE } from './helm-entity-factory';
 import { HelmHubRegistrationComponent } from './helm-hub-registration/helm-hub-registration.component';
-import {
-  HelmChartActionBuilders,
-  helmChartActionBuilders,
-  HelmChartVersionsActionBuilders,
-  helmChartVersionsActionBuilders,
-  HelmVersionActionBuilders,
-  helmVersionActionBuilders } from './store/helm.action-builders';
-import { HelmVersion, MonocularChart, MonocularVersion } from './store/helm.types';
 
 
 export function generateHelmEntities(): StratosBaseCatalogEntity[] {
@@ -54,15 +41,19 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         unConnectable: true,
         techPreview: false,
         authTypes: [],
-        endpointListActions: (_store: Store<AppState>): IListAction<EndpointModel>[] => {
+        endpointListActions: (
+          endpointsService: EndpointsDataService,
+          injector: EnvironmentInjector,
+        ): IListAction<EndpointModel>[] => {
           return [{
             action: (item: EndpointModel) => {
-              helmEntityCatalog.chart.api.synchronise(item).pipe(
-                catchError((): Observable<null> => of(null)), // Be super safe to ensure we pass the first filter
-                take(1)
-              ).subscribe((res: unknown) => {
-                if (res != null) {
-                  stratosEntityCatalog.endpoint.api.getAll();
+              // Signal-native synchronise (replaces the orphaned `helmSynchronise$`
+              // ngrx effect). Resolve KubeHelmDataService from the injector since
+              // this callback runs outside an injection context.
+              const helmData = runInInjectionContext(injector, () => inject(KubeHelmDataService));
+              void helmData.synchronise(item).then((ok: boolean) => {
+                if (ok) {
+                  void endpointsService.getAll(false);
                 }
               });
             },
@@ -75,7 +66,7 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
           }];
         },
         renderPriority: helmRepoRenderPriority,
-        registeredLimit: null, // Ensure this is null, otherwise inherits parent's value
+        registeredLimit: undefined, // Ensure this is unset (falsy), otherwise inherits parent's value
       },
       {
         type: HELM_HUB_ENDPOINT_TYPE,
@@ -86,18 +77,23 @@ export function generateHelmEntities(): StratosBaseCatalogEntity[] {
         logoUrl: '/kubernetes/assets/custom/helm.svg',
         renderPriority: helmRepoRenderPriority + 1,
         registrationComponent: HelmHubRegistrationComponent,
-        registeredLimit: (store: Store<AppState>): Observable<number> => store.select('auth').pipe(
-          filter(auth => !!auth.sessionData['plugin-config']),
-          map(auth => auth.sessionData['plugin-config'].artifactHubDisabled === 'true' ? 0 : 1),
-        )
+        registeredLimit: (injector: Injector): Observable<number> => {
+          // session-data reads route through AuthDataService (signal-native
+          // facade) resolved off the framework-passed injector.
+          const authData = injector?.get(AuthDataService, null);
+          if (!authData) {
+            return of(1);
+          }
+          return toObservable(authData.sessionData, { injector }).pipe(
+            filter(sessionData => !!sessionData?.['plugin-config']),
+            map(sessionData => sessionData?.['plugin-config']?.artifactHubDisabled === 'true' ? 0 : 1),
+          );
+        }
       },
     ] };
 
   return [
     generateEndpointEntity(endpointDefinition),
-    generateChartEntity(endpointDefinition),
-    generateVersionEntity(endpointDefinition),
-    generateChartVersionsEntity(endpointDefinition),
   ];
 }
 
@@ -107,51 +103,6 @@ function generateEndpointEntity(endpointDefinition: StratosEndpointExtensionDefi
     () => '/monocular',
   );
   return helmEntityCatalog.endpoint;
-}
-
-function generateChartEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: monocularChartsEntityType,
-    schema: helmEntityFactory(monocularChartsEntityType),
-    endpoint: endpointDefinition
-  };
-  helmEntityCatalog.chart = new StratosCatalogEntity<IFavoriteMetadata, MonocularChart, HelmChartActionBuilders>(
-    definition,
-    {
-      actionBuilders: helmChartActionBuilders
-    }
-  );
-  return helmEntityCatalog.chart;
-}
-
-function generateVersionEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: helmVersionsEntityType,
-    schema: helmEntityFactory(helmVersionsEntityType),
-    endpoint: endpointDefinition
-  };
-  helmEntityCatalog.version = new StratosCatalogEntity<IFavoriteMetadata, HelmVersion, HelmVersionActionBuilders>(
-    definition,
-    {
-      actionBuilders: helmVersionActionBuilders
-    }
-  );
-  return helmEntityCatalog.version;
-}
-
-function generateChartVersionsEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: monocularChartVersionsEntityType,
-    schema: helmEntityFactory(monocularChartVersionsEntityType),
-    endpoint: endpointDefinition
-  };
-  helmEntityCatalog.chartVersions = new StratosCatalogEntity<IFavoriteMetadata, MonocularVersion[], HelmChartVersionsActionBuilders>(
-    definition,
-    {
-      actionBuilders: helmChartVersionsActionBuilders
-    }
-  );
-  return helmEntityCatalog.chartVersions;
 }
 
 

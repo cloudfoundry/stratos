@@ -1,33 +1,450 @@
-import { Component , ChangeDetectionStrategy } from '@angular/core';
-import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterModule } from '@angular/router';
+import { combineLatest, map } from 'rxjs';
 
-import { CurrentUserPermissionsService } from '@stratosui/core';
-import { ListConfig, ListComponent, NoContentMessageComponent } from '@stratosui/core';
-import { CFAppState } from '../../../../cf-app-state';
-import { CfUserListConfigService } from '../../../../shared/components/list/list-types/cf-users/cf-user-list-config.service';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import {
+  ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  ListSubNavAction,
+  ListSubNavComponent,
+  SignalListCompoundSegment,
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListDropdown,
+  TailwindDialogService,
+  TailwindSnackBarService,
+} from '@stratosui/core';
 
+import { CfUsersSignalConfigService } from '../../../../shared/signal-list-configs/user/cf-users-signal-config.service';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions.types';
+import type { StUser, StUserOrgRole, StUserSpaceRole } from '../../../../services/endpoint-data/stratos-types';
+import {
+  bulkRemoveUsers,
+  selectedHasSpaceRole,
+  selectedHasAnyRole,
+  RemoveScope,
+  BulkRemoveDeps,
+} from '../../../../shared/signal-list-configs/user/cf-users-bulk-remove';
+import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
+import { UserInviteService } from '../../user-invites/user-invite.service';
+import { AddUserDialogComponent } from '../../users/add-user/add-user-dialog.component';
+
+// Signal-native replacement for the legacy CloudFoundryUsersComponent at
+// /cloud-foundry/:cnsi/users. CNSI-wide — shows every user the CF returns,
+// joined with their org and space role grants by the backend handler.
+//
+// Manage Roles + Remove User wizards are still legacy ngrx (separate
+// route entries under /cloud-foundry/:cnsi/users/manage|remove). Manage
+// Roles is selection-driven via the bulk action (forwards the selected
+// users as ?users=g1,g2,…); the per-row kebab now carries only the two
+// Remove entries, which navigate with ?user={guid} to pre-fill the
+// wizard for that row. The Org Roles + Space Roles columns resolve
+// org/space names via EndpointDataService signals so cells never render
+// raw GUIDs (no_raw_guids feedback rule).
 @Component({
   selector: 'app-cloud-foundry-users',
   templateUrl: './cloud-foundry-users.component.html',
-  providers: [{
-    provide: ListConfig,
-    useFactory: (
-      store: Store<CFAppState>,
-      cfUserService: CfUserService,
-      router: Router,
-      activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-      userPerms: CurrentUserPermissionsService,
-    ) => new CfUserListConfigService(store, cfUserService, router, activeRouteCfOrgSpace, userPerms),
-    deps: [Store, CfUserService, Router, ActiveRouteCfOrgSpace, CurrentUserPermissionsService]
-  }],
+  host: { class: 'app-host-fill' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    ListComponent,
-    NoContentMessageComponent
-  ]
+    CommonModule,
+    RouterModule,
+    ListSubNavComponent,
+    SignalListComponent,
+  ],
 })
-export class CloudFoundryUsersComponent { }
+export class CloudFoundryUsersComponent {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  private usersConfig = inject(CfUsersSignalConfigService);
+  private router = inject(Router);
+  private readonly perms = inject(CurrentUserPermissionsService);
+  private readonly rolesData = inject(CfUsersRolesDataService);
+  private readonly confirmDialog = inject(ConfirmationDialogService);
+  private readonly snackBar = inject(TailwindSnackBarService);
+  private readonly dialog = inject(TailwindDialogService);
+  private readonly userInviteService = inject(UserInviteService);
+
+  public listConfig: WritableSignal<SignalListConfig<StUser> | undefined> = signal(undefined);
+
+  // Bulk-selection state for the checkbox column. Holds the set of selected
+  // row keys (`${cnsiGuid}:${guid}`, per getRowKey). The "Manage Roles" bulk
+  // action reads this, resolves keys → user GUIDs, and navigates to the
+  // manage-users wizard with ?users=g1,g2,… then clears the set.
+  private readonly _selectedUserKeys: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
+  readonly selectedUserKeys: Signal<ReadonlySet<string>> = this._selectedUserKeys.asReadonly();
+
+  /** Reactive count for the L5 sub-nav. Wired in the constructor — the
+   *  underlying `usersConfig.view` is built by initialize() and isn't
+   *  available at field-initializer time. */
+  readonly totalUsers!: Signal<number>;
+
+  /** Action buttons surfaced in the always-visible ListSubNavComponent
+   *  "Total Users" bar. Prepended Add User + Manage Roles (primary) +
+   *  two destructive Remove entries. disabled/invoke semantics are
+   *  identical — only the rendering host has changed. */
+  protected readonly subNavActions: readonly ListSubNavAction[] = [
+    {
+      label: 'Add User',
+      icon: 'person_add',
+      variant: 'default',
+      dataTest: 'cf-users-add',
+      visible: computed(() => this.canManageRoles()),
+      disabled: computed(() => !this.canManageRoles()),
+      invoke: () => this.openAddUser(),
+    },
+    {
+      label: 'Manage Roles',
+      variant: 'primary',
+      icon: 'group',
+      dataTest: 'cf-users-bulk-manage-roles',
+      disabled: computed(() => this._selectedUserKeys().size === 0 || !this.canManageRoles()),
+      disabledReason: 'Select one or more users to manage roles',
+      invoke: () => this.bulkManageRoles(this._selectedUserKeys(), ['/cloud-foundry', this.cfGuid, 'users', 'manage']),
+    },
+    {
+      label: 'Remove from Spaces',
+      variant: 'destructive',
+      icon: 'remove_circle_outline',
+      dataTest: 'cf-users-bulk-remove-spaces',
+      disabled: computed(() => !this.canManageRoles() || !selectedHasSpaceRole(this.selectedUsers())),
+      disabledReason: 'Select one or more users with space roles to remove',
+      invoke: () => {
+        const n = this.selectedUsers().length;
+        this.bulkRemove('spaces', 'Remove from Spaces', `Remove ${n} selected ${n === 1 ? 'user' : 'users'} from all their space roles? This cannot be undone.`);
+      },
+    },
+    {
+      label: 'Remove from Org and Spaces',
+      variant: 'destructive',
+      icon: 'remove_circle',
+      dataTest: 'cf-users-bulk-remove-org-spaces',
+      disabled: computed(() => !this.canManageRoles() || !selectedHasAnyRole(this.selectedUsers())),
+      disabledReason: 'Select one or more users with roles to remove',
+      invoke: () => {
+        const n = this.selectedUsers().length;
+        this.bulkRemove('orgAndSpaces', 'Remove from Org and Spaces', `Remove ${n} selected ${n === 1 ? 'user' : 'users'} from all their org and space roles? This cannot be undone.`);
+      },
+    },
+  ];
+
+  /** Reactive selection count for the sub-nav "N selected · Clear" indicator. */
+  protected readonly selectedCount: Signal<number> = computed(() => this._selectedUserKeys().size);
+
+  /** Clears the user selection — bound to the sub-nav Clear button. */
+  protected readonly clearSelection = (): void => { this._selectedUserKeys.set(new Set<string>()); };
+
+  /** Opens the Add User dialog scoped to this CF endpoint (no org/space lock —
+   *  the dialog shows a full org picker). */
+  protected openAddUser(): void {
+    this.dialog.open(AddUserDialogComponent, {
+      ariaLabelledBy: 'add-user-dialog-title',
+      data: {
+        cfGuid: this.cfGuid,
+        userInviteAllowed: this.userInviteAllowed(),
+      },
+      width: '640px',
+    });
+  }
+
+  /** True when the current user holds org or space role-change rights on
+   *  this endpoint. Admin satisfies both checks; non-admin must have the
+   *  specific permission in at least one org or space. Bridges the
+   *  Observable from CurrentUserPermissionsService into a signal via
+   *  toSignal; initialValue: false keeps the action safely disabled until
+   *  the first emission resolves. Field initializer (injection context) —
+   *  needs only perms + the endpoint guid, no usersConfig.initialize(). */
+  private readonly canManageRoles: Signal<boolean> = toSignal(
+    combineLatest([
+      this.perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfEndpointService.cfGuid),
+      this.perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfEndpointService.cfGuid),
+    ]).pipe(map(([org, space]) => org || space)),
+    { initialValue: false },
+  );
+
+  /** True when the CF endpoint has the UAA invite feature configured.
+   *  Bridges UserInviteService.configured$ into a signal; false until the
+   *  first emission so the invite tab stays absent until resolved. */
+  private readonly userInviteAllowed: Signal<boolean> = toSignal(
+    this.userInviteService.configured$,
+    { initialValue: false },
+  );
+
+  /** Resolves the selected row keys against the full filtered list to yield
+   *  the concrete StUser objects. Used by the bulk Remove actions to pass
+   *  actual role data to the orchestrator without re-fetching. computed() is
+   *  lazy, so reading _selectedUserKeys / usersConfig here is safe at field
+   *  init — the body only runs when the signal is first evaluated. */
+  private readonly selectedUsers: Signal<StUser[]> = computed(() => {
+    const keys = this._selectedUserKeys();
+    if (keys.size === 0) return [];
+    return this.usersConfig.view.filteredItems().filter(u => keys.has(`${u.cnsiGuid}:${u.guid}`));
+  });
+
+  private readonly cfGuid: string;
+
+  constructor() {
+    const cfGuid = this.cfEndpointService.cfGuid;
+    this.cfGuid = cfGuid;
+    this.usersConfig.initialize(cfGuid);
+    (this as { totalUsers: Signal<number> }).totalUsers = this.usersConfig.view.totalItems;
+    // Cell renderers. Each role-bucket cell resolves org/space names via
+    // the config service's lookup signals (which read EndpointDataService
+    // orgs() / spaces() — populated by the home-page parallelization
+    // cache as a side-effect of loadDetails()). Empty buckets render '—'
+    // to match the legacy "no roles" presentation.
+    const renderUsername = (u: StUser): string =>
+      u.username && u.username.length > 0 ? u.username : (u.presentationName ?? u.guid);
+
+    const renderOrigin = (u: StUser): string =>
+      u.origin && u.origin.length > 0 ? u.origin : '—';
+
+    const renderOrgRoles = (u: StUser): string => {
+      const roles = u.orgRoles ?? [];
+      if (roles.length === 0) return '—';
+      return roles.map(r => `${this.orgLabel(r)}: ${(r.roles ?? []).join(', ')}`).join('  •  ');
+    };
+
+    const compoundOrgRoles = (u: StUser): SignalListCompoundSegment[] => {
+      const roles = u.orgRoles ?? [];
+      if (roles.length === 0) return [{ text: '—' }];
+      const out: SignalListCompoundSegment[] = [];
+      for (const r of roles) {
+        const orgName = this.usersConfig.orgNameByGuid().get(r.orgGuid);
+        const labelText = `${orgName ?? this.shortGuid(r.orgGuid)}: ${(r.roles ?? []).join(', ')}`;
+        // Link target is guid-based, so link from the first render rather than
+        // waiting for the org name to resolve — the text upgrades guid → name
+        // reactively when the org map loads.
+        if (r.orgGuid) {
+          out.push({
+            text: labelText,
+            link: ['/cloud-foundry', u.cnsiGuid, 'organizations', r.orgGuid],
+          });
+        } else {
+          out.push({ text: labelText });
+        }
+      }
+      return out;
+    };
+
+    const renderSpaceRoles = (u: StUser): string => {
+      const roles = u.spaceRoles ?? [];
+      if (roles.length === 0) return '—';
+      return roles.map(r => `${this.spaceLabel(r)}: ${(r.roles ?? []).join(', ')}`).join('  •  ');
+    };
+
+    const compoundSpaceRoles = (u: StUser): SignalListCompoundSegment[] => {
+      const roles = u.spaceRoles ?? [];
+      if (roles.length === 0) return [{ text: '—' }];
+      const out: SignalListCompoundSegment[] = [];
+      for (const r of roles) {
+        // Prefer the space name carried in the role payload (include=space) so
+        // it shows immediately; fall back to the endpoint-data map.
+        const spaceName = r.spaceName ?? this.usersConfig.spaceNameByGuid().get(r.spaceGuid);
+        const orgName = r.orgGuid ? this.usersConfig.orgNameByGuid().get(r.orgGuid) : undefined;
+        const display = spaceName
+          ? (orgName ? `${orgName} / ${spaceName}` : spaceName)
+          : this.shortGuid(r.spaceGuid);
+        const labelText = `${display}: ${(r.roles ?? []).join(', ')}`;
+        // Link target is guid-based — link from the first render rather than
+        // gating on name resolution; the label upgrades reactively.
+        if (r.orgGuid && r.spaceGuid) {
+          out.push({
+            text: labelText,
+            link: ['/cloud-foundry', u.cnsiGuid, 'organizations', r.orgGuid, 'spaces', r.spaceGuid],
+          });
+        } else {
+          out.push({ text: labelText });
+        }
+      }
+      return out;
+    };
+
+    const renderCreated = (u: StUser): string =>
+      CloudFoundryUsersComponent.formatDate(u.createdAt);
+
+    this.listConfig.set({
+      pagedItems: this.usersConfig.view.pagedItems,
+      totalFilteredResults: this.usersConfig.view.totalFilteredResults,
+      totalPages: this.usersConfig.view.totalPages,
+      pageIndex: this.usersConfig.pageIndex,
+      pageSize: this.usersConfig.pageSize,
+      isAnyLoading: computed(() => !this.usersConfig.hasLoadedOnce()),
+      errorsByCnsi: signal(new Map()),
+      columns: [
+        this.buildSelectColumn(),
+        {
+          header: 'Username', key: 'username', sortField: 'username',
+          kind: 'text',
+          render: renderUsername,
+          widthHint: '16rem',
+        },
+        {
+          header: 'Origin', key: 'origin', sortField: renderOrigin,
+          kind: 'text',
+          render: renderOrigin,
+          widthHint: '8rem',
+        },
+        {
+          header: 'Org Roles', key: 'orgRoles', sortField: renderOrgRoles,
+          kind: 'compound',
+          compound: compoundOrgRoles,
+          render: renderOrgRoles,
+          widthHint: '20rem',
+          // Cap visible org-role segments. A handful of orgs is the
+          // common case; the cap protects the row height from operators
+          // that hold roles in dozens of orgs (admin accounts on busy
+          // CFs). Click "…and N more orgs" to expand.
+          maxVisible: 5,
+          collapsedLabel: (n: number) => `…and ${n} more orgs`,
+        },
+        {
+          header: 'Space Roles', key: 'spaceRoles', sortField: renderSpaceRoles,
+          kind: 'compound',
+          compound: compoundSpaceRoles,
+          render: renderSpaceRoles,
+          widthHint: '22rem',
+          // Cap visible space-role segments. The motivating case: admin
+          // user with 2507 space role grants overflowed the row visually
+          // and pushed the Username out of viewport (see
+          // project_signallist_row_overflow.md). 5 keeps typical operator
+          // rows compact and gives a clear "…and N more spaces" link to
+          // see the rest.
+          maxVisible: 5,
+          collapsedLabel: (n: number) => `…and ${n} more spaces`,
+        },
+        {
+          header: 'Created', key: 'createdAt', sortField: 'createdAt',
+          render: renderCreated,
+          widthHint: '12rem',
+        },
+      ],
+      getRowKey: (u: StUser) => `${u.cnsiGuid}:${u.guid}`,
+      emptyMessage: 'There are no users in this Cloud Foundry',
+      emptyFilterMessage: 'No users match the current filters',
+      loadingMessage: 'Loading users…',
+      pageSizeOptions: {
+        table: [10, 25, 50, 100],
+        card: [6, 12, 24, 48, 96],
+      },
+      nameFilter: this.usersConfig.nameFilter,
+      filterDropdowns: [
+        {
+          label: 'Organization',
+          options: this.usersConfig.orgOptions,
+          selected: this.usersConfig.selectedOrg,
+          loading: this.usersConfig.isLoadingOrgs,
+        },
+        {
+          label: 'Space',
+          options: this.usersConfig.spaceOptions,
+          selected: this.usersConfig.selectedSpace,
+          loading: this.usersConfig.isLoadingSpaces,
+        },
+      ] as SignalListDropdown[],
+      onRefresh: () => this.usersConfig.refresh(),
+      onClear: () => this.usersConfig.clearFilters(),
+      viewMode: this.usersConfig.viewMode,
+      sort: this.usersConfig.sort,
+    });
+
+    this.usersConfig.registerSortExtractor('origin', renderOrigin);
+    this.usersConfig.registerSortExtractor('orgRoles', renderOrgRoles);
+    this.usersConfig.registerSortExtractor('spaceRoles', renderSpaceRoles);
+  }
+
+  // Leading checkbox column for bulk selection. selectAll selects every
+  // FILTERED row (across pages, not just the current page) when not all are
+  // already selected, else clears — mirroring the legacy
+  // dataSource.selectAllFilteredRows() affordance.
+  private buildSelectColumn(): SignalListColumn<StUser> {
+    return {
+      header: '', key: 'select', kind: 'checkbox',
+      render: () => '',
+      widthHint: '3rem',
+      checkbox: {
+        selectedKeys: this._selectedUserKeys,
+        selectAll: {
+          selectableCount: () => this.usersConfig.view.totalFilteredResults(),
+          onToggle: () => this.toggleSelectAllFiltered(),
+        },
+      },
+    };
+  }
+
+  // Select-all-filtered toggle: if every filtered row is already selected,
+  // clear; otherwise add all filtered rows' keys to the selection.
+  private toggleSelectAllFiltered(): void {
+    const filtered = this.usersConfig.view.filteredItems();
+    const allKeys = filtered.map(u => `${u.cnsiGuid}:${u.guid}`);
+    const current = this._selectedUserKeys();
+    const allSelected = allKeys.length > 0 && allKeys.every(k => current.has(k));
+    this._selectedUserKeys.set(allSelected ? new Set<string>() : new Set(allKeys));
+  }
+
+  // Bulk Manage Roles: resolve selected row keys (`${cnsiGuid}:${guid}`) to
+  // user GUIDs and navigate to the manage-users wizard with ?users=g1,g2,…
+  // (the wizard parses the comma-separated list itself — no ngrx dispatch).
+  // Clears the selection afterward so the bar collapses on return.
+  private bulkManageRoles(keys: ReadonlySet<string>, manageUrl: readonly string[]): void {
+    const guids = Array.from(keys).map(k => k.split(':')[1]).filter(Boolean);
+    if (guids.length === 0) return;
+    void this.router.navigate([...manageUrl], { queryParams: { users: guids.join(',') } });
+    this._selectedUserKeys.set(new Set<string>());
+  }
+
+  private removeDeps(): BulkRemoveDeps {
+    return {
+      rolesData: this.rolesData,
+      userPerms: this.perms,
+      confirmDialog: this.confirmDialog,
+      snackBar: this.snackBar,
+      cfGuid: this.cfGuid,
+    };
+  }
+
+  private async bulkRemove(scope: RemoveScope, title: string, message: string): Promise<void> {
+    await bulkRemoveUsers(this.removeDeps(), {
+      users: this.selectedUsers(),
+      opts: { scope, orgNameByGuid: this.usersConfig.orgNameByGuid(), spaceNameByGuid: this.usersConfig.spaceNameByGuid() },
+      title, message,
+      onComplete: () => this._selectedUserKeys.set(new Set<string>()),
+    });
+  }
+
+  // Resolves an org-role bucket's display label. Used by the plain-text
+  // render path (sort + accessibility) — the compound path does its own
+  // segment composition with link wiring.
+  private orgLabel(r: StUserOrgRole): string {
+    return this.usersConfig.orgNameByGuid().get(r.orgGuid) ?? this.shortGuid(r.orgGuid);
+  }
+
+  private spaceLabel(r: StUserSpaceRole): string {
+    const spaceName = r.spaceName ?? this.usersConfig.spaceNameByGuid().get(r.spaceGuid);
+    if (!spaceName) return this.shortGuid(r.spaceGuid);
+    const orgName = r.orgGuid ? this.usersConfig.orgNameByGuid().get(r.orgGuid) : undefined;
+    return orgName ? `${orgName} / ${spaceName}` : spaceName;
+  }
+
+  // GUID short-form for the rare case where a role references an org/space
+  // we haven't yet resolved a name for. Eight-char prefix is enough to
+  // disambiguate; full GUIDs in cells violate the no_raw_guids rule.
+  private shortGuid(guid: string): string {
+    if (!guid) return '—';
+    return guid.length > 8 ? `${guid.slice(0, 8)}…` : guid;
+  }
+
+  static formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    });
+  }
+}

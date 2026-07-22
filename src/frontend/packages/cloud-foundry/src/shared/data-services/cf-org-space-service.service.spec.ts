@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
@@ -19,6 +19,48 @@ import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/t
 import { generateCFEntities } from '../../cf-entity-generator';
 import { IOrganization, ISpace } from '../../cf-api.types';
 import { CfOrgSpaceDataService } from './cf-org-space-service.service';
+import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
+import type { StOrg, StSpace } from '../../services/endpoint-data/stratos-types';
+
+/**
+ * Fake EndpointDataRegistry for spec scenarios that need to drive
+ * orgs/spaces data into the picker without booting the real
+ * registry + drain stack. Each `acquire(cnsi)` returns a per-cnsi
+ * stub EDS whose `orgs` / `spaces` / loading flags are WritableSignals
+ * the test can mutate to simulate the drain landing.
+ */
+interface FakeEDS {
+  orgs: WritableSignal<StOrg[]>;
+  spaces: WritableSignal<StSpace[]>;
+  isLoadingOrgs: WritableSignal<boolean>;
+  isLoadingSpaces: WritableSignal<boolean>;
+}
+
+function makeFakeRegistry() {
+  const byCnsi = new Map<string, FakeEDS>();
+  const get = (cnsi: string): FakeEDS => {
+    let eds = byCnsi.get(cnsi);
+    if (!eds) {
+      eds = {
+        orgs: signal<StOrg[]>([]),
+        spaces: signal<StSpace[]>([]),
+        isLoadingOrgs: signal(false),
+        isLoadingSpaces: signal(false),
+      };
+      byCnsi.set(cnsi, eds);
+    }
+    return eds;
+  };
+  return {
+    acquire: (cnsi: string) => get(cnsi),
+    release: (_cnsi: string) => { /* no-op */ },
+    setOrgs: (cnsi: string, orgs: { guid: string; name: string }[]) =>
+      get(cnsi).orgs.set(orgs as StOrg[]),
+    setSpaces: (cnsi: string, spaces: { guid: string; name: string; orgGuid: string }[]) =>
+      get(cnsi).spaces.set(spaces as StSpace[]),
+  };
+}
+type FakeRegistry = ReturnType<typeof makeFakeRegistry>;
 
 /**
  * Helper to build an APIResource<IOrganization> with spaces for testing.
@@ -404,5 +446,324 @@ describe('FWT-917 auto-selector loading gate', () => {
       pagination$.next({ currentPage: 1, pageRequests: { 1: { busy: false } } });
       expect(results).toHaveLength(1);
     });
+  });
+});
+
+/**
+ * V3-native data sourcing via EndpointDataService.
+ *
+ * Org/space data is sourced from the per-CNSI EndpointDataService handle
+ * the picker acquires through EndpointDataRegistry on CF selection. The
+ * registry-driven drain (used by home cards / walls) already hydrates
+ * orgs/spaces; the picker just reads off the cached signals. Tests drive
+ * a FakeRegistry stub directly — no HTTP traffic, no real drain — and
+ * mutate the per-CNSI orgs/spaces signals to simulate the drain landing.
+ *
+ * Replaces the prior HTTP-driven coverage of the v3 `/pp/v1/cf/orgs/...`
+ * and `/pp/v1/cf/org/.../spaces` handlers, which moved out of the
+ * picker when CfOrgSpaceDataService stopped issuing its own fetches.
+ */
+describe('V3-native org sourcing', () => {
+
+  let fakeRegistry: FakeRegistry;
+
+  beforeEach(() => {
+    fakeRegistry = makeFakeRegistry();
+    TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
+      providers: [
+        CfOrgSpaceDataService,
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ],
+        },
+        { provide: EndpointDataRegistry, useValue: fakeRegistry },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  it('acquires an EndpointDataService for the selected cnsi', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+    const spy = vi.spyOn(fakeRegistry, 'acquire');
+
+    service.cf.select.set('cf-A');
+    TestBed.tick();
+
+    expect(spy).toHaveBeenCalledWith('cf-A');
+  });
+
+  it('populates the orgList signal from the EDS orgs signal', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    service.cf.select.set('cf-A');
+    TestBed.tick();
+
+    fakeRegistry.setOrgs('cf-A', [
+      { guid: 'org-1', name: 'alpha' },
+      { guid: 'org-2', name: 'bravo' },
+    ]);
+    TestBed.tick();
+
+    expect(service.orgList().map(o => o.guid)).toEqual(['org-1', 'org-2']);
+  });
+
+  /**
+   * Regression guard: duplicate-URL endpoint collision.
+   *
+   * Three CF endpoints share the same api_url. The old v2 ngrx
+   * cross-endpoint pagination collapsed entities by GUID across the
+   * three responses and stamped all of them with one winner cfGuid,
+   * causing the downstream filter (entity.cfGuid === selectedCF) to
+   * drop most orgs. The EDS-per-CNSI path is keyed by cnsi guid, so
+   * each endpoint's orgs are independently held even when they share
+   * GUIDs across endpoints — orgList must scope to the selected cnsi.
+   */
+  it('scopes orgList to the selected cnsi even with duplicate-URL endpoints', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    fakeRegistry.setOrgs('cf-A', [{ guid: 'shared-org-1', name: 'org-on-A' }]);
+    fakeRegistry.setOrgs('cf-B', [{ guid: 'shared-org-1', name: 'org-on-B' }]);
+
+    service.cf.select.set('cf-A');
+    TestBed.tick();
+    expect(service.orgList().map(o => o.name)).toEqual(['org-on-A']);
+
+    service.cf.select.set('cf-B');
+    TestBed.tick();
+    expect(service.orgList().map(o => o.name)).toEqual(['org-on-B']);
+  });
+
+  it('cascade-clears orgSelected and spaceSelected when cfSelected changes', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    service.cf.select.set('cf-A');
+    service.org.select.set('org-1');
+    service.space.select.set('space-1');
+    TestBed.tick();
+
+    service.cf.select.set('cf-B');
+    TestBed.tick();
+
+    expect(service.org.select()).toBeFalsy();
+    expect(service.space.select()).toBeFalsy();
+  });
+
+});
+
+/**
+ * V3-native space sourcing via EndpointDataService.
+ *
+ * Spaces are filtered out of the per-CNSI EDS spaces signal by orgGuid
+ * once an org is selected. Same structural cure as orgs — no
+ * cross-endpoint fan-out, no duplicate-URL collision.
+ */
+describe('V3-native space sourcing', () => {
+
+  let fakeRegistry: FakeRegistry;
+
+  beforeEach(() => {
+    fakeRegistry = makeFakeRegistry();
+    TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
+      providers: [
+        CfOrgSpaceDataService,
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ],
+        },
+        { provide: EndpointDataRegistry, useValue: fakeRegistry },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  it('populates the spaceList signal from the EDS spaces signal filtered by orgGuid', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    fakeRegistry.setOrgs('cf-A', [{ guid: 'org-1', name: 'alpha' }]);
+    fakeRegistry.setSpaces('cf-A', [
+      { guid: 'space-a', name: 'development', orgGuid: 'org-1' },
+      { guid: 'space-b', name: 'production', orgGuid: 'org-1' },
+    ]);
+
+    service.cf.select.set('cf-A');
+    service.org.select.set('org-1');
+    TestBed.tick();
+
+    expect(service.spaceList().map(s => s.guid)).toEqual(['space-a', 'space-b']);
+  });
+
+  it('filters out spaces belonging to other orgs', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    fakeRegistry.setOrgs('cf-A', [
+      { guid: 'org-1', name: 'alpha' },
+      { guid: 'org-2', name: 'bravo' },
+    ]);
+    fakeRegistry.setSpaces('cf-A', [
+      { guid: 'space-a', name: 'a-space', orgGuid: 'org-1' },
+      { guid: 'space-b', name: 'b-space', orgGuid: 'org-2' },
+    ]);
+
+    service.cf.select.set('cf-A');
+    service.org.select.set('org-1');
+    TestBed.tick();
+
+    expect(service.spaceList().map(s => s.guid)).toEqual(['space-a']);
+  });
+
+  it('cascade-clears spaceSelected when org changes', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    fakeRegistry.setOrgs('cf-A', [
+      { guid: 'org-1', name: 'alpha' },
+      { guid: 'org-2', name: 'bravo' },
+    ]);
+
+    service.cf.select.set('cf-A');
+    service.org.select.set('org-1');
+    service.space.select.set('space-1');
+    TestBed.tick();
+
+    service.org.select.set('org-2');
+    TestBed.tick();
+    expect(service.space.select()).toBeFalsy();
+  });
+
+});
+
+/**
+ * V3-native auto-selectors over EDS-sourced data.
+ *
+ * `enableAutoSelectors()` is opt-in (create-application calls it; the wizard
+ * does not). When enabled, a singleton org or space — count exactly 1 and
+ * nothing currently selected — is auto-picked off the EDS-sourced orgList /
+ * spaceList. Default (no enableAutoSelectors call) must do no auto-pick:
+ * the wizard relies on this so the user always picks org/space explicitly.
+ */
+describe('V3-native auto-selectors', () => {
+
+  let fakeRegistry: FakeRegistry;
+
+  beforeEach(() => {
+    fakeRegistry = makeFakeRegistry();
+    TestBed.configureTestingModule({
+      imports: [
+        createBasicStoreModule(),
+        EntityCatalogTestModule,
+      ],
+      providers: [
+        CfOrgSpaceDataService,
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities(),
+          ],
+        },
+        { provide: EndpointDataRegistry, useValue: fakeRegistry },
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    const helper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(helper);
+  });
+
+  it('auto-picks the single org when enableAutoSelectors is called and EDS holds one org', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    service.enableAutoSelectors();
+    fakeRegistry.setOrgs('cf-A', [{ guid: 'only-org', name: 'solo' }]);
+
+    service.cf.select.set('cf-A');
+    TestBed.tick();
+
+    expect(service.org.select()).toBe('only-org');
+  });
+
+  it('does NOT auto-pick when EDS holds more than one org', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    service.enableAutoSelectors();
+    fakeRegistry.setOrgs('cf-A', [
+      { guid: 'org-1', name: 'a' },
+      { guid: 'org-2', name: 'b' },
+    ]);
+
+    service.cf.select.set('cf-A');
+    TestBed.tick();
+
+    expect(service.org.select()).toBeFalsy();
+  });
+
+  it('does NOT auto-pick when enableAutoSelectors was never called (default)', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    // Note: no service.enableAutoSelectors() call.
+    fakeRegistry.setOrgs('cf-A', [{ guid: 'only-org', name: 'solo' }]);
+
+    service.cf.select.set('cf-A');
+    TestBed.tick();
+
+    expect(service.org.select()).toBeFalsy();
+  });
+
+  it('auto-picks the single space when enableAutoSelectors and EDS holds one space for the org', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    service.enableAutoSelectors();
+    fakeRegistry.setOrgs('cf-A', [{ guid: 'only-org', name: 'solo' }]);
+    fakeRegistry.setSpaces('cf-A', [
+      { guid: 'only-space', name: 'dev', orgGuid: 'only-org' },
+    ]);
+
+    service.cf.select.set('cf-A');
+    TestBed.tick();
+
+    expect(service.org.select()).toBe('only-org');
+    expect(service.space.select()).toBe('only-space');
+  });
+
+  it('does NOT auto-pick space when EDS holds multiple spaces for the org', () => {
+    const service = TestBed.inject(CfOrgSpaceDataService);
+
+    service.enableAutoSelectors();
+    fakeRegistry.setOrgs('cf-A', [{ guid: 'only-org', name: 'solo' }]);
+    fakeRegistry.setSpaces('cf-A', [
+      { guid: 'sp-1', name: 'dev', orgGuid: 'only-org' },
+      { guid: 'sp-2', name: 'prod', orgGuid: 'only-org' },
+    ]);
+
+    service.cf.select.set('cf-A');
+    TestBed.tick();
+
+    expect(service.org.select()).toBe('only-org');
+    expect(service.space.select()).toBeFalsy();
   });
 });

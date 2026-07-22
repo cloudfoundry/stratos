@@ -1,13 +1,13 @@
 <div class="cf-org-usage">
   <div class="custom-card">
     <div class="card-header">
-      <h2 class="card-title">Summary</h2>
+      <h2 class="font-medium">Summary</h2>
     </div>
     <div class="card-content">
-      <div class="app-metadata">
-        <div class="app-metadata__two-cols">
-          <app-metadata-item label="User Org Role">
-            {{ (cfOrgService.userOrgRole$ | async) }}
+      <div class="flex flex-row">
+        <div class="flex-1">
+          <app-metadata-item class="mt-0" label="User Org Role">
+            {{ cfOrgService.userOrgRole$ | async }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
             <a [routerLink]="cfOrgService.quotaLink$ | async">
@@ -15,20 +15,23 @@
             </a>
           </app-metadata-item>
           <app-metadata-item label="Provision Paid Services">
-            <app-boolean-indicator [isTrue]="(cfOrgService.quotaDefinition$ | async)?.non_basic_services_allowed" type="yes-no">
+            <app-boolean-indicator
+              [isTrue]="$safeNavigationMigration((cfOrgService.quotaDefinition$ | async)?.paidServicesAllowed)"
+              type="yes-no"
+            >
             </app-boolean-indicator>
           </app-metadata-item>
         </div>
 
-        <div class="app-metadata__two-cols">
-          <app-metadata-item label="Org Status">
-            {{ ((cfOrgService.org$ | async)?.entity?.entity?.status) | capitalizeFirst}}
+        <div class="flex-1">
+          <app-metadata-item class="mt-0" label="Org Status">
+            {{ (cfOrgService.orgDataService.org()?.status ?? '') | capitalizeFirst }}
           </app-metadata-item>
           <app-metadata-item label="Created At">
-            {{ ((cfOrgService.org$ | async)?.entity?.metadata?.created_at) | date:'medium' }}
+            {{ $safeNavigationMigration(cfOrgService.orgDataService.org()?.createdAt) | date: "medium" }}
           </app-metadata-item>
           <app-metadata-item label="Updated At">
-            {{ ((cfOrgService.org$ | async)?.entity?.metadata?.updated_at) | date:'medium' }}
+            {{ $safeNavigationMigration(cfOrgService.orgDataService.org()?.updatedAt) | date: "medium" }}
           </app-metadata-item>
         </div>
       </div>

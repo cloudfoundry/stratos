@@ -1,0 +1,124 @@
+import { test, expect } from '../../fixtures/test-base';
+
+/**
+ * Diagnostics Pages E2E Tests
+ *
+ * Covers the About → Diagnostics tab shell and its two proof-of-concept
+ * sub-pages:
+ *  - Entity Counts: per-endpoint entity counts via the jetstream
+ *    `?return=counts` fast paths, with footprint/risk annotations.
+ *  - Load Performance: the Performance-API load report (milestones,
+ *    resource waterfall, transfer sizes) with markdown/JSON export.
+ *
+ * The Load Performance page is the instrument used to compare deployments
+ * (GH #5550/#5391), so these tests guard that it keeps producing a real,
+ * populated report end to end.
+ */
+test.describe('Diagnostics', () => {
+
+  test('redirects to the overview tab and shows all three tabs', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
+    await page.goto('/about/diagnostics');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page).toHaveURL(/\/about\/diagnostics\/overview$/);
+    await expect(page.locator('a', { hasText: 'Overview' })).toBeVisible();
+    await expect(page.locator('a', { hasText: 'Entity Counts' })).toBeVisible();
+    await expect(page.locator('a', { hasText: 'Load Performance' })).toBeVisible();
+  });
+
+  test('entity counts page shows per-endpoint counts with footprints', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
+    await page.goto('/about/diagnostics/counts');
+    await page.waitForLoadState('networkidle');
+
+    // POC notice and heap line
+    await expect(page.locator('[data-test="poc-notice"]')).toBeVisible();
+    await expect(page.locator('text=/Heap: /')).toBeVisible();
+
+    // The fixture guarantees a connected CF endpoint, so a card must render
+    // with the probed entity rows (scope to table cells — "Organizations"
+    // also appears in the side nav and home shortcuts).
+    await expect(page.locator('td', { hasText: 'Organizations' }).first()).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('td', { hasText: 'Applications' }).first()).toBeVisible();
+
+    // At least one probe must resolve to a numeric count (not stay pending).
+    const orgRow = page.locator('tr', { hasText: 'Organizations' }).first();
+    await expect(orgRow.locator('td').nth(1)).toHaveText(/^[\d,]+$/, { timeout: 20000 });
+  });
+
+  test('load performance page produces a populated report', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
+    await page.goto('/about/diagnostics/performance');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('[data-test="poc-notice"]')).toBeVisible();
+
+    // Summary card with milestones
+    await expect(page.locator('text=Summary')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('td', { hasText: 'DOMContentLoaded' })).toBeVisible();
+    // Scope to the milestone cell — the waterfall caption also mentions LCP.
+    await expect(page.locator('td', { hasText: 'Largest contentful paint' })).toBeVisible();
+
+    // A real load produced resources: the waterfall and top-resources table
+    // both report a count — assert on the first.
+    await expect(page.locator('text=/Showing \\d+ of \\d+ resources/').first()).toBeVisible();
+
+    // Export buttons present
+    await expect(page.locator('[data-test="copy-markdown"]')).toBeVisible();
+    await expect(page.locator('[data-test="copy-json"]')).toBeVisible();
+  });
+
+  test('copy as JSON exports a parseable load report', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
+    await page.goto('/about/diagnostics/performance');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page.locator('[data-test="copy-json"]')).toBeVisible({ timeout: 15000 });
+    await page.locator('[data-test="copy-json"]').click();
+
+    const clipboard = await page.evaluate(() => navigator.clipboard.readText());
+    const report = JSON.parse(clipboard);
+    expect(report.collectedAt).toBeTruthy();
+    expect(report.topology === 'cf-pushed' || report.topology === 'local/other').toBe(true);
+    expect(Array.isArray(report.resources)).toBe(true);
+    expect(report.requestCount).toBeGreaterThan(0);
+  });
+
+  test('the report persists across tab switches', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
+    await page.goto('/about/diagnostics/performance');
+    await page.waitForLoadState('networkidle');
+
+    const collected = page.locator('text=/\\d{4}-\\d{2}-\\d{2}T[\\d:.]+Z/').first();
+    await expect(collected).toBeVisible({ timeout: 15000 });
+    const before = await collected.textContent();
+
+    // Soft-navigate away and back: the same report must re-display, not a
+    // fresh (and semantically wrong) re-measurement of leftover buffer.
+    await page.locator('a', { hasText: 'Entity Counts' }).click();
+    await expect(page).toHaveURL(/\/counts$/);
+    await page.locator('a', { hasText: 'Load Performance' }).click();
+    await expect(collected).toBeVisible({ timeout: 15000 });
+    expect(await collected.textContent()).toBe(before);
+  });
+
+  test('reload & measure collects a fresh report', async ({ connectedEndpointsAdminPage }) => {
+    const page = connectedEndpointsAdminPage.page;
+    await page.goto('/about/diagnostics/performance');
+    await page.waitForLoadState('networkidle');
+
+    const collected = page.locator('text=/\\d{4}-\\d{2}-\\d{2}T[\\d:.]+Z/').first();
+    await expect(collected).toBeVisible({ timeout: 15000 });
+    const before = await collected.textContent();
+
+    await page.locator('[data-test="reload-measure"]').click();
+    await page.waitForLoadState('networkidle');
+
+    // A document reload produces a new measurement with a cache verdict.
+    await expect(collected).toBeVisible({ timeout: 20000 });
+    expect(await collected.textContent()).not.toBe(before);
+    await expect(page.locator('[data-test="cache-verdict"]')).toHaveText(/(cold|warm)/);
+  });
+});

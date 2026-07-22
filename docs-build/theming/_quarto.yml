@@ -1,0 +1,15 @@
+project:
+  type: book
+
+book:
+  title: "Stratos Theming Guide"
+  author: "The Stratos maintainers"
+  chapters:
+    - index.qmd
+    - theming-architecture.qmd
+    - tailwind-usage.qmd
+    - branding-architecture.qmd
+
+format:
+  epub: default
+  typst: default

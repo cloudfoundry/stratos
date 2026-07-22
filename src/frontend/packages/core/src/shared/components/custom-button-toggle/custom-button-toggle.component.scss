@@ -1,4 +1,4 @@
-@tailwind components;
+@reference 'tailwindcss';
 
 @layer components {
   .custom-button-toggle-group {
@@ -15,11 +15,14 @@
 
   .custom-button-toggle {
     @apply px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer select-none;
-    @apply border border-gray-300 bg-white text-gray-700;
-    @apply first:ml-0 -ml-px first:rounded-l-md last:rounded-r-md;
+    @apply border first:ml-0 -ml-px first:rounded-l-md last:rounded-r-md;
+    border-color: var(--content-border);
+    background-color: var(--content-bg);
+    color: var(--content-text);
 
     &:hover:not(.disabled) {
-      @apply bg-gray-50 border-gray-400;
+      background-color: var(--content-secondary);
+      border-color: var(--content-border);
     }
 
     &:focus {

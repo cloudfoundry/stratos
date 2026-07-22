@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { EndpointModel } from '@stratosui/store';
 
-import { TableCellCustom } from '../../../../shared/components/list/list.types';
+import { TableCellCustom } from '../../../../shared/components/signal-list/cell-base';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
 
@@ -14,7 +14,6 @@ interface BackupCheckboxConfig {
 @Component({
   selector: 'app-backup-checkbox-cell',
   templateUrl: './backup-checkbox-cell.component.html',
-  styleUrls: ['./backup-checkbox-cell.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [

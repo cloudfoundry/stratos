@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
+import { isUnlimited } from './cf-quota.types';
+
 export function getIdFromRoute(activatedRoute: ActivatedRoute, id: string) {
   if (activatedRoute.snapshot.params[id]) {
     return activatedRoute.snapshot.params[id];
@@ -75,8 +77,7 @@ export class UtilsService {
       return '';
     }
 
-    // Special case: unlimited
-    if (mb === -1) {
+    if (isUnlimited(mb)) {
       return '∞';
     }
 
@@ -107,8 +108,7 @@ export class UtilsService {
       return '';
     }
 
-    // Special case: unlimited
-    if (bytes === -1) {
+    if (isUnlimited(bytes)) {
       return '∞';
     }
 
@@ -213,9 +213,9 @@ export class UtilsService {
     return (value / Math.pow(1024, Math.floor(multiplier)));
   }
 
-  private getDefaultPrecision(precision: number): number {
+  private getDefaultPrecision(precision?: number): number {
     if (precision === undefined || precision === null) {
-      precision = 0;
+      return 0;
     }
     return precision;
   }
@@ -257,21 +257,7 @@ export function pathGet(path: string, object: any): any {
   return (index && index === length) ? object : undefined;
 }
 
-export function pathSet(path: string, object: any, value: any) {
-  const params = path.split('.');
-
-  let index = 0;
-  const length = params.length - 1;
-
-  while (object !== null && object !== undefined && index < length) {
-    object = object[params[index++]];
-  }
-  if ((index && index === length)) {
-    object[params[index++]] = value;
-  }
-}
-
-export function safeStringToObj<T = object>(value: string): T {
+export function safeStringToObj<T = object>(value: string): T | null {
   try {
     if (value) {
       const jsonObj = JSON.parse(value);
@@ -296,7 +282,7 @@ export const safeUnsubscribe = (...subs: Subscription[]) => {
 };
 
 export const truthyIncludingZero = (obj: any): boolean => !!obj || obj === 0;
-export const truthyIncludingZeroString = (obj: any): string => truthyIncludingZero(obj) ? obj.toString() : null;
+export const truthyIncludingZeroString = (obj: any): string | null => truthyIncludingZero(obj) ? obj.toString() : null;
 
 /**
  * Real basic, shallow check

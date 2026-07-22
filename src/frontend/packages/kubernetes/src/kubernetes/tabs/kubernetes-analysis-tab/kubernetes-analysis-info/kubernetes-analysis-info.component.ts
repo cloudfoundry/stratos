@@ -24,7 +24,8 @@ import { SidepanelPreviewComponent } from '@stratosui/core';
 })
 export class KubernetesAnalysisInfoComponent implements PreviewableComponent {
 
-  analyzers$: Observable<any>;
+  // strict: assigned via setProps before the preview component renders
+  analyzers$!: Observable<any>;
 
   setProps(props: { [key: string]: any, }) {
     this.analyzers$ = props.analyzers$;

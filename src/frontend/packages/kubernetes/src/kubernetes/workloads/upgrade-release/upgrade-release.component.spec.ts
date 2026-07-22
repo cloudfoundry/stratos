@@ -5,12 +5,11 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
-import { provideStore } from '@ngrx/store';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { of } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
-import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers, appReducers } from '@stratosui/store';
+import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateStratosEntities } from '../../../../../store/src/stratos-entity-generator';
 import { generateHelmEntities } from '../../../helm/helm-entity-generator';
@@ -34,7 +33,9 @@ describe('UpgradeReleaseComponent', () => {
     mockHelmReleaseHelper = {
       guid: 'test-endpoint:test-namespace:test-release',
       hasUpgrade: vi.fn().mockReturnValue(of(null)),
-      release$: of(null),
+      // Real release$ filters out null, so it never emits a value until a
+      // release resolves; EMPTY models "no release resolved" without fabricating one.
+      release$: EMPTY,
       releaseTitle: 'test-release',
       endpointGuid: 'test-endpoint',
       namespace: 'test-namespace'
@@ -50,7 +51,6 @@ describe('UpgradeReleaseComponent', () => {
         provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         provideNoopAnimations(),
-        provideStore(appReducers),
         ...STORE_TEST_PROVIDERS,
         {
           provide: HTTP_INTERCEPTORS,
@@ -98,5 +98,12 @@ describe('UpgradeReleaseComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The version-step handle is valid only once a row is selected. With no
+  // upgrade target resolved (hasUpgrade → null here) nothing is loaded or
+  // auto-selected, so the step starts invalid.
+  it('version step starts invalid until a version is selected', () => {
+    expect(component.versionStepHandle.valid()).toBe(false);
   });
 });

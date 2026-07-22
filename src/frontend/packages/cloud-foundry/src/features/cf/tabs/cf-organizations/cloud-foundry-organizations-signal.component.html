@@ -1,0 +1,8 @@
+<div class="organizations h-full flex flex-col">
+  <app-list-sub-nav title="Total Organizations"
+                    [count]="totalOrganizations"
+                    [addAction]="createOrgAction"></app-list-sub-nav>
+  @if (listConfig(); as config) {
+    <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
+  }
+</div>

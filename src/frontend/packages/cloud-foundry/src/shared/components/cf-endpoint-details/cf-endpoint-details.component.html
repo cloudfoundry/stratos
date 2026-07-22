@@ -1,7 +1,7 @@
 @if (row?.user; as user) {
-  <div class="cf-details">
-    <div class="cf-details__line">
-      <span class="cf-details__icon" matTooltip="Username">
+  <div class="flex flex-col">
+    <div class="flex items-center">
+      <span class="flex items-center justify-center mr-2" matTooltip="Username">
         <span class="material-icons">person</span>
       </span>
       {{ user.name}} @if (user.admin) {

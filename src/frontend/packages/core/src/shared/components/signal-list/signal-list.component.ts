@@ -1,0 +1,1174 @@
+import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ContentChild, ContentChildren, QueryList, ElementRef, TemplateRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+
+import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
+import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
+
+export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
+
+// One line of a `kind: 'compound'` cell. `link` is optional — segments
+// without a link render as plain text, so callers can safely emit
+// placeholder strings ('—') while lookups resolve without making them
+// click as dead anchors.
+export interface SignalListCompoundSegment {
+  readonly text: string;
+  readonly link?: readonly (string | number)[];
+}
+
+// ── Per-row state (RowState) ────────────────────────────────────────────
+// Restores the legacy `<app-list>` table's per-row state affordance: row
+// coloring + an icon/message sub-row driven by a validation/operation state.
+// Used by the kube-config import wizard (validation messages, per-row import
+// result) and the per-row feedback layer for bulk/multi-row operations.
+
+// A row-state message: either a plain string (single line) or rich,
+// structured segments. Mirrors `SignalListCompoundSegment` but adds emphasis
+// (bold), per-segment color (tone), and line breaks. Rendered declaratively
+// — never via innerHTML, so server/user-sourced text can't inject markup.
+export type SignalListRowMessage = string | readonly SignalListMessageSegment[];
+
+export interface SignalListMessageSegment {
+  readonly text: string;
+  readonly bold?: boolean;                        // emphasis accent
+  readonly tone?: SignalListPillColor;            // per-segment color override
+  readonly link?: readonly (string | number)[];  // routerLink target
+  readonly break?: boolean;                       // start a new line BEFORE this segment
+}
+
+export interface SignalListRowState {
+  readonly error?: boolean;
+  readonly warning?: boolean;
+  readonly info?: boolean;
+  readonly blocked?: boolean;     // reserved — destructive in-flight (bulk ops); rendering deferred
+  readonly deleting?: boolean;    // reserved — see blocked
+  readonly highlighted?: boolean;
+  readonly disabled?: boolean;
+  readonly busy?: boolean;        // reserved — consumers showing progress via a status column today
+  readonly message?: SignalListRowMessage;
+}
+
+// Binding for a `kind: 'favorite'` column. The consumer owns persistence
+// (typically via UserFavoriteManager); SignalListComponent just reads
+// membership in the signal and calls toggle on click. Keys are row keys
+// per config.getRowKey so the component doesn't need a bespoke favorite
+// id scheme.
+export interface SignalListFavoriteBinding<T> {
+  readonly keys: Signal<ReadonlySet<string>>;
+  readonly toggle: (row: T) => void;
+}
+
+// Binding for a `kind: 'gauge'` column. Renders an `<app-usage-gauge>` per
+// row showing a 0..1 fraction as a horizontal bar that turns yellow at
+// `warningAt` and red at `errorAt`. Restores the legacy Memory/Disk/CPU
+// gauges that the V2 instances list rendered via `<app-table-cell-usage>`
+// — kept as text-only when slice-2 first migrated to the signal list, now
+// reinstated as a first-class kind so other usage-style columns (autoscaler
+// metrics, quota cells) can adopt the gauge without bespoke renderers.
+// `value` returns 0..1; `valueText` is an optional override for the label
+// (e.g. "14 / 128 MB" instead of the default percentage).
+export interface SignalListGaugeBinding<T> {
+  readonly value: (row: T) => number;
+  readonly valueText?: (row: T) => string;
+  readonly warningAt?: number;
+  readonly errorAt?: number;
+}
+
+// Binding for a `kind: 'checkbox'` column. Multi-row selection: the
+// consumer owns the writable signal holding the set of selected row
+// keys (per config.getRowKey). The list renders one checkbox per row
+// that reads/writes the set, and offers an optional `isDisabled`
+// predicate so non-selectable rows render as a dimmed disabled
+// checkbox. Mirrors `radio` but for multi-select — wired the same way
+// in the SignalListColumn descriptor.
+export interface SignalListCheckboxBinding<T> {
+  readonly selectedKeys: WritableSignal<ReadonlySet<string>>;
+  readonly isDisabled?: (row: T) => boolean;
+  // Optional per-row toggle callback, fired AFTER selectedKeys updates, with
+  // the row and its new selected state. Lets the consumer run per-row side
+  // effects (e.g. kube-config re-validates a row on select). CF bulk-select
+  // omits it — selection is just set membership.
+  readonly onToggle?: (row: T, selected: boolean) => void;
+  // Optional tri-state select-all header. When provided, the column header
+  // renders a checkbox that is checked when all selectable rows are
+  // selected, indeterminate when only some are, and empty when none are —
+  // restoring the legacy `TableHeaderSelectComponent` affordance (v4.9.2).
+  // Framework-level: serves both k8s (kube-config import) and CF bulk/
+  // multi-row operations (manage users, route unmap/delete).
+  readonly selectAll?: SignalListSelectAllBinding;
+}
+
+// Tri-state select-all header binding (see SignalListCheckboxBinding.selectAll).
+// Consumer-driven, mirroring the legacy `dataSource.selectAllFilteredRows()`:
+// the component renders the header checkbox state from `selectableCount`
+// vs the current selection size, and delegates the actual flip to `onToggle`
+// so the consumer can run per-row side effects (e.g. kube-config validity).
+export interface SignalListSelectAllBinding {
+  // Number of rows eligible for selection across the filtered set (NOT just
+  // the current page). Drives: checked = count > 0 && selected >= count;
+  // indeterminate = 0 < selected < count.
+  readonly selectableCount: () => number;
+  // Number currently selected (across the filtered set). Defaults to the
+  // checkbox column's `selectedKeys().size` when omitted — supply it when
+  // selection lives outside selectedKeys (e.g. a per-row `_selected` flag).
+  readonly selectedCount?: () => number;
+  // Invoked on header-checkbox click. Consumer selects-all when not already
+  // all-selected, else clears — and runs any per-row side effects.
+  readonly onToggle: () => void;
+  readonly isDisabled?: () => boolean;
+}
+
+// Binding for a `kind: 'radio'` column. Single-row selection: the
+// consumer owns the writable signal holding the selected row's key
+// (per config.getRowKey) or null when nothing is selected. The list
+// renders a radio input per row that reads/writes the signal directly,
+// and offers an optional `isDisabled` predicate so rows that can't be
+// picked (already-attached routes, archived items) render as a dimmed
+// disabled radio. Mirrors the `favorite` slot's shape: column carries
+// the binding, component handles the click + visual state.
+export interface SignalListRadioBinding<T> {
+  readonly selectedKey: WritableSignal<string | null>;
+  readonly isDisabled?: (row: T) => boolean;
+}
+
+// One entry in a `kind: 'actions'` kebab menu. Callers return the set
+// relevant to each row — items that don't apply (e.g. Stop on a stopped
+// app) can either be elided from the array or emitted with `disabled:
+// true`. Prefer eliding when the action simply has no meaning; keep
+// disabled for temporarily-unavailable actions so the menu shape stays
+// stable. `danger` applies destructive styling (red), useful for delete-
+// style entries that should stand apart visually.
+export interface SignalListRowAction<T> {
+  readonly label: string;
+  readonly icon?: string;
+  readonly disabled?: boolean;
+  readonly danger?: boolean;
+  /** Optional `data-test` attribute for E2E selectors. */
+  readonly dataTest?: string;
+  readonly invoke: (row: T) => void | Promise<void>;
+}
+
+export interface SignalListColumn<T> {
+  header: string;
+  render: (row: T) => string;
+  // When set, this column is sortable. String = property name on T;
+  // function = comparator key (e.g. computed values, lower-cased name).
+  sortField?: keyof T | ((row: T) => unknown);
+  // Stable identifier for this column; used as the sort.field value
+  // when the column is sortable. Defaults to the header text.
+  key?: string;
+  // Presentation hint. Default is 'text'.
+  kind?: 'text' | 'link' | 'pill' | 'dot' | 'compound' | 'favorite' | 'actions' | 'radio' | 'checkbox' | 'gauge' | 'template';
+  // Required when kind === 'link'. Returns the router-link target array,
+  // or null to render as plain text.
+  link?: (row: T) => readonly (string | number)[] | null;
+  // Optional for kind === 'link'. When set, the value is forwarded as
+  // [queryParams] on the rendered <a [routerLink]>. Use when the
+  // destination route needs a hint about the source — e.g. the
+  // CF-scoped applications wall passes {breadcrumbs:'cf'} so the
+  // app-detail page emits a CF-scoped 'Applications' breadcrumb
+  // (instead of the global one) when navigated to from that wall.
+  // Returning null/undefined omits the query params entirely.
+  linkQueryParams?: (row: T) => Record<string, string | number> | null;
+  // Optional, kind-agnostic. Returns an EXTERNAL http(s) URL to render the
+  // cell value as an `<a [href] target="_blank" rel="noopener">` (a launch
+  // icon + the render() text), or null to render the render() text as plain
+  // text. Distinct from `link` (internal routerLink). Used for the
+  // service-instance Dashboard column, restoring the v4.9.3 external-link
+  // cell the signal-list migration dropped. Does not make the row clickable
+  // (rowLink only follows `kind: 'link'` + `link`).
+  externalLink?: (row: T) => string | null;
+  // Optional, kind-agnostic. Overrides the hover `title` (tooltip) for this
+  // column's cell/card-title; defaults to the rendered text. Used by the
+  // routes card to show a route's full guid on hover while the visible title
+  // shows a short-guid fallback for unnamed routes.
+  tooltip?: (row: T) => string;
+  // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
+  pillColor?: (row: T) => SignalListPillColor;
+  // Required when kind === 'compound'. Returns an ordered list of segments;
+  // each segment renders on its own line within the cell. Segments with
+  // `link` render as cyan router links, those without render as plain
+  // text (useful when a referenced entity is still loading or lookup
+  // failed). `render(row)` is still used for the filter/sort string — the
+  // service's filter/sort extractors can delegate to it for parity with
+  // the visual.
+  compound?: (row: T) => readonly SignalListCompoundSegment[];
+  // Optional for kind === 'compound'. When set and the segment count for
+  // a row exceeds this value, only the first `maxVisible` segments render
+  // and a clickable "…and N more" affordance appears below them. Click
+  // expands the cell to show all segments (with a "…show fewer" indicator
+  // at the bottom to collapse). Each (row, column) pair tracks its own
+  // expanded state so unrelated compound columns on the same row can be
+  // expanded independently. Unset = unlimited (current behavior;
+  // high-cardinality cells like an admin user with thousands of role
+  // grants will overflow and break visual row alignment — see
+  // project_signallist_row_overflow.md).
+  maxVisible?: number;
+  // Optional for kind === 'compound'. Caller-supplied label for the
+  // collapsed-state link, given the count of hidden segments. Defaults to
+  // `…and N more`. Useful for domain-specific phrasing such as
+  // `(n) => '…and ' + n + ' more spaces'`.
+  collapsedLabel?: (hidden: number) => string;
+  // Required when kind === 'favorite'. See SignalListFavoriteBinding.
+  // In table view the column renders as its own narrow cell; in card
+  // view the star attaches to the Name line so the card doesn't grow
+  // an extra row just for the favorite icon.
+  favorite?: SignalListFavoriteBinding<T>;
+  // Required when kind === 'actions'. Returns the kebab-menu entries
+  // for this row. The cell renders a `more_vert` button; clicking
+  // opens a popover menu with the returned entries. At most one row's
+  // menu is open at any time; clicking outside (or on another kebab)
+  // dismisses. Card mode treats the kebab identically to the favorite
+  // star and lifts it onto the Name row.
+  actions?: (row: T) => readonly SignalListRowAction<T>[];
+  // Required when kind === 'gauge'. See SignalListGaugeBinding. The cell
+  // renders an `<app-usage-gauge>` showing the value as a horizontal bar
+  // with optional warning/error color thresholds, plus a label (default:
+  // value formatted as percentage). Restores the legacy V2-instances
+  // Mem/Disk/CPU gauges that slice-2 lost when migrating to plain text.
+  gauge?: SignalListGaugeBinding<T>;
+  // Required when kind === 'radio'. See SignalListRadioBinding.
+  // The cell renders a single radio input bound to the consumer's
+  // selectedKey signal; clicking sets it to the row's key (or unsets
+  // if already selected — radio behavior is single-select, so re-click
+  // is a no-op). Disabled rows show a dimmed radio that doesn't react.
+  radio?: SignalListRadioBinding<T>;
+  // Required when kind === 'checkbox'. See SignalListCheckboxBinding.
+  // The cell renders a checkbox bound to the consumer's selectedKeys
+  // signal — toggling adds/removes the row's key from the set. Disabled
+  // rows render a dimmed checkbox that doesn't react.
+  checkbox?: SignalListCheckboxBinding<T>;
+  // Required when kind === 'template'. Names the <ng-template
+  // appSignalListCell="..."> in the consumer's content projection that
+  // should render this cell. The template receives the row as both
+  // $implicit and `row` context, so consumers can use either
+  // `let-row` or `let-row="row"`.
+  templateName?: string;
+  // Optional CSS width value (e.g. '12rem', '20%'). When set, applied via a
+  // <col> in the table's <colgroup>. Unset columns share remaining width
+  // equally under the fixed table layout.
+  widthHint?: string;
+}
+
+export interface SignalListSort {
+  readonly field: string;
+  readonly direction: 'asc' | 'desc';
+  // Per-list case-sensitivity toggle. Default is undefined === false, i.e.
+  // case-insensitive natural sort. Flipping to true switches the underlying
+  // Intl.Collator from { sensitivity: 'base' } to { sensitivity: 'variant' },
+  // so "Aa" sorts ahead of "aa". Persisted in the list-state store.
+  readonly caseSensitive?: boolean;
+}
+
+export interface SignalListDropdownOption {
+  label: string;
+  value: string | null;
+}
+
+export interface SignalListDropdown {
+  label: string;
+  options: Signal<SignalListDropdownOption[]>;
+  selected: WritableSignal<string | null>;
+  disabled?: Signal<boolean>;
+  // Fires on the first user interaction with the dropdown (focus / mousedown).
+  // Lets the host service defer expensive option-population work until the user
+  // actually opens the menu — paint-fast pages, populate-on-demand dropdowns.
+  onOpen?: () => void;
+  // When true, render a small spinner next to the dropdown label so the user
+  // sees that option population is in-flight rather than mistaking an empty
+  // list for "no items available."
+  loading?: Signal<boolean>;
+}
+
+export type SignalListViewMode = 'table' | 'card';
+
+/**
+ * Page-level action button rendered in the SignalList toolbar — the slot
+ * that hosts affordances like "Invite User" / "Manage Users" / "Add Org".
+ *
+ * Wave-4 of the signal-list framework had this field excised after the
+ * first migration round shipped placeholder snackbar handlers; re-added
+ * with explicit semantics: this is for actions that operate on the LIST
+ * as a whole (open a dialog, navigate to a stepper), not on individual
+ * rows. Row-level actions still use the per-row `kind: 'actions'` column.
+ */
+export interface SignalListHeaderAction {
+  /** Display label inside the button. */
+  readonly label: string;
+  /** Optional Material icon name rendered to the left of the label. */
+  readonly icon?: string;
+  /** Click handler. */
+  readonly run: () => void;
+  /** Optional reactive disabled state — e.g. permission-gated actions. */
+  readonly disabled?: Signal<boolean>;
+  /** Optional tooltip / aria title. */
+  readonly title?: string;
+  /** Optional `data-test` attribute for E2E selectors. */
+  readonly dataTest?: string;
+  /** When true, render with a primary/accent style (typically the page's
+   *  default action). At most one primary per toolbar by convention. */
+  readonly primary?: boolean;
+}
+
+/**
+ * Bulk action button rendered in the selection bar that appears above the
+ * table when a `kind: 'checkbox'` column has 1+ rows selected. Operates on
+ * the set of selected row keys; the consumer resolves keys → rows from its
+ * own data source (the framework doesn't keep an index by key, and pageable
+ * lists may not have every selected row in memory at action time).
+ *
+ * Restores the legacy `IMultiListAction` slot that V2 list-configs used for
+ * bulk Delete / Unmap / Manage Users. The signal-list framework had a
+ * `kind: 'checkbox'` selection column from the start but never grew a slot
+ * to act on the selection — leaving bulk operations unmigratable. This is
+ * the slot, no consumers wired by this commit.
+ */
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- intentional public-API generic: T keeps bulk-action row type aligned with SignalListConfig<T> at the consumer call site
+export interface SignalListBulkAction<T> {
+  /** Display label inside the button. */
+  readonly label: string;
+  /** Optional Material icon name rendered to the left of the label. */
+  readonly icon?: string;
+  /** Invoked with a snapshot of the currently-selected row keys. */
+  readonly run: (selectedKeys: ReadonlySet<string>) => void | Promise<void>;
+  /** Optional reactive disabled state — e.g. permission-gated actions. */
+  readonly disabled?: Signal<boolean>;
+  /** Optional destructive styling (red) — for Delete-style entries. */
+  readonly danger?: boolean;
+  /** Optional tooltip / aria title. */
+  readonly title?: string;
+  /** Optional `data-test` attribute for E2E selectors. */
+  readonly dataTest?: string;
+}
+
+export interface SignalListConfig<T> {
+  readonly pagedItems: Signal<T[]>;
+  readonly totalFilteredResults: Signal<number>;
+  readonly totalPages: Signal<number>;
+  readonly pageIndex: WritableSignal<number>;
+  readonly pageSize: WritableSignal<number>;
+  // Page-size options presented to the user. Accepts either a single array
+  // (applies to both view modes) or a per-mode record so tables can default
+  // to tighter rows (10/25/50/100) while card grids favor larger pages
+  // (6/12/24/48/96). When the user toggles viewMode, the page size snaps
+  // to the first option for the new mode to avoid showing a value that
+  // isn't in the dropdown.
+  readonly pageSizeOptions?: readonly number[] | { table: readonly number[]; card: readonly number[] };
+  readonly isAnyLoading: Signal<boolean>;
+  readonly errorsByCnsi: Signal<Map<string, unknown>>;
+  readonly columns: SignalListColumn<T>[];
+  readonly getRowKey: (row: T) => string;
+  readonly emptyMessage?: string;
+  // Shown instead of emptyMessage when totalFilteredResults === 0 AND a
+  // filter is active (any dropdown selected or nameFilter non-empty). Lets
+  // the UI distinguish "no apps here" from "your filters match nothing".
+  readonly emptyFilterMessage?: string;
+  readonly loadingMessage?: string;
+  // Shown in the failed-load empty state (0 rows AND errorsByCnsi
+  // non-empty). That state also renders a Retry button wired to onRefresh,
+  // so a transient failure that exhausted the automatic retries has an
+  // in-page recovery affordance instead of an empty list until
+  // re-navigation (#5577).
+  readonly errorMessage?: string;
+  readonly nameFilter?: WritableSignal<string>;
+  // Column keys (see SignalListColumn.key / header fallback) eligible for
+  // the text-filter. When 2+ entries are provided AND filterField is
+  // supplied, the toolbar renders a dropdown left of the text input that
+  // picks WHICH column the filter compares against. 0-1 entries = no
+  // selector (text filter keeps its current target — typically name).
+  readonly filterColumns?: readonly string[];
+  // When filterColumns has 2+ entries, this signal tracks the active
+  // filter field key. Writes trigger re-filtering via whatever predicate
+  // the caller has registered on the data source.
+  readonly filterField?: WritableSignal<string>;
+  readonly filterDropdowns?: SignalListDropdown[];
+  readonly onRefresh?: () => void | Promise<void>;
+  // Optional — when provided, the toolbar renders a "Clear" button that
+  // invokes this callback. The button is disabled when no filter is active
+  // (all dropdowns at their "All" value and nameFilter empty), so it surfaces
+  // only when clicking it would actually change the view.
+  readonly onClear?: () => void;
+  // Optional — when provided, each card in card view renders a colored
+  // strip at the top reflecting the row's state. Common use: map app.state
+  // to a success/danger/neutral color so a quick glance over a wall of
+  // cards surfaces problems.
+  readonly cardAccentColor?: (row: T) => SignalListPillColor;
+  // Optional — when provided, each row is decorated with its state: row
+  // coloring (error/warning/info) + an icon/message sub-row. MUST return a
+  // STABLE Signal per row (store it on the row / in the consumer — do NOT
+  // create a fresh signal per call). Returning a signal (vs a plain value)
+  // lets a row re-render when its state changes without the pagedItems array
+  // changing identity; reading it in the template registers a per-row
+  // dependency (zoneless-friendly). Returns null → no decoration for that row.
+  readonly rowState?: (row: T) => Signal<SignalListRowState> | null;
+  // Optional — when provided, the toolbar shows a table/card view toggle
+  // and the body renders either a table or a card grid. When absent,
+  // the list is table-only.
+  readonly viewMode?: WritableSignal<SignalListViewMode>;
+  // Optional — when provided, sortable column headers and the
+  // card-mode sort dropdown are wired to this signal. Columns are
+  // sortable iff they declare a sortField.
+  readonly sort?: WritableSignal<SignalListSort>;
+  // Optional — when true, hide the pagination bar (page-size selector,
+  // range counter, page nav buttons) when the list fits on a single page
+  // (totalPages <= 1). Lets compact embedded lists (e.g. an attached-routes
+  // panel inside a stepper) skip the paginator chrome until it actually has
+  // a job to do. Default false preserves existing behavior.
+  readonly hidePagerWhenSingle?: boolean;
+  // Optional — page-level action buttons rendered in the toolbar between
+  // the view toggle and the refresh button. Use for affordances that
+  // operate on the list as a whole (Invite User / Manage Users / Create
+  // Org) — not per-row actions, which still go via `kind: 'actions'`.
+  readonly headerActions?: readonly SignalListHeaderAction[];
+  // Optional — bulk-action buttons rendered in a selection bar above the
+  // table when a `kind: 'checkbox'` column has 1+ rows selected. Restores
+  // the legacy `IMultiListAction` slot for bulk Delete / Unmap / Manage.
+  // Bar is hidden when no checkbox column exists, selection is empty, or
+  // this field is undefined/empty — no visual impact on lists that don't
+  // opt in.
+  readonly bulkActions?: readonly SignalListBulkAction<T>[];
+  // Optional. When it reads true, the bulk-action bar shows an indeterminate
+  // "Working…" spinner and disables its action buttons. The consumer owns it
+  // (set true while a bulk op runs, false when it settles) because the work
+  // happens behind a confirm dialog after `run()` has already returned, so the
+  // bar can't infer the in-flight state itself. Omit to keep the bar static.
+  readonly bulkRunning?: Signal<boolean>;
+}
+
+@Component({
+  selector: 'app-signal-list',
+  standalone: true,
+  imports: [CommonModule, RouterModule, UsageGaugeComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './signal-list.component.html',
+  host: { class: 'block h-full min-h-0' },
+})
+export class SignalListComponent<T> implements AfterViewInit {
+  @Input({ required: true }) config!: SignalListConfig<T>;
+
+  // Optional content-projected template for fully-custom card rendering.
+  // When supplied AND viewMode is 'card', signal-list delegates the card
+  // body to this template (passing each row as the implicit context),
+  // bypassing the default column-based card layout. Toolbar, pagination,
+  // empty/loading states, and overflow handling all stay in signal-list.
+  // Used by the helm catalog tab to render <app-chart-item> per row.
+  @ContentChild('cardTemplate', { read: TemplateRef })
+  cardTemplate?: TemplateRef<{ $implicit: T }>;
+
+  // Named cell templates supplied by the host page. Each tagged with
+  // `appSignalListCell="<name>"`; columns of `kind: 'template'` reference
+  // them by name via SignalListColumn.templateName.
+  @ContentChildren(SignalListCellTemplateDirective)
+  cellTemplates?: QueryList<SignalListCellTemplateDirective<T>>;
+
+  @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
+
+  protected readonly Math = Math;
+
+  // True when there is MORE content below the current scroll position —
+  // i.e. the body overflows AND the user hasn't scrolled to the bottom
+  // yet. Used to gate the bottom scroll-fade indicator so it shows only
+  // when scrolling would actually reveal more rows. Hides when the user
+  // has reached the bottom of the list.
+  readonly hasOverflow = signal(false);
+
+  // True while a refresh-button click is in flight. Used to drive the
+  // inline button spinner uniformly across list pages — many config
+  // services still wire isAnyLoading to !hasLoadedOnce() (which only
+  // flips during initial load), so without this internal signal the
+  // refresh button stays static on every subsequent click. Reset in a
+  // finally after onRefresh resolves, regardless of error.
+  readonly isRefreshing = signal(false);
+
+  // Click handler for the refresh button — wraps config.onRefresh so the
+  // internal isRefreshing signal flips around the call. Components that
+  // wire onRefresh return either void or Promise<void>; either way the
+  // refresh state clears once the promise resolves (or synchronously on
+  // void return).
+  async invokeRefresh(): Promise<void> {
+    const fn = this.config?.onRefresh;
+    if (!fn) return;
+    this.isRefreshing.set(true);
+    try {
+      await fn();
+    } finally {
+      this.isRefreshing.set(false);
+    }
+  }
+
+  private resizeObserver?: ResizeObserver;
+  private mutationObserver?: MutationObserver;
+  private onScroll = () => this.measureOverflow();
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    destroyRef.onDestroy(() => {
+      this.resizeObserver?.disconnect();
+      this.mutationObserver?.disconnect();
+      this.scrollBody?.nativeElement.removeEventListener('scroll', this.onScroll);
+    });
+  }
+
+  ngAfterViewInit(): void {
+    const el = this.scrollBody?.nativeElement;
+    if (!el) return;
+    this.measureOverflow();
+
+    // Viewport changes (window resize, container resize) shift clientHeight.
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.measureOverflow());
+      this.resizeObserver.observe(el);
+    }
+
+    // Data changes add/remove DOM nodes in the scroll body, shifting
+    // scrollHeight without triggering ResizeObserver on the body itself.
+    // A MutationObserver catches those.
+    if (typeof MutationObserver !== 'undefined') {
+      this.mutationObserver = new MutationObserver(() => this.measureOverflow());
+      this.mutationObserver.observe(el, { childList: true, subtree: true });
+    }
+
+    // Scroll position also matters: the fade should disappear when the
+    // user reaches the bottom of the list.
+    el.addEventListener('scroll', this.onScroll, { passive: true });
+  }
+
+  private measureOverflow(): void {
+    const el = this.scrollBody?.nativeElement;
+    if (!el) {
+      this.hasOverflow.set(false);
+      return;
+    }
+    const overflowing = el.scrollHeight > el.clientHeight + 1;
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+    this.hasOverflow.set(overflowing && !atBottom);
+  }
+
+  trackByRow = (_: number, row: T) => this.config.getRowKey(row);
+
+  pillClasses(color: SignalListPillColor): string {
+    switch (color) {
+      case 'success': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-success-50 text-success-900 dark:bg-success-900/40 dark:text-success-100';
+      case 'warning': return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-warning-50 text-warning-900 dark:bg-warning-900/40 dark:text-warning-100';
+      case 'danger':  return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-danger-50 text-danger-900 dark:bg-danger-900/40 dark:text-danger-100';
+      default:        return 'inline-block px-2 py-0.5 rounded text-xs font-medium bg-content-secondary text-content-text';
+    }
+  }
+
+  // Small colored circle rendered to the LEFT of the text for `kind: 'dot'`
+  // columns. Used for status rendering that matches the legacy Stratos
+  // app-wall ("● Deployed - Online", "● Incomplete", etc.).
+  dotClasses(color: SignalListPillColor): string {
+    switch (color) {
+      case 'success': return 'inline-block h-2.5 w-2.5 rounded-full bg-success';
+      case 'warning': return 'inline-block h-2.5 w-2.5 rounded-full bg-warning';
+      case 'danger':  return 'inline-block h-2.5 w-2.5 rounded-full bg-danger';
+      default:        return 'inline-block h-2.5 w-2.5 rounded-full bg-tentative';
+    }
+  }
+
+  // Color class for the accent strip at the TOP of a card in card view.
+  // Returns a Tailwind bg-* class matching the pill palette.
+  accentBarClass(color: SignalListPillColor): string {
+    switch (color) {
+      case 'success': return 'bg-success';
+      case 'warning': return 'bg-warning';
+      case 'danger':  return 'bg-danger';
+      default:        return 'bg-tentative';
+    }
+  }
+
+  colorFor(col: SignalListColumn<T>, row: T): SignalListPillColor {
+    return col.pillColor ? col.pillColor(row) : 'neutral';
+  }
+
+  cardAccentFor(row: T): SignalListPillColor {
+    return this.config.cardAccentColor ? this.config.cardAccentColor(row) : 'neutral';
+  }
+
+  pageSizeOptions(): readonly number[] {
+    const mode = this.config.viewMode ? this.config.viewMode() : 'table';
+    return this.effectivePageSizeOptions(mode);
+  }
+
+  // The option set actually offered in a view mode. Card views carry the
+  // legacy app-paginator "All" (-1) option; table views deliberately don't
+  // (switching to table reverts to a concrete size via the setViewMode
+  // snap). setViewMode must validate against THIS set, not the raw config
+  // lists, or a remembered "All" gets snapped away on return to card view.
+  private effectivePageSizeOptions(mode: SignalListViewMode): readonly number[] {
+    const opts = this.config.pageSizeOptions;
+    if (!opts) return [5, 20, 50, 80];
+    if ('table' in opts && 'card' in opts) {
+      const list = mode === 'card' ? opts.card : opts.table;
+      return mode === 'card' && !list.includes(-1) ? [...list, -1] : list;
+    }
+    return opts;
+  }
+
+  rangeText(): string {
+    const total = this.config.totalFilteredResults();
+    if (total === 0) return '0 of 0';
+    const size = this.config.pageSize();
+    if (size <= 0) return `1 – ${total} of ${total}`;
+    const start = this.config.pageIndex() * size + 1;
+    const end = Math.min(start + size - 1, total);
+    return `${start} – ${end} of ${total}`;
+  }
+
+  // -1 is the "All" page-size sentinel (legacy app-paginator parity).
+  pageSizeLabel(opt: number): string {
+    return opt === -1 ? 'All' : String(opt);
+  }
+
+  onPageSizeChange(value: string): void {
+    const n = parseInt(value, 10);
+    if (!Number.isFinite(n) || (n <= 0 && n !== -1)) return;
+    this.config.pageSize.set(n);
+    this.config.pageIndex.set(0);
+  }
+
+  setViewMode(mode: SignalListViewMode): void {
+    this.config.viewMode?.set(mode);
+    // Snap pageSize to a valid option for the new mode when per-mode
+    // options are configured. Otherwise the dropdown would display blank
+    // and the "X of Y" range would reflect a size not in the picker.
+    const opts = this.config.pageSizeOptions;
+    if (opts && 'table' in opts && 'card' in opts) {
+      const next = this.effectivePageSizeOptions(mode);
+      if (next.length && !next.includes(this.config.pageSize())) {
+        this.config.pageSize.set(next[0]);
+        this.config.pageIndex.set(0);
+      }
+    }
+  }
+
+  // Sort support ---------------------------------------------------------
+
+  columnKey(col: SignalListColumn<T>): string {
+    return col.key ?? col.header;
+  }
+
+  isSortable(col: SignalListColumn<T>): boolean {
+    return !!this.config.sort && col.sortField != null;
+  }
+
+  isSortedBy(col: SignalListColumn<T>): boolean {
+    return !!this.config.sort && this.config.sort()!.field === this.columnKey(col);
+  }
+
+  sortDirectionFor(col: SignalListColumn<T>): 'asc' | 'desc' | null {
+    if (!this.isSortedBy(col)) return null;
+    return this.config.sort!().direction;
+  }
+
+  onHeaderSort(col: SignalListColumn<T>): void {
+    if (!this.isSortable(col) || !this.config.sort) return;
+    const key = this.columnKey(col);
+    const current = this.config.sort();
+    const nextDirection: 'asc' | 'desc' =
+      current.field === key && current.direction === 'asc' ? 'desc' : 'asc';
+    this.config.sort.set({ field: key, direction: nextDirection });
+    this.config.pageIndex.set(0);
+  }
+
+  sortableColumns(): SignalListColumn<T>[] {
+    return this.config.columns.filter(c => c.sortField != null);
+  }
+
+  // Columns eligible for the text-filter dropdown. Returns columns whose
+  // key (or header fallback) appears in config.filterColumns, preserving
+  // the order the caller specified. Empty iff the caller didn't opt in or
+  // listed keys that don't match any configured column.
+  filterableColumns(): SignalListColumn<T>[] {
+    const keys = this.config.filterColumns;
+    if (!keys || keys.length === 0) return [];
+    const byKey = new Map<string, SignalListColumn<T>>();
+    for (const col of this.config.columns) byKey.set(this.columnKey(col), col);
+    const out: SignalListColumn<T>[] = [];
+    for (const k of keys) {
+      const col = byKey.get(k);
+      if (col) out.push(col);
+    }
+    return out;
+  }
+
+  showFilterFieldSelector(): boolean {
+    return !!this.config.filterField && this.filterableColumns().length >= 2;
+  }
+
+  // Returns the first column configured as kind === 'favorite'; the
+  // card-body uses this to attach the star to the Name row so the
+  // favorite column doesn't render as a label:value detail line.
+  favoriteColumn(): SignalListColumn<T> | null {
+    return this.config.columns.find(c => c.kind === 'favorite' && !!c.favorite) ?? null;
+  }
+
+  // Returns the first column configured as kind === 'actions'; the
+  // card-body uses this to attach the kebab to the Name row so the
+  // column doesn't render as a label:value detail line.
+  actionsColumn(): SignalListColumn<T> | null {
+    return this.config.columns.find(c => c.kind === 'actions' && !!c.actions) ?? null;
+  }
+
+  // Returns the first non-control column; the card header renders it as the
+  // title. Skips checkbox/favorite/actions/radio so a list that puts a
+  // leading selection column first (e.g. routes) still gets a real title
+  // instead of a blank one, and its checkbox moves to the header cluster.
+  titleColumn(): SignalListColumn<T> | null {
+    return this.config.columns.find(c =>
+      c.kind !== 'checkbox' && c.kind !== 'favorite' &&
+      c.kind !== 'actions' && c.kind !== 'radio'
+    ) ?? null;
+  }
+
+  // True when `col` is the card's title column. Compared by identity (key,
+  // falling back to header) rather than object reference so it holds even if
+  // the consumer rebuilds its column array between change-detection reads.
+  isTitleColumn(col: SignalListColumn<T>): boolean {
+    const tc = this.titleColumn();
+    return !!tc && (tc.key ?? tc.header) === (col.key ?? col.header);
+  }
+
+  // Bulk-action bar helpers --------------------------------------------
+
+  // Returns the first column configured as kind === 'checkbox'; the
+  // bulk-action bar reads its selectedKeys signal to drive count and
+  // pass-through to action handlers.
+  checkboxColumn(): SignalListColumn<T> | null {
+    return this.config.columns.find(c => c.kind === 'checkbox' && !!c.checkbox) ?? null;
+  }
+
+  // Number of rows currently selected via the checkbox column. 0 when no
+  // checkbox column is configured.
+  selectedCount(): number {
+    return this.checkboxColumn()?.checkbox?.selectedKeys().size ?? 0;
+  }
+
+  // True when the bulk-action bar should render: bulkActions is non-empty,
+  // a checkbox column exists, and at least one row is selected.
+  showBulkBar(): boolean {
+    const acts = this.config.bulkActions;
+    if (!acts || acts.length === 0) return false;
+    return this.selectedCount() > 0;
+  }
+
+  // Clears the checkbox column's selection. Used by the "Clear" button in
+  // the bulk-action bar and is the recommended path for consumers to call
+  // after a bulk action completes (delete-style actions especially).
+  clearBulkSelection(): void {
+    const col = this.checkboxColumn();
+    col?.checkbox?.selectedKeys.set(new Set());
+  }
+
+  // Invokes a bulk action, passing the current selection snapshot. Errors
+  // from the handler are caught and logged — the bar stays open so the
+  // user can retry or clear manually. Selection is NOT auto-cleared; the
+  // consumer decides whether the action invalidates the selection (delete:
+  // yes; mark-favorite: no).
+  async invokeBulkAction(act: SignalListBulkAction<T>): Promise<void> {
+    if (act.disabled?.()) return;
+    const col = this.checkboxColumn();
+    const keys = col?.checkbox?.selectedKeys() ?? new Set<string>();
+    if (keys.size === 0) return;
+    try {
+      await act.run(keys);
+    } catch (err) {
+      console.error(`Bulk action "${act.label}" failed:`, err);
+    }
+  }
+
+  // Resolves the row-level link target — used to make the whole card /
+  // table row clickable, mirroring the "name" link. Picks the first
+  // column declared as kind === 'link' and asks it for the row's target.
+  // Returns null when no link column exists or the column returns null
+  // for this row (lookup still pending, permission denied, etc.) — the
+  // template then renders the row as non-clickable.
+  rowLink(row: T): readonly (string | number)[] | null {
+    const col = this.config.columns.find(c => c.kind === 'link' && !!c.link);
+    return col?.link?.(row) ?? null;
+  }
+
+  // Mirrors rowLink for the optional query-params accessor on the same
+  // link column. Returned alongside the [routerLink] so the row-level
+  // clickable area carries the same query hint as the name cell's
+  // <a [routerLink] [queryParams]>.
+  rowLinkQueryParams(row: T): Record<string, string | number> | null {
+    const col = this.config.columns.find(c => c.kind === 'link' && !!c.link);
+    return col?.linkQueryParams?.(row) ?? null;
+  }
+
+  // Row key whose kebab menu is currently open. null = no menu open.
+  // Clicking a kebab sets this to the row's key; clicking it again or
+  // anywhere outside an open menu clears it.
+  readonly openActionsRowKey: WritableSignal<string | null> = signal(null);
+
+  toggleRowActions(row: T, ev: Event): void {
+    ev.stopPropagation();
+    const key = this.config.getRowKey(row);
+    const willOpen = this.openActionsRowKey() !== key;
+    this.openActionsRowKey.update(curr => (curr === key ? null : key));
+    if (willOpen) {
+      // After the menu's DOM lands, scroll it into view. Rows near the
+      // bottom of a scrollable container would otherwise drop the menu
+      // below the fold (it's `position: absolute top-full`).
+      const btn = ev.currentTarget as HTMLElement | null;
+      setTimeout(() => {
+        const menu = btn?.parentElement?.querySelector('[data-test="row-actions-menu"]') as HTMLElement | null;
+        menu?.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      }, 0);
+    }
+  }
+
+  invokeAction(act: SignalListRowAction<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    if (act.disabled) return;
+    this.openActionsRowKey.set(null);
+    void act.invoke(row);
+  }
+
+  // Any click that bubbles up to the document and isn't inside an
+  // open menu or on a kebab button closes the menu. Per-menu/kebab
+  // handlers already stopPropagation so clicks on them never reach
+  // here. Cheap enough to run always — no-op when no menu is open.
+  @HostListener('document:click', ['$event'])
+  onDocumentClickForActions(_ev: MouseEvent): void {
+    if (this.openActionsRowKey() !== null) {
+      this.openActionsRowKey.set(null);
+    }
+  }
+
+  isFavorite(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.favorite && col.favorite.keys().has(this.config.getRowKey(row));
+  }
+
+  onToggleFavorite(col: SignalListColumn<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    col.favorite?.toggle(row);
+  }
+
+  // Radio-select helpers -----------------------------------------------
+
+  isRadioSelected(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.radio && col.radio.selectedKey() === this.config.getRowKey(row);
+  }
+
+  isRadioDisabled(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.radio?.isDisabled && col.radio.isDisabled(row);
+  }
+
+  onSelectRadio(col: SignalListColumn<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    if (!col.radio || this.isRadioDisabled(col, row)) return;
+    col.radio.selectedKey.set(this.config.getRowKey(row));
+  }
+
+  // Checkbox-select helpers --------------------------------------------
+
+  isCheckboxSelected(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.checkbox && col.checkbox.selectedKeys().has(this.config.getRowKey(row));
+  }
+
+  isCheckboxDisabled(col: SignalListColumn<T>, row: T): boolean {
+    return !!col.checkbox?.isDisabled && col.checkbox.isDisabled(row);
+  }
+
+  onToggleCheckbox(col: SignalListColumn<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    if (!col.checkbox || this.isCheckboxDisabled(col, row)) return;
+    const key = this.config.getRowKey(row);
+    const next = new Set(col.checkbox.selectedKeys());
+    let nowSelected: boolean;
+    if (next.has(key)) {
+      next.delete(key);
+      nowSelected = false;
+    } else {
+      next.add(key);
+      nowSelected = true;
+    }
+    col.checkbox.selectedKeys.set(next);
+    col.checkbox.onToggle?.(row, nowSelected);
+  }
+
+  // Select-all header (tri-state) — restores v4.9.2 TableHeaderSelectComponent.
+  // selectedCount defaults to selectedKeys().size when the binding doesn't
+  // supply one (selection lives outside selectedKeys, e.g. a `_selected` flag).
+  private selectAllCounts(col: SignalListColumn<T>): { selected: number; count: number } | null {
+    const sa = col.checkbox?.selectAll;
+    if (!sa) return null;
+    const count = sa.selectableCount();
+    const selected = sa.selectedCount ? sa.selectedCount() : (col.checkbox?.selectedKeys().size ?? 0);
+    return { selected, count };
+  }
+
+  selectAllChecked(col: SignalListColumn<T>): boolean {
+    const c = this.selectAllCounts(col);
+    return !!c && c.count > 0 && c.selected >= c.count;
+  }
+
+  selectAllIndeterminate(col: SignalListColumn<T>): boolean {
+    const c = this.selectAllCounts(col);
+    return !!c && c.selected > 0 && c.selected < c.count;
+  }
+
+  selectAllDisabled(col: SignalListColumn<T>): boolean {
+    return !!col.checkbox?.selectAll?.isDisabled?.();
+  }
+
+  onToggleSelectAll(col: SignalListColumn<T>, ev: Event): void {
+    ev.stopPropagation();
+    if (this.selectAllDisabled(col)) return;
+    col.checkbox?.selectAll?.onToggle();
+  }
+
+  // Cell-template helpers ----------------------------------------------
+
+  cellTemplateFor(col: SignalListColumn<T>): TemplateRef<{ $implicit: T; row: T }> | undefined {
+    if (col.kind !== 'template' || !col.templateName || !this.cellTemplates) return undefined;
+    return this.cellTemplates.find(d => d.name === col.templateName)?.template;
+  }
+
+  // Per-row state (RowState) -------------------------------------------
+  // Reserved name for a fully-custom message body projected via
+  // `<ng-template appSignalListCell="__rowMessage" let-row>`.
+  private static readonly ROW_MESSAGE_TEMPLATE = '__rowMessage';
+
+  // Current state for a row, or null when no rowState provider is configured
+  // (or it returns null for this row). Reading the returned signal here
+  // registers this view's dependency on it — zoneless re-renders the row
+  // when the consumer mutates its state signal.
+  rowStateOf(row: T): SignalListRowState | null {
+    return this.config.rowState?.(row)?.() ?? null;
+  }
+
+  // Data rows stay neutral surfaces — severity colors belong to the message
+  // strip only (tinting a whole data row fights the theme). Rows keep the
+  // functional treatments: highlight, and dim/non-interactive for
+  // blocked/deleting/disabled (cf. v4.9.2 table-row).
+  rowStateRowClass(row: T): string {
+    const s = this.rowStateOf(row);
+    if (!s) return '';
+    const dim = (s.blocked || s.deleting || s.disabled) ? ' opacity-60 pointer-events-none' : '';
+    if (s.highlighted) return 'bg-accent/5' + dim;
+    return dim.trim();
+  }
+
+  // Tailwind tint for the row's message strip, by severity precedence
+  // error → warning → info.
+  rowStateMessageClass(row: T): string {
+    const s = this.rowStateOf(row);
+    if (!s) return '';
+    const dim = (s.blocked || s.deleting || s.disabled) ? ' opacity-60 pointer-events-none' : '';
+    if (s.error)   return 'bg-danger-50 dark:bg-danger-900/30 border-l-2 border-danger-300 dark:border-danger-700' + dim;
+    if (s.warning) return 'bg-warning-50 dark:bg-warning-900/30 border-l-2 border-warning-300 dark:border-warning-700' + dim;
+    if (s.info)    return 'bg-info-50 dark:bg-info-900/30 border-l-2 border-info-300 dark:border-info-700' + dim;
+    return dim.trim();
+  }
+
+  // Blocked/deleting rows suppress navigation (cf. legacy non-interactive rows).
+  rowStateBlocksNav(row: T): boolean {
+    const s = this.rowStateOf(row);
+    return !!s && (!!s.blocked || !!s.deleting);
+  }
+
+  // True while a row is mid-delete — renders the "Deleting" indeterminate bar.
+  rowStateDeleting(row: T): boolean {
+    return !!this.rowStateOf(row)?.deleting;
+  }
+
+  // True while a row has a non-delete operation in flight — renders a spinner.
+  rowStateBusy(row: T): boolean {
+    const s = this.rowStateOf(row);
+    return !!s && !!s.busy && !s.deleting;
+  }
+
+  // True when a row has a non-empty message to render in a sub-row.
+  hasRowMessage(row: T): boolean {
+    const m = this.rowStateOf(row)?.message;
+    if (!m) return false;
+    return typeof m === 'string' ? m.length > 0 : m.length > 0;
+  }
+
+  // Leading icon for the message sub-row: warning glyph for error/warning,
+  // info glyph otherwise. Mirrors the legacy table-row treatment.
+  rowMessageIcon(row: T): 'warning' | 'info' {
+    const s = this.rowStateOf(row);
+    return s && (s.error || s.warning) ? 'warning' : 'info';
+  }
+
+  // Text color for the message icon, matching severity.
+  rowMessageIconClass(row: T): string {
+    const s = this.rowStateOf(row);
+    if (s?.error)   return 'text-danger';
+    if (s?.warning) return 'text-warning';
+    return 'text-info';
+  }
+
+  // Normalize string | segments into a segment array for uniform rendering.
+  rowMessageSegments(row: T): readonly SignalListMessageSegment[] {
+    const m = this.rowStateOf(row)?.message;
+    if (!m) return [];
+    return typeof m === 'string' ? [{ text: m }] : m;
+  }
+
+  // The projected `__rowMessage` template, if the host supplied one.
+  rowMessageTemplate(): TemplateRef<{ $implicit: T; row: T }> | undefined {
+    return this.cellTemplates?.find(d => d.name === SignalListComponent.ROW_MESSAGE_TEMPLATE)?.template;
+  }
+
+  // Per-segment text classes: bold emphasis + optional tone color.
+  segmentClass(seg: SignalListMessageSegment): string {
+    const weight = seg.bold ? 'font-semibold ' : '';
+    switch (seg.tone) {
+      case 'success': return weight + 'text-success';
+      case 'warning': return weight + 'text-warning';
+      case 'danger':  return weight + 'text-danger';
+      case 'neutral': return weight + 'text-content-muted';
+      default:        return weight.trim();
+    }
+  }
+
+  // colspan for the message sub-row: data columns (excluding the
+  // favorite/actions columns, which collapse into one leading control cell)
+  // plus 1 when that leading control cell is present.
+  totalColumnCount(): number {
+    const dataCols = this.config.columns.filter(c => c.kind !== 'favorite' && c.kind !== 'actions').length;
+    const leading = (this.favoriteColumn() || this.actionsColumn()) ? 1 : 0;
+    return dataCols + leading;
+  }
+
+  // Compound-cell overflow ---------------------------------------------
+
+  // Set of `${rowKey}::${columnKey}` entries currently in the expanded
+  // state. Keyed per (row, column) so two compound columns on the same
+  // row (e.g. Org Roles + Space Roles on the cf users page) expand and
+  // collapse independently — keying by row alone would surprise users
+  // who clicked "…and N more spaces" and saw orgs expand too. Survives
+  // re-renders because the signal lives on the component instance, but
+  // resets when the user navigates away (component teardown).
+  readonly expandedCompoundCells: WritableSignal<ReadonlySet<string>> = signal(new Set<string>());
+
+  // Internal — composes the (row, column) key used by expandedCompoundCells.
+  private compoundCellKey(col: SignalListColumn<T>, row: T): string {
+    return `${this.config.getRowKey(row)}::${this.columnKey(col)}`;
+  }
+
+  // True when the compound cell for (row, col) should render every segment
+  // — either because the user expanded it OR because the segment count
+  // doesn't exceed the column's maxVisible cap (no overflow to hide).
+  // Always true when col.maxVisible is unset.
+  isCompoundExpanded(col: SignalListColumn<T>, row: T): boolean {
+    return this.expandedCompoundCells().has(this.compoundCellKey(col, row));
+  }
+
+  // Click handler for "…and N more" / "…show fewer" indicators. Toggles
+  // the (row, column) entry in the expanded set. stopPropagation so the
+  // click doesn't bubble to row-level selection (and doesn't close any
+  // open kebab menus, which is the document:click handler's job).
+  toggleCompoundExpanded(col: SignalListColumn<T>, row: T, ev: Event): void {
+    ev.stopPropagation();
+    const key = this.compoundCellKey(col, row);
+    this.expandedCompoundCells.update(curr => {
+      const next = new Set(curr);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
+  }
+
+  // Returns the segments to render for the cell, respecting maxVisible
+  // and the per-cell expanded state. When the cap applies and the cell
+  // is collapsed, returns a slice of the first `maxVisible`; otherwise
+  // returns the full list. Centralises the slicing so the template
+  // doesn't have to call .compound(row) twice (filter then count).
+  visibleCompoundSegments(col: SignalListColumn<T>, row: T): readonly SignalListCompoundSegment[] {
+    const all = col.compound!(row);
+    const cap = col.maxVisible;
+    if (cap == null || all.length <= cap || this.isCompoundExpanded(col, row)) {
+      return all;
+    }
+    return all.slice(0, cap);
+  }
+
+  // Number of segments hidden by the maxVisible cap when the cell is
+  // collapsed. Returns 0 when the cell renders fully (either no cap, no
+  // overflow, or expanded) — the template uses this as a guard to skip
+  // the "…and N more" affordance when there's nothing to hide.
+  hiddenCompoundCount(col: SignalListColumn<T>, row: T): number {
+    const cap = col.maxVisible;
+    if (cap == null) return 0;
+    if (this.isCompoundExpanded(col, row)) return 0;
+    const total = col.compound!(row).length;
+    return total > cap ? total - cap : 0;
+  }
+
+  // Caller-supplied or default phrasing for the "…and N more" affordance.
+  // Default uses the ellipsis-prefixed form so it reads as a continuation
+  // of the visible segments rather than a standalone label.
+  collapsedLabelFor(col: SignalListColumn<T>, hidden: number): string {
+    if (col.collapsedLabel) return col.collapsedLabel(hidden);
+    return `…and ${hidden} more`;
+  }
+
+  onFilterFieldChange(field: string): void {
+    this.config.filterField?.set(field);
+    this.config.pageIndex.set(0);
+  }
+
+  // Placeholder text for the text-filter input; tracks the active field
+  // when the selector is shown so users see e.g. "Filter by CF/Org/Space".
+  // Falls back to "Filter by Name" for the single-field case.
+  filterPlaceholder(): string {
+    if (!this.showFilterFieldSelector()) return 'Filter by Name';
+    const key = this.config.filterField!();
+    const col = this.config.columns.find(c => this.columnKey(c) === key);
+    return `Filter by ${col?.header ?? 'Name'}`;
+  }
+
+  onSortFieldChange(field: string): void {
+    if (!this.config.sort) return;
+    const current = this.config.sort();
+    this.config.sort.set({ field, direction: current.direction, caseSensitive: current.caseSensitive });
+    this.config.pageIndex.set(0);
+  }
+
+  toggleSortDirection(): void {
+    if (!this.config.sort) return;
+    const current = this.config.sort();
+    this.config.sort.set({
+      field: current.field,
+      direction: current.direction === 'asc' ? 'desc' : 'asc',
+      caseSensitive: current.caseSensitive,
+    });
+    this.config.pageIndex.set(0);
+  }
+
+  toggleSortCaseSensitive(): void {
+    if (!this.config.sort) return;
+    const current = this.config.sort();
+    this.config.sort.set({
+      field: current.field,
+      direction: current.direction,
+      caseSensitive: !current.caseSensitive,
+    });
+    this.config.pageIndex.set(0);
+  }
+
+  hasActiveFilter(): boolean {
+    for (const dd of this.config.filterDropdowns ?? []) {
+      if (dd.selected() != null) return true;
+    }
+    if (this.config.nameFilter && this.config.nameFilter().length > 0) return true;
+    return false;
+  }
+
+  onDropdownChange(dropdown: SignalListDropdown, value: string): void {
+    // The <select> value is a string, but our model uses `null` for the
+    // "All" option. The option with value=null renders as an empty string
+    // attribute, so treat empty string as the null selection.
+    dropdown.selected.set(value === '' ? null : value);
+    // Reset to first page so filtered results don't land on an empty page.
+    this.config.pageIndex.set(0);
+  }
+
+}

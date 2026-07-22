@@ -1,0 +1,78 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { brandingModel, nodeFor } from '@/state/branding';
+import { rootValues } from '@/state/tokens';
+import { applyEdit, reprojectNodeTokens } from '@/ui/element-edit';
+import type { BrandingModel } from '@/metadata/types';
+
+const routing = { containers: { 'auth.login': 'login' }, elements: {
+  'auth.login.title': { config: 'title' },
+  'auth.login.sign-in': { token: '--color-brand-500' },
+} };
+const model: BrandingModel = { scene: 'login', nodes: [
+  { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title', facets: { content: { text: 'A' } } },
+  { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn', facets: {} },
+] };
+
+describe('applyEdit', () => {
+  beforeEach(() => { brandingModel.value = JSON.parse(JSON.stringify(model)); rootValues.value = new Map(); });
+
+  it('content edit updates the model node', () => {
+    applyEdit('auth.login.title', { kind: 'content', text: 'B' }, routing);
+    expect(nodeFor('auth.login.title')?.facets.content?.text).toBe('B');
+  });
+  it('content edit with format subset stores the format on the facet', () => {
+    applyEdit('auth.login.title', { kind: 'content', text: '**B**', format: 'subset' }, routing);
+    expect(nodeFor('auth.login.title')?.facets.content).toEqual({ text: '**B**', format: 'subset' });
+  });
+  it('plain content edit stores no format key (byte-identical to pre-format shape)', () => {
+    applyEdit('auth.login.title', { kind: 'content', text: 'B' }, routing);
+    expect(nodeFor('auth.login.title')?.facets.content).toEqual({ text: 'B' });
+  });
+  it('color edit re-projects to the bound token', () => {
+    applyEdit('auth.login.sign-in', { kind: 'color', oklch: { l: 0.6, c: 0.12, h: 200 } }, routing);
+    expect(rootValues.value.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);
+  });
+});
+
+describe('reprojectNodeTokens', () => {
+  beforeEach(() => { brandingModel.value = JSON.parse(JSON.stringify(model)); rootValues.value = new Map(); });
+
+  it('re-projects a color edit from facets to the bound CSS token', () => {
+    reprojectNodeTokens(
+      'auth.login.sign-in',
+      { background: { color: { literal: { l: 0.6, c: 0.12, h: 200 } } } },
+      routing,
+    );
+    expect(rootValues.value.get('--color-brand-500')).toMatch(/^#[0-9a-f]{6}$/);
+  });
+});
+
+describe('applyEdit facets write-back', () => {
+  const facetModel: BrandingModel = { scene: 'login', nodes: [
+    { snapshotId: 'auth.login.title', role: 'heading', name: 'T', description: 'title',
+      facets: { content: { text: 'A' } } },
+    { snapshotId: 'auth.login.sign-in', role: 'button', name: 'S', description: 'btn',
+      facets: { background: { color: { literal: { l: 0.5, c: 0.1, h: 250 } } } } },
+    { snapshotId: 'auth.login.text-label', role: 'text', name: 'Label', description: 'text label',
+      facets: { text: { color: { literal: { l: 0.4, c: 0.1, h: 120 } } } } },
+  ] };
+  beforeEach(() => { brandingModel.value = JSON.parse(JSON.stringify(facetModel)); rootValues.value = new Map(); });
+
+  it('opens the primary lever from facets and writes the edit back into facets', () => {
+    applyEdit('auth.login.title', { kind: 'content', text: 'B' }, routing);
+    expect(nodeFor('auth.login.title')?.facets.content?.text).toEqual('B');
+  });
+
+  it('writes a color edit back into the background.color facet', () => {
+    const newOklch = { l: 0.6, c: 0.12, h: 200 };
+    applyEdit('auth.login.sign-in', { kind: 'color', oklch: newOklch }, routing);
+    expect(nodeFor('auth.login.sign-in')?.facets.background?.color).toEqual({ literal: newOklch });
+  });
+
+  it('writes a color edit back into the text.color facet', () => {
+    // Exercises the text.color write-back branch — background.color branch already covered above.
+    const newOklch = { l: 0.3, c: 0.08, h: 180 };
+    applyEdit('auth.login.text-label', { kind: 'color', oklch: newOklch }, routing);
+    expect(nodeFor('auth.login.text-label')?.facets.text?.color).toEqual({ literal: newOklch });
+  });
+});

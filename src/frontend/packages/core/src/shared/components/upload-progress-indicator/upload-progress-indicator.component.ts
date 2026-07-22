@@ -6,7 +6,6 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
 @Component({
   selector: 'app-upload-progress-indicator',
   templateUrl: './upload-progress-indicator.component.html',
-  styleUrls: ['./upload-progress-indicator.component.scss'],
   standalone: true,
   imports: [
     CommonModule,

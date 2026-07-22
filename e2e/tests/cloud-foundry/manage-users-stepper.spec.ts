@@ -42,7 +42,7 @@ test.describe('Manage Users Stepper', () => {
       await manageButton.click();
 
       // Verify wizard/stepper dialog opened
-      const wizard = page.locator('app-manage-users-stepper, app-user-management-wizard, mat-dialog-container, app-stepper');
+      const wizard = page.locator('app-manage-users-stepper, app-user-management-wizard, [role="dialog"], app-stepper');
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!wizardExists) {
@@ -78,7 +78,7 @@ test.describe('Manage Users Stepper', () => {
       await manageButton.click();
 
       // Wait for wizard
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!wizardExists) {
@@ -131,7 +131,7 @@ test.describe('Manage Users Stepper', () => {
       await manageButton.click();
 
       // Wait for wizard
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!wizardExists) {
@@ -191,7 +191,7 @@ test.describe('Manage Users Stepper', () => {
       await manageButton.click();
 
       // Wait for wizard
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!wizardExists) {
@@ -253,7 +253,7 @@ test.describe('Manage Users Stepper', () => {
       await manageButton.click();
 
       // Wait for wizard
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!wizardExists) {
@@ -307,7 +307,7 @@ test.describe('Manage Users Stepper', () => {
       await manageButton.click();
 
       // Wait for wizard
-      const wizard = page.locator('mat-dialog-container, app-stepper').first();
+      const wizard = page.locator('[role="dialog"], app-stepper').first();
       const wizardExists = await wizard.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!wizardExists) {

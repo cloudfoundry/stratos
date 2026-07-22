@@ -4,7 +4,7 @@
 <a href="https://goreportcard.com/report/github.com/cloudfoundry/stratos"><img src="https://goreportcard.com/badge/github.com/cloudfoundry-incubator/stratos"/></a>
 <a href="https://codecov.io/gh/cloudfoundry-community/stratos/branch/master"><img src="https://codecov.io/gh/cloudfoundry-community/stratos/branch/master/graph/badge.svg"/></a>
 [![GitHub release](https://img.shields.io/github/release/cloudfoundry-community/stratos.svg)](https://github.com/cloudfoundry/stratos/releases/latest)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/cloudfoundry/stratos/blob/master/LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/cloudfoundry/stratos/blob/main/LICENSE)
 [![slack.cloudfoundry.org](https://slack.cloudfoundry.org/badge.svg)](https://cloudfoundry.slack.com/messages/C80EP4Y57/)
 
 # Roadmap
@@ -68,7 +68,8 @@ make dev-frontend
 2. Builds the devkit package (required by Angular CLI)
 3. Generates extension module imports
 4. Creates development proxy configuration
-5. Cleans up workspace
+5. Stamps `build-info.ts` so vitest can run without a full build
+6. Cleans up workspace
 
 **Troubleshooting:**
 - If `bun install` fails with missing files: Run `make bootstrap` first

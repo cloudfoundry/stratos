@@ -3,7 +3,7 @@ package userinfo
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
@@ -152,8 +152,8 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 		return 0, nil, nil, fmt.Errorf("Request failed: %v", err)
 	}
 
-	data, err := ioutil.ReadAll(res.Body)
-	defer res.Body.Close()
+	data, err := io.ReadAll(res.Body)
+	defer func() { _ = res.Body.Close() }()
 
 	log.Debug("User profile request completed OK")
 	return res.StatusCode, data, &res.Header, err

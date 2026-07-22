@@ -1,7 +1,6 @@
 import { ApplicationRef, Injectable, NgZone, inject } from '@angular/core';
-import { MetricsAction, MetricQueryType, EntityMonitor, IMetrics } from '@stratosui/store';
-import { Subject, Subscription } from 'rxjs';
-import { debounceTime, takeWhile, tap } from 'rxjs/operators';
+import { MetricsRequest, MetricQueryType } from '@stratosui/store';
+import { Subject } from 'rxjs';
 import { isValid, isEqual } from 'date-fns';
 
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
@@ -18,93 +17,71 @@ export class MetricsRangeSelectorManagerService {
 
   public timeWindow$ = new Subject<ITimeRange>();
 
-  public commit: () => void = null;
+  // null until a valid start/end range has been chosen; reset to null after
+  // each commit. Templates guard the Set button on `!commit`.
+  public commit: (() => void) | null = null;
 
   public dateValid = false;
 
-  public committedStartEnd: [Date, Date] = [null, null];
+  // Slots are independently nullable: a range can be partially entered.
+  public committedStartEnd: [Date | null, Date | null] = [null, null];
 
   public rangeTypes = MetricQueryType;
 
   public times = this.metricRangeService.times;
 
-  public metricsMonitor: EntityMonitor<IMetrics>;
-
   private readonly startIndex = 0;
 
   private readonly endIndex = 1;
 
-  public startEnd: [Date, Date] = [null, null];
+  public startEnd: [Date | null, Date | null] = [null, null];
 
-  private initSub: Subscription;
+  // Assigned by `init()` / the selectedTimeRange setter before any read.
+  public selectedTimeRangeValue!: ITimeRange; // strict: lifecycle-assigned in init() before use
 
-  public selectedTimeRangeValue: ITimeRange;
+  public request$ = new Subject<MetricsRequest>();
 
-  public metricsAction$ = new Subject<MetricsAction>();
+  // Assigned by `init()` before any commit path reads it.
+  private baseRequest!: MetricsRequest; // strict: lifecycle-assigned in init() before use
 
-  private baseAction: MetricsAction;
-
-  private pollIndex: number;
+  // setInterval handle, assigned in startWindowPoll; only read by clearInterval.
+  private pollIndex!: number; // strict: assigned before clearInterval reads it
 
   public pollInterval = 10000;
 
-  private commitDate(date: Date, type: 'start' | 'end') {
+  private commitDate(date: Date | null, type: 'start' | 'end') {
     const index = type === 'start' ? this.startIndex : this.endIndex;
     const oldDate = this.startEnd[index];
     if (oldDate && !date) {
       this.startEnd[index] = date;
       return;
     }
-    if (!date || !isValid(date) || isEqual(date, oldDate)) {
+    if (!date || !isValid(date) || (oldDate && isEqual(date, oldDate))) {
       return;
     }
     this.startEnd[index] = date;
     const [start, end] = this.startEnd;
     if (start && end) {
-      const action = this.metricRangeService.getNewDateRangeAction(this.baseAction, start, end);
+      const next = this.metricRangeService.getNewDateRangeRequest(this.baseRequest, start, end);
       this.commit = () => {
         this.committedStartEnd = [
           this.startEnd[0],
           this.startEnd[1]
         ];
-        this.commitAction(action);
+        this.commitRequest(next);
       };
     }
   }
 
-  private setTimeWindowFromStore(metrics: IMetrics) {
-    const { timeRange, start, end } = this.metricRangeService.getDateFromStoreMetric(metrics);
-    const isDifferent = (!start || !end) || !isEqual(start, this.start) || !isEqual(end, this.end);
-    if (isDifferent) {
-      this.committedStartEnd = [start, end];
+  public init(baseRequest: MetricsRequest) {
+    this.baseRequest = baseRequest;
+    if (!this.selectedTimeRange) {
+      const { timeRange } = this.metricRangeService.resolveTimeRange(baseRequest.windowValue);
+      this.selectedTimeRange = timeRange;
     }
-    this.selectedTimeRange = timeRange;
-  }
-
-  public init(entityMonitor: EntityMonitor<IMetrics>, baseAction: MetricsAction) {
-    this.baseAction = baseAction;
-    this.initSub = entityMonitor.entity$.pipe(
-      tap(metrics => {
-        if (metrics && !this.selectedTimeRange) {
-          this.setTimeWindowFromStore(metrics);
-        }
-      }),
-      debounceTime(0),
-      tap(metrics => {
-        // entity$ emits null first.
-        // If its still null after the debounce then we run setTimeWindowFromStore to get default selection
-        if (!metrics && !this.selectedTimeRange) {
-          this.setTimeWindowFromStore(metrics);
-        }
-      }),
-      takeWhile(metrics => !metrics)
-    ).subscribe();
   }
 
   public destroy() {
-    if (this.initSub) {
-      this.initSub.unsubscribe();
-    }
     this.endWindowPoll();
   }
 
@@ -124,7 +101,7 @@ export class MetricsRangeSelectorManagerService {
     }
   }
 
-  set start(start: Date) {
+  set start(start: Date | null) {
     this.commitDate(start, 'start');
   }
 
@@ -132,7 +109,7 @@ export class MetricsRangeSelectorManagerService {
     return this.startEnd[this.startIndex];
   }
 
-  set end(end: Date) {
+  set end(end: Date | null) {
     this.commitDate(end, 'end');
   }
 
@@ -145,10 +122,8 @@ export class MetricsRangeSelectorManagerService {
     this.ngZone.runOutsideAngular(() => {
       this.pollIndex = window.setInterval(
         () => {
-          if (timeWindow.value != null && this.baseAction) {
-            this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
-            // ZONELESS: Trigger change detection after periodic metrics update
-            // This runs outside Angular zone but needs to notify Angular of state changes
+          if (timeWindow.value != null && this.baseRequest) {
+            this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
             this.ngZone.run(() => this.appRef.tick());
           }
         },
@@ -163,19 +138,20 @@ export class MetricsRangeSelectorManagerService {
 
   private commitWindow(timeWindow: ITimeRange) {
     this.endWindowPoll();
-    if (!timeWindow) {
+    // Only reached for ranges with a window value (the selectedTimeRange
+    // setter guards on `value` before calling); a value-less custom range
+    // commits dates instead. Bail if there is no window to commit.
+    if (!timeWindow || !timeWindow.value) {
       return;
     }
     this.committedStartEnd = [null, null];
     this.startEnd = [null, null];
-    this.commitAction(this.metricRangeService.getNewTimeWindowAction(this.baseAction, timeWindow.value));
-    if (timeWindow.value) {
-      this.startWindowPoll(timeWindow);
-    }
+    this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
+    this.startWindowPoll(timeWindow);
   }
 
-  private commitAction(action: MetricsAction) {
-    this.metricsAction$.next(action);
+  private commitRequest(request: MetricsRequest) {
+    this.request$.next(request);
     this.commit = null;
   }
 

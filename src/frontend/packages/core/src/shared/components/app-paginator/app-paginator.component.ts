@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output, ChangeDetectionStrategy } from 
 
 import { FormsModule } from '@angular/forms';
 import { TailwindPageEvent } from '../../services/tailwind-paginator.service';
-import { isPageSizeSentinel, resolvePageSize, getPageSizeLabel as getSizeLabel } from '../list/list.component.types';
+import { isPageSizeSentinel, resolvePageSize, getPageSizeLabel as getSizeLabel } from '../signal-list/page-size.types';
 
 @Component({
   selector: 'app-paginator',

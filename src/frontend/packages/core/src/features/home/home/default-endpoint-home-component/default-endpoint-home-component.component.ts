@@ -10,7 +10,6 @@ import { MetadataItemComponent } from '../../../../shared/components/metadata-it
 @Component({
   selector: 'app-default-endpoint-home-component',
   templateUrl: './default-endpoint-home-component.component.html',
-  styleUrls: ['./default-endpoint-home-component.component.scss'],
   standalone: true,
   imports: [
     MetadataItemComponent
@@ -19,9 +18,11 @@ import { MetadataItemComponent } from '../../../../shared/components/metadata-it
 })
 export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCard {
 
-  url: string;
+  // strict: assigned in ngOnInit before any template read
+  url!: string;
 
-  pLayout: HomePageCardLayout;
+  // strict: assigned via the @Input set layout accessor
+  pLayout!: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
     return this.pLayout;

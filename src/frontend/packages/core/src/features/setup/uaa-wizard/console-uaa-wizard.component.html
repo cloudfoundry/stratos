@@ -1,23 +1,23 @@
-<div class="page-container setup">
-  <app-page-header hideMenu="true" [showHistory]="false">
+<div class="setup flex flex-col h-full">
+  <app-page-header [hideMenu]="true" [showHistory]="false">
     <h1>{{title}} Setup with Cloud Foundry UAA</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
   <div class="p-6">
-    <app-steppers>
-      <app-step title="UAA Endpoint" [valid]="validateUAAForm | async" [onNext]="uaaFormNext">
+    <app-steppers class="flex flex-1 my-6" [cancel]="'/setup'">
+      <app-step title="UAA Endpoint" [signalHandle]="uaaFormStepHandle">
         <div class="space-y-6">
           <p class="text-content-text">Please enter the following information to allow <app-product-name></app-product-name> to authenticate
           with
         your UAA:</p>
-        <form [formGroup]="uaaForm" class="space-y-6">
+        <form [formGroup]="uaaForm" class="space-y-6 min-w-[400px] w-full">
           <div class="space-y-4">
             <div class="form-field">
               <label class="form-label" for="apiUrl">UAA Endpoint URL</label>
               <input id="apiUrl" class="input" formControlName="apiUrl" placeholder="UAA Endpoint URL">
             </div>
-            <label class="flex items-center space-x-2 cursor-pointer">
-              <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500" formControlName="skipSSL">
+            <label class="flex items-center space-x-2 cursor-pointer" for="uaa-skip-ssl">
+              <input id="uaa-skip-ssl" type="checkbox" class="rounded border-content-border text-brand-600 focus:ring-brand-500" formControlName="skipSSL">
               <span class="text-sm text-content-text">Skip SSL validation for the UAA</span>
             </label>
             <div class="form-field">
@@ -68,16 +68,16 @@
           <div class="border-t pt-6">
             <p class="text-content-text mb-4">UAA Single Sign On (SSO)</p>
             <div class="space-y-4">
-              <label class="flex items-start space-x-2 cursor-pointer">
-                <input type="checkbox" class="rounded border-gray-300 text-primary-600 focus:ring-primary-500 mt-0.5" formControlName="useSSO">
+              <label class="flex items-start space-x-2 cursor-pointer" for="uaa-use-sso">
+                <input id="uaa-use-sso" type="checkbox" class="rounded border-content-border text-brand-600 focus:ring-brand-500 mt-0.5" formControlName="useSSO">
                 <span class="text-sm text-content-text">Use SSO (Use the UAA's UI to login rather than the <app-product-name></app-product-name>
               login UI)</span>
             </label>
             @if (uaaForm.value.useSSO) {
               <div class="alert alert-info">
-                <p class="text-info-800">You must ensure that the client specified
+                <p class="text-info-shade-800">You must ensure that the client specified
                   above has its 'redirect_uri' configured to include the <app-product-name></app-product-name> SSO Callback URL:
-                  <code class="bg-info-100 px-1 py-0.5 rounded text-xs">{{ clientRedirectURI }}</code>
+                  <code class="bg-info-shade-100 px-1 py-0.5 rounded text-xs">{{ clientRedirectURI }}</code>
                 </p>
               </div>
             }
@@ -86,12 +86,12 @@
       </form>
     </div>
   </app-step>
-  <app-step title="Admin Scope" [onNext]="uaaScopeNext">
-    <app-loading-page [isLoading]="applyingSetup()" alert="Saving configuration"
+  <app-step title="Admin Scope" [signalHandle]="uaaScopeStepHandle">
+    <app-loading-page [isLoading]="applyingSetup$" alert="Saving configuration"
       text="Please wait - this will take a few moments">
       <div class="space-y-4">
         <p class="text-content-text">Please select the UAA scope to use to identify users as <app-product-name></app-product-name> Administrators:</p>
-        <form class="space-y-4">
+        <form class="space-y-4 min-w-[400px] w-full">
           <div class="form-field">
             <label class="form-label" for="uaaScope">UAA Scope</label>
             <select id="uaaScope" class="input" [(ngModel)]="selectedScope" name="UAAScope">

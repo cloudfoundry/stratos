@@ -8,7 +8,6 @@ import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 @Component({
   selector: 'app-edit-organization',
   templateUrl: './edit-organization.component.html',
-  styleUrls: ['./edit-organization.component.scss'],
   providers: [getActiveRouteCfOrgSpaceProvider],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,

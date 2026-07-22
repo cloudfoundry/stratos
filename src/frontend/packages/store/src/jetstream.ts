@@ -3,9 +3,6 @@ import { HttpErrorResponse } from '@angular/common/http';
 // API Version to use when making back-end API requests to Jetstraam
 export const proxyAPIVersion = 'v1';
 
-// CF API Version
-export const cfAPIVersion = 'v2';
-
 /**
  * Actual error response from stratos
  */
@@ -20,7 +17,7 @@ export interface JetStreamErrorResponse<T = any> {
   errorResponse: T;
 }
 
-export function isHttpErrorResponse(obj: any): HttpErrorResponse {
+export function isHttpErrorResponse(obj: any): HttpErrorResponse | null {
   const props = Object.keys(obj);
   return (
     props.indexOf('error') >= 0 &&
@@ -32,7 +29,7 @@ export function isHttpErrorResponse(obj: any): HttpErrorResponse {
   ) ? obj as HttpErrorResponse : null;
 }
 
-export function jetStreamErrorResponseToSafeString(response: JetStreamErrorResponse): string {
+export function jetStreamErrorResponseToSafeString(response: JetStreamErrorResponse): string | null {
   return response.error && response.error.status && response.error.statusCode ?
     `${response.error.status}. Status Code ${response.error.statusCode}` :
     null;
@@ -43,7 +40,7 @@ export function jetStreamErrorResponseToSafeString(response: JetStreamErrorRespo
  * @param err The raw error from a http request
  */
 export function httpErrorResponseToSafeString(err: any): string {
-  const httpResponse: HttpErrorResponse = isHttpErrorResponse(err);
+  const httpResponse: HttpErrorResponse | null = isHttpErrorResponse(err);
   if (httpResponse) {
     if (httpResponse.error) {
       if (typeof (httpResponse.error) === 'string') {
@@ -58,16 +55,16 @@ export function httpErrorResponseToSafeString(err: any): string {
 
 // TODO It would be nice if the BE could return a unique para for us to check for. #3827
 // There is always a chance that this will return a false positive (more so with extensions).
-export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): JetStreamErrorResponse {
+export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): JetStreamErrorResponse | null {
   if (!pages || !pages.length) {
     return null;
   }
-  return pages.find(page => {
+  return (pages.find(page => {
     return isJetstreamError(page);
-  }) as JetStreamErrorResponse;
+  }) as JetStreamErrorResponse) ?? null;
 }
 
-export function isJetstreamError(err: any): JetStreamErrorResponse {
+export function isJetstreamError(err: any): JetStreamErrorResponse | null {
   return err &&
     err.error &&
     err.error.status &&

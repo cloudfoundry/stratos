@@ -7,8 +7,6 @@ import { IUpdateSpace } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   applicationEntityType,
-  domainEntityType,
-  routeEntityType,
   serviceEntityType,
   serviceInstancesEntityType,
   serviceInstancesWithSpaceEntityType,
@@ -24,7 +22,6 @@ import {
 } from '../entity-relations/entity-relations.types';
 import { CFStartAction } from './cf-action.types';
 import { GetAllOrgUsers } from './organization.actions';
-import { RouteEvents } from './route.actions';
 import { getServiceInstanceRelations } from './service-instances.actions';
 
 export const GET_SPACES = '[Space] Get all';
@@ -77,7 +74,7 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     super();
     this.options = new HttpRequest(
       'GET',
-      'space'
+      `/pp/v1/cf/spaces/${endpointGuid}`
     );
   }
   actions = [GET_SPACES, GET_SPACES_SUCCESS, GET_SPACES_FAILED];
@@ -91,43 +88,6 @@ export class GetAllSpaces extends CFStartAction implements PaginatedAction, Enti
     'order-direction-field': 'name',
     'order-by': 'name'
   };
-}
-
-export class GetSpaceRoutes extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
-  constructor(
-    public spaceGuid: string,
-    public endpointGuid: string,
-    public paginationKey: string,
-    public includeRelations = [
-      createEntityRelationKey(routeEntityType, domainEntityType),
-      createEntityRelationKey(routeEntityType, applicationEntityType)
-    ],
-    public populateMissing = true,
-    public flattenPagination = true
-  ) {
-    super();
-    this.options = new HttpRequest(
-      'GET',
-      `spaces/${spaceGuid}/routes`
-    );
-    this.parentGuid = spaceGuid;
-  }
-  actions = [
-    RouteEvents.GET_SPACE_ALL,
-    RouteEvents.GET_SPACE_ALL_SUCCESS,
-    RouteEvents.GET_SPACE_ALL_FAILED
-  ];
-  initialParams = {
-    'results-per-page': 100,
-    page: 1,
-    'order-direction': 'desc',
-    'order-direction-field': 'creation',
-  };
-  parentGuid: string;
-  entity = cfEntityFactory(routeEntityType);
-  entityType = routeEntityType;
-  options: HttpRequest<any>;
-  parentEntityConfig = new CFEntityConfig(spaceEntityType);
 }
 
 export class GetAllAppsInSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
@@ -177,7 +137,7 @@ export class DeleteSpace extends BaseSpaceAction {
     super(guid, orgGuid, endpointGuid);
     this.options = new HttpRequest(
       'DELETE',
-      `spaces/${guid}`,
+      `/pp/v1/cf/spaces/${endpointGuid}/${guid}`,
       {
         params: new HttpParams({
           fromObject: {
@@ -193,6 +153,11 @@ export class DeleteSpace extends BaseSpaceAction {
 }
 
 export class CreateSpace extends BaseSpaceAction {
+  // FLAG (A6): URL not swapped to /pp/v1/cf/spaces/${endpointGuid} because
+  // backend createNativeSpace expects v3 capi.SpaceCreateRequest body
+  // ({name, relationships:{organization:{data:{guid}}}}); current body is
+  // legacy V2 IUpdateSpace ({name, organization_guid, ...}). Body-shape
+  // transform required before swap.
   constructor(public endpointGuid: string, orgGuid: string, createSpace: IUpdateSpace, key = `${orgGuid}-${createSpace.name}`) {
     super(key, orgGuid, endpointGuid);
     this.options = new HttpRequest(
@@ -206,6 +171,11 @@ export class CreateSpace extends BaseSpaceAction {
 export class UpdateSpace extends CFStartAction implements ICFAction {
 
   public static UpdateExistingSpace = 'Updating-Existing-Space';
+  // FLAG (A6): URL/method not swapped to PATCH /pp/v1/cf/spaces/${endpointGuid}/${guid}
+  // because backend updateNativeSpace expects v3 capi.SpaceUpdateRequest body
+  // ({name?, metadata?}); current body is V2 IUpdateSpace
+  // (name, organization_guid, *_guids, allow_ssh, ...). Body-shape transform
+  // and PUT→PATCH switch required before swap.
   constructor(public guid: string, public endpointGuid: string, updateSpace: IUpdateSpace) {
     super();
     this.options = new HttpRequest(
@@ -241,7 +211,7 @@ export class GetAllSpaceUsers extends GetAllOrgUsers {
 export class GetAllServicesForSpace extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
   constructor(
     public paginationKey: string,
-    public endpointGuid: string = null,
+    public endpointGuid: string = '',
     public spaceGuid: string,
     public includeRelations: string[] = [
       createEntityRelationKey(serviceEntityType, servicePlanEntityType)
@@ -274,7 +244,7 @@ export class GetServiceInstancesForSpace
     public spaceGuid: string,
     public endpointGuid: string,
     public paginationKey: string,
-    public q: string[] = null,
+    public q?: string[],
     public includeRelations: string[] = getServiceInstanceRelations,
     public populateMissing = true,
     public flattenPagination = true

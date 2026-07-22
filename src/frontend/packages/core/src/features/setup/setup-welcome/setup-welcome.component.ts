@@ -1,7 +1,5 @@
-import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
-
-import { Store } from '@ngrx/store';
-import { RouterNav, GeneralEntityAppState } from '@stratosui/store';
+import { Component, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { BASE_REDIRECT_QUERY } from '../../../shared/components/stepper/stepper.types';
 import { ITileConfig, ITileData } from '../../../shared/components/tile/tile-selector.types';
@@ -9,7 +7,7 @@ import { APP_TITLE } from './../../../core/core.types';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
-import { StepComponent } from '../../../shared/components/stepper/step/step.component';
+import { StepComponent, SignalStepHandle } from '../../../shared/components/stepper/step/step.component';
 import { TileSelectorTileComponent } from '../../../shared/components/tile-selector-tile/tile-selector-tile.component';
 import { StratosTitleComponent } from '../../../shared/components/stratos-title/stratos-title.component';
 import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
@@ -32,6 +30,11 @@ selector: 'app-setup-welcome',
 })
 export class SetupWelcomeComponent {
 
+  // FWT-956: signal-native step handle. Setup welcome is a confirmation-style
+  // step (no submission, Next button hidden); navigation happens via the
+  // tile-selector selectionChange handler.
+  signalHandle: SignalStepHandle = { valid: signal(true).asReadonly() };
+
   public tileSelectorConfig = [
     new ITileConfig<ITileData>(
       'Local Admin',
@@ -51,17 +54,12 @@ export class SetupWelcomeComponent {
     )
 
   ];
-  private store = inject(Store<GeneralEntityAppState>);
+  private router = inject(Router);
   public title = inject(APP_TITLE);
 
   public selectionChange(tile: ITileConfig<ITileData>) {
-    if (tile) {
-      this.store.dispatch(new RouterNav({
-        path: `setup/${tile.data.type}`,
-        query: {
-          [BASE_REDIRECT_QUERY]: 'setup'
-        }
-      }));
+    if (tile && tile.data) {
+      this.router.navigate(`setup/${tile.data.type}`.split('/'), { queryParams: { [BASE_REDIRECT_QUERY]: 'setup' } });
     }
   }
 

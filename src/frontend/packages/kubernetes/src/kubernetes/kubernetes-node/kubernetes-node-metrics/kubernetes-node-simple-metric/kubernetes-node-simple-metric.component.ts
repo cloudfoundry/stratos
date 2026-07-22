@@ -9,14 +9,18 @@ import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
 })
 export class KubernetesNodeSimpleMetricComponent {
 
+  // strict: required @Input, set by Angular before the template reads it
   @Input()
-  key: string;
+  key!: string;
 
+  // strict: required @Input, set by Angular before the template reads it.
+  // Callers bind interpolated (already formatted) values, so this is a string.
   @Input()
-  value: number;
+  value!: string;
 
+  // Optional - callers may omit the unit; formatValue() falls back to ''
   @Input()
-  unit: string;
+  unit?: string;
 
   public formatValue() {
     switch (this.unit) {

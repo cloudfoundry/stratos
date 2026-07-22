@@ -1,0 +1,17 @@
+<div class="revisions-tab h-full flex flex-col">
+  @if (!featureEnabled()) {
+    <div class="flex items-center gap-2 px-4 py-3 mb-3 bg-warning-50 dark:bg-warning-900/30 border-l-4 border-warning-400 dark:border-warning-600 text-warning-900 dark:text-warning-100 rounded">
+      <span class="material-icons text-warning text-base">warning</span>
+      <span>Revisions are disabled for this app. Enable the revisions feature flag on the Cloud Foundry foundation to use this feature.</span>
+    </div>
+  }
+  @if (deployedUnknown()) {
+    <div class="flex items-center gap-2 px-4 py-3 mb-3 bg-info-50 dark:bg-info-900/30 border-l-4 border-info-400 dark:border-info-600 text-info-900 dark:text-info-100 rounded">
+      <span class="material-icons text-info text-base">info</span>
+      <span>The currently deployed revision could not be determined. Deployed status shown below may be incomplete.</span>
+    </div>
+  }
+  @if (listConfig(); as cfg) {
+    <app-signal-list [config]="cfg" class="flex-1 min-h-0" />
+  }
+</div>

@@ -1,0 +1,220 @@
+<app-page-header [breadcrumbs]="breadcrumbs">
+  {{ title() }}
+  @if (actions().length || canShare()) {
+    <div class="page-header-right flex gap-2">
+      @if (canShare()) {
+        <button type="button" data-test="share-service-instance-action"
+          (click)="openShareToSpaces()" class="btn btn-secondary btn-sm">
+          <span class="material-icons text-base align-middle">share</span>
+          Share to spaces
+        </button>
+      }
+      @for (a of actions(); track a.label) {
+        <button type="button" (click)="runAction(a)"
+          [class]="a.danger ? 'btn btn-secondary btn-sm text-danger' : 'btn btn-secondary btn-sm'">
+          <span class="material-icons text-base align-middle">{{ a.icon }}</span>
+          {{ a.label }}
+        </button>
+      }
+    </div>
+  }
+</app-page-header>
+
+<div class="p-4">
+  @if (loading()) {
+    <p class="text-content-muted">Loading service instance…</p>
+  } @else if (error()) {
+    <p class="text-danger">Could not load this service instance.</p>
+  } @else if (view(); as v) {
+    <!-- Two-column header: a compact, content-sized metadata card on the left,
+         bound applications on the right. Replaces the shared MetaCard here (its
+         full-width, right-aligned, height:100% layout wasted space and pushed
+         the sections off-screen) with a left-aligned definition list. -->
+    <div class="flex flex-wrap gap-6 items-start">
+      <div class="w-96 max-w-full self-start">
+        <app-meta-card>
+          <app-meta-card-title>
+            <div class="text-lg font-semibold text-content-text">{{ v.name }}</div>
+          </app-meta-card-title>
+
+          <app-meta-card-item>
+            <app-meta-card-key>Type</app-meta-card-key>
+            <app-meta-card-value>{{ v.typeLabel }}</app-meta-card-value>
+          </app-meta-card-item>
+
+          @if (v.status) {
+            <app-meta-card-item>
+              <app-meta-card-key>Status</app-meta-card-key>
+              <app-meta-card-value>
+                {{ v.status }}@if (v.statusDetail) { — {{ v.statusDetail }} }
+              </app-meta-card-value>
+            </app-meta-card-item>
+          }
+
+          @if (v.isManaged) {
+            @if (v.plan) {
+              <app-meta-card-item>
+                <app-meta-card-key>Plan</app-meta-card-key>
+                <app-meta-card-value>{{ v.plan }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+            @if (v.offering) {
+              <app-meta-card-item>
+                <app-meta-card-key>Service</app-meta-card-key>
+                <app-meta-card-value>{{ v.offering }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+            @if (v.broker) {
+              <app-meta-card-item>
+                <app-meta-card-key>Broker</app-meta-card-key>
+                <app-meta-card-value>{{ v.broker }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+            @if (v.dashboardUrl) {
+              <app-meta-card-item>
+                <app-meta-card-key>Dashboard</app-meta-card-key>
+                <app-meta-card-value>
+                  <a [href]="v.dashboardUrl" target="_blank" rel="noopener" class="text-accent">
+                    <span class="material-icons align-middle">launch</span>
+                  </a>
+                </app-meta-card-value>
+              </app-meta-card-item>
+            }
+          } @else {
+            @if (v.routeServiceUrl) {
+              <app-meta-card-item customStyle="long-text">
+                <app-meta-card-key>Route Service URL</app-meta-card-key>
+                <app-meta-card-value>{{ v.routeServiceUrl }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+            @if (v.syslogDrainUrl) {
+              <app-meta-card-item customStyle="long-text">
+                <app-meta-card-key>Syslog Drain URL</app-meta-card-key>
+                <app-meta-card-value>{{ v.syslogDrainUrl }}</app-meta-card-value>
+              </app-meta-card-item>
+            }
+          }
+
+          @if (v.space) {
+            <app-meta-card-item>
+              <app-meta-card-key>Space</app-meta-card-key>
+              <app-meta-card-value>{{ v.space }}@if (v.org) { ({{ v.org }}) }</app-meta-card-value>
+            </app-meta-card-item>
+          }
+
+          <app-meta-card-item>
+            <app-meta-card-key>Created</app-meta-card-key>
+            <app-meta-card-value>{{ v.createdAt | date:'medium' }}</app-meta-card-value>
+          </app-meta-card-item>
+
+          @if (v.updatedAt) {
+            <app-meta-card-item>
+              <app-meta-card-key>Updated</app-meta-card-key>
+              <app-meta-card-value>{{ v.updatedAt | date:'medium' }}</app-meta-card-value>
+            </app-meta-card-item>
+          }
+
+          <app-meta-card-item customStyle="column">
+            <app-meta-card-key>Tags</app-meta-card-key>
+            <app-meta-card-value>
+              <app-chips [chips]="v.tags"></app-chips>
+            </app-meta-card-value>
+          </app-meta-card-item>
+        </app-meta-card>
+      </div>
+
+      <section class="flex-1 min-w-[20rem]">
+        <h2 class="text-lg font-semibold text-content-text mb-2">Bound Applications</h2>
+        @if (bindingsLoading()) {
+          <p class="text-content-muted">Loading bindings…</p>
+        } @else if (bindings().length === 0) {
+          <p class="text-content-muted">No applications are bound to this service instance.</p>
+        } @else {
+          <table class="w-full text-left">
+            <thead>
+              <tr class="border-b border-content-border text-sm uppercase tracking-wide text-content-muted">
+                <th class="py-2">Application</th>
+                <th class="py-2 w-24 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (b of bindings(); track b.guid) {
+                <tr class="border-b border-content-border">
+                  <td class="py-2 text-content-text">{{ b.appName }}</td>
+                  <td class="py-2 text-right">
+                    <button type="button" class="btn btn-secondary btn-sm" (click)="unbind(b)">Unbind</button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </section>
+    </div>
+
+    @if (v.isManaged) {
+      <!-- Parameters — managed only (CF's /parameters queries the broker, which
+           a UPS has none of). Lazy, click-to-expand; fetched on first expand so
+           a broker that doesn't support parameter retrieval errors only here. -->
+      <section class="mt-6">
+        <button type="button"
+          class="flex items-center gap-2 text-left hover:opacity-80"
+          [attr.aria-expanded]="isParamsOpen()" (click)="toggleParams()">
+          <svg class="w-5 h-5 shrink-0 text-content-muted transition-transform duration-200"
+            [class.rotate-90]="isParamsOpen()" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+          </svg>
+          <h2 class="text-lg font-semibold text-content-text">Parameters</h2>
+        </button>
+        @if (isParamsOpen()) {
+          <div class="mt-2">
+            @if (paramsLoading()) {
+              <p class="flex items-center gap-2 text-content-muted">
+                <span class="animate-spin inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent"
+                  aria-hidden="true"></span>
+                Loading parameters…
+              </p>
+            } @else if (paramsUnavailable()) {
+              <p class="text-content-muted">Parameters are not available for this service.</p>
+            } @else if (paramsEmpty()) {
+              <p class="text-content-muted">No configured parameters.</p>
+            } @else if (params(); as p) {
+              <app-json-viewer [json]="p" root="parameters"></app-json-viewer>
+            }
+          </div>
+        }
+      </section>
+    } @else {
+      <!-- Credentials — UPS only. Lazy + masked: nothing is fetched from CF
+           until the user expands, and values stay masked until revealed. -->
+      <section class="mt-6">
+        <button type="button"
+          class="flex items-center gap-2 text-left hover:opacity-80"
+          [attr.aria-expanded]="isCredsOpen()" (click)="toggleCreds()">
+          <svg class="w-5 h-5 shrink-0 text-content-muted transition-transform duration-200"
+            [class.rotate-90]="isCredsOpen()" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+            <path d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z" />
+          </svg>
+          <h2 class="text-lg font-semibold text-content-text">Credentials</h2>
+        </button>
+        @if (isCredsOpen()) {
+          <div class="mt-2">
+            @if (credsLoading()) {
+              <p class="flex items-center gap-2 text-content-muted">
+                <span class="animate-spin inline-block h-4 w-4 rounded-full border-2 border-current border-t-transparent"
+                  aria-hidden="true"></span>
+                Loading credentials…
+              </p>
+            } @else if (credsError()) {
+              <p class="text-danger">Could not load credentials for this service instance.</p>
+            } @else if (credentialFields().length === 0) {
+              <p class="text-content-muted">No credentials are set on this service instance.</p>
+            } @else {
+              <app-masked-credentials [fields]="credentialFields()"></app-masked-credentials>
+            }
+          </div>
+        }
+      </section>
+    }
+  }
+</div>

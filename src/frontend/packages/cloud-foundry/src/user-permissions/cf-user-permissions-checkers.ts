@@ -1,5 +1,6 @@
-import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import {
@@ -15,16 +16,13 @@ import {
   PermissionConfigLink,
   PermissionTypes,
 } from '@stratosui/core';
-import { GeneralEntityAppState, PermissionValues, connectedEndpointsSelector } from '@stratosui/store';
-import { CFFeatureFlagTypes, IFeatureFlag } from '../cf-api.types';
-import { cfEntityCatalog } from '../cf-entity-catalog';
+import { PermissionValues } from '@stratosui/store';
+import { CFFeatureFlagTypes } from '../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
-import {
-  getCurrentUserCFEndpointHasScope,
-  getCurrentUserCFEndpointRolesState,
-  getCurrentUserCFGlobalState,
-} from '../store/selectors/cf-current-user-role.selectors';
+import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
+import { featureFlagsAfterLoad$, getFeatureFlagsSource } from './feature-flags-cache';
 import { IOrgRoleState, ISpaceRoleState, ISpacesRoleState } from '../store/types/cf-current-user-roles.types';
+import { CfCurrentUserRolesSignalService } from './cf-current-user-roles-signal.service';
 import {
   CfCurrentUserPermissions,
   CfPermissionStrings,
@@ -115,7 +113,9 @@ export const cfPermissionConfigs: IPermissionConfigs = {
 
 @Injectable()
 export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker implements ICurrentUserPermissionsChecker {
-  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private roles = inject(CfCurrentUserRolesSignalService);
+  private http = inject(HttpClient);
+  private injector = inject(Injector);
 
   static readonly ALL_SPACES = 'PERMISSIONS__ALL_SPACES_PLEASE';
 
@@ -136,11 +136,14 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
       if (!endpointGuid) {
         return of(false);
       }
-      return this.store.select(getCurrentUserCFEndpointHasScope(endpointGuid, permission as CfScopeStrings));
+      return this.roles.cfEndpointHasScope$(endpointGuid, permission as CfScopeStrings);
     }
 
+    if (!endpointGuid) {
+      return of(false);
+    }
     if (type === CfPermissionTypes.ENDPOINT) {
-      return this.store.select(getCurrentUserCFGlobalState(endpointGuid, permission));
+      return this.roles.cfGlobalState$(endpointGuid, permission);
     }
     return this.getCfEndpointState(endpointGuid).pipe(
       filter(state => !!state),
@@ -159,15 +162,28 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   /**
    * @param permissionConfig Single permission to be checked
    */
-  public getSimpleCheck(permissionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
+  public getSimpleCheck(
+    permissionConfig: PermissionConfig,
+    endpointGuid?: string,
+    orgOrSpaceGuid?: string,
+    spaceGuid?: string
+  ): Observable<boolean> | undefined {
     const check$ = this.getBaseSimpleCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
+    if (!check$) {
+      return undefined;
+    }
     if (permissionConfig.type === CfPermissionTypes.ORGANIZATION || permissionConfig.type === CfPermissionTypes.SPACE) {
       return this.applyAdminCheck(check$, endpointGuid);
     }
     return check$;
   }
 
-  private getBaseSimpleCheck(permissionConfig: PermissionConfig, endpointGuid?: string, orgOrSpaceGuid?: string, spaceGuid?: string) {
+  private getBaseSimpleCheck(
+    permissionConfig: PermissionConfig,
+    endpointGuid?: string,
+    orgOrSpaceGuid?: string,
+    spaceGuid?: string
+  ): Observable<boolean> | undefined {
     switch (permissionConfig.type) {
       case (CfPermissionTypes.FEATURE_FLAG):
         return this.getFeatureFlagCheck(permissionConfig, endpointGuid);
@@ -177,6 +193,13 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
         return this.getCfCheck(permissionConfig, endpointGuid, orgOrSpaceGuid, spaceGuid);
       case (CfPermissionTypes.ENDPOINT_SCOPE):
         return this.getEndpointScopesCheck(permissionConfig.permission as CfScopeStrings, endpointGuid);
+      default:
+        // Not a CF permission type: returning undefined tells
+        // CurrentUserPermissionsService this checker does not own the config.
+        // Returning a denial stream here instead makes findChecker() count two
+        // claimants for every stratos-level check and deny it app-wide (#5570,
+        // #5571).
+        return undefined;
     }
   }
 
@@ -237,20 +260,30 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
       switchMap(guids => {
-        const createFFObs = (guid: string) =>
-          // For admins we don't have the ff list which is usually fetched right at the start,
-          // so this can't be a pagination monitor on its own (which doesn't fetch if list is missing)
-          cfEntityCatalog.featureFlag.store.getPaginationService(guid).entities$;
+        const createFFObs = (guid: string): Observable<StFeatureFlag[]> => {
+          // For admins the role-fetch barrier does not prime feature flags
+          // for us, so trigger an idempotent load() here. The shared cache
+          // (feature-flags-cache.ts) collapses concurrent + repeat loads
+          // for the same cnsi, so this is safe to call on every check.
+          //
+          // Gate on load() completion: the items signal starts empty, so a
+          // take(1) consumer would otherwise capture the pre-load empty list
+          // and resolve to a false negative (set/unset-roles-by-username
+          // wrongly appearing disabled despite the flag being enabled).
+          const src = getFeatureFlagsSource(guid, this.http);
+          return featureFlagsAfterLoad$(
+            () => src.load(),
+            () => toObservable(src.items, { injector: this.injector }),
+          );
+        };
         return combineLatest(guids.map(createFFObs));
       }),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
-      // startWith(false), // Don't start with anything, this ensures first value out can be trusted. Should never get to the point where
-      // nothing is returned
       distinctUntilChanged(),
     );
   }
 
-  private checkFeatureFlag(featureFlags: IFeatureFlag[], permission: CFFeatureFlagTypes) {
+  private checkFeatureFlag(featureFlags: StFeatureFlag[], permission: CFFeatureFlagTypes) {
     const flag = featureFlags.find(ff => ff.name === permission.toString());
     if (!flag) {
       return false;
@@ -337,9 +370,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   private getAllEndpointGuids(): Observable<string[]> {
-    return this.store.select(connectedEndpointsSelector()).pipe(
-      map(endpoints => Object.values(endpoints).filter(e => e.cnsi_type === CF_ENDPOINT_TYPE).map(endpoint => endpoint.guid))
-    );
+    return this.roles.connectedCfEndpointGuids$();
   }
 
   private getEndpointGuidObservable(endpointGuid: string | undefined): Observable<string[]> {
@@ -360,7 +391,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   }
 
   private getCfEndpointState(endpointGuid: string): Observable<any> {
-    return this.store.select(getCurrentUserCFEndpointRolesState(endpointGuid));
+    return this.roles.cfEndpointRolesState$(endpointGuid);
   }
 
   public getComplexCheck(
@@ -368,16 +399,22 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): IPermissionCheckCombiner[] {
+  ): IPermissionCheckCombiner[] | null {
     const groupedChecks = this.groupConfigs(permissionConfigs);
-    return Object.keys(groupedChecks).map((permission: PermissionTypes) => {
-      const configGroup = groupedChecks[permission];
-      const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
-      if (checkCombiner) {
-        checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid));
-      }
-      return checkCombiner;
-    });
+    const combiners = Object.keys(groupedChecks)
+      .map((permission: PermissionTypes) => {
+        const configGroup = groupedChecks[permission];
+        const checkCombiner = this.getBaseCheckFromConfig(configGroup, permission, endpointGuid, orgOrSpaceGuid, spaceGuid);
+        if (checkCombiner) {
+          checkCombiner.checks = checkCombiner.checks.map(check$ => this.applyAdminCheck(check$, endpointGuid));
+        }
+        return checkCombiner;
+      })
+      .filter((checkCombiner): checkCombiner is IPermissionCheckCombiner => !!checkCombiner);
+    // No group handled → this checker does not own the config; an empty array
+    // is truthy and would double-claim the check in findChecker() (see
+    // getBaseSimpleCheck's default case).
+    return combiners.length ? combiners : null;
   }
 
 
@@ -408,7 +445,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     endpointGuid?: string,
     orgOrSpaceGuid?: string,
     spaceGuid?: string
-  ): IPermissionCheckCombiner {
+  ): IPermissionCheckCombiner | undefined {
     switch (permission) {
       case CfPermissionTypes.ENDPOINT_SCOPE:
         return {

@@ -19,7 +19,8 @@ export enum CfUserRoleParams {
   AUDITED_ORGS = 'audited_organizations',
   SPACES = 'spaces',
   MANAGED_SPACES = 'managed_spaces',
-  AUDITED_SPACES = 'audited_spaces'
+  AUDITED_SPACES = 'audited_spaces',
+  SUPPORTED_SPACES = 'supported_spaces'
 }
 
 export interface CfUserMissingRoles {
@@ -36,6 +37,8 @@ export interface CfUser {
   spaces?: APIResource<ISpace>[];
   managed_spaces?: APIResource<ISpace>[];
   audited_spaces?: APIResource<ISpace>[];
+  supported_spaces?: APIResource<ISpace>[];
+  supported_spaces_url: string;
   cfGuid?: string;
   guid: string;
   username?: string;
@@ -66,7 +69,8 @@ export enum OrgUserRoleNames {
 export enum SpaceUserRoleNames {
   MANAGER = 'managers',
   AUDITOR = 'auditors',
-  DEVELOPER = 'developers'
+  DEVELOPER = 'developers',
+  SUPPORTER = 'supporters'
 }
 
 export class UserRoleInOrg {
@@ -96,8 +100,12 @@ export class UserRoleInOrg {
  * UserRoleInOrg, thus can create roles without this workaround function. See
  * https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#constant-named-properties for details
  */
-export function createUserRoleInOrg(manager: boolean, billingManager: boolean, auditor: boolean, user: boolean): UserRoleInOrg {
-  const res = {} as Record<OrgUserRoleNames, boolean>;
+export function createUserRoleInOrg(
+  manager?: boolean, billingManager?: boolean, auditor?: boolean, user?: boolean
+): UserRoleInOrg {
+  // Args are optional: an unset role stays `undefined` (distinct from an
+  // explicit `false`, which the role-change diff would treat as a removal).
+  const res = {} as Record<OrgUserRoleNames, boolean | undefined>;
   res[OrgUserRoleNames.MANAGER] = manager;
   res[OrgUserRoleNames.BILLING_MANAGERS] = billingManager;
   res[OrgUserRoleNames.AUDITOR] = auditor;
@@ -132,6 +140,10 @@ export interface UserRoleInSpace {
    * See {SpaceUserRoleNames.AUDITOR} for name
    */
   auditors: boolean;
+  /**
+   * See {SpaceUserRoleNames.SUPPORTER} for name
+   */
+  supporters: boolean;
 
   // Index signature to allow dynamic property access
   [key: string]: boolean;
@@ -143,10 +155,13 @@ export interface UserRoleInSpace {
  * https://github.com/Microsoft/TypeScript/wiki/What%27s-new-in-TypeScript#constant-named-properties for details
  *
  */
-export function createUserRoleInSpace(manager: boolean, auditor: boolean, developer: boolean): UserRoleInSpace {
-  const res = {} as Record<SpaceUserRoleNames, boolean>;
+export function createUserRoleInSpace(manager?: boolean, auditor?: boolean, developer?: boolean, supporter?: boolean): UserRoleInSpace {
+  // Args are optional: an unset role stays `undefined` (distinct from an
+  // explicit `false`, which the role-change diff would treat as a removal).
+  const res = {} as Record<SpaceUserRoleNames, boolean | undefined>;
   res[SpaceUserRoleNames.MANAGER] = manager;
   res[SpaceUserRoleNames.DEVELOPER] = developer;
   res[SpaceUserRoleNames.AUDITOR] = auditor;
+  res[SpaceUserRoleNames.SUPPORTER] = supporter;
   return res as UserRoleInSpace;
 }

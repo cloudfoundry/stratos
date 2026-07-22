@@ -42,7 +42,7 @@ func (job *AnalysisJob) RemoveTempFiles() {
 	for _, name := range job.TempFiles {
 		err := os.Remove(name)
 		if err != nil {
-			log.Error("Could not delete file: %s", name)
+			log.Errorf("Could not delete file: %s", name)
 		}
 	}
 }

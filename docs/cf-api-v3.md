@@ -239,7 +239,7 @@ filter | `state` | [MEDIUM] | See above |
 
 [2] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
 
-### `/service_bindings` (functionality for missing /apps/{guid}/service_bindings only)
+### `/service_bindings` (functionality for missing `/apps/{guid}/service_bindings` only)
 
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
@@ -316,7 +316,7 @@ links | `space.auditors` | [HIGH] | See [2] | we might be able to fetch this via
 
 [2] Display a list of users and their roles
 
-### `/routes` (functionality for `/spaces/${guid}/routes only)
+### `/routes` (functionality for `/spaces/${guid}/routes` only)
 
 > Note - There doesn't seem to be a way to list routes in a space. This is separate to the concept of listing them inline in a space (with
 some overlap though). This endpoint would be used to fetch a list of routes for a specific space and display them to the user.
@@ -330,7 +330,7 @@ links | `domain` | [LOW] | Display the url of the route | Not required if the fq
 links | `applications` | [HIGH] | Display a list of the apps that are bound to the route | Avoids making a request to `/v3/route_mappings` for each route (could be a massive amount). We expect these relations to be 1-to-not-many
 `include` | `applications` | [HIGH] | See above | See above
 
-### `/service_instances` (functionality for /spaces/{guid}/service_instances only)
+### `/service_instances` (functionality for `/spaces/{guid}/service_instances` only)
 
 > There's lots more that could be added here when taking into account our service instance lists in places other than the space details page
 (mainly including space and space.organisation).

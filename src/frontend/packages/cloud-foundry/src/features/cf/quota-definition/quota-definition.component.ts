@@ -1,25 +1,41 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, computed, inject } from '@angular/core';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Observable } from 'rxjs';
 
-import { CustomTooltipDirective, CurrentUserPermissionsService, PageHeaderComponent, IHeaderBreadcrumb, PageSubNavComponent, BooleanIndicatorComponent, LoadingPageComponent, CardNumberMetricComponent, TileGridComponent, TileGroupComponent, TileComponent } from '@stratosui/core';
-import { Store } from '@ngrx/store';
-import { Observable, of, Subscription } from 'rxjs';
-import { take, filter, map, switchMap } from 'rxjs/operators';
-import { AppState, APIResource, EndpointModel } from '@stratosui/store';
-import { IOrganization, IOrgQuotaDefinition, ISpace } from '../../../cf-api.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import {
+  BooleanIndicatorComponent,
+  CardNumberMetricComponent,
+  CurrentUserPermissionsService,
+  CustomTooltipDirective,
+  IHeaderBreadcrumb,
+  LoadingPageComponent,
+  PageHeaderComponent,
+  PageSubNavComponent,
+  TailwindDialogService,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent,
+} from '@stratosui/core';
+import { EndpointModel } from '@stratosui/store';
+import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
+import { StOrgDetail, StOrgQuota, StSpace } from '../../../services/endpoint-data/stratos-types';
+import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QuotaDefinitionBaseComponent } from '../quota-definition-base/quota-definition-base.component';
+import {
+  ApplyQuotaToOrgsDialogComponent,
+  ApplyQuotaToOrgsDialogData,
+} from './apply-quota-to-orgs-dialog.component';
 
 export const QUOTA_ORG_GUID = 'org';
 
 @Component({
   selector: 'app-quota-definition',
   templateUrl: './quota-definition.component.html',
-  styleUrls: ['../quota-definition-base/quota-definition-base.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],
@@ -40,71 +56,92 @@ export const QUOTA_ORG_GUID = 'org';
   ]
 })
 export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
-  protected store: Store<AppState>;
+  readonly quotaDefinition: Signal<StOrgQuota | null>;
+  readonly detailsLoading: Signal<boolean>;
+  // Observable bridge for <app-loading-page> until it migrates to Signal inputs.
+  readonly detailsLoading$: Observable<boolean>;
+  readonly editLink: Signal<string[]>;
+  readonly canEditQuota: Signal<boolean>;
 
-  declare breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
-  declare quotaDefinition$: Observable<APIResource<IOrgQuotaDefinition>>;
-  declare org$: Observable<APIResource<IOrganization>>;
-  declare space$: Observable<APIResource<ISpace>>;
-  declare cfGuid: string;
-  declare orgGuid: string;
-  declare spaceGuid: string;
-  declare quotaGuid: string;
-  editLink$!: Observable<string[]>;
   editParams: object;
-  declare detailsLoading$: Observable<boolean>;
-  declare orgSubscriber: Subscription;
-  public canEditQuota$!: Observable<boolean>;
   public isCf = false;
 
+  private readonly dialog = inject(TailwindDialogService);
+
   constructor() {
-    const store = inject<Store<AppState>>(Store);
+    const endpoints = inject(CfEndpointsDataService);
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
     const activatedRoute = inject(ActivatedRoute);
     const currentUserPermissionsService = inject(CurrentUserPermissionsService);
+    const quotaData = inject(QuotaDataService);
 
-    super(store, activeRouteCfOrgSpace, activatedRoute);
-    this.store = store;
+    super(endpoints, activeRouteCfOrgSpace, activatedRoute);
 
-    this.setupQuotaDefinitionObservable();
     const { cfGuid, orgGuid } = activeRouteCfOrgSpace;
-    this.canEditQuota$ = currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid);
+    this.canEditQuota = toSignal(
+      currentUserPermissionsService.can(CfCurrentUserPermissions.QUOTA_EDIT, cfGuid),
+      { initialValue: false },
+    );
     this.isCf = !orgGuid;
     this.editParams = { [QUOTA_ORG_GUID]: orgGuid };
-  }
 
-  setupQuotaDefinitionObservable() {
-    const quotaGuid$ = this.quotaGuid ? of(this.quotaGuid) : this.org$.pipe(map(org => org.entity.quota_definition_guid));
-    const entityInfo$ = quotaGuid$.pipe(
-      take(1),
-      switchMap(quotaGuid => cfEntityCatalog.quotaDefinition.store.getEntityService(quotaGuid, this.cfGuid, {}).entityObs$)
-    );
+    // Quota guid comes from the route directly, or — for org detail pages
+    // where the URL doesn't include the quota — falls back to the org's
+    // linked quotaGuid once the org load completes.
+    const resolvedQuotaGuid: Signal<string | null> = computed(() => {
+      if (this.quotaGuid) return this.quotaGuid;
+      return this.org()?.quotaGuid ?? null;
+    });
 
-    this.quotaDefinition$ = entityInfo$.pipe(
-      filter(definition => !!definition && !!definition.entity),
-      map(definition => definition.entity)
-    );
-    this.detailsLoading$ = entityInfo$.pipe(
-      filter(definition => !!definition),
-      map(definition => definition.entityRequestInfo.fetching)
-    );
+    const sourceSignal = computed(() => {
+      const guid = resolvedQuotaGuid();
+      return guid ? quotaData.orgQuota(this.cfGuid, guid) : null;
+    });
+    this.quotaDefinition = computed(() => sourceSignal()?.value() ?? null);
+    this.detailsLoading = computed(() => sourceSignal()?.isLoading() ?? false);
+    this.detailsLoading$ = toObservable(this.detailsLoading);
 
-    this.editLink$ = quotaGuid$.pipe(
-      map(quotaGuid => [
+    this.editLink = computed(() => {
+      const guid = resolvedQuotaGuid();
+      return guid ? [
         '/cloud-foundry',
         this.cfGuid,
         'quota-definitions',
-        quotaGuid,
+        guid,
         'edit-quota'
-      ])
+      ] : [];
+    });
+  }
+
+  // Opens the multi-select "Apply to organizations" dialog for THIS quota.
+  // Bulk entry point: pick N orgs, apply the quota to all of them in one
+  // call (QuotaDataService.applyOrgQuotaToOrgs). Only wired on the CF-level
+  // quota detail page (isCf) where "this quota" is unambiguous; gated on
+  // QUOTA_EDIT in the template alongside the Edit button.
+  openApplyToOrgs(): void {
+    const quota = this.quotaDefinition();
+    if (!quota) {
+      return;
+    }
+    this.dialog.open<ApplyQuotaToOrgsDialogComponent, ApplyQuotaToOrgsDialogData, boolean>(
+      ApplyQuotaToOrgsDialogComponent,
+      {
+        ariaLabelledBy: 'apply-quota-to-orgs-dialog-title',
+        data: {
+          cfGuid: this.cfGuid,
+          quotaGuid: quota.guid,
+          quotaName: quota.name,
+        },
+        width: '520px',
+      },
     );
   }
 
-  protected getBreadcrumbs(
+  protected override getBreadcrumbs(
     endpoint: EndpointModel,
-    org: APIResource<IOrganization>,
-    space: APIResource<ISpace>
-  ) {
+    org: StOrgDetail | null,
+    space: StSpace | null,
+  ): IHeaderBreadcrumb[] {
     const baseCFUrl = `/cloud-foundry/${this.cfGuid}`;
 
     const breadcrumbs: IHeaderBreadcrumb[] = [{
@@ -114,25 +151,23 @@ export class QuotaDefinitionComponent extends QuotaDefinitionBaseComponent {
     }];
 
     if (org) {
-      const baseOrgUrl = `${baseCFUrl}/organizations/${org.metadata.guid}`;
-
+      const baseOrgUrl = `${baseCFUrl}/organizations/${org.guid}`;
       breadcrumbs.push({
         key: 'org',
         breadcrumbs: [
           { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
-          { value: org.entity.name, routerLink: `${baseOrgUrl}/summary` },
+          { value: org.name, routerLink: `${baseOrgUrl}/summary` },
         ]
       });
 
       if (space) {
-        const baseSpaceUrl = `${baseCFUrl}/organizations/${org.metadata.guid}/spaces/${space.metadata.guid}`;
-
+        const baseSpaceUrl = `${baseCFUrl}/organizations/${org.guid}/spaces/${space.guid}`;
         breadcrumbs.push({
           key: 'space',
           breadcrumbs: [
             { value: endpoint.name, routerLink: `${baseCFUrl}/organizations` },
-            { value: org.entity.name, routerLink: `${baseOrgUrl}/spaces` },
-            { value: space.entity.name, routerLink: `${baseSpaceUrl}/summary` },
+            { value: org.name, routerLink: `${baseOrgUrl}/spaces` },
+            { value: space.name, routerLink: `${baseSpaceUrl}/summary` },
           ]
         });
       }

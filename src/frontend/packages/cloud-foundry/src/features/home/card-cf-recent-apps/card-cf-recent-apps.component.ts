@@ -1,11 +1,14 @@
-import { Component, EventEmitter, Input, OnInit, Output , ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Injector, Input, OnInit, Output, Signal, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 import { filter, map, startWith, tap } from 'rxjs/operators';
 
-import { PaginationObservables, APIResource } from '@stratosui/store';
+import { APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { AppStatsDataRegistry } from '../../../services/endpoint-data/app-stats-data.registry';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
 import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
 import {
   PollingIndicatorComponent,
@@ -38,7 +41,10 @@ const RECENT_ITEMS_COUNT = 10;
 })
 export class CardCfRecentAppsComponent implements OnInit {
 
-  public recentApps$: Observable<APIResource<IApp>[]>;
+  // strict: assigned in ngOnInit for the live path; in placeholderMode the
+  // hasEntities$=of(false) gate makes the template render placeholders and
+  // never read recentApps$, so the field is never observed unassigned.
+  public recentApps$!: Observable<APIResource<IApp>[]>;
   @Input() allApps$!: Observable<APIResource<IApp>[]>;
   @Input() loading$!: Observable<boolean>;
   @Output() refresh = new EventEmitter<any>();
@@ -54,10 +60,13 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   public placeholders: any[];
 
-  appsPagObs!: PaginationObservables<APIResource<IApp>>;
-
   hasEntities$!: Observable<boolean>;
   show$!: Observable<boolean>;
+
+  private readonly registry = inject(EndpointDataRegistry);
+  private readonly statsRegistry = inject(AppStatsDataRegistry);
+  private readonly injector = inject(Injector);
+  private statsRequested = new Set<string>();
 
   private maxRowsSubject = new BehaviorSubject<number>(RECENT_ITEMS_COUNT);
 
@@ -88,11 +97,22 @@ export class CardCfRecentAppsComponent implements OnInit {
       return;
     }
     this.canRefresh = this.refresh.observers.length > 0;
-    this.appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.endpoint);
     if (!this.allApps$) {
-      this.allApps$ = this.appsPagObs.entities$;
-      this.loading$ = this.appsPagObs.fetchingEntities$;
-      this.hasEntities$ = this.appsPagObs.hasEntities$;
+      // Signal-native source — EndpointDataService.apps is populated by the
+      // registry-managed loadDetails() call. The home card path warms via
+      // load() (recent apps fast path) and then loadDetails() chains; the
+      // CF/org/space summary acquire path goes straight to loadDetails().
+      // Either way we read the same signal — no separate ngrx fetch.
+      const endpointData = this.registry.acquire(this.endpoint);
+      const appResources: Signal<APIResource<IApp>[]> = computed(
+        () => endpointData.apps().map(stAppToAPIResource),
+      );
+      this.allApps$ = toObservable(appResources, { injector: this.injector });
+      this.loading$ = toObservable(endpointData.isLoadingDetails, { injector: this.injector });
+      this.hasEntities$ = toObservable(
+        computed(() => endpointData.apps().length > 0),
+        { injector: this.injector },
+      );
     } else {
       this.hasEntities$ = of(true);
     }
@@ -103,6 +123,10 @@ export class CardCfRecentAppsComponent implements OnInit {
     ).pipe(
       filter(([apps]) => !!apps),
       map(([apps, maxRows]) => this.restrictApps(apps, maxRows)),
+      // Stats fetch is gated by a per-(guid,endpoint) Set so the back-to-back
+      // signal emissions during loadDetails() warming don't fan out into
+      // duplicate /v2/apps/:guid/stats calls. Each app's stats fire at most
+      // once per card lifetime; refresh() clears the gate.
       tap(apps => this.fetchAppStats(apps))
     );
 
@@ -115,13 +139,14 @@ export class CardCfRecentAppsComponent implements OnInit {
   }
 
   private fetchAppStats(recentApps: APIResource<IApp>[]) {
-    if (!this.noStats) {
-      recentApps.forEach(app => {
-        if (app.entity.state === 'STARTED') {
-          cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.endpoint);
-        }
-      });
-    }
+    if (this.noStats) return;
+    recentApps.forEach(app => {
+      if (app.entity.state !== 'STARTED') return;
+      const key = `${this.endpoint}:${app.metadata.guid}`;
+      if (this.statsRequested.has(key)) return;
+      this.statsRequested.add(key);
+      this.statsRegistry.acquire(this.endpoint, app.metadata.guid).load();
+    });
   }
 
   private restrictApps(apps: APIResource<IApp>[], maxRows = RECENT_ITEMS_COUNT): APIResource<IApp>[] {

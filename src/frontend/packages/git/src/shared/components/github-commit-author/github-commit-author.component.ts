@@ -5,12 +5,12 @@ import { GitCommit } from '@stratosui/git';
 @Component({
   selector: 'app-github-commit-author',
   templateUrl: './github-commit-author.component.html',
-  styleUrls: ['./github-commit-author.component.scss'],
   standalone: true,
   imports: [],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class GithubCommitAuthorComponent {
-  @Input() commit: GitCommit;
+  // strict: required @Input, always bound by the host template.
+  @Input() commit!: GitCommit;
   @Input() showAvatar = true;
 }

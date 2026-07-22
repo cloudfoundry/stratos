@@ -1,9 +1,7 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, Input, OnInit, ViewEncapsulation, inject, ChangeDetectionStrategy } from '@angular/core';
-import { CustomTooltipDirective, MatIconRegistry } from '@stratosui/core';
-import { TailwindSnackBarService } from '@stratosui/core';
-import { DomSanitizer } from '@angular/platform-browser';
-import { ActivatedRoute } from '@angular/router';
+import { Component, Input, ViewEncapsulation, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CustomTooltipDirective } from '@stratosui/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { EndpointsService } from '../../../../../../core/src/core/endpoints.service';
 import { Chart } from '../../shared/models/chart';
@@ -12,31 +10,17 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
 @Component({
   selector: 'app-chart-details-usage',
   templateUrl: './chart-details-usage.component.html',
-  viewProviders: [MatIconRegistry],
   encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [AsyncPipe, CustomTooltipDirective]
+  imports: [AsyncPipe, CustomTooltipDirective, RouterLink]
 })
-export class ChartDetailsUsageComponent implements OnInit {
+export class ChartDetailsUsageComponent {
   @Input() chart!: Chart;
-  @Input() currentVersion: string;
+  @Input() currentVersion!: string; // strict: required @Input, only rendered inside @if (currentVersion) with a bound string
   installing!: boolean;
-  private mdIconRegistry = inject(MatIconRegistry);
-  private sanitizer = inject(DomSanitizer);
-  public snackBar = inject(TailwindSnackBarService);
   public endpointsService = inject(EndpointsService);
   private route = inject(ActivatedRoute);
-
-  ngOnInit() {
-    this.mdIconRegistry.addSvgIcon(
-      'content-copy',
-      this.sanitizer.bypassSecurityTrustResourceUrl(
-        // TODO: See #150 - content-copy.svg doesn't exist
-        '/assets/icons/content-copy.svg'
-      )
-    );
-  }
 
   get installUrl(): string {
     return `/workloads/install/${getMonocularEndpoint(this.route, this.chart)}/${this.chart.id}/${this.currentVersion}`;

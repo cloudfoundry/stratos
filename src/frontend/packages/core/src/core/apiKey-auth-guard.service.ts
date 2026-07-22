@@ -1,7 +1,5 @@
 import { inject } from '@angular/core';
-import { CanActivateFn } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AppState, RouterNav } from '@stratosui/store';
+import { CanActivateFn, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -9,13 +7,13 @@ import { CurrentUserPermissionsService } from './permissions/current-user-permis
 import { StratosCurrentUserPermissions } from './permissions/stratos-user-permissions.checker';
 
 export const apiKeyAuthGuard: CanActivateFn = (): Observable<boolean> => {
-  const store = inject(Store<AppState>);
+  const router = inject(Router);
   const cups = inject(CurrentUserPermissionsService);
 
   return cups.can(StratosCurrentUserPermissions.API_KEYS).pipe(
     map(can => {
       if (!can) {
-        store.dispatch(new RouterNav({ path: ['/'] }));
+        router.navigate(['/']);
       }
       return can;
     })

@@ -1,14 +1,13 @@
 import { Schema, schema } from 'normalizr';
 
-import { getAPIResourceGuid } from '../../../cloud-foundry/src/store/selectors/api.selectors';
-import { EntitySchema, metricEntityType } from '@stratosui/store';
+import { getCFCompositeEntityId } from '../../../cloud-foundry/src/store/selectors/api.selectors';
+import { EntitySchema } from '@stratosui/store';
 
 export const appAutoscalerInfoEntityType = 'autoscalerInfo';
 export const appAutoscalerHealthEntityType = 'autoscalerHealth';
 export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
 export const appAutoscalerScalingHistoryEntityType = 'autoscalerScalingHistory';
-export const appAutoscalerAppMetricEntityType = 'autoscalerAppMetric';
 export const appAutoscalerCredentialEntityType = 'autoscalerCredential';
 
 export const AUTOSCALER_ENDPOINT_TYPE = 'autoscaler';
@@ -38,44 +37,36 @@ export class AutoscalerEntitySchema extends EntitySchema {
 entityCache[appAutoscalerInfoEntityType] = new AutoscalerEntitySchema(
   appAutoscalerInfoEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 
 entityCache[appAutoscalerCredentialEntityType] = new AutoscalerEntitySchema(
   appAutoscalerCredentialEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 
 entityCache[appAutoscalerPolicyEntityType] = new AutoscalerEntitySchema(
   appAutoscalerPolicyEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 
 entityCache[appAutoscalerPolicyTriggerEntityType] = new AutoscalerEntitySchema(
   appAutoscalerPolicyTriggerEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 entityCache[appAutoscalerHealthEntityType] = new AutoscalerEntitySchema(
   appAutoscalerHealthEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
 entityCache[appAutoscalerScalingHistoryEntityType] = new AutoscalerEntitySchema(
   appAutoscalerScalingHistoryEntityType,
   {},
-  { idAttribute: getAPIResourceGuid }
+  { idAttribute: getCFCompositeEntityId }
 );
-entityCache[appAutoscalerAppMetricEntityType] = new AutoscalerEntitySchema(
-  appAutoscalerAppMetricEntityType,
-  {},
-  { idAttribute: getAPIResourceGuid }
-);
-
-const MetricSchema = new AutoscalerEntitySchema(metricEntityType);
-entityCache[metricEntityType] = MetricSchema;
 
 export function autoscalerEntityFactory(key: string): EntitySchema {
   const entity = entityCache[key];

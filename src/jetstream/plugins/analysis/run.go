@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
@@ -18,7 +18,9 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type popeyeConfig struct {
+// Referenced only by the parked sonobuoy analyzer (container/sonobuoy.go_);
+// kept so that file compiles if re-enabled.
+type popeyeConfig struct { //nolint:unused
 	Namespace string `json:"namespace"`
 	App       string `json:"app"`
 }
@@ -63,13 +65,17 @@ func (c *Analysis) runReport(ec echo.Context) error {
 	}
 
 	report.Name = fmt.Sprintf("Analysis report %s", analyzer)
-	dbStore.Save((report))
+	if _, err := dbStore.Save(report); err != nil {
+		return err
+	}
 
 	err = c.doRunReport(ec, analyzer, endpointID, userID, dbStore, &report)
 	if err != nil {
 		report.Status = "error"
 		report.Result = err.Error()
-		dbStore.UpdateReport(userID, &report)
+		if updateErr := dbStore.UpdateReport(userID, &report); updateErr != nil {
+			log.Warnf("Could not update analysis report %s: %v", report.ID, updateErr)
+		}
 	}
 
 	return err
@@ -105,13 +111,13 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	metadataHeader.Set("Content-Type", "application/yaml")
 	metadataHeader.Set("Content-ID", "kubeconfig")
 	part, _ := writer.CreatePart(metadataHeader)
-	part.Write([]byte(config))
+	_, _ = part.Write([]byte(config))
 
 	requestBody := make([]byte, 0)
 
 	// Read body
-	defer ec.Request().Body.Close()
-	if b, err := ioutil.ReadAll((ec.Request().Body)); err == nil {
+	defer func() { _ = ec.Request().Body.Close() }()
+	if b, err := io.ReadAll(ec.Request().Body); err == nil {
 		requestBody = b
 	}
 
@@ -120,7 +126,7 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	postHeader.Set("Content-Type", "application/json")
 	postHeader.Set("Content-ID", "body")
 	part, _ = writer.CreatePart(postHeader)
-	part.Write(requestBody)
+	_, _ = part.Write(requestBody)
 
 	// Report config
 	reportHeader := textproto.MIMEHeader{}
@@ -131,8 +137,10 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	if err != nil {
 		return errors.New("Could not serialize job")
 	}
-	part.Write(job)
-	writer.Close()
+	_, _ = part.Write(job)
+	if err := writer.Close(); err != nil {
+		return fmt.Errorf("Could not close multipart writer: %v", err)
+	}
 
 	// Post this to the Analyzer API
 	contentType := fmt.Sprintf("multipart/form-data; boundary=%s", writer.Boundary())
@@ -154,8 +162,8 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	// Job submitted okay
 	// Updated job is in the response
 
-	defer rsp.Body.Close()
-	response, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	response, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		return errors.New("Could not read response")
 	}

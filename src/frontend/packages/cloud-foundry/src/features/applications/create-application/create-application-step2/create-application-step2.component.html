@@ -2,7 +2,7 @@
 <form novalidate [formGroup]="form" class="flex flex-col gap-6">
   <div>
     <app-form-field class="relative">
-      <input required appInput placeholder="Application Name" formControlName="appName" autocomplete="off" [appApplicationNameUnique]="appNameChecking">
+      <input class="w-full placeholder:!text-transparent focus:outline-none" required appInput placeholder="Application Name" formControlName="appName" autocomplete="off" [appApplicationNameUnique]="appNameChecking">
       @if (form.controls.appName?.hasError('appNameTaken')) {
         <app-error>
           This name has been taken, please try another.

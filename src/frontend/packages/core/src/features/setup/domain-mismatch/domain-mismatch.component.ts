@@ -7,7 +7,6 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
 @Component({
   selector: 'app-domain-mismatch',
   templateUrl: './domain-mismatch.component.html',
-  styleUrls: ['./domain-mismatch.component.scss'],
   standalone: true,
   imports: [
     IntroScreenComponent,

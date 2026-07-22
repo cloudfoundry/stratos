@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 
 describe('ApplicationStateIconPipe', () => {
-  let pipe;
+  let pipe: ApplicationStateIconPipe;
 
   beforeEach(() => {
     pipe = new ApplicationStateIconPipe();
@@ -13,7 +13,10 @@ describe('ApplicationStateIconPipe', () => {
   });
 
   it('should return empty if no value', () => {
-    expect(pipe.transform(null, 'class')).toBe('');
+    // strict: the pipe is defensively null-safe by design (`if (!value) return ''`);
+    // its declared `string` param understates the runtime contract this case verifies.
+    const transform = pipe.transform.bind(pipe) as (value: string | null, args?: string) => string;
+    expect(transform(null, 'class')).toBe('');
   });
 
   it('should return css class', () => {

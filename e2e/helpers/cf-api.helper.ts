@@ -189,8 +189,29 @@ export class CFApiHelper {
       throw new Error(`CF endpoint not found: ${this.cfGuid}`);
     }
 
-    // CF API is proxied through Stratos
-    this.cfApiBase = `/pp/v1/proxy/v3/cf/${this.cfGuid}`;
+    // CF API is proxied through Stratos. The /pp/v1/proxy/ route prefix is
+    // stripped by makeRequestURI, so /pp/v1/proxy/v3/apps forwards to CF as
+    // /v3/apps. Passthrough requests must carry x-cap-cnsi-list (which CNSI to
+    // proxy to) and x-cap-passthrough=true (return the raw CF response).
+    this.cfApiBase = `/pp/v1/proxy/v3`;
+  }
+
+  /** Headers every proxied CF API call must carry (see passthrough.go). */
+  private get proxyHeaders(): Record<string, string> {
+    return { 'x-cap-cnsi-list': this.cfGuid, 'x-cap-passthrough': 'true' };
+  }
+
+  private pget(url: string): Promise<any> {
+    return this.request.get(url, this.proxyHeaders);
+  }
+  private ppost(url: string, body?: any): Promise<any> {
+    return this.request.post(url, body, this.proxyHeaders);
+  }
+  private ppatch(url: string, body?: any): Promise<any> {
+    return this.request.patch(url, body, this.proxyHeaders);
+  }
+  private pdelete(url: string): Promise<any> {
+    return this.request.delete(url, this.proxyHeaders);
   }
 
   // ============================================================================
@@ -226,7 +247,7 @@ export class CFApiHelper {
       }
     };
 
-    const app = await this.request.post(`${this.cfApiBase}/apps`, appData);
+    const app = await this.ppost(`${this.cfApiBase}/apps`, appData);
 
     // Set environment variables if provided
     if (params.environmentVariables) {
@@ -250,7 +271,7 @@ export class CFApiHelper {
    */
   async getApp(appGuid: string): Promise<CFApp> {
     if (!this.cfApiBase) await this.init();
-    return await this.request.get(`${this.cfApiBase}/apps/${appGuid}`);
+    return await this.pget(`${this.cfApiBase}/apps/${appGuid}`);
   }
 
   /**
@@ -258,7 +279,7 @@ export class CFApiHelper {
    */
   async updateApp(appGuid: string, updates: Partial<CFApp>): Promise<CFApp> {
     if (!this.cfApiBase) await this.init();
-    return await this.request.post(`${this.cfApiBase}/apps/${appGuid}`, updates);
+    return await this.ppost(`${this.cfApiBase}/apps/${appGuid}`, updates);
   }
 
   /**
@@ -266,7 +287,7 @@ export class CFApiHelper {
    */
   async deleteApp(appGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.delete(`${this.cfApiBase}/apps/${appGuid}`);
+    await this.pdelete(`${this.cfApiBase}/apps/${appGuid}`);
   }
 
   /**
@@ -274,7 +295,7 @@ export class CFApiHelper {
    */
   async startApp(appGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.post(`${this.cfApiBase}/apps/${appGuid}/actions/start`, {});
+    await this.ppost(`${this.cfApiBase}/apps/${appGuid}/actions/start`, {});
   }
 
   /**
@@ -282,7 +303,7 @@ export class CFApiHelper {
    */
   async stopApp(appGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.post(`${this.cfApiBase}/apps/${appGuid}/actions/stop`, {});
+    await this.ppost(`${this.cfApiBase}/apps/${appGuid}/actions/stop`, {});
   }
 
   /**
@@ -290,7 +311,7 @@ export class CFApiHelper {
    */
   async restartApp(appGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.post(`${this.cfApiBase}/apps/${appGuid}/actions/restart`, {});
+    await this.ppost(`${this.cfApiBase}/apps/${appGuid}/actions/restart`, {});
   }
 
   /**
@@ -308,7 +329,7 @@ export class CFApiHelper {
     if (scale.memory !== undefined) scaleData.memory_in_mb = scale.memory;
     if (scale.disk !== undefined) scaleData.disk_in_mb = scale.disk;
 
-    await this.request.post(`${this.cfApiBase}/apps/${appGuid}/processes/web/actions/scale`, scaleData);
+    await this.ppost(`${this.cfApiBase}/apps/${appGuid}/processes/web/actions/scale`, scaleData);
   }
 
   /**
@@ -316,7 +337,8 @@ export class CFApiHelper {
    */
   async updateAppEnvironment(appGuid: string, vars: Record<string, string>): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.post(`${this.cfApiBase}/apps/${appGuid}/environment_variables`, {
+    // CF API v3 updates env vars via PATCH; POST returns 404 "Unknown request".
+    await this.ppatch(`${this.cfApiBase}/apps/${appGuid}/environment_variables`, {
       var: vars
     });
   }
@@ -361,7 +383,7 @@ export class CFApiHelper {
       }
     };
 
-    return await this.request.post(`${this.cfApiBase}/organizations`, orgData);
+    return await this.ppost(`${this.cfApiBase}/organizations`, orgData);
   }
 
   /**
@@ -369,7 +391,7 @@ export class CFApiHelper {
    */
   async getOrg(orgGuid: string): Promise<CFOrganization> {
     if (!this.cfApiBase) await this.init();
-    return await this.request.get(`${this.cfApiBase}/organizations/${orgGuid}`);
+    return await this.pget(`${this.cfApiBase}/organizations/${orgGuid}`);
   }
 
   /**
@@ -377,7 +399,7 @@ export class CFApiHelper {
    */
   async deleteOrg(orgGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.delete(`${this.cfApiBase}/organizations/${orgGuid}`);
+    await this.pdelete(`${this.cfApiBase}/organizations/${orgGuid}`);
   }
 
   /**
@@ -386,7 +408,7 @@ export class CFApiHelper {
   async findOrgByName(name: string): Promise<CFOrganization | null> {
     if (!this.cfApiBase) await this.init();
 
-    const orgs = await this.request.get(`${this.cfApiBase}/organizations?names=${encodeURIComponent(name)}`);
+    const orgs = await this.pget(`${this.cfApiBase}/organizations?names=${encodeURIComponent(name)}`);
 
     return orgs.resources && orgs.resources.length > 0 ? orgs.resources[0] : null;
   }
@@ -417,7 +439,7 @@ export class CFApiHelper {
       }
     };
 
-    return await this.request.post(`${this.cfApiBase}/spaces`, spaceData);
+    return await this.ppost(`${this.cfApiBase}/spaces`, spaceData);
   }
 
   /**
@@ -425,7 +447,7 @@ export class CFApiHelper {
    */
   async getSpace(spaceGuid: string): Promise<CFSpace> {
     if (!this.cfApiBase) await this.init();
-    return await this.request.get(`${this.cfApiBase}/spaces/${spaceGuid}`);
+    return await this.pget(`${this.cfApiBase}/spaces/${spaceGuid}`);
   }
 
   /**
@@ -433,7 +455,7 @@ export class CFApiHelper {
    */
   async deleteSpace(spaceGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.delete(`${this.cfApiBase}/spaces/${spaceGuid}`);
+    await this.pdelete(`${this.cfApiBase}/spaces/${spaceGuid}`);
   }
 
   /**
@@ -442,7 +464,7 @@ export class CFApiHelper {
   async findSpaceByName(orgGuid: string, name: string): Promise<CFSpace | null> {
     if (!this.cfApiBase) await this.init();
 
-    const spaces = await this.request.get(
+    const spaces = await this.pget(
       `${this.cfApiBase}/spaces?organization_guids=${orgGuid}&names=${encodeURIComponent(name)}`
     );
 
@@ -459,11 +481,17 @@ export class CFApiHelper {
   async getDomains(spaceGuid?: string): Promise<CFDomain[]> {
     if (!this.cfApiBase) await this.init();
 
-    const url = spaceGuid
-      ? `${this.cfApiBase}/domains?space_guids=${spaceGuid}`
-      : `${this.cfApiBase}/domains`;
+    // CF v3 has no `space_guids` filter on /v3/domains (rejected 400). Domains
+    // usable within a space are the space's org's domains (shared + private),
+    // exposed as /v3/organizations/:org/domains. Resolve the space's org first.
+    let url = `${this.cfApiBase}/domains`;
+    if (spaceGuid) {
+      const space = await this.getSpace(spaceGuid);
+      const orgGuid = space.relationships.organization.data.guid;
+      url = `${this.cfApiBase}/organizations/${orgGuid}/domains`;
+    }
 
-    const response = await this.request.get(url);
+    const response = await this.pget(url);
     return response.resources || [];
   }
 
@@ -496,7 +524,7 @@ export class CFApiHelper {
     if (params.host) routeData.host = params.host;
     if (params.path) routeData.path = params.path;
 
-    return await this.request.post(`${this.cfApiBase}/routes`, routeData);
+    return await this.ppost(`${this.cfApiBase}/routes`, routeData);
   }
 
   /**
@@ -505,13 +533,20 @@ export class CFApiHelper {
   async mapRoute(appGuid: string, routeGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
 
-    await this.request.post(`${this.cfApiBase}/routes/${routeGuid}/destinations`, {
+    const body = {
       destinations: [{
         app: {
           guid: appGuid
         }
       }]
-    });
+    };
+    try {
+      await this.ppost(`${this.cfApiBase}/routes/${routeGuid}/destinations`, body);
+    } catch (e) {
+      // CC intermittently 500s on destination writes under load — one retry
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      await this.ppost(`${this.cfApiBase}/routes/${routeGuid}/destinations`, body);
+    }
   }
 
   /**
@@ -520,7 +555,12 @@ export class CFApiHelper {
   async unmapRoute(routeGuid: string, appGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
 
-    await this.request.delete(`${this.cfApiBase}/routes/${routeGuid}/destinations/${appGuid}`);
+    // The destination guid is not the app guid — look up the destination
+    // that points at this app.
+    const res = await this.pget(`${this.cfApiBase}/routes/${routeGuid}/destinations`);
+    const dest = (res.destinations || []).find((d: any) => d.app?.guid === appGuid);
+    if (!dest) return; // already unmapped
+    await this.pdelete(`${this.cfApiBase}/routes/${routeGuid}/destinations/${dest.guid}`);
   }
 
   /**
@@ -528,7 +568,7 @@ export class CFApiHelper {
    */
   async deleteRoute(routeGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.delete(`${this.cfApiBase}/routes/${routeGuid}`);
+    await this.pdelete(`${this.cfApiBase}/routes/${routeGuid}`);
   }
 
   // ============================================================================
@@ -541,7 +581,7 @@ export class CFApiHelper {
   async getServiceInstances(spaceGuid: string): Promise<CFServiceInstance[]> {
     if (!this.cfApiBase) await this.init();
 
-    const response = await this.request.get(
+    const response = await this.pget(
       `${this.cfApiBase}/service_instances?space_guids=${spaceGuid}`
     );
 
@@ -549,12 +589,47 @@ export class CFApiHelper {
   }
 
   /**
-   * Bind service to app
+   * Create a user-provided service instance (no broker needed) and return its guid
    */
-  async bindService(appGuid: string, serviceInstanceGuid: string): Promise<void> {
+  async createUserProvidedService(spaceGuid: string, name: string): Promise<string> {
     if (!this.cfApiBase) await this.init();
 
-    await this.request.post(`${this.cfApiBase}/service_credential_bindings`, {
+    const response = await this.ppost(`${this.cfApiBase}/service_instances`, {
+      type: 'user-provided',
+      name,
+      relationships: {
+        space: {
+          data: {
+            guid: spaceGuid
+          }
+        }
+      },
+      metadata: {
+        labels: {
+          'stratos-e2e-test': 'true'
+        }
+      }
+    });
+    return response.guid;
+  }
+
+  /**
+   * Delete a service instance (unbind first if bound)
+   */
+  async deleteServiceInstance(serviceInstanceGuid: string): Promise<void> {
+    if (!this.cfApiBase) await this.init();
+    await this.pdelete(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
+  }
+
+  /**
+   * Bind service to app; returns the credential-binding guid. User-provided
+   * bindings return it synchronously (201 + body); managed bindings are async
+   * (202, empty body) and yield undefined.
+   */
+  async bindService(appGuid: string, serviceInstanceGuid: string): Promise<string | undefined> {
+    if (!this.cfApiBase) await this.init();
+
+    const response = await this.ppost(`${this.cfApiBase}/service_credential_bindings`, {
       type: 'app',
       relationships: {
         service_instance: {
@@ -569,6 +644,7 @@ export class CFApiHelper {
         }
       }
     });
+    return response?.guid;
   }
 
   /**
@@ -576,7 +652,7 @@ export class CFApiHelper {
    */
   async unbindService(bindingGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.delete(`${this.cfApiBase}/service_credential_bindings/${bindingGuid}`);
+    await this.pdelete(`${this.cfApiBase}/service_credential_bindings/${bindingGuid}`);
   }
 
   // ============================================================================
@@ -618,7 +694,7 @@ export class CFApiHelper {
       quotaData.routes.total_reserved_ports = params.totalReservedRoutePorts;
     }
 
-    return await this.request.post(`${this.cfApiBase}/organization_quotas`, quotaData);
+    return await this.ppost(`${this.cfApiBase}/organization_quotas`, quotaData);
   }
 
   /**
@@ -626,7 +702,7 @@ export class CFApiHelper {
    */
   async getQuota(quotaGuid: string): Promise<CFQuota> {
     if (!this.cfApiBase) await this.init();
-    return await this.request.get(`${this.cfApiBase}/organization_quotas/${quotaGuid}`);
+    return await this.pget(`${this.cfApiBase}/organization_quotas/${quotaGuid}`);
   }
 
   /**
@@ -634,7 +710,7 @@ export class CFApiHelper {
    */
   async getQuotas(): Promise<CFQuota[]> {
     if (!this.cfApiBase) await this.init();
-    const response = await this.request.get(`${this.cfApiBase}/organization_quotas`);
+    const response = await this.pget(`${this.cfApiBase}/organization_quotas`);
     return response.resources || [];
   }
 
@@ -643,7 +719,7 @@ export class CFApiHelper {
    */
   async findQuotaByName(name: string): Promise<CFQuota | null> {
     if (!this.cfApiBase) await this.init();
-    const response = await this.request.get(`${this.cfApiBase}/organization_quotas?names=${name}`);
+    const response = await this.pget(`${this.cfApiBase}/organization_quotas?names=${name}`);
     return response.resources?.[0] || null;
   }
 
@@ -675,7 +751,7 @@ export class CFApiHelper {
       if (params.totalReservedRoutePorts !== undefined) quotaData.routes.total_reserved_ports = params.totalReservedRoutePorts;
     }
 
-    return await this.request.patch(`${this.cfApiBase}/organization_quotas/${quotaGuid}`, quotaData);
+    return await this.ppatch(`${this.cfApiBase}/organization_quotas/${quotaGuid}`, quotaData);
   }
 
   /**
@@ -683,7 +759,7 @@ export class CFApiHelper {
    */
   async deleteQuota(quotaGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.delete(`${this.cfApiBase}/organization_quotas/${quotaGuid}`);
+    await this.pdelete(`${this.cfApiBase}/organization_quotas/${quotaGuid}`);
   }
 
   // ============================================================================
@@ -732,7 +808,7 @@ export class CFApiHelper {
       quotaData.routes.total_reserved_ports = params.totalReservedRoutePorts;
     }
 
-    return await this.request.post(`${this.cfApiBase}/space_quotas`, quotaData);
+    return await this.ppost(`${this.cfApiBase}/space_quotas`, quotaData);
   }
 
   /**
@@ -740,7 +816,7 @@ export class CFApiHelper {
    */
   async getSpaceQuota(quotaGuid: string): Promise<CFSpaceQuota> {
     if (!this.cfApiBase) await this.init();
-    return await this.request.get(`${this.cfApiBase}/space_quotas/${quotaGuid}`);
+    return await this.pget(`${this.cfApiBase}/space_quotas/${quotaGuid}`);
   }
 
   /**
@@ -748,7 +824,7 @@ export class CFApiHelper {
    */
   async getSpaceQuotas(orgGuid: string): Promise<CFSpaceQuota[]> {
     if (!this.cfApiBase) await this.init();
-    const response = await this.request.get(`${this.cfApiBase}/space_quotas?organization_guids=${orgGuid}`);
+    const response = await this.pget(`${this.cfApiBase}/space_quotas?organization_guids=${orgGuid}`);
     return response.resources || [];
   }
 
@@ -757,7 +833,7 @@ export class CFApiHelper {
    */
   async findSpaceQuotaByName(orgGuid: string, name: string): Promise<CFSpaceQuota | null> {
     if (!this.cfApiBase) await this.init();
-    const response = await this.request.get(`${this.cfApiBase}/space_quotas?organization_guids=${orgGuid}&names=${name}`);
+    const response = await this.pget(`${this.cfApiBase}/space_quotas?organization_guids=${orgGuid}&names=${name}`);
     return response.resources?.[0] || null;
   }
 
@@ -789,7 +865,7 @@ export class CFApiHelper {
       if (params.totalReservedRoutePorts !== undefined) quotaData.routes.total_reserved_ports = params.totalReservedRoutePorts;
     }
 
-    return await this.request.patch(`${this.cfApiBase}/space_quotas/${quotaGuid}`, quotaData);
+    return await this.ppatch(`${this.cfApiBase}/space_quotas/${quotaGuid}`, quotaData);
   }
 
   /**
@@ -797,7 +873,7 @@ export class CFApiHelper {
    */
   async deleteSpaceQuota(quotaGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.delete(`${this.cfApiBase}/space_quotas/${quotaGuid}`);
+    await this.pdelete(`${this.cfApiBase}/space_quotas/${quotaGuid}`);
   }
 
   /**
@@ -805,7 +881,7 @@ export class CFApiHelper {
    */
   async applySpaceQuota(spaceGuid: string, quotaGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
-    await this.request.patch(`${this.cfApiBase}/spaces/${spaceGuid}/relationships/quota`, {
+    await this.ppatch(`${this.cfApiBase}/spaces/${spaceGuid}/relationships/quota`, {
       data: {
         guid: quotaGuid
       }
@@ -823,7 +899,7 @@ export class CFApiHelper {
     if (!this.cfApiBase) await this.init();
 
     // Delete apps with e2e label
-    const apps = await this.request.get(`${this.cfApiBase}/apps?label_selector=stratos-e2e-test`);
+    const apps = await this.pget(`${this.cfApiBase}/apps?label_selector=stratos-e2e-test`);
     if (apps.resources) {
       for (const app of apps.resources) {
         await this.deleteApp(app.guid).catch(() => {});
@@ -831,15 +907,24 @@ export class CFApiHelper {
     }
 
     // Delete routes with e2e label
-    const routes = await this.request.get(`${this.cfApiBase}/routes?label_selector=stratos-e2e-test`);
+    const routes = await this.pget(`${this.cfApiBase}/routes?label_selector=stratos-e2e-test`);
     if (routes.resources) {
       for (const route of routes.resources) {
         await this.deleteRoute(route.guid).catch(() => {});
       }
     }
 
+    // Delete service instances with e2e label (before spaces - CF refuses to
+    // delete a space that still contains instances)
+    const serviceInstances = await this.pget(`${this.cfApiBase}/service_instances?label_selector=stratos-e2e-test`);
+    if (serviceInstances.resources) {
+      for (const si of serviceInstances.resources) {
+        await this.deleteServiceInstance(si.guid).catch(() => {});
+      }
+    }
+
     // Delete spaces with e2e label
-    const spaces = await this.request.get(`${this.cfApiBase}/spaces?label_selector=stratos-e2e-test`);
+    const spaces = await this.pget(`${this.cfApiBase}/spaces?label_selector=stratos-e2e-test`);
     if (spaces.resources) {
       for (const space of spaces.resources) {
         await this.deleteSpace(space.guid).catch(() => {});
@@ -847,7 +932,7 @@ export class CFApiHelper {
     }
 
     // Delete orgs with e2e label
-    const orgs = await this.request.get(`${this.cfApiBase}/organizations?label_selector=stratos-e2e-test`);
+    const orgs = await this.pget(`${this.cfApiBase}/organizations?label_selector=stratos-e2e-test`);
     if (orgs.resources) {
       for (const org of orgs.resources) {
         await this.deleteOrg(org.guid).catch(() => {});

@@ -9,7 +9,16 @@ export * from './core/extension/extension-service';
 
 // Utils
 export { getIdFromRoute, pathGet, safeStringToObj, urlValidationExpression, truthyIncludingZeroString } from './core/utils.service';
-export { naturalCollator, naturalCompare } from './shared/utils/natural-sort';
+export { CF_QUOTA_UNLIMITED, isUnlimited } from './core/cf-quota.types';
+export {
+  naturalCollator,
+  naturalCompare,
+  detectSortContext,
+  NO_SEPARATOR_PATTERN_THRESHOLD,
+} from './shared/utils/natural-sort';
+export type { NaturalSortContext } from './shared/utils/natural-sort';
+export { GlobalEventService, GlobalEventData, endpointEventKey } from './shared/global-events.service';
+export type { IGlobalEvent, IGlobalEventConfig, GlobalEventTypes } from './shared/global-events.service';
 export { environment } from './environments/environment';
 export { isValidJsonValidator } from './shared/form-validators';
 
@@ -32,15 +41,12 @@ export { ProfileSettingsTypes } from './shared/components/profile-settings/profi
 // Tailwind Material Replacements
 export * from './shared/services/tailwind-material-replacements';
 export * from './shared/services/tailwind-snackbar.service';
+export * from './shared/services/endpoint-auth-state.service';
 export * from './shared/services/tailwind-dialog.service';
-export * from './shared/services/tailwind-sidenav.service';
 export * from './shared/services/tailwind-sort.service';
 export * from './shared/services/tailwind-paginator.service';
-export * from './shared/services/tailwind-json-schema-form.service';
-export * from './shared/services/tailwind-icon-registry.service';
 export * from './shared/services/tailwind-error-state-matcher';
-export { TailwindJsonSchemaFormModule } from './shared/components/tailwind-json-schema-form/tailwind-json-schema-form.module';
-export { TailwindJsonSchemaFormComponent } from './shared/components/tailwind-json-schema-form/tailwind-json-schema-form.component';
+export { SchemaWidgetRendererComponent } from './shared/components/schema-widget-renderer/schema-widget-renderer.component';
 
 // Tailwind Progress Components
 export { ProgressSpinnerComponent, MatSpinnerComponent } from './shared/components/progress-spinner/progress-spinner.component';
@@ -54,6 +60,7 @@ export { SteppersComponent } from './shared/components/stepper/steppers/steppers
 export { StepComponent, StepOnNextFunction } from './shared/components/stepper/step/step.component';
 export { PageSubNavComponent } from './shared/components/page-sub-nav/page-sub-nav.component';
 export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-section/page-sub-nav-section.component';
+export { ListSubNavComponent, ListSubNavAddAction, ListSubNavAction } from './shared/components/list-sub-nav/list-sub-nav.component';
 export { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 
 // Custom Material Replacement Components
@@ -70,9 +77,6 @@ export { CustomDatepickerInputComponent } from './shared/components/custom-mater
 export { CustomDatepickerToggleComponent } from './shared/components/custom-material/custom-material.component';
 export { MatDatepickerDirective } from './shared/components/custom-material/custom-material.component';
 export { CustomTabGroupComponent, CustomTabComponent, MatTabChangeEvent } from './shared/components/custom-tabs/custom-tabs.component';
-
-// Custom Expansion Panel Components
-export { CustomExpansionPanelComponent, CustomExpansionPanelHeaderComponent } from './shared/components/custom-expansion-panel/custom-expansion-panel.component';
 
 // Custom Form Field Components
 export {
@@ -124,7 +128,11 @@ export { TileComponent } from './shared/components/tile/tile/tile.component';
 export { LoadingPageComponent } from './shared/components/loading-page/loading-page.component';
 export { StatefulIconComponent } from './core/stateful-icon/stateful-icon.component';
 export { AppChipsComponent, AppChip, IAppChip } from './shared/components/chips/chips.component';
-export { BooleanIndicatorComponent } from './shared/components/boolean-indicator/boolean-indicator.component';
+export {
+  BooleanIndicatorComponent,
+  BooleanIndicatorType,
+  BooleanIndicatorTypeValue,
+} from './shared/components/boolean-indicator/boolean-indicator.component';
 export { CopyToClipboardComponent } from './shared/components/copy-to-clipboard/copy-to-clipboard.component';
 export { NoContentMessageComponent } from './shared/components/no-content-message/no-content-message.component';
 export { UploadProgressIndicatorComponent } from './shared/components/upload-progress-indicator/upload-progress-indicator.component';
@@ -137,24 +145,21 @@ export { ApplicationStateIconPipe } from './shared/components/application-state/
 export { ApplicationStateComponent } from './shared/components/application-state/application-state.component';
 export { EntityFavoriteStarComponent } from './core/entity-favorite-star/entity-favorite-star.component';
 export { DotContentComponent } from './core/dot-content/dot-content.component';
-export { AppMonitorComponentTypes } from './shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-export { AppActionMonitorComponent } from './shared/components/app-action-monitor/app-action-monitor.component';
 
 // List Components
-export { ListComponent } from './shared/components/list/list.component';
-export { ListViewComponent } from './shared/components/list/list-generics/list-view/list-view.component';
-export { TableComponent } from './shared/components/list/list-table/table.component';
+export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction, SignalListBulkAction, SignalListCheckboxBinding, SignalListRadioBinding, SignalListGaugeBinding } from './shared/components/signal-list/signal-list.component';
+export { SignalListCellTemplateDirective } from './shared/components/signal-list/signal-list-cell-template.directive';
+export { ListStateStore, ListStateDefaults, BoundListState, ModeIndexedTuple } from './shared/components/signal-list/list-state-store.service';
+export { ListFilterStore, BoundListFilterState, ListFilterDefaults } from './shared/components/signal-list/list-filter-store.service';
+export { ListSelectionStore, BoundListSelectionState } from './shared/components/signal-list/list-selection-store.service';
+export { MaxedStateSignal, MaxedStateSignalOptions, createMaxedStateSignal, maxedStateActive } from './shared/components/signal-list/maxed-state.signal';
 export { EnumerateComponent } from './shared/components/enumerate/enumerate.component';
-export * from './shared/components/list/list.component.types';
-export * from './shared/components/list/data-sources-controllers/list-data-source-types';
-export * from './shared/components/list/data-sources-controllers/list-data-source';
-export * from './shared/components/list/data-sources-controllers/list-data-source-config';
-export { ActionSchemaConfig, MultiActionConfig } from './shared/components/list/data-sources-controllers/list-data-source-config';
-export * from './shared/components/list/data-sources-controllers/list-pagination-controller';
-export { ActionListConfigProvider } from './shared/components/list/list-generics/list-providers/action-list-config-provider';
-export { TableRowStateManager } from './shared/components/list/list-table/table-row/table-row-state-manager';
-export { CardTypes } from './shared/components/list/list-cards/card/card.component';
-export { CardMultiActionComponents, CardDynamicComponent } from './shared/components/list/list-cards/card.component.types';
+export * from './shared/components/signal-list/page-size.types';
+export * from './shared/components/signal-list/list-action.types';
+export { RowState, RowsState, getDefaultRowState } from './shared/components/signal-list/row-state.types';
+export { TableCellStatusDirective } from './shared/components/signal-list/table-cell-status.directive';
+export { extractActualListEntity } from './shared/components/signal-list/list-entity.helpers';
+export type { ISimpleListConfig } from './shared/components/signal-list/simple-list-config.types';
 
 // Utility Components
 export { MultilineTitleComponent } from './shared/components/multiline-title/multiline-title.component';
@@ -201,13 +206,11 @@ export { BlurDirective } from './shared/components/blur.directive';
 export { ClickStopPropagationDirective } from './core/click-stop-propagation.directive';
 export { CustomTooltipDirective } from './shared/components/custom-tooltip/custom-tooltip.directive';
 export { FocusDirective } from './shared/components/focus.directive';
-export { TableCellStatusDirective } from './shared/components/list/list-table/table-cell-status.directive';
 
 // Dialog Services and Config
 export { ConfirmationDialogService } from './shared/components/confirmation-dialog.service';
 export { ConfirmationDialogConfig, TypeToConfirm } from './shared/components/confirmation-dialog.config';
 export { SidePanelService } from './shared/services/side-panel.service';
-export { SnackBarService } from './shared/services/snackbar.service';
 
 // Core Services
 export { EndpointsService } from './core/endpoints.service';
@@ -219,6 +222,14 @@ export { BaseCurrentUserPermissionsChecker, ICurrentUserPermissionsChecker, IPer
 export { StratosCurrentUserPermissions, StratosScopeStrings } from './core/permissions/stratos-user-permissions.checker';
 export { UserProfileService } from './core/user-profile.service';
 export { SessionService } from './shared/services/session.service';
+
+// Signal-native auth/session/endpoints/user/permissions shims (wave-3, consumers flip later)
+export { AuthSignalService } from './core/signals/auth-signal.service';
+export { SessionSignalService } from './core/signals/session-signal.service';
+export { UserSignalService } from './core/signals/user-signal.service';
+export { EndpointsSignalService } from './core/signals/endpoints-signal.service';
+export { PermissionsSignalService } from './core/signals/permissions-signal.service';
+export { CurrentUserRolesSignalService } from './core/signals/current-user-roles-signal.service';
 
 // Helper Classes
 export { arrayHelper } from './core/helper-classes/array.helper';
@@ -240,23 +251,22 @@ export { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './featur
 export * from './features/endpoints/create-endpoint/create-endpoint-helper';
 export { CreateEndpointModule } from './features/endpoints/create-endpoint/create-endpoint.module';
 export { CreateEndpointBaseStepComponent } from './features/endpoints/create-endpoint/create-endpoint-base-step/create-endpoint-base-step.component';
+export { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from './features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+export { ConnectEndpointConfig } from './features/endpoints/connect.service';
+export { EndpointRowActionsService } from './features/endpoints/endpoint-row-actions.service';
 export { BaseEndpointAuth, EndpointAuthTypeNames } from './core/endpoint-auth';
 
 // List Types and Components
-export * from './shared/components/list/list.types';
-export * from './shared/components/list/list-table/table.types';
-export * from './shared/components/list/data-sources-controllers/local-filtering-sorting';
-export { TableCellEndpointNameComponent } from './shared/components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
-export { EndpointListDetailsComponent } from './shared/components/list/list-types/endpoint/endpoint-list.helpers';
-export { createTableColumnFavorite } from './shared/components/list/list-table/table-cell-favorite/table-cell-favorite.component';
-export { ITableCellRequestMonitorIconConfig } from './shared/components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
+export { TableCellCustom, CardCell } from './shared/components/signal-list/cell-base';
+export { TableCellEndpointNameComponent } from './shared/components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
+export { EndpointListDetailsComponent } from './shared/components/endpoint-list/endpoint-list.helpers';
 
 // Meta Card Components
-export { MetaCardComponent } from './shared/components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-export { MetaCardItemComponent } from './shared/components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-export { MetaCardTitleComponent } from './shared/components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-export { MetaCardValueComponent } from './shared/components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-export { MetaCardKeyComponent } from './shared/components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
+export { MetaCardComponent } from './shared/components/meta-card/meta-card-base/meta-card.component';
+export { MetaCardItemComponent } from './shared/components/meta-card/meta-card-item/meta-card-item.component';
+export { MetaCardTitleComponent } from './shared/components/meta-card/meta-card-title/meta-card-title.component';
+export { MetaCardValueComponent } from './shared/components/meta-card/meta-card-value/meta-card-value.component';
+export { MetaCardKeyComponent } from './shared/components/meta-card/meta-card-key/meta-card-key.component';
 
 // Preview Components
 export * from './shared/previewable-component';

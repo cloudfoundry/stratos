@@ -18,13 +18,14 @@ describe('LocalStorageService', () => {
       localStorage.setItem('stratos-testuser-lists', JSON.stringify({ view: 'cards' }));
       localStorage.setItem('stratos-testuser-version', 'v4.9.0');
 
-      const store = { dispatch: vi.fn() } as any;
+      const dashboardData = { hydrateFromStorage: vi.fn() } as any;
       const sessionData = { user: { name: 'testuser', guid: 'test-guid', admin: false, scopes: [] } } as any;
 
-      LocalStorageService.localStorageToStore(store, sessionData);
+      LocalStorageService.localStorageToStore(sessionData, dashboardData);
 
-      // Should NOT dispatch any hydrate actions
-      expect(store.dispatch).not.toHaveBeenCalled();
+      // DashboardDataService is told the storage key (with null value)
+      // so subsequent mutations write through to the cleared slot.
+      expect(dashboardData.hydrateFromStorage).toHaveBeenCalledWith('stratos-testuser', null);
 
       // Should clear all user-scoped keys
       expect(localStorage.getItem('stratos-testuser')).toBeNull();
@@ -35,25 +36,29 @@ describe('LocalStorageService', () => {
       expect(localStorage.getItem('stratos-testuser-version')).toBe(CURRENT_VERSION);
     });
 
-    it('should hydrate normally when version matches', () => {
+    it('should hydrate dashboard via DashboardDataService (pagination/lists are signal-native)', () => {
       localStorage.setItem('stratos-testuser', JSON.stringify({ sidenavOpen: true }));
       localStorage.setItem('stratos-testuser-version', CURRENT_VERSION);
 
-      const store = { dispatch: vi.fn() } as any;
+      const dashboardData = { hydrateFromStorage: vi.fn() } as any;
       const sessionData = { user: { name: 'testuser', guid: 'test-guid', admin: false, scopes: [] } } as any;
 
-      LocalStorageService.localStorageToStore(store, sessionData);
+      LocalStorageService.localStorageToStore(sessionData, dashboardData);
 
-      // Should dispatch hydrate action for dashboard
-      expect(store.dispatch).toHaveBeenCalled();
+      // Dashboard hydrates through the signal-native data service. List/
+      // pagination state is owned by ListStateStore (its own localStorage
+      // keys), so localStorageToStore no longer touches the ngrx store.
+      expect(dashboardData.hydrateFromStorage).toHaveBeenCalledWith(
+        'stratos-testuser',
+        JSON.stringify({ sidenavOpen: true })
+      );
     });
 
     it('should hydrate on first login with no stored version', () => {
       // No version key, no stored data — first login
-      const store = { dispatch: vi.fn() } as any;
       const sessionData = { user: { name: 'newuser', guid: 'new-guid', admin: false, scopes: [] } } as any;
 
-      LocalStorageService.localStorageToStore(store, sessionData);
+      LocalStorageService.localStorageToStore(sessionData);
 
       // Should write version even on first login
       expect(localStorage.getItem('stratos-newuser-version')).toBe(CURRENT_VERSION);

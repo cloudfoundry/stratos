@@ -1,12 +1,16 @@
 package backup
 
 import (
+	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
+
+	"golang.org/x/crypto/pbkdf2"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
@@ -27,8 +31,8 @@ type ConnectionType string
 
 const (
 	BACKUP_CONNECTION_NONE    ConnectionType = "NONE"
-	BACKUP_CONNECTION_CURRENT                = "CURRENT"
-	BACKUP_CONNECTION_ALL                    = "ALL"
+	BACKUP_CONNECTION_CURRENT ConnectionType = "CURRENT"
+	BACKUP_CONNECTION_ALL     ConnectionType = "ALL"
 )
 
 // BackupEndpointsState - For a given endpoint define what's backed up
@@ -67,7 +71,7 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 	log.Debug("BackupEndpoints")
 
 	// Create the backup request struct from the body
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		return api.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body", "Invalid request body: %+v", err)
 	}
@@ -77,7 +81,7 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 		return api.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body - could not parse JSON", "Invalid request body - could not parse JSON: %+v", err)
 	}
 
-	if data.State == nil || len(data.State) == 0 {
+	if len(data.State) == 0 {
 		return api.NewHTTPError(http.StatusBadRequest, "Invalid request body - no endpoints to backup")
 	}
 
@@ -94,8 +98,8 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, error) {
@@ -186,7 +190,7 @@ func (ctb *cnsiTokenBackup) RestoreEndpoints(c echo.Context) error {
 	log.Debug("RestoreEndpoints")
 
 	// Create the restore request struct from the body
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
 		return api.NewHTTPShadowError(http.StatusBadRequest, "Invalid request body", "Invalid request body: %+v", err)
 	}
@@ -214,7 +218,7 @@ func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
 	}
 
 	// Check that the db version of backup file matches the stratos db version
-	if backup.IgnoreDbVersion == false {
+	if !backup.IgnoreDbVersion {
 		if ctb.dbVersion != data.DBVersion {
 			errorStr := fmt.Sprintf("Incompatible database versions. Expected %+v but got %+v", ctb.dbVersion, data.DBVersion)
 			return api.NewHTTPError(http.StatusBadRequest, errorStr)
@@ -263,7 +267,7 @@ func serializeEndpoint(endpoint *api.CNSIRecord) map[string]interface{} {
 	// Convert struct to generic map
 	m, _ := json.Marshal(endpoint)
 	var a interface{}
-	json.Unmarshal(m, &a)
+	_ = json.Unmarshal(m, &a)
 	newEndpoint := a.(map[string]interface{})
 
 	// Apply the correct client secret
@@ -277,20 +281,29 @@ func deSerializeEndpoint(endpoint map[string]interface{}) api.CNSIRecord {
 	// Convert struct to endpoint
 	m, _ := json.Marshal(endpoint)
 	var cnsi api.CNSIRecord
-	json.Unmarshal(m, &cnsi)
+	_ = json.Unmarshal(m, &cnsi)
 
 	// Apply the correct client secret
 	cnsi.ClientSecret = fmt.Sprintf("%v", endpoint["client_secret"])
 	return cnsi
 }
 
+// Key-derivation parameters for password-protected backups. Backups made
+// before the PBKDF2 format carry no magic prefix and decrypt via the legacy
+// single-round SHA256 path below.
+var backupKDFMagic = []byte("STRATOS-BACKUP-V2:")
+
+const (
+	backupKDFSaltLen    = 16
+	backupKDFIterations = 600000 // OWASP recommendation for PBKDF2-HMAC-SHA256
+)
+
 func encryptPayload(payload *BackupContentPayload, password string) ([]byte, error) {
-	// First ensure the password is an ok length
-	secret, err := createHash(password)
-	if err != nil {
-		log.Warningf("Could not create hash: %+v", err)
-		return nil, fmt.Errorf("Could not create hash")
+	salt := make([]byte, backupKDFSaltLen)
+	if _, err := io.ReadFull(rand.Reader, salt); err != nil {
+		return nil, fmt.Errorf("Could not generate salt: %+v", err)
 	}
+	secret := pbkdf2.Key([]byte(password), salt, backupKDFIterations, 32, sha256.New)
 
 	// Create the text that will be encrypted
 	payloadBytes, err := json.Marshal(payload)
@@ -304,15 +317,30 @@ func encryptPayload(payload *BackupContentPayload, password string) ([]byte, err
 		return nil, fmt.Errorf("Could not encrypt payload: %+v", err)
 	}
 
-	return payloadEncrypted, nil
+	// magic + salt + ciphertext, so restore can find the salt again
+	out := append([]byte{}, backupKDFMagic...)
+	out = append(out, salt...)
+	out = append(out, payloadEncrypted...)
+	return out, nil
 }
 
 func decryptPayload(payloadEncrypted []byte, password string) (*string, error) {
-	// First ensure the password is an ok length
-	secret, err := createHash(password)
-	if err != nil {
-		log.Warningf("Could not create hash: %+v", err)
-		return nil, fmt.Errorf("Could not create hash")
+	var secret []byte
+	if bytes.HasPrefix(payloadEncrypted, backupKDFMagic) {
+		rest := payloadEncrypted[len(backupKDFMagic):]
+		if len(rest) < backupKDFSaltLen {
+			return nil, fmt.Errorf("Failed to decrypt payload: truncated backup")
+		}
+		secret = pbkdf2.Key([]byte(password), rest[:backupKDFSaltLen], backupKDFIterations, 32, sha256.New)
+		payloadEncrypted = rest[backupKDFSaltLen:]
+	} else {
+		// Legacy backup from before the PBKDF2 format
+		var err error
+		secret, err = createHash(password)
+		if err != nil {
+			log.Warningf("Could not create hash: %+v", err)
+			return nil, fmt.Errorf("Could not create hash")
+		}
 	}
 
 	payloadUnencrypted, err := crypto.DecryptToken(secret, payloadEncrypted)
@@ -323,7 +351,8 @@ func decryptPayload(payloadEncrypted []byte, password string) (*string, error) {
 	return &payloadUnencrypted, nil
 }
 
-// createHash - Ensure the token used by crypto is at an acceptable length
+// createHash - legacy key derivation, kept so pre-PBKDF2 backups can still be
+// restored
 func createHash(password string) ([]byte, error) {
 	// Create a hash long enough to ensure with use AES-256
 	hasher := sha256.New()

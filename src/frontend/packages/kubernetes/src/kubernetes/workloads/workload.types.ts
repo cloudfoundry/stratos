@@ -23,6 +23,7 @@ export interface HelmRelease {
     metadata: {
       name: string;
       version: string;
+      appVersion?: string;
       icon?: string;
       description: string;
       sources: string[];

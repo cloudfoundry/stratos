@@ -20,6 +20,15 @@ func runKubeScore(job *AnalysisJob) error {
 	job.Format = "kubescore"
 	setJobNameAndPath(job, "Kube-score")
 
+	// Namespace is validated at the HTTP boundary in run.go (FWT-923). The
+	// guard here is defense-in-depth so a future caller that bypasses the
+	// multipart handler still can't splice shell syntax into the script.
+	if err := validateNamespace(job.Config.Namespace); err != nil {
+		log.Warnf("kubescore rejected invalid namespace: %v", err)
+		job.Status = "error"
+		return err
+	}
+
 	scriptPath := filepath.Join(getScriptFolder(), "kubescore-runner.sh")
 	args := []string{scriptPath, job.KubeConfigPath, job.Config.Namespace}
 

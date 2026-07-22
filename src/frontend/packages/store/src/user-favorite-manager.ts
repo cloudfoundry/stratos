@@ -1,22 +1,14 @@
 import { inject, Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { filter, map, switchMap, tap } from 'rxjs/operators';
 
-import { GeneralEntityAppState, IRequestEntityTypeState } from './app-state';
+import { IRequestEntityTypeState } from './app-state';
 import { StratosBaseCatalogEntity } from './entity-catalog/entity-catalog-entity/entity-catalog-entity';
 import { EntityCatalogHelpers } from './entity-catalog/entity-catalog.helper';
 import { IEntityMetadata, IStratosEntityDefinition } from './entity-catalog/entity-catalog.types';
 import { EndpointModel, entityCatalog } from './public-api';
-import { endpointEntitiesSelector } from './selectors/endpoint.selectors';
-import {
-  errorFetchingFavoritesSelector,
-  favoriteEntitiesSelector,
-  favoriteGroupsSelector,
-  fetchingFavoritesSelector,
-} from './selectors/favorite-groups.selectors';
-import { isFavorite } from './selectors/favorite.selectors';
-import { stratosEntityCatalog } from './stratos-entity-catalog';
+import { EndpointsDataService } from './services/endpoints-data.service';
+import { UserFavoritesDataService } from './services/user-favorites-data.service';
 import { IUserFavoritesGroups } from './types/favorite-groups.types';
 import {
   IEndpointFavMetadata,
@@ -28,20 +20,32 @@ import {
 
 
 interface IGroupedFavorites {
-  endpoint: UserFavorite<IEndpointFavMetadata>;
-  entities: UserFavorite<IFavoriteMetadata>[];
+  // Both may be null: getUserFavoriteFromObject returns null when a favorite
+  // record is missing required fields or the endpoint cannot be resolved.
+  endpoint: UserFavorite<IEndpointFavMetadata> | null;
+  entities: (UserFavorite<IFavoriteMetadata> | null)[];
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class UserFavoriteManager {
-  private store = inject(Store<GeneralEntityAppState>);
+  private endpointsService = inject(EndpointsDataService);
+  private userFavorites = inject(UserFavoritesDataService);
+
+  // The flat favorites map (legacy `favoriteEntitiesSelector`), projected from
+  // the signal source of truth as the `{ [guid]: UserFavorite }` shape callers
+  // (hydrateGroup, getFavoritesForEndpoint) expect.
+  private getFavoriteEntitiesObservable(): Observable<IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>> {
+    return this.userFavorites.favorites$.pipe(
+      map(favs => Object.fromEntries(favs) as IRequestEntityTypeState<UserFavorite<IFavoriteMetadata>>)
+    );
+  }
 
   public getAllFavorites() {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
-    const favoriteGroups$ = this.store.select(favoriteGroupsSelector);
-    const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
+    const favoriteGroups$ = this.userFavorites.groups$;
+    const favoriteEntities$ = this.getFavoriteEntitiesObservable();
     const combined$ = combineLatest(
       favoriteGroups$,
       favoriteEntities$
@@ -52,8 +56,8 @@ export class UserFavoriteManager {
 
   private getWaitForFavoritesObservable() {
     return combineLatest(
-      this.store.select(fetchingFavoritesSelector),
-      this.store.select(errorFetchingFavoritesSelector)
+      this.userFavorites.fetching$,
+      this.userFavorites.error$
     ).pipe(
       tap(([fetching, error]) => {
         // Defensive: Log error details before throwing
@@ -96,17 +100,16 @@ export class UserFavoriteManager {
     const endpointFav = favoriteEntities[endpointFavoriteGuid] as UserFavorite<IEndpointFavMetadata>;
     const entities = favEntitiesGuid.map(guid => this.getUserFavoriteFromObject(favoriteEntities[guid]));
     if (!endpointFav) {
-      return this.store.select(endpointEntitiesSelector).pipe(
-        map(endpoints => {
-          const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
-          const endpointEntity = endpoints[endpointGuid];
-          return this.getFavoriteEndpointFromEntity(endpointEntity);
-        }),
-        map(endpointFavorite => ({
-          endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite),
-          entities
-        }))
-      );
+      // Wave 5 (W36-B) decision C: legacy favorites point at endpoints by
+      // guid. Resolve via EndpointsDataService.endpointById signal rather
+      // than the deleted endpointEntitiesSelector.
+      const endpointGuid = UserFavorite.getEntityGuidFromFavoriteGuid(endpointFavoriteGuid);
+      const endpointEntity = endpointGuid ? this.endpointsService.endpointById(endpointGuid)() : null;
+      const endpointFavorite = endpointEntity ? this.getFavoriteEndpointFromEntity(endpointEntity) : null;
+      return of({
+        endpoint: endpointFavorite ? this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFavorite) : null,
+        entities
+      });
     }
     return of({
       endpoint: this.getUserFavoriteFromObject<IEndpointFavMetadata>(endpointFav),
@@ -114,7 +117,7 @@ export class UserFavoriteManager {
     });
   }
 
-  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: IFavoriteTypeInfo<T>): UserFavorite<T> => {
+  public getUserFavoriteFromObject = <T extends IFavoriteMetadata = IFavoriteMetadata>(f: IFavoriteTypeInfo<T>): UserFavorite<T> | null => {
     // Defensive: Validate favorite object before creating UserFavorite
     if (!f) {
       console.error('User favorites: getUserFavoriteFromObject - favorite object is null or undefined');
@@ -141,9 +144,7 @@ export class UserFavoriteManager {
       return of(false);
     }
 
-    return this.store.select(
-      isFavorite(favorite)
-    );
+    return this.userFavorites.isFavorite$(favorite);
   }
 
   public toggleFavorite(favorite: UserFavorite<IFavoriteMetadata>) {
@@ -153,20 +154,23 @@ export class UserFavoriteManager {
       return;
     }
 
-    stratosEntityCatalog.userFavorite.api.toggle(favorite);
+    this.userFavorites.toggle(favorite);
   }
 
   // Get all favorites for the given endpoint ID
   public getFavoritesForEndpoint(endpointID: string): Observable<UserFavorite<IFavoriteMetadata>[]> {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
-    const favoriteEntities$ = this.store.select(favoriteEntitiesSelector);
+    const favoriteEntities$ = this.getFavoriteEntitiesObservable();
     return waitForFavorites$.pipe(switchMap(() => favoriteEntities$)).pipe(
       map(favs => {
         const result: Array<UserFavorite<IFavoriteMetadata>> = [];
         Object.values(favs).forEach(f => {
           if (f.endpointId === endpointID && f.entityId) {
             // Ensure we actually have a UserFavorite object and not a struct
-            result.push(this.getUserFavoriteFromObject(f));
+            const userFavorite = this.getUserFavoriteFromObject(f);
+            if (userFavorite) {
+              result.push(userFavorite);
+            }
           }
         });
         return result;
@@ -212,14 +216,20 @@ export class UserFavoriteManager {
     const entityType = isEndpoint ? EntityCatalogHelpers.endpointType : entityDefinition.type;
     const metadata = catalogEntity.builders?.entityBuilder?.getMetadata(entity);
     const guid = isEndpoint ? null : catalogEntity.builders?.entityBuilder?.getGuid(entity);
-    if (!endpointId) {
-      console.error('User favourite - buildFavoriteFromCatalogEntity - endpointId is undefined');
+    // Transient state during data load: callers retry once the entity row
+    // resolves with a stamped endpoint id. Skip silently rather than emit
+    // a UserFavorite with no endpoint context (which can't round-trip
+    // through the favorites store anyway). The same applies to a missing
+    // endpoint/entity type.
+    if (!endpointId || !endpointType || !entityType) {
+      return null;
     }
     return new UserFavorite<T>(
       endpointId,
       endpointType,
       entityType,
-      guid,
+      // Endpoint favorites carry no entityId (guid is intentionally null here).
+      guid ?? undefined,
       metadata
     );
   }
@@ -249,7 +259,13 @@ export class UserFavoriteManager {
     return null;
   }
 
-  private getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
+  // Public so list cards on single-endpoint pages can supply the page's
+  // endpoint id explicitly. The default getFavorite() reads endpoint id off
+  // the entity row, but ngrx dedupes rows across Stratos endpoints that
+  // share a backend (e.g. multiple CF endpoints on one CAPI), so the row's
+  // stamped endpoint id can differ from the page's context — leading to
+  // stars rendering on the wrong endpoint's list page.
+  public getFavoriteFromEntity<T extends IEntityMetadata = IEntityMetadata, Y = any>(
     entityType: string,
     endpointType: string,
     endpointId: string,
@@ -272,7 +288,10 @@ export class UserFavoriteManager {
 
   public getFavoriteEndpointFromEntity(
     endpoint: EndpointModel
-  ): UserFavoriteEndpoint {
+  ): UserFavoriteEndpoint | null {
+    if (!endpoint.cnsi_type || !endpoint.guid) {
+      return null;
+    }
     return this.getFavoriteFromEntity(
       EntityCatalogHelpers.endpointType,
       endpoint.cnsi_type,
@@ -288,7 +307,7 @@ export class UserFavoriteManager {
     entities.forEach(e => {
       const defn = e.builders?.entityBuilder;
       if (defn) {
-        const canFavorite = defn.getGuid && defn.getMetadata && defn.getLink;
+        const canFavorite = !!defn.getGuid && !!defn.getMetadata && !!defn.getLink;
         if (canFavorite) {
           total++;
         }
@@ -300,7 +319,7 @@ export class UserFavoriteManager {
   public canFavoriteEntityType(entityDefn: StratosBaseCatalogEntity) {
     const defn = entityDefn.builders?.entityBuilder;
     if (defn) {
-      const canFavorite = defn.getGuid && defn.getMetadata && defn.getLink;
+      const canFavorite = !!defn.getGuid && !!defn.getMetadata && !!defn.getLink;
       return canFavorite;
     }
     return false;

@@ -6,20 +6,20 @@
       }
       <ng-content select="app-metrics-range-selector"></ng-content>
     </div>
-    @if (isRefreshing$ | async) {
+    @if (isRefreshing()) {
       <app-spinner [diameter]="20" class="metrics-chart__refreshing"></app-spinner>
     }
-    @if (isFetching$ | async) {
+    @if (isFetching()) {
       <app-progress-bar class="metrics-chart__loading" color="primary" mode="indeterminate">
       </app-progress-bar>
     }
-    @if ((isFetching$ | async) === false) {
+    @if (!isFetching()) {
       <div class="metrics-chart">
-        @if (results$ | async; as results) {
+        @if (results(); as results) {
           <div class="metrics-chart">
             @if (results.length) {
               <div class="metrics-chart">
-                @switch (chartConfig.chartType) {
+                @switch (chartConfig?.chartType) {
                   @case (chartTypes.LINE) {
                     <canvas baseChart
                       [data]="chartJsData"
@@ -28,7 +28,7 @@
                     </canvas>
                   }
                   @default {
-                    <span> {{ chartConfig.chartType }} chart type not found </span>
+                    <span> {{ chartConfig?.chartType }} chart type not found </span>
                   }
                 }
               </div>
@@ -36,7 +36,7 @@
               <div class="no-content">No results found
                 @if (!title) {
                   <div class="no-content__name">
-                    {{ chartConfig.yAxisLabel }}
+                    {{ chartConfig?.yAxisLabel }}
                   </div>
                 }
               </div>

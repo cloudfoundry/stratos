@@ -57,7 +57,7 @@ check_prerequisites() {
 
   # Check backend binaries
   if [ ! -d "${BIN_DIR}" ]; then
-    error "Backend binaries not found. Run: make build backend-all"
+    error "Backend binaries not found. Run: make build backend"
   fi
 
   local missing_binaries=()
@@ -73,7 +73,7 @@ check_prerequisites() {
   done
 
   if [ ${#missing_binaries[@]} -gt 0 ]; then
-    error "Missing binaries: ${missing_binaries[*]}. Run: make build backend-all"
+    error "Missing binaries: ${missing_binaries[*]}. Run: make build backend"
   fi
 
   success "Prerequisites OK"

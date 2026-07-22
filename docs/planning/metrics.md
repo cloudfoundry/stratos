@@ -20,7 +20,7 @@ We may need to add some metadata that can be retrieved from Prometheus or the ng
 
 We will extend the Stratos backend API to allow Prometheus queries to be made via its API. To ensure that a user only sees metrics for entities that they are permitted to see, we would create endpoints along the lines of:
 
-- Metrics for an Application = /metrics/app/{app-id}/query?query=PROMETHEUS_QUERY
+- Metrics for an Application = `/metrics/app/{app-id}/query?query=PROMETHEUS_QUERY`
 - Metrics for Cloud Foundry = /metrics/cf/query?query=PROMETHEUS_QUERY
 
 In the case of Application metrics, the Stratos back-end will first make an API call to Cloud Foundry to retrieve the specified application, in order to determine that the user

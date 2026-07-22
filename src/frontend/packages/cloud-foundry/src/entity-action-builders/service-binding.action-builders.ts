@@ -18,19 +18,19 @@ export interface ServiceBindingActionBuilders extends OrchestratedActionBuilders
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => FetchAllServiceBindings;
   getAllForApplication: (
     applicationGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, populateMissing }?: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetAppServiceBindings;
   getAllForServiceInstance: (
     serviceInstanceGuid: string,
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations }: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => ListServiceBindingsForInstance;
 }
 

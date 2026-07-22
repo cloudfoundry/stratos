@@ -5,7 +5,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 
-	"code.cloudfoundry.org/cli/util/configv3"
+	"code.cloudfoundry.org/cli/v8/util/configv3"
 	log "github.com/sirupsen/logrus"
 )
 

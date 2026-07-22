@@ -1,9 +1,10 @@
 import { inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CanActivateFn, RouterStateSnapshot } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { RouterNav, InternalAppState } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { filter, map, take } from 'rxjs/operators';
+
+import { AuthSignalService } from './signals/auth-signal.service';
 
 export function queryParamMap(): { [key: string]: string } {
   const paramMap: { [key: string]: string } = {};
@@ -35,22 +36,21 @@ function snapshotToQueryParams(state: RouterStateSnapshot): { [key: string]: str
 }
 
 export const authGuard: CanActivateFn = (_route, state): Observable<boolean> => {
-  const store = inject(Store<InternalAppState>);
+  const authSignals = inject(AuthSignalService);
 
-  return store.select('auth').pipe(
+  // Read the auth slice via the signal-native projection.
+  return toObservable(authSignals.auth).pipe(
     // Wait for auth state to stabilize before evaluation
     // This prevents redirecting to /login during transient state updates
-    filter(authState => !authState.verifying),
+    filter(authState => !!authState && !authState.verifying),
     map((authState) => {
-      if (!authState.sessionData || !authState.sessionData.valid) {
+      if (!authState || !authState.sessionData || !authState.sessionData.valid) {
         const [pathOnly] = state.url ? state.url.split('?') : ['/'];
         const targetPath = pathOnly && pathOnly !== '/' && pathOnly.length > 0 ? pathOnly : '/home';
-        store.dispatch(new RouterNav({
-          path: ['/login']
-        }, {
-            path: targetPath,
-            queryParams: snapshotToQueryParams(state)
-          }));
+        authSignals.navigateAndRememberRedirect(['/login'], {
+          path: targetPath,
+          queryParams: snapshotToQueryParams(state)
+        });
         return false;
       }
       return true;

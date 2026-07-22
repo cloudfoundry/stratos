@@ -14,7 +14,6 @@ interface CertsAuthForm {
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-kubernetes-certs-auth-form',
   templateUrl: './kubernetes-certs-auth-form.component.html',
-  styleUrls: ['./kubernetes-certs-auth-form.component.scss'],
   standalone: true,
   imports: [
     ReactiveFormsModule,
@@ -24,7 +23,7 @@ interface CertsAuthForm {
   ]
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup: FormGroup<CertsAuthForm>;
+  @Input() formGroup!: FormGroup<CertsAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {

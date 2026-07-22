@@ -453,6 +453,24 @@ stringData:
 
 ## 🔐 Security Hardening
 
+### Pre-deployment audit
+
+Before promoting a build to a production environment, run the audit
+verbs from the source tree to inventory known CVEs in shipped
+dependencies:
+
+```bash
+make audit summary     # high/moderate/low totals — fast triage
+make audit             # full output: bun audit + gosec + trivy + govulncheck
+make outdated          # direct deps with available upgrades
+make deps dependabot   # open dependency PRs awaiting review (requires gh)
+```
+
+`make audit` does not gate the build — it surfaces findings for
+operator judgement. Track which CVEs are reachable vs. transitive,
+which fixes are available upstream, and which need a workstream
+ticket. See `developer-environment.md` for tool installation.
+
 ### TLS/SSL Configuration
 
 **Generate Certificates:**
@@ -837,7 +855,7 @@ spec:
 
 ## 🔧 Troubleshooting
 
-See [troubleshooting.md](troubleshooting.md) for detailed troubleshooting guide.
+See [troubleshooting.md](deploy/troubleshooting.md) for detailed troubleshooting guide.
 
 **Quick Diagnostics:**
 ```bash
@@ -864,8 +882,8 @@ kubectl -n stratos run -it --rm debug --image=curlimages/curl --restart=Never --
 
 ### Documentation
 - [Official Docs](https://stratos.app/docs)
-- [Helm Chart](https://github.com/cloudfoundry/stratos/tree/master/deploy/kubernetes)
-- [Troubleshooting Guide](troubleshooting.md)
+- [Helm Chart](https://github.com/cloudfoundry/stratos/tree/main/deploy/kubernetes)
+- [Troubleshooting Guide](deploy/troubleshooting.md)
 
 ### Community
 - [GitHub Issues](https://github.com/cloudfoundry/stratos/issues)

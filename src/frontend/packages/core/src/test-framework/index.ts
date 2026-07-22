@@ -48,9 +48,12 @@ export {
   createEntityStoreState,
   populateStoreWithTestEndpoint,
   StoreTestingModule,
-  STORE_TEST_PROVIDERS,
-  CoreTestingModule
+  STORE_TEST_PROVIDERS
 } from '../../test-framework/core-test.helper';
+
+// CoreTestingModule lives in core-test.modules; core-test.helper imports but does
+// not re-export it, so source it directly to keep the barrel surface unchanged.
+export { CoreTestingModule } from '../../test-framework/core-test.modules';
 
 /**
  * Quick Start Guide:

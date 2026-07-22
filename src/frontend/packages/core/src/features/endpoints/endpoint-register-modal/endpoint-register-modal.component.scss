@@ -1,3 +1,5 @@
+@reference 'tailwindcss';
+
 /* Modal animations */
 @keyframes fade-in {
   from {
@@ -48,12 +50,14 @@
 
 /* Custom button hover effects */
 .btn-primary {
-  @apply bg-gradient-to-r from-blue-600 to-blue-700 text-white;
+  @apply text-white;
+  background-image: linear-gradient(to right, var(--color-primary), var(--color-secondary));
   transition: all 0.2s ease;
 }
 
 .btn-primary:hover {
-  @apply from-blue-700 to-blue-800 shadow-lg;
+  @apply shadow-lg;
+  background-image: linear-gradient(to right, var(--color-secondary), var(--color-primary));
   transform: translateY(-1px);
 }
 
@@ -78,25 +82,25 @@
 
 /* Theme color classes for dynamic theming */
 .bg-primary {
-  background-color: var(--color-primary, #2196f3);
+  background-color: var(--color-primary, oklch(65.816% 0.169 248.81));
 }
 
 .bg-secondary {
-  background-color: var(--color-secondary, #00bcd4);
+  background-color: var(--color-secondary, oklch(72.912% 0.1265 210.82));
 }
 
 .text-primary {
-  color: var(--color-primary, #2196f3);
+  color: var(--color-primary, oklch(65.816% 0.169 248.81));
 }
 
 .border-primary {
-  border-color: var(--color-primary, #2196f3);
+  border-color: var(--color-primary, oklch(65.816% 0.169 248.81));
 }
 
 /* Focus states for accessibility */
 button:focus,
 .endpoint-card:focus {
-  outline: 2px solid var(--color-primary, #2196f3);
+  outline: 2px solid var(--color-primary, oklch(65.816% 0.169 248.81));
   outline-offset: 2px;
 }
 
@@ -114,7 +118,7 @@ button:focus,
   height: 20px;
   margin: -10px 0 0 -10px;
   border: 2px solid transparent;
-  border-top: 2px solid var(--color-primary, #2196f3);
+  border-top: 2px solid var(--color-primary, oklch(65.816% 0.169 248.81));
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

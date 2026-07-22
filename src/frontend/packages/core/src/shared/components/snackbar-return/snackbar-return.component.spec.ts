@@ -2,7 +2,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Store } from '@ngrx/store';
 import { createBasicStoreModule } from '@test-framework/core-test.helper';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { MDAppModule } from '../../../core/md.module';
@@ -32,12 +31,6 @@ describe('SnackBarReturnComponent', () => {
         {
           provide: MAT_SNACK_BAR_DATA,
           useValue: { message: '', returnUrl: '' }
-        },
-        {
-          provide: Store,
-          useValue: {
-            dispatch: vi.fn()
-          }
         },
         provideZonelessChangeDetection(),
       ]

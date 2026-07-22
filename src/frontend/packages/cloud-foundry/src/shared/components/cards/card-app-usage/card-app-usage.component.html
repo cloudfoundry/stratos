@@ -1,36 +1,34 @@
-@if (appData$ | async; as appData) {
-  <app-card>
-    <app-card-status [status$]="status$"></app-card-status>
-    @if (appData.isRunning && appData.monitor) {
-      <app-card-content>
-        <table class="instances__detail">
-          <tr>
-            <td>Usage</td>
-            <td [appTableCellStatus]="appData.monitor.status.mem">Mem</td>
-            <td [appTableCellStatus]="appData.monitor.status.disk">Disk</td>
-            <td [appTableCellStatus]="appData.monitor.status.cpu">CPU</td>
-          </tr>
-          <tr>
-            <td>Max</td>
-            <td>{{ appData.monitor.max.mem | percentage }}</td>
-            <td>{{ appData.monitor.max.disk | percentage }}</td>
-            <td>{{ appData.monitor.max.cpu | percentage }}</td>
-          </tr>
-          <tr>
-            <td>Avg</td>
-            <td>{{ appData.monitor.avg.mem | percentage }}</td>
-            <td>{{ appData.monitor.avg.disk | percentage }}</td>
-            <td>{{ appData.monitor.avg.cpu | percentage }}</td>
-          </tr>
-        </table>
-      </app-card-content>
-    }
-    @if (!appData.isRunning) {
-      <app-card-content>
-        <app-card-header>
-          <app-card-title>Application is not running</app-card-title>
-        </app-card-header>
-      </app-card-content>
-    }
-  </app-card>
-}
+<app-card>
+  <app-card-status [status$]="status$"></app-card-status>
+  @if (isRunning() && hasUsageData()) {
+    <app-card-content>
+      <table class="w-full text-sm">
+        <tr>
+          <td class="py-1 text-content-muted">Usage</td>
+          <td class="py-1 text-right" [appTableCellStatus]="statuses().mem">Mem</td>
+          <td class="py-1 text-right" [appTableCellStatus]="statuses().disk">Disk</td>
+          <td class="py-1 text-right" [appTableCellStatus]="statuses().cpu">CPU</td>
+        </tr>
+        <tr>
+          <td class="py-1 text-content-muted">Max</td>
+          <td class="py-1 text-right">{{ max().mem | percentage }}</td>
+          <td class="py-1 text-right">{{ max().disk | percentage }}</td>
+          <td class="py-1 text-right">{{ max().cpu | percentage }}</td>
+        </tr>
+        <tr>
+          <td class="py-1 text-content-muted">Avg</td>
+          <td class="py-1 text-right">{{ avg().mem | percentage }}</td>
+          <td class="py-1 text-right">{{ avg().disk | percentage }}</td>
+          <td class="py-1 text-right">{{ avg().cpu | percentage }}</td>
+        </tr>
+      </table>
+    </app-card-content>
+  }
+  @if (!isRunning()) {
+    <app-card-content>
+      <app-card-header>
+        <app-card-title>Application is not running</app-card-title>
+      </app-card-header>
+    </app-card-content>
+  }
+</app-card>

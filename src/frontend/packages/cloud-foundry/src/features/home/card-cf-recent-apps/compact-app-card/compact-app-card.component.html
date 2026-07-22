@@ -1,6 +1,6 @@
 @if (app) {
   <div class="compact-app-card">
-    <app-application-state-icon [status]="appStatus$ | async "></app-application-state-icon>
+    <app-application-state-icon [status]="appStatus()"></app-application-state-icon>
     <div class="compact-app-card__name">
       <a [routerLink]="['/applications', endpoint, app.metadata.guid]" [queryParams]="bcType">{{ app.entity.name }}</a>
     </div>

@@ -38,8 +38,8 @@ export class TileSelectorComponent {
       }
       return grouped;
     }, {
-      show: [],
-      hidden: []
+      show: [] as ITileConfig[],
+      hidden: [] as ITileConfig[]
     });
     this.pOptions = groupedOptions.show;
     this.hiddenOptions = groupedOptions.hidden;
@@ -50,8 +50,8 @@ export class TileSelectorComponent {
     return this.pOptions;
   }
 
-  @Output() selection = new EventEmitter<ITileConfig>();
-  public selected: ITileConfig;
+  @Output() selection = new EventEmitter<ITileConfig | null>();
+  public selected: ITileConfig | null = null;
 
   constructor() { }
 

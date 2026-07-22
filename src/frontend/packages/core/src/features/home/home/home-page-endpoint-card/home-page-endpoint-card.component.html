@@ -2,8 +2,8 @@
   @if (endpoint && definition) {
     <div class="card-header border-b card-header-border">
       <div class="flex items-center justify-between w-full">
-        <div class="flex items-center space-x-4 cursor-pointer" [routerLink]="link">
-          <div class="flex-shrink-0">
+        <div class="flex items-center space-x-4" [class.cursor-pointer]="!disconnected" [routerLink]="disconnected ? null : link">
+          <div class="shrink-0">
             @if (definition.logoUrl) {
               <img class="h-12 w-12 object-contain" [src]="definition.logoUrl" alt="" />
             }
@@ -22,30 +22,44 @@
         <div class="flex items-center space-x-2">
           @if ((status$ | async); as status) {
             <div>
-              @if (status === 1) {
+              @if (status === Status.Loading) {
                 <div class="animate-spin">
-                  <div class="h-5 w-5 border-2 border-primary-600 border-t-transparent rounded-full"></div>
+                  <div class="h-5 w-5 border-2 border-brand-600 border-t-transparent rounded-full"></div>
                 </div>
               }
-              @if (status === 2) {
-                <div class="text-warning-500" title="Data for this endpoint took too long to load">
+              @if (status === Status.Error) {
+                <div class="text-warning-shade-500" title="Data for this endpoint took too long to load">
                   <span class="material-icons">warning</span>
                 </div>
               }
             </div>
           }
-          <app-entity-favorite-star [confirmRemoval]="true" [favorite]="favorite"></app-entity-favorite-star>
+          @if (favorite; as fav) {
+            <app-entity-favorite-star [confirmRemoval]="true" [favorite]="fav"></app-entity-favorite-star>
+          }
         </div>
       </div>
     </div>
   }
   <div class="card-body p-0">
-    <div class="flex h-full" [class.flex-col]="fullView" [class.flex-row]="!fullView">
+    @if (disconnected) {
+      <div class="p-6 flex flex-col items-center justify-center text-center space-y-3">
+        <span class="material-icons text-4xl sidebar-muted-text">cloud_off</span>
+        <div class="font-medium">Disconnected</div>
+        <button class="btn btn-primary" (click)="connect()">Connect</button>
+      </div>
+    }
+    <!-- Kept in the DOM (hidden) while disconnected: the #customCard anchor is
+         a static ViewChild, and a reconnect swaps the real card back in.
+         Two layouts, chosen per endpoint via homeCard.linksBelow: the classic
+         right-hand sidebar, or a Favorites/Shortcuts strip below the content
+         (suits content-light cards like kubernetes). -->
+    <div class="flex h-full" [class.hidden]="disconnected" [class.flex-col]="fullView || linksBelow" [class.flex-row]="!fullView && !linksBelow">
       <div class="flex-1 p-6">
         <div>
           <ng-template #customCard></ng-template>
         </div>
-        @if (!showShortcutsOnSide) {
+        @if (!linksBelow && !showShortcutsOnSide) {
           <div class="mt-6">
             @if (links$ | async; as links) {
               <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
@@ -53,7 +67,7 @@
           </div>
         }
       </div>
-      @if (!fullView) {
+      @if (!fullView && !linksBelow) {
         <div class="border-l sidebar-panel" [class.w-80]="!layout || layout.x <= 1" [class.w-48]="layout && layout.x === 2" [class.w-64]="layout && layout.x >= 3">
           @if (links$ | async; as links) {
             <div class="p-6">
@@ -82,6 +96,44 @@
               }
               @if (showShortcutsOnSide) {
                 <div class="mt-6">
+                  <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+      @if (!fullView && linksBelow) {
+        <div class="border-t sidebar-panel">
+          @if (links$ | async; as links) {
+            <div class="p-6 pt-2 flex flex-row gap-8">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mt-5 mb-2.5">
+                  <h3 class="text-sm font-medium sidebar-title">Favorites</h3>
+                  @if (hiddenFavorites > 0) {
+                    <div class="text-xs cursor-pointer sidebar-link" role="button" tabindex="0"
+                      (click)="showFavoritesPanel()"
+                      (keydown.enter)="showFavoritesPanel()"
+                      (keydown.space)="showFavoritesPanel(); $event.preventDefault()">
+                      {{hiddenFavorites}} more ...
+                    </div>
+                  }
+                </div>
+                @if (links.favs.length > 0) {
+                  <div class="space-y-3">
+                    @for (entity of links.favs; track entity) {
+                      <app-favorites-meta-card [favoriteEntity]="entity"></app-favorites-meta-card>
+                    }
+                  </div>
+                }
+                @if (links.favs.length === 0) {
+                  <div class="sidebar-muted-text">
+                    <div class="text-sm">No favorites</div>
+                  </div>
+                }
+              </div>
+              @if (links.shortcuts.length > 0) {
+                <div class="flex-1 min-w-0">
                   <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
                 </div>
               }

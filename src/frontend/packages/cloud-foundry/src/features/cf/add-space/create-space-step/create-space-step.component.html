@@ -9,14 +9,12 @@
         </app-error>
       }
     </app-form-field>
-    @if (hasSpaceQuotas$ | async) {
+    @if (hasSpaceQuotas()) {
       <app-form-field>
         <app-select class="form-control" formControlName="quotaDefinition" placeholder="Quota Definition">
-          @if (hasSpaceQuotas$ | async) {
-            <app-option [value]="0">None</app-option>
-          }
-          @for (quota of quotaDefinitions$ | async; track quota) {
-            <app-option [value]="quota.metadata.guid">{{ quota.entity.name }}
+          <app-option [value]="0">None</app-option>
+          @for (quota of quotaDefinitions(); track quota.guid) {
+            <app-option [value]="quota.guid">{{ quota.name }}
             </app-option>
           }
         </app-select>

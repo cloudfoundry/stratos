@@ -64,7 +64,7 @@ test.describe('Create Service Instance', () => {
       await serviceCards.click();
 
       // Verify creation wizard or service summary page opened
-      const wizardOrSummary = page.locator('app-create-service-instance, app-service-summary, mat-dialog-container');
+      const wizardOrSummary = page.locator('app-create-service-instance, app-service-summary, [role="dialog"]');
       const pageOpened = await wizardOrSummary.first().isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!pageOpened) {

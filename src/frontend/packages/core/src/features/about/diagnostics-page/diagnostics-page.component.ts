@@ -1,13 +1,14 @@
 import { ChangeDetectionStrategy, Component, OnInit, VERSION, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Meta } from '@angular/platform-browser';
-import { Store } from '@ngrx/store';
-import { GeneralEntityAppState, AuthState, SessionData } from '@stratosui/store';
+import { Diagnostics, SessionData } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 import { BooleanIndicatorComponent } from '../../../shared/components/boolean-indicator/boolean-indicator.component';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 import { InfoCardComponent } from '../../../shared/components/info-card/info-card.component';
 import { BUILD_INFO } from '../../../environments/build-info';
@@ -18,8 +19,8 @@ import { BUILD_INFO } from '../../../environments/build-info';
   standalone: true,
   imports: [
     CommonModule,
-    PageHeaderComponent,
     BooleanIndicatorComponent,
+    CardWrapperComponent,
     CustomIconComponent,
     InfoCardComponent
   ],
@@ -27,57 +28,51 @@ import { BUILD_INFO } from '../../../environments/build-info';
 })
 export class DiagnosticsPageComponent implements OnInit {
   private meta = inject(Meta);
-  private store = inject<Store<GeneralEntityAppState>>(Store);
+  private auth = inject(AuthSignalService);
 
 
-  sessionData$!: Observable<SessionData>;
+  // toObservable() requires an injection context — bridge the signal here
+  // (field initializer runs in DI context) rather than in ngOnInit (which is not).
+  sessionData$: Observable<SessionData & { diagnostics: Diagnostics; }> = toObservable(this.auth.sessionData).pipe(
+    filter((sessionData): sessionData is SessionData & { diagnostics: Diagnostics; } => !!sessionData && !!sessionData.diagnostics)
+  );
   versionNumber$!: Observable<string>;
   userIsAdmin$!: Observable<boolean>;
   helmLastModified$!: Observable<Date>;
 
-  public breadcrumbs = [
-    {
-      breadcrumbs: [{ value: 'About', routerLink: '/about' }]
-    }
-  ];
-
   angularVersion = VERSION.full;
   buildInfo = BUILD_INFO;
 
-  public gitProject: string;
-  public gitBranch: string;
-  public gitCommit: string;
-  public buildDate: string;
-  public gitHubRepository: string;
-  public gitHubRepositoryLink: string;
-  public gitBranchLink: string;
-  public gitCommitLink: string;
+  // These are populated by ngOnInit before the template reads them.
+  public gitProject!: string; // strict: assigned in ngOnInit
+  public gitBranch: string | null = null; // may be cleared when branch is 'HEAD'
+  public gitCommit!: string; // strict: assigned in ngOnInit
+  public buildDate!: string; // strict: assigned in ngOnInit
+  public gitHubRepository!: string; // strict: assigned in ngOnInit
+  // Links are only built when the corresponding info is present.
+  public gitHubRepositoryLink?: string;
+  public gitBranchLink?: string;
+  public gitCommitLink?: string;
 
   ngOnInit() {
 
     const helmLastModifiedRegEx = /seconds:([0-9]*)/;
 
-    this.sessionData$ = this.store.select(s => s.auth).pipe(
-      filter(auth => !!(auth && auth.sessionData)),
-      filter(auth => !!(auth.sessionData.diagnostics)),
-      map((auth: AuthState) => auth.sessionData)
-    );
-
     this.userIsAdmin$ = this.sessionData$.pipe(
-      map(session => session.user && session.user.admin)
+      map(session => !!(session.user && session.user.admin))
     );
 
     this.versionNumber$ = this.sessionData$.pipe(
       map((sessionData: SessionData) => {
-        const versionNumber = sessionData.version.proxy_version;
+        const versionNumber = sessionData.version?.proxy_version ?? '';
         return versionNumber.split('-')[0];
       })
     );
 
     this.helmLastModified$ = this.sessionData$.pipe(
       map((sessionData: SessionData) => {
-        const lastModified = sessionData.diagnostics.helmLastModified;
-        const match = helmLastModifiedRegEx.exec(lastModified);
+        const lastModified = sessionData.diagnostics?.helmLastModified;
+        const match = lastModified ? helmLastModifiedRegEx.exec(lastModified) : null;
         if (match && match.length === 2) {
           return new Date(parseInt(match[1], 10) * 1000);
         }

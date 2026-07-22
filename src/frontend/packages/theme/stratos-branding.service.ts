@@ -21,7 +21,7 @@ const defaultCompanyConfig: CompanyConfig = {
     navigation: '/core/assets/logo.png',
     navigationIcon: '/core/assets/logo.png',
     favicon: '/favicon.ico',
-    loginBackground: '/core/assets/login-bg.jpg',
+    loginBackground: '/core/assets/login-bg.webp',
   },
   theme: {
     primary: '#3b82f6',
@@ -269,6 +269,8 @@ export class StratosBrandingService {
     if (config.login.backgroundColor) loginCustom.backgroundColor = config.login.backgroundColor;
     if (config.login.cardBackground) loginCustom.cardBackground = config.login.cardBackground;
     if (config.login.customMessage) loginCustom.customMessage = config.login.customMessage;
+    if (config.login.inputBackground) loginCustom.inputBackground = config.login.inputBackground;
+    if (config.login.inputBorder) loginCustom.inputBorder = config.login.inputBorder;
     if (config.logos.loginBackground) loginCustom.backgroundImage = config.logos.loginBackground;
     this.setLoginCustomization(loginCustom);
   }

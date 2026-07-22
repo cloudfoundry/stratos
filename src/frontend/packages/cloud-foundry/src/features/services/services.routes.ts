@@ -7,6 +7,9 @@ import {
   AddServiceInstanceComponent,
 } from '../../shared/components/add-service-instance/add-service-instance/add-service-instance.component';
 import { DetachServiceInstanceComponent } from './detach-service-instance/detach-service-instance.component';
+import { RouteServiceComponent } from './route-service/route-service.component';
+import { ServiceInstanceSummaryComponent } from './service-instance-summary/service-instance-summary.component';
+import { ServiceKeysComponent } from './service-keys/service-keys.component';
 import { ServicesWallComponent } from './services-wall/services-wall.component';
 
 export const SERVICES_ROUTES: Routes = [
@@ -29,5 +32,19 @@ export const SERVICES_ROUTES: Routes = [
   {
     path: ':type/:endpointId/:serviceInstanceId/detach',
     component: DetachServiceInstanceComponent
+  },
+  {
+    path: ':type/:endpointId/:serviceInstanceId/keys',
+    component: ServiceKeysComponent
+  },
+  {
+    path: 'route-service/:endpointId/:routeGuid',
+    component: RouteServiceComponent
+  },
+  // Bare per-instance detail/summary (read view, #5370). Listed AFTER the
+  // literal `route-service/...` route so its `:type` segment cannot shadow it.
+  {
+    path: ':type/:endpointId/:serviceInstanceId',
+    component: ServiceInstanceSummaryComponent
   }
 ];

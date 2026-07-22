@@ -24,7 +24,7 @@ import { CloudFoundryEndpointService } from '../services/cloud-foundry-endpoint.
 @Component({
   selector: 'app-cloud-foundry-tabs-base',
   templateUrl: './cloud-foundry-tabs-base.component.html',
-  styleUrls: ['./cloud-foundry-tabs-base.component.scss'],
+  host: { class: 'flex flex-col flex-1 min-h-0 overflow-hidden' },
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
@@ -53,7 +53,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
   public tabsHeader = 'Cloud Foundry';
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundry);
 
-  public favorite$: Observable<UserFavoriteEndpoint>;
+  // null when the endpoint has no cnsi_type/guid (getFavoriteEndpointFromEntity);
+  // the template binds via `| async`, which already yields null.
+  public favorite$: Observable<UserFavoriteEndpoint | null>;
 
   constructor() {
     const cfEndpointService = this.cfEndpointService;
@@ -83,6 +85,9 @@ export class CloudFoundryTabsBaseComponent implements OnInit {
     this.tabLinks = [
       { link: 'summary', label: 'Summary', icon: 'cloud_foundry', iconFont: 'stratos-icons' },
       { link: 'organizations', label: 'Organizations', icon: 'organization', iconFont: 'stratos-icons' },
+      { link: 'applications', label: 'Applications', icon: 'apps' },
+      { link: 'marketplace', label: 'Marketplace', icon: 'store' },
+      { link: 'services', label: 'Services', icon: 'service', iconFont: 'stratos-icons' },
       {
         link: CloudFoundryTabsBaseComponent.cells,
         label: 'Cells',

@@ -10,7 +10,6 @@ import { ActivatedRoute } from '@angular/router';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock } from '@test-framework/cf';
 import { TabNavService } from '@stratosui/core';
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory } from '@stratosui/store';
 import { CfAutoscalerTestingModule } from '../../../cf-autoscaler-testing.module';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import { EditAutoscalerPolicyStep2Component } from './edit-autoscaler-policy-step2.component';
@@ -33,9 +32,6 @@ describe('EditAutoscalerPolicyStep2Component', () => {
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
-        EntityServiceFactory,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EditAutoscalerPolicyService,
         {
           provide: ActivatedRoute,

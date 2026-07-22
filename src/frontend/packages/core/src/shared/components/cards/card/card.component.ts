@@ -9,7 +9,7 @@ import { ChangeDetectionStrategy, Component  } from '@angular/core';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="card card-wrapper">
+    <div class="card card-wrapper border border-[color:var(--card-border)] rounded">
       <ng-content></ng-content>
     </div>
   `,

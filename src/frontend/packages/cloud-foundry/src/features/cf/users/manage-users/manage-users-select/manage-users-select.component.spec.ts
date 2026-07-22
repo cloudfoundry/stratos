@@ -7,7 +7,6 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 
-import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesSelectComponent } from './manage-users-select.component';
@@ -29,7 +28,6 @@ describe('UsersRolesSelectComponent', () => {
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
         ActiveRouteCfOrgSpace,
         CfRolesService,
-        CfUserService,
       ],
 
     })

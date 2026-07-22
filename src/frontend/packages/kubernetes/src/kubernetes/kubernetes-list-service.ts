@@ -20,7 +20,7 @@ export class KubernetesListConfigService {
     this.configs[name] = config;
   }
 
-  get<T= any>(name: string): ISimpleListConfig<T> {
+  get<T= any>(name: string): ISimpleListConfig<T> | undefined {
     return name ? this.configs[name] : undefined;
   }
 }

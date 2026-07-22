@@ -1,215 +1,100 @@
 import { HttpClient } from '@angular/common/http';
-import { Action, Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
-import { take, catchError, map, pairwise, share, skipWhile, switchMap, tap } from 'rxjs/operators';
+import { Observable, firstValueFrom, of } from 'rxjs';
+import { catchError, map, share, take } from 'rxjs/operators';
 
-import {
-  AppState,
-  entityCatalog,
-  EntityUserRolesEndpoint,
-  EntityUserRolesFetch,
-  BaseHttpClientFetcher,
-  flattenPagination,
-  PaginationFlattener,
-  ActionState,
-  connectedEndpointsOfTypesSelector,
-  selectPaginationState,
-  PaginationEntityState,
-  BasePaginatedAction } from '@stratosui/store';
-import {
-  CfUserRelationTypes,
-  GET_CURRENT_CF_USER_RELATIONS,
-  GET_CURRENT_CF_USER_RELATIONS_FAILED,
-  GET_CURRENT_CF_USER_RELATIONS_SUCCESS,
-  GetCfUserRelations,
-  GetCurrentCfUserRelations,
-  GetCurrentCfUserRelationsComplete } from '../actions/permissions.actions';
-import { cfEntityCatalog } from '../cf-entity-catalog';
-import { CF_ENDPOINT_TYPE } from '../cf-types';
-import { CFResponse } from '../store/types/cf-api.types';
+import { APIResource } from '@stratosui/store';
 
-const createEndpointArray = (
-  store: Store<AppState>,
-  endpoints: string[] | EntityUserRolesEndpoint[]
-): Observable<EntityUserRolesEndpoint[]> => {
-  // If there's no endpoints get all from store. Alternatively fetch specific endpoint id's from store
-  if (!endpoints || !endpoints.length || typeof (endpoints[0]) === 'string') {
-    const endpointIds = endpoints as string[];
-    return store.select(connectedEndpointsOfTypesSelector(CF_ENDPOINT_TYPE)).pipe(
-      take(1),
-      map(cfEndpoints => endpointIds.length === 0 ?
-        Object.values(cfEndpoints) :
-        Object.values(cfEndpoints).filter(cfEndpoint => endpointIds.find(endpointId => endpointId === cfEndpoint.guid))
-      ),
-    );
-  }
-  return of(endpoints as EntityUserRolesEndpoint[]);
-};
+import { CfUserRelationTypes } from '../actions/permissions.actions';
+import { CfCurrentUserRolesDataService } from '../services/cf-current-user-roles-data.service';
+import { getFeatureFlagsSource } from './feature-flags-cache';
 
-export const cfUserRolesFetch: EntityUserRolesFetch = (
-  endpoints: string[] | EntityUserRolesEndpoint[],
-  store: Store<AppState>,
-  httpClient: HttpClient
-) => {
-  return createEndpointArray(store, endpoints).pipe(
-    switchMap((cfEndpoints: EntityUserRolesEndpoint[]) => {
-      const isAllAdmins = cfEndpoints.every(endpoint => !!endpoint.user.admin);
-      // If all endpoints are connected as admin, there's no permissions to fetch. So only update the permission state to initialised
-      if (isAllAdmins) {
-        cfEndpoints.forEach(endpoint => store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS)));
-      } else {
-        // If some endpoints are not connected as admin, go out and fetch the current user's specific roles
-        const flagsAndRoleRequests = dispatchRoleRequests(cfEndpoints, store, httpClient);
-        const allRequestsCompleted = handleCfRequests(flagsAndRoleRequests);
-        return combineLatest(allRequestsCompleted).pipe(
-          map(succeeds => succeeds.every(succeeded => !!succeeded)),
-        );
-      }
-      return of(true);
-    })
-  );
-};
-
-interface CfsRequestState {
-  [cfGuid: string]: Observable<boolean>[];
+/**
+ * Wire shape returned by GET /pp/v1/cf/current-user-roles/:cnsiGuid
+ * (handler: getNativeCurrentUserRoles). Each bucket key matches a
+ * {@link CfUserRelationTypes} enum value; every canonical key is present
+ * (empty buckets serialize as `[]`, never absent). Entry shape mirrors the
+ * legacy V2 envelope so the role transforms (which read `metadata.guid` for org
+ * buckets and additionally `entity.organization_guid` for space buckets) need
+ * zero change.
+ */
+export interface CfCurrentUserRolesResponse {
+  buckets: {
+    [relationType: string]: APIResource<{ organization_guid?: string }>[];
+  };
 }
 
-interface IEndpointConnectionInfo {
+/** Endpoint shape the fetch reads: guid + connected user (for the admin shortcut). */
+export interface CfRolesFetchEndpoint {
   guid: string;
-  userGuid: string;
+  user?: { admin?: boolean } | null;
 }
 
-function dispatchRoleRequests(
-  endpoints: EntityUserRolesEndpoint[],
-  store: Store<AppState>,
-  httpClient: HttpClient
-): CfsRequestState {
-  const requests: CfsRequestState = {};
-
-  // Per endpoint fetch feature flags and user roles (unless admin, where we don't need to), then mark endpoint as initialised
-  endpoints.forEach(endpoint => {
-    if (endpoint.user.admin) {
-      // We don't need permissions for admin users (they can do everything)
-      requests[endpoint.guid] = [of(true)];
-      store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_SUCCESS));
-    } else {
-      // START fetching cf roles for current user
-      store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS));
-
-      // Dispatch feature flags fetch actions
-      const ffAction = cfEntityCatalog.featureFlag.actions.getMultiple(endpoint.guid);
-      requests[endpoint.guid] = [createPaginationCompleteWatcher(store, ffAction)];
-      store.dispatch(ffAction);
-
-      // Dispatch requests to fetch roles per role type for current user
-      requests[endpoint.guid].push(...fetchCfUserRoles({ guid: endpoint.guid, userGuid: endpoint.user.guid }, store, httpClient));
-
-      // FINISH fetching cf roles for current user
-      combineLatest(requests[endpoint.guid]).pipe(
-        take(1),
-        tap(succeeds => {
-          store.dispatch(new GetCfUserRelations(
-            endpoint.guid,
-            succeeds.every(succeeded => !!succeeded) ? GET_CURRENT_CF_USER_RELATIONS_SUCCESS : GET_CURRENT_CF_USER_RELATIONS_FAILED)
-          );
-        }),
-        catchError(err => {
-          console.warn('Failed to fetch current user permissions for a cf: ', err);
-          store.dispatch(new GetCfUserRelations(endpoint.guid, GET_CURRENT_CF_USER_RELATIONS_FAILED));
-          return of(err);
-        })
-      ).subscribe();
-    }
-  });
-  return requests;
-}
-
-function handleCfRequests(requests: CfsRequestState): Observable<boolean>[] {
-  const allCompleted: Observable<boolean>[] = [];
-  Object.keys(requests).forEach(cfGuid => {
-    const successes = requests[cfGuid];
-    allCompleted.push(...successes);
-  });
-  return allCompleted;
-}
-
-function fetchCfUserRoles(endpoint: IEndpointConnectionInfo, store: Store<AppState>, httpClient: HttpClient): Observable<boolean>[] {
-  return Object.values(CfUserRelationTypes).map((type: CfUserRelationTypes) => {
-    const relAction = new GetCurrentCfUserRelations(endpoint.userGuid, type, endpoint.guid);
-    return fetchCfUserRole(store, relAction, httpClient);
-  });
-}
-
-class PermissionFlattener extends BaseHttpClientFetcher<CFResponse> implements PaginationFlattener<CFResponse, CFResponse> {
-
-  constructor(httpClient: HttpClient, public url: string, public requestOptions: { [key: string]: any }) {
-    super(httpClient, url, requestOptions, 'page');
-  }
-  public getTotalPages = (res: CFResponse): number => res.total_pages;
-
-  public mergePages = (res: CFResponse[]): CFResponse => {
-    const firstRes = res.shift();
-    const final = res.reduce((finalRes: CFResponse, _currentRes: CFResponse) => {
-      finalRes.resources = [
-        ...finalRes.resources,
-      ];
-      return finalRes;
-    }, firstRes as CFResponse);
-    return final;
-  };
-  public getTotalResults = (res: CFResponse): number => res.total_results;
-  public clearResults = (res: CFResponse): Observable<CFResponse> => of(res);
-}
-
-export function fetchCfUserRole(store: Store<AppState>, action: GetCurrentCfUserRelations, httpClient: HttpClient): Observable<boolean> {
-  const url = `pp/v1/proxy/v2/users/${action.guid}/${action.relationType}`;
-  const params = {
-    headers: {
-      'x-cap-cnsi-list': action.endpointGuid,
-      'x-cap-passthrough': 'true'
-    },
-    params: {
-      'results-per-page': '100'
-    }
-  };
-  const get$ = httpClient.get<CFResponse>(
-    url,
-    params
-  );
-  return flattenPagination(
-    (flatAction: Action) => store.dispatch(flatAction),
-    get$,
-    new PermissionFlattener(httpClient, url, params)
-  ).pipe(
-    map(data => {
-      store.dispatch(new GetCurrentCfUserRelationsComplete(action.relationType, action.endpointGuid, data.resources));
+/**
+ * Single-fetch replacement for the legacy 8-fanout permission fetch.
+ *
+ * Hits GET /pp/v1/cf/current-user-roles/{endpointGuid} once and applies each of
+ * the 8 returned buckets to the signal source of truth via the CF roles facade
+ * (replaces the former per-bucket `GetCurrentCfUserRelationsComplete` dispatch).
+ * Missing buckets default to `[]` so a now-empty relation clears prior roles.
+ * On HTTP error: swallow + return false so the caller can mark the endpoint
+ * failed.
+ */
+export function fetchCfCurrentUserRoles(
+  cfRoles: CfCurrentUserRolesDataService,
+  endpointGuid: string,
+  httpClient: HttpClient,
+): Observable<boolean> {
+  return httpClient.get<CfCurrentUserRolesResponse>(`pp/v1/cf/current-user-roles/${endpointGuid}`).pipe(
+    map(response => {
+      const buckets = response?.buckets ?? {};
+      Object.values(CfUserRelationTypes).forEach((relationType: CfUserRelationTypes) => {
+        cfRoles.applyUserRelations(relationType, endpointGuid, buckets[relationType] ?? []);
+      });
       return true;
     }),
     take(1),
-    catchError(_err => of(false)),
-    share()
+    catchError(err => {
+      console.warn('Failed to fetch current user permissions for a cf: ', err);
+      return of(false);
+    }),
+    share(),
   );
 }
 
-const fetchPaginationStateFromAction = (store: Store<AppState>, action: BasePaginatedAction) => {
-  const entityKey = entityCatalog.getEntityKey(action);
-  return store.select(selectPaginationState(entityKey, action.paginationKey));
-};
-
 /**
- * Using the given action wait until the associated pagination section changes from busy to not busy
+ * Fetch + commit the connected user's CF roles for a single endpoint, driving
+ * the per-endpoint request state. Admins skip the role fetch entirely (they can
+ * do everything) and are marked initialised. Replaces the orchestration the
+ * legacy `cfUserRolesFetch` catalog plug-in performed via `GetCfUserRelations`
+ * dispatches.
  */
-const createPaginationCompleteWatcher = (store: Store<AppState>, action: BasePaginatedAction): Observable<boolean> =>
-  fetchPaginationStateFromAction(store, action).pipe(
-    map((paginationState: PaginationEntityState) => {
-      const pageRequest: ActionState =
-        paginationState && paginationState.pageRequests && paginationState.pageRequests[paginationState.currentPage];
-      return pageRequest ? pageRequest.busy : true;
-    }),
-    pairwise(),
-    map(([oldFetching, newFetching]) => {
-      return oldFetching === true && newFetching === false;
-    }),
-    skipWhile(completed => !completed),
-    take(1),
-  );
+export async function fetchCfUserRolesForEndpoint(
+  cfRoles: CfCurrentUserRolesDataService,
+  httpClient: HttpClient,
+  endpoint: CfRolesFetchEndpoint,
+): Promise<boolean> {
+  if (endpoint.user?.admin) {
+    // Admins need no per-org/space roles — just mark the endpoint initialised.
+    cfRoles.setFetched(endpoint.guid);
+    return true;
+  }
+  cfRoles.setFetching(endpoint.guid);
+  try {
+    // Prime the shared feature-flags cache so downstream permission checkers
+    // read flags from the same CnsiFeatureFlagsSource.
+    const ffSource = getFeatureFlagsSource(endpoint.guid, httpClient);
+    const ffOk = await ffSource.load().then(() => true).catch(() => false);
+    const rolesOk = await firstValueFrom(fetchCfCurrentUserRoles(cfRoles, endpoint.guid, httpClient));
+    const ok = ffOk && rolesOk;
+    if (ok) {
+      cfRoles.setFetched(endpoint.guid);
+    } else {
+      cfRoles.setFailed(endpoint.guid);
+    }
+    return ok;
+  } catch (err) {
+    console.warn('Failed to fetch current user permissions for a cf: ', err);
+    cfRoles.setFailed(endpoint.guid);
+    return false;
+  }
+}

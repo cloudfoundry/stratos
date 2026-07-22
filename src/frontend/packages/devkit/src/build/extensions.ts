@@ -31,16 +31,16 @@ export class ExtensionsHandler {
     fs.writeFileSync(overrideFile, '// This file is auto-generated - DO NOT EDIT\n\n');
     fs.appendFileSync(overrideFile, 'import { NgModule } from \'@angular/core\';\n');
 
-    const moduleImports = {
+    const moduleImports: { imports: string[] } = {
       imports: []
     };
 
-    const routingModuleImports = {
+    const routingModuleImports: { imports: string[] } = {
       imports: []
     };
 
     config.getExtensions().forEach(e => {
-      let modules = [];
+      const modules: string[] = [];
       if (e.module) {
         moduleImports.imports.push(e.module);
         modules.push(e.module);

@@ -148,7 +148,7 @@ export class SimpleUsageChartComponent {
     const percentage = (used / total) * 100;
     // I'm sure this can be tidies up - NJ
     if (this.thresholds) {
-      if (Object.prototype.hasOwnProperty.call(this.thresholds, 'danger')) {
+      if (this.thresholds.danger !== undefined) {
         if (this.thresholds.inverted) {
           if (percentage < this.thresholds.danger) {
             return this.getColorScheme('danger');
@@ -158,7 +158,7 @@ export class SimpleUsageChartComponent {
         }
       }
 
-      if (Object.prototype.hasOwnProperty.call(this.thresholds, 'warning')) {
+      if (this.thresholds.warning !== undefined) {
         if (this.thresholds.inverted) {
           if (percentage < this.thresholds.warning) {
             return this.getColorScheme('warning');
@@ -169,5 +169,8 @@ export class SimpleUsageChartComponent {
       }
       return this.getColorScheme('ok');
     }
+    // thresholds is a required @Input with a default, so the guard above always
+    // passes; this keeps the return type total for the unreachable falsy case.
+    return this.getColorScheme('ok');
   }
 }

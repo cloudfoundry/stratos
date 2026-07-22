@@ -1,16 +1,16 @@
 import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Actions, ofType } from '@ngrx/effects';
-import { InternalAppState, RouterRedirect, Login, VerifySession, AuthState } from '@stratosui/store';
-import { LOGIN_SUCCESS } from '../../../../../store/src/actions/auth.actions';
+import { AuthState, RouterRedirect } from '@stratosui/store';
 import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
 import { map, startWith, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
 import { queryParamMap } from '../../../core/auth-guard.service';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { EndpointStatusSignalService } from '../../../core/signals/endpoint-status-signal.service';
 import { IntroScreenComponent } from '../../../shared/components/intro-screen/intro-screen.component';
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 
@@ -28,10 +28,10 @@ import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hid
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class LoginPageComponent implements OnInit {
-  private store = inject<Store<Pick<InternalAppState, 'endpoints' | 'auth'>>>(Store);
+  private authSignal = inject(AuthSignalService);
+  private endpointStatusSignals = inject(EndpointStatusSignalService);
   private branding = inject(StratosBrandingService);
   private router = inject(Router);
-  private actions$ = inject(Actions);
   private appRef = inject(ApplicationRef);
 
 
@@ -50,6 +50,9 @@ export class LoginPageComponent implements OnInit {
     this.branding.theme()?.login?.cardBackground || '#ffffff'
   );
 
+  public inputBackground = computed(() => this.branding.theme()?.login?.inputBackground || null);
+  public inputBorder = computed(() => this.branding.theme()?.login?.inputBorder || null);
+
   public themeLogo = computed(() =>
     this.branding.theme()?.branding?.logo || '/core/assets/logo.png'
   );
@@ -66,6 +69,10 @@ export class LoginPageComponent implements OnInit {
     this.branding.theme()?.branding?.loginSubtitle || ''
   );
 
+  public showLogo = computed(() => this.branding.theme()?.login?.showLogo ?? true);
+  public showTitle = computed(() => this.branding.theme()?.login?.showTitle ?? true);
+  public customMessage = computed(() => this.branding.theme()?.login?.customMessage || '');
+
   // Form state
   loginForm!: NgForm;
   username = '';
@@ -74,7 +81,8 @@ export class LoginPageComponent implements OnInit {
   message = '';
 
   // Reactive state observables
-  private readonly auth$ = this.store.select(s => s.auth).pipe(
+  private readonly auth$ = toObservable(this.authSignal.auth).pipe(
+    filter((auth): auth is AuthState => !!auth),
     distinctUntilChanged((prev, curr) =>
       prev.verifying === curr.verifying &&
       prev.loggingIn === curr.loggingIn &&
@@ -85,10 +93,15 @@ export class LoginPageComponent implements OnInit {
     shareReplay({ bufferSize: 1, refCount: false })
   );
 
-  private readonly endpoints$ = this.store.select(s => s.endpoints).pipe(
+  private readonly endpoints$ = toObservable(this.endpointStatusSignals.status).pipe(
     distinctUntilChanged((prev, curr) => prev.loading === curr.loading),
     shareReplay({ bufferSize: 1, refCount: false })
   );
+
+  // Bridge the AuthDataService login-completion marker to an observable so
+  // login() can await a *fresh* completion (replaces the legacy
+  // `actions$.pipe(ofType(LOGIN_SUCCESS))` listener).
+  private readonly loginCompletedAt$ = toObservable(this.authSignal.loginCompletedAt);
 
   // Track navigation state
   private readonly navigationInProgress$ = new BehaviorSubject<boolean>(false);
@@ -186,14 +199,14 @@ export class LoginPageComponent implements OnInit {
     // Initialize the BehaviorSubject with current value
     this.redirectAttemptsSubject$.next(this.redirectAttempts);
 
-    // Dispatch initial session verification
-    this.store.dispatch(new VerifySession());
+    // Trigger initial session verification
+    this.authSignal.verifySession(true, true);
 
     // Handle auto-redirect ONLY for valid existing sessions (page refresh/direct navigation)
     this.auth$.pipe(
       filter(auth => {
         // Only auto-redirect if already logged in (existing session)
-        return !auth.loggingIn && !auth.verifying && auth.loggedIn && auth.sessionData?.valid;
+        return !auth.loggingIn && !auth.verifying && auth.loggedIn && !!auth.sessionData?.valid;
       }),
       take(1),  // Only check once on init
       switchMap(() => this.appReady$)  // Wait for app to be stable before navigating
@@ -202,6 +215,10 @@ export class LoginPageComponent implements OnInit {
       try {
         // Get current auth state
         const auth = await this.auth$.pipe(take(1)).toPromise();
+        if (!auth) {
+          // auth$ only completes without a value if the page is torn down mid-redirect
+          return;
+        }
 
         // Check for special redirects first
         if (auth.sessionData?.upgradeInProgress) {
@@ -262,38 +279,38 @@ export class LoginPageComponent implements OnInit {
   }
 
   login() {
-    // Check for SSO synchronously using store snapshot
-    this.store.select(s => s.auth.sessionData).pipe(
-      take(1)
-    ).subscribe(sessionData => {
-      if (sessionData?.ssoOptions) {
-        this.doSSOLoginReactive().subscribe();
-        return;
+    // Check for SSO synchronously via the auth signal snapshot
+    const sessionData = this.authSignal.sessionData();
+    if (sessionData?.ssoOptions) {
+      this.doSSOLoginReactive().subscribe();
+      return;
+    }
+
+    // Clear redirect counter and start login
+    this.clearRedirectAttempts();
+    this.message = '';
+
+    // Capture the current completion marker so we react to the *next* login
+    // completion, not a stale one from earlier in this app session.
+    const startedAt = this.authSignal.loginCompletedAt();
+    this.authSignal.login(this.username, this.password);
+
+    // Wait for a fresh login completion, then ensure app is ready before navigating
+    this.loginCompletedAt$.pipe(
+      filter(t => t !== startedAt),
+      take(1),
+      switchMap(() => this.appReady$),  // Wait for app to be stable
+      switchMap(() => this.auth$.pipe(
+        filter(a => a.loggedIn && !!a.sessionData?.valid),
+        take(1)
+      ))
+    ).subscribe(async auth => {
+      this.navigationInProgress$.next(true);
+      try {
+        await this.handleSuccessfulLogin(auth);
+      } finally {
+        this.navigationInProgress$.next(false);
       }
-
-      // Clear redirect counter and dispatch login
-      this.clearRedirectAttempts();
-      this.message = '';
-
-      this.store.dispatch(new Login(this.username, this.password));
-
-      // Wait for LOGIN_SUCCESS, then ensure app is ready before navigating
-      this.actions$.pipe(
-        ofType(LOGIN_SUCCESS),
-        take(1),
-        switchMap(() => this.appReady$),  // Wait for app to be stable
-        switchMap(() => this.auth$.pipe(
-          filter(a => a.loggedIn && a.sessionData?.valid),
-          take(1)
-        ))
-      ).subscribe(async auth => {
-        this.navigationInProgress$.next(true);
-        try {
-          await this.handleSuccessfulLogin(auth);
-        } finally {
-          this.navigationInProgress$.next(false);
-        }
-      });
     });
   }
 
@@ -305,7 +322,7 @@ export class LoginPageComponent implements OnInit {
       return null;
     }
 
-    const redirect: RouterRedirect = auth.redirect;
+    const redirect: RouterRedirect | undefined = auth.redirect;
     const targetPath = redirect ? decodeURI(redirect.path) : '/home';
     const queryParams = redirect?.queryParams || {};
 
@@ -334,7 +351,7 @@ export class LoginPageComponent implements OnInit {
     return this.auth$.pipe(
       take(1),
       tap((auth): void => {
-        const redirect: RouterRedirect = auth.redirect;
+        const redirect: RouterRedirect | undefined = auth.redirect;
         const returnUrl = this.formSSOredirectURL(redirect);
         window.open('/pp/v1/auth/sso_login?state=' + encodeURIComponent(returnUrl), '_self');
       }),
@@ -342,13 +359,15 @@ export class LoginPageComponent implements OnInit {
     );
   }
 
-  private formSSOredirectURL(redirect: RouterRedirect): string {
-    const queryKeys = redirect ? Object.keys(redirect.queryParams) : undefined;
+  private formSSOredirectURL(redirect: RouterRedirect | undefined): string {
+    const queryParams = redirect?.queryParams;
+    const queryKeys = queryParams ? Object.keys(queryParams) : undefined;
     return window.location.protocol + '//' + window.location.hostname +
       (window.location.port ? ':' + window.location.port : '') +
       (redirect ?
         redirect.path +
-        (queryKeys && queryKeys.length > 0 ? '?' + queryKeys.map(k => k + '=' + redirect.queryParams[k]).join('&') : '') : '/');
+        (queryParams && queryKeys && queryKeys.length > 0
+          ? '?' + queryKeys.map(k => k + '=' + queryParams[k]).join('&') : '') : '/');
   }
 
   private getErrorMessage(auth: AuthState): string {

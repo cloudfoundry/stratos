@@ -2,10 +2,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
-import { provideStore } from '@ngrx/store';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { EntityCatalogHelper, appReducers, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
 import { generateCFEntities } from '@test-framework/cf';
 import { CreateQuotaStepComponent } from './create-quota-step.component';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
@@ -26,7 +25,6 @@ describe('CreateQuotaStepComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
-        provideStore(appReducers),
         EntityCatalogHelper,
         {
           provide: TEST_CATALOGUE_ENTITIES,

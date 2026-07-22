@@ -1,219 +1,430 @@
-/* stylelint-disable docusaurus/copyright-header */
-/**
- * Any CSS included here will be global. The classic template
- * bundles Infima by default. Infima is a CSS framework designed to
- * work well for content-centric websites.
- */
+@layer theme, base, components, utilities;
+@import 'tailwindcss/theme.css' layer(theme) important;
+@import 'tailwindcss/utilities.css' layer(utilities) important;
 
-/* You can override the default Infima variables here. */
+@plugin 'tailwindcss-animate';
+
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+
+  --animate-gradient: gradient 8s linear infinite;
+
+  @keyframes gradient {
+    to {
+      background-position: var(--bg-size, 300%) 0;
+    }
+  }
+}
+
+@layer base {
+  /*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--border, currentColor);
+  }
+
+  * {
+    scrollbar-width: thin;
+  }
+
+  :root {
+    --radius: 0.65rem;
+    --background: oklch(1 0 0);
+    --foreground: oklch(0.145 0 0);
+    --card: oklch(1 0 0);
+    --card-foreground: oklch(0.145 0 0);
+    --popover: oklch(1 0 0);
+    --popover-foreground: oklch(0.145 0 0);
+    --primary: oklch(0.205 0 0);
+    --primary-foreground: oklch(0.985 0 0);
+    --secondary: oklch(0.97 0 0);
+    --secondary-foreground: oklch(0.205 0 0);
+    --muted: oklch(0.97 0 0);
+    --muted-foreground: oklch(0.556 0 0);
+    --accent: oklch(0.97 0 0);
+    --accent-foreground: oklch(0.205 0 0);
+    --destructive: oklch(0.577 0.245 27.325);
+    --border: oklch(0.922 0 0);
+    --input: oklch(0.922 0 0);
+    --ring: oklch(0.708 0 0);
+    --chart-1: oklch(0.646 0.222 41.116);
+    --chart-2: oklch(0.6 0.118 184.704);
+    --chart-3: oklch(0.398 0.07 227.392);
+    --chart-4: oklch(0.828 0.189 84.429);
+    --chart-5: oklch(0.769 0.188 70.08);
+    --radius: 0.625rem;
+    --sidebar: oklch(0.985 0 0);
+    --sidebar-foreground: oklch(0.145 0 0);
+    --sidebar-primary: oklch(0.205 0 0);
+    --sidebar-primary-foreground: oklch(0.985 0 0);
+    --sidebar-accent: oklch(0.97 0 0);
+    --sidebar-accent-foreground: oklch(0.205 0 0);
+    --sidebar-border: oklch(0.922 0 0);
+    --sidebar-ring: oklch(0.708 0 0);
+  }
+
+  html[data-theme='dark'] {
+    --background: oklch(20.8% 0.042 265.755);
+    --foreground: oklch(0.985 0 0);
+    --card: oklch(20.8% 0.042 265.755);
+    --card-foreground: oklch(0.985 0 0);
+    --popover: oklch(20.8% 0.042 265.755);
+    --popover-foreground: oklch(0.985 0 0);
+    --primary: oklch(0.606 0.25 292.717);
+    --primary-foreground: oklch(0.969 0.016 293.756);
+    --secondary: oklch(27.9% 0.041 260.031);
+    --secondary-foreground: oklch(0.985 0 0);
+    --muted: oklch(27.9% 0.041 260.031);
+    --muted-foreground: oklch(0.705 0.015 286.067);
+    --accent: oklch(27.9% 0.041 260.031);
+    --accent-foreground: oklch(0.985 0 0);
+    --destructive: oklch(0.704 0.191 22.216);
+    --border: oklch(1 0 0 / 10%);
+    --input: oklch(1 0 0 / 15%);
+    --ring: oklch(0.38 0.189 293.745);
+    --chart-1: oklch(0.811 0.111 293.571);
+    --chart-2: oklch(0.606 0.25 292.717);
+    --chart-3: oklch(0.541 0.281 293.009);
+    --chart-4: oklch(0.491 0.27 292.581);
+    --chart-5: oklch(0.432 0.232 292.759);
+    --sidebar: oklch(20.8% 0.042 265.755);
+    --sidebar-foreground: oklch(0.985 0 0);
+    --sidebar-primary: oklch(0.606 0.25 292.717);
+    --sidebar-primary-foreground: oklch(0.969 0.016 293.756);
+    --sidebar-accent: oklch(27.9% 0.041 260.031);
+    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --sidebar-border: oklch(1 0 0 / 10%);
+    --sidebar-ring: oklch(0.38 0.189 293.745);
+  }
+
+  html {
+    font: var(--ifm-font-size-base) / var(--ifm-line-height-base) var(--ifm-font-family-base);
+  }
+}
+
 :root {
-  --ifm-color-primary: #2196f3;
-  --ifm-color-primary-dark: #0d89ec;
-  --ifm-color-primary-darker: #0c81df;
-  --ifm-color-primary-darkest: #0a6bb7;
-  --ifm-color-primary-light: #3ba2f4;
-  --ifm-color-primary-lighter: #48a9f5;
-  --ifm-color-primary-lightest: #70bbf7;
+  /* Docusaurus vars */
+  --prism-background-color: #edefff;
+  --ifm-footer-background-color: #fff;
+  --ifm-footer-link-color: #333;
   --ifm-code-font-size: 95%;
-  --ifm-navbar-link-color: #fff;
+  --ifm-color-primary: #044cc1;
+  --ifm-h1-font-size: 2.5rem;
+  --docusaurus-highlighted-code-line-bg: #0000001a;
+  --ifm-global-shadow-tl: 2px 3px 5px 0 rgba(0, 0, 0, 0.2), 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+  --ifm-font-family-base:
+    Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, system-ui, -apple-system, sans-serif,
+    BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif, 'Apple Color Emoji',
+    'Segoe UI Emoji', 'Segoe UI Symbol';
+  --menu-link-active: rgba(0, 0, 0, 0.1);
+  --ifm-menu-link-padding-vertical: 0.5rem;
+  --docs-fg-base: #030712;
+  --ifm-menu-color-active: var(--docs-fg-base);
+
+  /* Docsearch color */
+  --docsearch-key-gradient: linear-gradient(-225deg, #d5dbe4, #f8f8f8);
+  --docsearch-key-shadow: inset 0 -2px 0 0 #cdcde6, inset 0 0 1px 1px #fff, 0 1px 2px 1px #1e235a66;
+  --docsearch-muted-color: #969faf;
 }
 
-.docusaurus-highlight-code-line {
-  background-color: rgb(72, 77, 91);
-  display: block;
-  margin: 0 calc(-1 * var(--ifm-pre-padding));
-  padding: 0 var(--ifm-pre-padding);
-}
+html[data-theme='dark'] {
+  /* Docusaurus color */
+  --prism-background-color: #1d2144;
+  --ifm-background-color: #14102c;
+  --ifm-background-surface-color: #14102c;
+  --ifm-footer-link-color: #dadde1;
+  --ifm-color-primary: #16ad8d;
+  --ifm-menu-color-background-active: #ffffff1a;
+  --menu-link-active: rgba(255, 255, 255, 0.1);
+  --ifm-menu-color-active: var(--ifm-color-primary);
 
-img.feature-img {
-  filter: grayscale(100%);
-  height: 100px;
-  width: 100px;
-}
+  /* Docsearch color */
+  --table-of-contents-color: #e8e8e8;
+  --docusaurus-highlighted-code-line-bg: #0000004d;
+  --docsearch-muted-color: #7f8497;
+  --docsearch-key-gradient: linear-gradient(-26.5deg, #565872, #31355b);
+  --docsearch-key-shadow:
+    inset 0 -2px 0 0 #282d55, inset 0 0 1px 1px #51577d, 0 2px 2px 0 #0304094d;
 
-img.cf-logo {
-  width: auto;
-}
-
-.toggleButton_node_modules-\@docusaurus-theme-classic-lib-theme-ColorModeToggle-styles-module {
-  color: #fff;
-}
-
-.navbar {
-  background-color: #333;
-}
-
-.navbar-sidebar .navbar-sidebar__brand {
-  background-color: #333;
-}
-
-.navbar__toggle {
-  color: #d0d0d0;
-}
-
-.navbar__brand:hover {
-  color: var(--ifm-link-hover-color);
-}
-
-.navbar__logo {
-  b {
-    display: none;
+  /* Custom css */
+  .background-grid {
+    &::before {
+      opacity: 0.03;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(248 250 252)' stroke-dasharray='5 3' transform='scale(1, -1)' %3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
+    }
   }
 }
 
-.main-wrapper .hero {
-  min-height: 480px;
+@utility blog-tags {
+  & b {
+    @apply hidden;
+  }
 }
 
-.main-wrapper .hero a.button.button--outline.button--secondary {
-  color: #fff;
-}
+@layer components {
+  .background-grid {
+    @apply relative z-0 bg-slate-100;
+    @apply dark:bg-[#0c1222];
 
-.main-wrapper .hero a.button.button--outline.button--secondary:hover {
-  color: #2196f3;
-}
-
-.container {
-  text-align: left;
-}
-
-.container .get-started {
-  justify-content: start;
-  padding-top: 20px;
-}
-
-/* Fix for dark mode, given the backgrounds are hardcoded below */
-.hero__title,
-.hero__subtitle {
-  color: #fff;
-}
-
-.hero__subtitle {
-  font-size: 36px;
-}
-
-/* Reduce the text sizes */
-
-#__docusaurus article h1 {
-  font-size: 28px;
-}
-
-#__docusaurus article h2 {
-  font-size: 24px;
-}
-
-#__docusaurus article h3 {
-  font-size: 20px;
-}
-
-#__docusaurus article h4 {
-  font-size: 18px;
-}
-
-.menu__list,
-.menu__link {
-  font-size: 14px;
-}
-
-#__docusaurus .menu .menu__link--sublist:after {
-  background-size: 1.25rem 1.25rem;
-}
-
-#__docusaurus .docSidebarContainer_node_modules-\@docusaurus-theme-classic-src-theme-DocPage- {
-  width: 280px;
-}
-
-.home-intro {
-  /*margin-right: 150px;*/
-}
-
-.home-logo {
-  height: 300px;
-  opacity: .9;
-  position: absolute;
-  right: -150px;
-}
-
-@media screen and (max-width: 966px) {
-  .home-logo {
-    display: none;
+    &::before {
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      content: '';
+      opacity: 0.65;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(226 232 240)' stroke-dasharray='5 3' transform='scale(1, -1)' %3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
+      mask-image: linear-gradient(transparent, black, transparent);
+    }
   }
 
-  .hero__subtitle {
-    font-size: 35px;
+  .background-grid--fade-in {
+    @apply bg-transparent bg-linear-to-t from-slate-100 via-slate-100;
+    @apply dark:bg-transparent dark:from-[#0c1222] dark:via-[#0c1222];
+
+    &::before {
+      @apply bg-bottom-left;
+
+      mask-image: linear-gradient(transparent, black, black);
+    }
   }
 
-  section .screenshot {
-    margin: 0 0;
+  .background-grid--fade-out {
+    @apply bg-transparent bg-linear-to-b from-slate-100 via-slate-100;
+    @apply dark:bg-transparent dark:from-[#0c1222] dark:via-[#0c1222];
+
+    &::before {
+      mask-image: linear-gradient(black, black, transparent);
+    }
   }
 
-
-}
-
-@media screen and (max-width: 813px) {
-  .hero__subtitle {
-    font-size: 31px;
+  .background-image {
+    &--fade-out {
+      mask-image: linear-gradient(black, black, transparent);
+    }
   }
-
-  img.feature-img {
-    height: 64px;
-    width: auto;
-  }
-
-
 }
 
-/* Screenshot */
-
-.blue {
-  background-color: #2196f3;
-  color: #fff
+.markdown h1:first-child {
+  --ifm-h1-font-size: 2rem;
 }
 
-.white {
-  background-color: #fff;
-  color: #444;
+a {
+  @apply hover:no-underline;
 }
 
+a[class^='footerLogoLink_'] {
+  opacity: 1;
+}
 
-.screenshot {
+button {
+  @apply border-0;
+}
+
+/* Custom CSS that should always be included */
+.navbar__item svg,
+.menu__link svg,
+.footer__link-item svg {
+  display: none;
+}
+
+.header-github-link::before {
+  content: '';
+  width: 24px;
+  height: 24px;
   display: flex;
-  margin: 60px 0;
+  background-color: var(--ifm-navbar-link-color);
+  mask-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12'/%3E%3C/svg%3E");
+  transition: background-color var(--ifm-transition-fast) var(--ifm-transition-timing-default);
 }
 
-.screenshot img {
-  width: 600px;
-  -webkit-box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
-  -moz-box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
-  box-shadow: 0px 0px 37px 15px rgba(20, 20, 20, 0.75);
+.header-github-link:hover::before {
+  background-color: var(--ifm-navbar-link-hover-color);
 }
 
-.screenshot img.right {
-  margin-left: 60px;
-}
+/*  Keyboard search keys */
+kbd {
+  &[class^='searchHint_'] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--docsearch-key-gradient);
+    border: 0;
+    border-radius: 3px;
+    box-shadow: var(--docsearch-key-shadow);
+    color: var(--docsearch-muted-color);
+    height: 20px;
+    margin-right: 0.4em;
+    padding: 0 7px 2px;
+  }
 
-.screenshot img.left {
-  margin-right: 60px;
-}
-
-.screenshot div {
-  font-size: 20px;
-}
-
-@media screen and (max-width: 966px) {
-  .screenshot img {
-    display: none;
-    margin: 0;
+  &.searchHint_btn {
+    display: inline-block;
+    align-items: unset;
+    justify-content: unset;
+    height: unset;
+    margin-left: 0.4rem;
+    padding: 4px 10px;
   }
 }
 
-
-/* Hide versions drop down and versions link on home page */
-.stratosIsNotDocsPage .navbar__item.dropdown--right {
-  display: none;
+/* Search navbar (local search) */
+.navbar__search-input {
+  padding: 0 2rem 0 2.25rem;
+  width: 13.5rem;
 }
 
-/* Hide the `Versions: x` pill that appears above a doc page's title */
-article > div > .badge.badge--secondary {
-  display: none;
+code[class^='codeBlockLines_'] {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+div[class^='tableOfContents_'] {
+  font-weight: 500;
+
+  &::before {
+    content: 'Table of Contents';
+    font-size: 14px;
+    font-weight: 500;
+    margin-left: 15px;
+  }
+}
+
+div[class^='docItemContainer_'] article nav + div > button.clean-btn {
+  color: #ffffff00;
+
+  &::before {
+    content: 'Table of Contents';
+    color: var(--ifm-breadcrumb-color-active);
+    font-weight: bold;
+    margin-left: 5px;
+  }
+
+  &::after {
+    content: ')';
+  }
+}
+
+div[class^='docItemContainer_'] article img {
+  display: block;
+  margin: auto;
+  border-radius: 7px;
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+  -ms-border-radius: 7px;
+  -o-border-radius: 7px;
+}
+
+[class^='title_'] {
+  font-size: 2.3rem !important;
+}
+
+#__blog-post-container img[class^='img_'] {
+  border-radius: 7px;
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+  -ms-border-radius: 7px;
+  -o-border-radius: 7px;
+}
+
+/* Sidebar Method labels */
+.api-method > .menu__link {
+  align-items: center;
+  justify-content: start;
+}
+
+.api-method > .menu__link::before {
+  width: 50px;
+  height: 20px;
+  font-size: 12px;
+  line-height: 20px;
+  text-transform: uppercase;
+  font-weight: 600;
+  border-radius: 0.25rem;
+  border: 1px solid;
+  margin-right: var(--ifm-spacing-horizontal);
+  text-align: center;
+  flex-shrink: 0;
+  border-color: transparent;
+  color: white;
+}
+
+.get > .menu__link::before {
+  content: 'get';
+  background-color: var(--ifm-color-primary);
+}
+
+.put > .menu__link::before {
+  content: 'put';
+  background-color: var(--openapi-code-blue);
+}
+
+.post > .menu__link::before {
+  content: 'post';
+  background-color: var(--openapi-code-green);
+}
+
+.delete > .menu__link::before {
+  content: 'del';
+  background-color: var(--openapi-code-red);
+}
+
+.patch > .menu__link::before {
+  content: 'patch';
+  background-color: var(--openapi-code-orange);
+}
+
+/* Tablet */
+@media screen and (max-width: 991px) {
+  /* Search navbar local */
+  .navbar__search-input {
+    width: 14rem;
+    padding: 0 0.5rem 0 2.25rem;
+  }
 }

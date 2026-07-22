@@ -1,4 +1,16 @@
-import { AutoscalerQuery } from './app-autoscaler.actions';
+// FWT-959 wave-3 (A-effects-cleanup): AutoscalerQuery used to live in
+// app-autoscaler.actions.ts as a payload-shape helper for the deleted
+// PolicyTriggerAction / ScalingHistoryAction effect path. The type is
+// retained on AppScalingTrigger for backwards compatibility with any
+// extension code that reads `trigger.query`, but no in-tree code mutates
+// it any more — the field is effectively documentation now.
+export interface AutoscalerQuery {
+  metric: string;
+  params?: {
+    start: number;
+    end: number;
+  };
+}
 
 export interface AutoscalerInfo {
   name: string;
@@ -158,7 +170,9 @@ export interface AppAutoscalerInvalidPolicyErrorEntity {
 
 export interface AppAutoscaleMetricChart {
   name: string;
-  unit: string;
+  // A scaling rule may omit its unit (AppScalingRule.unit is optional), so the
+  // derived chart metric's unit is likewise sometimes-absent.
+  unit?: string;
 }
 
 export interface AppAutoscalerCredential {

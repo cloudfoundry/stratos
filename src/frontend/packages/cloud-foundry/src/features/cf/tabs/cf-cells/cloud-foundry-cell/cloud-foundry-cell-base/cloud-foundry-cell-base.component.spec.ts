@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of as observableOf } from 'rxjs';
@@ -10,6 +11,7 @@ import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntiti
 import { STORE_TEST_PROVIDERS, createBasicStoreModule } from '@stratosui/store/testing';
 import { ActiveRouteCfCell, generateCFEntities } from '@test-framework/cf';
 import { AppTestModule, CoreTestingModule } from '@test-framework';
+import { getActiveRouteCfCellProvider } from '../../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryCellService } from '../cloud-foundry-cell.service';
 import { CloudFoundryCellBaseComponent } from './cloud-foundry-cell-base.component';
@@ -21,7 +23,6 @@ class MockCloudFoundryCellService {
   cellId = 'cellId';
   cellMetric$ = observableOf(null);
   healthy$ = observableOf(null);
-  healthyMetricId = null;
   cpus$ = observableOf(null);
   usageContainers$ = observableOf(null);
   remainingContainers$ = observableOf(null);
@@ -38,6 +39,8 @@ describe('CloudFoundryCellBaseComponent', () => {
   let component: CloudFoundryCellBaseComponent;
   let fixture: ComponentFixture<CloudFoundryCellBaseComponent>;
 
+  const mockCellService = new MockCloudFoundryCellService();
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
@@ -53,12 +56,9 @@ describe('CloudFoundryCellBaseComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         ...STORE_TEST_PROVIDERS,
         CloudFoundryEndpointService,
-        {
-          provide: CloudFoundryCellService,
-          useValue: new MockCloudFoundryCellService(),
-        },
         {
           provide: ActivatedRoute,
           useValue: {
@@ -80,8 +80,16 @@ describe('CloudFoundryCellBaseComponent', () => {
         },
         ActiveRouteCfCell,
       ]
-    })
-      .compileComponents();
+    });
+    TestBed.overrideComponent(CloudFoundryCellBaseComponent, {
+      set: {
+        providers: [
+          getActiveRouteCfCellProvider,
+          { provide: CloudFoundryCellService, useValue: mockCellService },
+        ],
+      },
+    });
+    TestBed.compileComponents();
   });
 
   beforeEach(() => {

@@ -1,39 +1,40 @@
-import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, Injector, Signal, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { combineLatest, EMPTY, Observable } from 'rxjs';
+import { catchError, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { APIResource, EntityInfo } from '../../../../../store/src/types/api.types';
+import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
+import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
+import { StOrgDetail, StOrgQuota, StSpace } from '../../../services/endpoint-data/stratos-types';
+import { createUserRoleInOrg } from '../../../store/types/cf-user.types';
+
+import { APIResource } from '../../../../../store/src/types/api.types';
 import {
   IApp,
-  IOrganization,
   IOrgQuotaDefinition,
-  IPrivateDomain,
-  ISpace,
   ISpaceQuotaDefinition,
 } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
-import {
-  domainEntityType,
-  organizationEntityType,
-  privateDomainsEntityType,
-  quotaDefinitionEntityType,
-  spaceEntityType,
-} from '../../../cf-entity-types';
-import { getEntityFlattenedList, getStartedAppInstanceCount } from '../../../cf.helpers';
-import { createEntityRelationKey } from '../../../entity-relations/entity-relations.types';
-import { CfUserService } from '../../../shared/data-services/cf-user.service';
+import { getStartedAppInstanceCount } from '../../../cf.helpers';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
-import { OrgUserRoleNames } from '../../../store/types/cf-user.types';
-import { fetchServiceInstancesCount } from '../../service-catalog/services-helper';
+import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getOrgRolesString } from '../cf.helpers';
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
+
+// V3-shape private domain envelope; we only read .length downstream so a
+// minimal shape suffices.
+interface StPrivateDomain {
+  guid: string;
+  name: string;
+}
+interface StPrivateDomainsResponse {
+  resources: StPrivateDomain[];
+}
 
 export const createOrgQuotaDefinition = (): IOrgQuotaDefinition => ({
   memory_limit: -1,
@@ -66,42 +67,51 @@ export const createSpaceQuotaDefinition = (orgGuid: string): ISpaceQuotaDefiniti
 })
 export class CloudFoundryOrganizationService {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-  private store = inject<Store<CFAppState>>(Store);
-  private cfUserService = inject(CfUserService);
-  private paginationMonitorFactory = inject(PaginationMonitorFactory);
+  private http = inject(HttpClient);
   private cfEndpointService = inject(CloudFoundryEndpointService);
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
+  private quotaData = inject(QuotaDataService);
+  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private orgDataRegistry = inject(OrgDataRegistry);
+  private injector = inject(Injector);
+
+  readonly orgDataService = this.orgDataRegistry.acquire(
+    this.activeRouteCfOrgSpace.cfGuid,
+    this.activeRouteCfOrgSpace.orgGuid,
+  );
 
   orgGuid: string;
   cfGuid: string;
-  quotaLink$!: Observable<string[]>;
+  quotaLink$!: Observable<string[] | undefined>;
   userOrgRole$!: Observable<string>;
-  quotaDefinition$!: Observable<IOrgQuotaDefinition>;
+  // V3-shape — quotaDefinition$ now emits StOrgQuota directly. Consumers
+  // that previously read V2 fields (memory_limit, etc.) must read the V3
+  // camelCase equivalents (totalMemoryInMB, etc.). Backwards-compat shim
+  // lives in space-detail template which still mixes IOrgQuotaDefinition
+  // for the union with space-quota fallback.
+  quotaDefinition$!: Observable<StOrgQuota>;
   totalMem$!: Observable<number>;
-  privateDomains$!: Observable<APIResource<IPrivateDomain>[]>;
+  // V3-native: signal of StPrivateDomain[] surfaced as Observable for
+  // template binding compatibility. Downstream only reads .length.
+  privateDomains$!: Observable<StPrivateDomain[]>;
   routes$!: Observable<APIResource<Route>[]>;
-  serviceInstancesCount$!: Observable<number>;
+  serviceInstancesCount!: Signal<number>;
   userProvidedServiceInstancesCount$!: Observable<number>;
   routesCount$!: Observable<number>;
-  spaces$!: Observable<APIResource<ISpace>[]>;
+  // V3-shape — spaces$ now emits StSpace[] direct from OrgDataService.
+  spaces$!: Observable<StSpace[]>;
   appInstances$!: Observable<number>;
   apps$!: Observable<APIResource<IApp>[]>;
   appCount$!: Observable<number>;
   loadingApps$!: Observable<boolean>;
-  org$!: Observable<EntityInfo<APIResource<IOrganization>>>;
   usersCount$!: Observable<number | null>;
 
   constructor() {
     const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
-
     this.orgGuid = activeRouteCfOrgSpace.orgGuid;
     this.cfGuid = activeRouteCfOrgSpace.cfGuid;
-
     this.initialiseObservables();
-  }
-
-  public deleteSpace(spaceGuid: string, orgGuid: string, endpointGuid: string) {
-    cfEntityCatalog.space.api.remove(spaceGuid, endpointGuid, { orgGuid });
   }
 
   public fetchApps() {
@@ -109,61 +119,57 @@ export class CloudFoundryOrganizationService {
   }
 
   private initialiseObservables() {
-    this.org$ = this.cfUserService.isConnectedUserAdmin(this.cfGuid).pipe(
-      switchMap(isAdmin => {
-        const relations = [
-          createEntityRelationKey(organizationEntityType, spaceEntityType),
-          createEntityRelationKey(organizationEntityType, domainEntityType),
-          createEntityRelationKey(organizationEntityType, quotaDefinitionEntityType),
-          createEntityRelationKey(organizationEntityType, privateDomainsEntityType),
-        ];
-        if (!isAdmin) {
-          // We're only interested in fetching org roles via the org request for non-admins.
-          // Non-admins cannot fetch missing roles via the users entity as the `<x>_url` is invalid
-          // #2902 Scaling Orgs/Spaces Inline --> individual capped requests & handling
-          relations.push(
-            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.USER),
-            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.MANAGER),
-            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.BILLING_MANAGERS),
-            createEntityRelationKey(organizationEntityType, OrgUserRoleNames.AUDITOR),
-          );
-        }
-        return cfEntityCatalog.org.store.getEntityService(this.orgGuid, this.cfGuid, { includeRelations: relations }).waitForEntity$;
-      }),
-      publishReplay(1),
-      refCount()
-    );
-
     this.initialiseOrgObservables();
-
     this.initialiseAppObservables();
-
     this.initialiseSpaceObservables();
 
-    this.userOrgRole$ = this.cfEndpointService.currentUser$.pipe(
-      switchMap(u => this.cfUserService.getUserRoleInOrg(u.guid, this.orgGuid, this.cfGuid)),
-      map(u => getOrgRolesString(u))
+    const users$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector });
+    this.userOrgRole$ = combineLatest([this.cfEndpointService.currentUser$, users$]).pipe(
+      map(([currentUser, users]) => {
+        if (!users) return 'None';
+        const me = users.find(u => u.guid === currentUser.guid);
+        const roles = me?.orgRoles.find(r => r.orgGuid === this.orgGuid)?.roles ?? [];
+        return getOrgRolesString(createUserRoleInOrg(
+          roles.includes('manager'),
+          roles.includes('billing_manager'),
+          roles.includes('auditor'),
+          roles.includes('user'),
+        ));
+      }),
+    );
+    this.usersCount$ = users$.pipe(
+      map(users => {
+        if (!users) return null;
+        return users.filter(u => u.orgRoles.some(r => r.orgGuid === this.orgGuid)).length;
+      }),
     );
 
-    this.serviceInstancesCount$ = fetchServiceInstancesCount(this.cfGuid, this.orgGuid, null, this.store, this.paginationMonitorFactory);
+    this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid).value;
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid);
 
-    this.routesCount$ = CloudFoundryEndpointService.fetchRouteCount(
-      this.store,
-      this.paginationMonitorFactory,
-      this.activeRouteCfOrgSpace.cfGuid,
+    this.routesCount$ = this.cfEndpointService.fetchRouteCount(
       this.activeRouteCfOrgSpace.orgGuid
     );
   }
 
   private initialiseSpaceObservables() {
-    this.routes$ = this.spaces$.pipe(this.getFlattenedList('routes'));
+    // V3-shape StSpace doesn't carry routes inline. The template binding
+    // for `routes$` is unused after the V3 migration — leave a stub that
+    // emits [] so legacy template branches continue to render "0 routes"
+    // without dispatching anything.
+    this.routes$ = this.spaces$.pipe(map((): APIResource<Route>[] => []));
   }
 
   private initialiseAppObservables() {
-    this.apps$ = this.org$.pipe(
-      switchMap(org => this.cfEndpointService.getAppsInOrgViaAllApps(org.entity))
+    // V3-native: filter foundation-wide apps stream by this org's space
+    // guids. spaces$ is V3-shaped (StSpace, .guid not .metadata.guid).
+    this.apps$ = combineLatest([this.cfEndpointService.apps$, this.spaces$]).pipe(
+      filter(([apps, spaces]) => !!apps && !!spaces),
+      map(([allApps, spaces]) => {
+        const spaceGuids = new Set(spaces.map(s => s.guid));
+        return allApps.filter(a => spaceGuids.has(a.entity.space_guid));
+      }),
     );
     this.appInstances$ = this.apps$.pipe(
       filter($apps => !!$apps),
@@ -172,13 +178,11 @@ export class CloudFoundryOrganizationService {
 
     this.totalMem$ = this.apps$.pipe(map(a => this.cfEndpointService.getMetricFromApps(a, 'memory')));
 
-    this.appCount$ = this.cfEndpointService.appsPagObs.hasEntities$.pipe(
+    this.appCount$ = this.cfEndpointService.hasApps$.pipe(
       switchMap(hasAllApps => hasAllApps ? this.countExistingApps() : this.fetchAppCount()),
     );
 
-    this.loadingApps$ = this.cfEndpointService.appsPagObs.fetchingEntities$;
-
-    this.usersCount$ = this.cfUserService.fetchTotalUsers(this.cfGuid, this.orgGuid);
+    this.loadingApps$ = this.cfEndpointService.appsLoading$;
   }
 
   private countExistingApps(): Observable<number> {
@@ -188,33 +192,55 @@ export class CloudFoundryOrganizationService {
   }
 
   private fetchAppCount(): Observable<number> {
-    return CloudFoundryEndpointService.fetchAppCount(
-      this.store,
-      this.paginationMonitorFactory,
-      this.activeRouteCfOrgSpace.cfGuid,
-      this.activeRouteCfOrgSpace.orgGuid
-    );
+    return this.cfEndpointService.fetchAppCount(this.activeRouteCfOrgSpace.orgGuid);
   }
 
-
   private initialiseOrgObservables() {
-    this.spaces$ = this.org$.pipe(map(o => o.entity.entity.spaces), filter(o => !!o));
-    this.privateDomains$ = this.org$.pipe(map(o => o.entity.entity.private_domains));
-    this.quotaDefinition$ = this.org$.pipe(map(o => o.entity.entity.quota_definition && o.entity.entity.quota_definition.entity));
-    this.quotaLink$ = this.org$.pipe(map(o => {
-      const quotaDefinition = o.entity.entity.quota_definition;
+    // V3-native: spaces come straight off the shared OrgDataService signal.
+    this.orgDataService.load().subscribe({ error: () => {} });
+    this.spaces$ = toObservable(this.orgDataService.spaces, { injector: this.injector }).pipe(
+      filter(spaces => !!spaces),
+    );
 
-      return quotaDefinition && [
+    // V3-native private domains: hit /pp/v1/cf/org/:cnsi/:orgGuid/private_domains
+    // directly. Backend filters /v3/domains?organization_guids= to the
+    // private subset. shareReplay so the Summary tile + breadcrumbs share
+    // the single HTTP fetch.
+    this.privateDomains$ = this.http.get<StPrivateDomainsResponse>(
+      `/pp/v1/cf/org/${this.cfGuid}/${this.orgGuid}/private_domains`,
+    ).pipe(
+      map(resp => resp?.resources ?? []),
+      catchError(() => EMPTY),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+
+    // V3-native: org quota lookup via QuotaDataService. The signal source
+    // returns null until the response lands; we filter to non-null so the
+    // Observable emission semantics match the legacy entity-service path.
+    const orgSnapshot$ = toObservable(this.orgDataService.org, { injector: this.injector }).pipe(
+      filter((o): o is StOrgDetail => !!o),
+    );
+    this.quotaDefinition$ = orgSnapshot$.pipe(
+      map(o => o.quotaGuid),
+      filter(quotaGuid => !!quotaGuid),
+      switchMap(quotaGuid => {
+        const source = this.quotaData.orgQuota(this.cfGuid, quotaGuid);
+        return toObservable(source.value, { injector: this.injector }).pipe(
+          filter((q): q is StOrgQuota => !!q),
+        );
+      }),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+
+    this.quotaLink$ = orgSnapshot$.pipe(map(o => {
+      const quotaDefinitionGuid = o.quotaGuid;
+      return quotaDefinitionGuid ? [
         '/cloud-foundry',
         this.cfGuid,
         'organizations',
         this.orgGuid,
         'quota'
-      ];
+      ] : undefined;
     }));
-  }
-
-  private getFlattenedList(property: string): (source: Observable<APIResource<any>[]>) => Observable<any> {
-    return map(entities => getEntityFlattenedList(property, entities));
   }
 }

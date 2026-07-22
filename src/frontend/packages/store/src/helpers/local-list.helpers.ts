@@ -28,7 +28,11 @@ export class LocalPaginationHelpers {
   static getEntityPageRequest(pagination: PaginationEntityState, entityKey: string) {
     const { pageRequests } = pagination;
     const pageNumber = (pageRequests && Object.keys(pageRequests).find(key => {
-      const baseEntityKey = entityCatalog.getEntityKey(pageRequests[key]?.baseEntityConfig);
+      const baseEntityConfig = pageRequests[key]?.baseEntityConfig;
+      if (!baseEntityConfig) {
+        return false;
+      }
+      const baseEntityKey = entityCatalog.getEntityKey(baseEntityConfig);
       return baseEntityKey === entityKey;
     })) || null;
     if (pageNumber) {

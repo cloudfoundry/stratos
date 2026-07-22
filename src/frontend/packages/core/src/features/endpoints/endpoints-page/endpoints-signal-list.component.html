@@ -1,0 +1,11 @@
+<app-list-sub-nav title="Total Endpoints" [count]="totalEndpoints" [addAction]="addAction"></app-list-sub-nav>
+@if (listConfig(); as config) {
+  <app-signal-list [config]="config" class="flex-1 min-h-0">
+    <ng-template #cardTemplate let-row>
+      <app-endpoint-card [row]="$any(row)" [actionMenu]="cardMenuFor($any(row))"></app-endpoint-card>
+    </ng-template>
+    <ng-template appSignalListCell="address" let-row>
+      <app-table-cell-endpoint-address [row]="row"></app-table-cell-endpoint-address>
+    </ng-template>
+  </app-signal-list>
+}

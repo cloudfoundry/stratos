@@ -1,32 +1,90 @@
-import { Component, OnDestroy, OnInit, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  signal,
+  ChangeDetectionStrategy,
+  inject,
+  computed,
+  Signal,
+  WritableSignal,
+} from '@angular/core';
 import { Validators, FormControl, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, Subscription } from 'rxjs';
-import { filter, map, mergeMap, pairwise, switchMap, tap } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
-
-import { CFAppState } from '../../../../cf-app-state';
-import { domainEntityType, spaceEntityType } from '../../../../cf-entity-types';
-import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
-import { Route, RouteMode } from '../../../../store/types/route.types';
-import { StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
-import { RouterNav, ActionState, RequestInfoState, APIResource } from '@stratosui/store';
-import { IDomain } from '../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
-import { ApplicationService } from '../../application.service';
+import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { filter, startWith } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 import {
+  AppErrorComponent,
+  AppInputDirective,
   CustomFormFieldComponent,
   CustomSelectComponent,
   CustomOptionComponent,
   CustomCheckboxComponent,
-  FocusDirective
+  FocusDirective,
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListSort,
+  SignalStepHandle,
 } from '@stratosui/core';
-import { MapRoutesComponent } from '../map-routes/map-routes.component';
+import { StDomain } from '../../../../services/endpoint-data/stratos-types';
+import { ApplicationService } from '../../application.service';
+import { AppDetailDataService } from '../../app-detail-data.service';
+import {
+  AppRouteActionsService,
+  CreateRouteRequest,
+} from '../../../../shared/services/app-route-actions.service';
+import {
+  CfMapRoutesSignalConfigService,
+} from '../../../../shared/signal-list-configs/app-route/cf-map-routes-signal-config.service';
+import type { StRoute } from '../../../../services/endpoint-data/stratos-types';
 
 const hostPattern = '^([\\w\\-\\.]*)$';
 const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*)$`;
 
+/**
+ * AddRoutesComponent — single-screen redesign.
+ *
+ * Renders three sections in one pane:
+ *   1. "Already attached to this app" — read-only list of routes whose
+ *      destinations include this app. Hidden when empty.
+ *   2. "Available routes in this space" — picker over routes the user
+ *      could attach (detached + attached-to-other-apps). Single-row
+ *      radio select.
+ *   3. "Or create a new route" — the existing domain/host/path/port
+ *      form, branched on the selected domain's router_group_type.
+ *
+ * Both lists drain from the same `GET /pp/v1/cf/routes/{cnsi}?space_guids=`
+ * call (eager on stepper mount via ngOnInit). The split between attached
+ * and available is computed at the picker service layer, keyed off the
+ * current app's GUID.
+ *
+ * Submit dispatch:
+ *   - Row selected in the available list → attachRoute(guid)
+ *   - Otherwise (and form valid) → createAndAttachRoute(req)
+ *   The two paths are mutually exclusive at the validate() layer.
+ *
+ * Client-side collision detection: as the user types host/path (HTTP) or
+ * port (TCP), `hostCollision` checks the loaded available-routes signal
+ * for a match on (host, domainGuid, path) for HTTP or (domainGuid, port)
+ * for TCP. A match disables submit and surfaces an inline message
+ * pointing at the existing row — covers the 99%+ of conflicts that live
+ * in the same space (the only space the user can act on anyway).
+ *
+ * 422 classification on submit: cross-space collisions and other
+ * uniqueness errors return as 422 with CF error codes 210003/210004/
+ * 210005. We translate those to a generic "Route name is unavailable"
+ * message; other 422s pass through CF's `detail` verbatim. No cross-space
+ * lookup — RBAC blind spots make precise topology messaging impossible
+ * without info leaks.
+ *
+ * Orphan-on-attach-fail (create succeeds, attach fails): the action
+ * service throws an error whose message names the orphan route GUID + URL
+ * verbatim; the rejection propagates up through signalHandle.submit to
+ * the stepper which surfaces it via the existing snackbar plumbing.
+ */
 @Component({
   selector: 'app-add-routes',
   templateUrl: './add-routes.component.html',
@@ -36,21 +94,32 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
   imports: [
     FormsModule,
     ReactiveFormsModule,
+    AppErrorComponent,
+    AppInputDirective,
     CustomFormFieldComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     CustomCheckboxComponent,
     FocusDirective,
-    MapRoutesComponent
-]
+    SignalListComponent,
+  ],
 })
 export class AddRoutesComponent implements OnInit, OnDestroy {
   private applicationService = inject(ApplicationService);
-  private store = inject<Store<CFAppState>>(Store);
+  private dataService = inject(AppDetailDataService);
+  private actions = inject(AppRouteActionsService);
+  private mapRoutesConfig = inject(CfMapRoutesSignalConfigService);
+  private router = inject(Router);
 
   subscriptions: Subscription[] = [];
-  model!: Route;
-  domains: APIResource<IDomain>[] = [];
+  /**
+   * Domains for the app's org. Sourced from the signal-native facade
+   * (`applicationService.orgDomains$`) so the picker stays in sync with the
+   * data service without dispatching ngrx actions or wiring through the
+   * legacy entity catalog.
+   */
+  readonly domains: Signal<StDomain[]>;
+
   addTCPRoute: FormGroup<{
     port: FormControl<string>;
     useRandomPort: FormControl<boolean>;
@@ -60,70 +129,257 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     path: FormControl<string>;
   }>;
   domainFormGroup: FormGroup<{
-    domain: FormControl<APIResource<IDomain> | ''>;
+    domain: FormControl<StDomain | ''>;
   }>;
+
   appGuid: string;
   cfGuid: string;
   spaceGuid!: string;
-  createTCPRoute = false;
-  selectedDomain!: APIResource<any>;
-  private _selectedRoute = signal<any>({
-    entity: {},
-    metadata: {}
-  });
-  // Convert signal to observable in field initializer (injection context)
-  private _selectedRoute$ = toObservable(this._selectedRoute);
-  // Expose as writable object for child component compatibility
-  selectedRoute$ = {
-    next: (value: any) => this._selectedRoute.set(value),
-    subscribe: (fn: any) => this._selectedRoute$.subscribe(fn)
-  } as any;
+  selectedDomain!: StDomain;
   appUrl: string;
-  isRouteSelected = signal<boolean>(false);
-  addRouteModes: RouteMode[] = [
-    { id: 'create', label: 'Create and map new route', submitLabel: 'Create' },
-    { id: 'map', label: 'Map existing route', submitLabel: 'Map' }
-  ];
-  addRouteMode: RouteMode;
+
   useRandomPort = false;
+
+  /** Picker config for the "Available routes in this space" list. */
+  readonly mapListConfig: SignalListConfig<StRoute>;
+  /** Read-only config for the "Already attached to this app" list. */
+  readonly attachedListConfig: SignalListConfig<StRoute>;
+
+  /** True when the user has clicked a row in the available list. */
+  readonly hasSelectedRoute: Signal<boolean> = computed(
+    () => this.mapRoutesConfig.selectedKey() !== null,
+  );
+
+  /**
+   * Client-side collision check. Returns the matching `StRoute` from the
+   * loaded available-in-space list when the form's host/path/port/domain
+   * combination collides with an existing detached or other-app route.
+   * `null` when no collision (or when the form isn't filled enough to
+   * compare). Catches the 99%+ same-space conflict cases without an extra
+   * round trip; cross-space conflicts still surface via 422 classification
+   * at submit time.
+   */
+  readonly hostCollision!: Signal<StRoute | null>;
+
+  /**
+   * Local override for the accordion's open state. `null` means "follow the
+   * count-driven default" (`attachedListOpen` reads the count and decides);
+   * once the user toggles the accordion, this becomes a bool and sticks.
+   */
+  readonly attachedListExpanded: WritableSignal<boolean | null> = signal(null);
+
+  /**
+   * Effective open state for the "Already attached" accordion. The accordion
+   * is always rendered so the user can find the list regardless of count.
+   * Initial open state is count-driven: if the list is small enough to read
+   * at a glance (≤3 rows) we open it by default; otherwise we collapse so
+   * the form and picker stay above the fold. User toggles win once set.
+   */
+  readonly attachedListOpen: Signal<boolean> = computed(() => {
+    const explicit = this.attachedListExpanded();
+    if (explicit !== null) return explicit;
+    const n = this.mapRoutesConfig.attachedRoutes().length;
+    return n > 0 && n <= 3;
+  });
+
+  /** Sort spec for the attached list — independent of the picker's sort. */
+  readonly attachedSort: WritableSignal<SignalListSort> = signal({
+    field: 'host', direction: 'asc',
+  });
+
+  /**
+   * Sorted attached routes. Drives the read-only "Already attached" list.
+   * Sort key is looked up against the column array's `sortField` so headers
+   * + the card-mode dropdown both work without extra wiring. Falls back to
+   * a stable property lookup when the field isn't a column we know about.
+   */
+  readonly sortedAttachedRoutes!: Signal<StRoute[]>;
+
+  // Signal-native step handle exposed to the parent stepper template.
+  signalHandle!: SignalStepHandle;
+
   constructor() {
     const applicationService = this.applicationService;
-
     this.appGuid = applicationService.appGuid;
     this.cfGuid = applicationService.cfGuid;
     this.appUrl = `/applications/${this.cfGuid}/${this.appGuid}/routes`;
-    this.addRouteMode = this.addRouteModes[0];
+
+    // Bridge the org-domains observable into a signal so the template's
+    // @for binds reactively and we keep the OnPush change detection model.
+    this.domains = toSignal(this.applicationService.orgDomains$, { initialValue: [] });
+
     this.domainFormGroup = new FormGroup({
-      domain: new FormControl<APIResource<IDomain> | ''>('', {
+      domain: new FormControl<StDomain | ''>('', {
         nonNullable: true,
-        validators: [Validators.required]
-      })
+        validators: [Validators.required],
+      }),
     });
 
     this.addHTTPRoute = new FormGroup({
       host: new FormControl('', {
         nonNullable: true,
-        validators: [Validators.required, Validators.pattern(hostPattern), Validators.maxLength(63)]
+        validators: [Validators.required, Validators.pattern(hostPattern), Validators.maxLength(63)],
       }),
       path: new FormControl('', {
         nonNullable: true,
-        validators: [Validators.pattern(pathPattern), Validators.maxLength(128)]
-      })
+        validators: [Validators.pattern(pathPattern), Validators.maxLength(128)],
+      }),
     });
 
     this.addTCPRoute = new FormGroup({
       port: new FormControl('', {
         nonNullable: true,
-        validators: [
-          Validators.required,
-          Validators.pattern('[0-9]*')
-        ]
+        validators: [Validators.required, Validators.pattern('[0-9]*')],
       }),
-      useRandomPort: new FormControl(false, { nonNullable: true })
+      useRandomPort: new FormControl(false, { nonNullable: true }),
     });
-  }
 
-  appService = this.applicationService;
+    // Track each form's status as a signal so signalHandle.valid recomputes
+    // reactively when any control transitions VALID/INVALID. Mirrors the
+    // pre-rebuild graph; the difference is the verb call below.
+    const httpStatus = toSignal(this.addHTTPRoute.statusChanges.pipe(startWith(this.addHTTPRoute.status)),
+      { initialValue: this.addHTTPRoute.status });
+    const tcpStatus = toSignal(this.addTCPRoute.statusChanges.pipe(startWith(this.addTCPRoute.status)),
+      { initialValue: this.addTCPRoute.status });
+    const domainStatus = toSignal(this.domainFormGroup.statusChanges.pipe(startWith(this.domainFormGroup.status)),
+      { initialValue: this.domainFormGroup.status });
+
+    // Form value signals so `hostCollision` recomputes on every keystroke.
+    const httpVal = toSignal(this.addHTTPRoute.valueChanges.pipe(startWith(this.addHTTPRoute.value)),
+      { initialValue: this.addHTTPRoute.value });
+    const tcpVal = toSignal(this.addTCPRoute.valueChanges.pipe(startWith(this.addTCPRoute.value)),
+      { initialValue: this.addTCPRoute.value });
+    const domainVal = toSignal(this.domainFormGroup.controls.domain.valueChanges.pipe(
+      startWith(this.domainFormGroup.controls.domain.value)),
+      { initialValue: this.domainFormGroup.controls.domain.value });
+
+    (this as { hostCollision: Signal<StRoute | null> }).hostCollision = computed(() => {
+      const domain = domainVal();
+      if (!domain || typeof domain === 'string') return null;
+      const domainGuid = domain.guid;
+      const isTcp = domain.supportedProtocols?.includes('tcp') ?? false;
+      const available = this.mapRoutesConfig.availableRoutes();
+      if (!available.length) return null;
+
+      if (isTcp) {
+        const v = tcpVal();
+        if (v?.useRandomPort) return null; // can't predict random
+        const portStr = (v?.port ?? '').trim();
+        if (!portStr) return null;
+        const port = parseInt(portStr, 10);
+        if (isNaN(port)) return null;
+        return available.find(r => r.domainGuid === domainGuid && (r.port ?? 0) === port) ?? null;
+      }
+
+      const v = httpVal();
+      const host = (v?.host ?? '').trim();
+      if (!host) return null;
+      let path = v?.path ?? '';
+      if (path && path.length && path[0] !== '/') path = '/' + path;
+      return available.find(r =>
+        r.domainGuid === domainGuid
+        && (r.host ?? '') === host
+        && (r.path ?? '') === path,
+      ) ?? null;
+    });
+
+    this.signalHandle = {
+      valid: computed(() => {
+        // Touch every reactive source so the signal graph re-runs on any
+        // input/form transition, then defer to validate().
+        void httpStatus(); void tcpStatus(); void domainStatus();
+        void this.hasSelectedRoute(); void this.hostCollision();
+        return this.validate();
+      }),
+      submit: async () => {
+        await this.runSubmit();
+      },
+      blocked: computed(() => this.actions.inFlight()),
+    };
+
+    // Build the picker (Available routes) config from the picker service.
+    // Sort/view-mode/pagination are owned by the service's tab-scoped state.
+    const columns: SignalListColumn<StRoute>[] = this.mapRoutesConfig.buildColumns();
+    this.mapListConfig = {
+      pagedItems: this.mapRoutesConfig.view.pagedItems,
+      totalFilteredResults: this.mapRoutesConfig.view.totalFilteredResults,
+      totalPages: this.mapRoutesConfig.view.totalPages,
+      pageIndex: this.mapRoutesConfig.pageIndex,
+      pageSize: this.mapRoutesConfig.pageSize,
+      isAnyLoading: signal(false).asReadonly(),
+      errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+      columns,
+      getRowKey: (row: StRoute) => row.guid,
+      emptyMessage: 'No routes available to map in this space',
+      emptyFilterMessage: 'No routes match the current filter',
+      loadingMessage: 'Loading routes…',
+      // Smallest option matches the picker's default page size — the
+      // stepper sits between a form and the attached list, so we want
+      // compact-by-default with room to grow. Larger options still on
+      // hand for spaces with many routes.
+      pageSizeOptions: {
+        table: [5, 10, 25, 50],
+        card: [6, 12, 24, 48],
+      },
+      nameFilter: this.mapRoutesConfig.nameFilter,
+      onRefresh: () => this.mapRoutesConfig.refresh(),
+      onClear: () => this.mapRoutesConfig.clearFilters(),
+      viewMode: this.mapRoutesConfig.viewMode,
+      sort: this.mapRoutesConfig.sort,
+      // Compact picker — paginator only when the list overflows page 1.
+      hidePagerWhenSingle: true,
+    };
+
+    // Read-only "Already attached" list. Reuses the picker's column shape
+    // minus the radio (no action) and feeds directly off the
+    // `attachedRoutes` signal — sort applied locally so headers stay
+    // interactive without a separate filter/page pipeline.
+    const attachedColumns = columns.filter(c => c.kind !== 'radio');
+    const attachedRoutesSignal = this.mapRoutesConfig.attachedRoutes;
+    (this as { sortedAttachedRoutes: Signal<StRoute[]> }).sortedAttachedRoutes = computed(() => {
+      const items = [...attachedRoutesSignal()];
+      const s = this.attachedSort();
+      const col = attachedColumns.find(c => (c.key ?? c.header) === s.field);
+      const sf = col?.sortField;
+      const getValue: (row: StRoute) => unknown = typeof sf === 'function'
+        ? sf
+        : (typeof sf === 'string'
+          ? (row: StRoute) => (row as unknown as Record<string, unknown>)[sf as string]
+          : (row: StRoute) => (row as unknown as Record<string, unknown>)[s.field]);
+      const sign = s.direction === 'asc' ? 1 : -1;
+      return items.sort((a, b) => {
+        const av = getValue(a), bv = getValue(b);
+        if (av == null && bv == null) return 0;
+        if (av == null) return 1;
+        if (bv == null) return -1;
+        if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * sign;
+        return av < bv ? -1 * sign : av > bv ? 1 * sign : 0;
+      });
+    });
+    const attachedPageIndex = signal(0);
+    const attachedPageSize = signal(100);
+    this.attachedListConfig = {
+      pagedItems: this.sortedAttachedRoutes,
+      totalFilteredResults: computed(() => attachedRoutesSignal().length),
+      totalPages: computed(() => 1),
+      pageIndex: attachedPageIndex,
+      pageSize: attachedPageSize,
+      isAnyLoading: signal(false).asReadonly(),
+      errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+      columns: attachedColumns,
+      getRowKey: (row: StRoute) => row.guid,
+      emptyMessage: '',
+      emptyFilterMessage: '',
+      loadingMessage: 'Loading…',
+      pageSizeOptions: {
+        table: [100],
+        card: [100],
+      },
+      viewMode: signal('table'),
+      sort: this.attachedSort,
+      hidePagerWhenSingle: true,
+    };
+  }
 
   ngOnInit() {
     this.subscriptions.push(this.addTCPRoute.valueChanges.subscribe(val => {
@@ -143,37 +399,35 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       }
     }));
 
-    const space$ = this.applicationService.orgDomains$.pipe(
-      // We don't need the domains, but we need them fetched first so we get the router_group_type
-      switchMap(() => this.appService.waitForAppEntity$
-        .pipe(
-          switchMap(app => {
-            this.spaceGuid = app.entity.entity.space_guid;
-            return cfEntityCatalog.space.store.getEntityService(
-              app.entity.entity.space_guid,
-              app.entity.entity.cfGuid,
-              { includeRelations: [createEntityRelationKey(spaceEntityType, domainEntityType)] }
-            ).waitForEntity$;
-          }),
-          filter(({ entity }) => !!entity.entity.domains),
-          tap(({ entity }) => {
-            this.domains = [];
-            const domains = entity.entity.domains;
-            domains.forEach(domain => {
-              this.domains.push(domain);
-            });
-            this.selectedDomain = Object.values(this.domains)[0];
-            // Set initial domain value in the form
-            if (this.selectedDomain) {
-              this.domainFormGroup.patchValue({ domain: this.selectedDomain });
-            }
-          })
-        )
-      ));
+    // Capture the app's space GUID for the create-route relationship payload
+    // as soon as the app entity resolves. Signal-native: the domain list
+    // itself flows from `this.domains` (toSignal of orgDomains$) so we no
+    // longer need the cfEntityCatalog space.domains include-fetch.
+    this.subscriptions.push(
+      this.applicationService.waitForAppEntity$.pipe(
+        filter(app => !!app?.entity?.entity?.space_guid),
+      ).subscribe(app => {
+        this.spaceGuid = app.entity.entity.space_guid;
+      }),
+    );
 
-    this.subscriptions.push(space$.subscribe());
+    // Seed the domain dropdown with the first available org domain once the
+    // signal-native facade emits a non-empty list. Stops at the first emission
+    // so a later refresh doesn't clobber a user-picked value.
+    this.subscriptions.push(
+      this.applicationService.orgDomains$.pipe(
+        filter(domains => Array.isArray(domains) && domains.length > 0),
+      ).subscribe(domains => {
+        if (this.selectedDomain) {
+          return;
+        }
+        this.selectedDomain = domains[0];
+        this.domainFormGroup.patchValue({ domain: this.selectedDomain });
+      }),
+    );
 
-    // Subscribe to domain form changes to update selectedDomain
+    // Subscribe to domain form changes to update selectedDomain so the
+    // template's TCP/HTTP branching reacts.
     this.subscriptions.push(
       this.domainFormGroup.controls.domain.valueChanges.subscribe(domain => {
         if (domain && typeof domain !== 'string') {
@@ -182,132 +436,172 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       })
     );
 
-    const selRoute$ = this._selectedRoute$.subscribe(x => {
-      if (x.metadata.guid) {
-        this.isRouteSelected.set(true);
-      }
-    });
-    this.subscriptions.push(selRoute$);
+    // Eagerly drain the space's routes for both lists. The two-list
+    // single-screen redesign needs this on entry rather than gated on a
+    // radio toggle. Idempotent: refresh() returns early until appDetail
+    // resolves, so calling here-and-now is safe even before the app
+    // entity has populated.
+    void this.mapRoutesConfig.refresh();
+    // Re-drain when appDetail.spaceGuid first lands (covers the cold-load
+    // race where ngOnInit fires before the cnsi+space are bound).
+    this.subscriptions.push(
+      this.applicationService.waitForAppEntity$.pipe(
+        filter(app => !!app?.entity?.entity?.space_guid),
+      ).subscribe(() => { void this.mapRoutesConfig.refresh(); }),
+    );
   }
 
-  _getValueForKey(key: string, form: any) {
-    return form.value[key] ? form.value[key] : '';
-  }
-
-  _getValue(key: string, form: any) {
-    return form.value[key] !== '' ? form.value[key] : null;
-  }
-
+  /**
+   * The submit gate. The user has two mutually exclusive intents:
+   *   - Pick a row from the available list → attach.
+   *   - Fill the form → create-and-attach.
+   * If a row is selected, the form's validity doesn't matter. If no row
+   * is selected, the active form (HTTP vs TCP) must be valid AND there
+   * must be no client-side host/port collision against the available
+   * list.
+   */
   validate(): boolean {
-    if (this.addRouteMode && this.addRouteMode.id === 'create') {
-      return this.isTCPRouteCreation()
-        ? this.addTCPRoute.valid
-        : this.addHTTPRoute.valid;
-    } else {
-      try {
-        return this.isRouteSelected();
-      } catch (_e) { /* intentionally empty */ }
-
-      return false;
+    if (this.hasSelectedRoute()) {
+      return true;
     }
+    const formValid = this.isTCPRouteCreation()
+      ? this.addTCPRoute.valid
+      : this.addHTTPRoute.valid;
+    if (!formValid) return false;
+    return this.hostCollision() === null;
   }
 
   isTCPRouteCreation(): boolean {
     const domain = this.domainFormGroup.value.domain;
-    return !!domain && typeof domain !== 'string' && domain.entity.router_group_type === 'tcp';
+    return !!domain && typeof domain !== 'string' && (domain.supportedProtocols?.includes('tcp') ?? false);
   }
 
-  submit: StepOnNextFunction = () => {
-    if (this.addRouteMode && this.addRouteMode.id === 'create') {
-      // Creating new route
-      return this.onSubmit();
+  /**
+   * Submit dispatch. Row-selected wins over the form (validate() ensures
+   * the two intents don't both produce valid=true). Resolves on success
+   * (signalHandle.submit unwraps), rejects with an Error to surface the
+   * message via stepper snackbar.
+   */
+  async runSubmit(): Promise<void> {
+    if (this.hasSelectedRoute()) {
+      await this.runAttachExisting();
     } else {
-      return this.mapRouteSubmit();
+      await this.runCreateAndAttach();
     }
-  };
+  }
 
-  onSubmit(): Observable<StepOnNextResult> {
+  /** Create a new route in the selected domain + attach to the app. */
+  private async runCreateAndAttach(): Promise<void> {
     const domain = this.domainFormGroup.value.domain;
-    const domainGuid = typeof domain !== 'string' ? domain?.metadata.guid : '';
-    const isTcpRoute = this.isTCPRouteCreation();
-    const formGroup = isTcpRoute ? this.addTCPRoute : this.addHTTPRoute;
-
-    // Set port to -1 to indicate that we should generate a random port number
-    let port = this._getValue('port', formGroup);
-    if (isTcpRoute && (this.addTCPRoute.value.useRandomPort ?? false)) {
-      port = -1;
+    const domainGuid = domain && typeof domain !== 'string' ? domain.guid : '';
+    if (!domainGuid) {
+      throw new Error('Failed to add route: domain is required');
+    }
+    const isTcp = this.isTCPRouteCreation();
+    const req: CreateRouteRequest = {
+      relationships: {
+        space: { data: { guid: this.spaceGuid } },
+        domain: { data: { guid: domainGuid } },
+      },
+    };
+    if (isTcp) {
+      const useRandomPort = this.addTCPRoute.value.useRandomPort ?? false;
+      if (!useRandomPort) {
+        const portVal = this.addTCPRoute.value.port ?? '';
+        const portNum = parseInt(portVal, 10);
+        if (!isNaN(portNum)) {
+          req.port = portNum;
+        }
+      }
+      // useRandomPort=true → omit `port` so V3 picks one (RouteCreateRequest.Port = *int).
+    } else {
+      const host = (this.addHTTPRoute.value.host ?? '').trim();
+      let path = this.addHTTPRoute.value.path ?? '';
+      if (path && path.length && path[0] !== '/') {
+        path = '/' + path;
+      }
+      // Host is required for HTTP routes per the form's Validators.required;
+      // include it as-is. Path is optional (empty string allowed).
+      if (host) req.host = host;
+      if (path) req.path = path;
     }
 
-    const newRouteGuid =
-      isTcpRoute ? 'tcp_' : 'http_' +
-        this._getValueForKey('host', formGroup) +
-        this._getValueForKey('port', formGroup) +
-        this._getValueForKey('path', formGroup) +
-        domainGuid;
-
-    return this.createAndMapRoute(
-      newRouteGuid,
-      domainGuid ?? '',
-      this._getValue('host', formGroup),
-      this._getValue('path', formGroup),
-      port,
-      isTcpRoute
-    );
-  }
-
-  private createAndMapRoute(
-    newRouteGuid: string,
-    domainGuid: string,
-    host: string,
-    path: string,
-    port: number,
-    _isTCP: boolean): Observable<StepOnNextResult> {
-    if (path && path.length && path[0] !== '/') {
-      path = '/' + path;
+    let created: StRoute;
+    try {
+      created = await this.actions.createAndAttachRoute(req);
+    } catch (err) {
+      // Translate uniqueness errors (CF v3 codes 210003 RouteHostTaken /
+      // 210004 RoutePathTaken / 210005 RoutePortTaken) into a generic
+      // "name unavailable" message — the typical case is a same-tuple
+      // route in another space we can't surface details on without
+      // info-leak. Same-space cases are caught client-side via
+      // hostCollision and never reach this branch. Other 422 details
+      // (invalid host, quota exceeded, etc.) pass through verbatim;
+      // orphan-on-attach-fail messages too.
+      throw new Error(this.classifyCreateError(err));
     }
-
-    return cfEntityCatalog.route.api.create<RequestInfoState>(
-      newRouteGuid,
-      this.cfGuid,
-      new Route(domainGuid, this.spaceGuid, host, path, port)
-    ).pipe(
-      pairwise(),
-      filter(([oldR, newR]) => oldR.creating && !newR.creating),
-      map(([, newR]) => newR),
-      mergeMap(route => {
-        if (route.error) {
-          return observableOf({ success: false, message: `Failed to create route: ${route.message}` });
-        } else {
-          return this.mapRoute(route.response.result[0]);
-        }
-      })
-    );
+    this.dataService.addRoute(created);
+    void this.router.navigate(['/applications', this.cfGuid, this.appGuid, 'routes']);
   }
 
-  private mapRoute(routeGuid: string): Observable<StepOnNextResult> {
-    return cfEntityCatalog.application.api.assignRoute<ActionState>(this.cfGuid, routeGuid, this.appGuid).pipe(
-      pairwise(),
-      filter(([oldR, newR]) => oldR.busy && !newR.busy),
-      map(([, newR]) => newR),
-      map((requestState: ActionState) => {
-        if (requestState.error) {
-          return { success: false, message: `Failed to associate route with app: ${requestState.error}` };
-        }
-        cfEntityCatalog.route.api.getAllForApplication(this.appGuid, this.cfGuid);
-        this.store.dispatch(new RouterNav({ path: ['/applications', this.cfGuid, this.appGuid, 'routes'] }));
-        return { success: true };
-      })
-    );
+  /**
+   * Map a thrown error from createAndAttachRoute into a user-facing
+   * message. CF v3 returns 422 with `errors[].code` for uniqueness
+   * conflicts (210003/210004/210005); we translate those without leaking
+   * the colliding route's space/org. Any other shape passes the original
+   * message through.
+   */
+  private classifyCreateError(err: unknown): string {
+    const e = err as { message?: string; status?: number; error?: unknown };
+    const status = e?.status ?? 0;
+    if (status === 422) {
+      const code = this.extractCfErrorCode(e?.error);
+      if (code === 210003 || code === 210004 || code === 210005) {
+        return 'Route name is unavailable. Please choose another.';
+      }
+    }
+    return e?.message ?? 'Failed to add route';
   }
 
-  private mapRouteSubmit(): Observable<StepOnNextResult> {
-    return this._selectedRoute$.pipe(
-      switchMap(route => this.mapRoute(route.metadata.guid))
-    );
+  /**
+   * CF v3 error envelopes nest as `{ errors: [{ code, title, detail }] }`.
+   * Stratos's HttpClient surfaces this on `HttpErrorResponse.error`,
+   * sometimes already parsed and sometimes as a JSON string depending on
+   * the route through Jetstream's proxy. Tolerate both.
+   */
+  private extractCfErrorCode(payload: unknown): number | null {
+    if (!payload) return null;
+    let body: unknown = payload;
+    if (typeof body === 'string') {
+      try { body = JSON.parse(body); } catch { return null; }
+    }
+    const arr = (body as { errors?: { code?: number }[] })?.errors;
+    if (!Array.isArray(arr) || !arr.length) return null;
+    const code = arr[0]?.code;
+    return typeof code === 'number' ? code : null;
   }
 
-  toggleCreateTCPRoute() {
-    this.createTCPRoute = !this.createTCPRoute;
+  /** Attach an existing route (the row currently selected in the picker). */
+  private async runAttachExisting(): Promise<void> {
+    const selectedKey = this.mapRoutesConfig.selectedKey();
+    if (!selectedKey) {
+      throw new Error('Failed to map route: no route selected');
+    }
+    const selected = this.mapRoutesConfig.view.pagedItems().find(r => r.guid === selectedKey)
+      ?? this.mapRoutesConfig.routes().find(r => r.guid === selectedKey);
+    if (!selected) {
+      throw new Error('Failed to map route: selected route not found');
+    }
+    try {
+      await this.actions.attachRoute(selected.guid);
+    } catch (err) {
+      const msg = (err as Error)?.message ?? 'Failed to map route';
+      throw new Error(msg);
+    }
+    // Use the picker's locally-held StRoute (backend returns empty 200 from
+    // attach). The picker's drain stamps cnsiGuid via toStRoute server-side.
+    this.dataService.addRoute(selected);
+    void this.router.navigate(['/applications', this.cfGuid, this.appGuid, 'routes']);
   }
 
   ngOnDestroy() {

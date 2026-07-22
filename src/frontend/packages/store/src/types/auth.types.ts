@@ -64,7 +64,8 @@ export interface SessionData {
   uaaError?: boolean;
   upgradeInProgress?: boolean;
   ssoOptions?: string;
-  sessionExpiresOn: number;
+  // Null for an invalid session (no session-expiry header was returned).
+  sessionExpiresOn: number | null;
   domainMismatch?: boolean;
   diagnostics?: Diagnostics;
   ['plugin-config']?: PluginConfig;
@@ -79,6 +80,42 @@ export interface SessionDataEnvelope {
   status: string;
   error?: string;
   data?: SessionData;
+}
+
+/**
+ * A redirect to replay after login. Previously lived in auth.actions.ts
+ * (alongside `RouterNav`). Now a plain type owned by the auth domain and
+ * set via {@link AuthDataService.navigateAndRememberRedirect}.
+ */
+export interface RouterRedirect {
+  path: string;
+  queryParams?: {
+    [key: string]: string
+  };
+}
+
+export interface AuthUser {
+  guid: string;
+  name: string;
+  admin: boolean;
+}
+
+/**
+ * Shape of the auth state. Previously the `auth` ngrx slice (auth.reducer.ts);
+ * now owned and mutated by {@link AuthDataService} as a signal.
+ */
+export interface AuthState {
+  loggedIn: boolean;
+  loggingIn: boolean;
+  // Null until/unless a logged-in user is hydrated (default + reset states).
+  user: AuthUser | null;
+  error: boolean;
+  errorResponse: any;
+  // Null in the default/reset state, before any verify cycle resolves.
+  sessionData: SessionData | null;
+  verifying: boolean;
+  redirect?: RouterRedirect;
+  keepAlive?: boolean;
 }
 
 export interface TokenData {
@@ -105,6 +142,7 @@ export interface AuthTokenEnvelope {
 export interface Diagnostics {
   deploymentType?: string;
   gitClientVersion?: string;
+  databaseBackend?: string;
   databaseMigrations?: any;
   helmName?: string;
   helmRevision?: string;

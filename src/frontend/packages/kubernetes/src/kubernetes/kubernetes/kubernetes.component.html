@@ -1,7 +1,10 @@
 <app-page-header>
   <h1>Kubernetes</h1>
 </app-page-header>
-@if ((connectedEndpoints$ | async) > 1) {
-  <app-list>
-  </app-list>
+@if (((connectedEndpoints$ | async) ?? 0) > 1) {
+  <app-signal-list [config]="endpointsSignalConfig.config" class="flex-1 min-h-0">
+    <ng-template #cardTemplate let-row>
+      <app-endpoint-card [row]="$any(row)"></app-endpoint-card>
+    </ng-template>
+  </app-signal-list>
 }

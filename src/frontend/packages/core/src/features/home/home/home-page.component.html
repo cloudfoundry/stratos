@@ -1,23 +1,47 @@
 <app-page-header [endpointIds$]="allEndpointIds$">
   <h1>Home</h1>
   <div class="page-header-right">
-    @if (layouts$ | async; as layouts) {
-      <div class="relative inline-block">
-        <div class="dropdown">
-          <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
-            type="button" #dropdownButton (click)="toggleDropdown(dropdownButton)">
-            <span class="material-icons">view_week</span>
-            <span class="material-icons">arrow_drop_down</span>
-          </button>
-          <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50 hidden" #dropdownMenu>
-            <div class="py-1">
-              @for (layout of layouts; track layout?.id ?? $index) {
+    <div class="inline-flex items-center rounded-lg border border-content-border bg-content-bg p-1 shadow-sm"
+      role="group" aria-label="Which endpoints to show">
+      @for (mode of showModes; track mode.value) {
+        <button type="button"
+          class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200"
+          [class.bg-primary]="resolvedShowMode() === mode.value"
+          [class.text-white]="resolvedShowMode() === mode.value"
+          [class.text-content-text]="resolvedShowMode() !== mode.value"
+          [class.hover:bg-content-secondary]="resolvedShowMode() !== mode.value"
+          (click)="setShowMode(mode.value)"
+          [attr.aria-pressed]="resolvedShowMode() === mode.value">
+          {{ mode.label }}
+        </button>
+      }
+      <span class="self-stretch border-l border-content-border mx-1" aria-hidden="true"></span>
+      <button type="button" (click)="toggleSortDirection()"
+        [title]="sortDirection() === 'asc' ? 'Sorted by endpoint name, A→Z' : 'Sorted by endpoint name, Z→A'"
+        [attr.aria-label]="sortDirection() === 'asc' ? 'Sorted by endpoint name, ascending' : 'Sorted by endpoint name, descending'"
+        class="px-2 py-1.5 rounded-md text-content-muted hover:bg-content-secondary transition-colors duration-200">
+        <span class="material-icons text-base leading-5 block" [class.rotate-180]="sortDirection() === 'asc'">sort</span>
+      </button>
+    </div>
+    <!-- Divider between the endpoint controls and the layout menu, matching
+         the page header's own divider idiom -->
+    <span class="mx-2 text-content-muted opacity-40 select-none" aria-hidden="true">|</span>
+    <div class="relative inline-block">
+      <div class="dropdown">
+        <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
+          type="button" #dropdownButton (click)="toggleDropdown(dropdownButton)">
+          <span class="material-icons">view_week</span>
+          <span class="material-icons">arrow_drop_down</span>
+        </button>
+        <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50 hidden" #dropdownMenu>
+          <div class="py-1">
+            @for (layout of layouts; track layout?.id ?? $index) {
                 <div>
                   @if (layout) {
                     <button (click)="onChangeLayout(layout); closeDropdown(dropdownButton)"
                       class="layout-dropdown__option">
                       <span>{{ layout.title }}</span>
-                      <span class="material-icons text-primary-600"
+                      <span class="material-icons text-brand-600"
                         [class.opacity-100]="layout.id === layoutID"
                       [class.opacity-0]="layout.id !== layoutID">done</span>
                     </button>
@@ -27,38 +51,29 @@
                   }
                 </div>
               }
-              <div class="layout-dropdown__divider"></div>
-              <button (click)="toggleShowAllEndpoints(); closeDropdown(dropdownButton)"
-                class="layout-dropdown__option">
-                <span>Show connected endpoints</span>
-                <span class="material-icons text-primary-600"
-                  [class.opacity-100]="showAllEndpoints"
-                [class.opacity-0]="!showAllEndpoints">done</span>
-              </button>
-            </div>
           </div>
         </div>
       </div>
-    }
+    </div>
   </div>
 </app-page-header>
-@if (haveThingsToShow$ | async ) {
+<app-home-url-banner></app-home-url-banner>
+@if (haveThingsToShow()) {
   <div class="p-6">
     <div class="home-grid"
       [class.columns-1]="columns === 1"
       [class.columns-2]="columns === 2"
-      [class.columns-3]="columns === 3"
-      #endpointsPanel>
-      @for (ep of endpoints$ | async; track ep?.guid ?? $index) {
-        <div #endpointElements class="home-grid-item" [style.grid-column]="'span ' + getEffectiveSpan(ep)">
-          <app-home-page-endpoint-card (loaded)="cardLoaded()" [layout]="layout()" [endpoint]="ep">
+      [class.columns-3]="columns === 3">
+      @for (ep of endpoints(); track ep?.guid ?? $index) {
+        <div class="home-grid-item" [style.grid-column]="'span ' + getEffectiveSpan(ep)">
+          <app-home-page-endpoint-card [layout]="layout()" [endpoint]="ep">
           </app-home-page-endpoint-card>
         </div>
       }
     </div>
   </div>
 } @else {
-  @if (haveRegistered$ | async) {
+  @if (haveRegistered()) {
     <div class="p-6">
       <app-no-content-message [icon]="noneAvailableMsg.icon" [firstLine]="noneAvailableMsg.firstLine"
       [secondLine]="noneAvailableMsg.secondLine"></app-no-content-message>

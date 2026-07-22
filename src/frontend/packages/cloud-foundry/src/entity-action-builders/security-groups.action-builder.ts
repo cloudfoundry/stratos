@@ -6,7 +6,7 @@ export interface SecurityGroupBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { includeRelations, flatten }: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetAllSecurityGroups;
 }
 

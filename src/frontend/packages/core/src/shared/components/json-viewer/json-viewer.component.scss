@@ -1,16 +1,16 @@
 $type-colors: (
-  string: #0065ff,
-  number: #009688,
-  boolean: #b938a4,
-  date: #05668D,
-  //null: #787878;
+  string: oklch(56.159% 0.2419 260.95),
+  number: oklch(60.454% 0.1074 183.38),
+  boolean: oklch(56.744% 0.2016 335.19),
+  date: oklch(48.11% 0.0992 234.04),
+  //null: oklch(57.268% 0 none);
 
-  array: #999,
-  object: #999,
-  function: #999,
+  array: oklch(68.295% 0 none),
+  object: oklch(68.295% 0 none),
+  function: oklch(68.295% 0 none),
 
-  'null': #787878,
-  undefined: #fff
+  'null': oklch(57.268% 0 none),
+  undefined: oklch(100% 0 none)
 );
 
 :host {
@@ -18,7 +18,7 @@ $type-colors: (
 }
 
 .ngx-json-viewer {
-  font-family: "Source Code Pro";
+  font-family: var(--font-mono);
   font-size: 14px;
   width: 100%;
   height: 100%;
@@ -39,7 +39,7 @@ $type-colors: (
         font-size: 0.8em;
         line-height: 1.2em;
         vertical-align: middle;
-        color: #787878;
+        color: var(--content-muted);
 
         &::after {
           display: inline-block;
@@ -48,16 +48,19 @@ $type-colors: (
         }
       }
 
+      // Structural colors resolve via theme tokens so the tree is legible in
+      // both light and dark (the syntax-accent hues below stay static — they
+      // read on both). Keys were a fixed purple, values a fixed black.
       .segment-key {
-        color: #4E187C;
+        color: var(--content-text);
       }
 
       .segment-separator {
-        color: #999;
+        color: var(--content-muted);
       }
 
       .segment-value {
-        color: #000;
+        color: var(--content-text);
       }
     }
 
@@ -74,15 +77,15 @@ $type-colors: (
 
   // // special cases need highlightted
   // .segment-type-null > .segment-main > .segment-value {
-  //   color: #787878;
+  //   color: oklch(57.268% 0 none);
   // }
 
   .segment-type-undefined > .segment-main {
     & > .segment-key {
-      color: #999;
+      color: oklch(68.295% 0 none);
     }
     & > .segment-value {
-      background-color: #999;
+      background-color: oklch(68.295% 0 none);
     }
   }
   .segment-type-object > .segment-main,

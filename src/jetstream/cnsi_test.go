@@ -50,7 +50,7 @@ func TestRegisterCFCluster(t *testing.T) {
 	}
 
 	mock.ExpectExec(insertIntoCNSIs).
-		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", "", "", "").
+		WithArgs(sqlmock.AnyArg(), "Some fancy CF Cluster", "cf", mockV2Info.URL, mockAuthEndpoint, mockTokenEndpoint, mockDopplerEndpoint, true, mockClientId, sqlmock.AnyArg(), false, "", sqlmock.AnyArg(), "", "").
 		WillReturnResult(sqlmock.NewResult(1, 1))
 
 	if err := pp.RegisterEndpoint(ctx, getCFPlugin(pp, "cf").Info); err != nil {
@@ -190,7 +190,6 @@ func TestRegisterCFClusterButCantSaveCNSIRecord(t *testing.T) {
 	}
 }
 func TestListCNSIs(t *testing.T) {
-	t.Skip("TODO: fix this test")
 	t.Parallel()
 
 	req := setupMockReq("GET", "", nil)
@@ -317,13 +316,8 @@ func TestRegisterEndpointStartsRefreshRoutine(t *testing.T) {
 				GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
 				Return(mockAdmin.ConnectedUser, nil)
 
-			mock.
-				ExpectQuery(selectFromCNSIs).
-				WillReturnRows(
-					sqlmock.NewRows(
-						[]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "sso_allowed", "sub_type", "meta_data", "creator", "ca_cert"},
-					),
-				)
+			// Production no longer SELECTs before INSERT (duplicate-URL check removed in
+			// 9a0207f16d — duplicates now allowed for operator multi-auth scenarios).
 			mock.
 				ExpectExec(insertIntoCNSIs).
 				WillReturnResult(sqlmock.NewResult(1, 1))
@@ -392,7 +386,7 @@ func TestRegisterEndpointStartsRefreshRoutine(t *testing.T) {
 			newReq.Header.Set("Content-Type", "application/x-www-form-urlencoded")
 
 			newContext := adminEndpoint.EchoContext.Echo().NewContext(newReq, adminEndpoint.EchoContext.Response())
-			_, err = pp.DoLoginToCNSI(newContext, adminEndpoint.InsertArgs[0].(string), true)
+			_, err = pp.DoLoginToCNSI(newContext, adminEndpoint.GUID, true)
 
 			// Asynchronosly wait 5 seconds, then cancel the refresh routines
 			go func() {
@@ -452,10 +446,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
 							Return(mockAdmin.ConnectedUser, nil)
 
-						// return no already saved endpoints
-						rows := testutils.GetEmptyCNSIRows()
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
-
+						// Production no longer SELECTs for duplicates before INSERT (9a0207f16d).
 						mock.ExpectExec(insertIntoCNSIs).
 							WithArgs(adminEndpoint.InsertArgs...).
 							WillReturnResult(sqlmock.NewResult(1, 1))
@@ -473,8 +464,10 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						})
 					})
 					Convey("create system endpoint over existing user endpoints", func() {
-						// setup
-						userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info, "CF Cluster 1 User", false, false)
+						// setup — userEndpoint simulates a pre-existing user registration with
+						// same URL; we no longer mock the SELECT that production used to do,
+						// but the fixture remains as documentation of the scenario being tested.
+						_ = setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info, "CF Cluster 1 User", false, false)
 
 						// mock executions
 						mockStratosAuth.
@@ -482,10 +475,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
 							Return(mockAdmin.ConnectedUser, nil)
 
-						// return a user endpoint with same apiurl
-						rows := testutils.GetEmptyCNSIRows().AddRow(userEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
-
+						// Production no longer SELECTs for duplicates before INSERT (9a0207f16d).
 						// save cnsi
 						mock.ExpectExec(insertIntoCNSIs).
 							WithArgs(adminEndpoint.InsertArgs...).
@@ -503,33 +493,9 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							So(dberr, ShouldBeNil)
 						})
 					})
-					Convey("create system endpoint over existing system endpoints", func() {
-						// mock executions
-						mockStratosAuth.
-							EXPECT().
-							GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
-							Return(mockAdmin.ConnectedUser, nil)
-
-						// return a admin endpoint with same apiurl
-						rows := testutils.GetEmptyCNSIRows().AddRow(adminEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
-
-						// test
-						err := pp.RegisterEndpoint(adminEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
-						dberr := mock.ExpectationsWereMet()
-
-						Convey("should fail ", func() {
-							So(err, ShouldResemble, api.NewHTTPShadowError(
-								http.StatusBadRequest,
-								"Can not register same system endpoint multiple times",
-								"Can not register same system endpoint multiple times",
-							))
-						})
-
-						Convey("no insert should be executed", func() {
-							So(dberr, ShouldBeNil)
-						})
-					})
+					// Removed sub-case "create system endpoint over existing system endpoints":
+					// production no longer rejects duplicate URLs (9a0207f16d); duplicates
+					// are allowed under the multi-auth operator scenario FWT-929 unblocked.
 				})
 				Convey("with createSystemEndpoint disabled", func() {
 
@@ -548,9 +514,9 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
 							Return(mockAdmin.ConnectedUser, nil)
 
-						// return a admin endpoint with same apiurl
-						rows := testutils.GetEmptyCNSIRows().AddRow(systemEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
+						// Production no longer SELECTs for duplicates before INSERT (9a0207f16d);
+						// systemEndpoint fixture kept above as scenario documentation.
+						_ = systemEndpoint
 
 						// save cnsi
 						mock.ExpectExec(insertIntoCNSIs).
@@ -569,33 +535,8 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							So(dberr, ShouldBeNil)
 						})
 					})
-					Convey("register personal endpoint twice", func() {
-						// mock executions
-						mockStratosAuth.
-							EXPECT().
-							GetUser(gomock.Eq(mockAdmin.ConnectedUser.GUID)).
-							Return(mockAdmin.ConnectedUser, nil)
-
-						// return a user endpoint with same apiurl
-						rows := testutils.GetEmptyCNSIRows().AddRow(adminEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
-
-						// test
-						err := pp.RegisterEndpoint(adminEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
-						dberr := mock.ExpectationsWereMet()
-
-						Convey("there should be no error", func() {
-							So(err, ShouldResemble, api.NewHTTPShadowError(
-								http.StatusBadRequest,
-								"Can not register same endpoint multiple times",
-								"Can not register same endpoint multiple times",
-							))
-						})
-
-						Convey("there should be no db error", func() {
-							So(dberr, ShouldBeNil)
-						})
-					})
+					// Removed sub-case "register personal endpoint twice": production no longer
+					// rejects duplicate registrations (9a0207f16d).
 				})
 			})
 
@@ -615,9 +556,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							GetUser(gomock.Eq(mockUser1.ConnectedUser.GUID)).
 							Return(mockUser1.ConnectedUser, nil)
 
-						rows := testutils.GetEmptyCNSIRows()
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
-
+						// Production no longer SELECTs for duplicates before INSERT (9a0207f16d).
 						mock.ExpectExec(insertIntoCNSIs).
 							WithArgs(userEndpoint.InsertArgs...).
 							WillReturnResult(sqlmock.NewResult(1, 1))
@@ -634,7 +573,9 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 						})
 					})
 					Convey("register existing endpoint from different user", func() {
-						userEndpoint2 := setupMockEndpointRegisterRequest(t, mockUser2.ConnectedUser, mockV2Info, "CF Cluster 2", false, false)
+						// userEndpoint2 simulates a pre-existing registration by a different
+						// user with the same URL; production no longer checks for it.
+						_ = setupMockEndpointRegisterRequest(t, mockUser2.ConnectedUser, mockV2Info, "CF Cluster 2", false, false)
 
 						// mock executions
 						mockStratosAuth.
@@ -642,9 +583,7 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							GetUser(gomock.Eq(mockUser1.ConnectedUser.GUID)).
 							Return(mockUser1.ConnectedUser, nil)
 
-						rows := testutils.GetEmptyCNSIRows().AddRow(userEndpoint2.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
-
+						// Production no longer SELECTs for duplicates before INSERT (9a0207f16d).
 						mock.ExpectExec(insertIntoCNSIs).
 							WithArgs(userEndpoint.InsertArgs...).
 							WillReturnResult(sqlmock.NewResult(1, 1))
@@ -660,63 +599,15 @@ func TestRegisterWithUserEndpointsEnabled(t *testing.T) {
 							So(dberr, ShouldBeNil)
 						})
 					})
-					Convey("register existing endpoint from same user", func() {
-						// mock executions
-						mockStratosAuth.
-							EXPECT().
-							GetUser(gomock.Eq(mockUser1.ConnectedUser.GUID)).
-							Return(mockUser1.ConnectedUser, nil)
-
-						rows := testutils.GetEmptyCNSIRows().AddRow(userEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
-
-						err := pp.RegisterEndpoint(userEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
-						dberr := mock.ExpectationsWereMet()
-
-						Convey("should fail ", func() {
-							So(err, ShouldResemble, api.NewHTTPShadowError(
-								http.StatusBadRequest,
-								"Can not register same endpoint multiple times",
-								"Can not register same endpoint multiple times",
-							))
-						})
-
-						Convey("there should be no db error", func() {
-							So(dberr, ShouldBeNil)
-						})
-					})
+					// Removed sub-case "register existing endpoint from same user" (user+system
+					// enabled): production no longer rejects duplicate registrations
+					// (9a0207f16d).
 				})
 				Convey("with createSystemEndpoint disabled", func() {
-					userEndpoint := setupMockEndpointRegisterRequest(t, mockUser1.ConnectedUser, mockV2Info, "CF Cluster 1", false, false)
-
-					if errSession := pp.setSessionValues(userEndpoint.EchoContext, mockUser1.SessionValues); errSession != nil {
-						t.Error(errors.New("unable to mock/stub user in session object"))
-					}
-					Convey("register existing endpoint from same user", func() {
-						// mock executions
-						mockStratosAuth.
-							EXPECT().
-							GetUser(gomock.Eq(mockUser1.ConnectedUser.GUID)).
-							Return(mockUser1.ConnectedUser, nil)
-
-						rows := testutils.GetEmptyCNSIRows().AddRow(userEndpoint.QueryArgs...)
-						mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockV2Info.URL).WillReturnRows(rows)
-
-						err := pp.RegisterEndpoint(userEndpoint.EchoContext, getCFPlugin(pp, "cf").Info)
-						dberr := mock.ExpectationsWereMet()
-
-						Convey("should fail ", func() {
-							So(err, ShouldResemble, api.NewHTTPShadowError(
-								http.StatusBadRequest,
-								"Can not register same endpoint multiple times",
-								"Can not register same endpoint multiple times",
-							))
-						})
-
-						Convey("there should be no db error", func() {
-							So(dberr, ShouldBeNil)
-						})
-					})
+					// Removed sub-case "register existing endpoint from same user" (user+system
+					// disabled): production no longer rejects duplicate registrations
+					// (9a0207f16d). The wrapping Convey is preserved in case future coverage
+					// for this config branch is added.
 				})
 
 			})
@@ -897,4 +788,54 @@ func TestListCNSIsWithUserEndpointsEnabled(t *testing.T) {
 
 		})
 	})
+}
+
+// Regression for the migrated endpoint-edit flow: the frontend PUTs the
+// endpoint id only in the URL path (POST /pp/v1/endpoints/:id). Before
+// UpdateEndpointParams gained the param:"id" tag, Bind left params.ID
+// empty and every update failed with the shadow 400 "Missing target
+// endpoint" before reaching the endpoint lookup.
+func TestUpdateEndpointBindsPathID(t *testing.T) {
+	t.Parallel()
+
+	req := setupMockReq("POST", "", map[string]string{"name": "renamed"})
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
+
+	ctx.SetParamNames("id")
+	ctx.SetParamValues(mockCNSIGUID)
+
+	err := pp.updateEndpoint(ctx)
+	if err == nil {
+		t.Fatal("expected the endpoint lookup to fail (no DB rows mocked)")
+	}
+	if strings.Contains(err.Error(), "Missing target endpoint") {
+		t.Errorf("update rejected before the lookup — path :id was not bound: %v", err)
+	}
+	// The lookup error names the guid it searched for — proves the path id
+	// travelled through Bind into the handler.
+	if !strings.Contains(err.Error(), mockCNSIGUID) {
+		t.Errorf("expected lookup error to reference the path id %q, got: %v", mockCNSIGUID, err)
+	}
+}
+
+// A body id, when present, still wins over the path id — clients send it to
+// correlate parallel operations and that contract is preserved.
+func TestUpdateEndpointBodyIDOverridesPath(t *testing.T) {
+	t.Parallel()
+
+	req := setupMockReq("POST", "", map[string]string{"id": "body-id", "name": "renamed"})
+	_, _, ctx, _, db, _ := setupHTTPTest(req)
+	defer db.Close()
+
+	ctx.SetParamNames("id")
+	ctx.SetParamValues("path-id")
+
+	params := new(api.UpdateEndpointParams)
+	if err := ctx.Bind(params); err != nil {
+		t.Fatalf("bind failed: %v", err)
+	}
+	if params.ID != "body-id" {
+		t.Errorf("expected body id to override path id, got %q", params.ID)
+	}
 }

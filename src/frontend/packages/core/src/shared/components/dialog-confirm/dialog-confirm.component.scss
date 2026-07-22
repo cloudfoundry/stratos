@@ -1,3 +1,5 @@
+@reference 'tailwindcss';
+
 :host {
   display: block;
   // Remove padding - let Angular Material dialog handle it

@@ -1,10 +1,12 @@
 import { DatePipe } from '@angular/common';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory, EntityCatalogHelper } from '@stratosui/store';
-import { ApplicationEnvVarsHelper, ServiceActionHelperService, ApplicationStateService } from '@stratosui/cloud-foundry';
+import { EntityCatalogHelper } from '@stratosui/store';
+import { ApplicationEnvVarsHelper, ApplicationStateService } from '@stratosui/cloud-foundry';
 import { generateTestApplicationServiceProvider } from '@test-framework/cf';
 import { CoreModule, ConfirmationDialogService } from '@stratosui/core';
 import { AppTestModule } from '@test-framework';
@@ -27,17 +29,15 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         AppAutoscalerComboSeriesVerticalComponent,
       ],
       providers: [
-        EntityServiceFactory,
-        EntityMonitorFactory,
         EntityCatalogHelper,
         generateTestApplicationServiceProvider('1', '1'),
         ApplicationEnvVarsHelper,
         ApplicationStateService,
-        PaginationMonitorFactory,
         ConfirmationDialogService,
         DatePipe,
-        ServiceActionHelperService,
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     }).compileComponents();
   });

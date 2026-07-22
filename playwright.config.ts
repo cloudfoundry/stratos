@@ -6,6 +6,13 @@ if (!process.env.E2E_PROFILE) {
   process.env.E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
 }
 
+// Anchor timestamp for backend fresh-vs-reused detection (see global-setup.ts).
+// Captured here because this module evaluates before Playwright starts (or
+// skips starting, per reuseExistingServer) the webServer processes below.
+if (!process.env.E2E_RUN_START) {
+  process.env.E2E_RUN_START = String(Date.now());
+}
+
 // Test environment ports (separate from dev to avoid conflicts)
 const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
 const FRONTEND_PORT = process.env.FRONTEND_PORT || '5540';
@@ -70,6 +77,14 @@ export default defineConfig({
   // SSO login fixtures can take 15-20s each (headless browser OAuth flow)
   timeout: 90000,
 
+  // Run-level backstop: caps total wall-clock time for the whole test run,
+  // independent of any single test's timeout. The full 3-browser suite
+  // legitimately runs ~4h, and future tiers must fit under this ceiling
+  // too, so 6h leaves headroom without masking a genuinely stuck run
+  // (e.g. a hung fixture whose per-test timeout is itself defeated, as
+  // measured in the 32.5-minute teardown hang this backstop guards against).
+  globalTimeout: 6 * 60 * 60 * 1000,
+
   // Report test environment status before tests start
   globalSetup: './e2e/global-setup.ts',
 
@@ -87,6 +102,17 @@ export default defineConfig({
       name: 'setup',
       testDir: './e2e',
       testMatch: /auth\.setup\.ts/,
+      // Not fully parallel: 'authenticate as admin' and 'authenticate as
+      // user' both call registerDefaultCloudFoundry(), whose idempotence
+      // check is check-then-act (GET-then-POST, see
+      // endpoint-management.helper.ts) — on a cold DB, two workers running
+      // this project concurrently can both observe "not registered" and
+      // both POST, duplicating the CF endpoint registration and breaking
+      // every list page with "Request failed". Deliberately NOT
+      // `mode: 'serial'`: serial would abort the user-setup test entirely
+      // if admin-setup fails, whereas non-parallel here just forces the
+      // two tests onto one worker so they run one at a time, in file order.
+      fullyParallel: false,
       use: { storageState: undefined },
     },
     {
@@ -138,11 +164,20 @@ export default defineConfig({
   ...(process.env.E2E_BASE_URL ? {} : {
     webServer: [
       {
-        command: `cd src/jetstream && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SESSION_STORE_EXPIRY=120 ../../dist/bin/jetstream`,
+        // Isolate the e2e database: jetstream runs from src/jetstream, where the
+        // dev stack's config.properties sets SQLITE_KEEP_DB=true — without an
+        // override the e2e server SHARES the dev sqlite and each auth.setup
+        // registers a duplicate endpoint into it (stale duplicates then fail
+        // every list page with "Request failed"). A fresh dedicated file per
+        // run keeps e2e deterministic and leaves the dev database alone.
+        command: `cd src/jetstream && mkdir -p ../../dist/e2e-db && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SQLITE_DB_DIR=../../dist/e2e-db SQLITE_KEEP_DB=false ../../dist/bin/jetstream`,
         url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
         reuseExistingServer: true,
         ignoreHTTPSErrors: true,
         timeout: 30000,
+        env: {
+          SESSION_STORE_EXPIRY: '360',
+        },
       },
       {
         command: `STRATOS_E2E=e2e:${BACKEND_PORT} BACKEND_PORT=${BACKEND_PORT} bun run ng serve --port ${FRONTEND_PORT} --proxy-config proxy.conf.cjs`,

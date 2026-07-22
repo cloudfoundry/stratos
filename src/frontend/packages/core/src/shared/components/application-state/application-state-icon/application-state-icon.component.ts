@@ -7,7 +7,6 @@ import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 @Component({
   selector: 'app-application-state-icon',
   templateUrl: './application-state-icon.component.html',
-  styleUrls: ['./application-state-icon.component.scss'],
   standalone: true,
   imports: [
     NgClass,
@@ -18,6 +17,7 @@ import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 })
 export class ApplicationStateIconComponent {
 
-  @Input() public status!: StratosStatus;
+  // Accepts null so callers can bind `status$ | async` directly
+  @Input() public status!: StratosStatus | null;
 
 }

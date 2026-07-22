@@ -6,7 +6,7 @@ import { CustomTooltipDirective } from '../../../../shared/components/custom-too
 import { FormsModule } from '@angular/forms';
 import { entityCatalog, EndpointModel, SystemSharedUserGuid } from '@stratosui/store';
 
-import { TableCellCustom } from '../../../../shared/components/list/list.types';
+import { TableCellCustom } from '../../../../shared/components/signal-list/cell-base';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointConnectionTypes, BackupEndpointTypes } from '../backup-restore.types';
 
@@ -34,6 +34,9 @@ export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel
   userConnectionWarning!: string;
 
   ngOnInit() {
+    if (!this.row.cnsi_type) {
+      return;
+    }
     const epType = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);
     const epEntity = epType.definition;
     this.connectable = !epEntity.unConnectable;

@@ -1,0 +1,23 @@
+@if (broker(); as broker) {
+  <div class="service-broker">
+    @if (config?.mode === 'NAME') {
+      {{ broker.name }}
+    }
+    @if (config?.mode === 'SCOPE') {
+      <div>
+        @if (spaceLink(); as spaceLink) {
+          @if (config?.altScope) {
+            Space
+          } @else {
+            <a [routerLink]="spaceLink.link">{{ spaceLink.name }}</a>
+          }
+        } @else {
+          All Spaces
+        }
+      </div>
+    }
+  </div>
+} @else {
+  -
+}
+<!-- Some CFs will return 403 when requesting a service's broker -->

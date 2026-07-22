@@ -6,16 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 
-import {
-  PaginationMonitorFactory,
-  EntityMonitorFactory,
-  EntityServiceFactory,
-  EntityCatalogTestModule,
-  TEST_CATALOGUE_ENTITIES,
-  generateStratosEntities,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreModule } from '@stratosui/core';
 import { getGitHubAPIURL, GITHUB_API_URL } from '@stratosui/git';
@@ -60,9 +51,6 @@ describe('CreateApplicationComponent', () => {
           }
         },
         CfOrgSpaceDataService,
-        PaginationMonitorFactory,
-        EntityMonitorFactory,
-        EntityServiceFactory,
         { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL }
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]

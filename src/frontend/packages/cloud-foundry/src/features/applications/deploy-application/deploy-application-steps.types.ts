@@ -1,14 +1,16 @@
-import { Injectable, inject } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, Injector, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
 
 import { PermissionConfig, CurrentUserPermissionsService } from '@stratosui/core';
 import { GitSCM, GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
-import { getFullEndpointApiUrl, stratosEntityCatalog } from '@stratosui/store';
+import { EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 
 import { CFFeatureFlagTypes } from '../../../cf-api.types';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
+import { StFeatureFlagsResponse } from '../../../services/endpoint-data/stratos-types';
 import { SourceType } from '../../../store/types/deploy-application.types';
 import { CfPermissionTypes } from '../../../user-permissions/cf-user-permissions-checkers';
 
@@ -28,6 +30,9 @@ export const AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM = 'auto-select-deploy-endpoi
 export class ApplicationDeploySourceTypes {
   private perms = inject(CurrentUserPermissionsService);
   private scmService = inject(GitSCMService);
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
+  private http = inject(HttpClient);
 
 
   private baseTypes: SourceType[] = [
@@ -88,11 +93,16 @@ export class ApplicationDeploySourceTypes {
 
   constructor() {
     const scms: { [deployId: string]: GitSCM; } = {
-      [DEPLOY_TYPES_IDS.GITHUB]: this.scmService.getSCM('github', null),
-      [DEPLOY_TYPES_IDS.GITLAB]: this.scmService.getSCM('gitlab', null)
+      // No endpoint guid for the public github.com/gitlab.com SCM; getSCM's
+      // getEndpoint() treats falsy guid as "no endpoint", and the empty-string
+      // sentinel matches the existing convention used elsewhere (step2 line ~354).
+      [DEPLOY_TYPES_IDS.GITHUB]: this.scmService.getSCM('github', ''),
+      [DEPLOY_TYPES_IDS.GITLAB]: this.scmService.getSCM('gitlab', '')
     };
 
-    this.types$ = stratosEntityCatalog.endpoint.store.getAll.getPaginationService().entities$.pipe(
+    // W36-B Wave 3: source endpoints from EndpointsDataService signal
+    // bridge instead of legacy ngrx PaginationService.
+    this.types$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
       filter(e => !!e),
       map(endpoints => {
         const newTypes: SourceType[] = [];
@@ -152,10 +162,10 @@ export class ApplicationDeploySourceTypes {
     );
   }
 
-  getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType> {
+  getAutoSelectedType(activatedRoute: ActivatedRoute): Observable<SourceType | undefined> {
     const typeId = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM];
     if (!typeId) {
-      return of(null);
+      return of(undefined);
     }
     const endpointGuid = activatedRoute.snapshot.queryParams[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM];
     return this.types$.pipe(map(types => types.find(source => source.id === typeId && source.endpointGuid === endpointGuid)));
@@ -166,10 +176,8 @@ export class ApplicationDeploySourceTypes {
       // We don't want to return until we have a trusted response (there's a `startsWith(false)` in the `.can`), otherwise we return false
       // then, if different, send the actual response (this leads to flashing misleading info in ux)
       // So fetch the feature flags for the cf, which is the blocker, first before checking if we `.can`
-      const fetchedFeatureFlags$ = cfEntityCatalog.featureFlag.store.getPaginationService(cfId).entities$.pipe(
-        map(entities => !!entities),
-        filter(hasEntities => hasEntities),
-        take(1),
+      const fetchedFeatureFlags$ = this.http.get<StFeatureFlagsResponse>(`/pp/v1/cf/feature_flags/${cfId}`).pipe(
+        map(resp => !!resp),
         publishReplay(1),
         refCount(),
       );

@@ -17,13 +17,13 @@
   </button>
   <app-polling-indicator class="ml-auto"
     [manualPoll]="(cfSpaceService.loadingApps$ | async) === false"
-    [isPolling]="(cfSpaceService.loadingApps$ | async)"
+    [isPolling]="(cfSpaceService.loadingApps$ | async) ?? false"
     (poll)="cfSpaceService.fetchApps()">
   </app-polling-indicator>
 </app-page-sub-nav>
 
 <div>
-  <app-tile-grid fit="true">
+  <app-tile-grid [fit]="true">
     <app-tile-group class="tile-group-1-cols">
       <app-tile>
         <app-card-cf-space-details>
@@ -38,19 +38,19 @@
             icon="apps" label="Applications" labelSingular="Application" value="{{ cfSpaceService.appCount$ | async }}">
           </app-card-number-metric>
         </app-tile>
-        @if (cfEndpointService.appsPagObs.hasEntities$ | async) {
+        @if (cfEndpointService.hasApps$ | async) {
           <app-tile>
             <app-card-number-metric icon="application_instance" iconFont="stratos-icons" label="App Instances"
               value="{{ (cfSpaceService.appInstances$ | async) }}"
-            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.app_instance_limit}}"></app-card-number-metric>
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalInstances}}"></app-card-number-metric>
           </app-tile>
         }
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/routes"
             iconFont="stratos-icons" icon="route" label="Routes"
-            value="{{ (cfSpaceService.routes$ | async)?.length }}"
-          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_routes}}"></app-card-number-metric>
+            value="{{ (cfSpaceService.routesCount$ | async) }}"
+          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalRoutes}}"></app-card-number-metric>
         </app-tile>
       </app-tile-group>
 
@@ -65,20 +65,20 @@
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/service-instances"
             iconFont="stratos-icons" icon="service" label="Service Instances"
-            value="{{ (cfSpaceService.serviceInstancesCount$ | async)}}"
-          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.total_services }}"></app-card-number-metric>
+            value="{{ cfSpaceService.serviceInstancesCount() }}"
+          limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalServiceInstances }}"></app-card-number-metric>
         </app-tile>
-        @if ((cfSpaceService.userProvidedServiceInstancesCount$ | async) > 0) {
+        @if (((cfSpaceService.userProvidedServiceInstancesCount$ | async) ?? 0) > 0) {
           <app-tile>
             <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
             value="{{ (cfSpaceService.userProvidedServiceInstancesCount$ | async)}}"></app-card-number-metric>
           </app-tile>
         }
-        @if (cfEndpointService.appsPagObs.hasEntities$ | async) {
+        @if (cfEndpointService.hasApps$ | async) {
           <app-tile>
             <app-card-number-metric icon="memory" label="Memory Usage" units="mb"
               value="{{ (cfSpaceService.totalMem$ | async) }}"
-            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.memory_limit }}"></app-card-number-metric>
+            limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalMemoryInMB }}"></app-card-number-metric>
           </app-tile>
         }
       </app-tile-group>

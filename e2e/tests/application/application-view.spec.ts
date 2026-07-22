@@ -1,7 +1,46 @@
+import { Locator, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test-base';
 import { ApplicationsPage } from '../../pages/application/applications-list.page';
 import { ApplicationPageSummary } from '../../pages/application/application.page';
+import { ListTableComponent } from '../../components/list.component';
+import { CFApiHelper } from '../../helpers/cf-api.helper';
+import { TestApp } from '../../helpers/application-test.helper';
 import { createCustomName } from '../../helpers/test-utils';
+
+/**
+ * Seed a bound user-provided service instance, run the assertion against its
+ * card in the services list, and always clean up the binding and instance.
+ */
+async function withBoundService(
+  page: Page,
+  testApp: TestApp,
+  cfApi: CFApiHelper,
+  namePrefix: string,
+  assertion: (card: Locator, serviceName: string) => Promise<void>,
+): Promise<void> {
+  const serviceName = createCustomName(namePrefix);
+  const serviceGuid = await cfApi.createUserProvidedService(testApp.spaceGuid, serviceName);
+  let bindingGuid: string | undefined;
+  try {
+    bindingGuid = await cfApi.bindService(testApp.app.guid, serviceGuid);
+
+    const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+    await appSummary.navigateTo();
+    await appSummary.goToServicesTab();
+
+    // The services list defaults to card view; a just-created binding can lag
+    // the polled list, so give the card a generous wait.
+    const card = page.locator('app-services-tab app-signal-list [data-test="card"]')
+      .filter({ hasText: serviceName }).first();
+    await card.waitFor({ state: 'visible', timeout: 30000 });
+    await assertion(card, serviceName);
+  } finally {
+    if (bindingGuid) {
+      await cfApi.unbindService(bindingGuid).catch(() => {});
+    }
+    await cfApi.deleteServiceInstance(serviceGuid).catch(() => {});
+  }
+}
 
 /**
  * Application View E2E Tests
@@ -14,8 +53,6 @@ import { createCustomName } from '../../helpers/test-utils';
  * - ✅ ApplicationTestHelper for navigation
  * - ✅ ApplicationPageSummary page object for tab navigation
  */
-
-const testAppName = createCustomName('test-app-view');
 
 test.describe('Application View', () => {
 
@@ -257,37 +294,12 @@ test.describe('Application View', () => {
         expect(isVisible).toBeTruthy();
       });
 
-      test('should allow SSH to instance (if enabled)', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
-
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToInstancesTab();
-        await page.waitForTimeout(1500);
-
-        // Look for SSH button or SSH indicator
-        const sshButton = page.locator('button, mat-icon').filter({ hasText: /ssh|terminal/i }).first();
-        const sshExists = await sshButton.count() > 0;
-
-        // SSH might not be enabled - just verify the tab structure allows for it
-        // For stopped apps, SSH wouldn't be available anyway
-        expect(sshExists !== undefined).toBeTruthy();
+      test('should allow SSH to instance (if enabled)', async () => {
+        test.skip(true, 'SSH requires a running instance; the API-created test app has no bits and stays STOPPED.');
       });
 
-      test('should show instance logs', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
-
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToInstancesTab();
-        await page.waitForTimeout(1500);
-
-        // Look for logs button or link per instance
-        const logsButton = page.locator('button, a').filter({ hasText: /logs|view logs/i }).first();
-        const logsExists = await logsButton.count() > 0;
-
-        // Logs access should be available (button, link, or in action menu)
-        expect(logsExists !== undefined).toBeTruthy();
+      test('should show instance logs', async () => {
+        test.skip(true, 'Per-instance logs require a running instance; app-level logs are covered by the Log Stream tab.');
       });
     });
 
@@ -376,52 +388,18 @@ test.describe('Application View', () => {
         expect(isVisible).toBeTruthy();
       });
 
-      test('should auto-scroll with new logs', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
-
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToLogStreamTab();
-        await page.waitForTimeout(1000);
-
-        // Look for auto-scroll toggle or option
-        const autoScrollToggle = page.locator('input[type="checkbox"], mat-slide-toggle').filter({ hasText: /auto.*scroll|scroll/i }).first();
-        const toggleExists = await autoScrollToggle.count() > 0;
-
-        // Auto-scroll control should exist (or be default behavior)
-        expect(toggleExists !== undefined).toBeTruthy();
+      test('should auto-scroll with new logs', async () => {
+        // The modern log viewer auto-scrolls by default (a "Scroll to Bottom"
+        // escape button appears only once the user scrolls up through content).
+        test.skip(true, 'Verifying auto-scroll needs flowing logs, which requires a running app; the API-created test app has no bits and stays STOPPED.');
       });
 
-      test('should allow filtering by log level', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
-
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToLogStreamTab();
-        await page.waitForTimeout(1000);
-
-        // Look for filter controls
-        const filterControl = page.locator('input[type="text"], mat-select, select').filter({ hasText: /filter|level/i }).first();
-        const filterExists = await filterControl.count() > 0;
-
-        // Filter controls might exist for log filtering
-        expect(filterExists !== undefined).toBeTruthy();
+      test('should allow filtering by log level', async () => {
+        test.skip(true, 'The modern log viewer (app-log-viewer) has no log-level filter UI; the legacy Material filter was not carried over.');
       });
 
-      test('should support log download', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
-
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToLogStreamTab();
-        await page.waitForTimeout(1000);
-
-        // Look for download button
-        const downloadButton = page.locator('button, a').filter({ hasText: /download|export|save/i }).first();
-        const downloadExists = await downloadButton.count() > 0;
-
-        // Download functionality might be available
-        expect(downloadExists !== undefined).toBeTruthy();
+      test('should support log download', async () => {
+        test.skip(true, 'The modern log viewer (app-log-viewer) has no download control; the legacy download feature was not carried over.');
       });
     });
 
@@ -453,39 +431,61 @@ test.describe('Application View', () => {
       });
 
       test('should allow unbinding service', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
+        const { page, testApp, cfApi } = withTestApp;
 
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToServicesTab();
-        await page.waitForTimeout(1500);
+        // Seed a real binding: user-provided service instances need no broker.
+        const serviceName = createCustomName('e2e-view-unbind');
+        const serviceGuid = await cfApi.createUserProvidedService(testApp.spaceGuid, serviceName);
+        let bindingGuid: string | undefined;
+        try {
+          bindingGuid = await cfApi.bindService(testApp.app.guid, serviceGuid);
 
-        // Look for unbind action (might not be visible if no services bound)
-        const unbindButton = page.locator('button, mat-icon').filter({ hasText: /unbind|remove|detach/i }).first();
-        const unbindExists = await unbindButton.count() > 0;
+          const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+          await appSummary.navigateTo();
+          await appSummary.goToServicesTab();
 
-        // Unbind action structure should exist (even if disabled)
-        expect(unbindExists !== undefined).toBeTruthy();
+          // The services list defaults to card view; each card carries the
+          // same row-actions kebab as a table row. Unbind lives behind it.
+          const card = page.locator('app-services-tab app-signal-list [data-test="card"]')
+            .filter({ hasText: serviceName }).first();
+          await card.waitFor({ state: 'visible', timeout: 30000 });
+          const list = new ListTableComponent(page, page.locator('app-services-tab app-signal-list'));
+          const menu = await list.openRowActionMenuByRow(card);
+          await expect(menu.getItem('Unbind')).toBeVisible();
+        } finally {
+          if (bindingGuid) {
+            await cfApi.unbindService(bindingGuid).catch(() => {});
+          }
+          await cfApi.deleteServiceInstance(serviceGuid).catch(() => {});
+        }
       });
 
       test('should show service details', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
+        const { page, testApp, cfApi } = withTestApp;
 
-        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
-        await appSummary.navigateTo();
-        await appSummary.goToServicesTab();
-        await page.waitForTimeout(1500);
+        // Seed a real binding so the list has a row to show details for.
+        const serviceName = createCustomName('e2e-view-details');
+        const serviceGuid = await cfApi.createUserProvidedService(testApp.spaceGuid, serviceName);
+        let bindingGuid: string | undefined;
+        try {
+          bindingGuid = await cfApi.bindService(testApp.app.guid, serviceGuid);
 
-        // Services list should show details or links to details
-        const servicesList = page.locator('app-list, mat-table').first();
-        await expect(servicesList).toBeVisible({ timeout: 10000 });
+          const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+          await appSummary.navigateTo();
+          await appSummary.goToServicesTab();
 
-        // Service details might be shown in list or via click
-        const detailsLink = page.locator('a, button').filter({ hasText: /details|view|info/i }).first();
-        const detailsExists = await detailsLink.count() > 0;
-
-        // Details access should be available
-        expect(detailsExists !== undefined).toBeTruthy();
+          // The services card IS the details surface: it must show the bound
+          // instance by name and its service type.
+          const card = page.locator('app-services-tab app-signal-list [data-test="card"]')
+            .filter({ hasText: serviceName }).first();
+          await card.waitFor({ state: 'visible', timeout: 30000 });
+          await expect(card.getByText('User Provided')).toBeVisible();
+        } finally {
+          if (bindingGuid) {
+            await cfApi.unbindService(bindingGuid).catch(() => {});
+          }
+          await cfApi.deleteServiceInstance(serviceGuid).catch(() => {});
+        }
       });
     });
 
@@ -520,35 +520,37 @@ test.describe('Application View', () => {
       });
 
       test('should allow editing variable', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
+        const { page, testApp, cfApi } = withTestApp;
+
+        // Seed a variable so the list has a row with actions.
+        await cfApi.updateAppEnvironment(testApp.app.guid, { E2E_EDIT_VAR: 'before' });
 
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToVariablesTab();
-        await page.waitForTimeout(1500);
 
-        // Look for edit action
-        const editButton = page.locator('button, mat-icon').filter({ hasText: /edit|modify|change/i }).first();
-        const editExists = await editButton.count() > 0;
-
-        // Edit functionality structure should exist
-        expect(editExists !== undefined).toBeTruthy();
+        // Edit is a per-row action behind the signal-list row-actions kebab.
+        const list = new ListTableComponent(page, page.locator('app-variables-tab app-signal-list'));
+        const row = await list.findRowByCellContent('E2E_EDIT_VAR');
+        const menu = await list.openRowActionMenuByRow(row);
+        await expect(menu.getItem('Edit')).toBeVisible();
       });
 
       test('should allow deleting variable', async ({ withTestApp }) => {
-        const { page, testApp } = withTestApp;
+        const { page, testApp, cfApi } = withTestApp;
+
+        // Seed a variable so the list has a row with actions.
+        await cfApi.updateAppEnvironment(testApp.app.guid, { E2E_DELETE_VAR: 'gone' });
 
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToVariablesTab();
-        await page.waitForTimeout(1500);
 
-        // Look for delete action
-        const deleteButton = page.locator('button, mat-icon').filter({ hasText: /delete|remove/i }).first();
-        const deleteExists = await deleteButton.count() > 0;
-
-        // Delete functionality structure should exist
-        expect(deleteExists !== undefined).toBeTruthy();
+        // Delete is a per-row action behind the signal-list row-actions kebab.
+        const list = new ListTableComponent(page, page.locator('app-variables-tab app-signal-list'));
+        const row = await list.findRowByCellContent('E2E_DELETE_VAR');
+        const menu = await list.openRowActionMenuByRow(row);
+        await expect(menu.getItem('Delete')).toBeVisible();
       });
     });
 
@@ -604,14 +606,9 @@ test.describe('Application View', () => {
         const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
         await appSummary.navigateTo();
         await appSummary.goToEventsTab();
-        await page.waitForTimeout(1000);
 
-        // Look for filter controls
-        const filterControl = page.locator('input[type="text"], mat-select, select, [placeholder*="filter"]').first();
-        const filterExists = await filterControl.count() > 0;
-
-        // Filter functionality might exist
-        expect(filterExists !== undefined).toBeTruthy();
+        // The events signal-list exposes a name filter input.
+        await expect(page.locator('app-events-tab [data-test="name-filter"]')).toBeVisible({ timeout: 10000 });
       });
     });
 

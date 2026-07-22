@@ -16,7 +16,7 @@
 
   <app-loading-page [isLoading]="isLoading$" [text]="'Retrieving Kubernetes details'">
     @if (endpointDetails$ | async; as details) {
-      <app-entity-summary-title [imagePath]="details.imagePath"
+      <app-entity-summary-title [imagePath]="details.imagePath ?? null"
         [title]="details.name" [subTitle]="details.label">
         <app-tile-grid class="max-w-[350px]">
           <app-tile-group class="tile-group-3-cols">
@@ -55,10 +55,6 @@
                     <button class="btn btn-primary leading-normal m-0 min-w-0 p-0"
                     (click)="configureDashboard()">Configure</button>
                   }
-                  @if ((kubeEndpointService.kubeDashboardStatus$ | async) === false) {
-                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-primary-500">
-                    </div>
-                  }
                 </div>
               </app-metadata-item>
             </div>
@@ -71,7 +67,7 @@
               <app-metadata-item label="CaaSP Version">
                 <div class="caasp-version">
                   <div>{{ data.version }}</div>@if (data.versionMismatch) {
-                  <span class="material-icons text-warning-600" title="Nodes report multiple versions">warning</span>
+                  <span class="material-icons text-warning-shade-600" title="Nodes report multiple versions">warning</span>
                 }
               </div>
             </app-metadata-item>
@@ -94,46 +90,58 @@
       <div class="m-2.5">
         <div>
           <div class="inline-block pr-5 pb-5 w-[250px]">
-            <div class="card">
-              <app-simple-usage-chart chartTitle="Pod Usage" [data]="podCapacity$ | async" height="{{chartHeight}}">
-              </app-simple-usage-chart>
-            </div>
-          </div>
-          <div class="inline-block pr-5 pb-5 w-[250px]">
-            <div class="card">
-              <app-simple-usage-chart [thresholds]="pressureChartThresholds" chartTitle="Nodes With Disk Pressure"
-                [data]="diskPressure$ | async" height="{{chartHeight}}">
-              </app-simple-usage-chart>
-            </div>
-          </div>
-          <div class="inline-block pr-5 pb-5 w-[250px]">
-            <div class="card">
-              <app-simple-usage-chart [thresholds]="pressureChartThresholds" chartTitle="Nodes With Memory Pressure"
-                [data]="memoryPressure$ | async" height="{{chartHeight}}">
-              </app-simple-usage-chart>
-            </div>
-          </div>
-          <div class="inline-block pr-5 pb-5 w-[250px]">
-            <div class="card">
-              <app-simple-usage-chart chartTitle="Nodes Out Of Disk" [thresholds]="criticalPressureChartThresholds"
-                [data]="outOfDisk$ | async" height="{{chartHeight}}">
-              </app-simple-usage-chart>
-            </div>
-          </div>
-          <div class="inline-block pr-5 pb-5 w-[250px]">
-            <div class="card">
-              <app-simple-usage-chart [thresholds]="nominalPressureChartThresholds" chartTitle="Nodes Ready"
-                [data]="nodesReady$ | async" height="{{chartHeight}}">
-              </app-simple-usage-chart>
-            </div>
-          </div>
-          <div class="inline-block pr-5 pb-5 w-[250px]">
-            @if ((networkUnavailable$ | async)?.supported) {
+            @if (podCapacity$ | async; as podCapacity) {
               <div class="card">
-                <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
-                  chartTitle="Nodes With Network Available" [data]="networkUnavailable$ | async" height="{{chartHeight}}">
+                <app-simple-usage-chart chartTitle="Pod Usage" [data]="podCapacity" height="{{chartHeight}}">
                 </app-simple-usage-chart>
               </div>
+            }
+          </div>
+          <div class="inline-block pr-5 pb-5 w-[250px]">
+            @if (diskPressure$ | async; as diskPressure) {
+              <div class="card">
+                <app-simple-usage-chart [thresholds]="pressureChartThresholds" chartTitle="Nodes With Disk Pressure"
+                  [data]="diskPressure" height="{{chartHeight}}">
+                </app-simple-usage-chart>
+              </div>
+            }
+          </div>
+          <div class="inline-block pr-5 pb-5 w-[250px]">
+            @if (memoryPressure$ | async; as memoryPressure) {
+              <div class="card">
+                <app-simple-usage-chart [thresholds]="pressureChartThresholds" chartTitle="Nodes With Memory Pressure"
+                  [data]="memoryPressure" height="{{chartHeight}}">
+                </app-simple-usage-chart>
+              </div>
+            }
+          </div>
+          <div class="inline-block pr-5 pb-5 w-[250px]">
+            @if (outOfDisk$ | async; as outOfDisk) {
+              <div class="card">
+                <app-simple-usage-chart chartTitle="Nodes Out Of Disk" [thresholds]="criticalPressureChartThresholds"
+                  [data]="outOfDisk" height="{{chartHeight}}">
+                </app-simple-usage-chart>
+              </div>
+            }
+          </div>
+          <div class="inline-block pr-5 pb-5 w-[250px]">
+            @if (nodesReady$ | async; as nodesReady) {
+              <div class="card">
+                <app-simple-usage-chart [thresholds]="nominalPressureChartThresholds" chartTitle="Nodes Ready"
+                  [data]="nodesReady" height="{{chartHeight}}">
+                </app-simple-usage-chart>
+              </div>
+            }
+          </div>
+          <div class="inline-block pr-5 pb-5 w-[250px]">
+            @if (networkUnavailable$ | async; as networkUnavailable) {
+              @if (networkUnavailable.supported) {
+                <div class="card">
+                  <app-simple-usage-chart [thresholds]="criticalPressureChartThresholdsInverted"
+                    chartTitle="Nodes With Network Available" [data]="networkUnavailable" height="{{chartHeight}}">
+                  </app-simple-usage-chart>
+                </div>
+              }
             }
           </div>
         </div>

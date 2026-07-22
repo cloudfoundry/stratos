@@ -153,7 +153,7 @@ test.describe('CF Users List', () => {
 
       // Check if we navigated to a user details page or if a dialog opened
       const urlChanged = page.url().includes('users/') && !page.url().endsWith('/users');
-      const dialog = page.locator('mat-dialog-container, app-user-details');
+      const dialog = page.locator('[role="dialog"], app-user-details');
       const dialogOpened = await dialog.isVisible({ timeout: 2000 }).catch(() => false);
 
       if (!urlChanged && !dialogOpened) {

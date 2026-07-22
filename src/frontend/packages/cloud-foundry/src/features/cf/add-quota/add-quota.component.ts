@@ -10,7 +10,6 @@ import { CreateQuotaStepComponent } from './create-quota-step/create-quota-step.
 @Component({
   selector: 'app-add-quota',
   templateUrl: './add-quota.component.html',
-  styleUrls: ['./add-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
   ],

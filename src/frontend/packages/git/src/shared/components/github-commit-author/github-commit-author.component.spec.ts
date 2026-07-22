@@ -39,7 +39,7 @@ describe('GithubCommitAuthorComponent', () => {
       guid: '',
       scmType: 'github',
       projectName: 'test',
-      endpointGuid: null,
+      endpointGuid: '',
     };
     fixture.detectChanges();
     element = fixture.nativeElement;
@@ -51,23 +51,26 @@ describe('GithubCommitAuthorComponent', () => {
 
   it('should render avatar img', () => {
     const img = element.querySelector('img');
-    expect(img.src).toBe(component.commit.author.avatar_url);
+    // strict: fixture sets a complete author/avatar, so the img and author are present.
+    expect(img!.src).toBe(component.commit.author!.avatar_url);
   });
 
   it('should render author name', () => {
-    expect(element.textContent).toContain(component.commit.commit.author.name);
+    // strict: fixture always sets commit.commit with an author name.
+    expect(element.textContent).toContain(component.commit.commit!.author.name);
   });
 
   it('should render github link', () => {
     const anchor = element.querySelector('a');
-    expect(anchor.href).toBe(component.commit.author.html_url);
+    // strict: fixture sets a complete author, so the anchor and author are present.
+    expect(anchor!.href).toBe(component.commit.author!.html_url);
   });
 
   it('should not render github link / avatar', () => {
     // OnPush change detection requires new object reference and manual check
     component.commit = {
       ...component.commit,
-      author: null,
+      author: undefined,
     };
     // Manually trigger change detection for OnPush strategy
     const cdr = fixture.debugElement.injector.get(ChangeDetectorRef);

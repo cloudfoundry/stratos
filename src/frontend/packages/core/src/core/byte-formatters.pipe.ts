@@ -1,25 +1,26 @@
 import { Pipe, PipeTransform } from '@angular/core';
 
+import { isUnlimited } from './cf-quota.types';
+
 @Pipe({
   name: 'bytesToHumanSize',
   standalone: true
 })
 export class BytesToHumanSize implements PipeTransform {
-  transform(value: string): string {
+  transform(value: string | number): string {
     // Handle null/undefined/empty string
     if (value == null || value === '') {
       return '';
     }
 
-    const bytes = parseInt(value, 10);
+    const bytes = parseInt(String(value), 10);
 
     // Type guard: ensure parsing succeeded
     if (isNaN(bytes)) {
       return '';
     }
 
-    // Special case: unlimited
-    if (bytes === -1) {
+    if (isUnlimited(bytes)) {
       return '∞';
     }
 
@@ -75,8 +76,7 @@ export class MegaBytesToHumanSize implements PipeTransform {
       return '';
     }
 
-    // Special case: unlimited
-    if (mbs === -1) {
+    if (isUnlimited(mbs)) {
       return '∞';
     }
 

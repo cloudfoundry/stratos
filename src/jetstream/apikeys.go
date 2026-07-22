@@ -10,10 +10,11 @@ import (
 )
 
 func (p *portalProxy) checkIfAPIKeysEnabled(userGUID string) error {
-	if p.Config.APIKeysEnabled == config.APIKeysConfigEnum.Disabled {
+	switch p.Config.APIKeysEnabled {
+	case config.APIKeysConfigEnum.Disabled:
 		log.Info("API keys are disabled")
 		return errors.New("API keys are disabled")
-	} else if p.Config.APIKeysEnabled == config.APIKeysConfigEnum.AdminOnly {
+	case config.APIKeysConfigEnum.AdminOnly:
 		user, err := p.StratosAuthService.GetUser(userGUID)
 		if err != nil {
 			return err

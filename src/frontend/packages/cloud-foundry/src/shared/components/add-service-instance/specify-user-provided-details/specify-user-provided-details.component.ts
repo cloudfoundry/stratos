@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
@@ -21,27 +21,27 @@ interface BindExistingInstanceForm {
 
 import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, StepOnNextResult, isValidJsonValidator } from '@stratosui/core';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
-import { Store } from '@ngrx/store';
-import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
-import { take, combineLatest, filter, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
-import { APIResource } from '@stratosui/store';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, from } from 'rxjs';
+import { take, filter, map, publishReplay, refCount, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
-import { CFAppState } from '../../../../cf-app-state';
-import {
-  serviceBindingEntityType,
-  userProvidedServiceInstanceEntityType } from '../../../../cf-entity-types';
-import { createEntityRelationKey } from '../../../../entity-relations/entity-relations.types';
-import {
-  selectCreateServiceInstance } from '../../../../store/selectors/create-service-instance.selectors';
-import { IUserProvidedServiceInstance } from '../../../../cf-api-svc.types';
-import { cfEntityCatalog } from '../../../../cf-entity-catalog';
+import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
-import { AppServiceBindingDataSource } from '../../list/list-types/app-sevice-bindings/app-service-binding-data-source';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
+import { CsiState, CsiStateService } from './../csi-state.service';
 
-const { proxyAPIVersion, cfAPIVersion } = environment;
+// Picker row: a UPS instance plus a flag indicating whether this instance is
+// already bound to the current app. Bound instances render disabled in the
+// dropdown with an " (Already bound)" suffix.
+export interface UpsPickerRow {
+  guid: string | null; // null for already-bound rows so the option is unselectable
+  name: string;
+  alreadyBound: boolean;
+}
+
+const { proxyAPIVersion } = environment;
 @Component({
   selector: 'app-specify-user-provided-details',
   templateUrl: './specify-user-provided-details.component.html',
@@ -52,6 +52,7 @@ const { proxyAPIVersion, cfAPIVersion } = environment;
     CommonModule,
     ReactiveFormsModule,
     FormsModule,
+    AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
     MatLabelComponent,
@@ -65,7 +66,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private route = inject(ActivatedRoute);
   private upsService = inject(CloudFoundryUserProvidedServicesService);
   modeService = inject(CsiModeService);
-  private store = inject<Store<CFAppState>>(Store);
+  // AppDetailDataService is provided per app-detail route, not 'root'. When the
+  // UPS edit dialog is reached from outside the app-detail hierarchy (e.g. the
+  // services wall), it isn't available — the v3 binding refresh becomes a no-op
+  // because there's no in-context bindings view to update.
+  private appDetailData = inject(AppDetailDataService, { optional: true });
+  private csiState = inject(CsiStateService);
+  // toObservable() must run inside an injection context — lift to a class field.
+  private csiState$ = toObservable(this.csiState.state);
 
 
   constructor() {
@@ -188,50 +196,81 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     }
   };
 
-  private serviceInstancesForApplication() {
-    return this.store.select(selectCreateServiceInstance).pipe(
-      filter(p => !!p && !!p.spaceGuid && !!p.cfGuid),
+  private serviceInstancesForApplication(): Observable<UpsPickerRow[] | null> {
+    // "Already bound" detection no longer rides on the legacy
+    // service_instance.service_bindings include chain — Stage 9c migrated
+    // app bindings onto AppDetailDataService.serviceBindings, which the
+    // picker reads as a synchronous signal snapshot. When the picker is
+    // mounted outside the app-detail hierarchy (services-wall create), the
+    // appDetailData injector is null and there is no app to bind to, so
+    // every row stays selectable.
+    return this.csiState$.pipe(
+      filter((p): p is CsiState & { cfGuid: string; spaceGuid: string } =>
+        !!p && !!p.spaceGuid && !!p.cfGuid),
       take(1),
-      switchMap(p => this.upsService.getUserProvidedServices(
-        p.cfGuid,
-        p.spaceGuid,
-        [createEntityRelationKey(userProvidedServiceInstanceEntityType, serviceBindingEntityType)]
-      )),
-      map(upsis => upsis.map(upsi => {
-        const alreadyBound = !!upsi.entity.service_bindings.find(binding => binding.entity.app_guid === this.appId);
-        if (alreadyBound) {
-          const updatedSvc: APIResource<IUserProvidedServiceInstance> = {
-            entity: { ...upsi.entity },
-            metadata: { ...upsi.metadata }
+      switchMap(p => this.upsService.getUserProvidedServices(p.cfGuid, p.spaceGuid)),
+      map(upsis => {
+        const boundSiGuids = this.boundServiceInstanceGuidsForApp();
+        return upsis.map<UpsPickerRow>(upsi => {
+          const alreadyBound = boundSiGuids.has(upsi.guid);
+          return {
+            guid: alreadyBound ? null : upsi.guid,
+            name: alreadyBound ? `${upsi.name} (Already bound)` : upsi.name,
+            alreadyBound,
           };
-          updatedSvc.entity.name += ' (Already bound)';
-          updatedSvc.metadata.guid = null;
-          return updatedSvc;
-        }
-        return upsi;
-      })),
+        });
+      }),
       startWith(null),
       publishReplay(1),
       refCount()
     );
   }
+
+  private boundServiceInstanceGuidsForApp(): Set<string> {
+    const out = new Set<string>();
+    if (!this.appId || !this.appDetailData) {
+      return out;
+    }
+    const bindings = this.appDetailData.serviceBindings();
+    if (!bindings) {
+      return out;
+    }
+    for (const b of bindings) {
+      // type=app bindings carry an app ref; the picker only cares about
+      // bindings to *this* app since UPS-to-other-app bindings remain
+      // selectable for binding to the current app.
+      if (b.type === 'app' && b.app?.guid === this.appId && b.serviceInstance?.guid) {
+        out.add(b.serviceInstance.guid);
+      }
+    }
+    return out;
+  }
+
   private initUpdate(serviceInstanceId: string, endpointId: string) {
     if (this.isUpdate) {
       this.createEditServiceInstance.disable();
       this.upsService.getUserProvidedService(endpointId, serviceInstanceId).pipe(
         take(1),
-        map(entityInfo => entityInfo.entity)
-      ).subscribe(entity => {
+      ).subscribe(si => {
         this.createEditServiceInstance.enable();
-        const serviceEntity = entity;
+        // StServiceInstance summary tier exposes name/syslogDrainUrl/
+        // routeServiceUrl/tags directly. credentials are intentionally
+        // NOT carried on the wire (sensitive — the v3 details/credentials
+        // sub-resource needs a separate call); the form starts the
+        // credentials textarea empty for edit, matching legacy behaviour
+        // where a missing credentials field meant "leave existing
+        // credentials untouched".
+        const credentialsJson = (si as unknown as { credentials?: unknown }).credentials !== undefined
+          ? JSON.stringify((si as unknown as { credentials?: unknown }).credentials)
+          : '';
         this.createEditServiceInstance.setValue({
-          name: serviceEntity.name,
-          syslog_drain_url: serviceEntity.syslog_drain_url,
-          credentials: JSON.stringify(serviceEntity.credentials),
-          route_service_url: serviceEntity.route_service_url,
+          name: si.name,
+          syslog_drain_url: si.syslogDrainUrl ?? '',
+          credentials: credentialsJson,
+          route_service_url: si.routeServiceUrl ?? '',
           tags: []
         });
-        this.tags = this.tagsArrayToChips(serviceEntity.tags);
+        this.tags = this.tagsArrayToChips(si.tags);
         this.originalFormValue = this.getServiceData();
       });
     }
@@ -239,19 +278,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   public getUniqueRequest = (name: string) => {
     const params = new HttpParams()
-      .set('q', 'name:' + name)
-      .append('q', 'space_guid:' + this.spaceGuid);
-    const headers = new HttpHeaders({
-      'x-cap-cnsi-list': this.cfGuid,
-      'x-cap-passthrough': 'true'
-    });
+      .set('return', 'counts')
+      .set('type', 'user-provided')
+      .set('names', name)
+      .set('space_guids', this.spaceGuid);
     return new HttpRequest(
       'GET',
-      `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/user_provided_service_instances`,
-      {
-        headers,
-        params
-      },
+      `/pp/${proxyAPIVersion}/cf/service_instances/${this.cfGuid}`,
+      { params },
     );
   };
 
@@ -269,25 +303,25 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       guid,
       data as IUserProvidedServiceInstanceData,
     ).pipe(
-      combineLatest(this.store.select(selectCreateServiceInstance)),
-      switchMap(([request, state]) => {
-        const success = !request.error;
-        const redirect = !request.error;
-        if (!!state.bindAppGuid && success) {
-          const newGuid = request.response.result[0];
-          return this.createApplicationServiceBinding(newGuid, state);
+      withLatestFrom(this.csiState$),
+      switchMap(([result, state]) => {
+        if (!result.success) {
+          return observableOf({
+            success: false,
+            redirect: false,
+            message: 'Failed to create User Provided Service Instance. Reason: "' + (result.message ?? '') + '"',
+          });
         }
-        return observableOf({
-          success,
-          redirect,
-          message: success ? '' : 'Failed to create User Provided Service Instance. Reason: "' + request.message + '"'
-        });
+        if (state.bindAppGuid && result.guid) {
+          return this.createApplicationServiceBinding(result.guid, state);
+        }
+        return observableOf({ success: true, redirect: true });
       })
     );
   }
 
   private onNextBind(): Observable<StepOnNextResult> {
-    return this.store.select(selectCreateServiceInstance).pipe(
+    return this.csiState$.pipe(
       switchMap(data => this.createApplicationServiceBinding(this.bindExistingInstance.controls.serviceInstances.value, data))
     );
   }
@@ -299,8 +333,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
           if (!req.success) {
             return { success: false, message: `Failed to create service instance binding: ${req.message}` };
           } else {
-            // Refetch env vars for app, since they have been changed by CF
-            cfEntityCatalog.appEnvVar.api.getMultiple(data.bindAppGuid, data.cfGuid);
+            // Bind succeeded — CF mutates VCAP_SERVICES on the app. Refresh
+            // env vars on AppDetailDataService when bind happened from inside
+            // the app-detail route hierarchy (the injector resolved). Outside
+            // that hierarchy the env-vars tab fetches fresh on next mount, so
+            // a no-op here is correct — no need to prime legacy ngrx state.
+            if (this.appDetailData && data.bindAppGuid) {
+              this.appDetailData.refresh('envVars').catch(() => { /* swallow — surface via _errors signal */ });
+            }
             return { success: true, redirect: true };
           }
         })
@@ -314,22 +354,23 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       this.serviceInstanceId,
       updateData
     ).pipe(
-      map(er => {
-        if (!er.error) {
-          // Update the application binding list
-          const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
-          if (appId) {
-            this.store.dispatch(AppServiceBindingDataSource.createGetAllServiceBindings(appId, this.cfGuid));
-          }
-          return {
-            success: true,
-            redirect: true };
+      switchMap(result => {
+        if (!result.success) {
+          return observableOf<StepOnNextResult>({
+            success: false,
+            redirect: false,
+            message: `Failed to update service instance: ${result.message ?? ''}`,
+          });
         }
-        return {
-          success: false,
-          redirect: false,
-          message: `Failed to update service instance: ${er.message}`
-        };
+        // The bound app's denormalized service-instance data (name, tags,
+        // syslog drain url, etc.) is included via ?return=summary on the v3
+        // bindings handler — refreshing pulls in the just-updated UPS shape.
+        // No-op outside the app-detail route hierarchy.
+        const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
+        const refresh = this.appDetailData && appId
+          ? from(this.appDetailData.refresh('serviceBindings'))
+          : observableOf<void>(undefined);
+        return refresh.pipe(map(() => ({ success: true, redirect: true } as StepOnNextResult)));
       })
     );
   }
@@ -356,7 +397,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   }
 
 
-  public addTagFromInput(event: KeyboardEvent): void {
+  // (keydown.*) template events are typed as plain Event by the compiler
+  public addTagFromInput(event: Event): void {
     event.preventDefault();
     const input = event.target as HTMLInputElement;
     const label = (input.value || '').trim();

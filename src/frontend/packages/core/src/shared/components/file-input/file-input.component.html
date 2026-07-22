@@ -1,23 +1,23 @@
-<div class="file-input" [ngClass]="{'file-input__disabled': disabled}">
+<div class="flex flex-col" [class.opacity-50]="disabled" [class.pointer-events-none]="disabled">
   <input [accept]="accept" type="file" (change)="onNativeInputFileSelect($event)" #inputFile hidden />
   @if (!buttonLabel) {
     <div class="form-field file-input__form-field">
       <div class="file-input__field input flex items-center justify-between"
         [class.opacity-50]="disabled"
         [class.cursor-not-allowed]="disabled">
-        <input type="text" class="file-input__input flex-1"
+        <input type="text" class="flex-1 bg-transparent border-none outline-none text-[inherit] font-[inherit] p-0 min-w-0"
           [placeholder]="placeholder || 'No file selected'"
           [value]="name"
           [disabled]="disabled"
           (change)="onPathInput($event)" />
         @if (fileCount) {
-          <button class="file-input__button btn btn-sm btn-secondary ml-1" type="button"
+          <button class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
             [disabled]="disabled" (click)="clearFile($event)"
             title="Clear file">
             <span class="material-icons text-sm">close</span>
           </button>
         }
-        <button class="file-input__button btn btn-sm btn-secondary ml-1" type="button"
+        <button class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
           [disabled]="disabled" (click)="selectFile($event)"
           title="Browse for file">
           <span class="material-icons text-sm">more_horiz</span>

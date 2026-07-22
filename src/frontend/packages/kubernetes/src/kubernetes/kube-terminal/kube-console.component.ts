@@ -45,21 +45,23 @@ import { KubernetesService } from '../services/kubernetes.service';
 })
 export class KubeConsoleComponent implements OnInit {
 
-  public messages: Observable<string>;
+  // strict: the websocket payload is string | ArrayBuffer | Blob (rxjs-websockets
+  // WebSocketPayload, not exported); ssh-viewer consumes it as Observable<any>.
+  public messages!: Observable<string | ArrayBuffer | Blob>; // strict: assigned in both ngOnInit branches
 
   public connectionStatus = new Subject<number>();
 
-  public sshInput: Subject<string>;
+  public sshInput!: Subject<string>; // strict: assigned in ngOnInit when an endpoint guid is available
 
-  public errorMessage: string;
+  public errorMessage?: string;
 
-  public connected: boolean;
+  public connected = false;
 
-  public kubeSummaryLink: string;
+  public kubeSummaryLink!: string; // strict: always assigned in ngOnInit
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>; // strict: assigned in ngOnInit when an endpoint guid is available
 
-  @ViewChild('sshViewer', { static: false }) sshViewer: SshViewerComponent;
+  @ViewChild('sshViewer', { static: false }) sshViewer!: SshViewerComponent; // strict: @ViewChild populated after view init
   public kubeEndpointService = inject(KubernetesEndpointService);
 
   ngOnInit() {
@@ -82,7 +84,7 @@ export class KubeConsoleComponent implements OnInit {
 
       this.messages = connection.pipe(
         tap(() => this.connectionStatus.next(1)),
-        switchMap((getResponse: (input: Subject<string>) => Observable<string>): Observable<string> => getResponse(this.sshInput)),
+        switchMap(getResponse => getResponse(this.sshInput)),
         catchError((e: Error): Observable<never> => {
           if (e.message !== normalClosureMessage && !this.sshViewer.isConnected) {
             this.errorMessage = 'Error launching Kubernetes Terminal';

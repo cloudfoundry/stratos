@@ -72,6 +72,9 @@ func (c *OIDCKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*
 	}
 
 	kubeConfig, err := config.ParseKubeConfig([]byte(body))
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to parse kubeconfig: %v", err)
+	}
 
 	kubeConfigUser, err := kubeConfig.GetUserForCluster(cnsiRecord.APIEndpoint.String())
 

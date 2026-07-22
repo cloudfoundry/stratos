@@ -1,11 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-  EntityServiceFactory,
-  EntityCatalogHelper,
-  EntityCatalogHelpers
-} from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { BaseTestModulesNoShared, STORE_TEST_PROVIDERS, BASE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { PageHeaderService } from '../../../core/page-header-service/page-header.service';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
@@ -30,7 +26,6 @@ describe('DashboardBaseComponent', () => {
         PageSideNavComponent,
       ],
       providers: [
-        EntityServiceFactory,
         PageHeaderService,
         MetricsService,
         TabNavService,

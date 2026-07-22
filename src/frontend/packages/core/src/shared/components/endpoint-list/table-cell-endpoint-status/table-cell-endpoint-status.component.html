@@ -1,0 +1,77 @@
+<div class="flex items-center">
+  @if (connectable) {
+    @if (status === 'connected' ) {
+      @if (config?.showLabel) {
+        <span class="mr-2">Connected @if (row.local) {
+          <span class="mr-2">(local)</span>
+        }</span>
+      }
+      <app-custom-icon fontSet="stratos-icons">endpoints_connected</app-custom-icon>
+    }
+    @if (status === 'disconnected') {
+      @if (config?.showLabel) {
+        <span class="mr-2">Disconnected @if (row.local) {
+          <span class="mr-2">(local)</span>
+        }</span>
+      }
+      <app-custom-icon fontSet="stratos-icons">endpoints_disconnected</app-custom-icon>
+    }
+    @if (status === 'expired') {
+      @if (config?.showLabel) {
+        <span class="mr-2 text-warning-shade-600 dark:text-warning-shade-300">Expired @if (row.local) {
+          <span class="mr-2">(local)</span>
+        }</span>
+      }
+      <!-- No dedicated "expired" glyph exists in the stratos-icons font;
+           reuse endpoints_disconnected rather than add a new font entry. -->
+      <app-custom-icon fontSet="stratos-icons" class="text-warning-shade-600 dark:text-warning-shade-300">endpoints_disconnected</app-custom-icon>
+    }
+    @if (status === 'connecting') {
+      @if (config?.showLabel) {
+        <span class="mr-2">Connecting </span>
+      }
+      <app-spinner [diameter]="20"></app-spinner>
+    }
+    @if (status === 'disconnecting') {
+      @if (config?.showLabel) {
+        <span class="mr-2">Disconnecting </span>
+      }
+      <app-spinner [diameter]="20"></app-spinner>
+    }
+    @if (status === 'unknown') {
+      @if (config?.showLabel) {
+        <span class="mr-2">Unknown </span>
+      }
+      <app-custom-icon>help_outline</app-custom-icon>
+    }
+  } @else {
+    @if (row?.endpoint_metadata?.status; as status) {
+      @if (status === 'Synchronized') {
+        @if (config?.showLabel) {
+          <span class="mr-2">Synchronized </span>
+        }
+        <app-custom-icon>cloud_done</app-custom-icon>
+      }
+      @if (status === 'Synchronizing') {
+        @if (config?.showLabel) {
+          <span class="mr-2">Synchronizing </span>
+        }
+        <app-spinner [diameter]="20"></app-spinner>
+      }
+      @if (status === 'Pending') {
+        @if (config?.showLabel) {
+          <span class="mr-2">Sync Pending</span>
+        }
+        <app-custom-icon>hourglass_empty</app-custom-icon>
+      }
+      @if (status === 'Failed') {
+        @if (config?.showLabel) {
+          <span class="mr-2">Synchronization failed</span>
+        }
+        <app-custom-icon>sync_problem</app-custom-icon>
+      }
+    } @else {
+      -
+    }
+  }
+</div>

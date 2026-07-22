@@ -17,9 +17,10 @@ export class HomePageCardLayout {
 }
 
 export abstract class HomePageEndpointCard {
-  public layout: HomePageCardLayout;
+  // strict: abstract card contract; concrete cards assign these (matches endpoint!)
+  public layout!: HomePageCardLayout;
   public endpoint!: EndpointModel;
-  public load: () => Observable<boolean>;
+  public load!: () => Observable<boolean>;
 }
 
 export interface LinkMetadata {

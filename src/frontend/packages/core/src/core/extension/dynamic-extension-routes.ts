@@ -45,21 +45,26 @@ export const dynamicExtensionRoutesGuard: CanActivateFn = (
 ): Observable<boolean> | Promise<boolean> | boolean => {
   const router = inject(Router);
 
-  const childRoutes = getChildRoutes(route.parent.routeConfig);
+  // strict: this guard is registered on the '**' catch-all child route, so when
+  // it activates the snapshot always has both a parent and a routeConfig.
+  const parent = route.parent!;
+  const routeConfig = route.routeConfig!;
+
+  const childRoutes = getChildRoutes(parent.routeConfig);
   // Remove the last route (which is us, the '**' route)
   let newChildRoutes = childRoutes.splice(0, childRoutes.length - 1);
 
   // Does the parent root have metadata to tell us what route group this is?
   // i.e. are there extension routes we need to try and add?
-  if (route.routeConfig.data && route.routeConfig.data.stratosRouteGroup) {
-    const tabGroup = route.routeConfig.data.stratosRouteGroup;
+  if (routeConfig.data && routeConfig.data.stratosRouteGroup) {
+    const tabGroup = routeConfig.data.stratosRouteGroup;
 
     // Add the missing routes
     const newRoutes = getRoutesFromExtensions(tabGroup as StratosRouteType);
     newChildRoutes = newChildRoutes.concat(newRoutes);
   }
   // Update the route config and navigate again to the same route that was intercepted
-  setChildRoutes(route.parent.routeConfig, newChildRoutes);
+  setChildRoutes(parent.routeConfig, newChildRoutes);
   router.navigateByUrl(state.url);
 
   return false;
@@ -77,16 +82,21 @@ export class DynamicExtensionRoutes {
   ): boolean {
     const router = this.router;
 
-    const childRoutes = getChildRoutes(route.parent.routeConfig);
+    // strict: this guard is registered on the '**' catch-all child route, so when
+    // it activates the snapshot always has both a parent and a routeConfig.
+    const parent = route.parent!;
+    const routeConfig = route.routeConfig!;
+
+    const childRoutes = getChildRoutes(parent.routeConfig);
     let newChildRoutes = childRoutes.splice(0, childRoutes.length - 1);
 
-    if (route.routeConfig.data && route.routeConfig.data.stratosRouteGroup) {
-      const tabGroup = route.routeConfig.data.stratosRouteGroup;
+    if (routeConfig.data && routeConfig.data.stratosRouteGroup) {
+      const tabGroup = routeConfig.data.stratosRouteGroup;
       const newRoutes = getRoutesFromExtensions(tabGroup as StratosRouteType);
       newChildRoutes = newChildRoutes.concat(newRoutes);
     }
 
-    setChildRoutes(route.parent.routeConfig, newChildRoutes);
+    setChildRoutes(parent.routeConfig, newChildRoutes);
     router.navigateByUrl(state.url);
 
     return false;

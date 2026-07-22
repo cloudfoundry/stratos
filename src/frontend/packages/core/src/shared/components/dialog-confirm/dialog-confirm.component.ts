@@ -25,6 +25,9 @@ export class DialogConfirmComponent {
 
   public textToMatch!: string;
 
+  // Bound via ngModel to the type-to-confirm input
+  public matchValue?: string;
+
   constructor() {
     const data = this.data;
 

@@ -120,7 +120,7 @@ func (c *ConsoleConfigRepository) GetValues(group string) (map[string]string, er
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve config records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var values = make(map[string]string)
 
@@ -152,7 +152,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*api.ConsoleConfig, error)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve console config record: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	rowCount := 0
 

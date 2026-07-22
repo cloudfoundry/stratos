@@ -56,6 +56,8 @@ export interface StratosTheme {
     backgroundColor?: string;
     cardBackground?: string;
     customMessage?: string;
+    inputBackground?: string;
+    inputBorder?: string;
   };
 }
 
@@ -103,7 +105,7 @@ export const defaultTheme: StratosTheme = {
   login: {
     showLogo: true,
     showTitle: true,
-    backgroundImage: '/core/assets/login-bg.jpg',
+    backgroundImage: '/core/assets/login-bg.webp',
     backgroundColor: '#f5f5f5',
     cardBackground: '#ffffff',
   },
@@ -153,7 +155,7 @@ export const darkTheme: StratosTheme = {
   login: {
     showLogo: true,
     showTitle: true,
-    backgroundImage: '/core/assets/login-bg.jpg',
+    backgroundImage: '/core/assets/login-bg.webp',
     backgroundColor: '#0f172a',
     cardBackground: '#1e293b',
   },

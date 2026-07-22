@@ -22,6 +22,74 @@ type WorkerFixtures = {
   workerUserContext: BrowserContext;
 };
 
+/**
+ * Race a promise against an explicit deadline so a stuck network call
+ * throws a named error instead of hanging the worker until the test
+ * timeout fires and teardown then waits out TCP-level timeouts on top
+ * of that (measured hang: 32.5 minutes for a single stuck fixture GET).
+ */
+function withDeadline<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error(`E2E_DEADLINE_EXCEEDED: ${label} did not complete within ${ms}ms`)), ms)
+    )
+  ]);
+}
+
+/**
+ * Resolve the connected CF endpoint for a worker's own session, with the
+ * same guards for both the admin and user identities:
+ *   - deadline-bounded GET /api/v1/endpoints (no hung fixture waits)
+ *   - registry-empty guard (an earlier spec cleared the registry)
+ *   - per-identity token guard via GET /pp/v1/info (registry is non-empty,
+ *     but this identity has no connected CNSI token for it)
+ *
+ * `label` distinguishes the two callers in error/deadline messages
+ * (e.g. "connectedEndpointsAdminPage", "connectedEndpointsUserPage").
+ */
+async function resolveConnectedCfEndpoint(page: Page, label: string): Promise<{ guid: string; cnsi_type: string; name: string }> {
+  const response = await withDeadline(page.request.get('/api/v1/endpoints'), 15000, `${label} endpoints GET`);
+  if (!response.ok()) {
+    throw new Error(`GET /api/v1/endpoints failed: ${response.status()} ${response.statusText()} — session may be invalid`);
+  }
+  const endpointsList = await response.json();
+  if (!Array.isArray(endpointsList)) {
+    throw new Error(`GET /api/v1/endpoints returned ${typeof endpointsList} instead of array: ${JSON.stringify(endpointsList).slice(0, 200)}`);
+  }
+  // Guard (a): registry emptied out from under us (e.g. an earlier spec
+  // cleared it and its own restore failed) — every downstream proxy call
+  // would otherwise die with "No CF endpoint found", or worse.
+  if (endpointsList.length === 0) {
+    throw new Error('E2E_ENDPOINT_REGISTRY_EMPTY: no endpoints registered — an earlier spec likely cleared them');
+  }
+  const cfEndpoint = endpointsList.find((ep: any) => ep.cnsi_type === 'cf');
+
+  if (!cfEndpoint) {
+    throw new Error(`No CF endpoint found. Endpoints: ${JSON.stringify(endpointsList.map((e: any) => ({ name: e.name, type: e.cnsi_type }))).slice(0, 200)}`);
+  }
+
+  // Guard (b): registry is non-empty, but does the identity riding this
+  // worker context actually have a connected CF token for it?
+  // /api/v1/endpoints doesn't carry per-identity token state; /pp/v1/info
+  // does (Endpoints[type][guid].user is populated only when a token row
+  // exists for the calling session). Missing token here is exactly the
+  // measured cause of the empty-body 400 at the proxy (passthrough.go
+  // token lookup failure) — surface it loudly instead of letting every
+  // proxied call in the test fail with an unexplained empty 400.
+  const infoResp = await withDeadline(page.request.get('/pp/v1/info'), 15000, `${label} info GET`);
+  if (!infoResp.ok()) {
+    throw new Error(`GET /pp/v1/info failed: ${infoResp.status()} ${infoResp.statusText()} — cannot verify CF token connection`);
+  }
+  const info = await infoResp.json();
+  const connectedDetail = info?.endpoints?.[cfEndpoint.cnsi_type]?.[cfEndpoint.guid];
+  if (!connectedDetail?.user) {
+    throw new Error(`E2E_NO_CF_TOKEN: identity user has no connected CF token for endpoint ${cfEndpoint.name} (${cfEndpoint.guid})`);
+  }
+
+  return cfEndpoint;
+}
+
 type TestFixtures = {
   secrets: ReturnType<typeof SecretsHelper.load>;
   authType: AuthType;
@@ -222,19 +290,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
     // Get CF endpoint GUID using the worker's own session
-    const response = await page.request.get('/api/v1/endpoints');
-    if (!response.ok()) {
-      throw new Error(`GET /api/v1/endpoints failed: ${response.status()} ${response.statusText()} — session may be invalid`);
-    }
-    const endpointsList = await response.json();
-    if (!Array.isArray(endpointsList)) {
-      throw new Error(`GET /api/v1/endpoints returned ${typeof endpointsList} instead of array: ${JSON.stringify(endpointsList).slice(0, 200)}`);
-    }
-    const cfEndpoint = endpointsList.find((ep: any) => ep.cnsi_type === 'cf');
-
-    if (!cfEndpoint) {
-      throw new Error(`No CF endpoint found. Endpoints: ${JSON.stringify(endpointsList.map((e: any) => ({ name: e.name, type: e.cnsi_type }))).slice(0, 200)}`);
-    }
+    const cfEndpoint = await resolveConnectedCfEndpoint(page, 'connectedEndpointsAdminPage');
 
     const cfConfig = secrets.cloudFoundry[0];
 
@@ -258,19 +314,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
 
     // Get CF endpoint GUID using the worker's own session
-    const response = await page.request.get('/api/v1/endpoints');
-    if (!response.ok()) {
-      throw new Error(`GET /api/v1/endpoints failed: ${response.status()} ${response.statusText()} — session may be invalid`);
-    }
-    const endpointsList = await response.json();
-    if (!Array.isArray(endpointsList)) {
-      throw new Error(`GET /api/v1/endpoints returned ${typeof endpointsList} instead of array: ${JSON.stringify(endpointsList).slice(0, 200)}`);
-    }
-    const cfEndpoint = endpointsList.find((ep: any) => ep.cnsi_type === 'cf');
-
-    if (!cfEndpoint) {
-      throw new Error(`No CF endpoint found. Endpoints: ${JSON.stringify(endpointsList.map((e: any) => ({ name: e.name, type: e.cnsi_type }))).slice(0, 200)}`);
-    }
+    const cfEndpoint = await resolveConnectedCfEndpoint(page, 'connectedEndpointsUserPage');
 
     const cfConfig = secrets.cloudFoundry[0];
 
@@ -298,10 +342,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
     // Create request helper with pre-authenticated state
     const request = new RequestHelper(baseURL || 'http://localhost:4200');
-    await request.initFromStorageState(ADMIN_STATE);
+    await withDeadline(request.initFromStorageState(ADMIN_STATE), 15000, 'cfApi initFromStorageState');
 
     // Get registered endpoints
-    const endpointsList = await request.get('/api/v1/endpoints');
+    const endpointsList = await withDeadline(request.get('/api/v1/endpoints'), 15000, 'cfApi endpoints GET');
     const cfEndpoint = endpointsList.find((ep: any) =>
       ep.cnsi_type === 'cf' && ep.api_endpoint?.Host
     );
@@ -316,7 +360,9 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
     await use(cfApi);
 
-    await cfApi.cleanupTestResources();
+    // Do NOT label-sweep here (cleanupTestResources): it deletes ALL
+    // stratos-e2e-test apps on the CF, including a parallel worker's app
+    // that is mid-test. Fixtures delete their own resources by guid.
     await request.dispose();
   },
 

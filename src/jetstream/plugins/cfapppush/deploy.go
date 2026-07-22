@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -16,8 +17,6 @@ import (
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
-
-	archiver "github.com/mholt/archiver/v3"
 )
 
 // Success
@@ -146,6 +145,9 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	if err != nil {
 		log.Errorf("Failed to fetch source: %v+", err)
+		// Tell the client the deploy is over — git getters send their own close
+		// events, but the file/folder path otherwise fails silently
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
 
@@ -211,6 +213,16 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	pushConfig.OutputWriter = socketWriter
 	pushConfig.DialTimeout = dialTimeout
 
+	// Convert any host/domain route override into a `routes:` entry in the
+	// manifest before the push reads it. cf v8 push takes a specific route
+	// only from the manifest (there is no host/domain flag), so this is the
+	// only point at which the wizard's Route fields can take effect.
+	if err = applyRouteOverride(manifestFile, overrides); err != nil {
+		log.Warnf("Failed to apply route override: %s", err)
+		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
+		return err
+	}
+
 	// Initialise Push Command
 	cfPush := Constructor(pushConfig, cfAppPush.portalProxy)
 
@@ -232,6 +244,17 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	log.Debug("Sending message to front-end to indicate push completed")
 	sendEvent(clientWebSocket, EVENT_PUSH_COMPLETED)
+
+	// For a new app the GUID isn't known until the push has created it, so
+	// (unlike the redeploy path above, which notifies up-front) resolve it now
+	// by name in the target space and notify the client — otherwise the UI's
+	// applicationGuid$ stays null and "Go to App Summary" never enables.
+	// Best-effort: a lookup failure must not fail the deploy.
+	if len(appID) == 0 {
+		if guid := cfAppPush.resolvePushedAppGUID(cnsiGUID, userGUID, spaceGUID, overrides, manifest); guid != "" {
+			cfAppPush.SendEvent(clientWebSocket, APP_GUID_NOTIFY, guid)
+		}
+	}
 
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
 
@@ -258,6 +281,17 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	return nil
 }
 
+// safeUploadJoin joins a client-supplied folder or file name onto base,
+// rejecting names that would escape base via traversal or an absolute path.
+// Mirrors the archive-entry guard in unarchive.go for the upload path.
+func safeUploadJoin(base, name string) (string, error) {
+	name = filepath.FromSlash(name)
+	if !filepath.IsLocal(name) {
+		return "", errors.New("upload path escapes the upload directory")
+	}
+	return filepath.Join(base, name), nil
+}
+
 func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
 	// The msg data is JSON for the Folder info
 	info := FolderSourceInfo{
@@ -270,9 +304,11 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 	// Create all of the folders
 	for _, folder := range info.Folders {
-		path := filepath.Join(tempDir, folder)
-		err := os.Mkdir(path, 0700)
+		path, err := safeUploadJoin(tempDir, folder)
 		if err != nil {
+			return StratosProject{}, tempDir, err
+		}
+		if err := os.Mkdir(path, 0700); err != nil {
 			return StratosProject{}, tempDir, errors.New("failed to create folder")
 		}
 	}
@@ -311,7 +347,10 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		}
 
 		// Write the file
-		path := filepath.Join(tempDir, msg.Message)
+		path, joinErr := safeUploadJoin(tempDir, msg.Message)
+		if joinErr != nil {
+			return StratosProject{}, tempDir, joinErr
+		}
 		err = os.WriteFile(path, p, 0644)
 		if err != nil {
 			return StratosProject{}, tempDir, err
@@ -340,7 +379,7 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 			return StratosProject{}, tempDir, err
 		}
 
-		err = archiver.Unarchive(lastFilePath, unpackPath)
+		err = unarchive(lastFilePath, unpackPath)
 		if err != nil {
 			return StratosProject{}, tempDir, err
 		}
@@ -776,4 +815,37 @@ func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event Mes
 	if err := clientWebSocket.WriteMessage(websocket.TextMessage, msg); err != nil {
 		log.Warnf("Failed to write message to web socket: %s", err)
 	}
+}
+
+// resolvePushedAppGUID looks up the GUID of a just-pushed (new) app by its name
+// within the target space. The push name is the override name if supplied,
+// otherwise the manifest's app name. Returns "" on any failure — the caller
+// treats this as best-effort and must not fail the deploy over it.
+func (cfAppPush *CFAppPush) resolvePushedAppGUID(cnsiGUID, userGUID, spaceGUID string, overrides CFPushAppOverrides, manifest Applications) string {
+	appName := overrides.Name
+	if appName == "" && len(manifest.Applications) > 0 {
+		appName = manifest.Applications[0].Name
+	}
+	if appName == "" || spaceGUID == "" {
+		log.Warnf("Cannot resolve pushed app GUID: missing app name or space GUID")
+		return ""
+	}
+
+	requestURL := fmt.Sprintf("/v3/apps?names=%s&space_guids=%s", url.QueryEscape(appName), url.QueryEscape(spaceGUID))
+	res, err := cfAppPush.portalProxy.DoProxySingleRequest(cnsiGUID, userGUID, "GET", requestURL, nil, nil)
+	if err != nil || res == nil || res.StatusCode != http.StatusOK {
+		log.Warnf("Failed to resolve GUID for pushed app %q: %v", appName, err)
+		return ""
+	}
+
+	var list struct {
+		Resources []struct {
+			GUID string `json:"guid"`
+		} `json:"resources"`
+	}
+	if err := json.Unmarshal(res.Response, &list); err != nil || len(list.Resources) == 0 {
+		log.Warnf("Could not find pushed app %q in space %q to notify its GUID", appName, spaceGUID)
+		return ""
+	}
+	return list.Resources[0].GUID
 }

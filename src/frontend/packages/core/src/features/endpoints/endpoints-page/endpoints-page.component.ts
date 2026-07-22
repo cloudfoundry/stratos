@@ -1,14 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
-import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { EndpointOnlyAppState, RouterNav, selectDashboardState, selectSessionData, stratosEntityCatalog, endpointStatusSelector } from '@stratosui/store';
+import { Router, RouterModule } from '@angular/router';
+import {
+  EndpointsDataService,
+} from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { take, delay, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { EndpointStatusSignalService } from '../../../core/signals/endpoint-status-signal.service';
 import {
   getActionsFromExtensions,
   StratosActionMetadata,
@@ -16,25 +21,18 @@ import {
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { EndpointListHelper } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
-import {
-  EndpointsListConfigService } from '../../../shared/components/list/list-types/endpoint/endpoints-list-config.service';
-import { ListConfig } from '../../../shared/components/list/list.component.types';
-import { ListComponent } from '../../../shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
-import { SnackBarService } from '../../../shared/services/snackbar.service';
+import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
+import { EndpointsSignalListComponent } from './endpoints-signal-list.component';
 
 @Component({
   selector: 'app-endpoints-page',
   templateUrl: './endpoints-page.component.html',
-  styleUrls: ['./endpoints-page.component.scss'],
-  providers: [{
-    provide: ListConfig,
-    useClass: EndpointsListConfigService }, EndpointListHelper],
+  host: { class: 'flex flex-col h-full min-h-0' },
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
@@ -42,18 +40,24 @@ import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpo
     RouterModule,
     CustomTooltipDirective,
     PageHeaderComponent,
-    ListComponent,
+    EndpointsSignalListComponent,
     EndpointsMissingComponent,
     EndpointRegisterModalComponent
   ]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
   endpointsService = inject(EndpointsService);
-  store = inject<Store<EndpointOnlyAppState>>(Store);
+  router = inject(Router);
+  private endpointsData = inject(EndpointsDataService);
+  private authSignal = inject(AuthSignalService);
   private ngZone = inject(NgZone);
-  private snackBarService = inject(SnackBarService);
+  private snackBarService = inject(TailwindSnackBarService);
   sessionService = inject(SessionService);
   private endpointModalService = inject(EndpointModalService);
+  private dashboardSignals = inject(DashboardSignalService);
+  private endpointStatusSignals = inject(EndpointStatusSignalService);
+  // Bridge dashboard signal → observable in injection context (field init).
+  private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
 
   // Signal-backed permission flag. The directive-based approach (*appUserPermission
   // + async pipe) was sensitive to CD timing under zoneless Angular 21 — the
@@ -63,12 +67,26 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public canRegisterEndpoint = signal<boolean>(false);
   private healthCheckTimeout!: number;
 
+  /**
+   * Primary "Register Endpoint" action wired to the L5 sub-nav above the
+   * endpoints list. The L5 row lives inside <app-endpoints-signal-list>;
+   * this object is passed via [addAction] so the inner component renders
+   * the button while the outer keeps ownership of the modal lifecycle.
+   * Visibility tracks `canRegisterEndpoint` so the button hides when the
+   * user lacks the permission.
+   */
+  public registerEndpointAction = {
+    label: 'Register Endpoint',
+    icon: 'add',
+    visible: this.canRegisterEndpoint,
+    invoke: () => this.openRegisterModal(),
+  };
+
   public canBackupRestore$: Observable<boolean>;
   public showRegisterModal = false;
   public isInitialised$: Observable<boolean>;
 
   @ViewChild('customNoEndpointsContainer', { read: ViewContainerRef, static: true }) customNoEndpointsContainer!: ViewContainerRef;
-  @ViewChild(ListComponent, { static: false }) listComponent: ListComponent<any>;
   customContentComponentRef!: ComponentRef<any>;
 
   private snackBarText = {
@@ -92,12 +110,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       map(off => {
         if (off) {
           // User should only get here if url is manually entered
-          this.store.dispatch(new RouterNav({
-            path: ['applications'],
-            extras: {
-              replaceUrl: true
-            }
-          }));
+          this.router.navigate(['applications'], { replaceUrl: true });
         }
       }),
       take(1)
@@ -125,7 +138,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     // Is the backup/restore plugin available on the backend?
     // Defensive: Add catchError to handle session data access issues
-    this.canBackupRestore$ = this.store.select(selectSessionData()).pipe(
+    this.canBackupRestore$ = toObservable(this.authSignal.sessionData).pipe(
       filter(sessionData => !!sessionData),
       take(1),
       map(sessionData => sessionData?.plugins?.backup || false),
@@ -134,9 +147,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
 
     // Create an observable to track when endpoints are loaded and ready
     // Defensive: Add null checks and error handling
-    this.isInitialised$ = this.store.select(endpointStatusSelector).pipe(
-      filter(endpointState => !!endpointState),
-      map(endpointState => !endpointState.loading),
+    this.isInitialised$ = toObservable(this.endpointStatusSignals.initialised).pipe(
       delay(500) // Delay to ensure proper loading sequence
     );
   }
@@ -173,27 +184,13 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     // and should be available by the time component constructors run. However, we add defensive checks
     // to gracefully handle edge cases where catalog might not be fully initialized.
 
-    // Dispatch the GET_ENDPOINTS action which triggers system info fetch
-    if (stratosEntityCatalog?.endpoint?.actions?.getAll) {
-      this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
-    } else {
-      console.error('Entity catalog endpoint actions not initialized. This may indicate a module initialization issue.', {
-        hasCatalog: !!stratosEntityCatalog,
-        hasEndpoint: !!stratosEntityCatalog?.endpoint,
-        hasActions: !!stratosEntityCatalog?.endpoint?.actions
-      });
-    }
-
-    // Also explicitly trigger system info
-    if (stratosEntityCatalog?.systemInfo?.actions?.getSystemInfo) {
-      this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
-    } else {
-      console.error('Entity catalog systemInfo actions not initialized. This may indicate a module initialization issue.', {
-        hasCatalog: !!stratosEntityCatalog,
-        hasSystemInfo: !!stratosEntityCatalog?.systemInfo,
-        hasActions: !!stratosEntityCatalog?.systemInfo?.actions
-      });
-    }
+    // Trigger endpoint hydration via the signal-native EndpointsDataService.
+    // The service owns its own /pp/v1/info HTTP call + lifecycle signals —
+    // this also supplies the per-endpoint metadata the legacy systemInfo
+    // fetch used to carry.
+    void this.endpointsData.getAll(false).catch(err => {
+      console.error('Failed to load endpoints via EndpointsDataService:', err);
+    });
 
     // Subscribe to haveRegistered$ to handle custom no-endpoints component
     // Defensive: Add error handling to prevent subscription failures from breaking the page
@@ -229,7 +226,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     // Subscribe to dashboard state to enable polling if configured
     // Defensive: Add error handling and ensure subscription cleanup
     this.subs.push(
-      this.store.select(selectDashboardState).pipe(
+      this.dashboardState$.pipe(
         filter(dashboard => !!dashboard),
         take(1)
       ).subscribe({
@@ -303,27 +300,12 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   }
 
   onEndpointRegistered() {
-    // Defensive: Validate entity catalog before dispatching refresh actions
-    if (stratosEntityCatalog?.endpoint?.actions?.getAll) {
-      this.store.dispatch(stratosEntityCatalog.endpoint.actions.getAll());
-    } else {
-      console.error('Cannot refresh endpoints - entity catalog not initialized', {
-        hasCatalog: !!stratosEntityCatalog,
-        hasEndpoint: !!stratosEntityCatalog?.endpoint,
-        hasActions: !!stratosEntityCatalog?.endpoint?.actions
-      });
-    }
-
-    // Also trigger system info refresh to update overall state
-    if (stratosEntityCatalog?.systemInfo?.actions?.getSystemInfo) {
-      this.store.dispatch(stratosEntityCatalog.systemInfo.actions.getSystemInfo());
-    } else {
-      console.error('Cannot refresh system info - entity catalog not initialized', {
-        hasCatalog: !!stratosEntityCatalog,
-        hasSystemInfo: !!stratosEntityCatalog?.systemInfo,
-        hasActions: !!stratosEntityCatalog?.systemInfo?.actions
-      });
-    }
+    // Refresh via signal-native service — re-fetches /pp/v1/info and
+    // updates the endpoints signal (carries the per-endpoint metadata the
+    // legacy systemInfo fetch supplied).
+    void this.endpointsData.getAll(false).catch(err => {
+      console.error('Failed to refresh endpoints via EndpointsDataService:', err);
+    });
 
     // Trigger endpoint health checks
     // Defensive: Wrap in try-catch to prevent errors from breaking the flow

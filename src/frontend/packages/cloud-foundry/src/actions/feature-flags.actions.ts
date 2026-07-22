@@ -9,12 +9,12 @@ import { createEntityRelationPaginationKey } from '../entity-relations/entity-re
 import { CFStartAction } from './cf-action.types';
 
 export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction {
-  constructor(public endpointGuid: string, public paginationKey: string = null) {
+  constructor(public endpointGuid: string, public paginationKey: string = '') {
     super();
     this.paginationKey = this.paginationKey || createEntityRelationPaginationKey(endpointEntityType, this.endpointGuid);
     this.options = new HttpRequest(
       'GET',
-      `config/feature_flags`
+      `/pp/v1/cf/feature_flags/${endpointGuid}`
     );
     this.guid = endpointGuid;
   }
@@ -28,6 +28,6 @@ export class GetAllFeatureFlags extends CFStartAction implements PaginatedAction
     page: 1,
     'order-direction': 'desc',
     'order-direction-field': 'name',
-    'results-per-page': 25,
+    per_page: 100,
   };
 }

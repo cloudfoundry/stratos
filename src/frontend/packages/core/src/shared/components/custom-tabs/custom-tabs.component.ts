@@ -48,7 +48,8 @@ export class CustomTabGroupComponent implements AfterContentInit {
   @Output() selectedIndexChange = new EventEmitter<number>();
   @Output() selectedTabChange = new EventEmitter<MatTabChangeEvent>();
 
-  @ContentChildren(CustomTabComponent) tabs: QueryList<CustomTabComponent>;
+  // strict: @ContentChildren is populated by Angular before ngAfterContentInit
+  @ContentChildren(CustomTabComponent) tabs!: QueryList<CustomTabComponent>;
 
   ngAfterContentInit() {
     this.selectTab(this.selectedIndex);

@@ -84,7 +84,7 @@ export function autoscalerTransformMapToArray(oldPolicy: AppAutoscalerPolicyLoca
     const newTrigger: AppScalingRule = {
       adjustment: trigger.adjustment,
       breach_duration_secs: trigger.breach_duration_secs,
-      cool_down_secs: trigger.breach_duration_secs,
+      cool_down_secs: trigger.cool_down_secs,
       metric_type: trigger.metric_type,
       operator: trigger.operator,
       threshold: trigger.threshold

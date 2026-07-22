@@ -44,6 +44,7 @@ export enum CfPermissionStrings {
   SPACE_MANAGER = 'isManager',
   SPACE_AUDITOR = 'isAuditor',
   SPACE_DEVELOPER = 'isDeveloper',
+  SPACE_SUPPORTER = 'isSupporter',
   ORG_MANAGER = 'isManager',
   ORG_AUDITOR = 'isAuditor',
   ORG_USER = 'isUser',

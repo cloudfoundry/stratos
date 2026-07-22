@@ -48,7 +48,7 @@ That's it! GitHub Actions handles everything else.
 
 ### Code Quality
 
-- [ ] All tests passing on develop/master branch
+- [ ] All tests passing on develop/main branch
 - [ ] No open critical bugs or blockers
 - [ ] All planned features merged
 - [ ] Code freeze announced (if applicable)
@@ -57,8 +57,8 @@ That's it! GitHub Actions handles everything else.
 **Verify:**
 ```bash
 # Check branch status
-git checkout master
-git pull origin master
+git checkout main
+git pull origin main
 git status
 
 # Run the full quality gate (lint + unit tests)
@@ -67,9 +67,11 @@ make check gate
 # Or run the full test matrix
 make test
 
-# Check for security issues
-bun audit
-go list -m -u all
+# Check for security issues + dependency drift
+make audit             # bun audit + backend scans (gosec + trivy + govulncheck)
+make audit summary     # totals only — fast triage
+make outdated          # list outdated direct deps in both stacks
+make deps dependabot   # show open dependency PRs awaiting review
 ```
 
 ### Version Management
@@ -111,7 +113,7 @@ make release cf FINAL=strip
 # Commit version bump (both files are updated automatically)
 git add package.json src/jetstream/VERSION
 git commit -m "chore: bump version to v5.0.0"
-git push origin master
+git push origin main
 ```
 
 Every `make bump` automatically appends `+build.YYYYMMDD.SHORT-SHA` build
@@ -250,9 +252,9 @@ git push origin v5.0.0-rc.2
 
 **Process:**
 ```bash
-# 1. Create hotfix branch from master
-git checkout master
-git pull origin master
+# 1. Create hotfix branch from main
+git checkout main
+git pull origin main
 git checkout -b hotfix/5.0.1
 
 # 2. Apply fix
@@ -260,8 +262,8 @@ git checkout -b hotfix/5.0.1
 make test
 git commit -am "fix: critical security issue"
 
-# 3. Merge to master
-git checkout master
+# 3. Merge to main
+git checkout main
 git merge hotfix/5.0.1
 
 # 4. Bump patch version
@@ -274,7 +276,7 @@ Critical security fix for authentication bypass.
 All users should upgrade immediately."
 
 # 6. Push
-git push origin master v5.0.1
+git push origin main v5.0.1
 ```
 
 **Timeline:** ~15 minutes
@@ -475,7 +477,7 @@ Thanks to everyone who contributed!
 ### External Communication
 
 **GitHub Release Notes:**
-```markdown
+````markdown
 # Stratos v5.0.0
 
 Major release with Angular 20 upgrade and new authentication features.
@@ -537,7 +539,7 @@ Thanks to all contributors who made this release possible!
 - Documentation: https://stratos.app/docs
 - Issues: https://github.com/cloudfoundry/stratos/issues
 - Discussions: https://github.com/cloudfoundry/stratos/discussions
-```
+````
 
 **Social Media:**
 ```markdown
@@ -654,7 +656,7 @@ git push origin :refs/tags/v5.0.0
 ### Track Release Success
 
 **Metrics to Monitor:**
-- Build time (target: <15 minutes)
+- Build time (target: under 15 minutes)
 - Download counts
 - Issue reports
 - Docker pull counts
@@ -736,7 +738,7 @@ All users should upgrade immediately.
 Details: https://github.com/cloudfoundry/stratos/security/advisories/GHSA-XXXX"
 
 # 3. Push at coordinated time
-git push origin master v5.0.1
+git push origin main v5.0.1
 
 # 4. Publish security advisory
 gh advisory create

@@ -1,12 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, inject, Input, signal  } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { MetricsStratosAction, AppState, EndpointModel } from '@stratosui/store';
+import { EndpointModel } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
-import { distinctUntilChanged, filter, map, publishReplay, refCount, tap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, publishReplay, refCount } from 'rxjs/operators';
 
-import { EndpointListDetailsComponent } from '../../../shared/components/list/list-types/endpoint/endpoint-list.helpers';
+import { EndpointListDetailsComponent } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
 import { mapMetricsData } from '../metrics.helpers';
 import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -21,7 +20,6 @@ interface MetricsDetailsInfo {
 @Component({
   selector: 'app-metrics-endpoint-details',
   templateUrl: './metrics-endpoint-details.component.html',
-  styleUrls: ['./metrics-endpoint-details.component.scss'],
   standalone: true,
   imports: [
     CommonModule,
@@ -33,12 +31,11 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
 
   data$: Observable<MetricsDetailsInfo>;
 
-  // The guid of the metrics endpoint that this row shows
-  private _guid = signal<string>(null);
+  // The guid of the metrics endpoint that this row shows; unset until the row Input arrives
+  private _guid = signal<string | undefined>(undefined);
   public guid = this._guid.asReadonly();
-  public guid$: Observable<string>;
+  public guid$: Observable<string | undefined>;
 
-  public store = inject<Store<AppState>>(Store);
   private metricsService = inject(MetricsService);
 
   constructor() {
@@ -63,11 +60,6 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
       map(([endpoints, guid]) => endpoints.find((item) => item.provider.guid === guid)),
       filter(provider => !!provider),
       filter(data => data.provider.connectionStatus === 'connected'),
-      tap(data => {
-        if (!this.hasStratosData(data)) {
-          this.store.dispatch(new MetricsStratosAction(data.provider.guid));
-        }
-      }),
       map((provider) => this.processProvider(provider)),
       publishReplay(1),
       refCount()

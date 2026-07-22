@@ -3,7 +3,6 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter, ActivatedRoute } from '@angular/router';
-import { Store, StoreModule } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
 
@@ -11,13 +10,10 @@ import {
   TabNavService
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
-import { appReducers } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
-import { UsersRolesSetUsers } from '../../../../actions/users-roles.actions';
 import { CloudFoundryTestingModule } from '../../../../cloud-foundry-test.module';
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
-import { CFAppState } from '../../../../cf-app-state';
+import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CfRolesService } from '../manage-users/cf-roles.service';
 import { RemoveUserComponent } from './remove-user.component';
@@ -47,10 +43,9 @@ describe('RemoveUserComponent', () => {
   const mockUser = {
     guid: 'test-user-guid',
     username: 'test-user',
-    entity: {
-      guid: 'test-user-guid',
-      username: 'test-user'
-    }
+    cnsiGuid: 'cf-guid',
+    orgRoles: [],
+    spaceRoles: []
   };
 
   const mockExistingRoles = {
@@ -81,7 +76,7 @@ describe('RemoveUserComponent', () => {
   const mockUserSubject = new BehaviorSubject(mockUser);
   const mockExistingRolesSubject = new BehaviorSubject(mockExistingRoles);
 
-  const mockCfUserService = {
+  const mockUsersData = {
     getUser: vi.fn(() => mockUserSubject.asObservable())
   };
 
@@ -93,9 +88,6 @@ describe('RemoveUserComponent', () => {
     TestBed.configureTestingModule({
       imports: [
         RemoveUserComponent,
-        StoreModule.forRoot(appReducers, {
-          runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-        }),
         CloudFoundryTestingModule,
         NoopAnimationsModule,
       ],
@@ -107,7 +99,7 @@ describe('RemoveUserComponent', () => {
         { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },
         { provide: CfRolesService, useValue: mockCfRolesService },
-        { provide: CfUserService, useValue: mockCfUserService },
+        { provide: CfUsersPagedDataService, useValue: mockUsersData },
         TabNavService,
         ...cfCurrentUserPermissionsService,
       ],
@@ -116,10 +108,6 @@ describe('RemoveUserComponent', () => {
   });
 
   beforeEach(() => {
-    // Initialize the store with the required state to prevent EmptyError
-    const store = TestBed.inject(Store) as Store<CFAppState>;
-    store.dispatch(new UsersRolesSetUsers('cf-guid', [mockUser.entity as any]));
-
     fixture = TestBed.createComponent(RemoveUserComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

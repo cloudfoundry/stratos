@@ -1,18 +1,20 @@
 <!-- Modal backdrop with backdrop blur -->
-<div class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
+<div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
 
   <!-- Modal container -->
   <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up">
 
-    <!-- Modal content -->
-    <div class="rounded-2xl shadow-2xl transform transition-all duration-300" style="overflow: visible; background-color: var(--card-bg);">
+    <!-- Modal content. No `transform` class: it would create a containing
+         block for the CustomSelect dropdown's position:fixed panel, breaking
+         its viewport-coordinate math. -->
+    <div class="rounded-2xl shadow-2xl transition-all duration-300" style="overflow: visible; background-color: var(--card-bg);">
 
       <!-- Modal header -->
       <div class="bg-gradient-to-r from-primary to-secondary px-6 py-4 text-white relative overflow-visible rounded-t-2xl">
-        <div class="absolute inset-0 bg-white bg-opacity-10 backdrop-blur-sm"></div>
+        <div class="absolute inset-0 bg-white/10 backdrop-blur-sm"></div>
         <div class="relative flex items-center justify-between">
           <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
+            <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
               <span class="material-icons text-white text-xl">
                 {{ selectedEndpointInfo ? 'arrow_back' : 'add_circle_outline' }}
               </span>
@@ -21,7 +23,7 @@
               <h2 class="text-xl font-bold text-white">
                 {{ selectedEndpointInfo ? 'Register ' + selectedEndpointInfo.label + ' Endpoint' : 'Register Endpoint' }}
               </h2>
-              <p class="text-white text-opacity-90 text-sm">
+              <p class="text-white/90 text-sm">
                 {{ selectedEndpointInfo ? 'Configure your endpoint settings' : 'Select the type of endpoint to register' }}
               </p>
             </div>
@@ -30,14 +32,14 @@
             @if (selectedEndpointInfo) {
               <button
                 (click)="goBackToSelection()"
-                class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+                class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
                 >
                 <span class="material-icons text-white text-lg">arrow_back</span>
               </button>
             }
             <button
               (click)="closeModal()"
-              class="w-8 h-8 bg-white bg-opacity-20 hover:bg-opacity-30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
+              class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
               >
               <span class="material-icons text-white text-lg">close</span>
             </button>
@@ -52,7 +54,7 @@
         @if (!selectedEndpointInfo) {
           <div>
             <app-tile-selector
-              [options]="tileSelectorConfig$ | async"
+              [options]="(tileSelectorConfig$ | async) ?? []"
               [dynamicSmallerTiles]="6"
               (selection)="onTileSelected($event)"
               class="endpoint-tile-selector">
@@ -111,21 +113,22 @@
   .endpoint-tile-selector ::ng-deep .tile:hover {
     transform: translateY(-2px);
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-    border-color: #3b82f6;
+    border-color: var(--color-primary);
   }
 
+  /* dark mode adapts border via --color-primary; only the shadow needs a darker variant */
   :host-context(.dark) .endpoint-tile-selector ::ng-deep .tile:hover {
     box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-    border-color: #60a5fa;
   }
 
   .endpoint-tile-selector ::ng-deep .tile.selected {
-    border-color: #3b82f6;
+    border-color: var(--color-primary);
     background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
   }
 
+  /* decorative selected-tile tint — kept as an explicit light/dark gradient pair
+     (no adaptive single-stop token); border adapts via --color-primary above */
   :host-context(.dark) .endpoint-tile-selector ::ng-deep .tile.selected {
-    border-color: #60a5fa;
     background: linear-gradient(135deg, #1e3a5f 0%, #1e40af 100%);
   }
 

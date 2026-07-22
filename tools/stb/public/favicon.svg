@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="stb theme builder">
+  <rect width="64" height="64" rx="14" fill="#1e293b"/>
+  <!-- overlapping theme swatches = a palette, distinct from the Cloud Foundry cloud mark -->
+  <circle cx="26" cy="26" r="13" fill="#2196f3"/>
+  <circle cx="40" cy="28" r="13" fill="#22c55e" fill-opacity="0.9"/>
+  <circle cx="32" cy="40" r="13" fill="#ff8c00" fill-opacity="0.9"/>
+</svg>

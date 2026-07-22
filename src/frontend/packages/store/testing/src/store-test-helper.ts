@@ -1,24 +1,27 @@
-import { ModuleWithProviders } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { Store, StoreModule, StoreRootModule } from '@ngrx/store';
 import {
-  appReducers,
   AppState,
   BaseEntityValues,
-  endpointEntityType,
+  EndpointsDataService,
   EndpointModel,
   entityCatalog,
   EntityCatalogEntityConfig,
   getDefaultPaginationEntityState,
   getDefaultRequestState,
   getDefaultRolesRequestState,
-  NormalizedResponse,
   rootUpdatingKey,
   SessionData,
   SessionDataEndpoint,
-  stratosEntityFactory,
-  WrapperRequestActionSuccess,
 } from '@stratosui/store';
+
+// The ngrx root store was removed in the final ngrx-removal closer. The
+// store-module factory functions below used to return `StoreModule.forRoot(...)`
+// modules; specs added them to `imports: []` but no spec injects/reads the
+// store any more (all data is signal-native). They now return this inert
+// module so the existing call sites keep compiling unchanged.
+@NgModule({})
+export class EmptyTestStoreModule { }
 
 export const testSCFEndpointGuid = '01ccda9d-8f40-4dd0-bc39-08eea68e364f';
 const testSCFSessionEndpoint: SessionDataEndpoint = {
@@ -133,12 +136,6 @@ export const testSessionData: SessionData = {
 function getDefaultInitialTestStratosStoreState() {
   return {
     recentlyVisited: {},
-    userFavoritesGroups: {
-      busy: false,
-      error: false,
-      message: '',
-      groups: {}
-    },
     auth: {
       loggedIn: true,
       loggingIn: false,
@@ -148,62 +145,12 @@ function getDefaultInitialTestStratosStoreState() {
       sessionData: testSessionData,
       verifying: false
     },
-    uaaSetup: {
-      payload: null as any,
-      setup: false,
-      error: false,
-      message: '',
-      settingUp: false
-    },
     endpoints: {
       loading: false,
       error: false,
       message: ''
     },
-    dashboard: {
-      sidenavOpen: true,
-      timeoutSession: true,
-      sideHelpOpen: false,
-      sideHelpDocument: '',
-      isMobile: false,
-      isMobileNavOpen: false,
-      sideNavPinned: false,
-      pollingEnabled: true,
-      themeKey: null as any,
-      headerEventMinimized: true,
-      gravatarEnabled: false,
-      homeLayout: 0,
-      homeShowAllEndpoints: true,
-    },
     lists: {},
-    routing: {
-      previousState: {
-        id: 4,
-        url: '/marketplace',
-        urlAfterRedirects: '/marketplace',
-        state: {
-          url: '/marketplace',
-          params: {},
-          queryParams: {}
-        }
-      },
-      currentState: {
-        id: 5,
-        url: '/applications',
-        urlAfterRedirects: '/applications',
-        state: {
-          url: '/applications',
-          params: {},
-          queryParams: {}
-        }
-      }
-    },
-    internalEvents: {
-      types: {
-        global: {},
-        endpoint: {}
-      }
-    },
     currentUserRoles: {
       internal: {
         isAdmin: false,
@@ -245,14 +192,9 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
         }
       },
       metrics: {},
-      stratosUserProfile: {},
-      stratosUserFavorites: {},
     },
     request: {
-      stratosUserProfile: {},
-      metrics: {},
-      stratosUserFavorites: {},
-      stratosEndpoint: {
+      metrics: {},      stratosEndpoint: {
         '57ab08d8-86cc-473a-8818-25d5e8d0ea23': {
           fetching: false,
           updating: {
@@ -276,9 +218,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
       },
       system: {},
     },
-    requestData: {
-      stratosUserFavorites: {},
-      stratosEndpoint: {
+    requestData: {      stratosEndpoint: {
         [testSCFEndpointGuid]: {
           guid: testSCFEndpointGuid,
           name: 'SCF',
@@ -286,6 +226,8 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
           api_endpoint: {
             Scheme: 'https',
             Opaque: '',
+            // Go's url.Userinfo pointer serializes to JSON null when absent;
+            // this fixture reproduces that real wire shape (User: object | null).
             User: null,
             Host: 'api.127.0.0.1.xip.io:8443',
             Path: '',
@@ -316,50 +258,19 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
       },
       metrics: {},
       system: {},
-      stratosUserProfile: {
-        id: 'test-user',
-        name: {
-          familyName: 'User',
-          givenName: 'Test',
-        },
-        userName: 'tesy-user-name',
-        meta: {
-          version: 1,
-          created: '',
-          lastModified: '',
-        },
-        verified: true,
-        active: true,
-        emails: [
-          {
-            primary: true,
-            value: 'test@test.com',
-          }
-        ],
-        passwordLastModified: '',
-        schemas: '',
-        zoneId: '',
-        origin: ''
-      },
     },
   };
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars -- signature preserved for call sites; state is no longer consumed (no ngrx store)
 export function createBasicStoreModule(
   initialState: Partial<AppState<BaseEntityValues>> = getDefaultInitialTestStoreState()
-): ModuleWithProviders<StoreRootModule> {
-  return StoreModule.forRoot(
-    appReducers,
-    {
-      initialState, runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false }
-    }
-  );
+): typeof EmptyTestStoreModule {
+  return EmptyTestStoreModule;
 }
 
-export function createEmptyStoreModule(): ModuleWithProviders<StoreRootModule> {
-  return StoreModule.forRoot(
-    appReducers, { runtimeChecks: { strictStateImmutability: false, strictActionImmutability: false } }
-  );
+export function createEmptyStoreModule(): typeof EmptyTestStoreModule {
+  return EmptyTestStoreModule;
 }
 
 function getStoreSectionForIds(entities: Array<TestStoreEntity | string>, dataOverride?: any): Record<string, any> {
@@ -384,7 +295,9 @@ export interface TestStoreEntity {
  */
 export function createEntityStoreState(entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>) {
   return Array.from(entityMap.keys()).reduce((state, entityConfig) => {
-    const entities = entityMap.get(entityConfig);
+    // strict: key comes from entityMap.keys(), so get() always resolves; ?? []
+    // here is an unreachable type-narrowing fallback, not fabricated data.
+    const entities = entityMap.get(entityConfig) ?? [];
     const entityKey = entityCatalog.getEntityKey(entityConfig);
     return {
       request: {
@@ -405,27 +318,46 @@ export function createEntityStoreState(entityMap: Map<EntityCatalogEntityConfig,
 
 export function createEntityStore(
   entityMap: Map<EntityCatalogEntityConfig, Array<TestStoreEntity | string>>
-): ModuleWithProviders<StoreRootModule> {
+): typeof EmptyTestStoreModule {
   const initialState = createEntityStoreState(entityMap);
   return createBasicStoreModule(initialState);
 }
 
-export function populateStoreWithTestEndpoint(): EndpointModel {
-  const stratosEndpointEntityConfig: EntityCatalogEntityConfig = stratosEntityFactory(endpointEntityType);
-  const stratosEndpointEntityKey = entityCatalog.getEntityKey(stratosEndpointEntityConfig);
-  const mappedData = {
-    entities: {
-      [stratosEndpointEntityKey]: {
-        [testSCFEndpoint.guid]: testSCFEndpoint
+/**
+ * Seed the signal-native EndpointsDataService with the given endpoints. For
+ * specs that previously dispatched endpoint data into the ngrx store so a
+ * (now signal-native) component could read it back. Tolerates the service not
+ * being available in the test injector (non-fatal).
+ */
+export function seedEndpointsDataService(endpoints: EndpointModel[]): void {
+  try {
+    const endpointsService = TestBed.inject(EndpointsDataService, null);
+    if (endpointsService) {
+      // Bypass private encapsulation via index access — the writable signal
+      // is the source of truth that the public readonly `endpoints` signal
+      // mirrors. This is a test-only seam; production code mutates via
+      // `getAll()` / `register()` etc.
+      const writable = (endpointsService as unknown as { ['_endpoints']?: { set: (m: Map<string, EndpointModel>) => void } })['_endpoints'];
+      if (writable && typeof writable.set === 'function') {
+        // EndpointModel.guid is optional in the source type, but the signal map
+        // is keyed by guid; drop any guid-less endpoint (it could never be keyed)
+        // so the entry tuples are genuinely [string, EndpointModel].
+        const entries = endpoints
+          .filter((e): e is EndpointModel & { guid: string } => e.guid !== undefined)
+          .map(e => [e.guid, e] as const);
+        writable.set(new Map(entries));
       }
-    },
-    result: [testSCFEndpoint.guid]
-  } as NormalizedResponse;
-  const store = TestBed.inject(Store);
-  store.dispatch(new WrapperRequestActionSuccess(mappedData, {
-    type: 'POPULATE_TEST_DATA',
-    ...stratosEndpointEntityConfig
-  }, 'fetch'));
+    }
+  } catch {
+    // Service not provided in this test — non-fatal.
+  }
+}
 
+export function populateStoreWithTestEndpoint(): EndpointModel {
+  // The ngrx store is gone; seed the signal-native EndpointsDataService
+  // directly so signal consumers (`EndpointsSignalService`,
+  // `CfEndpointsDataService`, `EndpointsService.endpoints$`) see the test
+  // endpoint.
+  seedEndpointsDataService([testSCFEndpoint]);
   return testSCFEndpoint;
 }

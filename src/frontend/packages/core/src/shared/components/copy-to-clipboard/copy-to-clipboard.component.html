@@ -1,26 +1,44 @@
-<div class="copy relative inline-flex items-center gap-2"
-  [ngClass]="{'copy__success': copySuccessWait}">
-  <div class="copy__copied-div flex items-center gap-1"
-    [class.opacity-100]="copySuccessWait"
-    [class.opacity-0]="!copySuccessWait"
-    class="transition-opacity duration-300">
-    @if (showSuccessText) {
-      <span class="copy__copied-msg text-sm text-success-600">Copied to clipboard</span>
+<!-- The copy icon and the transient success indicator stack in a single grid
+     cell (no absolute positioning), so the column reserves space for the
+     widest child — the "Copied to clipboard" text when shown — and the copy
+     icon flows in normal layout so it aligns with its row. -->
+<div class="inline-grid items-center">
+  @switch (didUserPressCopy()) {
+    @case ('not yet')
+    @case ('yes and saw succeeded'){
+      <button
+          class="inline-flex"
+          appClickStopPropagation       
+          [class.animate-scale-pop-in]="didUserPressCopy() === 'yes and saw succeeded'"
+          [attr.aria-label]="tooltip || 'Copy to clipboard'"
+          [title]="tooltip"
+          (click)="copyToClipboard(text)">
+        <span 
+          [ngClass]="{'text-sm': compact, 'text-base': !compact}"
+          class="material-icons cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300">
+          content_copy
+       </span>
+      </button>
     }
-    <span class="material-icons copy__copied-icon text-success-600"
-      [ngClass]="{'text-sm': compact, 'text-base': !compact}">
-      check_circle
-    </span>
-  </div>
-  @if (canCopy) {
-    <span class="material-icons copy__copy-icon cursor-pointer text-content-muted hover:text-content-text transition-colors"
-      [ngClass]="{'text-sm': compact, 'text-base': !compact}"
-      role="button" tabindex="0"
-      (click)="copyToClipboard($event)"
-      (keydown.enter)="copyToClipboard($event)"
-      (keydown.space)="copyToClipboard($event); $event.preventDefault()"
-      [title]="tooltip">
-      content_copy
-    </span>
+    @case ('yes but failed') {
+      <div class="col-start-1 row-start-1 justify-self-end flex items-center gap-1 transition-opacity duration-300">
+        <span class="material-icons text-status-danger"
+          [title]="'Failed to copy text. This might be due to security settings surrounding the clipboard API.'"
+          [ngClass]="{'text-sm': compact, 'text-base': !compact}">
+          error
+        </span>
+      </div>
+    }
+    @case ('yes and succeeded') {
+      <div class="col-start-1 row-start-1 justify-self-end flex items-center gap-1 transition-opacity duration-300">
+      @if (showSuccessText) {
+        <span class="text-sm text-success-shade-600 whitespace-nowrap">Copied to clipboard</span>
+      }
+      <span class="material-icons text-success-shade-600 animate-scale-pop-in"
+        [ngClass]="{'text-sm': compact, 'text-base': !compact}">
+        check_circle
+      </span>
+    </div>
+    }
   }
 </div>

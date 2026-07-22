@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -195,7 +195,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecor
 			"Could not connect to the endpoint: %s", err)
 	}
 
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 
 	// If we got anything other than a 200, then we did not find the Stratos Metrics metadata file
 	if res.StatusCode != http.StatusOK {
@@ -218,7 +218,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecor
 			return nil, false, api.LogHTTPError(res, err)
 		}
 
-		defer response.Body.Close()
+		defer func() { _ = response.Body.Close() }()
 		if response.StatusCode != http.StatusOK {
 			log.Errorf("Error fetching /api/v1/status/config - response: %v, error: %v", response, err)
 			return nil, false, api.LogHTTPError(res, err)
@@ -229,7 +229,7 @@ func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecor
 	}
 
 	// We read the Stratos Metadata file ok
-	body, _ := ioutil.ReadAll(res.Body)
+	body, _ := io.ReadAll(res.Body)
 	// Put the body in the token metadata
 	tr.Metadata = string(body)
 
@@ -256,12 +256,12 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 		log.Errorf("Error performing http request: %v", err)
 		return "", api.LogHTTPError(res, err)
 	}
-	defer res.Body.Close()
+	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != http.StatusOK {
 		log.Errorf("Error performing http request - response: %v", res)
 		return "", api.LogHTTPError(res, err)
 	}
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		log.Errorf("Unexpected response: %v", err)
 		return "", api.LogHTTPError(res, err)
@@ -466,9 +466,7 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 	if err != nil {
 		return nil, err
 	}
-	for _, endpoint := range systemSharedEndpoints {
-		allUserAccessibleEndpoints = append(allUserAccessibleEndpoints, endpoint)
-	}
+	allUserAccessibleEndpoints = append(allUserAccessibleEndpoints, systemSharedEndpoints...)
 
 	if err != nil {
 		return nil, err

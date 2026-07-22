@@ -19,6 +19,7 @@ import { generateCFEntities } from '../../../../../cf-entity-generator';
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
+import { CfOrgsSignalConfigService } from '../../../../../shared/signal-list-configs/org/cf-orgs-signal-config.service';
 import { CloudFoundryOrganizationSummaryComponent } from './cloud-foundry-organization-summary.component';
 
 describe('CloudFoundryOrganizationSummaryComponent', () => {
@@ -28,23 +29,14 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
   const mockOrgService = {
     cfGuid: 'cf-guid',
     orgGuid: 'org-guid',
-    org$: of({
-      entity: {
-        entity: {
-          name: 'test-org',
-          guid: 'org-guid',
-          spaces: []
-        },
-        metadata: {
-          guid: 'org-guid'
-        }
-      },
-      entityRequestInfo: {
-        fetching: false,
-        error: false,
-        deleting: { busy: false, deleted: false }
-      }
-    }),
+    orgDataService: {
+      org: () => null,
+      spaces: () => [],
+      isLoading: () => false,
+      errors: () => [],
+      load: () => of(undefined),
+    },
+    serviceInstancesCount: (() => 0) as unknown as import('@angular/core').Signal<number>,
     userProvidedServiceInstancesCount$: of(0)
   };
 
@@ -57,10 +49,12 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
         api_endpoint: { Host: 'api.example.com' }
       }
     }),
-    appsPagObs: {
-      fetchingEntities$: of(false)
-    },
+    appsLoading$: of(false),
     deleteOrg: () => {}
+  };
+
+  const mockOrgsConfig = {
+    deleteOrg: async (_cnsiGuid: string, _orgGuid: string) => {}
   };
 
   const mockActiveRoute = {
@@ -94,6 +88,7 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
         { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
         { provide: CloudFoundryOrganizationService, useValue: mockOrgService },
         { provide: CloudFoundryEndpointService, useValue: mockEndpointService },
+        { provide: CfOrgsSignalConfigService, useValue: mockOrgsConfig },
         TabNavService,
         ConfirmationDialogService,
         TailwindSnackBarService,

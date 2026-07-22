@@ -4,9 +4,9 @@ import { WritableSignal } from '@angular/core';
 import {
   IActionMonitorComponentState,
 } from '../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
 import { EndpointAuthTypeConfig } from '../../../../store/src/extension-types';
-import { ActionStatus } from './../../../../store/src/reducers/api-request-reducer/types';
+import { ActionStatus } from './../../../../store/src/types/entity-pipeline.types';
 
 // Type alias for signal wrapper with BehaviorSubject compatibility
 // Accepts either Subject<T> OR WritableSignal<T> with BehaviorSubject API methods
@@ -88,7 +88,8 @@ export interface KubeConfigFile {
 }
 
 export interface KubeConfigImportAction {
-  action: string;
+  // null marks a skipped action (e.g. a connect whose register failed)
+  action: string | null;
   description: string;
   cluster: KubeConfigFileCluster;
   user?: KubeConfigFileUser;

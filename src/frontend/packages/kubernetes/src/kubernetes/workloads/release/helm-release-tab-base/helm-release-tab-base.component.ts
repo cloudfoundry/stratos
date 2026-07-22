@@ -3,11 +3,12 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
+import { naturalCompare } from '@stratosui/core';
+
 import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
 
 import { IPageSideNavTab } from '../../../../../../core/src/features/dashboard/page-side-nav/page-side-nav.component';
 import { SessionService } from '../../../../../../core/src/shared/services/session.service';
-import { SnackBarService } from '../../../../../../core/src/shared/services/snackbar.service';
 import { kubeEntityCatalog } from '../../../kubernetes-entity-generator';
 import { KubernetesAnalysisService } from '../../../services/kubernetes.analysis.service';
 import { KubeResourceEntityDefinition } from '../../../store/kube.types';
@@ -56,7 +57,6 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   tabLinks: IPageSideNavTab[];
   public helmReleaseHelper = inject(HelmReleaseHelperService);
   private analysisService = inject(KubernetesAnalysisService);
-  private snackbarService = inject(SnackBarService);
   private sessionService = inject(SessionService);
   private socketService = inject(HelmReleaseSocketService);
 
@@ -84,8 +84,10 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
+    // No snackbar hide here: the only snackbar in this subtree is shown by
+    // HelmReleaseSocketService (provided by this component), which hides it
+    // in its own ngOnDestroy.
     this.socketService.stop();
-    this.snackbarService.hide();
   }
 
   private getTabsFromEntityConfig(): IPageSideNavTab[] {
@@ -98,7 +100,9 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
         if (defn.apiWorkspaced && !defn.hidden) {
           tabsFromRouterConfig.push({
             link: `resource/${catalogEntity.type}`,
-            label: defn.labelTab || defn.labelPlural,
+            // Definitions should carry a tab/plural label; fall back to the
+            // entity type so the required `label` is always a real string.
+            label: defn.labelTab || defn.labelPlural || catalogEntity.type,
             icon: defn.icon,
             iconFont: defn.iconFont,
           });
@@ -106,7 +110,7 @@ export class HelmReleaseTabBaseComponent implements OnDestroy {
       }
     });
 
-    tabsFromRouterConfig.sort((a, b) => a.label.localeCompare(b.label));
+    tabsFromRouterConfig.sort((a, b) => naturalCompare(a.label, b.label));
     return tabsFromRouterConfig;
   }
 }

@@ -4,7 +4,6 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { provideMockStore } from '@ngrx/store/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
@@ -25,7 +24,6 @@ describe('NewApplicationBaseStepComponent', () => {
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
-        provideMockStore(),
         ...STORE_TEST_PROVIDERS,
         GitSCMService,
         ApplicationDeploySourceTypes,

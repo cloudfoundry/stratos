@@ -2,12 +2,10 @@ import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { BehaviorSubject } from 'rxjs';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
-import { EntityServiceFactory, EntityMonitorFactory, PaginationMonitorFactory } from '@stratosui/store';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock } from '@test-framework/cf';
 import { TabNavService } from '@stratosui/core';
@@ -18,25 +16,8 @@ import { EditAutoscalerPolicyStep1Component } from './edit-autoscaler-policy-ste
 describe('EditAutoscalerPolicyStep1Component', () => {
   let component: EditAutoscalerPolicyStep1Component;
   let fixture: ComponentFixture<EditAutoscalerPolicyStep1Component>;
-  let mockEntityServiceFactory: any;
 
   beforeEach(() => {
-    // Create a mock entity service that emits proper values
-    const entityObsSubject = new BehaviorSubject({
-      entity: null,
-      entityRequestInfo: {
-        fetching: false,
-        error: true // Simulate error to satisfy the filter and complete the observable
-      }
-    });
-
-    mockEntityServiceFactory = {
-      create: vi.fn().mockReturnValue({
-        entityObs$: entityObsSubject.asObservable(),
-        waitForEntity$: entityObsSubject.asObservable()
-      })
-    };
-
     TestBed.configureTestingModule({
       imports: [
         EditAutoscalerPolicyStep1Component,
@@ -50,9 +31,6 @@ describe('EditAutoscalerPolicyStep1Component', () => {
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
-        { provide: EntityServiceFactory, useValue: mockEntityServiceFactory },
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
         EditAutoscalerPolicyService,
         {
           provide: ActivatedRoute,

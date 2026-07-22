@@ -2,4 +2,8 @@
   <app-analysis-report-runner [kubeId]="kubeEndpointService.kubeGuid"></app-analysis-report-runner>
 </app-page-sub-nav>
 
-<app-list></app-list>
+<div class="analysis-reports h-full flex flex-col">
+  @if (listConfig(); as cfg) {
+    <app-signal-list [config]="cfg" class="flex-1 min-h-0" />
+  }
+</div>

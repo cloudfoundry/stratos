@@ -21,7 +21,9 @@ selector: 'app-analysis-report-runner',
 export class AnalysisReportRunnerComponent implements OnInit {
 
   canShow$: Observable<boolean>;
-  analyzers$: Observable<KubernetesAnalysisType[]>;
+  // strict: assigned in ngOnInit before the template's async pipe reads it;
+  // namespaceAnalyzers$ on the service can emit null, so the union is honest.
+  analyzers$!: Observable<KubernetesAnalysisType[] | null>;
   menuOpen = false;
   @Input() kubeId!: string;
   @Input() namespace!: string;

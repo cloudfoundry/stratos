@@ -15,8 +15,8 @@ export interface PackageInfo {
   ignore: boolean;
   extension?: ExtensionMetadata;
   theme: boolean;
-  theming?: ThemingMetadata;
-  assets: AssetMetadata[];
+  theming?: ThemingMetadata | null;
+  assets: AssetMetadata[] | null;
   backendPlugins: string[];
 }
 
@@ -50,7 +50,7 @@ export interface ThemingMetadata {
 // Extension metadata
 export interface ExtensionMetadata {
   package: string;
-  module: string;
+  module?: string;
   routingModule?: string;
   themeable?: boolean;
 }
@@ -63,13 +63,13 @@ export interface AssetMetadata {
 }
 
 // Helpers for getting list of dirs in a dir
-const isDirectory = source => {
+const isDirectory = (source: string) => {
   const realPath = fs.realpathSync(source);
   const stats = fs.lstatSync(realPath);
   return stats.isDirectory();
 }
 
-const getDirectories = source => {
+const getDirectories = (source: string) => {
   if (!fs.existsSync(source)) {
     return [];
   }
@@ -83,13 +83,16 @@ export const DEFAULT_THEME = '@stratosui/theme';
 export class Packages {
 
   public packages: PackageInfo[] = [];
-  public packageMap: Map<string, PackageInfo> = new Map<string, PackageInfo>();
+  // Accessed via bracket notation as a plain string-keyed lookup, not a Map API.
+  public packageMap: Record<string, PackageInfo> = {};
 
-  public pkgReadMap: Map<string, PackageInfo> = new Map<string, PackageInfo>();
+  public pkgReadMap: Record<string, boolean> = {};
 
-  public theme: PackageInfo;
+  // Set during scan(); not assigned in the constructor.
+  public theme!: PackageInfo;
 
-  public logger: Logger;
+  // Set via setLogger() before any logging occurs.
+  public logger?: Logger;
 
 
   // Try and find and load a package.json file in the specified folder
@@ -104,7 +107,7 @@ export class Packages {
     return pkg;
   }
 
-  constructor(public config: StratosConfig, public nodeModulesFolder: string, public localPackagesFolder) { }
+  constructor(public config: StratosConfig, public nodeModulesFolder: string, public localPackagesFolder: string) { }
 
   public setLogger(logger: Logger) {
     this.logger = logger;
@@ -118,7 +121,7 @@ export class Packages {
 
   // Look for packages
   public scan(packageJson: any) {
-    this.pkgReadMap = new Map<string, PackageInfo>();
+    this.pkgReadMap = {};
 
     if (packageJson.peerDependencies) {
       Object.keys(packageJson.peerDependencies).forEach(dep => {
@@ -164,13 +167,13 @@ export class Packages {
       this.packages.push(items[0]);
     }
 
-    const excludeMap = {};
+    const excludeMap: Record<string, boolean> = {};
     const excludes = this.config.stratosConfig.packages.exclude as string[];
     excludes.forEach(e => {
       excludeMap[e] = true;
     });
 
-    const remove = {};
+    const remove: Record<string, PackageInfo> = {};
     // We have the excludes and the set of packages - remove any that have the excludes as dependencies
     this.packages.forEach(pkg => {
       if (this.hasExcludedDepenedncey(pkg, excludeMap)) {
@@ -200,7 +203,7 @@ export class Packages {
     return false;
   }
 
-  public addPackage(pkgName, isLocal = false) {
+  public addPackage(pkgName: string, isLocal = false) {
     if (this.pkgReadMap[pkgName]) {
       return;
     }
@@ -280,7 +283,7 @@ export class Packages {
       stratos: !!pkg.stratos,
       json: pkg,
       ignore: pkg.stratos ? pkg.stratos.ignore || false : false,
-      theme: pkg.stratos && pkg.stratos.theme,
+      theme: !!(pkg.stratos && pkg.stratos.theme),
       theming: this.getThemingConfig(pkg, folder),
       assets: this.getAssets(pkg, folder),
       backendPlugins: pkg.stratos ? pkg.stratos.backend || [] : [],
@@ -299,7 +302,7 @@ export class Packages {
   }
 
   // Get any theming metadata - this allows a package to theme its own components using the theme
-  private getThemingConfig(pkg: PackageJson, _packagePath: string): ThemingMetadata {
+  private getThemingConfig(pkg: PackageJson, _packagePath: string): ThemingMetadata | null {
     if (pkg.stratos && pkg.stratos.theming) {
       const refParts = pkg.stratos.theming.split('#');
       if (refParts.length === 2) {
@@ -321,16 +324,17 @@ export class Packages {
   }
 
   // Get any assets that the package has
-  private getAssets(pkg: PackageJson, packagePath: string): AssetMetadata[] {
+  private getAssets(pkg: PackageJson, packagePath: string): AssetMetadata[] | null {
     const assets: AssetMetadata[] = [];
     // Check for assets
     if (pkg.stratos && pkg.stratos.assets) {
-      Object.keys(pkg.stratos.assets).forEach(src => {
+      const pkgAssets = pkg.stratos.assets;
+      Object.keys(pkgAssets).forEach(src => {
         let abs = path.join(packagePath, src);
         abs = path.resolve(abs);
         assets.push({
           from: abs,
-          to: pkg.stratos.assets[src],
+          to: pkgAssets[src],
           force: true
         });
       });

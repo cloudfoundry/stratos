@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { PaginationMonitorFactory, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
 import { BaseTestModulesNoShared } from '@test-framework';
 import { CFBaseTestProviders, generateCFEntities } from '@test-framework/cf-test-helper';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
@@ -23,7 +23,6 @@ describe('EditSpaceQuotaStepComponent', () => {
       ],
       providers: [
         ...CFBaseTestProviders,
-        PaginationMonitorFactory,
         provideZonelessChangeDetection(),
         {
           provide: TEST_CATALOGUE_ENTITIES,

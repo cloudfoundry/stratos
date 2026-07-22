@@ -15,8 +15,9 @@ import { AssetMetadata, DEFAULT_THEME, ExtensionMetadata, PackageInfo, Packages,
 export class StratosConfig implements Logger {
 
   // File paths to a few files we need access to
-  public packageJsonFile: string;
-  public nodeModulesFile: string;
+  // packageJsonFile / nodeModulesFile may be null if discovery fails.
+  public packageJsonFile: string | null;
+  public nodeModulesFile: string | null;
   public angularJsonFile: string;
 
   public rootDir: string;
@@ -42,7 +43,11 @@ export class StratosConfig implements Logger {
   public packages: Packages;
 
   constructor(dir: string, options?: any, loggingEnabled = true) {
-    this.angularJsonFile = this.findFileOrFolderInChain(dir, 'angular.json');
+    const angularJsonFile = this.findFileOrFolderInChain(dir, 'angular.json');
+    if (angularJsonFile === null) {
+      throw new Error(`Could not find angular.json in or above ${dir}`);
+    }
+    this.angularJsonFile = angularJsonFile;
     this.angularJson = JSON.parse(fs.readFileSync(this.angularJsonFile, 'utf8').toString());
     this.loggingEnabled = loggingEnabled;
 
@@ -79,6 +84,9 @@ export class StratosConfig implements Logger {
     }
 
     this.nodeModulesFile = this.findFileOrFolderInChain(this.rootDir, 'node_modules');
+    if (this.nodeModulesFile === null) {
+      throw new Error(`Could not find node_modules in or above ${this.rootDir}`);
+    }
 
     this.gitMetadata = new GitMetadata(this.rootDir);
     // this.log(this.gitMetadata);
@@ -122,7 +130,7 @@ export class StratosConfig implements Logger {
       this.log('Building with desktop package');
     }
 
-    const exclude = [];
+    const exclude: string[] = [];
     // Are the default excluded packages explicitly in the include section?
     if (this.stratosConfig &&
       this.stratosConfig.packages &&
@@ -187,7 +195,9 @@ export class StratosConfig implements Logger {
   }
 
   public getExtensions(): ExtensionMetadata[] {
-    return this.packages.packages.filter(p => !!p.extension).map(pkg => pkg.extension);
+    return this.packages.packages
+      .map(pkg => pkg.extension)
+      .filter((ext): ext is ExtensionMetadata => !!ext);
   }
 
   public getAssets(): AssetMetadata[] {
@@ -203,7 +213,7 @@ export class StratosConfig implements Logger {
 
   public getBackendPlugins(): string[] {
     const configFile = path.join(this.rootDir, 'src', 'jetstream', 'plugin-config.yaml');
-    const plugins = {};
+    const plugins: Record<string, boolean> = {};
 
     if (fs.existsSync(configFile)) {
       const config = yaml.load(fs.readFileSync(configFile, 'utf8')) as { plugins?: string[] };
@@ -216,7 +226,7 @@ export class StratosConfig implements Logger {
 
     // stratos.yaml backend overrides still supported
     if (this.stratosConfig.backend) {
-      this.stratosConfig.backend.forEach(name => {
+      this.stratosConfig.backend.forEach((name: string) => {
         plugins[name] = true;
       });
     }
@@ -224,19 +234,25 @@ export class StratosConfig implements Logger {
   }
 
   public getThemedPackages(): ThemingMetadata[] {
-    return this.packages.packages.filter(p => !!p.theming).map(pkg => pkg.theming);
+    return this.packages.packages
+      .map(pkg => pkg.theming)
+      .filter((theming): theming is ThemingMetadata => !!theming);
   }
 
   public getPackageJsonFolder() {
+    if (this.packageJsonFile === null) {
+      throw new Error('package.json file was not found');
+    }
     return path.dirname(this.packageJsonFile);
   }
 
   public getNodeModulesFolder() {
-    return path.dirname(this.nodeModulesFile);
+    // strict: the constructor throws if node_modules is not found, so this is non-null on any constructed instance.
+    return path.dirname(this.nodeModulesFile!);
   }
 
   // Go up the directory hierarchy and look for the named file or folder
-  private findFileOrFolderInChain(dir: string, name: string): string {
+  private findFileOrFolderInChain(dir: string, name: string): string | null {
     const parent = path.dirname(dir);
     const itemPath = path.join(dir, name);
     if (fs.existsSync(itemPath)) {
@@ -251,7 +267,7 @@ export class StratosConfig implements Logger {
   }
 
   // Resolve a known package or return null if not a known package
-  public resolveKnownPackage(pkg: string): string {
+  public resolveKnownPackage(pkg: string): string | null {
     const p = this.packages.packageMap[pkg];
     if (p) {
       let packagePath = p.dir;

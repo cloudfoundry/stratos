@@ -1,15 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
 import {Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
-import { RouterModule } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Router, RouterModule } from '@angular/router';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
-import { ConfirmationDialogConfig, ConfirmationDialogService, SidePanelService } from '@stratosui/core';
-import { ClearPaginationOfType } from '@stratosui/store';
-import { RouterNav } from '@stratosui/store';
-import { AppState } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { take, distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { ConfirmationDialogConfig, ConfirmationDialogService, EndpointsSignalService, SidePanelService, naturalCompare } from '@stratosui/core';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, map } from 'rxjs/operators';
+
+import { KubeHelmDataService } from '../../../../../services/endpoint-data/kube-helm-data.service';
 
 import {
   PageSubNavComponent,
@@ -26,16 +23,16 @@ import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewe
 import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
 import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
-import { SnackBarService } from '@stratosui/core';
-import { endpointsEntityRequestDataSelector } from '@stratosui/store';
+import { TailwindSnackBarService } from '@stratosui/core';
 import {
   ResourceAlertPreviewComponent } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
 import { HelmReleaseChartData } from '../../../workload.types';
-import { workloadsEntityCatalog } from '../../../workloads-entity-catalog';
 import { getIcon } from '../../icon-helper';
 import { HelmReleaseHelperService } from '../helm-release-helper.service';
 import { ResourceAlert } from './../../../../services/analysis-report.types';
+
+const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
 @Component({
   selector: 'app-helm-release-summary-tab',
@@ -64,24 +61,29 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   deleteReleaseConfirmation: ConfirmationDialogConfig;
 
   private busyDeleting = signal<boolean>(false);
-  public isBusy$: Observable<boolean>;
-  public hasResources$: Observable<boolean>;
-  public hasAllResources$: Observable<boolean>;
+  // strict: the following observables are assigned in the constructor inside
+  // runInInjectionContext, which TS can't see through the closure.
+  public isBusy$!: Observable<boolean>;
+  public hasResources$!: Observable<boolean>;
+  public hasAllResources$!: Observable<boolean>;
   private readonly DEFAULT_LOADING_MESSAGE = 'Retrieving Release Details';
   public loadingMessage = this.DEFAULT_LOADING_MESSAGE;
 
   public podsChartData: any[] = [];
   public containersChartData: any[] = [];
 
-  private successChartColor = '#4DD3A7';
-  private completedChartColour = '#7aa3e5';
+  // Resolve adaptive theme colors once at construction. These feed the ring
+  // chart domains; the component is not rebuilt on a live theme toggle, so the
+  // colors reflect the theme active when this view loaded.
+  private successChartColor = cssVar('--color-success');
+  private completedChartColour = cssVar('--color-info');
 
-  public path: string;
+  public path!: string; // strict: assigned in the constructor inside runInInjectionContext
 
-  public hasUpgrade$: Observable<string>;
+  public hasUpgrade$!: Observable<string>; // strict: assigned in the constructor inside runInInjectionContext
 
   // Can we upgrade? Yes as long as the Helm Chart can be found
-  public canUpgrade$: Observable<boolean>;
+  public canUpgrade$!: Observable<boolean>; // strict: assigned in the constructor inside runInInjectionContext
 
   public podChartColors = [
     {
@@ -101,7 +103,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     },
     {
       name: 'Not Ready',
-      value: '#E7727D'
+      value: cssVar('--color-danger')
     }
   ];
 
@@ -109,8 +111,9 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Yellow: #FFC107
 
   private deleted = false;
-  public chartData$: Observable<HelmReleaseChartData>;
-  public resources$: Observable<any[]>;
+  // strict: assigned in the constructor inside runInInjectionContext.
+  public chartData$!: Observable<HelmReleaseChartData>;
+  public resources$!: Observable<any[]>;
 
   // Cached analysis report
   private analysisReport: any;
@@ -118,13 +121,14 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   private analysisReportId = signal<string | null>(null);
   private analysisReportUpdated$ = toObservable(this.analysisReportId).pipe(distinctUntilChanged());
   public helmReleaseHelper = inject(HelmReleaseHelperService);
-  private store = inject(Store<AppState>);
+  private router = inject(Router);
+  private endpointsSignals = inject(EndpointsSignalService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private httpClient = inject(HttpClient);
-  private snackbarService = inject(SnackBarService);
+  private snackbarService = inject(TailwindSnackBarService);
   public analyzerService = inject(KubernetesAnalysisService);
   private previewPanel = inject(SidePanelService);
   private injector = inject(Injector);
+  private helmDataService = inject(KubeHelmDataService);
 
 
   constructor() {
@@ -150,8 +154,8 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         distinctUntilChanged(),
         map((chartData: any) => ({
           ...chartData,
-          containersChartData: chartData.containersChartData.sort((a: any, b: any) => a.name.localeCompare(b.name)),
-          podsChartData: chartData.podsChartData.sort((a: any, b: any) => a.name.localeCompare(b.name))
+          containersChartData: chartData.containersChartData.sort((a: any, b: any) => naturalCompare(a.name, b.name)),
+          podsChartData: chartData.podsChartData.sort((a: any, b: any) => naturalCompare(a.name, b.name))
         })
         )
       );
@@ -190,7 +194,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
           });
         }
         this.applyAnalysis(resources, this.analysisReport);
-        return Object.values(resources).sort((a: any, b: any) => a.kind.localeCompare(b.kind));
+        return Object.values(resources).sort((a: any, b: any) => naturalCompare(a.kind, b.kind));
       });
 
       this.resources$ = toObservable(resourcesComputed);
@@ -263,21 +267,20 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
 
   public deleteRelease() {
     this.confirmDialog.open(this.deleteReleaseConfirmation, () => {
-      // Make the http request to delete the release
-      const endpointAndName = this.helmReleaseHelper.guid.replace(':', '/').replace(':', '/');
+      // Signal-native delete via KubeHelmDataService — handles HTTP +
+      // optimistic local removal + cache refresh.
       this.startDelete();
-      this.httpClient.delete(`/pp/v1/helm/releases/${endpointAndName}`).subscribe({
-        error: (err: any) => {
-          this.endDelete();
-          this.snackbarService.show('Failed to delete release', 'Close');
-          console.error('Failed to delete release: ', err);
-        },
-        complete: () => {
-          const action = workloadsEntityCatalog.release.actions.getMultiple();
-          this.store.dispatch(new ClearPaginationOfType(action));
-          this.completeDelete();
-          this.store.dispatch(new RouterNav({ path: ['./workloads'] }));
-        }
+      this.helmDataService.delete(
+        this.helmReleaseHelper.endpointGuid,
+        this.helmReleaseHelper.namespace,
+        this.helmReleaseHelper.releaseTitle,
+      ).then(() => {
+        this.completeDelete();
+        this.router.navigate(['./workloads']);
+      }).catch((err: Error) => {
+        this.endDelete();
+        this.snackbarService.show('Failed to delete release', 'Close');
+        console.error('Failed to delete release: ', err);
       });
     });
   }
@@ -305,11 +308,12 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   }
 
   public getClusterName(): Observable<string> {
-    return this.store.select(endpointsEntityRequestDataSelector(this.helmReleaseHelper.endpointGuid)).pipe(
-      filter((e: any) => !!e),
-      map((e: any) => e.name),
-      take(1)
-    );
+    // Read the endpoint name from EndpointsSignalService instead of the
+    // legacy `endpointsEntityRequestDataSelector`. Returns an empty string
+    // if the endpoint hasn't hydrated yet — matches legacy `filter(!!e)`
+    // behaviour by emitting a synchronous value the template can render.
+    const endpoint = this.endpointsSignals.endpoints()[this.helmReleaseHelper.endpointGuid];
+    return of(endpoint?.name ?? '');
   }
 
   private applyAnalysis(resources: any, report: any) {
@@ -317,7 +321,7 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
     Object.values(resources).forEach((resource: any) => resource.alerts = []);
 
     if (report && Object.keys(resources).length > 0) {
-      Object.values(report.alerts).forEach((group: ResourceAlert[]) => {
+      Object.values<ResourceAlert[]>(report.alerts).forEach((group: ResourceAlert[]) => {
         group.forEach(alert => {
           // Can we find a corresponding group in the resources?
           const res = Object.keys(resources).find((i) => i.toLowerCase() === alert.kind);

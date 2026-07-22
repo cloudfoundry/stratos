@@ -10,7 +10,6 @@ import { AppProgressBarComponent } from '../../shared/components/progress-bar/ap
 @Component({
   selector: 'app-log-out-dialog',
   templateUrl: './log-out-dialog.component.html',
-  styleUrls: ['./log-out-dialog.component.scss'],
   standalone: true,
   imports: [
     AppProgressBarComponent

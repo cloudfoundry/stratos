@@ -1,13 +1,13 @@
 <div [formGroup]="formGroup">
   <div formGroupName="authValues" class="flex flex-col">
     <app-form-field>
-      <input appInput placeholder="Cluster" formControlName="cluster">
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Cluster" formControlName="cluster">
     </app-form-field>
     <app-form-field>
-      <input appInput placeholder="Access Key ID" formControlName="access_key">
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Access Key ID" formControlName="access_key">
     </app-form-field>
     <app-form-field>
-      <input appInput placeholder="Secret Access Key" [type]="!showPassword ? 'password' : 'text'"
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Secret Access Key" [type]="!showPassword ? 'password' : 'text'"
         formControlName="secret_key">
       <span appSuffix>
         <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>

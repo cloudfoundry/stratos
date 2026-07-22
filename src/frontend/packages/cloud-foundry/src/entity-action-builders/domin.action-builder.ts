@@ -11,7 +11,7 @@ export interface DomainActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
     endpointGuid: string,
     paginationKey: string,
-    { flatten }: CFBasePipelineRequestActionMeta
+    meta?: CFBasePipelineRequestActionMeta
   ) => FetchAllDomains;
   getOrganizationDomains: (
     orgGuid: string,
@@ -36,7 +36,7 @@ export const domainActionBuilders: DomainActionBuilders = {
   getOrganizationDomains: (
     orgGuid: string,
     endpointGuid: string,
-    paginationKey: string = null,
+    paginationKey: string = '',
     meta: CFBasePipelineRequestActionMeta = {
       includeRelations: [],
       populateMissing: true

@@ -2,7 +2,7 @@
   Install Chart
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
-  <app-step [title]="'Kubernetes'" [valid]="validate$ | async">
+  <app-step [title]="'Kubernetes'" [signalHandle]="detailsStepHandle">
     <form [formGroup]="details" class="stepper-form flex-1">
       <b>Select the Kubernetes cluster to install to</b>
       <div class="form-group">
@@ -33,11 +33,11 @@
             formControlName="releaseNamespace"
             #namespaceInput>
           @if (namespaceInput.value && (namespaces$ | async)?.length) {
-            <div class="absolute top-full left-0 w-full bg-white border border-gray-300 rounded-md shadow-lg z-10 max-h-48 overflow-y-auto"
+            <div class="absolute top-full left-0 w-full bg-content-bg border border-content-border rounded-md shadow-lg z-10 max-h-48 overflow-y-auto custom-scrollbar"
               >
               @for (namespace of namespaces$ | async; track namespace) {
                 <div
-                  class="px-3 py-2 hover:bg-gray-100 cursor-pointer"
+                  class="px-3 py-2 hover:bg-content-secondary cursor-pointer"
                   tabindex="0" role="button"
                   (click)="details.patchValue({releaseNamespace: namespace})"
                   (keydown.enter)="details.patchValue({releaseNamespace: namespace})">
@@ -47,20 +47,20 @@
             </div>
           }
           @if (details.controls.releaseNamespace.errors?.namespaceDoesNotExist) {
-            <div class="text-error-600 text-sm mt-1">
+            <div class="text-danger-shade-600 text-sm mt-1">
               Namespace does not exist
             </div>
           }
         </div>
 
-        <label class="flex items-center space-x-2">
-          <input type="checkbox" class="checkbox" formControlName="createNamespace">
+        <label class="flex items-center space-x-2" for="release-create-namespace">
+          <input id="release-create-namespace" type="checkbox" class="checkbox" formControlName="createNamespace">
           <span>Create Namespace</span>
         </label>
 
       </form>
     </app-step>
-    <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
+    <app-step [title]="'Overrides'" [signalHandle]="overridesStepHandle">
       <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
     </app-step>
   </app-steppers>

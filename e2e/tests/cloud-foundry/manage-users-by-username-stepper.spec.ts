@@ -42,7 +42,7 @@ test.describe('Manage Users By Username Stepper', () => {
       await manageButton.click();
 
       // Verify stepper/wizard dialog opened
-      const stepper = page.locator('app-manage-users-stepper, app-add-user-stepper, mat-dialog-container, app-stepper');
+      const stepper = page.locator('app-manage-users-stepper, app-add-user-stepper, [role="dialog"], app-stepper');
       const stepperExists = await stepper.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!stepperExists) {
@@ -78,7 +78,7 @@ test.describe('Manage Users By Username Stepper', () => {
       await manageButton.click();
 
       // Wait for stepper
-      const stepper = page.locator('mat-dialog-container, app-stepper').first();
+      const stepper = page.locator('[role="dialog"], app-stepper').first();
       const stepperExists = await stepper.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!stepperExists) {
@@ -131,7 +131,7 @@ test.describe('Manage Users By Username Stepper', () => {
       await manageButton.click();
 
       // Wait for stepper
-      const stepper = page.locator('mat-dialog-container, app-stepper').first();
+      const stepper = page.locator('[role="dialog"], app-stepper').first();
       const stepperExists = await stepper.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!stepperExists) {
@@ -192,7 +192,7 @@ test.describe('Manage Users By Username Stepper', () => {
       await manageButton.click();
 
       // Wait for stepper
-      const stepper = page.locator('mat-dialog-container, app-stepper').first();
+      const stepper = page.locator('[role="dialog"], app-stepper').first();
       const stepperExists = await stepper.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!stepperExists) {
@@ -252,7 +252,7 @@ test.describe('Manage Users By Username Stepper', () => {
       await manageButton.click();
 
       // Wait for stepper
-      const stepper = page.locator('mat-dialog-container, app-stepper').first();
+      const stepper = page.locator('[role="dialog"], app-stepper').first();
       const stepperExists = await stepper.isVisible({ timeout: 5000 }).catch(() => false);
 
       if (!stepperExists) {

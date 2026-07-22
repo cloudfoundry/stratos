@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component  } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
 
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { StepComponent } from '../../../shared/components/stepper/step/step.component';
@@ -9,11 +8,9 @@ import { EditEndpointStepComponent } from './edit-endpoint-step/edit-endpoint-st
 @Component({
   selector: 'app-edit-endpoint',
   templateUrl: './edit-endpoint.component.html',
-  styleUrls: ['./edit-endpoint.component.scss'],
   providers: [],
   standalone: true,
   imports: [
-    AsyncPipe,
     SteppersComponent,
     StepComponent,
     PageHeaderComponent,

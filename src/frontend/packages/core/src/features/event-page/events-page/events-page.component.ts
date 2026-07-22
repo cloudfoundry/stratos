@@ -3,14 +3,13 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { Store } from '@ngrx/store';
-import { AppState, getPreviousRoutingState } from '@stratosui/store';
+import { RoutingHistoryService } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { take, distinctUntilChanged, map, share, switchMap, tap } from 'rxjs/operators';
 
 import { GlobalEventService, IGlobalEvent } from '../../../shared/global-events.service';
+import { CardWrapperComponent } from '../../../shared/components/cards/card/card.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
-import { StatefulIconComponent } from '../../../core/stateful-icon/stateful-icon.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 
 export const eventReturnUrlParam = 'returnFromEvents';
@@ -29,23 +28,24 @@ export enum EventFilterValues {
   imports: [
     CommonModule,
     RouterModule,
+    CardWrapperComponent,
     CustomIconComponent,
     CustomTooltipDirective,
-    PageHeaderComponent,
-    StatefulIconComponent
+    PageHeaderComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EventsPageComponent implements OnInit {
   private eventService = inject(GlobalEventService);
-  private store = inject<Store<AppState>>(Store);
+  private routingHistory = inject(RoutingHistoryService);
   private activatedRoute = inject(ActivatedRoute);
 
-  public unreadEvents$: Observable<IGlobalEvent[]>;
-  public readEvents$: Observable<IGlobalEvent[]>;
-  public events$: Observable<IGlobalEvent[]>;
+  // strict: assigned in ngOnInit before any template/async access; matches hasReadEvents$ below
+  public unreadEvents$!: Observable<IGlobalEvent[]>;
+  public readEvents$!: Observable<IGlobalEvent[]>;
+  public events$!: Observable<IGlobalEvent[]>;
   public hasReadEvents$!: Observable<boolean>;
-  public back$: Observable<string>;
+  public back$!: Observable<string>;
   public filterValues = EventFilterValues;
   public selectedFilter = EventFilterValues.UNREAD;
   public endpointOnly: boolean;
@@ -96,7 +96,7 @@ export class EventsPageComponent implements OnInit {
       }),
       share()
     );
-    this.back$ = this.store.select(getPreviousRoutingState).pipe(take(1)).pipe(
+    this.back$ = this.routingHistory.previousState$.pipe(take(1)).pipe(
       map((previousState: any) => previousState && previousState.url !== '/login' ? previousState.url.split('?')[0] : '/home'),
       map((returnUrl: string) => {
         // Override return url if we've come from the error page
@@ -108,6 +108,17 @@ export class EventsPageComponent implements OnInit {
   }
   updateReadState(event: IGlobalEvent, read: boolean) {
     this.eventService.updateEventReadState(event, read);
+  }
+
+  // Filter selector — wired from the toolbar buttons. Writes through to
+  // the private signal so events$ (driven by selectedFilterSubject$,
+  // toObservable on the same signal) re-runs the switchMap and the row
+  // list updates without a page reload. Was a silent no-op until this
+  // method existed: the template called `selectedFilterSubject.next()`
+  // on a property the component never declared, so clicks landed on
+  // undefined and changed nothing visible.
+  selectFilter(value: EventFilterValues) {
+    this._selectedFilter.set(value);
   }
 
   createQueryParams(urlForward: string): Observable<object> {

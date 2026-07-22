@@ -1,8 +1,11 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, OnInit, Signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
-import { take, filter, map } from 'rxjs/operators';
+import { take, map } from 'rxjs/operators';
+import { OrgDataRegistry } from '../../../../../services/endpoint-data/org-data.registry';
+import { OrgDataService } from '../../../../../services/endpoint-data/org-data.service';
 
 import {
   getActionsFromExtensions,
@@ -15,15 +18,13 @@ import { IPageSideNavTab } from '../../../../../../../core/src/features/dashboar
 import { IHeaderBreadcrumb } from '../../../../../../../core/src/shared/components/page-header/page-header.types';
 import { PageHeaderComponent } from '../../../../../../../core/src/shared/components/page-header/page-header.component';
 import { LoadingPageComponent } from '../../../../../../../core/src/shared/components/loading-page/loading-page.component';
-import { EntitySchema } from '../../../../../../../store/src/helpers/entity-schema';
 import { IFavoriteMetadata, UserFavorite } from '../../../../../../../store/src/types/user-favorites.types';
 import { UserFavoriteManager } from '../../../../../../../store/src/user-favorite-manager';
-import { cfEntityFactory } from '../../../../../cf-entity-factory';
 import { organizationEntityType } from '../../../../../cf-entity-types';
 import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
-import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
 import {
   CloudFoundryUserProvidedServicesService } from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
+import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
@@ -33,10 +34,19 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
   templateUrl: './cloud-foundry-organization-base.component.html',
   providers: [
     getActiveRouteCfOrgSpaceProvider,
-    CfUserService,
     CloudFoundryEndpointService,
     CloudFoundryOrganizationService,
-    CloudFoundryUserProvidedServicesService
+    CloudFoundryUserProvidedServicesService,
+    // Provide a single OrgDataService instance for this org-detail subtree,
+    // acquired from the registry so navigation away and back returns a hot
+    // cached signal instead of refiring HTTP. Children inject(OrgDataService)
+    // directly — no per-component acquire boilerplate.
+    {
+      provide: OrgDataService,
+      useFactory: (registry: OrgDataRegistry, route: ActiveRouteCfOrgSpace) =>
+        registry.acquire(route.cfGuid, route.orgGuid),
+      deps: [OrgDataRegistry, ActiveRouteCfOrgSpace],
+    },
   ],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,9 +57,14 @@ import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry
     LoadingPageComponent
   ]
 })
-export class CloudFoundryOrganizationBaseComponent {
+export class CloudFoundryOrganizationBaseComponent implements OnInit {
   cfEndpointService = inject(CloudFoundryEndpointService);
   cfOrgService = inject(CloudFoundryOrganizationService);
+  orgDataService = inject(OrgDataService);
+
+  // Drives the loading-page overlay from the signal-native data service,
+  // replacing the old ngrx EntityMonitor (entityId/entitySchema) path.
+  isLoading$ = toObservable(this.orgDataService.isLoading);
 
 
   tabLinks: IPageSideNavTab[] = [
@@ -90,35 +105,41 @@ export class CloudFoundryOrganizationBaseComponent {
   ];
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  public name$: Observable<string>;
-
   // Used to hide tab that is not yet implemented when in production
   public isDevEnvironment = !environment.production;
 
-  public schema: EntitySchema;
-
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.CloudFoundryOrg);
 
-  public favorite$: Observable<UserFavorite<IFavoriteMetadata>>;
+  // Favorite recomputes when the org signal lands. Built from the V3-native
+  // org-detail snapshot — getMetadata reads `entity.name`, getGuid reads
+  // `metadata.guid`. The endpoint id comes from the PAGE route (route.cfGuid)
+  // via getFavoriteFromEntity, NOT the row's stamped cfGuid: rows can be
+  // mis-stamped when Stratos endpoints share one CAPI, which would render the
+  // star on the wrong endpoint (the cross-endpoint favourite leak).
+  public favorite: Signal<UserFavorite<IFavoriteMetadata> | null>;
 
   constructor() {
-    const cfOrgService = this.cfOrgService;
     const userFavoriteManager = inject(UserFavoriteManager);
+    const route = inject(ActiveRouteCfOrgSpace);
 
-    this.schema = cfEntityFactory(organizationEntityType);
-    this.favorite$ = cfOrgService.org$.pipe(
-      take(1),
-      map(org => userFavoriteManager.getFavorite<IFavoriteMetadata>(org.entity, organizationEntityType, CF_ENDPOINT_TYPE))
-    );
-    this.name$ = cfOrgService.org$.pipe(
-      map(org => org.entity.entity.name),
-      filter(name => !!name),
-      take(1)
-    );
+    this.favorite = computed(() => {
+      const org = this.orgDataService.org();
+      if (!org) return null;
+      const favEntity = { entity: { name: org.name }, metadata: { guid: org.guid } };
+      return userFavoriteManager.getFavoriteFromEntity<IFavoriteMetadata>(
+        organizationEntityType, CF_ENDPOINT_TYPE, route.cfGuid, favEntity);
+    });
     this.breadcrumbs$ = this.getBreadcrumbs();
 
     // Add any tabs from extensions
     this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundryOrg));
+  }
+
+  ngOnInit(): void {
+    // Trigger initial load. The registry-acquired instance dedupes concurrent
+    // load() calls and short-circuits once warm, so re-entry on tab nav is a
+    // no-op.
+    this.orgDataService.load().subscribe({ error: () => {} });
   }
 
   private getBreadcrumbs() {

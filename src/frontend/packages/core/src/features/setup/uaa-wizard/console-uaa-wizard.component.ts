@@ -1,17 +1,16 @@
-import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import {
-  VerifySession,
-  SetupConsoleGetScopes,
-  SetupSaveConfig,
   AuthState,
-  UAASetupState,
-  InternalAppState,
 } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { delay, filter, map, skipWhile, take } from 'rxjs/operators';
+import { combineLatest, firstValueFrom, Subscription } from 'rxjs';
+import { delay, filter, skipWhile, take } from 'rxjs/operators';
+
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { UaaSetupSignalService } from '../../../core/signals/uaa-setup-signal.service';
+import { UaaSetupDataService, UaaSetupState } from '../../../core/uaa-setup-data.service';
 
 interface UAAWizardForm {
   apiUrl: FormControl<string>;
@@ -24,7 +23,7 @@ interface UAAWizardForm {
 }
 
 import { APP_TITLE } from '../../../core/core.types';
-import { StepOnNextFunction } from '../../../shared/components/stepper/step/step.component';
+import { SignalStepHandle } from '../../../shared/components/stepper/step/step.component';
 import { getSSOClientRedirectURI } from '../../endpoints/endpoint-helpers';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
@@ -37,8 +36,6 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
 @Component({
   selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',
-  styleUrls: ['./console-uaa-wizard.component.scss'],
-  encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
     CommonModule,
@@ -54,12 +51,18 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ConsoleUaaWizardComponent implements OnInit {
-  private store = inject<Store<Pick<InternalAppState, 'uaaSetup' | 'auth'>>>(Store);
+export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+  private authSignals = inject(AuthSignalService);
+  private uaaSetupSignals = inject(UaaSetupSignalService);
+  private uaaSetupData = inject(UaaSetupDataService);
   title = inject(APP_TITLE);
 
+  // Bridge signals → observables in injection context (used by step handlers below).
+  private uaaSetup$ = toObservable(this.uaaSetupSignals.uaaSetup);
+  private auth$ = toObservable(this.authSignals.auth);
 
-  private clientRedirectURI: string;
+  protected clientRedirectURI: string;
 
   constructor() {
     // Client Redirect URI for SSO
@@ -67,89 +70,109 @@ export class ConsoleUaaWizardComponent implements OnInit {
   }
 
   uaaForm!: FormGroup<UAAWizardForm>;
-  validateUAAForm!: Observable<boolean>;
   uaaScopes: string[] = [];
   selectedScope = '';
   applyingSetup = signal<boolean>(false);
+  // app-loading-page takes an Observable<boolean> — bridge the signal.
+  applyingSetup$ = toObservable(this.applyingSetup);
+
+  // Tracks UAA form validity for the first step's signal handle. Updated
+  // from the form's valueChanges subscription in ngOnInit so the step's
+  // Next button gates on form validity in the same way the legacy
+  // `validateUAAForm` Observable did.
+  private uaaFormValid = signal<boolean>(false);
+  private formSub?: Subscription;
 
   public show = false;
   public showPassword = false;
 
-  uaaFormNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetupConsoleGetScopes({
-      uaa_endpoint: this.uaaForm.get('apiUrl').value,
-      console_client: this.uaaForm.get('clientId').value,
-      password: this.uaaForm.get('adminPassword').value,
-      skip_ssl_validation: this.uaaForm.get('skipSSL').value,
-      username: this.uaaForm.get('adminUsername').value,
-      console_client_secret: this.uaaForm.get('clientSecret').value,
-      use_sso: this.uaaForm.get('useSSO').value,
-      console_admin_scope: ''
-    }));
-    return this.store.select('uaaSetup').pipe(
-      skipWhile((state: UAASetupState) => {
-        return state.settingUp;
-      }),
-      map((state: UAASetupState) => {
-        const success = !state.error;
-        if (success) {
-          this.uaaScopes = state.payload.scope;
-          if (this.uaaScopes.find(scope => scope === 'stratos.admin')) {
-            this.selectedScope = 'stratos.admin';
-          } else if (this.uaaScopes.find(scope => scope === 'cloud_controller.admin')) {
-            this.selectedScope = 'cloud_controller.admin';
-          }
-        }
-        return {
-          success,
-          message: state.message
-        };
-      })
-    );
-  }
+  // FWT-959 Part 2 (Partition A) — SignalStepHandle wiring.
+  //
+  // Two-step UAA setup. Step 1 collects credentials and dispatches
+  // SetupConsoleGetScopes; step 2 picks an admin scope and dispatches
+  // SetupSaveConfig then hard-reloads on success. Cross-step state
+  // (`uaaScopes`, `selectedScope`) lives on this parent and is read
+  // directly by step 2's template, so we don't need to plumb it through
+  // signals — the previous and migrated paths share the same fields.
 
-  uaaScopeNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetupSaveConfig({
-      uaa_endpoint: this.uaaForm.get('apiUrl').value,
-      console_client: this.uaaForm.get('clientId').value,
-      password: this.uaaForm.get('adminPassword').value,
-      skip_ssl_validation: this.uaaForm.get('skipSSL').value,
-      username: this.uaaForm.get('adminUsername').value,
-      console_client_secret: this.uaaForm.get('clientSecret').value,
-      use_sso: this.uaaForm.get('useSSO').value,
-      console_admin_scope: this.selectedScope
-    }));
+  uaaFormStepHandle: SignalStepHandle = {
+    valid: this.uaaFormValid.asReadonly(),
+    submit: async () => {
+      void this.uaaSetupData.checkScopes({
+        uaa_endpoint: this.uaaForm.controls.apiUrl.value,
+        console_client: this.uaaForm.controls.clientId.value,
+        password: this.uaaForm.controls.adminPassword.value,
+        skip_ssl_validation: this.uaaForm.controls.skipSSL.value,
+        username: this.uaaForm.controls.adminUsername.value,
+        console_client_secret: this.uaaForm.controls.clientSecret.value,
+        use_sso: this.uaaForm.controls.useSSO.value,
+        console_admin_scope: ''
+      });
+      const state = await firstValueFrom(
+        this.uaaSetup$.pipe(
+          skipWhile((s: UaaSetupState) => s.settingUp),
+          take(1),
+        )
+      );
+      if (state.error) {
+        throw new Error(state.message || 'Failed to fetch UAA scopes');
+      }
+      this.uaaScopes = state.payload?.scope ?? [];
+      if (this.uaaScopes.find(scope => scope === 'stratos.admin')) {
+        this.selectedScope = 'stratos.admin';
+      } else if (this.uaaScopes.find(scope => scope === 'cloud_controller.admin')) {
+        this.selectedScope = 'cloud_controller.admin';
+      }
+      // OnPush: uaaScopes / selectedScope are plain fields read by step 2's
+      // template. The setter assignments above don't trigger CD on their
+      // own, so step 2 may render with an empty scope dropdown until
+      // something else marks the view dirty. Force a tick.
+      this.cdr.markForCheck();
+    },
+  };
 
-    this.applyingSetup.set(true);
-    return this.store.select(s => [s.uaaSetup, s.auth]).pipe(
-      filter(([uaa, auth]: [UAASetupState, AuthState]) => {
-        return !(uaa.settingUp || auth.verifying);
-      }),
-      delay(2000),
-      take(10),
-      filter(([_uaa, auth]: [UAASetupState, AuthState]) => {
-        const validUAASessionData = auth.sessionData && !auth.sessionData.uaaError;
-        if (!validUAASessionData) {
-          this.store.dispatch(new VerifySession());
-        }
-        return validUAASessionData;
-      }),
-      map((state: [UAASetupState, AuthState]) => {
-        if (!state[0].error) {
-          // Do a hard reload of the app
-          const loc = window.location;
-          const reload = loc.protocol + '//' + loc.host;
-          window.location.assign(reload);
-        } else {
-          this.applyingSetup.set(false);
-        }
-        return {
-          success: !state[0].error,
-          message: state[0].message
-        };
-      })
-    );
-  }
+  uaaScopeStepHandle: SignalStepHandle = {
+    valid: signal(true).asReadonly(),
+    submit: async () => {
+      void this.uaaSetupData.saveConfig({
+        uaa_endpoint: this.uaaForm.controls.apiUrl.value,
+        console_client: this.uaaForm.controls.clientId.value,
+        password: this.uaaForm.controls.adminPassword.value,
+        skip_ssl_validation: this.uaaForm.controls.skipSSL.value,
+        username: this.uaaForm.controls.adminUsername.value,
+        console_client_secret: this.uaaForm.controls.clientSecret.value,
+        use_sso: this.uaaForm.controls.useSSO.value,
+        console_admin_scope: this.selectedScope
+      });
+
+      this.applyingSetup.set(true);
+      const state = await firstValueFrom(
+        combineLatest([this.uaaSetup$, this.auth$] as [typeof this.uaaSetup$, typeof this.auth$]).pipe(
+          filter(([uaa, auth]: [UaaSetupState, AuthState | undefined]) => !!auth && !(uaa.settingUp || auth.verifying)),
+          delay(2000),
+          take(10),
+          filter(([_uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
+            const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
+            if (!validUAASessionData) {
+              this.authSignals.verifySession(true, true);
+            }
+            return validUAASessionData;
+          }),
+          take(1),
+        )
+      );
+      const [uaa] = state;
+      if (uaa.error) {
+        this.applyingSetup.set(false);
+        throw new Error(uaa.message || 'Failed to save UAA configuration');
+      }
+      // Hard reload of the app on success — preserves the legacy behaviour.
+      const loc = window.location;
+      const reload = loc.protocol + '//' + loc.host;
+      window.location.assign(reload);
+    },
+  };
+
   ngOnInit() {
     this.uaaForm = new FormGroup<UAAWizardForm>({
       apiUrl: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -161,16 +184,16 @@ export class ConsoleUaaWizardComponent implements OnInit {
       useSSO: new FormControl(false, { nonNullable: true }),
     });
 
-    let observer: any;
-    this.validateUAAForm = new Observable(o => {
-      observer = o;
-      observer.next(false);
+    // Mirror form validity into a signal the step handle reads. Initial
+    // value is `false` (matches the legacy Observable's first emission).
+    this.uaaFormValid.set(this.uaaForm.valid);
+    this.formSub = this.uaaForm.valueChanges.subscribe(() => {
+      this.uaaFormValid.set(this.uaaForm.valid);
     });
+  }
 
-    this.uaaForm.valueChanges.subscribe(() => {
-      observer.next(this.uaaForm.valid);
-    });
-
+  ngOnDestroy() {
+    this.formSub?.unsubscribe();
   }
 
 }

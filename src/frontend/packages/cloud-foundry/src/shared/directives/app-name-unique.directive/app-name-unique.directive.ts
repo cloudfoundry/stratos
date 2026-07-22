@@ -1,13 +1,12 @@
-import { HttpClient, HttpHeaders, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Directive, forwardRef, Input, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
-import { Store } from '@ngrx/store';
-import { Observable, of as observableOf, throwError as observableThrowError, timer as observableTimer } from 'rxjs';
+import { Observable, of as observableOf, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
 import { environment } from '@stratosui/core';
-import { CFAppState } from '../../../cf-app-state';
-import { selectNewAppState } from './../../../store/effects/create-app-effects';
+import { StratosStatus } from '@stratosui/store';
+import { CreateAppStateService } from '../../data-services/create-app-state.service';
 
 const APP_UNIQUE_NAME_PROVIDER = {
   provide: NG_ASYNC_VALIDATORS, useExisting: forwardRef(() => AppNameUniqueDirective), multi: true
@@ -15,24 +14,26 @@ const APP_UNIQUE_NAME_PROVIDER = {
 
 // See: https://medium.com/@kahlil/asynchronous-validation-with-angular-reactive-forms-1a392971c062
 
-const { proxyAPIVersion, cfAPIVersion } = environment;
+const { proxyAPIVersion } = environment;
 export type NameTaken<T = any> = (response: HttpResponse<T>) => boolean;
 export type UniqueValidatorRequestBuilder<T = any> = (name: string) => HttpRequest<T>;
 export class AppNameUniqueChecking {
   busy!: boolean;
   taken: boolean | undefined;
-  status!: string;
+  // Consumed by <app-stateful-icon [state]> so it carries StratosStatus
+  // values (NONE renders nothing, OK renders the 'done' icon).
+  status: StratosStatus = StratosStatus.NONE;
 
   set(busy: boolean, taken?: boolean) {
     this.busy = busy;
     this.taken = taken;
 
     if (this.busy) {
-      this.status = 'busy';
+      this.status = StratosStatus.BUSY;
     } else if (this.taken === undefined) {
-      this.status = '';
+      this.status = StratosStatus.NONE;
     } else {
-      this.status = this.taken ? 'error' : 'done';
+      this.status = this.taken ? StratosStatus.ERROR : StratosStatus.OK;
     }
   }
 }
@@ -43,13 +44,13 @@ selector: '[appApplicationNameUnique][formControlName],[appApplicationNameUnique
 standalone: true
 })
 export class AppNameUniqueDirective implements AsyncValidator, OnInit {
-  private store = inject<Store<CFAppState>>(Store);
+  private createAppState = inject(CreateAppStateService);
   private http = inject(HttpClient);
 
 
   @Input() appApplicationNameUnique!: AppNameUniqueChecking;
   @Input() appApplicationNameUniqueRequest!: UniqueValidatorRequestBuilder;
-  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.total_results > 0;
+  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.totalResults > 0;
 
   constructor() {
     if (!this.appApplicationNameUnique) {
@@ -75,9 +76,12 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
         this.appApplicationNameUnique.set(false, appNameTaken);
         return appNameTaken ? { appNameTaken } : null;
       }),
-      catchError(err => {
+      catchError(() => {
+        // Fail open: CC enforces name uniqueness at create time, so a
+        // failed convenience check must not wedge the form (an erroring
+        // async validator leaves the control PENDING forever).
         this.appApplicationNameUnique.set(false);
-        return observableThrowError(err);
+        return observableOf(null);
       }));
   }
 
@@ -93,29 +97,23 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
 
   private getDefaultRequest(cfGuid: string, spaceGuid: string, name: string) {
     const params = new HttpParams()
-      .set('q', 'name:' + name)
-      .append('q', 'space_guid:' + spaceGuid);
-    const headers = new HttpHeaders({
-      'x-cap-cnsi-list': cfGuid,
-      'x-cap-passthrough': 'true'
-    });
+      .set('return', 'counts')
+      .set('names', name)
+      .set('space_guids', spaceGuid);
     return new HttpRequest(
       'GET',
-      `/pp/${proxyAPIVersion}/proxy/${cfAPIVersion}/apps`,
-      {
-        headers,
-        params
-      },
+      `/pp/${proxyAPIVersion}/cf/apps/${cfGuid}`,
+      { params },
     );
   }
 
   private getDefaultRequestData(name: string) {
-    return this.store.select(selectNewAppState).pipe(
+    return this.createAppState.cloudFoundryDetails$.pipe(
       take(1),
       switchMap(
-        newAppState => {
-          const cfGuid = newAppState.cloudFoundryDetails.cloudFoundry;
-          const spaceGuid = newAppState.cloudFoundryDetails.space;
+        cloudFoundryDetails => {
+          const cfGuid = cloudFoundryDetails!.cloudFoundry;
+          const spaceGuid = cloudFoundryDetails!.space;
           const request = this.getDefaultRequest(cfGuid, spaceGuid, name);
           return this.nameTaken(
             request,

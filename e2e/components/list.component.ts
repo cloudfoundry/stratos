@@ -57,9 +57,15 @@ export class ListTableComponent {
   }
 
   async getTableData(): Promise<TableData[]> {
-    // Read headers from app-table-cell inside each header cell to avoid sort icon text
+    // Read headers from app-table-cell inside each header cell to avoid sort icon text.
+    // Signal-list headers put the sort icon (a material-icons ligature, e.g. "sort")
+    // inside the th text, so strip icon elements before reading.
     const headerCells = await this.table.locator('.app-table__header-cell app-table-cell, th').all();
-    const headers = await Promise.all(headerCells.map(h => h.textContent().then(t => (t || '').trim())));
+    const headers = await Promise.all(headerCells.map(h => h.evaluate(el => {
+      const clone = el.cloneNode(true) as HTMLElement;
+      clone.querySelectorAll('.material-icons, mat-icon').forEach(icon => icon.remove());
+      return (clone.textContent || '').trim();
+    })));
 
     const rows = await this.getRows().all();
 
@@ -123,18 +129,23 @@ export class ListTableComponent {
 
   async openRowActionMenuByRow(row: Locator): Promise<MenuComponent> {
     // Target the overflow menu button (more_vert btn-icon), not inline action buttons
-    const actionButton = row.locator('app-table-cell-actions button.btn-icon, button[aria-label="Actions"]').first();
+    const actionButton = row.locator(
+      'app-table-cell-actions button.btn-icon, button[aria-label="Actions"], button[data-test="row-actions"]',
+    ).first();
     await actionButton.click();
 
-    // Wait for either Angular Material menu or the custom table-cell-actions dropdown
+    // Wait for the Angular Material menu, the custom table-cell-actions
+    // dropdown, or the signal-list row-actions menu
     const matMenu = this.page.locator('.mat-menu-content, .mat-mdc-menu-content');
-    const customMenu = row.locator('.table-cell-actions-menu--open');
+    const customMenu = row.locator('.table-cell-actions-menu--open, [data-test="row-actions-menu"]');
     await Promise.any([
       matMenu.waitFor({ state: 'visible', timeout: 5000 }),
       customMenu.waitFor({ state: 'visible', timeout: 5000 }),
     ]).catch(() => {});
 
-    return new MenuComponent(this.page);
+    // Bind to the row's own menu (custom dropdown / signal-list row-actions),
+    // not the dead Material menu the default MenuComponent locator targets.
+    return new MenuComponent(this.page, customMenu);
   }
 
   async toggleSort(headerTitle: string): Promise<void> {
@@ -148,7 +159,8 @@ export class ListTableComponent {
  * Card view of list component
  */
 export class ListCardComponent {
-  private static cardsCss = 'app-card:not(.row-filler), mat-card:not(.row-filler)';
+  // Legacy app-list cards plus signal-list card-grid children.
+  private static cardsCss = 'app-card:not(.row-filler), mat-card:not(.row-filler), [data-test="card-grid"] > *';
   private cards: Locator;
 
   constructor(private page: Page, private listLocator: Locator) {
@@ -422,7 +434,9 @@ export class ListComponent {
   public locator: Locator;
 
   constructor(private page: Page, locator?: Locator) {
-    this.locator = locator || page.locator('app-list').first();
+    // Pages are migrating from the legacy app-list to app-signal-list; a page
+    // renders exactly one of the two, so match either.
+    this.locator = locator || page.locator('app-list, app-signal-list').first();
     this.table = new ListTableComponent(page, this.locator);
     this.cards = new ListCardComponent(page, this.locator);
     this.header = new ListHeaderComponent(page, this.locator);
@@ -430,16 +444,25 @@ export class ListComponent {
     this.empty = new ListEmptyComponent(page, this.locator);
   }
 
+  // View detection covers both list generations. Legacy app-list carries a
+  // list-component__table/__cards class; signal-list renders a plain <table>
+  // for table view and a [data-test="card-grid"] for card view. Use count()
+  // (not getAttribute) so a missing legacy element returns false instead of
+  // hanging on the auto-wait.
   async isTableView(): Promise<boolean> {
-    const listElement = this.locator.locator('.list-component');
-    const className = (await listElement.getAttribute('class')) ?? '';
-    return className.includes('list-component__table');
+    const legacy = this.locator.locator('.list-component');
+    if (await legacy.count()) {
+      return ((await legacy.getAttribute('class')) ?? '').includes('list-component__table');
+    }
+    return (await this.locator.locator('table').count()) > 0;
   }
 
   async isCardsView(): Promise<boolean> {
-    const listElement = this.locator.locator('.list-component');
-    const className = (await listElement.getAttribute('class')) ?? '';
-    return className.includes('list-component__cards');
+    const legacy = this.locator.locator('.list-component');
+    if (await legacy.count()) {
+      return ((await legacy.getAttribute('class')) ?? '').includes('list-component__cards');
+    }
+    return (await this.locator.locator('[data-test="card-grid"]').count()) > 0;
   }
 
   getLoadingIndicator(): Locator {

@@ -18,10 +18,6 @@ export {
   TailwindSimpleSnackBar as SimpleSnackBar
 } from './tailwind-snackbar.service';
 
-export {
-  TailwindIconRegistry as MatIconRegistry
-} from './tailwind-icon-registry.service';
-
 // Export dialog data token for injection
 export {
   MAT_DIALOG_DATA
@@ -50,12 +46,6 @@ export {
 } from './tailwind-error-state-matcher';
 
 export {
-  TailwindSidenav as StratosSidenav,
-  TailwindSidenavService as StratosSidenavService,
-  TailwindSidenavConfig as StratosSidenavConfig
-} from './tailwind-sidenav.service';
-
-export {
   TailwindSortDirective as MatSort,
   TailwindSortHeaderDirective as StratosSortHeaderDirective,
   TailwindSortService as StratosSortService,
@@ -69,12 +59,5 @@ export {
   TailwindPaginatorService as StratosPaginatorService,
   TailwindPageEvent as PageEvent
 } from './tailwind-paginator.service';
-
-export {
-  TailwindJsonSchemaFormComponent as StratosJsonSchemaFormComponent,
-  TailwindJsonSchemaFormService as StratosJsonSchemaFormService,
-  JsonSchemaFormData as StratosJsonSchemaFormData,
-  JsonSchemaFormConfig as StratosJsonSchemaFormConfig
-} from './tailwind-json-schema-form.service';
 
 // Factory removed - use TailwindDialogService.open() instead

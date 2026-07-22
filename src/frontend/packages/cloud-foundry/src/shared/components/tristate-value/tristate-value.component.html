@@ -1,0 +1,9 @@
+@if (unavailable) {
+  <span class="tristate-value tristate-value--unavailable"
+        [matTooltip]="unavailableTooltip"
+        matTooltipPosition="above">Not Available</span>
+} @else if (value !== null && value !== undefined && value !== '') {
+  <span class="tristate-value tristate-value--known">{{ value }}</span>
+} @else {
+  <span class="tristate-value tristate-value--empty">{{ emptyText }}</span>
+}

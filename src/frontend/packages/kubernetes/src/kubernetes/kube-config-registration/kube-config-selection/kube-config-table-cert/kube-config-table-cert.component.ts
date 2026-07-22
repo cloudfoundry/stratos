@@ -6,7 +6,7 @@ import { CustomCheckboxComponent } from '../../../../../../core/src/shared/compo
 import { ProgressSpinnerComponent } from '../../../../../../core/src/shared/components/progress-spinner/progress-spinner.component';
 import { timeout } from 'rxjs/operators';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { TableCellCustom } from '../../../../../../core/src/shared/components/signal-list/cell-base';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
@@ -49,7 +49,7 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
         });
       } else {
         // Manually check if a cert is required, if so tick by default
-        this.http.get(`/pp/v1/kube/cert?url=${row.cluster.server}`).pipe(
+        this.http.get<CertResponse>(`/pp/v1/kube/cert?url=${row.cluster.server}`).pipe(
           timeout(5000),
         ).subscribe(
           // Success, no cert required

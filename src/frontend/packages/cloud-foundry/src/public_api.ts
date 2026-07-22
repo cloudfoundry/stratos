@@ -12,10 +12,8 @@ export { ApplicationService } from './features/applications/application.service'
 export { ApplicationMonitorService } from './features/applications/application-monitor.service';
 export { ApplicationStateService, ApplicationStateData } from './shared/services/application-state.service';
 export { ApplicationEnvVarsHelper } from './features/applications/application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-export { CfOrgSpaceDataService, createCfOrgSpaceFilterConfig, CfOrgSpaceItem } from './shared/data-services/cf-org-space-service.service';
-export { ServiceActionHelperService } from './shared/data-services/service-action-helper.service';
+export { CfOrgSpaceDataService, CfOrgSpaceItem } from './shared/data-services/cf-org-space-service.service';
 export { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
-export { CfAppConfigService } from './shared/components/list/list-types/app/cf-app-config.service';
 export { CfOrgSpaceLabelService } from './shared/services/cf-org-space-label.service';
 
 // Utility Functions
@@ -30,10 +28,11 @@ export { getSpaceRoles, IUserRole, getOrgRolesString } from './features/cf/cf.he
 export { getCFEntityKey } from './cf-entity-helpers';
 export { getStartedAppInstanceCount } from './cf.helpers';
 export { createOrgQuotaDefinition } from './features/cf/services/cloud-foundry-organization.service';
-export { createCfOrSpaceMultipleFilterFn } from './shared/data-services/cf-org-space-service.service';
 
 // Permissions
 export { CfCurrentUserPermissions, cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
+export { CfCurrentUserRolesSignalService } from './user-permissions/cf-current-user-roles-signal.service';
+export { CfCurrentUserRolesDataService } from './services/cf-current-user-roles-data.service';
 
 // Test helpers
 export * from './entity-relations/entity-relations-spec-helper';
@@ -57,7 +56,6 @@ export {
   organizationEntityType,
   quotaDefinitionEntityType,
   cfEventEntityType,
-  cfInfoEntityType,
   cfUserEntityType,
   appSummaryEntityType,
   appStatsEntityType,
@@ -97,14 +95,8 @@ export { UserRoleLabels } from './store/types/users-roles.types';
 export { RemoveCfUserRole } from './actions/users.actions';
 
 // CF Route Actions
-export { GetAppRoutes } from './actions/application-service-routes.actions';
-
-// CF Selectors
-export { selectCfEntity } from './store/selectors/api.selectors';
-export { selectDeployAppState } from './store/selectors/deploy-application.selector';
 
 // CF Actions
-export { CheckProjectExists } from './actions/deploy-applications.actions';
 export { UpdateExistingApplication } from './actions/application.actions';
 
 // CF Route Types
@@ -118,12 +110,6 @@ export { cfEntityFactory } from './cf-entity-factory';
 export { cfEntityCatalog } from './cf-entity-catalog';
 
 // List Configuration Base Class
-export { BaseCfListConfig } from './shared/components/list/list-types/base-cf/base-cf-list-config';
-
-// List Configuration Services
-export { CfAppRoutesListConfigService } from './shared/components/list/list-types/app-route/cf-app-routes-list-config.service';
-export { AppServiceBindingListConfigService } from './shared/components/list/list-types/app-sevice-bindings/app-service-binding-list-config.service';
-export { AppServiceBindingDataSource } from './shared/components/list/list-types/app-sevice-bindings/app-service-binding-data-source';
 
 // Components
 export { CfEndpointsMissingComponent } from './shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
@@ -136,7 +122,23 @@ export { RunningInstancesComponent } from './shared/components/running-instances
 export { CfUserPermissionDirective } from './shared/directives/cf-user-permission/cf-user-permission.directive';
 
 // List Table Cell Components
-export { TableCellAppInstancesComponent } from './shared/components/list/list-types/app/table-cell-app-instances/table-cell-app-instances.component';
-export { TableCellAppStatusComponent } from './shared/components/list/list-types/app/table-cell-app-status/table-cell-app-status.component';
-export { TableCellRouteComponent } from './shared/components/list/list-types/cf-routes/table-cell-route/table-cell-route.component';
-export { TableCellTCPRouteComponent } from './shared/components/list/list-types/cf-routes/table-cell-tcproute/table-cell-tcproute.component';
+
+// FWT-934 entity-key namespacing + diagnostics channel
+export { cfEntityId, parseCfEntityId, isComposite } from './cf-entity-ref';
+export type { CFEntityRef, CFEntityId } from './cf-entity-ref';
+export { selectCFEntity, selectCFEntities } from './selectors/cf-entity.selectors';
+export type { StApp, StOrg, StSpace, StAppDetail, StOrgDetail } from './services/endpoint-data/stratos-types';
+export { StratosDiagnostics } from './services/diagnostics/stratos-diagnostics.service';
+export { BareGuidLookupGuard } from './services/diagnostics/bare-guid-lookup-guard';
+export { cfApiInterceptor } from './interceptors/cf-api-interceptor';
+export {
+  DIAGNOSTIC_CODE_FAMILIES,
+  isDiagnosticCode,
+} from './services/diagnostics/diagnostics.types';
+export type {
+  DiagnosticCode,
+  DiagnosticCounter,
+  DiagnosticSample,
+  DiagnosticsQueryOptions,
+  DiagnosticsSnapshotEnvelope,
+} from './services/diagnostics/diagnostics.types';

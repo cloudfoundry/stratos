@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { provideStore } from '@ngrx/store';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { UtilsService } from '@stratosui/core';
@@ -15,7 +14,6 @@ describe('CardNumberMetricComponent', () => {
       imports: [CardNumberMetricComponent],
       providers: [
         provideZonelessChangeDetection(),
-        provideStore(),
         UtilsService,
       ]
     });

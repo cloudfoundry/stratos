@@ -33,7 +33,6 @@ export const domainEntityType = 'domain';
 export const organizationEntityType = 'organization';
 export const quotaDefinitionEntityType = 'quota_definition';
 export const cfEventEntityType = 'cloudFoundryEvent';
-export const cfInfoEntityType = 'cloudFoundryInfo';
 export const cfUserEntityType = 'user';
 export const appSummaryEntityType = 'applicationSummary';
 export const appStatsEntityType = 'applicationStats';

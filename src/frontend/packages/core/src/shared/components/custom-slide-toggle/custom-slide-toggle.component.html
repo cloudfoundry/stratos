@@ -7,6 +7,7 @@
     [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
 
     <label class="slide-toggle-label"
+      [attr.for]="id"
       [class.label-before]="labelPosition === 'before'"
       [class.label-after]="labelPosition === 'after'">
 

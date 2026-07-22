@@ -1,21 +1,29 @@
 @let bindings = serviceInstance.entity.service_bindings ?? [];
 @let latestBinding = bindings[bindings.length - 1];
-@let lastOp = latestBinding?.entity?.last_operation;
+@let lastOp = $safeNavigationMigration(latestBinding?.entity?.last_operation);
 
 @if (lastOp) {
-  <div class="flex items-center pb-1"
-    [class.justify-start]="!alignRight"
-    [class.justify-end]="alignRight">
+  <div class="flex items-center pb-1" [class.justify-start]="!alignRight" [class.justify-end]="alignRight">
     {{ lastOp.type | titlecase }}
-    @if (lastOp.state === 'in progress') {
-      <app-boolean-indicator [isTrue]="true" type="progress-progress" [subtle]="false" [showText]="false"
-        [ngClass]="alignRight ? 'pl-1' : 'pr-1'"></app-boolean-indicator>
+    @if (lastOp.state === "in progress") {
+      <app-boolean-indicator
+        [isTrue]="true"
+        type="progress-progress"
+        [subtle]="false"
+        [showText]="false"
+        [ngClass]="alignRight ? 'pl-1' : 'pr-1'"
+      ></app-boolean-indicator>
     } @else {
-      <app-boolean-indicator [isTrue]="lastOp.state === 'succeeded'" type="yes-no" [subtle]="false" [showText]="false"
-        [ngClass]="alignRight ? 'pl-1' : 'pr-1'"></app-boolean-indicator>
+      <app-boolean-indicator
+        [isTrue]="lastOp.state === 'succeeded'"
+        type="yes-no"
+        [subtle]="false"
+        [showText]="false"
+        [ngClass]="alignRight ? 'pl-1' : 'pr-1'"
+      ></app-boolean-indicator>
     }
   </div>
-  <div>{{ lastOp.created_at | date:'medium' }}</div>
+  <div>{{ lastOp.created_at | date: "medium" }}</div>
 } @else {
   -
 }

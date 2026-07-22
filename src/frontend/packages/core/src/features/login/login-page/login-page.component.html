@@ -17,21 +17,25 @@
   <!-- Login Form Card -->
   <div
     class="login-card card w-full max-w-md mx-4 p-8 rounded-lg shadow-lg relative z-10"
-    [ngStyle]="{
-      'background-color': loginCardBackground()
-    }"
+    [ngStyle]="{ 'background-color': loginCardBackground() }"
+    [style.--input-bg]="inputBackground()"
+    [style.--input-border]="inputBorder()"
     >
     <!-- Logo and Display Name Header -->
     <div class="login-header flex items-center space-x-4 mb-6">
-      <img
-        class="login-logo h-12 w-12 flex-shrink-0"
-        [src]="themeLogo()"
-        [alt]="themeDisplayName() || 'Logo'"
-        />
+      @if (showLogo()) {
+        <img
+          class="login-logo h-12 w-12 shrink-0"
+          [src]="themeLogo()"
+          [alt]="themeDisplayName() || 'Logo'"
+          />
+      }
       <div class="login-title-section flex-1">
-        <h1 class="login-title text-xl font-bold text-content-text mb-1">
-          {{ themeDisplayName() || themeTitle() || 'Stratos' }}
-        </h1>
+        @if (showTitle()) {
+          <h1 class="login-title text-xl font-bold text-content-text mb-1">
+            {{ themeDisplayName() || themeTitle() || 'Stratos' }}
+          </h1>
+        }
         @if (themeSubtitle()) {
           <p class="login-subtitle text-sm text-content-muted">
             {{ themeSubtitle() }}
@@ -41,6 +45,13 @@
     </div>
 
     <div class="login-body">
+      @if (customMessage()) {
+        <p class="login-message text-sm text-content-muted mb-4"
+           role="note"
+>
+          {{ customMessage() }}
+        </p>
+      }
       <div class="login-form-outer" [ngClass]="{'login-sso': (ssoLogin$ | async)}">
         <form class="login-form space-y-6" name="loginForm" (ngSubmit)="login()" #loginForm="ngForm">
           @if ((ssoLogin$ | async) === false) {
@@ -103,15 +114,14 @@
       id="login-error-message"
       class="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300
              flex items-center gap-2 px-4 py-3 rounded-lg shadow-lg
-             bg-red-50 dark:bg-red-900/30 border border-red-300 dark:border-red-700
-             text-red-800 dark:text-red-200 text-sm max-w-md"
+             border alert-danger text-sm max-w-md"
       [ngClass]="{
         'translate-y-0 opacity-100': !!displayMessage,
         '-translate-y-full opacity-0': !displayMessage
       }"
       role="alert"
       >
-      <span class="material-icons text-red-500 dark:text-red-400 flex-shrink-0">error_outline</span>
+      <span class="material-icons text-danger shrink-0">error_outline</span>
       <span>{{ displayMessage }}</span>
     </div>
   }

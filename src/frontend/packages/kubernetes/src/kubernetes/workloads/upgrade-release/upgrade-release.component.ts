@@ -1,28 +1,38 @@
-import { AsyncPipe } from '@angular/common';
-import {Component, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { combineLatest, Observable, of } from 'rxjs';
-import { filter, map, pairwise, take, tap } from 'rxjs/operators';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+  ViewChild,
+  WritableSignal,
+} from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { format, formatDistance } from 'date-fns';
+import { combineLatest, firstValueFrom, Observable } from 'rxjs';
+import { filter, map, take, tap } from 'rxjs/operators';
 
-import { ListComponent } from '../../../../../core/src/shared/components/list/list.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import {
+  SignalListComponent,
+  SignalListConfig,
+  SignalListDropdownOption,
+} from '../../../../../core/src/shared/components/signal-list/signal-list.component';
+import {
+  SignalStepHandle,
   StepComponent,
-  StepOnNextFunction,
-  StepOnNextResult,
 } from '../../../../../core/src/shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
 import { ChartsService } from '../../../helm/monocular/shared/services/charts.service';
 import { createMonocularProviders } from '../../../helm/monocular/stratos-monocular-providers.helpers';
 import { stratosMonocularEndpointGuid } from '../../../helm/monocular/stratos-monocular.helper';
-import { HelmUpgradeValues, MonocularVersion } from '../../../helm/store/helm.types';
+import { MonocularVersion } from '../../../helm/store/helm.types';
+import { KubeHelmDataService } from '../../../services/endpoint-data/kube-helm-data.service';
+import { HelmUpgradePayload } from '../../../services/endpoint-data/kube-types';
 import { ChartValuesConfig, ChartValuesEditorComponent } from '../chart-values-editor/chart-values-editor.component';
 import { HelmReleaseHelperService } from '../release/tabs/helm-release-helper.service';
 import { HelmReleaseGuid } from '../workload.types';
-import { workloadsEntityCatalog } from './../workloads-entity-catalog';
-import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config';
+import { HelmReleaseVersionsSignalConfigService } from './helm-release-versions-signal-config.service';
 
 @Component({
   selector: 'app-upgrade-release',
@@ -30,15 +40,15 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    AsyncPipe,
     ChartValuesEditorComponent,
-    ListComponent,
     PageHeaderComponent,
+    SignalListComponent,
     StepComponent,
     SteppersComponent
   ],
   providers: [
     HelmReleaseHelperService,
+    HelmReleaseVersionsSignalConfigService,
     {
       provide: HelmReleaseGuid,
       useFactory: (activatedRoute: ActivatedRoute) => ({
@@ -53,30 +63,72 @@ import { ReleaseUpgradeVersionsListConfig } from './release-version-list-config'
 })
 export class UpgradeReleaseComponent {
 
-  @ViewChild('editor', { static: true }) editor: ChartValuesEditorComponent;
+  @ViewChild('editor', { static: true }) editor!: ChartValuesEditorComponent; // strict: @ViewChild populated by Angular
 
   public cancelUrl;
-  public listConfig: ReleaseUpgradeVersionsListConfig;
-  public validate$: Observable<boolean>;
-  private version: MonocularVersion;
+  // Signal-native list config for the version picker; undefined until the
+  // upgrade target chart resolves (hasUpgrade emits).
+  public readonly listConfig: WritableSignal<SignalListConfig<MonocularVersion> | undefined> = signal(undefined);
+  private version!: MonocularVersion; // strict: set by the version step's submit() before the overrides step reads it
 
-  public config: ChartValuesConfig;
+  public config!: ChartValuesConfig; // strict: assigned by fetchVersionDetails$ before the editor renders
 
-  private monocularEndpointId: string;
+  private monocularEndpointId!: string; // strict: assigned in the hasUpgrade subscription before submit reads it
 
   // Future
   public showAdvancedOptions = false;
 
-  private chartUrl: string;
-  private store = inject(Store<any>);
+  private chartUrl!: string; // strict: assigned by fetchVersionDetails$ before doUpgrade$ reads it
   public helper = inject(HelmReleaseHelperService);
   private chartsService = inject(ChartsService);
+  private router = inject(Router);
+  private helmDataService = inject(KubeHelmDataService);
+  private readonly versionsConfig = inject(HelmReleaseVersionsSignalConfigService);
 
+  // FWT-959 Part 2: signal-native step handles.
+  //
+  // - versionStepHandle: validity tracks "a version is selected" directly off
+  //   the signal-config's radio selection. submit() captures the chosen
+  //   version then fetches release+chart-version metadata to prime the editor.
+  // - overridesStepHandle: submit() runs the upgrade and on success navigates
+  //   back to the release detail page (legacy `redirect: true`).
+  versionStepHandle: SignalStepHandle = {
+    valid: computed(() => this.versionsConfig.selectedKey() != null),
+    submit: async () => {
+      const selected = this.versionsConfig.selectedVersion();
+      if (!selected) {
+        throw new Error('No version selected');
+      }
+      this.version = selected;
+      await firstValueFrom(this.fetchVersionDetails$());
+    },
+  };
 
+  overridesStepHandle: SignalStepHandle = {
+    valid: signal(true).asReadonly(),
+    finishButtonText: signal('Upgrade').asReadonly(),
+    onEnter: () => {
+      this.editor.resizeEditor();
+    },
+    submit: async () => {
+      // showAdvancedOptions branching from the legacy doUpgrade is preserved
+      // for parity even though the advanced step is currently commented out
+      // of the template. If/when it returns, this branch keeps the second-
+      // step submit a no-op (the upgrade fires from the advanced step).
+      if (this.showAdvancedOptions) {
+        return;
+      }
+      const result = await firstValueFrom(this.doUpgrade$());
+      if (!result.success) {
+        throw new Error(result.message || 'Failed to upgrade release');
+      }
+      // Legacy { redirect: true, redirectPayload: { path: cancelUrl } }
+      // navigated back to the release detail. Make explicit.
+      await this.router.navigate([this.cancelUrl]);
+    },
+  };
 
   constructor() {
-
-
     this.cancelUrl = `/workloads/${this.helper.guid}`;
 
     this.helper.hasUpgrade(true).pipe(
@@ -89,35 +141,69 @@ export class UpgradeReleaseComponent {
       const name = chart.upgrade.name;
       const repoName = chart.upgrade.repo.name;
       const version = chart.release.chart.metadata.version;
-      this.listConfig = new ReleaseUpgradeVersionsListConfig(this.store, repoName, name, version, chart.monocularEndpointId);
       this.monocularEndpointId = chart.monocularEndpointId;
 
-      // First step is valid when a version has been selected
-      this.validate$ = this.listConfig.versionsDataSource.selectedRows$.pipe(
-        map((rows: Map<string, any>) => {
-          if (rows && rows.size === 1) {
-            this.version = rows.values().next().value;
-            return true;
-          }
-          return false;
-        })
-      );
+      this.versionsConfig.initialize(repoName, name, version, chart.monocularEndpointId);
+      void this.versionsConfig.loadAll();
+      this.listConfig.set(this.buildListConfig());
     });
-
-
   }
 
-  // Ensure the editor is resized when the overrides step becomes visible
-  onEnterOverrides = () => {
-    this.editor.resizeEditor();
-  };
+  private buildListConfig(): SignalListConfig<MonocularVersion> {
+    const versionTypeOptions = signal<SignalListDropdownOption[]>([
+      { label: 'Release Versions', value: 'release' },
+      { label: 'All Versions', value: 'all' },
+    ]);
+    return {
+      pagedItems: this.versionsConfig.view.pagedItems,
+      totalFilteredResults: this.versionsConfig.view.totalFilteredResults,
+      totalPages: this.versionsConfig.view.totalPages,
+      pageIndex: this.versionsConfig.pageIndex,
+      pageSize: this.versionsConfig.pageSize,
+      isAnyLoading: this.versionsConfig.isLoading(),
+      errorsByCnsi: signal(new Map()),
+      pageSizeOptions: [10, 25, 50, 100],
+      columns: [
+        {
+          header: '', key: 'radio',
+          kind: 'radio',
+          radio: { selectedKey: this.versionsConfig.selectedKey },
+          render: () => '',
+          widthHint: '3rem',
+        },
+        {
+          header: 'Version', key: 'version',
+          kind: 'text',
+          render: (v: MonocularVersion) =>
+            v.attributes.version + (this.versionsConfig.isCurrent(v) ? ' (current)' : ''),
+        },
+        {
+          header: 'Created', key: 'created',
+          kind: 'text',
+          render: (v: MonocularVersion) => format(new Date(v.attributes.created), 'PPPppp'),
+        },
+        {
+          header: 'Age', key: 'age',
+          kind: 'text',
+          render: (v: MonocularVersion) => formatDistance(new Date(v.attributes.created), new Date()),
+        },
+      ],
+      getRowKey: this.versionsConfig.getRowKey,
+      emptyMessage: 'There are no versions',
+      loadingMessage: 'Loading versions…',
+      filterDropdowns: [
+        { label: 'Versions', options: versionTypeOptions, selected: this.versionsConfig.versionType },
+      ],
+    };
+  }
 
-  // Update the editor with the chosen version when the user moves to the next step
-  onNext = (): Observable<StepOnNextResult> => {
+  // Update the editor with the chosen version when the user moves to the
+  // next step. Returns void on success — the side-effect is priming
+  // `this.config` so the editor can render the right schema/values.
+  private fetchVersionDetails$(): Observable<void> {
     const chart = this.version.relationships.chart.data;
     const version = this.version.attributes.version;
     const endpointID = this.monocularEndpointId || stratosMonocularEndpointGuid;
-
 
     // Fetch the release metadata so that we have the values used to install the current release
     return combineLatest(
@@ -136,25 +222,20 @@ export class UpgradeReleaseComponent {
           releaseValues: release.config
         };
       }),
-      map(() => {
-        return { success: true };
-      })
+      map((): void => undefined)
     );
-  };
+  }
 
   // Hide/show the advanced options step
   toggleAdvancedOptions() {
     this.showAdvancedOptions = !this.showAdvancedOptions;
   }
 
-  doUpgrade: StepOnNextFunction = (index: number, _step: StepComponent) => {
-    // If we are showing the advanced options, don't upgrade if we aer not on the last step
-    if (this.showAdvancedOptions && index === 1) {
-      return of({ success: true });
-    }
-
-    // Add the chart url into the values
-    const values: HelmUpgradeValues = {
+  // Returns the legacy ActionState shape so the caller can decide
+  // success/failure + redirect explicitly. Now backed by the
+  // KubeHelmDataService rather than the ngrx upgrade action.
+  private doUpgrade$(): Observable<{ success: boolean; message?: string }> {
+    const values: HelmUpgradePayload = {
       values: JSON.stringify(this.editor.getValues()),
       restartPods: false,
       chart: {
@@ -166,22 +247,19 @@ export class UpgradeReleaseComponent {
       chartUrl: this.chartUrl
     };
 
-    // Make the request
-    return workloadsEntityCatalog.release.api.upgrade<ActionState>(this.helper.releaseTitle,
-      this.helper.endpointGuid, this.helper.namespace, values).pipe(
-        // Wait for result of request
-        filter(state => !!state),
-        pairwise(),
-        filter(([oldVal, newVal]) => (oldVal.busy && !newVal.busy)),
-        map(([, newVal]) => newVal),
-        map((result: ActionState) => ({
-          success: !result.error,
-          redirect: !result.error,
-          redirectPayload: {
-            path: !result.error ? this.cancelUrl : ''
-          },
-          message: !result.error ? '' : result.message
-        }))
-      );
-  };
+    return new Observable<{ success: boolean; message?: string }>(sub => {
+      this.helmDataService.upgrade(
+        this.helper.endpointGuid,
+        this.helper.namespace,
+        this.helper.releaseTitle,
+        values,
+      ).then(() => {
+        sub.next({ success: true });
+        sub.complete();
+      }).catch((err: Error) => {
+        sub.next({ success: false, message: err?.message || 'Upgrade failed' });
+        sub.complete();
+      });
+    });
+  }
 }

@@ -538,7 +538,7 @@ func (p *portalProxy) doRequest(cnsiRequest *api.CNSIRequest, done chan<- *api.C
 		cnsiRequest.StatusCode = res.StatusCode
 		cnsiRequest.Status = res.Status
 		cnsiRequest.Response, cnsiRequest.Error = io.ReadAll(res.Body)
-		defer res.Body.Close()
+		defer func() { _ = res.Body.Close() }()
 	}
 
 	// If Status Code >=400, log this as a warning
