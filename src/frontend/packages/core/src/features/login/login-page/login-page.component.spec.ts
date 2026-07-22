@@ -7,7 +7,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { Store } from '@ngrx/store';
 import { of } from 'rxjs';
-import { InvalidSession, ResetAuth } from '../../../../../store/src/actions/auth.actions';
+import { InvalidSession, ResetAuth } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 
 import { LoginPageComponent } from './login-page.component';

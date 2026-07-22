@@ -62,7 +62,7 @@ export {
   InternalAppState,
 } from './app-state';
 export { internalEventStateSelector } from './selectors/internal-events.selectors';
-export { Login, Logout, VerifySession, VerifiedSession, SESSION_VERIFIED } from './actions/auth.actions';
+export { Login, Logout, VerifySession, VerifiedSession, InvalidSession, ResetAuth, SESSION_VERIFIED } from './actions/auth.actions';
 export { RequestTypes, APIResponse } from './actions/request.actions';
 export { selectDeletionInfo } from './selectors/api.selectors';
 export { SetDashboardStateValueAction } from './actions/dashboard-actions';
