@@ -196,6 +196,7 @@ $(_HIDE)WANT_SECRETS  :=
 $(_HIDE)WANT_TREE     :=
 $(_HIDE)WANT_HISTORY  :=
 $(_HIDE)WANT_LICENSES :=
+$(_HIDE)WANT_MODROT   :=
 
 ifneq ($(filter packages,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_PACKAGES := yes
@@ -211,6 +212,9 @@ ifneq ($(filter history,$(MAKECMDGOALS)),)
 endif
 ifneq ($(filter licenses,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_LICENSES := yes
+endif
+ifneq ($(filter modrot,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_MODROT := yes
 endif
 
 # cf modifier defaults to linux/amd64 unless PLATFORM is set
@@ -275,7 +279,7 @@ endif
 endif
 # Default: all scanners for audit when no modifier given
 ifneq ($(filter audit,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES)$($(_HIDE)WANT_MODROT),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
   $(_HIDE)WANT_ACTIONS  := yes
@@ -293,8 +297,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses
-frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses:
+.PHONY: frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot
+frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -568,6 +572,7 @@ $(call register, check, e2e)
 # make audit              — default scanners (frontend backend actions packages secrets)
 # make audit frontend     — bun audit (npm advisory DB)
 # make audit backend      — gosec + trivy + govulncheck (both Go modules)
+# make audit modrot       — modrot archived/deprecated dependency scan (needs gh auth)
 # make audit actions      — zizmor (GitHub Actions workflow SAST)
 #                           ZIZMOR_FLAGS="--persona=auditor" for the strict rule set
 # make audit packages     — osv-scanner (all lockfiles + go.mods, one pass)
@@ -599,6 +604,16 @@ define audit.backend
 	cd src/jetstream/api && govulncheck ./... || true
 endef
 $(call register, audit, backend)
+
+# Archived / deprecated dependency scan. Needs `gh auth token` (GitHub
+# GraphQL) + network, so it is a standalone extra, not in the default set.
+# --recursive covers jetstream + api + every plugin go.mod in one query pass.
+define audit.modrot
+	@echo "Running dependency-archival audit (modrot)..."
+	@which modrot > /dev/null 2>&1 || (echo "modrot not installed. Run: go install github.com/norman-abramovitz/modrot@latest" >&2 && exit 1)
+	modrot --recursive --deprecated --resolve src/jetstream || true
+endef
+$(call register, audit, modrot)
 
 define audit.actions
 	@echo "Running GitHub Actions workflow audit (zizmor)..."
@@ -1003,6 +1018,7 @@ help:
 	@echo "  make audit                Run default security scanners"
 	@echo "  make audit frontend       bun audit (npm advisory DB)"
 	@echo "  make audit backend        gosec + trivy + govulncheck (both Go modules)"
+	@echo "  make audit modrot         modrot archived/deprecated dep scan (needs gh auth)"
 	@echo "  make audit actions        zizmor (ZIZMOR_FLAGS=\"--persona=auditor\" for strict)"
 	@echo "  make audit packages       osv-scanner (all lockfiles + go.mods)"
 	@echo "  make audit secrets        gitleaks (working-tree secret scan)"
