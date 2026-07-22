@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
@@ -29,7 +30,7 @@ import { applicationEntityType } from '../../../../cf-entity-types';
 import { BulkResult, CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
 import type { StApp } from '../../../../services/endpoint-data/stratos-types';
 
 // Per-CF Applications tab. Scoped to one CNSI via the parent route's
@@ -55,6 +56,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private permissionsService = inject(CurrentUserPermissionsService);
 
@@ -328,33 +330,25 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       .filter(a => keys.has(`${a.cnsiGuid}:${a.guid}`));
   }
 
-  // Run a bulk op, report partial failures, and clear selection afterwards.
+  // Run a bulk op with live settlement feedback; clears selection when the
+  // POST phase ends (rows are already optimistically handled by the op).
   private async runBulk(
     verb: string,
     op: () => Promise<BulkResult>,
   ): Promise<void> {
-    this.bulkRunning.set(true);
     try {
-      const result = await op();
-      // succeeded + pending are BOTH the non-error count (the BulkResult
-      // contract): a CF delete accepted async comes back PENDING with a job
-      // still completing, not a failure — so we report it as "requested"
-      // rather than surfacing the raw "pending" state, which reads as stuck.
-      // True completion tracking (polling those jobs) is a separate follow-up.
-      const requested = result.succeeded + result.pending;
-      if (result.failed > 0) {
-        this.snackBar.error(
-          `Bulk ${verb}: ${result.failed} failed${requested ? `, ${requested} requested` : ''}`,
-        );
-      } else {
-        this.snackBar.open(
-          `${requested} ${requested === 1 ? 'application' : 'applications'} ${verb} requested`,
-        );
-      }
-    } catch (err: unknown) {
-      this.snackBar.error(`Bulk ${verb} failed: ${extractHttpErrorMessage(err)}`);
+      await runBulkWithProgress({
+        snackBar: this.snackBar,
+        http: this.http,
+        bulkRunning: this.bulkRunning,
+        noun: 'application',
+        verb,
+        progressVerb: 'Deleting',
+        doneVerb: 'deleted',
+        op,
+        refresh: () => this.appsConfig.refresh(),
+      });
     } finally {
-      this.bulkRunning.set(false);
       this.selectedAppKeys.set(new Set());
     }
   }
