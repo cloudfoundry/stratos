@@ -234,6 +234,29 @@ export class LoginPageComponent implements OnInit {
       }
     });
 
+    // Handle SSO 'nosplash' for unauthenticated visitors: when SSO is
+    // configured with the nosplash option and there is no valid session,
+    // redirect straight to the identity provider instead of showing the
+    // login form / Sign In button. The auto-redirect above only covers the
+    // already-logged-in case, so without this a first visit stops on the
+    // login page despite nosplash being set.
+    this.auth$.pipe(
+      filter(auth =>
+        !auth.loggingIn &&
+        !auth.verifying &&
+        !auth.loggedIn &&
+        !!auth.sessionData &&
+        !auth.sessionData.valid &&
+        !!auth.sessionData.ssoOptions &&
+        auth.sessionData.ssoOptions.indexOf('nosplash') >= 0 &&
+        !queryParamMap().SSO_Message
+      ),
+      take(1),  // Only trigger once on init
+      switchMap(() => this.appReady$)  // Wait for app to be stable before navigating
+    ).subscribe(() => {
+      this.doSSOLoginReactive().subscribe();
+    });
+
     // Subscribe to message$ to keep it updated
     this.message$.subscribe();
   }
