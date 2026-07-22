@@ -47,6 +47,23 @@ describe('LoginPageComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  // issue #5672: SSO_Message is attacker-controllable via the login query string.
+  it('strips URL-like tokens from an injected SSO_Message', () => {
+    const sanitize = (s: string) => (component as any).sanitizeSsoMessage(s);
+    expect(sanitize('SECURITY BREACH. Please visit https://evil.com to resolve'))
+      .toBe('SECURITY BREACH. Please visit [link removed] to resolve');
+    expect(sanitize('go to www.evil.com now')).toBe('go to [link removed] now');
+    expect(sanitize('open evil.com/phish')).toBe('open [link removed]');
+    // legitimate messages pass through untouched
+    expect(sanitize('You have been logged out')).toBe('You have been logged out');
+    expect(sanitize('Bad credentials')).toBe('Bad credentials');
+  });
+
+  it('caps a runaway SSO_Message at 256 chars', () => {
+    const sanitize = (s: string) => (component as any).sanitizeSsoMessage(s);
+    expect(sanitize('a'.repeat(500)).length).toBe(256);
+  });
 });
 
 describe('LoginPageComponent — error banner branding', () => {
