@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
@@ -28,7 +29,7 @@ import { BulkResult, CfAppsSignalConfigService } from '../../../../../../../shar
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
-import { extractHttpErrorMessage } from '../../../../../../../services/extract-error-message';
+import { runBulkWithProgress } from '../../../../../../../services/async-jobs/bulk-progress';
 import type { StApp } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Signal-native space-apps tab. Scoped to one space under one CF
@@ -61,6 +62,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private http = inject(HttpClient);
   private router = inject(Router);
   private permissionsService = inject(CurrentUserPermissionsService);
 
@@ -281,23 +283,23 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
       .filter(a => keys.has(`${a.cnsiGuid}:${a.guid}`));
   }
 
-  // Run a bulk op, report partial failures, and clear selection on success.
-  // succeeded+pending counts as non-error (pending items have an async CF
-  // job tracking completion); only `failed` drives an error snackbar.
+  // Run a bulk op with live settlement feedback; clears selection when the
+  // POST phase ends (rows are already optimistically handled by the op).
   private async runBulk(
     verb: string,
-    total: number,
     op: () => Promise<BulkResult>,
   ): Promise<void> {
     try {
-      const result = await op();
-      if (result.failed > 0) {
-        this.snackBar.error(`${result.failed} of ${total} applications failed to ${verb}`);
-      } else {
-        this.snackBar.open(`${total} ${total === 1 ? 'application' : 'applications'} ${verb} requested`);
-      }
-    } catch (err: unknown) {
-      this.snackBar.error(`Bulk ${verb} failed: ${extractHttpErrorMessage(err)}`);
+      await runBulkWithProgress({
+        snackBar: this.snackBar,
+        http: this.http,
+        noun: 'application',
+        verb,
+        progressVerb: 'Deleting',
+        doneVerb: 'deleted',
+        op,
+        refresh: () => this.appsConfig.refresh(),
+      });
     } finally {
       this.selectedAppKeys.set(new Set());
     }
@@ -320,7 +322,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await this.runBulk('delete', targets.length, () =>
+            await this.runBulk('delete', () =>
               this.appsConfig.bulkDeleteApps(cnsi, targets.map(a => a.guid)));
           });
         },
