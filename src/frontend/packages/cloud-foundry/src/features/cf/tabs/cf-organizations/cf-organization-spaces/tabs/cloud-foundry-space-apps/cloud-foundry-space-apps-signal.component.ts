@@ -287,6 +287,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   // POST phase ends (rows are already optimistically handled by the op).
   private async runBulk(
     verb: string,
+    count: number,
     op: () => Promise<BulkResult>,
   ): Promise<void> {
     try {
@@ -299,6 +300,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
         doneVerb: 'deleted',
         op,
         refresh: () => this.appsConfig.refresh(),
+        count,
       });
     } finally {
       this.selectedAppKeys.set(new Set());
@@ -322,7 +324,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await this.runBulk('delete', () =>
+            await this.runBulk('delete', targets.length, () =>
               this.appsConfig.bulkDeleteApps(cnsi, targets.map(a => a.guid)));
           });
         },

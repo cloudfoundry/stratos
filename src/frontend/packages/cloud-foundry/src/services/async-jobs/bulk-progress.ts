@@ -71,6 +71,10 @@ export interface BulkProgressOptions {
   refresh?: () => Promise<void>;
   refreshAfterPending?: boolean;
   backoffMs?: readonly number[];   // test hook, forwarded to pollBulkResult
+  /** Number of items requested (known from the caller's selection). When
+   *  provided and > 0, the progress snackbar opens BEFORE the POST rather
+   *  than waiting on the response — a fast POST still shows feedback. */
+  count?: number;
 }
 
 const plural = (n: number, noun: string): string => `${n} ${noun}${n === 1 ? '' : 's'}`;
@@ -82,21 +86,37 @@ const plural = (n: number, noun: string): string => `${n} ${noun}${n === 1 ? '' 
 export async function runBulkWithProgress(o: BulkProgressOptions): Promise<void> {
   let result: BulkResult;
   o.bulkRunning?.set(true);
+  // Open the progress snackbar BEFORE the POST when the caller knows the
+  // requested count — a fast POST still shows in-flight feedback instead of
+  // nothing until the final summary. The same ref is threaded through
+  // settlement, which upgrades it to an "X of Y" message and owns dismissal.
+  let progressRef: TailwindSnackBarRef<unknown> | undefined;
+  if (o.count && o.count > 0) {
+    progressRef = o.snackBar.open(`${o.progressVerb} ${plural(o.count, o.noun)}…`, undefined, { duration: 0 });
+  }
   try {
     result = await o.op();
   } catch (err: unknown) {
+    progressRef?.dismiss();
     o.snackBar.error(`Bulk ${o.verb} failed: ${extractHttpErrorMessage(err)}`);
     return;
   } finally {
     o.bulkRunning?.set(false);
   }
-  void trackSettlement(o, result).catch(() => { /* defensive: see contract above */ });
+  void trackSettlement(o, result, progressRef).catch(() => { /* defensive: see contract above */ });
 }
 
-async function trackSettlement(o: BulkProgressOptions, result: BulkResult): Promise<void> {
+async function trackSettlement(
+  o: BulkProgressOptions,
+  result: BulkResult,
+  initialRef?: TailwindSnackBarRef<unknown>,
+): Promise<void> {
   const total = result.results.length;
   const hadPending = result.results.some(r => r.state === 'PENDING');
-  let progressRef: TailwindSnackBarRef<unknown> | undefined;
+  // total (from the settled BulkResult) is authoritative over the caller's
+  // requested count for the "X of Y" text — a POST can settle fewer/more
+  // than requested (e.g. an already-gone guid).
+  let progressRef = initialRef;
 
   const report = (t: { settled: number; total: number }): void => {
     if (t.settled >= t.total) { return; }
