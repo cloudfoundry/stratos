@@ -225,8 +225,17 @@ jobs:
           name: release-artifacts
           path: dist/release/
 
-      # make publish owns the release-create logic (notes extraction from
-      # CHANGELOG.md, --prerelease derivation from the tag, --verify-tag,
+      # actions/checkout resolves the tag ref to its commit, losing the
+      # annotation whose body carries the assembled release notes — re-fetch
+      # the real tag object so --notes-from-tag sees them. Also covers
+      # workflow_dispatch, where the tag isn't checked out at all.
+      - name: Fetch tag annotation
+        env:
+          VERSION: ${{ needs.validate-version.outputs.version }}
+        run: git fetch --force origin "refs/tags/${VERSION}:refs/tags/${VERSION}"
+
+      # make publish owns the release-create logic (notes from the annotated
+      # tag body, --prerelease derivation from the tag, --verify-tag,
       # asset upload) — this workflow is a thin caller. --verify-tag makes
       # a workflow_dispatch with a typo'd version fail instead of minting
       # a new tag from the default branch.

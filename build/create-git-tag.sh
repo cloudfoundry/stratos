@@ -56,35 +56,27 @@ main() {
     log "Continuing anyway (tag will point to last commit)"
   fi
 
-  # Create annotated tag
+  # Create annotated tag. The tag body carries the release notes,
+  # assembled from the changelog.d fragments — `make publish` consumes
+  # it via --notes-from-tag.
   local commit=$(git rev-parse --short HEAD)
-  local date=$(date -u +"%Y-%m-%d")
+  local notes
+  notes=$("${ROOT_DIR}/build/release-notes.sh" assemble)
+  if [ -z "${notes}" ]; then
+    warn "No changelog.d fragments — tag body falls back to a pointer line"
+    notes="Release ${VERSION} — see CHANGELOG.md for details."
+  fi
 
   log "Creating annotated tag ${VERSION} at commit ${commit}..."
 
-  git tag -a "${VERSION}" -m "Release ${VERSION}
-
-Release Date: ${date}
-Commit: ${commit}
-
-Archives:
-- stratos-${VERSION}-linux-amd64.tar.gz
-- stratos-${VERSION}-linux-arm64.tar.gz
-- stratos-${VERSION}-darwin-amd64.tar.gz
-- stratos-${VERSION}-darwin-arm64.tar.gz
-- stratos-${VERSION}-windows-amd64.zip
-- stratos-${VERSION}-windows-arm64.zip
-- stratos-${VERSION}-src.tar.gz
-
-See CHANGELOG.md for full release notes.
-"
+  git tag -a "${VERSION}" -m "${notes}"
 
   success "Tag ${VERSION} created"
   echo ""
   log "Next steps:"
   log "  1. Review tag: git show ${VERSION}"
   log "  2. Push tag:   git push origin ${VERSION}"
-  log "  3. Create GitHub release: gh release create ${VERSION} dist/release/*"
+  log "  3. Create GitHub release: make publish TAG=${VERSION}"
   echo ""
 }
 
