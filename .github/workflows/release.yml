@@ -51,6 +51,9 @@ jobs:
         env:
           VERSION: ${{ steps.get-version.outputs.version }}
         run: |
+          # alpha/beta/rc are prereleases; dev.N tags CAN be full releases,
+          # so they are deliberately not matched here. Keep in sync with
+          # make publish's derivation.
           if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
             echo "🧪 This is a pre-release"
@@ -114,16 +117,10 @@ jobs:
         run: |
           # cf first (writes dist/stratos-cf-*.zip), then github (rebuilds
           # dist/release/), then aio (stages dist/aio-package for the docker
-          # image, reusing the same release-built jetstream + ui). Stage the
-          # cf-pushable zip into dist/release so it is checksummed and
-          # published alongside the platform archives.
+          # image, reusing the same release-built jetstream + ui). The
+          # release verb itself stages the cf zip into dist/release and
+          # generates SHA256SUMS as its final step.
           make release cf github aio VERSION="$VERSION"
-          cp dist/stratos-cf-*.zip dist/release/
-
-      - name: Generate checksums
-        env:
-          VERSION: ${{ needs.validate-version.outputs.version }}
-        run: ./build/create-checksums.sh "$VERSION"
 
       - name: Verify release artifacts
         run: |
@@ -228,46 +225,16 @@ jobs:
           name: release-artifacts
           path: dist/release/
 
-      - name: Extract changelog for version
-        id: changelog
-        env:
-          VERSION: ${{ needs.validate-version.outputs.version }}
-        run: |
-          # Try to extract version-specific changelog
-          if [ -f CHANGELOG.md ]; then
-            # Extract section between this version and next version header
-            NOTES=$(awk "/^## \[?${VERSION#v}\]?/,/^## \[?[0-9]/" CHANGELOG.md | sed '1d;$d' || echo "")
-          fi
-
-          if [ -z "$NOTES" ]; then
-            NOTES="Release $VERSION - See [CHANGELOG.md](CHANGELOG.md) for details."
-          fi
-
-          # Save to file for GitHub release
-          echo "$NOTES" > /tmp/release-notes.md
-
-          echo "📝 Release notes prepared"
-
-      # gh release create replaces softprops/action-gh-release: same
-      # capability, one less third-party action on the release path.
-      # --verify-tag makes a workflow_dispatch with a typo'd version fail
-      # instead of minting a new tag from the default branch.
+      # make publish owns the release-create logic (notes extraction from
+      # CHANGELOG.md, --prerelease derivation from the tag, --verify-tag,
+      # asset upload) — this workflow is a thin caller. --verify-tag makes
+      # a workflow_dispatch with a typo'd version fail instead of minting
+      # a new tag from the default branch.
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           VERSION: ${{ needs.validate-version.outputs.version }}
-          IS_PRERELEASE: ${{ needs.validate-version.outputs.is_prerelease }}
-        run: |
-          PRERELEASE_FLAG=""
-          if [ "$IS_PRERELEASE" == "true" ]; then
-            PRERELEASE_FLAG="--prerelease"
-          fi
-          gh release create "$VERSION" \
-            --title "Stratos $VERSION" \
-            --notes-file /tmp/release-notes.md \
-            --verify-tag \
-            $PRERELEASE_FLAG \
-            dist/release/*.tar.gz dist/release/*.zip dist/release/SHA256SUMS
+        run: make publish TAG="$VERSION"
 
       - name: Release summary
         env:

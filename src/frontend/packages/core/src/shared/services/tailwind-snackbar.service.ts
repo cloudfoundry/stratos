@@ -15,13 +15,17 @@ export interface TailwindSnackBarRef<T> {
   onAction(): Observable<any>;
   dismiss(): void;
   dismissWithAction(): void;
+  update(message: string): void;
 }
 
 export class TailwindSnackBarRefImpl<T> implements TailwindSnackBarRef<T> {
   private _afterDismissed = new Subject<any>();
   private _onAction = new Subject<any>();
 
-  constructor(private removeCallback: () => void) {}
+  constructor(
+    private removeCallback: () => void,
+    private updateCallback?: (message: string) => void,
+  ) {}
 
   afterDismissed(): Observable<any> {
     return this._afterDismissed.asObservable();
@@ -35,11 +39,19 @@ export class TailwindSnackBarRefImpl<T> implements TailwindSnackBarRef<T> {
     this.removeCallback();
     this._afterDismissed.next(null);
     this._afterDismissed.complete();
+    // Prevent race-condition mutations during removeSnackbar's 300ms fade-out:
+    // clear the update callback so that any in-flight update() calls (e.g. from
+    // settlement polling in the caller) become inert and don't mutate a fading element.
+    this.updateCallback = undefined;
   }
 
   dismissWithAction(): void {
     this._onAction.next(null);
     this.dismiss();
+  }
+
+  update(message: string): void {
+    this.updateCallback?.(message);
   }
 }
 
@@ -119,7 +131,15 @@ export class TailwindSnackBarService {
 
   open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
     const snackbarElement = this.createSnackbarElement(message, action, config);
-    const snackbarRef = new TailwindSnackBarRefImpl(() => this.removeSnackbar(snackbarElement));
+    const snackbarRef = new TailwindSnackBarRefImpl(
+      () => this.removeSnackbar(snackbarElement),
+      (message: string) => {
+        const el = snackbarElement.querySelector('.snackbar-message');
+        if (el) { el.textContent = message; }
+        // ZONELESS: keep parity with the other DOM mutations in this service
+        this.appRef.tick();
+      },
+    );
 
     // Add to DOM
     document.body.appendChild(snackbarElement);
@@ -212,7 +232,7 @@ export class TailwindSnackBarService {
     // line) while still wrapping normally — textContent keeps it XSS-safe.
     const messageElement = document.createElement('span');
     messageElement.textContent = message;
-    messageElement.className = 'flex-1 whitespace-pre-line';
+    messageElement.className = 'snackbar-message flex-1 whitespace-pre-line';
     snackbar.appendChild(messageElement);
 
     // Create action button if provided

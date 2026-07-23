@@ -9,9 +9,13 @@
 #   make test frontend          Frontend tests only
 #   make test backend           Backend tests only
 #   make test e2e               Run Playwright E2E tests
-#   make release                Release all targets (cf + github)
+#   make release                Release all targets (cf + github) + SHA256SUMS
 #   make release cf             CF-pushable zip
 #   make release github         GitHub release archives
+#   make stamp tag              Create + push the release tag
+#   make publish                Create GitHub release + upload dist/release/*
+#   make unpublish TAG=vX       Delete a GitHub release (assets included)
+#   make stamp untag TAG=vX     Delete a tag (local + remote)
 #   make install                Install dependencies
 #   make stage                  Stage for local testing
 #   make clean                  Remove all build output
@@ -30,6 +34,12 @@
 #   DRYRUN=yes                  Preview actions without executing
 #   VERSION=vX.Y.Z              Override version
 #   PLATFORM=os/arch            Override target platform
+#   TAG=vX.Y.Z                  Tag for publish/unpublish/stamp tag/untag
+#                               (default: version with build metadata stripped)
+#   TAG_REMOTE=<remote>         Remote for stamp tag/untag (default: origin)
+#   DRAFT=yes                   publish creates a draft release
+#   NOTES=<file>                Notes file for publish (default: CHANGELOG.md
+#                               section for the version, else a pointer line)
 #
 # Debug: make _HIDE= <target>  — exposes all internal variables
 #
@@ -138,9 +148,10 @@ endif
 # Default: frontend + backend when none specified (unless e2e),
 # but only for verbs that use these modifiers (not clean/dump).
 # korifi counts as a build modifier here (make build korifi = static
-# backend only), so it must suppress the default like the others.
+# backend only), so it must suppress the default like the others;
+# tag/untag are stamp modifiers and suppress it the same way.
 ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter korifi,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter korifi tag untag,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
 endif
@@ -196,6 +207,7 @@ $(_HIDE)WANT_SECRETS  :=
 $(_HIDE)WANT_TREE     :=
 $(_HIDE)WANT_HISTORY  :=
 $(_HIDE)WANT_LICENSES :=
+$(_HIDE)WANT_MODROT   :=
 
 ifneq ($(filter packages,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_PACKAGES := yes
@@ -211,6 +223,19 @@ ifneq ($(filter history,$(MAKECMDGOALS)),)
 endif
 ifneq ($(filter licenses,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_LICENSES := yes
+endif
+ifneq ($(filter modrot,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_MODROT := yes
+endif
+
+$(_HIDE)WANT_TAG   :=
+$(_HIDE)WANT_UNTAG :=
+
+ifneq ($(filter tag,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_TAG := yes
+endif
+ifneq ($(filter untag,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_UNTAG := yes
 endif
 
 # cf modifier defaults to linux/amd64 unless PLATFORM is set
@@ -275,7 +300,7 @@ endif
 endif
 # Default: all scanners for audit when no modifier given
 ifneq ($(filter audit,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES)$($(_HIDE)WANT_MODROT),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
   $(_HIDE)WANT_ACTIONS  := yes
@@ -293,8 +318,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses
-frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses:
+.PHONY: frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot tag untag
+frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot tag untag:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -568,6 +593,7 @@ $(call register, check, e2e)
 # make audit              — default scanners (frontend backend actions packages secrets)
 # make audit frontend     — bun audit (npm advisory DB)
 # make audit backend      — gosec + trivy + govulncheck (both Go modules)
+# make audit modrot       — modrot archived/deprecated dependency scan (needs gh auth)
 # make audit actions      — zizmor (GitHub Actions workflow SAST)
 #                           ZIZMOR_FLAGS="--persona=auditor" for the strict rule set
 # make audit packages     — osv-scanner (all lockfiles + go.mods, one pass)
@@ -599,6 +625,16 @@ define audit.backend
 	cd src/jetstream/api && govulncheck ./... || true
 endef
 $(call register, audit, backend)
+
+# Archived / deprecated dependency scan. Needs `gh auth token` (GitHub
+# GraphQL) + network, so it is a standalone extra, not in the default set.
+# --recursive covers jetstream + api + every plugin go.mod in one query pass.
+define audit.modrot
+	@echo "Running dependency-archival audit (modrot)..."
+	@which modrot > /dev/null 2>&1 || (echo "modrot not installed. Run: go install github.com/norman-abramovitz/modrot@latest" >&2 && exit 1)
+	modrot --recursive --deprecated --resolve src/jetstream || true
+endef
+$(call register, audit, modrot)
 
 define audit.actions
 	@echo "Running GitHub Actions workflow audit (zizmor)..."
@@ -743,6 +779,88 @@ define release.aio
 endef
 $(call register, release, aio)
 
+# ── Release checksums ────────────────────────────────────────
+# Checksums are a property of the artifacts: every artifact-producing
+# release invocation ends by staging the loose cf/korifi zips into
+# dist/release and regenerating a single SHA256SUMS over everything
+# there. Exact-version filenames so stale zips from earlier builds are
+# never picked up. Standalone regen (post-unpublish asset fix):
+# ./build/create-checksums.sh
+define release.checksums
+	@mkdir -p $($(_HIDE)RELEASE_DIR)
+	@for z in $($(_HIDE)DIST_DIR)/stratos-cf-$($(_HIDE)SEMVER_VERSION).zip $($(_HIDE)DIST_DIR)/stratos-korifi-$($(_HIDE)SEMVER_VERSION).zip; do \
+		if [ -f "$$z" ]; then cp "$$z" $($(_HIDE)RELEASE_DIR)/; fi; \
+	done
+	@chmod +x build/create-checksums.sh
+	@./build/create-checksums.sh "$($(_HIDE)SEMVER_VERSION)"
+endef
+$(call register_always, release, checksums)
+# Appended after every artifact modifier registration so it runs last;
+# gated on an artifact actually landing in dist/ (aio only stages a
+# docker build context — nothing to checksum).
+$(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)WANT_GITHUB),$(_HIDE)release.checksums)
+
+# ── Release lifecycle (tag → publish / unpublish → untag) ────
+#   make stamp tag [VERSION=vX]     create + push the annotated release tag
+#   make publish [DRAFT=yes]        gh release create + upload dist/release/*
+#   make unpublish TAG=vX           delete the GitHub release (assets included)
+#   make stamp untag TAG=vX         delete the tag (local + remote)
+#
+# Forward path:  build → release cf github → stamp tag → publish
+# Rollback:      unpublish → stamp untag   (release first, so the tag
+#                is never orphaned by a half-done rollback)
+#
+# TAG derives from the version with build metadata stripped — tags are
+# clean semver (package.json carries +build.* locally; tags never do).
+# gh authenticates from the environment (GH_TOKEN/GITHUB_TOKEN or a
+# prior `gh auth login`) — credentials never appear on a command line.
+TAG        ?= v$($(_HIDE)SEMVER_NOMETA)
+TAG_REMOTE ?= origin
+DRAFT      ?=
+NOTES      ?=
+
+# Prefix that turns state-changing commands into echoes under DRYRUN=yes
+$(_HIDE)DRY := $(if $(filter yes,$(DRYRUN)),@echo "DRYRUN:" )
+
+define stamp.tag
+	@case "$(TAG)" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "ERROR: '$(TAG)' does not look like a release tag (vX.Y.Z[-prerelease])" >&2; exit 1;; esac
+	@chmod +x build/create-git-tag.sh
+	$($(_HIDE)DRY)./build/create-git-tag.sh "$(TAG)"
+	$($(_HIDE)DRY)git push $(TAG_REMOTE) "refs/tags/$(TAG)"
+endef
+$(call register, stamp, tag)
+
+define stamp.untag
+	@echo "Deleting tag $(TAG) locally and on $(TAG_REMOTE)..."
+	-$($(_HIDE)DRY)git tag -d "$(TAG)"
+	$($(_HIDE)DRY)git push $(TAG_REMOTE) --delete "refs/tags/$(TAG)"
+endef
+$(call register, stamp, untag)
+
+# publish/unpublish are plain verbs (no modifiers). Notes source: NOTES=<file>
+# override, else the version's CHANGELOG.md section, else a pointer line.
+# --prerelease derives from the tag itself: alpha/beta/rc only — dev.N tags
+# CAN be full releases (keep in sync with release.yml validate-version).
+.PHONY: publish unpublish
+publish:
+	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
+	@TAG="$(TAG)"; \
+	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
+	NOTES_FILE="$(NOTES)"; \
+	if [ -z "$$NOTES_FILE" ]; then \
+		NOTES_FILE=$$(mktemp); \
+		awk -v ver="$${TAG#v}" 'f && /^## /{exit} f; $$0 ~ "^## \\[?"ver"(\\]| |$$)"{f=1}' CHANGELOG.md 2>/dev/null > "$$NOTES_FILE" || true; \
+		[ -s "$$NOTES_FILE" ] || echo "Release $$TAG — see [CHANGELOG.md](CHANGELOG.md) for details." > "$$NOTES_FILE"; \
+	fi; \
+	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft) --notes-file "$$NOTES_FILE" $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
+	$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@")
+
+unpublish:
+	@echo "Release to delete from GitHub:"
+	@gh release view "$(TAG)" --json tagName,name,isDraft,assets \
+		--jq '"  " + .tagName + "  (" + .name + ")" + (if .isDraft then "  [draft]" else "" end), (.assets[] | "    " + .name)'
+	$($(_HIDE)DRY)gh release delete "$(TAG)" --yes
+
 # ── Deploy (documentation website) ───────────────────────────
 # Grammar: make deploy website <destination> — the component says what is
 # deployed, the destination says where. Destinations here are mechanisms
@@ -834,7 +952,7 @@ $(_HIDE)finalize-and-reexec:
 	@./build/version-bump.sh bump release
 	@echo "Re-running: $(MAKE) $(MAKECMDGOALS)"
 	@$(MAKE) FINAL= $(MAKECMDGOALS)
-$(filter-out frontend backend cf korifi github dist version e2e actions packages secrets lint gate tests coverage tree history licenses,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
+$(filter-out frontend backend cf korifi github dist version e2e actions packages secrets lint gate tests coverage tree history licenses tag untag,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
 else ifneq ($(FINAL),)
 $(error Unknown FINAL value '$(FINAL)' — supported: strip)
 endif
@@ -864,7 +982,7 @@ endif
 
 # ── Stamp defaults ────────────────────────────────────────────
 # stamp with no modifier stamps frontend
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_TAG)$($(_HIDE)WANT_UNTAG),)
 stamp: $(_HIDE)stamp.frontend
 endif
 
@@ -979,10 +1097,14 @@ help:
 	@echo "  make check e2e            Playwright E2E core tests"
 	@echo ""
 	@echo "Release:"
-	@echo "  make release              Create CF zip + GitHub archives"
+	@echo "  make release              Create CF zip + GitHub archives (+ SHA256SUMS)"
 	@echo "  make release cf           CF-pushable zip only"
 	@echo "  make release korifi       Korifi-pushable zip (Paketo procfile manifest)"
 	@echo "  make release github       GitHub release archives only"
+	@echo "  make stamp tag            Create + push the release tag"
+	@echo "  make publish              Create GitHub release + upload dist/release/*"
+	@echo "  make unpublish TAG=vX     Delete the GitHub release (assets included)"
+	@echo "  make stamp untag TAG=vX   Delete the tag (local + remote)"
 	@echo ""
 	@echo "Deploy (documentation website):"
 	@echo "  make deploy website pages Push preview to your fork's GitHub Pages"
@@ -1003,6 +1125,7 @@ help:
 	@echo "  make audit                Run default security scanners"
 	@echo "  make audit frontend       bun audit (npm advisory DB)"
 	@echo "  make audit backend        gosec + trivy + govulncheck (both Go modules)"
+	@echo "  make audit modrot         modrot archived/deprecated dep scan (needs gh auth)"
 	@echo "  make audit actions        zizmor (ZIZMOR_FLAGS=\"--persona=auditor\" for strict)"
 	@echo "  make audit packages       osv-scanner (all lockfiles + go.mods)"
 	@echo "  make audit secrets        gitleaks (working-tree secret scan)"
@@ -1044,6 +1167,9 @@ help:
 	@echo "  DRYRUN=yes                Preview actions without executing"
 	@echo "  VERSION=vX.Y.Z            Override version"
 	@echo "  PLATFORM=os/arch          Override target platform"
+	@echo "  TAG=vX.Y.Z                Tag for publish/unpublish/stamp tag/untag"
+	@echo "  DRAFT=yes                 publish creates a draft release"
+	@echo "  NOTES=<file>              Notes file for publish (default: CHANGELOG section)"
 	@echo ""
 	@echo "  Examples:"
 	@echo "    make release cf FINAL=strip       Finalize version + package"

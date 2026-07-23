@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import { Component, ChangeDetectionStrategy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
@@ -23,6 +24,7 @@ import {
 
 import { BulkResult, CfRoutesSignalConfigService } from '../../../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
 import type { StApp, StRoute } from '../../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 
@@ -54,6 +56,7 @@ export class CloudFoundryRoutesSignalComponent {
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
+  private http = inject(HttpClient);
 
   private readonly favoriteRouteRowKeys: Signal<ReadonlySet<string>> = toSignal(
     this.userFavoriteManager.getAllFavorites().pipe(
@@ -312,23 +315,32 @@ export class CloudFoundryRoutesSignalComponent {
       .filter(r => keys.has(`${r.cnsiGuid}:${r.guid}`));
   }
 
-  // Run a bulk op, report partial failures, and clear selection on success.
-  // succeeded+pending counts as non-error (pending items have an async CF
-  // job tracking completion); only `failed` drives an error snackbar.
+  // Run a bulk op with live settlement feedback; clears selection when the
+  // POST phase ends. Unmap is synchronous server-side (results never come
+  // back PENDING), so runBulkWithProgress skips the progress phase and goes
+  // straight to the final summary for that kind.
   private async runBulk(
-    verb: string,
-    total: number,
+    kind: 'delete' | 'unmap',
+    count: number,
     op: () => Promise<BulkResult>,
   ): Promise<void> {
     try {
-      const result = await op();
-      if (result.failed > 0) {
-        this.snackBar.error(`${result.failed} of ${total} routes failed to ${verb}`);
-      } else {
-        this.snackBar.open(`${total} ${total === 1 ? 'route' : 'routes'} ${verb} requested`);
-      }
-    } catch (err: unknown) {
-      this.snackBar.error(`Bulk ${verb} failed: ${extractHttpErrorMessage(err)}`);
+      await runBulkWithProgress({
+        snackBar: this.snackBar,
+        http: this.http,
+        noun: 'route',
+        verb: kind,
+        progressVerb: kind === 'delete' ? 'Deleting' : 'Unmapping',
+        doneVerb: kind === 'delete' ? 'deleted' : 'unmapped',
+        op,
+        // bulkDeleteRoutes/bulkUnmapRoutes re-fetch immediately after the
+        // POST, but async deletes may still be pending then — refresh again
+        // once settled so the rows actually leave the view. Unmap never
+        // pends, so refreshAfterPending is a no-op for it.
+        refresh: () => this.routesConfig.refresh(),
+        refreshAfterPending: kind === 'delete',
+        count,
+      });
     } finally {
       this.selectedRouteKeys.set(new Set());
     }

@@ -25,7 +25,8 @@ describe('SnackBarReturnComponent', () => {
         {
           provide: 'TailwindSnackBarRef',
           useValue: {
-            dismiss: vi.fn()
+            dismiss: vi.fn(),
+            update: vi.fn(),
           }
         },
         {

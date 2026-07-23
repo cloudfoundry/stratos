@@ -159,7 +159,7 @@ export class LoginPageComponent implements OnInit {
       const ssoMessage = params.SSO_Message;
 
       if (ssoMessage) {
-        return ssoMessage;
+        return this.sanitizeSsoMessage(ssoMessage);
       }
 
       if (auth.error && (!auth.sessionData || !auth.sessionData.valid) &&
@@ -188,6 +188,15 @@ export class LoginPageComponent implements OnInit {
   private set redirectAttempts(value: number) {
     sessionStorage.setItem(this.REDIRECT_COUNTER_KEY, value.toString());
     this.redirectAttemptsSubject$.next(value);
+  }
+
+  // SSO_Message arrives via the /login query string and is attacker-controllable
+  // (issue #5672). Interpolation already blocks HTML/script injection; this strips
+  // URL-like tokens so the banner can't be used to social-engineer a user to a
+  // malicious link, and caps length to keep it a short status line.
+  private sanitizeSsoMessage(raw: string): string {
+    const urlLike = /\b(?:(?:[a-z][\w+.-]*:)?\/\/|www\.)\S+|\b[a-z0-9-]+(?:\.[a-z0-9-]+)*\.[a-z]{2,}(?:\/\S*)?/gi;
+    return raw.replace(urlLike, '[link removed]').trim().slice(0, 256);
   }
 
   private clearRedirectAttempts() {

@@ -39,9 +39,12 @@ $(_HIDE)FLAG_dependabot  := $($(_HIDE)WANT_DEPENDABOT)
 $(_HIDE)FLAG_tree        := $($(_HIDE)WANT_TREE)
 $(_HIDE)FLAG_history     := $($(_HIDE)WANT_HISTORY)
 $(_HIDE)FLAG_licenses    := $($(_HIDE)WANT_LICENSES)
+$(_HIDE)FLAG_modrot      := $($(_HIDE)WANT_MODROT)
+$(_HIDE)FLAG_tag         := $($(_HIDE)WANT_TAG)
+$(_HIDE)FLAG_untag       := $($(_HIDE)WANT_UNTAG)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist version actions packages secrets lint gate tests coverage summary dependabot tree history licenses
+$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist version actions packages secrets lint gate tests coverage summary dependabot tree history licenses modrot tag untag
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=

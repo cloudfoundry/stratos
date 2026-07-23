@@ -115,6 +115,44 @@ artifact values produce clear errors from `playwright test` itself.
 | `make release github` | `make build` | Create all release archives | `dist/release/` (7 archives) |
 | `make release` | All of the above | Create both CF zip and GitHub archives | Both |
 
+Every artifact-producing `release` invocation finishes by staging the
+cf/korifi zip (when present) into `dist/release/` and regenerating a single
+`SHA256SUMS` over everything there. `./build/create-checksums.sh` remains
+callable standalone for the exceptional regen case (fix an asset after
+`make unpublish`, re-checksum, re-publish).
+
+### Publishing a release
+
+`make` owns the whole lifecycle; any runner (a human terminal, GitHub
+Actions, Concourse) is a thin caller of the same targets. Credentials come
+from the environment (`GH_TOKEN`/`GITHUB_TOKEN`, or a prior `gh auth
+login`) — never from the command line.
+
+| Command | What it does |
+|---------|-------------|
+| `make stamp tag [VERSION=vX]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`) |
+| `make publish [DRAFT=yes] [TAG=vX]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases) |
+| `make unpublish TAG=vX` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives) |
+| `make stamp untag TAG=vX` | Delete the tag, local + remote (echoes first) |
+
+`TAG` defaults to the current version with build metadata stripped
+(`v5.0.0-dev.142+build...` → `v5.0.0-dev.142`). Release notes come from
+`NOTES=<file>` when given, else the version's `CHANGELOG.md` section, else
+a pointer line. All four targets honor `DRYRUN=yes`.
+
+Forward path (rollback runs the same verbs in reverse — release first, so
+a half-done rollback never orphans the tag):
+
+```bash
+make build VERSION=vX.Y.Z
+make release cf github VERSION=vX.Y.Z   # artifacts + SHA256SUMS
+make stamp tag VERSION=vX.Y.Z           # create + push tag
+make publish VERSION=vX.Y.Z             # gh release create + assets
+
+make unpublish TAG=vX.Y.Z               # rollback: release first...
+make stamp untag TAG=vX.Y.Z             # ...then the tag
+```
+
 ### Development
 
 | Command | What it does |

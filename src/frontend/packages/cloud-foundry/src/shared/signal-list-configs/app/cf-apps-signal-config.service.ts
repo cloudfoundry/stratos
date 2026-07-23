@@ -24,7 +24,7 @@ import { ListStateStore, naturalCompare } from '@stratosui/core';
 // import a single BulkResult type without reaching across into the routes
 // config service. The backend envelope is identical
 // (POST /pp/v1/cf/apps/:cnsi/bulk/delete) — one shape, one definition.
-export type { BulkItemResult, BulkResult } from '../route/cf-routes-signal-config.service';
+export type { BulkItemState, BulkItemResult, BulkResult } from '../route/cf-routes-signal-config.service';
 import type { BulkResult } from '../route/cf-routes-signal-config.service';
 
 @Injectable({ providedIn: 'root' })
@@ -1061,7 +1061,7 @@ export class CfAppsSignalConfigService {
       { guids: appGuids },
     ));
     for (const item of result.results) {
-      if (item.state !== 'failed') {
+      if (item.state !== 'FAILED') {
         this.orchestrator?.removeRow(cnsiGuid, item.guid);
       }
     }

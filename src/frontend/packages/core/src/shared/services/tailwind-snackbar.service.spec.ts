@@ -54,4 +54,24 @@ describe('TailwindSnackBarService', () => {
     expect(onDismiss).not.toHaveBeenCalled();
     vi.useRealTimers();
   });
+
+  it('update() replaces the message text of an open snackbar in place', () => {
+    const ref = service.open('Deleting 5 applications… 0 of 5', undefined, { duration: 0 });
+    const el = document.body.querySelector('.snackbar-message');
+    expect(el?.textContent).toBe('Deleting 5 applications… 0 of 5');
+    ref.update('Deleting 5 applications… 3 of 5');
+    expect(document.body.querySelector('.snackbar-message')?.textContent)
+      .toBe('Deleting 5 applications… 3 of 5');
+    ref.dismiss();
+  });
+
+  it('update() is inert after dismiss to prevent race-condition mutations during fade', () => {
+    const ref = service.open('Deleting 5 applications… 0 of 5', undefined, { duration: 0 });
+    const el = document.body.querySelector('.snackbar-message') as HTMLElement;
+    expect(el?.textContent).toBe('Deleting 5 applications… 0 of 5');
+    ref.dismiss();
+    // During the 300ms fade-out, the element is still in the DOM but update should not mutate it
+    ref.update('Deleting 5 applications… 5 of 5');
+    expect(el.textContent).toBe('Deleting 5 applications… 0 of 5');
+  });
 });
