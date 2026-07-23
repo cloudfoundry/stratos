@@ -237,6 +237,37 @@ describe('SignalListComponent', () => {
       expect(fixture.componentInstance.pageSize()).toBe(10);
     });
 
+    // #5670: pageIndex persists across navigation, so it can point past the
+    // end of the current data set. The pager must describe (and navigate
+    // from) the clamped page — the raw index produced "85 – 1 of 1" over a
+    // one-row list.
+    describe('stale out-of-range pageIndex', () => {
+      function staleFixture() {
+        const fixture = TestBed.createComponent(Host);
+        fixture.componentInstance.pageIndex.set(14);
+        fixture.componentInstance.pageSize.set(6);
+        fixture.componentInstance.config = {
+          ...fixture.componentInstance.config,
+          totalFilteredResults: signal(1).asReadonly(),
+          totalPages: signal(1).asReadonly(),
+        };
+        fixture.detectChanges();
+        return fixture;
+      }
+
+      it('range label describes the clamped page, not the stale index', () => {
+        const fixture = staleFixture();
+        expect(componentWith(fixture).rangeText()).toBe('1 – 1 of 1');
+      });
+
+      it('clamps effectivePageIndex and disables prev/next on the only page', () => {
+        const fixture = staleFixture();
+        expect(componentWith(fixture).effectivePageIndex()).toBe(0);
+        expect(fixture.nativeElement.querySelector('[title="Previous page"]').disabled).toBe(true);
+        expect(fixture.nativeElement.querySelector('[title="Next page"]').disabled).toBe(true);
+      });
+    });
+
     it('does not snap All away when switching to card view', () => {
       // Regression: setViewMode must validate against the effective card
       // options (which include -1), not the raw config list — otherwise a

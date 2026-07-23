@@ -81,8 +81,17 @@ export class ViewPipeline<T> {
     });
     this.pagedItems = computed(() => {
       const size = this.pageSize();
-      const start = this.pageIndex() * size;
-      return this.sortedItems().slice(start, start + size);
+      const rows = this.sortedItems();
+      // Non-positive size is the "All" page-size sentinel — no slicing.
+      if (size <= 0) return rows;
+      // Clamp a stale out-of-range index to the last available page.
+      // pageIndex persists in the shared list state across navigation
+      // (wall ↔ space tab), so it can point past the end of a smaller
+      // data set — unclamped, that rendered an empty page over a
+      // non-empty list (#5670).
+      const lastPage = Math.max(0, Math.ceil(rows.length / size) - 1);
+      const start = Math.max(0, Math.min(this.pageIndex(), lastPage)) * size;
+      return rows.slice(start, start + size);
     });
     this.totalItems = computed(() => this.items().length);
     this.totalFilteredResults = computed(() => this.filteredItems().length);

@@ -97,8 +97,13 @@ export class ViewPipeline<T> {
       const size = this.pageSize();
       // pageSize -1 = the "All" page-size option: no slicing.
       if (size <= 0) return this.sortedItems();
-      const start = this.pageIndex() * size;
-      return this.sortedItems().slice(start, start + size);
+      const rows = this.sortedItems();
+      // Clamp a stale out-of-range index to the last available page so
+      // persisted paging state can't render an empty page over a
+      // non-empty list (#5670).
+      const lastPage = Math.max(0, Math.ceil(rows.length / size) - 1);
+      const start = Math.max(0, Math.min(this.pageIndex(), lastPage)) * size;
+      return rows.slice(start, start + size);
     });
     this.totalItems = computed(() => this.items().length);
     this.totalFilteredResults = computed(() => this.filteredItems().length);
