@@ -159,6 +159,72 @@ describe('CfAppsSignalConfigService', () => {
     expect(svc.spaceOptions()[0]).toEqual({ label: 'All', value: null });
   });
 
+  // #5670: the per-space tab's scope must narrow the DATASET, not ride the
+  // user filter — the "Total X" header reads view.totalItems (unfiltered by
+  // design, see a2807cf827), so a filter-implemented scope leaks the whole
+  // endpoint's app count into a space tab's headline (82 shown on a 1-app
+  // space). Scope lives between the orchestrator and the ViewPipeline.
+  describe('space-scoped dataset (initializeForSpace)', () => {
+    const app = (guid: string, name: string, spaceGuid: string): StApp => ({
+      guid, name, state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid,
+      instances: 1, routes: [], createdAt: '', updatedAt: '',
+    });
+
+    function makeSeededSvc(apps: StApp[]): CfAppsSignalConfigService {
+      const http = makeHttp();
+      const eds = new EndpointDataService(http, { write: () => {}, read: () => undefined } as never, 'cf-1');
+      for (const a of apps) eds.addApp(a);
+      (eds as unknown as { _appsLastFetched: { set: (d: Date) => void } })._appsLastFetched.set(new Date());
+      const registry = { acquire: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
+      TestBed.configureTestingModule({
+        providers: [
+          { provide: HttpClient, useValue: http },
+          { provide: CloudFoundryService, useValue: makeStubCfService() },
+          { provide: EndpointDataRegistry, useValue: registry },
+          CfAppsSignalConfigService,
+        ],
+      });
+      return TestBed.inject(CfAppsSignalConfigService);
+    }
+
+    const inSpace = app('a', 'space-app', 'sp-1');
+    const inSpaceToo = app('b', 'space-app-2', 'sp-1');
+    const elsewhere = app('c', 'other-space-app', 'sp-2');
+
+    it('totalItems counts only the locked space, not the endpoint', () => {
+      const svc = makeSeededSvc([inSpace, inSpaceToo, elsewhere]);
+      svc.initializeForSpace('cf-1', 'sp-1');
+      expect(svc.view.totalItems()).toBe(2);
+      expect(svc.view.totalFilteredResults()).toBe(2);
+    });
+
+    it('name filter narrows filtered results but not the scoped total', () => {
+      const svc = makeSeededSvc([inSpace, inSpaceToo, elsewhere]);
+      svc.initializeForSpace('cf-1', 'sp-1');
+      svc.nameFilter.set('space-app-2');
+      TestBed.tick();
+      expect(svc.view.totalFilteredResults()).toBe(1);
+      expect(svc.view.totalItems()).toBe(2);
+    });
+
+    it('resets pageIndex on space mount so wall paging cannot blank the tab', () => {
+      const svc = makeSeededSvc([inSpace]);
+      svc.pageIndex.set(14);
+      svc.initializeForSpace('cf-1', 'sp-1');
+      expect(svc.pageIndex()).toBe(0);
+      expect(svc.view.pagedItems().map(a => a.guid)).toEqual(['a']);
+    });
+
+    it('clearLockedSpace restores the endpoint-wide dataset', () => {
+      const svc = makeSeededSvc([inSpace, inSpaceToo, elsewhere]);
+      svc.initializeForSpace('cf-1', 'sp-1');
+      expect(svc.view.totalItems()).toBe(2);
+      svc.clearLockedSpace();
+      svc.initialize(['cf-1']);
+      expect(svc.view.totalItems()).toBe(3);
+    });
+  });
+
   it('clearFilters resets all four filter signals and pageIndex', () => {
     const http = makeHttp();
     const svc = makeSvc(http);
