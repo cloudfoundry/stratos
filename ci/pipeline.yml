@@ -1,0 +1,109 @@
+---
+#
+# ci/pipeline.yml
+#
+# Structure file for the Stratos Concourse pipeline. Do not put
+# site-specific values here — copy ci/settings.yml.example to
+# ci/settings.yml, override what needs overriding, and deploy with
+# ci/repipe (requires spruce, jq, and fly).
+#
+# Every task is a thin caller of the same `make` targets a human or
+# GitHub Actions runs; all release/audit logic lives in the Makefile
+# and build/ scripts. Tasks run in the shared tools image
+# (ci/tools-image/Dockerfile).
+
+meta:
+  name:     stratos
+  pipeline: (( grab meta.name ))
+  target:   (( param "Please identify the name of the target Concourse CI" ))
+  url:      (( param "Please specify the full url of the target Concourse CI" ))
+  exposed:  false
+
+  image:
+    name: (( param "Please specify the CI tools image repository (e.g. ghcr.io/cloudfoundry/stratos-ci)" ))
+    tag:  latest
+
+  github:
+    owner:        cloudfoundry
+    repo:         stratos
+    branch:       develop
+    uri:          (( concat "https://github.com/" meta.github.owner "/" meta.github.repo ".git" ))
+    access_token: (( param "Please provide a GitHub access token (repo scope) for make publish and the network-using audit scanners" ))
+
+  nightly:
+    start:    "02:00"
+    stop:     "03:00"
+    location: UTC
+
+groups:
+  - name: (( grab meta.pipeline ))
+    jobs:
+      - gate
+      - audit
+      - release
+
+resources:
+  - name: stratos
+    type: git
+    source:
+      uri:    (( grab meta.github.uri ))
+      branch: (( grab meta.github.branch ))
+
+  # Release trigger: a pushed v* tag, same event release.yml reacts to.
+  - name: stratos-tag
+    type: git
+    source:
+      uri:        (( grab meta.github.uri ))
+      tag_filter: "v*"
+
+  - name: nightly
+    type: time
+    source:
+      start:    (( grab meta.nightly.start ))
+      stop:     (( grab meta.nightly.stop ))
+      location: (( grab meta.nightly.location ))
+
+  - name: tools-image
+    type: registry-image
+    source:
+      repository: (( grab meta.image.name ))
+      tag:        (( grab meta.image.tag ))
+
+jobs:
+  - name: gate
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - { get: stratos, trigger: true }
+          - { get: tools-image }
+      - task: gate
+        image: tools-image
+        file: stratos/ci/tasks/gate.yml
+
+  - name: audit
+    public: true
+    serial: true
+    plan:
+      - in_parallel:
+          - { get: stratos }
+          - { get: nightly, trigger: true }
+          - { get: tools-image }
+      - task: audit
+        image: tools-image
+        file: stratos/ci/tasks/audit.yml
+        params:
+          GH_TOKEN: (( grab meta.github.access_token ))
+
+  - name: release
+    serial: true
+    plan:
+      - in_parallel:
+          - { get: stratos-tag, trigger: true }
+          - { get: tools-image }
+      - task: release
+        image: tools-image
+        file: stratos-tag/ci/tasks/release.yml
+        input_mapping: { stratos: stratos-tag }
+        params:
+          GH_TOKEN: (( grab meta.github.access_token ))

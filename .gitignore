@@ -28,6 +28,8 @@ src/frontend/packages/devkit/package-lock.json
 
 # Site-specific overrides
 site.mk
+ci/settings.yml
+ci/settings-*.yml
 
 # Screenshot comparison artifacts
 e2e-screenshots/
