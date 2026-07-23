@@ -1,10 +1,11 @@
-import { ApplicationRef, provideZonelessChangeDetection, signal } from '@angular/core';
+import { ApplicationRef, provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
+import { of } from 'rxjs';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 import { AuthDataService } from '@stratosui/store';
 import type { AuthState } from '@stratosui/store';
@@ -17,11 +18,45 @@ function flushEffects() {
   TestBed.inject(ApplicationRef).tick();
 }
 
+// Build a signal-native AuthDataService stub whose `auth` signal can be
+// updated during a test to drive the component's `auth$` (which is
+// `toObservable(authSignal.auth)`).
+function makeAuthDataStub(initial: AuthState) {
+  const auth: WritableSignal<AuthState | undefined> = signal<AuthState | undefined>(initial);
+  return {
+    auth,
+    loggedIn: signal(!!initial.loggedIn),
+    loggingIn: signal(!!initial.loggingIn),
+    verifying: signal(!!initial.verifying),
+    error: signal(!!initial.error),
+    errorResponse: signal(initial.errorResponse),
+    sessionData: signal(initial.sessionData),
+    sessionValid: signal(!!initial.sessionData?.valid),
+    redirect: signal(undefined),
+    loginCompletedAt: signal(0),
+    login: vi.fn(),
+    logout: vi.fn(),
+    verifySession: vi.fn(),
+    navigateAndRememberRedirect: vi.fn(),
+  };
+}
+
 describe('LoginPageComponent', () => {
   let component: LoginPageComponent;
   let fixture: ComponentFixture<LoginPageComponent>;
+  let authData: ReturnType<typeof makeAuthDataStub>;
 
   beforeEach(async () => {
+    authData = makeAuthDataStub({
+      loggedIn: false,
+      loggingIn: false,
+      user: null,
+      error: false,
+      errorResponse: '',
+      sessionData: null,
+      verifying: false,
+    });
+
     await TestBed.configureTestingModule({
       imports: [
         RouterTestingModule,
@@ -34,18 +69,130 @@ describe('LoginPageComponent', () => {
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
+        { provide: AuthDataService, useValue: authData },
       ]
     }).compileComponents();
   });
 
   beforeEach(() => {
+    // The nosplash redirect loop guard persists a counter in sessionStorage;
+    // clear it so each test starts from a known (zero) attempt count.
+    sessionStorage.clear();
     fixture = TestBed.createComponent(LoginPageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // appReady$ gates navigation on ApplicationRef.isStable, which does not
+    // reliably emit under the test harness. Stub it so the (post-init)
+    // subscriptions can proceed. Set before detectChanges()/ngOnInit.
+    (component as any).appReady$ = of(true);
   });
 
   it('should be created', () => {
+    fixture.detectChanges();
     expect(component).toBeTruthy();
+  });
+
+  describe('SSO nosplash auto-login (unauthenticated)', () => {
+    it('redirects straight to the IdP when nosplash is set and there is no valid session', async () => {
+      const ssoSpy = vi
+        .spyOn(component as any, 'doSSOLoginReactive')
+        .mockReturnValue(of(null));
+
+      // ngOnInit subscribes to auth$ (toObservable(authSignal.auth)); spy must
+      // be installed first.
+      fixture.detectChanges();
+
+      // Simulate the backend reporting an invalid session with SSO nosplash.
+      authData.auth.set({
+        loggedIn: false,
+        loggingIn: false,
+        user: null,
+        error: false,
+        errorResponse: '',
+        verifying: false,
+        sessionData: { valid: false, ssoOptions: 'nosplash,logout' } as any,
+      });
+
+      await fixture.whenStable();
+
+      expect(ssoSpy).toHaveBeenCalledTimes(1);
+      // The redirect counter is bumped so a silent IdP round-trip can't loop.
+      expect(sessionStorage.getItem('stratos_login_redirect_attempts')).toBe('1');
+    });
+
+    it('does NOT auto-redirect when the session is invalid but SSO is not configured', async () => {
+      const ssoSpy = vi
+        .spyOn(component as any, 'doSSOLoginReactive')
+        .mockReturnValue(of(null));
+
+      fixture.detectChanges();
+
+      // Invalid session, no ssoOptions -> user should see the login form.
+      authData.auth.set({
+        loggedIn: false,
+        loggingIn: false,
+        user: null,
+        error: false,
+        errorResponse: '',
+        verifying: false,
+        sessionData: { valid: false } as any,
+      });
+
+      await fixture.whenStable();
+
+      expect(ssoSpy).not.toHaveBeenCalled();
+    });
+
+    it('does NOT auto-redirect when an SSO_Message error is present (failed round-trip)', async () => {
+      const ssoSpy = vi
+        .spyOn(component as any, 'doSSOLoginReactive')
+        .mockReturnValue(of(null));
+
+      // Simulate returning from the IdP with an error message in the URL.
+      const original = (component as any).shouldAutoRedirectNosplash?.bind(component);
+      void original;
+      history.replaceState({}, '', '/login?SSO_Message=Invalid+auth');
+
+      fixture.detectChanges();
+      authData.auth.set({
+        loggedIn: false,
+        loggingIn: false,
+        user: null,
+        error: false,
+        errorResponse: '',
+        verifying: false,
+        sessionData: { valid: false, ssoOptions: 'nosplash,logout' } as any,
+      });
+
+      await fixture.whenStable();
+
+      expect(ssoSpy).not.toHaveBeenCalled();
+      history.replaceState({}, '', '/login');
+    });
+
+    it('stops redirecting once the redirect cap is exceeded (loop protection)', async () => {
+      const ssoSpy = vi
+        .spyOn(component as any, 'doSSOLoginReactive')
+        .mockReturnValue(of(null));
+
+      // Simulate having already exhausted the redirect budget in a prior
+      // round-trip (MAX_REDIRECT_ATTEMPTS = 2).
+      sessionStorage.setItem('stratos_login_redirect_attempts', '3');
+
+      fixture.detectChanges();
+      authData.auth.set({
+        loggedIn: false,
+        loggingIn: false,
+        user: null,
+        error: false,
+        errorResponse: '',
+        verifying: false,
+        sessionData: { valid: false, ssoOptions: 'nosplash,logout' } as any,
+      });
+
+      await fixture.whenStable();
+
+      expect(ssoSpy).not.toHaveBeenCalled();
+    });
   });
 
   // issue #5672: SSO_Message is attacker-controllable via the login query string.

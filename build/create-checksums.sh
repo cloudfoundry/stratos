@@ -38,8 +38,16 @@ main() {
 
   cd "${RELEASE_DIR}"
 
-  # Check if we have any archives
-  local archive_count=$(ls -1 *.tar.gz *.zip 2>/dev/null | wc -l | tr -d ' ')
+  # Collect the archives that actually exist. A CF-only release stages just a
+  # .zip (no GitHub .tar.gz), so globbing both patterns unconditionally would
+  # leave a literal "*.tar.gz" that makes sha256sum/shasum fail under
+  # `set -o pipefail`. Enable nullglob so non-matching patterns expand to
+  # nothing, then build an explicit file list.
+  shopt -s nullglob
+  local archives=( *.tar.gz *.zip )
+  shopt -u nullglob
+
+  local archive_count="${#archives[@]}"
   if [ "$archive_count" = "0" ]; then
     error "No archives found in ${RELEASE_DIR}"
   fi
@@ -57,11 +65,11 @@ main() {
 #
 EOF
 
-  # Compute checksums (sorted alphabetically)
+  # Compute checksums (sorted alphabetically) over only the existing archives.
   if command -v sha256sum &> /dev/null; then
-    sha256sum *.tar.gz *.zip 2>/dev/null | sort -k 2 >> SHA256SUMS
+    sha256sum "${archives[@]}" | sort -k 2 >> SHA256SUMS
   elif command -v shasum &> /dev/null; then
-    shasum -a 256 *.tar.gz *.zip 2>/dev/null | sort -k 2 >> SHA256SUMS
+    shasum -a 256 "${archives[@]}" | sort -k 2 >> SHA256SUMS
   else
     error "Neither sha256sum nor shasum found. Cannot generate checksums."
   fi

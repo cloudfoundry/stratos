@@ -253,11 +253,40 @@ export class LoginPageComponent implements OnInit {
           return;
         }
 
+        // A valid session was established, so a genuine login round-trip
+        // completed: clear the nosplash redirect counter so a later visit
+        // does not inherit a stale count from an earlier failed attempt.
+        this.clearRedirectAttempts();
+
         // Normal redirect
         await this.handleSuccessfulLogin(auth);
       } finally {
         this.navigationInProgress$.next(false);
       }
+    });
+
+    // Handle SSO 'nosplash' for unauthenticated visitors: when SSO is
+    // configured with the nosplash option and there is no valid session,
+    // redirect straight to the identity provider instead of showing the
+    // login form / Sign In button. The auto-redirect above only covers the
+    // already-logged-in case, so without this a first visit stops on the
+    // login page despite nosplash being set.
+    //
+    // Loop protection: this fires on the same !loggedIn/!valid state a browser
+    // lands in when it returns from an SSO round-trip that did NOT seat a
+    // session (silent auth failure, cookie/config issue, back button). take(1)
+    // does not help across page loads — each IdP round-trip is a full
+    // navigation to a fresh component instance — so we gate on the persisted
+    // redirectAttempts counter (sessionStorage) and bump it before redirecting.
+    // The counter is reset once a valid session is seen (see logged-in branch
+    // above) so a genuine later visit never inherits a stale count.
+    this.auth$.pipe(
+      filter(auth => this.shouldAutoRedirectNosplash(auth)),
+      take(1),  // Only trigger once per component instance
+      switchMap(() => this.appReady$)  // Wait for app to be stable before navigating
+    ).subscribe(() => {
+      this.redirectAttempts++;  // survives the IdP round-trip via sessionStorage; breaks a silent redirect loop
+      this.doSSOLoginReactive().subscribe();
     });
 
     // Subscribe to message$ to keep it updated
@@ -298,6 +327,26 @@ export class LoginPageComponent implements OnInit {
         this.navigationInProgress$.next(false);
       }
     });
+  }
+
+  /**
+   * Whether an unauthenticated visitor should be auto-redirected to the SSO
+   * identity provider because `nosplash` is configured. Broken out from the
+   * ngOnInit filter so the rule reads at a glance and the loop guard is
+   * explicit:
+   *   - idle           : not mid-login / mid-verify
+   *   - noValidSession : logged out with a resolved (invalid) session
+   *   - nosplash       : SSO configured with the nosplash option
+   *   - not showing an SSO error message (avoids looping on a failed round-trip)
+   *   - under the redirect cap (persisted across IdP round-trips via sessionStorage)
+   */
+  private shouldAutoRedirectNosplash(auth: AuthState): boolean {
+    const idle           = !auth.loggingIn && !auth.verifying;
+    const noValidSession = !auth.loggedIn && !!auth.sessionData && !auth.sessionData.valid;
+    const nosplash       = !!auth.sessionData?.ssoOptions?.includes('nosplash');
+    return idle && noValidSession && nosplash
+      && !queryParamMap().SSO_Message
+      && this.redirectAttempts <= this.MAX_REDIRECT_ATTEMPTS;
   }
 
   private async handleSuccessfulLogin(auth: AuthState): Promise<null> {
