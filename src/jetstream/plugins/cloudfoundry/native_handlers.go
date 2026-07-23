@@ -1060,6 +1060,15 @@ func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx echo.Context) error
 		StSpace: toStSpace(*r, cnsiGUID),
 	}
 
+	// Per-space app + route counts — the space summary's tiles read these
+	// straight off this payload; V3 spaces carry no counts inline, so
+	// without this every space rendered "0 Apps / 0 Routes" (#5670).
+	// Lazy-non-fatal like the list handlers: a failed count degrades to 0.
+	appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, []string{spaceGUID})
+	routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, []string{spaceGUID})
+	detail.AppCount = appCounts[spaceGUID]
+	detail.RouteCount = routeCounts[spaceGUID]
+
 	// Best-effort SSH-feature lookup. V3 split this off the space resource
 	// to /v3/spaces/{guid}/features/ssh; failure here is non-fatal.
 	if feature, ferr := cfClient.Spaces().GetFeature(ctx.Request().Context(), spaceGUID, "ssh"); ferr != nil {

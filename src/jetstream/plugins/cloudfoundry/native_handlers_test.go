@@ -630,6 +630,76 @@ func TestGetNativeSpaceDetail(t *testing.T) {
 		assert.True(t, resp.AllowSSH)
 	})
 
+	// #5670: the space summary's Applications/Routes tiles read appCount/
+	// routeCount straight off this payload; without enrichment every space
+	// showed 0 (a space with 48 live routes rendered "0 Routes").
+	t.Run("enriches app and route counts for the space", func(t *testing.T) {
+		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Content-Type", "application/json")
+			switch r.URL.Path {
+			case "/v3":
+				w.Write([]byte(`{"links":{}}`))
+			case "/v3/spaces/sp-3":
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"guid":       "sp-3",
+					"name":       "counted",
+					"created_at": "2024-01-01T00:00:00Z",
+					"updated_at": "2024-01-02T00:00:00Z",
+					"relationships": map[string]interface{}{
+						"organization": map[string]interface{}{"data": map[string]interface{}{"guid": "org-1"}},
+					},
+				})
+			case "/v3/spaces/sp-3/features/ssh":
+				json.NewEncoder(w).Encode(map[string]interface{}{"name": "ssh", "enabled": false})
+			case "/v3/apps":
+				assert.Equal(t, "sp-3", r.URL.Query().Get("space_guids"))
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+					"resources": []map[string]interface{}{
+						{"guid": "app-1", "relationships": map[string]interface{}{"space": map[string]interface{}{"data": map[string]interface{}{"guid": "sp-3"}}}},
+						{"guid": "app-2", "relationships": map[string]interface{}{"space": map[string]interface{}{"data": map[string]interface{}{"guid": "sp-3"}}}},
+					},
+				})
+			case "/v3/routes":
+				assert.Equal(t, "sp-3", r.URL.Query().Get("space_guids"))
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"pagination": map[string]interface{}{"total_results": 3, "total_pages": 1},
+					"resources": []map[string]interface{}{
+						{"guid": "rt-1", "relationships": map[string]interface{}{"space": map[string]interface{}{"data": map[string]interface{}{"guid": "sp-3"}}}},
+						{"guid": "rt-2", "relationships": map[string]interface{}{"space": map[string]interface{}{"data": map[string]interface{}{"guid": "sp-3"}}}},
+						{"guid": "rt-3", "relationships": map[string]interface{}{"space": map[string]interface{}{"data": map[string]interface{}{"guid": "sp-3"}}}},
+					},
+				})
+			default:
+				http.NotFound(w, r)
+			}
+		}))
+		defer ts.Close()
+
+		e := echo.New()
+		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/sp-3", nil)
+		rec := httptest.NewRecorder()
+		ctx := e.NewContext(req, rec)
+		ctx.SetParamNames("cnsiGuid", "spaceGuid")
+		ctx.SetParamValues("cnsi-1", "sp-3")
+
+		plugin := &CloudFoundrySpecification{
+			testProxy: &mockNativeCFProxy{
+				userID:      "user-1",
+				cnsiRecord:  api.CNSIRecord{GUID: "cnsi-1", APIEndpoint: mustParseURL(ts.URL)},
+				tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+			},
+		}
+
+		require.NoError(t, plugin.getNativeSpaceDetail(ctx))
+		assert.Equal(t, http.StatusOK, rec.Code)
+
+		var resp StSpaceDetail
+		require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+		assert.Equal(t, 2, resp.AppCount)
+		assert.Equal(t, 3, resp.RouteCount)
+	})
+
 	t.Run("ssh feature failure leaves allowSsh false but succeeds", func(t *testing.T) {
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
