@@ -51,9 +51,10 @@ jobs:
         env:
           VERSION: ${{ steps.get-version.outputs.version }}
         run: |
-          # Any prerelease part marks a prerelease — dev.N tags included,
-          # matching make publish's derivation (any '-' in the tag).
-          if [[ "$VERSION" == *-* ]]; then
+          # alpha/beta/rc are prereleases; dev.N tags CAN be full releases,
+          # so they are deliberately not matched here. Keep in sync with
+          # make publish's derivation.
+          if [[ "$VERSION" =~ (alpha|beta|rc) ]]; then
             echo "is_prerelease=true" >> $GITHUB_OUTPUT
             echo "🧪 This is a pre-release"
           else

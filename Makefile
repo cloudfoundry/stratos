@@ -839,13 +839,13 @@ $(call register, stamp, untag)
 
 # publish/unpublish are plain verbs (no modifiers). Notes source: NOTES=<file>
 # override, else the version's CHANGELOG.md section, else a pointer line.
-# --prerelease derives from the tag itself: any prerelease part (dev/alpha/
-# beta/rc) marks the release as a prerelease.
+# --prerelease derives from the tag itself: alpha/beta/rc only — dev.N tags
+# CAN be full releases (keep in sync with release.yml validate-version).
 .PHONY: publish unpublish
 publish:
 	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
 	@TAG="$(TAG)"; \
-	PRERELEASE=""; case "$$TAG" in *-*) PRERELEASE="--prerelease";; esac; \
+	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
 	NOTES_FILE="$(NOTES)"; \
 	if [ -z "$$NOTES_FILE" ]; then \
 		NOTES_FILE=$$(mktemp); \
