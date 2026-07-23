@@ -1,0 +1,16 @@
+---
+# Pre-merge quality gate — the same `make check gate` a developer runs
+# before pushing. The image comes from the pipeline (tools-image).
+platform: linux
+
+inputs:
+  - name: stratos
+
+run:
+  path: bash
+  dir: stratos
+  args:
+    - -ce
+    - |
+      bun install --frozen-lockfile
+      make check gate

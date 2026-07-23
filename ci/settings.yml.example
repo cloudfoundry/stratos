@@ -1,0 +1,24 @@
+---
+#
+# ci/settings.yml.example
+#
+# Copy to ci/settings.yml (untracked), fill in your site's values, then
+# deploy with ci/repipe. Target-specific variants are also supported:
+# ci/settings-<target>.yml, selected via CONCOURSE_TARGET=<target>.
+#
+# Secrets can stay out of the file entirely with spruce's vault
+# operator (resolved at repipe time from Vault/safe), as shown below.
+
+meta:
+  target: ocfp
+  url:    https://ci.example.com
+
+  image:
+    name: ghcr.io/cloudfoundry/stratos-ci
+
+  github:
+    access_token: (( vault "secret/pipelines/stratos/github:token" ))
+
+  # Nightly audit window (Concourse time resource)
+  nightly:
+    location: America/Los_Angeles
