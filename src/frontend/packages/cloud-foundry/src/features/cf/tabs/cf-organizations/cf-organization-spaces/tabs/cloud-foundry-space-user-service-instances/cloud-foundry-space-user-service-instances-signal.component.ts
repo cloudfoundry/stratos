@@ -122,10 +122,11 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
     const cfGuid = this.cfEndpointService.cfGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     this.instancesConfig.initializeForSpace(cfGuid, spaceGuid, 'user-provided');
-    // view exists only after initializeForSpace(). Use the filtered count:
-    // the space + user-provided scope is applied via the filter predicate,
-    // so totalItems would report the CNSI-wide total, not this page's scope.
-    this.totalServiceInstances = this.instancesConfig.view.totalFilteredResults;
+    // view exists only after initializeForSpace(). The space +
+    // user-provided scope now narrows the dataset itself, so totalItems
+    // means "in this page's scope" and the headline no longer tracks the
+    // user's filter input (#5670).
+    this.totalServiceInstances = this.instancesConfig.view.totalItems;
 
     const renderTags = (si: StServiceInstance): string => {
       const tags = si.tags ?? [];

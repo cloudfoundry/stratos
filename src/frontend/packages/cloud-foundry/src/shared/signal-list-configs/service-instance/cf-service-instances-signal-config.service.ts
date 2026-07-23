@@ -300,10 +300,9 @@ export class CfServiceInstancesSignalConfigService {
 
     // Re-derive the filter predicate whenever a toolbar input changes. The
     // CF filter is a direct guid match; the text filter falls back to the
-    // current row's name when the registered extractor is missing. The
-    // scope filters (spaceGuid, typeFilter) come from initializeForSpace
-    // and are read here so per-space tabs narrow without touching the
-    // toolbar shape.
+    // current row's name when the registered extractor is missing. Scope
+    // narrowing (space lock / type / offering) is dataset-level — see
+    // rebuild() — so it never rides this predicate.
     effect(() => {
       const cnsi = this.selectedCnsi();
       const org = this.selectedOrg();
@@ -311,29 +310,15 @@ export class CfServiceInstancesSignalConfigService {
       const q = this.nameFilter().trim().toLowerCase();
       const field = this.filterField();
       const extractor = this._filterExtractors().get(field);
-      const spaceGuid = this._spaceGuid();
-      const typeFilter = this._typeFilter();
-      const offeringGuid = this._offeringGuid();
       const orgGuidBySpaceGuid = this._orgGuidBySpaceGuid();
+      // Scope narrowing (space lock / type / offering) is NOT here — it
+      // rides the dataset (see rebuild()) so totalItems stays scope-true.
       this.filter.set((si: StServiceInstance) => {
         if (cnsi && si.cnsiGuid !== cnsi) return false;
-        if (spaceGuid && si.space.guid !== spaceGuid) return false;
         // Toolbar org/space selections — only effective on the wall page;
         // per-space/per-offering callers don't render the dropdowns.
         if (space && si.space.guid !== space) return false;
         if (org && orgGuidBySpaceGuid.get(si.space.guid) !== org) return false;
-        if (typeFilter) {
-          const isUps = si.type === 'user-provided';
-          if (typeFilter === 'user-provided' && !isUps) return false;
-          if (typeFilter === 'managed' && isUps) return false;
-        }
-        if (offeringGuid) {
-          // service-offering Instances tab — only instances whose
-          // managed offering ref matches. UPS instances have no offering
-          // ref so they are filtered out by definition (correct: the tab
-          // is "instances of THIS offering"; UPS doesn't have an offering).
-          if (si.servicePlan?.serviceOffering?.guid !== offeringGuid) return false;
-        }
         if (q) {
           const hay = (extractor ? extractor(si) : (si.name ?? '')).toLowerCase();
           if (!hay.includes(q)) return false;
@@ -359,6 +344,9 @@ export class CfServiceInstancesSignalConfigService {
   }
 
   initialize(cnsiGuids: readonly string[]): void {
+    // New scope → new data set: drop any page position the previous scope
+    // left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cnsiGuids.join(',')}`);
     this._hasLoadedOnce.set(false);
     // Resetting on every initialize keeps the wall caller's behaviour
     // intact regardless of whether a per-space / per-offering caller
@@ -366,61 +354,65 @@ export class CfServiceInstancesSignalConfigService {
     this._spaceGuid.set('');
     this._typeFilter.set(undefined);
     this._offeringGuid.set('');
-    this.swapAcquiredEds(cnsiGuids);
-    const sources = cnsiGuids.map(guid => this.makeSource(guid));
-    this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
-    this.rewireErrorReporting();
-    this.view = new ViewPipeline<StServiceInstance>(
-      this.orchestrator.allItems,
-      this.filter,
-      this.sort,
-      this.pageSize,
-      this.pageIndex,
-      this._sortExtractors.asReadonly(),
-    );
+    this.rebuild(cnsiGuids);
   }
 
   // Per-space variant — single CNSI, narrowed to one space and (usually)
   // one instance type. The toolbar still has the same shape but the CF
   // dropdown is pointless in this context (the per-space components elect
-  // not to render it). The filter effect re-runs whenever _spaceGuid or
-  // _typeFilter changes so no extra wiring is needed at the call site.
+  // not to render it).
   initializeForSpace(cnsiGuid: string, spaceGuid: string, typeFilter?: 'managed' | 'user-provided'): void {
+    this.state.resetPageOnScopeChange(`${cnsiGuid}|space:${spaceGuid}|${typeFilter ?? ''}`);
     this._hasLoadedOnce.set(false);
     this._spaceGuid.set(spaceGuid);
     this._typeFilter.set(typeFilter);
     this._offeringGuid.set('');
-    this.swapAcquiredEds([cnsiGuid]);
-    const sources = [this.makeSource(cnsiGuid)];
-    this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
-    this.rewireErrorReporting();
-    this.view = new ViewPipeline<StServiceInstance>(
-      this.orchestrator.allItems,
-      this.filter,
-      this.sort,
-      this.pageSize,
-      this.pageIndex,
-      this._sortExtractors.asReadonly(),
-    );
+    this.rebuild([cnsiGuid]);
   }
 
   // Per-offering variant — single CNSI, narrowed to instances of one
   // service offering (the service-catalog "Instances" tab on a service
   // offering detail page). UPS instances have no offering ref so they are
-  // excluded by the filter regardless of typeFilter. The toolbar's CF
+  // excluded from the scoped dataset by definition. The toolbar's CF
   // dropdown is pointless in this context (the consumer elects not to
   // render it).
   initializeForOffering(cnsiGuid: string, serviceOfferingGuid: string): void {
+    this.state.resetPageOnScopeChange(`${cnsiGuid}|offering:${serviceOfferingGuid}`);
     this._hasLoadedOnce.set(false);
     this._spaceGuid.set('');
     this._typeFilter.set(undefined);
     this._offeringGuid.set(serviceOfferingGuid);
-    this.swapAcquiredEds([cnsiGuid]);
-    const sources = [this.makeSource(cnsiGuid)];
+    this.rebuild([cnsiGuid]);
+  }
+
+  // Shared orchestrator + view construction for the three initialize
+  // variants. Scope (space lock / instance type / offering) narrows the
+  // DATASET between the orchestrator and the ViewPipeline — not the user
+  // filter — so view.totalItems means "everything in this page's scope"
+  // and the "Total X" headers can read it without leaking wider counts
+  // (#5670; same pattern as cf-apps / cf-users).
+  private rebuild(cnsiGuids: readonly string[]): void {
+    this.swapAcquiredEds(cnsiGuids);
+    const sources = cnsiGuids.map(guid => this.makeSource(guid));
     this.orchestrator = new MergeOrchestrator<StServiceInstance>(sources);
     this.rewireErrorReporting();
+    const scopedItems = computed(() => {
+      const spaceGuid = this._spaceGuid();
+      const typeFilter = this._typeFilter();
+      const offeringGuid = this._offeringGuid();
+      return this.orchestrator.allItems().filter(si => {
+        if (spaceGuid && si.space.guid !== spaceGuid) return false;
+        if (typeFilter) {
+          const isUps = si.type === 'user-provided';
+          if (typeFilter === 'user-provided' && !isUps) return false;
+          if (typeFilter === 'managed' && isUps) return false;
+        }
+        if (offeringGuid && si.servicePlan?.serviceOffering?.guid !== offeringGuid) return false;
+        return true;
+      });
+    });
     this.view = new ViewPipeline<StServiceInstance>(
-      this.orchestrator.allItems,
+      scopedItems,
       this.filter,
       this.sort,
       this.pageSize,
