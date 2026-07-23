@@ -440,6 +440,7 @@ type PortalConfig struct {
 	CFClient                           string   `configName:"CF_CLIENT"`
 	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
 	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
+	CSPPolicy                          string   `configName:"CONSOLE_CSP"`
 	SessionStoreSecret                 string   `configName:"SESSION_STORE_SECRET"`
 	EncryptionKeyVolume                string   `configName:"ENCRYPTION_KEY_VOLUME"`
 	EncryptionKeyFilename              string   `configName:"ENCRYPTION_KEY_FILENAME"`

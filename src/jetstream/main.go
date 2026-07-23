@@ -80,6 +80,30 @@ const (
 	defaultSessionSecret = "wheeee!"
 )
 
+// defaultCSPPolicy is the Content-Security-Policy applied when CONSOLE_CSP is
+// set to "default" (or "on"). CSP is opt-in: with CONSOLE_CSP unset, no header
+// is emitted (preserving prior behavior). It is scoped to what the Stratos SPA
+// needs:
+//   - default/script/connect from same origin ('self'); WebSockets for the
+//     backend log/stream endpoints (ws:/wss:)
+//   - 'unsafe-inline' styles: Angular + the index.html loading splash inject
+//     inline <style>; Google Fonts stylesheet is allowed
+//   - data: images/fonts (inlined icons) and Google Fonts font files
+//   - worker-src blob: — the Monaco editor spins up its language web-workers
+//     from blob URLs
+//   - frame-ancestors 'self' mirrors the existing X-Frame-Options: SAMEORIGIN
+// Operators can instead set CONSOLE_CSP to a full policy string to use verbatim.
+const defaultCSPPolicy = "default-src 'self'; " +
+	"script-src 'self'; " +
+	"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+	"font-src 'self' data: https://fonts.gstatic.com; " +
+	"img-src 'self' data:; " +
+	"connect-src 'self' ws: wss:; " +
+	"worker-src 'self' blob:; " +
+	"frame-ancestors 'self'; " +
+	"base-uri 'self'; " +
+	"form-action 'self'"
+
 var appVersion string
 var buildDate string
 var gitCommit string
@@ -615,6 +639,26 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 	}
 
 	log.Debugf("Portal config auth endpoint type initialised to: %v", pc.AuthEndpointType)
+
+	// Content Security Policy (opt-in). To preserve existing behavior, no CSP
+	// header is emitted unless CONSOLE_CSP opts in. Recognized values:
+	//   - "default" / "on" -> apply the built-in defaultCSPPolicy (scoped to
+	//     what the Stratos SPA + Monaco editor need)
+	//   - "" / "off" / "none" / "false" / "disabled" -> no header (default)
+	//   - anything else -> treated as a full policy string, used verbatim
+	// The explicit off-values are normalized to "" so a well-meaning
+	// CONSOLE_CSP=off never leaks as a literal Content-Security-Policy value.
+	switch {
+	case strings.EqualFold(pc.CSPPolicy, "default"), strings.EqualFold(pc.CSPPolicy, "on"):
+		pc.CSPPolicy = defaultCSPPolicy
+	case pc.CSPPolicy == "",
+		strings.EqualFold(pc.CSPPolicy, "off"),
+		strings.EqualFold(pc.CSPPolicy, "none"),
+		strings.EqualFold(pc.CSPPolicy, "false"),
+		strings.EqualFold(pc.CSPPolicy, "disabled"):
+		pc.CSPPolicy = ""
+	}
+
 	return pc, nil
 }
 
@@ -811,6 +855,12 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 	}))
 	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
 		XFrameOptions: "SAMEORIGIN",
+		// Content Security Policy (opt-in via CONSOLE_CSP). Empty by default,
+		// so no CSP header is emitted unless an operator opts in — Echo's
+		// Secure middleware skips the header when this is "". CONSOLE_CSP may
+		// be "default"/"on" (built-in defaultCSPPolicy) or a full policy
+		// string; see loadPortalConfig.
+		ContentSecurityPolicy: config.CSPPolicy,
 	}))
 
 	if !isUpgrade {
