@@ -84,8 +84,8 @@ const (
 // set to "default" (or "on"). CSP is opt-in: with CONSOLE_CSP unset, no header
 // is emitted (preserving prior behavior). It is scoped to what the Stratos SPA
 // needs:
-//   - default/script/connect from same origin ('self'); WebSockets for the
-//     backend log/stream endpoints (ws:/wss:)
+//   - default/script/connect from same origin ('self'); same-origin 'self'
+//     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
 //   - 'unsafe-inline' styles: Angular + the index.html loading splash inject
 //     inline <style>; Google Fonts stylesheet is allowed
 //   - data: images/fonts (inlined icons) and Google Fonts font files
@@ -98,7 +98,10 @@ const defaultCSPPolicy = "default-src 'self'; " +
 	"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
 	"font-src 'self' data: https://fonts.gstatic.com; " +
 	"img-src 'self' data:; " +
-	"connect-src 'self' ws: wss:; " +
+	// 'self' also covers same-origin WebSocket (wss:// on an HTTPS page), so
+	// the backend log/stream sockets connect without a bare ws:/wss: wildcard
+	// (which scanners flag as overly permissive — it would allow any host).
+	"connect-src 'self'; " +
 	"worker-src 'self' blob:; " +
 	"frame-ancestors 'self'; " +
 	"base-uri 'self'; " +
