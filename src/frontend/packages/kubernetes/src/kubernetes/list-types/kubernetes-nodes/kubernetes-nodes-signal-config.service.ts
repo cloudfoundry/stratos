@@ -69,6 +69,9 @@ export class KubernetesNodesSignalConfigService {
   }
 
   initialize(kubeGuid: string): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${kubeGuid}`);
     this.kubeGuid = kubeGuid;
     this._nodes = this.nodeData.nodesInCluster(kubeGuid);
 

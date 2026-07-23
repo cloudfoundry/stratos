@@ -198,6 +198,15 @@ export class CfUsersSignalConfigService {
   }
 
   initialize(cnsiGuid: string): void {
+    // New scope → new data set: drop any page position the previous scope
+    // left behind (#5670). Same scope re-entry keeps position. The org/
+    // space variants below call initializeCore directly and apply their
+    // own (finer) scope keys.
+    this.state.resetPageOnScopeChange(cnsiGuid);
+    this.initializeCore(cnsiGuid);
+  }
+
+  private initializeCore(cnsiGuid: string): void {
     this.diag.record(cnsiGuid, 'initialize-called', {
       previousCnsiGuid: this.cnsiGuid,
       hasLoadedOnceBefore: this.hasLoadedOnce(),
@@ -278,7 +287,8 @@ export class CfUsersSignalConfigService {
   // raw list. Toolbar and column shape stay identical; the per-space page
   // simply chooses to render fewer columns (no Org Roles).
   initializeForSpace(cnsiGuid: string, spaceGuid: string): void {
-    this.initialize(cnsiGuid);
+    this.state.resetPageOnScopeChange(`${cnsiGuid}|space:${spaceGuid}`);
+    this.initializeCore(cnsiGuid);
     this._lockedSpaceGuid.set(spaceGuid);
     // Nudge the filter so the predicate re-runs against the new lock — the
     // computed already re-derives users, but the ViewPipeline reads filter
@@ -294,7 +304,8 @@ export class CfUsersSignalConfigService {
   // (Username, Origin, Org Roles for THIS org, Space Roles in THIS org,
   // Created — no all-CNSI Org Roles column).
   initializeForOrg(cnsiGuid: string, orgGuid: string): void {
-    this.initialize(cnsiGuid);
+    this.state.resetPageOnScopeChange(`${cnsiGuid}|org:${orgGuid}`);
+    this.initializeCore(cnsiGuid);
     this._lockedOrgGuid.set(orgGuid);
     // Same filter nudge as initializeForSpace (see comment above).
     this.filter.set(this.filter());

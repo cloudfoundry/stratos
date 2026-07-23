@@ -377,6 +377,12 @@ export class CfAppsSignalConfigService {
   }
 
   initialize(cnsiGuids: readonly string[]): void {
+    // New scope → new data set: drop any page position the previous scope
+    // left behind (#5670). Same scope re-entry (wall → app detail → wall)
+    // keeps position. The space lock is part of the scope key — it is set
+    // by initializeForSpace before this runs, and cleared by the wall via
+    // clearLockedSpace().
+    this.state.resetPageOnScopeChange(`${cnsiGuids.join(',')}|${this._lockedSpaceGuid()}`);
     // Reset hasLoadedOnce so the stale-selection effect is gated off while
     // the new orchestrator reloads. Without this, returning from a detail
     // page (e.g. after deleting an app) would see orgOptions momentarily
@@ -457,10 +463,6 @@ export class CfAppsSignalConfigService {
   // page — there's exactly one of each in scope.
   initializeForSpace(cnsiGuid: string, spaceGuid: string): void {
     this._lockedSpaceGuid.set(spaceGuid);
-    // A space mount is a fresh context: drop any page position the wall
-    // (or another space) left in the persisted list state, so the tab
-    // can't open on an out-of-range page (#5670).
-    this.pageIndex.set(0);
     this.initialize([cnsiGuid]);
   }
 

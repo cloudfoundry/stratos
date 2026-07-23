@@ -91,6 +91,9 @@ export class CfCellHealthSignalConfigService {
   view!: ViewPipeline<CfCellHealthEntry>;
 
   initialize(cnsiGuid: string, cellId: string): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cnsiGuid}:${cellId}`);
     this.cnsiGuid = cnsiGuid;
     this.cellId = cellId;
     this.view = new ViewPipeline<CfCellHealthEntry>(

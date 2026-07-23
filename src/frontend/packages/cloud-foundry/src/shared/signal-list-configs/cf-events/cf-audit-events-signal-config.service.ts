@@ -136,6 +136,9 @@ export class CfAuditEventsSignalConfigService {
   private cascadeEffect?: EffectRef;
 
   initialize(cnsiGuid: string): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cnsiGuid}`);
     // Swap CNSI: release the previous EDS handle if a re-initialize() in
     // the same singleton swapped foundations. Refcount-balanced —
     // acquire below pairs with release here or in the destroy hook.

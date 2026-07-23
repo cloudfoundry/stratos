@@ -85,6 +85,9 @@ export class CfSpacesSignalConfigService {
   readonly errorsByCnsi: Signal<Map<string, unknown>> = this._errorsByCnsi.asReadonly();
 
   initialize(cnsiGuid: string, orgGuid: string): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cnsiGuid}:${orgGuid}`);
     // If the active scope is changing (revisiting the page for a different
     // org under the same singleton), drop the previous payload so the
     // table doesn't flash stale rows for the wrong org while the fetch

@@ -51,8 +51,14 @@ export class KubeViewPipeline<T> {
     });
     this.pagedItems = computed(() => {
       const size = pageSize();
-      const idx = pageIndex();
-      return this.sortedItems().slice(idx * size, idx * size + size);
+      const rows = this.sortedItems();
+      if (size <= 0) return rows;
+      // Clamp a stale out-of-range index to the last available page so
+      // persisted paging state can't render an empty page over a
+      // non-empty list (#5670).
+      const lastPage = Math.max(0, Math.ceil(rows.length / size) - 1);
+      const start = Math.max(0, Math.min(pageIndex(), lastPage)) * size;
+      return rows.slice(start, start + size);
     });
     this.totalFilteredResults = computed(() => this.filteredItems().length);
     this.totalPages = computed(() => {

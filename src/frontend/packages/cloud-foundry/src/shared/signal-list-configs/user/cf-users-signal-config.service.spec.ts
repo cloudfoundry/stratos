@@ -72,6 +72,7 @@ function makeListStateStoreStub() {
       pageSize,
       pageIndex,
       sort,
+      resetPageOnScopeChange: vi.fn(),
     }),
   };
 }

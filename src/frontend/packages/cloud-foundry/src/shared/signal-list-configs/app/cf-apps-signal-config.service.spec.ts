@@ -207,12 +207,23 @@ describe('CfAppsSignalConfigService', () => {
       expect(svc.view.totalItems()).toBe(2);
     });
 
-    it('resets pageIndex on space mount so wall paging cannot blank the tab', () => {
+    it('scope change resets pageIndex so wall paging cannot blank a space tab', () => {
       const svc = makeSeededSvc([inSpace]);
+      svc.clearLockedSpace();
+      svc.initialize(['cf-1']);
       svc.pageIndex.set(14);
       svc.initializeForSpace('cf-1', 'sp-1');
       expect(svc.pageIndex()).toBe(0);
       expect(svc.view.pagedItems().map(a => a.guid)).toEqual(['a']);
+    });
+
+    it('same-scope re-entry keeps the page position', () => {
+      const svc = makeSeededSvc([inSpace, inSpaceToo, elsewhere]);
+      svc.clearLockedSpace();
+      svc.initialize(['cf-1']);
+      svc.pageIndex.set(2);
+      svc.initialize(['cf-1']);
+      expect(svc.pageIndex()).toBe(2);
     });
 
     it('clearLockedSpace restores the endpoint-wide dataset', () => {

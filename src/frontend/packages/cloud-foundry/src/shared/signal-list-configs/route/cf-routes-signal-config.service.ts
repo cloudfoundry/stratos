@@ -105,6 +105,9 @@ export class CfRoutesSignalConfigService {
   readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
 
   initialize(cnsiGuid: string, spaceGuid?: string): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cnsiGuid}|${spaceGuid ?? ''}`);
     this.cnsiGuid = cnsiGuid;
     this.spaceGuid = spaceGuid ?? '';
     // Acquire the endpoint-data service so its apps() signal is live —

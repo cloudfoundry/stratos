@@ -92,6 +92,9 @@ export class CfOrgsSignalConfigService {
     (this.endpointDataService()?.errors() ?? []).filter(e => e.resource === 'orgs-full' || e.resource === 'orgs'));
 
   initialize(cnsiGuid: string): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cnsiGuid}`);
     this.cnsiGuid = cnsiGuid;
     const ds = this.registry.acquire(cnsiGuid);
     this.endpointDataService.set(ds);

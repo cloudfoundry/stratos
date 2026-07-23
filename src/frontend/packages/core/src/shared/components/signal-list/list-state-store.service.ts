@@ -43,6 +43,15 @@ export interface BoundListState {
   readonly pageSize: WritableSignal<number>;
   readonly pageIndex: WritableSignal<number>;
   readonly sort: WritableSignal<SignalListSort>;
+
+  // Scope-aware page reset (#5670). Config services call this from every
+  // initialize path with a key describing the data set about to load
+  // (cnsi guids, org/space locks, app guid, …). Same key as last time →
+  // the user is returning to the same list (e.g. wall → app detail →
+  // wall) and their position is preserved. Different key → new data set,
+  // both mode slots reset to page 0 so a position from the previous
+  // scope can't carry over. The first call only records the scope.
+  resetPageOnScopeChange(scopeKey: string): void;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -61,7 +70,12 @@ export class ListStateStore {
 
     const viewMode = signal(initial.viewMode);
     const pageSizeByMode = signal(initial.pageSize);
-    const pageIndexByMode = signal(initial.pageIndex);
+    // pageIndex is deliberately NOT restored from storage: page position
+    // is navigation state, not a preference — a restored index from a
+    // previous session points into whatever data set happened to be
+    // loaded back then and can land past the end of today's (#5670).
+    // In-memory position within a session is unaffected.
+    const pageIndexByMode = signal(defaults.pageIndex);
     const sortByMode = signal(initial.sort);
 
     const pageSize = makeModeSignal(viewMode, pageSizeByMode);
@@ -84,7 +98,15 @@ export class ListStateStore {
       }));
     });
 
-    return { viewMode, pageSizeByMode, pageIndexByMode, sortByMode, pageSize, pageIndex, sort };
+    let lastScopeKey: string | undefined;
+    const resetPageOnScopeChange = (scopeKey: string): void => {
+      if (lastScopeKey !== undefined && lastScopeKey !== scopeKey) {
+        pageIndexByMode.set(defaults.pageIndex);
+      }
+      lastScopeKey = scopeKey;
+    };
+
+    return { viewMode, pageSizeByMode, pageIndexByMode, sortByMode, pageSize, pageIndex, sort, resetPageOnScopeChange };
   }
 
   private read(key: string): ListStateDefaults | null {
