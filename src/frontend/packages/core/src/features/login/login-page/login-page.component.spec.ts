@@ -75,6 +75,9 @@ describe('LoginPageComponent', () => {
   });
 
   beforeEach(() => {
+    // The nosplash redirect loop guard persists a counter in sessionStorage;
+    // clear it so each test starts from a known (zero) attempt count.
+    sessionStorage.clear();
     fixture = TestBed.createComponent(LoginPageComponent);
     component = fixture.componentInstance;
     // appReady$ gates navigation on ApplicationRef.isStable, which does not
@@ -112,6 +115,8 @@ describe('LoginPageComponent', () => {
       await fixture.whenStable();
 
       expect(ssoSpy).toHaveBeenCalledTimes(1);
+      // The redirect counter is bumped so a silent IdP round-trip can't loop.
+      expect(sessionStorage.getItem('stratos_login_redirect_attempts')).toBe('1');
     });
 
     it('does NOT auto-redirect when the session is invalid but SSO is not configured', async () => {
@@ -130,6 +135,58 @@ describe('LoginPageComponent', () => {
         errorResponse: '',
         verifying: false,
         sessionData: { valid: false } as any,
+      });
+
+      await fixture.whenStable();
+
+      expect(ssoSpy).not.toHaveBeenCalled();
+    });
+
+    it('does NOT auto-redirect when an SSO_Message error is present (failed round-trip)', async () => {
+      const ssoSpy = vi
+        .spyOn(component as any, 'doSSOLoginReactive')
+        .mockReturnValue(of(null));
+
+      // Simulate returning from the IdP with an error message in the URL.
+      const original = (component as any).shouldAutoRedirectNosplash?.bind(component);
+      void original;
+      history.replaceState({}, '', '/login?SSO_Message=Invalid+auth');
+
+      fixture.detectChanges();
+      authData.auth.set({
+        loggedIn: false,
+        loggingIn: false,
+        user: null,
+        error: false,
+        errorResponse: '',
+        verifying: false,
+        sessionData: { valid: false, ssoOptions: 'nosplash,logout' } as any,
+      });
+
+      await fixture.whenStable();
+
+      expect(ssoSpy).not.toHaveBeenCalled();
+      history.replaceState({}, '', '/login');
+    });
+
+    it('stops redirecting once the redirect cap is exceeded (loop protection)', async () => {
+      const ssoSpy = vi
+        .spyOn(component as any, 'doSSOLoginReactive')
+        .mockReturnValue(of(null));
+
+      // Simulate having already exhausted the redirect budget in a prior
+      // round-trip (MAX_REDIRECT_ATTEMPTS = 2).
+      sessionStorage.setItem('stratos_login_redirect_attempts', '3');
+
+      fixture.detectChanges();
+      authData.auth.set({
+        loggedIn: false,
+        loggingIn: false,
+        user: null,
+        error: false,
+        errorResponse: '',
+        verifying: false,
+        sessionData: { valid: false, ssoOptions: 'nosplash,logout' } as any,
       });
 
       await fixture.whenStable();
