@@ -68,4 +68,39 @@ describe('ViewPipeline', () => {
     const pipe = new ViewPipeline<Row>(items, filter, sort, signal(10), signal(0));
     expect(pipe.sortedItems().map(r => r.name)).toEqual(['b', 'a']);
   });
+
+  // #5670: pageIndex persists in the shared list state across wall ↔ space
+  // navigation, so a stale index can point past the end of a smaller data
+  // set. An unclamped slice then renders an empty page over a non-empty
+  // list (a 1-app space showed no rows because the wall left index 14).
+  describe('stale pageIndex clamping', () => {
+    const sort = signal<{ field: keyof Row; direction: 'asc' | 'desc' }>({ field: 'created', direction: 'asc' });
+
+    it('clamps an out-of-range pageIndex to the last available page', () => {
+      const items = signal<Row[]>([{ name: 'only', created: 1 }]).asReadonly();
+      const pipe = new ViewPipeline<Row>(items, signal(() => true), sort, signal(6), signal(14));
+      expect(pipe.pagedItems().map(r => r.name)).toEqual(['only']);
+    });
+
+    it('clamped index lands on the last partial page of a multi-page set', () => {
+      const items = signal<Row[]>([
+        { name: 'a', created: 1 }, { name: 'b', created: 2 }, { name: 'c', created: 3 },
+        { name: 'd', created: 4 }, { name: 'e', created: 5 },
+      ]).asReadonly();
+      const pipe = new ViewPipeline<Row>(items, signal(() => true), sort, signal(2), signal(99));
+      expect(pipe.pagedItems().map(r => r.name)).toEqual(['e']);
+    });
+
+    it('an empty filtered set stays empty regardless of pageIndex', () => {
+      const items = signal<Row[]>([{ name: 'a', created: 1 }]).asReadonly();
+      const pipe = new ViewPipeline<Row>(items, signal<(r: Row) => boolean>(() => false), sort, signal(6), signal(14));
+      expect(pipe.pagedItems()).toEqual([]);
+    });
+
+    it('non-positive page size (the "All" sentinel) renders every row', () => {
+      const items = signal<Row[]>([{ name: 'a', created: 1 }, { name: 'b', created: 2 }]).asReadonly();
+      const pipe = new ViewPipeline<Row>(items, signal(() => true), sort, signal(-1), signal(3));
+      expect(pipe.pagedItems().map(r => r.name)).toEqual(['a', 'b']);
+    });
+  });
 });

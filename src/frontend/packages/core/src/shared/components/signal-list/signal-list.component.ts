@@ -606,12 +606,23 @@ export class SignalListComponent<T> implements AfterViewInit {
     return opts;
   }
 
+  // The page index the list actually renders. The raw pageIndex signal
+  // persists across navigation and can point past the end of a smaller
+  // data set (wall → space tab); the data layer clamps its slice the same
+  // way, so the pager must describe the clamped page — an unclamped label
+  // read "85 – 1 of 1" over a one-row list (#5670). Navigation writes
+  // derived from this also snap the stored signal back into range on
+  // first interaction.
+  effectivePageIndex(): number {
+    return Math.max(0, Math.min(this.config.pageIndex(), this.config.totalPages() - 1));
+  }
+
   rangeText(): string {
     const total = this.config.totalFilteredResults();
     if (total === 0) return '0 of 0';
     const size = this.config.pageSize();
     if (size <= 0) return `1 – ${total} of ${total}`;
-    const start = this.config.pageIndex() * size + 1;
+    const start = this.effectivePageIndex() * size + 1;
     const end = Math.min(start + size - 1, total);
     return `${start} – ${end} of ${total}`;
   }
