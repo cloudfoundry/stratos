@@ -143,6 +143,9 @@ export class CfServiceOfferingsSignalConfigService {
   }
 
   initialize(cnsiGuids: readonly string[]): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cnsiGuids.join(',')}`);
     const key = [...cnsiGuids].sort().join(',');
     if (key === this._initializedFor) return;
     this._initializedFor = key;

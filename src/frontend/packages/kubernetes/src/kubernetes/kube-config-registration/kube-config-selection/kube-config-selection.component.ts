@@ -84,8 +84,14 @@ export class KubeConfigSelectionComponent {
   });
   private readonly pagedItems: Signal<KubeConfigFileCluster[]> = computed(() => {
     const size = this.pageSize();
-    const idx = this.pageIndex();
-    return this.clusters().slice(idx * size, idx * size + size);
+    const rows = this.clusters();
+    if (size <= 0) return rows;
+    // Clamp a stale out-of-range index to the last available page so
+    // paging state can't render an empty page over a non-empty list
+    // (#5670).
+    const lastPage = Math.max(0, Math.ceil(rows.length / size) - 1);
+    const idx = Math.max(0, Math.min(this.pageIndex(), lastPage));
+    return rows.slice(idx * size, idx * size + size);
   });
 
   public listConfig: SignalListConfig<KubeConfigFileCluster> = {

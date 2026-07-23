@@ -47,8 +47,14 @@ export class HelmReleaseHistoryTabComponent {
 
   private readonly pagedItems: Signal<HelmReleaseHistoryRow[]> = computed(() => {
     const size = this.pageSize();
-    const idx = this.pageIndex();
-    return this.history().slice(idx * size, idx * size + size);
+    const rows = this.history();
+    if (size <= 0) return rows;
+    // Clamp a stale out-of-range index to the last available page so
+    // paging state can't render an empty page over a non-empty list
+    // (#5670).
+    const lastPage = Math.max(0, Math.ceil(rows.length / size) - 1);
+    const idx = Math.max(0, Math.min(this.pageIndex(), lastPage));
+    return rows.slice(idx * size, idx * size + size);
   });
   private readonly totalFilteredResults: Signal<number> = computed(() => this.history().length);
   private readonly totalPages: Signal<number> = computed(() => {

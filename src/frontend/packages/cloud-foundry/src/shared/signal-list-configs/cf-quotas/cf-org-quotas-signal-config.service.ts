@@ -59,6 +59,9 @@ export class CfOrgQuotasSignalConfigService {
   private filterEffect?: EffectRef;
 
   initialize(cnsiGuid: string): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cnsiGuid}`);
     this.cnsiGuid = cnsiGuid;
     this.source = new CnsiOrgQuotasSource(cnsiGuid, this.http);
     this.view = new ViewPipeline<StOrgQuota>(

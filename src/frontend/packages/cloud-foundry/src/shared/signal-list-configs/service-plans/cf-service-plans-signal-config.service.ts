@@ -102,6 +102,9 @@ export class CfServicePlansSignalConfigService {
   }
 
   initialize(cfGuid: string, offeringGuid: string): void {
+    // New scope → new data set: drop any page position the previous
+    // scope left behind (#5670). Same scope re-entry keeps position.
+    this.state.resetPageOnScopeChange(`${cfGuid}:${offeringGuid}`);
     this.cfGuid = cfGuid;
     this.offeringGuid = offeringGuid;
     // One mirror effect for the lifetime of this service. Tracks both
