@@ -1,0 +1,21 @@
+---
+# Nightly security sweep — the default `make audit` scanner set plus the
+# network-using modrot archival scan. Report-only: scanners print their
+# findings to the build log; failures surface, findings don't gate.
+platform: linux
+
+inputs:
+  - name: stratos
+
+params:
+  GH_TOKEN:  # modrot + zizmor online mode
+
+run:
+  path: bash
+  dir: stratos
+  args:
+    - -ce
+    - |
+      bun install --frozen-lockfile
+      make audit
+      make audit modrot
