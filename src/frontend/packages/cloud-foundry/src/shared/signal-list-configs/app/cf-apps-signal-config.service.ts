@@ -168,12 +168,16 @@ export class CfAppsSignalConfigService {
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
 
   // Locked space scope for the per-space apps tab. Empty = no narrowing
-  // (the multi-CNSI app wall path); non-empty = filter to apps whose
-  // spaceGuid matches. Set via initializeForSpace() and re-applied on
-  // every initialize() call. Distinct from `selectedSpace` (the user's
-  // toolbar selection) so the per-space tab can pin scope without the
-  // dropdown — and so clearFilters() doesn't drop scope.
-  private _lockedSpaceGuid = '';
+  // (the multi-CNSI app wall path); non-empty = the DATASET is narrowed to
+  // apps whose spaceGuid matches, between the orchestrator and the
+  // ViewPipeline. Scope deliberately does NOT ride the user filter: the
+  // "Total X" header reads view.totalItems (unfiltered by design,
+  // a2807cf827), so a filter-implemented scope leaked the endpoint-wide
+  // app count into the space tab's headline (#5670). Distinct from
+  // `selectedSpace` (the user's toolbar selection) so the per-space tab
+  // can pin scope without the dropdown — and so clearFilters() doesn't
+  // drop scope.
+  private readonly _lockedSpaceGuid = signal('');
 
   private readonly endpointRegistry = inject(EndpointDataRegistry);
   private readonly deleteController = inject(EntityDeleteController);
@@ -359,12 +363,7 @@ export class CfAppsSignalConfigService {
       const field = this.filterField();
       const extractors = this._filterExtractors();
       const extractor = extractors.get(field);
-      const lockedSpace = this._lockedSpaceGuid;
       this.filter.set((app: StApp) => {
-        // Locked-space scope (per-space tab) takes precedence over the
-        // toolbar selectedSpace dropdown, which the per-space page doesn't
-        // expose at all.
-        if (lockedSpace && app.spaceGuid !== lockedSpace) return false;
         if (cnsi && app.cnsiGuid !== cnsi) return false;
         if (org && app.orgGuid !== org) return false;
         if (space && app.spaceGuid !== space) return false;
@@ -411,20 +410,22 @@ export class CfAppsSignalConfigService {
     // /errors page). Re-wire per initialize() — the orchestrator is rebuilt.
     this._errorEffect?.destroy();
     this._errorEffect = wireEndpointErrorReporting(this.orchestrator.errorsByCnsi, this.errorEvents, this.injector);
+    // Space scope narrows the dataset itself (not the user filter) so
+    // view.totalItems means "everything in this page's scope" on the
+    // per-space tab and the endpoint-wide set on the wall (#5670).
+    const scopedItems = computed(() => {
+      const lock = this._lockedSpaceGuid();
+      const all = this.orchestrator.allItems();
+      return lock ? all.filter(a => a.spaceGuid === lock) : all;
+    });
     this.view = new ViewPipeline<StApp>(
-      this.orchestrator.allItems,
+      scopedItems,
       this.filter,
       this.sort,
       this.pageSize,
       this.pageIndex,
       this._sortExtractors.asReadonly(),
     );
-    // Re-derive the filter predicate so any change to _lockedSpaceGuid (set
-    // immediately before this call by initializeForSpace) takes effect even
-    // when no other filter signal moved. The constructor effect only re-fires
-    // when one of its tracked signals changes, and lockedSpaceGuid isn't a
-    // signal — so we nudge a benign one (filterField → its current value).
-    this.filterField.set(this.filterField());
     // Lazy org/space name resolution. Previously fired here eagerly; now
     // deferred to `ensureNamesLoaded()`, called from the filter-dropdown
     // onOpen hook. The page paints fast and `networkidle` settles within
@@ -455,7 +456,11 @@ export class CfAppsSignalConfigService {
   // dropdowns (CF/Org/Space) are intentionally NOT exposed by the per-space
   // page — there's exactly one of each in scope.
   initializeForSpace(cnsiGuid: string, spaceGuid: string): void {
-    this._lockedSpaceGuid = spaceGuid;
+    this._lockedSpaceGuid.set(spaceGuid);
+    // A space mount is a fresh context: drop any page position the wall
+    // (or another space) left in the persisted list state, so the tab
+    // can't open on an out-of-range page (#5670).
+    this.pageIndex.set(0);
     this.initialize([cnsiGuid]);
   }
 
@@ -463,7 +468,7 @@ export class CfAppsSignalConfigService {
   // first initialize() so a stale lock from a previously-mounted space
   // page doesn't bleed into wall results.
   clearLockedSpace(): void {
-    this._lockedSpaceGuid = '';
+    this._lockedSpaceGuid.set('');
   }
 
   // Bumped on every initialize() so any in-flight name-resolution chunk
