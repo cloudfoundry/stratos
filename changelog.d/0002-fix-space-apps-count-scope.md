@@ -1,3 +1,4 @@
 [BugFixes]
 - List paging state is now scope-aware everywhere: navigating to a different data set (another org's spaces, a space tab after wall browsing, another app's tabs) resets to page 1, returning to the same one keeps your place, page position is no longer restored across sessions, and every pager clamps to its last page so stale state can never render an empty page over a non-empty list.
 - Space-scoped tab headers now report the scope's own count: the space Applications tab showed the endpoint-wide total (82 on a 1-app space), and the space Services / User Services headers tracked the filter box instead of the space.
+- Entering a name filter jumps to page 1 of the results and erasing it returns to the page you were on; the space summary page's Applications and Routes tiles now show the space's real counts (they were 0 for every space).
