@@ -12,10 +12,12 @@
 #   make release                Release all targets (cf + github) + SHA256SUMS
 #   make release cf             CF-pushable zip
 #   make release github         GitHub release archives
-#   make stamp tag              Create + push the release tag
+#   make stamp tag              Create + push the release tag (notes from
+#                               changelog.d fragments in the tag body)
 #   make publish                Create GitHub release + upload dist/release/*
 #   make unpublish TAG=vX       Delete a GitHub release (assets included)
 #   make stamp untag TAG=vX     Delete a tag (local + remote)
+#   make sweep                  Remove published changelog.d fragments
 #   make install                Install dependencies
 #   make stage                  Stage for local testing
 #   make clean                  Remove all build output
@@ -38,8 +40,9 @@
 #                               (default: version with build metadata stripped)
 #   TAG_REMOTE=<remote>         Remote for stamp tag/untag (default: origin)
 #   DRAFT=yes                   publish creates a draft release
-#   NOTES=<file>                Notes file for publish (default: CHANGELOG.md
-#                               section for the version, else a pointer line)
+#   NOTES=<file>                Notes file for publish (default: the
+#                               annotated tag body, assembled by stamp tag
+#                               from changelog.d fragments)
 #
 # Debug: make _HIDE= <target>  — exposes all internal variables
 #
@@ -806,7 +809,7 @@ $(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)W
 #   make unpublish TAG=vX           delete the GitHub release (assets included)
 #   make stamp untag TAG=vX         delete the tag (local + remote)
 #
-# Forward path:  build → release cf github → stamp tag → publish
+# Forward path:  build → release cf github → stamp tag → publish → sweep
 # Rollback:      unpublish → stamp untag   (release first, so the tag
 #                is never orphaned by a half-done rollback)
 #
@@ -838,21 +841,16 @@ endef
 $(call register, stamp, untag)
 
 # publish/unpublish are plain verbs (no modifiers). Notes source: NOTES=<file>
-# override, else the version's CHANGELOG.md section, else a pointer line.
+# override, else the annotated tag body — `stamp tag` assembles it from the
+# changelog.d fragments (build/release-notes.sh).
 # --prerelease derives from the tag itself: alpha/beta/rc only — dev.N tags
 # CAN be full releases (keep in sync with release.yml validate-version).
-.PHONY: publish unpublish
+.PHONY: publish unpublish sweep
 publish:
 	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
 	@TAG="$(TAG)"; \
 	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
-	NOTES_FILE="$(NOTES)"; \
-	if [ -z "$$NOTES_FILE" ]; then \
-		NOTES_FILE=$$(mktemp); \
-		awk -v ver="$${TAG#v}" 'f && /^## /{exit} f; $$0 ~ "^## \\[?"ver"(\\]| |$$)"{f=1}' CHANGELOG.md 2>/dev/null > "$$NOTES_FILE" || true; \
-		[ -s "$$NOTES_FILE" ] || echo "Release $$TAG — see [CHANGELOG.md](CHANGELOG.md) for details." > "$$NOTES_FILE"; \
-	fi; \
-	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft) --notes-file "$$NOTES_FILE" $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
+	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft) $(if $(NOTES),--notes-file "$(NOTES)",--notes-from-tag) $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
 	$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@")
 
 unpublish:
@@ -860,6 +858,12 @@ unpublish:
 	@gh release view "$(TAG)" --json tagName,name,isDraft,assets \
 		--jq '"  " + .tagName + "  (" + .name + ")" + (if .isDraft then "  [draft]" else "" end), (.assets[] | "    " + .name)'
 	$($(_HIDE)DRY)gh release delete "$(TAG)" --yes
+
+# sweep removes the changelog.d fragments a published release consumed;
+# the removal commit rides the next PR (e.g. the post-release bump).
+sweep:
+	@chmod +x build/release-notes.sh
+	$($(_HIDE)DRY)./build/release-notes.sh sweep
 
 # ── Deploy (documentation website) ───────────────────────────
 # Grammar: make deploy website <destination> — the component says what is
