@@ -268,6 +268,48 @@ describe('SignalListComponent', () => {
       });
     });
 
+    // #5670: changing the text filter redefines the result set, so the
+    // pager returns to page 1 — matching the dropdown/sort/filter-field
+    // behaviour. Staying mid-list showed a filtered set's last page and
+    // hid matches that sort earlier.
+    it('typing in the name filter resets pageIndex to 0', () => {
+      const fixture = TestBed.createComponent(Host);
+      const nameFilter = signal('');
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, nameFilter };
+      fixture.componentInstance.pageIndex.set(3);
+      fixture.detectChanges();
+      componentWith(fixture).onNameFilterChange('cf');
+      expect(nameFilter()).toBe('cf');
+      expect(fixture.componentInstance.pageIndex()).toBe(0);
+    });
+
+    // Filtering is a detour, not a destination: entering the filter saves
+    // the unfiltered position and erasing it restores it, so a user who
+    // filters from page 2 lands back on page 2 — even after paging within
+    // the filtered results.
+    it('erasing the filter restores the pre-filter page', () => {
+      const fixture = TestBed.createComponent(Host);
+      const nameFilter = signal('');
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, nameFilter };
+      fixture.componentInstance.pageIndex.set(2);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.onNameFilterChange('cf');
+      expect(fixture.componentInstance.pageIndex()).toBe(0);
+      fixture.componentInstance.pageIndex.set(1); // page within filtered results
+      component.onNameFilterChange('');
+      expect(fixture.componentInstance.pageIndex()).toBe(2);
+    });
+
+    it('erasing a filter that was never entered stays on page 0', () => {
+      const fixture = TestBed.createComponent(Host);
+      const nameFilter = signal('');
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, nameFilter };
+      fixture.detectChanges();
+      componentWith(fixture).onNameFilterChange('');
+      expect(fixture.componentInstance.pageIndex()).toBe(0);
+    });
+
     it('does not snap All away when switching to card view', () => {
       // Regression: setViewMode must validate against the effective card
       // options (which include -1), not the raw config list — otherwise a

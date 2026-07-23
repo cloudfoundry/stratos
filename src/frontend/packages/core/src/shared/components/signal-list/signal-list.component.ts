@@ -1126,6 +1126,31 @@ export class SignalListComponent<T> implements AfterViewInit {
     this.config.pageIndex.set(0);
   }
 
+  // Page position saved when the user starts typing a filter, restored
+  // when they erase it — filtering is a detour, not a destination.
+  private prefilterPageIndex: number | null = null;
+
+  // Text-filter input. Entering or changing the filter redefines the
+  // result set, so the pager goes to page 1 (staying mid-list would show
+  // the filtered set's last page and hide matches that sort earlier,
+  // #5670). Entering the filter from an empty box first saves the
+  // unfiltered position; erasing the filter restores it, so a user who
+  // filtered from page 2 lands back on page 2. The clamp in the data
+  // layer covers a restored index that outlived a shrunken data set.
+  onNameFilterChange(value: string): void {
+    const previous = this.config.nameFilter!();
+    if (previous === '' && value !== '') {
+      this.prefilterPageIndex = this.config.pageIndex();
+    }
+    this.config.nameFilter!.set(value);
+    if (value === '') {
+      this.config.pageIndex.set(this.prefilterPageIndex ?? 0);
+      this.prefilterPageIndex = null;
+    } else {
+      this.config.pageIndex.set(0);
+    }
+  }
+
   // Placeholder text for the text-filter input; tracks the active field
   // when the selector is shown so users see e.g. "Filter by CF/Org/Space".
   // Falls back to "Filter by Name" for the single-field case.
