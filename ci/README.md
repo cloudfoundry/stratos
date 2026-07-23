@@ -56,7 +56,8 @@ Target-specific settings files are supported:
 
 `ci/tools-image/Dockerfile`: node 24 + bun + go, gh CLI, and the full
 `make audit` scanner set (gosec, govulncheck, trivy, osv-scanner,
-gitleaks, modrot, zizmor, golangci-lint). Rebuilt and pushed by the
-`ci-image.yml` GitHub Actions workflow whenever the Dockerfile changes;
-GitHub Actions jobs can consume the same image via `container:`. ZAP is
-deliberately absent until the DAST workstream lands (#5679).
+gitleaks, modrot, zizmor). Rebuilt and pushed by the `ci-image.yml`
+GitHub Actions workflow whenever the Dockerfile changes; GitHub Actions
+jobs can consume the same image via `container:`. Deliberately absent
+until a job needs them: ZAP (DAST workstream, #5679) and golangci-lint
+(no lint job yet).
