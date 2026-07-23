@@ -131,7 +131,7 @@ login`) — never from the command line.
 | Command | What it does |
 |---------|-------------|
 | `make stamp tag [VERSION=vX]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`) |
-| `make publish [DRAFT=yes] [TAG=vX]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from any prerelease part in the tag (dev/alpha/beta/rc) |
+| `make publish [DRAFT=yes] [TAG=vX]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases) |
 | `make unpublish TAG=vX` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives) |
 | `make stamp untag TAG=vX` | Delete the tag, local + remote (echoes first) |
 
