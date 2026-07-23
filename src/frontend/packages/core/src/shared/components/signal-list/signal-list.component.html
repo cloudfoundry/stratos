@@ -49,8 +49,8 @@
         [placeholder]="filterPlaceholder()"
         [attr.aria-label]="filterPlaceholder()"
         [value]="config.nameFilter()"
-        (input)="config.nameFilter!.set($any($event.target).value)"
-        (keydown.escape)="config.nameFilter!.set('')"
+        (input)="onNameFilterChange($any($event.target).value)"
+        (keydown.escape)="onNameFilterChange('')"
         class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
     }
 
