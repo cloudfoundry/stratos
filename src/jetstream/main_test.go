@@ -118,6 +118,62 @@ func TestLoadPortalConfig(t *testing.T) {
 	if result.SessionStoreSecret != "cookiesecret" {
 		t.Error("Unable to get SessionStoreSecret from config")
 	}
+
+	// CSP is opt-in: CONSOLE_CSP not supplied above, so no header should be
+	// configured (preserves prior no-CSP behavior).
+	if result.CSPPolicy != "" {
+		t.Errorf("Expected no CSP policy when CONSOLE_CSP unset, got: %q", result.CSPPolicy)
+	}
+}
+
+func TestLoadPortalConfigDefaultCSP(t *testing.T) {
+	var pc api.PortalConfig
+
+	// "default" and "on" both opt into the built-in default policy.
+	for _, val := range []string{"default", "Default", "on", "ON"} {
+		result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+			"CONSOLE_CSP": val,
+		})))
+		if err != nil {
+			t.Fatalf("Unable to load portal config for CONSOLE_CSP=%q: %v", val, err)
+		}
+		if result.CSPPolicy != defaultCSPPolicy {
+			t.Errorf("Expected default CSP policy for CONSOLE_CSP=%q, got %q", val, result.CSPPolicy)
+		}
+	}
+}
+
+func TestLoadPortalConfigCustomCSP(t *testing.T) {
+	var pc api.PortalConfig
+	const custom = "default-src 'self'"
+
+	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"CONSOLE_CSP": custom,
+	})))
+	if err != nil {
+		t.Fatalf("Unable to load portal config: %v", err)
+	}
+	if result.CSPPolicy != custom {
+		t.Errorf("Expected custom CSP policy %q, got %q", custom, result.CSPPolicy)
+	}
+}
+
+func TestLoadPortalConfigOptOutCSP(t *testing.T) {
+	var pc api.PortalConfig
+
+	// Explicit off-values normalize to "" so a well-meaning CONSOLE_CSP=off
+	// never leaks as a literal Content-Security-Policy header value.
+	for _, val := range []string{"off", "OFF", "none", "None", "false", "disabled"} {
+		result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+			"CONSOLE_CSP": val,
+		})))
+		if err != nil {
+			t.Fatalf("Unable to load portal config for CONSOLE_CSP=%q: %v", val, err)
+		}
+		if result.CSPPolicy != "" {
+			t.Errorf("Expected CONSOLE_CSP=%q to disable CSP (empty), got %q", val, result.CSPPolicy)
+		}
+	}
 }
 
 func TestLoadDatabaseConfig(t *testing.T) {
