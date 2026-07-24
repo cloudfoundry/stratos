@@ -211,6 +211,10 @@ $(_HIDE)WANT_TREE     :=
 $(_HIDE)WANT_HISTORY  :=
 $(_HIDE)WANT_LICENSES :=
 $(_HIDE)WANT_MODROT   :=
+$(_HIDE)WANT_SEMGREP  :=
+$(_HIDE)WANT_CODEQL   :=
+$(_HIDE)WANT_SARIF    :=
+$(_HIDE)WANT_UPLOAD   :=
 
 ifneq ($(filter packages,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_PACKAGES := yes
@@ -229,6 +233,18 @@ ifneq ($(filter licenses,$(MAKECMDGOALS)),)
 endif
 ifneq ($(filter modrot,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_MODROT := yes
+endif
+ifneq ($(filter semgrep,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_SEMGREP := yes
+endif
+ifneq ($(filter codeql,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_CODEQL := yes
+endif
+ifneq ($(filter sarif,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_SARIF := yes
+endif
+ifneq ($(filter upload,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_UPLOAD := yes
 endif
 
 $(_HIDE)WANT_TAG   :=
@@ -303,7 +319,7 @@ endif
 endif
 # Default: all scanners for audit when no modifier given
 ifneq ($(filter audit,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES)$($(_HIDE)WANT_MODROT),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES)$($(_HIDE)WANT_MODROT)$($(_HIDE)WANT_SEMGREP)$($(_HIDE)WANT_CODEQL)$($(_HIDE)WANT_SARIF)$($(_HIDE)WANT_UPLOAD),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
   $(_HIDE)WANT_ACTIONS  := yes
@@ -321,8 +337,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot tag untag
-frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot tag untag:
+.PHONY: frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag
+frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -597,6 +613,8 @@ $(call register, check, e2e)
 # make audit frontend     — bun audit (npm advisory DB)
 # make audit backend      — gosec + trivy + govulncheck (both Go modules)
 # make audit modrot       — modrot archived/deprecated dependency scan (needs gh auth)
+# make audit semgrep      — semgrep SAST, account policy + SARIF (needs network, manual/build-machine only)
+# make audit codeql       — CodeQL SAST, Go + JS/TS (needs codeql CLI, manual/build-machine only)
 # make audit actions      — zizmor (GitHub Actions workflow SAST)
 #                           ZIZMOR_FLAGS="--persona=auditor" for the strict rule set
 # make audit packages     — osv-scanner (all lockfiles + go.mods, one pass)
@@ -605,6 +623,8 @@ $(call register, check, e2e)
 # make audit tree         — trivy over the whole tree (deploy/ Dockerfiles, helm, manifests)
 # make audit history      — gitleaks full git-history secret scan (slow)
 # make audit licenses     — osv-scanner dependency license report
+# make audit sarif        — sarif-tools summary across dist/*.sarif (local, no network)
+# make audit upload       — push dist/*.sarif to GitHub code scanning, skips codeql-* (CI covers those); needs repo push access
 # make audit summary      — high/moderate/low counts only
 
 define audit.frontend
@@ -632,12 +652,89 @@ $(call register, audit, backend)
 # Archived / deprecated dependency scan. Needs `gh auth token` (GitHub
 # GraphQL) + network, so it is a standalone extra, not in the default set.
 # --recursive covers jetstream + api + every plugin go.mod in one query pass.
+# SARIF (modrot >= 0.10.0) lands in dist/ for GitHub code scanning upload.
 define audit.modrot
 	@echo "Running dependency-archival audit (modrot)..."
 	@which modrot > /dev/null 2>&1 || (echo "modrot not installed. Run: go install github.com/norman-abramovitz/modrot@latest" >&2 && exit 1)
+	@mkdir -p dist
 	modrot --recursive --deprecated --resolve src/jetstream || true
+	modrot --recursive --deprecated --resolve --sarif src/jetstream > dist/modrot.sarif || true
 endef
 $(call register, audit, modrot)
+
+# Broad pattern-based SAST across the whole tree, using the org policy from
+# the logged-in Semgrep AppSec Platform account (`semgrep login`) — findings
+# also land in the account's dashboard, plus a local SARIF copy in dist/.
+# Falls back to community rules if not logged in. Needs network — standalone
+# extra, not in the default set. Run manually on the build machine.
+define audit.semgrep
+	@echo "Running Semgrep SAST (semgrep ci, account policy)..."
+	@which semgrep > /dev/null 2>&1 || (echo "semgrep not installed. Run: brew install semgrep" >&2 && exit 1)
+	@semgrep show identity > /dev/null 2>&1 || echo "Not logged in to Semgrep — falling back to community rules. Run: semgrep login"
+	@mkdir -p dist
+	semgrep ci --sarif --sarif-output=dist/semgrep.sarif || true
+endef
+$(call register, audit, semgrep)
+
+# Deep SAST via CodeQL databases (Go backend + JS/TS frontend). Needs the
+# codeql CLI with query packs installed — standalone extra, not in the
+# default set. Run manually on the build machine; SARIF output lands in dist/.
+define audit.codeql
+	@echo "Running CodeQL SAST (Go + JavaScript/TypeScript)..."
+	@which codeql > /dev/null 2>&1 || (echo "codeql not installed. See https://github.com/github/codeql-action/releases" >&2 && exit 1)
+	@mkdir -p dist
+	@echo "── Go (src/jetstream) ──"
+	codeql database create dist/codeql-db-go --language=go --source-root=src/jetstream --overwrite
+	codeql database analyze dist/codeql-db-go codeql/go-queries --format=sarif-latest --output=dist/codeql-go.sarif
+	@echo "── JavaScript/TypeScript (src/frontend) ──"
+	codeql database create dist/codeql-db-js --language=javascript --source-root=src/frontend --overwrite
+	codeql database analyze dist/codeql-db-js codeql/javascript-queries --format=sarif-latest --output=dist/codeql-js.sarif
+	@echo "SARIF written to dist/codeql-go.sarif and dist/codeql-js.sarif"
+endef
+$(call register, audit, codeql)
+
+# Aggregate summary across every SARIF file already written to dist/
+# (modrot, semgrep, codeql, and any scanner added later) via sarif-tools.
+# Local-only, no network — run after the SARIF-emitting scanners.
+define audit.sarif
+	@echo "Running SARIF summary (sarif-tools)..."
+	@which sarif > /dev/null 2>&1 || (echo "sarif-tools not installed. Run: pip install sarif-tools" >&2 && exit 1)
+	@ls dist/*.sarif > /dev/null 2>&1 || (echo "No SARIF files in dist/ — run audit modrot/semgrep/codeql first." >&2 && exit 1)
+	sarif summary dist
+endef
+$(call register, audit, sarif)
+
+# Push dist/*.sarif to GitHub code scanning (same endpoint the codeql-action
+# workflow uses), so findings show up in the Security tab. Skips codeql-*
+# — .github/workflows/codeql.yml already uploads those canonically under
+# categories /language:go and /language:javascript-typescript on every push/
+# PR to develop+main; a local upload with no category would just add a
+# duplicate-looking uncategorized entry. modrot/semgrep have no CI upload
+# path, so those are the ones this target actually adds. Needs push access
+# to this repo (code-scanning upload requires write) and the commit already
+# pushed — GitHub has to recognize commit_sha/ref. The fork-only account
+# used for day-to-day work has pull-only access upstream; switch to the
+# maintainer account first (`gh auth switch`) if this 403s.
+define audit.upload
+	@echo "Uploading SARIF to GitHub code scanning..."
+	@which gh > /dev/null 2>&1 || (echo "gh not installed. See https://cli.github.com" >&2 && exit 1)
+	@ls dist/*.sarif > /dev/null 2>&1 || (echo "No SARIF files in dist/ — run audit modrot/semgrep/codeql first." >&2 && exit 1)
+	@commit_sha=$$(git rev-parse HEAD); \
+	ref=refs/heads/$$(git branch --show-current); \
+	for f in dist/*.sarif; do \
+		case "$$f" in dist/codeql-*.sarif) echo "── $$f ── skipped (CI already uploads CodeQL canonically)"; continue;; esac; \
+		echo "── $$f ──"; \
+		tmpfile=$$(mktemp); \
+		gzip -c "$$f" | base64 | tr -d '\n' > "$$tmpfile"; \
+		gh api repos/{owner}/{repo}/code-scanning/sarifs \
+			-f commit_sha="$$commit_sha" \
+			-f ref="$$ref" \
+			-F sarif=@"$$tmpfile" \
+			--jq '.id' || { rm -f "$$tmpfile"; exit 1; }; \
+		rm -f "$$tmpfile"; \
+	done
+endef
+$(call register, audit, upload)
 
 define audit.actions
 	@echo "Running GitHub Actions workflow audit (zizmor)..."
@@ -1130,6 +1227,8 @@ help:
 	@echo "  make audit frontend       bun audit (npm advisory DB)"
 	@echo "  make audit backend        gosec + trivy + govulncheck (both Go modules)"
 	@echo "  make audit modrot         modrot archived/deprecated dep scan (needs gh auth)"
+	@echo "  make audit semgrep        semgrep SAST, account policy + SARIF (manual, needs network)"
+	@echo "  make audit codeql         CodeQL SAST, Go+JS/TS (manual, needs codeql CLI)"
 	@echo "  make audit actions        zizmor (ZIZMOR_FLAGS=\"--persona=auditor\" for strict)"
 	@echo "  make audit packages       osv-scanner (all lockfiles + go.mods)"
 	@echo "  make audit secrets        gitleaks (working-tree secret scan)"
@@ -1137,6 +1236,8 @@ help:
 	@echo "  make audit tree           trivy full-tree scan (deploy/, helm, manifests)"
 	@echo "  make audit history        gitleaks full git-history scan (slow)"
 	@echo "  make audit licenses       osv-scanner dependency license report"
+	@echo "  make audit sarif          sarif-tools summary across dist/*.sarif (local)"
+	@echo "  make audit upload         Push dist/*.sarif to GitHub (skips codeql-*, CI covers those)"
 	@echo "  make audit summary        High/moderate/low counts only"
 	@echo "  make outdated             List outdated direct deps (frontend + backend)"
 	@echo "  make outdated frontend    bun outdated"
