@@ -9,13 +9,10 @@ environment and making your first contribution.
 
 ### Prerequisites
 
-| Tool | Version | Install |
-|------|---------|---------|
-| Node.js | 24+ | [nodejs.org](https://nodejs.org/) or `mise install` |
-| Bun | 1.2+ | [bun.sh](https://bun.sh/) or `mise install` |
-| Go | 1.24.2+ | [golang.org/dl](https://golang.org/dl/) or `mise install` |
-| Git | any | [git-scm.com](https://git-scm.com/) |
-| Make | any | Included with Xcode CLI tools (macOS) or `build-essential` (Linux) |
+Node.js, Bun, Go, Git, and Make — see
+[Required Runtimes](developer-environment.md#required-runtimes) for exact
+versions (kept in sync with `.tool-versions`, so this guide doesn't repeat
+numbers that would drift out of date).
 
 **Recommended**: Install [mise](https://mise.jdx.dev/) to manage runtime versions
 automatically. The repo includes a `.tool-versions` file that specifies exact
@@ -55,13 +52,15 @@ echo "ENCRYPTION_KEY=$(openssl rand -hex 32)" >> src/jetstream/config.properties
 #   LOCAL_USER_PASSWORD=admin
 #   LOCAL_USER_SCOPE=stratos.admin
 
-# 7. Build everything
-make build
-
-# 8. Start development (two terminals)
-make dev backend      # Terminal 1: backend on port 5443
+# 7. Start development (two terminals)
+make dev backend      # Terminal 1: backend on port 5443 (builds the host binary first time)
 make dev frontend     # Terminal 2: frontend on port 5440
 ```
+
+No separate build step — `make dev backend` builds a host-platform binary
+itself the first time it's run. Running `make build` first would cross-compile
+for every platform, which is unnecessary for local dev (see
+[Development](build-and-packaging.md#development)).
 
 Open https://127.0.0.1:5440 (accept the self-signed certificate warning).
 
@@ -113,18 +112,11 @@ Branch naming:
 
 ### 3. Make Your Changes
 
-```bash
-# Two terminals
-make dev backend       # Terminal 1
-make dev frontend      # Terminal 2
-```
-
-The frontend auto-reloads on file changes. After Go changes, rebuild the
-backend:
-
-```bash
-make dev-restart       # rebuilds backend binary
-```
+Two terminals — see [Development](build-and-packaging.md#development) in
+the Build and Packaging guide for the full workflow, including why
+frontend and backend behave differently here (frontend hot-reloads on
+save; backend needs a stop + `make dev backend` again to pick up Go
+changes — there's no separate rebuild command).
 
 ### 4. Write Tests
 
@@ -229,7 +221,7 @@ packages/
 ```
 
 Key technologies:
-- Angular 20 with standalone components
+- Angular with standalone components (see `package.json` for the exact version)
 - NgRx for state management
 - RxJS for reactive programming
 - Tailwind CSS for styling (preferred for new code)
@@ -253,7 +245,7 @@ jetstream/
 ```
 
 Key technologies:
-- Go 1.24.2
+- Go (see [Required Runtimes](developer-environment.md#required-runtimes) for the exact version)
 - Echo v4 HTTP framework
 - PostgreSQL, MySQL/MariaDB, or SQLite (developer's choice)
 - Goose for database migrations
@@ -272,23 +264,11 @@ make release cf           # package for Cloud Foundry
 
 See `docs/build-and-packaging.md` for full details.
 
-### Documentation Booklets
+### Documentation
 
-Curated slices of `docs/` also render as offline epub/PDF booklets via
-[Quarto](https://quarto.org) (see `docs-build/README.md`):
-
-```bash
-make build booklets       # render all booklets to dist/booklets/
-```
-
-For a live drafting loop on one booklet, render once, then preview its
-assembled work directory:
-
-```bash
-quarto preview dist/booklets/.work/theming
-```
-
-Booklet chapters are normal `docs/` pages and must pass the docs lint
+`docs/` pages also render as an HTML site and as offline epub/PDF booklets
+— see [Documentation](build-and-packaging.md#documentation-docs--html-or-pdfepub)
+in the Build and Packaging guide. Docs pages must pass the docs lint
 (`node scripts/lint-docs.mjs`), which CI enforces.
 
 ---
@@ -314,20 +294,24 @@ complex selectors, animations).
 Stratos supports PostgreSQL, MySQL/MariaDB, and SQLite. For local development,
 SQLite is the default (zero setup).
 
-For PostgreSQL (closer to production):
+For MySQL/MariaDB (closer to production) using the repo's `docker-compose.yml`:
 
 ```bash
-# Start Postgres via Docker, Podman, OrbStack, or Colima
+# Start MySQL via Docker, Podman, OrbStack, or Colima
 docker compose up -d
 
 # Update config.properties:
-# DATABASE_PROVIDER=pgsql
+# DATABASE_PROVIDER=mysql
 # DB_HOST=localhost
-# DB_PORT=5432
+# DB_PORT=3306
 # DB_USER=stratos
 # DB_PASSWORD=strat0s
 # DB_DATABASE_NAME=stratosdb
 ```
+
+For PostgreSQL, there's no bundled `docker-compose.yml` service — point
+`DATABASE_PROVIDER=pgsql` (see `src/jetstream/config.example` for the full
+variable set) at a Postgres instance of your own.
 
 Migrations run automatically on startup.
 

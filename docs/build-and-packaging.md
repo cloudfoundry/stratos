@@ -1,17 +1,23 @@
 # Build and Packaging
 
-Single source of truth for building, testing, and packaging Stratos.
+Single source of truth for the `make` build/test/package system — commands,
+workflows, and how they compose. New to the project? Read the
+[Contributor Guide](contributing_guide.md) first; it covers first-time
+setup and the day-to-day PR workflow this doc doesn't.
 
 ## Prerequisites
 
-| Tool | Version | Purpose |
-|------|---------|---------|
-| Node.js | 24+ | Frontend build tooling |
-| Bun | 1.2+ | Package manager, script runner |
-| Go | 1.25+ | Backend compilation |
-| Git | any | Source control, `git archive` for source packages |
-| `zip` | any | CF and Windows release archives |
-| `swag` | optional | OpenAPI documentation generation |
+Exact tool versions are `developer-environment.md`'s job, not this doc's —
+see [Required Runtimes](developer-environment.md#required-runtimes) and
+[Optional Tools](developer-environment.md#optional-tools) there for the
+full, version-pinned list (kept in sync with `.tool-versions`). Everything
+below assumes those are already installed; this table only covers what's
+specific to *building/packaging* on top of them:
+
+| Tool | Purpose |
+|------|---------|
+| `zip` | CF and Windows release archives |
+| `swag` | optional — OpenAPI documentation generation |
 
 ## Run make from the repository root
 
@@ -23,6 +29,16 @@ generated-file dependencies that ad-hoc builds skip. For example, running
 `go build` from `src/jetstream` omits the generated `extra_plugins.go`, which
 produces a backend without the Cloud Foundry plugin that crashes at startup
 when deployed as a Cloud Foundry application.
+
+**Either `make` or `gmake` works** — this Makefile targets GNU Make 3.81+ (see
+Platform-specific notes in `developer-environment.md`), so macOS's stock
+`/usr/bin/make` (3.81, frozen there for licensing reasons — Apple won't ship
+GPLv3) and a newer `gmake` (e.g. via `brew install make`) behave identically;
+verified byte-for-byte across `make help`, `make dump version`, and
+representative recipes. Whichever binary you invoke at the top level is what
+every recursive self-invocation inside the Makefile reuses too (`$(MAKE)`,
+never a hardcoded `make`), so there's nothing to keep consistent by hand —
+just pick one and it propagates correctly on its own.
 
 ## Operations Reference
 
@@ -285,10 +301,16 @@ it without the raw formatting codes:
 |---------|-------------|
 | `make dev website` | Docusaurus dev server with hot reload — reads `docs/` directly (`path: '../docs'` in `website/docusaurus.config.js`), no separate conversion step |
 | `make build website` | Build the HTML site into `website/build/` |
-| `make build booklets` | Render curated `docs/` subsets to standalone PDF/epub via Quarto — see `docs-build/README.md` for how a booklet's chapter list ("spine") is defined |
+| `make build booklets` | Render curated `docs/` subsets to standalone PDF/epub via Quarto — see `docs/booklets/README.md` for how a booklet's chapter list ("spine") is defined |
 
 Booklets need the `quarto` tool (see `developer-environment.md`); the
 website only needs `bun` (already required).
+
+Booklet source (`docs/booklets/`) lives inside `docs/` but is excluded from
+the published site (`exclude` in `docusaurus.config.js`) — CI renders
+booklets on every PR as a downloadable artifact for review, not a publish
+target. Preview one locally with `quarto preview` (see
+`docs/booklets/README.md`).
 
 ### Clean
 
@@ -666,7 +688,7 @@ Plus: `stratos-{VERSION}-src.tar.gz` via `git archive`
 
 ## Known Issues
 
-### ENCRYPTION_KEY required (FWT-788)
+### ENCRYPTION_KEY required
 
 `ENCRYPTION_KEY` must be explicitly set as an environment variable or in
 `config.properties`. The old source-buildpack approach defaulted this via the
