@@ -161,6 +161,11 @@ Backend reads configuration from a 5-tier lookup chain (first match wins):
 All configuration keys work from any tier. Environment variables always
 override file-based settings.
 
+This is app runtime config (`ENCRYPTION_KEY` below encrypts the app's own
+database config store) — a different concern from E2E test credentials
+(`secrets.yaml`), which have their own zero-plaintext encrypt/decrypt
+workflow. See [Secrets Management](secrets-management.md) for that.
+
 ### Key Settings
 
 | Variable | Purpose | Required |
