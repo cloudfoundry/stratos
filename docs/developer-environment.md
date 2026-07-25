@@ -8,11 +8,16 @@ configuration. For step-by-step setup, see the
 
 | Tool | Version | Pinned In | Purpose |
 |------|---------|-----------|---------|
-| Node.js | 24.11.0 | `.tool-versions`, `package.json` engines | Angular CLI, build tooling |
-| Bun | 1.3.2 | `.tool-versions`, `package.json` engines (>=1.2) | Package manager, script runner |
-| Go | 1.24.2 | `go.mod` | Backend compilation |
+| Node.js | 26.2.0 | `.tool-versions` (`package.json` engines allows `^24 \|\| ^26`) | Angular CLI, build tooling |
+| Bun | 1.3.14 | `.tool-versions`, `package.json` engines (`>=1.3.14`) | Package manager, script runner |
+| Go | 1.26.5 | `.tool-versions` (`go.mod` requires `>=1.26.3`) | Backend compilation |
 | Git | any | — | Source control, build metadata |
 | Make | any | — | Build orchestration |
+
+**`.tool-versions` is the single source of truth for exact versions** —
+these numbers drift out of sync with it easily (this table itself was
+stale until 2026-07-25), so if this table and `.tool-versions` ever
+disagree, trust the file, not this page, and fix the page.
 
 ### Version Management
 
