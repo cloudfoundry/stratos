@@ -67,7 +67,6 @@ jobs:
               - '**'
               - '!tools/stb/**'
               - '!docs/**'
-              - '!docs-build/**'
               - '!website/**'
               - '!README.md'
             docs:
@@ -75,7 +74,7 @@ jobs:
             website:
               - 'website/**'
             booklets:
-              - 'docs-build/**'
+              - 'docs/booklets/**'
 
   # Enforce the GFM-intersection markdown subset on docs/ so every page
   # renders identically on GitHub and in the website generator. Not a
@@ -120,8 +119,8 @@ jobs:
       - name: Build website
         run: cd website && bun run build
 
-  # Booklets are offline epub/PDF renderings of docs/ (see docs-build/).
-  # Rendered on any docs or docs-build change; the outputs are uploaded
+  # Booklets are offline epub/PDF renderings of docs/ (see docs/booklets/).
+  # Rendered on any docs or booklets change; the outputs are uploaded
   # as a PR artifact for eyeballing, not published anywhere.
   booklets-build:
     name: Booklets Build
@@ -142,7 +141,7 @@ jobs:
       - name: Install chrome-headless-shell
         run: quarto install chrome-headless-shell --no-prompt
       - name: Render booklets
-        run: docs-build/render.sh
+        run: docs/booklets/render.sh
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: booklets
