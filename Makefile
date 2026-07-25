@@ -319,8 +319,9 @@ endif
 endif
 # Default: all scanners for audit when no modifier given
 ifneq ($(filter audit,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES)$($(_HIDE)WANT_MODROT)$($(_HIDE)WANT_SEMGREP)$($(_HIDE)WANT_CODEQL)$($(_HIDE)WANT_SARIF)$($(_HIDE)WANT_UPLOAD),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES)$($(_HIDE)WANT_MODROT)$($(_HIDE)WANT_SEMGREP)$($(_HIDE)WANT_CODEQL)$($(_HIDE)WANT_SARIF)$($(_HIDE)WANT_UPLOAD),)
   $(_HIDE)WANT_FRONTEND := yes
+  $(_HIDE)WANT_WEBSITE  := yes
   $(_HIDE)WANT_BACKEND  := yes
   $(_HIDE)WANT_ACTIONS  := yes
   $(_HIDE)WANT_PACKAGES := yes
@@ -610,7 +611,8 @@ $(call register, check, e2e)
 
 # ── Audit (security scanning) ────────────────────────────────
 # make audit              — default scanners (frontend backend actions packages secrets)
-# make audit frontend     — bun audit (npm advisory DB), root + website
+# make audit frontend     — bun audit (npm advisory DB), root workspace
+# make audit website      — bun audit (npm advisory DB), website/ workspace
 # make audit backend      — gosec + trivy + govulncheck (both Go modules)
 # make audit modrot       — modrot archived/deprecated dependency scan (needs gh auth)
 # make audit semgrep      — semgrep SAST, account policy + SARIF (needs network, manual/build-machine only)
@@ -627,14 +629,18 @@ $(call register, check, e2e)
 # make audit upload       — push dist/*.sarif to GitHub code scanning, skips codeql-* (CI covers those); needs repo push access
 # make audit summary      — high/moderate/low counts only
 
-# tools/stb isn't covered — pre-release, not worth auditing yet.
 define audit.frontend
 	@echo "Running frontend audit (bun audit)..."
 	@bun audit || true
-	@echo "── website ──"
-	@cd website && bun audit || true
 endef
 $(call register, audit, frontend)
+
+# tools/stb isn't covered — pre-release, not worth auditing yet.
+define audit.website
+	@echo "Running website audit (bun audit)..."
+	@cd website && bun audit || true
+endef
+$(call register, audit, website)
 
 define audit.backend
 	@echo "Running backend security scans..."
@@ -1227,7 +1233,8 @@ help:
 	@echo ""
 	@echo "Security & dependencies:"
 	@echo "  make audit                Run default security scanners"
-	@echo "  make audit frontend       bun audit (npm advisory DB), root + website"
+	@echo "  make audit frontend       bun audit (npm advisory DB), root workspace"
+	@echo "  make audit website        bun audit (npm advisory DB), website/ workspace"
 	@echo "  make audit backend        gosec + trivy + govulncheck (both Go modules)"
 	@echo "  make audit modrot         modrot archived/deprecated dep scan (needs gh auth)"
 	@echo "  make audit semgrep        semgrep SAST, account policy + SARIF (manual, needs network)"
