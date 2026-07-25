@@ -41,14 +41,19 @@ configuration. For step-by-step setup, see the
 | `zizmor` | GitHub Actions workflow SAST | `brew install zizmor` | `make audit actions` |
 | `osv-scanner` | Multi-lockfile dependency scanner | `brew install osv-scanner` | `make audit packages`, `make audit licenses` |
 | `gitleaks` | Secret scanner | `brew install gitleaks` | `make audit secrets`, `make audit history` |
-| `gh` | GitHub CLI | [cli.github.com](https://cli.github.com/) | `make deps dependabot` |
+| `modrot` | Archived/deprecated dependency scanner | `go install github.com/norman-abramovitz/modrot@latest` | `make audit modrot` (needs `gh auth`) |
+| `semgrep` | Pattern-based SAST | `brew install semgrep` | `make audit semgrep` (manual, needs network) |
+| `codeql` | Deep SAST (Go + JS/TS databases) | [codeql-action releases](https://github.com/github/codeql-action/releases) | `make audit codeql` (manual — CI already runs this canonically; local run is a pre-push spot-check) |
+| `sarif-tools` (`sarif`) | Summarize SARIF files | `pip install sarif-tools` | `make audit sarif` |
+| `gh` | GitHub CLI | [cli.github.com](https://cli.github.com/) | `make deps dependabot`, `make audit upload`, `make audit actions` (optional, for authenticated rate limits) |
 
 ### Audit & dependency commands
 
 | Command | Purpose |
 |---------|---------|
-| `make audit` | Default scanner set: frontend + backend + actions + packages + secrets |
-| `make audit frontend` | `bun audit` (npm advisory DB) |
+| `make audit` | Default scanner set: frontend + website + backend + actions + packages + secrets |
+| `make audit frontend` | `bun audit` (npm advisory DB), root workspace |
+| `make audit website` | `bun audit` (npm advisory DB), `website/` workspace (`tools/stb` isn't covered — pre-release) |
 | `make audit backend` | gosec + trivy + govulncheck on both Go modules (`src/jetstream`, `src/jetstream/api`) |
 | `make audit actions` | zizmor SAST over `.github/workflows/`; `ZIZMOR_FLAGS="--persona=auditor"` enables the strict rule set |
 | `make audit packages` | osv-scanner over every lockfile and `go.mod` in one pass |
@@ -58,6 +63,11 @@ configuration. For step-by-step setup, see the
 | `make audit tree` | trivy over the whole repo — covers the Dockerfiles, helm chart, and manifests under `deploy/` |
 | `make audit history` | gitleaks over the full git history (~14k commits) |
 | `make audit licenses` | osv-scanner dependency license report |
+| `make audit modrot` | modrot archived/deprecated dependency scan (needs `gh auth`) |
+| `make audit semgrep` | semgrep SAST via `semgrep ci` — uses your logged-in account's policy and dashboard if you've run `semgrep login`, falls back to community rules otherwise. SARIF to `dist/semgrep.sarif` |
+| `make audit codeql` | Local CodeQL SAST (Go + JS/TS) — manual pre-push mirror of what `.github/workflows/codeql.yml` runs on every push/PR. SARIF to `dist/codeql-{go,js}.sarif` |
+| `make audit sarif` | `sarif-tools` summary across every `dist/*.sarif` file, local only |
+| `make audit upload` | Push `dist/*.sarif` to GitHub code scanning; skips `codeql-*.sarif` since CI already uploads those canonically. Needs push access to the repo |
 | `make outdated` | List outdated direct deps in both stacks |
 | `make outdated frontend` | `bun outdated` |
 | `make outdated backend` | `go list -m -u all` (filtered to upgradable) |
@@ -65,8 +75,9 @@ configuration. For step-by-step setup, see the
 
 #### Non-default audit modes
 
-`make audit` runs the five default scanners only. Four modes are deliberately
-kept off the default path:
+`make audit` runs the six default scanners only (frontend, website, backend,
+actions, packages, secrets). The rest are deliberately kept off the default
+path:
 
 - **`tests`** — gosec findings inside `_test.go` files are advisory (test code
   doesn't ship), so they would add triage noise to every default run. Run it
@@ -82,6 +93,17 @@ kept off the default path:
   `secrets` mode already catches anything you are about to commit.
 - **`licenses`** — a compliance report, not a vulnerability source. Nothing
   in it is actionable on a normal development day.
+- **`modrot`** — needs `gh auth` (GitHub GraphQL) + network, so it's a
+  standalone extra rather than something every `make audit` run should
+  depend on.
+- **`semgrep`**, **`codeql`** — both need extra tooling (a `semgrep` account
+  login, the `codeql` CLI + query packs) and are meant to run manually on the
+  build machine, not on every audit invocation. CodeQL in particular already
+  runs in CI on every push/PR — the local mode exists so you can see findings
+  before pushing, not to replace CI.
+- **`sarif`**, **`upload`** — these consume the other scanners' `dist/*.sarif`
+  output; they're only meaningful after running one of the SARIF-emitting
+  modes, so they don't belong in a default sweep either.
 
 All audit recipes are report-only (`|| true`): they never fail the build, so
 scanner exit codes are informational. The lint/test gates are where failures
@@ -211,8 +233,8 @@ Go's `GOOS`/`GOARCH` conventions. Override with `PLATFORM=os/arch`.
 #### Linux
 
 - `build-essential` package provides Make and GCC
-- If using SQLite locally, GCC is required for cgo (until modernc.org/sqlite
-  migration, tracked in FWT-840)
+- SQLite no longer needs GCC/cgo — the backend uses the pure-Go
+  `ncruces/go-sqlite3` driver, so standard `CGO_ENABLED=0` builds work
 
 ## CI/CD
 
