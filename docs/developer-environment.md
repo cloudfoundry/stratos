@@ -227,6 +227,12 @@ Platform detection uses `uname -s | tr '[:upper:]' '[:lower:]'` for OS and
 normalizes architecture (`x86_64` → `amd64`, `aarch64` → `arm64`) to match
 Go's `GOOS`/`GOARCH` conventions. Override with `PLATFORM=os/arch`.
 
+Cross-compilation is host-arch-independent for the standard build
+(`CGO_ENABLED=0`, no C cross-compiler involved) — an arm64 machine builds
+any of the six combinations above exactly as an amd64 machine does, and
+vice versa. See Development in `build-and-packaging.md` for how `PLATFORM`
+interacts with `make build` vs `make stage`.
+
 ### Platform-specific notes
 
 #### macOS

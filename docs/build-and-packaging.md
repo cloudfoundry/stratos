@@ -249,6 +249,33 @@ hot reload, unoptimized, source maps intact. `make stage` packages an
 shippable build runs standalone — no dev-server proxying, no watch mode.
 Use `stage` as a pre-release sanity check, not for day-to-day iteration.
 
+**`stage` needs a single, host-matching backend binary — not what a bare
+`make build` produces.** `build.backend` branches on whether `PLATFORM` is
+set:
+
+| Command | `PLATFORM` | Output |
+|---------|-----------|--------|
+| `make build` / `make build backend` | unset (default) | Cross-compiles **all six** supported platforms via `cross-compile.sh` → `dist/bin/jetstream-{os}-{arch}` (e.g. `jetstream-linux-amd64`) |
+| `make build backend PLATFORM=<os>/<arch>` | set | Builds **one** platform → plain `dist/bin/jetstream` |
+| `make dev backend` | (n/a) | Builds for the **host** platform only, automatically, if `dist/bin/jetstream` is missing or wrong for this machine |
+
+`install-local.sh` (`make stage`) looks for exactly the unqualified
+`dist/bin/jetstream` — the per-platform-named files from a bare `make
+build` don't satisfy it, and it can't run a binary built for a different
+OS/arch than the host anyway. So `make build` then `make stage` fails with
+no matching binary; `make build backend PLATFORM=<host os>/<host arch>`
+(or just `make dev backend`, then `make stage`) is what you want instead.
+
+**Cross-compiling works in either direction, any host arch.** `build.backend`
+hardcodes `CGO_ENABLED=0`, so it never invokes a C cross-compiler — Go's own
+toolchain ships every `GOOS`/`GOARCH` combination self-contained, making
+the build host-arch-independent by construction: an Apple Silicon (arm64)
+machine cross-compiles `linux/amd64` exactly as readily as an amd64 machine
+cross-compiles `linux/arm64`, verified directly. The one exception is
+`build.korifi`, which deliberately uses `CGO_ENABLED=1` + `zig` for a
+static-cgo build — that path does need a real (portable) C cross-compiler,
+which is precisely why it reaches for `zig` instead of the host's own `cc`.
+
 ### Documentation (docs/ → HTML or PDF/epub)
 
 `docs/` is plain markdown — read as-is on GitHub, but two commands render
