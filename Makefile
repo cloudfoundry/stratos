@@ -475,7 +475,7 @@ $(call register, clean, website)
 
 define build.booklets
 	@echo "Rendering documentation booklets..."
-	docs-build/render.sh
+	docs/booklets/render.sh
 	@echo "Booklets rendered: dist/booklets/"
 endef
 $(call register, build, booklets)

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Assemble and render every booklet under docs-build/.
+# Assemble and render every booklet under docs/booklets/.
 #
 # A booklet is a directory holding _quarto.yml (the spine manifest — an
 # ordered chapter list drawn from the docs/ pool) plus index.qmd (the
@@ -10,13 +10,14 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 
 out=dist/booklets
-for manifest in docs-build/*/_quarto.yml; do
+for manifest in docs/booklets/*/_quarto.yml; do
   booklet=$(dirname "$manifest")
   name=$(basename "$booklet")
   work="$out/.work/$name"
   rm -rf "$work"
   mkdir -p "$work"
   cp -R docs/. "$work/"
+  rm -rf "$work/booklets"
   cp "$booklet"/* "$work/"
   # GFM-subset shim. docs/ is authored in the GFM intersection subset
   # (renders on GitHub and the website); Quarto handles none of it

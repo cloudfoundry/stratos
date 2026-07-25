@@ -49,6 +49,7 @@ const config = {
           editCurrentVersion: true,
           exclude: [
             'planning/**',
+            'booklets/**',
             'issue_template.md',
             'pull_request_template.md'
           ],
