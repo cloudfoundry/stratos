@@ -44,8 +44,8 @@ If you run into issues, please refer to the [Troubleshooting Guide](cf-troublesh
 > [!NOTE]
 > 1. You need the cf CLI command line tool installed and available on the path.
 > 1. You need to have configured the cf cli to point to your Cloud Foundry cluster, to be authenticated with your credentials and to be targeted at the organization and space where you want the console application be created.
-> 1. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [below](#application-security-groups) for more information.
-> 1. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described [below](#console-fails-to-start).
+> 1. You may need to configure Application Security Groups on your Cloud Foundry Cluster in order that  Stratos can communicate with the Cloud Foundry API. See [the troubleshooting guide](cf-troubleshooting.md#application-security-groups) for more information.
+> 1. The Stratos Console will automatically detect the API endpoint for your Cloud Foundry. To do so, it relies on the `cf_api_url` value inside the `VCAP_APPLICATION` environment variable. If this is not provided by your Cloud Foundry platform, then you must manually update the application manifest as described in the [troubleshooting guide](cf-troubleshooting.md#console-fails-to-start).
 
 ### Running Stratos in Production Environments
 
