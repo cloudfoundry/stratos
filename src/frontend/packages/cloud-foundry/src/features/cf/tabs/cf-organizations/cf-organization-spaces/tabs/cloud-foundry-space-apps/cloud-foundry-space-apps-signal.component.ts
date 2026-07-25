@@ -308,7 +308,8 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   }
 
   // Bulk Delete, rendered in the selection bar above the list when 1+ rows
-  // are selected. Deleting an app cascades its routes/bindings on the CF side.
+  // are selected. CF does not cascade-delete routes/bindings when an app
+  // goes away - the checkbox opts into cleaning those up first (#5692).
   private buildBulkActions(): SignalListBulkAction<StApp>[] {
     const cnsi = this.cfEndpointService.cfGuid;
     return [
@@ -322,10 +323,14 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
             `Delete ${targets.length} ${targets.length === 1 ? 'application' : 'applications'}? This cannot be undone.`,
             'Delete',
             true,
+            { label: 'Also delete these applications\' routes and service bindings' },
           );
-          this.confirmDialog.open(confirm, async () => {
+          this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
+            const guids = targets.map(a => a.guid);
             await this.runBulk('delete', targets.length, () =>
-              this.appsConfig.bulkDeleteApps(cnsi, targets.map(a => a.guid)));
+              result?.checkboxChecked
+                ? this.appsConfig.bulkDeleteAppsWithCleanup(cnsi, guids)
+                : this.appsConfig.bulkDeleteApps(cnsi, guids));
           });
         },
       },
@@ -354,9 +359,13 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
             `Delete the app "${app.name}"? This cannot be undone.`,
             'Delete',
             true,
+            { label: 'Also delete this application\'s routes and service bindings' },
           );
-          this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () => this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
+          this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
+            await runAction('Delete', () =>
+              result?.checkboxChecked
+                ? this.appsConfig.bulkDeleteAppsWithCleanup(app.cnsiGuid, [app.guid]).then(() => {})
+                : this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
           });
         },
       },
