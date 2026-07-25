@@ -852,10 +852,16 @@ $(call register, release, cf)
 
 # ── Korifi ────────────────────────────────────────────────────
 # Korifi runs droplets on the Paketo jammy run image, which has no
-# glibc loader at the paths a dynamically linked cgo binary expects,
-# and the sqlite driver needs cgo — so the binary must be a static
-# cgo build (zig/musl). Korifi also has no binary_buildpack; the
-# package manifest uses paketo-buildpacks/procfile instead.
+# glibc loader at the paths a dynamically linked cgo binary expects.
+# This target predates the pure-Go ncruces sqlite driver (see
+# sqlitestore.go) — that was the original reason cgo was needed here,
+# and it no longer applies: a plain CGO_ENABLED=0 build (build.backend's
+# approach) is already static with no glibc dependency, verified against
+# this same GOOS/GOARCH. Left as the static-cgo/zig build for now since
+# Korifi has no active maintainer to validate a change here; the target
+# still needs to build, just isn't worth touching further right now.
+# Korifi also has no binary_buildpack; the package manifest uses
+# paketo-buildpacks/procfile instead.
 
 define build.korifi
 	$(call require_tool,zig,Required for the static cgo cross-compile — install via: brew install zig)
