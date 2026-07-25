@@ -34,6 +34,7 @@ configuration. For step-by-step setup, see the
 | OpenSSL | Generate dev certs and encryption keys | Included on macOS/Linux | First-time setup |
 | `zip` | Release packaging | `brew install zip` | `make release` |
 | `swag` | OpenAPI doc generation | `go install github.com/swaggo/swag/cmd/swag@latest` | API docs |
+| `quarto` | Render `docs/` to standalone PDF/epub booklets | `brew install --cask quarto` | `make build booklets` — also needs Chrome (for mermaid diagrams), which Quarto auto-detects on dev machines and CI |
 | `golangci-lint` | Go meta-linter (staticcheck, errcheck, unused, ineffassign) | [golangci-lint.run](https://golangci-lint.run/welcome/install/) | `make lint`, `make check` — lint hard-fails without it |
 | `gosec` | Go security scanner | `go install github.com/securego/gosec/v2/cmd/gosec@latest` | `make audit backend`, `make audit tests` |
 | `trivy` | Vulnerability + misconfig scanner | [aquasecurity/trivy](https://github.com/aquasecurity/trivy) | `make audit backend`, `make audit tree` |

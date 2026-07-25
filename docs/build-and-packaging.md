@@ -176,6 +176,20 @@ and `./build/release-notes.sh assemble` for a preview.
 | `make dev backend` | Start backend dev server |
 | `make stage` | Stage production build into `dist/install/` for local testing |
 
+### Documentation (docs/ → HTML or PDF/epub)
+
+`docs/` is plain markdown — read as-is on GitHub, but two commands render
+it without the raw formatting codes:
+
+| Command | What it does |
+|---------|-------------|
+| `make dev website` | Docusaurus dev server with hot reload — reads `docs/` directly (`path: '../docs'` in `website/docusaurus.config.js`), no separate conversion step |
+| `make build website` | Build the HTML site into `website/build/` |
+| `make build booklets` | Render curated `docs/` subsets to standalone PDF/epub via Quarto — see `docs-build/README.md` for how a booklet's chapter list ("spine") is defined |
+
+Booklets need the `quarto` tool (see `developer-environment.md`); the
+website only needs `bun` (already required).
+
 ### Clean
 
 | Command | What it does |
