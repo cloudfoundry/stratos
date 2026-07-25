@@ -188,7 +188,20 @@ verbs in reverse — release first, so a half-done rollback never orphans
 the tag). A real release normally starts with `make bump <level>`
 instead of an explicit `VERSION=` — see Version Management below for
 what each bump level does; this example uses `VERSION=` throughout so
-it's copy-pastable without deciding a bump level first:
+it's copy-pastable without deciding a bump level first.
+
+**Word order matters when chaining `bump` into the same invocation as
+`build`/`release`.** Make runs multiple goals on one command line strictly
+in the order given — `bump`, `build`, and `release` have no prerequisite
+relationship forcing a different order, so Make just does what you typed.
+`make bump dev build release cf` bumps first, so the build/release pick up
+the new version. `make build release cf bump dev` builds and releases
+*first* with the still-old version, then bumps — `package.json` ends up
+one version ahead of what you just shipped, silently. If you're appending
+`bump dev` to a command you already typed rather than composing it fresh,
+put it at the front, not the end. The lifecycle below sidesteps the
+question entirely by using an explicit `VERSION=` instead of chaining
+`bump`:
 
 ```bash
 make build VERSION=X.Y.Z
@@ -209,6 +222,32 @@ make stamp untag TAG=vX.Y.Z             # ...then the tag
 | `make dev frontend` | Start frontend dev server with hot reload |
 | `make dev backend` | Start backend dev server |
 | `make stage` | Stage production build into `dist/install/` for local testing |
+
+Run `dev frontend` and `dev backend` in **two separate terminal windows** —
+neither backgrounds itself, and the frontend dev server proxies API calls
+to the backend port (`proxy.conf.cjs`), so both need to be running at once:
+
+```bash
+# Terminal 1
+make dev backend
+
+# Terminal 2
+make dev frontend
+```
+
+**Frontend changes are live** — `ng serve` watches and hot-reloads on save,
+no restart needed. **Backend changes are not** — `dev.backend` builds once
+(only if the binary is missing or stale for this platform) and then runs;
+editing Go source needs a stop (Ctrl-C) and a fresh `make dev backend` to
+rebuild and pick up the change.
+
+`make stage` isn't a substitute for `make dev`, despite both being "run it
+locally" — they answer different questions. `make dev` is live development:
+hot reload, unoptimized, source maps intact. `make stage` packages an
+*already-built* production artifact (`make build`'s output) into
+`dist/install/` with a `run.sh` launcher, so you can verify the actual
+shippable build runs standalone — no dev-server proxying, no watch mode.
+Use `stage` as a pre-release sanity check, not for day-to-day iteration.
 
 ### Documentation (docs/ → HTML or PDF/epub)
 
