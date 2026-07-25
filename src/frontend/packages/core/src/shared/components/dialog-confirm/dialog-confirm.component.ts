@@ -28,6 +28,9 @@ export class DialogConfirmComponent {
   // Bound via ngModel to the type-to-confirm input
   public matchValue?: string;
 
+  // Bound via ngModel to the optional checkbox (data.checkbox)
+  public checkboxChecked = false;
+
   constructor() {
     const data = this.data;
 
@@ -35,10 +38,17 @@ export class DialogConfirmComponent {
     if (typeToConfirm && typeToConfirm.textToMatch) {
       this.textToMatch = typeToConfirm.textToMatch;
     }
+    this.checkboxChecked = !!data.checkbox?.default;
   }
 
   onNoClick(): void {
     this.dialogRef.close();
+  }
+
+  onConfirmClick(): void {
+    // Plain `true` when there's no checkbox (existing callers just check
+    // truthiness); an object when there is, so the caller can read the choice.
+    this.dialogRef.close(this.data.checkbox ? { checkboxChecked: this.checkboxChecked } : true);
   }
 
   handlePaste($event: ClipboardEvent) {
