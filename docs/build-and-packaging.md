@@ -61,6 +61,12 @@ Run `make check gate` before any push — it mirrors what CI runs on each PR.
 point it at a specific deployment via the `E2E_BASE_URL` environment
 variable (defaults to the local dev server at `https://localhost:5540`).
 
+`make test e2e`/`make check e2e` also need Playwright's browser binaries —
+`bun install` pulls in the `@playwright/test` package but does **not**
+download the browsers themselves. One-time setup: `bunx playwright install
+chromium` (the default `E2E_BROWSERS` target); add `firefox`/`webkit` if
+you'll run with `E2E_BROWSERS=firefox`, `webkit`, or `all`.
+
 #### E2E recipe variables
 
 `make check e2e` and `make test e2e` accept these recipe-level variables to
