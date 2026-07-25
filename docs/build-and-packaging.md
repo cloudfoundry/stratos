@@ -85,9 +85,10 @@ freely — set any combination on one command line.
 | `E2E_VIDEO` | Force video capture. Values: `on`, `off`, `retain-on-failure`, `on-first-retry`. Empty → uses `playwright.config.ts` default (`retain-on-failure`). | `E2E_VIDEO=on` |
 | `E2E_SCREENSHOTS` | Force screenshot capture. Values: `on`, `off`, `only-on-failure`. Empty → uses `playwright.config.ts` default (`only-on-failure`). | `E2E_SCREENSHOTS=on` |
 
-The cross-cutting `DRYRUN=yes` variable (also used by `bump`) lists tests
-that would run without executing them — useful for checking browser and
-filter combinations without spinning up a Stratos instance.
+The cross-cutting `DRYRUN=yes` variable (also used by `make bump`, see
+Version Management below) lists tests that would run without executing
+them — useful for checking browser and filter combinations without
+spinning up a Stratos instance.
 
 **Common invocations:**
 
