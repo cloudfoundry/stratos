@@ -53,11 +53,11 @@ Flags:
   --dry-run                 Print new version without modifying files
 
 Examples:
-  $0 bump dev               # v4.9.3-dev.41 → v4.9.3-dev.42+build.YYYYMMDD.SHA
-  $0 bump alpha             # v4.9.3-dev.42 → v4.9.3-alpha.1+build.YYYYMMDD.SHA
-  $0 bump rc                # v4.9.3-beta.1 → v4.9.3-rc.1+build.YYYYMMDD.SHA
-  $0 bump patch             # v4.9.3-rc.2   → v4.9.4+build.YYYYMMDD.SHA
-  $0 set v5.0.0-rc.1        # Set explicit version
+  $0 bump dev               # 4.9.3-dev.41 → 4.9.3-dev.42+build.YYYYMMDD.SHA
+  $0 bump alpha             # 4.9.3-dev.42 → 4.9.3-alpha.1+build.YYYYMMDD.SHA
+  $0 bump rc                # 4.9.3-beta.1 → 4.9.3-rc.1+build.YYYYMMDD.SHA
+  $0 bump patch             # 4.9.3-rc.2   → 4.9.4+build.YYYYMMDD.SHA
+  $0 set 5.0.0-rc.1         # Set explicit version ('v' prefix also accepted)
   $0 bump dev --dry-run     # Preview without writing
 EOF
   exit 1
@@ -65,9 +65,11 @@ EOF
 
 validate_version() {
   local version=$1
-  if [[ ! $version =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$ ]]; then
+  # 'v' prefix is optional — package.json convention is without it, but
+  # git/GitHub tags conventionally have it, and this validates either.
+  if [[ ! $version =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9]+(\.[a-zA-Z0-9]+)*)?(\+[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)*)?$ ]]; then
     echo "Invalid version format: ${version}" >&2
-    echo "Expected: vMAJOR.MINOR.PATCH[-PRERELEASE][+BUILDMETA]" >&2
+    echo "Expected: [v]MAJOR.MINOR.PATCH[-PRERELEASE][+BUILDMETA]" >&2
     exit 1
   fi
 }
@@ -107,7 +109,7 @@ bump_semver() {
     patch) patch=$((patch + 1)) ;;
     *)     echo "Invalid bump type: ${component}" >&2; usage ;;
   esac
-  commit_version "v${major}.${minor}.${patch}"
+  commit_version "${major}.${minor}.${patch}"
 }
 
 bump_prerelease() {
@@ -129,7 +131,7 @@ bump_prerelease() {
   else
     counter=1
   fi
-  commit_version "v${core}-${kind}.${counter}"
+  commit_version "${core}-${kind}.${counter}"
 }
 
 bump_release() {
@@ -143,7 +145,7 @@ bump_release() {
     echo "Nothing to promote." >&2
     exit 1
   fi
-  commit_version "v${core}"
+  commit_version "${core}"
 }
 
 # ── Main ──────────────────────────────────────────────────────
