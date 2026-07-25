@@ -172,7 +172,6 @@ website/versions-repo
 /stratos-ui-packaged.zip
 
 src/jetstream/jetstream.exe
-.claude
 build/src/
 src/frontend/packages/store/node_modules/
 test-results/
