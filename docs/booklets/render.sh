@@ -7,7 +7,7 @@
 # so each booklet is assembled by copy into a work dir and rendered
 # there; the same docs/ file can appear in several spines.
 set -euo pipefail
-cd "$(dirname "$0")/.."
+cd "$(dirname "$0")/../.."
 
 out=dist/booklets
 for manifest in docs/booklets/*/_quarto.yml; do
