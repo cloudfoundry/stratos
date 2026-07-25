@@ -184,16 +184,24 @@ and `./build/release-notes.sh assemble` for a preview.
 | `make clean frontend` | Remove frontend build only (`dist/frontend/`, `.angular`) |
 | `make clean backend` | Remove backend binaries only (`dist/bin/`) |
 | `make clean dist` | Remove everything including `node_modules` |
-| `make clean repo` | Full reset — everything gitignored |
+| `make clean repo` | Full reset — `git clean -fdx`, fresh-clone state. Keeps `.env`, `secrets.yaml`, `cl.resume`, and `site.mk` (add `RM_SITE=yes` to drop `site.mk` too) |
 
 ### Security & Dependencies
 
 | Command | What it does |
 |---------|-------------|
-| `make audit` | `bun audit` + backend scans (gosec + trivy + govulncheck) |
-| `make audit frontend` | `bun audit` only — npm advisory DB |
-| `make audit backend` | gosec + trivy + govulncheck only |
+| `make audit` | Default set: frontend + website + backend + actions + packages + secrets |
+| `make audit frontend` | `bun audit`, root workspace |
+| `make audit website` | `bun audit`, `website/` workspace |
+| `make audit backend` | gosec + trivy + govulncheck |
+| `make audit actions` | zizmor SAST over `.github/workflows/` |
+| `make audit packages` | osv-scanner over every lockfile and `go.mod` |
+| `make audit secrets` | gitleaks working-tree scan |
 | `make audit summary` | High/moderate/low totals only — fast triage between full runs |
+| `make audit tests` / `tree` / `history` / `licenses` | Non-default modes — see `developer-environment.md` for what each covers and why it's opt-in |
+| `make audit modrot` / `semgrep` / `codeql` | Non-default, manual-run scanners — see `developer-environment.md` for tool install |
+| `make audit sarif` | `sarif-tools` summary across `dist/*.sarif` |
+| `make audit upload` | Push `dist/*.sarif` to GitHub code scanning |
 | `make outdated` | List outdated direct deps in both stacks |
 | `make outdated frontend` | `bun outdated` |
 | `make outdated backend` | `go list -m -u all`, filtered to upgradable lines |
