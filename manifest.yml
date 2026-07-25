@@ -20,6 +20,9 @@ applications:
 #       LOG_LEVEL: debug
 # Turn on staging debugging in stratos-buildpack
 # STRATOS_BP_DEBUG: true #Remove line to turn off debugging
+# Tune CAPI list-pagination (see build-and-packaging.md "Runtime tuning")
+#       STRATOS_CF_PER_PAGE: 1000
+#       STRATOS_CF_MAX_PARALLEL_PAGES: 8
 
 # User provided services can also be used to set environment properties:
 #   env:

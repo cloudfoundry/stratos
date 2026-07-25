@@ -709,7 +709,10 @@ in case your foundation's CAPI performance differs from the defaults.
 
 ### Applying changes
 
-Both variables are read at jetstream startup. To change them at a CF deployment:
+Both variables are read at jetstream startup, from plain OS environment
+variables — any of the usual ways to set one works, not just `cf set-env`:
+
+**CF deployment, imperative** (change now, on a running app):
 
 ```bash
 cf set-env console STRATOS_CF_PER_PAGE 1000
@@ -720,6 +723,44 @@ cf restage console
 > [!IMPORTANT]
 > `cf restart` preserves the environment variable set loaded when the
 > droplet was built and will NOT pick up `cf set-env` changes. Use `cf restage`.
+
+**CF deployment, declarative** (checked into `manifest.yml`, applied on
+the next `cf push`/`cf restage` — see the commented examples already in
+the repo's `manifest.yml`):
+
+```yaml
+applications:
+  - name: console
+    env:
+      STRATOS_CF_PER_PAGE: 1000
+      STRATOS_CF_MAX_PARALLEL_PAGES: 8
+```
+
+**Local (`make dev backend` or running the binary directly):**
+
+```bash
+export STRATOS_CF_PER_PAGE=1000
+export STRATOS_CF_MAX_PARALLEL_PAGES=8
+make dev backend
+```
+
+### Measuring the effect
+
+`DIAGNOSTICS_ENABLED=true` (same env-var mechanism as above, `FWT-934`)
+adds an `X-Stratos-Wire-Sizes` response header to JSON API responses —
+`raw_total`/`keys`/`values`/`structural`/`resources` byte breakdown plus
+`duration_ms` for that request (`wireSizeMiddleware`,
+`middleware_wiresize.go`). `duration_ms` on a CAPI-list-backed endpoint
+(orgs/apps/spaces) is the actual before/after signal for whether a
+`STRATOS_CF_PER_PAGE`/`STRATOS_CF_MAX_PARALLEL_PAGES` change helped — not
+just an abstract default to trust.
+
+Note: despite `DiagnosticsEnabled`'s doc-comment in `api/structs.go`
+describing "the admin-only `/pp/v1/admin/diagnostics` endpoint," no such
+route exists in the codebase — what's actually shipped is this response
+header on existing endpoints, not a separate admin diagnostics endpoint.
+Off by default in production; opt in per-deployment (dev/staging) via
+`DIAGNOSTICS_ENABLED`.
 
 The resolved values are logged at startup:
 
