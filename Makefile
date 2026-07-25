@@ -610,7 +610,7 @@ $(call register, check, e2e)
 
 # ── Audit (security scanning) ────────────────────────────────
 # make audit              — default scanners (frontend backend actions packages secrets)
-# make audit frontend     — bun audit (npm advisory DB)
+# make audit frontend     — bun audit (npm advisory DB), root + website
 # make audit backend      — gosec + trivy + govulncheck (both Go modules)
 # make audit modrot       — modrot archived/deprecated dependency scan (needs gh auth)
 # make audit semgrep      — semgrep SAST, account policy + SARIF (needs network, manual/build-machine only)
@@ -627,9 +627,12 @@ $(call register, check, e2e)
 # make audit upload       — push dist/*.sarif to GitHub code scanning, skips codeql-* (CI covers those); needs repo push access
 # make audit summary      — high/moderate/low counts only
 
+# tools/stb isn't covered — pre-release, not worth auditing yet.
 define audit.frontend
 	@echo "Running frontend audit (bun audit)..."
 	@bun audit || true
+	@echo "── website ──"
+	@cd website && bun audit || true
 endef
 $(call register, audit, frontend)
 
@@ -1224,7 +1227,7 @@ help:
 	@echo ""
 	@echo "Security & dependencies:"
 	@echo "  make audit                Run default security scanners"
-	@echo "  make audit frontend       bun audit (npm advisory DB)"
+	@echo "  make audit frontend       bun audit (npm advisory DB), root + website"
 	@echo "  make audit backend        gosec + trivy + govulncheck (both Go modules)"
 	@echo "  make audit modrot         modrot archived/deprecated dep scan (needs gh auth)"
 	@echo "  make audit semgrep        semgrep SAST, account policy + SARIF (manual, needs network)"
