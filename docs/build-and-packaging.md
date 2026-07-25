@@ -331,7 +331,7 @@ the command shape.
 | `DRYRUN=yes` | Preview actions without executing. Wired to `bump` (prints the new version without writing `package.json`) and to `check e2e` / `test e2e` (passes `--list` to Playwright, listing tests without running them). |
 | `FINAL=strip` | Strip prerelease suffix from the version (persisted to `package.json`), then re-invoke Make with the remaining goals. Useful as a one-shot finalize-then-package on the release verb. |
 | `VERSION=...` | Override the version from `package.json` for this invocation only (not persisted). |
-| `PLATFORM=...` | Override backend build platform (e.g. `darwin/arm64`, `linux/amd64`). |
+| `PLATFORM=os/arch` | Override backend build platform. Syntax is Go's own `GOOS`/`GOARCH` values, lowercase, slash-separated — not a Stratos-specific format. `os`: `linux`, `darwin`, `windows`. `arch`: `amd64`, `arm64`. Those are the six combinations this project builds/tests (see Supported Platforms in `developer-environment.md`); Go itself supports more `GOOS`/`GOARCH` pairs than that if you need one we don't list. |
 
 #### Finalizing a release
 
