@@ -24,6 +24,7 @@
 #   make clean frontend         Remove frontend build only
 #   make clean backend          Remove backend binaries only
 #   make clean dist             Remove everything (including node_modules)
+#   make clean repo             Full reset: git clean -fdx (fresh-clone state)
 #   make check                  Run all quality gates (lint + gate)
 #   make check e2e              Run Playwright E2E tests
 #   make test e2e TIER=acceptance PR=1234   Tiered E2E run (see TESTING.md)
@@ -282,6 +283,7 @@ ifeq ($($(_HIDE)WANT_KORIFI),yes)
 endif
 
 $(_HIDE)WANT_CLEAN_DIST :=
+$(_HIDE)WANT_CLEAN_REPO :=
 $(_HIDE)WANT_LINT       :=
 $(_HIDE)WANT_GATE       :=
 $(_HIDE)WANT_TESTS      :=
@@ -291,6 +293,9 @@ $(_HIDE)WANT_DEPENDABOT :=
 
 ifneq ($(filter dist,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_CLEAN_DIST := yes
+endif
+ifneq ($(filter repo,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_CLEAN_REPO := yes
 endif
 ifneq ($(filter lint,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_LINT := yes
@@ -338,8 +343,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag
-frontend backend website booklets cf korifi github aio pages dist version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag:
+.PHONY: frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag
+frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -1101,6 +1106,9 @@ endif
 # make clean frontend  — frontend build only
 # make clean backend   — backend binaries only
 # make clean dist      — above + node_modules
+# make clean repo      — full reset: git clean -fdx (fresh-clone state)
+#                         RM_SITE=yes also sweeps site.mk (kept by default —
+#                         it carries local site config, not build output)
 # make e2e clean        — sweep stratos-e2e-test labeled CF resources
 #                         (defined in the E2E section, above)
 
@@ -1114,8 +1122,19 @@ define clean.dist
 	rm -rf node_modules src/frontend/packages/*/node_modules
 endef
 
+# Everything git clean -fdx removes here already covers clean.release and
+# clean.dist's scope (it's untracked/ignored either way), so no prereq chain
+# is needed. .env/secrets.yaml/cl.resume are local machine state, not build
+# output — always kept. site.mk is kept unless RM_SITE=yes is passed
+# explicitly; it's local site config, not something to drop by default.
+RM_SITE ?=
+define clean.repo
+	git clean -fdx -e .env -e secrets.yaml -e cl.resume $(if $(filter yes,$(RM_SITE)),,-e site.mk)
+endef
+
 $(call register_always, clean, release)
 $(call register, clean, dist, $(_HIDE)clean.release)
+$(call register, clean, repo)
 
 $(call declare_verb_default, clean, $(_HIDE)clean.release)
 
@@ -1230,6 +1249,8 @@ help:
 	@echo "  make clean frontend       Remove frontend build only"
 	@echo "  make clean backend        Remove backend binaries only"
 	@echo "  make clean dist           Remove everything (including node_modules)"
+	@echo "  make clean repo           Full reset: git clean -fdx (fresh-clone state)"
+	@echo "                            RM_SITE=yes also removes site.mk"
 	@echo ""
 	@echo "Security & dependencies:"
 	@echo "  make audit                Run default security scanners"
@@ -1285,6 +1306,7 @@ help:
 	@echo "  TAG=vX.Y.Z                Tag for publish/unpublish/stamp tag/untag"
 	@echo "  DRAFT=yes                 publish creates a draft release"
 	@echo "  NOTES=<file>              Notes file for publish (default: CHANGELOG section)"
+	@echo "  RM_SITE=yes               make clean repo also removes site.mk"
 	@echo ""
 	@echo "  Examples:"
 	@echo "    make release cf FINAL=strip       Finalize version + package"
