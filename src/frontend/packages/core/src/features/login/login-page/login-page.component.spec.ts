@@ -148,8 +148,6 @@ describe('LoginPageComponent', () => {
         .mockReturnValue(of(null));
 
       // Simulate returning from the IdP with an error message in the URL.
-      const original = (component as any).shouldAutoRedirectNosplash?.bind(component);
-      void original;
       history.replaceState({}, '', '/login?SSO_Message=Invalid+auth');
 
       fixture.detectChanges();
@@ -192,6 +190,28 @@ describe('LoginPageComponent', () => {
       await fixture.whenStable();
 
       expect(ssoSpy).not.toHaveBeenCalled();
+    });
+
+    it('clears a stale redirect counter once a valid session is observed', async () => {
+      vi.spyOn((component as any).router, 'navigate').mockResolvedValue(true);
+
+      // Simulate a stale count left over from an earlier failed round-trip.
+      sessionStorage.setItem('stratos_login_redirect_attempts', '2');
+
+      fixture.detectChanges();
+      authData.auth.set({
+        loggedIn: true,
+        loggingIn: false,
+        user: null,
+        error: false,
+        errorResponse: '',
+        verifying: false,
+        sessionData: { valid: true } as any,
+      });
+
+      await fixture.whenStable();
+
+      expect(sessionStorage.getItem('stratos_login_redirect_attempts')).toBeNull();
     });
   });
 
