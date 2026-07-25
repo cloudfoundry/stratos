@@ -56,6 +56,11 @@ when deployed as a Cloud Foundry application.
 | `make check coverage` | Frontend unit tests with coverage (Vitest). No Go coverage. |
 | `make check e2e` | Playwright E2E core tests |
 
+ESLint and Vitest need no separate install — both are plain `devDependencies`
+in `package.json`, covered by `bun install`. `golangci-lint` is the only tool
+here that's external to the JS toolchain and needs its own install step (see
+`developer-environment.md`).
+
 Run `make check gate` before any push — it mirrors what CI runs on each PR.
 `make check e2e` requires a running Stratos instance (local or deployed);
 point it at a specific deployment via the `E2E_BASE_URL` environment
