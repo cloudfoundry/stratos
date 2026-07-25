@@ -204,6 +204,12 @@ export class LoginPageComponent implements OnInit {
     this.redirectAttemptsSubject$.next(0);
   }
 
+  // Single cap check shared by every auto-redirect guard so there is one
+  // budget, not a per-path copy of the comparison.
+  private get underRedirectCap(): boolean {
+    return this.redirectAttempts <= this.MAX_REDIRECT_ATTEMPTS;
+  }
+
   ngOnInit() {
     // Initialize the BehaviorSubject with current value
     this.redirectAttemptsSubject$.next(this.redirectAttempts);
@@ -245,17 +251,21 @@ export class LoginPageComponent implements OnInit {
           return;
         }
 
-        // Handle SSO no-splash redirect
-        if (auth.sessionData?.ssoOptions &&
-            auth.sessionData.ssoOptions.indexOf('nosplash') >= 0 &&
-            !queryParamMap().SSO_Message) {
+        // Handle SSO no-splash redirect, under the same cap as the
+        // unauthenticated nosplash path below (see shouldAutoRedirectNosplash) -
+        // otherwise a valid session that keeps landing back on /login can
+        // bounce to the IdP indefinitely.
+        if (this.shouldAutoRedirectLoggedInNosplash(auth)) {
+          this.redirectAttempts++;
           this.doSSOLoginReactive().subscribe();
           return;
         }
 
-        // A valid session was established, so a genuine login round-trip
-        // completed: clear the nosplash redirect counter so a later visit
-        // does not inherit a stale count from an earlier failed attempt.
+        // Either nosplash isn't in play, or the cap above stopped a bounce
+        // loop: this attempt cycle is over, so clear the counter now rather
+        // than only on a successful nav below - otherwise a cap hit here
+        // leaves a stale count that blocks an unrelated, later unauthenticated
+        // visit from auto-redirecting.
         this.clearRedirectAttempts();
 
         // Normal redirect
@@ -346,14 +356,22 @@ export class LoginPageComponent implements OnInit {
     const nosplash       = !!auth.sessionData?.ssoOptions?.includes('nosplash');
     return idle && noValidSession && nosplash
       && !queryParamMap().SSO_Message
-      && this.redirectAttempts <= this.MAX_REDIRECT_ATTEMPTS;
+      && this.underRedirectCap;
+  }
+
+  // Logged-in counterpart to shouldAutoRedirectNosplash: a valid session
+  // still configured for nosplash SSO gets bounced to the IdP too, under the
+  // same shared cap.
+  private shouldAutoRedirectLoggedInNosplash(auth: AuthState): boolean {
+    const nosplash = !!auth.sessionData?.ssoOptions?.includes('nosplash');
+    return nosplash && !queryParamMap().SSO_Message && this.underRedirectCap;
   }
 
   private async handleSuccessfulLogin(auth: AuthState): Promise<null> {
     this.redirectAttempts++;
 
     // Prevent infinite redirect loop
-    if (this.redirectAttempts > this.MAX_REDIRECT_ATTEMPTS) {
+    if (!this.underRedirectCap) {
       return null;
     }
 
