@@ -44,6 +44,14 @@ import type { StRoute } from '../../../services/endpoint-data/stratos-types';
                 [checked]="isSelected(route.guid)"
                 (change)="toggle(route.guid)" />
               <span class="flex-1 text-content-text truncate" [attr.title]="route.url">{{ route.url }}</span>
+              @if ((route.appGuids?.length ?? 0) > 1) {
+                <span
+                  data-test="route-shared-badge"
+                  class="text-warning-shade-500 text-xs whitespace-nowrap"
+                  title="This route is also mapped to other applications - deleting it will remove it for them too.">
+                  Shared ({{ route.appGuids!.length }} apps)
+                </span>
+              }
             </li>
           }
         </ul>
