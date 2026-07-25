@@ -24,7 +24,8 @@ flowchart LR
     plain["secrets.yaml
     (plaintext, .gitignored)"]
     enc["secrets.yaml.enc
-    (encrypted, in git)"]
+    (encrypted — committing it
+    is a per-project choice)"]
     env["STRATOS_SECRETS env var
     (in-memory, never on disk)"]
     loader["Secrets loader
@@ -36,6 +37,13 @@ flowchart LR
 
 Plaintext secrets never persist on disk in CI. For local development,
 `secrets.yaml` is `.gitignored` and can be deleted after encrypting.
+
+**In this repo, `secrets.yaml.enc` is also `.gitignored` and not committed**
+(see `.gitignore`) — the encrypted file and the age keys that can decrypt
+it are distributed out-of-band (e.g. a shared vault), not via git. This
+doc doubles as a portable template (see Adopting in Other Projects below),
+where committing `.enc` is a valid per-project choice — just not this
+project's.
 
 ## Why SOPS + age
 
@@ -161,8 +169,12 @@ Flag              Plaintext file          Encrypted file
 --env staging     secrets.staging.yaml    secrets.staging.yaml.enc
 ```
 
-All `secrets.*.yaml` files are `.gitignored`. Encrypted `.enc` files
-can be committed if the team wants shared encrypted secrets in the repo.
+All `secrets.*.yaml` files are `.gitignored`. Encrypted `.enc` files can
+be committed if the team wants shared encrypted secrets in the repo — or,
+as this repo does, kept out of git entirely and distributed out-of-band
+(shared vault) instead, e.g. when the repo itself is public and a team
+doesn't want to reveal even the *existence* of environment-specific
+secrets to outside forks.
 
 ## Profiles vs Environments
 
