@@ -26,6 +26,7 @@ $(_HIDE)FLAG_aio         := $($(_HIDE)WANT_AIO)
 $(_HIDE)FLAG_pages       := $($(_HIDE)WANT_PAGES)
 $(_HIDE)FLAG_e2e         := $($(_HIDE)WANT_E2E)
 $(_HIDE)FLAG_dist        := $($(_HIDE)WANT_CLEAN_DIST)
+$(_HIDE)FLAG_repo        := $($(_HIDE)WANT_CLEAN_REPO)
 $(_HIDE)FLAG_version     := $($(_HIDE)WANT_VERSION)
 $(_HIDE)FLAG_actions     := $($(_HIDE)WANT_ACTIONS)
 $(_HIDE)FLAG_packages    := $($(_HIDE)WANT_PACKAGES)
@@ -48,7 +49,7 @@ $(_HIDE)FLAG_tag         := $($(_HIDE)WANT_TAG)
 $(_HIDE)FLAG_untag       := $($(_HIDE)WANT_UNTAG)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist version actions packages secrets lint gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag
+$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist repo version actions packages secrets lint gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=
