@@ -47,6 +47,7 @@ configuration. For step-by-step setup, see the
 | `codeql` | Deep SAST (Go + JS/TS databases) | [codeql-action releases](https://github.com/github/codeql-action/releases) | `make audit codeql` (manual — CI already runs this canonically; local run is a pre-push spot-check) |
 | `sarif-tools` (`sarif`) | Summarize SARIF files | `pip install sarif-tools` | `make audit sarif` |
 | `gh` | GitHub CLI | [cli.github.com](https://cli.github.com/) | `make deps dependabot`, `make audit upload`, `make audit actions` (optional, for authenticated rate limits) |
+| Playwright browser binaries | E2E test runner (the `@playwright/test` package itself comes via `bun install`) | `bunx playwright install chromium` (add `firefox`/`webkit` for `E2E_BROWSERS=firefox`/`webkit`/`all`) | `make test e2e`, `make check e2e` |
 
 ### Audit & dependency commands
 
