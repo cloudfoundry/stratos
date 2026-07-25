@@ -35,10 +35,14 @@
 # Variables:
 #   FINAL=strip                 Strip prerelease from version (persisted)
 #   DRYRUN=yes                  Preview actions without executing
-#   VERSION=vX.Y.Z              Override version
+#   VERSION=X.Y.Z               Override version (project convention: no v,
+#                               matching package.json/semver.org — a v is
+#                               accepted too, it's just baked in as given)
 #   PLATFORM=os/arch            Override target platform
 #   TAG=vX.Y.Z                  Tag for publish/unpublish/stamp tag/untag
-#                               (default: version with build metadata stripped)
+#                               (default: v + version with build metadata
+#                               stripped; v is a git/GitHub tag convention,
+#                               same underlying value as VERSION)
 #   TAG_REMOTE=<remote>         Remote for stamp tag/untag (default: origin)
 #   DRAFT=yes                   publish creates a draft release
 #   NOTES=<file>                Notes file for publish (default: the
@@ -921,7 +925,7 @@ $(call register_always, release, checksums)
 $(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)WANT_GITHUB),$(_HIDE)release.checksums)
 
 # ── Release lifecycle (tag → publish / unpublish → untag) ────
-#   make stamp tag [VERSION=vX]     create + push the annotated release tag
+#   make stamp tag [VERSION=X]      create + push the annotated release tag
 #   make publish [DRAFT=yes]        gh release create + upload dist/release/*
 #   make unpublish TAG=vX           delete the GitHub release (assets included)
 #   make stamp untag TAG=vX         delete the tag (local + remote)
@@ -1130,12 +1134,12 @@ endef
 
 # Everything git clean -fdx removes here already covers clean.release and
 # clean.dist's scope (it's untracked/ignored either way), so no prereq chain
-# is needed. .env/secrets.yaml/cl.resume are local machine state, not build
-# output — always kept. site.mk is kept unless RM_SITE=yes is passed
-# explicitly; it's local site config, not something to drop by default.
+# is needed. .env/secrets.yaml are local machine state, not build output —
+# always kept. site.mk is kept unless RM_SITE=yes is passed explicitly;
+# it's local site config, not something to drop by default.
 RM_SITE ?=
 define clean.repo
-	git clean -fdx -e .env -e secrets.yaml -e cl.resume $(if $(filter yes,$(RM_SITE)),,-e site.mk)
+	git clean -fdx -e .env -e secrets.yaml $(if $(filter yes,$(RM_SITE)),,-e site.mk)
 endef
 
 $(call register_always, clean, release)
@@ -1307,7 +1311,7 @@ help:
 	@echo "Variables:"
 	@echo "  FINAL=strip               Strip prerelease from version (persisted)"
 	@echo "  DRYRUN=yes                Preview actions without executing"
-	@echo "  VERSION=vX.Y.Z            Override version"
+	@echo "  VERSION=X.Y.Z             Override version (convention: no v — see docs)"
 	@echo "  PLATFORM=os/arch          Override target platform"
 	@echo "  TAG=vX.Y.Z                Tag for publish/unpublish/stamp tag/untag"
 	@echo "  DRAFT=yes                 publish creates a draft release"
