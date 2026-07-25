@@ -576,7 +576,7 @@ $(call register, clean, e2e)
 
 define check.lint
 	@echo "Running lint checks..."
-	@which golangci-lint > /dev/null 2>&1 || (echo "golangci-lint not installed. See https://golangci-lint.run/welcome/install/ (macOS: brew install golangci-lint)" >&2 && exit 1)
+	$(call require_tool,golangci-lint,See https://golangci-lint.run/welcome/install/ (macOS: brew install golangci-lint))
 	bun run lint
 	cd src/jetstream && go fmt ./... && go vet ./...
 	cd src/jetstream && golangci-lint run ./...
@@ -649,9 +649,9 @@ $(call register, audit, website)
 
 define audit.backend
 	@echo "Running backend security scans..."
-	@which gosec > /dev/null 2>&1 || (echo "gosec not installed. Run: go install github.com/securego/gosec/v2/cmd/gosec@latest" >&2 && exit 1)
-	@which trivy > /dev/null 2>&1 || (echo "trivy not installed. See https://github.com/aquasecurity/trivy" >&2 && exit 1)
-	@which govulncheck > /dev/null 2>&1 || (echo "govulncheck not installed. Run: go install golang.org/x/vuln/cmd/govulncheck@latest" >&2 && exit 1)
+	$(call require_tool,gosec,Run: go install github.com/securego/gosec/v2/cmd/gosec@latest)
+	$(call require_tool,trivy,See https://github.com/aquasecurity/trivy)
+	$(call require_tool,govulncheck,Run: go install golang.org/x/vuln/cmd/govulncheck@latest)
 	@echo "── gosec ──"
 	cd src/jetstream && gosec -quiet ./... || true
 	cd src/jetstream/api && gosec -quiet ./... || true
@@ -669,7 +669,7 @@ $(call register, audit, backend)
 # SARIF (modrot >= 0.10.0) lands in dist/ for GitHub code scanning upload.
 define audit.modrot
 	@echo "Running dependency-archival audit (modrot)..."
-	@which modrot > /dev/null 2>&1 || (echo "modrot not installed. Run: go install github.com/norman-abramovitz/modrot@latest" >&2 && exit 1)
+	$(call require_tool,modrot,Run: go install github.com/norman-abramovitz/modrot@latest)
 	@mkdir -p dist
 	modrot --recursive --deprecated --resolve src/jetstream || true
 	modrot --recursive --deprecated --resolve --sarif src/jetstream > dist/modrot.sarif || true
@@ -683,7 +683,7 @@ $(call register, audit, modrot)
 # extra, not in the default set. Run manually on the build machine.
 define audit.semgrep
 	@echo "Running Semgrep SAST (semgrep ci, account policy)..."
-	@which semgrep > /dev/null 2>&1 || (echo "semgrep not installed. Run: brew install semgrep" >&2 && exit 1)
+	$(call require_tool,semgrep,Run: brew install semgrep)
 	@semgrep show identity > /dev/null 2>&1 || echo "Not logged in to Semgrep — falling back to community rules. Run: semgrep login"
 	@mkdir -p dist
 	semgrep ci --sarif --sarif-output=dist/semgrep.sarif || true
@@ -695,7 +695,7 @@ $(call register, audit, semgrep)
 # default set. Run manually on the build machine; SARIF output lands in dist/.
 define audit.codeql
 	@echo "Running CodeQL SAST (Go + JavaScript/TypeScript)..."
-	@which codeql > /dev/null 2>&1 || (echo "codeql not installed. See https://github.com/github/codeql-action/releases" >&2 && exit 1)
+	$(call require_tool,codeql,See https://github.com/github/codeql-action/releases)
 	@mkdir -p dist
 	@echo "── Go (src/jetstream) ──"
 	codeql database create dist/codeql-db-go --language=go --source-root=src/jetstream --overwrite
@@ -712,7 +712,7 @@ $(call register, audit, codeql)
 # Local-only, no network — run after the SARIF-emitting scanners.
 define audit.sarif
 	@echo "Running SARIF summary (sarif-tools)..."
-	@which sarif > /dev/null 2>&1 || (echo "sarif-tools not installed. Run: pip install sarif-tools" >&2 && exit 1)
+	$(call require_tool,sarif,Run: pip install sarif-tools)
 	@ls dist/*.sarif > /dev/null 2>&1 || (echo "No SARIF files in dist/ — run audit modrot/semgrep/codeql first." >&2 && exit 1)
 	sarif summary dist
 endef
@@ -731,7 +731,7 @@ $(call register, audit, sarif)
 # maintainer account first (`gh auth switch`) if this 403s.
 define audit.upload
 	@echo "Uploading SARIF to GitHub code scanning..."
-	@which gh > /dev/null 2>&1 || (echo "gh not installed. See https://cli.github.com" >&2 && exit 1)
+	$(call require_tool,gh,See https://cli.github.com)
 	@ls dist/*.sarif > /dev/null 2>&1 || (echo "No SARIF files in dist/ — run audit modrot/semgrep/codeql first." >&2 && exit 1)
 	@commit_sha=$$(git rev-parse HEAD); \
 	ref=refs/heads/$$(git branch --show-current); \
@@ -752,7 +752,7 @@ $(call register, audit, upload)
 
 define audit.actions
 	@echo "Running GitHub Actions workflow audit (zizmor)..."
-	@which zizmor > /dev/null 2>&1 || (echo "zizmor not installed. Run: brew install zizmor" >&2 && exit 1)
+	$(call require_tool,zizmor,Run: brew install zizmor)
 	@if command -v gh > /dev/null 2>&1 && gh auth token > /dev/null 2>&1; then \
 		GH_TOKEN=$$(gh auth token) zizmor $(ZIZMOR_FLAGS) .github/workflows/ || true; \
 	else \
@@ -763,21 +763,21 @@ $(call register, audit, actions)
 
 define audit.packages
 	@echo "Running dependency audit (osv-scanner)..."
-	@which osv-scanner > /dev/null 2>&1 || (echo "osv-scanner not installed. Run: brew install osv-scanner" >&2 && exit 1)
+	$(call require_tool,osv-scanner,Run: brew install osv-scanner)
 	@osv-scanner scan source -r . || true
 endef
 $(call register, audit, packages)
 
 define audit.secrets
 	@echo "Running secret scan (gitleaks)..."
-	@which gitleaks > /dev/null 2>&1 || (echo "gitleaks not installed. Run: brew install gitleaks" >&2 && exit 1)
+	$(call require_tool,gitleaks,Run: brew install gitleaks)
 	@gitleaks dir . --no-banner --redact || true
 endef
 $(call register, audit, secrets)
 
 define audit.tests
 	@echo "Running gosec including test files..."
-	@which gosec > /dev/null 2>&1 || (echo "gosec not installed. Run: go install github.com/securego/gosec/v2/cmd/gosec@latest" >&2 && exit 1)
+	$(call require_tool,gosec,Run: go install github.com/securego/gosec/v2/cmd/gosec@latest)
 	cd src/jetstream && gosec -quiet -tests -track-suppressions ./... || true
 	cd src/jetstream/api && gosec -quiet -tests -track-suppressions ./... || true
 endef
@@ -785,21 +785,21 @@ $(call register, audit, tests)
 
 define audit.tree
 	@echo "Running full-tree scan (trivy)..."
-	@which trivy > /dev/null 2>&1 || (echo "trivy not installed. See https://github.com/aquasecurity/trivy" >&2 && exit 1)
+	$(call require_tool,trivy,See https://github.com/aquasecurity/trivy)
 	trivy fs --scanners vuln,misconfig --skip-dirs '**/node_modules' --skip-dirs '**/dist' . || true
 endef
 $(call register, audit, tree)
 
 define audit.history
 	@echo "Running full git-history secret scan (gitleaks)..."
-	@which gitleaks > /dev/null 2>&1 || (echo "gitleaks not installed. Run: brew install gitleaks" >&2 && exit 1)
+	$(call require_tool,gitleaks,Run: brew install gitleaks)
 	gitleaks git . --no-banner --redact || true
 endef
 $(call register, audit, history)
 
 define audit.licenses
 	@echo "Running dependency license report (osv-scanner)..."
-	@which osv-scanner > /dev/null 2>&1 || (echo "osv-scanner not installed. Run: brew install osv-scanner" >&2 && exit 1)
+	$(call require_tool,osv-scanner,Run: brew install osv-scanner)
 	osv-scanner scan source --licenses -r . || true
 endef
 $(call register, audit, licenses)
@@ -834,7 +834,7 @@ $(call register, outdated, backend)
 # make deps dependabot   — list open dependency PRs from GitHub
 
 define deps.dependabot
-	@which gh > /dev/null 2>&1 || (echo "gh not installed. See https://cli.github.com/" >&2 && exit 1)
+	$(call require_tool,gh,See https://cli.github.com)
 	@echo "Open dependency PRs:"
 	@gh pr list --label dependencies --state open --limit 50 \
 		--json number,title,createdAt,author \
@@ -858,7 +858,7 @@ $(call register, release, cf)
 # package manifest uses paketo-buildpacks/procfile instead.
 
 define build.korifi
-	@command -v zig > /dev/null 2>&1 || (echo "zig not installed — required for the static cgo cross-compile. Install: brew install zig" >&2 && exit 1)
+	$(call require_tool,zig,Required for the static cgo cross-compile — install via: brew install zig)
 	@echo "Building static backend for $($(_HIDE)CURRENT_PLATFORM) (Korifi)..."
 	@mkdir -p $($(_HIDE)BIN_DIR)
 	cd src/jetstream && CGO_ENABLED=1 GOOS=linux GOARCH=$($(_HIDE)TARGET_ARCH) \

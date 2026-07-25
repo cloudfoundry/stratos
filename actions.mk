@@ -88,6 +88,11 @@ register_always = $(eval $(call $(_HIDE)register_always_impl,$(strip $1),$(strip
 # than adding a distinct target (e.g., cf forces linux/amd64 for build).
 allow = $(eval $(_HIDE)VALID_MODS_$(strip $1) += $(strip $2))
 
+# ── require_tool(name,hint) ──────────────────────────────────
+# Hard-fail a recipe with a consistent message if `name` isn't on PATH.
+# hint is free text describing how to install it.
+require_tool = @which $(strip $1) > /dev/null 2>&1 || (echo "$(strip $1) not installed. $(strip $2)" >&2 && exit 1)
+
 # ── Modifier validation ──────────────────────────────────────
 # Called inside declare_verb and declare_verb_default. Emits a
 # parse-time warning for each active modifier not registered or
