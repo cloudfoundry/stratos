@@ -133,40 +133,6 @@ cf/korifi zip (when present) into `dist/release/` and regenerating a single
 callable standalone for the exceptional regen case (fix an asset after
 `make unpublish`, re-checksum, re-publish).
 
-### Publishing a release
-
-`make` owns the whole lifecycle; any runner (a human terminal, GitHub
-Actions, Concourse) is a thin caller of the same targets. Credentials come
-from the environment (`GH_TOKEN`/`GITHUB_TOKEN`, or a prior `gh auth
-login`) — never from the command line.
-
-| Command | What it does |
-|---------|-------------|
-| `make stamp tag [VERSION=vX]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`); the tag body carries the release notes assembled from `changelog.d/` fragments |
-| `make publish [DRAFT=yes] [TAG=vX]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases) |
-| `make unpublish TAG=vX` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives) |
-| `make stamp untag TAG=vX` | Delete the tag, local + remote (echoes first) |
-| `make sweep` | Remove the `changelog.d/` fragments the release consumed (commit rides the next PR) |
-
-`TAG` defaults to the current version with build metadata stripped
-(`v5.0.0-dev.142+build...` → `v5.0.0-dev.142`). Release notes come from
-`NOTES=<file>` when given, else the annotated tag body (a pointer line
-when no fragments existed at tag time). All targets honor `DRYRUN=yes`.
-
-Forward path (rollback runs the same verbs in reverse — release first, so
-a half-done rollback never orphans the tag):
-
-```bash
-make build VERSION=vX.Y.Z
-make release cf github VERSION=vX.Y.Z   # artifacts + SHA256SUMS
-make stamp tag VERSION=vX.Y.Z           # create + push tag (notes in body)
-make publish VERSION=vX.Y.Z             # gh release create + assets
-make sweep                              # drop consumed fragments
-
-make unpublish TAG=vX.Y.Z               # rollback: release first...
-make stamp untag TAG=vX.Y.Z             # ...then the tag
-```
-
 ### Release notes
 
 Notes accumulate continuously as per-PR fragment files in `changelog.d/`
@@ -178,6 +144,44 @@ body, `make publish` reuses the tag body as the GitHub release notes,
 and `make sweep` clears the directory for the next cycle. See
 [changelog.d/README.md](../changelog.d/README.md) for authoring details
 and `./build/release-notes.sh assemble` for a preview.
+
+### Publishing a release
+
+`make` owns the whole lifecycle; any runner (a human terminal, GitHub
+Actions, Concourse) is a thin caller of the same targets. Credentials come
+from the environment (`GH_TOKEN`/`GITHUB_TOKEN`, or a prior `gh auth
+login`) — never from the command line.
+
+| Command | What it does |
+|---------|-------------|
+| `make stamp tag [VERSION=vX]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`); the tag body carries the release notes assembled from `changelog.d/` fragments (see Release notes above) |
+| `make publish [DRAFT=yes] [TAG=vX]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases) |
+| `make unpublish TAG=vX` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives) |
+| `make stamp untag TAG=vX` | Delete the tag, local + remote (echoes first) |
+| `make sweep` | Remove the `changelog.d/` fragments the release consumed (commit rides the next PR) |
+
+`TAG` defaults to the current version with build metadata stripped
+(`v5.0.0-dev.142+build...` → `v5.0.0-dev.142`). Release notes come from
+`NOTES=<file>` when given, else the annotated tag body (a pointer line
+when no fragments existed at tag time). All targets honor `DRYRUN=yes`.
+
+**Complete lifecycle**, start to finish (rollback runs the release/tag
+verbs in reverse — release first, so a half-done rollback never orphans
+the tag). A real release normally starts with `make bump <level>`
+instead of an explicit `VERSION=` — see Version Management below for
+what each bump level does; this example uses `VERSION=` throughout so
+it's copy-pastable without deciding a bump level first:
+
+```bash
+make build VERSION=vX.Y.Z
+make release cf github VERSION=vX.Y.Z   # artifacts + SHA256SUMS
+make stamp tag VERSION=vX.Y.Z           # create + push tag (notes in body)
+make publish VERSION=vX.Y.Z             # gh release create + assets
+make sweep                              # drop consumed fragments
+
+make unpublish TAG=vX.Y.Z               # rollback: release first...
+make stamp untag TAG=vX.Y.Z             # ...then the tag
+```
 
 ### Development
 
