@@ -382,7 +382,7 @@ make build release cf FINAL=strip
 # Explicit version override (not persisted to package.json; no v prefix):
 make VERSION=5.0.0 build release cf
 
-# Deploy (via site.mk or manually):
+# Deploy (via site.mk or manually — see Site-Specific Overrides below):
 cf target -o system -s stratos
 cf push -f dist/cf-package/manifest.yml -p dist/stratos-cf-{VERSION}.zip
 ```
