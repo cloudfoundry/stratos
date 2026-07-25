@@ -653,6 +653,68 @@ describe('CfAppsSignalConfigService', () => {
     expect(remaining).toEqual(['app-bad']); // failed row stays; completed row removed
   });
 
+  it('bulkDeleteAppsWithCleanup deletes only routes/bindings fully owned by the batch, then bulk-deletes the apps', async () => {
+    const deleteCalls: string[] = [];
+    const httpMock = {
+      get: vi.fn((url: string) => {
+        if (url === '/pp/v1/cf/apps/cnsi-1/app-A/routes') {
+          return of({
+            resources: [
+              // Shared with app-B, also in this batch -> safe to delete.
+              { guid: 'r-shared-ab', url: 'ab.example.com', host: 'ab', path: '', domainGuid: 'd', spaceGuid: 's', createdAt: '', updatedAt: '', appGuids: ['app-A', 'app-B'] },
+              // Shared with app-C, NOT in this batch -> must survive.
+              { guid: 'r-shared-ac', url: 'ac.example.com', host: 'ac', path: '', domainGuid: 'd', spaceGuid: 's', createdAt: '', updatedAt: '', appGuids: ['app-A', 'app-C'] },
+            ],
+            totalResults: 2,
+          });
+        }
+        if (url === '/pp/v1/cf/apps/cnsi-1/app-B/routes') {
+          return of({
+            resources: [
+              { guid: 'r-shared-ab', url: 'ab.example.com', host: 'ab', path: '', domainGuid: 'd', spaceGuid: 's', createdAt: '', updatedAt: '', appGuids: ['app-A', 'app-B'] },
+            ],
+            totalResults: 1,
+          });
+        }
+        if (url === '/pp/v1/cf/apps/cnsi-1/app-A/service_bindings?return=summary') {
+          return of({
+            resources: [
+              {
+                guid: 'b-1', cnsiGuid: 'cnsi-1', name: 'x', type: 'app',
+                serviceInstance: { guid: 'si-1', name: 'db', type: 'managed' },
+                app: { guid: 'app-A' }, createdAt: '', updatedAt: '',
+              },
+            ],
+            pagination: { totalResults: 1, totalPages: 1, first: null, last: null, next: null, previous: null },
+          });
+        }
+        if (url === '/pp/v1/cf/apps/cnsi-1/app-B/service_bindings?return=summary') {
+          return of({ resources: [], pagination: { totalResults: 0, totalPages: 1, first: null, last: null, next: null, previous: null } });
+        }
+        return of({ resources: [], pagination: {} });
+      }),
+      delete: vi.fn((url: string) => {
+        deleteCalls.push(url);
+        return of(new HttpResponse<unknown>({ status: 200, body: { result: {}, state: 'COMPLETE' } }));
+      }),
+      post: vi.fn(() => of({
+        results: [
+          { guid: 'app-A', state: 'COMPLETE' },
+          { guid: 'app-B', state: 'COMPLETE' },
+        ],
+        succeeded: 2, failed: 0, pending: 0,
+      })),
+    } as unknown as HttpClient;
+    const svc = makeSvc(httpMock);
+
+    await svc.bulkDeleteAppsWithCleanup('cnsi-1', ['app-A', 'app-B']);
+
+    expect(deleteCalls.filter(u => u === '/pp/v1/cf/routes/cnsi-1/r-shared-ab')).toHaveLength(1); // deduped, not once per app
+    expect(deleteCalls).not.toContain('/pp/v1/cf/routes/cnsi-1/r-shared-ac');
+    expect(deleteCalls).toContain('/pp/v1/cf/service_bindings/cnsi-1/b-1');
+    expect(httpMock.post).toHaveBeenCalledWith('/pp/v1/cf/apps/cnsi-1/bulk/delete', { guids: ['app-A', 'app-B'] });
+  });
+
   it('resolver fetches space names for visible-row guids that are NOT in the catalog', async () => {
     // Catalog (per_page=500&page=1) returns NO spaces — simulating the
     // overflow case where the visible row's space lives beyond page 1.

@@ -1054,14 +1054,17 @@ export class CfAppsSignalConfigService {
     this.orchestrator?.removeRow(cnsiGuid, appGuid);
   }
 
-  // Bulk delete: destroys each app entity (cascading its routes/bindings on
-  // the CF side). CF v3 has no batch delete, so the backend fans out one
-  // DELETE /v3/apps/{guid} per item and returns a BulkResult with per-guid
-  // outcomes; pending items carry an async CF job tracking completion.
-  // Optimistically drops every non-failed row from the orchestrator's
-  // aggregated view (mirrors deleteApp's removeRow) so the list reflects the
-  // request immediately without a full re-fetch — a pending delete that later
-  // fails resurfaces on the next refresh.
+  // Bulk delete: destroys each app entity. CF v3 does not cascade-delete a
+  // route or service binding when the app goes away (only the destination/
+  // binding to that app is implicitly gone with it) - see
+  // bulkDeleteAppsWithCleanup for the opt-in cleanup path. CF v3 also has no
+  // batch delete, so the backend fans out one DELETE /v3/apps/{guid} per item
+  // and returns a BulkResult with per-guid outcomes; pending items carry an
+  // async CF job tracking completion. Optimistically drops every non-failed
+  // row from the orchestrator's aggregated view (mirrors deleteApp's
+  // removeRow) so the list reflects the request immediately without a full
+  // re-fetch — a pending delete that later fails resurfaces on the next
+  // refresh.
   async bulkDeleteApps(cnsiGuid: string, appGuids: string[]): Promise<BulkResult> {
     const result = await firstValueFrom(this.http.post<BulkResult>(
       `/pp/v1/cf/apps/${cnsiGuid}/bulk/delete`,
@@ -1073,5 +1076,46 @@ export class CfAppsSignalConfigService {
       }
     }
     return result;
+  }
+
+  // Opt-in cleanup variant of bulkDeleteApps: resolves each app's routes and
+  // service bindings first, deletes them, then runs the bulk app delete -
+  // otherwise a bulk delete leaves every selected app's routes behind (44 of
+  // 48 routes orphaned in one observed test space, #5692).
+  //
+  // A route is only deleted if every one of its destinations belongs to an
+  // app in this same batch - a route shared with an app NOT being deleted
+  // here must survive, matching the single-app delete wizard's per-route
+  // picker semantics.
+  //
+  // Best-effort: a route/binding delete failure is swallowed (mirrors
+  // deleteWithCleanup's per-item fan-out) so one bad relationship doesn't
+  // block the rest of the cleanup or the app deletes that follow.
+  async bulkDeleteAppsWithCleanup(cnsiGuid: string, appGuids: string[]): Promise<BulkResult> {
+    const targets = new Set(appGuids);
+    const perApp = await Promise.all(appGuids.map(async guid => ({
+      routes: await this.fetchAppRoutes(cnsiGuid, guid),
+      bindings: await this.fetchAppServiceBindings(cnsiGuid, guid),
+    })));
+
+    const routesToDelete = new Map<string, StRoute>();
+    for (const { routes } of perApp) {
+      for (const route of routes) {
+        // appGuids always carries at least the app this route was fetched
+        // for (see toStRoute); an empty/missing value would mean "unknown
+        // destinations" - treat that conservatively as "don't delete".
+        if (route.appGuids?.length && route.appGuids.every(appGuid => targets.has(appGuid))) {
+          routesToDelete.set(route.guid, route);
+        }
+      }
+    }
+    const bindingsToDelete = perApp.flatMap(({ bindings }) => bindings);
+
+    await Promise.all([
+      ...Array.from(routesToDelete.values()).map(route => this.deleteRoute(cnsiGuid, route.guid).catch(() => {})),
+      ...bindingsToDelete.map(binding => this.deleteServiceBinding(cnsiGuid, binding.guid).catch(() => {})),
+    ]);
+
+    return this.bulkDeleteApps(cnsiGuid, appGuids);
   }
 }
