@@ -45,6 +45,12 @@ when deployed as a Cloud Foundry application.
 | `make test backend` | Backend tests only (Go) |
 | `make test e2e` | Playwright E2E tests against deployed instance |
 
+E2E tests need CF credentials, supplied via `secrets.yaml` (plaintext,
+gitignored) or its encrypted form `secrets.yaml.enc` (committed) — see
+[Secrets Management](secrets-management.md) for the zero-plaintext
+encrypt/decrypt workflow. `make clean repo` (below) keeps `secrets.yaml`
+by default rather than sweeping it with everything else untracked.
+
 ### Quality Gates
 
 | Command | What it does |
@@ -154,14 +160,26 @@ login`) — never from the command line.
 
 | Command | What it does |
 |---------|-------------|
-| `make stamp tag [VERSION=vX]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`); the tag body carries the release notes assembled from `changelog.d/` fragments (see Release notes above) |
-| `make publish [DRAFT=yes] [TAG=vX]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases) |
-| `make unpublish TAG=vX` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives) |
-| `make stamp untag TAG=vX` | Delete the tag, local + remote (echoes first) |
+| `make stamp tag [VERSION=X.Y.Z]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`); the tag body carries the release notes assembled from `changelog.d/` fragments (see Release notes above) |
+| `make publish [DRAFT=yes] [TAG=vX.Y.Z]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases) |
+| `make unpublish TAG=vX.Y.Z` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives) |
+| `make stamp untag TAG=vX.Y.Z` | Delete the tag, local + remote (echoes first) |
 | `make sweep` | Remove the `changelog.d/` fragments the release consumed (commit rides the next PR) |
 
-`TAG` defaults to the current version with build metadata stripped
-(`v5.0.0-dev.142+build...` → `v5.0.0-dev.142`). Release notes come from
+**`VERSION` and `TAG` hold the same underlying value** — whether a `v`
+prefix is present is a per-tool convention, not a semver rule, and the
+Makefile round-trips whatever you give it rather than forcing either
+way: `VERSION`'s value gets baked byte-for-byte into the binary
+(`main.appVersion`), so whatever prefix you pass shows up in the running
+app's own version string. `make bump` writes `package.json` without a
+`v` (that's the project's convention, matching semver.org — and where
+git/GitHub tags conventionally *do* carry one, since that's their own
+ecosystem's convention, handled at the tag layer via `TAG`'s default:
+`v` + the current `VERSION` with build metadata stripped,
+`5.0.0-dev.142+build...` → `v5.0.0-dev.142`). `make stamp tag` (creating
+a new tag) validates the result looks like `vX.Y.Z[-prerelease]`, but
+`publish`/`unpublish`/`stamp untag` just reference whatever tag already
+exists — any value GitHub accepts works. Release notes come from
 `NOTES=<file>` when given, else the annotated tag body (a pointer line
 when no fragments existed at tag time). All targets honor `DRYRUN=yes`.
 
@@ -173,10 +191,10 @@ what each bump level does; this example uses `VERSION=` throughout so
 it's copy-pastable without deciding a bump level first:
 
 ```bash
-make build VERSION=vX.Y.Z
-make release cf github VERSION=vX.Y.Z   # artifacts + SHA256SUMS
-make stamp tag VERSION=vX.Y.Z           # create + push tag (notes in body)
-make publish VERSION=vX.Y.Z             # gh release create + assets
+make build VERSION=X.Y.Z
+make release cf github VERSION=X.Y.Z    # artifacts + SHA256SUMS
+make stamp tag VERSION=X.Y.Z            # create + push tag vX.Y.Z (notes in body)
+make publish VERSION=X.Y.Z              # gh release create + assets
 make sweep                              # drop consumed fragments
 
 make unpublish TAG=vX.Y.Z               # rollback: release first...
@@ -214,7 +232,7 @@ website only needs `bun` (already required).
 | `make clean frontend` | Remove frontend build only (`dist/frontend/`, `.angular`) |
 | `make clean backend` | Remove backend binaries only (`dist/bin/`) |
 | `make clean dist` | Remove everything including `node_modules` |
-| `make clean repo` | Full reset — `git clean -fdx`, fresh-clone state. Keeps `.env`, `secrets.yaml`, `cl.resume`, and `site.mk` (add `RM_SITE=yes` to drop `site.mk` too) |
+| `make clean repo` | Full reset — `git clean -fdx`, fresh-clone state. Keeps `.env`, `secrets.yaml`, and `site.mk` (add `RM_SITE=yes` to drop `site.mk` too) |
 
 ### Security & Dependencies
 
@@ -361,8 +379,8 @@ make build release cf
 # Finalize a prerelease and package in one shot:
 make build release cf FINAL=strip
 
-# Explicit version override (not persisted to package.json):
-make VERSION=v5.0.0 build release cf
+# Explicit version override (not persisted to package.json; no v prefix):
+make VERSION=5.0.0 build release cf
 
 # Deploy (via site.mk or manually):
 cf target -o system -s stratos
@@ -385,11 +403,13 @@ make release github
 
 **Version override:**
 
-Any make target respects `VERSION=` to override the version from `package.json`:
+Any make target respects `VERSION=` to override the version from
+`package.json`. No `v` prefix — `VERSION` is bare semver, unlike `TAG`
+(see Publishing a release above):
 
 ```bash
-make VERSION=v5.0.0-rc.1 build release cf
-make VERSION=v5.0.0 dump version
+make VERSION=5.0.0-rc.1 build release cf
+make VERSION=5.0.0 dump version
 ```
 
 ## Site-Specific Overrides (site.mk)
