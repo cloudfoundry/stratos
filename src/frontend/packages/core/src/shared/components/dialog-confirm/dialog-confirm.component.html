@@ -17,12 +17,18 @@
       </div>
     </div>
   }
+  @if (data.checkbox) {
+    <div class="confirm-dialog__checkbox mb-4 flex items-center gap-2">
+      <input type="checkbox" id="confirmCheckbox" [(ngModel)]="checkboxChecked" />
+      <label for="confirmCheckbox" class="text-content-text">{{ data.checkbox.label }}</label>
+    </div>
+  }
   <div class="confirm-dialog__actions flex gap-2 justify-end mt-6">
     <button class="btn btn-secondary" (click)="onNoClick()" cdkFocusInitial>Cancel</button>
     @if (data.confirm) {
       <button class="confirm-dialog__confirm"
         [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'"
-        (click)="dialogRef.close(true)"
+        (click)="onConfirmClick()"
         [disabled]="textToMatch && textToMatch !== matchValue">{{
       data.confirm }}</button>
     }
