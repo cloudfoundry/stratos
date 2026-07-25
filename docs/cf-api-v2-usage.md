@@ -1,10 +1,10 @@
 # Cloud Foundry API v2 Feature Usage
 
-1. [High Level Stratos Concepts](#High-Level-Stratos-Concepts)
-1. [API Parameters](#API-Parameters)
-1. [API Examples](#API-Examples)
-1. [V2 Specifics](#V2-Specifics)
-1. [V2 Summary](#V2-Summary)
+1. [High Level Stratos Concepts](#high-level-stratos-concepts)
+1. [API Parameters](#api-parameters)
+1. [API Examples](#api-examples)
+1. [V2 Specifics](#v2-specifics)
+1. [V2 Summary](#v2-summary)
 
 
 ## High Level Stratos Concepts
@@ -734,7 +734,7 @@ __*``*__
 ### Inline Relations
 Below is a list of all the inline relations we use for each of the more fleshed out v3 endpoints of apps, spaces and organisations.
 
-> Note - Some of the one to many relations will be removed in the near future to support scaling, see [Scaling](#Scaling)
+> Note - Some of the one to many relations will be removed in the near future to support scaling, see [Scaling](#scaling)
 
 #### Application
 Endpoint | Inline Relations

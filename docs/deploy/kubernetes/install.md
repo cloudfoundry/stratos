@@ -56,7 +56,7 @@ After the install, you should be able to access the Console in a web browser by 
 
 Advanced installation topics are covered in the the [Advanced Topics](#advanced-topics) section below.
 
-# Helm Chart Configuration
+## Helm Chart Configuration
 
 The following table lists the configurable parameters of the Stratos Helm chart and their default values.
 
@@ -152,7 +152,7 @@ The URL you use for accessing Stratos will depend on the service configuration a
 
 > Note: If you did not provide a certificate when installing, Stratos will use a self-signed certificate, so you will see a certificate warning which you access Stratos in a browser.
 
-# Upgrading your deployment
+## Upgrading your deployment
 
 To upgrade your instance when using the Helm repository, fetch any updates to the repository:
 
@@ -180,7 +180,7 @@ kubectl delete namespace console
 > Note: Stratos creates secrets in the namespace as part of an initialization job. These are not managed by Helm, so make sure you
 delete the namespace to remove these secrets. 
 
-# Advanced Topics
+## Advanced Topics
 
 ## Using a Load Balancer
 

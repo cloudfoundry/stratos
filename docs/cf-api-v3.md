@@ -2,9 +2,9 @@
 
 See [Cloud Foundry API v2 Feature Usage](cf-api-v2-usage.md) for v2 information
 
-1. [Comparing v2 features to v3](#Comparing-v2-features-to-v3)
-1. [V3 Availability](#V3-Availability)
-1. [Stratos Adoption of v3](#Stratos-Adoption-of-v3)
+1. [Comparing v2 features to v3](#comparing-v2-features-to-v3)
+1. [V3 Availability](#v3-availability)
+1. [Stratos Adoption of v3](#stratos-adoption-of-v3)
 
 ## Comparing v2 features to v3
 
@@ -28,7 +28,7 @@ Now, from my understanding, ...
   - `/apps` only supports `space` include
   - `/organization` doesn't support any includes
   - `/space` doesn't support any includes
-  - (see [Cloud Foundry API v2 Feature Usage - Inline-Relations](cf-api-v2-usage.md#Inline-Relations) for required)
+  - (see [Cloud Foundry API v2 Feature Usage - Inline-Relations](cf-api-v2-usage.md#inline-relations) for required)
 ~- Unclear if `include` will cover chained entities aka `inline-relations-depth` from v2~
 
 ### Collections - Pagination
@@ -49,7 +49,7 @@ Now, from my understanding, ...
   process will be required though.
 
 ### Application State
-- For v2 info see [Cloud Foundry API v2 Feature Usage - Application State](cf-api-v2-usage.md#Application-State)
+- For v2 info see [Cloud Foundry API v2 Feature Usage - Application State](cf-api-v2-usage.md#application-state)
 - The improved application state string that stratos shows will be much harder to determine
   - App `package_state` is from a separate entity that is not `linked` and requires an additional request
   - App `package_updated_at` is from a separate entity that is not `linked` and requires an additional request
@@ -76,7 +76,7 @@ Then Stratos should either ..
 ### Blocking Issues
 - Coverage of `include` is not on par with v2 `include-relations`
   - To meet parity it should support all entities in `relationships` and `links`, whether one to one or one to many
-  - Currently not supported on all endpoints and does not cover enough `relationships`/`links` (see [Cloud Foundry API v2 Feature Usage - Inline-Relations](cf-api-v2-usage.md#Inline-Relations))
+  - Currently not supported on all endpoints and does not cover enough `relationships`/`links` (see [Cloud Foundry API v2 Feature Usage - Inline-Relations](cf-api-v2-usage.md#inline-relations))
   - For instance new v3 entities are not `include`s (`/apps` - `package`, `processes`, `route_mappings`, `environment_variables`, `droplets`, `tasks`)
   - ~~Not supported by common CFs used to develop with (SCF, PCFDev)~~.
 - Entities do not contain all properties that were in v2 (where functionality has not changed)
@@ -103,7 +103,7 @@ Then Stratos should either ..
   - Have asked this question in the V3 Users proposal - https://docs.google.com/document/d/1EA65UN3Xsi0EuX-3YfbFNqtJGseFr6FGBt2SR9c4Aqk/edit#heading=h.tyy5zdgqnnt0
 - Not all v2 endpoints exist in v3, for instance no `domains`, `events`, `route`, org/space quota definitions, etc
   - This would make our entity validation much more complex
-- Cannot utilise v3 pagination due to limited sorting and filtering functionality (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#sortingFiltering) for missing fields)
+- Cannot utilise v3 pagination due to limited sorting and filtering functionality (see [Cloud Foundry API v2 Feature Usage - Sorting/Filtering](cf-api-v2-usage.md#sortingfiltering) for missing fields)
   - This is currently on par with v2, but causes us a lot of headaches for large data sets
 - The Stratos method of calculating application state has become much harder
   - Additional requests to app `/packages` are required. This would be resolved if applications were `link`ed to package
@@ -158,25 +158,25 @@ filtering done via v3 api)
 Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
 ~~`include`~~ | ~~`space`~~  |  | |
-`include` | Organization via `space.organization` | [HIGH] | Used in application wall's application list to filter local lists by org, show org name on app wall app entries, upfront fetch leading to quicker navigation to app summary | See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+`include` | Organization via `space.organization` | [HIGH] | Used in application wall's application list to filter local lists by org, show org name on app wall app entries, upfront fetch leading to quicker navigation to app summary | See ([non-local lists](cf-api-v2-usage.md#lists) for more detail on local and non-local lists).
 `include` | `packages` | [HIGH] | See [1] | Required to determine application state (state, updated_at)
 `include` | `processes` | [HIGH] | See [1] | Required to determine application state (instances)
 `include` | Stats via `processes.stats` | [HIGH] | See [1] | Required to determine application state (state).
 `include` | `current_droplet` | [HIGH] | See [1] | Required to determine application state (state).
 `include` | Builds via `packages.builds` | [HIGH] | See [1] | v3 currently has no link or relation. Required to determine application state (state).
-`order_by` | sum of `processes` `instances` count [See below for notes](#v3-Required-Features) | [MEDIUM] | See [2] |
-`order_by` | sum of `processes` `disk_in_mb` count [See below for notes](#v3-Required-Features) | [MEDIUM]  | See [2] |
-`order_by` | sum of `processes` `memory_in_mb` count [See below for notes](#v3-Required-Features) | [MEDIUM]  | See [2] |
+`order_by` | sum of `processes` `instances` count [See below for notes](#v3-required-features) | [MEDIUM] | See [2] |
+`order_by` | sum of `processes` `disk_in_mb` count [See below for notes](#v3-required-features) | [MEDIUM]  | See [2] |
+`order_by` | sum of `processes` `memory_in_mb` count [See below for notes](#v3-required-features) | [MEDIUM]  | See [2] |
 filter | `processes` state | [MEDIUM] | User wishes to find all apps that have errored processes
 filter | organization name | [MEDIUM] | See [3] |
 filter | space name | [MEDIUM] | See [3] |
 
-[1] Property/s used to determine application state without spamming requests ([app state](#Application-State)). On the application wall
+[1] Property/s used to determine application state without spamming requests ([app state](#application-state)). On the application wall
 page we determine the state of up to 9 apps at a time. Returning this information in a single request, or during the initial request, will
 save apps x missing property's endpoints (packages, process, process stats, current_droplet, etc). This could lead to 21 concurrent calls
 followed by another 18 (given the results of the first run).
 
-[2] Enables sorting by instance count in tables. See ([non-local lists](cf-api-v2-usage.md#Lists) for more information on local and non-local list sorting).
+[2] Enables sorting by instance count in tables. See ([non-local lists](cf-api-v2-usage.md#lists) for more information on local and non-local list sorting).
 
 [3] Allows free text search by org or space name in application wall (rather than manual selection of cf, org and then space). For instance a user types part of an org name in a
 special org drop down and is presented with list of apps in matching orgs. This is a short cut for the user having to scroll down a list in a
@@ -212,7 +212,7 @@ multiple times in the case of 1:M, for example `route_mappings` would require mu
 
 [3] Display bound service instance count & list of services, determine if a service is already bound when user is binding existing service to app, etc
 
-[4] Property/s used to determine application state without spamming endpoints ([app state](#Application-State)).
+[4] Property/s used to determine application state without spamming endpoints ([app state](#application-state)).
 
 
 ### `/apps/{guid}/packages`
@@ -229,15 +229,15 @@ Type | Name | Priority | UX Example | Notes
 --- | --- | --- | --- | ---
 `include` | `stats` | [HIGH] | See explanation in `/app/${guid}` - `processes.stats` | See [1]
 `order_by` | `state` | [MEDIUM] | In the app summary page instances tab we show a list of instances and their properties. This needs updating, but it's easy to imagine that we will display a list of processes in v3 | See [2]
-`order_by` | `stats` `usage.time` | [MEDIUM] | See above | See [2] [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.cpu` | [MEDIUM] | See above | See [2] [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.mem` | [MEDIUM] | See above | See [2] [See below for notes](#v3-Required-Features)
-`order_by` | `stats` `usage.disk` | [MEDIUM] | See above | See [2] [See below for notes](#v3-Required-Features)
+`order_by` | `stats` `usage.time` | [MEDIUM] | See above | See [2] [See below for notes](#v3-required-features)
+`order_by` | `stats` `usage.cpu` | [MEDIUM] | See above | See [2] [See below for notes](#v3-required-features)
+`order_by` | `stats` `usage.mem` | [MEDIUM] | See above | See [2] [See below for notes](#v3-required-features)
+`order_by` | `stats` `usage.disk` | [MEDIUM] | See above | See [2] [See below for notes](#v3-required-features)
 filter | `state` | [MEDIUM] | See above |
 
 [1] If at some point we've fetched an app without this property we will make a separate request to fetch it, so the same includes/links are required
 
-[2] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists.
+[2] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#lists) for more detail on local and non-local lists.
 
 ### `/service_bindings` (functionality for missing `/apps/{guid}/service_bindings` only)
 
@@ -262,7 +262,7 @@ filter | service plan name | [MEDIUM] | See above | See above
 
 [2] Fetching this information inline avoids making lots of additional requests
 
-[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#lists) for more detail on local and non-local lists).
 
 
 ### `/spaces`
@@ -279,7 +279,7 @@ filter | name | [MEDIUM] | See [1]. Pre-check to ensure a space name is not take
 
 [1] Display a list of spaces in an organisation
 
-[2] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+[2] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#lists) for more detail on local and non-local lists).
 
 [3] Avoids making additional requests. Particularly important when viewing multiple spaces at the same time.
 
@@ -353,7 +353,7 @@ filter | `name` | [MEDIUM] | | See [3]
 
 [2] Avoids making additional requests per service instance
 
-[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+[3] This will be required in order to switch from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#lists) for more detail on local and non-local lists).
 
 ### `/user_provided_service_instances`
 
@@ -376,7 +376,7 @@ filter | `name` | [MEDIUM] | | See [1]
 `order_by` | `active` | [MEDIUM] | | see [1]
 `order_by` | `bindable` | [MEDIUM] | | see [1]
 
-[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#lists) for more detail on local and non-local lists).
 
 ### `/service/${guid}`
 
@@ -411,7 +411,7 @@ filter | application name | [MEDIUM] | | See [1]
 `order_by` | service instance name | [MEDIUM] | | see [1]
 `order_by` | application name | [MEDIUM] | | see [1]
 
-[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#lists) for more detail on local and non-local lists).
 
 ### `service_bindings/${guid}`
 
@@ -431,7 +431,7 @@ filter | service broker name | [MEDIUM] | | See [1]
 filter | space guid | [MEDIUM] | | See [1]
 `order_by` | service broker name | [MEDIUM] | | see [1]
 
-[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#Lists) for more detail on local and non-local lists).
+[1] As other situations where we fetch lists this will help us from switching from local (fetch allll entities in a list and sort locally) to non-local (use CF api pagination including sorting). See ([non-local lists](cf-api-v2-usage.md#lists) for more detail on local and non-local lists).
 
 ### `service_brokers/{guid}`
 
