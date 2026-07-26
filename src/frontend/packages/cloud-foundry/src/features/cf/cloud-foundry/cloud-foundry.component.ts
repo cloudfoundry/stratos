@@ -11,6 +11,7 @@ import {
 import { Router } from '@angular/router';
 
 import {
+  DuplicateUrlBannerComponent,
   EndpointRowActionsService,
   PageHeaderComponent,
   SignalListComponent,
@@ -24,7 +25,6 @@ import { withConnectingOverlay } from '@stratosui/store';
 import type { EndpointModel } from '@stratosui/store';
 
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 
 @Component({

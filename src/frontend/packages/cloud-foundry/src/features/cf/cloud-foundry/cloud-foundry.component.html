@@ -3,6 +3,7 @@
 </app-page-header>
 <app-cf-endpoints-missing></app-cf-endpoints-missing>
 <app-duplicate-url-banner
+  [endpoints$]="cloudFoundryService.connectedCFEndpoints$"
   message="Several of the endpoints below are views of the same foundation.">
 </app-duplicate-url-banner>
 @if (connectedCount() > 1 && listConfig(); as cfg) {

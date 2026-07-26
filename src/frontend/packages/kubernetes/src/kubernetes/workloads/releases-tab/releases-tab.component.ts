@@ -4,9 +4,12 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 
 import { EndpointsSignalService } from '../../../../../core/src/core/signals/endpoints-signal.service';
+import { DuplicateUrlBannerComponent } from '../../../../../core/src/shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
 import { SignalListComponent, SignalListConfig, SignalListDropdownOption } from '../../../../../core/src/shared/components/signal-list/signal-list.component';
+import { EndpointModel } from '../../../../../store/src/public-api';
 import { HELM_ENDPOINT_TYPE } from '../../../helm/helm-entity-factory';
+import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { HelmRelease } from '../../../services/endpoint-data/kube-types';
 import { HelmReleasesSignalConfigService } from '../list-types/helm-releases-signal-config.service';
 
@@ -22,6 +25,7 @@ import { HelmReleasesSignalConfigService } from '../list-types/helm-releases-sig
   standalone: true,
   imports: [
     CommonModule,
+    DuplicateUrlBannerComponent,
     PageHeaderComponent,
     SignalListComponent,
   ],
@@ -29,6 +33,7 @@ import { HelmReleasesSignalConfigService } from '../list-types/helm-releases-sig
 })
 export class HelmReleasesTabComponent {
   public helmIds$: Observable<string[]>;
+  public connectedKubeEndpoints$: Observable<EndpointModel[]>;
   private endpointsSignals = inject(EndpointsSignalService);
   private datePipe = inject(DatePipe);
   readonly signalConfig = inject(HelmReleasesSignalConfigService);
@@ -40,6 +45,12 @@ export class HelmReleasesTabComponent {
       .filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE)
       .map(ep => ep.guid)
       .filter((g): g is string => !!g),
+  );
+
+  // Connected k8s endpoints for the duplicate-URL banner — scoped to k8s so
+  // it never mentions unrelated CF/helm duplicates on this page.
+  private readonly connectedKubeEndpoints = computed(() =>
+    this.endpointsSignals.connectedEndpoints().filter(ep => ep?.cnsi_type === KUBERNETES_ENDPOINT_TYPE),
   );
 
   readonly listConfig: WritableSignal<SignalListConfig<HelmRelease> | undefined> = signal(undefined);
@@ -71,6 +82,7 @@ export class HelmReleasesTabComponent {
     // Endpoint-id stream for the page header. Bridges the helmEndpointIds
     // computed signal to an Observable for PageHeaderComponent's input.
     this.helmIds$ = toObservable(this.helmEndpointIds);
+    this.connectedKubeEndpoints$ = toObservable(this.connectedKubeEndpoints);
 
     this.signalConfig.initialize();
     void this.signalConfig.loadAll();
