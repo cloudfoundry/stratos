@@ -20,6 +20,42 @@ export class CnsiAppsSource extends CnsiEntitySource<StApp> {
     super(cnsiGuid, http, pageSize);
   }
 
+  // Apps are drained per endpoint by EndpointDataService (home cards, detail
+  // views, the pre-warm queue). Draining them again here duplicates that
+  // work: the caller used to hand us a finished cache via preSeed(), which
+  // covered a *completed* drain but not one still in flight — mount the wall
+  // mid-drain and both ran. loadApps() closes that window: warm cache, live
+  // in-flight observable, or a fresh drain, whichever applies. Both URL
+  // shapes return the same enriched rows (verified field-by-field against a
+  // live foundation: identical keys, routes included), so there's nothing
+  // the per-source `?return=summary` drain was adding.
+  //
+  // Falls back to the base drain when no EDS was threaded in — the cold
+  // bookmark / HMR paths the constructor comment describes.
+  override async load(): Promise<void> {
+    if (!this.eds) return super.load();
+    this.setLoading(true);
+    try {
+      await firstValueFrom(this.eds.loadApps());
+      this.preSeed(this.eds.apps());
+    } finally {
+      this.setLoading(false);
+    }
+  }
+
+  // refresh() is user-driven ("give me current data"), so it must bypass the
+  // shared cache rather than join it — refreshApps() re-drains unconditionally.
+  override async refresh(): Promise<void> {
+    if (!this.eds) return super.refresh();
+    this.setLoading(true);
+    try {
+      await firstValueFrom(this.eds.refreshApps());
+      this.preSeed(this.eds.apps());
+    } finally {
+      this.setLoading(false);
+    }
+  }
+
   // NOTE: app delete routes through EntityDeleteController (see
   // CfAppsSignalConfigService.deleteApp); create/update/action stay here.
 

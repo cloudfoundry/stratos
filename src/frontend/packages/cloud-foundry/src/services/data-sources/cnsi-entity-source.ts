@@ -93,6 +93,16 @@ export abstract class CnsiEntitySource<T> {
     this._preseeded = true;
   }
 
+  /**
+   * Report loading while a subclass satisfies load() from somewhere other
+   * than _doLoad() — joining an endpoint-level drain, say. Without this the
+   * source stays loading() === false for the whole join and consumers show
+   * an empty list instead of a spinner.
+   */
+  protected setLoading(loading: boolean): void {
+    this._loading.set(loading);
+  }
+
   private async _doLoad(): Promise<void> {
     // Short-circuit when preSeed() handed us a ready bundle. The seed
     // satisfies this load(); refresh() (or any subsequent load() after
