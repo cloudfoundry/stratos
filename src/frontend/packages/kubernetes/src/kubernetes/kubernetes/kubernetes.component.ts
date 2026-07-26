@@ -3,18 +3,22 @@ import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   ChangeDetectionStrategy,
 } from "@angular/core";
+import { toObservable } from "@angular/core/rxjs-interop";
 import { Router } from "@angular/router";
 import { Observable } from "rxjs";
 import { take, filter, map } from "rxjs/operators";
 
 import { SignalListComponent } from "@stratosui/core";
 
-import { EndpointCardComponent } from "../../../../core/src/shared/components/endpoint-list/endpoint-card/endpoint-card.component";
-import { EndpointListHelper } from "../../../../core/src/shared/components/endpoint-list/endpoint-list.helpers";
+import { EndpointsSignalService } from "../../../../core/src/core/signals/endpoints-signal.service";
+import { DuplicateUrlBannerComponent } from "../../../../core/src/shared/components/duplicate-url-banner/duplicate-url-banner.component";
 import { PageHeaderComponent } from "../../../../core/src/shared/components/page-header/page-header.component";
+import { EndpointModel } from "../../../../store/src/public-api";
+import { KUBERNETES_ENDPOINT_TYPE } from "../kubernetes-entity-factory";
 import { KubernetesEndpointsSignalConfigService } from "../list-types/kubernetes-endpoints/kubernetes-endpoints-signal-config.service";
 import { KubernetesService } from "../services/kubernetes.service";
 
@@ -22,32 +26,37 @@ import { KubernetesService } from "../services/kubernetes.service";
   selector: "app-kubernetes",
   templateUrl: "./kubernetes.component.html",
 
-  providers: [EndpointListHelper, KubernetesService],
+  providers: [KubernetesService],
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
     PageHeaderComponent,
     SignalListComponent,
-    EndpointCardComponent,
+    DuplicateUrlBannerComponent,
   ],
 })
 export class KubernetesComponent implements OnInit, OnDestroy {
   connectedEndpoints$: Observable<number>;
+  connectedKubeEndpoints$: Observable<EndpointModel[]>;
   private kubeService = inject(KubernetesService);
   private router = inject(Router);
+  private endpointsSignals = inject(EndpointsSignalService);
   // Wave-3: signal-native list config. The service is now a true
   // SignalListConfig orchestrator — no `Store` import, no
-  // BaseEndpointsDataSource. The card template below renders rows via
-  // the standard EndpointCardComponent without binding `dataSource`,
-  // which keeps the kebab menu suppressed (matching the legacy
-  // `dsEndpointType: 'k8s'` flag) and leaves cardStatus$ unset
-  // (matching the legacy "no per-row error indicator" behaviour).
+  // BaseEndpointsDataSource.
   readonly endpointsSignalConfig = inject(
     KubernetesEndpointsSignalConfigService,
   );
 
+  // Connected k8s endpoints for the duplicate-URL banner — scoped to k8s so
+  // it never mentions unrelated CF/helm duplicates on this page.
+  private readonly connectedKubeEndpoints = computed(() =>
+    this.endpointsSignals.connectedEndpoints().filter(ep => ep?.cnsi_type === KUBERNETES_ENDPOINT_TYPE),
+  );
+
   constructor() {
+    this.connectedKubeEndpoints$ = toObservable(this.connectedKubeEndpoints);
     this.connectedEndpoints$ = this.kubeService.kubeEndpoints$.pipe(
       map((kubeEndpoints) => {
         // 'expired' deliberately excluded: a dead-token endpoint must not

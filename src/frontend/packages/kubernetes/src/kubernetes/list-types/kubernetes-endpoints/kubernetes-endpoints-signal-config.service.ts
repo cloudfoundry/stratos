@@ -1,13 +1,15 @@
 import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
 import {
+  EndpointRowActionsService,
   ListStateStore,
   SignalListColumn,
   SignalListConfig,
+  SignalListPillColor,
 } from '@stratosui/core';
 import { EndpointsSignalService } from '@stratosui/core';
 import type { EndpointModel } from '@stratosui/store';
-import { EndpointsDataService } from '@stratosui/store';
+import { EndpointsDataService, withConnectingOverlay } from '@stratosui/store';
 
 // Wave-3 endpoints-list config service for the K8s landing page.
 //
@@ -25,13 +27,11 @@ import { EndpointsDataService } from '@stratosui/store';
 // `BaseEndpointsDataSource` was overkill for a list that is just
 // "filter the endpoints projection by cnsi_type=k8s + connected".
 //
-// The host page (`KubernetesComponent`) consumes `this.config` via
-// `<app-signal-list>` and renders rows via the standard
-// `<app-endpoint-card>` projected through the `cardTemplate` slot. The
-// card's `dataSource` input is omitted; the card's gates on
-// `dataSource.dsEndpointType` and `dataSource.getRowState` collapse
-// gracefully (kebab menu suppressed — same effect as the legacy
-// `dsEndpointType: 'k8s'` flag — and row error state stays clean).
+// The host page (`KubernetesComponent`) consumes `this.config` via a bare
+// `<app-signal-list [config]="...">`, no custom cardTemplate — same as the
+// /cloud-foundry picker, so both card and table mode render straight from
+// the columns below (plain-Host address, dot status, kebab actions) and
+// stay visually consistent between the two pickers.
 
 // Sort spec mirrors the local copy in `endpoints-signal-config.service.ts`.
 // We DON'T import that one because it lives under
@@ -52,6 +52,7 @@ export class KubernetesEndpointsSignalConfigService {
   private readonly injector = inject(Injector);
   private readonly endpointsSignals = inject(EndpointsSignalService);
   private readonly endpointsData = inject(EndpointsDataService);
+  private readonly rowActions = inject(EndpointRowActionsService);
 
   // Filter / sort / paging state. Card-only on the legacy K8s landing
   // page; pageSize 24 (a 2x12 / 3x8 / 4x6 friendly default for card
@@ -129,11 +130,30 @@ export class KubernetesEndpointsSignalConfigService {
   }
 
   private buildConfig(): SignalListConfig<EndpointModel> {
+    // Same status derivation as the /cloud-foundry picker, so a connect/
+    // disconnect/reconnect in flight shows the transient overlay instead of
+    // the stale wire status.
+    const rowStatus = (ep: EndpointModel): string =>
+      withConnectingOverlay(
+        ep.connectionStatus,
+        this.endpointsData.isConnecting(ep.guid ?? ''),
+        this.endpointsData.isDisconnecting(ep.guid ?? ''),
+      );
+    const statusLabel = (ep: EndpointModel): string => {
+      const s = rowStatus(ep);
+      return s.charAt(0).toUpperCase() + s.slice(1);
+    };
+    const statusColor = (ep: EndpointModel): SignalListPillColor => {
+      const s = rowStatus(ep);
+      if (s === 'connected') return 'success';
+      if (s === 'expired' || s === 'connecting' || s === 'disconnecting') return 'warning';
+      return 'neutral';
+    };
+
     const columns: SignalListColumn<EndpointModel>[] = [
-      // Name column — sortable on the underlying field. The card
-      // template renders names directly via the EndpointCardComponent;
-      // this column drives table-mode rendering (for users who flip the
-      // view toggle) and provides the sort field.
+      // Name, Address, Status, and Actions below all match the
+      // /cloud-foundry picker's columns exactly, so both surfaces render
+      // identically in card and table mode.
       {
         header: 'Name',
         key: 'name',
@@ -142,16 +162,31 @@ export class KubernetesEndpointsSignalConfigService {
         render: (ep: EndpointModel) => ep.name ?? '',
         widthHint: '24rem',
       },
-      // Address column — useful as a secondary table-mode signal and as
-      // a sortable axis. Card mode shows it inside the endpoint card so
-      // there's no duplication.
       {
         header: 'Address',
         key: 'address',
         sortField: (ep: EndpointModel) => ep.api_endpoint?.Host ?? '',
         kind: 'text',
-        render: (ep: EndpointModel) => ep.api_endpoint?.Host ?? '',
+        render: (ep: EndpointModel) => ep.api_endpoint?.Host ?? '—',
         widthHint: '32rem',
+      },
+      {
+        header: 'Status', key: 'status',
+        kind: 'dot',
+        pillColor: statusColor,
+        sortField: (ep: EndpointModel) => rowStatus(ep),
+        render: statusLabel,
+        widthHint: '10rem',
+      },
+      // Matches the /cloud-foundry picker's row actions (Connect /
+      // Disconnect / Reconnect / Edit — unregister stays admin-only on
+      // /endpoints).
+      {
+        header: '', key: 'actions',
+        kind: 'actions',
+        actions: (ep: EndpointModel) => this.rowActions.buildEndpointActions(ep, { unregister: false }),
+        render: () => '',
+        widthHint: '3rem',
       },
     ];
 
