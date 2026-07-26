@@ -573,7 +573,15 @@ export class CfAppsSignalConfigService {
     // chunk's RTT is bounded (≤20 orgs of spaces) so awaiting it yields
     // a brief, predictable initial-mount delay in exchange for visible
     // names on first paint.
-    const drainPromises = cnsiGuids.map(cnsi => {
+    // Same story as the org catalog above: an endpoint's full space list may
+    // already be cached or draining on the shared EndpointDataService (a
+    // summary page fetches `/cf/spaces/{cnsi}?per_page=500&page=N` for every
+    // page), and the per-org fanout below re-fetches exactly those spaces —
+    // measured together on one mount as 14 requests / 37.5s. When the shared
+    // slice is available, join it and seed from its result; the fanout is
+    // only worth its request count when nothing else is loading the data.
+    const drainPromises = cnsiGuids.map(async cnsi => {
+      if (await this.seedSpacesFromEndpoint(cnsi, gen)) return;
       const orgs = orgMap.get(cnsi) ?? [];
       const orderedOrgGuids = this.orderOrgsForCnsi(cnsi, orgs);
       return this.drainSpacesByOrgChunks(cnsi, orderedOrgGuids, gen);
@@ -583,6 +591,32 @@ export class CfAppsSignalConfigService {
     // hence allSettled.
     await Promise.allSettled(drainPromises);
     this._isLoadingSpaces.set(false);
+  }
+
+  // Seeds _spacesByCnsi for one endpoint from its shared EndpointDataService
+  // space slice, joining an in-flight drain rather than starting a second
+  // one. Returns false when there's nothing to join (no cached instance, or
+  // the drain produced nothing) so the caller falls back to the per-org
+  // fanout — a slow CF whose drain failed must still get its names.
+  private async seedSpacesFromEndpoint(cnsi: string, gen: number): Promise<boolean> {
+    const eds = this.endpointRegistry.peek(cnsi);
+    if (!eds) return false;
+    try {
+      await firstValueFrom(eds.loadSpaces());
+    } catch {
+      return false;
+    }
+    // A newer initialize() started while we waited — drop the result rather
+    // than merging it into the new mount's map.
+    if (gen !== this._initGen) return true;
+    const spaces = eds.spaces();
+    if (!spaces.length) return false;
+    this._spacesByCnsi.update(curr => {
+      const next = new Map(curr);
+      next.set(cnsi, spaces.slice());
+      return next;
+    });
+    return true;
   }
 
   // Returns the cnsi's orgs ordered with "priority" orgs first (those
