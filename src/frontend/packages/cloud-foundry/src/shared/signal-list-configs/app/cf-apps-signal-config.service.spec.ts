@@ -1086,3 +1086,53 @@ describe('CfAppsSignalConfigService', () => {
     expect(svc.spaceNames().get('space-stale')).toBeUndefined();
   });
 });
+
+// A summary page and this tab both need the endpoint's full org list. Each
+// used to fetch it independently, so arriving here while the other's drain
+// was still running issued two concurrent
+// /pp/v1/cf/orgs/{cnsi}?per_page=500&page=1 requests. loadNames() now joins
+// the endpoint's shared load (EndpointDataService.loadOrgs) instead.
+describe('CfAppsSignalConfigService — org catalog shares the endpoint load', () => {
+  const orgsUrl = (url: unknown) => typeof url === 'string' && url.includes('/pp/v1/cf/orgs/');
+
+  function makeSvcWithPeek(http: HttpClient, peeked: unknown): CfAppsSignalConfigService {
+    const registry = {
+      acquire: vi.fn(() => peeked),
+      peek: vi.fn(() => peeked),
+    } as unknown as EndpointDataRegistry;
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: HttpClient, useValue: http },
+        { provide: CloudFoundryService, useValue: makeStubCfService() },
+        { provide: EndpointDataRegistry, useValue: registry },
+        CfAppsSignalConfigService,
+      ],
+    });
+    return TestBed.inject(CfAppsSignalConfigService);
+  }
+
+  it('joins the endpoint org load rather than issuing its own orgs request', async () => {
+    const http = makeHttp();
+    const loadOrgs = vi.fn(() => of(undefined));
+    const eds = { loadOrgs, orgs: () => [{ guid: 'org-1', name: 'org one' }] };
+    const svc = makeSvcWithPeek(http, eds);
+
+    await svc.ensureNamesLoaded(['cf-1']);
+
+    expect(loadOrgs).toHaveBeenCalledTimes(1);
+    // The spaces drain still uses http; the orgs catalog must not.
+    const orgCalls = (http.get as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter(c => orgsUrl(c[0]));
+    expect(orgCalls).toEqual([]);
+    expect(svc.orgNames().get('org-1')).toBe('org one');
+  });
+
+  it('falls back to a direct fetch for a guid the registry never acquired', async () => {
+    const http = makeHttp();
+    const svc = makeSvcWithPeek(http, undefined);
+
+    await svc.ensureNamesLoaded(['cf-1']);
+
+    const orgCalls = (http.get as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter(c => orgsUrl(c[0]));
+    expect(orgCalls.length).toBe(1);
+  });
+});

@@ -517,12 +517,40 @@ export class CfAppsSignalConfigService {
     // #500 → "—" in the CF/Org/Space cell), so spaces are fetched per-org-
     // batch below once orgs are known.
     const namePerPage = 500;
-    const fetchOrgs = (guid: string) =>
-      firstValueFrom(this.http.get<StOrgsResponse>(
+    // Join the endpoint's shared org load instead of issuing a second
+    // identical request. A summary page and this tab both want the full org
+    // list, and each used to fetch it independently — arriving here while
+    // the other's drain was still in flight produced two concurrent
+    // `/pp/v1/cf/orgs/{cnsi}?per_page=500&page=1` calls (measured: 13s and
+    // 22s, overlapping). EndpointDataService.loadOrgs() is the single owner
+    // of that state per endpoint: it serves a warm cache outright, returns
+    // the in-flight observable when a drain is already running, and its
+    // shareReplay hands a completed drain's result to a late subscriber —
+    // so joining can't hang waiting on a completion signal that already
+    // fired. Whichever page arrives first starts the load; the other joins.
+    //
+    // peek() rather than acquire(): acquire() on an unseen guid enqueues the
+    // home-card load/details/pre-warm cascade, which this tab must not
+    // trigger. initialize() has already acquired every scoped guid by the
+    // time we run, so the lookup hits; the direct fetch stays as the
+    // fallback for a guid that was never acquired (e.g. ensureNamesLoaded()
+    // deriving guids from connectedEndpoints() beyond the mounted scope).
+    const fetchOrgs = async (guid: string): Promise<{ guid: string; orgs: StOrg[] }> => {
+      const eds = this.endpointRegistry.peek?.(guid);
+      if (eds) {
+        try {
+          await firstValueFrom(eds.loadOrgs());
+          return { guid, orgs: eds.orgs() };
+        } catch {
+          return { guid, orgs: [] as StOrg[] };
+        }
+      }
+      return firstValueFrom(this.http.get<StOrgsResponse>(
         `/pp/v1/cf/orgs/${guid}?per_page=${namePerPage}&page=1`,
       ))
         .then(r => ({ guid, orgs: r.resources as StOrg[] }))
         .catch(() => ({ guid, orgs: [] as StOrg[] }));
+    };
 
     this._isLoadingOrgs.set(true);
     this._isLoadingSpaces.set(true);
