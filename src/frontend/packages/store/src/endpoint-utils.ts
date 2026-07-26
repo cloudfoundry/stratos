@@ -23,11 +23,14 @@ export function countDuplicateUrlEndpoints(endpoints: EndpointModel[]): number |
 /**
  * Shared-URL detection with enough detail for grammatical banners: `count`
  * is the number of endpoints sitting in a shared-URL group (what
- * {@link countDuplicateUrlEndpoints} returns), `groups` is how many distinct
- * URLs are shared. 4 endpoints in one group "share a URL"; 2+2 across two
- * groups "share URLs". Null when all URLs are distinct.
+ * {@link countDuplicateUrlEndpoints} returns), `sizes` is each distinct
+ * group's own endpoint count (e.g. `[2, 4, 5]` for three separate shared
+ * URLs with 2, 4, and 5 endpoints respectively) - the total and group count
+ * alone ("11 across 3 URLs") invite a false assumption that the groups are
+ * roughly equal-sized; only the actual sizes rule that out. Null when all
+ * URLs are distinct.
  */
-export function duplicateUrlStats(endpoints: EndpointModel[]): { count: number; groups: number } | null {
+export function duplicateUrlStats(endpoints: EndpointModel[]): { count: number; sizes: number[] } | null {
   if (!endpoints || endpoints.length < 2) {
     return null;
   }
@@ -36,15 +39,9 @@ export function duplicateUrlStats(endpoints: EndpointModel[]): { count: number; 
     const url = getFullEndpointApiUrl(ep);
     urlCounts.set(url, (urlCounts.get(url) ?? 0) + 1);
   }
-  let dupCount = 0;
-  let groups = 0;
-  for (const count of urlCounts.values()) {
-    if (count > 1) {
-      dupCount += count;
-      groups++;
-    }
-  }
-  return dupCount > 0 ? { count: dupCount, groups } : null;
+  const sizes = [...urlCounts.values()].filter(count => count > 1).sort((a, b) => a - b);
+  const dupCount = sizes.reduce((sum, size) => sum + size, 0);
+  return dupCount > 0 ? { count: dupCount, sizes } : null;
 }
 
 /**
@@ -57,23 +54,40 @@ export function duplicateUrlStats(endpoints: EndpointModel[]): { count: number; 
 /**
  * The shared-URL banner sentence, built the same way everywhere it appears
  * (home page and the CF Application Wall / Marketplace / Services banner):
- * per-type counts joined into one sentence with the verb agreeing with how
- * many distinct URLs are shared, e.g. "4 Cloud Foundry endpoints share a
- * URL." or "4 Cloud Foundry endpoints and 4 Kubernetes endpoints share
- * URLs." Null when all URLs are distinct.
+ * one independent clause per type, e.g. "A Cloud Foundry URL is shared by
+ * 4 endpoints." or, with more than one group, "3 Cloud Foundry URLs are
+ * shared by 11 endpoints (2, 4, and 5 per URL)." Both forms lead with the
+ * URL(s) as the subject, so the single- and multi-group phrasing stay
+ * parallel. Two design choices this encodes:
+ *
+ * - Each type is its own clause with its own verb rather than one shared
+ *   verb across an "and"-joined list - a CF endpoint and a k8s endpoint
+ *   never share a URL with each other (duplicate detection is strictly
+ *   within a type), so joining them with "and...share URLs" would read as
+ *   if they did.
+ * - A multi-group type names every group's actual size, not just the
+ *   group count - "11 across 3 URLs" invites a false assumption that the
+ *   groups are roughly equal-sized (they might be 2, 4, and 5).
+ *
+ * Null when all URLs are distinct.
  */
 export function formatDuplicateUrlEndpointsMessage(endpoints: EndpointModel[]): string | null {
   const dups = countDuplicateUrlEndpointsByType(endpoints);
   if (!dups.length) {
     return null;
   }
-  const parts = dups.map(dup =>
-    `${dup.count} ${entityCatalog.getEndpoint(dup.type)?.definition?.label ?? dup.type} endpoints`);
-  const totalGroups = dups.reduce((sum, dup) => sum + dup.groups, 0);
-  return `${listFormat.format(parts)} ${totalGroups > 1 ? 'share URLs' : 'share a URL'}.`;
+  const clauses = dups.map(dup => {
+    const label = entityCatalog.getEndpoint(dup.type)?.definition?.label ?? dup.type;
+    if (dup.sizes.length === 1) {
+      return `A ${label} URL is shared by ${dup.count} endpoints`;
+    }
+    const sizesList = listFormat.format(dup.sizes.map(String));
+    return `${dup.sizes.length} ${label} URLs are shared by ${dup.count} endpoints (${sizesList} per URL)`;
+  });
+  return `${clauses.join('; ')}.`;
 }
 
-export function countDuplicateUrlEndpointsByType(endpoints: EndpointModel[]): { type: string; count: number; groups: number }[] {
+export function countDuplicateUrlEndpointsByType(endpoints: EndpointModel[]): { type: string; count: number; sizes: number[] }[] {
   if (!endpoints || endpoints.length < 2) {
     return [];
   }
@@ -87,7 +101,7 @@ export function countDuplicateUrlEndpointsByType(endpoints: EndpointModel[]): { 
       byType.set(type, [ep]);
     }
   }
-  const counts: { type: string; count: number; groups: number }[] = [];
+  const counts: { type: string; count: number; sizes: number[] }[] = [];
   for (const [type, group] of byType) {
     const stats = duplicateUrlStats(group);
     if (stats) {
