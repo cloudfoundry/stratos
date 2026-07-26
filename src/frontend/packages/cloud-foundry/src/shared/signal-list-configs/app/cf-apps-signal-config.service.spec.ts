@@ -68,7 +68,7 @@ describe('CfAppsSignalConfigService', () => {
     eds.addApp(a);
     (eds as unknown as { _appsLastFetched: { set: (d: Date) => void } })._appsLastFetched.set(new Date());
 
-    const registry = { acquire: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
+    const registry = { acquire: vi.fn(() => eds), peek: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
     TestBed.configureTestingModule({
       providers: [
         { provide: HttpClient, useValue: http },
@@ -91,7 +91,7 @@ describe('CfAppsSignalConfigService', () => {
     const eds = new EndpointDataService(http, { write: () => {}, read: () => undefined } as never, 'cf-1');
     // No addApp / no appsLastFetched mutation — appsLastFetched stays null.
 
-    const registry = { acquire: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
+    const registry = { acquire: vi.fn(() => eds), peek: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
     TestBed.configureTestingModule({
       providers: [
         { provide: HttpClient, useValue: http },
@@ -175,7 +175,7 @@ describe('CfAppsSignalConfigService', () => {
       const eds = new EndpointDataService(http, { write: () => {}, read: () => undefined } as never, 'cf-1');
       for (const a of apps) eds.addApp(a);
       (eds as unknown as { _appsLastFetched: { set: (d: Date) => void } })._appsLastFetched.set(new Date());
-      const registry = { acquire: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
+      const registry = { acquire: vi.fn(() => eds), peek: vi.fn(() => eds) } as unknown as EndpointDataRegistry;
       TestBed.configureTestingModule({
         providers: [
           { provide: HttpClient, useValue: http },

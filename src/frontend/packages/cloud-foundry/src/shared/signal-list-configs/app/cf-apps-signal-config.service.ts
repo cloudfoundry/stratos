@@ -536,7 +536,7 @@ export class CfAppsSignalConfigService {
     // fallback for a guid that was never acquired (e.g. ensureNamesLoaded()
     // deriving guids from connectedEndpoints() beyond the mounted scope).
     const fetchOrgs = async (guid: string): Promise<{ guid: string; orgs: StOrg[] }> => {
-      const eds = this.endpointRegistry.peek?.(guid);
+      const eds = this.endpointRegistry.peek(guid);
       if (eds) {
         try {
           await firstValueFrom(eds.loadOrgs());
