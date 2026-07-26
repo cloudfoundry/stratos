@@ -83,3 +83,57 @@ describe('CnsiAppsSource', () => {
     expect(http.put).toHaveBeenCalledWith('/pp/v1/cf/apps/cnsi-1/a/routes/r-1', {});
   });
 });
+
+// Apps are drained per endpoint by EndpointDataService. The source used to
+// run its own drain unless handed a finished cache, so mounting the wall
+// while the endpoint drain was in flight ran both.
+describe('CnsiAppsSource — joins the endpoint apps load', () => {
+  const app = { guid: 'a', name: 'from-eds' } as unknown as StApp;
+
+  function makeEds(apps: StApp[]) {
+    return {
+      loadApps: vi.fn(() => of(undefined)),
+      refreshApps: vi.fn(() => of(undefined)),
+      apps: () => apps,
+    };
+  }
+
+  it('load() joins the shared drain instead of fetching', async () => {
+    const http = makeHttp({ resources: [], pagination: { totalResults: 0, totalPages: 1, next: null } });
+    const eds = makeEds([app]);
+    const src = new CnsiAppsSource('cnsi-1', http, eds as never);
+
+    await src.load();
+
+    expect(eds.loadApps).toHaveBeenCalledTimes(1);
+    expect(http.get).not.toHaveBeenCalled();
+    expect(src.items()).toEqual([app]);
+    expect(src.loading()).toBe(false);
+  });
+
+  it('refresh() bypasses the shared cache rather than joining it', async () => {
+    const http = makeHttp({ resources: [], pagination: { totalResults: 0, totalPages: 1, next: null } });
+    const eds = makeEds([app]);
+    const src = new CnsiAppsSource('cnsi-1', http, eds as never);
+
+    await src.refresh();
+
+    // User asked for current data — a cache-serving loadApps() would defeat it.
+    expect(eds.refreshApps).toHaveBeenCalledTimes(1);
+    expect(eds.loadApps).not.toHaveBeenCalled();
+    expect(http.get).not.toHaveBeenCalled();
+  });
+
+  it('still drains itself when no endpoint service was threaded in', async () => {
+    const http = makeHttp({
+      resources: [{ guid: 'b', name: 'own-drain' } as unknown as StApp],
+      pagination: { totalResults: 1, totalPages: 1, next: null },
+    });
+    const src = new CnsiAppsSource('cnsi-1', http);
+
+    await src.load();
+
+    expect(http.get).toHaveBeenCalled();
+    expect(src.items()).toHaveLength(1);
+  });
+});

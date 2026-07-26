@@ -399,13 +399,12 @@ export class CfAppsSignalConfigService {
     const sources = cnsiGuids.map(guid => {
       const eds = this.endpointRegistry.acquire(guid);
       const source = new CnsiAppsSource(guid, this.http, eds);
-      // If a prior page (home card / detail view / earlier tab mount) has
-      // already drained this CF's apps into the shared EndpointDataService,
-      // seed the new source from that cache so the user lands on populated
-      // rows instead of staring at a spinner while we re-fetch the same
-      // data. The base class's preSeed flag short-circuits the next load()
-      // exactly once; an explicit refresh() falls through to the normal
-      // HTTP drain.
+      // Warm cache seeds SYNCHRONOUSLY, at mount, so the user lands on
+      // populated rows. CnsiAppsSource.load() now joins the endpoint's
+      // shared drain as well, which covers the cold and still-in-flight
+      // cases this block never could — but that join is necessarily async,
+      // and awaiting it here would trade an instant first paint for a
+      // spinner on every warm mount.
       if (eds.appsLastFetched() !== null) {
         source.preSeed(eds.apps());
       }
