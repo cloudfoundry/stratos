@@ -262,18 +262,50 @@ export class CfRoutesSignalConfigService {
     return opts;
   });
 
-  private async fetchRoutes(): Promise<void> {
+  // Every mount used to re-drain the whole route list, with no cache and no
+  // in-flight guard — measured live, tabbing Routes → Summary → Routes issued
+  // two full fetches, and two mounts close together would overlap outright.
+  // EndpointDataService owns no full route slice to join (it keeps only
+  // _routeCount, deliberately), so this service is the single owner and the
+  // guard belongs here.
+  //
+  // Cached result is reused when it belongs to the current endpoint and the
+  // cascade hasn't marked routes stale — a write that touches routes flips
+  // routesStale, so post-mutation reads never serve a stale list. force=true
+  // is for the user-driven and post-write paths that must see fresh data.
+  private _routesInFlight: Promise<void> | null = null;
+  private _routesFetchedFor: string | null = null;
+
+  private fetchRoutes(force = false): Promise<void> {
+    const stale = this.endpointDataService?.routesStale() ?? false;
+    if (!force && !stale && this._routesFetchedFor === this.cnsiGuid && this._allRoutes().length > 0) {
+      return Promise.resolve();
+    }
+    // A forced fetch always goes to the network; joining an in-flight read
+    // could hand back a response that predates the write that forced it.
+    if (!force && this._routesInFlight) return this._routesInFlight;
+    const run = this.runFetchRoutes();
+    this._routesInFlight = run;
+    return run;
+  }
+
+  private async runFetchRoutes(): Promise<void> {
+    const cnsiGuid = this.cnsiGuid;
     try {
       const resp = await firstValueFrom(
-        this.http.get<StRoutesResponse>(`/pp/v1/cf/routes/${this.cnsiGuid}`),
+        this.http.get<StRoutesResponse>(`/pp/v1/cf/routes/${cnsiGuid}`),
       );
       this._allRoutes.set(resp?.resources ?? []);
-      this._hasLoadedOnce.set(true);
+      // Stamp on success only — a failed fetch must leave the cache cold so
+      // the next mount retries instead of serving the failure.
+      this._routesFetchedFor = cnsiGuid;
     } catch {
       // Swallow — errors surface via the list's generic error UI if wired;
       // we still flip hasLoadedOnce so the empty state renders instead of
       // a forever-loading spinner.
+    } finally {
       this._hasLoadedOnce.set(true);
+      this._routesInFlight = null;
     }
   }
 
@@ -286,7 +318,7 @@ export class CfRoutesSignalConfigService {
   }
 
   async refresh(): Promise<void> {
-    await this.fetchRoutes();
+    await this.fetchRoutes(true);
     // Also refresh apps so recently-mapped routes pick up new names.
     // refreshApps() bypasses the cache guard — user-driven refresh always
     // re-fetches.
@@ -318,7 +350,7 @@ export class CfRoutesSignalConfigService {
     // not on the EDS cache — re-fetch so the just-deleted row leaves the view.
     // The controller has already marked the routes/space/app slices stale for
     // the cross-tab UX.
-    await this.fetchRoutes();
+    await this.fetchRoutes(true);
   }
 
   // Per-row Unmap on a route entry. Hits the single unmap_all endpoint,
@@ -340,7 +372,7 @@ export class CfRoutesSignalConfigService {
       `/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}/unmap_all`,
       {},
     ));
-    await this.fetchRoutes();
+    await this.fetchRoutes(true);
   }
 
   // Bulk delete: destroys each route entity (which also unmaps any bound
@@ -352,7 +384,7 @@ export class CfRoutesSignalConfigService {
       `/pp/v1/cf/routes/${cnsiGuid}/bulk/delete`,
       { guids: routeGuids },
     ));
-    await this.fetchRoutes();
+    await this.fetchRoutes(true);
     return result;
   }
 
@@ -364,7 +396,7 @@ export class CfRoutesSignalConfigService {
       `/pp/v1/cf/routes/${cnsiGuid}/bulk/unmap`,
       { guids: routeGuids },
     ));
-    await this.fetchRoutes();
+    await this.fetchRoutes(true);
     return result;
   }
 }
