@@ -45,6 +45,18 @@ beforeEach(() => TestBed.resetTestingModule());
 // destroys).
 afterEach(() => TestBed.resetTestingModule());
 
+// Drain microtasks until `done()` holds, rather than a fixed tick count.
+// The number of awaits between initialize() and the first spaces request is
+// an implementation detail — it changed when loadNames() started joining the
+// endpoint's shared space load — and encoding it makes the drain tests fail
+// for reasons unrelated to what they assert.
+async function drainUntil(done: () => boolean, maxTicks = 40): Promise<void> {
+  for (let i = 0; i < maxTicks && !done(); i++) {
+    await Promise.resolve();
+    TestBed.tick();
+  }
+}
+
 describe('CfAppsSignalConfigService', () => {
   it('constructs one CnsiAppsSource per connected CF in scope', () => {
     const http = makeHttp();
@@ -1023,7 +1035,7 @@ describe('CfAppsSignalConfigService', () => {
     svc.initialize(['cnsi-1']);
     void svc.ensureNamesLoaded(['cnsi-1']);
     // Drain microtasks until the priority chunk request is open.
-    for (let i = 0; i < 6; i++) { await Promise.resolve(); TestBed.tick(); }
+    await drainUntil(() => subjects.length > 0);
     expect(subjects.length).toBe(1); // only priority is in flight before resolution
 
     // Resolve the priority request → background workers spin up (cap 3).
@@ -1064,14 +1076,14 @@ describe('CfAppsSignalConfigService', () => {
     const svc = makeSvc(httpMock, cf);
     svc.initialize(['cnsi-1']);
     void svc.ensureNamesLoaded(['cnsi-1']);
-    for (let i = 0; i < 4; i++) { await Promise.resolve(); TestBed.tick(); }
+    await drainUntil(() => subjects.length > 0);
     expect(subjects.length).toBe(1);
 
     // Second initialize() bumps the generation; the still-pending gen-1
     // chunk must NOT merge into _spacesByCnsi when it eventually resolves.
     svc.initialize(['cnsi-1']);
     void svc.ensureNamesLoaded(['cnsi-1']);
-    for (let i = 0; i < 4; i++) { await Promise.resolve(); TestBed.tick(); }
+    await drainUntil(() => subjects.length > 1);
 
     // Resolve the stale request with a space that would otherwise leak in.
     subjects[0].next({
@@ -1134,5 +1146,61 @@ describe('CfAppsSignalConfigService — org catalog shares the endpoint load', (
 
     const orgCalls = (http.get as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter(c => orgsUrl(c[0]));
     expect(orgCalls.length).toBe(1);
+  });
+});
+
+// The endpoint's full space list is drained by summary pages via
+// EndpointDataService.loadSpaces(); the per-org fanout here re-fetched the
+// same spaces. loadNames() now joins the shared slice when there is one.
+describe('CfAppsSignalConfigService — space catalog shares the endpoint load', () => {
+  const spacesFanout = (url: unknown) => typeof url === 'string' && url.includes('organization_guids=');
+
+  function makeSvcWith(http: HttpClient, peeked: unknown): CfAppsSignalConfigService {
+    const registry = {
+      acquire: vi.fn(() => peeked),
+      peek: vi.fn(() => peeked),
+    } as unknown as EndpointDataRegistry;
+    TestBed.configureTestingModule({
+      providers: [
+        { provide: HttpClient, useValue: http },
+        { provide: CloudFoundryService, useValue: makeStubCfService() },
+        { provide: EndpointDataRegistry, useValue: registry },
+        CfAppsSignalConfigService,
+      ],
+    });
+    return TestBed.inject(CfAppsSignalConfigService);
+  }
+
+  const edsWith = (spaces: Array<{ guid: string; name: string }>) => ({
+    loadOrgs: vi.fn(() => of(undefined)),
+    orgs: () => [{ guid: 'org-1', name: 'org one' }],
+    loadSpaces: vi.fn(() => of(undefined)),
+    spaces: () => spaces,
+  });
+
+  it('seeds space names from the shared load instead of the per-org fanout', async () => {
+    const http = makeHttp();
+    const eds = edsWith([{ guid: 'space-1', name: 'space one' }]);
+    const svc = makeSvcWith(http, eds);
+
+    await svc.ensureNamesLoaded(['cf-1']);
+
+    expect(eds.loadSpaces).toHaveBeenCalledTimes(1);
+    expect(svc.spaceNames().get('space-1')).toBe('space one');
+    const fanout = (http.get as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter(c => spacesFanout(c[0]));
+    expect(fanout).toEqual([]);
+  });
+
+  it('falls back to the fanout when the shared slice drained nothing', async () => {
+    const http = makeHttp();
+    // A CF whose spaces drain failed reports an empty slice — the names
+    // still have to come from somewhere, so the fanout must still run.
+    const eds = edsWith([]);
+    const svc = makeSvcWith(http, eds);
+
+    await svc.ensureNamesLoaded(['cf-1']);
+
+    const fanout = (http.get as unknown as { mock: { calls: unknown[][] } }).mock.calls.filter(c => spacesFanout(c[0]));
+    expect(fanout.length).toBeGreaterThan(0);
   });
 });
