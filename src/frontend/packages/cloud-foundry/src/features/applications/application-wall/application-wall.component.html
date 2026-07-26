@@ -16,7 +16,9 @@
 }
 
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {
-  <app-duplicate-url-banner></app-duplicate-url-banner>
+  <app-duplicate-url-banner
+    [endpoints$]="cloudFoundryService.connectedCFEndpoints$"
+    nounPlural="Applications and organizations"></app-duplicate-url-banner>
   @if (listConfig(); as cfg) {
     <app-list-sub-nav title="Total Applications"
                       [count]="totalApplications"

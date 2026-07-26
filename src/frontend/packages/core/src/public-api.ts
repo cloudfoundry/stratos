@@ -61,6 +61,7 @@ export { StepComponent, StepOnNextFunction } from './shared/components/stepper/s
 export { PageSubNavComponent } from './shared/components/page-sub-nav/page-sub-nav.component';
 export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-section/page-sub-nav-section.component';
 export { ListSubNavComponent, ListSubNavAddAction, ListSubNavAction } from './shared/components/list-sub-nav/list-sub-nav.component';
+export { DuplicateUrlBannerComponent } from './shared/components/duplicate-url-banner/duplicate-url-banner.component';
 export { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
 
 // Custom Material Replacement Components

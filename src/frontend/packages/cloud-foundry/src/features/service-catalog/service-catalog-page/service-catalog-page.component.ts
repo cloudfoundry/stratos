@@ -7,6 +7,7 @@ import { Observable, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
 
 import {
+  DuplicateUrlBannerComponent,
   ListSubNavAddAction,
   ListSubNavComponent,
   PageHeaderComponent,
@@ -17,7 +18,6 @@ import {
 import { UserFavorite, UserFavoriteManager } from '@stratosui/store';
 import { serviceEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import {
   CfServiceOfferingsSignalConfigService,
 } from '../../../shared/signal-list-configs/service-offering/cf-service-offerings-signal-config.service';

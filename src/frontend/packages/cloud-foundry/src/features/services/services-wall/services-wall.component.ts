@@ -8,6 +8,7 @@ import { filter, map, take } from 'rxjs/operators';
 
 import {
   ConfirmationDialogService,
+  DuplicateUrlBannerComponent,
   ListSubNavAddAction,
   ListSubNavComponent,
   PageHeaderComponent,
@@ -24,7 +25,6 @@ import {
   userProvidedServiceInstanceEntityType,
 } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
-import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import {
   CfServiceInstancesSignalConfigService,
 } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';

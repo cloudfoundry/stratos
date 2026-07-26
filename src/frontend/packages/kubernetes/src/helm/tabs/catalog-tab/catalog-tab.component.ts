@@ -6,7 +6,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
 import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
 
+import { EndpointsSignalService } from '../../../../../core/src/core/signals/endpoints-signal.service';
 import { AppInputDirective, CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
+import { DuplicateUrlBannerComponent } from '../../../../../core/src/shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { SignalListComponent, SignalListConfig } from '../../../../../core/src/shared/components/signal-list/signal-list.component';
 import { EndpointModel, EndpointsDataService } from '../../../../../store/src/public-api';
 import { MonocularChart } from '../../../services/endpoint-data/kube-types';
@@ -29,6 +31,7 @@ import { ChartItemComponent } from '../../monocular/chart-item/chart-item.compon
     FormsModule,
     AppInputDirective,
     CustomFormFieldComponent,
+    DuplicateUrlBannerComponent,
     SignalListComponent,
     ChartItemComponent,
   ],
@@ -48,6 +51,7 @@ export class CatalogTabComponent implements OnDestroy {
   private sub: Subscription | undefined;
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly endpointsData = inject(EndpointsDataService);
+  private readonly endpointsSignals = inject(EndpointsSignalService);
   private readonly injector = inject(Injector);
   readonly signalConfig = inject(MonocularChartsSignalConfigService);
 
@@ -56,6 +60,15 @@ export class CatalogTabComponent implements OnDestroy {
   // computeSidebarVisibility() one-shot read so we don't recreate
   // toObservable() on every change-detection cycle.
   private readonly endpoints$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector });
+
+  // Connected helm endpoints for the duplicate-URL banner — scoped to helm
+  // so it never mentions unrelated CF/k8s duplicates on this page.
+  private readonly connectedHelmEndpoints = computed(() =>
+    this.endpointsSignals.connectedEndpoints().filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE),
+  );
+  readonly connectedHelmEndpoints$: Observable<EndpointModel[]> = toObservable(
+    this.connectedHelmEndpoints, { injector: this.injector },
+  );
 
   readonly listConfig: WritableSignal<SignalListConfig<MonocularChart> | undefined> = signal(undefined);
 

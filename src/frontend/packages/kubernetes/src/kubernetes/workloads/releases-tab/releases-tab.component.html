@@ -2,6 +2,10 @@
   <h1>Workloads</h1>
 </app-page-header>
 
+<app-duplicate-url-banner
+  [endpoints$]="connectedKubeEndpoints$"
+  nounPlural="Releases"></app-duplicate-url-banner>
+
 <div class="h-full flex flex-col">
   @if (listConfig(); as cfg) {
     <app-signal-list [config]="cfg" class="flex-1 min-h-0" />
