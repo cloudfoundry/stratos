@@ -143,6 +143,17 @@ export class DeployApplicationStep2Component
   gitMode: GitAccessMode = 'public';
   // --------------
 
+  // Endpoint guid to use for the project-exists validator (and repo/branch
+  // lookups). When the user is in Private/Enterprise mode they've supplied a
+  // token directly in the form, so we must talk to the SCM API with that token
+  // rather than proxying through a registered endpoint (whose stored creds —
+  // or lack thereof — would otherwise be used, causing a 404 on a private repo
+  // the typed token can actually see). Only use the registered endpoint's guid
+  // in Public mode.
+  get projectExistsEndpointGuid(): string {
+    return this.gitMode === 'public' ? (this.sourceType?.endpointGuid ?? '') : '';
+  }
+
   // Git URL
   gitUrl!: string;
   gitUrlBranchName!: string;
@@ -171,19 +182,23 @@ export class DeployApplicationStep2Component
     // Set the details based on which source type is selected
     if (this.sourceType.group === 'gitscm') {
       const branch = this.repositoryBranch;
-      const endpointGuid = this.sourceType.endpointGuid;
+      // Public mode deploys via the registered endpoint (its stored creds);
+      // Private/Enterprise mode deploys with the token typed in the form and
+      // no endpoint. So only require an endpoint guid in Public mode.
+      const endpointGuid = this.gitMode === 'public' ? this.sourceType.endpointGuid : '';
       this.gitData.getRepository(this.scm, this.repository)
         .waitForValue$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
-        // A gitscm save needs a resolved repo, branch and endpoint; all three
-        // are populated by setupForGit before the step can validate.
-        if (!repo || !branch || !endpointGuid) { return; }
+        // A gitscm save needs a resolved repo and branch. An endpoint guid is
+        // only required for Public mode; Private/Enterprise carry the token.
+        if (!repo || !branch) { return; }
+        if (this.gitMode === 'public' && !endpointGuid) { return; }
         this.deployData.saveAppDetails({
           projectName: this.repository,
           branch,
           url: repo.clone_url,
           accessToken: this.accessToken,
           commit: this.isRedeploy ? this.commitInfo?.sha : undefined,
-          endpointGuid,
+          endpointGuid: endpointGuid ?? '',
         }, null);
       });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
@@ -354,7 +369,14 @@ export class DeployApplicationStep2Component
         if (!matched) { return; }
         this.sourceType = matched;
 
-        const newScm = this.scmService.getSCM(matched.id as GitSCMType, matched.endpointGuid ?? '');
+        const newScm = this.scmService.getSCM(
+          matched.id as GitSCMType,
+          // In Private/Enterprise mode the user supplies a token directly, so
+          // don't bind the SCM to a registered endpoint (which would proxy via
+          // the endpoint's own creds and 404 on private repos the typed token
+          // can see). Public mode still uses the registered endpoint guid.
+          this.gitMode === 'public' ? (matched.endpointGuid ?? '') : '',
+        );
         if (newScm) {
           // User selected one of the SCM options
           if (this.scm && newScm.getType() !== this.scm.getType()) {
@@ -478,6 +500,20 @@ export class DeployApplicationStep2Component
       this.accessToken = '';
     } else if (mode === 'private') {
       this.githubEnterpriseUrl = '';
+    }
+    // Rebuild the SCM for the new mode: Public binds to the registered
+    // endpoint guid (proxy via stored creds); Private/Enterprise talk to the
+    // SCM API directly with the token typed in the form. Without this rebuild,
+    // a Public-mode SCM (bound to the endpoint) would keep proxying and 404 on
+    // private repos the typed token can actually see.
+    if (this.sourceType) {
+      const rebuilt = this.scmService.getSCM(
+        this.sourceType.id as GitSCMType,
+        mode === 'public' ? (this.sourceType.endpointGuid ?? '') : '',
+      );
+      if (rebuilt) {
+        this.scm = rebuilt;
+      }
     }
     this.applyGithubEnterpriseAndToken(this.githubEnterpriseUrl, this.accessToken);
   }

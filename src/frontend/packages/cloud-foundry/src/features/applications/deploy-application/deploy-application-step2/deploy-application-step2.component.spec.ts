@@ -189,6 +189,56 @@ describe('DeployApplicationStep2Component', () => {
     });
   });
 
+  // Regression guard: a separately-registered github.com endpoint tags the
+  // GitHub source type with its guid. In Private/Enterprise mode the user
+  // supplies a token directly in the form, so project-exists validation and
+  // repo/branch lookups must talk to the SCM API with THAT token, not proxy
+  // through the registered endpoint's stored creds (which 404s on a private
+  // repo the typed token can actually see). Only Public mode should carry the
+  // endpoint guid.
+  describe('projectExistsEndpointGuid (private/enterprise must not proxy via registered endpoint)', () => {
+    beforeEach(() => {
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      // Simulate the GitHub source type carrying a registered endpoint guid.
+      component.sourceType = {
+        id: 'github',
+        group: 'gitscm',
+        name: 'GitHub',
+        endpointGuid: '747ed39a-endpoint-guid',
+      } as any;
+    });
+
+    it('uses the registered endpoint guid in Public mode', () => {
+      component.gitMode = 'public';
+      expect(component.projectExistsEndpointGuid).toBe('747ed39a-endpoint-guid');
+    });
+
+    it('drops the endpoint guid in Private mode (use the typed token directly)', () => {
+      component.gitMode = 'private';
+      expect(component.projectExistsEndpointGuid).toBe('');
+    });
+
+    it('drops the endpoint guid in Enterprise mode (use the typed token directly)', () => {
+      component.gitMode = 'enterprise';
+      expect(component.projectExistsEndpointGuid).toBe('');
+    });
+
+    it('rebuilds the SCM with no endpoint guid when switching to Private', () => {
+      const getSCM = vi.spyOn(TestBed.inject(GitSCMService), 'getSCM');
+      component.setGitMode('private');
+      // Last getSCM call should target the github type with an empty guid so
+      // the SCM talks to the API directly with the form token.
+      expect(getSCM).toHaveBeenCalledWith('github', '');
+    });
+
+    it('rebuilds the SCM with the endpoint guid when switching to Public', () => {
+      const getSCM = vi.spyOn(TestBed.inject(GitSCMService), 'getSCM');
+      component.setGitMode('public');
+      expect(getSCM).toHaveBeenCalledWith('github', '747ed39a-endpoint-guid');
+    });
+  });
+
   describe('applyGithubEnterpriseAndToken — form wiring', () => {
     let scmSpy: {
       setPublicApi: ReturnType<typeof vi.fn>;
