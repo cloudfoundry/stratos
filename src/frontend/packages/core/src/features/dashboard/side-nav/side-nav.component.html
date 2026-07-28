@@ -86,6 +86,27 @@
       }
     </ul>
 
+    <!-- Company links. Reference-grade, so plain rel="noopener noreferrer"
+         external links — unlike the header docs link these are one-shot. -->
+    @if (companyWebsite() || supportEmail()) {
+      <div class="nav-company-links border-t border-nav-border p-3 space-y-1" [class.hidden]="iconMode">
+        @if (companyWebsite(); as website) {
+          <a class="nav-company-website flex items-center p-2 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
+            [href]="website" target="_blank" rel="noopener noreferrer">
+            <span class="material-icons text-xl shrink-0">language</span>
+            <span class="ml-3 text-sm font-medium">Website</span>
+          </a>
+        }
+        @if (supportEmail(); as email) {
+          <a class="nav-company-support flex items-center p-2 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
+            [href]="'mailto:' + email">
+            <span class="material-icons text-xl shrink-0">mail_outline</span>
+            <span class="ml-3 text-sm font-medium">Support</span>
+          </a>
+        }
+      </div>
+    }
+
     <!-- Logout Button -->
     <div class="nav-logout border-t border-nav-border p-3">
       <button

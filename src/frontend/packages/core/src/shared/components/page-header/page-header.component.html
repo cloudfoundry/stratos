@@ -46,6 +46,36 @@
                 [favorite]="pFavorite">
               </app-entity-favorite-star>
             }
+
+            <!-- Documentation split control. The anchor opens the docs; the
+                 caret chooses tab vs popup. Named target so repeat clicks reuse
+                 one window rather than piling up; deliberately no rel="noopener"
+                 — severing the opener also severs the reuse. Popup mode is
+                 intercepted in the handler. See #5690. -->
+            @if (documentationUrl(); as docsUrl) {
+              <div class="page-header-documentation flex items-center text-header-text">
+                <a class="page-header-documentation-link pl-1.5 pr-0 py-1.5 hover:bg-white/10 rounded-l-md transition-colors"
+                  [href]="docsUrl"
+                  target="stratos-docs"
+                  (click)="openDocumentation($event, docsUrl)"
+                  [matTooltip]="documentationTooltip()"
+                  [attr.aria-label]="documentationTooltip()">
+                  <span class="material-icons text-base leading-5 block">menu_book</span>
+                </a>
+                <button type="button"
+                  class="page-header-documentation-toggle pl-1 pr-1.5 py-1.5 hover:bg-white/10 rounded-r-md transition-colors"
+                  (click)="toggleDocumentationTarget()"
+                  [matTooltip]="documentationTargetTooltip()"
+                  [attr.aria-label]="documentationTargetTooltip()">
+                  <span class="flex items-center gap-0.5 opacity-80">
+                    <span class="text-xs leading-5">{{ documentationTargetLabel() }}</span>
+                    <!-- Static rotate glyph: signals the word toggles, without a
+                         caret's implication that a menu will open. -->
+                    <span class="material-icons text-[13px] leading-5">autorenew</span>
+                  </span>
+                </button>
+              </div>
+            }
           </div>
 
           <!-- Right content -->

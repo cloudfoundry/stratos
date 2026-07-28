@@ -63,6 +63,10 @@ export class SideNavComponent implements OnInit {
 
   public copyright = computed(() => this.branding.getCopyrightText());
 
+  // Operator-configured company links. website is https-validated by the service.
+  public companyWebsite = computed(() => this.branding.getCompanyWebsite());
+  public supportEmail = computed(() => this.branding.getSupportEmail());
+
   public environment = environment;
   public showAllMenuItems = false;
 
