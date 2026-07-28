@@ -335,13 +335,18 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
     // wizards) receive the enter callback — see comment above for rationale.
     //
-    // Delivery is deferred to after the NEXT render: the entering step's
-    // content is only instantiated by the ngTemplateOutlet on currentIndex
-    // during that render, so a synchronous pOnEnter here runs before any
-    // @ViewChild the handle's onEnter body dereferences exists — the enter
-    // callback was silently dropped for every step after the first (#5600:
-    // specify-details-step never received onEnter, so its formMode was
-    // never set and the step rendered empty).
+    // Delivery is deferred to after the NEXT render. Note: projected step
+    // content is NOT lazily instantiated — Ivy constructs <ng-content> inside
+    // an <ng-template> on first render regardless of the active step, so a
+    // step's directives/@Inputs (and their ngOnChanges) run up-front. The
+    // deferral is instead about ordering relative to THIS transition: a
+    // synchronous pOnEnter here would run before the entering step is marked
+    // active and before change detection settles for the newly-current index,
+    // so onEnter side effects (e.g. building a list keyed off the now-active
+    // step) could see stale state. afterNextRender guarantees the enter
+    // callback fires once the step is active and rendered (#5600:
+    // specify-details-step never received onEnter, so its formMode was never
+    // set and the step rendered empty).
     const enteringStep = this.steps[index];
     const enterData = this.enterData;
     this.enterData = undefined;

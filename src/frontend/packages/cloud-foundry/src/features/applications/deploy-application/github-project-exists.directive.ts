@@ -32,9 +32,10 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
   @Input() appGithubProjectExists!: string;
 
   private lastValue = '';
-  // The auth context (scm,guid,token) used for the last check. When it
-  // changes we must force a re-check even for the same project name.
-  private lastAuthContext = '';
+  // The auth context (scm,guid,token) used for the last check. `undefined`
+  // until the first ngOnChanges records the initial value — distinct from ''
+  // so we can tell "first render" apart from "token later cleared to empty".
+  private lastAuthContext: string | undefined = undefined;
 
   private onChange?: () => void;
 
@@ -50,16 +51,32 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.appGithubProjectExists) {
-      const auth = this.appGithubProjectExists ?? '';
-      if (auth !== this.lastAuthContext) {
-        this.lastAuthContext = auth;
-        // Drop any cached project-exists result so the guard in validate()
-        // (name !== c.value) doesn't short-circuit the re-check under the new
-        // auth context, then ask Angular to re-run validation.
-        this.deployData.projectDoesntExist('');
-        this.onChange?.();
-      }
+    const change = changes.appGithubProjectExists;
+    if (!change) {
+      return;
+    }
+    const auth = this.appGithubProjectExists ?? '';
+
+    // First render just records the baseline. Do NOT clear projectExists here:
+    // the redeploy path pre-seeds checkProjectExists() before navigating to
+    // the wizard (CfDeployAppDataService is providedIn:'root'), and this
+    // directive is constructed on first render even when its step isn't active
+    // (Ivy doesn't defer <ng-content> in <ng-template>). Clearing on the first
+    // change would discard that seeded repo info, and on redeploy the project
+    // input is [disabled] so its async validator never re-runs to rebuild it.
+    if (this.lastAuthContext === undefined) {
+      this.lastAuthContext = auth;
+      return;
+    }
+
+    if (auth !== this.lastAuthContext) {
+      this.lastAuthContext = auth;
+      // Auth context genuinely changed (e.g. a PAT typed after the project
+      // name). Drop the cached project-exists result so validate()'s
+      // name-match guard doesn't short-circuit the re-check, then ask Angular
+      // to re-run validation under the new auth.
+      this.deployData.projectDoesntExist('');
+      this.onChange?.();
     }
   }
 
