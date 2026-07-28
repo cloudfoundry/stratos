@@ -95,7 +95,9 @@
                         @if (sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError) {
                           <div class="text-danger text-sm mt-1"
                             >
-                            Project does not exist
+                            Repository not found. Check the owner/name is exact (it is
+                            case-sensitive), and for a private repository make sure your
+                            access token is authorized for it.
                           </div>
                         }
                         @if (sourceSelectionForm.controls.projectName?.errors?.githubProjectError) {
