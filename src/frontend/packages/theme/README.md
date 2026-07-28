@@ -55,7 +55,10 @@ from these locations in order:
     "name": "Acme Corp",
     "displayName": "Acme Cloud",
     "website": "https://acme.example.com",
-    "supportEmail": "support@acme.example.com"
+    "supportEmail": "support@acme.example.com",
+    "documentationUrl": "https://cloudfoundry.github.io/stratos/",
+    "documentationTarget": "tab",
+    "documentationLabel": "documentation"
   },
   "logos": {
     "main": "/assets/acme-logo.png",
@@ -120,8 +123,11 @@ from these locations in order:
 |---------|-------|----------|-------------|
 | `company.name` | string | Yes | Company name used in branding and page title |
 | `company.displayName` | string | No | Display name (falls back to `name`) |
-| `company.website` | string | No | Company website URL |
-| `company.supportEmail` | string | No | Support contact email |
+| `company.website` | string | No | Company website URL. Shown as a link in the side navigation. Honoured only over `https` |
+| `company.supportEmail` | string | No | Support contact email. Shown as a `mailto:` link in the side navigation |
+| `company.documentationUrl` | string | No | Documentation to open from the page header. Honoured only over `https`; without it no documentation control appears |
+| `company.documentationTarget` | `tab` \| `popup` | No | How the documentation opens by default (`tab`). Users can override this for themselves from the header control |
+| `company.documentationLabel` | string | No | What the documentation is called in the control's tooltip (`documentation`) |
 | `logos.main` | string | Yes | Main logo for login page and headers |
 | `logos.navigation` | string | Yes | Logo for expanded navigation bar |
 | `logos.navigationIcon` | string | Yes | Icon-only logo for collapsed nav |
@@ -196,6 +202,33 @@ from these locations in order:
 | `getLoginSubtitle()` | Login page subtitle |
 | `getBrandingInfo()` | Full branding object |
 | `getLoginConfig()` | Full login config object |
+| `getCompanyWebsite()` | Company website URL, or `undefined` unless `https` |
+| `getSupportEmail()` | Support contact email |
+| `getDocumentationUrl()` | Documentation URL, or `undefined` unless `https` |
+| `getDocumentationTarget()` | `tab` or `popup` — user choice, else config, else `tab` |
+| `getDocumentationLabel()` | Documentation name for the tooltip |
+| `setDocumentationTarget(t)` | Records the user's `tab`/`popup` choice |
+
+### Documentation Link Behaviour
+
+Setting `company.documentationUrl` puts a documentation control in the
+page header. It opens in a tab or a separate window, and reuses the
+same one on repeat clicks rather than accumulating new ones.
+
+That reuse has a consequence operators should know about. Keeping one
+window addressable means the console stays its opener, and a page can
+navigate whatever opened it. So the configured documentation site is
+able to navigate the console's tab away. The two properties cannot be
+separated — every way of severing the opener (`noopener`,
+`Cross-Origin-Opener-Policy`, discarding the handle) also ends the
+reuse. Point `documentationUrl` at a host you trust as much as the
+console itself.
+
+URLs are honoured only over `https`. Anything else, including a
+malformed value, renders no control rather than a broken or dangerous
+link. There is no reachability check: a well-formed URL to a dead host
+still produces a link, because the browser cannot inspect a
+cross-origin response to know the difference.
 
 ### Config Defaults (Layer 4)
 
