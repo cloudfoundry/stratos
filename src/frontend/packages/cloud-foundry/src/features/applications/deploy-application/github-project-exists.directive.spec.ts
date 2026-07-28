@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
@@ -39,25 +39,48 @@ describe('GithubProjectExistsDirective', () => {
     let reRuns = 0;
     directive.registerOnValidatorChange(() => reRuns++);
 
-    // Initial value (no token) — first assignment establishes the baseline.
+    // First change only records the baseline — it must NOT re-run validation
+    // or clear cached state (see redeploy-seed guard below).
     directive.appGithubProjectExists = 'github,,';
     directive.ngOnChanges({
       appGithubProjectExists: { currentValue: 'github,,', previousValue: undefined, firstChange: true, isFirstChange: () => true },
     } as any);
-    expect(reRuns).toBe(1);
+    expect(reRuns).toBe(0);
 
     // Token added — auth context changed, so validation must re-run.
     directive.appGithubProjectExists = 'github,,ghp_secrettoken';
     directive.ngOnChanges({
       appGithubProjectExists: { currentValue: 'github,,ghp_secrettoken', previousValue: 'github,,', firstChange: false, isFirstChange: () => false },
     } as any);
-    expect(reRuns).toBe(2);
+    expect(reRuns).toBe(1);
 
     // Same value again — no auth change, so no extra re-run.
     directive.ngOnChanges({
       appGithubProjectExists: { currentValue: 'github,,ghp_secrettoken', previousValue: 'github,,ghp_secrettoken', firstChange: false, isFirstChange: () => false },
     } as any);
-    expect(reRuns).toBe(2);
+    expect(reRuns).toBe(1);
+  });
+
+  // Regression guard (PR #5707 review): the redeploy path pre-seeds
+  // checkProjectExists() before the wizard renders, and this directive is
+  // constructed on first render even in a non-active step. The first
+  // ngOnChanges must NOT clear that seeded projectExists state, or the
+  // repository info card disappears on redeploy (the disabled project input
+  // never re-runs its async validator to rebuild it).
+  it('does not clear seeded projectExists state on the first change', () => {
+    const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
+    const deployData = (directive as any).deployData as {
+      projectDoesntExist: (n: string) => void;
+      state: () => { projectExists?: { name: string } };
+    };
+    const clearSpy = vi.spyOn(deployData, 'projectDoesntExist');
+
+    directive.appGithubProjectExists = 'github,747ed39a-guid,';
+    directive.ngOnChanges({
+      appGithubProjectExists: { currentValue: 'github,747ed39a-guid,', previousValue: undefined, firstChange: true, isFirstChange: () => true },
+    } as any);
+
+    expect(clearSpy).not.toHaveBeenCalled();
   });
 
   it('preserves commas in the access token when splitting the auth context', () => {
