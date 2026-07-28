@@ -80,7 +80,7 @@
                           </label>
                           <input id="projectName" type="text" class="input" [disabled]="isRedeploy" [(ngModel)]="repository"
                             placeholder="owner/repo" name="projectName"
-                            [appGithubProjectExists]="sourceType.id + ',' + sourceType.endpointGuid + ',' + (accessToken || '')" required
+                            [appGithubProjectExists]="sourceType.id + ',' + projectExistsEndpointGuid + ',' + (accessToken || '')" required
                             list="repo-suggestions">
                           <!-- Repository suggestions datalist -->
                           <datalist id="repo-suggestions">
