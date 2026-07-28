@@ -179,9 +179,15 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     this.step2_1Sub?.unsubscribe();
     this.step2_1Sub = undefined;
     if (v) {
-      // Replicate the legacy [onEnter]="step2_1.onEnter" binding so the
-      // child re-validates against the SCM commit selection on entry.
-      v.onEnter();
+      // Subscription wiring only. The activation-time `onEnter` call (which
+      // builds the commit list from the git source populated by step 2's
+      // submit) lives on `step2_1Handle.onEnter` — see the `step2_2Ref`
+      // comment for why the ViewChild-time call is the wrong hook: step 2_1
+      // is rendered via `[hidden]` and so is instantiated up-front, before
+      // step 2 has saved any gitDetails. Calling `v.onEnter()` here ran the
+      // commit-list wrapper with an empty applicationSource, so it never
+      // resolved a project/branch — leaving "Source Config" with no options
+      // and the Next button disabled.
       this.step2_1Sub = v.validate.subscribe(valid => {
         this.step2_1Valid.set(!!valid);
         this.cdr.markForCheck();
@@ -297,6 +303,12 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
 
   step2_1Handle: SignalStepHandle = {
     valid: this.step2_1Valid.asReadonly(),
+    // Activation-time build of the commit list. Runs on each entry (not at
+    // ViewChild init) so it reads the git source that step 2's submit just
+    // saved — the commit-list wrapper resolves project/branch from
+    // applicationSource, which is empty until then. Re-entries after a
+    // Previous click also rebuild against the latest selection.
+    onEnter: () => this._step2_1?.onEnter(),
     onLeave: () => this._step2_1?.onLeave(),
     submit: async () => {
       const result = await firstValueFrom(this._step2_1!.onNext(0, null as any));

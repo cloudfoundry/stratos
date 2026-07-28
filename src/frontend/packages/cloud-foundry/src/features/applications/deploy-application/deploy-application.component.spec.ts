@@ -116,4 +116,26 @@ describe('DeployApplicationComponent', () => {
     expect(mockStep2_2.onEnter).toHaveBeenCalledWith(fakeFileInfo);
     expect((component as any).pendingFsFileInfo).toBeUndefined();
   });
+
+  // Regression guard for the "Source Config shows no options / Next disabled"
+  // bug. step2_1 (the git commit picker) is rendered via [hidden], so its
+  // @ViewChild fires at parent view-init — before step 2 has saved any
+  // git source. Building the commit list there (the old `v.onEnter()` in the
+  // setter) ran against an empty applicationSource and never resolved a
+  // project/branch. The build must instead happen on step activation via
+  // step2_1Handle.onEnter, which the stepper fires after step 2's submit.
+  it('builds the commit list on step2_1 activation (handle.onEnter), not at ViewChild init', () => {
+    const mockStep2_1 = { onEnter: vi.fn(), onLeave: vi.fn(), validate: of(false) };
+
+    // ViewChild fires at parent view-init. The setter must NOT call
+    // onEnter here — applicationSource has no git details yet, so the
+    // commit list would build empty (the reported bug).
+    (component as any).step2_1Ref = mockStep2_1;
+    expect(mockStep2_1.onEnter).not.toHaveBeenCalled();
+
+    // Stepper navigates into Source Config → fires handle.onEnter →
+    // the child builds the commit list against the now-populated source.
+    component.step2_1Handle.onEnter!();
+    expect(mockStep2_1.onEnter).toHaveBeenCalledTimes(1);
+  });
 });
