@@ -1,7 +1,7 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -13,6 +13,7 @@ import {
   UserProfileInfo,
   AuthTokenEnvelope,
 } from '@stratosui/store';
+import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { getTime } from 'date-fns';
@@ -37,6 +38,10 @@ import { RecentEntitiesComponent } from '../recent-entities/recent-entities.comp
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
 import { PageHeaderEventsComponent } from './page-header-events/page-header-events.component';
 import { ThemeToggleComponent } from '../theme-toggle/theme-toggle.component';
+
+// Shared between the anchor's target and the popup window.open call, so both
+// modes address the same window and reuse it on repeat clicks.
+const DOCUMENTATION_WINDOW_NAME = 'stratos-docs';
 
 @Component({
   selector: 'app-page-header',
@@ -71,6 +76,44 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private dashboardSignals = inject(DashboardSignalService);
   private dashboardData = inject(DashboardDataService);
   private viewContainerRef = inject(ViewContainerRef);
+  private branding = inject(StratosBrandingService);
+
+  // Operator-configured docs link, https-validated by the branding service.
+  public documentationUrl = computed(() => this.branding.getDocumentationUrl());
+  public documentationTarget = computed(() => this.branding.getDocumentationTarget());
+  // Operators can rename "documentation" to whatever they call their docs.
+  public documentationLabel = computed(() => this.branding.getDocumentationLabel());
+  public documentationTooltip = computed(() =>
+    `Open ${this.documentationLabel()} in a reusable tab or window`
+  );
+
+  // Word toggle, behaving like the home page's sort button: the label shows the
+  // current state and the tooltip says what clicking will do.
+  public documentationTargetLabel = computed(() =>
+    this.documentationTarget() === 'popup' ? 'Window' : 'Tab'
+  );
+  public documentationTargetTooltip = computed(() =>
+    this.documentationTarget() === 'popup'
+      ? `Opens in a separate window — click to use a tab instead`
+      : `Opens in a tab — click to use a separate window instead`
+  );
+
+  /**
+   * In 'tab' mode the anchor does the work unaided, so middle-click and
+   * cmd-click keep behaving normally. Only 'popup' needs intercepting, because
+   * a window features string has no markup equivalent.
+   *
+   * The named target is what makes repeat clicks reuse one window instead of
+   * piling up; it only works while this window remains the opener, which is why
+   * there is deliberately no rel="noopener" here. See #5690.
+   */
+  openDocumentation(event: MouseEvent, url: string): void {
+    if (this.documentationTarget() !== 'popup') {
+      return;
+    }
+    event.preventDefault();
+    window.open(url, DOCUMENTATION_WINDOW_NAME, 'width=1024,height=900');
+  }
 
   public canAPIKeys$: Observable<boolean>;
   public breadcrumbDefinitions: IHeaderBreadcrumbLink[] | null = null;
@@ -353,6 +396,10 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
       this.isUserMenuOpen = false;
       this.refreshTokenObservables();
     }
+  }
+
+  toggleDocumentationTarget() {
+    this.branding.setDocumentationTarget(this.documentationTarget() === 'popup' ? 'tab' : 'popup');
   }
 
   closeUserMenu() {

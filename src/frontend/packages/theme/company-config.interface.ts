@@ -5,6 +5,9 @@ export interface CompanyConfig {
     displayName?: string;  // Shown in nav/title — falls back to name
     website?: string;
     supportEmail?: string;
+    documentationUrl?: string;  // Operator docs, opened from the page header
+    documentationTarget?: 'tab' | 'popup';  // How to open it; defaults to 'tab'
+    documentationLabel?: string;  // Name used in the link's tooltip; defaults to 'documentation'
   };
 
   // Logo customization

@@ -87,6 +87,89 @@ describe('StratosBrandingService', () => {
   });
 
   // ===========================================================================
+  // Operator-supplied URL validation (#5690)
+  // ===========================================================================
+
+  describe('operator-supplied company URLs', () => {
+    it('should return undefined when no documentation URL is configured', () => {
+      expect(service.getDocumentationUrl()).toBeUndefined();
+    });
+
+    it('should honour an https documentation URL', () => {
+      service.updateCompanyInfo({ documentationUrl: 'https://docs.cloud.gov/' });
+      expect(service.getDocumentationUrl()).toBe('https://docs.cloud.gov/');
+    });
+
+    it('should reject a plain http documentation URL', () => {
+      service.updateCompanyInfo({ documentationUrl: 'http://docs.cloud.gov/' });
+      expect(service.getDocumentationUrl()).toBeUndefined();
+    });
+
+    it('should reject a javascript: documentation URL', () => {
+      service.updateCompanyInfo({ documentationUrl: 'javascript:alert(1)' });
+      expect(service.getDocumentationUrl()).toBeUndefined();
+    });
+
+    it('should reject a data: documentation URL', () => {
+      service.updateCompanyInfo({ documentationUrl: 'data:text/html,<script>alert(1)</script>' });
+      expect(service.getDocumentationUrl()).toBeUndefined();
+    });
+
+    it('should reject an unparseable documentation URL', () => {
+      service.updateCompanyInfo({ documentationUrl: 'not a url' });
+      expect(service.getDocumentationUrl()).toBeUndefined();
+    });
+
+    it('should default the documentation target to tab', () => {
+      expect(service.getDocumentationTarget()).toBe('tab');
+    });
+
+    it('should honour an explicit popup documentation target', () => {
+      service.updateCompanyInfo({ documentationTarget: 'popup' });
+      expect(service.getDocumentationTarget()).toBe('popup');
+    });
+
+    it('should fall back to tab for an unrecognised documentation target', () => {
+      service.updateCompanyInfo({ documentationTarget: 'sidebar' as never });
+      expect(service.getDocumentationTarget()).toBe('tab');
+    });
+
+    it('should default the documentation label to "documentation"', () => {
+      expect(service.getDocumentationLabel()).toBe('documentation');
+    });
+
+    it('should let branding rename the documentation label', () => {
+      service.updateCompanyInfo({ documentationLabel: 'the Cloud.gov handbook' });
+      expect(service.getDocumentationLabel()).toBe('the Cloud.gov handbook');
+    });
+
+    it('should ignore a blank documentation label', () => {
+      service.updateCompanyInfo({ documentationLabel: '   ' });
+      expect(service.getDocumentationLabel()).toBe('documentation');
+    });
+
+    it('should let the user choice override the operator default', () => {
+      service.updateCompanyInfo({ documentationTarget: 'tab' });
+      service.setDocumentationTarget('popup');
+      expect(service.getDocumentationTarget()).toBe('popup');
+    });
+
+    it('should persist the user choice for the next session', () => {
+      service.setDocumentationTarget('popup');
+      expect(localStorage.getItem('stratos-docs-target')).toBe('popup');
+      service.setDocumentationTarget('tab');
+      expect(localStorage.getItem('stratos-docs-target')).toBe('tab');
+    });
+
+    it('should apply the same validation to the company website', () => {
+      service.updateCompanyInfo({ website: 'javascript:alert(1)' });
+      expect(service.getCompanyWebsite()).toBeUndefined();
+      service.updateCompanyInfo({ website: 'https://cloud.gov/' });
+      expect(service.getCompanyWebsite()).toBe('https://cloud.gov/');
+    });
+  });
+
+  // ===========================================================================
   // Layer 3: activateUserPreferences()
   // ===========================================================================
 

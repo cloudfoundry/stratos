@@ -95,6 +95,11 @@ export class StratosBrandingService {
   private readonly THEME_MODE_KEY = 'stratos-theme-mode';
   private readonly BRANDING_STORAGE_KEY = 'stratos-branding';
   private readonly CONFIG_STORAGE_KEY = 'stratos-company-config';
+  private readonly DOCS_TARGET_KEY = 'stratos-docs-target';
+
+  // User's choice of how the documentation link opens. null = follow the
+  // operator's configured default. Hydrated from storage on construction.
+  private _docsTargetOverride = signal<'tab' | 'popup' | null>(null);
 
   // --- Media query ---
   private mediaQueryList!: MediaQueryList;
@@ -129,6 +134,7 @@ export class StratosBrandingService {
 
     // Start async company config load (Layer 1 update)
     this.loadCompanyConfig();
+    this.hydrateDocumentationTarget();
 
     // Remove initializing class after a small delay to enable transitions
     setTimeout(() => {
@@ -644,6 +650,73 @@ export class StratosBrandingService {
 
   getCopyrightText(): string | undefined {
     return this._config().footer.copyright;
+  }
+
+  /**
+   * company-config.json is operator-supplied, so a URL from it is only honoured
+   * over https. Anything else — javascript:, data:, a typo — yields undefined
+   * and the link is simply not rendered.
+   */
+  private httpsUrlOrUndefined(value?: string): string | undefined {
+    if (!value) {
+      return undefined;
+    }
+    try {
+      return new URL(value).protocol === 'https:' ? value : undefined;
+    } catch {
+      return undefined;
+    }
+  }
+
+  getDocumentationUrl(): string | undefined {
+    return this.httpsUrlOrUndefined(this._config().company.documentationUrl);
+  }
+
+  /** What the docs are called in the UI, so operators can brand it. */
+  getDocumentationLabel(): string {
+    return this._config().company.documentationLabel?.trim() || 'documentation';
+  }
+
+  /**
+   * User choice wins over the operator default, mirroring how theme mode works.
+   * Anything unrecognised from either source falls back to 'tab'.
+   */
+  getDocumentationTarget(): 'tab' | 'popup' {
+    const override = this._docsTargetOverride();
+    if (override) {
+      return override;
+    }
+    return this._config().company.documentationTarget === 'popup' ? 'popup' : 'tab';
+  }
+
+  setDocumentationTarget(target: 'tab' | 'popup') {
+    this._docsTargetOverride.set(target);
+    try {
+      localStorage.setItem(this.DOCS_TARGET_KEY, target);
+    } catch (_error) {
+      // Storage unavailable (private mode / quota) — the choice still applies
+      // for this session, it just will not survive a reload.
+    }
+  }
+
+  private hydrateDocumentationTarget() {
+    try {
+      const stored = localStorage.getItem(this.DOCS_TARGET_KEY);
+      if (stored === 'tab' || stored === 'popup') {
+        this._docsTargetOverride.set(stored);
+      }
+    } catch (_error) {
+      // Storage unavailable — fall back to the operator default.
+    }
+  }
+
+  getCompanyWebsite(): string | undefined {
+    return this.httpsUrlOrUndefined(this._config().company.website);
+  }
+
+  // NOTE: not URL-validated — the value is only ever used behind a mailto: scheme.
+  getSupportEmail(): string | undefined {
+    return this._config().company.supportEmail;
   }
 
   // =========================================================================
