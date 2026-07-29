@@ -18,6 +18,8 @@
 #   make unpublish TAG=vX       Delete a GitHub release (assets included)
 #   make stamp untag TAG=vX     Delete a tag (local + remote)
 #   make sweep                  Remove published changelog.d fragments
+#   make changelog              Report dependency bumps since the last tag
+#                               (./build/release-notes.sh deps drafts them)
 #   make install                Install dependencies
 #   make stage                  Stage for local testing
 #   make clean                  Remove all build output
@@ -966,7 +968,7 @@ $(call register, stamp, untag)
 # changelog.d fragments (build/release-notes.sh).
 # --prerelease derives from the tag itself: alpha/beta/rc only — dev.N tags
 # CAN be full releases (keep in sync with release.yml validate-version).
-.PHONY: publish unpublish sweep
+.PHONY: publish unpublish sweep changelog
 publish:
 	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
 	@TAG="$(TAG)"; \
@@ -985,6 +987,14 @@ unpublish:
 sweep:
 	@chmod +x build/release-notes.sh
 	$($(_HIDE)DRY)./build/release-notes.sh sweep
+
+# changelog reports how many dependency bumps have landed since the last
+# release tag — the "is a build due yet?" question, answerable between
+# releases. Read-only, so no DRYRUN guard. `stamp tag` runs the same check
+# before it freezes the notes into the tag body.
+changelog:
+	@chmod +x build/release-notes.sh
+	@./build/release-notes.sh check
 
 # ── Deploy (documentation website) ───────────────────────────
 # Grammar: make deploy website <destination> — the component says what is
