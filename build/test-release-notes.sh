@@ -66,7 +66,53 @@ rm "${FRAG_DIR}/0004-bad.md"
 
 printf 'stray line before any header\n' > "${FRAG_DIR}/0005-stray.md"
 check_fails "content before a section header fails" bash "${RN}" assemble
-rm "${FRAG_DIR}/0005-stray.md"
+rm "${FRAG_DIR}"/*.md
+
+# deps/check read git history, so they need a repo of their own rather than
+# the checkout this harness runs in.
+echo "deps:"
+export ROOT_DIR="${TMPDIR}/repo"
+mkdir -p "${ROOT_DIR}"
+git -C "${ROOT_DIR}" init -q
+git -C "${ROOT_DIR}" -c user.email=t@t -c user.name=t commit -q --allow-empty -m 'feat: base'
+git -C "${ROOT_DIR}" tag v1.0.0
+for msg in 'chore(deps): bump left from 1 to 2' \
+           'feat: unrelated work' \
+           'chore(deps-dev): bump right from 3 to 4' \
+           'chore(deps): bump left from 1 to 2'; do
+  git -C "${ROOT_DIR}" -c user.email=t@t -c user.name=t commit -q --allow-empty -m "${msg}"
+done
+
+check "no fragment yet → check warns" "1" \
+  "$(bash "${RN}" check 2>&1 >/dev/null | grep -c '^WARNING')"
+
+frag=$(bash "${RN}" deps 2>/dev/null)
+check "deps fragment is named for the slug" "${FRAG_DIR}/0001-dependency-updates.md" "${frag}"
+check "bumps deduped, prefix stripped, non-deps commits ignored" \
+  "[Chores]
+- Dependency updates: left from 1 to 2; right from 3 to 4." "$(cat "${frag}")"
+check "drafted fragment silences check" "" "$(bash "${RN}" check 2>&1 >/dev/null)"
+# The draft is meant to be rewritten; prose that drops the raw subjects must
+# still count as covered, or every well-curated release warns.
+check "hand-written prose still counts as covered" "" \
+  "$(printf '[Chores]\n- Routine dependency updates (#1, #2).\n' > "${frag}"
+     bash "${RN}" check 2>&1 >/dev/null)"
+check "unrelated fragment does not count as covered" "1" \
+  "$(printf '[Features]\n- a feature\n' > "${frag}"
+     bash "${RN}" check 2>&1 >/dev/null | grep -c '^WARNING')"
+rm "${frag}"
+check "check exits 0 even when warning" "0" \
+  "$(bash "${RN}" check >/dev/null 2>&1; echo $?)"
+# Runnable between releases to answer "has enough piled up to cut a build?"
+check "count reported on stdout regardless of coverage" \
+  "changelog.d: 2 dependency bump(s) in v1.0.0..HEAD" "$(bash "${RN}" check 2>/dev/null)"
+
+git -C "${ROOT_DIR}" tag v1.1.0
+check "window starts at the newest tag" \
+  "changelog.d: no dependency bumps in v1.1.0..HEAD — nothing to draft" \
+  "$(bash "${RN}" deps 2>/dev/null)"
+check "explicit since overrides the tag" "${FRAG_DIR}/0001-dependency-updates.md" \
+  "$(bash "${RN}" deps v1.0.0 2>/dev/null)"
 
 echo ""
 echo "${PASS} passed, ${FAIL} failed"
