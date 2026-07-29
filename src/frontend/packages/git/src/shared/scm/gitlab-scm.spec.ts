@@ -1,4 +1,6 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
+import { of } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 import { GitLabSCM } from './gitlab-scm';
 
@@ -31,5 +33,66 @@ describe('GitLabSCM access token', () => {
     scm.clearAccessToken();
     options = (scm as unknown as { options?: { headers?: Record<string, string> } }).options;
     expect(options?.headers).toEqual({});
+  });
+});
+
+describe('GitLabSCM nested subgroups', () => {
+  // Point the SCM at the public API root so getAPI() (no registered endpoint)
+  // returns { url: <root> } and we can assert the exact request URL.
+  const makeScm = () => {
+    const scm = new GitLabSCM('');
+    (scm as unknown as { publicApiUrl: string }).publicApiUrl = 'https://workshop.cloud.gov/api/v4';
+    return scm;
+  };
+
+  it('getRepository URL-encodes a nested group/subgroup/project path whole', () => {
+    const scm = makeScm();
+    const get = vi.fn().mockReturnValue(of({ path_with_namespace: 'cloud-gov/platform/rag-demo', namespace: { name: 'platform' } }));
+    const httpClient = { get } as any;
+
+    scm.getRepository(httpClient, 'cloud-gov/platform/rag-demo').pipe(take(1)).subscribe();
+
+    expect(get).toHaveBeenCalledTimes(1);
+    expect(get.mock.calls[0][0]).toBe(
+      'https://workshop.cloud.gov/api/v4/projects/cloud-gov%2Fplatform%2Frag-demo'
+    );
+  });
+
+  it('getRepository still resolves a simple two-segment path', () => {
+    const scm = makeScm();
+    const get = vi.fn().mockReturnValue(of({ path_with_namespace: 'group/repo', namespace: { name: 'group' } }));
+    const httpClient = { get } as any;
+
+    scm.getRepository(httpClient, 'group/repo').pipe(take(1)).subscribe();
+
+    expect(get.mock.calls[0][0]).toBe('https://workshop.cloud.gov/api/v4/projects/group%2Frepo');
+  });
+
+  it('getMatchingRepositories searches the group namespace (with subgroups), not /users, for a nested path', () => {
+    const scm = makeScm();
+    const get = vi.fn().mockReturnValue(of([]));
+    const httpClient = { get } as any;
+
+    scm.getMatchingRepositories(httpClient, 'cloud-gov/platform/rag').pipe(take(1)).subscribe();
+
+    const urls = get.mock.calls.map((c: unknown[]) => c[0] as string);
+    // Nested namespace is not a user, so the /users lookup must be skipped.
+    expect(urls.some(u => u.includes('/users/'))).toBe(false);
+    // The namespace (cloud-gov/platform) is URL-encoded and subgroups included.
+    expect(urls).toContain(
+      'https://workshop.cloud.gov/api/v4/groups/cloud-gov%2Fplatform/projects?search=rag&include_subgroups=true'
+    );
+  });
+
+  it('getMatchingRepositories still tries the /users lookup for a single-segment namespace', () => {
+    const scm = makeScm();
+    const get = vi.fn().mockReturnValue(of([]));
+    const httpClient = { get } as any;
+
+    scm.getMatchingRepositories(httpClient, 'someuser/rag').pipe(take(1)).subscribe();
+
+    const urls = get.mock.calls.map((c: unknown[]) => c[0] as string);
+    expect(urls).toContain('https://workshop.cloud.gov/api/v4/users/someuser/projects/?search=rag');
+    expect(urls).toContain('https://workshop.cloud.gov/api/v4/groups/someuser/projects?search=rag&include_subgroups=true');
   });
 });

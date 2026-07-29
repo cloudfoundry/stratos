@@ -69,9 +69,15 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
     const parts = projectName.split('/');
 
-    const obs$: Observable<unknown> = parts.length !== 2 ?
+    // GitLab projects can live in nested subgroups
+    // (group/subgroup/.../project), so any path with at least a namespace and
+    // a project (>= 2 segments) is valid. The full path is URL-encoded whole
+    // (cloud-gov/platform/rag-demo -> cloud-gov%2Fplatform%2Frag-demo) as
+    // GitLab's "project ID or URL-encoded path" API expects.
+    const obs$: Observable<unknown> = parts.length < 2 ?
       observableOf(null) :
-      this.getAPI(this.options).pipe(switchMap(api => httpClient.get(`${api.url}/projects/${parts.join('%2F')}`, api.requestArgs)));
+      this.getAPI(this.options).pipe(
+        switchMap(api => httpClient.get(`${api.url}/projects/${encodeURIComponent(projectName)}`, api.requestArgs)));
 
     return obs$.pipe(
       map((data: unknown) => {
@@ -177,12 +183,26 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
   }
 
   private getMatchingUserGroupRepositories(httpClient: HttpClient, prjParts: string[]): Observable<GitRepo[]> {
+    // The last segment is the (partial) project name being searched; every
+    // segment before it forms the namespace, which for nested subgroups is
+    // itself a slash-joined path (e.g. cloud-gov/platform). URL-encode the
+    // whole namespace so the subgroup separator survives as %2F. A user
+    // namespace is always a single segment, so only attempt the /users lookup
+    // when there's exactly one namespace segment — otherwise it 404s with
+    // "User Not Found" (a group path is not a user).
+    const search = prjParts[prjParts.length - 1];
+    const namespaceParts = prjParts.slice(0, -1);
+    const namespace = encodeURIComponent(namespaceParts.join('/'));
+    const isUserNamespace = namespaceParts.length === 1;
+
     return this.getAPI(this.options).pipe(
       switchMap(api => combineLatest([
-        httpClient.get<[]>(`${api.url}/users/${prjParts[0]}/projects/?search=${prjParts[1]}`, api.requestArgs).pipe(
-          catchError(() => of([]))
-        ),
-        httpClient.get<[]>(`${api.url}/groups/${prjParts[0]}/projects?search=${prjParts[1]}`, api.requestArgs).pipe(
+        isUserNamespace ?
+          httpClient.get<[]>(`${api.url}/users/${namespace}/projects/?search=${search}`, api.requestArgs).pipe(
+            catchError(() => of([]))
+          ) :
+          of([] as []),
+        httpClient.get<[]>(`${api.url}/groups/${namespace}/projects?search=${search}&include_subgroups=true`, api.requestArgs).pipe(
           catchError(() => of([]))
         ),
       ])),
