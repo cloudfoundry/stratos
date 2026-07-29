@@ -431,12 +431,15 @@ jobs:
         env:
           BASE: ${{ github.event.pull_request.base.sha }}
         run: |
-          if git diff --name-only --diff-filter=A "$BASE...HEAD" \
+          # AM, not A: appending to an existing fragment is how a change joins
+          # a note that is already there — a dependency bump landing after the
+          # fragment that covers its group, for instance.
+          if git diff --name-only --diff-filter=AM "$BASE...HEAD" \
              | grep -qE '^changelog\.d/[0-9]+-.*\.md$'; then
             echo "✅ Release-notes fragment present."
             exit 0
           fi
-          echo "::warning title=No release-notes fragment::This PR adds no changelog.d fragment, so it will not appear in the release notes. Run ./build/release-notes.sh new — or ignore this if the change needs no note."
+          echo "::warning title=No release-notes fragment::This PR neither adds nor updates a changelog.d fragment, so it will not appear in the release notes. Run ./build/release-notes.sh new — or ignore this if the change needs no note."
 
   pr-success:
     name: PR Quality Gate
