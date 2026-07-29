@@ -13,9 +13,17 @@ empty right after every release. Only this README is permanent.
 ./build/release-notes.sh new my-slug  # or pick a slug
 ```
 
-This creates `NNNN-<slug>.md` (NNNN = highest existing + 1). If a
-concurrent PR picks the same NNNN that's fine — the slug keeps the
-filenames distinct and ties just sort alphabetically.
+This creates `NNNN-<slug>.md` (NNNN = highest existing + 1). The number
+is only there to keep filenames distinct — it does **not** decide where
+your entry appears in the published notes, so if a concurrent PR picks
+the same NNNN that's fine and needs no coordination.
+
+Bullets are ordered by when each fragment **landed on develop**, taken
+from the commit that added the file. Nothing a contributor can write at
+authoring time could express that: you don't know the merge order while
+you're still working, two people branching from the same develop pick the
+same number, and even a PR number would only record the order PRs were
+*opened* — nothing requires them to merge in that order.
 
 Write your entry under the section header(s) it belongs to. One file can
 feed multiple sections:

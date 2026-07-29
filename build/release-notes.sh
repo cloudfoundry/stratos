@@ -31,6 +31,34 @@ fragments() {
   find "${FRAG_DIR}" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | LC_ALL=C sort
 }
 
+# Assembly order is when each fragment LANDED, not what it was named.
+#
+# The NNNN prefix cannot carry chronology: a contributor picks it before the
+# work merges, two people branching from the same develop pick the same one,
+# and PR numbers would only give the order PRs were OPENED — nothing requires
+# them to merge in that order. The commit that ADDED the fragment is the
+# authority, and its committer date is the merge time under both rebase- and
+# squash-merge, which is how this repo lands PRs.
+#
+# So the number is now purely a filename disambiguator, and a collision
+# between concurrent PRs is harmless again.
+#
+# --follow is load-bearing: renaming a fragment (renumbering it, say) would
+# otherwise register as a fresh add and jump the entry to the end of the
+# notes. Following the rename keeps the date the content actually landed.
+#
+# A fragment git has no record of is being written right now: it sorts last,
+# as the newest. Ties keep filename order (sort -s), so assembly stays
+# deterministic — including when FRAG_DIR is outside a repo and every
+# fragment falls back to the sentinel.
+fragments_by_landing() {
+  local file landed
+  for file in $(fragments); do
+    landed=$(git -C "${ROOT_DIR}" log --follow --diff-filter=A -1 --format=%ct -- "${file}" 2>/dev/null) || landed=''
+    printf '%s\t%s\n' "${landed:-9999999999}" "${file}"
+  done | LC_ALL=C sort -n -s -k1,1 | cut -f2-
+}
+
 # Next free NNNN-<slug>.md path. Errors if the slug is empty or taken.
 next_file() {
   local slug
@@ -157,7 +185,7 @@ cmd_check() {
 
 cmd_assemble() {
   local files
-  files=$(fragments)
+  files=$(fragments_by_landing)
   [ -n "${files}" ] || return 0
   # shellcheck disable=SC2086  # fragment paths contain no whitespace
   awk -v order="${SECTION_ORDER}" '
