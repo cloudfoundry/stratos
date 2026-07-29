@@ -16,7 +16,7 @@ import {
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../../cf-entity-generator';
-import { ApplicationDeploySourceTypes } from '../deploy-application-steps.types';
+import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { DeployApplicationStep2Component } from './deploy-application-step2.component';
 
 describe('DeployApplicationStep2Component', () => {
@@ -154,14 +154,41 @@ describe('DeployApplicationStep2Component', () => {
       expect(scmSpy.setPublicApi).toHaveBeenCalledWith('https://github.example.com/api/v3');
     });
 
-    it('skips token handling when the active SCM is neither GitHub nor GitLab', () => {
-      scmSpy.getType.mockReturnValue('bitbucket');
-      invoke('https://bitbucket.example.com', 'pat-should-be-ignored');
+    // Token handling used to be gated on the SCM type. It no longer is:
+    // setAccessToken/clearAccessToken are part of the GitSCM contract and
+    // GitSCMType is exactly 'github' | 'gitlab', so the guard could never be
+    // false. A provider added later has to implement the pair to compile.
+    it('clears the token for GitLab too when none is provided', () => {
+      scmSpy.getType.mockReturnValue('gitlab');
+      invoke('https://workshop.cloud.gov', '');
 
+      expect(scmSpy.clearAccessToken).toHaveBeenCalled();
       expect(scmSpy.setAccessToken).not.toHaveBeenCalled();
-      expect(scmSpy.clearAccessToken).not.toHaveBeenCalled();
     });
 
+  });
+
+  describe('scmBaseApiUrl', () => {
+    // The getter feeds the project-exists validator's own SCM instance. A
+    // half-typed URL must not reach it, or the validator queries a malformed
+    // host and reports "not found" for a repository that exists.
+    it('is empty while the entered base URL is invalid', () => {
+      component.gitMode = 'private';
+      component.sourceType = { id: DEPLOY_TYPES_IDS.GITLAB } as any;
+      component.githubEnterpriseUrl = 'not a url';
+      component.isInvalidGithubEnterpriseUrl = true;
+
+      expect(component.scmBaseApiUrl).toBe('');
+    });
+
+    it('normalizes a valid GitLab base URL', () => {
+      component.gitMode = 'private';
+      component.sourceType = { id: DEPLOY_TYPES_IDS.GITLAB } as any;
+      component.githubEnterpriseUrl = 'https://workshop.cloud.gov';
+      component.isInvalidGithubEnterpriseUrl = false;
+
+      expect(component.scmBaseApiUrl).toBe('https://workshop.cloud.gov/api/v4');
+    });
   });
 
   describe('git access mode (Public / Private / Enterprise tabs)', () => {

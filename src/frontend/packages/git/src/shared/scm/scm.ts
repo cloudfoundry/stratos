@@ -18,6 +18,12 @@ export interface GitSCM {
   getIcon(): SCMIcon;
   getPublicApi(): string;
   getAPI(): Observable<GitApiRequest>;
+  // Personal access token for a private or self-hosted instance, supplied in
+  // the deploy wizard rather than by a registered endpoint. Both providers
+  // carry it as an Authorization: Bearer header on every subsequent call, so
+  // callers can set or drop it without knowing which provider they hold.
+  setAccessToken(token: string): void;
+  clearAccessToken(): void;
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo>;
   getBranch(httpClient: HttpClient, projectName: string, branchId: string): Observable<GitBranch>;
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]>;

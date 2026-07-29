@@ -97,4 +97,41 @@ describe('GithubProjectExistsDirective', () => {
     const parsed = (directive as any).getTypeAndEndpointWithAuth();
     expect(parsed).toEqual(['gitlab', '', 'https://workshop.cloud.gov/api/v4', 'glpat-xyz']);
   });
+
+  // Nested subgroups are a GitLab feature. GitHub has no nested namespaces, so
+  // a three-segment path cannot resolve there and must be rejected locally
+  // rather than spending a request to find out.
+  describe('isValidProjectName', () => {
+    const isValid = (name: string, type?: string) => {
+      const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
+      return (directive as any).isValidProjectName(name, type);
+    };
+
+    it('accepts owner/repo for both providers', () => {
+      expect(isValid('owner/repo', 'github')).toBe(true);
+      expect(isValid('owner/repo', 'gitlab')).toBe(true);
+    });
+
+    it('accepts a nested subgroup path only for GitLab', () => {
+      expect(isValid('group/subgroup/repo', 'gitlab')).toBe(true);
+      expect(isValid('group/subgroup/repo', 'github')).toBe(false);
+    });
+
+    it('rejects a bare name with no namespace', () => {
+      expect(isValid('repo', 'gitlab')).toBe(false);
+      expect(isValid('repo', 'github')).toBe(false);
+    });
+
+    it('rejects a project name of 2 characters or fewer', () => {
+      expect(isValid('owner/ab', 'gitlab')).toBe(false);
+      expect(isValid('group/subgroup/ab', 'gitlab')).toBe(false);
+    });
+
+    // An unparseable context string yields no type; fall back to the stricter
+    // two-segment rule rather than admitting paths that may not resolve.
+    it('applies the stricter rule when the type is unknown', () => {
+      expect(isValid('owner/repo')).toBe(true);
+      expect(isValid('group/subgroup/repo')).toBe(false);
+    });
+  });
 });

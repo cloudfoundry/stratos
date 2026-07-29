@@ -84,6 +84,20 @@ describe('GitLabSCM nested subgroups', () => {
     );
   });
 
+  // The search term is user input landing in a query string. An unescaped &
+  // would truncate the parameter and a space would make the URL invalid.
+  it('getMatchingRepositories URL-encodes the search term', () => {
+    const scm = makeScm();
+    const get = vi.fn().mockReturnValue(of([]));
+    const httpClient = { get } as any;
+
+    scm.getMatchingRepositories(httpClient, 'someuser/a&b c').pipe(take(1)).subscribe();
+
+    const urls = get.mock.calls.map((c: unknown[]) => c[0] as string);
+    expect(urls.every(u => u.includes('search=a%26b%20c'))).toBe(true);
+    expect(urls.some(u => u.includes('search=a&b'))).toBe(false);
+  });
+
   it('getMatchingRepositories still tries the /users lookup for a single-segment namespace', () => {
     const scm = makeScm();
     const get = vi.fn().mockReturnValue(of([]));
