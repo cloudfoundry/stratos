@@ -36,6 +36,11 @@ type portalProxy struct {
 	APIKeysRepository    apikeys.Repository
 	PluginRegisterRoutes map[string]func(echo.Context) error
 	StoreFactory         api.StoreFactory
+	// indexHTMLTemplate is the pristine index.html, read once at startup;
+	// serveIndexHTML injects a per-response CSP nonce into a copy of it. Empty
+	// when the UI is not served from disk, which leaves the SPA document on the
+	// plain static path with no nonce and no CSP header.
+	indexHTMLTemplate string
 }
 
 // HttpSessionStore - Interface for a store that can manage HTTP Sessions
