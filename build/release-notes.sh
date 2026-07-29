@@ -3,6 +3,12 @@
 #
 #   release-notes.sh new [slug]   Create changelog.d/NNNN-<slug>.md
 #                                 (slug defaults to the current branch)
+#   release-notes.sh deps [since] Draft the dependency-updates fragment from
+#                                 the dependabot commits in the release
+#                                 window (since defaults to the last v* tag)
+#   release-notes.sh check [since] Warn if the window has dependency bumps
+#                                 with no dependency-updates fragment.
+#                                 Always exits 0 — this reports, never gates
 #   release-notes.sh assemble     Print fragments merged into the release
 #                                 layout on stdout (empty if no fragments)
 #   release-notes.sh sweep        git rm all fragments (post-publish; the
@@ -14,7 +20,7 @@
 
 set -euo pipefail
 
-ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
 FRAG_DIR="${FRAG_DIR:-${ROOT_DIR}/changelog.d}"
 
 # Section order is the release-notes layout: Breaking Changes lead when
@@ -25,9 +31,10 @@ fragments() {
   find "${FRAG_DIR}" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | LC_ALL=C sort
 }
 
-cmd_new() {
-  local slug="${1:-$(git -C "${ROOT_DIR}" branch --show-current)}"
-  slug=$(printf '%s' "${slug}" | tr '[:upper:]' '[:lower:]' \
+# Next free NNNN-<slug>.md path. Errors if the slug is empty or taken.
+next_file() {
+  local slug
+  slug=$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]' \
     | tr -cs 'a-z0-9' '-' | sed 's/^-*//; s/-*$//')
   if [ -z "${slug}" ]; then
     echo "ERROR: empty slug (detached HEAD?) — pass one: release-notes.sh new <slug>" >&2
@@ -45,8 +52,107 @@ cmd_new() {
     echo "ERROR: ${file} already exists" >&2
     exit 1
   fi
+  echo "${file}"
+}
+
+cmd_new() {
+  local file
+  file=$(next_file "${1:-$(git -C "${ROOT_DIR}" branch --show-current)}")
   printf '[Features]\n- \n' > "${file}"
   echo "${file}"
+}
+
+# The release window: <last v* tag>..HEAD, or all history before the first
+# tag. Dependabot is the reason this is derived rather than authored — it
+# opens PRs but never runs this script, so its bumps reach a release only if
+# something reads them out of the log.
+dep_range() {
+  local since="${1:-}"
+  if [ -z "${since}" ]; then
+    since=$(git -C "${ROOT_DIR}" describe --tags --match 'v[0-9]*' --abbrev=0 2>/dev/null || true)
+  fi
+  echo "${since:+${since}..}HEAD"
+}
+
+# Bump subjects in the window, prefix stripped, deduped, oldest first.
+# Keyed on the commit-message prefix pinned in .github/dependabot.yaml,
+# which also catches dependency work done by hand under the same prefix —
+# for a changelog bullet that is wanted, not a miss.
+dep_subjects() {
+  git -C "${ROOT_DIR}" log --reverse --no-merges --format='%s' \
+      --grep='^chore(deps' "$(dep_range "${1:-}")" -- 2>/dev/null \
+    | sed -E 's/^chore\(deps[^)]*\): *(bump )?//I' \
+    | awk 'NF && !seen[$0]++'
+}
+
+DEPS_SLUG='dependency-updates'
+
+cmd_deps() {
+  local subjects
+  subjects=$(dep_subjects "${1:-}")
+  if [ -z "${subjects}" ]; then
+    echo "changelog.d: no dependency bumps in $(dep_range "${1:-}") — nothing to draft"
+    return 0
+  fi
+  local file
+  file=$(next_file "${DEPS_SLUG}")
+  {
+    echo '[Chores]'
+    printf -- '- Dependency updates: %s.\n' \
+      "$(echo "${subjects}" | paste -sd ';' - | sed 's/;/; /g')"
+  } > "${file}"
+  echo "${file}"
+  echo "Drafted from $(echo "${subjects}" | wc -l | tr -d ' ') bump(s) in $(dep_range "${1:-}") — edit into prose before release." >&2
+}
+
+# When was dependency work last written up? Answering with a timestamp rather
+# than a yes/no is what makes the check survive an incremental window: a
+# fragment can only describe bumps that landed before it, so "does any
+# fragment mention dependencies" goes quiet the moment one does — even for
+# bumps that merge afterwards.
+#
+# The fragment side stays a loose text match: `deps` writes a DRAFT the author
+# is meant to rewrite, and prose that no longer quotes the raw subjects must
+# not warn on a well-curated release.
+#
+# A fragment git has no record of is being written right now, so it covers
+# everything; this also keeps the check quiet when FRAG_DIR sits outside the
+# repo. Prints nothing when no fragment mentions dependencies at all.
+newest_deps_fragment_time() {
+  local file t newest=0
+  for file in $(fragments); do
+    grep -qiE 'depend|bump' "${file}" 2>/dev/null || continue
+    t=$(git -C "${ROOT_DIR}" log -1 --format=%ct -- "${file}" 2>/dev/null) || t=''
+    [ -n "${t}" ] || { echo uncommitted; return 0; }
+    [ "${t}" -gt "${newest}" ] && newest=${t}
+  done
+  [ "${newest}" -gt 0 ] && echo "${newest}"
+}
+
+newest_dep_bump_time() {
+  git -C "${ROOT_DIR}" log -1 --format=%ct --no-merges \
+      --grep='^chore(deps' "$(dep_range "${1:-}")" -- 2>/dev/null
+}
+
+# The count goes to stdout unconditionally, so this doubles as an any-time
+# status command: "how much dependency work has piled up since the last
+# release" is the question that decides whether a patch build is due, and it
+# needs answering between releases, not only at tag time.
+cmd_check() {
+  local n frag bump why
+  n=$(dep_subjects "${1:-}" | wc -l | tr -d ' ')
+  echo "changelog.d: ${n} dependency bump(s) in $(dep_range "${1:-}")"
+  [ "${n}" -gt 0 ] || return 0
+
+  frag=$(newest_deps_fragment_time || true)
+  [ "${frag}" = uncommitted ] && return 0
+  bump=$(newest_dep_bump_time "${1:-}" || true)
+  { [ -n "${frag}" ] && [ -n "${bump}" ] && [ "${frag}" -ge "${bump}" ]; } && return 0
+
+  why='none of them are mentioned in any fragment'
+  [ -n "${frag}" ] && why='some landed after the newest fragment that mentions them'
+  echo "WARNING: ${why}, so they will not" >&2
+  echo "         appear in the release notes. Draft them: ./build/release-notes.sh deps" >&2
 }
 
 cmd_assemble() {
@@ -112,10 +218,12 @@ cmd_sweep() {
 
 case "${1:-}" in
   new)      shift; cmd_new "$@" ;;
+  deps)     shift; cmd_deps "$@" ;;
+  check)    shift; cmd_check "$@" ;;
   assemble) cmd_assemble ;;
   sweep)    cmd_sweep ;;
   *)
-    echo "Usage: release-notes.sh new [slug] | assemble | sweep" >&2
+    echo "Usage: release-notes.sh new [slug] | deps [since] | check [since] | assemble | sweep" >&2
     exit 1
     ;;
 esac

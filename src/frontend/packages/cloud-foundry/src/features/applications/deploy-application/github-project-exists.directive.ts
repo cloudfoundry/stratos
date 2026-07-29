@@ -23,12 +23,12 @@ const GITHUB_PROJECT_EXISTS = {
 })
 export class GithubProjectExistsDirective implements Validator, OnChanges {
 
-  // Value shape: `<scm type>,<endpoint guid>,<access token>`. Changing the
-  // token (or endpoint) must re-trigger validation — an NgControl async
-  // validator only re-runs when its OWN control (the project name) changes,
-  // so without OnChanges a token added AFTER the project name was entered
-  // would never be re-checked, leaving a stale "does not exist" from the
-  // earlier unauthenticated lookup.
+  // Value shape: `<scm type>,<endpoint guid>,<base api url>,<access token>`.
+  // Changing the token, endpoint, or base URL must re-trigger validation — an
+  // NgControl async validator only re-runs when its OWN control (the project
+  // name) changes, so without OnChanges a token/URL added AFTER the project
+  // name was entered would never be re-checked, leaving a stale "does not
+  // exist" from the earlier unauthenticated / wrong-host lookup.
   @Input() appGithubProjectExists!: string;
 
   private lastValue = '';
@@ -81,24 +81,27 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
   }
 
   // Reduce API calls trying to validate until we have a valid name
-  // Must be of the form USER/NAME - where NAME must be at least 2 charts in length
+  // Must be of the form OWNER/NAME (GitHub) or NAMESPACE/.../NAME (GitLab
+  // nested subgroups), i.e. at least two segments, and the final segment
+  // (the project name) must be more than 2 characters.
   private isValidProjectName(name: string) {
     const parts = name.split('/');
-    return parts.length === 2 && parts[1].length > 2;
+    return parts.length >= 2 && parts[parts.length - 1].length > 2;
   }
 
   private haveAlreadyChecked(name: string) {
     return this.lastValue.length && this.lastValue.indexOf(name) === 0;
   }
 
-  private getTypeAndEndpointWithAuth(): [GitSCMType, string, string] | null {
+  private getTypeAndEndpointWithAuth(): [GitSCMType, string, string, string] | null {
     const res = this.appGithubProjectExists.split(',');
-    if (res.length >= 3) {
+    if (res.length >= 4) {
       // A PAT can legitimately contain commas — rejoin everything after the
-      // scm type + endpoint guid so the token is passed intact.
-      return [res[0] as GitSCMType, res[1], res.slice(2).join(',')];
+      // scm type + endpoint guid + base URL so the token is passed intact.
+      // The base URL never contains a comma.
+      return [res[0] as GitSCMType, res[1], res[2], res.slice(3).join(',')];
     }
-    console.warn('appGithubProjectExists value should be `<scm type>,<endpoint guid>,<access token>`');
+    console.warn('appGithubProjectExists value should be `<scm type>,<endpoint guid>,<base api url>,<access token>`');
     return null;
   }
 
@@ -117,10 +120,19 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
         tap(createAppState => {
           const typeAndEndpoint = this.getTypeAndEndpointWithAuth();
           if (typeAndEndpoint && createAppState?.projectExists && createAppState.projectExists.name !== c.value) {
-            this.deployData.checkProjectExists(
-              this.scmService.getSCM(...typeAndEndpoint),
-              c.value,
-            );
+            const [type, endpointGuid, baseApiUrl, token] = typeAndEndpoint;
+            const scm = this.scmService.getSCM(type, endpointGuid, token || undefined);
+            // Private/Enterprise mode: the user typed a base URL (GitLab
+            // self-hosted, or GitHub Enterprise), so point the validator's SCM
+            // at that host. Without this the validator would hit the default
+            // public API (gitlab.com / api.github.com) and 404, showing a
+            // spurious "Repository not found" for a repo that lives on the
+            // self-hosted host. The suggestions path already does this via the
+            // component's own SCM; the validator uses its own instance.
+            if (baseApiUrl) {
+              (scm as unknown as { setPublicApi(url: string): void }).setPublicApi(baseApiUrl);
+            }
+            this.deployData.checkProjectExists(scm, c.value);
           }
         }),
         filter(createAppState =>

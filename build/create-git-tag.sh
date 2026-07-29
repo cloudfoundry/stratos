@@ -61,6 +61,9 @@ main() {
   # it via --notes-from-tag.
   local commit=$(git rev-parse --short HEAD)
   local notes
+  # Reported here, before the notes are frozen into the tag body, so the
+  # author can still act on it. Warns, never blocks.
+  "${ROOT_DIR}/build/release-notes.sh" check || true
   notes=$("${ROOT_DIR}/build/release-notes.sh" assemble)
   if [ -z "${notes}" ]; then
     warn "No changelog.d fragments — tag body falls back to a pointer line"

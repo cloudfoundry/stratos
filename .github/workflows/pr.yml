@@ -409,6 +409,38 @@ jobs:
           path: dist/bin/jetstream
           retention-days: 1
 
+  # Advisory only, and deliberately NOT in pr-success's needs: a hard failure
+  # here would fire on pipeline fixes, docs-only changes, reverts and bumps,
+  # and a gate with that false-positive rate gets routed around rather than
+  # obeyed. A ::warning:: renders inline on the Files tab; a plain log line
+  # would be invisible once the check goes green.
+  #
+  # Dependabot is exempt because it cannot act on the advice — it never runs
+  # release-notes.sh. Its bumps are picked up instead by
+  # `release-notes.sh check` at `make stamp tag` time, off the commit log.
+  changelog-fragment:
+    name: Changelog Fragment (advisory)
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.actor != 'dependabot[bot]'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check for a release-notes fragment
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          # AM, not A: appending to an existing fragment is how a change joins
+          # a note that is already there — a dependency bump landing after the
+          # fragment that covers its group, for instance.
+          if git diff --name-only --diff-filter=AM "$BASE...HEAD" \
+             | grep -qE '^changelog\.d/[0-9]+-.*\.md$'; then
+            echo "✅ Release-notes fragment present."
+            exit 0
+          fi
+          echo "::warning title=No release-notes fragment::This PR neither adds nor updates a changelog.d fragment, so it will not appear in the release notes. Run ./build/release-notes.sh new — or ignore this if the change needs no note."
+
   pr-success:
     name: PR Quality Gate
     runs-on: ubuntu-latest

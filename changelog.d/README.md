@@ -46,3 +46,31 @@ Preview the assembled notes any time:
 ```bash
 ./build/release-notes.sh assemble
 ```
+
+## Dependency updates
+
+Dependabot opens PRs but never runs this tooling, so its bumps are read out
+of the commit log instead of being authored per PR — they are identified by
+the `chore(deps)` commit prefix pinned in `.github/dependabot.yaml`.
+
+```bash
+./build/release-notes.sh check   # how many bumps since the last release tag
+./build/release-notes.sh deps    # draft NNNN-dependency-updates.md from them
+```
+
+`check` is safe to run at any time and answers "has enough piled up to be
+worth a build yet?". It also runs automatically during `make stamp tag`,
+before the notes are frozen into the tag body, and warns there if bumps
+landed that no fragment mentions. It only ever warns — it never blocks.
+
+`deps` writes a draft, one bump per clause. Edit it into prose before the
+release; the prose is what ships. Both commands take an optional starting
+ref (`./build/release-notes.sh deps v5.0.0-dev.147`) when the window should
+not be the last tag.
+
+Because both read the commit log, they only see bumps that have **landed on
+this branch** — a bump still sitting in an open PR is not counted.
+
+A pull request that adds no fragment at all gets a non-blocking warning on
+the Files tab. Dependabot's own PRs are exempt from it, since they are
+covered by the two commands above.

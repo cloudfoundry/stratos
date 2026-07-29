@@ -41,22 +41,23 @@ describe('GithubProjectExistsDirective', () => {
 
     // First change only records the baseline — it must NOT re-run validation
     // or clear cached state (see redeploy-seed guard below).
-    directive.appGithubProjectExists = 'github,,';
+    // Value shape: `<scm type>,<endpoint guid>,<base api url>,<access token>`.
+    directive.appGithubProjectExists = 'github,,,';
     directive.ngOnChanges({
-      appGithubProjectExists: { currentValue: 'github,,', previousValue: undefined, firstChange: true, isFirstChange: () => true },
+      appGithubProjectExists: { currentValue: 'github,,,', previousValue: undefined, firstChange: true, isFirstChange: () => true },
     } as any);
     expect(reRuns).toBe(0);
 
     // Token added — auth context changed, so validation must re-run.
-    directive.appGithubProjectExists = 'github,,ghp_secrettoken';
+    directive.appGithubProjectExists = 'github,,,ghp_secrettoken';
     directive.ngOnChanges({
-      appGithubProjectExists: { currentValue: 'github,,ghp_secrettoken', previousValue: 'github,,', firstChange: false, isFirstChange: () => false },
+      appGithubProjectExists: { currentValue: 'github,,,ghp_secrettoken', previousValue: 'github,,,', firstChange: false, isFirstChange: () => false },
     } as any);
     expect(reRuns).toBe(1);
 
     // Same value again — no auth change, so no extra re-run.
     directive.ngOnChanges({
-      appGithubProjectExists: { currentValue: 'github,,ghp_secrettoken', previousValue: 'github,,ghp_secrettoken', firstChange: false, isFirstChange: () => false },
+      appGithubProjectExists: { currentValue: 'github,,,ghp_secrettoken', previousValue: 'github,,,ghp_secrettoken', firstChange: false, isFirstChange: () => false },
     } as any);
     expect(reRuns).toBe(1);
   });
@@ -75,9 +76,9 @@ describe('GithubProjectExistsDirective', () => {
     };
     const clearSpy = vi.spyOn(deployData, 'projectDoesntExist');
 
-    directive.appGithubProjectExists = 'github,747ed39a-guid,';
+    directive.appGithubProjectExists = 'github,747ed39a-guid,,';
     directive.ngOnChanges({
-      appGithubProjectExists: { currentValue: 'github,747ed39a-guid,', previousValue: undefined, firstChange: true, isFirstChange: () => true },
+      appGithubProjectExists: { currentValue: 'github,747ed39a-guid,,', previousValue: undefined, firstChange: true, isFirstChange: () => true },
     } as any);
 
     expect(clearSpy).not.toHaveBeenCalled();
@@ -85,8 +86,15 @@ describe('GithubProjectExistsDirective', () => {
 
   it('preserves commas in the access token when splitting the auth context', () => {
     const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
-    directive.appGithubProjectExists = 'github,,tok,en,with,commas';
+    directive.appGithubProjectExists = 'github,,,tok,en,with,commas';
     const parsed = (directive as any).getTypeAndEndpointWithAuth();
-    expect(parsed).toEqual(['github', '', 'tok,en,with,commas']);
+    expect(parsed).toEqual(['github', '', '', 'tok,en,with,commas']);
+  });
+
+  it('parses the base api url (GitLab self-hosted) between the guid and the token', () => {
+    const directive = TestBed.runInInjectionContext(() => new GithubProjectExistsDirective());
+    directive.appGithubProjectExists = 'gitlab,,https://workshop.cloud.gov/api/v4,glpat-xyz';
+    const parsed = (directive as any).getTypeAndEndpointWithAuth();
+    expect(parsed).toEqual(['gitlab', '', 'https://workshop.cloud.gov/api/v4', 'glpat-xyz']);
   });
 });

@@ -2,6 +2,12 @@
 
 version: 2
 
+# The commit-message prefix is pinned on every ecosystem below, not left to
+# Dependabot's default: build/release-notes.sh reads the bumps for a release
+# window straight out of the commit log with `--grep '^chore(deps'`, since
+# Dependabot opens PRs but never runs the fragment tooling itself. Change a
+# prefix here and those bumps stop reaching the release notes.
+
 # Disable Dependabot during Angular
 updates:
   # bun ecosystem, not npm: the lockfile is bun.lock (no package-lock.json),
@@ -11,12 +17,18 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
     open-pull-requests-limit: 0 # version updates off; security updates still open PRs
 
   - package-ecosystem: "bun"
     directory: "/website"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
     open-pull-requests-limit: 2
     groups: # one grouped PR so the site's dep tree doesn't dominate the list
       website:
@@ -27,5 +39,8 @@ updates:
     directory: "src/jetstream/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
     open-pull-requests-limit: 0 # GoLang CVE updates being done as part of refactor
     

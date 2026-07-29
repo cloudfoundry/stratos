@@ -1,0 +1,2 @@
+[Chores]
+- Dependency bumps now reach the release notes on their own: `release-notes.sh check` reports how many have landed since the last tag and `release-notes.sh deps` drafts the fragment from them, both reading the `chore(deps)` commit prefix now pinned in the Dependabot config. `make stamp tag` runs the check before freezing the tag body, and pull requests that add no fragment get a non-blocking warning on the Files tab.
