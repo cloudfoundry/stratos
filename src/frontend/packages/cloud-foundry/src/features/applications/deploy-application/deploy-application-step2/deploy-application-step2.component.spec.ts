@@ -129,9 +129,34 @@ describe('DeployApplicationStep2Component', () => {
       expect(scmSpy.setPublicApi).not.toHaveBeenCalled();
     });
 
-    it('skips token handling when the active SCM is not GitHub (e.g. GitLab)', () => {
+    it('applies the access token for GitLab too, and normalizes the base URL to /api/v4', () => {
       scmSpy.getType.mockReturnValue('gitlab');
-      invoke('https://gitlab.example.com/api/v4', 'pat-should-be-ignored');
+      // User types the plain host; we append the GitLab API root before it
+      // reaches the SCM.
+      invoke('https://workshop.cloud.gov', 'pat-gitlab');
+
+      expect(scmSpy.setPublicApi).toHaveBeenCalledWith('https://workshop.cloud.gov/api/v4');
+      expect(scmSpy.setAccessToken).toHaveBeenCalledWith('pat-gitlab');
+      expect(scmSpy.clearAccessToken).not.toHaveBeenCalled();
+    });
+
+    it('does not double-append /api/v4 when the GitLab base URL already includes it', () => {
+      scmSpy.getType.mockReturnValue('gitlab');
+      invoke('https://workshop.cloud.gov/api/v4', 'pat-gitlab');
+
+      expect(scmSpy.setPublicApi).toHaveBeenCalledWith('https://workshop.cloud.gov/api/v4');
+    });
+
+    it('does not append /api/v4 for a GitHub Enterprise base URL', () => {
+      scmSpy.getType.mockReturnValue('github');
+      invoke('https://github.example.com/api/v3', 'pat-abc123');
+
+      expect(scmSpy.setPublicApi).toHaveBeenCalledWith('https://github.example.com/api/v3');
+    });
+
+    it('skips token handling when the active SCM is neither GitHub nor GitLab', () => {
+      scmSpy.getType.mockReturnValue('bitbucket');
+      invoke('https://bitbucket.example.com', 'pat-should-be-ignored');
 
       expect(scmSpy.setAccessToken).not.toHaveBeenCalled();
       expect(scmSpy.clearAccessToken).not.toHaveBeenCalled();
@@ -186,6 +211,26 @@ describe('DeployApplicationStep2Component', () => {
       expect(component.gitMode).toBe('enterprise');
       expect(component.githubEnterpriseUrl).toBe('https://github.corp.com');
       expect(component.accessToken).toBe('tok');
+    });
+  });
+
+  describe('normalizeGitlabApiUrl', () => {
+    const normalize = (u: string) => DeployApplicationStep2Component.normalizeGitlabApiUrl(u);
+
+    it('appends /api/v4 to a plain host', () => {
+      expect(normalize('https://workshop.cloud.gov')).toBe('https://workshop.cloud.gov/api/v4');
+    });
+
+    it('trims a trailing slash before appending', () => {
+      expect(normalize('https://workshop.cloud.gov/')).toBe('https://workshop.cloud.gov/api/v4');
+    });
+
+    it('is idempotent when /api/v4 is already present', () => {
+      expect(normalize('https://workshop.cloud.gov/api/v4')).toBe('https://workshop.cloud.gov/api/v4');
+    });
+
+    it('is idempotent when /api/v4 is present with a trailing slash', () => {
+      expect(normalize('https://workshop.cloud.gov/api/v4/')).toBe('https://workshop.cloud.gov/api/v4');
     });
   });
 

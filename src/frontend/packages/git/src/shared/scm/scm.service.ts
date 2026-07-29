@@ -29,7 +29,7 @@ export class GitSCMService {
       case 'github':
         return new GitHubSCM(this.gitHubURL, endpointGuid, accessToken, this.endpointsData, this.injector);
       case 'gitlab':
-        return new GitLabSCM(endpointGuid, this.endpointsData, this.injector);
+        return new GitLabSCM(endpointGuid, accessToken, this.endpointsData, this.injector);
     }
   }
 }
