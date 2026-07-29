@@ -105,20 +105,33 @@ cmd_deps() {
   echo "Drafted from $(echo "${subjects}" | wc -l | tr -d ' ') bump(s) in $(dep_range "${1:-}") — edit into prose before release." >&2
 }
 
-# Does any fragment cover dependency work? Deliberately a loose text match and
-# not an exact one against the bump subjects: `deps` writes a DRAFT that the
-# author is meant to rewrite into prose, and prose that no longer quotes the
-# raw subjects would make an exact match warn on every well-curated release.
+# When was dependency work last written up? Answering with a timestamp rather
+# than a yes/no is what makes the check survive an incremental window: a
+# fragment can only describe bumps that landed before it, so "does any
+# fragment mention dependencies" goes quiet the moment one does — even for
+# bumps that merge afterwards.
 #
-# Known limit: a dependency fragment left behind from an already-published
-# window silences the report for the current one. `make sweep` after each
-# release is what keeps that from happening; the directory is meant to be
-# empty right after a release (see changelog.d/README.md).
-has_deps_fragment() {
-  local files
-  files=$(fragments)
-  [ -n "${files}" ] || return 1   # empty input would leave grep reading stdin
-  echo "${files}" | xargs grep -qiE 'depend|bump' 2>/dev/null
+# The fragment side stays a loose text match: `deps` writes a DRAFT the author
+# is meant to rewrite, and prose that no longer quotes the raw subjects must
+# not warn on a well-curated release.
+#
+# A fragment git has no record of is being written right now, so it covers
+# everything; this also keeps the check quiet when FRAG_DIR sits outside the
+# repo. Prints nothing when no fragment mentions dependencies at all.
+newest_deps_fragment_time() {
+  local file t newest=0
+  for file in $(fragments); do
+    grep -qiE 'depend|bump' "${file}" 2>/dev/null || continue
+    t=$(git -C "${ROOT_DIR}" log -1 --format=%ct -- "${file}" 2>/dev/null) || t=''
+    [ -n "${t}" ] || { echo uncommitted; return 0; }
+    [ "${t}" -gt "${newest}" ] && newest=${t}
+  done
+  [ "${newest}" -gt 0 ] && echo "${newest}"
+}
+
+newest_dep_bump_time() {
+  git -C "${ROOT_DIR}" log -1 --format=%ct --no-merges \
+      --grep='^chore(deps' "$(dep_range "${1:-}")" -- 2>/dev/null
 }
 
 # The count goes to stdout unconditionally, so this doubles as an any-time
@@ -126,11 +139,19 @@ has_deps_fragment() {
 # release" is the question that decides whether a patch build is due, and it
 # needs answering between releases, not only at tag time.
 cmd_check() {
-  local n
+  local n frag bump why
   n=$(dep_subjects "${1:-}" | wc -l | tr -d ' ')
   echo "changelog.d: ${n} dependency bump(s) in $(dep_range "${1:-}")"
-  { [ "${n}" -gt 0 ] && ! has_deps_fragment; } || return 0
-  echo "WARNING: none of them are mentioned in any fragment, so they will not" >&2
+  [ "${n}" -gt 0 ] || return 0
+
+  frag=$(newest_deps_fragment_time || true)
+  [ "${frag}" = uncommitted ] && return 0
+  bump=$(newest_dep_bump_time "${1:-}" || true)
+  { [ -n "${frag}" ] && [ -n "${bump}" ] && [ "${frag}" -ge "${bump}" ]; } && return 0
+
+  why='none of them are mentioned in any fragment'
+  [ -n "${frag}" ] && why='some landed after the newest fragment that mentions them'
+  echo "WARNING: ${why}, so they will not" >&2
   echo "         appear in the release notes. Draft them: ./build/release-notes.sh deps" >&2
 }
 
