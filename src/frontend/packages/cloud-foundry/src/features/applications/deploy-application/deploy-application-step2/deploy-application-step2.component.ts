@@ -9,7 +9,6 @@ import {
   GitBranch,
   GitCommit,
   GitDataService,
-  GitHubSCM,
   GitRepo,
   GitSCM,
   GitSCMService,
@@ -152,6 +151,21 @@ export class DeployApplicationStep2Component
   // in Public mode.
   get projectExistsEndpointGuid(): string {
     return this.gitMode === 'public' ? (this.sourceType?.endpointGuid ?? '') : '';
+  }
+
+  // Base API URL to pass to the project-exists validator so its own SCM
+  // instance targets the same host the suggestions/lookup SCM does. Empty in
+  // Public mode (the validator uses the registered endpoint / default public
+  // API). In Private/Enterprise mode it's the user-supplied base URL,
+  // normalized to /api/v4 for GitLab so the validator hits the REST API rather
+  // than the web UI (which 302-redirects and yields a false "not found").
+  get scmBaseApiUrl(): string {
+    if (this.gitMode === 'public' || !this.githubEnterpriseUrl) {
+      return '';
+    }
+    return this.sourceType?.id === DEPLOY_TYPES_IDS.GITLAB
+      ? DeployApplicationStep2Component.normalizeGitlabApiUrl(this.githubEnterpriseUrl)
+      : this.githubEnterpriseUrl;
   }
 
   // Git URL
@@ -422,9 +436,9 @@ export class DeployApplicationStep2Component
   }
 
   // Forwards the two optional inputs (GHE base URL, GitHub PAT) into the
-  // active GitHubSCM instance so that subsequent repo/branch/commit API calls
-  // target the right host with the right Authorization header. Silent no-op
-  // when the active SCM is not GitHub (e.g. GitLab selected).
+  // active SCM instance so that subsequent repo/branch/commit API calls
+  // target the right host with the right Authorization header. Applies to
+  // both GitHub (Enterprise) and self-hosted GitLab.
   private applyGithubEnterpriseAndToken(enterpriseUrl: string | undefined, token: string | undefined) {
     if (!this.scm) {
       return;
@@ -440,14 +454,30 @@ export class DeployApplicationStep2Component
     this.isInvalidGithubEnterpriseUrl = !!enterpriseUrl && !isValidUrl(enterpriseUrl);
 
     if (enterpriseUrl && !this.isInvalidGithubEnterpriseUrl) {
-      (this.scm as unknown as BaseSCM).setPublicApi(enterpriseUrl);
+      // GitLab's REST API lives under /api/v4. Users type the plain host
+      // (e.g. https://workshop.cloud.gov) in the Self-hosted GitLab field, so
+      // normalize to the API root before it reaches the SCM — otherwise every
+      // call hits the GitLab web UI (which 302-redirects to /users/sign_in for
+      // an unauthenticated browser request, producing the CORS/redirect errors
+      // and a spurious "Repository not found"). GitHub Enterprise users type
+      // the full /api/v3 URL themselves, so only GitLab needs this.
+      const apiUrl = this.scm.getType() === 'gitlab'
+        ? DeployApplicationStep2Component.normalizeGitlabApiUrl(enterpriseUrl)
+        : enterpriseUrl;
+      (this.scm as unknown as BaseSCM).setPublicApi(apiUrl);
     }
 
-    if (this.scm.getType() === 'github') {
+    // Apply/clear the PAT for both GitHub and GitLab (both expose
+    // setAccessToken/clearAccessToken). Previously this was gated to GitHub
+    // only, so a GitLab token typed in Private/Enterprise mode was never sent
+    // and private / self-hosted GitLab projects 404'd.
+    const scmType = this.scm.getType();
+    if (scmType === 'github' || scmType === 'gitlab') {
+      const tokenScm = this.scm as unknown as { setAccessToken(t: string): void; clearAccessToken(): void };
       if (token) {
-        (this.scm as GitHubSCM).setAccessToken(token);
+        tokenScm.setAccessToken(token);
       } else {
-        (this.scm as GitHubSCM).clearAccessToken();
+        tokenScm.clearAccessToken();
       }
     }
   }
@@ -487,6 +517,21 @@ export class DeployApplicationStep2Component
       return 'private';
     }
     return 'public';
+  }
+
+  // Normalize a self-hosted GitLab base URL to its REST API root. The user
+  // types the plain host (e.g. https://workshop.cloud.gov); the GitLab API is
+  // served from `<host>/api/v4`. Idempotent: a URL that already ends in
+  // /api/v4 (with or without a trailing slash) is returned unchanged, and any
+  // trailing slash on the host is trimmed first so we never emit a double
+  // slash. Falls back to the raw input if it isn't a parseable URL (the caller
+  // has already flagged invalid URLs via isInvalidGithubEnterpriseUrl).
+  static normalizeGitlabApiUrl(baseUrl: string): string {
+    const trimmed = baseUrl.replace(/\/+$/, '');
+    if (/\/api\/v4$/.test(trimmed)) {
+      return trimmed;
+    }
+    return `${trimmed}/api/v4`;
   }
 
   // Tab handler: switch the active access mode and clear the now-irrelevant

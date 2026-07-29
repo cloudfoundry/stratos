@@ -1,0 +1,2 @@
+[BugFixes]
+- Deploying an application from a private or self-hosted GitLab now works: the access token entered in the deploy wizard is applied to every GitLab API call (previously only GitHub tokens were sent, so private/self-hosted GitLab lookups were unauthenticated and returned "Repository not found"), and the GitLab base URL is normalized to its `/api/v4` REST root so users can enter just the host (e.g. `https://gitlab.example.com`) instead of the full API URL.
