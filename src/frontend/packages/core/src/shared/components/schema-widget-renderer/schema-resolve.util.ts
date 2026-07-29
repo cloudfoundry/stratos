@@ -96,7 +96,7 @@ export function classifyNode(node: JsonSchema, root: JsonSchema): ResolvedNode {
  */
 export function schemaToSkeleton(schema: JsonSchema, root: JsonSchema = schema, seen: Set<JsonSchema> = new Set()): unknown {
   const node = classifyNode(schema, root);
-  // ponytail: guard self-referential $ref schemas (recursive defs) — emit null rather than recurse forever.
+  // NOTE: guard self-referential $ref schemas (recursive defs) — emit null rather than recurse forever.
   if (seen.has(node.schema)) {
     return null;
   }
@@ -165,7 +165,7 @@ export function mergeSkeleton(skeleton: unknown, data: unknown): unknown {
  * objects that become empty after cleaning — while KEEPING meaningful falsy values
  * (`false`, `0`). Used so the params actually submitted contain only what the user
  * set: an untouched JSON skeleton collapses to `undefined` (→ no params).
- * ponytail: empty strings are treated as unset and dropped; a broker needing a
+ * simplification: empty strings are treated as unset and dropped; a broker needing a
  * literal "" param isn't supported here — out of scope for the schema editor.
  */
 export function stripEmpty(value: unknown): unknown {
