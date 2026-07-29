@@ -80,10 +80,8 @@ const (
 	defaultSessionSecret = "wheeee!"
 )
 
-// defaultCSPPolicy is the Content-Security-Policy applied when CONSOLE_CSP is
-// set to "default" (or "on"). CSP is opt-in: with CONSOLE_CSP unset, no header
-// is emitted (preserving prior behavior). It is scoped to what the Stratos SPA
-// needs:
+// defaultCSPPolicy is the Content-Security-Policy applied unless CONSOLE_CSP
+// opts out or supplies its own. It is scoped to what the Stratos SPA needs:
 //   - default/script/connect from same origin ('self'); same-origin 'self'
 //     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
 //   - 'unsafe-inline' styles: Angular + the index.html loading splash inject
@@ -643,19 +641,19 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 
 	log.Debugf("Portal config auth endpoint type initialised to: %v", pc.AuthEndpointType)
 
-	// Content Security Policy (opt-in). To preserve existing behavior, no CSP
-	// header is emitted unless CONSOLE_CSP opts in. Recognized values:
-	//   - "default" / "on" -> apply the built-in defaultCSPPolicy (scoped to
+	// Content Security Policy. Recognized values:
+	//   - unset / "default" / "on" -> the built-in defaultCSPPolicy (scoped to
 	//     what the Stratos SPA + Monaco editor need)
-	//   - "" / "off" / "none" / "false" / "disabled" -> no header (default)
+	//   - "off" / "none" / "false" / "disabled" -> no header
 	//   - anything else -> treated as a full policy string, used verbatim
 	// The explicit off-values are normalized to "" so a well-meaning
 	// CONSOLE_CSP=off never leaks as a literal Content-Security-Policy value.
 	switch {
-	case strings.EqualFold(pc.CSPPolicy, "default"), strings.EqualFold(pc.CSPPolicy, "on"):
-		pc.CSPPolicy = defaultCSPPolicy
 	case pc.CSPPolicy == "",
-		strings.EqualFold(pc.CSPPolicy, "off"),
+		strings.EqualFold(pc.CSPPolicy, "default"),
+		strings.EqualFold(pc.CSPPolicy, "on"):
+		pc.CSPPolicy = defaultCSPPolicy
+	case strings.EqualFold(pc.CSPPolicy, "off"),
 		strings.EqualFold(pc.CSPPolicy, "none"),
 		strings.EqualFold(pc.CSPPolicy, "false"),
 		strings.EqualFold(pc.CSPPolicy, "disabled"):
