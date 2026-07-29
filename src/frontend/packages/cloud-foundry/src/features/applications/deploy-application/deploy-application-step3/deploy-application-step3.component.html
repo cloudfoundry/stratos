@@ -5,6 +5,6 @@
   }
 </div>
 @if (deployer) {
-  <app-log-viewer style="flex: 1 1 0%; min-height: 0; display: flex;" [logStream]="deployer.messages.asObservable()">
+  <app-log-viewer class="flex-1 min-h-0 flex" [logStream]="deployer.messages.asObservable()">
   </app-log-viewer>
 }

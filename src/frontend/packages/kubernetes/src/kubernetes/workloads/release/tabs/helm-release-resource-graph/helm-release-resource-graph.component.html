@@ -28,7 +28,7 @@
           <svg:text alignment-baseline="top">
             <svg:tspan [attr.fill]="node.data.text" x="10" dy="1.2em" font-size="32px"
               [attr.font-family]="node.data.icon.font">{{ node.data.icon.name }}</svg:tspan>
-              <svg:tspan [attr.fill]="node.data.text" x="52" dy="-1.2em" style="font-weight: bold">{{node.label}}</svg:tspan>
+              <svg:tspan [attr.fill]="node.data.text" x="52" dy="-1.2em" font-weight="bold">{{node.label}}</svg:tspan>
                 <svg:tspan [attr.fill]="node.data.text" x="52" dy="1.5em">{{node.data.kind}}</svg:tspan>
                   </svg:text>
                   <!--
@@ -42,12 +42,12 @@
                       @if (!node.data.alerts) {
                         <svg:rect [attr.stroke-dasharray]="node.data.dash" x="-2" y="-2" rx="4" ry="4"
                           [attr.width]="node.dimension.width + 4" [attr.height]="node.dimension.height + 4"
-                          style="stroke:black;stroke-width:2;fill:none;"></svg:rect>
+                          stroke="black" stroke-width="2" fill="none"></svg:rect>
                         }
                         @if (node.data.alerts) {
                           <svg:rect x="-2" y="-2" rx="4" ry="4" [attr.stroke]="node.data.alertSummary.color"
                             [attr.width]="node.dimension.width + 4" [attr.height]="node.dimension.height + 4"
-                            style="stroke-width:5;fill:none;"></svg:rect>
+                            stroke-width="5" fill="none"></svg:rect>
                           }
                           </svg:g>
                         </ng-template>

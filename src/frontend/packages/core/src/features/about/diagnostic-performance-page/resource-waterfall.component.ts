@@ -281,8 +281,7 @@ export function rowLabel(path: string): string {
             <div class="w-56 shrink-0 pr-2 text-xs leading-5 text-content-muted truncate">{{ rowLabel(g.rows[0].path) }}</div>
             <div class="relative flex-1 min-w-0">
               <div
-                class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded bg-[#2a78d6] dark:bg-[#3987e5]"
-                style="min-width: 2px"
+                class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded bg-[#2a78d6] dark:bg-[#3987e5] min-w-[2px]"
                 [style.left.%]="pct(g.rows[0].startMs)"
                 [style.width.%]="spanPct(g.rows[0].startMs, g.rows[0].durationMs)"></div>
             </div>
@@ -298,8 +297,7 @@ export function rowLabel(path: string): string {
             </span>
             <span class="relative flex-1 min-w-0">
               <span
-                class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded bg-[#2a78d6] dark:bg-[#3987e5] opacity-70"
-                style="min-width: 2px"
+                class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded bg-[#2a78d6] dark:bg-[#3987e5] opacity-70 min-w-[2px]"
                 [style.left.%]="pct(g.startMs)"
                 [style.width.%]="spanPct(g.startMs, g.endMs - g.startMs)"></span>
             </span>
@@ -310,8 +308,7 @@ export function rowLabel(path: string): string {
                 <div class="w-56 shrink-0 pl-3 pr-2 text-xs leading-5 text-content-muted truncate">{{ rowLabel(r.path) }}</div>
                 <div class="relative flex-1 min-w-0">
                   <div
-                    class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded bg-[#2a78d6] dark:bg-[#3987e5]"
-                    style="min-width: 2px"
+                    class="absolute top-1/2 -translate-y-1/2 h-2.5 rounded bg-[#2a78d6] dark:bg-[#3987e5] min-w-[2px]"
                     [style.left.%]="pct(r.startMs)"
                     [style.width.%]="spanPct(r.startMs, r.durationMs)"></div>
                 </div>

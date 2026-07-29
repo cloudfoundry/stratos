@@ -33,8 +33,7 @@ export function barWidthPercent(bytes: number, maxBytes: number): number {
           <div class="w-56 shrink-0 pr-2 text-xs text-content-muted truncate">{{ basename(r.path) }}</div>
           <div class="flex-1 min-w-0 flex items-center gap-2">
             <div
-              class="h-3 shrink-0"
-              style="min-width: 2px"
+              class="h-3 shrink-0 min-w-[2px]"
               [class]="r.cached
                 ? 'rounded bg-transparent border-[1.5px] border-solid border-[#2a78d6] dark:border-[#3987e5]'
                 : 'rounded bg-[#2a78d6] dark:bg-[#3987e5]'"
