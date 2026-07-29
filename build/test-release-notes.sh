@@ -154,6 +154,29 @@ check "stale fragment from a past window does not cover" "1" \
 rm "${frag}"
 commit_frag 2026-01-17T00:00:00 'changelog: sweep'
 
+# Assembly order follows when a fragment LANDED, not its NNNN prefix. A
+# contributor cannot know the merge order at authoring time, so a fragment
+# numbered lower can legitimately land later.
+echo "assemble ordering:"
+printf '[Features]\n- numbered first, landed second.\n' > "${FRAG_DIR}/0010-early-number.md"
+commit_frag 2026-02-02T00:00:00 'changelog: the low number, landing later'
+printf '[Features]\n- numbered second, landed first.\n' > "${FRAG_DIR}/0020-late-number.md"
+commit_frag 2026-02-01T00:00:00 'changelog: the high number, landing earlier'
+check "bullets follow landing order, not filename order" \
+  "[Features]
+- numbered second, landed first.
+- numbered first, landed second." "$(bash "${RN}" assemble)"
+
+# An unlanded fragment is the newest thing there is.
+printf '[Features]\n- still being written.\n' > "${FRAG_DIR}/0005-uncommitted.md"
+check "an uncommitted fragment sorts last" \
+  "[Features]
+- numbered second, landed first.
+- numbered first, landed second.
+- still being written." "$(bash "${RN}" assemble)"
+rm "${FRAG_DIR}/0005-uncommitted.md" "${FRAG_DIR}/0010-early-number.md" "${FRAG_DIR}/0020-late-number.md"
+commit_frag 2026-02-03T00:00:00 'changelog: sweep the ordering fixtures'
+
 echo "window:"
 repo_git tag v1.1.0
 check "window starts at the newest tag" \
