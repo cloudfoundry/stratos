@@ -159,8 +159,13 @@ export class DeployApplicationStep2Component
   // API). In Private/Enterprise mode it's the user-supplied base URL,
   // normalized to /api/v4 for GitLab so the validator hits the REST API rather
   // than the web UI (which 302-redirects and yields a false "not found").
+  //
+  // A half-typed URL is treated as no URL: applyGithubEnterpriseAndToken
+  // already refuses to setPublicApi while isInvalidGithubEnterpriseUrl is set,
+  // and without the same guard here the validator's SCM would be pointed at a
+  // malformed host and report "not found" for a repository that exists.
   get scmBaseApiUrl(): string {
-    if (this.gitMode === 'public' || !this.githubEnterpriseUrl) {
+    if (this.gitMode === 'public' || !this.githubEnterpriseUrl || this.isInvalidGithubEnterpriseUrl) {
       return '';
     }
     return this.sourceType?.id === DEPLOY_TYPES_IDS.GITLAB
