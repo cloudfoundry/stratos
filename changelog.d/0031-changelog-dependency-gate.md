@@ -1,2 +1,3 @@
 [Chores]
 - Dependency bumps now reach the release notes on their own: `release-notes.sh check` reports how many have landed since the last tag and `release-notes.sh deps` drafts the fragment from them, both reading the `chore(deps)` commit prefix now pinned in the Dependabot config. `make stamp tag` runs the check before freezing the tag body, and pull requests that add no fragment get a non-blocking warning on the Files tab.
+- Release notes are now ordered by when each fragment landed on develop rather than by the number in its filename, so entries read in merge order without anyone renumbering them by hand. The number is only there to keep filenames distinct, and two concurrent pull requests picking the same one no longer matters.
