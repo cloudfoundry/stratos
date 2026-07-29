@@ -16,7 +16,7 @@ import {
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../../cf-entity-generator';
-import { ApplicationDeploySourceTypes } from '../deploy-application-steps.types';
+import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { DeployApplicationStep2Component } from './deploy-application-step2.component';
 
 describe('DeployApplicationStep2Component', () => {
@@ -162,6 +162,29 @@ describe('DeployApplicationStep2Component', () => {
       expect(scmSpy.clearAccessToken).not.toHaveBeenCalled();
     });
 
+  });
+
+  describe('scmBaseApiUrl', () => {
+    // The getter feeds the project-exists validator's own SCM instance. A
+    // half-typed URL must not reach it, or the validator queries a malformed
+    // host and reports "not found" for a repository that exists.
+    it('is empty while the entered base URL is invalid', () => {
+      component.gitMode = 'private';
+      component.sourceType = { id: DEPLOY_TYPES_IDS.GITLAB } as any;
+      component.githubEnterpriseUrl = 'not a url';
+      component.isInvalidGithubEnterpriseUrl = true;
+
+      expect(component.scmBaseApiUrl).toBe('');
+    });
+
+    it('normalizes a valid GitLab base URL', () => {
+      component.gitMode = 'private';
+      component.sourceType = { id: DEPLOY_TYPES_IDS.GITLAB } as any;
+      component.githubEnterpriseUrl = 'https://workshop.cloud.gov';
+      component.isInvalidGithubEnterpriseUrl = false;
+
+      expect(component.scmBaseApiUrl).toBe('https://workshop.cloud.gov/api/v4');
+    });
   });
 
   describe('git access mode (Public / Private / Enterprise tabs)', () => {
