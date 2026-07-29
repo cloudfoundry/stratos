@@ -190,7 +190,10 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
     // namespace is always a single segment, so only attempt the /users lookup
     // when there's exactly one namespace segment — otherwise it 404s with
     // "User Not Found" (a group path is not a user).
-    const search = prjParts[prjParts.length - 1];
+    // The search term is user input going into a query string, so it is
+    // encoded too — an unescaped & or # would truncate the parameter and a
+    // space would produce an invalid URL.
+    const search = encodeURIComponent(prjParts[prjParts.length - 1]);
     const namespaceParts = prjParts.slice(0, -1);
     const namespace = encodeURIComponent(namespaceParts.join('/'));
     const isUserNamespace = namespaceParts.length === 1;
@@ -212,7 +215,7 @@ export class GitLabSCM extends BaseSCM implements GitSCM {
 
   private getMatchingProjects(httpClient: HttpClient, exactProjectName: string): Observable<GitRepo[]> {
     return this.getAPI(this.options).pipe(
-      switchMap(api => httpClient.get(`${api.url}/projects?search=${exactProjectName}`, {
+      switchMap(api => httpClient.get(`${api.url}/projects?search=${encodeURIComponent(exactProjectName)}`, {
         ...api.requestArgs,
         params: {
           [GITLAB_PER_PAGE_PARAM]: GITLAB_PER_PAGE_PARAM_VALUE.toString()
