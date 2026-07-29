@@ -1,0 +1,2 @@
+[Features]
+- Added the Stratos Theme Builder (`tools/stb`), a build-time theming tool that harvests the running console's styling into a typed facet model and lets you edit it with a live preview and export the result (#5396, #5503). It covers a collapsible facet tree, a light/dark axis, per-element scoped CSS as an escape hatch, composite facets, and a DOM-sourced branding model (#5508 through #5546). stb is a developer tool with its own test suite; it is not part of the shipped console.
