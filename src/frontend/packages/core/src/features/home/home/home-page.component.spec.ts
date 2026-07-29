@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, EmbeddedViewRef, ViewContainerRef, provideZonelessChangeDetection } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { Router } from '@angular/router';
@@ -21,6 +22,7 @@ import {
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { TabNavService } from '../../../tab-nav.service';
+import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { HomePageComponent } from './home-page.component';
 
 function makeStubEndpointsService(disablePersistenceFeatures: boolean, endpoints: Record<string, EndpointModel> = {}): Partial<EndpointsService> {
@@ -181,6 +183,66 @@ describe('HomePageComponent', () => {
       component = fixture.componentInstance;
       component.setShowMode('all');
       expect(component.endpoints().map(ep => ep.guid)).toEqual(['ep1']);
+    });
+  });
+
+  // The header controls live in content projected into <app-page-header>, which
+  // renders through a CDK portal attached to TabNavService — so none of it is in
+  // the fixture's own DOM. Instantiate the header template directly to get at
+  // the projected markup.
+  describe('header controls', () => {
+    async function renderHeader(): Promise<{ root: HTMLElement, view: EmbeddedViewRef<unknown> }> {
+      await configureTestBed(makeStubEndpointsService(false));
+      fixture = TestBed.createComponent(HomePageComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+
+      const headerDe = fixture.debugElement.query(By.directive(PageHeaderComponent));
+      const header = headerDe.componentInstance as PageHeaderComponent;
+      const view = headerDe.injector.get(ViewContainerRef).createEmbeddedView(header.pageHeaderTmpl);
+      view.detectChanges();
+
+      const root = view.rootNodes.find((n: Node) => n instanceof HTMLElement) as HTMLElement;
+      return { root, view };
+    }
+
+    const filterGroup = (root: HTMLElement) => root.querySelector('[aria-label="Which endpoints to show"]')!;
+
+    it('the endpoint filter group holds only the show-mode buttons', async () => {
+      const { root } = await renderHeader();
+      expect([...filterGroup(root).querySelectorAll('button')].map(b => b.textContent!.trim()))
+        .toEqual(['Favorites', 'Connected', 'All']);
+    });
+
+    it('the sort toggle sits outside the endpoint filter group', async () => {
+      const { root } = await renderHeader();
+      const sort = root.querySelector('button[aria-label^="Sorted by endpoint name"]');
+      expect(sort).toBeTruthy();
+      expect(filterGroup(root).contains(sort)).toBe(false);
+    });
+
+    it('the card layout trigger is named and reports its open state', async () => {
+      const { root, view } = await renderHeader();
+      const trigger = root.querySelector('.dropdown > button') as HTMLButtonElement;
+      expect(trigger.getAttribute('aria-label')).toBe('Card layout');
+      expect(trigger.getAttribute('aria-expanded')).toBe('false');
+
+      // The trigger is projected content, so its bindings are checked with the
+      // home component's view rather than the header's embedded one.
+      trigger.click();
+      fixture.detectChanges();
+      view.detectChanges();
+      expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    });
+
+    // The tick is only faded to opacity-0 for unselected layouts, so without
+    // aria-hidden its "done" ligature lands in every option's accessible name.
+    it('layout options keep the tick glyph out of their accessible name', async () => {
+      const { root } = await renderHeader();
+      const options = [...root.querySelectorAll('.layout-dropdown__option')];
+      expect(options.length).toBe(component.layouts.length);
+      options.forEach(o => expect(o.querySelector('.material-icons')!.getAttribute('aria-hidden')).toBe('true'));
+      expect(options.filter(o => o.getAttribute('aria-current') === 'true')).toHaveLength(1);
     });
   });
 });
