@@ -204,7 +204,7 @@ export class TailwindSnackBarService {
     // to a wider container with proper wrapping lets multi-line messages
     // render in full while keeping short ones on a single line.
     //
-    // ponytail: bg-gray-800/text-white is a deliberate INVERSE overlay, not a
+    // NOTE: bg-gray-800/text-white is a deliberate INVERSE overlay, not a
     // theme surface — a toast stays dark in both light and dark mode. Kept raw
     // (no content-* token) so the #5494 sweep doesn't flip it to a light-on-light
     // surface and break the white action/close text + the !bg-danger error variant.

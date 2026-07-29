@@ -16,7 +16,7 @@ export function extractCreateParameters(plan: StServicePlan | null | undefined):
  * schema-form's filterSchema) and treats an otherwise-empty object as "no
  * configurable parameters".
  *
- * ponytail: strips only top-level `$schema` and gates on key-count. If live
+ * simplification: strips only top-level `$schema` and gates on key-count. If live
  * verify shows nested noise (`additionalProperties: false`, bare `type:object`
  * with no `properties`), extend the strip/gate here rather than per-caller.
  */

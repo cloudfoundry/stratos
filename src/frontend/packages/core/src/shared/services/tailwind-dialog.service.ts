@@ -409,7 +409,7 @@ export class TailwindDialogService {
    * the drag — track the pointer 1:1, and stops a resize-drag that ends on the
    * backdrop from re-centering.
    *
-   * ponytail: hand-rolled mouse-drag rather than @angular/cdk's cdkDrag — the
+   * simplification: hand-rolled mouse-drag rather than @angular/cdk's cdkDrag — the
    * panel is created imperatively (document.createElement), so an Angular
    * directive can't decorate it. Mouse events (not pointer) keep it testable
    * in jsdom, which lacks setPointerCapture.
