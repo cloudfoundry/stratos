@@ -129,7 +129,7 @@ async function main() {
     // `<id>.background`, e.g. the login scene's .login-bg overlay). Background
     // edits on the parent are painted over by it, which reads as a broken
     // editor — surface the backdrop with a jump link instead.
-    // ponytail: naming-convention detection; geometry-based full-bleed
+    // simplification: naming-convention detection; geometry-based full-bleed
     // detection if a scene ever ships a backdrop under another name.
     const backdrop = nodeFor(`${snapshotId}.background`);
     openLeverEditor({
