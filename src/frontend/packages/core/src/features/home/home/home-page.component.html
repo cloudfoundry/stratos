@@ -1,47 +1,59 @@
 <app-page-header [endpointIds$]="allEndpointIds$">
   <h1>Home</h1>
-  <div class="page-header-right">
-    <div class="inline-flex items-center rounded-lg border border-content-border bg-content-bg p-1 shadow-sm"
-      role="group" aria-label="Which endpoints to show">
-      @for (mode of showModes; track mode.value) {
-        <button type="button"
-          class="px-3 py-1.5 text-sm font-medium rounded-md transition-colors duration-200"
-          [class.bg-primary]="resolvedShowMode() === mode.value"
-          [class.text-white]="resolvedShowMode() === mode.value"
-          [class.text-content-text]="resolvedShowMode() !== mode.value"
-          [class.hover:bg-content-secondary]="resolvedShowMode() !== mode.value"
-          (click)="setShowMode(mode.value)"
-          [attr.aria-pressed]="resolvedShowMode() === mode.value">
-          {{ mode.label }}
-        </button>
-      }
+  <div class="page-header-right flex items-center">
+    <div class="inline-flex items-center rounded-lg border border-content-border bg-content-bg p-1 shadow-sm">
+      <!-- Only the mode buttons carry the group role; the sort toggle shares the
+           pill visually but is not one of the "which endpoints" choices. -->
+      <div class="flex items-center" role="group" aria-label="Which endpoints to show">
+        @for (mode of showModes; track mode.value) {
+          <button type="button"
+            class="px-3 py-1 text-sm font-medium rounded-md transition-colors duration-200"
+            [class.bg-primary]="resolvedShowMode() === mode.value"
+            [class.text-white]="resolvedShowMode() === mode.value"
+            [class.text-content-text]="resolvedShowMode() !== mode.value"
+            [class.hover:bg-content-secondary]="resolvedShowMode() !== mode.value"
+            (click)="setShowMode(mode.value)"
+            [attr.aria-pressed]="resolvedShowMode() === mode.value">
+            {{ mode.label }}
+          </button>
+        }
+      </div>
       <span class="self-stretch border-l border-content-border mx-1" aria-hidden="true"></span>
       <button type="button" (click)="toggleSortDirection()"
         [title]="sortDirection() === 'asc' ? 'Sorted by endpoint name, A→Z' : 'Sorted by endpoint name, Z→A'"
         [attr.aria-label]="sortDirection() === 'asc' ? 'Sorted by endpoint name, ascending' : 'Sorted by endpoint name, descending'"
-        class="px-2 py-1.5 rounded-md text-content-muted hover:bg-content-secondary transition-colors duration-200">
+        class="px-2 py-1 rounded-md text-content-muted hover:bg-content-secondary transition-colors duration-200">
         <span class="material-icons text-base leading-5 block" [class.rotate-180]="sortDirection() === 'asc'">sort</span>
       </button>
     </div>
-    <!-- Divider between the endpoint controls and the layout menu, matching
-         the page header's own divider idiom -->
-    <span class="mx-2 text-content-muted opacity-40 select-none" aria-hidden="true">|</span>
+    <!-- Divider between the endpoint controls and the layout menu. A 1px rule
+         rather than a "|" glyph, so its height and weight don't ride on the
+         header font — same idiom as the pill's own internal separator. -->
+    <span class="mx-3 h-6 border-l border-content-border" aria-hidden="true"></span>
     <div class="relative inline-block">
       <div class="dropdown">
-        <button class="btn btn-secondary flex items-center space-x-1" [attr.aria-expanded]="false"
-          type="button" #dropdownButton (click)="toggleDropdown(dropdownButton)">
+        <button class="btn btn-secondary flex items-center space-x-1"
+          type="button" title="Card layout" aria-label="Card layout"
+          [attr.aria-expanded]="layoutMenuOpen()"
+          (click)="layoutMenuOpen.set(!layoutMenuOpen())">
           <span class="material-icons">view_week</span>
           <span class="material-icons">arrow_drop_down</span>
         </button>
-        <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50 hidden" #dropdownMenu>
+        <div class="dropdown-menu layout-dropdown__panel absolute right-0 mt-2 w-56 rounded-md z-50"
+          [class.hidden]="!layoutMenuOpen()">
           <div class="py-1">
             @for (layout of layouts; track layout?.id ?? $index) {
                 <div>
                   @if (layout) {
-                    <button (click)="onChangeLayout(layout); closeDropdown(dropdownButton)"
-                      class="layout-dropdown__option">
+                    <button (click)="onChangeLayout(layout); layoutMenuOpen.set(false)"
+                      class="layout-dropdown__option"
+                      [attr.aria-current]="layout.id === layoutID">
                       <span>{{ layout.title }}</span>
-                      <span class="material-icons text-brand-600"
+                      <!-- Hidden from assistive tech: the tick is only faded out
+                           for unselected layouts, so its "done" ligature would
+                           otherwise be read as part of every option's name.
+                           aria-current carries the selection instead. -->
+                      <span class="material-icons text-brand-600" aria-hidden="true"
                         [class.opacity-100]="layout.id === layoutID"
                       [class.opacity-0]="layout.id !== layoutID">done</span>
                     </button>
