@@ -863,6 +863,11 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 	// it; see loadPortalConfig for how CONSOLE_CSP resolves.
 	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
 		XFrameOptions: "SAMEORIGIN",
+		// Every response declares its own content type; nosniff stops a
+		// browser second-guessing that and reading, say, a JSON error body as
+		// markup. This is the control for that, not CSP, which now only
+		// accompanies the console document.
+		ContentTypeNosniff: "nosniff",
 	}))
 
 	if !isUpgrade {
