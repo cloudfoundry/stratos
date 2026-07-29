@@ -366,18 +366,7 @@ export class HomePageComponent implements OnInit {
     return Math.min(declared, this.columns || 1);
   }
 
-  // Dropdown menu helpers
-  toggleDropdown(button: HTMLElement) {
-    const menu = button.nextElementSibling as HTMLElement;
-    if (menu) {
-      menu.classList.toggle('hidden');
-    }
-  }
-
-  closeDropdown(button: HTMLElement) {
-    const menu = button.nextElementSibling as HTMLElement;
-    if (menu) {
-      menu.classList.add('hidden');
-    }
-  }
+  // Layout menu open state. Held here rather than toggled onto the DOM node so
+  // the trigger's aria-expanded reflects it.
+  public layoutMenuOpen = signal(false);
 }
