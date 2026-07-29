@@ -1,0 +1,2 @@
+[BugFixes]
+- Deploying an application from GitHub or GitLab works again: Source Config is applied, private repositories authenticate, and an expired token is re-validated rather than silently failing (#5707). File-upload deploy was restored during the signal migration (#5379, #5380), route host/domain/path overrides take effect (#5425), the source/commit picker UX was reworked (#5424), and a failed source fetch now surfaces as a deploy failure instead of an empty wizard (#5623).

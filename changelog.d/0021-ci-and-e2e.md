@@ -1,0 +1,3 @@
+[Chores]
+- Required status checks now report on every pull request, including ones that touch only `tools/stb` or only docs, which previously left PRs waiting forever on a check that never ran (#5527, #5529, #5564, #5566, #5567). Bun caching and lockfile handling in CI were fixed (#5543), and the CF vitest async leaks behind an intermittent gate hang were tracked down (#5671).
+- End-to-end tests run in tiers with impact-based selection and make dispatch (#5653). Playwright selectors were modernized for the Tailwind frontend (#5615), the `data-test` contract is complete and guarded by a ratchet (#5648, #5650), and the harness reliability fixes were driven by measured failure classes rather than guesses (#5655, #5568).
