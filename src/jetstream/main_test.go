@@ -119,10 +119,10 @@ func TestLoadPortalConfig(t *testing.T) {
 		t.Error("Unable to get SessionStoreSecret from config")
 	}
 
-	// CSP is opt-in: CONSOLE_CSP not supplied above, so no header should be
-	// configured (preserves prior no-CSP behavior).
-	if result.CSPPolicy != "" {
-		t.Errorf("Expected no CSP policy when CONSOLE_CSP unset, got: %q", result.CSPPolicy)
+	// CSP is on by default: CONSOLE_CSP is not supplied above, so the built-in
+	// policy applies. Opting out takes an explicit off-value.
+	if result.CSPPolicy != defaultCSPPolicy {
+		t.Errorf("Expected the default CSP policy when CONSOLE_CSP unset, got: %q", result.CSPPolicy)
 	}
 }
 

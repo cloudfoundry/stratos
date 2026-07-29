@@ -39,6 +39,13 @@ ENABLE_TECH_PREVIEW=false
 # By default, only show favorites endpoints on the home view
 # HOME_VIEW_SHOW_FAVORITES_ONLY=false
 
+# Content-Security-Policy sent with the console page. Unset (or "default"/"on")
+# applies the built-in policy, which permits only what the console needs.
+# Set "off" to send no header at all, or a full policy string to use verbatim.
+# A deployment reaching a host the built-in policy does not name -- a custom
+# metrics or auth endpoint on another origin, say -- needs its own string here.
+# CONSOLE_CSP=off
+
 # Enable users create user endpoints (disabled, admin_only, enabled). Default is disabled
 # admin_only will enable admins to create or see user endpoints, but users won't be able to create user endpoints or see them
 USER_ENDPOINTS_ENABLED=disabled
