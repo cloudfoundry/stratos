@@ -229,13 +229,13 @@ describe('DeployApplicationStep2Component', () => {
       component.setGitMode('private');
       // Last getSCM call should target the github type with an empty guid so
       // the SCM talks to the API directly with the form token.
-      expect(getSCM).toHaveBeenCalledWith('github', '');
+      expect(getSCM).toHaveBeenLastCalledWith('github', '');
     });
 
     it('rebuilds the SCM with the endpoint guid when switching to Public', () => {
       const getSCM = vi.spyOn(TestBed.inject(GitSCMService), 'getSCM');
       component.setGitMode('public');
-      expect(getSCM).toHaveBeenCalledWith('github', '747ed39a-endpoint-guid');
+      expect(getSCM).toHaveBeenLastCalledWith('github', '747ed39a-endpoint-guid');
     });
   });
 

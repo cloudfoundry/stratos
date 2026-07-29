@@ -185,7 +185,7 @@ export class DeployApplicationStep2Component
       // Public mode deploys via the registered endpoint (its stored creds);
       // Private/Enterprise mode deploys with the token typed in the form and
       // no endpoint. So only require an endpoint guid in Public mode.
-      const endpointGuid = this.gitMode === 'public' ? this.sourceType.endpointGuid : '';
+      const endpointGuid: string = this.gitMode === 'public' ? (this.sourceType.endpointGuid ?? '') : '';
       this.gitData.getRepository(this.scm, this.repository)
         .waitForValue$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
         // A gitscm save needs a resolved repo and branch. An endpoint guid is
@@ -198,7 +198,7 @@ export class DeployApplicationStep2Component
           url: repo.clone_url,
           accessToken: this.accessToken,
           commit: this.isRedeploy ? this.commitInfo?.sha : undefined,
-          endpointGuid: endpointGuid ?? '',
+          endpointGuid,
         }, null);
       });
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {

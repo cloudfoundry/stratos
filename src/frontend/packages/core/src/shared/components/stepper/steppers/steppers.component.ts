@@ -339,12 +339,13 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     // content is NOT lazily instantiated — Ivy constructs <ng-content> inside
     // an <ng-template> on first render regardless of the active step, so a
     // step's directives/@Inputs (and their ngOnChanges) run up-front. The
-    // deferral is instead about ordering relative to THIS transition: a
-    // synchronous pOnEnter here would run before the entering step is marked
-    // active and before change detection settles for the newly-current index,
-    // so onEnter side effects (e.g. building a list keyed off the now-active
-    // step) could see stale state. afterNextRender guarantees the enter
-    // callback fires once the step is active and rendered (#5600:
+    // deferral is instead about ordering relative to THIS transition: the
+    // entering step is already marked active just above, but change detection
+    // has not yet re-rendered the content outlet for the new currentIndex, so
+    // a synchronous pOnEnter would run against a view that is still showing
+    // the outgoing step and onEnter side effects (e.g. building a list keyed
+    // off the now-active step) could see stale state. afterNextRender
+    // guarantees the enter callback fires once the step is rendered (#5600:
     // specify-details-step never received onEnter, so its formMode was never
     // set and the step rendered empty).
     const enteringStep = this.steps[index];
