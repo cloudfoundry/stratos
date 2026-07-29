@@ -81,10 +81,12 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
   }
 
   // Reduce API calls trying to validate until we have a valid name
-  // Must be of the form USER/NAME - where NAME must be at least 2 charts in length
+  // Must be of the form OWNER/NAME (GitHub) or NAMESPACE/.../NAME (GitLab
+  // nested subgroups), i.e. at least two segments, and the final segment
+  // (the project name) must be more than 2 characters.
   private isValidProjectName(name: string) {
     const parts = name.split('/');
-    return parts.length === 2 && parts[1].length > 2;
+    return parts.length >= 2 && parts[parts.length - 1].length > 2;
   }
 
   private haveAlreadyChecked(name: string) {
