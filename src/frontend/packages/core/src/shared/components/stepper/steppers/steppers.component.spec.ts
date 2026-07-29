@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef } from '@angular/core';
+import { ChangeDetectorRef, Component, Directive, Input, OnChanges, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
@@ -11,7 +12,7 @@ import { createBasicStoreModule } from "@test-framework/core-test.helper";
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../../core/core.module';
 import { MDAppModule } from '../../../../core/md.module';
-import { StepComponent } from '../step/step.component';
+import { SignalStepHandle, StepComponent } from '../step/step.component';
 import { SteppersComponent } from './steppers.component';
 
 describe('SteppersComponent', () => {
@@ -103,5 +104,109 @@ describe('SteppersComponent', () => {
 
     await fixture.whenStable();
     expect(entered).toEqual([{ plan: 'p1' }]);
+  });
+});
+
+// The suite above builds StepComponent instances by hand and assigns
+// allSteps directly. That covers setActive's bookkeeping but never renders a
+// stepper, so nothing there can observe how projected step content is
+// actually instantiated — which is how an incorrect claim about lazy
+// instantiation sat in setActive's comment unchallenged. These mount a real
+// <app-steppers> with projected content instead.
+const projectionLog: string[] = [];
+
+@Directive({ selector: '[probeInput]', standalone: true })
+class ProbeInputDirective implements OnChanges {
+  @Input() probeInput = '';
+  ngOnChanges(): void {
+    projectionLog.push(`ngOnChanges:${this.probeInput}`);
+  }
+}
+
+@Component({ selector: 'probe-first', template: 'first', standalone: true })
+class ProbeFirstComponent {
+  constructor() { projectionLog.push('ctor:first'); }
+}
+
+@Component({
+  selector: 'probe-second',
+  standalone: true,
+  imports: [ProbeInputDirective],
+  // Nested @if mirrors deploy-application-step2, where the directive whose
+  // first-render ngOnChanges caused the trouble sits behind two of them.
+  template: `@if (outer) { @if (inner) { <span [probeInput]="token"></span> } }`,
+})
+class ProbeSecondComponent {
+  outer = true;
+  inner = true;
+  token = 'ctx';
+  constructor() { projectionLog.push('ctor:second'); }
+}
+
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent, ProbeFirstComponent, ProbeSecondComponent],
+  template: `
+    <app-steppers>
+      <app-step [title]="'One'" [signalHandle]="firstHandle"><probe-first></probe-first></app-step>
+      <app-step [title]="'Two'" [signalHandle]="secondHandle"><probe-second></probe-second></app-step>
+    </app-steppers>
+  `,
+})
+class ProjectionHostComponent {
+  entered: string[] = [];
+  firstHandle: SignalStepHandle = { valid: signal(true) };
+  secondHandle: SignalStepHandle = {
+    valid: signal(true),
+    onEnter: () => { this.entered.push('two'); },
+  };
+}
+
+describe('SteppersComponent — projected step content', () => {
+  let hostFixture: ComponentFixture<ProjectionHostComponent>;
+
+  beforeEach(async () => {
+    projectionLog.length = 0;
+    TestBed.configureTestingModule({
+      imports: [ProjectionHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(ProjectionHostComponent);
+    hostFixture.detectChanges();
+    await hostFixture.whenStable();
+  });
+
+  // Ivy does not defer <ng-content> inside an <ng-template>: every step's
+  // projected content is constructed with the declaring view, whichever step
+  // is active. Anything reasoning about when a step's directives run — an
+  // @Input's ngOnChanges firing, a service touched on first render — must
+  // assume it happens up-front, not on activation. #5710.
+  it('constructs and change-detects a NON-active step on first render', () => {
+    expect(projectionLog).toContain('ctor:first');
+    // Step Two is never activated in this test.
+    expect(projectionLog).toContain('ctor:second');
+    // Its template ran too: the nested @if resolved and bound the directive.
+    expect(projectionLog).toContain('ngOnChanges:ctx');
+  });
+
+  // The companion to the hand-built delivery test above, but through a real
+  // stepper: onEnter must not arrive until after the activating render.
+  it('delivers onEnter to a projected step only after the activating render', async () => {
+    const steppers = hostFixture.debugElement
+      .query(By.directive(SteppersComponent))
+      .componentInstance as SteppersComponent;
+
+    expect(hostFixture.componentInstance.entered).toEqual([]);
+
+    steppers.setActive(1);
+    expect(hostFixture.componentInstance.entered).toEqual([]);
+
+    await hostFixture.whenStable();
+    expect(hostFixture.componentInstance.entered).toEqual(['two']);
   });
 });
