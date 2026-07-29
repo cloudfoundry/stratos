@@ -472,18 +472,14 @@ export class DeployApplicationStep2Component
       (this.scm as unknown as BaseSCM).setPublicApi(apiUrl);
     }
 
-    // Apply/clear the PAT for both GitHub and GitLab (both expose
-    // setAccessToken/clearAccessToken). Previously this was gated to GitHub
-    // only, so a GitLab token typed in Private/Enterprise mode was never sent
-    // and private / self-hosted GitLab projects 404'd.
-    const scmType = this.scm.getType();
-    if (scmType === 'github' || scmType === 'gitlab') {
-      const tokenScm = this.scm as unknown as { setAccessToken(t: string): void; clearAccessToken(): void };
-      if (token) {
-        tokenScm.setAccessToken(token);
-      } else {
-        tokenScm.clearAccessToken();
-      }
+    // Apply/clear the PAT. Token handling is part of the GitSCM contract, so
+    // this needs no per-provider branch: previously it was gated to GitHub
+    // only, and a GitLab token typed in Private/Enterprise mode was never sent
+    // at all, so private / self-hosted GitLab projects 404'd.
+    if (token) {
+      this.scm.setAccessToken(token);
+    } else {
+      this.scm.clearAccessToken();
     }
   }
 

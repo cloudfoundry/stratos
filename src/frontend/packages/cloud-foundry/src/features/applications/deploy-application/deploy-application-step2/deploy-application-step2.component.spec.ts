@@ -154,12 +154,16 @@ describe('DeployApplicationStep2Component', () => {
       expect(scmSpy.setPublicApi).toHaveBeenCalledWith('https://github.example.com/api/v3');
     });
 
-    it('skips token handling when the active SCM is neither GitHub nor GitLab', () => {
-      scmSpy.getType.mockReturnValue('bitbucket');
-      invoke('https://bitbucket.example.com', 'pat-should-be-ignored');
+    // Token handling used to be gated on the SCM type. It no longer is:
+    // setAccessToken/clearAccessToken are part of the GitSCM contract and
+    // GitSCMType is exactly 'github' | 'gitlab', so the guard could never be
+    // false. A provider added later has to implement the pair to compile.
+    it('clears the token for GitLab too when none is provided', () => {
+      scmSpy.getType.mockReturnValue('gitlab');
+      invoke('https://workshop.cloud.gov', '');
 
+      expect(scmSpy.clearAccessToken).toHaveBeenCalled();
       expect(scmSpy.setAccessToken).not.toHaveBeenCalled();
-      expect(scmSpy.clearAccessToken).not.toHaveBeenCalled();
     });
 
   });
