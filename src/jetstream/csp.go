@@ -1,6 +1,12 @@
 package main
 
-import "strings"
+import (
+	"crypto/rand"
+	"net/http"
+	"strings"
+
+	"github.com/labstack/echo/v4"
+)
 
 // cspNoncePlaceholder is the literal token a CSP policy carries where the
 // per-request nonce belongs. cspHeaderWithNonce substitutes it.
@@ -36,4 +42,30 @@ func cspHeaderWithNonce(policy, nonce string) string {
 		return ""
 	}
 	return strings.ReplaceAll(policy, cspNoncePlaceholder, "'nonce-"+nonce+"'")
+}
+
+// serveIndexHTML serves the SPA document with a freshly minted nonce in both
+// the CSP header and the markup that header authorises.
+//
+// This is the only response that carries a CSP header. A nonce is per-response
+// by definition, so it cannot come from Echo's Secure middleware, which emits
+// one string fixed at startup; every other response needs no nonce because
+// 'self' already covers the assets it serves.
+//
+// p.indexHTMLTemplate must be the pristine template — injectNonce is not
+// re-appliable, so the result is never written back over it.
+func (p *portalProxy) serveIndexHTML(c echo.Context) error {
+	nonce := rand.Text()
+
+	if policy := p.GetConfig().CSPPolicy; policy != "" {
+		c.Response().Header().Set("Content-Security-Policy", cspHeaderWithNonce(policy, nonce))
+	}
+
+	// Each response carries a different nonce, so this document must never be
+	// stored: a 304 would pair the fresh header with a stale body and block
+	// every style. This overrides the weaker no-cache that
+	// setStaticCacheContentMiddleware puts on every response.
+	c.Response().Header().Set("Cache-Control", "no-store")
+
+	return c.HTML(http.StatusOK, injectNonce(p.indexHTMLTemplate, nonce))
 }
