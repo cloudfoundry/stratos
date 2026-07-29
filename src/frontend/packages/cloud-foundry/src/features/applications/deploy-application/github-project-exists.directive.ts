@@ -80,13 +80,18 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
     }
   }
 
-  // Reduce API calls trying to validate until we have a valid name
-  // Must be of the form OWNER/NAME (GitHub) or NAMESPACE/.../NAME (GitLab
-  // nested subgroups), i.e. at least two segments, and the final segment
-  // (the project name) must be more than 2 characters.
-  private isValidProjectName(name: string) {
+  // Reduce API calls trying to validate until we have a valid name.
+  // Must be OWNER/NAME, or NAMESPACE/.../NAME on GitLab, whose projects can
+  // live in nested subgroups. GitHub has no nested namespaces, so a path with
+  // more than two segments cannot resolve there and is rejected without
+  // spending a request. The final segment (the project name) must be more
+  // than 2 characters either way.
+  private isValidProjectName(name: string, type?: GitSCMType) {
     const parts = name.split('/');
-    return parts.length >= 2 && parts[parts.length - 1].length > 2;
+    if (parts[parts.length - 1].length <= 2) {
+      return false;
+    }
+    return type === 'gitlab' ? parts.length >= 2 : parts.length === 2;
   }
 
   private haveAlreadyChecked(name: string) {
@@ -108,7 +113,8 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
 
   validate(c: AbstractControl): Observable<GithubProjectExistsResponse | null> {
     if (c.value) {
-      if (!this.isValidProjectName(c.value) || this.haveAlreadyChecked(c.value)) {
+      const scmType = this.getTypeAndEndpointWithAuth()?.[0];
+      if (!this.isValidProjectName(c.value, scmType) || this.haveAlreadyChecked(c.value)) {
         return observableOf({
           githubProjectDoesNotExist: true,
           githubProjectError: ''
