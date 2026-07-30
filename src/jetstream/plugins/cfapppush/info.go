@@ -27,11 +27,29 @@ func (c *CFPushApp) setEndpointInfo(config *configv3.Config) error {
 	}
 
 	if info, ok := endpointInfo.(api.EndpointInfo); ok {
-		// Got the info we need - update the config with it
+		// Always use the CC v3 API version for the embedded CF CLI's minimum-version
+		// checks. The CLI v8 checks minimum versions against v3 version strings
+		// (e.g. MinVersionCNB = "3.168.0"). When a v2 api_version is passed
+		// (e.g. "2.289.0"), those checks fail — "2.289.0 < 3.168.0" — and the CLI
+		// then attempts a token refresh to UAA (with no refresh token, since we
+		// deliberately don't provide one), producing "refresh_token parameter not
+		// provided". Using the v3 version ("3.224.0") always satisfies the CLI's
+		// minimum-version gate regardless of whether the foundation also serves v2.
+		// On v3-only foundations the v3 version is also what backfillFromRoot sets.
+		apiVersion := info.ApiRoot.Links.CloudControllerV3.Meta.Version
+		if apiVersion == "" {
+			// Unexpected: root / links should always have this. Fall back to the
+			// v2 api_version as a last resort so the CLI at least gets something.
+			apiVersion = info.V2Info.APIVersion
+			log.Warnf("CF Push: CC v3 version not found in root links, falling back to v2 api_version: %s", apiVersion)
+		} else {
+			log.Debugf("CF Push: using CC v3 version for CLI minimum-version checks: %s", apiVersion)
+		}
+
 		config.SetTargetInformation(
 			configv3.TargetInformationArgs{
 				Api:               apiEndpoint,
-				ApiVersion:        info.V2Info.APIVersion,
+				ApiVersion:        apiVersion,
 				Auth:              info.V2Info.AuthorizationEndpoint,
 				MinCLIVersion:     info.V2Info.MinCLIVersion,
 				Doppler:           info.V2Info.DopplerLoggingEndpoint,
