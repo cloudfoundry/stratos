@@ -1,4 +1,3 @@
-import { ScrollingModule } from '@angular/cdk/scrolling';
 import { NgModule } from '@angular/core';
 
 import { CoreModule } from '../../core/core.module';
@@ -11,7 +10,6 @@ import { SideNavComponent } from './side-nav/side-nav.component';
 @NgModule({
   imports: [
     CoreModule,
-    ScrollingModule,
     SharedModule,
     SideNavComponent,
     DashboardBaseComponent,

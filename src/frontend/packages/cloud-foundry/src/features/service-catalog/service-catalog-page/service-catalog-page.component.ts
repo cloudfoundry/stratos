@@ -1,4 +1,3 @@
-import { animate, query, style, transition, trigger } from '@angular/animations';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -43,16 +42,6 @@ import type { StServiceOffering } from '../../../services/endpoint-data/stratos-
     ListSubNavComponent,
     CfEndpointsMissingComponent,
     DuplicateUrlBannerComponent,
-  ],
-  animations: [
-    trigger('cardEnter', [
-      transition('* => *', [
-        query(':enter', [
-          style({ opacity: 0, transform: 'translateY(10px)' }),
-          animate('150ms ease-out', style({ opacity: 1, transform: 'translateY(0)' })),
-        ], { optional: true }),
-      ]),
-    ]),
   ],
   providers: [
     DatePipe,
