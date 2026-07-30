@@ -27,11 +27,23 @@ func (c *CFPushApp) setEndpointInfo(config *configv3.Config) error {
 	}
 
 	if info, ok := endpointInfo.(api.EndpointInfo); ok {
-		// Got the info we need - update the config with it
+		// When CAPI v2 is disabled, /v2/info returns an empty api_version string.
+		// The embedded CF CLI (v8) passes that value to blang/semver.Make() as
+		// part of its minimum-version check (push_command.go → MinimumCCAPIVersionCheck),
+		// which immediately returns "Version string empty" and aborts the push.
+		// Fall back to the CC v3 version from the root `/` links — this is the
+		// same value backfillFromRoot sets at registration time, so we're
+		// consistent with how the rest of Stratos talks to the v3-only foundation.
+		apiVersion := info.V2Info.APIVersion
+		if apiVersion == "" {
+			apiVersion = info.ApiRoot.Links.CloudControllerV3.Meta.Version
+			log.Debugf("CF Push: /v2/info api_version empty (v2 API disabled), using v3 version: %s", apiVersion)
+		}
+
 		config.SetTargetInformation(
 			configv3.TargetInformationArgs{
 				Api:               apiEndpoint,
-				ApiVersion:        info.V2Info.APIVersion,
+				ApiVersion:        apiVersion,
 				Auth:              info.V2Info.AuthorizationEndpoint,
 				MinCLIVersion:     info.V2Info.MinCLIVersion,
 				Doppler:           info.V2Info.DopplerLoggingEndpoint,
