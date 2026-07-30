@@ -1,4 +1,3 @@
-import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
@@ -16,20 +15,6 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
     CommonModule,
     RouterModule,
     CustomIconComponent
-  ],
-  animations: [
-    trigger(
-      'eventEnter', [
-      transition(':enter', [
-        style({ opacity: 0 }),
-        animate('250ms ease-in', style({ opacity: 1 }))
-      ]),
-      transition(':leave', [
-        style({ opacity: 1 }),
-        animate('250ms ease-out', style({ opacity: 0 }))
-      ])
-    ]
-    )
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
