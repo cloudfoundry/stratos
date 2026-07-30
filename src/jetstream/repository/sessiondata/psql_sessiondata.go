@@ -18,8 +18,12 @@ var insertSessionDataValue = `INSERT INTO session_data (session, groupName, name
 
 var deleteSessionGroupData = `DELETE FROM session_data WHERE session=$1 AND groupName=$2`
 
-// Expire data for sessions that no longer exist
-var expireSessionData = `UPDATE session_data SET expired=true WHERE session NOT IN (SELECT CAST(id AS varchar) from sessions)`
+// Expire data for sessions that no longer exist.
+// The Postgres session store (pgstore) creates the sessions table as
+// "http_sessions" — not "sessions". Referencing "sessions" here causes a
+// "relation does not exist" error on every cleanup tick and leaves orphaned
+// session_data rows in the database indefinitely.
+var expireSessionData = `UPDATE session_data SET expired=true WHERE session NOT IN (SELECT CAST(id AS varchar) from http_sessions)`
 
 // Delete data for sessions that no longer exist
 var deleteSessionData = `DELETE FROM session_data WHERE expired=true AND keep_on_expire=false`
