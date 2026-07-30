@@ -27,17 +27,23 @@ func (c *CFPushApp) setEndpointInfo(config *configv3.Config) error {
 	}
 
 	if info, ok := endpointInfo.(api.EndpointInfo); ok {
-		// When CAPI v2 is disabled, /v2/info returns an empty api_version string.
-		// The embedded CF CLI (v8) passes that value to blang/semver.Make() as
-		// part of its minimum-version check (push_command.go → MinimumCCAPIVersionCheck),
-		// which immediately returns "Version string empty" and aborts the push.
-		// Fall back to the CC v3 version from the root `/` links — this is the
-		// same value backfillFromRoot sets at registration time, so we're
-		// consistent with how the rest of Stratos talks to the v3-only foundation.
-		apiVersion := info.V2Info.APIVersion
+		// Always use the CC v3 API version for the embedded CF CLI's minimum-version
+		// checks. The CLI v8 checks minimum versions against v3 version strings
+		// (e.g. MinVersionCNB = "3.168.0"). When a v2 api_version is passed
+		// (e.g. "2.289.0"), those checks fail — "2.289.0 < 3.168.0" — and the CLI
+		// then attempts a token refresh to UAA (with no refresh token, since we
+		// deliberately don't provide one), producing "refresh_token parameter not
+		// provided". Using the v3 version ("3.224.0") always satisfies the CLI's
+		// minimum-version gate regardless of whether the foundation also serves v2.
+		// On v3-only foundations the v3 version is also what backfillFromRoot sets.
+		apiVersion := info.ApiRoot.Links.CloudControllerV3.Meta.Version
 		if apiVersion == "" {
-			apiVersion = info.ApiRoot.Links.CloudControllerV3.Meta.Version
-			log.Debugf("CF Push: /v2/info api_version empty (v2 API disabled), using v3 version: %s", apiVersion)
+			// Unexpected: root / links should always have this. Fall back to the
+			// v2 api_version as a last resort so the CLI at least gets something.
+			apiVersion = info.V2Info.APIVersion
+			log.Warnf("CF Push: CC v3 version not found in root links, falling back to v2 api_version: %s", apiVersion)
+		} else {
+			log.Debugf("CF Push: using CC v3 version for CLI minimum-version checks: %s", apiVersion)
 		}
 
 		config.SetTargetInformation(
