@@ -1,34 +1,34 @@
 package sessiondata
 
 import (
+	"strings"
 	"testing"
+
+	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
 
-// TestExpireSessionDataTableName verifies that the expireSessionData SQL
-// references "http_sessions" (the table name pgstore actually creates) and
-// not the incorrect "sessions" name that caused
+// TestExpireSessionDataTableName guards the regression that had
+// expireSessionData naming a session table that does not exist on the running
+// provider — originally "sessions" on Postgres, which failed with
 // "pq: relation \"sessions\" does not exist" on every cleanup tick.
+//
+// The guard is per provider because the session store names that table
+// differently on each, so there is no single correct spelling to assert. The
+// statements are package state mutated by InitRepositoryProvider, so each case
+// re-resolves from the pristine template.
 func TestExpireSessionDataTableName(t *testing.T) {
-	const wrongTable = "from sessions"
-	const rightTable = "from http_sessions"
+	template := expireSessionData
+	t.Cleanup(func() { expireSessionData = template })
 
-	if contains(expireSessionData, wrongTable) {
-		t.Errorf("expireSessionData references %q — pgstore creates %q; this causes a DB error on every cleanup tick", wrongTable, rightTable)
-	}
-	if !contains(expireSessionData, rightTable) {
-		t.Errorf("expireSessionData does not reference %q — got: %s", rightTable, expireSessionData)
-	}
-}
+	for _, provider := range []string{datastore.PGSQL, datastore.MYSQL, datastore.SQLITE} {
+		expireSessionData = datastore.ModifySQLStatement(template, provider)
 
-func contains(s, substr string) bool {
-	return len(s) >= len(substr) && (s == substr || len(s) > 0 && containsAt(s, substr))
-}
-
-func containsAt(s, substr string) bool {
-	for i := 0; i <= len(s)-len(substr); i++ {
-		if s[i:i+len(substr)] == substr {
-			return true
+		want := "from " + datastore.SessionsTableName(provider)
+		if !strings.Contains(expireSessionData, want) {
+			t.Errorf("%s: expireSessionData does not reference %q — got: %s", provider, want, expireSessionData)
+		}
+		if strings.Contains(expireSessionData, datastore.SessionsTablePlaceholder) {
+			t.Errorf("%s: expireSessionData still carries the unresolved placeholder", provider)
 		}
 	}
-	return false
 }

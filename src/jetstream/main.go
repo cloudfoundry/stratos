@@ -552,7 +552,9 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error)
 func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
 	log.Debug("initSessionStore")
 
-	sessionsTable := "sessions"
+	// Same source of truth the session-data statements resolve against, so the
+	// table we ask these stores to create is the one those statements query.
+	sessionsTable := datastore.SessionsTableName(databaseProvider)
 
 	// Allow the cookie domain to be configured
 	domain := pc.CookieDomain
