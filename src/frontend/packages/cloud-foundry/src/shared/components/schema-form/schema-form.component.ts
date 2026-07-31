@@ -7,6 +7,7 @@ import {
   TailwindSnackBarService,
   safeStringToObj,
 } from '@stratosui/core';
+import { configureJsonDiagnostics } from '../../../../../core/src/monaco-loader';
 import { SchemaWidgetRendererComponent } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-widget-renderer.component';
 import { validateAgainstSchema, SchemaWarning } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-validate.util';
 import { schemaToSkeleton, stripEmpty, mergeSkeleton } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-resolve.util';
@@ -96,7 +97,7 @@ export class SchemaFormComponent {
   }
 
   private _destroyed = false;
-  private _jsonEditor: any = null;
+  private _jsonEditor: MonacoEditorComponent | null = null;
   // Signal mirror of jsonText (a plain field) so the Format/Minify button
   // state tracks edits reactively.
   private _jsonTextSig = signal('');
@@ -186,8 +187,8 @@ export class SchemaFormComponent {
         : this.data();
       this.setJsonText(seed != null ? JSON.stringify(seed, null, 2) : '');
       // Push the updated text into a mounted editor so it shows immediately.
-      // Guard against the onDidChangeModelContent feedback loop: only setValue
-      // when the editor does not already hold the correct value.
+      // Guard against the valueChange feedback loop: only setValue when the
+      // editor does not already hold the correct value.
       if (this._jsonEditor && this._jsonEditor.getValue() !== this.jsonText) {
         this._jsonEditor.setValue(this.jsonText);
       }
@@ -213,21 +214,25 @@ export class SchemaFormComponent {
     });
   }
 
-  onMonacoInit(editor: any) {
+  onMonacoInit(editor: MonacoEditorComponent) {
     this._jsonEditor = editor;
-    // Seed the editor with the current text: the [model].value binding is read-once
-    // at construction, so a freshly-mounted editor may be stale if jsonText was
-    // written after the previous view was destroyed (e.g. Form→JSON toggle).
+    // Seed the editor with the current text: the editor's text state is set only
+    // through the CVA path (ngModel), which this component does not bind — so a
+    // freshly-mounted editor is empty even when jsonText was already written
+    // (e.g. Form→JSON toggle).
     if (editor.getValue() !== this.jsonText) {
       editor.setValue(this.jsonText);
     }
-    editor.onDidChangeModelContent(() => this.setJsonText(editor.getValue()));
     // advisory squiggles; we never gate on these — only on parseValid
-    (window as any).monaco?.languages?.json?.jsonDefaults?.setDiagnosticsOptions({
+    configureJsonDiagnostics({
       validate: true,
       schemas: this.cleanSchema
         ? [{ uri: 'inmemory://plan-schema.json', fileMatch: ['*'], schema: this.cleanSchema }]
         : [],
+    }).catch((err) => {
+      // The editor still works without schema squiggles; surface the loss
+      // instead of letting it vanish as an unhandled rejection.
+      console.error('Failed to configure JSON diagnostics', err);
     });
   }
 

@@ -1,6 +1,6 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
+import { MAT_DIALOG_DATA, MonacoEditorComponent, TailwindDialogRef } from '@stratosui/core';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { VariableEditDialogComponent, VariableEditDialogData } from './variable-edit-dialog.component';
@@ -19,6 +19,25 @@ function make(data: VariableEditDialogData) {
   // the signals from MAT_DIALOG_DATA — without rendering the Monaco editor.
   const fixture = TestBed.createComponent(VariableEditDialogComponent);
   return { cmp: fixture.componentInstance, close };
+}
+
+/** Construct the component OUTSIDE a fixture: the language-switch effect then
+ *  registers on the environment injector and runs on ApplicationRef.tick()
+ *  without rendering the template (which would try to load Monaco). */
+function makeDetached(data: VariableEditDialogData) {
+  TestBed.resetTestingModule();
+  TestBed.configureTestingModule({
+    providers: [
+      provideZonelessChangeDetection(),
+      { provide: MAT_DIALOG_DATA, useValue: data },
+      { provide: TailwindDialogRef, useValue: { close: vi.fn() } },
+    ],
+  });
+  return TestBed.runInInjectionContext(() => new VariableEditDialogComponent());
+}
+
+function flushEffects() {
+  TestBed.inject(ApplicationRef).tick();
 }
 
 describe('VariableEditDialogComponent', () => {
@@ -112,6 +131,32 @@ describe('VariableEditDialogComponent', () => {
     expect(cmp.jsonMode()).toBe(true);
     expect(cmp.jsonWarning()).toMatch(/json/i);
     expect(cmp.canSave()).toBe(true); // warn, never block
+  });
+
+  // -------------------------------------------------------------------------
+  // Live language switching — the effect drives the wrapper's setLanguage
+  // -------------------------------------------------------------------------
+
+  it('switches the editor language when JSON mode is toggled after init', () => {
+    const cmp = makeDetached({ mode: 'edit', name: 'ENV', value: 'plain text' });
+    const setLanguage = vi.fn();
+    cmp.onEditorInit({ setLanguage } as unknown as MonacoEditorComponent);
+    flushEffects(); // initial run applies the current (plaintext) language
+    setLanguage.mockClear();
+
+    cmp.toggleJsonMode();
+    flushEffects();
+    expect(setLanguage).toHaveBeenCalledWith('json');
+
+    cmp.toggleJsonMode();
+    flushEffects();
+    expect(setLanguage).toHaveBeenLastCalledWith('plaintext');
+  });
+
+  it('toggling JSON mode before the editor exists does not throw', () => {
+    const cmp = makeDetached({ mode: 'add' });
+    cmp.toggleJsonMode();
+    expect(() => flushEffects()).not.toThrow();
   });
 
   // -------------------------------------------------------------------------

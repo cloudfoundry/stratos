@@ -1,6 +1,6 @@
 # Monaco Editor Component
 
-A standalone Angular component that provides Monaco Editor integration with full ngx-monaco-editor API compatibility.
+A standalone Angular component that wraps Monaco Editor behind an ngx-monaco-editor-style API. The wrapper component is the whole public surface — the raw Monaco instance is never exposed.
 
 ## Features
 
@@ -8,9 +8,9 @@ A standalone Angular component that provides Monaco Editor integration with full
 - ✅ Full ngModel two-way binding support via ControlValueAccessor
 - ✅ TypeScript type safety with @types/monaco-editor
 - ✅ Automatic layout handling with ResizeObserver
-- ✅ Theme synchronization support
+- ✅ Automatic app-theme synchronization (opt out by pinning `options.theme`)
 - ✅ YAML language support (via monaco-yaml)
-- ✅ 100% API compatible with ngx-monaco-editor
+- ✅ ngx-monaco-editor-compatible options and methods (the wrapper, not the raw Monaco instance, is the public surface)
 
 ## Usage
 
@@ -31,7 +31,7 @@ import { MonacoEditorComponent, MonacoEditorOptions, MonacoEditorModel } from '@
       [options]="editorOptions"
       [model]="model"
       [(ngModel)]="code"
-      (onInit)="onEditorInit($event)">
+      (editorInit)="onEditorInit($event)">
     </app-monaco-editor>
   `
 })
@@ -49,7 +49,7 @@ export class ExampleComponent {
     language: 'javascript'
   };
 
-  onEditorInit(editor: any) {
+  onEditorInit(editor: MonacoEditorComponent) {
     console.log('Editor initialized', editor);
   }
 }
@@ -72,13 +72,13 @@ import { MonacoEditorComponent, MonacoEditorOptions, MonacoEditorModel } from '@
       [options]="editorOptions"
       [model]="model"
       [(ngModel)]="yamlContent"
-      (onInit)="onEditorInit($event)">
+      (editorInit)="onEditorInit($event)">
     </app-monaco-editor>
   `
 })
 export class YamlEditorComponent {
   yamlContent = '';
-  editor: any;
+  editor?: MonacoEditorComponent;
 
   editorOptions: MonacoEditorOptions = {
     automaticLayout: false,
@@ -92,7 +92,7 @@ export class YamlEditorComponent {
     uri: 'https://myapp.com/schema.json'
   };
 
-  onEditorInit(editor: any) {
+  onEditorInit(editor: MonacoEditorComponent) {
     this.editor = editor;
 
     // YAML language support (monaco-yaml) is registered by the ESM loader
@@ -153,10 +153,11 @@ Editor model configuration:
 ```typescript
 {
   language?: string,  // Language ID (e.g., 'yaml', 'javascript', 'json')
-  uri?: string,       // Unique URI for the model (used for schemas)
-  value?: string      // Initial value (alternative to ngModel)
+  uri?: string        // Unique URI for the model (used for schemas)
 }
 ```
+
+The content itself comes through `ngModel`/`formControl` or `setValue()`.
 
 ### Two-way Binding
 
@@ -165,16 +166,18 @@ Code content with two-way binding support via FormsModule.
 
 ### Outputs
 
-#### `(onInit): EventEmitter<any>`
-Emitted when the editor is initialized. Receives the Monaco editor instance.
+#### `(editorInit): EventEmitter<MonacoEditorComponent>`
+Emitted when the editor is initialized. Receives the wrapper component itself — the raw Monaco instance is never exposed.
 
 ```typescript
-onEditorInit(editor: any) {
-  // Access Monaco editor instance
+onEditorInit(editor: MonacoEditorComponent) {
   editor.updateOptions({ lineNumbers: 'off' });
   editor.focus();
 }
 ```
+
+#### `(valueChange): EventEmitter<string>`
+Emitted with the new text on every content change. This is the change signal for consumers that do not bind `ngModel`/`formControl`.
 
 ### Public Methods
 
@@ -216,34 +219,23 @@ Set the editor content programmatically.
 this.editor.setValue('new content');
 ```
 
-#### `getEditor(): any`
-Get the raw Monaco editor instance for advanced operations.
+#### `setLanguage(language: string): void`
+Switch the language mode of the current model. A no-op until the editor exists.
 
 ```typescript
-const monaco = this.editor.getEditor();
-monaco.getModel().updateOptions({ tabSize: 4 });
+this.editor.setLanguage('json');
 ```
 
 ## Theme Synchronization
 
-To synchronize with Stratos theme changes:
+The wrapper follows the app theme automatically: when Stratos switches between
+light and dark mode, every editor that does not pin `options.theme` is re-themed
+(`vs` / `vs-dark`). Setting `options.theme` opts that editor out of the sync and
+keeps the pinned theme.
 
-```typescript
-import { ThemeService } from '@stratos/store';
-
-constructor(private themeService: ThemeService) {}
-
-onEditorInit(editor: any) {
-  this.editor = editor;
-
-  // Subscribe to theme changes
-  this.themeService.getTheme().subscribe((theme: any) => {
-    const monaco = (window as any).monaco;
-    const monacoTheme = (theme.styleName === 'dark-theme') ? 'vs-dark' : 'vs';
-    monaco.editor.setTheme(monacoTheme);
-  });
-}
-```
+Do not set the Monaco theme yourself. The theme is process-global
+(`monaco.editor.setTheme`), so one editor changing it re-skins every editor on
+the page — the wrapper is the single place that decision is made.
 
 ## Resizing
 
@@ -295,15 +287,13 @@ edits (json, yaml); other languages fall back to the basic editor worker —
 add a wrapper in `monaco-workers/` if a new language surface appears.
 
 ### Custom Languages
-Register custom languages using Monaco API:
-
-```typescript
-const monaco = (window as any).monaco;
-monaco.languages.register({ id: 'myLang' });
-monaco.languages.setMonarchTokensProvider('myLang', {
-  // Language definition
-});
-```
+Registering a custom language needs the raw Monaco API
+(`monaco.languages.register`, `setMonarchTokensProvider`), which sits outside
+the wrapper's supported surface — components should not reach for the global.
+If a custom language is needed, add a loader-level helper in
+`core/src/monaco-loader.ts` following the `configureYaml()` /
+`configureJsonDiagnostics()` pattern: the helper awaits `loadMonacoEditor()`
+and performs the registration in one place.
 
 ## Forms Integration
 
@@ -394,22 +384,13 @@ editorOptions = {
 ```
 
 ### Diff Editor
-For diff viewing, use Monaco's diff editor:
-
-```typescript
-onEditorInit(editor: any) {
-  const monaco = (window as any).monaco;
-  const diffEditor = monaco.editor.createDiffEditor(container);
-  diffEditor.setModel({
-    original: monaco.editor.createModel(originalCode, 'javascript'),
-    modified: monaco.editor.createModel(modifiedCode, 'javascript')
-  });
-}
-```
-
-## Migration from ngx-monaco-editor
-
-See [MIGRATION.md](./MIGRATION.md) for complete migration instructions.
+The wrapper only creates the standard code editor. Diff viewing needs
+`monaco.editor.createDiffEditor`, which sits outside the wrapper's supported
+surface — the raw global is not part of the API, so don't reach for it from a
+component. If a diff view is needed, add a loader-level helper in
+`core/src/monaco-loader.ts` (the `configureYaml()` /
+`configureJsonDiagnostics()` pattern) that awaits `loadMonacoEditor()` and
+creates the diff editor there.
 
 ## Resources
 

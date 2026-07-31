@@ -110,9 +110,11 @@ if (typeof window !== 'undefined') {
         onDidChangeModelContent: () => ({ dispose: () => {} }),
         onDidBlurEditorText: () => ({ dispose: () => {} }),
         setModel: () => {},
+        getModel: () => ({}),
       }),
       createModel: () => ({}),
       getModel: () => null,
+      setModelLanguage: () => {},
       setTheme: () => {},
     },
     Uri: {
