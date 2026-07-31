@@ -14,8 +14,8 @@ type rootEndpoints struct {
 
 // deriveEndpointsFromRoot extracts the auth/uaa/logging/routing endpoints and
 // the CC API version from the CF root `/` links. It is the fallback source used
-// when /v2/info is absent (V2 API disabled), so endpoint registration and
-// cf push remain functional on a v3-only foundation.
+// when /v2/info is absent or the V2 API is disabled, so endpoint registration
+// and cf push remain functional on a v3-only foundation.
 func deriveEndpointsFromRoot(root api.ApiRoot) rootEndpoints {
 	return rootEndpoints{
 		AuthorizationEndpoint:  root.Links.Login.Href,
@@ -27,10 +27,12 @@ func deriveEndpointsFromRoot(root api.ApiRoot) rootEndpoints {
 }
 
 // backfillFromRoot populates the CNSI record's auth/token/doppler endpoints and
-// the V2Info struct from the root `/` links when /v2/info did not supply them
-// (V2 API disabled). When /v2/info responded (supportsV2), it remains the source
-// of truth and this is a no-op so v2-enabled foundations keep their existing
-// behavior.
+// the V2Info struct from the root `/` links when the V2 API is disabled or
+// /v2/info is absent. When /v2/info proved v2 enabled (supportsV2), it remains
+// the source of truth and this is a no-op so v2-enabled foundations keep their
+// existing behavior. Fields root cannot supply (app_ssh_*, min_cli_version)
+// are left as /v2/info served them — a v2-disabled foundation still populates
+// those, and cfappssh depends on them.
 func backfillFromRoot(newCNSI *api.CNSIRecord, v2Info *api.V2Info, root api.ApiRoot, supportsV2 bool) {
 	if supportsV2 {
 		return
