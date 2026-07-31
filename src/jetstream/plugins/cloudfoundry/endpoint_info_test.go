@@ -48,9 +48,11 @@ func TestDeriveEndpointsFromRoot_EmptyLinks(t *testing.T) {
 	assert.Empty(t, ep.APIVersion)
 }
 
-// On a v3-only CF (/v2/info absent → supportsV2 false), backfillFromRoot fills
-// the CNSI record's token/auth endpoints (needed for token refresh) and the
-// V2Info struct (consumed by cfapppush) from the root links.
+// On a v3-only CF (V2 API disabled — /v2/info still answers 200 but with
+// api_version:"" — or genuinely absent; either way supportsV2 false),
+// backfillFromRoot fills the CNSI record's token/auth endpoints (needed for
+// token refresh) and the V2Info struct (consumed by cfapppush) from the root
+// links.
 func TestBackfillFromRoot_V3OnlyPopulatesCNSIAndV2Info(t *testing.T) {
 	var root api.ApiRoot
 	require.NoError(t, json.Unmarshal([]byte(`{"links":{
@@ -74,9 +76,11 @@ func TestBackfillFromRoot_V3OnlyPopulatesCNSIAndV2Info(t *testing.T) {
 	assert.Equal(t, "3.180.0", v2.APIVersion)
 }
 
-// When /v2/info responded (supportsV2 true), it stays the source of truth —
-// backfillFromRoot must not clobber the V2-supplied endpoints with root links.
-func TestBackfillFromRoot_V2PresentDoesNotOverwrite(t *testing.T) {
+// When /v2/info proved the V2 API enabled (supportsV2 true — a populated
+// api_version, not merely a 200; a v2-disabled foundation also answers 200),
+// it stays the source of truth — backfillFromRoot must not clobber the
+// V2-supplied endpoints with root links.
+func TestBackfillFromRoot_V2EnabledDoesNotOverwrite(t *testing.T) {
 	var root api.ApiRoot
 	require.NoError(t, json.Unmarshal([]byte(`{"links":{"login":{"href":"https://root-login.example.com"}}}`), &root))
 

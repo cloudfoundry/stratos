@@ -82,9 +82,8 @@ import { CommonModule } from "@angular/common";
       <!-- Solid mode (static bar at 100%) -->
       @if (mode === "solid") {
         <div
-          class="absolute h-full"
+          class="absolute h-full w-full"
           [ngClass]="progressBarClass"
-          style="width: 100%"
         ></div>
       }
     </div>

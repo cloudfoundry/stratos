@@ -7,10 +7,10 @@
           <h3 class="text-sm font-bold truncate m-0" [title]="ev.endpointName + ' (' + ev.endpointId + ')'">
             {{ ev.endpointName }} <span class="font-normal text-xs text-danger-shade-500">({{ ev.endpointId }})</span>
           </h3>
-          <span class="text-xs whitespace-normal break-words mt-1" style="text-wrap: balance">{{ ev.detail }}</span>
+          <span class="text-xs whitespace-normal break-words mt-1 text-balance">{{ ev.detail }}</span>
         </div>
       } @else {
-        <span class="text-sm whitespace-normal break-words self-center max-w-prose" style="text-wrap: balance">{{ message }}</span>
+        <span class="text-sm whitespace-normal break-words self-center max-w-prose text-balance">{{ message }}</span>
       }
       @if (!endpointId) {
         <a class="text-primary hover:underline font-medium text-sm shrink-0 self-center" [routerLink]="['/events/endpoints']">view details</a>

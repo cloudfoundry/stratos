@@ -3,7 +3,6 @@ import { Portal, PortalModule } from '@angular/cdk/portal';
 import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
-import { ScrollingModule } from '@angular/cdk/scrolling';
 import { toObservable } from '@angular/core/rxjs-interop';
 import {
   entityCatalog,
@@ -36,7 +35,6 @@ import { ShowPageHeaderComponent } from '../../../shared/components/page-header/
     CommonModule,
     RouterModule,
     PortalModule,
-    ScrollingModule,
     SideNavComponent,
     PageSideNavComponent,
     ShowPageHeaderComponent,

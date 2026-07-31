@@ -2,7 +2,7 @@
   <div class="create-endpoint__grid">
     <!-- Left column: Cloud Foundry Information -->
     <div class="create-endpoint__info-column">
-      <h1 class="create-endpoint__section-title" style="color: var(--content-text)">
+      <h1 class="create-endpoint__section-title text-[var(--content-text)]">
         {{ endpoint.definition.label }} Information
       </h1>
       <app-form-field class="block w-full">
@@ -72,7 +72,7 @@
 
     <!-- Right column: Checkbox options -->
     <div class="create-endpoint__options-column">
-      <h1 class="create-endpoint__section-title" style="color: var(--content-text)">Options</h1>
+      <h1 class="create-endpoint__section-title text-[var(--content-text)]">Options</h1>
       <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSLField"
         >Skip SSL validation for the endpoint</app-checkbox
       >
@@ -92,7 +92,7 @@
 
   <!-- Full-width sections below grid -->
   <div [ngClass]="{ 'create-endpoint__shown': showCACertField }" class="create-endpoint__advanced" spellcheck="false">
-    <span class="create-endpoint__cacert-title text-sm mb-2 block" style="color: var(--content-text)"
+    <span class="create-endpoint__cacert-title text-sm mb-2 block text-[var(--content-text)]"
       >Specify CA Certificate:</span
     >
     <textarea
@@ -106,9 +106,9 @@
 
   <div [ngClass]="{ hide: !showAdvancedFields, show: showAdvancedFields }" class="create-endpoint__section">
     <div [ngClass]="{ 'create-endpoint__shown': showAdvancedOptions }" class="create-endpoint__advanced">
-      <h1 style="color: var(--content-text)">Advanced Options</h1>
-      <p style="color: var(--content-text)">Client ID and Client Secret do not normally need to be specified.</p>
-      <p style="color: var(--content-text)">
+      <h1 class="text-[var(--content-text)]">Advanced Options</h1>
+      <p class="text-[var(--content-text)]">Client ID and Client Secret do not normally need to be specified.</p>
+      <p class="text-[var(--content-text)]">
         Note that these are not administrator credentials and only need to be specified if your endpoint uses
         non-standard configuration.
       </p>
@@ -149,17 +149,11 @@
   <div [ngClass]="{ hide: !endpointTypeSupportsSSO, show: endpointTypeSupportsSSO }" class="create-endpoint__sso">
     @if (!!registerForm.controls.ssoAllowedField.value) {
       <div>
-        <p style="color: var(--content-text)">
+        <p class="text-[var(--content-text)]">
           Please ensure that you have added the <app-product-name></app-product-name> SSO Callback URL shown below to
           the client's 'redirect_uri'.
         </p>
-        <pre
-          class="border"
-          style="
-            background-color: var(--code-block-bg);
-            color: var(--code-block-text);
-            border-color: var(--code-block-border);
-          "
+        <pre class="border bg-[var(--code-block-bg)] text-[var(--code-block-text)] border-[var(--code-block-border)]"
           >{{ clientRedirectURI }}</pre
         >
       </div>

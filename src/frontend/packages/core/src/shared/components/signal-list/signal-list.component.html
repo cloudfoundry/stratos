@@ -259,8 +259,7 @@
       }
     } @else if (config.viewMode && config.viewMode!() === 'card' && cardTemplate) {
       <div data-test="card-grid"
-           class="grid gap-3 p-3"
-           style="grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));">
+           class="grid gap-3 p-3 grid-cols-[repeat(auto-fill,minmax(16rem,1fr))]">
         @for (row of config.pagedItems(); track trackByRow($index, row)) {
           <div data-test="card-projected">
             <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: row }"></ng-container>
@@ -269,8 +268,7 @@
       </div>
     } @else if (config.viewMode && config.viewMode!() === 'card') {
       <div data-test="card-grid"
-           class="grid gap-3 p-3"
-           style="grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));">
+           class="grid gap-3 p-3 grid-cols-[repeat(auto-fill,minmax(16rem,1fr))]">
         @for (row of config.pagedItems(); track trackByRow($index, row)) {
           <div data-test="card"
                [routerLink]="rowLink(row)"
@@ -456,10 +454,10 @@
         }
       </div>
     } @else {
-      <table class="min-w-full border-collapse" style="table-layout: fixed;">
+      <table class="min-w-full border-collapse table-fixed">
         <colgroup>
           @if (favoriteColumn() || actionsColumn()) {
-            <col style="width: 4.5rem">
+            <col class="w-[4.5rem]">
           }
           @for (col of config.columns; track col.key) {
             @if (col.kind !== 'favorite' && col.kind !== 'actions') {

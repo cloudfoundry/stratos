@@ -80,10 +80,8 @@ const (
 	defaultSessionSecret = "wheeee!"
 )
 
-// defaultCSPPolicy is the Content-Security-Policy applied when CONSOLE_CSP is
-// set to "default" (or "on"). CSP is opt-in: with CONSOLE_CSP unset, no header
-// is emitted (preserving prior behavior). It is scoped to what the Stratos SPA
-// needs:
+// defaultCSPPolicy is the Content-Security-Policy applied unless CONSOLE_CSP
+// opts out or supplies its own. It is scoped to what the Stratos SPA needs:
 //   - default/script/connect from same origin ('self'); same-origin 'self'
 //     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
 //   - 'unsafe-inline' styles: Angular + the index.html loading splash inject
@@ -643,19 +641,19 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 
 	log.Debugf("Portal config auth endpoint type initialised to: %v", pc.AuthEndpointType)
 
-	// Content Security Policy (opt-in). To preserve existing behavior, no CSP
-	// header is emitted unless CONSOLE_CSP opts in. Recognized values:
-	//   - "default" / "on" -> apply the built-in defaultCSPPolicy (scoped to
+	// Content Security Policy. Recognized values:
+	//   - unset / "default" / "on" -> the built-in defaultCSPPolicy (scoped to
 	//     what the Stratos SPA + Monaco editor need)
-	//   - "" / "off" / "none" / "false" / "disabled" -> no header (default)
+	//   - "off" / "none" / "false" / "disabled" -> no header
 	//   - anything else -> treated as a full policy string, used verbatim
 	// The explicit off-values are normalized to "" so a well-meaning
 	// CONSOLE_CSP=off never leaks as a literal Content-Security-Policy value.
 	switch {
-	case strings.EqualFold(pc.CSPPolicy, "default"), strings.EqualFold(pc.CSPPolicy, "on"):
-		pc.CSPPolicy = defaultCSPPolicy
 	case pc.CSPPolicy == "",
-		strings.EqualFold(pc.CSPPolicy, "off"),
+		strings.EqualFold(pc.CSPPolicy, "default"),
+		strings.EqualFold(pc.CSPPolicy, "on"):
+		pc.CSPPolicy = defaultCSPPolicy
+	case strings.EqualFold(pc.CSPPolicy, "off"),
 		strings.EqualFold(pc.CSPPolicy, "none"),
 		strings.EqualFold(pc.CSPPolicy, "false"),
 		strings.EqualFold(pc.CSPPolicy, "disabled"):
@@ -856,14 +854,18 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
 		AllowCredentials: true,
 	}))
+	// No ContentSecurityPolicy here: the policy carries a per-response nonce,
+	// and this middleware can only emit one string fixed at startup, which
+	// would stamp the literal placeholder — a publicly known nonce — on every
+	// response. serveIndexHTML sets the header on the one response that needs
+	// it; see loadPortalConfig for how CONSOLE_CSP resolves.
 	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
 		XFrameOptions: "SAMEORIGIN",
-		// Content Security Policy (opt-in via CONSOLE_CSP). Empty by default,
-		// so no CSP header is emitted unless an operator opts in — Echo's
-		// Secure middleware skips the header when this is "". CONSOLE_CSP may
-		// be "default"/"on" (built-in defaultCSPPolicy) or a full policy
-		// string; see loadPortalConfig.
-		ContentSecurityPolicy: config.CSPPolicy,
+		// Every response declares its own content type; nosniff stops a
+		// browser second-guessing that and reading, say, a JSON error body as
+		// markup. This is the control for that, not CSP, which now only
+		// accompanies the console document.
+		ContentTypeNosniff: "nosniff",
 	}))
 
 	if !isUpgrade {
@@ -1163,8 +1165,21 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		e.Use(p.setStaticCacheContentMiddleware)
 		log.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
-		e.Group("", middleware.Gzip()).Static("/", staticDir)
-		e.HTTPErrorHandler = getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
+		staticGroup := e.Group("", middleware.Gzip())
+		// The SPA document is served by hand so each response can carry its own
+		// CSP nonce; everything else stays on the plain static handler, which
+		// 'self' already covers. A UI folder without an index.html is a
+		// supported state (getStaticFiles only checks the folder), so failing
+		// to read it degrades to the un-nonced static path rather than serving
+		// an empty document.
+		if indexHTML, readErr := os.ReadFile(path.Join(staticDir, "index.html")); readErr == nil {
+			p.indexHTMLTemplate = string(indexHTML)
+			staticGroup.GET("/", p.serveIndexHTML)
+		} else {
+			log.Warnf("Unable to read index.html; serving the UI without a CSP nonce: %v", readErr)
+		}
+		staticGroup.Static("/", staticDir)
+		e.HTTPErrorHandler = p.getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
 		log.Info("Serving static UI resources")
 	} else {
 		// Not serving UI - use V2 Error compatability error handler
@@ -1202,7 +1217,7 @@ func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
 }
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
-func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPErrorHandler) echo.HTTPErrorHandler {
+func (p *portalProxy) getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPErrorHandler) echo.HTTPErrorHandler {
 	return func(err error, c echo.Context) {
 		code := http.StatusInternalServerError
 		if he, ok := err.(*echo.HTTPError); ok {
@@ -1211,7 +1226,17 @@ func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPError
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
 		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
-			if fileErr := c.File(path.Join(staticDir, "index.html")); fileErr != nil {
+			// Deep links reach the SPA through here, not through GET "/", so
+			// this path needs the same nonce treatment. The header has to be
+			// set before the first write, as the default handler below writes
+			// again.
+			var fileErr error
+			if p.indexHTMLTemplate != "" {
+				fileErr = p.serveIndexHTML(c)
+			} else {
+				fileErr = c.File(path.Join(staticDir, "index.html"))
+			}
+			if fileErr != nil {
 				log.Warnf("Unable to serve index.html: %v", fileErr)
 			}
 			// Let the default handler handle it

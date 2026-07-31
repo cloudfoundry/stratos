@@ -1,2 +1,2 @@
-[Features]
-- Jetstream can send a Content-Security-Policy header, opt-in through `CONSOLE_CSP` (#5688). It is off by default; operators who enable it should read the CSP section of the docs first, since a policy that is too strict will break console features.
+[Breaking Changes]
+- Jetstream now sends a Content-Security-Policy header with the console page by default (#5688). The built-in policy permits only the origins the console itself needs, so a deployment that reaches somewhere else — a metrics or auth endpoint on another host, say — has to set `CONSOLE_CSP` to a policy of its own, or `CONSOLE_CSP=off` to send no header. The page is served uncached so each response can carry its own nonce. Settings are described in `src/jetstream/config.example`.
