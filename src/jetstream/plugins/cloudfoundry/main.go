@@ -123,13 +123,23 @@ func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord api.CNSI
 	return tokenRecord, cfAdmin, nil
 }
 
+// v2APIEnabled reports whether a decoded /v2/info payload comes from a
+// foundation with the V2 API enabled. Since cloud_controller_ng#4280 a
+// v2-disabled foundation still serves /v2/info with 200 and every endpoint
+// field populated — only api_version (blanked) and support ("CF API v2 is
+// disabled") change — so a populated authorization_endpoint proves the
+// payload is real, and a populated api_version is the signal that v2 is on.
+func v2APIEnabled(v2 api.V2Info) bool {
+	return v2.AuthorizationEndpoint != "" && v2.APIVersion != ""
+}
+
 // confirmCapabilityMetadata re-probes /v2/info and /v3/info if the stored
 // metadata was assumed (both probes failed at registration). Writes confirmed
 // values back to the DB so subsequent info requests see real capability flags.
 //
 // The dual-probe is the same intentional pattern documented at the Info()
-// callsite: /v2/info and /v3/info return 404 on the other CF version, so
-// probing both is the canonical way to detect what the foundation supports.
+// callsite; both sites must share v2APIEnabled so registration and connect
+// cannot disagree about the same foundation.
 func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNSIRecord) {
 	var existing api.CFEndpointMetadata
 	if err := json.Unmarshal([]byte(cnsiRecord.Metadata), &existing); err != nil || !existing.Assumed {
@@ -151,7 +161,7 @@ func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNS
 		defer func() { _ = res.Body.Close() }()
 		if res.StatusCode == 200 {
 			var v2 api.V2Info
-			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2.AuthorizationEndpoint != "" {
+			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2APIEnabled(v2) {
 				confirmed.SupportsV2 = true
 			}
 		}
@@ -347,13 +357,16 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	// This is NOT an unmigrated v2 callsite; it's how Stratos discovers what
 	// the foundation supports so downstream handlers know whether to gate
 	// V3-only operations (rolling/canary deployments, restage v3 composition).
-	// Both endpoints return 404 on the other version's CF, so each probe is
-	// soft-fail. Until RFC-0032's v2 sunset (end of 2026), every reachable CF
-	// has at least one of the two responding 200; if both fail (TLS / network),
-	// we fall through to "assume v2" + Assumed=true, which triggers re-probe
-	// at Connect time via confirmCapabilityMetadata.
+	// Since cloud_controller_ng#4280 a v2-disabled foundation still serves
+	// /v2/info (200, api_version blanked) — see v2APIEnabled — so a 200 alone
+	// proves nothing about v2. Each probe is soft-fail; if both fail
+	// (TLS / network), we fall through to "assume v2" + Assumed=true, which
+	// triggers re-probe at Connect time via confirmCapabilityMetadata.
 
-	// Probe /v2/info — soft failure; v3-only CFs will 404 here
+	// Probe /v2/info — soft failure. The body is captured whenever it parses,
+	// independent of the capability verdict: a v2-disabled CF still serves
+	// app_ssh_* and min_cli_version here, and nothing else supplies them
+	// (cfappssh reads them off V2Info; ApiRootLinks does not model app_ssh).
 	v2Uri := *uri
 	v2Uri.Path = "v2/info"
 	if res, err := h.Get(v2Uri.String()); err == nil {
@@ -361,11 +374,13 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 		if res.StatusCode == 200 {
 			var v2 api.V2Info
 			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2.AuthorizationEndpoint != "" {
-				metadata.SupportsV2 = true
 				v2InfoResponse = v2
-				newCNSI.TokenEndpoint = v2.TokenEndpoint
-				newCNSI.AuthorizationEndpoint = v2.AuthorizationEndpoint
-				newCNSI.DopplerLoggingEndpoint = v2.DopplerLoggingEndpoint
+				if v2APIEnabled(v2) {
+					metadata.SupportsV2 = true
+					newCNSI.TokenEndpoint = v2.TokenEndpoint
+					newCNSI.AuthorizationEndpoint = v2.AuthorizationEndpoint
+					newCNSI.DopplerLoggingEndpoint = v2.DopplerLoggingEndpoint
+				}
 			}
 		}
 	}
@@ -391,11 +406,14 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 		metadata.Assumed = true
 	}
 
-	// When /v2/info is absent (V2 API disabled), source the auth/token/doppler/
-	// routing endpoints and CC API version from the root `/` links so endpoint
-	// registration (token refresh) and cf push work on a v3-only foundation.
-	// No-op when /v2/info responded — it stays the source of truth (#5047).
-	backfillFromRoot(&newCNSI, &v2InfoResponse, apiRootResponse, metadata.SupportsV2)
+	// When /v2/info did not prove v2 enabled (absent, disabled, or merely
+	// assumed above), source the auth/token/doppler/routing endpoints and CC
+	// API version from the root `/` links so endpoint registration (token
+	// refresh) and cf push work on a v3-only foundation. Root is available
+	// here — it is the hard reachability gate at the top of this function.
+	// No-op when v2 is genuinely enabled — /v2/info stays the source of
+	// truth (#5047).
+	backfillFromRoot(&newCNSI, &v2InfoResponse, apiRootResponse, metadata.SupportsV2 && !metadata.Assumed)
 
 	if metaBytes, err := json.Marshal(metadata); err == nil {
 		newCNSI.Metadata = string(metaBytes)

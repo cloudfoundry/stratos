@@ -423,6 +423,10 @@ var mockV2InfoResponse = api.V2Info{
 	AuthorizationEndpoint:  mockAuthEndpoint,
 	TokenEndpoint:          mockTokenEndpoint,
 	DopplerLoggingEndpoint: mockDopplerEndpoint,
+	// A v2-enabled foundation always serves api_version; a blank one is the
+	// v2-disabled marker (cloud_controller_ng#4280) and would make the CF
+	// capability probe classify this mock as v2-disabled.
+	APIVersion: "2.164.0",
 }
 
 var mockApiRootResponse = api.ApiRoot{
