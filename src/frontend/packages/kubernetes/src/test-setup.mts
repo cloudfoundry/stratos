@@ -50,6 +50,7 @@ if (typeof (window as any).monaco === 'undefined') {
     onDidChangeModelContent: (callback: any) => ({ dispose: () => { } }),
     onDidBlurEditorText: (callback: any) => ({ dispose: () => { } }),
     setModel: (model: any) => { },
+    getModel: () => ({}),
   };
 
   (window as any).monaco = {
@@ -57,6 +58,7 @@ if (typeof (window as any).monaco === 'undefined') {
       create: () => mockEditor,
       getModel: () => null,
       createModel: () => ({}),
+      setModelLanguage: () => { },
       setTheme: () => { },
     },
     Uri: {

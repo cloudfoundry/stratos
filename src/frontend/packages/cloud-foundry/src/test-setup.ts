@@ -31,6 +31,37 @@ if (typeof window !== 'undefined') {
       return originalConsoleError(...args);
     };
   }
+
+  // IMMEDIATE: Setup Monaco Editor mock before any component initialization
+  // A pre-set window.monaco makes loadMonacoEditor() short-circuit, so specs
+  // that mount app-monaco-editor never kick off the real multi-megabyte
+  // monaco-editor ESM import (whose in-flight chunk fetches otherwise abort
+  // noisily at environment teardown)
+  const monacoMock = {
+    editor: {
+      create: () => ({
+        getValue: () => '',
+        setValue: () => {},
+        updateOptions: () => {},
+        layout: () => {},
+        focus: () => {},
+        dispose: () => {},
+        onDidChangeModelContent: () => ({ dispose: () => {} }),
+        onDidBlurEditorText: () => ({ dispose: () => {} }),
+        setModel: () => {},
+        getModel: () => ({}),
+      }),
+      createModel: () => ({}),
+      getModel: () => null,
+      setModelLanguage: () => {},
+      setTheme: () => {},
+    },
+    Uri: {
+      parse: (uri: string) => ({ toString: () => uri }),
+    },
+  };
+
+  (window as any).monaco = monacoMock;
 }
 
 import '@angular/compiler';

@@ -20,7 +20,6 @@ declare const monaco: typeof import('monaco-editor');
 export interface MonacoEditorModel {
   language?: string;
   uri?: string;
-  value?: string;
 }
 
 export interface MonacoEditorOptions {
@@ -55,10 +54,13 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
   @Input() options: MonacoEditorOptions = {};
   @Input() model?: MonacoEditorModel;
-  @Output() editorInit = new EventEmitter<any>();
+  @Output() editorInit = new EventEmitter<MonacoEditorComponent>();
+  // Fires for every content change, including ones no ngModel is bound to —
+  // consumers without a CVA binding have no other change signal.
+  @Output() valueChange = new EventEmitter<string>();
 
   private branding = inject(StratosBrandingService);
-  private editor: any;
+  private editor: import('monaco-editor').editor.IStandaloneCodeEditor | undefined;
 
   constructor() {
     // Monaco's theme is process-global (monaco.editor.setTheme), so one
@@ -115,7 +117,8 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     };
 
     // Create the editor
-    this.editor = monaco.editor.create(this.editorContainer.nativeElement, editorOptions);
+    const editor = monaco.editor.create(this.editorContainer.nativeElement, editorOptions);
+    this.editor = editor;
 
     // Set model if uri is provided
     if (this.model?.uri) {
@@ -130,20 +133,21 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
         );
       }
 
-      this.editor.setModel(model);
+      editor.setModel(model);
     }
 
     // Listen for content changes
-    this.editor.onDidChangeModelContent(() => {
-      const newValue = this.editor.getValue();
+    editor.onDidChangeModelContent(() => {
+      const newValue = editor.getValue();
       if (newValue !== this.value) {
         this.value = newValue;
         this.onChange(newValue);
+        this.valueChange.emit(newValue);
       }
     });
 
     // Listen for blur events
-    this.editor.onDidBlurEditorText(() => {
+    editor.onDidBlurEditorText(() => {
       this.onTouched();
     });
 
@@ -153,7 +157,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     }
 
     // Emit initialization event
-    this.editorInit.emit(this.editor);
+    this.editorInit.emit(this);
   }
 
   private setupResizeObserver(): void {
@@ -233,7 +237,13 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     this.writeValue(value);
   }
 
-  public getEditor(): any {
-    return this.editor;
+  public setLanguage(language: string): void {
+    if (typeof monaco === 'undefined') {
+      return;
+    }
+    const model = this.editor?.getModel();
+    if (model) {
+      monaco.editor.setModelLanguage(model, language);
+    }
   }
 }

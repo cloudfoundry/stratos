@@ -2,11 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
+import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { SchemaFormComponent } from './schema-form.component';
-import { TailwindSnackBarService } from '@stratosui/core';
+import { MonacoEditorComponent, TailwindSnackBarService } from '@stratosui/core';
 
 describe('SchemaFormComponent', () => {
   let component: SchemaFormComponent;
@@ -264,10 +265,9 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
     // Simulate Monaco mounting AFTER jsonText was already set (the race the bug triggered)
     const setValueSpy = vi.fn();
     const fakeEditor = {
-      getValue: () => '',                        // editor starts empty (stale [model].value)
+      getValue: () => '',                        // editor starts empty (no ngModel binding seeds it)
       setValue: setValueSpy,
-      onDidChangeModelContent: () => {},
-    };
+    } as unknown as MonacoEditorComponent;
     c.onMonacoInit(fakeEditor);
 
     // onMonacoInit must have pushed the current jsonText into the editor
@@ -292,11 +292,54 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
     const fakeEditor = {
       getValue: () => expectedText,              // editor already has the correct text
       setValue: setValueSpy,
-      onDidChangeModelContent: () => {},
-    };
+    } as unknown as MonacoEditorComponent;
     c.onMonacoInit(fakeEditor);
 
     // No redundant setValue — editor is already up to date
     expect(setValueSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('SchemaFormComponent editor text changes', () => {
+  beforeEach(() => TestBed.configureTestingModule({
+    providers: [provideZonelessChangeDetection()],
+  }));
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  // Emit through the mounted child's valueChange output so the test exercises
+  // the template's (valueChange)="setJsonText($event)" binding itself — the
+  // only channel editor edits reach the component through. Driving setJsonText
+  // directly would stay green with the binding deleted.
+  async function mountRawJsonEditor(): Promise<{
+    fixture: ComponentFixture<SchemaFormComponent>;
+    c: SchemaFormComponent;
+    editor: MonacoEditorComponent;
+  }> {
+    const fixture = TestBed.createComponent(SchemaFormComponent);
+    const c = fixture.componentInstance;
+    c.config = {};                               // no schema — raw JSON mode
+    fixture.detectChanges();
+    await fixture.whenStable();                  // mocked Monaco finishes mounting
+
+    const editorDe = fixture.debugElement.query(By.directive(MonacoEditorComponent));
+    expect(editorDe).toBeTruthy();               // raw JSON mode rendered an editor
+    return { fixture, c, editor: editorDe.componentInstance };
+  }
+
+  it('updates data() and parseValid from an editor text change', async () => {
+    const { c, editor } = await mountRawJsonEditor();
+
+    editor.valueChange.emit('{"region":"us-west"}');
+    expect(c.parseValid()).toBe(true);
+    expect(c.data()).toEqual({ region: 'us-west' });
+  });
+
+  it('flags parseValid=false when the editor emits unparseable JSON', async () => {
+    const { c, editor } = await mountRawJsonEditor();
+
+    editor.valueChange.emit('{ not json');
+    expect(c.parseValid()).toBe(false);
+    expect(c.data()).toBeNull();                 // never fed a bad parse
   });
 });

@@ -12,7 +12,6 @@ import { ConfirmationDialogService } from '../../../../../core/src/shared/compon
 import { SchemaWidgetRendererComponent } from '../../../../../core/src/shared/components/schema-widget-renderer/schema-widget-renderer.component';
 import { MonacoEditorComponent } from '../../../../../core/src/shared/components/monaco-editor/monaco-editor.component';
 import { configureYaml } from '../../../../../core/src/monaco-loader';
-import { StratosBrandingService } from '@stratosui/theme';
 import { diffObjects } from './diffvalues';
 import { generateJsonSchemaFromObject } from './json-schema-generator';
 import { mergeObjects } from './merge';
@@ -109,7 +108,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   };
 
   // Monaco editor
-  public editor: any;
+  public editor: MonacoEditorComponent | undefined;
 
   // Observable - are we still loading resources? Assigned in init() once a
   // config is provided via the @Input setter.
@@ -121,7 +120,6 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   private monacoLoaded = signal<boolean>(false);
 
   private resizeSub?: Subscription;
-  private themeSub?: Subscription;
 
   // Track whether the user changes the code in the text editor
   private codeOnEnter!: string;
@@ -160,9 +158,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   );  private elRef = inject(ElementRef);
   private renderer = inject(Renderer2);
   private httpClient = inject(HttpClient);
-  private branding = inject(StratosBrandingService);
   private confirmDialog = inject(ConfirmationDialogService);
-  private isDarkMode$ = toObservable(this.branding.isDarkMode);
 
   ngOnInit(): void {
     // Listen for window resize and resize the editor when this happens
@@ -223,21 +219,18 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     if (this.resizeSub) {
       this.resizeSub.unsubscribe();
     }
-    if (this.themeSub) {
-      this.themeSub.unsubscribe();
-    }
   }
 
   // Toggle editor minimap on/off
   toggleMinimap() {
     this.minimap = !this.minimap;
-    this.editor.updateOptions({ minimap: { enabled: this.minimap } });
+    this.editor?.updateOptions({ minimap: { enabled: this.minimap } });
   }
 
   // Toggle editor line numbers on/off
   toggleLineNumbers() {
     this.lineNumbers = !this.lineNumbers;
-    this.editor.updateOptions({ lineNumbers: this.lineNumbers ? 'on' : 'off' });
+    this.editor?.updateOptions({ lineNumbers: this.lineNumbers ? 'on' : 'off' });
   }
 
   // Store the update form data when the form changes
@@ -289,8 +282,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   }
 
   // Called once the Monaco editor has loaded and then each time the model is update
-  // Store a reference to the editor and ensure the editor theme is synchronized with the Stratos theme
-  onMonacoInit(editor: any) {
+  // Store a reference to the editor wrapper component; it follows the app
+  // theme itself since we do not pin options.theme.
+  onMonacoInit(editor: MonacoEditorComponent) {
     this.editor = editor;
     this.resize();
 
@@ -304,13 +298,6 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     // model directly; its uri matches the schema's fileMatch entry.
     this.updateModel();
     this.monacoLoaded.set(true);
-
-    // Watch for theme changes - set light/dark theme in the monaco editor as the Stratos theme changes
-    this.themeSub = this.isDarkMode$.subscribe((isDark: boolean) => {
-      const monaco = (window as any).monaco;
-      const monacoTheme = isDark ? 'vs-dark' : 'vs';
-      monaco.editor.setTheme(monacoTheme);
-    });
   }
 
   private updateModel() {

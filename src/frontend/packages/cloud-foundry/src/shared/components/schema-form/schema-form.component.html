@@ -41,8 +41,9 @@
       </div>
       <div class="h-[200px] min-h-[200px] min-w-[16rem] resize overflow-hidden border border-content-border rounded-md">
         <app-monaco-editor
-          [model]="{ language: 'json', value: jsonText }"
+          [model]="{ language: 'json' }"
           [options]="monacoOptions"
+          (valueChange)="setJsonText($event)"
           (editorInit)="onMonacoInit($event)">
         </app-monaco-editor>
       </div>
@@ -64,8 +65,9 @@
   </div>
   <div class="h-[200px] min-h-[200px] min-w-[16rem] resize overflow-hidden border border-content-border rounded-md">
     <app-monaco-editor
-      [model]="{ language: 'json', value: jsonText }"
+      [model]="{ language: 'json' }"
       [options]="monacoOptions"
+      (valueChange)="setJsonText($event)"
       (editorInit)="onMonacoInit($event)">
     </app-monaco-editor>
   </div>

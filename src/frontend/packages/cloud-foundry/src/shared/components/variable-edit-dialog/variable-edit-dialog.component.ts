@@ -88,9 +88,9 @@ export class VariableEditDialogComponent {
     fontSize: 16,
   };
 
-  /** Captured Monaco editor instance (undefined until editorInit fires; never
-   *  fires in unit tests, where Monaco isn't loaded). */
-  private editor: any;
+  /** Captured Monaco wrapper component (undefined until editorInit fires;
+   *  never fires in unit tests, where Monaco isn't loaded). */
+  private editor: MonacoEditorComponent | undefined;
 
   private readonly nameValidation = computed(() => validateVariableName(this.name(), this.existingNames));
   readonly nameError: Signal<string | null> = computed(() => this.nameValidation().hardError);
@@ -139,7 +139,7 @@ export class VariableEditDialogComponent {
   });
 
   /** Monaco model — initial language reflects the auto-detected mode. Live
-   *  toggles are applied via setModelLanguage in the effect below. */
+   *  toggles are applied via setLanguage in the effect below. */
   readonly model: Signal<MonacoEditorModel> = computed(() => ({
     language: this.jsonMode() ? 'json' : 'plaintext',
   }));
@@ -152,17 +152,15 @@ export class VariableEditDialogComponent {
     this.title = this.data.mode === 'add' ? 'Add Variable' : 'Edit Variable';
 
     // Apply live language switches to the running editor when the user
-    // toggles JSON/Plain. Guarded so it's a no-op before the editor exists.
+    // toggles JSON/Plain. A no-op before the editor exists (setLanguage
+    // itself also guards against Monaco not being ready yet).
     effect(() => {
       const language = this.jsonMode() ? 'json' : 'plaintext';
-      const monaco = (window as any).monaco;
-      if (this.editor && monaco) {
-        monaco.editor.setModelLanguage(this.editor.getModel(), language);
-      }
+      this.editor?.setLanguage(language);
     });
   }
 
-  onEditorInit(editor: any): void {
+  onEditorInit(editor: MonacoEditorComponent): void {
     this.editor = editor;
   }
 
