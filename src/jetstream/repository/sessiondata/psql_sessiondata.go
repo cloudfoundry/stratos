@@ -18,14 +18,17 @@ var insertSessionDataValue = `INSERT INTO session_data (session, groupName, name
 
 var deleteSessionGroupData = `DELETE FROM session_data WHERE session=$1 AND groupName=$2`
 
-// Expire data for sessions that no longer exist
-var expireSessionData = `UPDATE session_data SET expired=true WHERE session NOT IN (SELECT CAST(id AS varchar) from sessions)`
+// Expire data for sessions that no longer exist. The session store creates
+// that table as "http_sessions" on Postgres and "sessions" on MySQL and
+// SQLite, so the name is resolved by InitRepositoryProvider — hardcoding
+// either spelling leaves this failing on the other providers.
+var expireSessionData = `UPDATE session_data SET expired=true WHERE session NOT IN (SELECT CAST(id AS varchar) from ` + datastore.SessionsTablePlaceholder + `)`
 
 // Delete data for sessions that no longer exist
 var deleteSessionData = `DELETE FROM session_data WHERE expired=true AND keep_on_expire=false`
 
 // Check if a session valid
-var isValidSession = `SELECT id, expires_on from http_sessions WHERE id=$1`
+var isValidSession = `SELECT id, expires_on from ` + datastore.SessionsTablePlaceholder + ` WHERE id=$1`
 
 // SessionDataRepository is a RDB-backed Session Data repository
 type SessionDataRepository struct {
