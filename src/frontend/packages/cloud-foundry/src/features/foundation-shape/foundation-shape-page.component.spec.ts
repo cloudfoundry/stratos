@@ -10,10 +10,17 @@ import { MeasuredEcosystem, MeasuredTotals, ShapeMeasureService } from './shape-
 import { app, org, space } from './testing/entity-builders';
 
 const cfEndpoint = { guid: 'cf-1', name: 'My Cloud Foundry', cnsi_type: 'cf' } as EndpointModel;
+const adminCfEndpoint = {
+  guid: 'cf-1',
+  name: 'My Cloud Foundry',
+  cnsi_type: 'cf',
+  user: { guid: 'u1', name: 'admin', admin: true },
+} as EndpointModel;
 const nonCfEndpoint = { guid: 'k8s-1', name: 'My Kube', cnsi_type: 'k8s' } as EndpointModel;
 
 /** Writable-signal stand-in for the EndpointDataService surface the page reads. */
 const fakeDataService = () => ({
+  lastFetched: signal<Date | null>(new Date('2026-08-01T10:00:00Z')),
   orgs: signal([org('o1'), org('o2')]),
   spaces: signal([space('s1', 'o1'), space('s2', 'o1')]),
   apps: signal([
@@ -40,6 +47,7 @@ describe('FoundationShapePageComponent', () => {
   let component: FoundationShapePageComponent;
   let services: Map<string, ReturnType<typeof fakeDataService>>;
   let registry: { acquire: ReturnType<typeof vi.fn>; release: ReturnType<typeof vi.fn> };
+  let endpoints: ReturnType<typeof signal<EndpointModel[]>>;
   let measure: {
     totals: ReturnType<typeof signal<ReadonlyMap<string, MeasuredTotals>>>;
     ecosystem: ReturnType<typeof signal<ReadonlyMap<string, MeasuredEcosystem>>>;
@@ -77,7 +85,7 @@ describe('FoundationShapePageComponent', () => {
         provideZonelessChangeDetection(),
         {
           provide: EndpointsSignalService,
-          useValue: { connectedEndpoints: signal<EndpointModel[]>([cfEndpoint, nonCfEndpoint]) },
+          useValue: { connectedEndpoints: (endpoints = signal<EndpointModel[]>([cfEndpoint, nonCfEndpoint])) },
         },
         { provide: EndpointDataRegistry, useValue: registry },
         { provide: ShapeMeasureService, useValue: measure },
@@ -153,6 +161,23 @@ describe('FoundationShapePageComponent', () => {
       expect(strip?.textContent).toContain('24');
       expect(strip?.textContent).toContain('Org quotas');
       expect(strip?.textContent).toContain('unavailable');
+    });
+
+    it('hides export for non-admin endpoint connections', () => {
+      expect((fixture.nativeElement as HTMLElement).querySelector('[data-test="shape-export"]')).toBeNull();
+    });
+
+    it('shows export to a CF admin and builds a schema_version 1 payload', async () => {
+      endpoints.set([adminCfEndpoint]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect((fixture.nativeElement as HTMLElement).querySelector('[data-test="shape-export"]')).not.toBeNull();
+
+      const payload = component.exportPayload(component.sections()[0]);
+      expect(payload.schema_version).toBe(1);
+      expect(payload.totals['organizations']).toBe(2);
+      expect(payload.totals['spaces']).toBe(2);
+      expect(payload.distributions.spaces_per_org).toMatchObject({ n: 2 });
     });
 
     it('renders defined stacks and buildpacks with unused stacks called out', async () => {
