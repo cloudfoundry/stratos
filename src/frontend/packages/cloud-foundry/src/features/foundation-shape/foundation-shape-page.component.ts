@@ -15,6 +15,7 @@ import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data
 import { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
 import { computeSessionShape, SessionShape } from './session-shape';
 import { ShapeDistCardComponent } from './shape-dist-card.component';
+import { AgnosticExport, buildAgnosticExport, exportMarkdown } from './shape-export';
 import {
   MeasuredEcosystem,
   MeasuredTotals,
@@ -47,6 +48,10 @@ export interface ShapeSection {
   loading: boolean;
   /** At least one full drain landed, so the shape cards mean something. */
   hasDrains: boolean;
+  /** The fast counts pass has run, so the totals row is real data. */
+  countsLoaded: boolean;
+  /** The connected user is a CF admin on this endpoint — gates export. */
+  admin: boolean;
 }
 
 /** Human age of a drain timestamp; the ambiguity note in one place. */
@@ -148,6 +153,8 @@ export class FoundationShapePageComponent implements OnDestroy {
           loading: svc.isLoadingDetails(),
           hasDrains:
             svc.orgsLastFetched() !== null || svc.spacesLastFetched() !== null || svc.appsLastFetched() !== null,
+          countsLoaded: svc.lastFetched() !== null,
+          admin: !!ep.user?.admin,
         };
       })
       .filter((section): section is ShapeSection => section !== null);
@@ -190,6 +197,39 @@ export class FoundationShapePageComponent implements OnDestroy {
 
   ageOf(date: Date): string {
     return ageLabel(date, new Date());
+  }
+
+  /** The anonymous projection (#5703) of everything this section has measured. */
+  exportPayload(section: ShapeSection): AgnosticExport {
+    return buildAgnosticExport({
+      shape: section.shape,
+      sessionTotals: section.totals,
+      drains: {
+        counts: section.countsLoaded,
+        orgs: section.drains.orgs.fetchedAt !== null,
+        spaces: section.drains.spaces.fetchedAt !== null,
+        apps: section.drains.apps.fetchedAt !== null,
+      },
+      collectedAt: new Date(),
+      measuredTotals: this.measuredTotals(section),
+      measuredEcosystem: this.measuredEcosystem(section),
+    });
+  }
+
+  downloadJson(section: ShapeSection): void {
+    const payload = JSON.stringify(this.exportPayload(section), null, 2);
+    const blob = new Blob([payload], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    // Guid prefix keys multi-endpoint exports without leaking a name.
+    anchor.download = `foundation-shape-${section.guid.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }
+
+  copyMarkdown(section: ShapeSection): void {
+    void navigator.clipboard.writeText(exportMarkdown(this.exportPayload(section)));
   }
 
   measuredTotals(section: ShapeSection): MeasuredTotals | undefined {

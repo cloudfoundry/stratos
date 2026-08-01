@@ -206,6 +206,24 @@
             </div>
           }
         </div>
+
+        <!-- Export (#5703): the anonymous projection; CF-admin only -->
+        @if (section.admin) {
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-content-border pt-3" data-test="shape-export">
+            <span class="text-sm">Export anonymous shape</span>
+            <span class="text-xs text-content-muted">identity-stripped projection of what this page has measured</span>
+            <button data-test="export-json" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+              (click)="downloadJson(section)">
+              Download JSON
+            </button>
+            <button data-test="export-markdown" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+              (click)="copyMarkdown(section)">
+              Copy markdown
+            </button>
+          </div>
+        }
       </div>
     </app-info-card>
   }
