@@ -45,6 +45,7 @@ export { CF_ENDPOINT_TYPE } from './cf-types';
 export { CFAppState } from './cf-app-state';
 export * from './cf-api.types';
 export { ActiveRouteCfOrgSpace, ActiveRouteCfCell } from './features/cf/cf-page.types';
+export { FoundationShapePageComponent } from './features/foundation-shape/foundation-shape-page.component';
 
 // CF Entity Types
 export {

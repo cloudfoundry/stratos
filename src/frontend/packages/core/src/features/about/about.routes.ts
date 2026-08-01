@@ -26,6 +26,10 @@ export const ABOUT_ROUTES: Routes = [
       { path: 'counts', component: DiagnosticCountsPageComponent },
       { path: 'performance', component: DiagnosticPerformancePageComponent },
       { path: 'probes', component: DiagnosticProbesPageComponent },
+      {
+        path: 'shape',
+        loadComponent: () => import('@stratosui/cloud-foundry').then(m => m.FoundationShapePageComponent),
+      },
     ]
   }
 ];

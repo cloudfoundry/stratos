@@ -46,6 +46,6 @@ describe('DiagnosticsBaseComponent', () => {
   });
 
   it('defines the diagnostics tab links', () => {
-    expect(component.tabLinks.map(t => t.link)).toEqual(['overview', 'counts', 'performance', 'probes']);
+    expect(component.tabLinks.map(t => t.link)).toEqual(['overview', 'counts', 'performance', 'probes', 'shape']);
   });
 });

@@ -1,0 +1,135 @@
+<div class="flex flex-col gap-4">
+  <div data-test="poc-notice"
+    class="px-3 py-2 text-sm rounded border border-warning-shade-300 bg-warning-shade-100 text-warning-shade-700 dark:border-warning-shade-700 dark:bg-warning-shade-900/30 dark:text-warning-shade-300">
+    Proof of concept &mdash; this page and its metrics are exploratory and may change or be removed.
+  </div>
+
+  <p class="text-sm text-content-muted">
+    Foundation shape computed from data this session has already loaded &mdash; this page issues no
+    Cloud Foundry requests. Each section reads through its endpoint's own connection, so what you see
+    reflects your CF roles there.
+  </p>
+
+  @if (sections().length === 0) {
+    <div class="px-4 py-6 text-sm text-content-muted">
+      No connected Cloud Foundry endpoints.
+    </div>
+  }
+
+  @for (section of sections(); track section.guid) {
+    <app-info-card [title]="section.name">
+      <div class="flex flex-col gap-4 px-4 py-1">
+
+        <!-- Totals strip (fast counts; spaces from the full drain when it has run) -->
+        <div class="flex flex-wrap gap-x-6 gap-y-2" data-test="shape-totals">
+          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.orgs | number }}</span>
+            <span class="text-xs text-content-muted"> orgs</span></div>
+          <div>
+            @if (section.totals.spaces !== null) {
+              <span class="text-lg font-semibold tabular-nums">{{ section.totals.spaces | number }}</span>
+            } @else {
+              <span class="text-lg font-semibold text-content-muted" data-test="spaces-not-loaded">&mdash;</span>
+            }
+            <span class="text-xs text-content-muted"> spaces</span>
+          </div>
+          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.apps | number }}</span>
+            <span class="text-xs text-content-muted"> apps</span></div>
+          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.routes | number }}</span>
+            <span class="text-xs text-content-muted"> routes</span></div>
+          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.serviceInstances | number }}</span>
+            <span class="text-xs text-content-muted"> service instances</span></div>
+          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.serviceOfferings | number }}</span>
+            <span class="text-xs text-content-muted"> offerings</span></div>
+          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.servicePlans | number }}</span>
+            <span class="text-xs text-content-muted"> plans</span></div>
+          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.serviceBrokers | number }}</span>
+            <span class="text-xs text-content-muted"> brokers</span></div>
+        </div>
+
+        <!-- Data age stamps -->
+        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-content-muted" data-test="shape-drain-stamps">
+          <span>orgs drained {{ age(section.drains.orgs) }}</span>
+          <span>spaces drained {{ age(section.drains.spaces) }}</span>
+          <span>apps drained {{ age(section.drains.apps) }}</span>
+          @if (section.drains.orgs.stale || section.drains.spaces.stale || section.drains.apps.stale) {
+            <span class="px-1.5 rounded-full bg-warning-shade-100 text-warning-shade-700 dark:bg-warning-shade-900/30 dark:text-warning-shade-300">stale</span>
+          }
+          @if (section.loading) {
+            <span>loading&hellip;</span>
+          }
+        </div>
+
+        @if (!section.hasDrains) {
+          <div class="px-1 py-4 text-sm text-content-muted">
+            Shape appears once this session has drained orgs, spaces and apps for this endpoint
+            (that load starts automatically and is shared with the other CF pages).
+          </div>
+        } @else {
+
+          <!-- Concentration tiles -->
+          @if (concentrationTiles(section).length > 0) {
+            <div class="flex flex-wrap gap-6" data-test="shape-concentration">
+              @for (tile of concentrationTiles(section); track tile.detail) {
+                <div>
+                  <div class="text-lg font-semibold tabular-nums">{{ tile.headline }}</div>
+                  <div class="text-xs text-content-muted max-w-44">{{ tile.detail }}</div>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Occupancy + state share bars -->
+          <div class="grid gap-4 sm:grid-cols-2">
+            @if (occupancy(section); as occ) {
+              <app-shape-share-bar label="Space occupancy" [primary]="occ.primary" [remainder]="occ.remainder" />
+            }
+            @if (started(section); as st) {
+              <app-shape-share-bar label="App state" [primary]="st.primary" [remainder]="st.remainder" />
+            }
+          </div>
+
+          <!-- Topology histograms -->
+          <div class="grid gap-4 lg:grid-cols-2">
+            @if (section.shape.distributions.spaces_per_org; as d) {
+              <app-shape-dist-card label="Spaces per org" [d]="d" />
+            }
+            @if (section.shape.distributions.apps_per_space; as d) {
+              <app-shape-dist-card label="Apps per space" [d]="d" />
+            }
+            @if (section.shape.distributions.apps_per_org; as d) {
+              <app-shape-dist-card label="Apps per org" [d]="d" />
+            }
+            @if (section.shape.distributions.routes_per_app; as d) {
+              <app-shape-dist-card label="Routes per app" [d]="d" />
+            }
+          </div>
+
+          <!-- App sizing -->
+          <div class="grid gap-4 lg:grid-cols-2">
+            @if (section.shape.composition.web_process_memory_mb; as d) {
+              <app-shape-dist-card label="App memory (MB)" [d]="d" />
+            }
+            @if (section.shape.composition.web_process_disk_mb; as d) {
+              <app-shape-dist-card label="App disk (MB)" [d]="d" />
+            }
+            @if (section.shape.composition.web_process_instances; as d) {
+              <app-shape-dist-card label="App instances" [d]="d" />
+            }
+          </div>
+
+          <!-- Stacks -->
+          @if (stackChips(section).length > 0) {
+            <div class="flex flex-wrap items-center gap-2 text-xs" data-test="shape-stacks">
+              <span class="font-semibold uppercase tracking-wider text-content-muted">Stacks</span>
+              @for (chip of stackChips(section); track chip.label) {
+                <span class="px-2 py-0.5 rounded-full border border-content-border tabular-nums">
+                  {{ chip.label }} &times;{{ chip.count | number }}
+                </span>
+              }
+            </div>
+          }
+        }
+      </div>
+    </app-info-card>
+  }
+</div>
