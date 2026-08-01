@@ -166,3 +166,16 @@ export interface IUserProvidedServiceInstance {
   route_service_url: string;
   cfGuid?: string;
 }
+
+export interface IUserProvidedServiceInstanceDataCredentials {
+  [name: string]: string;
+}
+
+export interface IUserProvidedServiceInstanceData {
+  spaceGuid: string;
+  name: string;
+  route_service_url?: string;
+  syslog_drain_url?: string;
+  tags?: string[];
+  credentials?: IUserProvidedServiceInstanceDataCredentials;
+}

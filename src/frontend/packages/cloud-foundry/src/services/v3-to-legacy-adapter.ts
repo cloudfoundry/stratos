@@ -39,7 +39,7 @@ function v3PackageStateToLegacy(detail: StAppDetail): string {
 /**
  * Build the legacy v2 `APIResource<IApp>` shape from a Stratos-shape
  * `StAppDetail`. The result mirrors what the ngrx app entity store
- * would have populated via `GetApplication` — flat IApp fields under
+ * would have populated via the legacy v2 app fetch — flat IApp fields under
  * `entity`, GUID echoed under both `entity.guid` and `metadata.guid`,
  * and the lifecycle fields (stack/buildpack/command/health-check)
  * lifted out of the embedded process+droplet sub-objects so unmigrated

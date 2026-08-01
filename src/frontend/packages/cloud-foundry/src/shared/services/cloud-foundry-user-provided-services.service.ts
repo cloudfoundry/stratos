@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
 
-import { IUserProvidedServiceInstanceData } from '../../actions/user-provided-service.actions';
+import { IUserProvidedServiceInstanceData } from '../../cf-api-svc.types';
 import { StServiceInstance } from '../../services/endpoint-data/stratos-types';
 
 export interface UpsCreateResult {

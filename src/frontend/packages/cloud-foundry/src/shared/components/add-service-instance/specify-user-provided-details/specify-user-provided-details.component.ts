@@ -25,7 +25,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, from } from 'rxjs';
 import { take, filter, map, publishReplay, refCount, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { IUserProvidedServiceInstanceData } from '../../../../actions/user-provided-service.actions';
+import { IUserProvidedServiceInstanceData } from '../../../../cf-api-svc.types';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';

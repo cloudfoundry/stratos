@@ -811,7 +811,7 @@ function generateCFServiceInstanceEntity(endpointDefinition: StratosEndpointExte
       getEntitiesFromResponse: v3EntitiesFromResponse<StServiceInstance>(serviceInstanceV3ToV2Renames),
     },
     // Global successfulRequestDataMapper handles cfGuid/guid stamping.
-    // Single-resource GET (GetServiceInstance) is left on V2 — no native
+    // No single-resource GET — there is no native
     // /pp/v1/cf/service_instances/:cnsi/:guid handler yet (flagged).
   };
   cfEntityCatalog.serviceInstance = new StratosCatalogEntity<
