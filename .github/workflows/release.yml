@@ -30,7 +30,16 @@ jobs:
     outputs:
       version: ${{ steps.get-version.outputs.version }}
       is_prerelease: ${{ steps.check-prerelease.outputs.is_prerelease }}
+      is_latest: ${{ steps.check-latest.outputs.is_latest }}
     steps:
+      # Full history: check-latest compares the released tag against every
+      # tag in the repo, so the shallow default is not enough.
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
       - name: Get version from tag or input
         id: get-version
         # Expressions pass through env rather than interpolating into the
@@ -61,6 +70,19 @@ jobs:
             echo "is_prerelease=false" >> $GITHUB_OUTPUT
             echo "🚀 This is a production release"
           fi
+
+      - name: Check if Latest
+        id: check-latest
+        env:
+          VERSION: ${{ steps.get-version.outputs.version }}
+        run: |
+          # The Makefile owns the Latest derivation (make publish passes
+          # --latest to the GitHub release); the docker 'latest' tag must
+          # follow the same answer, or a maintenance release (5.0.5 after
+          # 5.1.0) would yank the moving tag backwards.
+          IS_LATEST=$(make -s dump version TAG="$VERSION" | awk '$1 == "LATEST_RESOLVED" { print $2 }')
+          echo "is_latest=${IS_LATEST}" >> $GITHUB_OUTPUT
+          echo "🏷️ Latest pointer: ${IS_LATEST}"
 
   build-release:
     name: Build Release Artifacts
@@ -192,7 +214,7 @@ jobs:
           tags: |
             type=semver,pattern={{version}},value=${{ needs.validate-version.outputs.version }}
             type=semver,pattern={{major}}.{{minor}},value=${{ needs.validate-version.outputs.version }}
-            type=raw,value=latest,enable=${{ needs.validate-version.outputs.is_prerelease == 'false' }}
+            type=raw,value=latest,enable=${{ needs.validate-version.outputs.is_latest == 'true' }}
 
       # Built and pushed for prereleases too (unlike the k8s component images
       # in docker.yml) so rc/alpha/beta tags get a runnable all-in-one image.

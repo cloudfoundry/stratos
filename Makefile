@@ -57,6 +57,9 @@
 #   TAG_MATCH=<glob>            Tag family scoping nearest-tag queries
 #                               (default: v$(LINE).*)
 #   DRAFT=yes                   publish creates a draft release
+#   LATEST=auto|yes|no          Whether publish marks the release Latest
+#                               (default auto: only when TAG is the
+#                               highest full-release tag of any line)
 #   NOTES=<file>                Notes file for publish (default: the
 #                               annotated tag body, assembled by stamp tag
 #                               from changelog.d fragments)
@@ -100,6 +103,8 @@ define dump.version.extra
 	@echo "GO_LDFLAGS        $($(_HIDE)GO_LDFLAGS)"
 	@echo "LINE              $(LINE)"
 	@echo "TAG_MATCH         $(TAG_MATCH)"
+	@echo "HIGHEST_FULL_TAG  $($(_HIDE)HIGHEST_FULL_TAG)"
+	@echo "LATEST_RESOLVED   $($(_HIDE)LATEST_RESOLVED)"
 endef
 
 # ── Directories ───────────────────────────────────────────────
@@ -984,6 +989,21 @@ $(_HIDE)LAST_TAG    = $(shell git describe --tags --abbrev=0 --match '$(TAG_MATC
 $(_HIDE)CREATE_TAG  = $(or $(TAG),$($(_HIDE)NEXT_TAG))
 $(_HIDE)PUBLISH_TAG = $(or $(TAG),$($(_HIDE)LAST_TAG))
 
+# LATEST controls the repo's Latest-release pointer at publish
+# (auto|yes|no, default auto). gh moves Latest onto any new non-draft,
+# non-prerelease release, so cutting 5.0.5 after 5.1.0 would yank the
+# pointer backwards onto the maintenance patch. auto answers "is this
+# tag the highest that publishes as a full release?" across ALL lines —
+# Latest is a repo-global pointer, so lines compete — and passes the
+# answer explicitly both ways. alpha/beta/rc never qualify; dev.N
+# publish as full releases (keep in sync with publish's PRERELEASE case
+# and release.yml validate-version). The sed dance is semver prerelease
+# ordering under sort -V: '~' sorts before the empty string
+# (5.0.0~dev.9 < 5.0.0) where '-' does not.
+LATEST ?= auto
+$(_HIDE)HIGHEST_FULL_TAG = $(shell git tag -l 'v[0-9]*' | grep -vE 'alpha|beta|rc' | sed 's/-/~/' | sort -V | tail -n 1 | sed 's/~/-/')
+$(_HIDE)LATEST_RESOLVED  = $(if $(filter auto,$(LATEST)),$(if $(filter $($(_HIDE)PUBLISH_TAG),$($(_HIDE)HIGHEST_FULL_TAG)),true,false),$(if $(filter yes,$(LATEST)),true,false))
+
 # Prefix that turns state-changing commands into echoes under DRYRUN=yes
 $(_HIDE)DRY := $(if $(filter yes,$(DRYRUN)),@echo "DRYRUN:" )
 
@@ -1009,6 +1029,8 @@ $(call register, stamp, untag)
 # changelog.d fragments (build/release-notes.sh).
 # --prerelease derives from the tag itself: alpha/beta/rc only — dev.N tags
 # CAN be full releases (keep in sync with release.yml validate-version).
+# --latest carries LATEST's answer explicitly both ways; a draft has no
+# Latest semantics, so DRAFT=yes omits the flag.
 .PHONY: publish unpublish sweep changelog
 publish:
 	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
@@ -1018,7 +1040,7 @@ publish:
 		exit 1; \
 	fi; \
 	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
-	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft) $(if $(NOTES),--notes-file "$(NOTES)",--notes-from-tag) $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
+	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft,--latest=$($(_HIDE)LATEST_RESOLVED)) $(if $(NOTES),--notes-file "$(NOTES)",--notes-from-tag) $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
 	$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@")
 
 unpublish:
