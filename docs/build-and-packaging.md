@@ -177,9 +177,10 @@ login`) — never from the command line.
 | Command | What it does |
 |---------|-------------|
 | `make stamp tag [VERSION=X.Y.Z]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`); the tag body carries the release notes assembled from `changelog.d/` fragments (see Release notes above) |
-| `make publish [DRAFT=yes] [TAG=vX.Y.Z]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases) |
-| `make unpublish TAG=vX.Y.Z` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives) |
-| `make stamp untag TAG=vX.Y.Z` | Delete the tag, local + remote (echoes first) |
+| `make publish [DRAFT=yes] [TAG=vX.Y.Z]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases); `--latest` from `LATEST` (see Maintenance lines below) |
+| `make unpublish TAG=vX.Y.Z` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives). `TAG=` is required |
+| `make stamp untag TAG=vX.Y.Z` | Delete the tag, local + remote (echoes first). `TAG=` is required |
+| `make stamp line [LINE=X.Y]` | Cut the maintenance branch `release/X.Y.x` at the line's newest final tag (see Maintenance lines below) |
 | `make sweep` | Remove the `changelog.d/` fragments the release consumed (commit rides the next PR) |
 
 **`VERSION` and `TAG` hold the same underlying value** — whether a `v`
@@ -190,12 +191,17 @@ way: `VERSION`'s value gets baked byte-for-byte into the binary
 app's own version string. `make bump` writes `package.json` without a
 `v` (that's the project's convention, matching semver.org — and where
 git/GitHub tags conventionally *do* carry one, since that's their own
-ecosystem's convention, handled at the tag layer via `TAG`'s default:
-`v` + the current `VERSION` with build metadata stripped,
-`5.0.0-dev.142+build...` → `v5.0.0-dev.142`). `make stamp tag` (creating
-a new tag) validates the result looks like `vX.Y.Z[-prerelease]`, but
-`publish`/`unpublish`/`stamp untag` just reference whatever tag already
-exists — any value GitHub accepts works. Release notes come from
+ecosystem's convention, handled at the tag layer via `TAG`). Unset,
+`TAG` resolves per verb from its intent: `make stamp tag` (creating a
+new tag) derives `v` + the current `VERSION` with build metadata
+stripped (`5.0.0-dev.142+build...` → `v5.0.0-dev.142`) and validates
+the result looks like `vX.Y.Z[-prerelease]` on this checkout's version
+line; `make publish` operates on a tag that already *exists*, so it
+takes the nearest existing tag instead of deriving one — deriving would
+point one release ahead the moment the post-release bump lands;
+`unpublish`/`stamp untag` delete things and refuse to guess, so they
+require an explicit `TAG=`. Any tag value GitHub accepts works when
+given explicitly. Release notes come from
 `NOTES=<file>` when given, else the annotated tag body (a pointer line
 when no fragments existed at tag time). All targets honor `DRYRUN=yes`.
 
@@ -229,6 +235,49 @@ make sweep                              # drop consumed fragments
 make unpublish TAG=vX.Y.Z               # rollback: release first...
 make stamp untag TAG=vX.Y.Z             # ...then the tag
 ```
+
+### Maintenance lines (concurrent versions)
+
+One moving HEAD can only serve one release line. The moment 5.1 work
+starts, a 5.0.X fix needs somewhere to land — and a released 4.9 keeps
+serving CF foundations on the v2 API while 5.x is v3-only. Three pieces
+make concurrent lines work, and all of them derive from per-branch
+state, so there is no per-line configuration to maintain:
+
+- **`LINE`** — the version line a checkout releases, derived from
+  `package.json`'s major.minor (develop at `5.1.0-dev` is line `5.1`; a
+  `release/5.0.x` branch is line `5.0`). Overridable per invocation.
+- **`TAG_MATCH`** — the tag-family glob (`v$(LINE).*`) filtering every
+  nearest-tag query: `publish`'s default tag and the changelog window
+  anchor. Branch ancestry usually scopes these already, but once a
+  maintenance fix back-merges into develop its tag becomes reachable
+  there — the filter keeps it from becoming develop's "nearest tag".
+  `stamp tag` also refuses to create a tag off the checkout's line.
+- **`LATEST`** — whether `publish` marks the release Latest
+  (`auto|yes|no`). `auto` marks it only when the tag is the highest
+  full-release tag of *any* line, so cutting 5.0.5 after 5.1.0 cannot
+  move the Latest pointer backwards onto a maintenance patch — nor the
+  docker `latest` tag, which release.yml derives from the same answer.
+
+A line is born with `make stamp line`: it branches `release/X.Y.x` at
+the line's highest final tag. Run bare right after tagging a final, it
+cuts the line for the release just shipped; `LINE=X.Y` retrofits an
+older one (`make stamp line LINE=4.9` branches `release/4.9.x` at
+`v4.9.4`). Patch work then targets that branch like any other: fix (or
+cherry-pick from develop), `make bump patch`, tag, publish — every
+derivation above reads the branch's own `package.json` and tags, so the
+same commands release the right line from either checkout.
+
+`changelog.d/` fragments are per-branch files, which is what makes
+their ownership per-line: a fix cherry-picked to both lines carries its
+fragment in both places, and each line's `make sweep` consumes only its
+own copies.
+
+One caveat when retrofitting an old line: the new branch carries the
+tooling its tree had at the branch point. `release/4.9.x` cut from
+`v4.9.4` predates this Makefile machinery entirely — backport the
+machinery to that branch first (or release it by hand) before using
+these verbs there.
 
 ### Development
 
