@@ -10,39 +10,14 @@ import {
   RequestInfoState,
   rootUpdatingKey,
 } from '@stratosui/store';
-import { GetApplication } from '../../actions/application.actions';
-import {
-  applicationEntityType,
-  domainEntityType,
-  organizationEntityType,
-  routeEntityType,
-  serviceBindingEntityType,
-  spaceEntityType,
-  stackEntityType
-} from '../../cf-entity-types';
 import { IApp, IAppSummary } from '../../cf-api.types';
 import { CfEndpointsDataService } from '../../services/domain-data/cf-endpoints-data.service';
 import { StDomain, StOrg, StSpace } from '../../services/endpoint-data/stratos-types';
-import { createEntityRelationKey } from '../../entity-relations/entity-relations.types';
 import { ApplicationStateData } from '../../shared/services/application-state.service';
 import { AppDetailDataService } from './app-detail-data.service';
 import { AppStat } from '../../store/types/app-metadata.types';
 import { stToLegacy } from '../../services/v3-to-legacy-adapter';
 import { EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
-
-export function createGetApplicationAction(guid: string, endpointGuid: string) {
-  return new GetApplication(
-    guid,
-    endpointGuid, [
-    createEntityRelationKey(applicationEntityType, routeEntityType),
-    createEntityRelationKey(applicationEntityType, spaceEntityType),
-    createEntityRelationKey(applicationEntityType, stackEntityType),
-    createEntityRelationKey(applicationEntityType, serviceBindingEntityType),
-    createEntityRelationKey(routeEntityType, domainEntityType),
-    createEntityRelationKey(spaceEntityType, organizationEntityType),
-  ]
-  );
-}
 
 export interface ApplicationData {
   fetching: boolean;

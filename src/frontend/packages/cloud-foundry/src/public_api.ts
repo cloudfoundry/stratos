@@ -91,13 +91,7 @@ export {
 // CF Users Roles Types
 export { UserRoleLabels } from './store/types/users-roles.types';
 
-// CF User Actions
-export { RemoveCfUserRole } from './actions/users.actions';
-
 // CF Route Actions
-
-// CF Actions
-export { UpdateExistingApplication } from './actions/application.actions';
 
 // CF Route Types
 export { Route, RouteMode, CfRoute } from './store/types/route.types';
