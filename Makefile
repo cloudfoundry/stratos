@@ -17,6 +17,8 @@
 #   make publish                Create GitHub release + upload dist/release/*
 #   make unpublish TAG=vX       Delete a GitHub release (assets included)
 #   make stamp untag TAG=vX     Delete a tag (local + remote)
+#   make stamp line [LINE=X.Y]  Cut maintenance branch release/X.Y.x at
+#                               the line's newest final tag
 #   make sweep                  Remove published changelog.d fragments
 #   make changelog              Report dependency bumps since the last tag
 #                               (./build/release-notes.sh deps drafts them)
@@ -176,9 +178,9 @@ endif
 # but only for verbs that use these modifiers (not clean/dump).
 # korifi counts as a build modifier here (make build korifi = static
 # backend only), so it must suppress the default like the others;
-# tag/untag are stamp modifiers and suppress it the same way.
+# tag/untag/line are stamp modifiers and suppress it the same way.
 ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter korifi tag untag,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter korifi tag untag line,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
 endif
@@ -273,12 +275,16 @@ endif
 
 $(_HIDE)WANT_TAG   :=
 $(_HIDE)WANT_UNTAG :=
+$(_HIDE)WANT_LINE  :=
 
 ifneq ($(filter tag,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_TAG := yes
 endif
 ifneq ($(filter untag,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_UNTAG := yes
+endif
+ifneq ($(filter line,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_LINE := yes
 endif
 
 # cf modifier defaults to linux/amd64 unless PLATFORM is set
@@ -366,8 +372,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag
-frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag:
+.PHONY: frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line
+frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -948,6 +954,7 @@ $(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)W
 #   make publish [DRAFT=yes]        gh release create + upload dist/release/*
 #   make unpublish TAG=vX           delete the GitHub release (assets included)
 #   make stamp untag TAG=vX         delete the tag (local + remote)
+#   make stamp line [LINE=X.Y]      cut maintenance branch release/X.Y.x
 #
 # Forward path:  build → release cf github → stamp tag → publish → sweep
 # Rollback:      unpublish → stamp untag   (release first, so the tag
@@ -1023,6 +1030,29 @@ define stamp.untag
 	$($(_HIDE)DRY)git push $(TAG_REMOTE) --delete "refs/tags/$(TAG)"
 endef
 $(call register, stamp, untag)
+
+# stamp line cuts a maintenance branch: release/X.Y.x at the line's
+# highest FINAL tag — maintenance starts from a shipped release, so
+# prereleases never qualify as the branch point. LINE defaults to the
+# current line for the moment of need (right after the final is
+# tagged); LINE=X.Y retrofits an older line, e.g. LINE=4.9 branches
+# release/4.9.x at v4.9.4. The new branch carries whatever tooling its
+# tree had at the branch point — releasing an old line with the
+# current machinery means backporting the machinery to that branch
+# first.
+$(_HIDE)LINE_BRANCH = release/$(LINE).x
+$(_HIDE)LINE_BASE   = $(shell git tag -l 'v$(LINE).*' | grep -v -- - | sort -V | tail -n 1)
+
+define stamp.line
+	@[ -n "$(LINE)" ] || { echo "ERROR: no line to cut — set LINE=X.Y (e.g. make stamp line LINE=4.9)" >&2; exit 1; }
+	@[ -n "$($(_HIDE)LINE_BASE)" ] || { echo "ERROR: no final v$(LINE).Z tag to branch from — cut the release first (make stamp tag)" >&2; exit 1; }
+	@! git show-ref --verify --quiet "refs/heads/$($(_HIDE)LINE_BRANCH)" || { echo "ERROR: $($(_HIDE)LINE_BRANCH) already exists" >&2; exit 1; }
+	@! git ls-remote --exit-code --heads $(TAG_REMOTE) "$($(_HIDE)LINE_BRANCH)" >/dev/null 2>&1 || { echo "ERROR: $($(_HIDE)LINE_BRANCH) already exists on $(TAG_REMOTE)" >&2; exit 1; }
+	@echo "Cutting $($(_HIDE)LINE_BRANCH) at $($(_HIDE)LINE_BASE)..."
+	$($(_HIDE)DRY)git branch "$($(_HIDE)LINE_BRANCH)" "$($(_HIDE)LINE_BASE)"
+	$($(_HIDE)DRY)git push $(TAG_REMOTE) "refs/heads/$($(_HIDE)LINE_BRANCH)"
+endef
+$(call register, stamp, line)
 
 # publish/unpublish are plain verbs (no modifiers). Notes source: NOTES=<file>
 # override, else the annotated tag body — `stamp tag` assembles it from the
@@ -1155,7 +1185,7 @@ $(_HIDE)finalize-and-reexec:
 	@./build/version-bump.sh bump release
 	@echo "Re-running: $(MAKE) $(MAKECMDGOALS)"
 	@$(MAKE) FINAL= $(MAKECMDGOALS)
-$(filter-out frontend backend cf korifi github dist version e2e actions packages secrets lint gate tests coverage tree history licenses tag untag,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
+$(filter-out frontend backend cf korifi github dist version e2e actions packages secrets lint gate tests coverage tree history licenses tag untag line,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
 else ifneq ($(FINAL),)
 $(error Unknown FINAL value '$(FINAL)' — supported: strip)
 endif
@@ -1185,7 +1215,7 @@ endif
 
 # ── Stamp defaults ────────────────────────────────────────────
 # stamp with no modifier stamps frontend
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_TAG)$($(_HIDE)WANT_UNTAG),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_TAG)$($(_HIDE)WANT_UNTAG)$($(_HIDE)WANT_LINE),)
 stamp: $(_HIDE)stamp.frontend
 endif
 

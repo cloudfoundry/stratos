@@ -47,9 +47,10 @@ $(_HIDE)FLAG_sarif       := $($(_HIDE)WANT_SARIF)
 $(_HIDE)FLAG_upload      := $($(_HIDE)WANT_UPLOAD)
 $(_HIDE)FLAG_tag         := $($(_HIDE)WANT_TAG)
 $(_HIDE)FLAG_untag       := $($(_HIDE)WANT_UNTAG)
+$(_HIDE)FLAG_line        := $($(_HIDE)WANT_LINE)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist repo version actions packages secrets lint gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag
+$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist repo version actions packages secrets lint gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=
