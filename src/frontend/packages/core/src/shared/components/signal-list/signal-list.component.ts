@@ -472,6 +472,11 @@ export class SignalListComponent<T> implements AfterViewInit {
   // has reached the bottom of the list.
   readonly hasOverflow = signal(false);
 
+  // Horizontal twin of hasOverflow: true when more columns exist to the
+  // right of the current scroll position. Gates the right edge fade so it
+  // shows only when scrolling right would reveal more.
+  readonly canScrollRight = signal(false);
+
   // True while a refresh-button click is in flight. Used to drive the
   // inline button spinner uniformly across list pages — many config
   // services still wire isAnyLoading to !hasLoadedOnce() (which only
@@ -537,11 +542,17 @@ export class SignalListComponent<T> implements AfterViewInit {
     const el = this.scrollBody?.nativeElement;
     if (!el) {
       this.hasOverflow.set(false);
+      this.canScrollRight.set(false);
       return;
     }
+    // 2px tolerance: client/scroll sizes are integer-rounded while scroll
+    // position is fractional, and on hidpi/zoomed displays the rounding
+    // can stack past 1px — a too-tight bound leaves the fade stuck at the
+    // far edge, obscuring the last column/row.
     const overflowing = el.scrollHeight > el.clientHeight + 1;
-    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 2;
     this.hasOverflow.set(overflowing && !atBottom);
+    this.canScrollRight.set(el.scrollLeft + el.clientWidth < el.scrollWidth - 2);
   }
 
   trackByRow = (_: number, row: T) => this.config.getRowKey(row);
