@@ -148,7 +148,7 @@ const isDist = (value: unknown): value is Distribution =>
 
 export const exportMarkdown = (exported: AgnosticExport): string => {
   const lines: string[] = [
-    '## Foundation shape (anonymous export)',
+    '## Foundational shape (anonymous export)',
     '',
     `Collected: ${exported.collected_at}`,
     '',

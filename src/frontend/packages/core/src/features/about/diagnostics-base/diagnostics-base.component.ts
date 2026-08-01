@@ -24,6 +24,6 @@ export class DiagnosticsBaseComponent {
     { link: 'counts', label: 'Entity Counts', icon: 'storage' },
     { link: 'performance', label: 'Load Performance', icon: 'speed' },
     { link: 'probes', label: 'Endpoint Probes', icon: 'network_check' },
-    { link: 'shape', label: 'Foundation Shape', icon: 'insights' },
+    { link: 'shape', label: 'Foundational Shape', icon: 'insights' },
   ];
 }

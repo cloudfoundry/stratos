@@ -242,9 +242,11 @@ export class FoundationShapePageComponent implements OnDestroy {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    // The name must say what the file holds: anonymized data. Guid prefix
-    // keys multi-endpoint exports without leaking a foundation name.
-    anchor.download = `foundation-shape-anonymous-${section.guid.slice(0, 8)}-${new Date().toISOString().slice(0, 10)}.json`;
+    // <endpoint>-foundational-shape-<mode>-<date>: the name says which
+    // endpoint it came from and that the content is anonymized (a future
+    // detail-mode export will say "detail" in the same slot).
+    const endpoint = section.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    anchor.download = `${endpoint}-foundational-shape-anonymous-${new Date().toISOString().slice(0, 10)}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
   }
