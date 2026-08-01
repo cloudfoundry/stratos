@@ -41,10 +41,14 @@
 #                               matching package.json/semver.org — a v is
 #                               accepted too, it's just baked in as given)
 #   PLATFORM=os/arch            Override target platform
-#   TAG=vX.Y.Z                  Tag for publish/unpublish/stamp tag/untag
-#                               (default: v + version with build metadata
-#                               stripped; v is a git/GitHub tag convention,
-#                               same underlying value as VERSION)
+#   TAG=vX.Y.Z                  Tag for publish/unpublish/stamp tag/untag.
+#                               Set explicitly it applies to every verb.
+#                               Unset, each verb resolves what its intent
+#                               needs: stamp tag derives the version being
+#                               released (v + package.json, metadata
+#                               stripped), publish takes the nearest
+#                               EXISTING tag, and unpublish/stamp untag
+#                               refuse to guess and require TAG=.
 #   TAG_REMOTE=<remote>         Remote for stamp tag/untag (default: origin)
 #   DRAFT=yes                   publish creates a draft release
 #   NOTES=<file>                Notes file for publish (default: the
@@ -936,27 +940,43 @@ $(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)W
 # Rollback:      unpublish → stamp untag   (release first, so the tag
 #                is never orphaned by a half-done rollback)
 #
-# TAG derives from the version with build metadata stripped — tags are
-# clean semver (package.json carries +build.* locally; tags never do).
 # gh authenticates from the environment (GH_TOKEN/GITHUB_TOKEN or a
 # prior `gh auth login`) — credentials never appear on a command line.
-TAG        ?= v$($(_HIDE)SEMVER_NOMETA)
+TAG        ?=
 TAG_REMOTE ?= origin
 DRAFT      ?=
 NOTES      ?=
+
+# Per-verb tag resolution. stamp tag CREATES the release, so its default
+# derives from the version being released (v + package.json with build
+# metadata stripped — tags are clean semver; package.json carries
+# +build.* locally, tags never do). publish operates on a tag that
+# already EXISTS — deriving from package.json there points one release
+# ahead the moment the post-release bump lands, and publish aborts on
+# --verify-tag having published nothing. So publish defaults to the
+# nearest existing tag, resolved at recipe time (kept lazy) so it also
+# sees a tag created earlier in the same invocation. Deletion verbs
+# (unpublish, stamp untag) never guess: "whatever is newest" as a
+# default is how a typo removes the wrong release — both demand an
+# explicit TAG. TAG= on the command line overrides every verb unchanged.
+$(_HIDE)NEXT_TAG    = v$($(_HIDE)SEMVER_NOMETA)
+$(_HIDE)LAST_TAG    = $(shell git describe --tags --abbrev=0 2>/dev/null)
+$(_HIDE)CREATE_TAG  = $(or $(TAG),$($(_HIDE)NEXT_TAG))
+$(_HIDE)PUBLISH_TAG = $(or $(TAG),$($(_HIDE)LAST_TAG))
 
 # Prefix that turns state-changing commands into echoes under DRYRUN=yes
 $(_HIDE)DRY := $(if $(filter yes,$(DRYRUN)),@echo "DRYRUN:" )
 
 define stamp.tag
-	@case "$(TAG)" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "ERROR: '$(TAG)' does not look like a release tag (vX.Y.Z[-prerelease])" >&2; exit 1;; esac
+	@case "$($(_HIDE)CREATE_TAG)" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "ERROR: '$($(_HIDE)CREATE_TAG)' does not look like a release tag (vX.Y.Z[-prerelease])" >&2; exit 1;; esac
 	@chmod +x build/create-git-tag.sh
-	$($(_HIDE)DRY)./build/create-git-tag.sh "$(TAG)"
-	$($(_HIDE)DRY)git push $(TAG_REMOTE) "refs/tags/$(TAG)"
+	$($(_HIDE)DRY)./build/create-git-tag.sh "$($(_HIDE)CREATE_TAG)"
+	$($(_HIDE)DRY)git push $(TAG_REMOTE) "refs/tags/$($(_HIDE)CREATE_TAG)"
 endef
 $(call register, stamp, tag)
 
 define stamp.untag
+	@[ -n "$(TAG)" ] || { echo "ERROR: untag deletes a tag — name it: make stamp untag TAG=vX.Y.Z" >&2; exit 1; }
 	@echo "Deleting tag $(TAG) locally and on $(TAG_REMOTE)..."
 	-$($(_HIDE)DRY)git tag -d "$(TAG)"
 	$($(_HIDE)DRY)git push $(TAG_REMOTE) --delete "refs/tags/$(TAG)"
@@ -971,12 +991,17 @@ $(call register, stamp, untag)
 .PHONY: publish unpublish sweep changelog
 publish:
 	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
-	@TAG="$(TAG)"; \
+	@TAG="$($(_HIDE)PUBLISH_TAG)"; \
+	if [ -z "$$TAG" ]; then \
+		echo "ERROR: no tag to publish — create one with 'make stamp tag' or pass TAG=vX.Y.Z" >&2; \
+		exit 1; \
+	fi; \
 	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
 	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft) $(if $(NOTES),--notes-file "$(NOTES)",--notes-from-tag) $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
 	$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@")
 
 unpublish:
+	@[ -n "$(TAG)" ] || { echo "ERROR: unpublish deletes a release — name it: make unpublish TAG=vX.Y.Z" >&2; exit 1; }
 	@echo "Release to delete from GitHub:"
 	@gh release view "$(TAG)" --json tagName,name,isDraft,assets \
 		--jq '"  " + .tagName + "  (" + .name + ")" + (if .isDraft then "  [draft]" else "" end), (.assets[] | "    " + .name)'
