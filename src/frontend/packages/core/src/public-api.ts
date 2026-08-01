@@ -55,6 +55,7 @@ export { ProgressBarComponent } from './shared/components/progress-bar/progress-
 export { AppProgressBarComponent } from './shared/components/progress-bar/app-progress-bar.component';
 
 // Shared Components
+export { InfoCardComponent } from './shared/components/info-card/info-card.component';
 export { PageHeaderComponent } from './shared/components/page-header/page-header.component';
 export { SteppersComponent } from './shared/components/stepper/steppers/steppers.component';
 export { StepComponent, StepOnNextFunction } from './shared/components/stepper/step/step.component';
