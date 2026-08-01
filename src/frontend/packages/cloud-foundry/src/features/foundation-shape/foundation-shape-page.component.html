@@ -129,6 +129,83 @@
             </div>
           }
         }
+
+        <!-- Measure on demand: dimensions the session never caches, each with
+             its cost stated before it runs -->
+        <div class="flex flex-col gap-3 border-t border-content-border pt-3" data-test="shape-measure-panel">
+          <div class="text-xs font-semibold uppercase tracking-wider text-content-muted">Measure on demand</div>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="text-sm">Ecosystem totals</span>
+            <span class="text-xs text-content-muted">buildpacks · stacks · isolation segments · domains · quotas · security groups · users</span>
+            <span class="text-xs text-content-muted">({{ measure.totalsCost() }})</span>
+            <button data-test="measure-totals" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="measuring(section, 'totals')"
+              (click)="measure.measureTotals(section.guid)">
+              @if (measuring(section, 'totals')) { Measuring&hellip; }
+              @else if (measuredTotals(section)) { Re-measure }
+              @else { Measure }
+            </button>
+            @if (measuredTotals(section); as mt) {
+              <span class="text-xs text-content-muted">measured {{ ageOf(mt.fetchedAt) }}</span>
+            }
+          </div>
+          @if (measuredTotals(section); as mt) {
+            <div class="flex flex-wrap gap-x-6 gap-y-2" data-test="measured-totals">
+              @for (row of measuredTotalsRows(mt); track row.label) {
+                <div>
+                  @if (row.count !== null) {
+                    <span class="text-lg font-semibold tabular-nums">{{ row.count | number }}</span>
+                  } @else {
+                    <span class="text-sm text-content-muted">unavailable</span>
+                  }
+                  <span class="text-xs text-content-muted"> {{ row.label }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="text-sm">Stacks &amp; buildpacks defined</span>
+            <span class="text-xs text-content-muted">full definition lists; enables defined-vs-used</span>
+            <span class="text-xs text-content-muted">({{ measure.ecosystemCost() }})</span>
+            <button data-test="measure-ecosystem" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="measuring(section, 'ecosystem')"
+              (click)="measure.measureEcosystem(section.guid)">
+              @if (measuring(section, 'ecosystem')) { Measuring&hellip; }
+              @else if (measuredEcosystem(section)) { Re-measure }
+              @else { Measure }
+            </button>
+            @if (measuredEcosystem(section); as eco) {
+              <span class="text-xs text-content-muted">measured {{ ageOf(eco.fetchedAt) }}</span>
+            }
+          </div>
+          @if (measuredEcosystem(section); as eco) {
+            <div class="flex flex-col gap-2" data-test="measured-ecosystem">
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="font-semibold uppercase tracking-wider text-content-muted">Stacks defined</span>
+                @for (chip of stackDefinedChips(section, eco); track chip.label) {
+                  <span class="px-2 py-0.5 rounded-full border tabular-nums"
+                    [class]="chip.unused
+                      ? 'border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300'
+                      : 'border-content-border'">
+                    {{ chip.label }}@if (chip.unused) { <span class="text-[10px] uppercase"> unused</span> }
+                  </span>
+                }
+              </div>
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="font-semibold uppercase tracking-wider text-content-muted">Buildpacks defined</span>
+                @for (chip of buildpackDefinedChips(eco); track chip.label) {
+                  <span class="px-2 py-0.5 rounded-full border border-content-border tabular-nums">
+                    {{ chip.label }}@if (chip.count > 1) { &times;{{ chip.count }} }
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
       </div>
     </app-info-card>
   }

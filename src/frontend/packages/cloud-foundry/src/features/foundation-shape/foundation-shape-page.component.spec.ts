@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import { FoundationShapePageComponent } from './foundation-shape-page.component';
+import { MeasuredEcosystem, MeasuredTotals, ShapeMeasureService } from './shape-measure.service';
 import { app, org, space } from './testing/entity-builders';
 
 const cfEndpoint = { guid: 'cf-1', name: 'My Cloud Foundry', cnsi_type: 'cf' } as EndpointModel;
@@ -39,6 +40,15 @@ describe('FoundationShapePageComponent', () => {
   let component: FoundationShapePageComponent;
   let services: Map<string, ReturnType<typeof fakeDataService>>;
   let registry: { acquire: ReturnType<typeof vi.fn>; release: ReturnType<typeof vi.fn> };
+  let measure: {
+    totals: ReturnType<typeof signal<ReadonlyMap<string, MeasuredTotals>>>;
+    ecosystem: ReturnType<typeof signal<ReadonlyMap<string, MeasuredEcosystem>>>;
+    inFlight: ReturnType<typeof signal<ReadonlySet<string>>>;
+    totalsCost: () => string;
+    ecosystemCost: () => string;
+    measureTotals: ReturnType<typeof vi.fn>;
+    measureEcosystem: ReturnType<typeof vi.fn>;
+  };
 
   beforeEach(async () => {
     services = new Map();
@@ -51,6 +61,15 @@ describe('FoundationShapePageComponent', () => {
       }),
       release: vi.fn(),
     };
+    measure = {
+      totals: signal<ReadonlyMap<string, MeasuredTotals>>(new Map()),
+      ecosystem: signal<ReadonlyMap<string, MeasuredEcosystem>>(new Map()),
+      inFlight: signal<ReadonlySet<string>>(new Set()),
+      totalsCost: () => '8 requests',
+      ecosystemCost: () => '2 requests',
+      measureTotals: vi.fn(),
+      measureEcosystem: vi.fn(),
+    };
 
     await TestBed.configureTestingModule({
       imports: [FoundationShapePageComponent],
@@ -61,6 +80,7 @@ describe('FoundationShapePageComponent', () => {
           useValue: { connectedEndpoints: signal<EndpointModel[]>([cfEndpoint, nonCfEndpoint]) },
         },
         { provide: EndpointDataRegistry, useValue: registry },
+        { provide: ShapeMeasureService, useValue: measure },
       ],
     }).compileComponents();
 
@@ -104,5 +124,52 @@ describe('FoundationShapePageComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(component.sections()[0].totals.spaces).toBeNull();
+  });
+
+  describe('measure on demand', () => {
+    it('states each block cost before it runs', () => {
+      const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+      expect(text).toContain('8 requests');
+      expect(text).toContain('2 requests');
+    });
+
+    it('starts a totals measurement for the section endpoint on click', async () => {
+      const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[data-test="measure-totals"]');
+      button.click();
+      await fixture.whenStable();
+      expect(measure.measureTotals).toHaveBeenCalledWith('cf-1');
+    });
+
+    it('renders measured ecosystem totals with their timestamp once available', async () => {
+      measure.totals.set(new Map([
+        ['cf-1', {
+          counts: { buildpacks: 24, stacks: 2, isolation_segments: 1, domains: 4, organization_quotas: 11, space_quotas: 3, security_groups: null, users: 14 },
+          fetchedAt: new Date(),
+        }],
+      ]));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const strip = (fixture.nativeElement as HTMLElement).querySelector('[data-test="measured-totals"]');
+      expect(strip?.textContent).toContain('24');
+      expect(strip?.textContent).toContain('Org quotas');
+      expect(strip?.textContent).toContain('unavailable');
+    });
+
+    it('renders defined stacks and buildpacks with unused stacks called out', async () => {
+      measure.ecosystem.set(new Map([
+        ['cf-1', {
+          stacksDefined: ['cflinuxfs4', 'cflinuxfs3'],
+          buildpacksDefined: ['ruby_buildpack', 'go_buildpack'],
+          fetchedAt: new Date(),
+        }],
+      ]));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const panel = (fixture.nativeElement as HTMLElement).querySelector('[data-test="measured-ecosystem"]');
+      // Session apps pin only cflinuxfs4, so cflinuxfs3 is defined-but-unused.
+      expect(panel?.textContent).toContain('cflinuxfs3');
+      expect(panel?.textContent).toContain('unused');
+      expect(panel?.textContent).toContain('ruby_buildpack');
+    });
   });
 });
