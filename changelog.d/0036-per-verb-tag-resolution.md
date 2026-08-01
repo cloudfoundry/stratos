@@ -1,0 +1,2 @@
+[Chores]
+- Release verbs resolve their default tag from their intent: `stamp tag` still derives it from the version being released, `publish` now targets the nearest existing tag (deriving from package.json pointed one release ahead once the post-release bump landed, and `--verify-tag` aborted having published nothing), and the deletion verbs `unpublish` and `stamp untag` no longer guess — they require an explicit `TAG=`.
