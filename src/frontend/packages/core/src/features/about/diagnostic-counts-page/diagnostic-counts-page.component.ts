@@ -76,6 +76,9 @@ export class DiagnosticCountsPageComponent {
   readonly heap = signal<HeapInfo>(readHeap());
   private readonly counts = signal<Record<string, EndpointCounts>>({});
 
+  // "Heap" here is the browser tab's JS heap (performance.memory, Chromium
+  // only) — on Firefox/WebKit-based browsers the line shows the fixed-budget
+  // fallback instead. Not jetstream/server memory.
   readonly heapLine = computed(() => {
     const heap = this.heap();
     const limit = formatBytes(heap.limitBytes);

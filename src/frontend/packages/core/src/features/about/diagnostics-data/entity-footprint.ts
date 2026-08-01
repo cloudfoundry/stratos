@@ -56,8 +56,11 @@ export interface HeapInfo {
 const FIXED_BUDGET_BYTES = 2 * 1024 ** 3; // 2 GiB when the heap API is unavailable
 
 /**
- * Read the JS heap via the non-standard performance.memory API (Chromium),
- * falling back to a fixed 2 GiB budget elsewhere.
+ * Read the BROWSER TAB's JS heap via the non-standard performance.memory
+ * API. Only Chromium-based browsers expose it; on Firefox and WebKit-based
+ * browsers (Safari) there is no equivalent, so those fall back to a fixed
+ * 2 GiB budget with usedBytes unknown — the heap line then reads "assuming
+ * a 2 GiB budget" and risk ratings compare estimates against that budget.
  */
 export function readHeap(): HeapInfo {
   const memory = (performance as any).memory;
