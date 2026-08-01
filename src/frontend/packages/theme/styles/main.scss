@@ -899,6 +899,21 @@ body.modal-open {
     background-color: var(--nav-tooltip);
   }
 
+  /* Hide native scrollbars on containers whose scroll affordance is
+     provided another way (edge fades). Scrolling is unaffected. Not
+     applied under forced colors (Windows High Contrast): that mode
+     strips background gradients, so the fades vanish — without this
+     guard the container would be left with no affordance at all. */
+  @media not (forced-colors: active) {
+    .scrollbar-none {
+      scrollbar-width: none;
+    }
+
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
   /* Always-visible themed scrollbar. macOS overlay scrollbars are 0px wide
      when idle, leaving scrollable containers with no affordance. */
   .custom-scrollbar::-webkit-scrollbar {

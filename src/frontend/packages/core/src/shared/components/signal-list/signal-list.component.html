@@ -220,8 +220,10 @@
     </div>
   }
 
-  <!-- Body: loading / empty state / table -->
-  <div #scrollBody data-test="scroll-body" class="relative flex-1 overflow-auto">
+  <!-- Body: loading / empty state / table. The wrapper exists so the
+       horizontal edge fades can overlay exactly the scroll area. -->
+  <div class="relative flex-1 min-h-0 flex flex-col">
+  <div #scrollBody data-test="scroll-body" class="relative flex-1 overflow-auto scrollbar-none">
     @if ((config.isAnyLoading() || isRefreshing()) && config.totalFilteredResults() === 0) {
       <div data-test="loading" class="flex items-center justify-center p-8 h-full">
         <div class="flex items-center space-x-4 text-content-muted">
@@ -703,6 +705,17 @@
         </tbody>
       </table>
     }
+  </div>
+
+  <!-- Right scroll fade (prototype): horizontal twin of the bottom scroll
+       fade. Shows only while scrolling right would reveal more columns —
+       the leading (left) edge, like the top, never needs an affordance:
+       it is territory the user has already seen. Passive indicator only,
+       pointer-events-none. -->
+  @if (canScrollRight() && config.totalFilteredResults() > 0) {
+    <div data-test="scroll-fade-right" aria-hidden="true"
+         class="pointer-events-none absolute inset-y-0 right-0 z-20 w-10 bg-gradient-to-l from-black/30 via-black/10 to-transparent dark:from-white/25 dark:via-white/10"></div>
+  }
   </div>
 
   <!-- Scroll fade: sibling of body so it never moves with the data. Takes 0
