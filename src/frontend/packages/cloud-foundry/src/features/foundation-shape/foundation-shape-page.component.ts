@@ -15,6 +15,12 @@ import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data
 import { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
 import { computeSessionShape, SessionShape } from './session-shape';
 import { ShapeDistCardComponent } from './shape-dist-card.component';
+import {
+  MeasuredEcosystem,
+  MeasuredTotals,
+  ShapeMeasureService,
+  TOTALS_PROBES,
+} from './shape-measure.service';
 import { ShapeShareBarComponent, SharePart } from './shape-share-bar.component';
 
 interface DrainStamp {
@@ -74,6 +80,7 @@ export const ageLabel = (date: Date | null, now: Date): string => {
 export class FoundationShapePageComponent implements OnDestroy {
   private readonly endpointsSignal = inject(EndpointsSignalService);
   private readonly registry = inject(EndpointDataRegistry);
+  readonly measure = inject(ShapeMeasureService);
 
   readonly cfEndpoints = computed(() =>
     this.endpointsSignal.connectedEndpoints().filter(ep => ep.cnsi_type === 'cf' && !!ep.guid)
@@ -179,6 +186,41 @@ export class FoundationShapePageComponent implements OnDestroy {
     return Object.entries(section.shape.composition.stacks_pinned_by_apps)
       .sort((a, b) => b[1] - a[1])
       .map(([label, count]) => ({ label, count }));
+  }
+
+  ageOf(date: Date): string {
+    return ageLabel(date, new Date());
+  }
+
+  measuredTotals(section: ShapeSection): MeasuredTotals | undefined {
+    return this.measure.totals().get(section.guid);
+  }
+
+  measuredEcosystem(section: ShapeSection): MeasuredEcosystem | undefined {
+    return this.measure.ecosystem().get(section.guid);
+  }
+
+  measuring(section: ShapeSection, block: 'totals' | 'ecosystem'): boolean {
+    return this.measure.inFlight().has(`${section.guid}:${block}`);
+  }
+
+  measuredTotalsRows(measured: MeasuredTotals): { label: string; count: number | null }[] {
+    return TOTALS_PROBES.map(probe => ({ label: probe.label, count: measured.counts[probe.key] ?? null }));
+  }
+
+  /** Defined stacks annotated with whether any session app pins them. */
+  stackDefinedChips(section: ShapeSection, measured: MeasuredEcosystem): { label: string; unused: boolean }[] {
+    const pinned = section.shape.composition.stacks_pinned_by_apps;
+    return measured.stacksDefined.map(name => ({ label: name, unused: !(name in pinned) }));
+  }
+
+  /** Defined buildpacks deduped to name × multiplicity (one entry per stack build). */
+  buildpackDefinedChips(measured: MeasuredEcosystem): { label: string; count: number }[] {
+    const counts = new Map<string, number>();
+    for (const name of measured.buildpacksDefined) {
+      counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+    return [...counts.entries()].map(([label, count]) => ({ label, count }));
   }
 
   concentrationTiles(section: ShapeSection): { headline: string; detail: string }[] {
