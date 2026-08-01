@@ -36,6 +36,7 @@ const fakeDataService = () => ({
   orgsLastFetched: signal<Date | null>(new Date('2026-08-01T10:00:00Z')),
   appsLastFetched: signal<Date | null>(new Date('2026-08-01T10:00:00Z')),
   spacesLastFetched: signal<Date | null>(new Date('2026-08-01T10:00:00Z')),
+  servicesCountsLastFetched: signal<Date | null>(new Date('2026-08-01T10:00:00Z')),
   orgsStale: signal(false),
   appsStale: signal(false),
   spacesStale: signal(false),
@@ -132,6 +133,26 @@ describe('FoundationShapePageComponent', () => {
     fixture.detectChanges();
     await fixture.whenStable();
     expect(component.sections()[0].totals.spaces).toBeNull();
+  });
+
+  it('shows dashes, not zeros, when the fast counts never loaded', async () => {
+    const svc = services.get('cf-1');
+    svc.lastFetched.set(null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const totals = (fixture.nativeElement as HTMLElement).querySelector('[data-test="shape-totals"]');
+    expect(totals?.textContent).not.toContain('0 orgs');
+    expect(totals?.textContent).toContain('— orgs');
+  });
+
+  it('shows dashes for service counts until their own counts fetch lands', async () => {
+    const svc = services.get('cf-1');
+    svc.servicesCountsLastFetched.set(null);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const totals = (fixture.nativeElement as HTMLElement).querySelector('[data-test="shape-totals"]');
+    expect(totals?.textContent).toContain('— brokers');
+    expect(totals?.textContent).toContain('2 orgs');
   });
 
   describe('measure on demand', () => {

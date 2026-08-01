@@ -50,6 +50,8 @@ export interface ShapeSection {
   hasDrains: boolean;
   /** The fast counts pass has run, so the totals row is real data. */
   countsLoaded: boolean;
+  /** The services counts pass (a later, separate fetch) has run. */
+  servicesCountsLoaded: boolean;
   /** The connected user is a CF admin on this endpoint — gates export. */
   admin: boolean;
 }
@@ -154,6 +156,7 @@ export class FoundationShapePageComponent implements OnDestroy {
           hasDrains:
             svc.orgsLastFetched() !== null || svc.spacesLastFetched() !== null || svc.appsLastFetched() !== null,
           countsLoaded: svc.lastFetched() !== null,
+          servicesCountsLoaded: svc.servicesCountsLastFetched() !== null,
           admin: !!ep.user?.admin,
         };
       })
@@ -199,6 +202,22 @@ export class FoundationShapePageComponent implements OnDestroy {
     return ageLabel(date, new Date());
   }
 
+  /** Totals strip rows; null renders as a dash — a count that never loaded is not 0. */
+  totalsRows(section: ShapeSection): { label: string; value: number | null }[] {
+    const counted = (value: number): number | null => (section.countsLoaded ? value : null);
+    const serviceCounted = (value: number): number | null => (section.servicesCountsLoaded ? value : null);
+    return [
+      { label: 'orgs', value: counted(section.totals.orgs) },
+      { label: 'spaces', value: section.totals.spaces },
+      { label: 'apps', value: counted(section.totals.apps) },
+      { label: 'routes', value: counted(section.totals.routes) },
+      { label: 'service instances', value: serviceCounted(section.totals.serviceInstances) },
+      { label: 'offerings', value: serviceCounted(section.totals.serviceOfferings) },
+      { label: 'plans', value: serviceCounted(section.totals.servicePlans) },
+      { label: 'brokers', value: serviceCounted(section.totals.serviceBrokers) },
+    ];
+  }
+
   /** The anonymous projection (#5703) of everything this section has measured. */
   exportPayload(section: ShapeSection): AgnosticExport {
     return buildAgnosticExport({
@@ -206,6 +225,7 @@ export class FoundationShapePageComponent implements OnDestroy {
       sessionTotals: section.totals,
       drains: {
         counts: section.countsLoaded,
+        servicesCounts: section.servicesCountsLoaded,
         orgs: section.drains.orgs.fetchedAt !== null,
         spaces: section.drains.spaces.fetchedAt !== null,
         apps: section.drains.apps.fetchedAt !== null,

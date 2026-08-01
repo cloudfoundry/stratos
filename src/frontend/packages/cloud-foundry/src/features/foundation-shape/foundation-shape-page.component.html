@@ -22,28 +22,16 @@
 
         <!-- Totals strip (fast counts; spaces from the full drain when it has run) -->
         <div class="flex flex-wrap gap-x-6 gap-y-2" data-test="shape-totals">
-          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.orgs | number }}</span>
-            <span class="text-xs text-content-muted"> orgs</span></div>
-          <div>
-            @if (section.totals.spaces !== null) {
-              <span class="text-lg font-semibold tabular-nums">{{ section.totals.spaces | number }}</span>
-            } @else {
-              <span class="text-lg font-semibold text-content-muted" data-test="spaces-not-loaded">&mdash;</span>
-            }
-            <span class="text-xs text-content-muted"> spaces</span>
-          </div>
-          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.apps | number }}</span>
-            <span class="text-xs text-content-muted"> apps</span></div>
-          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.routes | number }}</span>
-            <span class="text-xs text-content-muted"> routes</span></div>
-          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.serviceInstances | number }}</span>
-            <span class="text-xs text-content-muted"> service instances</span></div>
-          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.serviceOfferings | number }}</span>
-            <span class="text-xs text-content-muted"> offerings</span></div>
-          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.servicePlans | number }}</span>
-            <span class="text-xs text-content-muted"> plans</span></div>
-          <div><span class="text-lg font-semibold tabular-nums">{{ section.totals.serviceBrokers | number }}</span>
-            <span class="text-xs text-content-muted"> brokers</span></div>
+          @for (row of totalsRows(section); track row.label) {
+            <div>
+              @if (row.value !== null) {
+                <span class="text-lg font-semibold tabular-nums">{{ row.value | number }}</span>
+              } @else {
+                <span class="text-lg font-semibold text-content-muted">&mdash;</span>
+              }
+              <span class="text-xs text-content-muted"> {{ row.label }}</span>
+            </div>
+          }
         </div>
 
         <!-- Data age stamps -->
@@ -137,7 +125,7 @@
 
           <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span class="text-sm">Ecosystem totals</span>
-            <span class="text-xs text-content-muted">buildpacks · stacks · isolation segments · domains · quotas · security groups · users</span>
+            <span class="text-xs text-content-muted">buildpacks · stacks · domains · quotas · security groups · users</span>
             <span class="text-xs text-content-muted">({{ measure.totalsCost() }})</span>
             <button data-test="measure-totals" type="button"
               class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors disabled:opacity-50"
