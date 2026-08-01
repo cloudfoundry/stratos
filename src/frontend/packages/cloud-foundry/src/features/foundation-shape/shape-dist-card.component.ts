@@ -27,7 +27,11 @@ interface HistRow {
         <div class="flex h-4 items-center" [title]="label() + ' = ' + row.label + ': ' + row.count">
           <div class="w-16 shrink-0 pr-2 text-right text-xs text-content-muted tabular-nums truncate">{{ row.label }}</div>
           <div class="flex-1 min-w-0 flex items-center gap-2">
-            <div class="h-2.5 shrink-0 min-w-[2px] rounded bg-[#2a78d6] dark:bg-[#3987e5]" [style.width.%]="width(row)"></div>
+            <!-- Same two-tone vocabulary as the share bars: slate = the empty
+                 (zero-valued) share, blue = the data-holding population -->
+            <div class="h-2.5 shrink-0 min-w-[2px] rounded"
+              [class]="row.label === '0' ? 'bg-[#94a3b8] dark:bg-[#64748b]' : 'bg-[#2a78d6] dark:bg-[#3987e5]'"
+              [style.width.%]="width(row)"></div>
             <span class="text-xs tabular-nums">{{ row.count | number }}</span>
           </div>
         </div>
