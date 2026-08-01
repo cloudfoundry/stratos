@@ -86,8 +86,8 @@ export class ShapeMeasureService {
       stacks: this.http.get<StStacksResponse>(`/pp/v1/cf/stacks/${guid}`).pipe(catchError(() => of(null))),
       buildpacks: this.http.get<StBuildpacksResponse>(`/pp/v1/cf/buildpacks/${guid}`).pipe(catchError(() => of(null))),
     }).subscribe(({ stacks, buildpacks }) => {
-      // ponytail: all-or-nothing — a partial defined-list would silently skew
-      // the defined-vs-used comparison; retry is one click away.
+      // simplification: all-or-nothing — a partial defined-list would silently
+      // skew the defined-vs-used comparison; retry is one click away.
       if (stacks && buildpacks) {
         this._ecosystem.update(all =>
           new Map(all).set(guid, {
