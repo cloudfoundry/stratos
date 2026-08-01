@@ -97,7 +97,15 @@ cmd_new() {
 dep_range() {
   local since="${1:-}"
   if [ -z "${since}" ]; then
-    since=$(git -C "${ROOT_DIR}" describe --tags --match 'v[0-9]*' --abbrev=0 2>/dev/null || true)
+    # TAG_MATCH (exported by make) scopes the anchor to this checkout's
+    # version line, so a maintenance tag back-merged from another line
+    # never truncates the window. At the birth of a line no tag matches
+    # yet — fall back to the nearest tag of any line (the previous
+    # line's final) rather than reporting the whole history.
+    since=$(git -C "${ROOT_DIR}" describe --tags --match "${TAG_MATCH:-v[0-9]*}" --abbrev=0 2>/dev/null || true)
+    if [ -z "${since}" ]; then
+      since=$(git -C "${ROOT_DIR}" describe --tags --match 'v[0-9]*' --abbrev=0 2>/dev/null || true)
+    fi
   fi
   echo "${since:+${since}..}HEAD"
 }

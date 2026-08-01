@@ -50,6 +50,12 @@
 #                               EXISTING tag, and unpublish/stamp untag
 #                               refuse to guess and require TAG=.
 #   TAG_REMOTE=<remote>         Remote for stamp tag/untag (default: origin)
+#   LINE=X.Y                    Version line this checkout releases
+#                               (default: package.json's major.minor —
+#                               per-branch state, so a release/5.0.x
+#                               branch is line 5.0 automatically)
+#   TAG_MATCH=<glob>            Tag family scoping nearest-tag queries
+#                               (default: v$(LINE).*)
 #   DRAFT=yes                   publish creates a draft release
 #   NOTES=<file>                Notes file for publish (default: the
 #                               annotated tag body, assembled by stamp tag
@@ -92,6 +98,8 @@ endef
 
 define dump.version.extra
 	@echo "GO_LDFLAGS        $($(_HIDE)GO_LDFLAGS)"
+	@echo "LINE              $(LINE)"
+	@echo "TAG_MATCH         $(TAG_MATCH)"
 endef
 
 # ── Directories ───────────────────────────────────────────────
@@ -947,6 +955,18 @@ TAG_REMOTE ?= origin
 DRAFT      ?=
 NOTES      ?=
 
+# LINE names the version line this checkout releases — the noun behind
+# concurrent lines (5.0.X maintenance beside 5.1.Y development). It
+# derives from package.json's major.minor, which is per-branch state:
+# develop at 5.1.0-dev is line 5.1, a release/5.0.x branch is line 5.0.
+# TAG_MATCH is the tag-family glob every nearest-tag query filters by —
+# ancestry alone scopes a maintenance branch (5.1 tags are never its
+# ancestors), but the moment a 5.0.X fix back-merges into develop its
+# tag becomes reachable there, and without the filter it could become
+# develop's "nearest tag".
+LINE      ?= $($(_HIDE)SEMVER_MAJOR).$($(_HIDE)SEMVER_MINOR)
+TAG_MATCH ?= v$(LINE).*
+
 # Per-verb tag resolution. stamp tag CREATES the release, so its default
 # derives from the version being released (v + package.json with build
 # metadata stripped — tags are clean semver; package.json carries
@@ -960,7 +980,7 @@ NOTES      ?=
 # default is how a typo removes the wrong release — both demand an
 # explicit TAG. TAG= on the command line overrides every verb unchanged.
 $(_HIDE)NEXT_TAG    = v$($(_HIDE)SEMVER_NOMETA)
-$(_HIDE)LAST_TAG    = $(shell git describe --tags --abbrev=0 2>/dev/null)
+$(_HIDE)LAST_TAG    = $(shell git describe --tags --abbrev=0 --match '$(TAG_MATCH)' 2>/dev/null)
 $(_HIDE)CREATE_TAG  = $(or $(TAG),$($(_HIDE)NEXT_TAG))
 $(_HIDE)PUBLISH_TAG = $(or $(TAG),$($(_HIDE)LAST_TAG))
 
@@ -969,8 +989,9 @@ $(_HIDE)DRY := $(if $(filter yes,$(DRYRUN)),@echo "DRYRUN:" )
 
 define stamp.tag
 	@case "$($(_HIDE)CREATE_TAG)" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "ERROR: '$($(_HIDE)CREATE_TAG)' does not look like a release tag (vX.Y.Z[-prerelease])" >&2; exit 1;; esac
+	@case "$($(_HIDE)CREATE_TAG)" in $(TAG_MATCH)) ;; *) echo "ERROR: '$($(_HIDE)CREATE_TAG)' is off the $(LINE) line this checkout releases ($(TAG_MATCH)) — cut it from that line's branch, or pass LINE= if intentional" >&2; exit 1;; esac
 	@chmod +x build/create-git-tag.sh
-	$($(_HIDE)DRY)./build/create-git-tag.sh "$($(_HIDE)CREATE_TAG)"
+	$($(_HIDE)DRY)TAG_MATCH='$(TAG_MATCH)' ./build/create-git-tag.sh "$($(_HIDE)CREATE_TAG)"
 	$($(_HIDE)DRY)git push $(TAG_REMOTE) "refs/tags/$($(_HIDE)CREATE_TAG)"
 endef
 $(call register, stamp, tag)
@@ -1019,7 +1040,7 @@ sweep:
 # before it freezes the notes into the tag body.
 changelog:
 	@chmod +x build/release-notes.sh
-	@./build/release-notes.sh check
+	@TAG_MATCH='$(TAG_MATCH)' ./build/release-notes.sh check
 
 # ── Deploy (documentation website) ───────────────────────────
 # Grammar: make deploy website <destination> — the component says what is
