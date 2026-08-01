@@ -13,11 +13,15 @@ import { StBuildpacksResponse, StStacksResponse } from '../../services/endpoint-
  * joins the shape with its own timestamp.
  */
 
-/** Ecosystem totals absent from the session registry; key = schema_version 1 totals name. */
+/**
+ * Ecosystem totals absent from the session registry; key = schema_version 1
+ * totals name. isolation_segments is missing: jetstream has no GET list
+ * handler for it yet (only the entitlement POST) — add the probe when the
+ * backend grows one.
+ */
 export const TOTALS_PROBES: { key: string; label: string; path: string }[] = [
   { key: 'buildpacks', label: 'Buildpacks', path: 'buildpacks' },
   { key: 'stacks', label: 'Stacks', path: 'stacks' },
-  { key: 'isolation_segments', label: 'Isolation segments', path: 'isolation_segments' },
   { key: 'domains', label: 'Domains', path: 'domains' },
   { key: 'organization_quotas', label: 'Org quotas', path: 'organization_quotas' },
   { key: 'space_quotas', label: 'Space quotas', path: 'space_quotas' },

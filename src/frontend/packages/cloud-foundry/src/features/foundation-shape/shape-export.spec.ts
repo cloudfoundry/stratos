@@ -21,7 +21,7 @@ const SESSION_TOTALS = {
   serviceBrokers: 1,
 };
 
-const ALL_DRAINS = { counts: true, orgs: true, spaces: true, apps: true };
+const ALL_DRAINS = { counts: true, servicesCounts: true, orgs: true, spaces: true, apps: true };
 
 const baseInput = () => ({
   shape: computeSessionShape(ORGS, SPACES, APPS),
@@ -63,13 +63,16 @@ describe('buildAgnosticExport', () => {
 
   it('omits everything a never-run drain would misstate', () => {
     const input = baseInput();
-    input.drains = { counts: true, orgs: true, spaces: false, apps: false };
+    input.drains = { counts: true, servicesCounts: false, orgs: true, spaces: false, apps: false };
     input.sessionTotals = { ...SESSION_TOTALS, spaces: null };
     const exported = buildAgnosticExport(input);
     // spaces total needs the spaces drain; apps/routes come from fast counts
     expect(exported.totals).not.toHaveProperty('spaces');
     expect(exported.totals.apps).toBe(1);
     expect(exported.totals.organizations).toBe(2);
+    // service counts arrive in their own later fetch, which never ran here
+    expect(exported.totals).not.toHaveProperty('service_instances');
+    expect(exported.totals).not.toHaveProperty('service_brokers');
     // every distribution touching an un-drained population is omitted
     expect(exported.distributions).not.toHaveProperty('spaces_per_org');
     expect(exported.distributions).not.toHaveProperty('apps_per_space');

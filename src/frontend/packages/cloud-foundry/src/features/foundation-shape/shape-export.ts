@@ -19,8 +19,10 @@ export const COVERAGE_NOTE =
 
 /** Which data sources have actually run this session. */
 export interface ShapeDrains {
-  /** The fast ?return=counts pass (orgs/apps/routes + service counts). */
+  /** The fast ?return=counts pass (orgs/apps/routes). */
   counts: boolean;
+  /** The services counts pass — a separate, later fetch. */
+  servicesCounts: boolean;
   orgs: boolean;
   spaces: boolean;
   apps: boolean;
@@ -82,6 +84,8 @@ export const buildAgnosticExport = (input: AgnosticExportInput): AgnosticExport 
     totals['organizations'] = sessionTotals.orgs;
     totals['apps'] = sessionTotals.apps;
     totals['routes'] = sessionTotals.routes;
+  }
+  if (drains.servicesCounts) {
     // Combined managed + user-provided: the session count cannot split them.
     totals['service_instances'] = sessionTotals.serviceInstances;
     totals['service_offerings'] = sessionTotals.serviceOfferings;
