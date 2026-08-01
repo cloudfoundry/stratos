@@ -126,6 +126,28 @@ describe('FoundationShapePageComponent', () => {
     expect((fixture.nativeElement as HTMLElement).textContent).toContain('My Cloud Foundry');
   });
 
+  it('always shows all three concentration tiles, naming the missing ones', async () => {
+    const withData = component.concentrationTiles(component.sections()[0]);
+    expect(withData).toHaveLength(3);
+    expect(withData.every(tile => tile.headline !== null)).toBe(true);
+
+    const svc = services.get('cf-1');
+    svc.apps.set([]);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const withoutApps = component.concentrationTiles(component.sections()[0]);
+    expect(withoutApps).toHaveLength(3);
+    // apps-based tiles lose their headline but stay visible
+    expect(withoutApps.filter(tile => tile.headline === null)).toHaveLength(2);
+    const rendered = (fixture.nativeElement as HTMLElement).querySelector('[data-test="shape-concentration"]');
+    expect(rendered?.textContent).toContain('no data');
+  });
+
+  it('renders app state as one segment per actual state, all summing to 100%', () => {
+    const parts = component.appStateParts(component.sections()[0]);
+    expect(parts).toEqual([{ label: 'STARTED', value: 1 }]);
+  });
+
   it('flags never-loaded drains as null spaces total, distinct from empty', async () => {
     const svc = services.get('cf-1');
     svc.spaces.set([]);

@@ -54,25 +54,27 @@
           </div>
         } @else {
 
-          <!-- Concentration tiles -->
-          @if (concentrationTiles(section).length > 0) {
-            <div class="flex flex-wrap gap-6" data-test="shape-concentration">
-              @for (tile of concentrationTiles(section); track tile.detail) {
-                <div>
+          <!-- Concentration tiles — always all three, so gaps are visible -->
+          <div class="flex flex-wrap gap-6" data-test="shape-concentration">
+            @for (tile of concentrationTiles(section); track tile.detail) {
+              <div>
+                @if (tile.headline !== null) {
                   <div class="text-lg font-semibold tabular-nums">{{ tile.headline }}</div>
-                  <div class="text-xs text-content-muted max-w-44">{{ tile.detail }}</div>
-                </div>
-              }
-            </div>
-          }
+                } @else {
+                  <div class="text-lg font-semibold text-content-muted">&mdash;</div>
+                }
+                <div class="text-xs text-content-muted max-w-44">{{ tile.detail }}</div>
+              </div>
+            }
+          </div>
 
           <!-- Occupancy + state share bars -->
           <div class="grid gap-4 sm:grid-cols-2">
             @if (occupancy(section); as occ) {
-              <app-shape-share-bar label="Space occupancy" [primary]="occ.primary" [remainder]="occ.remainder" />
+              <app-shape-share-bar label="Space occupancy" [parts]="occ" />
             }
-            @if (started(section); as st) {
-              <app-shape-share-bar label="App state" [primary]="st.primary" [remainder]="st.remainder" />
+            @if (appStateParts(section); as st) {
+              <app-shape-share-bar label="App state" [parts]="st" />
             }
           </div>
 

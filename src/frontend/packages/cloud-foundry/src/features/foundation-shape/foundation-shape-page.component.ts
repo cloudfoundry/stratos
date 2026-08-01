@@ -168,28 +168,27 @@ export class FoundationShapePageComponent implements OnDestroy {
   }
 
   /** Occupied vs empty spaces, from the apps-per-space zero count. */
-  occupancy(section: ShapeSection): { primary: SharePart; remainder: SharePart } | null {
+  occupancy(section: ShapeSection): SharePart[] | null {
     const d = section.shape.distributions.apps_per_space;
     if (!d) {
       return null;
     }
-    return {
-      primary: { label: 'occupied', value: d.n - d.zeros },
-      remainder: { label: 'empty', value: d.zeros },
-    };
+    return [
+      { label: 'occupied', value: d.n - d.zeros },
+      { label: 'empty', value: d.zeros },
+    ];
   }
 
-  started(section: ShapeSection): { primary: SharePart; remainder: SharePart } | null {
+  /** One part per state actually present — nothing gets lumped into a guess. */
+  appStateParts(section: ShapeSection): SharePart[] | null {
     const states = section.shape.composition.app_state;
-    const total = Object.values(states).reduce((sum, count) => sum + count, 0);
-    if (!total) {
-      return null;
-    }
-    const startedCount = states['STARTED'] ?? 0;
-    return {
-      primary: { label: 'started', value: startedCount },
-      remainder: { label: 'stopped', value: total - startedCount },
-    };
+    const known = ['STARTED', 'STOPPED'];
+    const ordered = [
+      ...known.filter(state => state in states),
+      ...Object.keys(states).filter(state => !known.includes(state)).sort(),
+    ];
+    const parts = ordered.map(state => ({ label: state, value: states[state] }));
+    return parts.length ? parts : null;
   }
 
   stackChips(section: ShapeSection): { label: string; count: number }[] {
@@ -286,27 +285,21 @@ export class FoundationShapePageComponent implements OnDestroy {
     return [...counts.entries()].map(([label, count]) => ({ label, count }));
   }
 
-  concentrationTiles(section: ShapeSection): { headline: string; detail: string }[] {
+  /** Always all three tiles — a missing one shows as such instead of vanishing. */
+  concentrationTiles(section: ShapeSection): { headline: string | null; detail: string }[] {
     const shares = section.shape.distributions.top_share;
-    const tiles: { headline: string; detail: string }[] = [];
-    if (shares.apps_in_largest_space) {
-      tiles.push({
-        headline: `${(shares.apps_in_largest_space.fraction * 100).toFixed(1)}%`,
-        detail: `of all apps sit in one space (${shares.apps_in_largest_space.largest_holds} apps)`,
-      });
-    }
-    if (shares.apps_in_largest_org) {
-      tiles.push({
-        headline: `${(shares.apps_in_largest_org.fraction * 100).toFixed(1)}%`,
-        detail: `of all apps sit in one org (${shares.apps_in_largest_org.largest_holds} apps)`,
-      });
-    }
-    if (shares.spaces_in_largest_org) {
-      tiles.push({
-        headline: `${(shares.spaces_in_largest_org.fraction * 100).toFixed(1)}%`,
-        detail: `of all spaces sit in one org (${shares.spaces_in_largest_org.largest_holds} spaces)`,
-      });
-    }
-    return tiles;
+    const tile = (
+      share: { largest_holds: number; fraction: number } | null,
+      story: (holds: number) => string,
+      emptyStory: string
+    ) =>
+      share
+        ? { headline: `${(share.fraction * 100).toFixed(1)}%`, detail: story(share.largest_holds) }
+        : { headline: null, detail: `${emptyStory} — no data` };
+    return [
+      tile(shares.apps_in_largest_space, holds => `of all apps sit in one space (${holds} apps)`, 'apps in one space'),
+      tile(shares.apps_in_largest_org, holds => `of all apps sit in one org (${holds} apps)`, 'apps in one org'),
+      tile(shares.spaces_in_largest_org, holds => `of all spaces sit in one org (${holds} spaces)`, 'spaces in one org'),
+    ];
   }
 }
