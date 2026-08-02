@@ -1,99 +1,86 @@
 /**
- * Pure comparison of two foundation shapes (GH #5702 follow-on): the
- * promotion-verification view. Both sides are schema_version 1 exports —
+ * Pure N-way comparison of foundation shapes (GH #5702 follow-on): the
+ * promotion-verification view. Every side is a schema_version 1 export —
  * a live section's projection or an imported file — and the comparison
  * walks what each side actually measured: an absent key means "not
  * measured" on that side (never-loaded ≠ empty), a null distribution
  * means measured-but-empty, and neither is ever presented as a zero.
  *
- * Emphasis follows the promotion question — did a stack migration,
- * buildpack update, or app rollout propagate — so ecosystem lists diff as
- * added/removed and categorical compositions diff as share deltas, with
- * totals and distribution key-stats as the secondary table.
+ * Sides are ordered; the first is the baseline. Values come back as
+ * index-aligned arrays (one entry per side) — judgment against the
+ * baseline (added/removed, deltas) is the view's concern, not computed
+ * here, so the same comparison serves tables, bars, and matrices.
  */
 import { AgnosticExport, isDist } from './shape-export';
 import { Distribution, TopShare } from './shape-stats';
 
-/** undefined = that side never measured this; null = measured, empty. */
-export interface ComparedValue<T> {
+export interface LabelledExport {
+  label: string;
+  exported: AgnosticExport;
+}
+
+/** Per-key row: values[i] belongs to sides[i]; undefined = that side never measured it, null = measured, empty. */
+export interface ComparedRow<T> {
   key: string;
-  a?: T | null;
-  b?: T | null;
+  values: (T | null | undefined)[];
 }
 
 export interface CategoryRow {
   category: string;
   /** undefined = dimension unmeasured on that side; counts are real zeros otherwise. */
-  a?: number;
-  b?: number;
+  counts: (number | undefined)[];
   /** Share of the side's dimension total, 0..1; undefined when unmeasured. */
-  aShare?: number;
-  bShare?: number;
+  shares: (number | undefined)[];
 }
 
-export interface ListDiff {
+export interface ListMatrix {
   key: string;
-  added: string[];
-  removed: string[];
-  unchanged: string[];
+  /** Side-level: whether this side measured the list at all. */
+  measured: boolean[];
+  /** One row per union label ("name" or "name ×n"); present[i] only meaningful where measured[i]. */
+  rows: { label: string; present: boolean[] }[];
 }
 
 export interface ShapeComparison {
-  a: { label: string; collectedAt: string };
-  b: { label: string; collectedAt: string };
-  totals: ComparedValue<number>[];
-  distributions: ComparedValue<Distribution>[];
-  topShare: ComparedValue<TopShare>[];
+  sides: { label: string; collectedAt: string }[];
+  totals: ComparedRow<number>[];
+  distributions: ComparedRow<Distribution>[];
+  topShare: ComparedRow<TopShare>[];
   /** One entry per categorical dimension measured on at least one side. */
   categorical: { dimension: string; rows: CategoryRow[] }[];
-  /** Defined-list diffs; multiset entries render as "name ×n". */
-  lists: ListDiff[];
+  lists: ListMatrix[];
 }
 
-/** Union of both sides' keys, a-side order first — comparison rows never drop a key. */
-const unionKeys = (a: Record<string, unknown>, b: Record<string, unknown>): string[] => {
-  const keys = Object.keys(a);
-  for (const key of Object.keys(b)) {
-    if (!keys.includes(key)) {
-      keys.push(key);
+/** Union of every side's keys, first-seen order — comparison rows never drop a key. */
+const unionKeys = (sources: Record<string, unknown>[]): string[] => {
+  const keys: string[] = [];
+  for (const source of sources) {
+    for (const key of Object.keys(source)) {
+      if (!keys.includes(key)) {
+        keys.push(key);
+      }
     }
   }
   return keys;
 };
 
-const comparedValues = <T>(
-  a: Record<string, T | null | undefined>,
-  b: Record<string, T | null | undefined>
-): ComparedValue<T>[] =>
-  unionKeys(a, b).map(key => {
-    const row: ComparedValue<T> = { key };
-    if (key in a) {
-      row.a = a[key] as T | null;
-    }
-    if (key in b) {
-      row.b = b[key] as T | null;
-    }
-    return row;
-  });
+const comparedRows = <T>(sources: Record<string, T | null | undefined>[]): ComparedRow<T>[] =>
+  unionKeys(sources).map(key => ({
+    key,
+    values: sources.map(source => (key in source ? (source[key] as T | null) : undefined)),
+  }));
 
-const categoricalRows = (
-  a: Record<string, number> | undefined,
-  b: Record<string, number> | undefined
-): CategoryRow[] => {
-  const aTotal = Object.values(a ?? {}).reduce((acc, v) => acc + v, 0);
-  const bTotal = Object.values(b ?? {}).reduce((acc, v) => acc + v, 0);
-  return unionKeys(a ?? {}, b ?? {}).map(category => {
-    const row: CategoryRow = { category };
-    if (a) {
-      row.a = a[category] ?? 0;
-      row.aShare = aTotal ? row.a / aTotal : 0;
-    }
-    if (b) {
-      row.b = b[category] ?? 0;
-      row.bShare = bTotal ? row.b / bTotal : 0;
-    }
-    return row;
-  });
+const categoricalRows = (sources: (Record<string, number> | undefined)[]): CategoryRow[] => {
+  const totals = sources.map(source =>
+    source ? Object.values(source).reduce((acc, v) => acc + v, 0) : 0
+  );
+  return unionKeys(sources.filter((s): s is Record<string, number> => !!s)).map(category => ({
+    category,
+    counts: sources.map(source => (source ? source[category] ?? 0 : undefined)),
+    shares: sources.map((source, i) =>
+      source ? (totals[i] ? (source[category] ?? 0) / totals[i] : 0) : undefined
+    ),
+  }));
 };
 
 /** Multiset entries collapse to "name ×n" so a second stack's build of the same buildpack shows. */
@@ -105,14 +92,23 @@ const multisetLabels = (names: string[]): string[] => {
   return [...counts.entries()].map(([name, count]) => (count > 1 ? `${name} ×${count}` : name));
 };
 
-const listDiff = (key: string, a: string[] | undefined, b: string[] | undefined): ListDiff => {
-  const aLabels = multisetLabels(a ?? []);
-  const bLabels = multisetLabels(b ?? []);
+const listMatrix = (key: string, sources: (string[] | undefined)[]): ListMatrix => {
+  const labelled = sources.map(names => (names ? multisetLabels(names) : undefined));
+  const union: string[] = [];
+  for (const labels of labelled) {
+    for (const label of labels ?? []) {
+      if (!union.includes(label)) {
+        union.push(label);
+      }
+    }
+  }
   return {
     key,
-    added: bLabels.filter(label => !aLabels.includes(label)),
-    removed: aLabels.filter(label => !bLabels.includes(label)),
-    unchanged: aLabels.filter(label => bLabels.includes(label)),
+    measured: labelled.map(labels => labels !== undefined),
+    rows: union.map(label => ({
+      label,
+      present: labelled.map(labels => !!labels?.includes(label)),
+    })),
   };
 };
 
@@ -128,32 +124,25 @@ const distEntries = (exported: AgnosticExport): Record<string, Distribution | nu
   return entries;
 };
 
-export interface LabelledExport {
-  label: string;
-  exported: AgnosticExport;
-}
+const CATEGORICAL_DIMENSIONS = ['app_state', 'stacks_pinned_by_apps'] as const;
+const DEFINED_LISTS = ['stacks_defined', 'buildpacks_defined'] as const;
 
-export const compareExports = (a: LabelledExport, b: LabelledExport): ShapeComparison => {
-  const dimensions = ['app_state', 'stacks_pinned_by_apps'] as const;
-  const lists = ['stacks_defined', 'buildpacks_defined'] as const;
+export const compareExports = (sides: LabelledExport[]): ShapeComparison => {
+  const exports = sides.map(side => side.exported);
   return {
-    a: { label: a.label, collectedAt: a.exported.collected_at },
-    b: { label: b.label, collectedAt: b.exported.collected_at },
-    totals: comparedValues(a.exported.totals, b.exported.totals),
-    distributions: comparedValues(distEntries(a.exported), distEntries(b.exported)),
-    topShare: comparedValues(
-      a.exported.distributions.top_share as Record<string, TopShare | null>,
-      b.exported.distributions.top_share as Record<string, TopShare | null>
-    ),
-    categorical: dimensions
-      .filter(dimension => a.exported.composition[dimension] || b.exported.composition[dimension])
+    sides: sides.map(side => ({ label: side.label, collectedAt: side.exported.collected_at })),
+    totals: comparedRows(exports.map(e => e.totals)),
+    distributions: comparedRows(exports.map(distEntries)),
+    topShare: comparedRows(exports.map(e => e.distributions.top_share as Record<string, TopShare | null>)),
+    categorical: CATEGORICAL_DIMENSIONS
+      .filter(dimension => exports.some(e => e.composition[dimension]))
       .map(dimension => ({
         dimension,
-        rows: categoricalRows(a.exported.composition[dimension], b.exported.composition[dimension]),
+        rows: categoricalRows(exports.map(e => e.composition[dimension])),
       })),
-    lists: lists
-      .filter(key => a.exported.composition[key] || b.exported.composition[key])
-      .map(key => listDiff(key, a.exported.composition[key], b.exported.composition[key])),
+    lists: DEFINED_LISTS
+      .filter(key => exports.some(e => e.composition[key]))
+      .map(key => listMatrix(key, exports.map(e => e.composition[key]))),
   };
 };
 

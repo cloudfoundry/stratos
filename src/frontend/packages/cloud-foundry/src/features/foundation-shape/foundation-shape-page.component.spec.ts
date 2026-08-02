@@ -223,6 +223,41 @@ describe('FoundationShapePageComponent', () => {
       expect(payload.distributions.spaces_per_org).toMatchObject({ n: 2 });
     });
 
+    it('shows compact bar stats from loaded data', () => {
+      const bar = (fixture.nativeElement as HTMLElement).querySelector('[data-test="section-bar-stats"]');
+      expect(bar?.textContent).toContain('1 apps');
+      expect(bar?.textContent).toContain('100.0% started');
+    });
+
+    it('starts expanded with a single endpoint and collapses on bar toggle', async () => {
+      const root = fixture.nativeElement as HTMLElement;
+      expect(root.querySelector('[data-test="shape-totals"]')).not.toBeNull();
+      root.querySelector<HTMLButtonElement>('[data-test="section-toggle"]').click();
+      await fixture.whenStable();
+      expect(root.querySelector('[data-test="shape-totals"]')).toBeNull();
+      root.querySelector<HTMLButtonElement>('[data-test="section-toggle"]').click();
+      await fixture.whenStable();
+      expect(root.querySelector('[data-test="shape-totals"]')).not.toBeNull();
+    });
+
+    it('collapses by default with several endpoints; selecting two shows the compare strip', async () => {
+      endpoints.set([cfEndpoint, { guid: 'cf-2', name: 'Second CF', cnsi_type: 'cf' } as EndpointModel]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const root = fixture.nativeElement as HTMLElement;
+      expect(root.querySelector('[data-test="shape-totals"]')).toBeNull();
+      expect(root.querySelector('[data-test="compare-now-strip"]')).toBeNull();
+
+      const boxes = root.querySelectorAll<HTMLInputElement>('[data-test="compare-select"]');
+      expect(boxes).toHaveLength(2);
+      boxes[0].click();
+      boxes[1].click();
+      await fixture.whenStable();
+      const strip = root.querySelector('[data-test="compare-now-strip"]');
+      expect(strip?.textContent).toContain('2 sides selected');
+      expect(root.querySelector('[data-test="compare-totals"]')).not.toBeNull();
+    });
+
     it('renders defined stacks and buildpacks with unused stacks called out', async () => {
       measure.ecosystem.set(new Map([
         ['cf-1', {

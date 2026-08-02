@@ -80,92 +80,145 @@ describe('ShapeCompareCardComponent', () => {
     await fixture.whenStable();
   });
 
-  it('defaults side A to the first live section and prompts until B is chosen', () => {
-    expect(component.effectiveChoice('a')).toBe('live:cf-1');
+  it('prompts until two sides are selected', () => {
+    expect(component.sideCount()).toBe(0);
     expect(component.comparison()).toBeNull();
-    expect(text()).toContain('Choose a source for each side');
+    expect(text()).toContain('Select at least two sides');
+    component.toggleLive('cf-1');
+    expect(component.comparison()).toBeNull();
   });
 
-  it('compares two live sections once side B is chosen', async () => {
-    component.onSelect('b', 'live:cf-2');
+  it('compares live sections in selection order, first selected as baseline', async () => {
+    component.toggleLive('cf-2');
+    component.toggleLive('cf-1');
     fixture.detectChanges();
     await fixture.whenStable();
     const cmp = component.comparison();
-    expect(cmp?.a.label).toBe('Lab CF');
-    expect(cmp?.b.label).toBe('AWS CF');
+    expect(cmp?.sides.map(s => s.label)).toEqual(['AWS CF', 'Lab CF']);
+    expect(component.sideVms()[0].isBaseline).toBe(true);
     // each side pins a different stack: both categories appear with zero-fill
     const stacks = cmp?.categorical.find(c => c.dimension === 'stacks_pinned_by_apps');
-    expect(stacks?.rows).toContainEqual({ category: 'cflinuxfs4', a: 1, aShare: 1, b: 0, bShare: 0 });
+    expect(stacks?.rows.find(r => r.category === 'cflinuxfs3')?.counts).toEqual([1, 0]);
     expect(text()).toContain('Totals');
   });
 
-  it('imports a valid export file, labelling it from the filename', async () => {
-    await component.importFrom('b', exportFile('aws-foundational-shape-anonymous-2026-07-31.json', sampleExport()));
+  it('unselecting on the bar removes the side again', () => {
+    component.toggleLive('cf-1');
+    component.toggleLive('cf-2');
+    expect(component.comparison()).not.toBeNull();
+    component.toggleLive('cf-1');
+    expect(component.isSelected('cf-1')).toBe(false);
+    expect(component.comparison()).toBeNull();
+  });
+
+  it('imports a valid export file as a side, labelling it from the filename', async () => {
+    component.toggleLive('cf-1');
+    await component.importFrom(exportFile('aws-foundational-shape-anonymous-2026-07-31.json', sampleExport()));
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(component.effectiveChoice('b')).toBe('file');
-    expect(component.comparison()?.b.label).toBe('aws-foundational-shape-anonymous-2026-07-31');
-    expect(component.errorB()).toBeNull();
+    const cmp = component.comparison();
+    expect(cmp?.sides.map(s => s.label)).toEqual(['Lab CF', 'aws-foundational-shape-anonymous-2026-07-31']);
+    expect(component.importError()).toBeNull();
   });
 
   it('prefers the file foundation_label when the export carries one', async () => {
-    await component.importFrom('b', exportFile('x.json', { ...sampleExport(), foundation_label: 'prod-east' }));
-    expect(component.comparison()?.b.label).toBe('prod-east');
+    component.toggleLive('cf-1');
+    await component.importFrom(exportFile('x.json', { ...sampleExport(), foundation_label: 'prod-east' }));
+    expect(component.comparison()?.sides[1].label).toBe('prod-east');
   });
 
-  it('rejects an invalid file with a reason and leaves the slot unchanged', async () => {
-    await component.importFrom('b', exportFile('bad.json', { schema_version: 2 }));
+  it('rejects an invalid file with a reason and adds no side', async () => {
+    await component.importFrom(exportFile('bad.json', { schema_version: 2 }));
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(component.errorB()).toContain('schema_version');
-    expect(component.comparison()).toBeNull();
+    expect(component.importError()).toContain('schema_version');
+    expect(component.sideCount()).toBe(0);
     expect(text()).toContain('bad.json');
   });
 
-  it('swaps the two sides including imported files', async () => {
-    await component.importFrom('b', exportFile('imported.json', sampleExport()));
-    component.swap();
+  it('compares three sides and re-baselines on demand', async () => {
+    component.toggleLive('cf-1');
+    component.toggleLive('cf-2');
+    await component.importFrom(exportFile('imported.json', sampleExport()));
     fixture.detectChanges();
     await fixture.whenStable();
-    const cmp = component.comparison();
-    expect(cmp?.a.label).toBe('imported');
-    expect(cmp?.b.label).toBe('Lab CF');
+    expect(component.comparison()?.sides.map(s => s.label)).toEqual(['Lab CF', 'AWS CF', 'imported']);
+
+    const fileId = component.sideVms()[2].id;
+    component.makeBaseline(fileId);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.comparison()?.sides.map(s => s.label)).toEqual(['imported', 'Lab CF', 'AWS CF']);
+    expect(component.sideVms()[0].isBaseline).toBe(true);
   });
 
-  it('accepts imported files in both slots', async () => {
-    await component.importFrom('a', exportFile('one.json', sampleExport()));
-    await component.importFrom('b', exportFile('two.json', sampleExport()));
-    const cmp = component.comparison();
-    expect(cmp?.a.label).toBe('one');
-    expect(cmp?.b.label).toBe('two');
+  it('removes a side by chip', async () => {
+    component.toggleLive('cf-1');
+    component.toggleLive('cf-2');
+    const id = component.sideVms()[1].id;
+    component.remove(id);
+    expect(component.sideCount()).toBe(1);
+    expect(component.comparison()).toBeNull();
   });
 
-  it('collapses long unchanged lists behind a toggle', async () => {
-    const buildpacks = ['a_bp', 'b_bp', 'c_bp', 'd_bp', 'e_bp', 'f_bp', 'g_bp'];
-    const withEco = { ...sampleExport(), composition: { buildpacks_defined: buildpacks } };
-    await component.importFrom('a', exportFile('one.json', withEco));
-    await component.importFrom('b', exportFile('two.json', withEco));
+  it('collapses unchanged matrix rows behind a toggle, keeping changed rows visible', async () => {
+    const shared = ['a_bp', 'b_bp', 'c_bp', 'd_bp', 'e_bp', 'f_bp', 'g_bp'];
+    await component.importFrom(exportFile('one.json', {
+      ...sampleExport(), composition: { buildpacks_defined: [...shared, 'only_in_one'] },
+    }));
+    await component.importFrom(exportFile('two.json', {
+      ...sampleExport(), composition: { buildpacks_defined: shared },
+    }));
     fixture.detectChanges();
     await fixture.whenStable();
     const list = component.listVms().find(l => l.key === 'buildpacks_defined');
-    expect(list?.shown).toHaveLength(5);
+    // the changed row survives the collapse; 5 of 7 unchanged show
+    expect(list?.rows.some(row => row.label === 'only_in_one')).toBe(true);
+    expect(list?.rows).toHaveLength(6);
     expect(list?.more).toBe(2);
     expect(text()).toContain('2 more unchanged');
     component.toggleList('buildpacks_defined');
     fixture.detectChanges();
     await fixture.whenStable();
-    expect(component.listVms().find(l => l.key === 'buildpacks_defined')?.shown).toHaveLength(7);
+    expect(component.listVms().find(l => l.key === 'buildpacks_defined')?.rows).toHaveLength(8);
+  });
+
+  it('judges added and removed against the baseline side', async () => {
+    await component.importFrom(exportFile('base.json', {
+      ...sampleExport(), composition: { stacks_defined: ['cflinuxfs3', 'cflinuxfs4'] },
+    }));
+    await component.importFrom(exportFile('next.json', {
+      ...sampleExport(), composition: { stacks_defined: ['cflinuxfs4', 'windows'] },
+    }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const list = component.listVms().find(l => l.key === 'stacks_defined');
+    expect(list?.rows.find(r => r.label === 'windows')?.cells).toEqual(['absent', 'added']);
+    expect(list?.rows.find(r => r.label === 'cflinuxfs3')?.cells).toEqual(['present', 'removed']);
+    expect(list?.rows.find(r => r.label === 'cflinuxfs4')?.cells).toEqual(['present', 'present']);
+  });
+
+  it('marks a side that never measured a list as unmeasured, not empty', async () => {
+    component.toggleLive('cf-1'); // live section without measured ecosystem
+    await component.importFrom(exportFile('file.json', {
+      ...sampleExport(), composition: { stacks_defined: ['cflinuxfs4'] },
+    }));
+    fixture.detectChanges();
+    await fixture.whenStable();
+    const list = component.listVms().find(l => l.key === 'stacks_defined');
+    expect(list?.rows.find(r => r.label === 'cflinuxfs4')?.cells[0]).toBe('unmeasured');
   });
 
   it('folds measured ecosystem data of a live section into its side', async () => {
     measure.ecosystem.set(new Map([
       ['cf-1', { stacksDefined: ['cflinuxfs4'], buildpacksDefined: ['ruby_buildpack'], fetchedAt: new Date() }],
     ]));
-    component.onSelect('b', 'live:cf-2');
+    component.toggleLive('cf-1');
+    component.toggleLive('cf-2');
     fixture.detectChanges();
     await fixture.whenStable();
-    const lists = component.comparison()?.lists;
-    // cf-1 measured its definitions, cf-2 did not: the diff shows them as removed-side-only
-    expect(lists?.find(l => l.key === 'stacks_defined')?.removed).toEqual(['cflinuxfs4']);
+    const list = component.listVms().find(l => l.key === 'stacks_defined');
+    expect(list?.measured).toEqual([true, false]);
+    expect(list?.rows.find(r => r.label === 'cflinuxfs4')?.cells[0]).toBe('present');
   });
 });

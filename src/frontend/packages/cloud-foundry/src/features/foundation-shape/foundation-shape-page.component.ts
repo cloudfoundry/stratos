@@ -141,6 +141,35 @@ export class FoundationShapePageComponent implements OnDestroy {
     return ageLabel(stamp.fetchedAt, new Date());
   }
 
+  /** Per-endpoint collapse; untouched sections default open only when the page has a single endpoint. */
+  private readonly collapsedOverrides = signal<ReadonlyMap<string, boolean>>(new Map());
+
+  isCollapsed(guid: string): boolean {
+    return this.collapsedOverrides().get(guid) ?? this.sections().length > 1;
+  }
+
+  toggleCollapsed(guid: string): void {
+    const next = new Map(this.collapsedOverrides());
+    next.set(guid, !this.isCollapsed(guid));
+    this.collapsedOverrides.set(next);
+  }
+
+  /** Compact bar stats from already-loaded data: apps count + started share; nulls render as nothing. */
+  barStats(section: ShapeSection): { apps: number | null; started: string | null } {
+    const apps = section.countsLoaded ? section.totals.apps : null;
+    const states = section.shape.composition.app_state;
+    const total = Object.values(states).reduce((acc, value) => acc + value, 0);
+    const started =
+      section.drains.apps.fetchedAt !== null && total > 0
+        ? `${(((states['STARTED'] ?? 0) / total) * 100).toFixed(1)}% started`
+        : null;
+    return { apps, started };
+  }
+
+  scrollToCompare(): void {
+    document.getElementById('shape-compare-anchor')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   /** Occupied vs empty spaces, from the apps-per-space zero count. */
   occupancy(section: ShapeSection): SharePart[] | null {
     const d = section.shape.distributions.apps_per_space;

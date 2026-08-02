@@ -16,8 +16,46 @@
     </div>
   }
 
+  <!-- Selection summary: appears once a comparison is possible -->
+  @if (compare.sideCount() >= 2) {
+    <div class="sticky top-0 z-10 flex items-center gap-3 px-3 py-2 rounded border border-content-border bg-content-secondary/95 backdrop-blur text-sm"
+      data-test="compare-now-strip">
+      <span class="tabular-nums">{{ compare.sideCount() }} sides selected</span>
+      <button type="button" data-test="compare-now"
+        class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+        (click)="scrollToCompare()">
+        Compare now
+      </button>
+    </div>
+  }
+
   @for (section of sections(); track section.guid) {
-    <app-info-card [title]="section.name">
+    <div class="border border-content-border rounded-lg overflow-hidden">
+      <!-- Endpoint bar: collapse toggle, compact stats, compare selection -->
+      <div class="bg-content-secondary px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-1"
+        [class.border-b]="!isCollapsed(section.guid)"
+        [class.border-content-border]="!isCollapsed(section.guid)"
+        data-test="section-bar">
+        <button type="button" class="flex items-center gap-2 min-w-0" data-test="section-toggle"
+          (click)="toggleCollapsed(section.guid)">
+          <span class="text-content-muted text-[10px]" aria-hidden="true">@if (isCollapsed(section.guid)) { &#9654; } @else { &#9660; }</span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">{{ section.name }}</span>
+        </button>
+        @if (barStats(section); as stats) {
+          <span class="text-xs text-content-muted tabular-nums" data-test="section-bar-stats">
+            @if (stats.apps !== null) { {{ stats.apps | number }} apps }
+            @if (stats.apps !== null && stats.started) { &middot; }
+            @if (stats.started) { {{ stats.started }} }
+          </span>
+        }
+        <label class="ml-auto flex items-center gap-1.5 text-xs cursor-pointer">
+          <input type="checkbox" data-test="compare-select"
+            [checked]="compare.isSelected(section.guid)" (change)="compare.toggleLive(section.guid)">
+          Compare
+        </label>
+      </div>
+      @if (!isCollapsed(section.guid)) {
+      <div class="py-3">
       <div class="flex flex-col gap-4 px-4 py-1">
 
         <!-- Totals strip (fast counts; spaces from the full drain when it has run) -->
@@ -220,13 +258,13 @@
           </div>
         }
       </div>
-    </app-info-card>
+      </div>
+      }
+    </div>
   }
 
-  <!-- Promotion verification: diff two shape snapshots (live or imported) -->
-  @if (sections().length > 0) {
-    <app-info-card title="Compare shapes">
-      <app-shape-compare-card [sections]="sections()" />
-    </app-info-card>
-  }
+  <!-- Promotion verification: diff N shape snapshots (live or imported files) -->
+  <app-info-card title="Compare shapes" id="shape-compare-anchor">
+    <app-shape-compare-card #compare [sections]="sections()" />
+  </app-info-card>
 </div>

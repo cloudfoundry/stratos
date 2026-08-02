@@ -1,36 +1,55 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, signal, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 
 import {
-  CategoryRow,
   compareExports,
-  ComparedValue,
   LabelledExport,
   parseImportedExport,
   ShapeComparison,
 } from './shape-compare';
 import { ShapeMeasureService } from './shape-measure.service';
 import { sectionExportPayload, ShapeSection } from './shape-section';
-import { Distribution, TopShare } from './shape-stats';
+import { TopShare } from './shape-stats';
 
-type SlotId = 'a' | 'b';
-
-/** How many unchanged chips a list shows before collapsing behind "n more". */
+/** How many unchanged matrix rows a list shows before collapsing behind "n more". */
 const UNCHANGED_SHOWN = 5;
+
+/**
+ * Side colors by position, cycling: blue, amber, teal, slate. Literal class
+ * strings so the Tailwind scanner picks every variant up.
+ */
+const SIDE_BG = [
+  'bg-[#2a78d6] dark:bg-[#3987e5]',
+  'bg-[#d97706] dark:bg-[#f59e0b]',
+  'bg-[#0d9488] dark:bg-[#14b8a6]',
+  'bg-[#64748b] dark:bg-[#94a3b8]',
+];
+const SIDE_TEXT = [
+  'text-[#2a78d6] dark:text-[#3987e5]',
+  'text-[#d97706] dark:text-[#f59e0b]',
+  'text-[#0d9488] dark:text-[#14b8a6]',
+  'text-[#64748b] dark:text-[#94a3b8]',
+];
 
 const humanize = (key: string): string => key.replace(/_/g, ' ');
 const pctText = (fraction: number): string => `${(fraction * 100).toFixed(1)}%`;
 const ptsText = (delta: number): string => `${delta >= 0 ? '+' : ''}${(delta * 100).toFixed(1)} pts`;
 
-interface BarVm {
-  width: number;
-  label: string;
+/** One comparison side: a live endpoint section (by guid) or an imported export file. */
+interface CompareSide {
+  id: string;
+  kind: 'live' | 'file';
+  guid?: string;
+  file?: LabelledExport;
 }
 
+type MatrixCell = 'present' | 'absent' | 'added' | 'removed' | 'unmeasured';
+
 /**
- * Promotion-verification comparison (GH #5702 follow-on): two slots, each a
- * live endpoint section or an imported schema_version 1 export file, diffed
- * with ecosystem and composition emphasis. Reads only what both sides
- * measured; nothing here issues CF requests.
+ * Promotion-verification comparison (GH #5702 follow-on): N ordered sides —
+ * live endpoint sections selected on their bars, plus imported schema_version
+ * 1 export files — diffed with ecosystem and composition emphasis. The first
+ * side is the baseline; added/removed and deltas are judged against it.
+ * Reads only what each side measured; nothing here issues CF requests.
  */
 @Component({
   selector: 'app-shape-compare-card',
@@ -41,103 +60,110 @@ interface BarVm {
 export class ShapeCompareCardComponent {
   private readonly measure = inject(ShapeMeasureService);
 
-  readonly sections = input.required<ShapeSection[]>();
+  /** Defaulted (not required): the page's selection strip reads sideCount() before the first binding lands. */
+  readonly sections = input<ShapeSection[]>([]);
 
-  readonly choiceA = signal<string | null>(null);
-  readonly choiceB = signal<string | null>(null);
-  readonly fileA = signal<LabelledExport | null>(null);
-  readonly fileB = signal<LabelledExport | null>(null);
-  readonly errorA = signal<string | null>(null);
-  readonly errorB = signal<string | null>(null);
+  private readonly sides = signal<readonly CompareSide[]>([]);
+  readonly importError = signal<string | null>(null);
   private readonly expandedLists = signal<ReadonlySet<string>>(new Set());
+  private fileSeq = 0;
 
-  choice(slot: SlotId): WritableSignal<string | null> {
-    return slot === 'a' ? this.choiceA : this.choiceB;
+  /** Sides whose live section still exists (an endpoint may disconnect while selected). */
+  private readonly liveSides = computed<CompareSide[]>(() => {
+    const byGuid = new Map(this.sections().map(section => [section.guid, section]));
+    return this.sides().filter(side => side.kind === 'file' || byGuid.has(side.guid as string));
+  });
+
+  readonly sideCount = computed(() => this.liveSides().length);
+
+  isSelected(guid: string): boolean {
+    return this.sides().some(side => side.guid === guid);
   }
 
-  file(slot: SlotId): WritableSignal<LabelledExport | null> {
-    return slot === 'a' ? this.fileA : this.fileB;
-  }
-
-  error(slot: SlotId): WritableSignal<string | null> {
-    return slot === 'a' ? this.errorA : this.errorB;
-  }
-
-  /** Side A defaults to the first live section; B stays unset until chosen. */
-  effectiveChoice(slot: SlotId): string | null {
-    const choice = this.choice(slot)();
-    if (choice) {
-      return choice;
-    }
-    return slot === 'a' && this.sections().length ? `live:${this.sections()[0].guid}` : null;
-  }
-
-  onSelect(slot: SlotId, value: string): void {
-    this.choice(slot).set(value || null);
-    this.error(slot).set(null);
+  /** Bar checkbox hook: select order is baseline order (first selected = baseline). */
+  toggleLive(guid: string): void {
+    const current = this.sides();
+    this.sides.set(
+      this.isSelected(guid)
+        ? current.filter(side => side.guid !== guid)
+        : [...current, { id: guid, kind: 'live', guid }]
+    );
   }
 
   /** Template hook for the hidden file input; the parse work lives in importFrom. */
-  importFile(slot: SlotId, event: Event): void {
+  importFile(event: Event): void {
     const inputEl = event.target as HTMLInputElement;
     const file = inputEl.files?.[0];
     inputEl.value = '';
     if (file) {
-      void this.importFrom(slot, file);
+      void this.importFrom(file);
     }
   }
 
-  async importFrom(slot: SlotId, file: File): Promise<void> {
+  async importFrom(file: File): Promise<void> {
     const { exported, error } = parseImportedExport(await file.text());
     if (!exported) {
-      this.error(slot).set(`${file.name}: ${error}`);
+      this.importError.set(`${file.name}: ${error}`);
       return;
     }
     const label = exported.foundation_label || file.name.replace(/\.json$/i, '');
-    this.file(slot).set({ label, exported });
-    this.choice(slot).set('file');
-    this.error(slot).set(null);
+    this.sides.set([
+      ...this.sides(),
+      { id: `file-${++this.fileSeq}`, kind: 'file', file: { label, exported } },
+    ]);
+    this.importError.set(null);
   }
 
-  swap(): void {
-    const [choiceA, choiceB] = [this.effectiveChoice('a'), this.effectiveChoice('b')];
-    const [fileA, fileB] = [this.fileA(), this.fileB()];
-    this.choiceA.set(choiceB);
-    this.choiceB.set(choiceA);
-    this.fileA.set(fileB);
-    this.fileB.set(fileA);
-    this.errorA.set(null);
-    this.errorB.set(null);
+  remove(id: string): void {
+    this.sides.set(this.sides().filter(side => side.id !== id));
   }
 
-  private resolveSlot(slot: SlotId): LabelledExport | null {
-    const choice = this.effectiveChoice(slot);
-    if (!choice) {
-      return null;
+  makeBaseline(id: string): void {
+    const current = this.sides();
+    const side = current.find(s => s.id === id);
+    if (side) {
+      this.sides.set([side, ...current.filter(s => s.id !== id)]);
     }
-    if (choice === 'file') {
-      return this.file(slot)();
-    }
-    const guid = choice.slice('live:'.length);
-    const section = this.sections().find(s => s.guid === guid);
-    if (!section) {
-      return null;
-    }
-    return {
-      label: section.name,
-      exported: sectionExportPayload(section, this.measure.totals().get(guid), this.measure.ecosystem().get(guid)),
-    };
   }
 
-  readonly comparison = computed<ShapeComparison | null>(() => {
-    const a = this.resolveSlot('a');
-    const b = this.resolveSlot('b');
-    return a && b ? compareExports(a, b) : null;
+  private readonly resolved = computed<LabelledExport[]>(() => {
+    const byGuid = new Map(this.sections().map(section => [section.guid, section]));
+    return this.liveSides().map(side => {
+      if (side.kind === 'file') {
+        return side.file as LabelledExport;
+      }
+      const guid = side.guid as string;
+      const section = byGuid.get(guid) as ShapeSection;
+      return {
+        label: section.name,
+        exported: sectionExportPayload(section, this.measure.totals().get(guid), this.measure.ecosystem().get(guid)),
+      };
+    });
   });
 
-  /** Imported-file description for a slot header (live slots show their name in the select). */
-  fileNote(slot: SlotId): string | null {
-    return this.effectiveChoice(slot) === 'file' ? this.file(slot)()?.label ?? null : null;
+  readonly comparison = computed<ShapeComparison | null>(() =>
+    this.liveSides().length >= 2 ? compareExports(this.resolved()) : null
+  );
+
+  /** Ordered side chips; index drives the color pairing everywhere below. */
+  readonly sideVms = computed(() =>
+    this.liveSides().map((side, index) => ({
+      id: side.id,
+      kind: side.kind,
+      label: side.kind === 'file'
+        ? (side.file as LabelledExport).label
+        : this.sections().find(s => s.guid === side.guid)?.name ?? '',
+      dotClass: SIDE_BG[index % SIDE_BG.length],
+      isBaseline: index === 0,
+    }))
+  );
+
+  sideDot(index: number): string {
+    return SIDE_BG[index % SIDE_BG.length];
+  }
+
+  sideText(index: number): string {
+    return SIDE_TEXT[index % SIDE_TEXT.length];
   }
 
   readonly listVms = computed(() => {
@@ -147,15 +173,35 @@ export class ShapeCompareCardComponent {
     }
     const expanded = this.expandedLists();
     return cmp.lists.map(list => {
+      const baselineMeasured = list.measured[0];
+      const rows = list.rows.map(row => ({
+        label: row.label,
+        cells: row.present.map((present, i): MatrixCell => {
+          if (!list.measured[i]) {
+            return 'unmeasured';
+          }
+          if (i > 0 && baselineMeasured) {
+            if (present && !row.present[0]) {
+              return 'added';
+            }
+            if (!present && row.present[0]) {
+              return 'removed';
+            }
+          }
+          return present ? 'present' : 'absent';
+        }),
+      }));
+      // unchanged = same presence on every side that measured the list
+      const changed = rows.filter(row => row.cells.some(cell => cell === 'added' || cell === 'removed'));
+      const unchanged = rows.filter(row => !row.cells.some(cell => cell === 'added' || cell === 'removed'));
       const isOpen = expanded.has(list.key);
-      const shown = isOpen ? list.unchanged : list.unchanged.slice(0, UNCHANGED_SHOWN);
+      const shownUnchanged = isOpen ? unchanged : unchanged.slice(0, UNCHANGED_SHOWN);
       return {
         key: list.key,
         title: humanize(list.key),
-        added: list.added,
-        removed: list.removed,
-        shown,
-        more: list.unchanged.length - shown.length,
+        measured: list.measured,
+        rows: [...changed, ...shownUnchanged],
+        more: unchanged.length - shownUnchanged.length,
         isOpen,
       };
     });
@@ -171,13 +217,6 @@ export class ShapeCompareCardComponent {
     this.expandedLists.set(next);
   }
 
-  private barVm(count: number | undefined, share: number | undefined): BarVm | null {
-    if (share === undefined || count === undefined) {
-      return null;
-    }
-    return { width: Math.max(share * 100, 0.5), label: `${count} · ${pctText(share)}` };
-  }
-
   readonly categoricalVms = computed(() => {
     const cmp = this.comparison();
     if (!cmp) {
@@ -186,11 +225,19 @@ export class ShapeCompareCardComponent {
     return cmp.categorical.map(({ dimension, rows }) => ({
       dimension,
       title: humanize(dimension),
-      rows: rows.map((row: CategoryRow) => ({
+      rows: rows.map(row => ({
         category: row.category,
-        a: this.barVm(row.a, row.aShare),
-        b: this.barVm(row.b, row.bShare),
-        delta: row.aShare !== undefined && row.bShare !== undefined ? ptsText(row.bShare - row.aShare) : '—',
+        bars: row.shares.map((share, i) => {
+          if (share === undefined) {
+            return null;
+          }
+          const delta = i > 0 && row.shares[0] !== undefined ? ` · ${ptsText(share - row.shares[0])}` : '';
+          return {
+            width: Math.max(share * 100, 0.5),
+            fillClass: SIDE_BG[i % SIDE_BG.length],
+            label: `${row.counts[i]} · ${pctText(share)}${delta}`,
+          };
+        }),
       })),
     }));
   });
@@ -200,14 +247,19 @@ export class ShapeCompareCardComponent {
     if (!cmp) {
       return [];
     }
-    const text = (share: TopShare | null | undefined): string =>
-      share ? pctText(share.fraction) : share === null ? 'no data' : 'not measured';
-    return cmp.topShare.map((row: ComparedValue<TopShare>) => ({
-      label: humanize(row.key),
-      a: text(row.a),
-      b: text(row.b),
-      delta: row.a && row.b ? ptsText(row.b.fraction - row.a.fraction) : '',
-    }));
+    return cmp.topShare.map(row => {
+      const parts = row.values.map((share, i) => ({
+        text: share ? pctText(share.fraction) : share === null ? 'no data' : 'not measured',
+        colorClass: SIDE_TEXT[i % SIDE_TEXT.length],
+      }));
+      const baseline = row.values[0];
+      const deltas = row.values
+        .map((share, i) =>
+          i > 0 && share && baseline ? ptsText(share.fraction - (baseline as TopShare).fraction) : null
+        )
+        .filter((d): d is string => d !== null);
+      return { label: humanize(row.key), parts, deltas: deltas.join(' · ') };
+    });
   });
 
   readonly totalsVms = computed(() => {
@@ -215,15 +267,16 @@ export class ShapeCompareCardComponent {
     if (!cmp) {
       return [];
     }
-    const cell = (value: number | null | undefined): string => (value === undefined || value === null ? '—' : String(value));
-    return cmp.totals.map((row: ComparedValue<number>) => ({
+    return cmp.totals.map(row => ({
       label: humanize(row.key),
-      a: cell(row.a),
-      b: cell(row.b),
-      delta:
-        typeof row.a === 'number' && typeof row.b === 'number'
-          ? `${row.b - row.a >= 0 ? '+' : ''}${row.b - row.a}`
-          : '—',
+      cells: row.values.map((value, i) => {
+        const baseline = row.values[0];
+        const delta =
+          i > 0 && typeof value === 'number' && typeof baseline === 'number'
+            ? `${value - baseline >= 0 ? '+' : ''}${value - baseline}`
+            : null;
+        return { text: value === undefined || value === null ? '—' : String(value), delta };
+      }),
     }));
   });
 
@@ -232,16 +285,15 @@ export class ShapeCompareCardComponent {
     if (!cmp) {
       return [];
     }
-    const side = (label: string, d: Distribution | null | undefined) => ({
-      label,
-      state: d ? ('data' as const) : d === null ? ('empty' as const) : ('missing' as const),
-      cells: d ? [d.n, d.median, d.p90, d.max, d.mean, d.sum] : [],
-    });
-    return cmp.distributions.map((row: ComparedValue<Distribution>) => ({
+    return cmp.distributions.map(row => ({
       key: row.key,
       title: humanize(row.key),
-      a: side(cmp.a.label, row.a),
-      b: side(cmp.b.label, row.b),
+      sides: row.values.map((d, i) => ({
+        label: cmp.sides[i].label,
+        dotClass: SIDE_BG[i % SIDE_BG.length],
+        state: d ? ('data' as const) : d === null ? ('empty' as const) : ('missing' as const),
+        cells: d ? [d.n, d.median, d.p90, d.max, d.mean, d.sum] : [],
+      })),
     }));
   });
 }
