@@ -111,10 +111,11 @@ export class CfAuditEventsSignalConfigService {
   }
 
   // Mirror source.items() directly so the UI re-renders incrementally as
-  // pages drain in. Audit events on a busy CF can span 50+ pages of 100;
-  // awaiting full drain before paint left the page in "Loading…" for
-  // 30-60s. Reading the source signal lets the first page render
-  // immediately and subsequent pages append as they arrive.
+  // pages drain in. Audit events on a busy CF can fill the source's full
+  // newest-25k window (50 pages × 500); awaiting full drain before paint
+  // left the page in "Loading…" for 30-60s. Reading the source signal
+  // lets the first page render immediately and subsequent pages append
+  // as they arrive.
   readonly auditEvents: Signal<StAuditEvent[]> = computed(() =>
     this.source ? this.source.items() : [],
   );

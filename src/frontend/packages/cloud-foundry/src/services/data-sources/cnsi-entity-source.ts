@@ -21,6 +21,14 @@ export interface StratosPagedResponseLike<T> {
 export abstract class CnsiEntitySource<T> {
   protected abstract readonly entityName: string;
 
+  // Page ceiling for the drain. Undefined (the default) drains every
+  // page — right for catalog-sized collections (orgs, spaces, apps)
+  // whose full set the UI genuinely needs. Subclasses over unbounded
+  // historical collections (audit events) set this to keep browser
+  // memory bounded; the handler must order newest-first so the kept
+  // window is the recent one, not the oldest.
+  protected readonly maxPages?: number;
+
   protected readonly _items = signal<T[]>([]);
   private readonly _loading = signal(false);
   private readonly _error = signal<unknown | null>(null);
@@ -136,7 +144,12 @@ export abstract class CnsiEntitySource<T> {
       this._fetchedPages.set(1);
 
       const totalPages = first.pagination.totalPages ?? 1;
-      if (totalPages <= 1 || first.pagination.next == null) {
+      // done means "loaded everything this source intends to load" —
+      // for a capped source that's the newest maxPages-window, not the
+      // foundation's full history (totalResults still reports the real
+      // total for consumers that want to surface the difference).
+      const lastPage = this.maxPages ? Math.min(totalPages, this.maxPages) : totalPages;
+      if (lastPage <= 1 || first.pagination.next == null) {
         this._done.set(true);
         return;
       }
@@ -146,7 +159,7 @@ export abstract class CnsiEntitySource<T> {
       // long time" feedback on adepttech dev.84 — N sequential round-trips
       // for an N-page result, even when CAPI could serve them concurrently.
       // Matches the orgs/spaces drain pattern shipped in PR #5338.
-      const remainingPages = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+      const remainingPages = Array.from({ length: lastPage - 1 }, (_, i) => i + 2);
       const concurrency = 4;
       let cursor = 0;
       let pageFetchErr: unknown = null;

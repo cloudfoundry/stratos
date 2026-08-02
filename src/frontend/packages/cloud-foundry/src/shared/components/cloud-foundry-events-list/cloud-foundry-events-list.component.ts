@@ -18,8 +18,9 @@ import { EventDetailComponent, hasEventMetadata, parseEventData } from './event-
 // targetGuid AND typeMustContain). The legacy server-side query-param
 // scoping (organization_guids, space_guids, target_guids) is replaced
 // by client-side filtering against the foundation-wide event stream.
-// The handler caps at 25k events so deep historical retrieval will
-// need a future detail-screen / search feature.
+// The source loads the newest 25k events at most (see
+// CnsiAuditEventsSource), so deep historical retrieval will need a
+// future detail-screen / search feature.
 @Component({
   selector: 'app-cloud-foundry-events-list',
   templateUrl: './cloud-foundry-events-list.component.html',
