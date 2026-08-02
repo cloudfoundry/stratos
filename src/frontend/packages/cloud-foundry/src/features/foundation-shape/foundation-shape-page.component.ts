@@ -10,12 +10,14 @@ import {
   untracked,
 } from '@angular/core';
 import { EndpointsSignalService, InfoCardComponent } from '@stratosui/core';
+import writeXlsxFile from 'write-excel-file/browser';
 
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
 import { computeSessionShape, SessionShape } from './session-shape';
 import { ShapeDistCardComponent } from './shape-dist-card.component';
 import { AgnosticExport, buildAgnosticExport, exportMarkdown } from './shape-export';
+import { buildShapeWorkbook } from './shape-export-xlsx';
 import {
   MeasuredEcosystem,
   MeasuredTotals,
@@ -235,19 +237,29 @@ export class FoundationShapePageComponent implements OnDestroy {
     });
   }
 
+  // <endpoint>-foundational-shape-<mode>-<date>: the name says which
+  // endpoint it came from and that the content is anonymized (a future
+  // detail-mode export will say "detail" in the same slot).
+  private exportFileName(section: ShapeSection, extension: 'json' | 'xlsx'): string {
+    const endpoint = section.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return `${endpoint}-foundational-shape-anonymous-${new Date().toISOString().slice(0, 10)}.${extension}`;
+  }
+
   downloadJson(section: ShapeSection): void {
     const payload = JSON.stringify(this.exportPayload(section), null, 2);
     const blob = new Blob([payload], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    // <endpoint>-foundational-shape-<mode>-<date>: the name says which
-    // endpoint it came from and that the content is anonymized (a future
-    // detail-mode export will say "detail" in the same slot).
-    const endpoint = section.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
-    anchor.download = `${endpoint}-foundational-shape-anonymous-${new Date().toISOString().slice(0, 10)}.json`;
+    anchor.download = this.exportFileName(section, 'json');
     anchor.click();
     URL.revokeObjectURL(url);
+  }
+
+  downloadXlsx(section: ShapeSection): void {
+    const sheets = buildShapeWorkbook(this.exportPayload(section))
+      .map(({ name, rows }) => ({ sheet: name, data: rows }));
+    void writeXlsxFile(sheets).toFile(this.exportFileName(section, 'xlsx'));
   }
 
   copyMarkdown(section: ShapeSection): void {

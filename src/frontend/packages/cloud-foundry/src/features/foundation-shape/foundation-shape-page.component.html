@@ -207,6 +207,11 @@
               (click)="downloadJson(section)">
               Download JSON
             </button>
+            <button data-test="export-xlsx" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+              (click)="downloadXlsx(section)">
+              Download spreadsheet
+            </button>
             <button data-test="export-markdown" type="button"
               class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
               (click)="copyMarkdown(section)">

@@ -143,7 +143,8 @@ export const buildAgnosticExport = (input: AgnosticExportInput): AgnosticExport 
   };
 };
 
-const isDist = (value: unknown): value is Distribution =>
+/** Distribution detector for walking export sections (null and share objects fail it). */
+export const isDist = (value: unknown): value is Distribution =>
   !!value && typeof value === 'object' && 'hist' in (value as object);
 
 export const exportMarkdown = (exported: AgnosticExport): string => {
