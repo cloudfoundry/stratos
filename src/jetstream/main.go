@@ -674,6 +674,26 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 		pc.CSPPolicy = ""
 	}
 
+	// HSTS. The same vocabulary as CONSOLE_CSP above, with the opposite
+	// default: unset means no header.
+	//   - unset / "off" / "none" / "false" / "disabled" -> no header
+	//   - "on" / "default" -> defaultHSTSPolicy
+	//   - anything else -> a full directive string, used verbatim
+	// Off by default because HSTS is a promise about a domain, not about
+	// Stratos: once a browser has seen it, that domain is HTTPS-only for the
+	// max-age whether or not Stratos is still there. Only the operator knows
+	// if that is safe to say, so nothing is asserted on their behalf.
+	switch {
+	case strings.EqualFold(pc.HSTSPolicy, "on"),
+		strings.EqualFold(pc.HSTSPolicy, "default"):
+		pc.HSTSPolicy = defaultHSTSPolicy
+	case strings.EqualFold(pc.HSTSPolicy, "off"),
+		strings.EqualFold(pc.HSTSPolicy, "none"),
+		strings.EqualFold(pc.HSTSPolicy, "false"),
+		strings.EqualFold(pc.HSTSPolicy, "disabled"):
+		pc.HSTSPolicy = ""
+	}
+
 	return pc, nil
 }
 
@@ -881,6 +901,10 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		// accompanies the console document.
 		ContentTypeNosniff: "nosniff",
 	}))
+
+	// The headers Echo's Secure middleware has no setting for, plus HSTS,
+	// which it can only express as a max-age. See security_headers.go.
+	e.Use(p.securityHeaders)
 
 	if !isUpgrade {
 		e.Use(errorLoggingMiddleware)

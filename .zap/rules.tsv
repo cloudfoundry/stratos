@@ -1,0 +1,60 @@
+# ZAP baseline rule configuration.
+#
+# Format: <rule id> <TAB> <IGNORE|WARN|FAIL> <TAB> [url regex]
+# Used with: zap-baseline.py -c .zap/rules.tsv
+#
+# ZAP is a black-box scanner and never sees our source, so a finding it gets
+# wrong cannot be annotated at the call site the way gosec or semgrep findings
+# can. Suppression has to live here instead — which means each entry needs to
+# carry the evidence that justified it.
+#
+# Only add a rule here when the finding has been shown to be wrong. A real
+# finding belongs in an issue, not in this file.
+
+# 10096 Timestamp Disclosure - Unix.
+# The flagged values are MD5 algorithm constants in a bundled dependency, not
+# timestamps: 1732584193 and 4023233417 are 0x67452301 and 0xefcdab89, the MD5
+# initialisation vector, and 1804603682 is 0x6b901122 from its sine-derived T
+# table. Two of the five "timestamps" also decode to 2027 and 2028, which is a
+# giveaway on its own. Scoped to the bundle so a real timestamp disclosed by an
+# API response would still be reported.
+10096	IGNORE	.*/main-.*\.js
+
+# 10110 Dangerous JS Functions.
+# Matches the string "bypassSecurityTrustHtml(" in the Angular framework code
+# that defines DomSanitizer. Stratos never calls it: the only sanitizer
+# bypasses in our source are bypassSecurityTrustResourceUrl (safe-img,
+# kubernetes dashboard) and bypassSecurityTrustUrl (a data: URL for a JSON
+# download). Scoped to the bundle for the same reason as above.
+10110	IGNORE	.*/main-.*\.js
+
+# 10109 Modern Web Application.
+# Not a finding. It tells whoever is running the scan that the client spider
+# would explore this application better than the standard one, which is advice
+# about the scan rather than about Stratos.
+10109	IGNORE	.*
+
+# 90004 Cross-Origin-Embedder-Policy Header Missing or Invalid.
+# COEP is NOT IMPLEMENTED, deliberately — require-corp would refuse the Google
+# Fonts stylesheet and font files the Content-Security-Policy permits, and it
+# mainly exists to enable cross-origin isolation for features Stratos does not
+# use. Reasoning is in docs/advanced/content-security-policy.md and in
+# security_headers.go. Revisit only alongside a decision about remote fonts.
+#
+# This rule also covers COOP and CORP, which ARE sent — they share plugin id
+# 90004. Both are asserted by tests in security_headers_test.go, so suppressing
+# the shared id here does not leave them unguarded.
+90004	IGNORE	.*
+
+# DELIBERATELY NOT SUPPRESSED, so the next person does not re-litigate it:
+#
+#   10015 Re-examine Cache-control Directives
+#   10049 Non-Storable / Storable and Cacheable / Storable but Non-Cacheable
+#
+# Both are informational, and one is self-inflicted on purpose: the console
+# document is Cache-Control: no-store because the CSP nonce requires it, so
+# "Non-Storable Content" is the scanner correctly observing a deliberate
+# choice. They stay as warnings anyway, because cache directives are exactly
+# where a future real mistake would surface — an API response caching
+# per-user data would report under these same rules, and a blanket IGNORE
+# would hide it.
