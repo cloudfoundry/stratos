@@ -21,10 +21,12 @@ func TestParseSummaryQueryParams_Defaults(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	params := parseSummaryQueryParams(ctx)
+	params, perPage, page := parseSummaryQueryParams(ctx)
 
-	assert.Equal(t, 1, params.Page)
-	assert.Equal(t, 50, params.PerPage)
+	assert.Equal(t, 1, page)
+	assert.Equal(t, 50, perPage)
+	assert.Zero(t, params.Page, "absent paging is not forwarded upstream — V3 applies its own defaults")
+	assert.Zero(t, params.PerPage, "absent paging is not forwarded upstream — V3 applies its own defaults")
 	assert.Empty(t, params.OrderBy)
 	assert.Empty(t, params.Filters)
 }
@@ -35,10 +37,12 @@ func TestParseSummaryQueryParams_PageAndPerPage(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	params := parseSummaryQueryParams(ctx)
+	params, perPage, page := parseSummaryQueryParams(ctx)
 
 	assert.Equal(t, 3, params.Page)
 	assert.Equal(t, 25, params.PerPage)
+	assert.Equal(t, 3, page)
+	assert.Equal(t, 25, perPage)
 }
 
 func TestParseSummaryQueryParams_SortAscending(t *testing.T) {
@@ -47,7 +51,7 @@ func TestParseSummaryQueryParams_SortAscending(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	params := parseSummaryQueryParams(ctx)
+	params, _, _ := parseSummaryQueryParams(ctx)
 
 	assert.Equal(t, "name", params.OrderBy, "direction omitted should be asc (no minus prefix)")
 }
@@ -58,7 +62,7 @@ func TestParseSummaryQueryParams_SortAscExplicit(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	params := parseSummaryQueryParams(ctx)
+	params, _, _ := parseSummaryQueryParams(ctx)
 
 	assert.Equal(t, "name", params.OrderBy)
 }
@@ -69,7 +73,7 @@ func TestParseSummaryQueryParams_SortDescending(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	params := parseSummaryQueryParams(ctx)
+	params, _, _ := parseSummaryQueryParams(ctx)
 
 	assert.Equal(t, "-created_at", params.OrderBy, "direction=desc should prepend minus")
 }
@@ -80,7 +84,7 @@ func TestParseSummaryQueryParams_FilterPassthrough(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	params := parseSummaryQueryParams(ctx)
+	params, _, _ := parseSummaryQueryParams(ctx)
 
 	assert.Equal(t, []string{"app-a", "app-b"}, params.Filters["names"])
 	assert.Equal(t, []string{"STARTED"}, params.Filters["states"])
@@ -92,7 +96,7 @@ func TestParseSummaryQueryParams_ReservedParamsExcludedFromFilters(t *testing.T)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	params := parseSummaryQueryParams(ctx)
+	params, _, _ := parseSummaryQueryParams(ctx)
 
 	for _, reserved := range []string{"page", "per_page", "order_by", "direction", "return"} {
 		_, ok := params.Filters[reserved]
@@ -107,10 +111,12 @@ func TestParseSummaryQueryParams_InvalidPageFallsBackToDefault(t *testing.T) {
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
 
-	params := parseSummaryQueryParams(ctx)
+	params, perPage, page := parseSummaryQueryParams(ctx)
 
-	assert.Equal(t, 1, params.Page, "invalid page should fall back to default 1")
-	assert.Equal(t, 50, params.PerPage, "non-positive per_page should fall back to default 50")
+	assert.Equal(t, 1, page, "invalid page should fall back to default 1")
+	assert.Equal(t, 50, perPage, "non-positive per_page should fall back to default 50")
+	assert.Zero(t, params.Page, "malformed paging is not forwarded upstream")
+	assert.Zero(t, params.PerPage, "malformed paging is not forwarded upstream")
 }
 
 func TestGetNativeAppsSummary_ReturnsStratosPagedEnvelope(t *testing.T) {
@@ -238,6 +244,50 @@ func TestGetNativeAppsSummary_DescendingSortTranslatesToMinusPrefix(t *testing.T
 
 	require.NoError(t, plugin.getNativeApps(ctx))
 	assert.Equal(t, "-created_at", capturedQuery.Get("order_by"))
+}
+
+func TestGetNativeAppsSummary_AbsentPagingNotForwardedUpstream(t *testing.T) {
+	// Converged with the canonical helper chain (#5375): when the caller
+	// sends no per_page, the upstream CAPI call carries no paging at all
+	// and V3 applies its own defaults.
+	var capturedQuery url.Values
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			capturedQuery = r.URL.Query()
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary&states=STARTED", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+
+	assert.False(t, capturedQuery.Has("per_page"), "absent per_page must not be forwarded upstream")
+	assert.False(t, capturedQuery.Has("page"), "absent page must not be forwarded upstream")
+	assert.Equal(t, "STARTED", capturedQuery.Get("states"), "filters still pass through")
 }
 
 func TestGetNativeAppsSummary_EmptyResultSet(t *testing.T) {
