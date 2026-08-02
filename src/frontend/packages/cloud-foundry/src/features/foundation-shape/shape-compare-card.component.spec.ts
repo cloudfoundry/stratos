@@ -155,10 +155,10 @@ describe('ShapeCompareCardComponent', () => {
   it('keeps each side its identity color across re-baselining', async () => {
     component.toggleLive('cf-1');
     component.toggleLive('cf-2');
-    const colorsBefore = new Map(component.sideVms().map(vm => [vm.id, vm.dotClass]));
+    const colorsBefore = new Map(component.sideVms().map(vm => [vm.id, vm.dotColor]));
     expect(colorsBefore.get('cf-1')).not.toBe(colorsBefore.get('cf-2'));
     component.makeBaseline(component.sideVms()[1].id);
-    const colorsAfter = new Map(component.sideVms().map(vm => [vm.id, vm.dotClass]));
+    const colorsAfter = new Map(component.sideVms().map(vm => [vm.id, vm.dotColor]));
     expect(colorsAfter).toEqual(colorsBefore);
     // the bar chip matches the side's color everywhere
     expect(component.dotFor('cf-2')).toBe(colorsBefore.get('cf-2'));
@@ -171,9 +171,23 @@ describe('ShapeCompareCardComponent', () => {
     for (let i = 0; i < 4; i++) {
       await component.importFrom(exportFile(`snap-${i}.json`, sampleExport()));
     }
-    const colors = component.sideVms().map(vm => vm.dotClass);
+    const colors = component.sideVms().map(vm => vm.dotColor);
     expect(colors).toHaveLength(6);
     expect(new Set(colors).size).toBe(6);
+  });
+
+  it('sizes the color range to contain the endpoint count', async () => {
+    expect(component.paletteSize()).toBe(8); // floor, even with only two endpoints
+    const many = Array.from({ length: 10 }, (_, i) => makeSection(`cf-${i}`, `CF ${i}`, 'cflinuxfs4'));
+    fixture.componentRef.setInput('sections', many);
+    fixture.detectChanges();
+    await fixture.whenStable();
+    expect(component.paletteSize()).toBe(12); // contains 10, never an exact fit
+    for (const section of many) {
+      component.toggleLive(section.guid);
+    }
+    const colors = component.sideVms().map(vm => vm.dotColor);
+    expect(new Set(colors).size).toBe(10);
   });
 
   it('frees a removed side color for the next selection', () => {
