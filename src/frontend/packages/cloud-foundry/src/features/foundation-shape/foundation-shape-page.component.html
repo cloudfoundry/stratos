@@ -222,4 +222,11 @@
       </div>
     </app-info-card>
   }
+
+  <!-- Promotion verification: diff two shape snapshots (live or imported) -->
+  @if (sections().length > 0) {
+    <app-info-card title="Compare shapes">
+      <app-shape-compare-card [sections]="sections()" />
+    </app-info-card>
+  }
 </div>

@@ -182,7 +182,7 @@ export const parseImportedExport = (raw: string): { exported?: AgnosticExport; e
   return {
     exported: {
       ...exported,
-      distributions: { top_share: {}, ...exported.distributions },
+      distributions: { ...exported.distributions, top_share: exported.distributions.top_share ?? {} },
       composition: exported.composition ?? {},
     },
   };

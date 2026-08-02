@@ -14,9 +14,10 @@ import writeXlsxFile from 'write-excel-file/browser';
 
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
-import { computeSessionShape, SessionShape } from './session-shape';
+import { computeSessionShape } from './session-shape';
+import { ShapeCompareCardComponent } from './shape-compare-card.component';
 import { ShapeDistCardComponent } from './shape-dist-card.component';
-import { AgnosticExport, buildAgnosticExport, exportMarkdown } from './shape-export';
+import { AgnosticExport, exportMarkdown } from './shape-export';
 import { buildShapeWorkbook } from './shape-export-xlsx';
 import {
   MeasuredEcosystem,
@@ -24,39 +25,10 @@ import {
   ShapeMeasureService,
   TOTALS_PROBES,
 } from './shape-measure.service';
+import { DrainStamp, sectionExportPayload, ShapeSection } from './shape-section';
 import { ShapeShareBarComponent, SharePart } from './shape-share-bar.component';
 
-interface DrainStamp {
-  fetchedAt: Date | null;
-  stale: boolean;
-}
-
-export interface ShapeSection {
-  guid: string;
-  name: string;
-  shape: SessionShape;
-  totals: {
-    orgs: number;
-    /** null = spaces drain never ran this session (distinct from an empty foundation). */
-    spaces: number | null;
-    apps: number;
-    routes: number;
-    serviceInstances: number;
-    serviceOfferings: number;
-    servicePlans: number;
-    serviceBrokers: number;
-  };
-  drains: { orgs: DrainStamp; spaces: DrainStamp; apps: DrainStamp };
-  loading: boolean;
-  /** At least one full drain landed, so the shape cards mean something. */
-  hasDrains: boolean;
-  /** The fast counts pass has run, so the totals row is real data. */
-  countsLoaded: boolean;
-  /** The services counts pass (a later, separate fetch) has run. */
-  servicesCountsLoaded: boolean;
-  /** The connected user is a CF admin on this endpoint — gates export. */
-  admin: boolean;
-}
+export type { ShapeSection } from './shape-section';
 
 /** Human age of a drain timestamp; the ambiguity note in one place. */
 export const ageLabel = (date: Date | null, now: Date): string => {
@@ -83,7 +55,7 @@ export const ageLabel = (date: Date | null, now: Date): string => {
   selector: 'app-foundation-shape-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, InfoCardComponent, ShapeDistCardComponent, ShapeShareBarComponent],
+  imports: [DecimalPipe, InfoCardComponent, ShapeCompareCardComponent, ShapeDistCardComponent, ShapeShareBarComponent],
   templateUrl: './foundation-shape-page.component.html',
 })
 export class FoundationShapePageComponent implements OnDestroy {
@@ -221,20 +193,7 @@ export class FoundationShapePageComponent implements OnDestroy {
 
   /** The anonymous projection (#5703) of everything this section has measured. */
   exportPayload(section: ShapeSection): AgnosticExport {
-    return buildAgnosticExport({
-      shape: section.shape,
-      sessionTotals: section.totals,
-      drains: {
-        counts: section.countsLoaded,
-        servicesCounts: section.servicesCountsLoaded,
-        orgs: section.drains.orgs.fetchedAt !== null,
-        spaces: section.drains.spaces.fetchedAt !== null,
-        apps: section.drains.apps.fetchedAt !== null,
-      },
-      collectedAt: new Date(),
-      measuredTotals: this.measuredTotals(section),
-      measuredEcosystem: this.measuredEcosystem(section),
-    });
+    return sectionExportPayload(section, this.measuredTotals(section), this.measuredEcosystem(section));
   }
 
   // <endpoint>-foundational-shape-<mode>-<date>: the name says which
