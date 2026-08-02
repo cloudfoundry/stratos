@@ -40,6 +40,12 @@ interface CompareSide {
   kind: 'live' | 'file';
   guid?: string;
   file?: LabelledExport;
+  /**
+   * Identity color slot, taken when the side is added and kept until it is
+   * removed — reordering (re-baselining) never recolors a side, so an
+   * endpoint keeps one color everywhere it appears.
+   */
+  color: number;
 }
 
 type MatrixCell = 'present' | 'absent' | 'added' | 'removed' | 'unmeasured';
@@ -80,14 +86,30 @@ export class ShapeCompareCardComponent {
     return this.sides().some(side => side.guid === guid);
   }
 
+  /** Lowest palette slot not held by a current side; freed colors get reused. */
+  private nextColor(): number {
+    const used = new Set(this.sides().map(side => side.color));
+    let color = 0;
+    while (used.has(color)) {
+      color++;
+    }
+    return color;
+  }
+
   /** Bar checkbox hook: select order is baseline order (first selected = baseline). */
   toggleLive(guid: string): void {
     const current = this.sides();
     this.sides.set(
       this.isSelected(guid)
         ? current.filter(side => side.guid !== guid)
-        : [...current, { id: guid, kind: 'live', guid }]
+        : [...current, { id: guid, kind: 'live', guid, color: this.nextColor() }]
     );
+  }
+
+  /** The endpoint's identity color chip for its section bar; null when not selected. */
+  dotFor(guid: string): string | null {
+    const side = this.sides().find(s => s.guid === guid);
+    return side ? SIDE_BG[side.color % SIDE_BG.length] : null;
   }
 
   /** Template hook for the hidden file input; the parse work lives in importFrom. */
@@ -109,7 +131,7 @@ export class ShapeCompareCardComponent {
     const label = exported.foundation_label || file.name.replace(/\.json$/i, '');
     this.sides.set([
       ...this.sides(),
-      { id: `file-${++this.fileSeq}`, kind: 'file', file: { label, exported } },
+      { id: `file-${++this.fileSeq}`, kind: 'file', file: { label, exported }, color: this.nextColor() },
     ]);
     this.importError.set(null);
   }
@@ -145,7 +167,7 @@ export class ShapeCompareCardComponent {
     this.liveSides().length >= 2 ? compareExports(this.resolved()) : null
   );
 
-  /** Ordered side chips; index drives the color pairing everywhere below. */
+  /** Ordered side chips; each carries its side's identity color. */
   readonly sideVms = computed(() =>
     this.liveSides().map((side, index) => ({
       id: side.id,
@@ -153,17 +175,20 @@ export class ShapeCompareCardComponent {
       label: side.kind === 'file'
         ? (side.file as LabelledExport).label
         : this.sections().find(s => s.guid === side.guid)?.name ?? '',
-      dotClass: SIDE_BG[index % SIDE_BG.length],
+      dotClass: SIDE_BG[side.color % SIDE_BG.length],
       isBaseline: index === 0,
     }))
   );
 
+  /** Identity color of the side at comparison position `index` (values arrays are side-ordered). */
   sideDot(index: number): string {
-    return SIDE_BG[index % SIDE_BG.length];
+    const side = this.liveSides()[index];
+    return SIDE_BG[(side?.color ?? index) % SIDE_BG.length];
   }
 
   sideText(index: number): string {
-    return SIDE_TEXT[index % SIDE_TEXT.length];
+    const side = this.liveSides()[index];
+    return SIDE_TEXT[(side?.color ?? index) % SIDE_TEXT.length];
   }
 
   readonly listVms = computed(() => {
@@ -234,7 +259,7 @@ export class ShapeCompareCardComponent {
           const delta = i > 0 && row.shares[0] !== undefined ? ` · ${ptsText(share - row.shares[0])}` : '';
           return {
             width: Math.max(share * 100, 0.5),
-            fillClass: SIDE_BG[i % SIDE_BG.length],
+            fillClass: this.sideDot(i),
             label: `${row.counts[i]} · ${pctText(share)}${delta}`,
           };
         }),
@@ -250,7 +275,7 @@ export class ShapeCompareCardComponent {
     return cmp.topShare.map(row => {
       const parts = row.values.map((share, i) => ({
         text: share ? pctText(share.fraction) : share === null ? 'no data' : 'not measured',
-        colorClass: SIDE_TEXT[i % SIDE_TEXT.length],
+        colorClass: this.sideText(i),
       }));
       const baseline = row.values[0];
       const deltas = row.values
@@ -290,7 +315,7 @@ export class ShapeCompareCardComponent {
       title: humanize(row.key),
       sides: row.values.map((d, i) => ({
         label: cmp.sides[i].label,
-        dotClass: SIDE_BG[i % SIDE_BG.length],
+        dotClass: this.sideDot(i),
         state: d ? ('data' as const) : d === null ? ('empty' as const) : ('missing' as const),
         cells: d ? [d.n, d.median, d.p90, d.max, d.mean, d.sum] : [],
       })),
