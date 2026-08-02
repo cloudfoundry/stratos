@@ -84,8 +84,17 @@ const (
 // opts out or supplies its own. It is scoped to what the Stratos SPA needs:
 //   - default/script/connect from same origin ('self'); same-origin 'self'
 //     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
-//   - 'unsafe-inline' styles: Angular + the index.html loading splash inject
-//     inline <style>; Google Fonts stylesheet is allowed
+//   - style-src-elem carries a per-response nonce, so <style> elements are
+//     enforced without 'unsafe-inline'. serveIndexHTML nonces the ones in
+//     index.html; Angular nonces its own from ngCspNonce; installStyleNonce
+//     (frontend polyfills) nonces the ones Monaco and xterm create, neither of
+//     which accepts a nonce itself. A <style> arriving as markup carries none
+//     and is refused, which is the point.
+//   - style-src keeps 'unsafe-inline', but style-src-elem now overrides it for
+//     elements, so what it still permits is inline style ATTRIBUTES (Monaco's
+//     per-line positioning, xterm's truecolor cells). CSP has no nonce or hash
+//     mechanism for dynamic attributes, so no policy change can tighten this.
+//     It also remains the whole style policy on pre-CSP3 browsers.
 //   - data: images/fonts (inlined icons) and Google Fonts font files
 //   - worker-src blob: — the Monaco editor spins up its language web-workers
 //     from blob URLs
@@ -94,6 +103,9 @@ const (
 const defaultCSPPolicy = "default-src 'self'; " +
 	"script-src 'self'; " +
 	"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+	// style-src-elem overrides style-src for elements wholesale, so it has to
+	// repeat every source style-src grants them or it silently withdraws one.
+	"style-src-elem 'self' " + cspNoncePlaceholder + " https://fonts.googleapis.com; " +
 	"font-src 'self' data: https://fonts.gstatic.com; " +
 	"img-src 'self' data:; " +
 	// 'self' also covers same-origin WebSocket (wss:// on an HTTPS page), so
