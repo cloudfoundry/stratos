@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -216,10 +217,25 @@ func (p *portalProxy) urlCheckMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+// immutableAssetPath matches the content-hashed files the Angular build
+// emits: root bundles (main|styles|polyfills|chunk|worker)-<8 char hash>
+// .js/.css and media/<name>-<8 char hash>.<ext>. A content change
+// produces a new filename, so these are immutable by construction and
+// safe to cache forever. Everything else — index.html (the pointer to
+// the hashed bundles), assets/, the plugin trees, Monaco's unversioned
+// files — keeps the conservative no-cache default: broader caching
+// historically caused cached-data bleed, so the allowlist stays
+// filename-shaped and default-deny (#5562).
+var immutableAssetPath = regexp.MustCompile(`(?:^|/)(?:(?:main|styles|polyfills|chunk|worker)-[A-Za-z0-9_-]{8}\.(?:js|css)|media/[A-Za-z0-9._-]+-[A-Z0-9]{8}\.[a-z0-9]+)$`)
+
 func (p *portalProxy) setStaticCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		c.Response().Header().Set("cache-control", "no-cache")
-		c.Response().Header().Set("pragma", "no-cache")
+		if immutableAssetPath.MatchString(c.Request().URL.Path) {
+			c.Response().Header().Set("cache-control", "public, max-age=31536000, immutable")
+		} else {
+			c.Response().Header().Set("cache-control", "no-cache")
+			c.Response().Header().Set("pragma", "no-cache")
+		}
 		return h(c)
 	}
 }

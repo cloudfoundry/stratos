@@ -53,6 +53,67 @@ func makeNewRequestWithParams(httpVerb string, formValues map[string]string) (ec
 	return ctx, rec
 }
 
+// Filenames mirror a real dist/frontend/browser build — including a hash
+// that itself contains a dash (chunk-B40-posg.js) and the uppercase media
+// hashes esbuild emits. Everything unhashed must keep the conservative
+// no-cache header; see immutableAssetPath in middleware.go (#5562).
+func TestStaticCacheMiddlewareImmutableAllowlist(t *testing.T) {
+	p := &portalProxy{}
+	mw := p.setStaticCacheContentMiddleware(func(c echo.Context) error { return nil })
+
+	serve := func(path string) http.Header {
+		rec := httptest.NewRecorder()
+		c := echo.New().NewContext(httptest.NewRequest(http.MethodGet, path, nil), rec)
+		if err := mw(c); err != nil {
+			t.Fatalf("middleware(%s): %v", path, err)
+		}
+		return rec.Header()
+	}
+
+	immutable := []string{
+		"/main-Bv2flKV8.js",
+		"/main-Qw12_ab9.css",
+		"/styles-B5ABX2YE.css",
+		"/polyfills-AbCd12_x.js",
+		"/chunk-B40-posg.js",
+		"/chunk-_4dOh9uF.js",
+		"/worker-Zz9varAB.js",
+		"/media/roboto-v18-latin-300-5THLCT4U.woff2",
+		"/prefix/stripped/main-Bv2flKV8.js",
+	}
+	for _, path := range immutable {
+		h := serve(path)
+		if got := h.Get("Cache-Control"); got != "public, max-age=31536000, immutable" {
+			t.Errorf("%s: want immutable cache-control, got %q", path, got)
+		}
+		if got := h.Get("Pragma"); got != "" {
+			t.Errorf("%s: immutable asset must not carry pragma, got %q", path, got)
+		}
+	}
+
+	mutable := []string{
+		"/",
+		"/index.html",
+		"/favicon.ico",
+		"/assets/company-config.json",
+		"/core/plugin-bundle.js",
+		"/media/unhashed-font.woff2",
+		"/chunk-toolong123.js",
+		"/chunk-short.js",
+		"/hackchunk-AAAAAAAA.js",
+		"/applications/deep/link",
+	}
+	for _, path := range mutable {
+		h := serve(path)
+		if got := h.Get("Cache-Control"); got != "no-cache" {
+			t.Errorf("%s: want no-cache, got %q", path, got)
+		}
+		if got := h.Get("Pragma"); got != "no-cache" {
+			t.Errorf("%s: want pragma no-cache, got %q", path, got)
+		}
+	}
+}
+
 func Test_apiKeyMiddleware(t *testing.T) {
 	t.Parallel()
 
