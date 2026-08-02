@@ -143,6 +143,7 @@
     "rxjs-websockets": "9.0.0",
     "ts-md5": "2.0.1",
     "tslib": "2.8.1",
+    "write-excel-file": "^4.1.1",
     "xterm": "5.4.0-beta.37",
     "xterm-addon-fit": "0.9.0-beta.37"
   },
