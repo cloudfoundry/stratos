@@ -152,6 +152,29 @@ describe('ShapeCompareCardComponent', () => {
     expect(component.sideVms()[0].isBaseline).toBe(true);
   });
 
+  it('keeps each side its identity color across re-baselining', async () => {
+    component.toggleLive('cf-1');
+    component.toggleLive('cf-2');
+    const colorsBefore = new Map(component.sideVms().map(vm => [vm.id, vm.dotClass]));
+    expect(colorsBefore.get('cf-1')).not.toBe(colorsBefore.get('cf-2'));
+    component.makeBaseline(component.sideVms()[1].id);
+    const colorsAfter = new Map(component.sideVms().map(vm => [vm.id, vm.dotClass]));
+    expect(colorsAfter).toEqual(colorsBefore);
+    // the bar chip matches the side's color everywhere
+    expect(component.dotFor('cf-2')).toBe(colorsBefore.get('cf-2'));
+    expect(component.dotFor('cf-1')).toBe(colorsBefore.get('cf-1'));
+  });
+
+  it('frees a removed side color for the next selection', () => {
+    component.toggleLive('cf-1');
+    component.toggleLive('cf-2');
+    const first = component.dotFor('cf-1');
+    component.toggleLive('cf-1'); // unselect: frees the first color
+    component.toggleLive('cf-1'); // reselect: takes the freed slot again
+    expect(component.dotFor('cf-1')).toBe(first);
+    expect(component.dotFor('cf-1')).not.toBe(component.dotFor('cf-2'));
+  });
+
   it('removes a side by chip', async () => {
     component.toggleLive('cf-1');
     component.toggleLive('cf-2');

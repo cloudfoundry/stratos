@@ -49,6 +49,9 @@
           </span>
         }
         <label class="ml-auto flex items-center gap-1.5 text-xs cursor-pointer">
+          @if (compare.dotFor(section.guid); as dot) {
+            <span class="inline-block w-2 h-2 rounded-full" [class]="dot" data-test="compare-select-dot"></span>
+          }
           <input type="checkbox" data-test="compare-select"
             [checked]="compare.isSelected(section.guid)" (change)="compare.toggleLive(section.guid)">
           Compare

@@ -256,6 +256,8 @@ describe('FoundationShapePageComponent', () => {
       const strip = root.querySelector('[data-test="compare-now-strip"]');
       expect(strip?.textContent).toContain('2 sides selected');
       expect(root.querySelector('[data-test="compare-totals"]')).not.toBeNull();
+      // each selected bar shows its side's identity color chip
+      expect(root.querySelectorAll('[data-test="compare-select-dot"]')).toHaveLength(2);
     });
 
     it('renders defined stacks and buildpacks with unused stacks called out', async () => {
