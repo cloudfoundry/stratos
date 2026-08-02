@@ -14,31 +14,13 @@ import { TopShare } from './shape-stats';
 const UNCHANGED_SHOWN = 5;
 
 /**
- * Identity color slots: blue, amber, teal, slate, violet, rose, green, lime —
- * eight distinct hues so a side's color stays unique well past the usual
- * endpoint count (colors repeat only from the ninth concurrent side).
- * Literal class strings so the Tailwind scanner picks every variant up.
+ * Identity color for a slot: hues spaced evenly around the OKLCH wheel over a
+ * range sized to CONTAIN the current side capacity (never an exact fit, so
+ * there is always headroom and never a repeat). Anchored at blue; mid-tone
+ * lightness/chroma reads on both the light and the dark theme.
  */
-const SIDE_BG = [
-  'bg-[#2a78d6] dark:bg-[#3987e5]',
-  'bg-[#d97706] dark:bg-[#f59e0b]',
-  'bg-[#0d9488] dark:bg-[#14b8a6]',
-  'bg-[#64748b] dark:bg-[#94a3b8]',
-  'bg-[#7c3aed] dark:bg-[#8b5cf6]',
-  'bg-[#db2777] dark:bg-[#ec4899]',
-  'bg-[#16a34a] dark:bg-[#22c55e]',
-  'bg-[#65a30d] dark:bg-[#84cc16]',
-];
-const SIDE_TEXT = [
-  'text-[#2a78d6] dark:text-[#3987e5]',
-  'text-[#d97706] dark:text-[#f59e0b]',
-  'text-[#0d9488] dark:text-[#14b8a6]',
-  'text-[#64748b] dark:text-[#94a3b8]',
-  'text-[#7c3aed] dark:text-[#8b5cf6]',
-  'text-[#db2777] dark:text-[#ec4899]',
-  'text-[#16a34a] dark:text-[#22c55e]',
-  'text-[#65a30d] dark:text-[#84cc16]',
-];
+const sideColorAt = (slot: number, rangeSize: number): string =>
+  `oklch(62% 0.16 ${(262 + (slot * 360) / rangeSize) % 360}deg)`;
 
 const humanize = (key: string): string => key.replace(/_/g, ' ');
 const pctText = (fraction: number): string => `${(fraction * 100).toFixed(1)}%`;
@@ -116,10 +98,23 @@ export class ShapeCompareCardComponent {
     );
   }
 
-  /** The endpoint's identity color chip for its section bar; null when not selected. */
+  /**
+   * The color range is sized by the endpoints on the page (plus imported
+   * files): at least 8, grown in fours, always containing the capacity.
+   */
+  readonly paletteSize = computed(() => {
+    const capacity = this.sections().length + this.sides().filter(side => side.kind === 'file').length;
+    return Math.max(8, Math.ceil(capacity / 4) * 4);
+  });
+
+  private colorOfSlot(slot: number): string {
+    return sideColorAt(slot, this.paletteSize());
+  }
+
+  /** The endpoint's identity color for its section bar chip; null when not selected. */
   dotFor(guid: string): string | null {
     const side = this.sides().find(s => s.guid === guid);
-    return side ? SIDE_BG[side.color % SIDE_BG.length] : null;
+    return side ? this.colorOfSlot(side.color) : null;
   }
 
   /** Template hook for the hidden file input; the parse work lives in importFrom. */
@@ -185,20 +180,15 @@ export class ShapeCompareCardComponent {
       label: side.kind === 'file'
         ? (side.file as LabelledExport).label
         : this.sections().find(s => s.guid === side.guid)?.name ?? '',
-      dotClass: SIDE_BG[side.color % SIDE_BG.length],
+      dotColor: this.colorOfSlot(side.color),
       isBaseline: index === 0,
     }))
   );
 
   /** Identity color of the side at comparison position `index` (values arrays are side-ordered). */
-  sideDot(index: number): string {
+  sideColor(index: number): string {
     const side = this.liveSides()[index];
-    return SIDE_BG[(side?.color ?? index) % SIDE_BG.length];
-  }
-
-  sideText(index: number): string {
-    const side = this.liveSides()[index];
-    return SIDE_TEXT[(side?.color ?? index) % SIDE_TEXT.length];
+    return this.colorOfSlot(side?.color ?? index);
   }
 
   readonly listVms = computed(() => {
@@ -269,7 +259,7 @@ export class ShapeCompareCardComponent {
           const delta = i > 0 && row.shares[0] !== undefined ? ` · ${ptsText(share - row.shares[0])}` : '';
           return {
             width: Math.max(share * 100, 0.5),
-            fillClass: this.sideDot(i),
+            fill: this.sideColor(i),
             label: `${row.counts[i]} · ${pctText(share)}${delta}`,
           };
         }),
@@ -285,7 +275,7 @@ export class ShapeCompareCardComponent {
     return cmp.topShare.map(row => {
       const parts = row.values.map((share, i) => ({
         text: share ? pctText(share.fraction) : share === null ? 'no data' : 'not measured',
-        colorClass: this.sideText(i),
+        color: this.sideColor(i),
       }));
       const baseline = row.values[0];
       const deltas = row.values
@@ -325,7 +315,7 @@ export class ShapeCompareCardComponent {
       title: humanize(row.key),
       sides: row.values.map((d, i) => ({
         label: cmp.sides[i].label,
-        dotClass: this.sideDot(i),
+        dotColor: this.sideColor(i),
         state: d ? ('data' as const) : d === null ? ('empty' as const) : ('missing' as const),
         cells: d ? [d.n, d.median, d.p90, d.max, d.mean, d.sum] : [],
       })),

@@ -10,7 +10,7 @@
     @for (side of sideVms(); track side.id) {
       <span class="flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full border border-content-border text-xs"
         [attr.data-test]="'compare-side-' + side.id">
-        <span class="inline-block w-2 h-2 rounded-full" [class]="side.dotClass"></span>
+        <span class="inline-block w-2 h-2 rounded-full" [style.background-color]="side.dotColor"></span>
         <span class="max-w-48 truncate" [title]="side.label">{{ side.label }}</span>
         @if (side.isBaseline) {
           <span class="text-[10px] uppercase text-content-muted">baseline</span>
@@ -48,7 +48,7 @@
                   <td class="pr-4 pb-1 font-semibold uppercase tracking-wider">{{ list.title }}</td>
                   @for (side of sideVms(); track side.id; let i = $index) {
                     <td class="px-3 pb-1 text-center">
-                      <span class="inline-block w-2 h-2 rounded-full" [class]="sideDot(i)"></span>
+                      <span class="inline-block w-2 h-2 rounded-full" [style.background-color]="sideColor(i)"></span>
                     </td>
                   }
                 </tr>
@@ -104,7 +104,7 @@
                   @if (bar) {
                     <div class="flex items-center gap-2">
                       <div class="flex-1 h-2.5 rounded bg-content-secondary overflow-hidden">
-                        <div class="h-full rounded" [class]="bar.fillClass" [style.width.%]="bar.width"></div>
+                        <div class="h-full rounded" [style.background-color]="bar.fill" [style.width.%]="bar.width"></div>
                       </div>
                       <div class="w-36 text-right text-[11px] text-content-muted tabular-nums">{{ bar.label }}</div>
                     </div>
@@ -128,7 +128,7 @@
             <div class="flex-1 min-w-[160px] rounded border border-content-border p-3">
               <div class="text-base font-semibold tabular-nums">
                 @for (part of tile.parts; track $index; let last = $last) {
-                  <span [class]="part.colorClass">{{ part.text }}</span>@if (!last) {
+                  <span [style.color]="part.color">{{ part.text }}</span>@if (!last) {
                     <span class="text-content-muted font-normal"> &rarr; </span>
                   }
                 }
@@ -156,7 +156,7 @@
               <tr class="text-content-muted">
                 <th class="text-left font-normal pr-4 pb-1"></th>
                 @for (side of cmp.sides; track $index; let i = $index) {
-                  <th class="text-right font-normal px-3 pb-1" [class]="sideText(i)">{{ side.label }}</th>
+                  <th class="text-right font-normal px-3 pb-1" [style.color]="sideColor(i)">{{ side.label }}</th>
                 }
               </tr>
             </thead>
@@ -203,7 +203,7 @@
                 @for (side of row.sides; track $index) {
                   <tr>
                     <td class="py-0.5 pl-4">
-                      <span class="inline-block w-2 h-2 rounded-full mr-1.5" [class]="side.dotClass"></span>{{ side.label }}
+                      <span class="inline-block w-2 h-2 rounded-full mr-1.5" [style.background-color]="side.dotColor"></span>{{ side.label }}
                     </td>
                     @if (side.state === 'data') {
                       @for (cell of side.cells; track $index) {
