@@ -177,8 +177,8 @@ login`) — never from the command line.
 | Command | What it does |
 |---------|-------------|
 | `make stamp tag [VERSION=X.Y.Z]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`); the tag body carries the release notes assembled from `changelog.d/` fragments (see Release notes above) |
-| `make publish [DRAFT=yes] [TAG=vX.Y.Z]` | `gh release create --verify-tag` + upload `dist/release/*`; `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases); `--latest` from `LATEST` (see Maintenance lines below) |
-| `make unpublish TAG=vX.Y.Z` | Delete the GitHub release and its assets (echoes what it will delete first; the tag survives). `TAG=` is required |
+| `make publish [DRAFT=yes] [TAG=vX.Y.Z]` | `gh release create --verify-tag` + upload `dist/release/*`; refuses a tag that already has a release, drafts included (GitHub happily stacks several releases on one tag); `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases); `--latest` from `LATEST` (see Maintenance lines below) |
+| `make unpublish TAG=vX.Y.Z` | Delete every GitHub release on the tag — drafts and duplicates included, resolved by release id since tag-based `gh` lookups can't see drafts (echoes what it will delete first; the tag survives). `TAG=` is required |
 | `make stamp untag TAG=vX.Y.Z` | Delete the tag, local + remote (echoes first). `TAG=` is required |
 | `make stamp line [LINE=X.Y]` | Cut the maintenance branch `release/X.Y.x` at the line's newest final tag (see Maintenance lines below) |
 | `make sweep` | Remove the `changelog.d/` fragments the release consumed (commit rides the next PR) |

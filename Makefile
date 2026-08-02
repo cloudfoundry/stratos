@@ -15,7 +15,8 @@
 #   make stamp tag              Create + push the release tag (notes from
 #                               changelog.d fragments in the tag body)
 #   make publish                Create GitHub release + upload dist/release/*
-#   make unpublish TAG=vX       Delete a GitHub release (assets included)
+#   make unpublish TAG=vX       Delete a GitHub release (assets and
+#                               drafts included)
 #   make stamp untag TAG=vX     Delete a tag (local + remote)
 #   make stamp line [LINE=X.Y]  Cut maintenance branch release/X.Y.x at
 #                               the line's newest final tag
@@ -1061,6 +1062,11 @@ $(call register, stamp, line)
 # CAN be full releases (keep in sync with release.yml validate-version).
 # --latest carries LATEST's answer explicitly both ways; a draft has no
 # Latest semantics, so DRAFT=yes omits the flag.
+# GitHub allows several releases per tag (drafts don't own the tag, and a
+# CI-published release doesn't block `gh release create`), so publish
+# refuses a tag that already has one. The check goes through the API:
+# `gh release view` can't see drafts, which is exactly the duplicate
+# that needs catching.
 .PHONY: publish unpublish sweep changelog
 publish:
 	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
@@ -1069,16 +1075,32 @@ publish:
 		echo "ERROR: no tag to publish — create one with 'make stamp tag' or pass TAG=vX.Y.Z" >&2; \
 		exit 1; \
 	fi; \
+	EXISTING=$$(gh api --paginate 'repos/{owner}/{repo}/releases' --jq '.[].tag_name' | grep -Fxc "$$TAG" || true); \
+	if [ "$$EXISTING" -gt 0 ]; then \
+		echo "ERROR: $$TAG already has $$EXISTING GitHub release(s), drafts included — 'make unpublish TAG=$$TAG' first" >&2; \
+		exit 1; \
+	fi; \
 	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
 	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft,--latest=$($(_HIDE)LATEST_RESOLVED)) $(if $(NOTES),--notes-file "$(NOTES)",--notes-from-tag) $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
 	$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@")
 
+# unpublish resolves the tag to release ids through the API: tag-based
+# `gh release view`/`delete` can't see drafts and picks one arbitrarily
+# when a tag has duplicates. Deleting a release never touches the git
+# tag — that stays `stamp untag`'s job.
 unpublish:
 	@[ -n "$(TAG)" ] || { echo "ERROR: unpublish deletes a release — name it: make unpublish TAG=vX.Y.Z" >&2; exit 1; }
-	@echo "Release to delete from GitHub:"
-	@gh release view "$(TAG)" --json tagName,name,isDraft,assets \
-		--jq '"  " + .tagName + "  (" + .name + ")" + (if .isDraft then "  [draft]" else "" end), (.assets[] | "    " + .name)'
-	$($(_HIDE)DRY)gh release delete "$(TAG)" --yes
+	@ids=$$(gh api --paginate 'repos/{owner}/{repo}/releases' --jq '.[] | select(.tag_name == "$(TAG)") | .id'); \
+	[ -n "$$ids" ] || { echo "ERROR: no GitHub release (draft or published) has tag $(TAG)" >&2; exit 1; }; \
+	echo "Release(s) to delete from GitHub:"; \
+	for id in $$ids; do \
+		gh api "repos/{owner}/{repo}/releases/$$id" \
+			--jq '"  " + .tag_name + "  (" + (.name // "") + ")" + (if .draft then "  [draft]" else "" end), (.assets[] | "    " + .name)'; \
+	done; \
+	for id in $$ids; do \
+		set -- gh api -X DELETE "repos/{owner}/{repo}/releases/$$id"; \
+		$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@") || exit 1; \
+	done
 
 # sweep removes the changelog.d fragments a published release consumed;
 # the removal commit rides the next PR (e.g. the post-release bump).
