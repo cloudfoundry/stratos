@@ -1,61 +1,36 @@
 <div class="flex flex-col gap-4 px-4 py-1" data-test="shape-compare">
   <span class="text-xs text-content-muted">
-    Diff two snapshots &mdash; a live endpoint section or an imported shape export file. Sides show only
-    what each snapshot measured; nothing here issues Cloud Foundry requests.
+    Diff the selected snapshots &mdash; pick endpoints with the Compare box on their section bars, or import
+    exported shape files. Sides are ordered; the first is the baseline for added/removed and &Delta;.
+    Nothing here issues Cloud Foundry requests.
   </span>
 
-  <!-- Slot pickers: A (blue) vs B (amber) -->
-  <div class="flex flex-wrap items-stretch gap-3">
-    <div class="flex-1 min-w-[220px] rounded border border-content-border border-l-4 border-l-[#2a78d6] dark:border-l-[#3987e5] p-3 flex flex-col gap-1.5"
-      data-test="compare-slot-a">
-      <select class="text-sm bg-transparent border border-content-border rounded px-2 py-1"
-        aria-label="Comparison side A"
-        [value]="effectiveChoice('a') ?? ''" (change)="onSelect('a', $any($event.target).value)">
-        <option value="" disabled>choose a source&hellip;</option>
-        @for (section of sections(); track section.guid) {
-          <option [value]="'live:' + section.guid">{{ section.name }} &mdash; live</option>
+  <!-- Ordered sides: chips + file import -->
+  <div class="flex flex-wrap items-center gap-2" data-test="compare-sides">
+    @for (side of sideVms(); track side.id) {
+      <span class="flex items-center gap-1.5 pl-2.5 pr-1.5 py-1 rounded-full border border-content-border text-xs"
+        [attr.data-test]="'compare-side-' + side.id">
+        <span class="inline-block w-2 h-2 rounded-full" [class]="side.dotClass"></span>
+        <span class="max-w-48 truncate" [title]="side.label">{{ side.label }}</span>
+        @if (side.isBaseline) {
+          <span class="text-[10px] uppercase text-content-muted">baseline</span>
+        } @else {
+          <button type="button" class="text-content-muted hover:underline" title="Make baseline"
+            data-test="compare-make-baseline" (click)="makeBaseline(side.id)">&#8676;</button>
         }
-        @if (fileA(); as file) {
-          <option value="file">{{ file.label }} &mdash; imported</option>
-        }
-      </select>
-      <label class="text-xs text-content-muted cursor-pointer hover:underline">
-        Import export file&hellip;
-        <input type="file" accept=".json,application/json" class="hidden" data-test="compare-import-a"
-          (change)="importFile('a', $event)">
-      </label>
-      @if (errorA(); as error) {
-        <span class="text-xs text-danger-shade-600 dark:text-danger-shade-300" data-test="compare-error-a">{{ error }}</span>
-      }
-    </div>
-
-    <button type="button" data-test="compare-swap" title="Swap sides"
-      class="self-center px-2.5 py-1 text-sm rounded border border-content-border hover:bg-content-secondary transition-colors"
-      (click)="swap()">&#8646;</button>
-
-    <div class="flex-1 min-w-[220px] rounded border border-content-border border-l-4 border-l-[#d97706] dark:border-l-[#f59e0b] p-3 flex flex-col gap-1.5"
-      data-test="compare-slot-b">
-      <select class="text-sm bg-transparent border border-content-border rounded px-2 py-1"
-        aria-label="Comparison side B"
-        [value]="effectiveChoice('b') ?? ''" (change)="onSelect('b', $any($event.target).value)">
-        <option value="" disabled>choose a source&hellip;</option>
-        @for (section of sections(); track section.guid) {
-          <option [value]="'live:' + section.guid">{{ section.name }} &mdash; live</option>
-        }
-        @if (fileB(); as file) {
-          <option value="file">{{ file.label }} &mdash; imported</option>
-        }
-      </select>
-      <label class="text-xs text-content-muted cursor-pointer hover:underline">
-        Import export file&hellip;
-        <input type="file" accept=".json,application/json" class="hidden" data-test="compare-import-b"
-          (change)="importFile('b', $event)">
-      </label>
-      @if (errorB(); as error) {
-        <span class="text-xs text-danger-shade-600 dark:text-danger-shade-300" data-test="compare-error-b">{{ error }}</span>
-      }
-    </div>
+        <button type="button" class="text-content-muted hover:underline px-0.5" title="Remove side"
+          data-test="compare-remove-side" (click)="remove(side.id)">&#10005;</button>
+      </span>
+    }
+    <label class="text-xs text-content-muted cursor-pointer hover:underline">
+      Import export file&hellip;
+      <input type="file" accept=".json,application/json" class="hidden" data-test="compare-import"
+        (change)="importFile($event)">
+    </label>
   </div>
+  @if (importError(); as error) {
+    <span class="text-xs text-danger-shade-600 dark:text-danger-shade-300" data-test="compare-error">{{ error }}</span>
+  }
 
   @if (comparison(); as cmp) {
     <!-- Ecosystem: the promotion tell -->
@@ -63,37 +38,61 @@
       <div class="flex flex-col gap-2" data-test="compare-ecosystem">
         <div>
           <span class="text-sm font-semibold">Ecosystem</span>
-          <span class="text-xs text-content-muted ml-2">defined stacks and buildpacks &mdash; added / removed / unchanged</span>
+          <span class="text-xs text-content-muted ml-2">defined stacks and buildpacks per side; +/&minus; judged against the baseline</span>
         </div>
         @for (list of listVms(); track list.key) {
-          <div class="flex flex-wrap items-center gap-1.5 text-xs">
-            <span class="font-semibold uppercase tracking-wider text-content-muted mr-1">{{ list.title }}</span>
-            @for (label of list.removed; track label) {
-              <span class="px-2 py-0.5 rounded-full border line-through border-danger-shade-300 text-danger-shade-700 dark:border-danger-shade-700 dark:text-danger-shade-300">&minus; {{ label }}</span>
-            }
-            @for (label of list.added; track label) {
-              <span class="px-2 py-0.5 rounded-full border border-success-shade-300 text-success-shade-700 dark:border-success-shade-700 dark:text-success-shade-300">+ {{ label }}</span>
-            }
-            @for (label of list.shown; track label) {
-              <span class="px-2 py-0.5 rounded-full border border-content-border text-content-muted">{{ label }}</span>
-            }
-            @if (list.more > 0 || list.isOpen) {
-              <button type="button" class="px-2 py-0.5 rounded-full border border-content-border text-content-muted hover:bg-content-secondary transition-colors"
-                (click)="toggleList(list.key)">
-                @if (list.isOpen) { show fewer } @else { {{ list.more }} more unchanged }
-              </button>
-            }
+          <div class="overflow-x-auto">
+            <table class="text-xs">
+              <thead>
+                <tr class="text-content-muted">
+                  <td class="pr-4 pb-1 font-semibold uppercase tracking-wider">{{ list.title }}</td>
+                  @for (side of sideVms(); track side.id; let i = $index) {
+                    <td class="px-3 pb-1 text-center">
+                      <span class="inline-block w-2 h-2 rounded-full" [class]="sideDot(i)"></span>
+                    </td>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of list.rows; track row.label) {
+                  <tr>
+                    <td class="pr-4 py-0.5">{{ row.label }}</td>
+                    @for (cell of row.cells; track $index) {
+                      <td class="px-3 py-0.5 text-center">
+                        @switch (cell) {
+                          @case ('added') { <span class="text-success-shade-700 dark:text-success-shade-300">+&#10003;</span> }
+                          @case ('removed') { <span class="text-danger-shade-700 dark:text-danger-shade-300">&minus;</span> }
+                          @case ('present') { <span class="text-content-muted">&#10003;</span> }
+                          @case ('absent') { <span class="text-content-muted">&middot;</span> }
+                          @case ('unmeasured') { <span class="text-content-muted text-[10px]">n/m</span> }
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+                @if (list.more > 0 || list.isOpen) {
+                  <tr>
+                    <td colspan="99" class="py-0.5">
+                      <button type="button" class="text-content-muted hover:underline"
+                        (click)="toggleList(list.key)">
+                        @if (list.isOpen) { show fewer } @else { {{ list.more }} more unchanged }
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
           </div>
         }
       </div>
     }
 
-    <!-- Composition: paired share bars, delta in share points -->
+    <!-- Composition: share bars per side, delta vs baseline -->
     @if (categoricalVms().length) {
       <div class="flex flex-col gap-2" data-test="compare-composition">
         <div>
           <span class="text-sm font-semibold">Composition</span>
-          <span class="text-xs text-content-muted ml-2">share of each side's own total; &Delta; in share points</span>
+          <span class="text-xs text-content-muted ml-2">share of each side's own total; &Delta; in share points vs the baseline</span>
         </div>
         @for (group of categoricalVms(); track group.dimension) {
           <div class="text-xs font-semibold uppercase tracking-wider text-content-muted">{{ group.title }}</div>
@@ -101,28 +100,19 @@
             <div class="flex items-center gap-3">
               <div class="w-32 text-xs truncate" [title]="row.category">{{ row.category }}</div>
               <div class="flex-1 flex flex-col gap-0.5">
-                @if (row.a; as bar) {
-                  <div class="flex items-center gap-2">
-                    <div class="flex-1 h-2.5 rounded bg-content-secondary overflow-hidden">
-                      <div class="h-full rounded bg-[#2a78d6] dark:bg-[#3987e5]" [style.width.%]="bar.width"></div>
+                @for (bar of row.bars; track $index) {
+                  @if (bar) {
+                    <div class="flex items-center gap-2">
+                      <div class="flex-1 h-2.5 rounded bg-content-secondary overflow-hidden">
+                        <div class="h-full rounded" [class]="bar.fillClass" [style.width.%]="bar.width"></div>
+                      </div>
+                      <div class="w-36 text-right text-[11px] text-content-muted tabular-nums">{{ bar.label }}</div>
                     </div>
-                    <div class="w-24 text-right text-[11px] text-content-muted tabular-nums">{{ bar.label }}</div>
-                  </div>
-                } @else {
-                  <div class="text-[11px] text-content-muted">not measured</div>
-                }
-                @if (row.b; as bar) {
-                  <div class="flex items-center gap-2">
-                    <div class="flex-1 h-2.5 rounded bg-content-secondary overflow-hidden">
-                      <div class="h-full rounded bg-[#d97706] dark:bg-[#f59e0b]" [style.width.%]="bar.width"></div>
-                    </div>
-                    <div class="w-24 text-right text-[11px] text-content-muted tabular-nums">{{ bar.label }}</div>
-                  </div>
-                } @else {
-                  <div class="text-[11px] text-content-muted">not measured</div>
+                  } @else {
+                    <div class="text-[11px] text-content-muted">not measured</div>
+                  }
                 }
               </div>
-              <div class="w-16 text-right text-xs tabular-nums">{{ row.delta }}</div>
             </div>
           }
         }
@@ -137,12 +127,16 @@
           @for (tile of tileVms(); track tile.label) {
             <div class="flex-1 min-w-[160px] rounded border border-content-border p-3">
               <div class="text-base font-semibold tabular-nums">
-                <span class="text-[#2a78d6] dark:text-[#3987e5]">{{ tile.a }}</span>
-                <span class="text-content-muted font-normal"> &rarr; </span>
-                <span class="text-[#d97706] dark:text-[#f59e0b]">{{ tile.b }}</span>
+                @for (part of tile.parts; track $index; let last = $last) {
+                  <span [class]="part.colorClass">{{ part.text }}</span>@if (!last) {
+                    <span class="text-content-muted font-normal"> &rarr; </span>
+                  }
+                }
               </div>
               <div class="text-[11px] text-content-muted mt-0.5">{{ tile.label }}</div>
-              <div class="text-[11px] tabular-nums mt-0.5">{{ tile.delta }}</div>
+              @if (tile.deltas) {
+                <div class="text-[11px] tabular-nums mt-0.5">{{ tile.deltas }}</div>
+              }
             </div>
           }
         </div>
@@ -154,28 +148,32 @@
       <div class="flex flex-col gap-2" data-test="compare-totals">
         <div>
           <span class="text-sm font-semibold">Totals</span>
-          <span class="text-xs text-content-muted ml-2">&Delta; = right minus left</span>
+          <span class="text-xs text-content-muted ml-2">&Delta; vs the baseline column</span>
         </div>
-        <table class="text-xs w-auto">
-          <thead>
-            <tr class="text-content-muted">
-              <th class="text-left font-normal pr-4 pb-1"></th>
-              <th class="text-right font-normal px-3 pb-1">{{ cmp.a.label }}</th>
-              <th class="text-right font-normal px-3 pb-1">{{ cmp.b.label }}</th>
-              <th class="text-right font-normal pl-3 pb-1">&Delta;</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (row of totalsVms(); track row.label) {
-              <tr>
-                <td class="pr-4 py-0.5">{{ row.label }}</td>
-                <td class="text-right px-3 py-0.5 tabular-nums text-[#2a78d6] dark:text-[#3987e5]">{{ row.a }}</td>
-                <td class="text-right px-3 py-0.5 tabular-nums text-[#d97706] dark:text-[#f59e0b]">{{ row.b }}</td>
-                <td class="text-right pl-3 py-0.5 tabular-nums">{{ row.delta }}</td>
+        <div class="overflow-x-auto">
+          <table class="text-xs w-auto">
+            <thead>
+              <tr class="text-content-muted">
+                <th class="text-left font-normal pr-4 pb-1"></th>
+                @for (side of cmp.sides; track $index; let i = $index) {
+                  <th class="text-right font-normal px-3 pb-1" [class]="sideText(i)">{{ side.label }}</th>
+                }
               </tr>
-            }
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              @for (row of totalsVms(); track row.label) {
+                <tr>
+                  <td class="pr-4 py-0.5">{{ row.label }}</td>
+                  @for (cell of row.cells; track $index) {
+                    <td class="text-right px-3 py-0.5 tabular-nums">
+                      {{ cell.text }}@if (cell.delta) { <span class="text-content-muted text-[10px]"> ({{ cell.delta }})</span> }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
       </div>
     }
 
@@ -202,11 +200,10 @@
             <tbody>
               @for (row of distVms(); track row.key) {
                 <tr><td colspan="7" class="pt-2 pb-0.5 font-semibold">{{ row.title }}</td></tr>
-                @for (side of [row.a, row.b]; track $index; let first = $first) {
+                @for (side of row.sides; track $index) {
                   <tr>
                     <td class="py-0.5 pl-4">
-                      <span class="inline-block w-2 h-2 rounded-full mr-1.5"
-                        [class]="first ? 'bg-[#2a78d6] dark:bg-[#3987e5]' : 'bg-[#d97706] dark:bg-[#f59e0b]'"></span>{{ side.label }}
+                      <span class="inline-block w-2 h-2 rounded-full mr-1.5" [class]="side.dotClass"></span>{{ side.label }}
                     </td>
                     @if (side.state === 'data') {
                       @for (cell of side.cells; track $index) {
@@ -226,6 +223,8 @@
       </div>
     }
   } @else {
-    <div class="text-xs text-content-muted" data-test="compare-prompt">Choose a source for each side to compare.</div>
+    <div class="text-xs text-content-muted" data-test="compare-prompt">
+      Select at least two sides &mdash; tick Compare on endpoint section bars or import export files.
+    </div>
   }
 </div>
