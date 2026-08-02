@@ -24,6 +24,13 @@
  * APPLICATION IMPORTS
  */
 
+import { installStyleNonce } from './csp-nonce';
+
+// Nonce the <style> elements created at runtime so the Content-Security-Policy
+// can enforce style-src-elem. This runs here rather than in main.ts because it
+// has to be in place before any library creates one.
+installStyleNonce();
+
 // NOTE: Zone.js has been removed in favor of zoneless change detection (Angular 20+)
 // The provideZonelessChangeDetection() provider is configured in main.ts
 
