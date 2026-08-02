@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
@@ -99,6 +100,66 @@ func TestCspHeaderWithNonceLeavesPolicyWithoutPlaceholderUnchanged(t *testing.T)
 	pol := "default-src 'self'; style-src 'self' 'unsafe-inline'"
 	if got := cspHeaderWithNonce(pol, "N1"); got != pol {
 		t.Errorf("custom policy must pass through verbatim: %q", got)
+	}
+}
+
+// directiveSources returns the source list of the named directive in policy.
+// Splitting on the directive name is what distinguishes style-src from
+// style-src-elem — a substring search matches both.
+func directiveSources(t *testing.T, policy, name string) []string {
+	t.Helper()
+	for _, directive := range strings.Split(policy, "; ") {
+		if fields := strings.Fields(directive); len(fields) > 0 && fields[0] == name {
+			return fields[1:]
+		}
+	}
+	t.Fatalf("policy has no %s directive: %q", name, policy)
+	return nil
+}
+
+// Nothing else proves the shipped policy participates in the nonce mechanism.
+// A style-src-elem without the placeholder is enforced against every <style>
+// in the document with no nonce able to satisfy it, which blocks the lot.
+func TestDefaultCSPPolicyNoncesStyleElements(t *testing.T) {
+	if !slices.Contains(directiveSources(t, defaultCSPPolicy, "style-src-elem"), cspNoncePlaceholder) {
+		t.Errorf("style-src-elem must carry the nonce placeholder: %q", defaultCSPPolicy)
+	}
+}
+
+// style-src-elem overrides style-src for elements wholesale rather than
+// intersecting with it, so a source added to style-src alone is silently
+// withdrawn from every <style> and <link rel=stylesheet>.
+func TestDefaultCSPPolicyStyleElemRepeatsEveryStyleSrcSource(t *testing.T) {
+	elem := directiveSources(t, defaultCSPPolicy, "style-src-elem")
+	for _, source := range directiveSources(t, defaultCSPPolicy, "style-src") {
+		// The one deliberate omission: dropping 'unsafe-inline' for elements is
+		// the entire purpose of the directive. Browsers ignore it beside a nonce
+		// anyway; it stays in style-src for attributes and pre-CSP3 browsers.
+		if source == "'unsafe-inline'" {
+			continue
+		}
+		if !slices.Contains(elem, source) {
+			t.Errorf("style-src grants %s but style-src-elem does not repeat it: %q", source, defaultCSPPolicy)
+		}
+	}
+}
+
+// The mechanism end to end on the policy that actually ships, rather than on a
+// synthetic one: the styles in the document must carry the value the header's
+// style-src-elem authorises.
+func TestServeIndexHTMLNoncesStyleElementsUnderTheDefaultPolicy(t *testing.T) {
+	p := &portalProxy{indexHTMLTemplate: `<style>a{}</style><app-root></app-root>`}
+	p.Config.CSPPolicy = defaultCSPPolicy
+
+	rec := serveIndex(t, p)
+	hdr := rec.Header().Get("Content-Security-Policy")
+	nonce := nonceFromHeader(t, hdr)
+
+	if !slices.Contains(directiveSources(t, hdr, "style-src-elem"), "'nonce-"+nonce+"'") {
+		t.Errorf("style-src-elem must carry the substituted nonce: %q", hdr)
+	}
+	if !strings.Contains(rec.Body.String(), `<style nonce="`+nonce+`">`) {
+		t.Errorf("document styles must carry the nonce %q: %q", nonce, rec.Body.String())
 	}
 }
 

@@ -31,6 +31,7 @@ Values are matched without regard to case.
 default-src 'self';
 script-src 'self';
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+style-src-elem 'self' 'nonce-PLACEHOLDER' https://fonts.googleapis.com;
 font-src 'self' data: https://fonts.gstatic.com;
 img-src 'self' data:;
 connect-src 'self';
@@ -51,7 +52,21 @@ A few of these are worth explaining:
   Stratos already sends.
 - The Google Fonts origins are permitted because the console can load its
   interface font from them.
-- `style-src` still permits `'unsafe-inline'`. Removing it is in progress.
+- `'nonce-PLACEHOLDER'` is not sent literally. Each response replaces it with a
+  freshly generated value that also appears on the styles in that response, so
+  only those styles are permitted. A policy you supply yourself gets the same
+  treatment: include the `'nonce-PLACEHOLDER'` token and it is substituted the
+  same way.
+- `style-src-elem` governs `<style>` elements and stylesheet links, and it
+  replaces `style-src` for them rather than adding to it. If you extend
+  `style-src` with an origin, add it to `style-src-elem` too or stylesheets
+  from that origin are still refused.
+- `style-src` continues to permit `'unsafe-inline'`, but with `style-src-elem`
+  declared, what that now covers is inline style *attributes* — the code editor
+  positions each line with one, and the terminal colours each cell with one.
+  CSP offers no nonce or hash for attributes whose values are computed at
+  runtime, so this cannot be tightened by configuration; it needs the libraries
+  to set those styles through the CSSOM instead, which CSP exempts.
 
 ## Overriding the policy
 
