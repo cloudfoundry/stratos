@@ -81,6 +81,27 @@ describe('CnsiEntitySource', () => {
     expect(src.fetchedPages()).toBe(5);
   });
 
+  it('load() honors maxPages — a capped source stops at its window and still reports done', async () => {
+    class CappedSource extends CnsiEntitySource<TestItem> {
+      protected readonly entityName = 'test';
+      protected override readonly maxPages = 3;
+    }
+    // totalPages=10, but the capped source must fetch only pages 1..3.
+    // (The drain-all test above proves the uncapped harness would issue
+    // all 10 — the 3-deep response queue only satisfies a capped drain.)
+    const mkPage = (id: string, page: number) => ({
+      resources: [new TestItem(id)],
+      pagination: { totalResults: 10, totalPages: 10, next: { href: '/?page=' + (page + 1) }, previous: null, first: { href: '...' }, last: { href: '...' } }
+    });
+    const http = makeHttp([mkPage('a', 1), mkPage('b', 2), mkPage('c', 3)]);
+    const src = new CappedSource('cnsi-1', http);
+    await src.load();
+    expect(http.get).toHaveBeenCalledTimes(3);
+    expect(src.items().map(i => i.guid).sort()).toEqual(['a', 'b', 'c']);
+    expect(src.done()).toBe(true);
+    expect(src.totalResults()).toBe(10);
+  });
+
   it('load() records error and preserves any items already streamed in', async () => {
     const page1 = {
       resources: [new TestItem('a')],

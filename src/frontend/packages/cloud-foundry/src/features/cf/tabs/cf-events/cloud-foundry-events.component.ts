@@ -2,8 +2,9 @@ import { Component, ChangeDetectionStrategy } from '@angular/core';
 
 import { CloudFoundryEventsListComponent } from '../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
 
-// CF foundation-wide Events tab. No scoping inputs — surfaces every
-// audit event the foundation emits (capped at 25k by the backend).
+// CF foundation-wide Events tab. No scoping inputs — surfaces the
+// foundation's audit events, newest first (the source caps the drain
+// at the most recent 25k).
 @Component({
   selector: 'app-cloud-foundry-events',
   templateUrl: './cloud-foundry-events.component.html',
