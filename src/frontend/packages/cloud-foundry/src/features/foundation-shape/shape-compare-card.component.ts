@@ -14,20 +14,30 @@ import { TopShare } from './shape-stats';
 const UNCHANGED_SHOWN = 5;
 
 /**
- * Side colors by position, cycling: blue, amber, teal, slate. Literal class
- * strings so the Tailwind scanner picks every variant up.
+ * Identity color slots: blue, amber, teal, slate, violet, rose, green, lime —
+ * eight distinct hues so a side's color stays unique well past the usual
+ * endpoint count (colors repeat only from the ninth concurrent side).
+ * Literal class strings so the Tailwind scanner picks every variant up.
  */
 const SIDE_BG = [
   'bg-[#2a78d6] dark:bg-[#3987e5]',
   'bg-[#d97706] dark:bg-[#f59e0b]',
   'bg-[#0d9488] dark:bg-[#14b8a6]',
   'bg-[#64748b] dark:bg-[#94a3b8]',
+  'bg-[#7c3aed] dark:bg-[#8b5cf6]',
+  'bg-[#db2777] dark:bg-[#ec4899]',
+  'bg-[#16a34a] dark:bg-[#22c55e]',
+  'bg-[#65a30d] dark:bg-[#84cc16]',
 ];
 const SIDE_TEXT = [
   'text-[#2a78d6] dark:text-[#3987e5]',
   'text-[#d97706] dark:text-[#f59e0b]',
   'text-[#0d9488] dark:text-[#14b8a6]',
   'text-[#64748b] dark:text-[#94a3b8]',
+  'text-[#7c3aed] dark:text-[#8b5cf6]',
+  'text-[#db2777] dark:text-[#ec4899]',
+  'text-[#16a34a] dark:text-[#22c55e]',
+  'text-[#65a30d] dark:text-[#84cc16]',
 ];
 
 const humanize = (key: string): string => key.replace(/_/g, ' ');

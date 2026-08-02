@@ -165,6 +165,17 @@ describe('ShapeCompareCardComponent', () => {
     expect(component.dotFor('cf-1')).toBe(colorsBefore.get('cf-1'));
   });
 
+  it('gives six concurrent sides six distinct colors', async () => {
+    component.toggleLive('cf-1');
+    component.toggleLive('cf-2');
+    for (let i = 0; i < 4; i++) {
+      await component.importFrom(exportFile(`snap-${i}.json`, sampleExport()));
+    }
+    const colors = component.sideVms().map(vm => vm.dotClass);
+    expect(colors).toHaveLength(6);
+    expect(new Set(colors).size).toBe(6);
+  });
+
   it('frees a removed side color for the next selection', () => {
     component.toggleLive('cf-1');
     component.toggleLive('cf-2');
