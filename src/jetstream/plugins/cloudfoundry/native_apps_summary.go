@@ -5,7 +5,6 @@ import (
 	"context"
 	"net/http"
 	"sort"
-	"strconv"
 	"strings"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
@@ -34,14 +33,6 @@ func isDerivedSortField(orderBy string) (bool, string, bool) {
 	return derivedSortFields[field], field, desc
 }
 
-// Summary-tier defaults for the Stratos-shape paged response. CAPI V3's own
-// default per-page is 50; we match it so uninstrumented clients get a
-// reasonable page without surprise.
-const (
-	summaryDefaultPage    = 1
-	summaryDefaultPerPage = 50
-)
-
 // stratosReservedSummaryParams are the query-param keys the Stratos-shape
 // contract reserves for paging / sort / tier. Everything else in the query
 // string is passed through to CAPI as a filter per the "mirror CAPI filter
@@ -55,26 +46,21 @@ var stratosReservedSummaryParams = map[string]bool{
 }
 
 // parseSummaryQueryParams translates Stratos-shape query params into a
-// CAPI QueryParams struct. Stratos-shape separates sort field from sort
-// direction (order_by=<field>&direction=<asc|desc>); CAPI V3 combines them
-// in a single minus-prefix string. Filter fields are forwarded unchanged;
-// comma-separated values in a Stratos filter become the CAPI filter slice.
-func parseSummaryQueryParams(ctx echo.Context) *capi.QueryParams {
-	params := capi.NewQueryParams()
-
-	params.Page = summaryDefaultPage
-	if raw := ctx.QueryParam("page"); raw != "" {
-		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-			params.Page = v
-		}
-	}
-
-	params.PerPage = summaryDefaultPerPage
-	if raw := ctx.QueryParam("per_page"); raw != "" {
-		if v, err := strconv.Atoi(raw); err == nil && v > 0 {
-			params.PerPage = v
-		}
-	}
+// CAPI QueryParams struct via the canonical paging helpers
+// (parsePerPageAndPage / applyPagingParams — see stratos_paging.go), then
+// layers the two summary-specific concerns on top: Stratos-shape separates
+// sort field from sort direction (order_by=<field>&direction=<asc|desc>)
+// where CAPI V3 combines them in a single minus-prefix string, and filter
+// fields are forwarded unchanged (comma-separated values in a Stratos
+// filter become the CAPI filter slice).
+//
+// Returns the upstream params plus the resolved perPage/page the handler
+// needs for pagination meta and in-memory slicing — resolved because the
+// params only carry paging when the caller supplied per_page (absent
+// paging stays off the upstream call so V3 applies its own defaults).
+func parseSummaryQueryParams(ctx echo.Context) (*capi.QueryParams, int, int) {
+	perPage, page, present := parsePerPageAndPage(ctx)
+	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
 
 	if orderBy := ctx.QueryParam("order_by"); orderBy != "" {
 		if ctx.QueryParam("direction") == "desc" {
@@ -100,7 +86,7 @@ func parseSummaryQueryParams(ctx echo.Context) *capi.QueryParams {
 		}
 	}
 
-	return params
+	return params, perPage, page
 }
 
 // processDerivedFields are the StApp fields sourced from /v3/processes/web —
@@ -397,10 +383,10 @@ func envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr error, affect
 // root causes.
 func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfClient capi.Client) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
-	params := parseSummaryQueryParams(ctx)
+	params, perPage, page := parseSummaryQueryParams(ctx)
 
 	if derived, field, desc := isDerivedSortField(params.OrderBy); derived {
-		return c.getNativeAppsSummaryDerivedSort(ctx, cfClient, params, field, desc)
+		return c.getNativeAppsSummaryDerivedSort(ctx, cfClient, params, field, desc, perPage, page)
 	}
 
 	raw, err := cfClient.Apps().List(ctx.Request().Context(), params)
@@ -480,7 +466,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 
 	response := StratosPagedResponse[StApp]{
 		Resources:  resources,
-		Pagination: BuildPaginationMeta(ctx, params.Page, params.PerPage, raw.Pagination.TotalResults),
+		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
 		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, appGUIDs),
 	}
 
@@ -501,10 +487,9 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 	params *capi.QueryParams,
 	sortField string,
 	desc bool,
+	requestedPerPage, requestedPage int,
 ) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
-	requestedPage := params.Page
-	requestedPerPage := params.PerPage
 
 	// Fetch all matching apps (filters retained; page/per_page/order_by ignored)
 	allApps, err := fetchAllAppsWithFilters(ctx.Request().Context(), cfClient, params.Filters)
