@@ -118,7 +118,7 @@
     "@angular/forms": "22.0.1",
     "@angular/platform-browser": "22.0.1",
     "@angular/platform-browser-dynamic": "22.0.1",
-    "@angular/platform-server": "22.0.1",
+    "@angular/platform-server": "22.0.7",
     "@angular/router": "22.0.1",
     "@swimlane/ngx-graph": "11.0.0",
     "ajv": "^8.20.0",
