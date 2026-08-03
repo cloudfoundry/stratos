@@ -352,3 +352,13 @@ func TestServeIndexHTMLReportOnlyCarriesTheEnforcedNonce(t *testing.T) {
 		t.Errorf("both headers describe one response and must share its nonce:\n enforced=%q\n report-only=%q", enforced, reportOnly)
 	}
 }
+
+// Plugin content executes script by a route script-src does not govern. The
+// directive is declared rather than inherited: falling back to default-src
+// 'self' would still permit <object> and <embed> from this origin.
+func TestDefaultCSPPolicyForbidsPluginContent(t *testing.T) {
+	sources := directiveSources(t, defaultCSPPolicy, "object-src")
+	if !slices.Equal(sources, []string{"'none'"}) {
+		t.Errorf("object-src must be exactly 'none', got %v", sources)
+	}
+}
