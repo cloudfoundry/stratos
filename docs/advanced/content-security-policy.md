@@ -44,6 +44,7 @@ appended — declaring either twice would lose the destination you chose.
 ```
 default-src 'self';
 script-src 'self';
+object-src 'none';
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
 style-src-elem 'self' 'nonce-PLACEHOLDER' https://fonts.googleapis.com;
 font-src 'self' data: https://fonts.gstatic.com;
@@ -61,6 +62,11 @@ A few of these are worth explaining:
 - `connect-src 'self'` covers same-origin WebSockets, so the application log
   and stream sockets connect without needing a `ws:`/`wss:` wildcard. A bare
   wildcard would permit any host and security scanners flag it.
+- `object-src 'none'` forbids plugin content — `<object>`, `<embed>` — which
+  is a way of executing script that `script-src` does not cover. It is stated
+  rather than left to `default-src`, because falling back to `'self'` would
+  still permit plugin content served from the console's own origin. The console
+  embeds none.
 - `worker-src blob:` is required by the code editor, which starts its language
   workers from blob URLs.
 - `frame-ancestors 'self'` mirrors the `X-Frame-Options: SAMEORIGIN` header

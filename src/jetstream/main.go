@@ -84,6 +84,10 @@ const (
 // opts out or supplies its own. It is scoped to what the Stratos SPA needs:
 //   - default/script/connect from same origin ('self'); same-origin 'self'
 //     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
+//   - object-src 'none' — plugin content (<object>, <embed>) is a script
+//     execution path that script-src does not govern. Stated explicitly
+//     because falling back to default-src 'self' would still permit it from
+//     this origin, and the console embeds no plugin content at all.
 //   - style-src-elem carries a per-response nonce, so <style> elements are
 //     enforced without 'unsafe-inline'. serveIndexHTML nonces the ones in
 //     index.html; Angular nonces its own from ngCspNonce; installStyleNonce
@@ -102,6 +106,7 @@ const (
 // Operators can instead set CONSOLE_CSP to a full policy string to use verbatim.
 const defaultCSPPolicy = "default-src 'self'; " +
 	"script-src 'self'; " +
+	"object-src 'none'; " +
 	"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
 	// style-src-elem overrides style-src for elements wholesale, so it has to
 	// repeat every source style-src grants them or it silently withdraws one.
