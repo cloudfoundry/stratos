@@ -1,11 +1,14 @@
 # Stratos
 
-<a style="padding-left: 4px" href="https://codeclimate.com/github/cloudfoundry-community/stratos/maintainability"><img src="https://api.codeclimate.com/v1/badges/61af8b605f385e894632/maintainability" /></a>
-<a href="https://goreportcard.com/report/github.com/cloudfoundry/stratos"><img src="https://goreportcard.com/badge/github.com/cloudfoundry-incubator/stratos"/></a>
-<a href="https://codecov.io/gh/cloudfoundry-community/stratos/branch/master"><img src="https://codecov.io/gh/cloudfoundry-community/stratos/branch/master/graph/badge.svg"/></a>
-[![GitHub release](https://img.shields.io/github/release/cloudfoundry-community/stratos.svg)](https://github.com/cloudfoundry/stratos/releases/latest)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/cloudfoundry/stratos/blob/main/LICENSE)
-[![slack.cloudfoundry.org](https://slack.cloudfoundry.org/badge.svg)](https://cloudfoundry.slack.com/messages/C80EP4Y57/)
+[![Frontend Tests](https://img.shields.io/github/actions/workflow/status/cloudfoundry/stratos/frontend_tests.yml?branch=develop&label=frontend%20tests)](https://github.com/cloudfoundry/stratos/actions/workflows/frontend_tests.yml)
+[![Backend Tests](https://img.shields.io/github/actions/workflow/status/cloudfoundry/stratos/backend_tests.yml?branch=develop&label=backend%20tests)](https://github.com/cloudfoundry/stratos/actions/workflows/backend_tests.yml)
+[![CodeQL](https://img.shields.io/github/actions/workflow/status/cloudfoundry/stratos/codeql.yml?branch=develop&label=CodeQL)](https://github.com/cloudfoundry/stratos/actions/workflows/codeql.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/cloudfoundry/stratos/badge)](https://scorecard.dev/viewer/?uri=github.com/cloudfoundry/stratos)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/13948/badge)](https://www.bestpractices.dev/projects/13948)
+[![Angular](https://img.shields.io/github/package-json/dependency-version/cloudfoundry/stratos/@angular/core?branch=develop&label=angular)](package.json)
+[![Go Version](https://img.shields.io/github/go-mod/go-version/cloudfoundry/stratos?filename=src%2Fjetstream%2Fgo.mod&label=go)](src/jetstream/go.mod)
+[![Latest Release](https://img.shields.io/github/v/release/cloudfoundry/stratos)](https://github.com/cloudfoundry/stratos/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 # Roadmap
 
