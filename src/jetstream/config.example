@@ -46,6 +46,19 @@ ENABLE_TECH_PREVIEW=false
 # metrics or auth endpoint on another origin, say -- needs its own string here.
 # CONSOLE_CSP=off
 
+# Violations of the policy above are always logged by Jetstream as a security
+# warning, whether or not anything below is set. Set a URL here to have a copy
+# of each report forwarded to your own collector as well -- a security team's
+# feed, for instance. The forwarded copy carries the whole browser report plus
+# server-side context, with the response nonce redacted.
+# CONSOLE_CSP_REPORT_COLLECTOR=https://collector.example.com/csp
+
+# A second, stricter policy sent as Content-Security-Policy-Report-Only. It
+# blocks nothing: violations of it are reported alongside the enforced policy,
+# so a tightening can be measured against real traffic before it is enforced.
+# No built-in value -- only you know what you want to trial.
+# CONSOLE_CSP_REPORT_ONLY=default-src 'self'; script-src 'nonce-PLACEHOLDER' 'strict-dynamic'
+
 # Enable users create user endpoints (disabled, admin_only, enabled). Default is disabled
 # admin_only will enable admins to create or see user endpoints, but users won't be able to create user endpoints or see them
 USER_ENDPOINTS_ENABLED=disabled

@@ -44,6 +44,28 @@ func cspHeaderWithNonce(policy, nonce string) string {
 	return strings.ReplaceAll(policy, cspNoncePlaceholder, "'nonce-"+nonce+"'")
 }
 
+// policyWithReporting appends the violation reporting directive to policy.
+//
+// This applies to an operator's custom CONSOLE_CSP as well as the built-in
+// policy, which is a deliberate exception to using a custom policy verbatim.
+// A reporting directive grants and denies nothing — it cannot change what the
+// browser loads — and an operator who has written their own policy is the one
+// most likely to block something they did not intend to.
+//
+// A policy that already names a reporting directive is left alone. Declaring
+// report-uri twice does not merge the two: the browser takes the first and
+// warns about the rest, so appending would quietly cost the operator the
+// destination they chose.
+func policyWithReporting(policy string) string {
+	if policy == "" {
+		return ""
+	}
+	if strings.Contains(policy, "report-uri") || strings.Contains(policy, "report-to") {
+		return policy
+	}
+	return policy + "; report-uri " + cspReportPath
+}
+
 // serveIndexHTML serves the SPA document with a freshly minted nonce in both
 // the CSP header and the markup that header authorises.
 //
@@ -56,9 +78,19 @@ func cspHeaderWithNonce(policy, nonce string) string {
 // re-appliable, so the result is never written back over it.
 func (p *portalProxy) serveIndexHTML(c echo.Context) error {
 	nonce := rand.Text()
+	config := p.GetConfig()
 
-	if policy := p.GetConfig().CSPPolicy; policy != "" {
+	if policy := config.CSPPolicy; policy != "" {
 		c.Response().Header().Set("Content-Security-Policy", cspHeaderWithNonce(policy, nonce))
+	}
+
+	// A report-only policy rides alongside the enforced one, carrying the same
+	// nonce because it describes the same response. Nothing it names is
+	// blocked; violations of it are reported with disposition "report", which
+	// is how a stricter policy gets measured against real traffic before it is
+	// enforced. Empty unless an operator supplies one.
+	if policy := config.CSPReportOnlyPolicy; policy != "" {
+		c.Response().Header().Set("Content-Security-Policy-Report-Only", cspHeaderWithNonce(policy, nonce))
 	}
 
 	// Each response carries a different nonce, so this document must never be
