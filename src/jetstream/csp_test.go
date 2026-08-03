@@ -284,3 +284,71 @@ func TestServeIndexHTMLOmitsCSPHeaderWhenPolicyEmpty(t *testing.T) {
 		t.Errorf("no CSP header when the policy is empty, got %q", got)
 	}
 }
+
+func TestPolicyWithReportingAppendsTheDirective(t *testing.T) {
+	got := policyWithReporting("default-src 'self'")
+	if got != "default-src 'self'; report-uri "+cspReportPath {
+		t.Errorf("the reporting directive should be appended, got %q", got)
+	}
+}
+
+// A custom policy gets the directive too. It grants and denies nothing, and an
+// operator who wrote their own policy is the most likely to block something by
+// accident.
+func TestPolicyWithReportingAppliesToACustomPolicy(t *testing.T) {
+	if !strings.Contains(policyWithReporting("default-src 'none'"), "report-uri "+cspReportPath) {
+		t.Error("a custom policy should carry the reporting directive")
+	}
+}
+
+// Declaring report-uri twice does not merge the destinations — the browser
+// takes the first and warns about the rest — so appending would silently cost
+// the operator the collector they chose.
+func TestPolicyWithReportingLeavesAnOperatorsOwnDestinationAlone(t *testing.T) {
+	for _, policy := range []string{
+		"default-src 'self'; report-uri https://collector.example/csp",
+		"default-src 'self'; report-to csp-endpoint",
+	} {
+		if got := policyWithReporting(policy); got != policy {
+			t.Errorf("policy %q already reports somewhere and must be left alone, got %q", policy, got)
+		}
+	}
+}
+
+// CSP off means no header at all, so there is nothing to append to.
+func TestPolicyWithReportingLeavesEmptyPolicyEmpty(t *testing.T) {
+	if got := policyWithReporting(""); got != "" {
+		t.Errorf("an empty policy must stay empty, got %q", got)
+	}
+}
+
+func TestServeIndexHTMLSendsNoReportOnlyHeaderUnlessConfigured(t *testing.T) {
+	p := &portalProxy{indexHTMLTemplate: `<style>a{}</style><app-root></app-root>`}
+	p.Config.CSPPolicy = defaultCSPPolicy
+
+	if got := serveIndex(t, p).Header().Get("Content-Security-Policy-Report-Only"); got != "" {
+		t.Errorf("no report-only policy is configured, so no header should be sent, got %q", got)
+	}
+}
+
+// Both headers describe the same response, so a candidate policy that nonces
+// anything has to carry the nonce that response actually used.
+func TestServeIndexHTMLReportOnlyCarriesTheEnforcedNonce(t *testing.T) {
+	p := &portalProxy{indexHTMLTemplate: `<style>a{}</style><app-root></app-root>`}
+	p.Config.CSPPolicy = "style-src-elem 'self' " + cspNoncePlaceholder
+	p.Config.CSPReportOnlyPolicy = "script-src " + cspNoncePlaceholder + " 'strict-dynamic'"
+
+	rec := serveIndex(t, p)
+	enforced := rec.Header().Get("Content-Security-Policy")
+	reportOnly := rec.Header().Get("Content-Security-Policy-Report-Only")
+
+	if reportOnly == "" {
+		t.Fatal("a configured report-only policy must be sent")
+	}
+	if strings.Contains(reportOnly, "PLACEHOLDER") {
+		t.Errorf("the report-only placeholder must be substituted too: %q", reportOnly)
+	}
+	if nonceFromHeader(t, reportOnly) != nonceFromHeader(t, enforced) {
+		t.Errorf("both headers describe one response and must share its nonce:\n enforced=%q\n report-only=%q", enforced, reportOnly)
+	}
+}

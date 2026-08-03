@@ -25,6 +25,20 @@ The `CONSOLE_CSP` environment variable controls the header.
 
 Values are matched without regard to case.
 
+Two further variables control violation reporting, described under
+[Violation reporting](#violation-reporting) below.
+
+| Variable | Effect |
+|----------|--------|
+| `CONSOLE_CSP_REPORT_COLLECTOR` | A URL to forward a copy of each report to, in addition to the log. Unset means the log only. |
+| `CONSOLE_CSP_REPORT_ONLY` | A stricter policy to trial without enforcing it. Unset means no such header. |
+
+One directive is added to whatever policy is in effect, including one you
+supply yourself: `report-uri /pp/v1/csp-report`, which is how violations reach
+the log at all. It permits and forbids nothing. If your own policy already
+names a `report-uri` or `report-to`, yours is left alone and nothing is
+appended — declaring either twice would lose the destination you chose.
+
 ## The built-in policy
 
 ```
@@ -38,7 +52,8 @@ connect-src 'self';
 worker-src 'self' blob:;
 frame-ancestors 'self';
 base-uri 'self';
-form-action 'self'
+form-action 'self';
+report-uri /pp/v1/csp-report
 ```
 
 A few of these are worth explaining:
@@ -67,6 +82,88 @@ A few of these are worth explaining:
   CSP offers no nonce or hash for attributes whose values are computed at
   runtime, so this cannot be tightened by configuration; it needs the libraries
   to set those styles through the CSSOM instead, which CSP exempts.
+
+## Violation reporting
+
+When the browser refuses to load something the policy does not permit, it posts
+a report to Stratos, which writes it to the Jetstream log as a security
+warning. This is on whenever the policy is, and needs no configuration.
+
+It matters because a blocked resource is usually **silent**. The page keeps
+rendering, the elements still look right in the inspector, and the only signs
+are a console message nobody is watching and something subtly wrong on screen.
+Without reporting, the first you hear of it is a user saying a page looks odd.
+
+A logged violation looks like this:
+
+```
+WARN[Mon Aug  3 13:18:01 PDT 2026] SECURITY: Content-Security-Policy violation reported by browser
+  blocked_uri=inline disposition=enforce
+  document_uri="https://stratos.example.com/applications/9f2c/log-stream"
+  line_number=1 security_event=csp-violation
+  source_file="https://stratos.example.com/main-7F3A9C2E.js"
+  violated_directive=style-src-elem
+```
+
+Find them with `grep 'SECURITY:'`, or if you run Jetstream with
+`LOG_TO_JSON=true`, filter on `.security_event == "csp-violation"`.
+
+`violated_directive` names the rule, and `source_file` with `line_number` is
+what identifies the resource — for an inline style or script, `blocked_uri` is
+only ever the word `inline`.
+
+Two things are deliberately absent. The report's `original-policy` field is not
+logged: it is the whole policy, identical on every violation, and it contains
+that response's nonce. Nor is any user identified — a violation is a fact about
+a page, and putting names in a security log is a liability of its own.
+
+Reports are logged at a bounded rate. The endpoint has to accept requests
+without authentication, because the login page carries the policy too and a
+violation there must still be reportable, so the rate is capped to stop it
+being used to fill your log storage. If the cap is reached, the count of
+reports not written is logged when the minute ends, rather than dropping them
+silently.
+
+### Sending reports somewhere else as well
+
+Set `CONSOLE_CSP_REPORT_COLLECTOR` to a URL and Stratos will also forward each
+report there. This is in addition to the log, never instead of it.
+
+The forwarded copy is richer than the log line, because a collector is a
+security feed rather than something you read by eye. It carries the complete
+browser report plus the Stratos version and commit, the time of receipt,
+whether the policy was the built-in one or your own, the client address and
+`X-Forwarded-For`, the user agent, and whether the page was authenticated — as
+a yes or no, not as an identity.
+
+The response nonce is replaced with `'nonce-REDACTED'` before the report is
+sent. Everything else in the policy is left intact.
+
+Forwarding is best-effort: one attempt with a short timeout, no retry and no
+queue. A collector that is down costs you forwarded reports, never a delay to
+the console, and the failure is logged. The log remains the record.
+
+Because reports come to Stratos first and are forwarded from there, the
+collector URL is never sent to the browser.
+
+### Trialling a stricter policy
+
+`CONSOLE_CSP_REPORT_ONLY` takes a full policy string and sends it as
+`Content-Security-Policy-Report-Only` alongside the enforced one. It blocks
+nothing. Violations of it arrive through the same reporting as above, marked
+`disposition=report` instead of `enforce`, so you can see what a tightening
+*would* have broken before you enforce it.
+
+There is no built-in value: only you know what you want to trial.
+
+Both headers describe the same response, so a candidate policy may use
+`'nonce-PLACEHOLDER'` and it is substituted with the same nonce the enforced
+policy used.
+
+One thing to expect: a report-only policy makes the browser log a
+"would have been blocked" message in the user's console for everything the
+candidate would refuse. Nothing breaks, but users with developer tools open
+will see it, so trial a candidate on a staging foundation before a busy one.
 
 ## Overriding the policy
 

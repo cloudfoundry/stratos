@@ -1,0 +1,2 @@
+[Features]
+- Content-Security-Policy violations are now reported to Jetstream and logged as a security warning, so a resource the policy blocks no longer fails silently. Grep the log for `SECURITY:`, or filter on `security_event` if you run with `LOG_TO_JSON=true`. Set `CONSOLE_CSP_REPORT_COLLECTOR` to forward a fuller copy of each report to your own collector as well, and `CONSOLE_CSP_REPORT_ONLY` to trial a stricter policy against real traffic without enforcing it.

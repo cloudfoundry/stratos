@@ -674,6 +674,25 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 		pc.CSPPolicy = ""
 	}
 
+	// Violation reporting. Resolved here rather than per response so that the
+	// policy Jetstream holds is the policy it sends, and a custom policy
+	// carries the directive too — see policyWithReporting for why that is
+	// worth the exception to using a custom policy verbatim.
+	pc.CSPPolicy = policyWithReporting(pc.CSPPolicy)
+
+	// A report-only policy has no built-in value: it exists to carry a
+	// candidate stricter than what is enforced, and Stratos has no opinion on
+	// what an operator wants to trial. Unset means no header. It gets the same
+	// reporting directive, since a policy nothing reports on measures nothing.
+	switch {
+	case strings.EqualFold(pc.CSPReportOnlyPolicy, "off"),
+		strings.EqualFold(pc.CSPReportOnlyPolicy, "none"),
+		strings.EqualFold(pc.CSPReportOnlyPolicy, "false"),
+		strings.EqualFold(pc.CSPReportOnlyPolicy, "disabled"):
+		pc.CSPReportOnlyPolicy = ""
+	}
+	pc.CSPReportOnlyPolicy = policyWithReporting(pc.CSPReportOnlyPolicy)
+
 	// HSTS. The same vocabulary as CONSOLE_CSP above, with the opposite
 	// default: unset means no header.
 	//   - unset / "off" / "none" / "false" / "disabled" -> no header
@@ -1093,6 +1112,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// Ping - returns version (but is not logged)
 	pp.GET("/v1/ping", p.getVersions)
+
+	// Content-Security-Policy violation reports. Unauthenticated of necessity:
+	// the login page carries the policy too, so a violation has to be
+	// reportable before anyone has signed in. Registered outside sessionGroup,
+	// so it takes neither the session nor the XSRF middleware — a browser
+	// posting a violation report sends no XSRF token and cannot be made to.
+	pp.POST("/v1/csp-report", p.receiveCSPReport, middleware.BodyLimit(cspReportBodyLimit))
 
 	// All routes in the session group need the user to be authenticated
 	sessionGroup := pp.Group("/v1")

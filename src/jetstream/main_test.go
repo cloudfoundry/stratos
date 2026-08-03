@@ -120,8 +120,9 @@ func TestLoadPortalConfig(t *testing.T) {
 	}
 
 	// CSP is on by default: CONSOLE_CSP is not supplied above, so the built-in
-	// policy applies. Opting out takes an explicit off-value.
-	if result.CSPPolicy != defaultCSPPolicy {
+	// policy applies. Opting out takes an explicit off-value. The resolved
+	// policy carries the reporting directive, which is appended at load time.
+	if result.CSPPolicy != policyWithReporting(defaultCSPPolicy) {
 		t.Errorf("Expected the default CSP policy when CONSOLE_CSP unset, got: %q", result.CSPPolicy)
 	}
 }
@@ -137,7 +138,7 @@ func TestLoadPortalConfigDefaultCSP(t *testing.T) {
 		if err != nil {
 			t.Fatalf("Unable to load portal config for CONSOLE_CSP=%q: %v", val, err)
 		}
-		if result.CSPPolicy != defaultCSPPolicy {
+		if result.CSPPolicy != policyWithReporting(defaultCSPPolicy) {
 			t.Errorf("Expected default CSP policy for CONSOLE_CSP=%q, got %q", val, result.CSPPolicy)
 		}
 	}
@@ -153,8 +154,10 @@ func TestLoadPortalConfigCustomCSP(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Unable to load portal config: %v", err)
 	}
-	if result.CSPPolicy != custom {
-		t.Errorf("Expected custom CSP policy %q, got %q", custom, result.CSPPolicy)
+	// A custom policy is used as given except for the reporting directive,
+	// which is appended to it too — see policyWithReporting.
+	if result.CSPPolicy != policyWithReporting(custom) {
+		t.Errorf("Expected custom CSP policy %q, got %q", policyWithReporting(custom), result.CSPPolicy)
 	}
 }
 
