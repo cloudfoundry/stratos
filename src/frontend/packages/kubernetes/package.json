@@ -2,8 +2,8 @@
   "name": "@stratosui/kubernetes",
   "version": "0.0.1",
   "peerDependencies": {
-    "@angular/common": "22.0.1",
-    "@angular/core": "22.0.1"
+    "@angular/common": "22.0.8",
+    "@angular/core": "22.0.8"
   },
   "stratos": {
     "module": "KubePackageModule",
