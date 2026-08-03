@@ -21,6 +21,14 @@ updates:
       prefix: "chore(deps)"
       prefix-development: "chore(deps-dev)"
     open-pull-requests-limit: 0 # version updates off; security updates still open PRs
+    ignore:
+      # Angular releases its packages as one set, and eight package.json files
+      # here pin the framework to an exact version -- seven of them as
+      # peerDependencies. A single-package bump therefore lands a tree that
+      # cannot satisfy its own peer ranges (PRs #5745 and #5746 both did).
+      # Move the whole family in one commit instead.
+      - dependency-name: "@angular/*"
+      - dependency-name: "@angular-devkit/*"
 
   - package-ecosystem: "bun"
     directory: "/website"
