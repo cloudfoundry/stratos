@@ -122,6 +122,19 @@ const (
 //     well until the AMD loader went away in #5561; a blob: worker inherits
 //     the creating document's policy, so re-granting it is a way back to
 //     running script the nonce never authorised.
+//   - require-trusted-types-for 'script' closes the sinks script-src cannot
+//     see. A nonce governs how script ARRIVES; it says nothing about a string
+//     assigned to innerHTML by script that is already trusted, which is the
+//     DOM-XSS half of the problem. Under this directive the browser refuses a
+//     plain string at those sinks outright.
+//
+//     No trusted-types allowlist accompanies it, so any policy name is
+//     permitted. Angular creates 'angular' and 'angular#unsafe-bypass', and
+//     Monaco creates nine of its own; naming them would pin this policy to
+//     the internals of two dependencies and break the console on the upgrade
+//     that adds a tenth. The allowlist is what stops an attacker who already
+//     runs script from minting their own policy — which, at that point, is no
+//     longer the boundary that matters.
 //   - frame-ancestors 'self' mirrors the existing X-Frame-Options: SAMEORIGIN
 // Operators can instead set CONSOLE_CSP to a full policy string to use verbatim.
 const defaultCSPPolicy = "default-src 'self'; " +
@@ -140,7 +153,8 @@ const defaultCSPPolicy = "default-src 'self'; " +
 	"worker-src 'self'; " +
 	"frame-ancestors 'self'; " +
 	"base-uri 'self'; " +
-	"form-action 'self'"
+	"form-action 'self'; " +
+	"require-trusted-types-for 'script'"
 
 var appVersion string
 var buildDate string

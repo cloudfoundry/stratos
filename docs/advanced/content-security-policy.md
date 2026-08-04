@@ -54,6 +54,7 @@ worker-src 'self';
 frame-ancestors 'self';
 base-uri 'self';
 form-action 'self';
+require-trusted-types-for 'script';
 report-uri /pp/v1/csp-report
 ```
 
@@ -90,6 +91,14 @@ A few of these are worth explaining:
   own address, which is what an origin-based rule cannot do. Adding `'self'`
   back would not restore anything, because the browser ignores it; if you need
   a script from somewhere else, the mechanism is a nonce, not an origin.
+- `require-trusted-types-for 'script'` covers what the rules above cannot see.
+  They all govern how script and styles *arrive*; none of them says anything
+  about a string that script already running assigns to `innerHTML`, which is
+  where DOM-based XSS lives. With this set, the browser refuses a plain string
+  at those points outright. No `trusted-types` allowlist accompanies it, so any
+  policy name is permitted: naming them would tie the console's policy to the
+  internals of Angular and the code editor, and break it on the upgrade that
+  adds one.
 - `'report-sample'` permits nothing. It asks the browser to include the opening
   characters of whatever it refused in the violation report, which is the only
   thing that distinguishes one blocked inline script or style from another. It

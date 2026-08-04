@@ -247,6 +247,27 @@ func TestDefaultCSPPolicyWorkerSrcForbidsBlobURLs(t *testing.T) {
 	}
 }
 
+// The nonce governs how script arrives and says nothing about a string a
+// trusted script assigns to innerHTML, which is where DOM XSS lives. Without
+// this directive that half of the problem is not policed at all.
+func TestDefaultCSPPolicyRequiresTrustedTypes(t *testing.T) {
+	if !slices.Contains(directiveSources(t, defaultCSPPolicy, "require-trusted-types-for"), "'script'") {
+		t.Errorf("the policy must require trusted types for script sinks: %q", defaultCSPPolicy)
+	}
+}
+
+// An allowlist would have to name every policy Angular and Monaco create
+// between them, which pins this policy to their internals: the upgrade that
+// adds one breaks the console. Absent, any name is permitted, which is the
+// deliberate trade.
+func TestDefaultCSPPolicyDoesNotAllowlistTrustedTypesPolicies(t *testing.T) {
+	for _, directive := range strings.Split(defaultCSPPolicy, "; ") {
+		if fields := strings.Fields(directive); len(fields) > 0 && fields[0] == "trusted-types" {
+			t.Errorf("a trusted-types allowlist has to track Angular's and Monaco's policy names: %q", directive)
+		}
+	}
+}
+
 // style-src-elem overrides style-src for elements wholesale rather than
 // intersecting with it, so a source added to style-src alone is silently
 // withdrawn from every <style> and <link rel=stylesheet>.
