@@ -379,6 +379,37 @@ describe('EndpointDataService', () => {
       expect(service.serviceOfferingsAndPlans()).toBeNull();
     });
 
+    // A failed fetch is swallowed into { resources: [] }. Stamping the bundle
+    // anyway published an empty-but-warm cache: consumers pre-seeded from it,
+    // skipped their own fetch, and rendered an empty list until a reload —
+    // with no toast, because the error only reaches errors() (#5755).
+    it('leaves the instances bundle cold when the instances fetch fails', async () => {
+      const done = service.loadServicesDetails();
+      httpMock.expectOne(SERVICE_INSTANCES_FULL_URL).error(new ProgressEvent('network'));
+      httpMock.expectOne(SERVICE_OFFERINGS_FULL_URL).flush({ resources: [{ guid: 'off-1' }] });
+      httpMock.expectOne(SERVICE_PLANS_FULL_URL).flush({ resources: [] });
+      httpMock.expectOne(SERVICE_BROKERS_FULL_URL).flush({ resources: [] });
+      await done;
+
+      // Cold → the next consumer refetches instead of pre-seeding from [].
+      expect(service.serviceInstancesAndBrokers()).toBeNull();
+      // The offerings half succeeded, so it stays warm.
+      expect(service.serviceOfferingsAndPlans()).not.toBeNull();
+    });
+
+    it('a failed instances fetch does not wipe already-loaded instances', async () => {
+      service.setServiceInstancesAndBrokers([{ guid: 'si-1' } as any], []);
+
+      const done = service.loadServicesDetails();
+      httpMock.expectOne(SERVICE_INSTANCES_FULL_URL).error(new ProgressEvent('network'));
+      httpMock.expectOne(SERVICE_OFFERINGS_FULL_URL).flush({ resources: [] });
+      httpMock.expectOne(SERVICE_PLANS_FULL_URL).flush({ resources: [] });
+      httpMock.expectOne(SERVICE_BROKERS_FULL_URL).flush({ resources: [] });
+      await done;
+
+      expect(service.serviceInstances()).toHaveLength(1);
+    });
+
     it('loadServicesDetails() still fetches when only the offerings bundle is warm', async () => {
       service.setServiceOfferingsAndPlans([{ guid: 'off-1' } as any], [{ guid: 'pl-1' } as any]);
 
