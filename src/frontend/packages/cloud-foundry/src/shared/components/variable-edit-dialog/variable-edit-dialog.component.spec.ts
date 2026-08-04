@@ -7,18 +7,19 @@ import { VariableEditDialogComponent, VariableEditDialogData } from './variable-
 
 function make(data: VariableEditDialogData) {
   const close = vi.fn();
+  const ref: { close: typeof close; closeGuard?: () => boolean } = { close };
   TestBed.resetTestingModule();
   TestBed.configureTestingModule({
     providers: [
       provideZonelessChangeDetection(),
       { provide: MAT_DIALOG_DATA, useValue: data },
-      { provide: TailwindDialogRef, useValue: { close } },
+      { provide: TailwindDialogRef, useValue: ref },
     ],
   });
   // createComponent (no detectChanges) runs the constructor — initializing
   // the signals from MAT_DIALOG_DATA — without rendering the Monaco editor.
   const fixture = TestBed.createComponent(VariableEditDialogComponent);
-  return { cmp: fixture.componentInstance, close };
+  return { cmp: fixture.componentInstance, close, ref };
 }
 
 /** Construct the component OUTSIDE a fixture: the language-switch effect then
@@ -269,5 +270,45 @@ describe('VariableEditDialogComponent', () => {
     cmp.name.set('RENAMED');
     cmp.save();
     expect(close).toHaveBeenCalledWith({ name: 'RENAMED', value: 'v' });
+  });
+
+  // -------------------------------------------------------------------------
+  // unsaved edits block the dismissals that discard silently
+  // -------------------------------------------------------------------------
+
+  it('does not guard an untouched dialog, so click-away still works', () => {
+    const { ref } = make({ mode: 'edit', name: 'FOO', value: 'bar' });
+    expect(ref.closeGuard?.()).toBe(false);
+  });
+
+  it('guards once the value has been edited', () => {
+    const { cmp, ref } = make({ mode: 'edit', name: 'FOO', value: 'bar' });
+    cmp.value.set('bar changed');
+    expect(ref.closeGuard?.()).toBe(true);
+  });
+
+  it('guards once the name has been edited', () => {
+    const { cmp, ref } = make({ mode: 'edit', name: 'FOO', value: 'bar' });
+    cmp.name.set('RENAMED');
+    expect(ref.closeGuard?.()).toBe(true);
+  });
+
+  // Add opens empty, so the first keystroke is what makes it dirty — otherwise
+  // an accidental dismissal of a half-typed new variable still loses it.
+  it('guards a new variable as soon as anything is typed', () => {
+    const { cmp, ref } = make({ mode: 'add' });
+    expect(ref.closeGuard?.()).toBe(false);
+    cmp.name.set('N');
+    expect(ref.closeGuard?.()).toBe(true);
+  });
+
+  // The guard is a live read, not a latch: undoing the edit by hand has to
+  // hand click-away back.
+  it('stops guarding when the edit is reverted by hand', () => {
+    const { cmp, ref } = make({ mode: 'edit', name: 'FOO', value: 'bar' });
+    cmp.value.set('bar changed');
+    expect(ref.closeGuard?.()).toBe(true);
+    cmp.value.set('bar');
+    expect(ref.closeGuard?.()).toBe(false);
   });
 });

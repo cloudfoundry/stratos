@@ -114,6 +114,13 @@ export class VariableEditDialogComponent {
   /** Save is gated solely by hard name errors — warnings never block. */
   readonly canSave: Signal<boolean> = computed(() => !this.nameValidation().hardError);
 
+  /** Whether anything has been typed that closing would throw away. Compared
+   *  against what the dialog was opened with, so reverting an edit by hand
+   *  makes it clean again. */
+  readonly isDirty: Signal<boolean> = computed(() =>
+    this.name() !== (this.data.name ?? '') || this.value() !== (this.data.value ?? ''),
+  );
+
   /** Format/Minify is offered only in JSON mode and only when the text
    *  parses — reformatting non-JSON makes no sense. */
   readonly canFormat: Signal<boolean> = computed(() => {
@@ -150,6 +157,13 @@ export class VariableEditDialogComponent {
     this.value = signal(this.data.value ?? '');
     this.jsonMode = signal(looksLikeJson(this.data.value ?? ''));
     this.title = this.data.mode === 'add' ? 'Add Variable' : 'Edit Variable';
+
+    // Refuse the dismissals that discard silently — a backdrop click and
+    // Escape — while there is unsaved work. Cancel and Save still close: they
+    // are the exits the user actually aimed at. This dialog is resizable, and
+    // the resize grip sits at the panel corner with the backdrop a few pixels
+    // outside it, so a missed grab would otherwise take the edit with it.
+    this.dialogRef.closeGuard = () => this.isDirty();
 
     // Apply live language switches to the running editor when the user
     // toggles JSON/Plain. A no-op before the editor exists (setLanguage
