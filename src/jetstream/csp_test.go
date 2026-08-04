@@ -209,6 +209,17 @@ func TestDefaultCSPPolicyScriptSrcCarriesNoIgnoredSource(t *testing.T) {
 	}
 }
 
+// blob: was here for Monaco's language workers, which have been built from
+// same-origin module URLs since the ESM change in #5561. A blob: worker
+// inherits the creating document's policy, so re-granting it is a way back to
+// running script the nonce never authorised — the one thing script-src
+// 'strict-dynamic' was just tightened to prevent.
+func TestDefaultCSPPolicyWorkerSrcForbidsBlobURLs(t *testing.T) {
+	if slices.Contains(directiveSources(t, defaultCSPPolicy, "worker-src"), "blob:") {
+		t.Errorf("worker-src must not grant blob:: %q", defaultCSPPolicy)
+	}
+}
+
 // style-src-elem overrides style-src for elements wholesale rather than
 // intersecting with it, so a source added to style-src alone is silently
 // withdrawn from every <style> and <link rel=stylesheet>.

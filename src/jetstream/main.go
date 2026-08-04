@@ -110,8 +110,12 @@ const (
 //     mechanism for dynamic attributes, so no policy change can tighten this.
 //     It also remains the whole style policy on pre-CSP3 browsers.
 //   - data: images/fonts (inlined icons) and Google Fonts font files
-//   - worker-src blob: — the Monaco editor spins up its language web-workers
-//     from blob URLs
+//   - worker-src 'self' — Monaco's language workers are same-origin module
+//     workers built from `new Worker(new URL(…), {type: 'module'})`, hashed
+//     chunks like the rest of the app (monaco-loader.ts). It granted blob: as
+//     well until the AMD loader went away in #5561; a blob: worker inherits
+//     the creating document's policy, so re-granting it is a way back to
+//     running script the nonce never authorised.
 //   - frame-ancestors 'self' mirrors the existing X-Frame-Options: SAMEORIGIN
 // Operators can instead set CONSOLE_CSP to a full policy string to use verbatim.
 const defaultCSPPolicy = "default-src 'self'; " +
@@ -127,7 +131,7 @@ const defaultCSPPolicy = "default-src 'self'; " +
 	// the backend log/stream sockets connect without a bare ws:/wss: wildcard
 	// (which scanners flag as overly permissive — it would allow any host).
 	"connect-src 'self'; " +
-	"worker-src 'self' blob:; " +
+	"worker-src 'self'; " +
 	"frame-ancestors 'self'; " +
 	"base-uri 'self'; " +
 	"form-action 'self'"

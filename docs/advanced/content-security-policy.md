@@ -50,7 +50,7 @@ style-src-elem 'self' 'nonce-PLACEHOLDER' https://fonts.googleapis.com;
 font-src 'self' data: https://fonts.gstatic.com;
 img-src 'self' data:;
 connect-src 'self';
-worker-src 'self' blob:;
+worker-src 'self';
 frame-ancestors 'self';
 base-uri 'self';
 form-action 'self';
@@ -67,8 +67,11 @@ A few of these are worth explaining:
   rather than left to `default-src`, because falling back to `'self'` would
   still permit plugin content served from the console's own origin. The console
   embeds none.
-- `worker-src blob:` is required by the code editor, which starts its language
-  workers from blob URLs.
+- `worker-src 'self'` covers the code editor's language workers, which are
+  ordinary same-origin scripts served by the console like any other. Earlier
+  releases also permitted `blob:` here, and no longer do: a worker started from
+  a blob URL runs under the page's own policy, which would give script a way in
+  that the nonce above never authorised.
 - `frame-ancestors 'self'` mirrors the `X-Frame-Options: SAMEORIGIN` header
   Stratos already sends.
 - The Google Fonts origins are permitted because the console can load its
