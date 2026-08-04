@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject, effect } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -29,6 +29,7 @@ import { IUserProvidedServiceInstanceData } from '../../../../cf-api-svc.types';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { AppNameUniqueChecking } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
+import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { CreateServiceFormMode, CsiModeService } from './../csi-mode.service';
 import { CsiState, CsiStateService } from './../csi-state.service';
 
@@ -72,6 +73,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   // because there's no in-context bindings view to update.
   private appDetailData = inject(AppDetailDataService, { optional: true });
   private csiState = inject(CsiStateService);
+  private serviceCatalog = inject(ServiceCatalogDataService);
   // toObservable() must run inside an injection context — lift to a class field.
   private csiState$ = toObservable(this.csiState.state);
 
@@ -93,6 +95,34 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }) });
     this.initUpdate(serviceInstanceId, endpointId);
     this.setupValidate();
+
+    // Bridge revealed credentials into the textarea once the sub-resource
+    // lands. originalFormValue is recomputed so that revealing on its own
+    // does not register as an edit — the wizard's Next button gates on the
+    // form having actually changed.
+    effect(() => {
+      const creds = this.credsSource()?.value();
+      if (!creds) return;
+      // emitEvent: false — setValue would otherwise fire statusChanges while
+      // originalFormValue still holds the pre-reveal snapshot, and the
+      // validAndChanged() comparison would read the reveal as a user edit and
+      // enable Next. Validation still runs; only the notification is skipped.
+      this.createEditServiceInstance.controls.credentials.setValue(
+        JSON.stringify(creds, null, 2), { emitEvent: false },
+      );
+      this.originalFormValue = this.getServiceData();
+    });
+  }
+
+  /** Credentials sub-resource, fetched on the first reveal. Null until then:
+   *  credentials are sensitive, so they are never pulled on page load (same
+   *  stance as the instance summary page's Credentials section). */
+  public credsSource = signal<SignalSource<Record<string, unknown> | null> | null>(null);
+
+  public revealCredentials(): void {
+    if (!this.isUpdate || this.credsSource()) return;
+    const { endpointId, serviceInstanceId } = this.route.snapshot.params;
+    this.credsSource.set(this.serviceCatalog.userProvidedCredentials(endpointId, serviceInstanceId));
   }
   public createEditServiceInstance: FormGroup<CreateEditServiceInstanceForm>;
   public bindExistingInstance: FormGroup<BindExistingInstanceForm>;
@@ -254,19 +284,19 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       ).subscribe(si => {
         this.createEditServiceInstance.enable();
         // StServiceInstance summary tier exposes name/syslogDrainUrl/
-        // routeServiceUrl/tags directly. credentials are intentionally
-        // NOT carried on the wire (sensitive — the v3 details/credentials
-        // sub-resource needs a separate call); the form starts the
-        // credentials textarea empty for edit, matching legacy behaviour
-        // where a missing credentials field meant "leave existing
-        // credentials untouched".
-        const credentialsJson = (si as unknown as { credentials?: unknown }).credentials !== undefined
-          ? JSON.stringify((si as unknown as { credentials?: unknown }).credentials)
-          : '';
+        // routeServiceUrl/tags directly. credentials are never on a read
+        // response (jetstream native_types.go) — reading them off this
+        // payload always yielded '', which is what left the textarea
+        // permanently blank on edit (#5755). They come from the separate
+        // credentials sub-resource via revealCredentials() instead.
+        //
+        // Blank still means "leave existing credentials untouched":
+        // getServiceData() maps '' to undefined and toV3RequestBody() omits
+        // the key, so saving without revealing preserves what CF holds.
         this.createEditServiceInstance.setValue({
           name: si.name,
           syslog_drain_url: si.syslogDrainUrl ?? '',
-          credentials: credentialsJson,
+          credentials: '',
           route_service_url: si.routeServiceUrl ?? '',
           tags: []
         });

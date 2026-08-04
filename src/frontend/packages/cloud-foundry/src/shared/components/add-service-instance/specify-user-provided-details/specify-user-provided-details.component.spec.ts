@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { ActivatedRoute, provideRouter } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
@@ -9,6 +9,7 @@ import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
+import { ServiceCatalogDataService } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
 import { SpecifyUserProvidedDetailsComponent } from "./specify-user-provided-details.component";
@@ -142,5 +143,100 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       redirect: false,
       message: 'Failed to update service instance: broker rejected the update',
     });
+  });
+});
+
+// #5755 part 2: in edit mode the credentials textarea was always blank. It was
+// filled from the ?return=summary read, which by contract never carries
+// credentials ("credentials never appear on a read response, only on writes"
+// — native_types.go). The credentials live behind a separate sub-resource,
+// fetched on an explicit reveal so secrets are not pulled on page load.
+describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
+  function setup(creds: Record<string, unknown> | null) {
+    const upsServiceStub = {
+      getUserProvidedServices: vi.fn().mockReturnValue(of([])),
+      getUserProvidedService: vi.fn().mockReturnValue(of({
+        name: 'my-ups', syslogDrainUrl: '', routeServiceUrl: '', tags: [],
+      })),
+      updateUserProvidedService: vi.fn().mockReturnValue(of({ success: true })),
+    };
+    const credsSpy = vi.fn().mockReturnValue({
+      value: signal(creds),
+      isLoading: signal(false),
+      error: signal(null),
+    });
+
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [SpecifyUserProvidedDetailsComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        CsiModeService,
+        CsiStateService,
+        { provide: CloudFoundryUserProvidedServicesService, useValue: upsServiceStub },
+        { provide: ServiceCatalogDataService, useValue: { userProvidedCredentials: credsSpy } },
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { endpointId: 'cf-1', serviceInstanceId: 'si-1' },
+              queryParams: {},
+              queryParamMap: { get: () => null },
+            },
+          },
+        },
+      ],
+    });
+
+    const fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);
+    const component = fixture.componentInstance;
+    component.cfGuid = 'cf-1';
+    component.spaceGuid = 'space-1';
+    component.serviceInstanceId = 'si-1';
+    return { fixture, component, credsSpy };
+  }
+
+  it('does not fetch credentials on load', () => {
+    const { fixture, component, credsSpy } = setup({ user: 'admin' });
+    fixture.detectChanges();
+
+    expect(credsSpy).not.toHaveBeenCalled();
+    expect(component.createEditServiceInstance.controls.credentials.value).toBe('');
+  });
+
+  it('fills the textarea from the credentials sub-resource on reveal', () => {
+    const { fixture, component, credsSpy } = setup({ user: 'admin', password: 'p' });
+    fixture.detectChanges();
+
+    component.revealCredentials();
+    fixture.detectChanges();
+
+    expect(credsSpy).toHaveBeenCalledWith('cf-1', 'si-1');
+    expect(JSON.parse(component.createEditServiceInstance.controls.credentials.value))
+      .toEqual({ user: 'admin', password: 'p' });
+  });
+
+  it('revealing alone is not an edit — Next stays disabled', () => {
+    const { fixture, component } = setup({ user: 'admin' });
+    fixture.detectChanges();
+
+    component.revealCredentials();
+    fixture.detectChanges();
+
+    expect(component.validate()).toBe(false);
+  });
+
+  it('fetches once — a second reveal reuses the first result', () => {
+    const { fixture, component, credsSpy } = setup({ user: 'admin' });
+    fixture.detectChanges();
+
+    component.revealCredentials();
+    component.revealCredentials();
+
+    expect(credsSpy).toHaveBeenCalledTimes(1);
   });
 });
