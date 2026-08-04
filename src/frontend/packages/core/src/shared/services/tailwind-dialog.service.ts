@@ -20,6 +20,22 @@ export abstract class TailwindDialogRef<T = any, R = any> {
   abstract afterOpened(): Observable<void>;
   abstract close(dialogResult?: R): void;
   abstract componentInstance: T;
+
+  /**
+   * Consulted before an *incidental* dismissal — a backdrop click or Escape.
+   * Return true to refuse it. Explicit close() calls (a Cancel or Save button)
+   * are never guarded: the user asked for those.
+   *
+   * This exists because both incidental paths discard whatever the dialog
+   * holds, with no undo. On a resizable dialog that is easy to trigger by
+   * accident: the native resize grip sits at the very corner of the panel with
+   * the backdrop immediately outside it, and a press that misses outward is
+   * indistinguishable from a deliberate click-away.
+   *
+   * Read per dismissal rather than latched at open, so a dialog can drop the
+   * guard once its edits are saved or reverted.
+   */
+  closeGuard?: () => boolean;
 }
 
 export interface TailwindDialogConfig<D = any> {
@@ -366,13 +382,22 @@ export class TailwindDialogService {
       // backdrop makes the browser synthesize a `click` whose target resolves
       // to the common ancestor (this overlay), which would wrongly dismiss the
       // dialog. Require the press to have ALSO started on the backdrop.
+      // Both incidental paths route through here so a dialog holding unsaved
+      // work only has to refuse once, rather than once per dismissal gesture.
+      const dismiss = () => {
+        if (dialogRef.closeGuard?.()) {
+          return;
+        }
+        dialogRef.close();
+      };
+
       let pressedOnBackdrop = false;
       const pointerDownListener = (event: MouseEvent) => {
         pressedOnBackdrop = event.target === dialogContainer;
       };
       const backdropClickListener = (event: MouseEvent) => {
         if (event.target === dialogContainer && pressedOnBackdrop) {
-          dialogRef.close();
+          dismiss();
         }
       };
       dialogContainer.addEventListener('mousedown', pointerDownListener);
@@ -384,7 +409,7 @@ export class TailwindDialogService {
           // Only close if this is the topmost dialog
           const topDialog = this.openDialogs[this.openDialogs.length - 1];
           if (topDialog === dialogContainer) {
-            dialogRef.close();
+            dismiss();
           }
         }
       };
