@@ -1243,6 +1243,14 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		// an empty document.
 		if indexHTML, readErr := os.ReadFile(path.Join(staticDir, "index.html")); readErr == nil {
 			p.indexHTMLTemplate = string(indexHTML)
+			// The script tags are appended by the frontend build, so no test
+			// reading the source index.html can pin their form. If the build
+			// ever emits a shape injectNonce cannot match, those scripts ship
+			// un-nonced and a policy without 'unsafe-inline' blocks the app —
+			// say so at startup rather than let it fail silently in a browser.
+			if scriptNonceGap(p.indexHTMLTemplate) {
+				log.Warn("index.html carries script tags injectNonce cannot match; they will be served without a CSP nonce")
+			}
 			staticGroup.GET("/", p.serveIndexHTML)
 		} else {
 			log.Warnf("Unable to read index.html; serving the UI without a CSP nonce: %v", readErr)

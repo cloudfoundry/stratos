@@ -12,9 +12,16 @@ import (
 // per-request nonce belongs. cspHeaderWithNonce substitutes it.
 const cspNoncePlaceholder = "'nonce-PLACEHOLDER'"
 
+// moduleScriptTail is the closing run every script tag the Angular build emits
+// ends with: <script src="main-<hash>.js" type="module"></script>. The hash
+// lives in src, outside this literal, so matching it needs neither a regex nor
+// an HTML rewrite — and once a nonce has been spliced in, the literal no
+// longer occurs, which is what keeps injection non-re-appliable.
+const moduleScriptTail = `type="module"></script>`
+
 // injectNonce returns htmlTemplate with nonce="<n>" on every bare <style> tag
-// and ngCspNonce="<n>" on <app-root> (which Angular reads at bootstrap to
-// nonce the styles it injects at runtime).
+// and on every module <script>, and ngCspNonce="<n>" on <app-root> (which
+// Angular reads at bootstrap to nonce the styles it injects at runtime).
 //
 // nonce must come from crypto/rand.Text(). It is interpolated into an HTML
 // attribute and an HTTP header unescaped, and rand.Text's base32 alphabet is
@@ -23,14 +30,28 @@ const cspNoncePlaceholder = "'nonce-PLACEHOLDER'"
 //
 // The bare opening tags are what index.html ships today; a <style> or
 // <app-root> carrying attributes would be missed silently, so
-// TestInjectNonceOnRealIndexHTML asserts the tag forms have not changed.
+// TestInjectNonceOnRealIndexHTML asserts the tag forms have not changed. It
+// cannot do the same for scripts — the source file has none, the build appends
+// them — so scriptNonceGap reports that mismatch at startup instead.
 //
-// Injection is not re-appliable — no bare tag survives it — so callers must
-// always inject into the pristine template and must never write the result
-// back over it.
+// Injection is not re-appliable — no bare tag and no un-nonced module script
+// survives it — so callers must always inject into the pristine template and
+// must never write the result back over it.
 func injectNonce(htmlTemplate, nonce string) string {
 	withStyles := strings.ReplaceAll(htmlTemplate, "<style>", `<style nonce="`+nonce+`">`)
-	return strings.Replace(withStyles, "<app-root>", `<app-root ngCspNonce="`+nonce+`">`, 1)
+	withScripts := strings.ReplaceAll(withStyles, moduleScriptTail, `type="module" nonce="`+nonce+`"></script>`)
+	return strings.Replace(withScripts, "<app-root>", `<app-root ngCspNonce="`+nonce+`">`, 1)
+}
+
+// scriptNonceGap reports whether htmlTemplate carries any script tag that
+// injectNonce cannot reach, by comparing opening tags against matchable ones.
+//
+// Counting rather than testing for presence is deliberate: it catches a
+// template where only some scripts are matchable, and an inline <script>, both
+// of which would otherwise be served un-nonced and blocked under a policy
+// without 'unsafe-inline'.
+func scriptNonceGap(htmlTemplate string) bool {
+	return strings.Count(htmlTemplate, "<script") != strings.Count(htmlTemplate, moduleScriptTail)
 }
 
 // cspHeaderWithNonce returns policy with every nonce placeholder replaced by

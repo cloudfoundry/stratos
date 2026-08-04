@@ -1,0 +1,3 @@
+[Features]
+- The Content-Security-Policy nonce is now placed on the console's script tags as well as its style tags. This is groundwork: the policy still admits scripts via `'self'`, so nothing an operator has configured behaves differently today, but it is what a later `strict-dynamic` policy will rest on.
+- Jetstream now warns at startup if the `index.html` it is serving carries script tags it cannot nonce. Those tags are appended by the frontend build rather than written by hand, so a change to the form they are emitted in would otherwise surface only as a blank console under a strict policy.
