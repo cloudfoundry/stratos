@@ -23,6 +23,26 @@ func TestInjectNonceStylesAndAppRoot(t *testing.T) {
 	}
 }
 
+func TestInjectNonceScriptTags(t *testing.T) {
+	in := `<script src="polyfills-AAA.js" type="module"></script><script src="main-BBB.js" type="module"></script>`
+	out := injectNonce(in, "N1")
+	if got := strings.Count(out, `type="module" nonce="N1"></script>`); got != 2 {
+		t.Errorf("both module scripts must be nonced, got %d: %q", got, out)
+	}
+	if strings.Contains(out, `type="module"></script>`) {
+		t.Errorf("no un-nonced module script may survive injection: %q", out)
+	}
+}
+
+// The hash in src changes on every build. It sits outside the matched literal,
+// so a differing hash must not affect the result.
+func TestInjectNonceScriptTagsIsHashIndependent(t *testing.T) {
+	in := `<script src="main-ZZZZZZZZ.js" type="module"></script>`
+	if got := injectNonce(in, "N1"); !strings.Contains(got, `src="main-ZZZZZZZZ.js" type="module" nonce="N1">`) {
+		t.Errorf("hash must survive untouched and the tag be nonced: %q", got)
+	}
+}
+
 // The synthetic string above cannot detect a change to the tag forms the
 // frontend actually ships. index.html has two bare <style> tags — the first is
 // inside <noscript>, so a count-1 replace would nonce the wrong one — and one
@@ -30,6 +50,11 @@ func TestInjectNonceStylesAndAppRoot(t *testing.T) {
 // "<style>") so that a tag gaining an attribute turns this test red rather
 // than letting injectNonce miss it silently. Missing the file is a failure,
 // not a skip: this is the only guard against that silent miss.
+//
+// Script tags are deliberately absent from the assertions: the source file
+// carries none — Angular's build appends them — so this test cannot pin the
+// form injectNonce has to match. scriptNonceGap covers that at startup
+// instead; see TestScriptNonceGap.
 func TestInjectNonceOnRealIndexHTML(t *testing.T) {
 	path := filepath.Join("..", "frontend", "packages", "core", "src", "index.html")
 	raw, err := os.ReadFile(path)
@@ -52,18 +77,52 @@ func TestInjectNonceOnRealIndexHTML(t *testing.T) {
 	if strings.Contains(out, "<style>") || strings.Contains(out, "<app-root>") {
 		t.Error("no bare <style> or <app-root> may survive injection")
 	}
+
+	// If the source ever gains script tags, the startup guard stops being the
+	// only thing standing between a form change and un-nonced scripts, and
+	// this test should assert on them directly.
+	if strings.Contains(in, "<script") {
+		t.Error("index.html now ships script tags; assert their form here rather than relying on scriptNonceGap alone")
+	}
+}
+
+// scriptNonceGap is the whole guard for the script form: no built index.html
+// exists in the repo and the backend suite never runs the frontend build, so
+// nothing else can see what the builder actually emits.
+func TestScriptNonceGap(t *testing.T) {
+	cases := []struct {
+		name string
+		html string
+		want bool
+	}{
+		{"emitted form matches", `<script src="main-AAA.js" type="module"></script>`, false},
+		{"both emitted scripts match", `<script src="a.js" type="module"></script><script src="b.js" type="module"></script>`, false},
+		{"unmatchable form", `<script src="main-AAA.js" defer></script>`, true},
+		{"attribute order swapped", `<script type="module" src="main-AAA.js"></script>`, true},
+		{"inline script carries no src to match", `<script>console.log(1)</script>`, true},
+		{"no scripts at all", `<style>a{}</style><app-root></app-root>`, false},
+		{"one matchable, one not", `<script src="a.js" type="module"></script><script src="b.js" defer></script>`, true},
+	}
+	for _, tc := range cases {
+		if got := scriptNonceGap(tc.html); got != tc.want {
+			t.Errorf("%s: scriptNonceGap = %v, want %v", tc.name, got, tc.want)
+		}
+	}
 }
 
 // Injection is not re-appliable: the first nonce sticks. Callers must always
 // inject into the pristine template, never into a previous result.
 func TestInjectNonceOnAlreadyInjectedHTMLKeepsFirstNonce(t *testing.T) {
-	in := `<style>a{}</style><app-root></app-root>`
+	in := `<style>a{}</style><app-root></app-root><script src="main-AAA.js" type="module"></script>`
 	out := injectNonce(injectNonce(in, "A"), "B")
 	if strings.Contains(out, `"B"`) {
 		t.Errorf("second injection must not apply: %q", out)
 	}
 	if !strings.Contains(out, `<style nonce="A">`) || !strings.Contains(out, `<app-root ngCspNonce="A">`) {
 		t.Errorf("first nonce must be retained: %q", out)
+	}
+	if !strings.Contains(out, `type="module" nonce="A"></script>`) {
+		t.Errorf("script must retain the first nonce: %q", out)
 	}
 }
 
