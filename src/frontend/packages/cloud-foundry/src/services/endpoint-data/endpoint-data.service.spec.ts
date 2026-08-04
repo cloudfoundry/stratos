@@ -20,6 +20,11 @@ const SERVICE_OFFERINGS_COUNTS_URL = '/pp/v1/cf/service_offerings/test-cnsi-guid
 const SERVICE_PLANS_COUNTS_URL = '/pp/v1/cf/service_plans/test-cnsi-guid?return=counts';
 const SERVICE_BROKERS_COUNTS_URL = '/pp/v1/cf/service_brokers/test-cnsi-guid?return=counts';
 
+const SERVICE_INSTANCES_FULL_URL = '/pp/v1/cf/service_instances/test-cnsi-guid?return=summary&per_page=500&page=1';
+const SERVICE_OFFERINGS_FULL_URL = '/pp/v1/cf/service_offerings/test-cnsi-guid?return=summary&per_page=500&page=1';
+const SERVICE_PLANS_FULL_URL = '/pp/v1/cf/service_plans/test-cnsi-guid?return=summary&per_page=500&page=1';
+const SERVICE_BROKERS_FULL_URL = '/pp/v1/cf/service_brokers/test-cnsi-guid?return=summary&per_page=500&page=1';
+
 describe('EndpointDataService', () => {
   let httpMock: HttpTestingController;
   let shimSpy: { write: ReturnType<typeof vi.fn> };
@@ -326,7 +331,7 @@ describe('EndpointDataService', () => {
       expect(service.serviceInstancesAndBrokers()).toBeNull();
     });
 
-    it('setServiceOfferingsAndPlans() stamps timestamp and exposes the bundle on read', () => {
+    it('setServiceOfferingsAndPlans() exposes the bundle on read', () => {
       const offerings = [{ guid: 'off-1', name: 'mysql' } as any];
       const plans = [{ guid: 'pl-1', name: 'small' } as any];
       service.setServiceOfferingsAndPlans(offerings, plans);
@@ -334,10 +339,9 @@ describe('EndpointDataService', () => {
       expect(bundle).not.toBeNull();
       expect(bundle!.offerings).toBe(offerings);
       expect(bundle!.plans).toBe(plans);
-      expect(service.servicesDetailsLastFetched()).not.toBeNull();
     });
 
-    it('setServiceInstancesAndBrokers() stamps timestamp and exposes the bundle on read', () => {
+    it('setServiceInstancesAndBrokers() exposes the bundle on read', () => {
       const instances = [{ guid: 'si-1', name: 'cache' } as any];
       const brokers = [{ guid: 'br-1', name: 'broker' } as any];
       service.setServiceInstancesAndBrokers(instances, brokers);
@@ -345,7 +349,13 @@ describe('EndpointDataService', () => {
       expect(bundle).not.toBeNull();
       expect(bundle!.instances).toBe(instances);
       expect(bundle!.brokers).toBe(brokers);
-      expect(service.servicesDetailsLastFetched()).not.toBeNull();
+    });
+
+    // servicesDetailsLastFetched now means "a full four-list load ran", so a
+    // single-bundle write-back must not advertise one.
+    it('a bundle write-back does not claim a full services-details load', () => {
+      service.setServiceInstancesAndBrokers([{ guid: 'si-1' } as any], []);
+      expect(service.servicesDetailsLastFetched()).toBeNull();
     });
 
     it('accessors return empty arrays (not null) when timestamp set but lists empty', () => {
@@ -354,6 +364,32 @@ describe('EndpointDataService', () => {
       expect(bundle).not.toBeNull();
       expect(bundle!.offerings).toEqual([]);
       expect(bundle!.plans).toEqual([]);
+    });
+
+    // Each bundle carries its own freshness stamp. Writing one must not make
+    // the other read as a hot-but-empty cache — a consumer pre-seeding from
+    // that would short-circuit its own fetch and render nothing (#5755).
+    it('setServiceOfferingsAndPlans() leaves the instances bundle cold', () => {
+      service.setServiceOfferingsAndPlans([{ guid: 'off-1' } as any], [{ guid: 'pl-1' } as any]);
+      expect(service.serviceInstancesAndBrokers()).toBeNull();
+    });
+
+    it('setServiceInstancesAndBrokers() leaves the offerings bundle cold', () => {
+      service.setServiceInstancesAndBrokers([{ guid: 'si-1' } as any], [{ guid: 'br-1' } as any]);
+      expect(service.serviceOfferingsAndPlans()).toBeNull();
+    });
+
+    it('loadServicesDetails() still fetches when only the offerings bundle is warm', async () => {
+      service.setServiceOfferingsAndPlans([{ guid: 'off-1' } as any], [{ guid: 'pl-1' } as any]);
+
+      const done = service.loadServicesDetails();
+      httpMock.expectOne(SERVICE_INSTANCES_FULL_URL).flush({ resources: [{ guid: 'si-1' }] });
+      httpMock.expectOne(SERVICE_OFFERINGS_FULL_URL).flush({ resources: [] });
+      httpMock.expectOne(SERVICE_PLANS_FULL_URL).flush({ resources: [] });
+      httpMock.expectOne(SERVICE_BROKERS_FULL_URL).flush({ resources: [] });
+      await done;
+
+      expect(service.serviceInstancesAndBrokers()!.instances).toHaveLength(1);
     });
   });
 
