@@ -659,10 +659,18 @@ export class EndpointDataService {
     const detailPerPage = 500;
     type Paged<T> = { resources: T[]; totalResults?: number; pagination?: { totalResults?: number } };
     const totalOf = <T>(r: Paged<T>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
+    // A swallowed failure must not look like "fetched, and there are none".
+    // The empty fallback below keeps the Promise.all shape, but the slice it
+    // belongs to is then neither written nor stamped, so its accessor stays
+    // cold and the next consumer refetches rather than pre-seeding from []
+    // (#5755). The error itself only reaches errors(), so nothing else marks
+    // this path — which is why the empty list appeared with no toast.
+    const failed = new Set<string>();
     const fetch = <T>(path: string, errKey: string): Promise<Paged<T>> => firstValueFrom(
       this.http.get<Paged<T>>(path).pipe(
         catchError(err => {
           this.addError(errKey, err);
+          failed.add(errKey);
           return of({ resources: [], totalResults: 0 } as Paged<T>);
         }),
       ),
@@ -675,21 +683,34 @@ export class EndpointDataService {
         fetch<StServicePlan>(`/pp/v1/cf/service_plans/${this.guid}?return=summary&per_page=${detailPerPage}&page=1`, 'service-plans-full'),
         fetch<StServiceBroker>(`/pp/v1/cf/service_brokers/${this.guid}?return=summary&per_page=${detailPerPage}&page=1`, 'service-brokers-full'),
       ]);
-      this._serviceInstances.set(insts.resources.map(si => ({ ...si, cnsiGuid: this.guid })));
-      this._serviceOfferings.set(offerings.resources.map(o => ({ ...o, cnsiGuid: this.guid })));
-      this._servicePlans.set(plans.resources.map(p => ({ ...p, cnsiGuid: this.guid })));
-      this._serviceBrokers.set(brokers.resources.map(b => ({ ...b, cnsiGuid: this.guid })));
-      this._serviceInstancesStale.set(false);
-      this._serviceInstancesCount.set(totalOf(insts));
-      this._serviceOfferingsCount.set(totalOf(offerings));
-      this._servicePlansCount.set(totalOf(plans));
-      this._serviceBrokersCount.set(totalOf(brokers));
+      // Each slice is written only if its own fetch succeeded — a failure
+      // must leave whatever was already cached alone rather than replacing
+      // good data with the empty fallback.
+      if (!failed.has('service-instances-full')) {
+        this._serviceInstances.set(insts.resources.map(si => ({ ...si, cnsiGuid: this.guid })));
+        this._serviceInstancesStale.set(false);
+        this._serviceInstancesCount.set(totalOf(insts));
+      }
+      if (!failed.has('service-offerings-full')) {
+        this._serviceOfferings.set(offerings.resources.map(o => ({ ...o, cnsiGuid: this.guid })));
+        this._serviceOfferingsCount.set(totalOf(offerings));
+      }
+      if (!failed.has('service-plans-full')) {
+        this._servicePlans.set(plans.resources.map(p => ({ ...p, cnsiGuid: this.guid })));
+        this._servicePlansCount.set(totalOf(plans));
+      }
+      if (!failed.has('service-brokers-full')) {
+        this._serviceBrokers.set(brokers.resources.map(b => ({ ...b, cnsiGuid: this.guid })));
+        this._serviceBrokersCount.set(totalOf(brokers));
+      }
     } finally {
       this._isLoadingServicesDetails.set(false);
       const now = new Date();
-      this._servicesDetailsLastFetched.set(now);
-      this._serviceInstancesFetchedAt.set(now);
-      this._serviceOfferingsFetchedAt.set(now);
+      // Stamp only what actually landed. A stamped-but-empty bundle is the
+      // whole defect: it reads as a hot cache and suppresses the refetch.
+      if (!failed.has('service-instances-full')) this._serviceInstancesFetchedAt.set(now);
+      if (!failed.has('service-offerings-full')) this._serviceOfferingsFetchedAt.set(now);
+      if (failed.size === 0) this._servicesDetailsLastFetched.set(now);
     }
   }
 
