@@ -185,6 +185,30 @@ func TestDefaultCSPPolicyNoncesStyleElements(t *testing.T) {
 	}
 }
 
+// The script half of the same mechanism. 'strict-dynamic' alone would block
+// every script in the document, and the placeholder alone would leave the lazy
+// chunks main.js pulls in unauthorised — neither token is useful without the
+// other, so both are asserted together.
+func TestDefaultCSPPolicyNoncesScripts(t *testing.T) {
+	sources := directiveSources(t, defaultCSPPolicy, "script-src")
+	for _, want := range []string{cspNoncePlaceholder, "'strict-dynamic'"} {
+		if !slices.Contains(sources, want) {
+			t.Errorf("script-src must carry %s: %q", want, defaultCSPPolicy)
+		}
+	}
+}
+
+// 'strict-dynamic' makes a browser ignore every host and 'self' source in the
+// same directive. One left behind reads as a grant that no longer holds, which
+// is how a policy comes to be trusted for something it does not do.
+func TestDefaultCSPPolicyScriptSrcCarriesNoIgnoredSource(t *testing.T) {
+	for _, source := range directiveSources(t, defaultCSPPolicy, "script-src") {
+		if source != cspNoncePlaceholder && source != "'strict-dynamic'" {
+			t.Errorf("strict-dynamic makes script-src's %s ignored: %q", source, defaultCSPPolicy)
+		}
+	}
+}
+
 // style-src-elem overrides style-src for elements wholesale rather than
 // intersecting with it, so a source added to style-src alone is silently
 // withdrawn from every <style> and <link rel=stylesheet>.
@@ -219,6 +243,26 @@ func TestServeIndexHTMLNoncesStyleElementsUnderTheDefaultPolicy(t *testing.T) {
 	}
 	if !strings.Contains(rec.Body.String(), `<style nonce="`+nonce+`">`) {
 		t.Errorf("document styles must carry the nonce %q: %q", nonce, rec.Body.String())
+	}
+}
+
+// The script mechanism end to end on the shipped policy: under
+// 'strict-dynamic' the nonce is the only thing that can authorise the build's
+// module scripts, so header and markup have to agree or the app does not boot
+// at all.
+func TestServeIndexHTMLNoncesScriptsUnderTheDefaultPolicy(t *testing.T) {
+	p := &portalProxy{indexHTMLTemplate: `<app-root></app-root><script src="main-ABC.js" ` + moduleScriptTail}
+	p.Config.CSPPolicy = defaultCSPPolicy
+
+	rec := serveIndex(t, p)
+	hdr := rec.Header().Get("Content-Security-Policy")
+	nonce := nonceFromHeader(t, hdr)
+
+	if !slices.Contains(directiveSources(t, hdr, "script-src"), "'nonce-"+nonce+"'") {
+		t.Errorf("script-src must carry the substituted nonce: %q", hdr)
+	}
+	if !strings.Contains(rec.Body.String(), `type="module" nonce="`+nonce+`">`) {
+		t.Errorf("document scripts must carry the nonce %q: %q", nonce, rec.Body.String())
 	}
 }
 

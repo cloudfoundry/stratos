@@ -43,7 +43,7 @@ appended — declaring either twice would lose the destination you chose.
 
 ```
 default-src 'self';
-script-src 'self';
+script-src 'nonce-PLACEHOLDER' 'strict-dynamic';
 object-src 'none';
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
 style-src-elem 'self' 'nonce-PLACEHOLDER' https://fonts.googleapis.com;
@@ -74,10 +74,19 @@ A few of these are worth explaining:
 - The Google Fonts origins are permitted because the console can load its
   interface font from them.
 - `'nonce-PLACEHOLDER'` is not sent literally. Each response replaces it with a
-  freshly generated value that also appears on the styles in that response, so
-  only those styles are permitted. A policy you supply yourself gets the same
-  treatment: include the `'nonce-PLACEHOLDER'` token and it is substituted the
-  same way.
+  freshly generated value that also appears on the scripts and styles in that
+  response, so only those are permitted. A policy you supply yourself gets the
+  same treatment: include the `'nonce-PLACEHOLDER'` token and it is substituted
+  the same way.
+- `script-src` names no origin at all, not even `'self'`. `'strict-dynamic'`
+  makes the browser ignore every origin in that directive and go by the nonce
+  instead: the console's own scripts carry it, and anything they go on to load —
+  the parts of the interface that arrive only when you navigate to them, and the
+  code editor — is trusted because a trusted script asked for it. A script
+  injected into the page is refused even when it is served from the console's
+  own address, which is what an origin-based rule cannot do. Adding `'self'`
+  back would not restore anything, because the browser ignores it; if you need
+  a script from somewhere else, the mechanism is a nonce, not an origin.
 - `style-src-elem` governs `<style>` elements and stylesheet links, and it
   replaces `style-src` for them rather than adding to it. If you extend
   `style-src` with an origin, add it to `style-src-elem` too or stylesheets
