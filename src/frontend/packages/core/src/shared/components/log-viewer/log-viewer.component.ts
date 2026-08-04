@@ -26,6 +26,7 @@ import {
   timeInterval,
 } from 'rxjs/operators';
 
+import { KEEP_CLASS_ATTRIBUTE, setSanitizedHTML } from '../../../core/browser-helper';
 import { AnsiColors } from './ansi-colors';
 
 interface LogStreamMessage {
@@ -259,7 +260,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
             if (logs.length > 1) {
               ele.setAttribute(this.countAttribute, '' + logs.length);
             }
-            ele.innerHTML = elementString;
+            setSanitizedHTML(ele, elementString, KEEP_CLASS_ATTRIBUTE);
             contentElement.append(ele);
           } catch (err) {
             console.error('Error processing log batch:', err);

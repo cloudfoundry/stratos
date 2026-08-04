@@ -1,6 +1,8 @@
 import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener, SecurityContext, inject, numberAttribute } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
+import { setSanitizedHTML } from '../../../core/browser-helper';
+
 @Directive({
   selector: '[matTooltip]',
   // Material parity: templates use #ref="matTooltip"
@@ -79,8 +81,13 @@ export class CustomTooltipDirective implements OnDestroy {
     // Angular's sanitizer. Run the value through DomSanitizer first: it keeps
     // the safe formatting subset (<b>, <strong>, <i>, <em>, <br>, …) while
     // stripping scripts, event handlers, and other XSS vectors.
+    // Renderer2.setProperty('innerHTML') is an injection sink, so it is refused
+    // outright under require-trusted-types-for; the sanitized value is a plain
+    // string, because DomSanitizer.sanitize ends in .toString(). The sanitize
+    // call stays because it is what protects the innerHTML fallback inside
+    // setSanitizedHTML, on browsers that have no setHTML of their own.
     const safeHtml = this.sanitizer.sanitize(SecurityContext.HTML, this.tooltipText) ?? '';
-    this.renderer.setProperty(el, 'innerHTML', safeHtml);
+    setSanitizedHTML(el, safeHtml);
 
     // Apply visual styles BEFORE positioning so getBoundingClientRect()
     // measures the content-sized box. A bare `<div>` with no styling is
