@@ -97,6 +97,21 @@
         />
       </div>
     </app-form-field>
+    @if (isUpdate && !credsSource()) {
+      <button
+        type="button"
+        class="self-start text-sm text-primary hover:underline focus:outline-none focus:ring-1 focus:ring-primary rounded"
+        (click)="revealCredentials()"
+      >
+        Show existing credentials
+      </button>
+    }
+    @if (credsSource()?.isLoading()) {
+      <span class="self-start text-sm text-secondary-text">Loading credentials…</span>
+    }
+    @if (credsSource()?.error()) {
+      <app-error>Could not load the existing credentials.</app-error>
+    }
     <app-form-field class="">
       <textarea
         appInput
