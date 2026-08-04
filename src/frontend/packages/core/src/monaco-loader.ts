@@ -17,6 +17,46 @@ import type { MonacoYaml, MonacoYamlOptions } from 'monaco-yaml';
 let monacoLoad: Promise<void> | null = null;
 let monacoYaml: MonacoYaml | null = null;
 
+/**
+ * Installs the document's default Trusted Types policy for worker script URLs.
+ *
+ * The Worker constructor is a script sink, so under
+ * require-trusted-types-for 'script' it refuses a plain URL. Monaco carries its
+ * own policy for the workers it starts itself, but the MonacoEnvironment below
+ * replaces that path wholesale — nothing Monaco does covers a worker Stratos
+ * constructs, so the obligation lands here.
+ *
+ * It has to be the *default* policy rather than a named one the call sites use.
+ * The builder recognises `new Worker(new URL('./x', import.meta.url))`
+ * syntactically and emits a hashed chunk for each; wrapping the URL in anything
+ * at all breaks that recognition, and the workers then stop being built —
+ * measured, the emitted worker chunks went from present to absent. There is
+ * nowhere to put an explicit policy without losing the workers themselves.
+ *
+ * It defines createScriptURL and nothing else, so it does not soften the sinks
+ * this directive exists to close: a plain string assigned to innerHTML still
+ * finds no createHTML here and is still refused.
+ *
+ * The origin check is not ceremony. A policy that returned its argument
+ * unchanged would satisfy the browser while checking nothing, which is worse
+ * than no policy, and worker-src 'self' is a second lock on the same door
+ * rather than a reason to leave this one open.
+ */
+export function installWorkerURLPolicy(): void {
+  const trustedTypes = (window as any).trustedTypes;
+  if (!trustedTypes?.createPolicy || trustedTypes.defaultPolicy) {
+    return;
+  }
+  trustedTypes.createPolicy('default', {
+    createScriptURL: (candidate: string) => {
+      if (new URL(candidate, window.location.href).origin !== window.location.origin) {
+        throw new Error(`Refusing to start a worker from ${candidate}`);
+      }
+      return candidate;
+    },
+  });
+}
+
 export function loadMonacoEditor(): Promise<void> {
   if (!monacoLoad) {
     monacoLoad = doLoadMonacoEditor();
@@ -64,6 +104,8 @@ async function doLoadMonacoEditor(): Promise<void> {
   // Only the languages Stratos edits get a language worker (json, yaml);
   // everything else falls back to the basic editor worker — add a wrapper
   // in monaco-workers/ if an editor surface for a new language appears.
+  installWorkerURLPolicy();
+
   (self as any).MonacoEnvironment = {
     getWorker(workerId: string, label: string): Worker {
       switch (label) {
