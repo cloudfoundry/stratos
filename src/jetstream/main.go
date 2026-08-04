@@ -82,8 +82,18 @@ const (
 
 // defaultCSPPolicy is the Content-Security-Policy applied unless CONSOLE_CSP
 // opts out or supplies its own. It is scoped to what the Stratos SPA needs:
-//   - default/script/connect from same origin ('self'); same-origin 'self'
+//   - default/connect from same origin ('self'); same-origin 'self'
 //     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
+//   - script-src carries the per-response nonce and 'strict-dynamic', which is
+//     the CSP Level 3 mechanism for scripts: the nonce authorises the module
+//     scripts the build appends to index.html (serveIndexHTML stamps them),
+//     and 'strict-dynamic' propagates that trust to what they load — Angular's
+//     lazy route chunks and Monaco's, which arrive by dynamic import() from an
+//     already-trusted module. It carries no 'self' and no host source on
+//     purpose: 'strict-dynamic' makes a browser ignore every one of them, so a
+//     source left beside it reads as a grant that does not hold. That is the
+//     directive's whole point — an injected <script src="/…"> is same-origin
+//     and still refused, because origin no longer confers trust.
 //   - object-src 'none' — plugin content (<object>, <embed>) is a script
 //     execution path that script-src does not govern. Stated explicitly
 //     because falling back to default-src 'self' would still permit it from
@@ -105,7 +115,7 @@ const (
 //   - frame-ancestors 'self' mirrors the existing X-Frame-Options: SAMEORIGIN
 // Operators can instead set CONSOLE_CSP to a full policy string to use verbatim.
 const defaultCSPPolicy = "default-src 'self'; " +
-	"script-src 'self'; " +
+	"script-src " + cspNoncePlaceholder + " 'strict-dynamic'; " +
 	"object-src 'none'; " +
 	"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
 	// style-src-elem overrides style-src for elements wholesale, so it has to
