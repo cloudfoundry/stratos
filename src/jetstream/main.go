@@ -94,6 +94,12 @@ const (
 //     source left beside it reads as a grant that does not hold. That is the
 //     directive's whole point — an injected <script src="/…"> is same-origin
 //     and still refused, because origin no longer confers trust.
+//   - 'report-sample' on both directives that can refuse inline content
+//     (script-src, style-src-elem) — without it a browser reports a blocked
+//     inline script or style as blocked-uri "inline" and nothing else, which
+//     names no file and no content. It grants nothing, so it does not weaken
+//     'strict-dynamic' beside it. style-src does not carry it: 'unsafe-inline'
+//     means nothing ever violates it to sample.
 //   - object-src 'none' — plugin content (<object>, <embed>) is a script
 //     execution path that script-src does not govern. Stated explicitly
 //     because falling back to default-src 'self' would still permit it from
@@ -119,12 +125,12 @@ const (
 //   - frame-ancestors 'self' mirrors the existing X-Frame-Options: SAMEORIGIN
 // Operators can instead set CONSOLE_CSP to a full policy string to use verbatim.
 const defaultCSPPolicy = "default-src 'self'; " +
-	"script-src " + cspNoncePlaceholder + " 'strict-dynamic'; " +
+	"script-src " + cspNoncePlaceholder + " 'strict-dynamic' " + cspReportSample + "; " +
 	"object-src 'none'; " +
 	"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
 	// style-src-elem overrides style-src for elements wholesale, so it has to
 	// repeat every source style-src grants them or it silently withdraws one.
-	"style-src-elem 'self' " + cspNoncePlaceholder + " https://fonts.googleapis.com; " +
+	"style-src-elem 'self' " + cspNoncePlaceholder + " " + cspReportSample + " https://fonts.googleapis.com; " +
 	"font-src 'self' data: https://fonts.gstatic.com; " +
 	"img-src 'self' data:; " +
 	// 'self' also covers same-origin WebSocket (wss:// on an HTTPS page), so

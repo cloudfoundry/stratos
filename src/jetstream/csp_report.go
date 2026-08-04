@@ -154,6 +154,14 @@ func (p *portalProxy) receiveCSPReport(c echo.Context) error {
 		// original-policy is deliberately absent: it is the longest field in
 		// the report, it is identical on every violation, and it carries the
 		// live nonce. An operator reading this line already knows the policy.
+		//
+		// script_sample is present and is the exception to that caution. It is
+		// the refused content itself rather than a description of it, so on an
+		// injection it is the attacker's own text — and that is precisely why
+		// it is worth having: blocked_uri reads "inline" for every one of them.
+		// The policy asks for it via 'report-sample'; the browser sends the
+		// first 40 characters, truncateField bounds it in case one does not,
+		// and logrus quotes what it contains.
 		log.WithFields(log.Fields{
 			"security_event":     "csp-violation",
 			"document_uri":       truncateField(report.DocumentURI),
@@ -162,6 +170,7 @@ func (p *portalProxy) receiveCSPReport(c echo.Context) error {
 			"source_file":        truncateField(report.SourceFile),
 			"line_number":        report.LineNumber,
 			"disposition":        truncateField(report.Disposition),
+			"script_sample":      truncateField(report.ScriptSample),
 		}).Warn("SECURITY: Content-Security-Policy violation reported by browser")
 	}
 

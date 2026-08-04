@@ -201,11 +201,38 @@ func TestDefaultCSPPolicyNoncesScripts(t *testing.T) {
 // 'strict-dynamic' makes a browser ignore every host and 'self' source in the
 // same directive. One left behind reads as a grant that no longer holds, which
 // is how a policy comes to be trusted for something it does not do.
+//
+// 'report-sample' is exempt because it is not a source: it grants nothing and
+// matches nothing, it only asks the browser to describe what it refused.
 func TestDefaultCSPPolicyScriptSrcCarriesNoIgnoredSource(t *testing.T) {
 	for _, source := range directiveSources(t, defaultCSPPolicy, "script-src") {
-		if source != cspNoncePlaceholder && source != "'strict-dynamic'" {
-			t.Errorf("strict-dynamic makes script-src's %s ignored: %q", source, defaultCSPPolicy)
+		switch source {
+		case cspNoncePlaceholder, "'strict-dynamic'", cspReportSample:
+			continue
 		}
+		t.Errorf("strict-dynamic makes script-src's %s ignored: %q", source, defaultCSPPolicy)
+	}
+}
+
+// Without 'report-sample' a browser sends script-sample empty, so a blocked
+// inline script or style is reported as nothing but blocked-uri "inline" —
+// which names no file, no line worth trusting, and nothing to grep for. Both
+// directives that enforce against inline content have to ask for it; asking in
+// one leaves the other half of the policy undiagnosable.
+func TestDefaultCSPPolicyAsksForViolationSamples(t *testing.T) {
+	for _, directive := range []string{"script-src", "style-src-elem"} {
+		if !slices.Contains(directiveSources(t, defaultCSPPolicy, directive), cspReportSample) {
+			t.Errorf("%s must carry %s: %q", directive, cspReportSample, defaultCSPPolicy)
+		}
+	}
+}
+
+// style-src keeps 'unsafe-inline', so an inline style attribute never violates
+// it and never produces a sample. Asking anyway would read as telemetry that
+// arrives, and none ever would.
+func TestDefaultCSPPolicyDoesNotAskForSamplesItCannotGet(t *testing.T) {
+	if slices.Contains(directiveSources(t, defaultCSPPolicy, "style-src"), cspReportSample) {
+		t.Errorf("style-src permits inline, so it can never sample: %q", defaultCSPPolicy)
 	}
 }
 
