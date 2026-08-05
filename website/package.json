@@ -22,7 +22,7 @@
     "@mdx-js/react": "^3.1.1",
     "@radix-ui/react-avatar": "^1.2.6",
     "@radix-ui/react-slot": "^1.3.3",
-    "baseline-browser-mapping": "^2.11.9",
+    "baseline-browser-mapping": "^2.11.10",
     "caniuse-lite": "^1.0.30001806",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
