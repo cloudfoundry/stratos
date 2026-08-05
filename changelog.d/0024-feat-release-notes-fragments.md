@@ -1,2 +1,2 @@
 [Features]
-- Release notes now accumulate as per-PR fragments in `changelog.d/`, are assembled into the annotated release tag body at `make stamp tag`, published from the tag by `make publish`, and cleared by `make sweep` after each release.
+- Release notes now accumulate as per-PR fragments in `changelog.d/`, are assembled into the annotated release tag body at `make stamp tag` and published from the tag by `make publish`. Fragments are not cleared by a prerelease — they accumulate until the official release, so each prerelease's notes stand on their own rather than sending the reader back through the intermediate ones. `make sweep` clears them when the official release ships.
