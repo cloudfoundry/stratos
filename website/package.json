@@ -60,5 +60,14 @@
   },
   "optionalDependencies": {
     "postman-code-generators": "^2.1.1"
+  },
+  "overrides": {
+    "lodash": "^4.18.1",
+    "brace-expansion": "^1.1.17",
+    "undici": "^7.29.0",
+    "serialize-javascript": "^7.0.5",
+    "fast-uri": "^3.1.5",
+    "svgo": "^3.3.4",
+    "postcss": "^8.5.25"
   }
 }
