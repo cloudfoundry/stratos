@@ -1,2 +1,2 @@
-[Performance Improvements]
+[Chores]
 - Content-hashed build artifacts (the Angular bundles and hashed media files) are now served with `cache-control: public, max-age=31536000, immutable`, eliminating the per-asset revalidation round-trips (and Firefox's full re-downloads) that dominated warm page loads. The allowlist is filename-shaped and default-deny: `index.html`, `assets/`, plugin trees, and anything unversioned keep the conservative no-cache policy that guards against cached-data bleed (#5562).
