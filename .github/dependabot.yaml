@@ -43,8 +43,20 @@ updates:
         patterns:
           - "*"
   
+  # Every go.mod is listed: `directory` covers one module and gomod does not
+  # recurse, so the single src/jetstream entry left the other six unwatched.
+  # x/text CVE-2026-56852, x/net CVE-2026-46600 and oras-go CVE-2026-50163
+  # all sat in those modules and had to be found with a local trivy run.
+  # Keep this list in step with `find src/jetstream -name go.mod`.
   - package-ecosystem: "gomod"
-    directory: "src/jetstream/"
+    directories:
+      - "/src/jetstream"
+      - "/src/jetstream/api"
+      - "/src/jetstream/plugins/analysis/container"
+      - "/src/jetstream/plugins/cfapppush"
+      - "/src/jetstream/plugins/kubernetes"
+      - "/src/jetstream/plugins/kubernetes/auth"
+      - "/src/jetstream/plugins/monocular"
     schedule:
       interval: "weekly"
     commit-message:

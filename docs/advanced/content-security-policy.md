@@ -43,10 +43,10 @@ appended — declaring either twice would lose the destination you chose.
 
 ```
 default-src 'self';
-script-src 'nonce-PLACEHOLDER' 'strict-dynamic';
+script-src 'nonce-PLACEHOLDER' 'strict-dynamic' 'report-sample';
 object-src 'none';
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-style-src-elem 'self' 'nonce-PLACEHOLDER' https://fonts.googleapis.com;
+style-src-elem 'self' 'nonce-PLACEHOLDER' 'report-sample' https://fonts.googleapis.com;
 font-src 'self' data: https://fonts.gstatic.com;
 img-src 'self' data:;
 connect-src 'self';
@@ -54,6 +54,7 @@ worker-src 'self';
 frame-ancestors 'self';
 base-uri 'self';
 form-action 'self';
+require-trusted-types-for 'script';
 report-uri /pp/v1/csp-report
 ```
 
@@ -90,6 +91,19 @@ A few of these are worth explaining:
   own address, which is what an origin-based rule cannot do. Adding `'self'`
   back would not restore anything, because the browser ignores it; if you need
   a script from somewhere else, the mechanism is a nonce, not an origin.
+- `require-trusted-types-for 'script'` covers what the rules above cannot see.
+  They all govern how script and styles *arrive*; none of them says anything
+  about a string that script already running assigns to `innerHTML`, which is
+  where DOM-based XSS lives. With this set, the browser refuses a plain string
+  at those points outright. No `trusted-types` allowlist accompanies it, so any
+  policy name is permitted: naming them would tie the console's policy to the
+  internals of Angular and the code editor, and break it on the upgrade that
+  adds one.
+- `'report-sample'` permits nothing. It asks the browser to include the opening
+  characters of whatever it refused in the violation report, which is the only
+  thing that distinguishes one blocked inline script or style from another. It
+  is on the two directives that can refuse inline content, and not on
+  `style-src`, which still permits it and so has nothing to report.
 - `style-src-elem` governs `<style>` elements and stylesheet links, and it
   replaces `style-src` for them rather than adding to it. If you extend
   `style-src` with an origin, add it to `style-src-elem` too or stylesheets
@@ -118,7 +132,8 @@ A logged violation looks like this:
 WARN[Mon Aug  3 13:18:01 PDT 2026] SECURITY: Content-Security-Policy violation reported by browser
   blocked_uri=inline disposition=enforce
   document_uri="https://stratos.example.com/applications/9f2c/log-stream"
-  line_number=1 security_event=csp-violation
+  line_number=1 script_sample=".xterm-fg-124 { color: #af"
+  security_event=csp-violation
   source_file="https://stratos.example.com/main-7F3A9C2E.js"
   violated_directive=style-src-elem
 ```
@@ -128,7 +143,11 @@ Find them with `grep 'SECURITY:'`, or if you run Jetstream with
 
 `violated_directive` names the rule, and `source_file` with `line_number` is
 what identifies the resource — for an inline style or script, `blocked_uri` is
-only ever the word `inline`.
+only ever the word `inline`. `script_sample` is what tells those apart: the
+first characters of the content that was refused, which is usually enough to
+recognise where it came from. It is the refused content itself rather than a
+description of it, so on a genuine injection attempt it is the injected text
+that appears here, bounded in length and escaped.
 
 Two things are deliberately absent. The report's `original-policy` field is not
 logged: it is the whole policy, identical on every violation, and it contains

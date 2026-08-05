@@ -245,7 +245,7 @@ export class TailwindSnackBarService {
 
     // Create close button
     const closeButton = document.createElement('button');
-    closeButton.innerHTML = '&times;';
+    closeButton.textContent = '×';
     closeButton.className = 'snackbar-close text-gray-400 hover:text-white text-xl font-bold ml-2';
     snackbar.appendChild(closeButton);
 

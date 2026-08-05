@@ -12,6 +12,15 @@ import (
 // per-request nonce belongs. cspHeaderWithNonce substitutes it.
 const cspNoncePlaceholder = "'nonce-PLACEHOLDER'"
 
+// cspReportSample is the token that asks a browser to include the first of the
+// refused script or style in its violation report's script-sample. It is not a
+// source expression: it grants nothing and matches nothing, so it can sit in a
+// directive alongside 'strict-dynamic' without weakening it.
+//
+// It only has an effect in a directive that can refuse inline content, which is
+// why style-src does not carry it — 'unsafe-inline' means nothing violates it.
+const cspReportSample = "'report-sample'"
+
 // moduleScriptTail is the closing run every script tag the Angular build emits
 // ends with: <script src="main-<hash>.js" type="module"></script>. The hash
 // lives in src, outside this literal, so matching it needs neither a regex nor

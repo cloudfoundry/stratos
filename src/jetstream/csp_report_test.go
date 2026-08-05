@@ -104,6 +104,52 @@ func TestReceiveCSPReportNeverLogsTheNonce(t *testing.T) {
 	}
 }
 
+// The sample is the only field that says which inline script or style was
+// refused: blocked-uri reads "inline" for all of them, and source-file names
+// the bundle that inserted it rather than the content. Parsing it and then not
+// logging it leaves the operator exactly where they were.
+func TestReceiveCSPReportLogsTheSample(t *testing.T) {
+	hook := captureLogs(t)
+	cspLogBudget = &reportLogBudget{}
+
+	sampled := `{"csp-report":{"blocked-uri":"inline","violated-directive":"script-src-elem","script-sample":"console.log('hi')"}}`
+	if _, err := postReport(t, &portalProxy{}, sampled); err != nil {
+		t.Fatalf("receiveCSPReport: %v", err)
+	}
+
+	if got := hook.LastEntry().Data["script_sample"]; got != "console.log('hi')" {
+		t.Errorf("the sample must reach the log: %v", hook.LastEntry().Data)
+	}
+}
+
+// Every other field describes page state. The sample is the refused content
+// itself, so on an injection it is the attacker's own text arriving verbatim —
+// the field most worth proving cannot forge a line or run away with the log,
+// whatever the spec says about a browser capping it at forty characters.
+func TestReceiveCSPReportContainsAHostileSample(t *testing.T) {
+	hook := captureLogs(t)
+	cspLogBudget = &reportLogBudget{}
+
+	hostile := `{"csp-report":{"blocked-uri":"inline","script-sample":"x\ntime=\"now\" level=warning msg=\"forged\"` +
+		strings.Repeat("A", 2*cspFieldLimit) + `"}}`
+	if _, err := postReport(t, &portalProxy{}, hostile); err != nil {
+		t.Fatalf("receiveCSPReport: %v", err)
+	}
+
+	entry := hook.LastEntry()
+	rendered, err := entry.String()
+	if err != nil {
+		t.Fatalf("rendering the entry: %v", err)
+	}
+	if strings.Count(strings.TrimRight(rendered, "\n"), "\n") != 0 {
+		t.Errorf("the sample opened a second log line: %q", rendered)
+	}
+	sample, _ := entry.Data["script_sample"].(string)
+	if len([]rune(sample)) > cspFieldLimit+1 {
+		t.Errorf("the sample must be bounded like every other field, got %d chars", len([]rune(sample)))
+	}
+}
+
 // Report fields are supplied by the browser from page state an attacker may
 // influence. A newline in one of them must not be able to open a second log
 // line and forge an entry.
