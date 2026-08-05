@@ -71,7 +71,16 @@ export class EndpointDataService {
   private readonly _isLoadingServicesCounts = signal<boolean>(false);
   private readonly _servicesCountsLastFetched = signal<Date | null>(null);
   private readonly _isLoadingServicesDetails = signal<boolean>(false);
+  // "A full four-list loadServicesDetails() completed." Set only by that
+  // method — the per-bundle setters below stamp their own slice instead.
   private readonly _servicesDetailsLastFetched = signal<Date | null>(null);
+  // Per-bundle freshness. loadServicesDetails() fills both; the write-back
+  // setters fill one each. Split because a single shared stamp let a write
+  // of one bundle advertise the OTHER as a hot cache that had never been
+  // fetched — an empty array is indistinguishable from "no results", so
+  // consumers pre-seeded from it and skipped their own fetch (#5755).
+  private readonly _serviceInstancesFetchedAt = signal<Date | null>(null);
+  private readonly _serviceOfferingsFetchedAt = signal<Date | null>(null);
 
   // Staleness flags per entity slice. Flipped true by applyCascade(key)
   // after a related mutation; cleared back to false on a successful
@@ -635,7 +644,12 @@ export class EndpointDataService {
   // Bindings stay app-scoped on the wire — load them per-app where needed.
   async loadServicesDetails(): Promise<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'loadServicesDetails' });
-    if (this._servicesDetailsLastFetched() !== null && this._servicePlans().length > 0 && !this._serviceInstancesStale()) {
+    // Warm only when BOTH bundles have actually been fetched. Gating on one
+    // shared stamp let a marketplace write-back (offerings+plans only)
+    // short-circuit this method and leave _serviceInstances permanently
+    // empty for every reader of serviceInstances() (#5755).
+    if (this._serviceInstancesFetchedAt() !== null && this._serviceOfferingsFetchedAt() !== null
+      && !this._serviceInstancesStale()) {
       this.diagnostics?.emitCounter('cache-hit', { service: 'EndpointDataService', method: 'loadServicesDetails' });
       return;
     }
@@ -645,10 +659,18 @@ export class EndpointDataService {
     const detailPerPage = 500;
     type Paged<T> = { resources: T[]; totalResults?: number; pagination?: { totalResults?: number } };
     const totalOf = <T>(r: Paged<T>): number => r.pagination?.totalResults ?? r.totalResults ?? r.resources.length;
+    // A swallowed failure must not look like "fetched, and there are none".
+    // The empty fallback below keeps the Promise.all shape, but the slice it
+    // belongs to is then neither written nor stamped, so its accessor stays
+    // cold and the next consumer refetches rather than pre-seeding from []
+    // (#5755). The error itself only reaches errors(), so nothing else marks
+    // this path — which is why the empty list appeared with no toast.
+    const failed = new Set<string>();
     const fetch = <T>(path: string, errKey: string): Promise<Paged<T>> => firstValueFrom(
       this.http.get<Paged<T>>(path).pipe(
         catchError(err => {
           this.addError(errKey, err);
+          failed.add(errKey);
           return of({ resources: [], totalResults: 0 } as Paged<T>);
         }),
       ),
@@ -661,18 +683,34 @@ export class EndpointDataService {
         fetch<StServicePlan>(`/pp/v1/cf/service_plans/${this.guid}?return=summary&per_page=${detailPerPage}&page=1`, 'service-plans-full'),
         fetch<StServiceBroker>(`/pp/v1/cf/service_brokers/${this.guid}?return=summary&per_page=${detailPerPage}&page=1`, 'service-brokers-full'),
       ]);
-      this._serviceInstances.set(insts.resources.map(si => ({ ...si, cnsiGuid: this.guid })));
-      this._serviceOfferings.set(offerings.resources.map(o => ({ ...o, cnsiGuid: this.guid })));
-      this._servicePlans.set(plans.resources.map(p => ({ ...p, cnsiGuid: this.guid })));
-      this._serviceBrokers.set(brokers.resources.map(b => ({ ...b, cnsiGuid: this.guid })));
-      this._serviceInstancesStale.set(false);
-      this._serviceInstancesCount.set(totalOf(insts));
-      this._serviceOfferingsCount.set(totalOf(offerings));
-      this._servicePlansCount.set(totalOf(plans));
-      this._serviceBrokersCount.set(totalOf(brokers));
+      // Each slice is written only if its own fetch succeeded — a failure
+      // must leave whatever was already cached alone rather than replacing
+      // good data with the empty fallback.
+      if (!failed.has('service-instances-full')) {
+        this._serviceInstances.set(insts.resources.map(si => ({ ...si, cnsiGuid: this.guid })));
+        this._serviceInstancesStale.set(false);
+        this._serviceInstancesCount.set(totalOf(insts));
+      }
+      if (!failed.has('service-offerings-full')) {
+        this._serviceOfferings.set(offerings.resources.map(o => ({ ...o, cnsiGuid: this.guid })));
+        this._serviceOfferingsCount.set(totalOf(offerings));
+      }
+      if (!failed.has('service-plans-full')) {
+        this._servicePlans.set(plans.resources.map(p => ({ ...p, cnsiGuid: this.guid })));
+        this._servicePlansCount.set(totalOf(plans));
+      }
+      if (!failed.has('service-brokers-full')) {
+        this._serviceBrokers.set(brokers.resources.map(b => ({ ...b, cnsiGuid: this.guid })));
+        this._serviceBrokersCount.set(totalOf(brokers));
+      }
     } finally {
       this._isLoadingServicesDetails.set(false);
-      this._servicesDetailsLastFetched.set(new Date());
+      const now = new Date();
+      // Stamp only what actually landed. A stamped-but-empty bundle is the
+      // whole defect: it reads as a hot cache and suppresses the refetch.
+      if (!failed.has('service-instances-full')) this._serviceInstancesFetchedAt.set(now);
+      if (!failed.has('service-offerings-full')) this._serviceOfferingsFetchedAt.set(now);
+      if (failed.size === 0) this._servicesDetailsLastFetched.set(now);
     }
   }
 
@@ -682,7 +720,7 @@ export class EndpointDataService {
   // CnsiServiceOfferingsSource from the registry's pre-warmed cache
   // instead of re-firing the offerings HTTP call.
   serviceOfferingsAndPlans(): { offerings: StServiceOffering[], plans: StServicePlan[] } | null {
-    if (this._servicesDetailsLastFetched() === null) return null;
+    if (this._serviceOfferingsFetchedAt() === null) return null;
     return { offerings: this._serviceOfferings(), plans: this._servicePlans() };
   }
 
@@ -696,7 +734,7 @@ export class EndpointDataService {
     // applyCascade/markStale, so pre-seeding from it would resurrect the
     // pre-mutation rows (boundApps included). Forcing the null path makes
     // the consumer refetch, whose setter below clears the flag.
-    if (this._servicesDetailsLastFetched() === null || this._serviceInstancesStale()) return null;
+    if (this._serviceInstancesFetchedAt() === null || this._serviceInstancesStale()) return null;
     return { instances: this._serviceInstances(), brokers: this._serviceBrokers() };
   }
 
@@ -708,7 +746,7 @@ export class EndpointDataService {
   setServiceOfferingsAndPlans(offerings: StServiceOffering[], plans: StServicePlan[]): void {
     this._serviceOfferings.set(offerings);
     this._servicePlans.set(plans);
-    this._servicesDetailsLastFetched.set(new Date());
+    this._serviceOfferingsFetchedAt.set(new Date());
   }
 
   // Setter used by the services-instances signal-config after its
@@ -718,7 +756,7 @@ export class EndpointDataService {
     this._serviceInstances.set(instances);
     this._serviceBrokers.set(brokers);
     this._serviceInstancesStale.set(false);
-    this._servicesDetailsLastFetched.set(new Date());
+    this._serviceInstancesFetchedAt.set(new Date());
   }
 
   currentData(): StEndpointData {
