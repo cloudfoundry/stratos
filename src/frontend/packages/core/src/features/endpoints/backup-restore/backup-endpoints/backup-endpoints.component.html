@@ -34,7 +34,7 @@
       <form [formGroup]="passwordForm" class="stepper-form">
         <div class="form-field">
           <label class="form-label" for="backup-password">Password</label>
-          <input class="w-full" id="backup-password" formControlName="password" name="password" required
+          <input class="form-input w-full" id="backup-password" formControlName="password" name="password" required
             [type]="!showPassword[1] ? 'password' : 'text'">
           <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
@@ -51,7 +51,7 @@
         </div>
         <div class="form-field">
           <label class="form-label" for="backup-password2">Confirm Password</label>
-          <input class="w-full" id="backup-password2" formControlName="password2" name="password2" required
+          <input class="form-input w-full" id="backup-password2" formControlName="password2" name="password2" required
             [type]="!showPassword[2] ? 'password' : 'text'">
           <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
