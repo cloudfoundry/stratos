@@ -103,16 +103,40 @@
          textarea holding the JSON that will be saved. The readonly view is
          a styled block rather than a readonly textarea so the markers can
          be colorized. Create mode is just the editable field. -->
-    @if (isUpdate && credsMode() !== 'edit' && displayedCredentialSegments(); as segments) {
-      <div class="flex flex-col w-full">
+    <!-- Header row: label + the state controls, ABOVE the (scrollable) box
+         so they are on screen before the box can swallow the scroll — a
+         tall credential set otherwise hides below-the-box buttons. -->
+    @if (isUpdate) {
+      <div class="flex items-center justify-between w-full gap-2">
         <span class="text-xs font-medium text-primary">Credentials (JSON)</span>
-        <pre class="w-full min-h-[240px] max-h-[400px] mt-1 font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg overflow-auto">@for (segment of segments; track $index) {{{ segment }}@if (!$last) {<span class="text-warning-shade-700 font-semibold">"&lt;redacted&gt;"</span>}}</pre>
+        @if (!credsSource()?.isLoading()) {
+          <div class="flex gap-2">
+            @if (credsMode() === 'edit') {
+              <button type="button" class="btn btn-ghost" (click)="cancelEdit()">
+                Cancel edit
+              </button>
+            } @else if (displayedCredentialSegments()) {
+              <button type="button" class="btn btn-ghost" (click)="toggleReveal()">
+                {{ credsMode() === 'revealed' ? 'Hide credentials' : 'Show credentials' }}
+              </button>
+              <button type="button" class="btn btn-ghost" (click)="enterEdit()">
+                Edit credentials
+              </button>
+            }
+          </div>
+        }
       </div>
+    }
+    @if (isUpdate && credsMode() !== 'edit' && displayedCredentialSegments(); as segments) {
+      <pre class="w-full min-h-[240px] max-h-[400px] font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg overflow-auto">@for (segment of segments; track $index) {{{ segment }}@if (!$last) {<span class="text-warning-shade-700 font-semibold">"&lt;redacted&gt;"</span>}}</pre>
     } @else {
       <app-form-field class="">
+        <!-- In update mode the header row above carries the label; a
+             placeholder here would float a duplicate over the field. -->
         <textarea
           appInput
-          placeholder="Credentials (JSON)"
+          [attr.placeholder]="isUpdate ? null : 'Credentials (JSON)'"
+          aria-label="Credentials (JSON)"
           rows="10"
           class="w-full min-w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
           formControlName="credentials"
@@ -127,22 +151,6 @@
     }
     @if (credsSource()?.error()) {
       <app-error>Could not load the existing credentials.</app-error>
-    }
-    @if (isUpdate && !credsSource()?.isLoading()) {
-      <div class="flex gap-2">
-        @if (credsMode() === 'edit') {
-          <button type="button" class="btn btn-ghost" (click)="cancelEdit()">
-            Cancel edit
-          </button>
-        } @else if (displayedCredentialSegments()) {
-          <button type="button" class="btn btn-ghost" (click)="toggleReveal()">
-            {{ credsMode() === 'revealed' ? 'Hide credentials' : 'Show credentials' }}
-          </button>
-          <button type="button" class="btn btn-ghost" (click)="enterEdit()">
-            Edit credentials
-          </button>
-        }
-      </div>
     }
   </form>
 } @else {
