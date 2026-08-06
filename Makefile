@@ -22,6 +22,8 @@
 #                               the line's newest final tag
 #   make sweep                  Remove published changelog.d fragments
 #   make changelog              Report dependency bumps since the last tag
+#   make preview                Render the assembled release notes to HTML
+#                               (GitHub's markdown API) and print the path
 #                               (./build/release-notes.sh deps drafts them)
 #   make install                Install dependencies
 #   make stage                  Stage for local testing
@@ -1067,7 +1069,7 @@ $(call register, stamp, line)
 # refuses a tag that already has one. The check goes through the API:
 # `gh release view` can't see drafts, which is exactly the duplicate
 # that needs catching.
-.PHONY: publish unpublish sweep changelog
+.PHONY: publish unpublish sweep changelog preview
 publish:
 	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
 	@TAG="$($(_HIDE)PUBLISH_TAG)"; \
@@ -1115,6 +1117,14 @@ sweep:
 changelog:
 	@chmod +x build/release-notes.sh
 	@TAG_MATCH='$(TAG_MATCH)' ./build/release-notes.sh check
+
+# preview answers "what will the release page show" BEFORE a tag exists,
+# which is the only cheap moment: once a tag is pushed CI publishes from it,
+# and correcting the body afterwards leaves the tag body stale. Titled from
+# the version being released so the page matches the release it previews.
+preview:
+	@chmod +x build/release-notes.sh
+	@PREVIEW_TITLE="Stratos $($(_HIDE)NEXT_TAG)" ./build/release-notes.sh preview
 
 # ── Deploy (documentation website) ───────────────────────────
 # Grammar: make deploy website <destination> — the component says what is

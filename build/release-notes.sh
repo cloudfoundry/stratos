@@ -11,6 +11,10 @@
 #                                 Always exits 0 — this reports, never gates
 #   release-notes.sh assemble     Print fragments merged into the release
 #                                 layout on stdout (empty if no fragments)
+#   release-notes.sh preview      Render the assembled notes to HTML through
+#                                 GitHub's own markdown API and print the
+#                                 file path — what the release page will
+#                                 show, before a tag exists
 #   release-notes.sh sweep        git rm all fragments (post-publish; the
 #                                 removal commit rides the next PR)
 #
@@ -247,6 +251,61 @@ cmd_assemble() {
   ' ${files}
 }
 
+# Rendered by GitHub's own markdown endpoint rather than a local library:
+# the question this answers is "what will the release page show", and only
+# GitHub can answer it. Two heading defects reached a published tag because
+# the only available check was assemble's plain text, where markdown that
+# renders as nothing still looks correct.
+cmd_preview() {
+  local notes out
+  notes=$(cmd_assemble)
+  if [ -z "${notes}" ]; then
+    echo "changelog.d: no fragments — nothing to preview"
+    return 0
+  fi
+  command -v gh >/dev/null 2>&1 || { echo "ERROR: preview needs the gh CLI" >&2; exit 1; }
+
+  out="${PREVIEW_OUT:-${TMPDIR:-/tmp}/stratos-release-preview.html}"
+  local title="${PREVIEW_TITLE:-Stratos release notes}"
+  local body
+  # -F, not -f, for the notes: only --field interprets a leading '@', which
+  # is what reads them from stdin. --raw-field would post the literal "@-"
+  # and GitHub would faithfully render that as a one-word document.
+  body=$(printf '%s' "${notes}" \
+    | gh api -X POST /markdown -f mode=gfm \
+        -f context=cloudfoundry/stratos -F text=@-) \
+    || { echo "ERROR: gh could not render the notes (is it authenticated?)" >&2; exit 1; }
+  case "${body}" in
+    ''|'<p>@-</p>'*) echo "ERROR: preview rendered empty — refusing to write a misleading page" >&2; exit 1 ;;
+  esac
+
+  {
+    printf '<!doctype html><html><head><meta charset="utf-8"><title>%s</title>\n' "${title}"
+    cat <<'CSS'
+<style>
+:root{color-scheme:light dark}
+body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:#f6f8fa;color:#1f2328}
+.wrap{max-width:860px;margin:0 auto;padding:32px 24px 80px}
+.card{background:#fff;border:1px solid #d1d9e0;border-radius:6px;padding:8px 24px 24px}
+h1{font-size:24px;margin:16px 0 4px}
+h2{font-size:20px;border-bottom:1px solid #d1d9e0;padding-bottom:.3em;margin-top:28px}
+ul{padding-left:24px}li{margin:.4em 0}
+code{background:#eff2f5;padding:.2em .4em;border-radius:6px;font-size:85%}
+a{color:#0969da;text-decoration:none}a:hover{text-decoration:underline}
+@media(prefers-color-scheme:dark){body{background:#0d1117;color:#e6edf3}
+ .card{background:#151b23;border-color:#3d444d}code{background:#262c36}
+ h2{border-color:#3d444d}a{color:#4493f8}}
+</style></head><body><div class="wrap"><div class="card">
+CSS
+    printf '<h1>%s</h1>\n' "${title}"
+    printf '%s\n' "${body}"
+    printf '</div></div></body></html>\n'
+  } > "${out}"
+
+  echo "${out}"
+  echo "$(printf '%s' "${notes}" | grep -c '^## ') section(s), $(printf '%s' "${notes}" | grep -c '^- ') bullet(s)" >&2
+}
+
 cmd_sweep() {
   local files
   files=$(fragments)
@@ -263,9 +322,10 @@ case "${1:-}" in
   deps)     shift; cmd_deps "$@" ;;
   check)    shift; cmd_check "$@" ;;
   assemble) cmd_assemble ;;
+  preview)  cmd_preview ;;
   sweep)    cmd_sweep ;;
   *)
-    echo "Usage: release-notes.sh new [slug] | deps [since] | check [since] | assemble | sweep" >&2
+    echo "Usage: release-notes.sh new [slug] | deps [since] | check [since] | assemble | preview | sweep" >&2
     exit 1
     ;;
 esac
