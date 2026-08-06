@@ -331,35 +331,58 @@ describe('CnsiEntitySource', () => {
   });
 
   describe('preSeed', () => {
-    it('marks source done with seeded items and totalResults; load() does not fire HTTP', async () => {
-      const http = makeHttp([]); // would throw on shift if called
-      const src = new TestSource('cnsi-1', http);
+    it('paints seeded items immediately and marks the source done', () => {
+      const src = new TestSource('cnsi-1', makeHttp([]));
       const seed = [new TestItem('a'), new TestItem('b')];
       src.preSeed(seed);
       expect(src.items()).toEqual(seed);
       expect(src.done()).toBe(true);
       expect(src.totalResults()).toBe(2);
       expect(src.fetchedPages()).toBe(1);
-      await src.load();
-      expect(http.get).not.toHaveBeenCalled();
-      // Items unchanged after the short-circuited load.
-      expect(src.items()).toEqual(seed);
     });
 
-    it('subsequent load() (after a seeded one) falls through to HTTP — flag is single-shot', async () => {
+    it('load() after preSeed revalidates over HTTP and swaps in the fetched rows (#5766)', async () => {
       const fetched = {
-        resources: [new TestItem('x')],
-        pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '...' }, last: { href: '...' } }
+        resources: [new TestItem('x'), new TestItem('y')],
+        pagination: { totalResults: 2, totalPages: 1, next: null, previous: null, first: { href: '...' }, last: { href: '...' } }
       };
       const http = makeHttp([fetched]);
       const src = new TestSource('cnsi-1', http);
       src.preSeed([new TestItem('seed')]);
-      await src.load(); // short-circuits
-      expect(http.get).not.toHaveBeenCalled();
-      // refresh() re-enters _doLoad — preseeded flag was reset, so HTTP fires.
-      await src.refresh();
+      await src.load();
       expect(http.get).toHaveBeenCalledTimes(1);
+      expect(src.items().map(i => i.guid)).toEqual(['x', 'y']);
+      expect(src.totalResults()).toBe(2);
+    });
+
+    it('warm revalidate is silent — loading() stays false while seeded rows remain visible', async () => {
+      const fetched = {
+        resources: [new TestItem('x')],
+        pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '...' }, last: { href: '...' } }
+      };
+      let observedLoading: boolean | null = null;
+      const http = {
+        get: vi.fn(() => new Observable(subscriber => {
+          observedLoading = src.loading();
+          subscriber.next(fetched);
+          subscriber.complete();
+        }))
+      } as unknown as HttpClient;
+      const src = new TestSource('cnsi-1', http);
+      src.preSeed([new TestItem('seed')]);
+      await src.load();
+      expect(observedLoading).toBe(false);
       expect(src.items().map(i => i.guid)).toEqual(['x']);
+    });
+
+    it('failed warm revalidate keeps the seeded rows', async () => {
+      const http = makeHttp([new Error('boom')]);
+      const src = new TestSource('cnsi-1', http);
+      const seed = [new TestItem('seed')];
+      src.preSeed(seed);
+      await src.load();
+      expect(src.error()).not.toBeNull();
+      expect(src.items()).toEqual(seed);
     });
   });
 

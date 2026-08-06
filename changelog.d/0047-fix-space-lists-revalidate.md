@@ -1,0 +1,2 @@
+[BugFixes]
+- A space's Services and User Services tabs no longer freeze on the first snapshot the session happened to cache. The lists painted from a cached bundle and skipped their fetch entirely, so instances created or deleted outside that browser session — or a partial first snapshot — stayed wrong until a hard refresh. The cached rows still paint instantly, but the list now quietly revalidates against Cloud Foundry on every visit and swaps in the fresh result (#5766, #5767).
