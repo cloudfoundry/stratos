@@ -14,10 +14,10 @@
   <form class="connection-dialog__form" [formGroup]="endpointForm" (ngSubmit)="submit()">
     <div class="dialog-content connection-dialog__content">
       <div class="form-field">
-        <input class="form-input" placeholder="Client ID" formControlName="clientID">
+        <input class="w-full" placeholder="Client ID" formControlName="clientID">
       </div>
       <div class="form-field">
-        <input class="form-input" placeholder="Client Secret" formControlName="clientSecret"
+        <input class="w-full" placeholder="Client Secret" formControlName="clientSecret"
           [type]="!showSecret() ? 'password' : 'text'">
         <button class="btn-icon" (click)="toggleShowSecret()" [attr.aria-label]="'Hide Secret'"
           [attr.aria-pressed]="!showSecret()" type='button'>
