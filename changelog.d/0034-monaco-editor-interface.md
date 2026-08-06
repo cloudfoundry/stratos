@@ -1,2 +1,0 @@
-[Chores]
-- The Monaco editor wrapper no longer hands consumers the raw Monaco editor instance: its init event emits the typed wrapper component, text changes and language switches go through a typed `valueChange` output and `setLanguage()` method, JSON schema diagnostics are configured through the shared Monaco loader, and no component outside the loader touches the `window.monaco` global anymore. This makes the wrapper's public API the complete editor contract, so any future change of the underlying editor (see #5705) fails at compile time instead of at runtime.

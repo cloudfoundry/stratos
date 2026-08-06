@@ -1,2 +1,0 @@
-[Features]
-- Work has begun on the Stratos Theme Builder (`tools/stb`), a build-time theming tool that harvests the running console's styling into a typed facet model and edits it with a live preview and export (#5396, #5503, #5508 through #5546). **It is a work in progress and is not ready to be used.** It is a developer tool rather than part of the shipped console, and is listed here to record the work, not to invite use.

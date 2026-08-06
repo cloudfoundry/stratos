@@ -1,4 +1,0 @@
-[BugFixes]
-- Deploying an application from a private or self-hosted GitLab now works: the access token entered in the deploy wizard is applied to every GitLab API call (previously only GitHub tokens were sent, so private/self-hosted GitLab lookups were unauthenticated and returned "Repository not found"), and the GitLab base URL is normalized to its `/api/v4` REST root so users can enter just the host (e.g. `https://gitlab.example.com`) instead of the full API URL.
-- GitLab projects in nested subgroups (e.g. `group/subgroup/project`) can now be deployed: the repository lookup accepts paths with more than two segments and URL-encodes the full path, the repository-suggestions search queries the group namespace (including subgroups) instead of the `/users` endpoint (which returned "404 User Not Found" for a group path), and the project-name validator no longer rejects nested paths.
-

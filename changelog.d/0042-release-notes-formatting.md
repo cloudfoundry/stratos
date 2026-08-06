@@ -1,3 +1,0 @@
-[Chores]
-- Release notes now carry their section headings. The assembler emitted the `[Section]` authoring syntax verbatim, which is not markdown, so a published release body arrived as one undifferentiated list with bracketed labels sitting in it as plain text. Headings are now emitted as markdown, and `BugFixes` is displayed as "Bug Fixes".
-- The release tag now has a title. Its message opened straight into the first section header, and since git ends a subject at the first blank line, the header and the whole first bullet became a single run-on subject — which is what `git tag -n` and the tag list on GitHub display. The subject is now the release name, and the notes follow as the body.

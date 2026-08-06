@@ -1,5 +1,0 @@
-[Breaking Changes]
-- The Content-Security-Policy nonce is now placed on the console's script tags as well as its style tags, and the default policy's `script-src` carries `'strict-dynamic'` in place of `'self'`. Origin no longer confers trust: a script the console did not nonce is refused even when it is served from the console's own address, which is the point of the directive. The console's own module scripts are appended by the frontend build and nonced as the page is served, so a stock deployment is unaffected — but a deployment that injects its own `<script>` tag into `index.html`, or serves the page through something that rewrites those tags, will find that script refused unless it carries the nonce. `CONSOLE_CSP` supplies a policy of your own if you need one.
-
-[Features]
-- Jetstream now warns at startup if the `index.html` it is serving carries script tags it cannot nonce. Those tags are appended by the frontend build rather than written by hand, so a change to the form they are emitted in would otherwise surface only as a blank console under a strict policy.
