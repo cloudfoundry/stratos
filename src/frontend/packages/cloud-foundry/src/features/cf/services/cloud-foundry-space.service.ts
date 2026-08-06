@@ -130,7 +130,9 @@ export class CloudFoundrySpaceService {
       filter((s): s is StSpace => !!s),
     );
 
-    this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid, this.spaceGuid).value;
+    // Quota tile: managed only — user-provided instances don't count
+    // against the service-instance quota (#5769); they get their own tile.
+    this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid, this.spaceGuid, 'managed').value;
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid, this.spaceGuid);
     this.routesCount$ = space$.pipe(map(s => s.routeCount ?? 0));

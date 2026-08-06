@@ -144,7 +144,9 @@ export class CloudFoundryOrganizationService {
       }),
     );
 
-    this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid).value;
+    // Quota tile: managed only — user-provided instances don't count
+    // against the service-instance quota (#5769); they get their own tile.
+    this.serviceInstancesCount = this.serviceCatalog.serviceInstanceCount(this.cfGuid, this.orgGuid, undefined, 'managed').value;
     this.userProvidedServiceInstancesCount$ =
       this.cfUserProvidedServicesService.fetchUserProvidedServiceInstancesCount(this.cfGuid, this.orgGuid);
 

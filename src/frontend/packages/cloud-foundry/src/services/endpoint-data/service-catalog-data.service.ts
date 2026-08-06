@@ -325,15 +325,20 @@ export class ServiceCatalogDataService {
   }
 
   // Returns the total count of service instances under a cf, optionally
-  // narrowed by org or space. Backend ?return=counts emits a flat envelope
-  // with totalResults populated and resources empty.
-  serviceInstanceCount(cnsiGuid: string, orgGuid?: string, spaceGuid?: string): SignalSource<number> {
+  // narrowed by org or space and by instance type. Backend ?return=counts
+  // emits a flat envelope with totalResults populated and resources empty.
+  // Quota-facing callers pass type='managed' — user-provided instances do
+  // not count against the service-instance quota (#5769).
+  serviceInstanceCount(cnsiGuid: string, orgGuid?: string, spaceGuid?: string, type?: 'managed' | 'user-provided'): SignalSource<number> {
     let params = new HttpParams().set('return', 'counts');
     if (orgGuid) {
       params = params.set('organization_guids', orgGuid);
     }
     if (spaceGuid) {
       params = params.set('space_guids', spaceGuid);
+    }
+    if (type) {
+      params = params.set('type', type);
     }
     return this.signalize(
       this.http.get<StServiceInstancesResponse>(
