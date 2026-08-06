@@ -72,7 +72,18 @@ main() {
 
   log "Creating annotated tag ${VERSION} at commit ${commit}..."
 
-  git tag -a "${VERSION}" -m "${notes}"
+  # Two -m flags, not one: git joins them with a blank line, which is what
+  # separates a tag's subject from its body. With the notes as the only -m
+  # the body has no blank line until the first section break, so git takes
+  # the opening section header AND its first bullet as one subject —
+  # `git tag -n` and GitHub's tag list then show a paragraph where a title
+  # belongs. The subject is the release name; the notes stay the body.
+  #
+  # --cleanup=verbatim is load-bearing: the default strips lines beginning
+  # with '#' as comments, and a markdown '## Section' heading is exactly
+  # that. Without it every heading is silently deleted from the tag body —
+  # the notes still publish, just with no sections at all.
+  git tag -a "${VERSION}" --cleanup=verbatim -m "Stratos ${VERSION}" -m "${notes}"
 
   success "Tag ${VERSION} created"
   echo ""

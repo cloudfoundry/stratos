@@ -234,7 +234,13 @@ cmd_assemble() {
         sub(/\n+$/, "\n", b)
         if (b !~ /[^[:space:]]/) continue
         if (out) printf "\n"
-        printf "[%s]\n%s", s, b
+        # [Section] is the authoring syntax, not the output. Emitted as a
+        # bracketed literal it renders as plain text wherever these notes
+        # land — a GitHub release body is markdown — so the published notes
+        # had no headings at all. BugFixes is an identifier and gets a
+        # display name; the rest already read as titles.
+        label = (s == "BugFixes") ? "Bug Fixes" : s
+        printf "## %s\n\n%s", label, b
         out = 1
       }
     }
