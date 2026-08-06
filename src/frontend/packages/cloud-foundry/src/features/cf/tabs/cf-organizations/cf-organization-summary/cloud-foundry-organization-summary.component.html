@@ -52,8 +52,6 @@
             value="{{ (cfOrgService.routesCount$ | async) }}"
           limit="{{ (cfOrgService.quotaDefinition$ | async)?.totalRoutes}}"></app-card-number-metric>
         </app-tile>
-      </app-tile-group>
-      <app-tile-group class="tile-group-auto">
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfOrgService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/users" icon="person"
