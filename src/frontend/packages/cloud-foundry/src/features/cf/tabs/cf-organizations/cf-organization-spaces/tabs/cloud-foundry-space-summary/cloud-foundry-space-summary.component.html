@@ -31,7 +31,7 @@
       </app-tile>
     </app-tile-group>
     <app-loading-page [isLoading]="detailsLoading$" text="Retrieving details">
-      <app-tile-group class="tile-group-3-cols">
+      <app-tile-group class="tile-group-4-cols">
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/apps"
@@ -52,9 +52,6 @@
             value="{{ (cfSpaceService.routesCount$ | async) }}"
           limit="{{ (cfSpaceService.quotaDefinition$ | async)?.totalRoutes}}"></app-card-number-metric>
         </app-tile>
-      </app-tile-group>
-
-      <app-tile-group class="tile-group-auto">
         <app-tile>
           <app-card-number-metric
             link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/users"
