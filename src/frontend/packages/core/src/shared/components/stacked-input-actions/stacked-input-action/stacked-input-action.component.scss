@@ -9,6 +9,10 @@
     flex: 1;
     flex-direction: row;
     margin-right: $margin;
+
+    app-form-field {
+      flex: 1;
+    }
   }
   &__detail {
     align-items: center;

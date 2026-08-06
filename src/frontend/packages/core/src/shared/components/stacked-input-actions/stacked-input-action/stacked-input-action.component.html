@@ -1,7 +1,7 @@
 <div class="input-action">
   <form class="input-action__form stepper-form">
     <app-form-field>
-      <input appInput [placeholder]="config.text.placeholder" [formControl]="textFormControl" #inputElement
+      <input appInput class="w-full" [placeholder]="config.text.placeholder" [formControl]="textFormControl" #inputElement
         [name]="position">
       @if (textFormControl.hasError('email') && !textFormControl.hasError('required')) {
         <app-error>
