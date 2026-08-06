@@ -49,14 +49,20 @@ check "no fragments → empty output" "" "$(bash "${RN}" assemble)"
 printf '[Features]\n- feature A\n\n[BugFixes]\n- fix A\n' > "${FRAG_DIR}/0001-a.md"
 printf '[Features]\n- feature B\n' > "${FRAG_DIR}/0002-b.md"
 printf '[Breaking Changes]\n- breaks X\n' > "${FRAG_DIR}/0003-c.md"
-expected='[Breaking Changes]
+# [Section] is authoring syntax; the output is markdown, so headings render
+# as headings wherever the notes land. BugFixes is an identifier and is
+# displayed as "Bug Fixes".
+expected='## Breaking Changes
+
 - breaks X
 
-[Features]
+## Features
+
 - feature A
 - feature B
 
-[BugFixes]
+## Bug Fixes
+
 - fix A'
 check "grouped, canonical order, populated sections only" "${expected}" "$(bash "${RN}" assemble)"
 
@@ -163,14 +169,16 @@ commit_frag 2026-02-02T00:00:00 'changelog: the low number, landing later'
 printf '[Features]\n- numbered second, landed first.\n' > "${FRAG_DIR}/0020-late-number.md"
 commit_frag 2026-02-01T00:00:00 'changelog: the high number, landing earlier'
 check "bullets follow landing order, not filename order" \
-  "[Features]
+  "## Features
+
 - numbered second, landed first.
 - numbered first, landed second." "$(bash "${RN}" assemble)"
 
 # An unlanded fragment is the newest thing there is.
 printf '[Features]\n- still being written.\n' > "${FRAG_DIR}/0005-uncommitted.md"
 check "an uncommitted fragment sorts last" \
-  "[Features]
+  "## Features
+
 - numbered second, landed first.
 - numbered first, landed second.
 - still being written." "$(bash "${RN}" assemble)"
@@ -184,6 +192,35 @@ check "window starts at the newest tag" \
   "$(bash "${RN}" deps 2>/dev/null)"
 check "explicit since overrides the tag" "${FRAG_DIR}/0001-dependency-updates.md" \
   "$(bash "${RN}" deps v1.0.0 2>/dev/null)"
+
+# The tag body is where the notes are actually consumed — `make publish`
+# reads it with --notes-from-tag. Two silent losses have happened here, both
+# invisible in `release-notes.sh assemble` output and both caught only by
+# looking at a real tag, so assert against one the script itself created.
+echo "tag body:"
+mkdir -p "${ROOT_DIR}/build"
+cp "${SCRIPT_DIR}/release-notes.sh" "${SCRIPT_DIR}/create-git-tag.sh" "${ROOT_DIR}/build/"
+rm -f "${FRAG_DIR}"/*.md
+printf '[Breaking Changes]\n- breaks X\n\n[BugFixes]\n- fix A\n' > "${FRAG_DIR}/0001-tagged.md"
+commit_frag 2026-03-01T00:00:00 'changelog: tag-body fixture'
+TAG_MATCH='v*' bash "${ROOT_DIR}/build/create-git-tag.sh" v9.9.9 >/dev/null 2>&1
+
+# Without a subject of its own the notes' opening header and its first bullet
+# become one run-on subject, which is what `git tag -n` and GitHub's tag list
+# display.
+check "tag subject is the release name, not the first bullet" \
+  "Stratos v9.9.9" "$(repo_git tag -l v9.9.9 --format='%(subject)')"
+
+# git's default message cleanup strips '#' lines as comments, and a markdown
+# '## Section' heading is exactly that — every heading vanished from the body
+# while assemble output looked correct.
+check "markdown headings survive into the tag body" \
+  "## Breaking Changes
+## Bug Fixes" "$(repo_git tag -l v9.9.9 --format='%(body)' | grep '^## ')"
+
+# The tag body is the published notes; drift between them is the bug class.
+check "tag body round-trips the assembled notes" \
+  "$(bash "${RN}" assemble)" "$(repo_git tag -l v9.9.9 --format='%(body)')"
 
 echo ""
 echo "${PASS} passed, ${FAIL} failed"
