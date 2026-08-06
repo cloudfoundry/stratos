@@ -115,9 +115,10 @@ describe('CfServiceInstancesSignalConfigService cache wiring', () => {
     expect(brokersArg).toEqual([]);
   });
 
-  it('cache-hit: source pre-seeded; orchestrator load() does not fire HTTP', async () => {
+  it('cache-hit: source pre-seeded for instant paint; loadAll() still revalidates over HTTP (#5766)', async () => {
     const cached = [makeInstance({ guid: 'cached-1', name: 'cached' })];
-    const http = makeHttp([]);
+    const fresh = [makeInstance({ guid: 'cached-1', name: 'cached' }), makeInstance({ guid: 'fresh-2' })];
+    const http = makeHttp(fresh);
     const { registry } = makeRegistry([
       {
         guid: 'cnsi-1',
@@ -127,11 +128,13 @@ describe('CfServiceInstancesSignalConfigService cache wiring', () => {
     ]);
     const svc = makeSvc(http, registry);
     svc.initialize(['cnsi-1']);
+    // Seed paints immediately, before any fetch resolves.
     expect(svc.orchestrator.sources[0].items().map(s => s.guid)).toEqual(['cached-1']);
     expect(svc.orchestrator.sources[0].done()).toBe(true);
     await svc.loadAll();
-    expect((http.get as any)).not.toHaveBeenCalled();
-    expect(svc.orchestrator.sources[0].items().map(s => s.guid)).toEqual(['cached-1']);
+    // Stale-while-revalidate: the drain runs and the backend's rows win.
+    expect((http.get as any)).toHaveBeenCalled();
+    expect(svc.orchestrator.sources[0].items().map(s => s.guid)).toEqual(['cached-1', 'fresh-2']);
   });
 
   it('skips pre-seed when isLoadingServicesDetails() is true (race-condition gate)', async () => {
@@ -167,7 +170,8 @@ describe('CfServiceInstancesSignalConfigService cache wiring', () => {
     svc.initializeForSpace('cnsi-1', 'sp-1');
     expect(svc.orchestrator.sources[0].items().map(s => s.guid)).toEqual(['cached-1']);
     await svc.loadAll();
-    expect((http.get as any)).not.toHaveBeenCalled();
+    // Seed is paint-only; the space tab still revalidates (#5766).
+    expect((http.get as any)).toHaveBeenCalled();
   });
 
   it('initializeForOffering pre-seeds from cache when warm', async () => {
@@ -184,7 +188,8 @@ describe('CfServiceInstancesSignalConfigService cache wiring', () => {
     svc.initializeForOffering('cnsi-1', 'offering-1');
     expect(svc.orchestrator.sources[0].items().map(s => s.guid)).toEqual(['cached-1']);
     await svc.loadAll();
-    expect((http.get as any)).not.toHaveBeenCalled();
+    // Seed is paint-only; the offering tab still revalidates (#5766).
+    expect((http.get as any)).toHaveBeenCalled();
   });
 
   it('without a registry provided, behaves exactly like before (no preSeed, no write-back)', async () => {

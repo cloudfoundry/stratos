@@ -126,9 +126,9 @@ describe('CfServiceOfferingsSignalConfigService cache wiring', () => {
     expect(plansArg).toEqual([]);
   });
 
-  it('cache-hit: source pre-seeded from registry; orchestrator load() does not fire HTTP', async () => {
+  it('cache-hit: source pre-seeded from registry for instant paint; loadAll() still revalidates (#5766)', async () => {
     const cached = [makeOffering({ guid: 'cached-1', name: 'cached' })];
-    const http = makeHttp([]);
+    const http = makeHttp(cached);
     const { registry } = makeRegistry([
       {
         guid: 'cnsi-1',
@@ -143,9 +143,9 @@ describe('CfServiceOfferingsSignalConfigService cache wiring', () => {
     expect(svc.orchestrator.sources[0].items().map(o => o.guid)).toEqual(['cached-1']);
     expect(svc.orchestrator.sources[0].done()).toBe(true);
     await svc.loadAll();
-    // HTTP did NOT fire — preSeed short-circuited _doLoad.
-    expect((http.get as any)).not.toHaveBeenCalled();
-    // Items still reflect the seeded cache.
+    // Stale-while-revalidate: the seed painted instantly (asserted above),
+    // and the drain still fired so out-of-band changes surface (#5766).
+    expect((http.get as any)).toHaveBeenCalled();
     expect(svc.orchestrator.sources[0].items().map(o => o.guid)).toEqual(['cached-1']);
   });
 

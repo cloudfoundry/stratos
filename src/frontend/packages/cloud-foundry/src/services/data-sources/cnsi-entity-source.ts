@@ -45,11 +45,6 @@ export abstract class CnsiEntitySource<T> {
 
   private _inFlight: Promise<void> | null = null;
   private _inFlightOne: Map<string, Promise<void>> = new Map();
-  // Set true by preSeed() — short-circuits the next _doLoad() so the cached
-  // bundle handed in by the registry-aware signal-config isn't immediately
-  // wiped + re-fetched. The flag flips back to false after that one
-  // short-circuit so refresh() (which re-enters _doLoad) still works.
-  private _preseeded = false;
 
   constructor(
     readonly cnsiGuid: string,
@@ -84,10 +79,11 @@ export abstract class CnsiEntitySource<T> {
 
   /**
    * Pre-seed local state from a cache the consumer has already populated
-   * (e.g. the EndpointDataRegistry's pre-warmed services bundle). The next
-   * call to load() will short-circuit, skipping the HTTP drain entirely;
-   * subsequent refresh() / load()-after-refresh calls re-enter the normal
-   * fetch path.
+   * (e.g. the EndpointDataRegistry's pre-warmed services bundle). The seed
+   * is paint-only: it makes the cached rows visible immediately, but the
+   * next load() still revalidates against the backend (stale-while-
+   * revalidate) — a seeded list that skipped its fetch was how out-of-band
+   * changes stayed invisible until a hard refresh (#5766, #5767).
    *
    * Idempotent — calling preSeed() twice replaces the prior seed. Marks
    * the source as done so consumers querying done()/totalResults see the
@@ -98,7 +94,6 @@ export abstract class CnsiEntitySource<T> {
     this._totalResults.set(items.length);
     this._fetchedPages.set(1);
     this._done.set(true);
-    this._preseeded = true;
   }
 
   /**
@@ -112,19 +107,25 @@ export abstract class CnsiEntitySource<T> {
   }
 
   private async _doLoad(): Promise<void> {
-    // Short-circuit when preSeed() handed us a ready bundle. The seed
-    // satisfies this load(); refresh() (or any subsequent load() after
-    // refresh()) will fall through to the normal HTTP drain because the
-    // flag flips off here.
-    if (this._preseeded) {
-      this._preseeded = false;
-      return;
+    // Warm = rows already visible (a preSeed() or an earlier drain). The
+    // drain still runs, but silently: no spinner, no wipe — pages collect
+    // into a buffer and swap in atomically at the end, so the user never
+    // sees the list flash empty and a failed revalidate keeps the old rows.
+    // Cold keeps the original behavior: spinner + progressive per-page
+    // rendering, which matters on many-page foundations.
+    const warm = this._items().length > 0;
+    const buffer: T[] = [];
+    const append = warm
+      ? (rows: T[]) => { buffer.push(...rows); }
+      : (rows: T[]) => this._items.update(curr => curr.concat(rows));
+
+    if (!warm) {
+      this._loading.set(true);
+      this._items.set([]);
+      this._fetchedPages.set(0);
+      this._done.set(false);
     }
-    this._loading.set(true);
     this._error.set(null);
-    this._items.set([]);
-    this._fetchedPages.set(0);
-    this._done.set(false);
 
     try {
       // Backend native handlers now echo cnsiGuid on every St* row, so the
@@ -137,11 +138,22 @@ export abstract class CnsiEntitySource<T> {
         ? (resources as unknown[]).map(r => this.adaptResource!(r, this.cnsiGuid))
         : resources;
 
+      // Swap the buffered drain in atomically (warm path); cold pages are
+      // already in _items, so only the bookkeeping signals need setting.
+      const commit = (totalResults: number, lastPage: number): void => {
+        if (warm) this._items.set(buffer);
+        this._totalResults.set(totalResults);
+        this._fetchedPages.set(lastPage);
+        this._done.set(true);
+      };
+
       // Page 1 sequentially — its pagination block tells us totalPages.
       const first = await firstValueFrom(this.http.get<StratosPagedResponseLike<T>>(this.urlFor(1)));
-      this._items.update(curr => curr.concat(stamp(first.resources)));
-      this._totalResults.set(first.pagination.totalResults);
-      this._fetchedPages.set(1);
+      append(stamp(first.resources));
+      if (!warm) {
+        this._totalResults.set(first.pagination.totalResults);
+        this._fetchedPages.set(1);
+      }
 
       const totalPages = first.pagination.totalPages ?? 1;
       // done means "loaded everything this source intends to load" —
@@ -150,7 +162,7 @@ export abstract class CnsiEntitySource<T> {
       // total for consumers that want to surface the difference).
       const lastPage = this.maxPages ? Math.min(totalPages, this.maxPages) : totalPages;
       if (lastPage <= 1 || first.pagination.next == null) {
-        this._done.set(true);
+        commit(first.pagination.totalResults, 1);
         return;
       }
 
@@ -171,8 +183,8 @@ export abstract class CnsiEntitySource<T> {
           const page = remainingPages[idx];
           try {
             const resp = await firstValueFrom(this.http.get<StratosPagedResponseLike<T>>(this.urlFor(page)));
-            this._items.update(curr => curr.concat(stamp(resp.resources)));
-            this._fetchedPages.update(p => Math.max(p, page));
+            append(stamp(resp.resources));
+            if (!warm) this._fetchedPages.update(p => Math.max(p, page));
           } catch (err) {
             pageFetchErr = err;
             return;
@@ -182,7 +194,7 @@ export abstract class CnsiEntitySource<T> {
       const workers = Array.from({ length: Math.min(concurrency, remainingPages.length) }, () => worker());
       await Promise.all(workers);
       if (pageFetchErr != null) throw pageFetchErr;
-      this._done.set(true);
+      commit(first.pagination.totalResults, lastPage);
     } catch (err) {
       this._error.set(err);
     } finally {
