@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Injector, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, Signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, Injector, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, Signal, inject } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -53,6 +53,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     [key: string]: {
       stateInSignal: Signal<StackedInputActionsState | null>,
       stateInUpdate: (state: StackedInputActionsState | null) => void,
+      componentRef: ComponentRef<StackedInputActionComponent>,
       stackedAction: StackedInputActionComponent,
       update: StackedInputActionUpdate | null
     }
@@ -60,13 +61,14 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   addComponent(): void {
-    const component = this.inputs.createComponent(StackedInputActionComponent);
+    const componentRef = this.inputs.createComponent(StackedInputActionComponent);
 
-    const stackedAction = component.instance;
-    // Track a unique key for the component and it's position in the stack
-    stackedAction.key = this.count++;
-    stackedAction.position = this.inputs.length - 1;
-    stackedAction.config = this.stackedActionConfig;
+    const stackedAction = componentRef.instance;
+    // Track a unique key for the component and it's position in the stack.
+    // Inputs go through setInput so the OnPush component is marked for check.
+    componentRef.setInput('key', this.count++);
+    componentRef.setInput('position', this.inputs.length - 1);
+    componentRef.setInput('config', this.stackedActionConfig);
     // Handle when the component wants to be removed
     this.subs.push(stackedAction.remove.subscribe(() => {
       this.removeComponent(stackedAction);
@@ -90,14 +92,15 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     this.components[stackedAction.key] = {
       stateInSignal: stateInSignal.asReadonly(),
       stateInUpdate: (state: StackedInputActionsState | null) => stateInSignal.set(state),
+      componentRef,
       stackedAction,
       update: null
     };
 
-    this.cd.detectChanges();
-
     // Ensure all components know their new position
     this.updatePositions();
+
+    this.cd.detectChanges();
   }
 
   emitState(): void {
@@ -118,19 +121,22 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
   removeComponent(stackedAction: StackedInputActionComponent): void {
     // Remove the visual component
-    this.inputs.remove(stackedAction.position);
+    const componentRef = this.components[stackedAction.key].componentRef;
+    this.inputs.remove(this.inputs.indexOf(componentRef.hostView));
     // Remove the tracked component
     delete this.components[stackedAction.key];
     // Update all components with their new position
     this.updatePositions();
+    this.cd.detectChanges();
   }
 
   private updatePositions(): void {
-    // Ensure all components know which position they are and whether they can be removed or not
+    // Ensure all components know which position they are and whether they can be removed or not.
+    // Integer-like keys iterate in ascending order, which matches view insertion order.
     const componentCount = this.inputs.length;
-    Object.values(this.components).sort((a, b) => a.stackedAction.key < b.stackedAction.key ? 1 : 0).forEach((component, position) => {
-      component.stackedAction.position = position;
-      component.stackedAction.showRemove = position > 0 || componentCount > 1;
+    Object.values(this.components).forEach((component, position) => {
+      component.componentRef.setInput('position', position);
+      component.componentRef.setInput('showRemove', componentCount > 1);
     });
   }
 
