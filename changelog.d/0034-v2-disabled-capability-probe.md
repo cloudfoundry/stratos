@@ -1,2 +1,0 @@
-[BugFixes]
-- The CF capability probe no longer reports v2 support on foundations where the CAPI v2 API is disabled. Such foundations still answer `/v2/info` with 200 and a blank `api_version`, which the probe previously read as v2-enabled — leaving `V2Info.APIVersion` empty and breaking `cf push` through the deploy wizard. The probe now requires a populated `api_version`, while still keeping the served `/v2/info` body for the SSH fields the root document does not carry, so application SSH keeps working (#5727).

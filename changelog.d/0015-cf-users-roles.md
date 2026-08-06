@@ -1,2 +1,0 @@
-[Features]
-- The CF Users surface was rebuilt on the CF v3 role APIs. There is a selection-driven action bar for Manage Roles and Remove across the CF, organization and space pages (#5475), an Add User dialog that either associates an existing user or sends an invite (#5478), a multi-organization role-assignment widget with `space_supporter` support and a role registry (#5479), and faster role loading with a view toggle, mixed-role summaries and links from role cells (#5480).

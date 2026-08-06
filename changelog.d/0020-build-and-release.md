@@ -1,2 +1,0 @@
-[Chores]
-- The release lifecycle is owned by make: tag, publish, unpublish and untag (#5684), a CF-pushable zip is published (#5659), and the all-in-one image is thin with a CGO-free pure-Go sqlite driver (#5662). Backend plugins are generated before every build (#5587), `make` must be run from the repository root (#5563), and `version.mk` was split into a vendorable core (#5656). Korifi build and release targets exist but are not usable until Korifi auth lands (#5584).

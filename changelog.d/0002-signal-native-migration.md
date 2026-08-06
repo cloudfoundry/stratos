@@ -1,2 +1,0 @@
-[Features]
-- The frontend no longer uses @ngrx. Every page, list and wizard now reads its data through signal-native services, and the legacy ngrx list framework, router-store, auth/session/dashboard/endpoint/create-app/deploy slices and the schema-only entity catalog are gone. This ran as a long series of waves (#5308 through #5428) covering CF, Kubernetes, Helm, autoscaler, git and core, and the store package is now a fraction of its former size.

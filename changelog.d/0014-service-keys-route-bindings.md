@@ -1,3 +1,0 @@
-[Features]
-- Service keys and route service bindings are supported end to end (#4301, #4302) — native Jetstream handlers (#5460) plus the Service Keys (#5461) and Route Services (#5462) pages, with busy states, a per-instance key-count column and count cells anchored to the list they came from (#5470, #5472, #5473).
-- Service instance parameter editing works against the full OSBAPI schema again (#5495), plan parameters can be previewed from the marketplace Plans tab (#5497), and the service instance detail page gained parameters, credentials and uniform linking (#5500). Bind-existing options now render from v3 rows (#5617) and the service instance dashboard link is back (#5491).
