@@ -1,0 +1,2 @@
+[BugFixes]
+- Text fields in the user-invite configuration dialog and the backup password step are full width again, rather than showing about twenty characters at a time. They carried a `form-input` class whose styling did not survive the move to Tailwind, and an input with no width falls back to the browser's default of roughly twenty characters — so a client secret or a long password scrolled out of sight as it was typed and looked truncated. Nothing was ever cut off; the value was always stored in full (#5758).
