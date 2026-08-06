@@ -97,14 +97,30 @@
         />
       </div>
     </app-form-field>
-    @if (isUpdate && !credsSource()) {
-      <button
-        type="button"
-        class="self-start text-sm text-primary hover:underline focus:outline-none focus:ring-1 focus:ring-primary rounded"
-        (click)="revealCredentials()"
-      >
-        Show existing credentials
-      </button>
+    <!-- Credentials: one visual control (#5768). In update mode it opens as
+         a readonly view — structure with highlighted '<redacted>' markers,
+         real values after Show credentials — and Edit swaps in the real
+         textarea holding the JSON that will be saved. The readonly view is
+         a styled block rather than a readonly textarea so the markers can
+         be colorized. Create mode is just the editable field. -->
+    @if (isUpdate && credsMode() !== 'edit' && displayedCredentialSegments(); as segments) {
+      <div class="flex flex-col w-full">
+        <span class="text-xs font-medium text-primary">Credentials (JSON)</span>
+        <pre class="w-full min-h-[240px] max-h-[400px] mt-1 font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg overflow-auto">@for (segment of segments; track $index) {{{ segment }}@if (!$last) {<span class="text-warning-shade-700 font-semibold">"&lt;redacted&gt;"</span>}}</pre>
+      </div>
+    } @else {
+      <app-form-field class="">
+        <textarea
+          appInput
+          placeholder="Credentials (JSON)"
+          rows="10"
+          class="w-full min-w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
+          formControlName="credentials"
+        ></textarea>
+        @if (createEditServiceInstance.controls.credentials.hasError("notValidJson")) {
+          <app-error> Not valid JSON. </app-error>
+        }
+      </app-form-field>
     }
     @if (credsSource()?.isLoading()) {
       <span class="self-start text-sm text-secondary-text">Loading credentials…</span>
@@ -112,18 +128,22 @@
     @if (credsSource()?.error()) {
       <app-error>Could not load the existing credentials.</app-error>
     }
-    <app-form-field class="">
-      <textarea
-        appInput
-        placeholder="Credentials (JSON)"
-        rows="10"
-        class="w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
-        formControlName="credentials"
-      ></textarea>
-      @if (createEditServiceInstance.controls.credentials.hasError("notValidJson")) {
-        <app-error> Not valid JSON. </app-error>
-      }
-    </app-form-field>
+    @if (isUpdate && !credsSource()?.isLoading()) {
+      <div class="flex gap-2">
+        @if (credsMode() === 'edit') {
+          <button type="button" class="btn btn-ghost" (click)="cancelEdit()">
+            Cancel edit
+          </button>
+        } @else if (displayedCredentialSegments()) {
+          <button type="button" class="btn btn-ghost" (click)="toggleReveal()">
+            {{ credsMode() === 'revealed' ? 'Hide credentials' : 'Show credentials' }}
+          </button>
+          <button type="button" class="btn btn-ghost" (click)="enterEdit()">
+            Edit credentials
+          </button>
+        }
+      </div>
+    }
   </form>
 } @else {
   <form class="stepper-form" [formGroup]="bindExistingInstance">

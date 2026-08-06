@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject, effect } from '@angular/core';
+import { Component, Input, OnDestroy, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -43,6 +43,19 @@ export interface UpsPickerRow {
 }
 
 const { proxyAPIVersion } = environment;
+
+// Replace every leaf value with the '<redacted>' marker, keeping the key
+// structure (nested objects and array shapes included) browsable. Angle
+// brackets match the masked-credentials URL redaction convention and keep
+// the marker distinguishable from a credential whose real value happens to
+// be the word "redacted".
+function redactValues(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(redactValues);
+  if (value !== null && typeof value === 'object') {
+    return Object.fromEntries(Object.entries(value).map(([k, v]) => [k, redactValues(v)]));
+  }
+  return '<redacted>';
+}
 @Component({
   selector: 'app-specify-user-provided-details',
   templateUrl: './specify-user-provided-details.component.html',
@@ -95,34 +108,86 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }) });
     this.initUpdate(serviceInstanceId, endpointId);
     this.setupValidate();
-
-    // Bridge revealed credentials into the textarea once the sub-resource
-    // lands. originalFormValue is recomputed so that revealing on its own
-    // does not register as an edit — the wizard's Next button gates on the
-    // form having actually changed.
-    effect(() => {
-      const creds = this.credsSource()?.value();
-      if (!creds) return;
-      // emitEvent: false — setValue would otherwise fire statusChanges while
-      // originalFormValue still holds the pre-reveal snapshot, and the
-      // validAndChanged() comparison would read the reveal as a user edit and
-      // enable Next. Validation still runs; only the notification is skipped.
-      this.createEditServiceInstance.controls.credentials.setValue(
-        JSON.stringify(creds, null, 2), { emitEvent: false },
-      );
-      this.originalFormValue = this.getServiceData();
-    });
+    // Fetch on load so the redacted structure preview renders without a
+    // click; real values stay off-screen until explicitly shown.
+    this.fetchCredentials();
   }
 
-  /** Credentials sub-resource, fetched on the first reveal. Null until then:
-   *  credentials are sensitive, so they are never pulled on page load (same
-   *  stance as the instance summary page's Credentials section). */
+  /** What the readonly credential view displays: the structure with
+   *  '<redacted>' leaves by default, the real JSON while revealed.
+   *  Null until the sub-resource lands. */
+  public displayedCredentialsJson = computed<string | null>(() => {
+    const creds = this.credsSource()?.value();
+    if (!creds) return null;
+    return this.credsMode() === 'revealed'
+      ? JSON.stringify(creds, null, 2)
+      : JSON.stringify(redactValues(creds), null, 2);
+  });
+
+  /** The preview split on the '"<redacted>"' tokens so the template can
+   *  re-insert each token as a highlighted span — colorized without
+   *  innerHTML. In real-values mode the split yields one segment and no
+   *  markers render. */
+  public displayedCredentialSegments = computed<string[] | null>(() => {
+    const json = this.displayedCredentialsJson();
+    return json ? json.split('"<redacted>"') : null;
+  });
+
+  /** Explicit step from viewing to editing: put the full JSON in the
+   *  textarea. Separate from the reveal so the plaintext values only render
+   *  where the user asked to edit them. originalFormValue is recomputed so
+   *  loading on its own does not register as an edit — the wizard's finish
+   *  button gates on the form having actually changed; emitEvent: false
+   *  keeps statusChanges from firing against the pre-load snapshot.
+   *  Validation still runs; only the notification is skipped. */
+  public loadCredentialsIntoEditor(): void {
+    const creds = this.credsSource()?.value();
+    if (!creds) return;
+    this.createEditServiceInstance.controls.credentials.setValue(
+      JSON.stringify(creds, null, 2), { emitEvent: false },
+    );
+    this.originalFormValue = this.getServiceData();
+  }
+
+  /** Credentials sub-resource, fetched on load in update mode so the
+   *  structure preview can render immediately. Fetching pulls the values
+   *  into memory only — the screen shows '<redacted>' markers until the
+   *  user explicitly asks for the real values (the threat model is a
+   *  passer-by reading the screen, not the browser session itself). */
   public credsSource = signal<SignalSource<Record<string, unknown> | null> | null>(null);
 
-  public revealCredentials(): void {
-    if (!this.isUpdate || this.credsSource()) return;
+  /** The single credentials control's state in update mode:
+   *  'redacted' — readonly view, structure with '<redacted>' markers;
+   *  'revealed' — readonly view, real values;
+   *  'edit'     — the real textarea, holding the JSON that will be saved. */
+  public credsMode = signal<'redacted' | 'revealed' | 'edit'>('redacted');
+
+  public fetchCredentials(): void {
+    if (!this.isUpdate) return;
     const { endpointId, serviceInstanceId } = this.route.snapshot.params;
+    this.credsMode.set('redacted');
     this.credsSource.set(this.serviceCatalog.userProvidedCredentials(endpointId, serviceInstanceId));
+  }
+
+  public toggleReveal(): void {
+    this.credsMode.update(m => m === 'revealed' ? 'redacted' : 'revealed');
+  }
+
+  /** Swap the readonly view for the editable field, pre-loaded with the
+   *  real JSON. From here the field's content is what gets saved. */
+  public enterEdit(): void {
+    this.loadCredentialsIntoEditor();
+    this.credsMode.set('edit');
+  }
+
+  /** Leave edit mode without saving anything: blank the field (blank =
+   *  leave stored credentials untouched on save) and fall back to the
+   *  readonly redacted view. originalFormValue is recomputed so the
+   *  round-trip doesn't register as an edit. */
+  public cancelEdit(): void {
+    this.createEditServiceInstance.controls.credentials.setValue('', { emitEvent: false });
+    this.originalFormValue = this.getServiceData();
+    this.credsMode.set('redacted');
   }
   public createEditServiceInstance: FormGroup<CreateEditServiceInstanceForm>;
   public bindExistingInstance: FormGroup<BindExistingInstanceForm>;
