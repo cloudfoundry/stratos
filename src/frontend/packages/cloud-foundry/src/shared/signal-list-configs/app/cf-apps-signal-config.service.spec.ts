@@ -1215,10 +1215,19 @@ describe('CfAppsSignalConfigService stacks', () => {
     expect(svc.stackOptions().map(o => o.value)).toEqual([null, 'cflinuxfs4', 'windows']);
   });
 
-  it('predicate filters by stackName; docker apps (no stackName) match only All', async () => {
+  it('null selection (the default) passes every app, including docker apps with no stackName', async () => {
     const svc = makeSvc(makeStacksHttp({ 'cf-1': ['cflinuxfs4', 'cflinuxfs5'] }));
     svc.initialize(['cf-1']);
-    svc.selectedStack.set('cflinuxfs4');
+    await drainUntil(() => svc.stackOptions().length > 1);
+    expect(svc.filter()(makeStackApp('a', 'cflinuxfs4'))).toBe(true);
+    expect(svc.filter()(makeStackApp('b', 'cflinuxfs5'))).toBe(true);
+    expect(svc.filter()(makeStackApp('c', undefined))).toBe(true);
+  });
+
+  it('a single selected name passes only matching apps; docker apps (no stackName) never match', async () => {
+    const svc = makeSvc(makeStacksHttp({ 'cf-1': ['cflinuxfs4', 'cflinuxfs5'] }));
+    svc.initialize(['cf-1']);
+    svc.selectedStacks.set(['cflinuxfs4']);
     // Drain on a condition the PRE-effect default filter (`() => true`)
     // can't already satisfy — filter()(a) is trivially true even before
     // the predicate effect installs the real stack-aware filter, so
@@ -1228,16 +1237,47 @@ describe('CfAppsSignalConfigService stacks', () => {
     expect(svc.filter()(makeStackApp('a', 'cflinuxfs4'))).toBe(true);
     expect(svc.filter()(makeStackApp('b', 'cflinuxfs5'))).toBe(false);
     expect(svc.filter()(makeStackApp('c', undefined))).toBe(false);
-    svc.selectedStack.set(null);
+    svc.selectedStacks.set(null);
     await drainUntil(() => svc.filter()(makeStackApp('c', undefined)));
     expect(svc.filter()(makeStackApp('c', undefined))).toBe(true);
   });
 
-  it('clearFilters resets the stack selection', () => {
+  it('an explicitly empty selection behaves as "all" — same as null', async () => {
+    const svc = makeSvc(makeStacksHttp({ 'cf-1': ['cflinuxfs4', 'cflinuxfs5'] }));
+    svc.initialize(['cf-1']);
+    svc.selectedStacks.set(['cflinuxfs4']);
+    await drainUntil(() => !svc.filter()(makeStackApp('b', 'cflinuxfs5')));
+    svc.selectedStacks.set([]);
+    await drainUntil(() => svc.filter()(makeStackApp('b', 'cflinuxfs5')));
+    expect(svc.filter()(makeStackApp('a', 'cflinuxfs4'))).toBe(true);
+    expect(svc.filter()(makeStackApp('b', 'cflinuxfs5'))).toBe(true);
+    expect(svc.filter()(makeStackApp('c', undefined))).toBe(true);
+  });
+
+  it('clearFilters resets the stack selection to null', () => {
     const svc = makeSvc(makeHttp());
-    svc.selectedStack.set('cflinuxfs4');
+    svc.selectedStacks.set(['cflinuxfs4']);
     svc.clearFilters();
-    expect(svc.selectedStack()).toBe(null);
+    expect(svc.selectedStacks()).toBe(null);
+  });
+
+  it('drops just the vanished name(s) from the selection when the stack catalog no longer lists them, collapsing to null when none remain', async () => {
+    const svc = makeSvc(makeStacksHttp({ 'cf-1': ['cflinuxfs4', 'cflinuxfs5'] }));
+    svc.initialize(['cf-1']);
+    await drainUntil(() => svc.stackOptions().length > 1);
+    svc.selectedStacks.set(['cflinuxfs4', 'cflinuxfs5', 'windows']);
+    await svc.loadAll();
+    TestBed.tick();
+    // 'windows' isn't in the installed catalog — it's dropped, the two
+    // still-installed names survive.
+    expect(svc.selectedStacks()).toEqual(['cflinuxfs4', 'cflinuxfs5']);
+
+    svc.selectedStacks.set(['windows']);
+    await svc.refresh();
+    TestBed.tick();
+    // Every selected name is gone — the selection collapses to null
+    // (== all), not an empty array that would silently hide every app.
+    expect(svc.selectedStacks()).toBe(null);
   });
 });
 

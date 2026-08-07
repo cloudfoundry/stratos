@@ -1,6 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import {
-  Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal, Injector, effect,
+  Component, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal, WritableSignal, Injector, effect,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -280,12 +280,14 @@ export class ApplicationWallComponent implements OnInit {
         loading: this.appsConfig.isLoadingSpaces,
       },
     ];
-    const stackDropdown: SignalListDropdown = {
-      label: 'Stack',
-      options: this.appsConfig.stackOptions,
-      selected: this.appsConfig.selectedStack,
-      // No onOpen: the stacks catalog is fetched eagerly by initialize()
-      // (visibility itself depends on it), unlike the lazy org/space names.
+    // Stack filtering rides the field-selectable filter rather than its
+    // own dropdown: "Stack" is a filter-field whose input is a checklist
+    // popup (multi-select, default all) — see SignalListMultiFilter. The
+    // stacks catalog is still fetched eagerly (visibility depends on it).
+    const stackFilterMulti = {
+      field: 'stackName',
+      options: computed(() => this.appsConfig.stackOptions().filter(o => o.value !== null).map(o => o.label)),
+      selected: this.appsConfig.selectedStacks,
     };
     const stackColumn: SignalListColumn<StApp> = {
       header: 'Stack', key: 'stackName', sortField: 'stackName',
@@ -438,9 +440,14 @@ export class ApplicationWallComponent implements OnInit {
           card: [6, 12, 24, 48, 96],
         },
         nameFilter: this.appsConfig.nameFilter,
-        filterColumns: ['name', 'state', 'cfOrgSpace'],
+        filterColumns: withStack ? ['name', 'state', 'cfOrgSpace', 'stackName'] : ['name', 'state', 'cfOrgSpace'],
+        // Only wired while the Stack column itself is in filterColumns —
+        // otherwise a filterField left over at 'stackName' from another
+        // stack-visible page (the service's filter state is a shared
+        // singleton) would pop the checklist for a column not shown here.
+        filterMultis: withStack ? [stackFilterMulti] : undefined,
         filterField: this.appsConfig.filterField,
-        filterDropdowns: withStack ? [...dropdowns, stackDropdown] : dropdowns,
+        filterDropdowns: dropdowns,
         onRefresh: () => this.appsConfig.refresh(),
         onClear: () => this.appsConfig.clearFilters(),
         cardAccentColor: stateColor,

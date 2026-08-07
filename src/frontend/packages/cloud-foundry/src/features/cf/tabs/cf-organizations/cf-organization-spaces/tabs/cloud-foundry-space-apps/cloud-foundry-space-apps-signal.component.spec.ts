@@ -60,7 +60,7 @@ function makeStubAppsConfig() {
     orchestrator,
     nameFilter: signal(''),
     viewMode: signal<'card' | 'table'>('card'),
-    selectedStack: signal<string | null>(null),
+    selectedStacks: signal<string[] | null>(null),
     stackUiVisible: signal(false).asReadonly(),
     stackOptions: signal([allOption]).asReadonly(),
   };

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
-  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal, Injector, effect,
+  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
@@ -153,12 +153,14 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
         onOpen: onDropdownOpen,
       },
     ];
-    const stackDropdown: SignalListDropdown = {
-      label: 'Stack',
-      options: this.appsConfig.stackOptions,
-      selected: this.appsConfig.selectedStack,
-      // No onOpen: the stacks catalog is fetched eagerly by initialize()
-      // (visibility itself depends on it), unlike the lazy org/space names.
+    // Stack filtering rides the field-selectable filter rather than its
+    // own dropdown: "Stack" is a filter-field whose input is a checklist
+    // popup (multi-select, default all) — see SignalListMultiFilter. The
+    // stacks catalog is still fetched eagerly (visibility depends on it).
+    const stackFilterMulti = {
+      field: 'stackName',
+      options: computed(() => this.appsConfig.stackOptions().filter(o => o.value !== null).map(o => o.label)),
+      selected: this.appsConfig.selectedStacks,
     };
     const stackColumn: SignalListColumn<StApp> = {
       header: 'Stack', key: 'stackName', sortField: 'stackName',
@@ -293,10 +295,16 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
         },
         nameFilter: this.appsConfig.nameFilter,
         // Filter-by-field parity with the wall: the text filter can target
-        // Name, Status, or the Org/Space column.
-        filterColumns: ['name', 'state', 'orgSpace'],
+        // Name, Status, or the Org/Space column; Stack joins the list
+        // (as a checklist, not text) once its column is visible.
+        filterColumns: withStack ? ['name', 'state', 'orgSpace', 'stackName'] : ['name', 'state', 'orgSpace'],
+        // Only wired while the Stack column itself is in filterColumns —
+        // otherwise a filterField left over at 'stackName' from another
+        // stack-visible page (the service's filter state is a shared
+        // singleton) would pop the checklist for a column not shown here.
+        filterMultis: withStack ? [stackFilterMulti] : undefined,
         filterField: this.appsConfig.filterField,
-        filterDropdowns: withStack ? [...dropdowns, stackDropdown] : dropdowns,
+        filterDropdowns: dropdowns,
         onRefresh: () => this.appsConfig.refresh(),
         onClear: () => this.appsConfig.clearFilters(),
         cardAccentColor: stateColor,
