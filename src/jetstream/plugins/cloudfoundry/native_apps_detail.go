@@ -398,8 +398,12 @@ func (c *CloudFoundrySpecification) composeAppSummaryEntry(reqCtx context.Contex
 	// Single-app path: OrgName is not stitched here (the org join is a
 	// batch optimisation that pays off on list responses). Detail-page
 	// consumers resolve org via the dedicated /pp/v1/cf/org/{cnsi}/{org}
-	// fetch anyway, so the empty value is the right default.
-	return composeStAppSummary(app, cnsiGUID, process, nil, "", []StAppRoute{})
+	// fetch anyway, so the empty value is the right default. Droplets
+	// mirror the same call-cheap tradeoff as routes: pass an empty (non-
+	// nil) map so a never-staged app reads as legitimately absent rather
+	// than a spurious fetch failure — this single-app path doesn't fan
+	// out to /v3/droplets.
+	return composeStAppSummary(app, cnsiGUID, process, nil, "", []StAppRoute{}, map[string]string{})
 }
 
 // composeAppDetails returns the full StAppDetail envelope for the
