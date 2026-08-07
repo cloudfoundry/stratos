@@ -1427,3 +1427,190 @@ describe('SignalListComponent rowState blocked/deleting/busy (multiline-ops feed
     expect(fixture.nativeElement.querySelector('[data-test="row-busy"]')).not.toBeNull();
   });
 });
+
+// Checklist-popup filter input (config.filterMultis / SignalListMultiFilter).
+// Stack is the first consumer of this control (app status is a planned
+// second filterMultis entry on the same field-selector, elsewhere).
+@Component({
+  standalone: true,
+  imports: [SignalListComponent],
+  template: `<app-signal-list [config]="config" />`
+})
+class MultiFilterHost {
+  items = signal([
+    { name: 'one', stack: 'cflinuxfs4' },
+    { name: 'two', stack: 'cflinuxfs5' },
+  ]);
+  pageIndex = signal(0);
+  pageSize = signal(10);
+  filterField = signal('stackName');
+  selectedStacks = signal<string[] | null>(null);
+  stackOptions = signal(['cflinuxfs4', 'cflinuxfs5', 'windows']);
+  config: SignalListConfig<{ name: string; stack: string }> = {
+    pagedItems: this.items.asReadonly(),
+    totalFilteredResults: signal(2).asReadonly(),
+    totalPages: signal(1).asReadonly(),
+    pageIndex: this.pageIndex,
+    pageSize: this.pageSize,
+    isAnyLoading: signal(false).asReadonly(),
+    errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+    columns: [
+      { header: 'Name', key: 'name', render: r => r.name },
+      { header: 'Stack', key: 'stackName', render: r => r.stack },
+    ],
+    getRowKey: r => r.name,
+    nameFilter: signal(''),
+    filterColumns: ['name', 'stackName'],
+    filterField: this.filterField,
+    filterMultis: [{
+      field: 'stackName',
+      options: this.stackOptions.asReadonly(),
+      selected: this.selectedStacks,
+    }],
+  };
+}
+
+describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
+  function componentWith(fixture: ReturnType<typeof TestBed.createComponent<MultiFilterHost>>) {
+    return fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string; stack: string }>;
+  }
+
+  it('renders the checklist toggle instead of the text input when filterField matches a filterMultis entry', () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="name-filter"]')).toBeNull();
+  });
+
+  it('falls back to the text input when filterField does not match any filterMultis entry', () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.componentInstance.filterField.set('name');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="name-filter"]')).not.toBeNull();
+  });
+
+  describe('multiSummary() — the four button-label states', () => {
+    it('reads "All (n)" when selected is null (the default)', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      expect(component.multiSummary(component.activeMulti()!)).toBe('All (3)');
+    });
+
+    it('reads "All (n)" when every option is explicitly selected', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.componentInstance.selectedStacks.set(['cflinuxfs4', 'cflinuxfs5', 'windows']);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      expect(component.multiSummary(component.activeMulti()!)).toBe('All (3)');
+    });
+
+    it('reads the bare value when exactly one option is selected', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.componentInstance.selectedStacks.set(['cflinuxfs4']);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      expect(component.multiSummary(component.activeMulti()!)).toBe('cflinuxfs4');
+    });
+
+    it('reads "x of y selected" for a partial pick', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.componentInstance.selectedStacks.set(['cflinuxfs4', 'windows']);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      expect(component.multiSummary(component.activeMulti()!)).toBe('2 of 3 selected');
+    });
+
+    it('reads "None — showing all" when the selection is explicitly emptied', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.componentInstance.selectedStacks.set([]);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      expect(component.multiSummary(component.activeMulti()!)).toBe('None — showing all');
+    });
+  });
+
+  describe('toggleMultiOption() set math', () => {
+    it('starting from null (all), unchecking one option produces the explicit remaining set', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.toggleMultiOption(component.activeMulti()!, 'windows');
+      expect(fixture.componentInstance.selectedStacks()).toEqual(['cflinuxfs4', 'cflinuxfs5']);
+    });
+
+    it('checking every option back on collapses the selection to null, not an explicit full list', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.componentInstance.selectedStacks.set(['cflinuxfs4', 'cflinuxfs5']);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.toggleMultiOption(component.activeMulti()!, 'windows');
+      expect(fixture.componentInstance.selectedStacks()).toBe(null);
+    });
+
+    it('unchecking the last remaining option leaves an explicit empty array, not null', () => {
+      // Distinguishing [] from null is what lets the popup show the
+      // "showing all" note instead of silently reverting to "all".
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.componentInstance.selectedStacks.set(['cflinuxfs4']);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.toggleMultiOption(component.activeMulti()!, 'cflinuxfs4');
+      expect(fixture.componentInstance.selectedStacks()).toEqual([]);
+    });
+
+    it('resets pageIndex to 0', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.componentInstance.pageIndex.set(3);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.toggleMultiOption(component.activeMulti()!, 'windows');
+      expect(fixture.componentInstance.pageIndex()).toBe(0);
+    });
+  });
+
+  it('shows the "Nothing selected — showing all" note in the popup when the selection is explicitly empty', () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.componentInstance.selectedStacks.set([]);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).toContain('Nothing selected — showing all');
+  });
+
+  it('toggling a checkbox in the popup updates the selection', () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.detectChanges();
+    (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    const boxes = fixture.nativeElement.querySelectorAll('input[type="checkbox"]') as NodeListOf<HTMLInputElement>;
+    boxes[0].click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.selectedStacks()).toEqual(['cflinuxfs5', 'windows']);
+  });
+
+  it('closes the popup on the Close button and on any click outside the control', () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.detectChanges();
+    const component = componentWith(fixture);
+    (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.multiPopupOpen()).toBe(true);
+
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+    expect(component.multiPopupOpen()).toBe(false);
+  });
+
+  it('changing filterField closes an open popup', () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.detectChanges();
+    const component = componentWith(fixture);
+    (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.multiPopupOpen()).toBe(true);
+    component.onFilterFieldChange('name');
+    expect(component.multiPopupOpen()).toBe(false);
+  });
+});
