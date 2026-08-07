@@ -69,6 +69,14 @@ describe('CloudFoundryComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('has a Stacks column that renders an em-dash until an endpoint\'s stacks are known', () => {
+    const col = component.listConfig().columns.find(c => c.key === 'stacks');
+    expect(col).toBeTruthy();
+    expect(col!.header).toBe('Stacks');
+    const unknown = { guid: 'never-fetched', name: 'cf' } as EndpointModel;
+    expect(col!.render(unknown)).toBe('—');
+  });
 });
 
 // The single-CF shortcut is a one-shot decision taken once the endpoint list
