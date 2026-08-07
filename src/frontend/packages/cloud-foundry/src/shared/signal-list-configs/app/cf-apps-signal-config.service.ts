@@ -18,8 +18,8 @@ import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServ
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import type { StratosJob } from '../../../services/async-jobs/async-job.types';
-import type { SignalListDropdownOption } from '@stratosui/core';
-import { ListStateStore, naturalCompare } from '@stratosui/core';
+import type { SignalListDropdownOption, SignalListRangeValue } from '@stratosui/core';
+import { ListStateStore, naturalCompare, rangeMatches } from '@stratosui/core';
 
 // Re-export the bulk-endpoint response shapes so per-space app consumers
 // import a single BulkResult type without reaching across into the routes
@@ -140,6 +140,12 @@ export class CfAppsSignalConfigService {
   // constraint); an explicitly empty array is ALSO treated as all — the
   // popup shows a note rather than silently emptying the app list.
   readonly selectedStacks: WritableSignal<string[] | null> = signal(null);
+
+  // Range constraint on lastRefreshedAt, shared by all three list
+  // variants (root singleton, same as selectedStacks). null = no
+  // constraint. Unlike stack there is no visibility gate to go stale
+  // against — the column and control are always shown.
+  readonly lastRefreshedRange: WritableSignal<SignalListRangeValue | null> = signal(null);
 
   // Stack UI (column + dropdown) shows when ANY scoped endpoint has 2+
   // installed stacks; a single-stack foundation would render a constant
@@ -448,6 +454,7 @@ export class CfAppsSignalConfigService {
       const stacks = this.selectedStacks();
       const stackUiVisible = this.stackUiVisible();
       const states = this.selectedStates();
+      const refreshed = this.lastRefreshedRange();
       const q = this.nameFilter().trim().toLowerCase();
       const field = this.filterField();
       const extractors = this._filterExtractors();
@@ -473,6 +480,7 @@ export class CfAppsSignalConfigService {
         // it has no visibility condition to go stale against, since it's
         // always shown.
         if (stackUiVisible && stacks && stacks.length > 0 && (!app.stackName || !stacks.includes(app.stackName))) return false;
+        if (!rangeMatches(app.lastRefreshedAt, refreshed, 'date')) return false;
         // Same posture: an app whose label isn't one of the four known
         // options (raw/unknown CF state, extractor unregistered) only
         // fails to match while the filter is actually narrowed — it
@@ -968,6 +976,7 @@ export class CfAppsSignalConfigService {
     this.selectedOrg.set(null);
     this.selectedSpace.set(null);
     this.selectedStacks.set(null);
+    this.lastRefreshedRange.set(null);
     this.selectedStates.set(null);
     this.nameFilter.set('');
     this.filterField.set('name');

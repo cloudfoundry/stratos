@@ -46,6 +46,9 @@ export interface StApp {
   spaceGuid: string;
   spaceName?: string;
   stackName?: string;
+  // Newest STAGED droplet's created_at — jetstream-enriched "last
+  // refreshed" (#5770). Absent when the app never successfully staged.
+  lastRefreshedAt?: string;
   instances: number;
   memory?: number;
   diskQuota?: number;

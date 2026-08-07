@@ -1458,3 +1458,42 @@ describe('CfAppsSignalConfigService — space catalog shares the endpoint load',
     expect(fanout.length).toBeGreaterThan(0);
   });
 });
+
+function makeRefreshedApp(guid: string, lastRefreshedAt: string | undefined): StApp {
+  return {
+    guid, name: guid, state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1',
+    instances: 1, routes: [], createdAt: '', updatedAt: '',
+    ...(lastRefreshedAt !== undefined ? { lastRefreshedAt } : {}),
+  } as StApp;
+}
+
+describe('CfAppsSignalConfigService last-refreshed range', () => {
+  it('predicate keeps only apps inside the active range', async () => {
+    const svc = makeSvc(makeHttp());
+    svc.initialize(['cf-1']);
+    const fresh = makeRefreshedApp('fresh', '2026-07-01T00:00:00Z');
+    const stale = makeRefreshedApp('stale', '2026-01-01T00:00:00Z');
+    svc.lastRefreshedRange.set({ op: 'gte', a: '2026-06-01' });
+    await drainUntil(() => !svc.filter()(stale));
+    expect(svc.filter()(fresh)).toBe(true);
+    expect(svc.filter()(stale)).toBe(false);
+  });
+
+  it('never-staged apps match only an inert range', async () => {
+    const svc = makeSvc(makeHttp());
+    svc.initialize(['cf-1']);
+    const never = makeRefreshedApp('never', undefined);
+    expect(svc.filter()(never)).toBe(true);
+    svc.lastRefreshedRange.set({ op: 'lt', a: '2099-01-01' });
+    await drainUntil(() => !svc.filter()(never));
+    expect(svc.filter()(never)).toBe(false);
+  });
+
+  it('clearFilters resets the range', () => {
+    const svc = makeSvc(makeHttp());
+    svc.initialize(['cf-1']);
+    svc.lastRefreshedRange.set({ op: 'lt', a: '2026-01-01' });
+    svc.clearFilters();
+    expect(svc.lastRefreshedRange()).toBeNull();
+  });
+});
