@@ -289,6 +289,14 @@ export class ApplicationWallComponent implements OnInit {
       options: computed(() => this.appsConfig.stackOptions().filter(o => o.value !== null).map(o => o.label)),
       selected: this.appsConfig.selectedStacks,
     };
+    // Status rides the same field-selectable filter, no visibility gate
+    // (CF always reports 2+ possible states): picking "Status" swaps the
+    // text input for the checklist populated from the fixed label set.
+    const statusFilterMulti = {
+      field: 'state',
+      options: this.appsConfig.statusOptions,
+      selected: this.appsConfig.selectedStates,
+    };
     const stackColumn: SignalListColumn<StApp> = {
       header: 'Stack', key: 'stackName', sortField: 'stackName',
       render: (app: StApp) => app.stackName || '—',
@@ -441,11 +449,13 @@ export class ApplicationWallComponent implements OnInit {
         },
         nameFilter: this.appsConfig.nameFilter,
         filterColumns: withStack ? ['name', 'state', 'cfOrgSpace', 'stackName'] : ['name', 'state', 'cfOrgSpace'],
-        // Only wired while the Stack column itself is in filterColumns —
-        // otherwise a filterField left over at 'stackName' from another
-        // stack-visible page (the service's filter state is a shared
-        // singleton) would pop the checklist for a column not shown here.
-        filterMultis: withStack ? [stackFilterMulti] : undefined,
+        // Status has no visibility gate (always ≥2 possible states) so its
+        // entry is unconditional; Stack's is only wired while its column
+        // is actually in filterColumns — otherwise a filterField left
+        // over at 'stackName' from another stack-visible page (the
+        // service's filter state is a shared singleton) would pop the
+        // checklist for a column not shown here.
+        filterMultis: withStack ? [statusFilterMulti, stackFilterMulti] : [statusFilterMulti],
         filterField: this.appsConfig.filterField,
         filterDropdowns: dropdowns,
         onRefresh: () => this.appsConfig.refresh(),
@@ -468,8 +478,11 @@ export class ApplicationWallComponent implements OnInit {
     this.appsConfig.registerSortExtractor('cfOrgSpace', renderCfOrgSpace);
     // Register text-filter extractors for each column eligible for the
     // filter-field dropdown. 'name' uses the raw field; 'state' uses the
-    // user-facing label (so typing "crashed" matches STATE=CRASHED); and
-    // 'cfOrgSpace' flattens the composite column to its rendered string.
+    // user-facing label (so typing "crashed" matches STATE=CRASHED) —
+    // this same function is what the Status checklist's predicate reuses
+    // to match a selected label back to an app, so the two can't drift
+    // apart; 'cfOrgSpace' flattens the composite column to its rendered
+    // string.
     this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
     this.appsConfig.registerFilterExtractor('state', stateLabel);
     this.appsConfig.registerFilterExtractor('cfOrgSpace', renderCfOrgSpace);

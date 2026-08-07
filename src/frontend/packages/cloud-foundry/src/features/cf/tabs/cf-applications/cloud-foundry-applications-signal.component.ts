@@ -162,6 +162,14 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       options: computed(() => this.appsConfig.stackOptions().filter(o => o.value !== null).map(o => o.label)),
       selected: this.appsConfig.selectedStacks,
     };
+    // Status rides the same field-selectable filter, no visibility gate
+    // (CF always reports 2+ possible states): picking "Status" swaps the
+    // text input for the checklist populated from the fixed label set.
+    const statusFilterMulti = {
+      field: 'state',
+      options: this.appsConfig.statusOptions,
+      selected: this.appsConfig.selectedStates,
+    };
     const stackColumn: SignalListColumn<StApp> = {
       header: 'Stack', key: 'stackName', sortField: 'stackName',
       render: (app: StApp) => app.stackName || '—',
@@ -298,11 +306,13 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
         // Name, Status, or the Org/Space column; Stack joins the list
         // (as a checklist, not text) once its column is visible.
         filterColumns: withStack ? ['name', 'state', 'orgSpace', 'stackName'] : ['name', 'state', 'orgSpace'],
-        // Only wired while the Stack column itself is in filterColumns —
-        // otherwise a filterField left over at 'stackName' from another
-        // stack-visible page (the service's filter state is a shared
-        // singleton) would pop the checklist for a column not shown here.
-        filterMultis: withStack ? [stackFilterMulti] : undefined,
+        // Status has no visibility gate (always ≥2 possible states) so its
+        // entry is unconditional; Stack's is only wired while its column
+        // is actually in filterColumns — otherwise a filterField left
+        // over at 'stackName' from another stack-visible page (the
+        // service's filter state is a shared singleton) would pop the
+        // checklist for a column not shown here.
+        filterMultis: withStack ? [statusFilterMulti, stackFilterMulti] : [statusFilterMulti],
         filterField: this.appsConfig.filterField,
         filterDropdowns: dropdowns,
         onRefresh: () => this.appsConfig.refresh(),
@@ -325,7 +335,9 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
 
     // Sort + filter extractors for the Org/Space column (composed from name
     // maps rather than a direct StApp field), plus name/state so the
-    // filter-by-field dropdown can target each.
+    // filter-by-field dropdown can target each. The 'state' extractor is
+    // also what the Status checklist's predicate reuses to match a
+    // selected label back to an app — one mapping, not two.
     const orgSpaceText = (app: StApp) => CloudFoundryApplicationsSignalComponent.renderOrgSpace(
       app, this.appsConfig.orgNames(), this.appsConfig.spaceNames());
     this.appsConfig.registerSortExtractor('orgSpace', orgSpaceText);

@@ -3,7 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { SignalListComponent } from './signal-list.component';
-import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption, SignalListRowState } from './signal-list.component';
+import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption, SignalListMultiFilter, SignalListRowState } from './signal-list.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 
 // SignalListComponent now applies [routerLink] to the card / table row when a
@@ -417,6 +417,33 @@ describe('SignalListComponent', () => {
     };
     fixture.detectChanges();
     const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
+    expect(btn.disabled).toBe(false);
+    selected.set(null);
+    fixture.detectChanges();
+    expect(btn.disabled).toBe(true);
+  });
+
+  it('Clear button is enabled when a filterMultis selection is non-null (narrowed or explicitly empty)', () => {
+    const fixture = TestBed.createComponent(Host);
+    const selected = signal<string[] | null>(null);
+    const fm: SignalListMultiFilter = {
+      field: 'name',
+      options: signal(['a', 'b']).asReadonly(),
+      selected,
+    };
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      filterMultis: [fm],
+      onClear: () => { /* no-op */ },
+    };
+    fixture.detectChanges();
+    const btn = fixture.nativeElement.querySelector('[data-test="clear-filters"]');
+    expect(btn.disabled).toBe(true);
+    selected.set(['a']);
+    fixture.detectChanges();
+    expect(btn.disabled).toBe(false);
+    selected.set([]);
+    fixture.detectChanges();
     expect(btn.disabled).toBe(false);
     selected.set(null);
     fixture.detectChanges();
