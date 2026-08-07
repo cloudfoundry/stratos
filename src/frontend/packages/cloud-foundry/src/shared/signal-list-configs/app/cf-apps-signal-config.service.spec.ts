@@ -1281,6 +1281,104 @@ describe('CfAppsSignalConfigService stacks', () => {
   });
 });
 
+function makeStateApp(guid: string, state: string): StApp {
+  return {
+    guid, name: guid, state, cnsiGuid: 'cf-1', spaceGuid: 'sp-1',
+    instances: 1, routes: [], createdAt: '', updatedAt: '',
+  } as StApp;
+}
+
+// Mirrors the identical mapping every app-list component defines locally
+// (application-wall, cloud-foundry-applications-signal,
+// cloud-foundry-space-apps-signal) and registers via
+// registerFilterExtractor('state', stateLabel) — these tests register it
+// the same way a real consumer's ngOnInit does, so the predicate exercises
+// the actual "reuse the registered extractor" path instead of a shortcut.
+function stateLabel(app: StApp): string {
+  const s = (app.state ?? '').toUpperCase();
+  if (s === 'STARTED') return 'Deployed - Online';
+  if (s === 'STOPPED') return 'Stopped';
+  if (s === 'CRASHED') return 'Crashed';
+  if (s === 'FAILED') return 'Failed';
+  return app.state ?? '';
+}
+
+describe('CfAppsSignalConfigService status', () => {
+  it('statusOptions is the fixed four-label set — no catalog fetch, no visibility gate', () => {
+    const svc = makeSvc(makeHttp());
+    expect(svc.statusOptions()).toEqual(['Deployed - Online', 'Stopped', 'Crashed', 'Failed']);
+  });
+
+  it('null selection (the default) passes every app regardless of state', () => {
+    const svc = makeSvc(makeHttp());
+    svc.registerFilterExtractor('state', stateLabel);
+    expect(svc.filter()(makeStateApp('a', 'STARTED'))).toBe(true);
+    expect(svc.filter()(makeStateApp('b', 'STOPPED'))).toBe(true);
+  });
+
+  it('matches by LABEL, not raw state — selecting "Deployed - Online" matches STARTED apps', async () => {
+    const svc = makeSvc(makeHttp());
+    svc.registerFilterExtractor('state', stateLabel);
+    svc.selectedStates.set(['Deployed - Online']);
+    await drainUntil(() => !svc.filter()(makeStateApp('b', 'STOPPED')));
+    expect(svc.filter()(makeStateApp('a', 'STARTED'))).toBe(true);
+    expect(svc.filter()(makeStateApp('b', 'STOPPED'))).toBe(false);
+  });
+
+  it('a multi-selection passes apps matching ANY selected label', async () => {
+    const svc = makeSvc(makeHttp());
+    svc.registerFilterExtractor('state', stateLabel);
+    svc.selectedStates.set(['Stopped', 'Crashed']);
+    await drainUntil(() => !svc.filter()(makeStateApp('a', 'STARTED')));
+    expect(svc.filter()(makeStateApp('a', 'STARTED'))).toBe(false);
+    expect(svc.filter()(makeStateApp('b', 'STOPPED'))).toBe(true);
+    expect(svc.filter()(makeStateApp('c', 'CRASHED'))).toBe(true);
+    expect(svc.filter()(makeStateApp('d', 'FAILED'))).toBe(false);
+  });
+
+  it('an explicitly empty selection behaves as "all" — same as null', async () => {
+    const svc = makeSvc(makeHttp());
+    svc.registerFilterExtractor('state', stateLabel);
+    svc.selectedStates.set(['Stopped']);
+    await drainUntil(() => !svc.filter()(makeStateApp('a', 'STARTED')));
+    svc.selectedStates.set([]);
+    await drainUntil(() => svc.filter()(makeStateApp('a', 'STARTED')));
+    expect(svc.filter()(makeStateApp('a', 'STARTED'))).toBe(true);
+    expect(svc.filter()(makeStateApp('b', 'STOPPED'))).toBe(true);
+  });
+
+  it('an app with an unknown/raw state is findable while the filter is inert, but excluded once narrowed', async () => {
+    // stateLabel falls back to the raw string for anything other than the
+    // four known lifecycle states — that fallback label is never one of
+    // the checklist's fixed options, so it can only ever fail an ACTIVE
+    // narrowed selection, never a null/empty/all-selected one. Same
+    // posture as a docker app (no stackName) under the stack filter.
+    const svc = makeSvc(makeHttp());
+    svc.registerFilterExtractor('state', stateLabel);
+    expect(svc.filter()(makeStateApp('x', 'PENDING'))).toBe(true);
+    svc.selectedStates.set(['Stopped']);
+    await drainUntil(() => !svc.filter()(makeStateApp('x', 'PENDING')));
+    expect(svc.filter()(makeStateApp('x', 'PENDING'))).toBe(false);
+  });
+
+  it('falls back to the raw app.state when no state extractor is registered', async () => {
+    const svc = makeSvc(makeHttp());
+    // No registerFilterExtractor('state', ...) call — the predicate falls
+    // back to app.state directly (mirrors the text-filter's own fallback).
+    svc.selectedStates.set(['STARTED']);
+    await drainUntil(() => !svc.filter()(makeStateApp('a', 'STOPPED')));
+    expect(svc.filter()(makeStateApp('a', 'STARTED'))).toBe(true);
+    expect(svc.filter()(makeStateApp('b', 'STOPPED'))).toBe(false);
+  });
+
+  it('clearFilters resets the status selection to null', () => {
+    const svc = makeSvc(makeHttp());
+    svc.selectedStates.set(['Stopped']);
+    svc.clearFilters();
+    expect(svc.selectedStates()).toBe(null);
+  });
+});
+
 describe('CfAppsSignalConfigService — space catalog shares the endpoint load', () => {
   const spacesFanout = (url: unknown) => typeof url === 'string' && url.includes('organization_guids=');
 

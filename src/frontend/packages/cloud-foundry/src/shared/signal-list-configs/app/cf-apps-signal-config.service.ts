@@ -171,6 +171,25 @@ export class CfAppsSignalConfigService {
     return opts;
   });
 
+  // Status filter: multi-select, same checklist-popup model as the stack
+  // filter above — null/[] both mean "all". Unlike stack, Status has no
+  // installed-catalog to fetch and no visibility gate: CF only reports a
+  // handful of lifecycle states, so the option set is a fixed vocabulary
+  // rather than something to discover per-endpoint.
+  readonly selectedStates: WritableSignal<string[] | null> = signal(null);
+
+  // The four user-facing labels every app-list's Status column already
+  // renders (see each consumer's local `stateLabel` mapping, also
+  // registered as the 'state' filter extractor). Kept here as the single
+  // list of checkbox options so the checklist can't drift from what the
+  // column actually shows; the LABEL → app match itself is done via the
+  // registered extractor in the filter predicate below, not a second
+  // mapping, so the two can't disagree either.
+  private static readonly STATUS_LABELS: readonly string[] =
+    ['Deployed - Online', 'Stopped', 'Crashed', 'Failed'];
+  readonly statusOptions: Signal<string[]> =
+    signal([...CfAppsSignalConfigService.STATUS_LABELS]).asReadonly();
+
   // Loading flags for the Org / Space toolbar dropdowns — set true while
   // loadNames() is fetching and cleared once the relevant map is populated.
   // Drives the SignalListDropdown spinner so users see "loading" rather
@@ -427,16 +446,30 @@ export class CfAppsSignalConfigService {
       const org = this.selectedOrg();
       const space = this.selectedSpace();
       const stacks = this.selectedStacks();
+      const states = this.selectedStates();
       const q = this.nameFilter().trim().toLowerCase();
       const field = this.filterField();
       const extractors = this._filterExtractors();
       const extractor = extractors.get(field);
+      // Reuse the SAME 'state' extractor the consumer registers for the
+      // text-filter (registerFilterExtractor('state', stateLabel)) rather
+      // than a second label mapping here — the checklist options and the
+      // predicate then can't disagree about what a state maps to.
+      const stateExtractor = extractors.get('state');
       this.filter.set((app: StApp) => {
         if (cnsi && app.cnsiGuid !== cnsi) return false;
         if (org && app.orgGuid !== org) return false;
         if (space && app.spaceGuid !== space) return false;
         // null or [] both mean "all" — see selectedStacks doc comment.
         if (stacks && stacks.length > 0 && (!app.stackName || !stacks.includes(app.stackName))) return false;
+        // Same posture: an app whose label isn't one of the four known
+        // options (raw/unknown CF state, extractor unregistered) only
+        // fails to match while the filter is actually narrowed — it
+        // stays findable whenever the filter is inert.
+        if (states && states.length > 0) {
+          const label = stateExtractor ? stateExtractor(app) : (app.state ?? '');
+          if (!states.includes(label)) return false;
+        }
         if (q) {
           const hay = (extractor ? extractor(app) : (app.name ?? '')).toLowerCase();
           if (!hay.includes(q)) return false;
@@ -924,6 +957,7 @@ export class CfAppsSignalConfigService {
     this.selectedOrg.set(null);
     this.selectedSpace.set(null);
     this.selectedStacks.set(null);
+    this.selectedStates.set(null);
     this.nameFilter.set('');
     this.filterField.set('name');
     this.sort.set({ field: 'name', direction: 'asc' });

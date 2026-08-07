@@ -51,6 +51,8 @@ function makeStubAppsConfig() {
     deleteApp: vi.fn().mockResolvedValue(undefined),
     bulkDeleteApps: vi.fn().mockResolvedValue({ results: [], succeeded: 0, failed: 0, pending: 0 }),
     startStatsPolling: vi.fn(),
+    registerSortExtractor: vi.fn(),
+    registerFilterExtractor: vi.fn(),
     appStats: stats,
     filter: filterSig,
     sort: sortSig,
@@ -59,10 +61,13 @@ function makeStubAppsConfig() {
     view,
     orchestrator,
     nameFilter: signal(''),
+    filterField: signal('name'),
     viewMode: signal<'card' | 'table'>('card'),
     selectedStacks: signal<string[] | null>(null),
+    selectedStates: signal<string[] | null>(null),
     stackUiVisible: signal(false).asReadonly(),
     stackOptions: signal([allOption]).asReadonly(),
+    statusOptions: signal(['Deployed - Online', 'Stopped', 'Crashed', 'Failed']).asReadonly(),
   };
 }
 

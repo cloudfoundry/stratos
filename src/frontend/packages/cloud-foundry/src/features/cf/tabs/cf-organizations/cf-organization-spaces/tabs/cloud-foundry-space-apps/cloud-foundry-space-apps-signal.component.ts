@@ -143,6 +143,14 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
       options: computed(() => this.appsConfig.stackOptions().filter(o => o.value !== null).map(o => o.label)),
       selected: this.appsConfig.selectedStacks,
     };
+    // Status rides the same field-selectable filter, no visibility gate
+    // (CF always reports 2+ possible states): picking "Status" swaps the
+    // text input for the checklist populated from the fixed label set.
+    const statusFilterMulti = {
+      field: 'state',
+      options: this.appsConfig.statusOptions,
+      selected: this.appsConfig.selectedStates,
+    };
     const stackColumn: SignalListColumn<StApp> = {
       header: 'Stack', key: 'stackName', sortField: 'stackName',
       render: (app: StApp) => app.stackName || '—',
@@ -260,17 +268,19 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
         nameFilter: this.appsConfig.nameFilter,
         // Single-CNSI single-space tab: there's exactly one CF and one
         // space in scope, so no Org/Space/CF dropdowns — matches the
-        // page's existing "no dropdowns" contract. Stack filtering rides
-        // the field selector like the wall and CF tab: the filter-field
-        // dropdown gains a "Stack" option once this CF has 2+ installed
-        // stacks, and picking it swaps in the checklist popup.
-        filterColumns: withStack ? ['name', 'stackName'] : undefined,
-        // Only wired while the Stack column itself is in filterColumns —
+        // page's existing "no dropdowns" contract. Name and Status ride
+        // the field selector like the wall and CF tab (Status has no
+        // visibility gate); Stack joins the selector's option list too
+        // once this CF has 2+ installed stacks, and picking any of them
+        // swaps in the corresponding checklist popup.
+        filterColumns: withStack ? ['name', 'state', 'stackName'] : ['name', 'state'],
+        // Status is unconditional (no visibility gate); Stack's entry is
+        // only wired while its column is actually in filterColumns —
         // otherwise a filterField left over at 'stackName' from a
         // previous, stack-visible page (the service's filter state is a
         // shared singleton) would pop the checklist for a column this
         // page isn't even showing.
-        filterMultis: withStack ? [stackFilterMulti] : undefined,
+        filterMultis: withStack ? [statusFilterMulti, stackFilterMulti] : [statusFilterMulti],
         filterField: this.appsConfig.filterField,
         onRefresh: () => this.appsConfig.refresh(),
         onClear: () => this.appsConfig.clearFilters(),
@@ -288,6 +298,12 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
     // after initializeForSpace()). effect() needs an injection context;
     // ngOnInit isn't one, hence the explicit injector.
     effect(() => { this.listConfig.set(buildConfig()); }, { injector: this.injector });
+    // Text-filter extractors for the two always-present fields, and the
+    // 'state' one doubles as the Status checklist's label source — see
+    // CfAppsSignalConfigService's predicate, which reuses this exact
+    // registered function instead of a second state→label mapping.
+    this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
+    this.appsConfig.registerFilterExtractor('state', stateLabel);
 
     // Default per-space tab presentation: card view at 6 per page. The
     // service's writable signals carry user toggles within a session; we

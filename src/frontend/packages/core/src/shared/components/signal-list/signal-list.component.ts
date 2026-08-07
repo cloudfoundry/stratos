@@ -1298,6 +1298,14 @@ export class SignalListComponent<T> implements AfterViewInit {
     for (const dd of this.config.filterDropdowns ?? []) {
       if (dd.selected() != null) return true;
     }
+    // A filterMultis selection of null means "all" (inactive); toggling
+    // any option away from that — including down to an explicit empty
+    // selection — sets a non-null value, so this mirrors the dropdown
+    // check above without needing to special-case the checklist's
+    // null/[]/partial states individually.
+    for (const fm of this.config.filterMultis ?? []) {
+      if (fm.selected() != null) return true;
+    }
     if (this.config.nameFilter && this.config.nameFilter().length > 0) return true;
     return false;
   }
