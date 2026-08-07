@@ -1456,8 +1456,8 @@ describe('SignalListComponent rowState blocked/deleting/busy (multiline-ops feed
 });
 
 // Checklist-popup filter input (config.filterMultis / SignalListMultiFilter).
-// Stack is the first consumer of this control (app status is a planned
-// second filterMultis entry on the same field-selector, elsewhere).
+// Stack is the first consumer of this control; status is the second
+// filterMultis entry on the same field-selector, elsewhere.
 @Component({
   standalone: true,
   imports: [SignalListComponent],
@@ -1626,6 +1626,20 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
     expect(component.multiPopupOpen()).toBe(true);
 
     document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    fixture.detectChanges();
+    expect(component.multiPopupOpen()).toBe(false);
+  });
+
+  it('Escape closes the popup — the same affordance the text input it replaces offers', () => {
+    const fixture = TestBed.createComponent(MultiFilterHost);
+    fixture.detectChanges();
+    const component = componentWith(fixture);
+    const wrap = fixture.nativeElement.querySelector('[data-test="multi-filter-wrap"]') as HTMLElement;
+    (wrap.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
+    fixture.detectChanges();
+    expect(component.multiPopupOpen()).toBe(true);
+
+    wrap.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
     fixture.detectChanges();
     expect(component.multiPopupOpen()).toBe(false);
   });

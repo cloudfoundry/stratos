@@ -455,10 +455,10 @@ export interface SignalListConfig<T> {
   // Filter fields whose input is a checklist popup rather than the plain
   // text box — see SignalListMultiFilter. An array (not a single slot)
   // because more than one filterColumns entry can want this treatment:
-  // stack is the first checklist consumer, app status is a planned
-  // second entry here, and a date-range input is a separate filter-field
-  // kind slated for a later PR (not modeled by this array). Only the
-  // entry whose `field` matches the current filterField() renders.
+  // stack is the first checklist consumer, status is the second, and a
+  // date-range input is a separate filter-field kind slated for a later
+  // PR (not modeled by this array). Only the entry whose `field` matches
+  // the current filterField() renders.
   readonly filterMultis?: readonly SignalListMultiFilter[];
 }
 

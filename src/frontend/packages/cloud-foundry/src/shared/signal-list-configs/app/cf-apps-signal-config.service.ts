@@ -446,6 +446,7 @@ export class CfAppsSignalConfigService {
       const org = this.selectedOrg();
       const space = this.selectedSpace();
       const stacks = this.selectedStacks();
+      const stackUiVisible = this.stackUiVisible();
       const states = this.selectedStates();
       const q = this.nameFilter().trim().toLowerCase();
       const field = this.filterField();
@@ -461,7 +462,17 @@ export class CfAppsSignalConfigService {
         if (org && app.orgGuid !== org) return false;
         if (space && app.spaceGuid !== space) return false;
         // null or [] both mean "all" — see selectedStacks doc comment.
-        if (stacks && stacks.length > 0 && (!app.stackName || !stacks.includes(app.stackName))) return false;
+        // Gated on stackUiVisible: the checklist only renders (and the
+        // consumer only wires filterMultis) while the stack UI is
+        // visible, but selectedStacks is a root-singleton signal that
+        // can carry a stale selection in from a page where it WAS
+        // visible. Without this gate, a single-stack scope with no
+        // stack control on screen and no way to clear it would still
+        // silently drop every docker app — a filter with no visible
+        // control and a disabled Clear button. Status has no such gate:
+        // it has no visibility condition to go stale against, since it's
+        // always shown.
+        if (stackUiVisible && stacks && stacks.length > 0 && (!app.stackName || !stacks.includes(app.stackName))) return false;
         // Same posture: an app whose label isn't one of the four known
         // options (raw/unknown CF state, extractor unregistered) only
         // fails to match while the filter is actually narrowed — it
