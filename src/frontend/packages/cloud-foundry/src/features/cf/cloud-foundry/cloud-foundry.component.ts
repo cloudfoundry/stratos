@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -26,6 +27,7 @@ import type { EndpointModel } from '@stratosui/store';
 
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { CnsiStacksSource } from '../../../services/data-sources/cnsi-stacks-source';
 
 @Component({
   selector: 'app-cloud-foundry',
@@ -49,6 +51,10 @@ export class CloudFoundryComponent {
   // rows carry the same management kebab (Connect / Disconnect / Edit /
   // Unregister) via the shared builder.
   private endpointRowActions = inject(EndpointRowActionsService);
+  private readonly http = inject(HttpClient);
+  // endpoint guid → installed stack names. Only connected CFs can answer
+  // /pp/v1/cf/stacks; expired/disconnected rows render '—'.
+  private readonly stacksByEndpoint: WritableSignal<Map<string, string[]>> = signal(new Map());
 
   public readonly listConfig: Signal<SignalListConfig<EndpointModel>>;
   public readonly connectedCount: Signal<number>;
@@ -72,6 +78,14 @@ export class CloudFoundryComponent {
     // expired CFs; routing into a lone expired one lands on its reconnect prompt.
     void this.endpointsData.whenReady().then(() => {
       const endpoints = available();
+
+      const connected = available().filter(e => e.guid && e.connectionStatus === 'connected');
+      void Promise.all(connected.map(async e => {
+        const source = new CnsiStacksSource(e.guid!, this.http);
+        await source.load(); // never throws; failure → empty items
+        return [e.guid!, source.items().map(s => s.name)] as const;
+      })).then(entries => this.stacksByEndpoint.set(new Map(entries)));
+
       if (endpoints.length === 1) {
         void this.router.navigate(['cloud-foundry', endpoints[0].guid]);
       }
@@ -163,6 +177,15 @@ export class CloudFoundryComponent {
           sortField: (e: EndpointModel) => e.user?.name ?? '',
           render: (e: EndpointModel) => e.user?.name ?? '—',
           widthHint: '12rem',
+        },
+        {
+          header: 'Stacks', key: 'stacks',
+          sortField: (e: EndpointModel) => (this.stacksByEndpoint().get(e.guid ?? '') ?? []).join(', '),
+          render: (e: EndpointModel) => {
+            const names = this.stacksByEndpoint().get(e.guid ?? '');
+            return names?.length ? names.join(', ') : '—';
+          },
+          widthHint: '14rem',
         },
         {
           header: 'Status', key: 'status',
