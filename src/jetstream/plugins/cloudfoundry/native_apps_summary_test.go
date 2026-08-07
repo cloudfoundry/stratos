@@ -565,6 +565,25 @@ func TestSortStAppsByDerivedField_Instances(t *testing.T) {
 	assert.Equal(t, []int{1, 3, 5}, []int{apps[0].Instances, apps[1].Instances, apps[2].Instances})
 }
 
+func TestSortStAppsByDerivedField_LastRefreshed(t *testing.T) {
+	apps := []StApp{
+		{GUID: "b", LastRefreshedAt: "2026-07-01T00:00:00Z"},
+		{GUID: "never"}, // absent → end, both directions
+		{GUID: "a", LastRefreshedAt: "2026-05-01T00:00:00Z"},
+	}
+	sortStAppsByDerivedField(apps, "lastRefreshedAt", false)
+	assert.Equal(t, []string{"a", "b", "never"}, []string{apps[0].GUID, apps[1].GUID, apps[2].GUID})
+	sortStAppsByDerivedField(apps, "lastRefreshedAt", true)
+	assert.Equal(t, []string{"b", "a", "never"}, []string{apps[0].GUID, apps[1].GUID, apps[2].GUID})
+}
+
+func TestIsDerivedSortField_LastRefreshed(t *testing.T) {
+	derived, field, desc := isDerivedSortField("-lastRefreshedAt")
+	assert.True(t, derived)
+	assert.Equal(t, "lastRefreshedAt", field)
+	assert.True(t, desc)
+}
+
 func TestGetNativeAppsSummary_DerivedSortFetchesAllAndPaginatesInMemory(t *testing.T) {
 	// Serve 5 apps across 2 CAPI pages; /v3/processes supplies distinct memory
 	// per app so memory sort produces a predictable global order.
