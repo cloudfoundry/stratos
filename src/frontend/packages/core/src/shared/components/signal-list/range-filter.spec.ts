@@ -54,6 +54,18 @@ describe('rangeMatches — date domain (day-granular, local time)', () => {
     expect(rangeMatches(may15noon, d('between', '2026-05-01'), 'date')).toBe(true);
     expect(rangeMatches(may15noon, d('lt', 'not-a-date'), 'date')).toBe(true);
   });
+
+  it('day windows honor DST transitions (spring-forward)', () => {
+    // US spring-forward 2026-03-08: lte 2026-03-08 must NOT include 2026-03-09T00:30 local
+    const springForwardProbe = new Date(2026, 2, 9, 0, 30).toISOString();
+    expect(rangeMatches(springForwardProbe, d('lte', '2026-03-08'), 'date')).toBe(false);
+  });
+
+  it('day windows honor DST transitions (fall-back)', () => {
+    // US fall-back 2026-11-01: lte 2026-11-01 MUST include 2026-11-01T23:30 local
+    const fallBackProbe = new Date(2026, 10, 1, 23, 30).toISOString();
+    expect(rangeMatches(fallBackProbe, d('lte', '2026-11-01'), 'date')).toBe(true);
+  });
 });
 
 describe('rangeMatches — number domain (memory-style consumer)', () => {
@@ -61,6 +73,9 @@ describe('rangeMatches — number domain (memory-style consumer)', () => {
     expect(rangeMatches(512, d('gte', '512'), 'number')).toBe(true);
     expect(rangeMatches(511, d('gte', '512'), 'number')).toBe(false);
     expect(rangeMatches(512, d('lt', '512'), 'number')).toBe(false);
+    expect(rangeMatches(512, d('lte', '512'), 'number')).toBe(true);
+    expect(rangeMatches(512, d('gt', '512'), 'number')).toBe(false);
+    expect(rangeMatches(1024, d('gt', '512'), 'number')).toBe(true);
     expect(rangeMatches(256, d('between', '128', '512'), 'number')).toBe(true);
     expect(rangeMatches(512, d('between', '128', '512', true, false), 'number')).toBe(false);
   });
