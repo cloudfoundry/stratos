@@ -41,6 +41,7 @@ function makeStubAppsConfig() {
     errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
   };
   const stats = signal(new Map<string, { running: number; total: number }>());
+  const allOption = { label: 'All', value: null };
   return {
     initialize: vi.fn(),
     initializeForSpace: vi.fn(),
@@ -59,6 +60,9 @@ function makeStubAppsConfig() {
     orchestrator,
     nameFilter: signal(''),
     viewMode: signal<'card' | 'table'>('card'),
+    selectedStack: signal<string | null>(null),
+    stackUiVisible: signal(false).asReadonly(),
+    stackOptions: signal([allOption]).asReadonly(),
   };
 }
 
