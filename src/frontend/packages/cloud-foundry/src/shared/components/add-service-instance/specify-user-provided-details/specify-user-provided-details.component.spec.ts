@@ -146,11 +146,12 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
   });
 });
 
-// #5755 part 2: in edit mode the credentials textarea was always blank. It was
-// filled from the ?return=summary read, which by contract never carries
-// credentials ("credentials never appear on a read response, only on writes"
-// — native_types.go). The credentials live behind a separate sub-resource,
-// fetched on an explicit reveal so secrets are not pulled on page load.
+// #5755 part 2 / #5768: credentials live behind a separate sub-resource
+// (the ?return=summary read never carries them — native_types.go). The
+// single-control area fetches them on load so the redacted structure preview
+// renders immediately, but real values stay off-screen until an explicit
+// reveal, and only enterEdit() puts them in the textarea. Blank textarea =
+// leave stored credentials untouched on save.
 describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
   function setup(creds: Record<string, unknown> | null) {
     const upsServiceStub = {
@@ -200,42 +201,65 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
     return { fixture, component, credsSpy };
   }
 
-  it('does not fetch credentials on load', () => {
+  it('fetches on load but keeps the textarea blank (blank = keep stored)', () => {
     const { fixture, component, credsSpy } = setup({ user: 'admin' });
     fixture.detectChanges();
 
-    expect(credsSpy).not.toHaveBeenCalled();
+    expect(credsSpy).toHaveBeenCalledTimes(1);
+    expect(credsSpy).toHaveBeenCalledWith('cf-1', 'si-1');
     expect(component.createEditServiceInstance.controls.credentials.value).toBe('');
   });
 
-  it('fills the textarea from the credentials sub-resource on reveal', () => {
-    const { fixture, component, credsSpy } = setup({ user: 'admin', password: 'p' });
+  it('shows the redacted structure by default, real values only after toggleReveal', () => {
+    const { fixture, component } = setup({ user: 'admin', password: 'p' });
     fixture.detectChanges();
 
-    component.revealCredentials();
-    fixture.detectChanges();
+    expect(component.credsMode()).toBe('redacted');
+    expect(component.displayedCredentialsJson()).toContain('"user": "<redacted>"');
+    expect(component.displayedCredentialsJson()).not.toContain('admin');
 
-    expect(credsSpy).toHaveBeenCalledWith('cf-1', 'si-1');
-    expect(JSON.parse(component.createEditServiceInstance.controls.credentials.value))
+    component.toggleReveal();
+    expect(JSON.parse(component.displayedCredentialsJson()!))
       .toEqual({ user: 'admin', password: 'p' });
+
+    component.toggleReveal();
+    expect(component.displayedCredentialsJson()).not.toContain('admin');
   });
 
-  it('revealing alone is not an edit — Next stays disabled', () => {
+  it('enterEdit fills the textarea from the sub-resource; cancelEdit blanks it', () => {
+    const { fixture, component } = setup({ user: 'admin', password: 'p' });
+    fixture.detectChanges();
+
+    component.enterEdit();
+    expect(component.credsMode()).toBe('edit');
+    expect(JSON.parse(component.createEditServiceInstance.controls.credentials.value))
+      .toEqual({ user: 'admin', password: 'p' });
+
+    component.cancelEdit();
+    expect(component.credsMode()).toBe('redacted');
+    expect(component.createEditServiceInstance.controls.credentials.value).toBe('');
+  });
+
+  it('reveal and edit round-trips are not edits — Next stays disabled', () => {
     const { fixture, component } = setup({ user: 'admin' });
     fixture.detectChanges();
 
-    component.revealCredentials();
+    component.toggleReveal();
     fixture.detectChanges();
+    expect(component.validate()).toBe(false);
 
+    component.enterEdit();
+    component.cancelEdit();
+    fixture.detectChanges();
     expect(component.validate()).toBe(false);
   });
 
-  it('fetches once — a second reveal reuses the first result', () => {
+  it('fetches once — reveal and edit reuse the loaded sub-resource', () => {
     const { fixture, component, credsSpy } = setup({ user: 'admin' });
     fixture.detectChanges();
 
-    component.revealCredentials();
-    component.revealCredentials();
+    component.toggleReveal();
+    component.enterEdit();
 
     expect(credsSpy).toHaveBeenCalledTimes(1);
   });
