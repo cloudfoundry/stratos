@@ -77,6 +77,16 @@ describe('CloudFoundryComponent', () => {
     const unknown = { guid: 'never-fetched', name: 'cf' } as EndpointModel;
     expect(col!.render(unknown)).toBe('—');
   });
+
+  it('sorts the Stacks column by joined stack names, not by falling back to endpoint name', () => {
+    const col = component.listConfig().columns.find(c => c.key === 'stacks');
+    const unknown = { guid: 'never-fetched', name: 'cf' } as EndpointModel;
+    expect(typeof col!.sortField).toBe('function');
+    // stacksByEndpoint is unpopulated in this harness (the test endpoint isn't
+    // connected), so the extractor's join-of-nothing is '' — a dedicated
+    // 'stacks' key distinct from the name extractor, which would return 'cf'.
+    expect((col!.sortField as (e: EndpointModel) => unknown)(unknown)).toBe('');
+  });
 });
 
 // The single-CF shortcut is a one-shot decision taken once the endpoint list
