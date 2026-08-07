@@ -662,6 +662,10 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 	// is intentionally minimal (the summary path carries the full
 	// _meta.unavailable / _meta.errors envelope).
 	routesByApp, _ := fetchRoutesForApps(ctx, cfClient, appGUIDs)
+	// Droplets are fetched lazily-non-fatal too — same posture as routes
+	// above. On error, dropletsByApp is nil and every row's lookup below
+	// simply misses, leaving LastRefreshedAt at its zero value.
+	dropletsByApp, _ := fetchDropletsForApps(ctx, cfClient, appGUIDs)
 	// Orgs-by-guid: derives the unique org guids from the spaces we
 	// already fetched and stitches OrgName per row. Mirrors the
 	// getNativeAppsSummary path so frontend can render the CF/Org/Space
@@ -699,6 +703,9 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 		}
 		if rts, ok := routesByApp[r.GUID]; ok {
 			s.Routes = rts
+		}
+		if ts, ok := dropletsByApp[r.GUID]; ok {
+			s.LastRefreshedAt = ts
 		}
 		apps = append(apps, s)
 	}
