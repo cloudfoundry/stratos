@@ -34,6 +34,26 @@ function numWindow(bound: string): [number, number] | null {
   return Number.isNaN(n) ? null : [n, n];
 }
 
+// True iff `range` names a fully-typed constraint: a non-null range whose
+// primary bound parses in the given domain, and — for `between` — whose
+// upper bound parses too. A half-typed range (e.g. `{ op: 'between', a: '' }`
+// right after picking "between" but before typing a date) is inert for
+// filtering purposes (see rangeMatches's half-typed-bounds note above) but
+// is NOT the canonical "no constraint" state — updateRange stores it as-is
+// so the popup keeps the user's op choice across keystrokes. Callers that
+// need to know whether a range is actually constraining the list (the
+// Clear button, hasActiveFilter) should check this instead of `!== null`.
+export function rangeIsComplete(
+  range: SignalListRangeValue | null,
+  valueType: SignalListRangeValueType,
+): boolean {
+  if (range === null) return false;
+  const window = valueType === 'date' ? dayWindow : numWindow;
+  if (window(range.a) === null) return false;
+  if (range.op === 'between' && window(range.b ?? '') === null) return false;
+  return true;
+}
+
 export function rangeMatches(
   raw: string | number | null | undefined,
   range: SignalListRangeValue | null,
