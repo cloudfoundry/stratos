@@ -9,7 +9,7 @@ import { EndpointRowActionsService, TabNavService } from '@stratosui/core';
 import type { EndpointModel } from '@stratosui/store';
 import { EndpointsDataService } from '../../../../../store/src/services/endpoints-data.service';
 import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint, seedEndpointsDataService } from '@stratosui/store/testing';
 import { CF_BASE_TEST_PROVIDERS, generateCfActiveRouteMock } from '@test-framework/cf';
 
 import { generateCFEntities } from '../../../cf-entity-generator';
@@ -78,14 +78,30 @@ describe('CloudFoundryComponent', () => {
     expect(col!.render(unknown)).toBe('—');
   });
 
-  it('sorts the Stacks column by joined stack names, not by falling back to endpoint name', () => {
-    const col = component.listConfig().columns.find(c => c.key === 'stacks');
-    const unknown = { guid: 'never-fetched', name: 'cf' } as EndpointModel;
-    expect(typeof col!.sortField).toBe('function');
-    // stacksByEndpoint is unpopulated in this harness (the test endpoint isn't
-    // connected), so the extractor's join-of-nothing is '' — a dedicated
-    // 'stacks' key distinct from the name extractor, which would return 'cf'.
-    expect((col!.sortField as (e: EndpointModel) => unknown)(unknown)).toBe('');
+  it('sorts rows by joined stack names when the Stacks header is active, not by falling back to endpoint name', () => {
+    // Two fake CFs whose name order is the opposite of their stack-name order,
+    // so a fallback to the name extractor would produce the wrong result.
+    const bravo = { guid: 'ep-bravo', name: 'Bravo', cnsi_type: 'cf', connectionStatus: 'connected' } as EndpointModel;
+    const alpha = { guid: 'ep-alpha', name: 'Alpha', cnsi_type: 'cf', connectionStatus: 'connected' } as EndpointModel;
+    seedEndpointsDataService([bravo, alpha]);
+
+    // stacksByEndpoint is private; reached directly the way the harness's own
+    // seedEndpointsDataService helper reaches into private state — a test-only
+    // seam, not production access.
+    (component as unknown as { stacksByEndpoint: WritableSignal<Map<string, string[]>> })
+      .stacksByEndpoint.set(new Map([
+        ['ep-bravo', ['cflinuxfs3']], // 'cflinuxfs3' < 'windows2016'
+        ['ep-alpha', ['windows2016']],
+      ]));
+
+    component.listConfig().sort.set({ field: 'stacks', direction: 'asc' });
+
+    const guids = component.listConfig().pagedItems().map(e => e.guid);
+    // By name ascending this would be [ep-alpha, ep-bravo]; by stack name
+    // ascending it's the reverse — this only passes if sorting actually reads
+    // stacksByEndpoint via sortExtractors.stacks, not the name-extractor
+    // fallback that ships when the 'stacks' key is missing from that map.
+    expect(guids).toEqual(['ep-bravo', 'ep-alpha']);
   });
 });
 
