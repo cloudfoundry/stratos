@@ -258,7 +258,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
         },
         nameFilter: this.appsConfig.nameFilter,
         // Single-CNSI single-space tab: no Org/Space dropdowns, but a Stack
-        // dropdown appears once this space has 2+ distinct stacks in use.
+        // dropdown appears once this CF has 2+ installed stacks.
         // Undefined (not an empty array) when not visible, matching the
         // toolbar's existing "no dropdowns" contract for this page.
         filterDropdowns: withStack ? [stackDropdown] : undefined,
