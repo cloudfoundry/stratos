@@ -302,6 +302,11 @@ export class ApplicationWallComponent implements OnInit {
       render: (app: StApp) => app.stackName || '—',
       widthHint: '9rem',
     };
+    const lastRefreshedColumn: SignalListColumn<StApp> = {
+      header: 'Last Refreshed', key: 'lastRefreshedAt', sortField: 'lastRefreshedAt',
+      render: (app: StApp) => app.lastRefreshedAt ? ApplicationWallComponent.formatDate(app.lastRefreshedAt) : '—',
+      widthHint: '12rem',
+    };
     const stateColor = (app: StApp): SignalListPillColor => {
       const s = (app.state ?? '').toUpperCase();
       if (s === 'STARTED') return 'success';
@@ -421,6 +426,7 @@ export class ApplicationWallComponent implements OnInit {
             render: (app: StApp) => ApplicationWallComponent.formatDate(app.createdAt),
             widthHint: '12rem',
           },
+          lastRefreshedColumn,
           {
             header: '', key: 'favorite',
             kind: 'favorite',
@@ -448,7 +454,9 @@ export class ApplicationWallComponent implements OnInit {
           card: [6, 12, 24, 48, 96],
         },
         nameFilter: this.appsConfig.nameFilter,
-        filterColumns: withStack ? ['name', 'state', 'cfOrgSpace', 'stackName'] : ['name', 'state', 'cfOrgSpace'],
+        filterColumns: withStack
+          ? ['name', 'state', 'cfOrgSpace', 'stackName', 'lastRefreshedAt']
+          : ['name', 'state', 'cfOrgSpace', 'lastRefreshedAt'],
         // Status has no visibility gate (always ≥2 possible states) so its
         // entry is unconditional; Stack's is only wired while its column
         // is actually in filterColumns — otherwise a filterField left
@@ -456,6 +464,11 @@ export class ApplicationWallComponent implements OnInit {
         // service's filter state is a shared singleton) would pop the
         // checklist for a column not shown here.
         filterMultis: withStack ? [statusFilterMulti, stackFilterMulti] : [statusFilterMulti],
+        filterRanges: [{
+          field: 'lastRefreshedAt',
+          valueType: 'date' as const,
+          selected: this.appsConfig.lastRefreshedRange,
+        }],
         filterField: this.appsConfig.filterField,
         filterDropdowns: dropdowns,
         onRefresh: () => this.appsConfig.refresh(),
