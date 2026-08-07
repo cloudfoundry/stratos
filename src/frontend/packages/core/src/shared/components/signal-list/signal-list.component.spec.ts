@@ -1754,4 +1754,59 @@ describe('SignalListComponent range filter (filterRanges)', () => {
     fixture.componentInstance.selectedRange.set({ op: 'between', a: '2026-05-01', b: '2026-06-01' });
     expect(component.rangeSummary(fr)).toBe('2026-05-01 – 2026-06-01');
   });
+
+  // Reproduces the real UI sequence: the "between" <select> and the two
+  // <input> bounds each fire their own (change) event, so op and a/b land
+  // in SEPARATE updateRange() calls — never merged in one patch like the
+  // collapse test above. An op-only patch must survive so the template's
+  // between-branch gate (`selected()?.op === 'between'`) can ever see the
+  // op and render the second input + inclusive checkboxes.
+  describe('updateRange sequence: pick "between" before typing any bound', () => {
+    it('(a) op-only patch to "between" with empty bounds stores a non-null selection with op "between"', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { op: 'between' });
+      expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'between', a: '' });
+      expect(component.hasActiveFilter()).toBe(false);
+    });
+
+    it('(b) then typing the first bound keeps op "between" (not reset to gte)', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { op: 'between' });
+      component.updateRange(fr, { a: '2026-05-01' });
+      expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'between', a: '2026-05-01' });
+      expect(component.hasActiveFilter()).toBe(false);
+    });
+
+    it('(c) then typing the second bound completes the range and activates the filter', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { op: 'between' });
+      component.updateRange(fr, { a: '2026-05-01' });
+      component.updateRange(fr, { b: '2026-06-01' });
+      expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'between', a: '2026-05-01', b: '2026-06-01' });
+      expect(component.hasActiveFilter()).toBe(true);
+    });
+
+    it('(d) clearing both bounds one at a time collapses back to null', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { op: 'between' });
+      component.updateRange(fr, { a: '2026-05-01' });
+      component.updateRange(fr, { b: '2026-06-01' });
+      component.updateRange(fr, { a: '' });
+      expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'between', a: '', b: '2026-06-01' });
+      component.updateRange(fr, { b: '' });
+      expect(fixture.componentInstance.selectedRange()).toBe(null);
+    });
+  });
 });

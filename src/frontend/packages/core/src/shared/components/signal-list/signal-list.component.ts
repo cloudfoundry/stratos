@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
-import { SignalListRangeValue, SignalListRangeValueType } from './range-filter';
+import { rangeIsComplete, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -1220,16 +1220,22 @@ export class SignalListComponent<T> implements AfterViewInit {
     return `${sym[sel.op]} ${sel.a || '…'}${unit}`;
   }
 
-  // Merges a partial edit into the current range. An empty primary bound
-  // (and, for between, an empty upper bound too) collapses to null so
-  // `selected === null` stays the one canonical "no constraint" state —
-  // the same contract toggleMultiOption keeps for checklists — and a
-  // half-cleared input never leaves a phantom active filter behind.
+  // Merges a partial edit into the current range. Only collapses to null
+  // when the edit touched a BOUND ('a' or 'b') and every bound is now
+  // empty — an op-only change (e.g. picking "between" before typing any
+  // date) must never collapse, or the template's between-branch gate
+  // (`selected()?.op === 'between'`) would never see the op and the
+  // second input/checkboxes could never render. Half-typed non-empty
+  // ranges are stored as-is; hasActiveFilter() and the row predicate both
+  // treat an incomplete bound as inert rather than as "no constraint", so
+  // a stray non-null selected() here can't blank the list or the Clear
+  // button under the user's cursor mid-edit.
   updateRange(fr: SignalListRangeFilter, patch: Partial<SignalListRangeValue>): void {
     const curr = fr.selected() ?? { op: 'gte' as const, a: '' };
     const next: SignalListRangeValue = { ...curr, ...patch };
-    const empty = next.a === '' && (next.op !== 'between' || !next.b);
-    fr.selected.set(empty ? null : next);
+    const touchedBound = 'a' in patch || 'b' in patch;
+    const allBoundsEmpty = next.a === '' && !next.b;
+    fr.selected.set(touchedBound && allBoundsEmpty ? null : next);
     this.config.pageIndex.set(0);
   }
 
@@ -1361,8 +1367,12 @@ export class SignalListComponent<T> implements AfterViewInit {
     for (const fm of this.config.filterMultis ?? []) {
       if (fm.selected() != null) return true;
     }
+    // updateRange stores a half-typed range (e.g. op picked, no date yet)
+    // as non-null so the popup keeps the user's choice across keystrokes —
+    // so `!= null` alone would flag Clear active on an inert filter.
+    // rangeIsComplete gates on the bound(s) actually parsing.
     for (const fr of this.config.filterRanges ?? []) {
-      if (fr.selected() != null) return true;
+      if (rangeIsComplete(fr.selected(), fr.valueType)) return true;
     }
     if (this.config.nameFilter && this.config.nameFilter().length > 0) return true;
     return false;

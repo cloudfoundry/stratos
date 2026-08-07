@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { rangeMatches, SignalListRangeValue } from './range-filter';
+import { rangeIsComplete, rangeMatches, SignalListRangeValue } from './range-filter';
 
 const d = (op: SignalListRangeValue['op'], a: string, b?: string, inclusiveA?: boolean, inclusiveB?: boolean): SignalListRangeValue =>
   ({ op, a, ...(b !== undefined ? { b } : {}), ...(inclusiveA !== undefined ? { inclusiveA } : {}), ...(inclusiveB !== undefined ? { inclusiveB } : {}) });
@@ -87,5 +87,30 @@ describe('rangeMatches — number domain (memory-style consumer)', () => {
   it('missing or non-numeric row values never match an active range', () => {
     expect(rangeMatches(undefined, d('gte', '0'), 'number')).toBe(false);
     expect(rangeMatches('n/a', d('gte', '0'), 'number')).toBe(false);
+  });
+});
+
+describe('rangeIsComplete', () => {
+  it('a null range is not complete', () => {
+    expect(rangeIsComplete(null, 'date')).toBe(false);
+  });
+
+  it('a single-op range with a parsing primary bound is complete', () => {
+    expect(rangeIsComplete(d('gte', '2026-05-01'), 'date')).toBe(true);
+    expect(rangeIsComplete(d('lt', '512'), 'number')).toBe(true);
+  });
+
+  it('a "between" range with only the primary bound typed is not complete', () => {
+    expect(rangeIsComplete(d('between', '2026-05-01'), 'date')).toBe(false);
+  });
+
+  it('a "between" range with both bounds parsing is complete', () => {
+    expect(rangeIsComplete(d('between', '2026-05-01', '2026-06-01'), 'date')).toBe(true);
+    expect(rangeIsComplete(d('between', '128', '512'), 'number')).toBe(true);
+  });
+
+  it('an unparsable primary bound is not complete', () => {
+    expect(rangeIsComplete(d('gte', 'not-a-date'), 'date')).toBe(false);
+    expect(rangeIsComplete(d('gte', ''), 'date')).toBe(false);
   });
 });
