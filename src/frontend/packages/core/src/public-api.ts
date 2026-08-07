@@ -162,6 +162,7 @@ export { RowState, RowsState, getDefaultRowState } from './shared/components/sig
 export { TableCellStatusDirective } from './shared/components/signal-list/table-cell-status.directive';
 export { extractActualListEntity } from './shared/components/signal-list/list-entity.helpers';
 export type { ISimpleListConfig } from './shared/components/signal-list/simple-list-config.types';
+export * from './shared/components/signal-list/range-filter';
 
 // Utility Components
 export { MultilineTitleComponent } from './shared/components/multiline-title/multiline-title.component';
