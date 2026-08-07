@@ -1279,6 +1279,33 @@ describe('CfAppsSignalConfigService stacks', () => {
     // (== all), not an empty array that would silently hide every app.
     expect(svc.selectedStacks()).toBe(null);
   });
+
+  // #5770 review: selectedStacks is a root-singleton signal, so a value
+  // set while the stack UI was visible on one page can carry into a
+  // single-stack scope where the checklist isn't rendered at all —
+  // with no visible control and a disabled Clear button, that used to
+  // silently drop every docker app. The predicate must stay inert
+  // wherever stackUiVisible() is false.
+  it('a stack selection is inert while the stack UI is hidden (single-stack scope) — docker apps still pass', async () => {
+    const svc = makeSvc(makeStacksHttp({ 'cf-1': ['cflinuxfs4'] }));
+    svc.initialize(['cf-1']);
+    await drainUntil(() => svc.stackOptions().length > 1);
+    expect(svc.stackUiVisible()).toBe(false);
+    svc.selectedStacks.set(['cflinuxfs4']);
+    TestBed.tick();
+    expect(svc.filter()(makeStackApp('a', 'cflinuxfs4'))).toBe(true);
+    expect(svc.filter()(makeStackApp('b', undefined))).toBe(true);
+  });
+
+  it('the same selection filters normally once the stack UI is visible (2+ installed stacks)', async () => {
+    const svc = makeSvc(makeStacksHttp({ 'cf-1': ['cflinuxfs4', 'cflinuxfs5'] }));
+    svc.initialize(['cf-1']);
+    await drainUntil(() => svc.stackUiVisible());
+    svc.selectedStacks.set(['cflinuxfs4']);
+    await drainUntil(() => !svc.filter()(makeStackApp('b', undefined)));
+    expect(svc.filter()(makeStackApp('a', 'cflinuxfs4'))).toBe(true);
+    expect(svc.filter()(makeStackApp('b', undefined))).toBe(false);
+  });
 });
 
 function makeStateApp(guid: string, state: string): StApp {

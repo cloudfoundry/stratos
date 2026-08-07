@@ -44,7 +44,7 @@
         </select>
       }
       @if (activeMulti(); as fm) {
-        <div class="relative" data-test="multi-filter-wrap">
+        <div class="relative" data-test="multi-filter-wrap" (keydown.escape)="multiPopupOpen.set(false)">
           <button
             type="button"
             data-test="multi-filter-toggle"
@@ -54,6 +54,9 @@
             <span class="material-icons text-base leading-4 align-middle float-right">arrow_drop_down</span>
           </button>
           @if (multiPopupOpen()) {
+            <!-- Deliberately overlays the input slot (absolute, left-0 top-0)
+                 rather than pushing content below it — this is the product
+                 owner's approved design, not an oversight; don't "fix" it. -->
             <div class="absolute left-0 top-0 z-30 min-w-44 border border-content-border rounded bg-content-bg shadow-lg p-2">
               @for (name of fm.options(); track name) {
                 <label class="flex items-center gap-2 px-1 py-0.5 text-sm text-content-text cursor-pointer">
@@ -62,7 +65,7 @@
                 </label>
               }
               @if (fm.selected() !== null && fm.selected()!.length === 0) {
-                <div class="mt-1 px-1 text-xs text-amber-600 dark:text-amber-400">Nothing selected — showing all</div>
+                <div class="mt-1 px-1 text-xs text-warning-shade-600 dark:text-warning-shade-300">Nothing selected — showing all</div>
               }
               <button
                 type="button"
