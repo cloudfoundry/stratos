@@ -4,6 +4,7 @@ import { Component, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { SignalListComponent } from './signal-list.component';
 import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption, SignalListMultiFilter, SignalListRowState } from './signal-list.component';
+import type { SignalListRangeValue } from './range-filter';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 
 // SignalListComponent now applies [routerLink] to the card / table row when a
@@ -1653,5 +1654,104 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
     expect(component.multiPopupOpen()).toBe(true);
     component.onFilterFieldChange('name');
     expect(component.multiPopupOpen()).toBe(false);
+  });
+});
+
+// Range-comparison filter input (config.filterRanges / SignalListRangeFilter).
+// Mirrors the checklist-popup fixture above; lastRefreshedAt is the first
+// consumer of this control.
+@Component({
+  standalone: true,
+  imports: [SignalListComponent],
+  template: `<app-signal-list [config]="config" />`
+})
+class RangeFilterHost {
+  items = signal([
+    { name: 'one', lastRefreshedAt: '2026-05-01' },
+    { name: 'two', lastRefreshedAt: '2026-06-01' },
+  ]);
+  pageIndex = signal(0);
+  pageSize = signal(10);
+  filterField = signal('lastRefreshedAt');
+  selectedRange = signal<SignalListRangeValue | null>(null);
+  config: SignalListConfig<{ name: string; lastRefreshedAt: string }> = {
+    pagedItems: this.items.asReadonly(),
+    totalFilteredResults: signal(2).asReadonly(),
+    totalPages: signal(1).asReadonly(),
+    pageIndex: this.pageIndex,
+    pageSize: this.pageSize,
+    isAnyLoading: signal(false).asReadonly(),
+    errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+    columns: [
+      { header: 'Name', key: 'name', render: r => r.name },
+      { header: 'Last Refreshed', key: 'lastRefreshedAt', render: r => r.lastRefreshedAt },
+    ],
+    getRowKey: r => r.name,
+    nameFilter: signal(''),
+    filterColumns: ['name', 'lastRefreshedAt'],
+    filterField: this.filterField,
+    filterRanges: [{
+      field: 'lastRefreshedAt',
+      valueType: 'date',
+      selected: this.selectedRange,
+    }],
+  };
+}
+
+describe('SignalListComponent range filter (filterRanges)', () => {
+  function componentWith(fixture: ReturnType<typeof TestBed.createComponent<RangeFilterHost>>) {
+    return fixture.debugElement.children[0].componentInstance as SignalListComponent<{ name: string; lastRefreshedAt: string }>;
+  }
+
+  it('activeRange resolves when filterField names a range field, activeMulti stays undefined', () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    fixture.detectChanges();
+    const component = componentWith(fixture);
+    expect(component.activeRange()?.field).toBe('lastRefreshedAt');
+    expect(component.activeMulti()).toBeUndefined();
+  });
+
+  it('updateRange collapses an empty primary bound to null (no constraint)', () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    fixture.detectChanges();
+    const component = componentWith(fixture);
+    const fr = component.activeRange()!;
+    component.updateRange(fr, { op: 'gte', a: '2026-05-01' });
+    expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'gte', a: '2026-05-01' });
+    component.updateRange(fr, { a: '' });
+    expect(fixture.componentInstance.selectedRange()).toBe(null);
+  });
+
+  it('updateRange resets to page 0', () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    fixture.componentInstance.pageIndex.set(3);
+    fixture.detectChanges();
+    const component = componentWith(fixture);
+    component.updateRange(component.activeRange()!, { op: 'gte', a: '2026-05-01' });
+    expect(fixture.componentInstance.pageIndex()).toBe(0);
+  });
+
+  it('hasActiveFilter sees a non-null range selection and Clear resets it', () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    fixture.detectChanges();
+    const component = componentWith(fixture);
+    fixture.componentInstance.selectedRange.set({ op: 'lt', a: '2026-01-01' });
+    expect(component.hasActiveFilter()).toBe(true);
+    fixture.componentInstance.selectedRange.set(null);
+    expect(component.hasActiveFilter()).toBe(false);
+  });
+
+  it('rangeSummary renders Any / single-bound / between forms', () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    fixture.detectChanges();
+    const component = componentWith(fixture);
+    const fr = component.activeRange()!;
+    expect(component.rangeSummary(fr)).toBe('Any');
+
+    fixture.componentInstance.selectedRange.set({ op: 'gte', a: '2026-05-01' });
+    expect(component.rangeSummary(fr)).toBe('≥ 2026-05-01');
+
+    fixture.componentInstance.selectedRange.set({ op: 'between', a: '2026-05-01', b: '2026-06-01' });
+    expect(component.rangeSummary(fr)).toBe('2026-05-01 – 2026-06-01');
   });
 });

@@ -74,6 +74,64 @@
             </div>
           }
         </div>
+      } @else if (activeRange(); as fr) {
+        <div class="relative" data-test="range-filter-wrap" (keydown.escape)="multiPopupOpen.set(false)">
+          <button
+            type="button"
+            data-test="range-filter-toggle"
+            (click)="multiPopupOpen.set(!multiPopupOpen())"
+            class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text min-w-44 text-left">
+            {{ rangeSummary(fr) }}
+            <span class="material-icons text-base leading-4 align-middle float-right">arrow_drop_down</span>
+          </button>
+          @if (multiPopupOpen()) {
+            <!-- Overlays the input slot like the checklist popup — same approved
+                 product design; don't "fix" it. -->
+            <div class="absolute left-0 top-0 z-30 min-w-56 border border-content-border rounded bg-content-bg shadow-lg p-2 flex flex-col gap-1.5">
+              <select
+                data-test="range-op"
+                class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
+                [value]="fr.selected()?.op ?? 'gte'"
+                (change)="updateRange(fr, { op: $any($event.target).value })">
+                <option value="lt">before</option>
+                <option value="lte">on or before</option>
+                <option value="gt">after</option>
+                <option value="gte">on or after</option>
+                <option value="between">between</option>
+              </select>
+              <input
+                data-test="range-a"
+                [type]="fr.valueType === 'date' ? 'date' : 'number'"
+                class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
+                [value]="fr.selected()?.a ?? ''"
+                (change)="updateRange(fr, { a: $any($event.target).value })" />
+              @if ((fr.selected()?.op ?? 'gte') === 'between') {
+                <input
+                  data-test="range-b"
+                  [type]="fr.valueType === 'date' ? 'date' : 'number'"
+                  class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
+                  [value]="fr.selected()?.b ?? ''"
+                  (change)="updateRange(fr, { b: $any($event.target).value })" />
+                <label class="flex items-center gap-2 px-1 text-xs text-content-text cursor-pointer">
+                  <input type="checkbox" data-test="range-incl-a"
+                    [checked]="fr.selected()?.inclusiveA ?? true"
+                    (change)="updateRange(fr, { inclusiveA: $any($event.target).checked })" />
+                  include start
+                </label>
+                <label class="flex items-center gap-2 px-1 text-xs text-content-text cursor-pointer">
+                  <input type="checkbox" data-test="range-incl-b"
+                    [checked]="fr.selected()?.inclusiveB ?? true"
+                    (change)="updateRange(fr, { inclusiveB: $any($event.target).checked })" />
+                  include end
+                </label>
+              }
+              <button
+                type="button"
+                (click)="multiPopupOpen.set(false)"
+                class="w-full text-xs text-content-muted border-t border-content-border pt-1">Close</button>
+            </div>
+          }
+        </div>
       } @else {
         <input
           type="text"
