@@ -43,15 +43,45 @@
           }
         </select>
       }
-      <input
-        type="text"
-        data-test="name-filter"
-        [placeholder]="filterPlaceholder()"
-        [attr.aria-label]="filterPlaceholder()"
-        [value]="config.nameFilter()"
-        (input)="onNameFilterChange($any($event.target).value)"
-        (keydown.escape)="onNameFilterChange('')"
-        class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
+      @if (activeMulti(); as fm) {
+        <div class="relative" data-test="multi-filter-wrap">
+          <button
+            type="button"
+            data-test="multi-filter-toggle"
+            (click)="multiPopupOpen.set(!multiPopupOpen())"
+            class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text min-w-44 text-left">
+            {{ multiSummary(fm) }}
+            <span class="material-icons text-base leading-4 align-middle float-right">arrow_drop_down</span>
+          </button>
+          @if (multiPopupOpen()) {
+            <div class="absolute left-0 top-0 z-30 min-w-44 border border-content-border rounded bg-content-bg shadow-lg p-2">
+              @for (name of fm.options(); track name) {
+                <label class="flex items-center gap-2 px-1 py-0.5 text-sm text-content-text cursor-pointer">
+                  <input type="checkbox" [checked]="multiChecked(fm, name)" (change)="toggleMultiOption(fm, name)" />
+                  {{ name }}
+                </label>
+              }
+              @if (fm.selected() !== null && fm.selected()!.length === 0) {
+                <div class="mt-1 px-1 text-xs text-amber-600 dark:text-amber-400">Nothing selected — showing all</div>
+              }
+              <button
+                type="button"
+                (click)="multiPopupOpen.set(false)"
+                class="mt-1 w-full text-xs text-content-muted border-t border-content-border pt-1">Close</button>
+            </div>
+          }
+        </div>
+      } @else {
+        <input
+          type="text"
+          data-test="name-filter"
+          [placeholder]="filterPlaceholder()"
+          [attr.aria-label]="filterPlaceholder()"
+          [value]="config.nameFilter()"
+          (input)="onNameFilterChange($any($event.target).value)"
+          (keydown.escape)="onNameFilterChange('')"
+          class="px-3 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text" />
+      }
     }
 
     @if (config.onClear) {

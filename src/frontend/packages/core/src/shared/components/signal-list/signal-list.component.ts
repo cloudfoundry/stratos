@@ -280,6 +280,25 @@ export interface SignalListDropdown {
   loading?: Signal<boolean>;
 }
 
+// Binding for a filter field whose input is a checklist popup instead of
+// the free-text box (see SignalListConfig.filterMultis). Used for fields
+// whose domain is a small closed set of discrete values — e.g. stack
+// name — where a fuzzy text match is the wrong affordance and the user
+// wants to pick from what's actually installed, possibly several at
+// once. `field` names the filterColumns entry this control activates
+// for: the active entry is whichever filterMultis element's `field`
+// equals filterField(), so the component only needs one popup-open
+// state (filterField() can only name one column at a time).
+// `selected === null` means "all" (no constraint) — same as no filter.
+// An explicitly EMPTY selection is ALSO treated as all, with a visible
+// note in the popup, rather than silently matching zero rows: a filter
+// that shows nothing reads as a bug, not a deliberate choice.
+export interface SignalListMultiFilter {
+  readonly field: string;
+  readonly options: Signal<string[]>;
+  readonly selected: WritableSignal<string[] | null>;
+}
+
 export type SignalListViewMode = 'table' | 'card';
 
 /**
@@ -433,6 +452,14 @@ export interface SignalListConfig<T> {
   // happens behind a confirm dialog after `run()` has already returned, so the
   // bar can't infer the in-flight state itself. Omit to keep the bar static.
   readonly bulkRunning?: Signal<boolean>;
+  // Filter fields whose input is a checklist popup rather than the plain
+  // text box — see SignalListMultiFilter. An array (not a single slot)
+  // because more than one filterColumns entry can want this treatment:
+  // stack is the first checklist consumer, app status is a planned
+  // second entry here, and a date-range input is a separate filter-field
+  // kind slated for a later PR (not modeled by this array). Only the
+  // entry whose `field` matches the current filterField() renders.
+  readonly filterMultis?: readonly SignalListMultiFilter[];
 }
 
 @Component({
@@ -1134,6 +1161,72 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   onFilterFieldChange(field: string): void {
     this.config.filterField?.set(field);
+    this.config.pageIndex.set(0);
+    this.multiPopupOpen.set(false);
+  }
+
+  // Popup-open state for the checklist-style filter input (see
+  // SignalListMultiFilter). Only one checklist field can be active at a
+  // time — filterField() names a single column — so a single boolean
+  // suffices rather than one open-flag per configured field.
+  readonly multiPopupOpen = signal(false);
+
+  // The filterMultis entry whose field matches the active filterField(),
+  // or undefined when the current field uses the plain text input.
+  activeMulti(): SignalListMultiFilter | undefined {
+    const field = this.config.filterField?.();
+    return this.config.filterMultis?.find(m => m.field === field);
+  }
+
+  // Button label for the checklist popup: "All (n)" when every option is
+  // implicitly or explicitly selected, the bare value for a single pick,
+  // "x of y selected" for a partial pick, and a "showing all" note when
+  // the user has explicitly unchecked everything (see toggleMultiOption
+  // for why that's kept distinct from null rather than collapsed to it).
+  multiSummary(fm: SignalListMultiFilter): string {
+    const sel = fm.selected();
+    const total = fm.options().length;
+    if (sel === null || sel.length === total) return `All (${total})`;
+    if (sel.length === 0) return 'None — showing all';
+    if (sel.length === 1) return sel[0];
+    return `${sel.length} of ${total} selected`;
+  }
+
+  // Closes the checklist popup on any click outside its wrapper — the
+  // same "click away" pattern as the row-actions kebab menu, keyed off
+  // the multi-filter-wrap data-test hook so it works uniformly across
+  // every consumer without a template ref.
+  @HostListener('document:click', ['$event'])
+  onDocumentClickForMultiPopup(event: Event): void {
+    if (!this.multiPopupOpen()) return;
+    const target = event.target as HTMLElement | null;
+    if (target && !target.closest('[data-test="multi-filter-wrap"]')) {
+      this.multiPopupOpen.set(false);
+    }
+  }
+
+  // selected === null (or, degenerately, an explicit list containing
+  // every option) reads as "all" — every checkbox renders checked
+  // without the caller having to populate a full option list up front.
+  multiChecked(fm: SignalListMultiFilter, name: string): boolean {
+    const sel = fm.selected();
+    return sel === null || sel.includes(name);
+  }
+
+  // Checking every option back on collapses the selection to null
+  // (matching multiChecked's "all == every option" read) rather than
+  // leaving an explicit full list around, so `selected === null` stays
+  // the one canonical "no constraint" state for predicates to check.
+  // Unchecking the LAST option is deliberately NOT collapsed to null —
+  // it's preserved as [] so the popup can render its "showing all" note;
+  // silently reverting to null there would hide that the user just
+  // cleared every box, and a filter that quietly shows everything after
+  // an all-uncheck reads as a bug.
+  toggleMultiOption(fm: SignalListMultiFilter, name: string): void {
+    const all = fm.options();
+    const curr = fm.selected() ?? all;
+    const next = curr.includes(name) ? curr.filter(n => n !== name) : [...curr, name];
+    fm.selected.set(next.length === all.length ? null : next);
     this.config.pageIndex.set(0);
   }
 
