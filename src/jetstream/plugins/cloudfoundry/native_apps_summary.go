@@ -16,9 +16,10 @@ import (
 // doesn't sort natively — requests on these trigger the fetch-all-sort-in-
 // memory-paginate fallback path in getNativeAppsSummary.
 var derivedSortFields = map[string]bool{
-	"memory":    true,
-	"diskQuota": true,
-	"instances": true,
+	"memory":          true,
+	"diskQuota":       true,
+	"instances":       true,
+	"lastRefreshedAt": true,
 }
 
 // isDerivedSortField returns true when the Stratos-shape order_by value
@@ -694,10 +695,19 @@ func fetchAllAppsWithFilters(ctx context.Context, cfClient capi.Client, filters 
 }
 
 // sortStAppsByDerivedField sorts composed StApps in place on a process-
-// derived field. Rows with a nil value for the field (composition failure
-// on that row) sort to the end regardless of direction — unavailable data
-// isn't ranked ahead of known data, either as largest or smallest.
+// derived field. Rows with a nil/absent value for the field (composition
+// failure on that row, or an app that's never been staged) sort to the end
+// regardless of direction — unavailable data isn't ranked ahead of known
+// data, either as largest/latest or smallest/earliest.
+//
+// lastRefreshedAt is string-valued (RFC3339, sorts lexicographically =
+// chronologically) so it gets its own comparator rather than being boxed
+// into the numeric one below.
 func sortStAppsByDerivedField(apps []StApp, field string, desc bool) {
+	if field == "lastRefreshedAt" {
+		sortStAppsByDerivedStringField(apps, field, desc)
+		return
+	}
 	sort.SliceStable(apps, func(i, j int) bool {
 		vi, iPresent := derivedSortValue(apps[i], field)
 		vj, jPresent := derivedSortValue(apps[j], field)
@@ -739,4 +749,44 @@ func derivedSortValue(app StApp, field string) (int, bool) {
 		return app.Instances, true
 	}
 	return 0, false
+}
+
+// sortStAppsByDerivedStringField sorts composed StApps in place on a
+// string-valued derived field, applying the same nils-sort-last posture as
+// sortStAppsByDerivedField's numeric path.
+func sortStAppsByDerivedStringField(apps []StApp, field string, desc bool) {
+	sort.SliceStable(apps, func(i, j int) bool {
+		vi, iPresent := derivedSortStringValue(apps[i], field)
+		vj, jPresent := derivedSortStringValue(apps[j], field)
+
+		// Absent values always sort last
+		if !iPresent && jPresent {
+			return false
+		}
+		if iPresent && !jPresent {
+			return true
+		}
+		if !iPresent && !jPresent {
+			return false
+		}
+		if desc {
+			return vi > vj
+		}
+		return vi < vj
+	})
+}
+
+// derivedSortStringValue returns the string value of a string-valued
+// derived sort field on a StApp, plus a present flag. LastRefreshedAt is
+// empty for apps that have never had a droplet staged, which is treated as
+// absent (not a valid, empty-string sort key).
+func derivedSortStringValue(app StApp, field string) (string, bool) {
+	switch field {
+	case "lastRefreshedAt":
+		if app.LastRefreshedAt == "" {
+			return "", false
+		}
+		return app.LastRefreshedAt, true
+	}
+	return "", false
 }
