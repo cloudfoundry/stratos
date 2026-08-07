@@ -12,9 +12,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// derivedSortFields are StApp fields sourced from /v3/processes that CAPI
-// doesn't sort natively — requests on these trigger the fetch-all-sort-in-
-// memory-paginate fallback path in getNativeAppsSummary.
+// derivedSortFields are StApp fields sourced from /v3/processes (memory,
+// diskQuota, instances) or /v3/droplets (lastRefreshedAt) that CAPI doesn't
+// sort natively — requests on these trigger the fetch-all-sort-in-memory-
+// paginate fallback path in getNativeAppsSummary.
 var derivedSortFields = map[string]bool{
 	"memory":          true,
 	"diskQuota":       true,
@@ -23,9 +24,9 @@ var derivedSortFields = map[string]bool{
 }
 
 // isDerivedSortField returns true when the Stratos-shape order_by value
-// refers to a process-derived field (memory / diskQuota / instances).
-// Accepts both "field" and "-field" forms; returns the bare field name and
-// the descending flag.
+// refers to a process-derived field (memory / diskQuota / instances) or
+// droplet-derived field (lastRefreshedAt). Accepts both "field" and "-field"
+// forms; returns the bare field name and the descending flag.
 func isDerivedSortField(orderBy string) (bool, string, bool) {
 	if orderBy == "" {
 		return false, "", false
