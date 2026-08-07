@@ -79,7 +79,7 @@ export class CloudFoundryComponent {
     void this.endpointsData.whenReady().then(() => {
       const endpoints = available();
 
-      const connected = available().filter(e => e.guid && e.connectionStatus === 'connected');
+      const connected = endpoints.filter(e => e.guid && e.connectionStatus === 'connected');
       void Promise.all(connected.map(async e => {
         const source = new CnsiStacksSource(e.guid!, this.http);
         await source.load(); // never throws; failure → empty items
@@ -115,6 +115,7 @@ export class CloudFoundryComponent {
       name: e => e.name ?? '',
       address: e => e.api_endpoint?.Host ?? '',
       user: e => e.user?.name ?? '',
+      stacks: e => (this.stacksByEndpoint().get(e.guid ?? '') ?? []).join(', '),
       status: e => rowStatus(e),
     };
     const sorted: Signal<EndpointModel[]> = computed(() => {
