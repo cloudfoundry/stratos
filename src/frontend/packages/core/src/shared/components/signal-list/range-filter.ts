@@ -18,12 +18,14 @@ export interface SignalListRangeValue {
 }
 
 // [startOfDay, endOfDay] for a YYYY-MM-DD input, in ms; null when unparsable.
+// End bound computed as start-of-next-day - 1ms to honor DST transitions.
 function dayWindow(bound: string): [number, number] | null {
   const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(bound);
   if (!m) return null;
   const start = new Date(+m[1], +m[2] - 1, +m[3]).getTime();
   if (Number.isNaN(start)) return null;
-  return [start, start + 86_400_000 - 1];
+  const end = new Date(+m[1], +m[2] - 1, +m[3] + 1).getTime() - 1;
+  return [start, end];
 }
 
 function numWindow(bound: string): [number, number] | null {
