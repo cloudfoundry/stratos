@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
 import { EndpointErrorEventsService } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../services/data-sources/cnsi-apps-source';
+import { CnsiStacksSource } from '../../../services/data-sources/cnsi-stacks-source';
 import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
 import { wireEndpointErrorReporting } from '../endpoint-error-reporting';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
@@ -13,7 +14,7 @@ import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { applicationEntityType, routeEntityType } from '../../../cf-entity-types';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
-import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServiceCredentialBinding, StServiceCredentialBindingsResponse, StSpace, StSpacesResponse } from '../../../services/endpoint-data/stratos-types';
+import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServiceCredentialBinding, StServiceCredentialBindingsResponse, StSpace, StSpacesResponse, StStack } from '../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import type { StratosJob } from '../../../services/async-jobs/async-job.types';
@@ -118,6 +119,54 @@ export class CfAppsSignalConfigService {
   // is the expected visual cue.
   private readonly _orgsByCnsi = signal<Map<string, StOrg[]>>(new Map());
   private readonly _spacesByCnsi = signal<Map<string, StSpace[]>>(new Map());
+
+  // Installed-stacks catalog, per scoped CNSI, fetched EAGERLY on
+  // initialize() — unlike the lazy org/space catalogs, because the stack
+  // column/filter's own visibility depends on it. Options and visibility
+  // read the catalog (what the foundation has installed), never the loaded
+  // apps: a stack with zero apps must stay selectable so an operator can
+  // filter to it, see 0 results, and conclude the stack is removable.
+  private readonly _stacksByCnsi = signal<Map<string, StStack[]>>(new Map());
+  // The cnsi guids the current mount was initialized with; scopes both
+  // visibility and the option union (wall = all connected CFs, per-CF and
+  // per-space tabs = one).
+  private readonly _scopeCnsiGuids = signal<readonly string[]>([]);
+  // Bumped per initialize() so a slow stacks fetch from a previous mount
+  // can't overwrite the new scope's catalog.
+  private _stacksGen = 0;
+
+  readonly selectedStack: WritableSignal<string | null> = signal(null);
+
+  // Stack UI (column + dropdown) shows when ANY scoped endpoint has 2+
+  // installed stacks; a single-stack foundation would render a constant
+  // column. Endpoint-scoped pages pass one guid, so "any" degenerates to
+  // "that endpoint" there.
+  readonly stackUiVisible: Signal<boolean> = computed(() => {
+    const byCnsi = this._stacksByCnsi();
+    for (const guid of this._scopeCnsiGuids()) {
+      if ((byCnsi.get(guid)?.length ?? 0) >= 2) return true;
+    }
+    return false;
+  });
+
+  // Dropdown options: installed stack NAMES (the predicate matches
+  // app.stackName, a name — stack guids never appear on app rows).
+  // Cascades to the selected CF like orgOptions does.
+  readonly stackOptions: Signal<SignalListDropdownOption[]> = computed(() => {
+    const cnsi = this.selectedCnsi();
+    const byCnsi = this._stacksByCnsi();
+    const scope = cnsi ? [cnsi] : this._scopeCnsiGuids();
+    const names = new Set<string>();
+    for (const guid of scope) {
+      for (const s of byCnsi.get(guid) ?? []) names.add(s.name);
+    }
+    const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
+    for (const name of Array.from(names).sort((a, b) => naturalCompare(a, b))) {
+      opts.push({ label: name, value: name });
+    }
+    return opts;
+  });
+
   // Loading flags for the Org / Space toolbar dropdowns — set true while
   // loadNames() is fetching and cleared once the relevant map is populated.
   // Drives the SignalListDropdown spinner so users see "loading" rather
@@ -347,6 +396,11 @@ export class CfAppsSignalConfigService {
       if (!selectedCfFailed) {
         if (orgCatalogReady && org != null && !orgValues.has(org)) this.selectedOrg.set(null);
         if (spaceCatalogReady && space != null && !spaceValues.has(space)) this.selectedSpace.set(null);
+        const stackCatalogReady = this.stackOptions().length > 1;
+        const stack = this.selectedStack();
+        if (stackCatalogReady && stack != null && !this.stackOptions().some(o => o.value === stack)) {
+          this.selectedStack.set(null);
+        }
       }
     });
 
@@ -359,6 +413,7 @@ export class CfAppsSignalConfigService {
       const cnsi = this.selectedCnsi();
       const org = this.selectedOrg();
       const space = this.selectedSpace();
+      const stack = this.selectedStack();
       const q = this.nameFilter().trim().toLowerCase();
       const field = this.filterField();
       const extractors = this._filterExtractors();
@@ -367,6 +422,7 @@ export class CfAppsSignalConfigService {
         if (cnsi && app.cnsiGuid !== cnsi) return false;
         if (org && app.orgGuid !== org) return false;
         if (space && app.spaceGuid !== space) return false;
+        if (stack && app.stackName !== stack) return false;
         if (q) {
           const hay = (extractor ? extractor(app) : (app.name ?? '')).toLowerCase();
           if (!hay.includes(q)) return false;
@@ -396,6 +452,8 @@ export class CfAppsSignalConfigService {
     // alongside the dedup sets so previously-resolved names don't bleed
     // across initialize() calls.
     this.clearResolverState();
+    this._scopeCnsiGuids.set([...cnsiGuids]);
+    void this.loadStacksCatalog(cnsiGuids);
     const sources = cnsiGuids.map(guid => {
       const eds = this.endpointRegistry.acquire(guid);
       const source = new CnsiAppsSource(guid, this.http, eds);
@@ -507,6 +565,24 @@ export class CfAppsSignalConfigService {
     if (!guids.length) return Promise.resolve();
     this._namesLoadingPromise = this.loadNames(guids);
     return this._namesLoadingPromise;
+  }
+
+  // Fetch the installed-stacks catalog for every scoped endpoint. Stacks
+  // are tiny (<10 per CF) so the eager fanout is one small request per
+  // endpoint. CnsiEntitySource.load() never throws — a failed endpoint
+  // contributes an empty list, which reads as "single stack": the UI
+  // stays hidden rather than erroring.
+  private async loadStacksCatalog(cnsiGuids: readonly string[]): Promise<void> {
+    const gen = ++this._stacksGen;
+    const results = await Promise.all(cnsiGuids.map(async guid => {
+      const source = new CnsiStacksSource(guid, this.http);
+      await source.load();
+      return { guid, stacks: [...source.items()] };
+    }));
+    if (gen !== this._stacksGen) return;
+    const m = new Map<string, StStack[]>();
+    for (const { guid, stacks } of results) m.set(guid, stacks);
+    this._stacksByCnsi.set(m);
   }
 
   private async loadNames(cnsiGuids: readonly string[]): Promise<void> {
@@ -833,6 +909,7 @@ export class CfAppsSignalConfigService {
     this.selectedCnsi.set(null);
     this.selectedOrg.set(null);
     this.selectedSpace.set(null);
+    this.selectedStack.set(null);
     this.nameFilter.set('');
     this.filterField.set('name');
     this.sort.set({ field: 'name', direction: 'asc' });
