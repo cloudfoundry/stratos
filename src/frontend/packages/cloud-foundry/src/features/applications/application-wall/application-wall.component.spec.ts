@@ -55,7 +55,7 @@ function makeStubSignalConfigService() {
     selectedCnsi: signal<string | null>(null),
     selectedOrg: signal<string | null>(null),
     selectedSpace: signal<string | null>(null),
-    selectedStack: signal<string | null>(null),
+    selectedStacks: signal<string[] | null>(null),
     nameFilter: signal(''),
     filterField: signal('name'),
     viewMode: signal<'table' | 'card'>('table'),

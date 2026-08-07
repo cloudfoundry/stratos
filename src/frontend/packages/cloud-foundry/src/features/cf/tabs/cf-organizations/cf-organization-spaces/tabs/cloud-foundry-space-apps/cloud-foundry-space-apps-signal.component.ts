@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
-  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal, Injector, effect,
+  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
@@ -18,7 +18,6 @@ import {
   SignalListColumn,
   SignalListComponent,
   SignalListConfig,
-  SignalListDropdown,
   SignalListPillColor,
   SignalListRowAction,
   TailwindSnackBarService,
@@ -135,12 +134,14 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
     this.appsConfig.initializeForSpace(cfGuid, spaceGuid);
     this.totalApplications = this.appsConfig.view.totalItems;
 
-    const stackDropdown: SignalListDropdown = {
-      label: 'Stack',
-      options: this.appsConfig.stackOptions,
-      selected: this.appsConfig.selectedStack,
-      // No onOpen: the stacks catalog is fetched eagerly by initialize()
-      // (visibility itself depends on it), unlike the lazy org/space names.
+    // Stack filtering rides the field-selectable filter rather than its
+    // own dropdown: "Stack" is a filter-field whose input is a checklist
+    // popup (multi-select, default all) — see SignalListMultiFilter. The
+    // stacks catalog is still fetched eagerly (visibility depends on it).
+    const stackFilterMulti = {
+      field: 'stackName',
+      options: computed(() => this.appsConfig.stackOptions().filter(o => o.value !== null).map(o => o.label)),
+      selected: this.appsConfig.selectedStacks,
     };
     const stackColumn: SignalListColumn<StApp> = {
       header: 'Stack', key: 'stackName', sortField: 'stackName',
@@ -257,11 +258,20 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
           card: [6, 12, 24, 48, 96],
         },
         nameFilter: this.appsConfig.nameFilter,
-        // Single-CNSI single-space tab: no Org/Space dropdowns, but a Stack
-        // dropdown appears once this CF has 2+ installed stacks.
-        // Undefined (not an empty array) when not visible, matching the
-        // toolbar's existing "no dropdowns" contract for this page.
-        filterDropdowns: withStack ? [stackDropdown] : undefined,
+        // Single-CNSI single-space tab: there's exactly one CF and one
+        // space in scope, so no Org/Space/CF dropdowns — matches the
+        // page's existing "no dropdowns" contract. Stack filtering rides
+        // the field selector like the wall and CF tab: the filter-field
+        // dropdown gains a "Stack" option once this CF has 2+ installed
+        // stacks, and picking it swaps in the checklist popup.
+        filterColumns: withStack ? ['name', 'stackName'] : undefined,
+        // Only wired while the Stack column itself is in filterColumns —
+        // otherwise a filterField left over at 'stackName' from a
+        // previous, stack-visible page (the service's filter state is a
+        // shared singleton) would pop the checklist for a column this
+        // page isn't even showing.
+        filterMultis: withStack ? [stackFilterMulti] : undefined,
+        filterField: this.appsConfig.filterField,
         onRefresh: () => this.appsConfig.refresh(),
         onClear: () => this.appsConfig.clearFilters(),
         cardAccentColor: stateColor,

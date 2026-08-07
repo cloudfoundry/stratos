@@ -135,7 +135,11 @@ export class CfAppsSignalConfigService {
   // can't overwrite the new scope's catalog.
   private _stacksGen = 0;
 
-  readonly selectedStack: WritableSignal<string | null> = signal(null);
+  // Stack filter: multi-select, driven by the field-selectable filter's
+  // checklist-popup input (SignalListMultiFilter). null = all stacks (no
+  // constraint); an explicitly empty array is ALSO treated as all — the
+  // popup shows a note rather than silently emptying the app list.
+  readonly selectedStacks: WritableSignal<string[] | null> = signal(null);
 
   // Stack UI (column + dropdown) shows when ANY scoped endpoint has 2+
   // installed stacks; a single-stack foundation would render a constant
@@ -396,10 +400,19 @@ export class CfAppsSignalConfigService {
       if (!selectedCfFailed) {
         if (orgCatalogReady && org != null && !orgValues.has(org)) this.selectedOrg.set(null);
         if (spaceCatalogReady && space != null && !spaceValues.has(space)) this.selectedSpace.set(null);
+        // Multi-select stack: drop just the vanished name(s) rather than
+        // clearing the whole selection — an operator who picked 3 stacks
+        // and lost 1 (e.g. it was uninstalled) keeps filtering on the
+        // other 2. An empty result after dropping collapses to null
+        // (== all), matching toggleMultiOption's canonical-null contract.
         const stackCatalogReady = this.stackOptions().length > 1;
-        const stack = this.selectedStack();
-        if (stackCatalogReady && stack != null && !this.stackOptions().some(o => o.value === stack)) {
-          this.selectedStack.set(null);
+        const stacks = this.selectedStacks();
+        if (stackCatalogReady && stacks != null && stacks.length > 0) {
+          const validNames = new Set(this.stackOptions().map(o => o.value));
+          const kept = stacks.filter(name => validNames.has(name));
+          if (kept.length !== stacks.length) {
+            this.selectedStacks.set(kept.length > 0 ? kept : null);
+          }
         }
       }
     });
@@ -413,7 +426,7 @@ export class CfAppsSignalConfigService {
       const cnsi = this.selectedCnsi();
       const org = this.selectedOrg();
       const space = this.selectedSpace();
-      const stack = this.selectedStack();
+      const stacks = this.selectedStacks();
       const q = this.nameFilter().trim().toLowerCase();
       const field = this.filterField();
       const extractors = this._filterExtractors();
@@ -422,7 +435,8 @@ export class CfAppsSignalConfigService {
         if (cnsi && app.cnsiGuid !== cnsi) return false;
         if (org && app.orgGuid !== org) return false;
         if (space && app.spaceGuid !== space) return false;
-        if (stack && app.stackName !== stack) return false;
+        // null or [] both mean "all" — see selectedStacks doc comment.
+        if (stacks && stacks.length > 0 && (!app.stackName || !stacks.includes(app.stackName))) return false;
         if (q) {
           const hay = (extractor ? extractor(app) : (app.name ?? '')).toLowerCase();
           if (!hay.includes(q)) return false;
@@ -909,7 +923,7 @@ export class CfAppsSignalConfigService {
     this.selectedCnsi.set(null);
     this.selectedOrg.set(null);
     this.selectedSpace.set(null);
-    this.selectedStack.set(null);
+    this.selectedStacks.set(null);
     this.nameFilter.set('');
     this.filterField.set('name');
     this.sort.set({ field: 'name', direction: 'asc' });
