@@ -1,6 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
+import {
+  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal, Injector, effect,
+} from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
@@ -13,8 +15,10 @@ import {
   ListSubNavAddAction,
   ListSubNavComponent,
   SignalListBulkAction,
+  SignalListColumn,
   SignalListComponent,
   SignalListConfig,
+  SignalListDropdown,
   SignalListPillColor,
   SignalListRowAction,
   TailwindSnackBarService,
@@ -65,6 +69,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   private http = inject(HttpClient);
   private router = inject(Router);
   private permissionsService = inject(CurrentUserPermissionsService);
+  private readonly injector = inject(Injector);
 
   /** Total app count in this space for the L5 sub-nav. */
   public totalApplications!: Signal<number>;
@@ -130,6 +135,19 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
     this.appsConfig.initializeForSpace(cfGuid, spaceGuid);
     this.totalApplications = this.appsConfig.view.totalItems;
 
+    const stackDropdown: SignalListDropdown = {
+      label: 'Stack',
+      options: this.appsConfig.stackOptions,
+      selected: this.appsConfig.selectedStack,
+      // No onOpen: the stacks catalog is fetched eagerly by initialize()
+      // (visibility itself depends on it), unlike the lazy org/space names.
+    };
+    const stackColumn: SignalListColumn<StApp> = {
+      header: 'Stack', key: 'stackName', sortField: 'stackName',
+      render: (app: StApp) => app.stackName || '—',
+      widthHint: '9rem',
+    };
+
     const stateColor = (app: StApp): SignalListPillColor => {
       const s = (app.state ?? '').toUpperCase();
       if (s === 'STARTED') return 'success';
@@ -145,104 +163,121 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
       return app.state ?? '';
     };
 
-    this.listConfig.set({
-      pagedItems: this.appsConfig.view.pagedItems,
-      totalFilteredResults: this.appsConfig.view.totalFilteredResults,
-      totalPages: this.appsConfig.view.totalPages,
-      pageIndex: this.appsConfig.pageIndex,
-      pageSize: this.appsConfig.pageSize,
-      isAnyLoading: this.appsConfig.orchestrator.isAnyLoading,
-      errorsByCnsi: this.appsConfig.orchestrator.errorsByCnsi,
-      columns: [
-        {
-          header: '', key: 'select',
-          kind: 'checkbox',
-          checkbox: {
-            selectedKeys: this.selectedAppKeys,
-            selectAll: {
-              // Filtered set size, not just the current page — matches the
-              // tri-state header's "all selectable rows" semantics.
-              selectableCount: () => this.appsConfig.view.totalFilteredResults(),
-              onToggle: () => this.toggleSelectAll(),
+    const buildConfig = (): SignalListConfig<StApp> => {
+      const withStack = this.appsConfig.stackUiVisible();
+      return {
+        pagedItems: this.appsConfig.view.pagedItems,
+        totalFilteredResults: this.appsConfig.view.totalFilteredResults,
+        totalPages: this.appsConfig.view.totalPages,
+        pageIndex: this.appsConfig.pageIndex,
+        pageSize: this.appsConfig.pageSize,
+        isAnyLoading: this.appsConfig.orchestrator.isAnyLoading,
+        errorsByCnsi: this.appsConfig.orchestrator.errorsByCnsi,
+        columns: [
+          {
+            header: '', key: 'select',
+            kind: 'checkbox',
+            checkbox: {
+              selectedKeys: this.selectedAppKeys,
+              selectAll: {
+                // Filtered set size, not just the current page — matches the
+                // tri-state header's "all selectable rows" semantics.
+                selectableCount: () => this.appsConfig.view.totalFilteredResults(),
+                onToggle: () => this.toggleSelectAll(),
+              },
             },
+            render: () => '',
+            widthHint: '3rem',
           },
-          render: () => '',
-          widthHint: '3rem',
-        },
-        {
-          header: 'Name', key: 'name', sortField: 'name',
-          kind: 'link',
-          link: (app: StApp) => ['/applications', app.cnsiGuid, app.guid],
-          render: (app: StApp) => app.name,
-          widthHint: '16rem',
-        },
-        {
-          header: 'Status', key: 'state', sortField: 'state',
-          kind: 'dot',
-          pillColor: stateColor,
-          render: stateLabel,
-          widthHint: '12rem',
-        },
-        {
-          header: 'Instances', key: 'instances', sortField: 'instances',
-          render: (app: StApp) => {
-            const desired = app.instances ?? 0;
-            const rowKey = `${app.cnsiGuid}:${app.guid}`;
-            const s = this.appsConfig.appStats().get(rowKey);
-            if (!s) return `— / ${desired}`;
-            return `${s.running} / ${desired}`;
+          {
+            header: 'Name', key: 'name', sortField: 'name',
+            kind: 'link',
+            link: (app: StApp) => ['/applications', app.cnsiGuid, app.guid],
+            render: (app: StApp) => app.name,
+            widthHint: '16rem',
           },
-          widthHint: '6rem',
-        },
-        {
-          header: 'Memory', key: 'memory', sortField: 'memory',
-          render: (app: StApp) => CloudFoundrySpaceAppsSignalComponent.formatMb(app.memory),
-          widthHint: '7rem',
-        },
-        {
-          header: 'Disk', key: 'diskQuota', sortField: 'diskQuota',
-          render: (app: StApp) => CloudFoundrySpaceAppsSignalComponent.formatMb(app.diskQuota),
-          widthHint: '7rem',
-        },
-        {
-          header: 'Created', key: 'createdAt', sortField: 'createdAt',
-          render: (app: StApp) => CloudFoundrySpaceAppsSignalComponent.formatDate(app.createdAt),
-          widthHint: '12rem',
-        },
-        {
-          header: '', key: 'favorite',
-          kind: 'favorite',
-          favorite: {
-            keys: this.favoriteAppRowKeys,
-            toggle: (app: StApp) => this.toggleAppFavorite(app),
+          {
+            header: 'Status', key: 'state', sortField: 'state',
+            kind: 'dot',
+            pillColor: stateColor,
+            render: stateLabel,
+            widthHint: '12rem',
           },
-          render: () => '',
-          widthHint: '3rem',
+          {
+            header: 'Instances', key: 'instances', sortField: 'instances',
+            render: (app: StApp) => {
+              const desired = app.instances ?? 0;
+              const rowKey = `${app.cnsiGuid}:${app.guid}`;
+              const s = this.appsConfig.appStats().get(rowKey);
+              if (!s) return `— / ${desired}`;
+              return `${s.running} / ${desired}`;
+            },
+            widthHint: '6rem',
+          },
+          {
+            header: 'Memory', key: 'memory', sortField: 'memory',
+            render: (app: StApp) => CloudFoundrySpaceAppsSignalComponent.formatMb(app.memory),
+            widthHint: '7rem',
+          },
+          {
+            header: 'Disk', key: 'diskQuota', sortField: 'diskQuota',
+            render: (app: StApp) => CloudFoundrySpaceAppsSignalComponent.formatMb(app.diskQuota),
+            widthHint: '7rem',
+          },
+          ...(withStack ? [stackColumn] : []),
+          {
+            header: 'Created', key: 'createdAt', sortField: 'createdAt',
+            render: (app: StApp) => CloudFoundrySpaceAppsSignalComponent.formatDate(app.createdAt),
+            widthHint: '12rem',
+          },
+          {
+            header: '', key: 'favorite',
+            kind: 'favorite',
+            favorite: {
+              keys: this.favoriteAppRowKeys,
+              toggle: (app: StApp) => this.toggleAppFavorite(app),
+            },
+            render: () => '',
+            widthHint: '3rem',
+          },
+          {
+            header: '', key: 'actions',
+            kind: 'actions',
+            actions: this.buildAppActions,
+            render: () => '',
+            widthHint: '3rem',
+          },
+        ],
+        getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
+        emptyMessage: 'There are no applications in this space',
+        emptyFilterMessage: 'No applications match the current filters',
+        loadingMessage: 'Loading applications…',
+        pageSizeOptions: {
+          table: [10, 25, 50, 100],
+          card: [6, 12, 24, 48, 96],
         },
-        {
-          header: '', key: 'actions',
-          kind: 'actions',
-          actions: this.buildAppActions,
-          render: () => '',
-          widthHint: '3rem',
-        },
-      ],
-      getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
-      emptyMessage: 'There are no applications in this space',
-      emptyFilterMessage: 'No applications match the current filters',
-      loadingMessage: 'Loading applications…',
-      pageSizeOptions: {
-        table: [10, 25, 50, 100],
-        card: [6, 12, 24, 48, 96],
-      },
-      nameFilter: this.appsConfig.nameFilter,
-      onRefresh: () => this.appsConfig.refresh(),
-      onClear: () => this.appsConfig.clearFilters(),
-      cardAccentColor: stateColor,
-      viewMode: this.appsConfig.viewMode,
-      sort: this.appsConfig.sort,
-      bulkActions: this.buildBulkActions(),
-    });
+        nameFilter: this.appsConfig.nameFilter,
+        // Single-CNSI single-space tab: no Org/Space dropdowns, but a Stack
+        // dropdown appears once this space has 2+ distinct stacks in use.
+        // Undefined (not an empty array) when not visible, matching the
+        // toolbar's existing "no dropdowns" contract for this page.
+        filterDropdowns: withStack ? [stackDropdown] : undefined,
+        onRefresh: () => this.appsConfig.refresh(),
+        onClear: () => this.appsConfig.clearFilters(),
+        cardAccentColor: stateColor,
+        viewMode: this.appsConfig.viewMode,
+        sort: this.appsConfig.sort,
+        bulkActions: this.buildBulkActions(),
+      };
+    };
+    // Set once synchronously so the config is available immediately (in
+    // the same tick as ngOnInit) rather than leaving listConfig undefined
+    // until the first effect flush.
+    this.listConfig.set(buildConfig());
+    // Rebuild when the stacks catalog flips visibility (it lands async
+    // after initializeForSpace()). effect() needs an injection context;
+    // ngOnInit isn't one, hence the explicit injector.
+    effect(() => { this.listConfig.set(buildConfig()); }, { injector: this.injector });
 
     // Default per-space tab presentation: card view at 6 per page. The
     // service's writable signals carry user toggles within a session; we
