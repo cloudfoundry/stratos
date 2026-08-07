@@ -175,6 +175,12 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
       render: (app: StApp) => app.stackName || '—',
       widthHint: '9rem',
     };
+    const lastRefreshedColumn: SignalListColumn<StApp> = {
+      header: 'Last Refreshed', key: 'lastRefreshedAt', sortField: 'lastRefreshedAt',
+      render: (app: StApp) => app.lastRefreshedAt
+        ? CloudFoundryApplicationsSignalComponent.formatDate(app.lastRefreshedAt) : '—',
+      widthHint: '12rem',
+    };
 
     const stateColor = (app: StApp): SignalListPillColor => {
       const s = (app.state ?? '').toUpperCase();
@@ -275,6 +281,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
             render: (app: StApp) => CloudFoundryApplicationsSignalComponent.formatDate(app.createdAt),
             widthHint: '12rem',
           },
+          lastRefreshedColumn,
           {
             header: '', key: 'favorite',
             kind: 'favorite',
@@ -305,7 +312,9 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
         // Filter-by-field parity with the wall: the text filter can target
         // Name, Status, or the Org/Space column; Stack joins the list
         // (as a checklist, not text) once its column is visible.
-        filterColumns: withStack ? ['name', 'state', 'orgSpace', 'stackName'] : ['name', 'state', 'orgSpace'],
+        filterColumns: withStack
+          ? ['name', 'state', 'orgSpace', 'stackName', 'lastRefreshedAt']
+          : ['name', 'state', 'orgSpace', 'lastRefreshedAt'],
         // Status has no visibility gate (always ≥2 possible states) so its
         // entry is unconditional; Stack's is only wired while its column
         // is actually in filterColumns — otherwise a filterField left
@@ -313,6 +322,11 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
         // service's filter state is a shared singleton) would pop the
         // checklist for a column not shown here.
         filterMultis: withStack ? [statusFilterMulti, stackFilterMulti] : [statusFilterMulti],
+        filterRanges: [{
+          field: 'lastRefreshedAt',
+          valueType: 'date' as const,
+          selected: this.appsConfig.lastRefreshedRange,
+        }],
         filterField: this.appsConfig.filterField,
         filterDropdowns: dropdowns,
         onRefresh: () => this.appsConfig.refresh(),

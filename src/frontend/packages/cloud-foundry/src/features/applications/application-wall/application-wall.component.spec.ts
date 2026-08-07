@@ -57,6 +57,7 @@ function makeStubSignalConfigService() {
     selectedSpace: signal<string | null>(null),
     selectedStacks: signal<string[] | null>(null),
     selectedStates: signal<string[] | null>(null),
+    lastRefreshedRange: signal<any>(null),
     nameFilter: signal(''),
     filterField: signal('name'),
     viewMode: signal<'table' | 'card'>('table'),
@@ -171,6 +172,36 @@ describe('ApplicationWallComponent', () => {
     expect(cfg!.filterDropdowns![0].selected).toBe(stubSignalConfig.selectedCnsi);
     expect(cfg!.filterDropdowns![1].selected).toBe(stubSignalConfig.selectedOrg);
     expect(cfg!.filterDropdowns![2].selected).toBe(stubSignalConfig.selectedSpace);
+  });
+
+  it('adds a Last Refreshed column directly after Created', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig();
+    expect(cfg).toBeDefined();
+    const headers = cfg!.columns.map(c => c.header);
+    const createdIdx = headers.indexOf('Created');
+    expect(createdIdx).toBeGreaterThanOrEqual(0);
+    expect(headers[createdIdx + 1]).toBe('Last Refreshed');
+
+    const lastRefreshedCol = cfg!.columns.find(c => c.header === 'Last Refreshed');
+    expect(lastRefreshedCol).toBeDefined();
+    expect(lastRefreshedCol!.key).toBe('lastRefreshedAt');
+    expect(lastRefreshedCol!.sortField).toBe('lastRefreshedAt');
+    expect(lastRefreshedCol!.render({ lastRefreshedAt: '2026-07-15T12:00:00Z' } as any))
+      .toBe(ApplicationWallComponent.formatDate('2026-07-15T12:00:00Z'));
+    expect(lastRefreshedCol!.render({} as any)).toBe('—');
+  });
+
+  it('includes lastRefreshedAt in filterColumns and wires filterRanges to appsConfig.lastRefreshedRange', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig();
+    expect(cfg).toBeDefined();
+    expect(cfg!.filterColumns).toContain('lastRefreshedAt');
+    expect(cfg!.filterRanges).toBeDefined();
+    const range = cfg!.filterRanges!.find(r => r.field === 'lastRefreshedAt');
+    expect(range).toBeDefined();
+    expect(range!.valueType).toBe('date');
+    expect(range!.selected).toBe(stubSignalConfig.lastRefreshedRange);
   });
 });
 
