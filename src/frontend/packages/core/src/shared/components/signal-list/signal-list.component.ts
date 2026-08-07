@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
+import { SignalListRangeValue, SignalListRangeValueType } from './range-filter';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -299,6 +300,25 @@ export interface SignalListMultiFilter {
   readonly selected: WritableSignal<string[] | null>;
 }
 
+// Binding for a filter field whose input is a range-comparison popup
+// (date or number bounds) instead of the free-text box or the checklist —
+// see SignalListMultiFilter above for the sibling mechanism this parallels.
+// `field` names the filterColumns entry this control activates for, same
+// contract as SignalListMultiFilter.field: the active entry is whichever
+// filterRanges element's `field` equals filterField(), so the two popup
+// kinds share the component's single `multiPopupOpen` state — filterField()
+// can only name one column at a time, so at most one of activeMulti() /
+// activeRange() is ever defined.
+// `selected === null` means "no constraint" — the range comparator in
+// range-filter.ts treats it the same way.
+export interface SignalListRangeFilter {
+  readonly field: string;
+  readonly valueType: SignalListRangeValueType;
+  readonly selected: WritableSignal<SignalListRangeValue | null>;
+  // Display suffix appended to numeric bounds in the summary/popup, e.g. 'MB'.
+  readonly unit?: string;
+}
+
 export type SignalListViewMode = 'table' | 'card';
 
 /**
@@ -460,6 +480,11 @@ export interface SignalListConfig<T> {
   // PR (not modeled by this array). Only the entry whose `field` matches
   // the current filterField() renders.
   readonly filterMultis?: readonly SignalListMultiFilter[];
+  // Filter fields whose input is a range-comparison popup (date or number
+  // bounds) rather than the plain text box or checklist — see
+  // SignalListRangeFilter. lastRefreshedAt is the first consumer. Only the
+  // entry whose `field` matches the current filterField() renders.
+  readonly filterRanges?: readonly SignalListRangeFilter[];
 }
 
 @Component({
@@ -1178,6 +1203,36 @@ export class SignalListComponent<T> implements AfterViewInit {
     return this.config.filterMultis?.find(m => m.field === field);
   }
 
+  // The filterRanges entry whose field matches the active filterField().
+  // Same single-active-field contract as activeMulti — the two popups
+  // can never be live simultaneously, so they share multiPopupOpen.
+  activeRange(): SignalListRangeFilter | undefined {
+    const field = this.config.filterField?.();
+    return this.config.filterRanges?.find(r => r.field === field);
+  }
+
+  rangeSummary(fr: SignalListRangeFilter): string {
+    const sel = fr.selected();
+    if (sel === null) return 'Any';
+    const unit = fr.unit ? ` ${fr.unit}` : '';
+    const sym: Record<string, string> = { lt: '<', lte: '≤', gt: '>', gte: '≥' };
+    if (sel.op === 'between') return `${sel.a || '…'}${unit} – ${sel.b || '…'}${unit}`;
+    return `${sym[sel.op]} ${sel.a || '…'}${unit}`;
+  }
+
+  // Merges a partial edit into the current range. An empty primary bound
+  // (and, for between, an empty upper bound too) collapses to null so
+  // `selected === null` stays the one canonical "no constraint" state —
+  // the same contract toggleMultiOption keeps for checklists — and a
+  // half-cleared input never leaves a phantom active filter behind.
+  updateRange(fr: SignalListRangeFilter, patch: Partial<SignalListRangeValue>): void {
+    const curr = fr.selected() ?? { op: 'gte' as const, a: '' };
+    const next: SignalListRangeValue = { ...curr, ...patch };
+    const empty = next.a === '' && (next.op !== 'between' || !next.b);
+    fr.selected.set(empty ? null : next);
+    this.config.pageIndex.set(0);
+  }
+
   // Button label for the checklist popup: "All (n)" when every option is
   // implicitly or explicitly selected, the bare value for a single pick,
   // "x of y selected" for a partial pick, and a "showing all" note when
@@ -1200,7 +1255,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   onDocumentClickForMultiPopup(event: Event): void {
     if (!this.multiPopupOpen()) return;
     const target = event.target as HTMLElement | null;
-    if (target && !target.closest('[data-test="multi-filter-wrap"]')) {
+    if (target && !target.closest('[data-test="multi-filter-wrap"], [data-test="range-filter-wrap"]')) {
       this.multiPopupOpen.set(false);
     }
   }
@@ -1305,6 +1360,9 @@ export class SignalListComponent<T> implements AfterViewInit {
     // null/[]/partial states individually.
     for (const fm of this.config.filterMultis ?? []) {
       if (fm.selected() != null) return true;
+    }
+    for (const fr of this.config.filterRanges ?? []) {
+      if (fr.selected() != null) return true;
     }
     if (this.config.nameFilter && this.config.nameFilter().length > 0) return true;
     return false;
