@@ -163,6 +163,11 @@ func TestGetNativeAppsSummary_ReturnsStratosPagedEnvelope(t *testing.T) {
 				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
 				"resources":  []map[string]interface{}{},
 			})
+		case "/v3/droplets":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -423,6 +428,11 @@ func TestGetNativeAppsSummary_PopulatesMemoryDiskInstancesFromProcesses(t *testi
 					},
 				},
 			})
+		case "/v3/droplets":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -657,6 +667,11 @@ func TestGetNativeAppsSummary_DerivedSortFetchesAllAndPaginatesInMemory(t *testi
 				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
 				"resources":  []map[string]interface{}{},
 			})
+		case "/v3/droplets":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -736,6 +751,12 @@ func TestGetNativeAppsSummary_SpacesFetchFailureSurfacesOrgGuidTristate(t *testi
 				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
 				"resources":  []map[string]interface{}{},
 			})
+		case "/v3/droplets":
+			// Droplets succeeds so the test isolates the spaces failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -807,6 +828,13 @@ func TestGetNativeAppsSummary_BothCompositionFetchesFailMultiError(t *testing.T)
 			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
 		case "/v3/routes":
 			http.Error(w, `{"errors":[{"title":"Unavailable"}]}`, http.StatusServiceUnavailable)
+		case "/v3/droplets":
+			// Droplets succeeds so the test isolates to exactly the three
+			// intentional failures (processes/spaces/routes).
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
 		default:
 			http.NotFound(w, r)
 		}
@@ -887,6 +915,12 @@ func TestGetNativeAppsSummary_ProcessesFetchFailureSurfacesTristate(t *testing.T
 			})
 		case "/v3/routes":
 			// Routes succeeds so the test isolates the processes failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/droplets":
+			// Droplets succeeds so the test isolates the processes failure
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
 				"resources":  []map[string]interface{}{},
@@ -1156,4 +1190,179 @@ func TestGetNativeApps_ReturnCountsHonorsSpaceGuidsFilter(t *testing.T) {
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
 	assert.Equal(t, 3, resp.TotalResults)
 	assert.Contains(t, capturedQuery, "space_guids=space-X")
+}
+
+// --- Task 1 (#5770 part 2): last-refreshed droplet enrichment ---
+
+func TestGetNativeAppsSummary_LastRefreshedFromNewestStagedDroplet(t *testing.T) {
+	var dropletQuery url.Values
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "app-1", "name": "App One", "state": "STARTED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+					{
+						"guid": "app-2", "name": "App Two", "state": "STOPPED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+						"created_at": "2024-01-03T00:00:00Z", "updated_at": "2024-01-04T00:00:00Z",
+					},
+				},
+			})
+		case "/v3/processes":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/spaces":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/routes":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/droplets":
+			dropletQuery = r.URL.Query()
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 2, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{"guid": "d-old", "state": "STAGED", "created_at": "2026-05-01T00:00:00Z",
+						"relationships": map[string]interface{}{"app": map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}}}},
+					{"guid": "d-new", "state": "STAGED", "created_at": "2026-07-15T12:00:00Z",
+						"relationships": map[string]interface{}{"app": map[string]interface{}{"data": map[string]interface{}{"guid": "app-1"}}}},
+				},
+			})
+			// app-2 gets NO droplet rows (never staged).
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 2)
+	assert.Equal(t, "2026-07-15T12:00:00Z", resp.Resources[0].LastRefreshedAt, "newest STAGED droplet wins")
+	assert.Equal(t, "", resp.Resources[1].LastRefreshedAt, "never-staged app has no value")
+	if resp.Resources[1].Meta != nil {
+		assert.NotContains(t, resp.Resources[1].Meta.Unavailable, "lastRefreshedAt",
+			"legit absence is not a fetch failure")
+	}
+	require.NotNil(t, dropletQuery)
+	assert.Equal(t, "STAGED", dropletQuery.Get("states"), "only successful stagings count")
+	assert.Contains(t, dropletQuery.Get("app_guids"), "app-1")
+	assert.Nil(t, resp.Meta, "no envelope error on clean fetch")
+}
+
+func TestGetNativeAppsSummary_DropletsFetchFailureSurfacesTristate(t *testing.T) {
+	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		switch r.URL.Path {
+		case "/v3":
+			w.Write([]byte(`{"links":{}}`))
+		case "/v3/apps":
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 1, "total_pages": 1},
+				"resources": []map[string]interface{}{
+					{
+						"guid": "app-1", "name": "App One", "state": "STARTED",
+						"relationships": map[string]interface{}{
+							"space": map[string]interface{}{"data": map[string]interface{}{"guid": "space-1"}},
+						},
+						"created_at": "2024-01-01T00:00:00Z", "updated_at": "2024-01-02T00:00:00Z",
+					},
+				},
+			})
+		case "/v3/processes":
+			// Processes succeeds so the test isolates the droplets failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/spaces":
+			// Spaces succeeds so the test isolates the droplets failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/routes":
+			// Routes succeeds so the test isolates the droplets failure
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"pagination": map[string]interface{}{"total_results": 0, "total_pages": 0},
+				"resources":  []map[string]interface{}{},
+			})
+		case "/v3/droplets":
+			w.WriteHeader(http.StatusBadGateway)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer ts.Close()
+
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?return=summary", nil)
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetParamNames("cnsiGuid")
+	ctx.SetParamValues("test-cnsi")
+
+	plugin := &CloudFoundrySpecification{
+		testProxy: &mockNativeCFProxy{
+			userID:      "user-1",
+			cnsiRecord:  api.CNSIRecord{GUID: "test-cnsi", APIEndpoint: mustParseURL(ts.URL)},
+			tokenRecord: api.TokenRecord{AuthToken: "test-token"},
+		},
+	}
+
+	require.NoError(t, plugin.getNativeApps(ctx))
+	// HTTP 200 — the payload is valid, it describes partial failure
+	assert.Equal(t, http.StatusOK, rec.Code)
+
+	var resp StratosPagedResponse[StApp]
+	require.NoError(t, json.NewDecoder(rec.Body).Decode(&resp))
+	require.Len(t, resp.Resources, 1)
+
+	require.NotNil(t, resp.Meta)
+	found := false
+	for _, e := range resp.Meta.Errors {
+		if e.Code == "DROPLETS_FETCH_FAILED" {
+			found = true
+		}
+	}
+	assert.True(t, found, "envelope carries the droplets error")
+	require.NotNil(t, resp.Resources[0].Meta)
+	assert.Contains(t, resp.Resources[0].Meta.Unavailable, "lastRefreshedAt")
 }

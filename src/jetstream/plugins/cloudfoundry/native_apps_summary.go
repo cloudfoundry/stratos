@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v4"
@@ -269,6 +270,56 @@ func fetchRoutesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []strin
 	return out, nil
 }
 
+var dropletDerivedFields = []string{"lastRefreshedAt"}
+
+// fetchDropletsForApps returns, per app guid, the created_at of that app's
+// newest STAGED droplet, RFC3339-formatted. Newest-by-created_at rather
+// than "current droplet": rollbacks and droplet copies can repoint the
+// current droplet at an old row, but can't change which row is newest.
+// Apps that never staged have no entry — legit absence, not a failure.
+func fetchDropletsForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []string) (map[string]string, error) {
+	if len(appGUIDs) == 0 {
+		return map[string]string{}, nil
+	}
+	newest := make(map[string]time.Time, len(appGUIDs))
+	// Chunked — see native_guid_chunks.go / #5579.
+	cerr := forEachGuidChunk("app_guids", appGUIDs, func(chunk []string) error {
+		for page := 1; ; page++ {
+			params := capi.NewQueryParams().WithPerPage(fullPagePerRequest)
+			params.Page = page
+			params.Filters["app_guids"] = chunk
+			params.Filters["states"] = []string{"STAGED"}
+			raw, err := cfClient.Droplets().List(ctx.Request().Context(), params)
+			if err != nil {
+				return err
+			}
+			for _, d := range raw.Resources {
+				if d.Relationships == nil || d.Relationships.App == nil {
+					continue
+				}
+				appGUID := relationshipGUID(*d.Relationships.App)
+				if appGUID == "" {
+					continue
+				}
+				if cur, ok := newest[appGUID]; !ok || d.CreatedAt.After(cur) {
+					newest[appGUID] = d.CreatedAt
+				}
+			}
+			if raw.Pagination.Next == nil || page >= raw.Pagination.TotalPages {
+				return nil
+			}
+		}
+	})
+	if cerr != nil {
+		return nil, cerr
+	}
+	out := make(map[string]string, len(newest))
+	for g, ts := range newest {
+		out[g] = ts.Format(time.RFC3339)
+	}
+	return out, nil
+}
+
 // composeStAppSummary builds a summary-tier StApp from its source app, its
 // web Process (may be nil), its Space (may be nil for unresolved), and its
 // route bucket (nil signals routes-fetch failure; an empty slice signals a
@@ -279,7 +330,11 @@ func fetchRoutesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []strin
 // the orgs-by-guid fetch failed or the org wasn't returned. Stitched at
 // the caller from a batched fetchOrgsByGUIDs so the per-app composition
 // remains pure (no per-row CAPI fanout).
-func composeStAppSummary(app capi.App, cnsiGUID string, process *capi.Process, space *capi.Space, orgName string, routes []StAppRoute) StApp {
+// droplets maps app guid → newest-STAGED-droplet created_at (RFC3339); nil
+// signals the droplets fetch failed (surfaces "lastRefreshedAt" in
+// _meta.unavailable), a non-nil map with a missing key means the app
+// simply never staged (field stays absent, not a failure).
+func composeStAppSummary(app capi.App, cnsiGUID string, process *capi.Process, space *capi.Space, orgName string, routes []StAppRoute, droplets map[string]string) StApp {
 	s := toStApp(app, cnsiGUID)
 
 	var unavailable []string
@@ -321,6 +376,15 @@ func composeStAppSummary(app capi.App, cnsiGUID string, process *capi.Process, s
 		unavailable = append(unavailable, routesDerivedFields...)
 	}
 
+	if droplets != nil {
+		if ts, ok := droplets[app.GUID]; ok {
+			s.LastRefreshedAt = ts
+		}
+		// missing key = never staged: field stays absent, NOT unavailable.
+	} else {
+		unavailable = append(unavailable, dropletDerivedFields...)
+	}
+
 	if len(unavailable) > 0 {
 		s.Meta = &StratosMeta{Unavailable: unavailable}
 	}
@@ -332,7 +396,7 @@ func composeStAppSummary(app capi.App, cnsiGUID string, process *capi.Process, s
 // envelope's _meta stays absent) when no errors occurred. Supports
 // additively stacking errors — each failed sub-fetch gets its own envelope
 // error with its own Affected + AffectedGuids lists.
-func envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr error, affectedGUIDs []string) *StratosMeta {
+func envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, dropletsErr error, affectedGUIDs []string) *StratosMeta {
 	var errors []StratosError
 	if procErr != nil {
 		errors = append(errors, StratosError{
@@ -361,6 +425,16 @@ func envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr error, affect
 			Title:         "Routes fetch failed",
 			Detail:        routesErr.Error(),
 			Affected:      append([]string(nil), routesDerivedFields...),
+			AffectedGuids: append([]string(nil), affectedGUIDs...),
+		})
+	}
+	if dropletsErr != nil {
+		errors = append(errors, StratosError{
+			Scope:         "envelope",
+			Code:          "DROPLETS_FETCH_FAILED",
+			Title:         "Droplets fetch failed",
+			Detail:        dropletsErr.Error(),
+			Affected:      append([]string(nil), dropletDerivedFields...),
 			AffectedGuids: append([]string(nil), affectedGUIDs...),
 		})
 	}
@@ -410,6 +484,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 	processes, procErr := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
 	spaces, spaceErr := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
 	routesByApp, routesErr := fetchRoutesForApps(ctx, cfClient, appGUIDs)
+	dropletsByApp, dropletsErr := fetchDropletsForApps(ctx, cfClient, appGUIDs)
 
 	// Orgs-by-guid for the OrgName stitch. Derive the unique org guids
 	// from the spaces we just fetched — every app's org is reachable
@@ -461,13 +536,17 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 				rts = []StAppRoute{}
 			}
 		}
-		resources = append(resources, composeStAppSummary(r, cnsiGUID, p, s, orgName, rts))
+		var drops map[string]string
+		if dropletsErr == nil {
+			drops = dropletsByApp
+		}
+		resources = append(resources, composeStAppSummary(r, cnsiGUID, p, s, orgName, rts, drops))
 	}
 
 	response := StratosPagedResponse[StApp]{
 		Resources:  resources,
 		Pagination: BuildPaginationMeta(ctx, page, perPage, raw.Pagination.TotalResults),
-		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, appGUIDs),
+		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, dropletsErr, appGUIDs),
 	}
 
 	return ctx.JSON(http.StatusOK, response)
@@ -513,6 +592,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 	processes, procErr := fetchWebProcessesForApps(ctx, cfClient, appGUIDs)
 	spaces, spaceErr := fetchSpacesByGUIDs(ctx, cfClient, spaceGUIDs)
 	routesByApp, routesErr := fetchRoutesForApps(ctx, cfClient, appGUIDs)
+	dropletsByApp, dropletsErr := fetchDropletsForApps(ctx, cfClient, appGUIDs)
 
 	// Orgs-by-guid stitch (mirrors getNativeAppsSummary above).
 	orgs := map[string]capi.Organization{}
@@ -558,7 +638,11 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 				rts = []StAppRoute{}
 			}
 		}
-		composed = append(composed, composeStAppSummary(r, cnsiGUID, p, s, orgName, rts))
+		var drops map[string]string
+		if dropletsErr == nil {
+			drops = dropletsByApp
+		}
+		composed = append(composed, composeStAppSummary(r, cnsiGUID, p, s, orgName, rts, drops))
 	}
 
 	sortStAppsByDerivedField(composed, sortField, desc)
@@ -577,7 +661,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
 	response := StratosPagedResponse[StApp]{
 		Resources:  pageSlice,
 		Pagination: BuildPaginationMeta(ctx, requestedPage, requestedPerPage, totalResults),
-		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, appGUIDs),
+		Meta:       envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, dropletsErr, appGUIDs),
 	}
 
 	return ctx.JSON(http.StatusOK, response)

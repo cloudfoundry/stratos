@@ -71,7 +71,12 @@ type StApp struct {
 	Routes    []StAppRoute `json:"routes"`
 	CreatedAt string       `json:"createdAt"`
 	UpdatedAt string       `json:"updatedAt"`
-	Meta      *StratosMeta `json:"_meta,omitempty"`
+	// Newest STAGED droplet's created_at (RFC3339) — the app's "last
+	// refreshed" instant (#5770): a droplet row is only born when staging
+	// completes, so this covers push and restage, counts only successes,
+	// and works for docker apps. Absent when the app never staged.
+	LastRefreshedAt string       `json:"lastRefreshedAt,omitempty"`
+	Meta            *StratosMeta `json:"_meta,omitempty"`
 }
 
 // StAppRoute is the inline-collection shape carried on StApp.Routes.
