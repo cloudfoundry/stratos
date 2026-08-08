@@ -139,11 +139,15 @@
                 </label>
               }
               @if (fr.selected()?.mode === 'businessDays') {
-                <div class="flex gap-1.5 px-1" data-test="working-days">
+                <!-- Weekend framing: checked = weekend (the smaller, more
+                     natural set); the model still stores the complement as
+                     workingDays, so the walk and specs are untouched. -->
+                <div class="px-1 text-xs text-content-muted">Weekend days</div>
+                <div class="flex gap-1.5 px-1" data-test="weekend-days">
                   @for (wd of weekdayToggles; track wd.value) {
                     <label class="flex flex-col items-center text-[10px] text-content-text cursor-pointer">
                       <input type="checkbox" [attr.data-test]="'wd-' + wd.value"
-                        [checked]="fr.selected()?.workingDays?.includes(wd.value)"
+                        [checked]="!fr.selected()?.workingDays?.includes(wd.value)"
                         (change)="toggleWorkingDay(fr, wd.value)" />
                       {{ wd.label }}
                     </label>
@@ -151,10 +155,10 @@
                 </div>
                 <label class="flex items-center gap-2 px-1 text-xs text-content-text">
                   + weekday holidays
-                  <input type="number" min="0" data-test="range-holidays"
+                  <input type="number" min="0" step="1" data-test="range-holidays"
                     class="w-14 text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
                     [value]="fr.selected()?.holidayCount ?? 0"
-                    (change)="updateRange(fr, { holidayCount: +$any($event.target).value || 0 })" />
+                    (change)="updateRange(fr, { holidayCount: +$any($event.target).value })" />
                 </label>
               }
               @if (isRelativeRange(fr)) {
@@ -165,8 +169,8 @@
                 }
                 @if (fr.selected()?.mode === 'businessDays') {
                   <div data-test="range-holiday-warning" class="px-1 text-xs text-content-muted">
-                    Holidays are not counted — if the resolved date is a
-                    holiday, increase the holiday count by 1 and check again.
+                    If the resolved date is a holiday, increase the holiday
+                    count by 1 and check again.
                   </div>
                 }
               }
