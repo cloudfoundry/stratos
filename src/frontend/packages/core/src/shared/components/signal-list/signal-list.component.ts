@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
-import { rangeIsComplete, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
+import { rangeIsComplete, resolveRelativeDay, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -1214,10 +1214,63 @@ export class SignalListComponent<T> implements AfterViewInit {
   rangeSummary(fr: SignalListRangeFilter): string {
     const sel = fr.selected();
     if (sel === null) return 'Any';
+    const mode = fr.valueType === 'date' ? (sel.mode ?? 'date') : 'date';
+    if (mode !== 'date') {
+      const relUnit = mode === 'businessDays' ? 'business days' : 'days';
+      const n = sel.a || '…';
+      switch (sel.op) {
+        case 'lt': return `older than ${n} ${relUnit}`;
+        case 'lte': return `at least ${n} ${relUnit} old`;
+        case 'gt': return `newer than ${n} ${relUnit}`;
+        case 'gte': return `within ${n} ${relUnit}`;
+        case 'between': return `${n} – ${sel.b || '…'} ${relUnit} ago`;
+      }
+    }
     const unit = fr.unit ? ` ${fr.unit}` : '';
     const sym: Record<string, string> = { lt: '<', lte: '≤', gt: '>', gte: '≥' };
     if (sel.op === 'between') return `${sel.a || '…'}${unit} – ${sel.b || '…'}${unit}`;
     return `${sym[sel.op]} ${sel.a || '…'}${unit}`;
+  }
+
+  // Op wording tracks the bound mode: absolute dates read as positions on a
+  // calendar ("before"), relative counts read as ages ("older than").
+  opLabel(fr: SignalListRangeFilter, op: SignalListRangeValue['op']): string {
+    const relative = fr.valueType === 'date' && (fr.selected()?.mode ?? 'date') !== 'date';
+    const labels: Record<SignalListRangeValue['op'], string> = relative
+      ? { lt: 'older than', lte: 'at least', gt: 'newer than', gte: 'within', between: 'between' }
+      : { lt: 'before', lte: 'on or before', gt: 'after', gte: 'on or after', between: 'between' };
+    return labels[op];
+  }
+
+  // The calendar day a relative bound currently resolves to, formatted for
+  // the popup ("Fri, Aug 7, 2026"), or null when the bound is absolute or
+  // not yet parsable. Shown next to the holiday warning so the user can
+  // verify the date and bump the holiday count if it lands on one.
+  resolvedDayLabel(fr: SignalListRangeFilter, bound: 'a' | 'b'): string | null {
+    const sel = fr.selected();
+    if (sel === null || fr.valueType !== 'date') return null;
+    const day = resolveRelativeDay(sel, bound);
+    if (day === null) return null;
+    return day.toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  isRelativeRange(fr: SignalListRangeFilter): boolean {
+    return fr.valueType === 'date' && (fr.selected()?.mode ?? 'date') !== 'date';
+  }
+
+  // Sun-first so toggle order matches the getDay() numbering the model uses.
+  readonly weekdayToggles = [
+    { value: 0, label: 'Su' }, { value: 1, label: 'Mo' }, { value: 2, label: 'Tu' },
+    { value: 3, label: 'We' }, { value: 4, label: 'Th' }, { value: 5, label: 'Fr' },
+    { value: 6, label: 'Sa' },
+  ];
+
+  // Flips one weekday in the business-day working week. Routed through
+  // updateRange so paging reset and storage rules stay in one place.
+  toggleWorkingDay(fr: SignalListRangeFilter, day: number): void {
+    const curr = fr.selected()?.workingDays ?? [];
+    const workingDays = curr.includes(day) ? curr.filter(d => d !== day) : [...curr, day];
+    this.updateRange(fr, { workingDays });
   }
 
   // Merges a partial edit into the current range. Only collapses to null
@@ -1232,7 +1285,17 @@ export class SignalListComponent<T> implements AfterViewInit {
   // button under the user's cursor mid-edit.
   updateRange(fr: SignalListRangeFilter, patch: Partial<SignalListRangeValue>): void {
     const curr = fr.selected() ?? { op: 'gte' as const, a: '' };
-    const next: SignalListRangeValue = { ...curr, ...patch };
+    let next: SignalListRangeValue = { ...curr, ...patch };
+    // A mode switch clears the bounds — `a`/`b` change meaning between a
+    // date string and a day count, so carrying one across modes would store
+    // garbage. The op and any chosen working week survive; businessDays
+    // seeds Mon–Fri on first entry so the toggles have a sane start.
+    if (patch.mode !== undefined && patch.mode !== (curr.mode ?? 'date')) {
+      next = { ...next, a: '', b: undefined };
+      if (patch.mode === 'businessDays' && next.workingDays === undefined) {
+        next = { ...next, workingDays: [1, 2, 3, 4, 5] };
+      }
+    }
     const touchedBound = 'a' in patch || 'b' in patch;
     const allBoundsEmpty = next.a === '' && !next.b;
     fr.selected.set(touchedBound && allBoundsEmpty ? null : next);
