@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
-import { rangeIsComplete, resolveRelativeDay, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
+import { rangeIsComplete, resolveRelativeDay, SignalListRangeBoundMode, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
 
 export type SignalListPillColor = 'success' | 'warning' | 'danger' | 'neutral';
 
@@ -1211,10 +1211,18 @@ export class SignalListComponent<T> implements AfterViewInit {
     return this.config.filterRanges?.find(r => r.field === field);
   }
 
+  // Single source of truth for a range filter's bound mode: number-domain
+  // filters are always absolute, date-domain ones follow the stored mode.
+  // Every relative-vs-absolute decision (labels, summary, input types)
+  // routes through here.
+  private rangeMode(fr: SignalListRangeFilter): SignalListRangeBoundMode {
+    return fr.valueType === 'date' ? (fr.selected()?.mode ?? 'date') : 'date';
+  }
+
   rangeSummary(fr: SignalListRangeFilter): string {
     const sel = fr.selected();
     if (sel === null) return 'Any';
-    const mode = fr.valueType === 'date' ? (sel.mode ?? 'date') : 'date';
+    const mode = this.rangeMode(fr);
     if (mode !== 'date') {
       const relUnit = mode === 'businessDays' ? 'business days' : 'days';
       const n = sel.a || '…';
@@ -1235,8 +1243,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Op wording tracks the bound mode: absolute dates read as positions on a
   // calendar ("before"), relative counts read as ages ("older than").
   opLabel(fr: SignalListRangeFilter, op: SignalListRangeValue['op']): string {
-    const relative = fr.valueType === 'date' && (fr.selected()?.mode ?? 'date') !== 'date';
-    const labels: Record<SignalListRangeValue['op'], string> = relative
+    const labels: Record<SignalListRangeValue['op'], string> = this.isRelativeRange(fr)
       ? { lt: 'older than', lte: 'at least', gt: 'newer than', gte: 'within', between: 'between' }
       : { lt: 'before', lte: 'on or before', gt: 'after', gte: 'on or after', between: 'between' };
     return labels[op];
@@ -1255,7 +1262,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   isRelativeRange(fr: SignalListRangeFilter): boolean {
-    return fr.valueType === 'date' && (fr.selected()?.mode ?? 'date') !== 'date';
+    return this.rangeMode(fr) !== 'date';
   }
 
   // Sun-first so toggle order matches the getDay() numbering the model uses.
@@ -1267,8 +1274,11 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   // Flips one weekday in the business-day working week. Routed through
   // updateRange so paging reset and storage rules stay in one place.
+  // Removing the last working day is refused — a 7-day weekend would make
+  // the walk unresolvable while the summary still reads as a constraint.
   toggleWorkingDay(fr: SignalListRangeFilter, day: number): void {
     const curr = fr.selected()?.workingDays ?? [];
+    if (curr.includes(day) && curr.length === 1) return;
     const workingDays = curr.includes(day) ? curr.filter(d => d !== day) : [...curr, day];
     this.updateRange(fr, { workingDays });
   }
@@ -1296,9 +1306,18 @@ export class SignalListComponent<T> implements AfterViewInit {
         next = { ...next, workingDays: [1, 2, 3, 4, 5] };
       }
     }
+    if (patch.holidayCount !== undefined) {
+      const n = Math.floor(Number(patch.holidayCount));
+      next = { ...next, holidayCount: Number.isFinite(n) && n > 0 ? n : 0 };
+    }
     const touchedBound = 'a' in patch || 'b' in patch;
     const allBoundsEmpty = next.a === '' && !next.b;
-    fr.selected.set(touchedBound && allBoundsEmpty ? null : next);
+    // Collapse-to-null is a date-mode rule only: a relative range carries
+    // configuration beyond its bounds (mode, working week, holiday count)
+    // that emptying a count input to retype it must not destroy. An empty
+    // relative range is simply inert; Clear remains the real reset.
+    const collapse = touchedBound && allBoundsEmpty && (next.mode ?? 'date') === 'date';
+    fr.selected.set(collapse ? null : next);
     this.config.pageIndex.set(0);
   }
 

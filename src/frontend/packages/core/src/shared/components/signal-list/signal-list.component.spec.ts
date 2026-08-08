@@ -1873,16 +1873,48 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(component.hasActiveFilter()).toBe(true);
     });
 
-    it('toggling every working day off leaves the filter inert, not active', () => {
+    it('the last working day cannot be toggled off — a 7-day weekend is refused', () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
       fixture.detectChanges();
       const component = componentWith(fixture);
       const fr = component.activeRange()!;
       component.updateRange(fr, { mode: 'businessDays' });
       component.updateRange(fr, { a: '30' });
-      for (const day of [1, 2, 3, 4, 5]) component.toggleWorkingDay(fr, day);
-      expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([]);
-      expect(component.hasActiveFilter()).toBe(false);
+      for (const day of [1, 2, 3, 4]) component.toggleWorkingDay(fr, day);
+      expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([5]);
+      component.toggleWorkingDay(fr, 5); // refused: would empty the working week
+      expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([5]);
+      expect(component.hasActiveFilter()).toBe(true);
+    });
+
+    it('clearing the count in a relative range keeps mode, week, and holidays', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { mode: 'businessDays' });
+      component.updateRange(fr, { a: '30' });
+      component.toggleWorkingDay(fr, 5);
+      component.updateRange(fr, { holidayCount: 2 });
+      component.updateRange(fr, { a: '' }); // clear to retype
+      expect(fixture.componentInstance.selectedRange()).toEqual({
+        op: 'gte', a: '', mode: 'businessDays', workingDays: [1, 2, 3, 4], holidayCount: 2,
+      });
+      expect(component.hasActiveFilter()).toBe(false); // inert, but config survives
+    });
+
+    it('holidayCount patches are floored to non-negative integers', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { mode: 'businessDays' });
+      component.updateRange(fr, { holidayCount: 1.5 });
+      expect(fixture.componentInstance.selectedRange()?.holidayCount).toBe(1);
+      component.updateRange(fr, { holidayCount: -2 });
+      expect(fixture.componentInstance.selectedRange()?.holidayCount).toBe(0);
+      component.updateRange(fr, { holidayCount: Number.NaN });
+      expect(fixture.componentInstance.selectedRange()?.holidayCount).toBe(0);
     });
 
     it('rangeSummary renders relative forms', () => {
@@ -1905,22 +1937,29 @@ describe('SignalListComponent range filter (filterRanges)', () => {
     });
 
     it('resolvedDayLabel names the resolved day for a complete relative bound, null otherwise', () => {
-      const fixture = TestBed.createComponent(RangeFilterHost);
-      fixture.detectChanges();
-      const component = componentWith(fixture);
-      const fr = component.activeRange()!;
+      // Frozen clock: the component and the expectation must see the same
+      // "today", or a run straddling local midnight flakes.
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date(2026, 7, 10, 12, 0)); // Mon 2026-08-10
+      try {
+        const fixture = TestBed.createComponent(RangeFilterHost);
+        fixture.detectChanges();
+        const component = componentWith(fixture);
+        const fr = component.activeRange()!;
 
-      fixture.componentInstance.selectedRange.set({ op: 'lt', a: '2026-05-01' });
-      expect(component.resolvedDayLabel(fr, 'a')).toBeNull();
+        fixture.componentInstance.selectedRange.set({ op: 'lt', a: '2026-05-01' });
+        expect(component.resolvedDayLabel(fr, 'a')).toBeNull();
 
-      fixture.componentInstance.selectedRange.set({ op: 'lt', a: '1', mode: 'days' });
-      const today = new Date();
-      const expected = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
-        .toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
-      expect(component.resolvedDayLabel(fr, 'a')).toBe(expected);
+        fixture.componentInstance.selectedRange.set({ op: 'lt', a: '1', mode: 'days' });
+        const expected = new Date(2026, 7, 9)
+          .toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+        expect(component.resolvedDayLabel(fr, 'a')).toBe(expected);
 
-      fixture.componentInstance.selectedRange.set({ op: 'lt', a: '', mode: 'days' });
-      expect(component.resolvedDayLabel(fr, 'a')).toBeNull();
+        fixture.componentInstance.selectedRange.set({ op: 'lt', a: '', mode: 'days' });
+        expect(component.resolvedDayLabel(fr, 'a')).toBeNull();
+      } finally {
+        vi.useRealTimers();
+      }
     });
 
     it('opLabel wording follows the mode', () => {
