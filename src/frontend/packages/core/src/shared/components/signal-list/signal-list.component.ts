@@ -1265,11 +1265,15 @@ export class SignalListComponent<T> implements AfterViewInit {
     return this.rangeMode(fr) !== 'date';
   }
 
-  // Sun-first so toggle order matches the getDay() numbering the model uses.
+  // Thursday-first so every real-world weekend reads as a consecutive run:
+  // Thu–Fri (Iran, Afghanistan), Fri–Sat (much of MENA), Sat–Sun (most of
+  // the world), and the single-day conventions all sit in the head of the
+  // row with nothing wrapping (Sun-first split the default Sat+Sun weekend
+  // across the row's two far ends). Values stay getDay() numbers.
   readonly weekdayToggles = [
+    { value: 4, label: 'Th' }, { value: 5, label: 'Fr' }, { value: 6, label: 'Sa' },
     { value: 0, label: 'Su' }, { value: 1, label: 'Mo' }, { value: 2, label: 'Tu' },
-    { value: 3, label: 'We' }, { value: 4, label: 'Th' }, { value: 5, label: 'Fr' },
-    { value: 6, label: 'Sa' },
+    { value: 3, label: 'We' },
   ];
 
   // Flips one weekday in the business-day working week. Routed through
