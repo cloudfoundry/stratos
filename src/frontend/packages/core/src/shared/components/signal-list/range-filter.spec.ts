@@ -183,6 +183,51 @@ describe('rangeMatches — relative "business days ago" bounds', () => {
   });
 });
 
+describe('between normalization — typing order never matters', () => {
+  const nowMon = new Date(2026, 7, 10, 12, 0);
+  const may15noon = '2026-05-15T12:00:00Z';
+
+  it('relative between accepts smaller-first entry (30 then 90)', () => {
+    const r = rel('between', '30', 'days', { b: '90' });
+    expect(rangeMatches(at(2026, 6, 15), r, 'date', nowMon)).toBe(true);
+    expect(rangeMatches(at(2026, 5, 11), r, 'date', nowMon)).toBe(false);
+    expect(rangeMatches(at(2026, 7, 12), r, 'date', nowMon)).toBe(false);
+  });
+
+  it('date between accepts later-date-first entry', () => {
+    expect(rangeMatches(may15noon, d('between', '2026-06-01', '2026-05-01'), 'date')).toBe(true);
+    expect(rangeMatches('2026-04-30T12:00:00Z', d('between', '2026-06-01', '2026-05-01'), 'date')).toBe(false);
+  });
+
+  it('inclusive flags travel with their bound values when flipped', () => {
+    // a = Jun 1 is the UPPER bound after the flip; exclusiveA still excludes Jun 1.
+    const v = new Date(2026, 5, 1, 12).toISOString();
+    expect(rangeMatches(v, d('between', '2026-06-01', '2026-05-01', false, true), 'date')).toBe(false);
+    expect(rangeMatches(v, d('between', '2026-06-01', '2026-05-01', true, true), 'date')).toBe(true);
+  });
+
+  it('number domain between also normalizes', () => {
+    expect(rangeMatches(256, d('between', '512', '128'), 'number')).toBe(true);
+    expect(rangeMatches(64, d('between', '512', '128'), 'number')).toBe(false);
+  });
+});
+
+describe('workingDays sanitation', () => {
+  const nowMon = new Date(2026, 7, 10, 12, 0);
+
+  it('a set of only out-of-range weekday values is inert, not an endless walk', () => {
+    const r = rel('lt', '5', 'businessDays', { workingDays: [7, 13] });
+    expect(rangeMatches(at(2026, 5, 11), r, 'date', nowMon)).toBe(true);
+    expect(rangeIsComplete(r, 'date')).toBe(false);
+    expect(resolveRelativeDay(r, 'a', nowMon)).toBeNull();
+  });
+
+  it('mixed valid and invalid values keep the valid ones', () => {
+    const r = rel('lt', '1', 'businessDays', { workingDays: [1, 2, 3, 4, 5, 9] });
+    expect(resolveRelativeDay(r, 'a', nowMon)).toEqual(new Date(2026, 7, 7)); // Fri
+  });
+});
+
 describe('resolveRelativeDay', () => {
   const nowMon = new Date(2026, 7, 10, 12, 0); // Mon 2026-08-10
 

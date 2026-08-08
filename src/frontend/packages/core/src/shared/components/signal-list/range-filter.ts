@@ -56,6 +56,19 @@ function parseCount(bound: string): number | null {
   return n > 0 && n <= 3650 ? n : null;
 }
 
+// The model is public (@stratosui/core), so weekday values are sanitized at
+// use: anything outside getDay()'s 0–6 can never match a real day, and an
+// unsanitized set like ISO-numbered [6, 7] would spin the walk forever.
+function validWorkingDays(days: readonly number[] | undefined): number[] {
+  return (days ?? []).filter(d => Number.isInteger(d) && d >= 0 && d <= 6);
+}
+
+// Resolved-day memo: the range value is immutable (every edit stores a new
+// object) so object identity + bound + calendar day fully key a walk result.
+// Kept because resolution runs per row in list predicates and inside
+// change-detection-hot template bindings.
+const relativeDayCache = new WeakMap<SignalListRangeValue, Map<string, Date | null>>();
+
 // Resolves a relative bound to the local-midnight Date it names, or null
 // when the range is not relative or the bound doesn't parse. Exported so
 // the popup can display the resolved date next to the holiday warning.
@@ -68,12 +81,28 @@ export function resolveRelativeDay(
 ): Date | null {
   const mode = range.mode ?? 'date';
   if (mode === 'date') return null;
+  const key = `${bound}|${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`;
+  const hit = relativeDayCache.get(range);
+  if (hit?.has(key)) return hit.get(key)!;
+  const day = resolveRelativeDayUncached(range, bound, mode, now);
+  const entry = hit ?? new Map<string, Date | null>();
+  if (!hit) relativeDayCache.set(range, entry);
+  entry.set(key, day);
+  return day;
+}
+
+function resolveRelativeDayUncached(
+  range: SignalListRangeValue,
+  bound: 'a' | 'b',
+  mode: SignalListRangeBoundMode,
+  now: Date,
+): Date | null {
   const count = parseCount(bound === 'a' ? range.a : range.b ?? '');
   if (count === null) return null;
   if (mode === 'days') {
     return new Date(now.getFullYear(), now.getMonth(), now.getDate() - count);
   }
-  const working = new Set(range.workingDays ?? []);
+  const working = new Set(validWorkingDays(range.workingDays));
   if (working.size === 0) return null;
   const h = range.holidayCount;
   const holidays = Number.isInteger(h) && (h as number) > 0 ? (h as number) : 0;
@@ -108,6 +137,13 @@ export function rangeIsComplete(
   valueType: SignalListRangeValueType,
 ): boolean {
   if (range === null) return false;
+  // Relative modes: completeness is answerable from the raw fields — don't
+  // run the business-day walk from change-detection-hot callers.
+  if (valueType === 'date' && (range.mode ?? 'date') !== 'date') {
+    if (parseCount(range.a) === null) return false;
+    if (range.op === 'between' && parseCount(range.b ?? '') === null) return false;
+    return range.mode !== 'businessDays' || validWorkingDays(range.workingDays).length > 0;
+  }
   const window = (bound: 'a' | 'b') => boundWindow(range, bound, valueType);
   if (window('a') === null) return false;
   if (range.op === 'between' && window('b') === null) return false;
@@ -160,8 +196,17 @@ export function rangeMatches(
     case 'gt': return v > wa[1];
     case 'gte': return v >= wa[0];
     case 'between': {
-      const loOk = (range.inclusiveA ?? true) ? v >= wa[0] : v > wa[1];
-      const hiOk = (range.inclusiveB ?? true) ? v <= wb![1] : v < wb![0];
+      // Typing order never matters: bounds entered upper-first (natural for
+      // "between 30 and 90 days ago") are flipped here, each inclusive flag
+      // traveling with its bound's value.
+      let [lo, hi] = [wa, wb!];
+      let [incLo, incHi] = [range.inclusiveA ?? true, range.inclusiveB ?? true];
+      if (lo[0] > hi[0]) {
+        [lo, hi] = [hi, lo];
+        [incLo, incHi] = [incHi, incLo];
+      }
+      const loOk = incLo ? v >= lo[0] : v > lo[1];
+      const hiOk = incHi ? v <= hi[1] : v < hi[0];
       return loOk && hiOk;
     }
   }
