@@ -1962,6 +1962,26 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       }
     });
 
+    it('holiday warning is singular for one bound, plural with per-bound remedies for between', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      (fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
+      fixture.detectChanges();
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { mode: 'businessDays' });
+      fixture.detectChanges();
+      const warnText = () =>
+        (fixture.nativeElement.querySelector('[data-test="range-holiday-warning"]') as HTMLElement).textContent!.replace(/\s+/g, ' ').trim();
+      expect(warnText()).toContain('the resolved date');
+      expect(warnText()).not.toContain('either');
+
+      component.updateRange(fr, { op: 'between' });
+      fixture.detectChanges();
+      expect(warnText()).toContain('either resolved date');
+      expect(warnText()).toContain('holiday count shifts both dates');
+    });
+
     it('opLabel wording follows the mode', () => {
       const fixture = TestBed.createComponent(RangeFilterHost);
       fixture.detectChanges();

@@ -169,8 +169,18 @@
                 }
                 @if (fr.selected()?.mode === 'businessDays') {
                   <div data-test="range-holiday-warning" class="px-1 text-xs text-content-muted">
-                    If the resolved date is a holiday, increase the holiday
-                    count by 1 and check again.
+                    <!-- Between: the holiday count is part of BOTH bounds'
+                         walks, so bumping it moves both dates — the
+                         per-bound remedies are that bound's own count or
+                         its include checkbox. -->
+                    @if ((fr.selected()?.op ?? 'gte') === 'between') {
+                      If either resolved date is a holiday, adjust that
+                      bound's day count or its include checkbox — the
+                      holiday count shifts both dates.
+                    } @else {
+                      If the resolved date is a holiday, increase the holiday
+                      count by 1 and check again.
+                    }
                   </div>
                 }
               }
