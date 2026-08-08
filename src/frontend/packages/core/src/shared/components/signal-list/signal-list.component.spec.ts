@@ -1809,4 +1809,129 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       expect(fixture.componentInstance.selectedRange()).toBe(null);
     });
   });
+
+  // Relative bound modes ("older than N days / business days"): the mode
+  // select, count input, working-day toggles, and holiday count each fire
+  // their own change event — same separate-events discipline as the
+  // between sequence above.
+  describe('relative bound modes', () => {
+    it('a mode-only patch stores the mode without collapsing to null', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.updateRange(component.activeRange()!, { mode: 'days' });
+      expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'gte', a: '', mode: 'days' });
+      expect(component.hasActiveFilter()).toBe(false);
+    });
+
+    it('switching mode clears the bounds but keeps the op — a date is not a count', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { op: 'lt' });
+      component.updateRange(fr, { a: '2026-05-01' });
+      component.updateRange(fr, { mode: 'days' });
+      expect(fixture.componentInstance.selectedRange()).toEqual({ op: 'lt', a: '', mode: 'days' });
+    });
+
+    it('switching to businessDays seeds a Mon–Fri working week', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      component.updateRange(component.activeRange()!, { mode: 'businessDays' });
+      expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([1, 2, 3, 4, 5]);
+    });
+
+    it('toggleWorkingDay flips membership in both directions', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { mode: 'businessDays' });
+      component.toggleWorkingDay(fr, 5); // Friday off
+      expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([1, 2, 3, 4]);
+      component.toggleWorkingDay(fr, 0); // Sunday on
+      expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([1, 2, 3, 4, 0]);
+    });
+
+    it('full event sequence: mode, then count, then toggles, then holidays', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { op: 'lt' });
+      component.updateRange(fr, { mode: 'businessDays' });
+      expect(component.hasActiveFilter()).toBe(false); // no count yet
+      component.updateRange(fr, { a: '30' });
+      expect(component.hasActiveFilter()).toBe(true);
+      component.toggleWorkingDay(fr, 5);
+      component.updateRange(fr, { holidayCount: 2 });
+      expect(fixture.componentInstance.selectedRange()).toEqual({
+        op: 'lt', a: '30', mode: 'businessDays', workingDays: [1, 2, 3, 4], holidayCount: 2,
+      });
+      expect(component.hasActiveFilter()).toBe(true);
+    });
+
+    it('toggling every working day off leaves the filter inert, not active', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      component.updateRange(fr, { mode: 'businessDays' });
+      component.updateRange(fr, { a: '30' });
+      for (const day of [1, 2, 3, 4, 5]) component.toggleWorkingDay(fr, day);
+      expect(fixture.componentInstance.selectedRange()?.workingDays).toEqual([]);
+      expect(component.hasActiveFilter()).toBe(false);
+    });
+
+    it('rangeSummary renders relative forms', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+
+      fixture.componentInstance.selectedRange.set({ op: 'lt', a: '90', mode: 'days' });
+      expect(component.rangeSummary(fr)).toBe('older than 90 days');
+
+      fixture.componentInstance.selectedRange.set({ op: 'gte', a: '30', mode: 'businessDays', workingDays: [1, 2, 3, 4, 5] });
+      expect(component.rangeSummary(fr)).toBe('within 30 business days');
+
+      fixture.componentInstance.selectedRange.set({ op: 'gt', a: '7', mode: 'days' });
+      expect(component.rangeSummary(fr)).toBe('newer than 7 days');
+
+      fixture.componentInstance.selectedRange.set({ op: 'between', a: '90', b: '30', mode: 'days' });
+      expect(component.rangeSummary(fr)).toBe('90 – 30 days ago');
+    });
+
+    it('resolvedDayLabel names the resolved day for a complete relative bound, null otherwise', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+
+      fixture.componentInstance.selectedRange.set({ op: 'lt', a: '2026-05-01' });
+      expect(component.resolvedDayLabel(fr, 'a')).toBeNull();
+
+      fixture.componentInstance.selectedRange.set({ op: 'lt', a: '1', mode: 'days' });
+      const today = new Date();
+      const expected = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)
+        .toLocaleDateString(undefined, { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' });
+      expect(component.resolvedDayLabel(fr, 'a')).toBe(expected);
+
+      fixture.componentInstance.selectedRange.set({ op: 'lt', a: '', mode: 'days' });
+      expect(component.resolvedDayLabel(fr, 'a')).toBeNull();
+    });
+
+    it('opLabel wording follows the mode', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      const component = componentWith(fixture);
+      const fr = component.activeRange()!;
+      expect(component.opLabel(fr, 'lt')).toBe('before');
+      fixture.componentInstance.selectedRange.set({ op: 'lt', a: '90', mode: 'days' });
+      expect(component.opLabel(fr, 'lt')).toBe('older than');
+      expect(component.opLabel(fr, 'gte')).toBe('within');
+    });
+  });
 });

@@ -88,27 +88,40 @@
             <!-- Overlays the input slot like the checklist popup — same approved
                  product design; don't "fix" it. -->
             <div class="absolute left-0 top-0 z-30 min-w-56 border border-content-border rounded bg-content-bg shadow-lg p-2 flex flex-col gap-1.5">
+              @if (fr.valueType === 'date') {
+                <select
+                  data-test="range-mode"
+                  class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
+                  [value]="fr.selected()?.mode ?? 'date'"
+                  (change)="updateRange(fr, { mode: $any($event.target).value })">
+                  <option value="date">specific date</option>
+                  <option value="days">days ago</option>
+                  <option value="businessDays">business days ago</option>
+                </select>
+              }
               <select
                 data-test="range-op"
                 class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
                 [value]="fr.selected()?.op ?? 'gte'"
                 (change)="updateRange(fr, { op: $any($event.target).value })">
-                <option value="lt">before</option>
-                <option value="lte">on or before</option>
-                <option value="gt">after</option>
-                <option value="gte">on or after</option>
-                <option value="between">between</option>
+                <option value="lt">{{ opLabel(fr, 'lt') }}</option>
+                <option value="lte">{{ opLabel(fr, 'lte') }}</option>
+                <option value="gt">{{ opLabel(fr, 'gt') }}</option>
+                <option value="gte">{{ opLabel(fr, 'gte') }}</option>
+                <option value="between">{{ opLabel(fr, 'between') }}</option>
               </select>
               <input
                 data-test="range-a"
-                [type]="fr.valueType === 'date' ? 'date' : 'number'"
+                [type]="fr.valueType === 'date' && !isRelativeRange(fr) ? 'date' : 'number'"
+                [attr.min]="isRelativeRange(fr) ? 1 : null"
                 class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
                 [value]="fr.selected()?.a ?? ''"
                 (change)="updateRange(fr, { a: $any($event.target).value })" />
               @if ((fr.selected()?.op ?? 'gte') === 'between') {
                 <input
                   data-test="range-b"
-                  [type]="fr.valueType === 'date' ? 'date' : 'number'"
+                  [type]="fr.valueType === 'date' && !isRelativeRange(fr) ? 'date' : 'number'"
+                  [attr.min]="isRelativeRange(fr) ? 1 : null"
                   class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
                   [value]="fr.selected()?.b ?? ''"
                   (change)="updateRange(fr, { b: $any($event.target).value })" />
@@ -124,6 +137,38 @@
                     (change)="updateRange(fr, { inclusiveB: $any($event.target).checked })" />
                   include end
                 </label>
+              }
+              @if (fr.selected()?.mode === 'businessDays') {
+                <div class="flex gap-1.5 px-1" data-test="working-days">
+                  @for (wd of weekdayToggles; track wd.value) {
+                    <label class="flex flex-col items-center text-[10px] text-content-text cursor-pointer">
+                      <input type="checkbox" [attr.data-test]="'wd-' + wd.value"
+                        [checked]="fr.selected()?.workingDays?.includes(wd.value)"
+                        (change)="toggleWorkingDay(fr, wd.value)" />
+                      {{ wd.label }}
+                    </label>
+                  }
+                </div>
+                <label class="flex items-center gap-2 px-1 text-xs text-content-text">
+                  + weekday holidays
+                  <input type="number" min="0" data-test="range-holidays"
+                    class="w-14 text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
+                    [value]="fr.selected()?.holidayCount ?? 0"
+                    (change)="updateRange(fr, { holidayCount: +$any($event.target).value || 0 })" />
+                </label>
+              }
+              @if (isRelativeRange(fr)) {
+                @if (resolvedDayLabel(fr, 'a'); as dayA) {
+                  <div data-test="range-resolved" class="px-1 text-xs text-content-muted">
+                    → {{ dayA }}@if (resolvedDayLabel(fr, 'b'); as dayB) {&nbsp;– {{ dayB }}}
+                  </div>
+                }
+                @if (fr.selected()?.mode === 'businessDays') {
+                  <div data-test="range-holiday-warning" class="px-1 text-xs text-content-muted">
+                    Holidays are not counted — if the resolved date is a
+                    holiday, increase the holiday count by 1 and check again.
+                  </div>
+                }
               }
               <button
                 type="button"
