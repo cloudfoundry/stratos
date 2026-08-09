@@ -21,11 +21,16 @@ import (
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kat-co/vala"
 
+	// Postgres driver. Registered here explicitly: it used to arrive via
+	// pgstore's own lib/pq import, which left with the per-provider session
+	// stores (GH #5733).
+	_ "github.com/lib/pq"
+
 	// Sqlite driver — pure-Go (sqlite compiled to wasm, run on wazero), so
 	// the driver works under CGO_ENABLED=0. mattn/go-sqlite3 is cgo-only and
 	// silently became a runtime stub in the CGO_ENABLED=0 release binaries.
-	// Registers under the name "sqlite3", so datastore, goose, and the
-	// nwmac/sqlitestore session store all keep working unchanged.
+	// Registers under the name "sqlite3", so datastore and goose keep
+	// working unchanged.
 	_ "github.com/ncruces/go-sqlite3/driver"
 
 	"github.com/pressly/goose"
@@ -322,30 +327,10 @@ func Ping(db *sql.DB) error {
 	return nil
 }
 
-// SessionsTablePlaceholder is the token a statement carries where the Gorilla
-// session table belongs. ModifySQLStatement swaps in the name that provider's
-// session store actually creates.
-const SessionsTablePlaceholder = "{{sessions_table}}"
-
-// SessionsTableName returns the table the session store creates for the given
-// provider. The name is not ours to choose on Postgres: pgstore hardcodes
-// "http_sessions" in its own DDL and its constructors take no table argument,
-// while the MySQL and SQLite stores are handed the name we pass them. Any
-// statement joining against the session table must therefore resolve the name
-// per provider rather than hardcode either spelling.
-func SessionsTableName(databaseProvider string) string {
-	if databaseProvider == PGSQL {
-		return "http_sessions"
-	}
-	return "sessions"
-}
-
 // ModifySQLStatement - Modify the given DB statement for the specified provider, as appropraite
 // e.g Postgres uses $1, $2 etc
 // SQLite uses ?
 func ModifySQLStatement(sql string, databaseProvider string) string {
-	sql = strings.ReplaceAll(sql, SessionsTablePlaceholder, SessionsTableName(databaseProvider))
-
 	if databaseProvider == SQLITE || databaseProvider == MYSQL {
 		// Replace positional parameters ($1, $2, etc.) with ?
 		sqlParamReplace := regexp.MustCompile(`\$[0-9]+`)

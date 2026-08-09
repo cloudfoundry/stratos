@@ -10,14 +10,11 @@ import (
 	_ "github.com/ncruces/go-sqlite3/driver"
 )
 
-// These statements are shared by every provider but the session table they
-// join against is named differently per provider, so a statement is only
-// proven by running it against a database that actually has that table. A
-// wrong name fails at execution ("no such table"), which no assertion on the
-// statement text can catch.
+// These statements are only proven by running them against a database that
+// actually has the session table — a wrong table name fails at execution
+// ("no such table"), which no assertion on the statement text can catch.
 //
-// SQLite is the provider the gate can run for real; the pgsql spelling is
-// covered by the resolution tests in the datastore package.
+// SQLite is the provider the gate can run for real.
 func sqliteSessionDB(t *testing.T) *sql.DB {
 	t.Helper()
 
@@ -27,16 +24,15 @@ func sqliteSessionDB(t *testing.T) *sql.DB {
 	}
 	t.Cleanup(func() { db.Close() })
 
-	// Mirrors what the SQLite session store creates (it is handed the table
-	// name from datastore.SessionsTableName) plus the session_data table from
-	// migration 20200117152200.
+	// Mirrors the SQLite DDL of migration 20260808120000 plus the
+	// session_data table from migration 20200117152200.
 	schema := []string{
-		`CREATE TABLE ` + datastore.SessionsTableName(datastore.SQLITE) + ` (
-			id INTEGER PRIMARY KEY,
-			session_data LONGBLOB,
-			created_on TIMESTAMP DEFAULT 0,
-			modified_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-			expires_on TIMESTAMP DEFAULT 0)`,
+		`CREATE TABLE sessions (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			session_data TEXT NOT NULL DEFAULT '',
+			created_on TIMESTAMP NOT NULL DEFAULT 0,
+			modified_on TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+			expires_on TIMESTAMP NOT NULL DEFAULT 0)`,
 		`CREATE TABLE session_data (
 			session VARCHAR(255) NOT NULL,
 			groupName VARCHAR(32) NOT NULL,
@@ -58,7 +54,7 @@ func TestExpireSessionDataRunsAgainstSQLite(t *testing.T) {
 	db := sqliteSessionDB(t)
 
 	// Session 1 still exists; session 2 does not.
-	if _, err := db.Exec(`INSERT INTO ` + datastore.SessionsTableName(datastore.SQLITE) + ` (id) VALUES (1)`); err != nil {
+	if _, err := db.Exec(`INSERT INTO sessions (id) VALUES (1)`); err != nil {
 		t.Fatalf("seed session: %v", err)
 	}
 	for _, session := range []string{"1", "2"} {
@@ -96,8 +92,7 @@ func TestIsValidSessionRunsAgainstSQLite(t *testing.T) {
 
 	future := time.Now().Add(time.Hour)
 	past := time.Now().Add(-time.Hour)
-	table := datastore.SessionsTableName(datastore.SQLITE)
-	if _, err := db.Exec(`INSERT INTO `+table+` (id, expires_on) VALUES (1, ?), (2, ?)`, future, past); err != nil {
+	if _, err := db.Exec(`INSERT INTO sessions (id, expires_on) VALUES (1, ?), (2, ?)`, future, past); err != nil {
 		t.Fatalf("seed sessions: %v", err)
 	}
 

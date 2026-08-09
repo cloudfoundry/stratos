@@ -22,16 +22,14 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/custombinder"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/sessionstore"
 	//_ "github.com/cloudfoundry/stratos/src/jetstream/docs"
 
-	"github.com/antonlindstrom/pgstore"
-	"github.com/cf-stratos/mysqlstore"
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/cloudfoundry/stratos/src/jetstream/repository/sqlitestore"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -603,10 +601,6 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error)
 func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
 	log.Debug("initSessionStore")
 
-	// Same source of truth the session-data statements resolve against, so the
-	// table we ask these stores to create is the one those statements query.
-	sessionsTable := datastore.SessionsTableName(databaseProvider)
-
 	// Allow the cookie domain to be configured
 	domain := pc.CookieDomain
 	if domain == "-" {
@@ -615,41 +609,8 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 
 	log.Infof("Session Cookie Domain: %s", domain)
 
-	// Store depends on the DB Type
-	if databaseProvider == datastore.PGSQL {
-		log.Info("Creating Postgres session store")
-		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
-		if err != nil {
-			return nil, nil, err
-		}
-		// Setup cookie-store options
-		sessionStore.Options.MaxAge = sessionExpiry
-		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = true
-		if len(domain) > 0 {
-			sessionStore.Options.Domain = domain
-		}
-		return sessionStore, sessionStore.Options, nil
-	}
-	// Store depends on the DB Type
-	if databaseProvider == datastore.MYSQL {
-		log.Info("Creating MySQL session store")
-		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
-		if err != nil {
-			return nil, nil, err
-		}
-		// Setup cookie-store options
-		sessionStore.Options.MaxAge = sessionExpiry
-		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = true
-		if len(domain) > 0 {
-			sessionStore.Options.Domain = domain
-		}
-		return sessionStore, sessionStore.Options, nil
-	}
-
-	log.Info("Creating SQLite session store")
-	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
+	log.Infof("Creating %s session store", databaseProvider)
+	sessionStore, err := sessionstore.New(db, databaseProvider, "/", 3600, []byte(pc.SessionStoreSecret))
 	if err != nil {
 		return nil, nil, err
 	}
