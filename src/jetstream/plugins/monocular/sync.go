@@ -84,7 +84,7 @@ func (m *Monocular) deleteChartStoreForEndpoint(id string) {
 
 	// Delete files from the cache
 	if err := m.deleteCacheForEndpoint(id); err != nil {
-		log.Warnf("Unable to delete Helm Chart Cache for endpoint %s - %+v", err)
+		log.Warnf("Unable to delete Helm Chart Cache for endpoint %s - %+v", id, err)
 	}
 }
 
@@ -103,7 +103,7 @@ func (m *Monocular) processSyncRequests() {
 		metadata.Busy = false
 		err := m.syncHelmRepository(job.Endpoint.GUID, job.Endpoint.Name, chartIndexURL)
 		if err != nil {
-			log.Warn("Helm Repository sync repository failed for repository %s - %v", job.Endpoint.GUID, err)
+			log.Warnf("Helm Repository sync repository failed for repository %s - %v", job.Endpoint.GUID, err)
 			metadata.Status = "Sync Failed"
 		}
 

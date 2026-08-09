@@ -110,7 +110,7 @@ func (c *KubernetesSpecification) InstallRelease(ec echo.Context) error {
 
 	release, err := install.Run(chart, userSuppliedValues)
 	if err != nil {
-		return api.NewJetstreamUserErrorf(fmt.Sprintf("Error installing: %+v", err))
+		return api.NewJetstreamUserErrorf("Error installing: %+v", err)
 	}
 
 	return ec.JSON(200, release)
