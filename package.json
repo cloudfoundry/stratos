@@ -199,7 +199,7 @@
     "@vitest/ui": "3.1.1",
     "acorn": "8.15.0",
     "adm-zip": "0.6.0",
-    "angular-eslint": "22.0.0",
+    "angular-eslint": "22.1.0",
     "autoprefixer": "^10.5.4",
     "baseline-browser-mapping": "^2.11.1",
     "browserstack-local": "1.5.13",
