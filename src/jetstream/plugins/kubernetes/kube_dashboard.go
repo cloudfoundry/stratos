@@ -85,7 +85,7 @@ func (k *KubernetesSpecification) kubeDashboardCreateServiceAccount(c echo.Conte
 
 	err := dashboard.CreateServiceAccount(p, endpointGUID, userGUID)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), "%s", err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -101,7 +101,7 @@ func (k *KubernetesSpecification) kubeDashboardDeleteServiceAccount(c echo.Conte
 
 	err := dashboard.DeleteServiceAccount(p, endpointGUID, userGUID)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), "%s", err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -117,7 +117,7 @@ func (k *KubernetesSpecification) kubeDashboardInstallDashboard(c echo.Context) 
 
 	err := dashboard.InstallDashboard(p, endpointGUID, userGUID)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), "%s", err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
@@ -133,7 +133,7 @@ func (k *KubernetesSpecification) kubeDashboardDeleteDashboard(c echo.Context) e
 
 	err := dashboard.DeleteDashboard(p, endpointGUID, userGUID)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), err.Error())
+		return api.NewHTTPShadowError(http.StatusInternalServerError, err.Error(), "%s", err.Error())
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")

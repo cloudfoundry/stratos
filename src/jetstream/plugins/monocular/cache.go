@@ -299,14 +299,14 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 
 	f, err := os.Open(archivePath)
 	if err != nil {
-		log.Error("Helm: Archive extract file: Could not open file %s - %+v", archivePath, err)
+		log.Errorf("Helm: Archive extract file: Could not open file %s - %+v", archivePath, err)
 		return err
 	}
 	defer f.Close()
 
 	gzf, err := gzip.NewReader(f)
 	if err != nil {
-		log.Error("Helm: Archive extract file: Could not open zip file %s - %+v", archivePath, err)
+		log.Errorf("Helm: Archive extract file: Could not open zip file %s - %+v", archivePath, err)
 		return err
 	}
 
@@ -318,7 +318,7 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 		}
 
 		if err != nil {
-			log.Error("Helm: Archive extract file: Could not process archive file %s - %+v", archivePath, err)
+			log.Errorf("Helm: Archive extract file: Could not process archive file %s - %+v", archivePath, err)
 			return err
 		}
 
