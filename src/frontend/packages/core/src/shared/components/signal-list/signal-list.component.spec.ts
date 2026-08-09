@@ -1655,6 +1655,42 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
     component.onFilterFieldChange('name');
     expect(component.multiPopupOpen()).toBe(false);
   });
+
+  describe('popup Clear button', () => {
+    function openPopup(fixture: ReturnType<typeof TestBed.createComponent<MultiFilterHost>>): HTMLButtonElement {
+      (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
+      fixture.detectChanges();
+      return fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement;
+    }
+
+    it('is disabled while the filter is already inactive (null selection)', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.detectChanges();
+      expect(openPopup(fixture).disabled).toBe(true);
+    });
+
+    it('resets the selection to null, pages back to 0, and leaves the popup open', () => {
+      const fixture = TestBed.createComponent(MultiFilterHost);
+      fixture.componentInstance.selectedStacks.set(['cflinuxfs4']);
+      fixture.componentInstance.pageIndex.set(3);
+      fixture.detectChanges();
+      const clear = openPopup(fixture);
+      expect(clear.disabled).toBe(false);
+
+      clear.click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.selectedStacks()).toBe(null);
+      expect(fixture.componentInstance.pageIndex()).toBe(0);
+      const component = componentWith(fixture);
+      expect(component.multiPopupOpen()).toBe(true);
+      // Visible feedback: the popup stays up while the toggle summary and
+      // the button's own disabled state flip to the neutral form
+      expect(fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]')).not.toBeNull();
+      expect((fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement).disabled).toBe(true);
+      expect(component.multiSummary(component.activeMulti()!)).toBe('All (3)');
+    });
+  });
 });
 
 // Range-comparison filter input (config.filterRanges / SignalListRangeFilter).
@@ -1991,6 +2027,42 @@ describe('SignalListComponent range filter (filterRanges)', () => {
       fixture.componentInstance.selectedRange.set({ op: 'lt', a: '90', mode: 'days' });
       expect(component.opLabel(fr, 'lt')).toBe('older than');
       expect(component.opLabel(fr, 'gte')).toBe('within');
+    });
+  });
+
+  describe('popup Clear button', () => {
+    function openPopup(fixture: ReturnType<typeof TestBed.createComponent<RangeFilterHost>>): HTMLButtonElement {
+      (fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
+      fixture.detectChanges();
+      return fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement;
+    }
+
+    it('is disabled while the filter is already inactive (null selection)', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      fixture.detectChanges();
+      expect(openPopup(fixture).disabled).toBe(true);
+    });
+
+    it('discards a configured relative range, pages back to 0, and leaves the popup open reading Any', () => {
+      const fixture = TestBed.createComponent(RangeFilterHost);
+      // A relative range with configuration beyond its bounds — exactly the
+      // state updateRange's implicit collapse refuses to destroy; the
+      // explicit Clear is allowed to.
+      fixture.componentInstance.selectedRange.set({ op: 'lte', a: '5', mode: 'businessDays', workingDays: [1, 2, 3, 4], holidayCount: 2 });
+      fixture.componentInstance.pageIndex.set(2);
+      fixture.detectChanges();
+      const clear = openPopup(fixture);
+      expect(clear.disabled).toBe(false);
+
+      clear.click();
+      fixture.detectChanges();
+
+      expect(fixture.componentInstance.selectedRange()).toBe(null);
+      expect(fixture.componentInstance.pageIndex()).toBe(0);
+      const component = componentWith(fixture);
+      expect(component.multiPopupOpen()).toBe(true);
+      expect((fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement).disabled).toBe(true);
+      expect(component.rangeSummary(component.activeRange()!)).toBe('Any');
     });
   });
 });

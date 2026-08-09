@@ -67,10 +67,18 @@
               @if (fm.selected() !== null && fm.selected()!.length === 0) {
                 <div class="mt-1 px-1 text-xs text-warning-shade-600 dark:text-warning-shade-300">Nothing selected — showing all</div>
               }
-              <button
-                type="button"
-                (click)="multiPopupOpen.set(false)"
-                class="mt-1 w-full text-xs text-content-muted border-t border-content-border pt-1">Close</button>
+              <div class="mt-1 flex border-t border-content-border pt-1">
+                <button
+                  type="button"
+                  data-test="multi-filter-clear"
+                  [disabled]="fm.selected() === null"
+                  (click)="clearPopupFilter(fm)"
+                  class="flex-1 text-xs text-content-muted disabled:opacity-40">Clear</button>
+                <button
+                  type="button"
+                  (click)="multiPopupOpen.set(false)"
+                  class="flex-1 text-xs text-content-muted">Close</button>
+              </div>
             </div>
           }
         </div>
@@ -184,10 +192,18 @@
                   </div>
                 }
               }
-              <button
-                type="button"
-                (click)="multiPopupOpen.set(false)"
-                class="w-full text-xs text-content-muted border-t border-content-border pt-1">Close</button>
+              <div class="flex border-t border-content-border pt-1">
+                <button
+                  type="button"
+                  data-test="range-filter-clear"
+                  [disabled]="fr.selected() === null"
+                  (click)="clearPopupFilter(fr)"
+                  class="flex-1 text-xs text-content-muted disabled:opacity-40">Clear</button>
+                <button
+                  type="button"
+                  (click)="multiPopupOpen.set(false)"
+                  class="flex-1 text-xs text-content-muted">Close</button>
+              </div>
             </div>
           }
         </div>

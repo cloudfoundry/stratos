@@ -1276,6 +1276,16 @@ export class SignalListComponent<T> implements AfterViewInit {
     { value: 3, label: 'We' },
   ];
 
+  // Clear button in the checklist/range popups: resets THIS filter to its
+  // neutral state and leaves the popup open, so the toggle summary flipping
+  // to All/Any is the visible feedback. For a relative range this is the
+  // one deliberate gesture that discards the stored configuration — the
+  // implicit collapse rules in updateRange stay date-mode-only.
+  clearPopupFilter(f: SignalListMultiFilter | SignalListRangeFilter): void {
+    f.selected.set(null);
+    this.config.pageIndex.set(0);
+  }
+
   // Flips one weekday in the business-day working week. Routed through
   // updateRange so paging reset and storage rules stay in one place.
   // Removing the last working day is refused — a 7-day weekend would make
