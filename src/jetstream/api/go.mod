@@ -3,9 +3,9 @@ module github.com/cloudfoundry/stratos/src/jetstream/api
 go 1.26.3
 
 require (
+	github.com/coder/websocket v1.8.15
 	github.com/golang/mock v1.6.0
 	github.com/gorilla/sessions v1.4.0
-	github.com/gorilla/websocket v1.5.3
 	github.com/govau/cf-common v0.0.7
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/sirupsen/logrus v1.9.3

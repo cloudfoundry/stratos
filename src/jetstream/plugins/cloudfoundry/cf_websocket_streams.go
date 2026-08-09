@@ -17,7 +17,7 @@ import (
 	"github.com/cloudfoundry/noaa/v2/consumer"
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 )
@@ -41,15 +41,19 @@ func (c *CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context
 	if err != nil {
 		return err
 	}
-	defer func() { _ = clientWebSocket.Close() }()
+	defer clientWebSocket.CloseNow()
 	defer pingTicker.Stop()
+
+	// Discard incoming messages, effectively making our WebSocket read-only;
+	// the returned context is cancelled when the client disconnects
+	readCtx := clientWebSocket.CloseRead(echoContext.Request().Context())
 
 	if err := bespokeStreamHandler(echoContext, ac, clientWebSocket); err != nil {
 		return err
 	}
 
 	// This blocks until the WebSocket is closed
-	drainClientMessages(clientWebSocket)
+	<-readCtx.Done()
 	return nil
 }
 
@@ -218,17 +222,6 @@ func drainFirehoseEvents(eventChan <-chan *events.Envelope, callback func(msg *e
 	}
 }
 
-// Drain and discard incoming messages from the WebSocket client, effectively making our WebSocket read-only
-func drainClientMessages(clientWebSocket *websocket.Conn) {
-	for {
-		_, _, err := clientWebSocket.ReadMessage()
-		if err != nil {
-			// We get here when the client (browser) disconnects
-			break
-		}
-	}
-}
-
 func appStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWebSocket *websocket.Conn) error {
 	// Get the CNSI and app IDs from route parameters
 	cnsiGUID := echoContext.Param("cnsiGuid")
@@ -241,7 +234,7 @@ func appStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWe
 		if jsonMsg, err := json.Marshal(msg); err != nil {
 			log.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
 		} else {
-			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
+			err := clientWebSocket.Write(context.Background(), websocket.MessageText, jsonMsg)
 			if err != nil {
 				log.Errorf("Error writing data to WebSocket, %v", err)
 			}
@@ -289,7 +282,7 @@ func firehoseStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, cli
 		if jsonMsg, err := json.Marshal(msg); err != nil {
 			log.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
 		} else {
-			err := clientWebSocket.WriteMessage(websocket.TextMessage, jsonMsg)
+			err := clientWebSocket.Write(context.Background(), websocket.MessageText, jsonMsg)
 			if err != nil {
 				log.Errorf("Error writing data to WebSocket, %v", err)
 			}

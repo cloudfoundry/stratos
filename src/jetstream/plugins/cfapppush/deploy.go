@@ -1,6 +1,7 @@
 package cfapppush
 
 import (
+	"context"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -13,7 +14,8 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
+	"github.com/coder/websocket/wsjson"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
@@ -96,7 +98,11 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
 		return err
 	}
-	defer clientWebSocket.Close()
+	// The file/folder upload protocol sends each file as one whole binary
+	// message, so no read limit can be safely applied to this socket
+	clientWebSocket.SetReadLimit(-1)
+	readCtx := echoContext.Request().Context()
+	defer clientWebSocket.CloseNow()
 	defer pingTicker.Stop()
 
 	// We use a simple protocol to get the source to use for cf push and any cf push cli overrides
@@ -110,7 +116,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Debug("Waiting for source information from client")
 
 	msg := SocketMessage{}
-	if err := clientWebSocket.ReadJSON(&msg); err != nil {
+	if err := wsjson.Read(readCtx, clientWebSocket, &msg); err != nil {
 		log.Errorf("Error reading JSON: %v+", err)
 		return err
 	}
@@ -134,7 +140,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	case SOURCE_GITSCM:
 		stratosProject, appDir, err = cfAppPush.getGitSCMSource(clientWebSocket, tempDir, msg, userGUID)
 	case SOURCE_FOLDER:
-		stratosProject, appDir, err = getFolderSource(clientWebSocket, tempDir, msg)
+		stratosProject, appDir, err = getFolderSource(readCtx, clientWebSocket, tempDir, msg)
 	case SOURCE_GITURL:
 		stratosProject, appDir, err = getGitURLSource(clientWebSocket, tempDir, msg)
 	case SOURCE_DOCKER_IMG:
@@ -158,7 +164,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	log.Debug("Waiting for app overrides from client")
 
 	msgOverrides := SocketMessage{}
-	if err := clientWebSocket.ReadJSON(&msgOverrides); err != nil {
+	if err := wsjson.Read(readCtx, clientWebSocket, &msgOverrides); err != nil {
 		log.Errorf("Error reading JSON: %v+", err)
 		return err
 	}
@@ -260,11 +266,11 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 
 	log.Debug("Waiting for close acknowledgement from the client")
 
-	wait := 30 * time.Second
-	clientWebSocket.SetReadDeadline(time.Now().Add(wait))
+	ackCtx, ackCancel := context.WithTimeout(readCtx, 30*time.Second)
+	defer ackCancel()
 
 	// Wait for the client to acknowledge the close - timeout ?
-	if err := clientWebSocket.ReadJSON(&msg); err != nil {
+	if err := wsjson.Read(ackCtx, clientWebSocket, &msg); err != nil {
 		log.Errorf("Error reading JSON: %v+", err)
 		return nil
 	}
@@ -275,8 +281,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 		log.Debug("Got close acknowledgement from the client")
 	}
 
-	// Close the web socket - should we wait for ack from client?
-	clientWebSocket.Close()
+	// Close the web socket
+	clientWebSocket.Close(websocket.StatusNormalClosure, "")
 
 	return nil
 }
@@ -292,7 +298,7 @@ func safeUploadJoin(base, name string) (string, error) {
 	return filepath.Join(base, name), nil
 }
 
-func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
+func getFolderSource(readCtx context.Context, clientWebSocket *websocket.Conn, tempDir string, msg SocketMessage) (StratosProject, string, error) {
 	// The msg data is JSON for the Folder info
 	info := FolderSourceInfo{
 		WaitAfterUpload: false,
@@ -323,7 +329,7 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 
 		// We should get a SOURCE_FILE message next
 		msg := SocketMessage{}
-		if err := clientWebSocket.ReadJSON(&msg); err != nil {
+		if err := wsjson.Read(readCtx, clientWebSocket, &msg); err != nil {
 			log.Errorf("Error reading JSON: %v+", err)
 			return StratosProject{}, tempDir, err
 		}
@@ -336,13 +342,13 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		log.Debugf("Transferring file: %s", msg.Message)
 
 		// Now expecting a binary message
-		messageType, p, err := clientWebSocket.ReadMessage()
+		messageType, p, err := clientWebSocket.Read(readCtx)
 
 		if err != nil {
 			return StratosProject{}, tempDir, err
 		}
 
-		if messageType != websocket.BinaryMessage {
+		if messageType != websocket.MessageBinary {
 			return StratosProject{}, tempDir, errors.New("expecting binary file data")
 		}
 
@@ -401,7 +407,7 @@ func getFolderSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 	// The client (v2) can request only source upload and for deploy to wait until it sends a message
 	if info.WaitAfterUpload {
 		msg := SocketMessage{}
-		if err := clientWebSocket.ReadJSON(&msg); err != nil {
+		if err := wsjson.Read(readCtx, clientWebSocket, &msg); err != nil {
 			log.Errorf("Error reading JSON: %v+", err)
 			return StratosProject{}, tempDir, err
 		}
@@ -774,7 +780,7 @@ func (sw *SocketWriter) Write(data []byte) (int, error) {
 
 	message, _ := getMarshalledSocketMessage(string(data), DATA)
 
-	err := sw.clientWebSocket.WriteMessage(websocket.TextMessage, message)
+	err := sw.clientWebSocket.Write(context.Background(), websocket.MessageText, message)
 	if err != nil {
 		log.Warnf("Failed to write data to web socket: %s", err)
 		return 0, err
@@ -791,20 +797,20 @@ func sendManifest(manifest Applications, clientWebSocket *websocket.Conn) error 
 	manifestJSON := string(manifestBytes)
 	message, _ := getMarshalledSocketMessage(manifestJSON, MANIFEST)
 
-	clientWebSocket.WriteMessage(websocket.TextMessage, message)
+	clientWebSocket.Write(context.Background(), websocket.MessageText, message)
 	return nil
 }
 
 func sendErrorMessage(clientWebSocket *websocket.Conn, err error, errorType MessageType) {
 	closingMessage, _ := getMarshalledSocketMessage(fmt.Sprintf("Failed due to %s!", err), errorType)
-	if err := clientWebSocket.WriteMessage(websocket.TextMessage, closingMessage); err != nil {
+	if err := clientWebSocket.Write(context.Background(), websocket.MessageText, closingMessage); err != nil {
 		log.Warnf("Failed to write error message to web socket: %s", err)
 	}
 }
 
 func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 	msg, _ := getMarshalledSocketMessage("", event)
-	if err := clientWebSocket.WriteMessage(websocket.TextMessage, msg); err != nil {
+	if err := clientWebSocket.Write(context.Background(), websocket.MessageText, msg); err != nil {
 		log.Warnf("Failed to write message to web socket: %s", err)
 	}
 }
@@ -812,7 +818,7 @@ func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 // SendEvent sends a message over the web socket
 func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string) {
 	msg, _ := getMarshalledSocketMessage(data, event)
-	if err := clientWebSocket.WriteMessage(websocket.TextMessage, msg); err != nil {
+	if err := clientWebSocket.Write(context.Background(), websocket.MessageText, msg); err != nil {
 		log.Warnf("Failed to write message to web socket: %s", err)
 	}
 }

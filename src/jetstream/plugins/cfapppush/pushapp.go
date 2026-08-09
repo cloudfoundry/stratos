@@ -22,7 +22,7 @@ import (
 	"code.cloudfoundry.org/cli/v8/util/manifestparser"
 	"code.cloudfoundry.org/cli/v8/util/progressbar"
 	"code.cloudfoundry.org/cli/v8/util/ui"
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 
 	"code.cloudfoundry.org/cli/v8/cf/flags"
 

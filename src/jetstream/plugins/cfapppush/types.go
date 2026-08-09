@@ -1,9 +1,7 @@
 package cfapppush
 
 import (
-	"net/http"
-
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 )
 
 type ManifestResponse struct {
@@ -18,13 +16,6 @@ type SocketMessage struct {
 
 type SocketWriter struct {
 	clientWebSocket *websocket.Conn
-}
-
-// Allow connections from any Origin
-var upgrader = websocket.Upgrader{
-	CheckOrigin: func(r *http.Request) bool {
-		return true
-	},
 }
 
 type StratosProject struct {
