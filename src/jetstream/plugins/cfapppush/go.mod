@@ -14,7 +14,6 @@ require (
 	code.cloudfoundry.org/cli/v8 v8.18.2
 	code.cloudfoundry.org/clock v1.64.0
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
-	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/sirupsen/logrus v1.9.4
 	golang.org/x/crypto v0.53.0 // indirect
@@ -26,7 +25,10 @@ require (
 
 require github.com/kr/text v0.2.0 // indirect
 
-require github.com/mholt/archives v0.1.5
+require (
+	github.com/coder/websocket v1.8.15
+	github.com/mholt/archives v0.1.5
+)
 
 require (
 	code.cloudfoundry.org/bytefmt v0.67.0 // indirect

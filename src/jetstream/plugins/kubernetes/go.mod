@@ -5,7 +5,7 @@ go 1.26.3
 require (
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-20250312201517-2a076063346f
-	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674
+	github.com/coder/websocket v1.8.15
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.3

@@ -1,12 +1,12 @@
 package kubernetes
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 
@@ -105,7 +105,7 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer ws.Close()
+	defer ws.CloseNow()
 	defer pingTicker.Stop()
 
 	// ws is the websocket ready for use
@@ -172,7 +172,7 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 			paused = pause
 			break
 		case <-stopchan:
-			ws.Close()
+			ws.Close(websocket.StatusNormalClosure, "")
 			return nil
 		case <-time.After(sleep):
 			break
@@ -206,21 +206,15 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 func readLoop(c *websocket.Conn, stopchan chan<- bool, pausechan chan<- bool) {
 	for {
 
-		messageType, r, err := c.NextReader()
+		messageType, data, err := c.Read(context.Background())
 		if err != nil {
-			c.Close()
+			c.CloseNow()
 			close(stopchan)
 			break
 		}
 
 		switch messageType {
-		case websocket.TextMessage:
-			data, err := ioutil.ReadAll(r)
-			if err != nil {
-				log.Warnf("Failed to read content of helm resource websocket message: %+v", err)
-				break
-			}
-
+		case websocket.MessageText:
 			message := ResourceMessage{}
 			err = json.Unmarshal(data, &message)
 			if err != nil {
@@ -237,7 +231,7 @@ func readLoop(c *websocket.Conn, stopchan chan<- bool, pausechan chan<- bool) {
 				break
 			}
 		default:
-			c.Close()
+			c.CloseNow()
 			close(stopchan)
 			break
 		}
@@ -254,7 +248,7 @@ func sendResource(ws *websocket.Conn, kind string, data interface{}) error {
 		}
 
 		if txt, err = json.Marshal(resp); err == nil {
-			if ws.WriteMessage(websocket.TextMessage, txt); err == nil {
+			if err = ws.Write(context.Background(), websocket.MessageText, txt); err == nil {
 				return nil
 			}
 		}

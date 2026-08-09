@@ -1,6 +1,7 @@
 package cfappssh
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -12,7 +13,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
@@ -20,7 +21,6 @@ import (
 
 // See: https://docs.cloudfoundry.org/devguide/deploy-apps/ssh-apps.html
 
-// WebScoket code based on: https://github.com/gorilla/websocket/blob/master/examples/command/main.go
 
 const (
 	// Time allowed to write a message to the peer.
@@ -132,8 +132,10 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer func() { _ = ws.Close() }()
+	defer ws.CloseNow()
 	defer pingTicker.Stop()
+
+	readCtx := c.Request().Context()
 
 	modes := ssh.TerminalModes{
 		ssh.TTY_OP_ISPEED: 14400, // input speed = 14.4kbaud
@@ -168,7 +170,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 
 	// Read the input from the web socket and pipe it to the SSH client
 	for {
-		_, r, err := ws.ReadMessage()
+		_, r, err := ws.Read(readCtx)
 		if err != nil {
 			log.Error("Error reading message from web socket")
 			log.Warnf("%+v", err)
@@ -252,15 +254,17 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 			if err != io.EOF {
 				log.Errorf("App SSH encountered an error reading from stdout; %v", err)
 			}
-			_ = ws.Close()
+			_ = ws.CloseNow()
 			break
 		}
 
-		_ = ws.SetWriteDeadline(time.Now().Add(writeWait))
+		ctx, cancel := context.WithTimeout(context.Background(), writeWait)
 		bytes := fmt.Sprintf("% x\n", buffer[:len])
-		if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
+		err = ws.Write(ctx, websocket.MessageText, []byte(bytes))
+		cancel()
+		if err != nil {
 			log.Error("App SSH Failed to write nessage")
-			_ = ws.Close()
+			_ = ws.CloseNow()
 			break
 		}
 	}

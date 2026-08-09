@@ -130,6 +130,8 @@ github.com/cloudfoundry/noaa/v2 v2.5.0/go.mod h1:R33q73MnTXa549YPMHupTdQuKL3QqKQ
 github.com/cloudfoundry/sonde-go v0.0.0-20250505082611-517434ece96d h1:zFEOGvCZYR7QrZ94C7r2dqsLNw/BYMr0QYyuwlMAhrY=
 github.com/cloudfoundry/sonde-go v0.0.0-20250505082611-517434ece96d/go.mod h1:n3NQkJyrQPZ/pq+mjECQL7sLjL/U3rmTwyWMwpGxcXQ=
 github.com/codegangsta/negroni v1.0.0/go.mod h1:v0y3T5G7Y1UlFfyxFn/QLRU4a2EuNau2iZY63YTKWo0=
+github.com/coder/websocket v1.8.15 h1:6B2JPeOGlpff2Uz6vOEH1Vzpi0iUz20A+lPVhPHtNUA=
+github.com/coder/websocket v1.8.15/go.mod h1:NX3SzP+inril6yawo5CQXx8+fk145lPDC6pumgx0mVg=
 github.com/containerd/containerd v1.7.33 h1:iAkYGC/ifR/V+0eR4iXWHNGYUF0DF2PmGV5iz4Irj5M=
 github.com/containerd/containerd v1.7.33/go.mod h1:gSbSCVjPCdkfJCjyrzz7aRC+xFlqVbatNpfHfVCYGUM=
 github.com/containerd/errdefs v1.0.0 h1:tg5yIfIlQIrxYtu9ajqY42W3lpS19XqdxRQeEwYG8PI=

@@ -16,7 +16,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth"
 
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -256,7 +256,7 @@ func sendProgressMessage(ws *websocket.Conn, progressMsg string) {
 	// Send a message to say that we are creating the pod
 	msg := fmt.Sprintf("\033]2;%s\007", progressMsg)
 	bytes := fmt.Sprintf("% x\n", []byte(msg))
-	if err := ws.WriteMessage(websocket.TextMessage, []byte(bytes)); err != nil {
+	if err := ws.Write(context.Background(), websocket.MessageText, []byte(bytes)); err != nil {
 		log.Error("Could not send message to client to indicate terminal is starting")
 	}
 }
