@@ -6,9 +6,30 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      # The Angular packages only work in lockstep; one-at-a-time bumps
+      # produce mutually incompatible PRs.
+      angular:
+        patterns:
+          - "@angular*"
+          - "@schematics/*"
+    ignore:
+      # TypeScript majors are pinned by Angular's supported range; they move
+      # with the framework upgrade, not on their own.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
 
   # The devkit package keeps its own npm lockfile.
   - package-ecosystem: "npm"
     directory: "/src/frontend/packages/devkit"
     schedule:
       interval: "weekly"
+    groups:
+      angular-devkit:
+        patterns:
+          - "@angular-devkit/*"
+          - "@schematics/*"
+    ignore:
+      # The devkit TypeScript follows the root toolchain's major.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
