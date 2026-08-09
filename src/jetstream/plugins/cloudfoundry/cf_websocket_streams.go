@@ -37,16 +37,27 @@ func (c *CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context
 	}
 	defer func() { _ = ac.consumer.Close() }()
 
-	clientWebSocket, pingTicker, err := api.UpgradeToWebSocket(echoContext)
+	clientWebSocket, err := api.UpgradeToWebSocket(echoContext)
 	if err != nil {
 		return err
 	}
 	defer clientWebSocket.CloseNow()
-	defer pingTicker.Stop()
 
-	// Discard incoming messages, effectively making our WebSocket read-only;
-	// the returned context is cancelled when the client disconnects
-	readCtx := clientWebSocket.CloseRead(echoContext.Request().Context())
+	// Drain and discard incoming messages from the WebSocket client,
+	// effectively making our WebSocket read-only; the standing read also
+	// processes the keepalive pongs. The context ends when the client
+	// disconnects.
+	readCtx, stopReading := context.WithCancel(echoContext.Request().Context())
+	defer stopReading()
+	go func() {
+		defer stopReading()
+		for {
+			if _, _, err := clientWebSocket.Read(readCtx); err != nil {
+				// We get here when the client (browser) disconnects
+				return
+			}
+		}
+	}()
 
 	if err := bespokeStreamHandler(echoContext, ac, clientWebSocket); err != nil {
 		return err
@@ -234,7 +245,7 @@ func appStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWe
 		if jsonMsg, err := json.Marshal(msg); err != nil {
 			log.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
 		} else {
-			err := clientWebSocket.Write(context.Background(), websocket.MessageText, jsonMsg)
+			err := api.WriteText(clientWebSocket, jsonMsg)
 			if err != nil {
 				log.Errorf("Error writing data to WebSocket, %v", err)
 			}
@@ -282,7 +293,7 @@ func firehoseStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, cli
 		if jsonMsg, err := json.Marshal(msg); err != nil {
 			log.Errorf("Received unparsable message from Doppler %v, %v", jsonMsg, err)
 		} else {
-			err := clientWebSocket.Write(context.Background(), websocket.MessageText, jsonMsg)
+			err := api.WriteText(clientWebSocket, jsonMsg)
 			if err != nil {
 				log.Errorf("Error writing data to WebSocket, %v", err)
 			}

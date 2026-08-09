@@ -256,7 +256,7 @@ func sendProgressMessage(ws *websocket.Conn, progressMsg string) {
 	// Send a message to say that we are creating the pod
 	msg := fmt.Sprintf("\033]2;%s\007", progressMsg)
 	bytes := fmt.Sprintf("% x\n", []byte(msg))
-	if err := ws.Write(context.Background(), websocket.MessageText, []byte(bytes)); err != nil {
+	if err := api.WriteText(ws, []byte(bytes)); err != nil {
 		log.Error("Could not send message to client to indicate terminal is starting")
 	}
 }
