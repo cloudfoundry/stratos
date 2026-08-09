@@ -193,7 +193,7 @@
     "@types/node": "24.2.1",
     "@types/pngjs": "^6.0.5",
     "@types/webpack": "^5.28.5",
-    "@typescript-eslint/eslint-plugin": "^8.65.0",
+    "@typescript-eslint/eslint-plugin": "^8.66.0",
     "@typescript-eslint/parser": "^8.65.0",
     "@vitest/coverage-v8": "^4.1.10",
     "@vitest/ui": "3.1.1",
