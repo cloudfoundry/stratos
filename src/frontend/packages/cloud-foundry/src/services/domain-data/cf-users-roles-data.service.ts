@@ -12,7 +12,6 @@ import {
   IUserPermissionInOrg,
   IUserPermissionInSpace,
   OrgUserRoleNames,
-  SpaceUserRoleNames,
   createUserRoleInOrg,
   createUserRoleInSpace,
 } from '../../store/types/cf-user.types';

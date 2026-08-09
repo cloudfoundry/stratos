@@ -1,4 +1,4 @@
-import { provideZonelessChangeDetection, signal, Signal, WritableSignal } from '@angular/core';
+import { provideZonelessChangeDetection, signal, Signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';

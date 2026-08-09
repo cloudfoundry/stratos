@@ -44,7 +44,7 @@
         </select>
       }
       @if (activeMulti(); as fm) {
-        <div class="relative" data-test="multi-filter-wrap" (keydown.escape)="multiPopupOpen.set(false)">
+        <div class="relative" data-test="multi-filter-wrap" tabindex="-1" (keydown.escape)="multiPopupOpen.set(false)">
           <button
             type="button"
             data-test="multi-filter-toggle"
@@ -75,7 +75,7 @@
           }
         </div>
       } @else if (activeRange(); as fr) {
-        <div class="relative" data-test="range-filter-wrap" (keydown.escape)="multiPopupOpen.set(false)">
+        <div class="relative" data-test="range-filter-wrap" tabindex="-1" (keydown.escape)="multiPopupOpen.set(false)">
           <button
             type="button"
             data-test="range-filter-toggle"

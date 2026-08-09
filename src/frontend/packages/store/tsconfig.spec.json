@@ -7,5 +7,5 @@
     "target": "ES2022"
   },
   "files": ["src/test-setup.ts"],
-  "include": ["**/*.spec.ts", "**/*.d.ts"]
+  "include": ["**/*.spec.ts", "**/*.d.ts", "../../vitest.workspace.setup.ts"]
 }

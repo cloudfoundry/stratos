@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { SessionData, UserProfileInfo } from '@stratosui/store';
 import { UserProfileDataService } from '@stratosui/store';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { first } from 'rxjs/operators';
 
 import { AuthSignalService } from './signals/auth-signal.service';
