@@ -7,28 +7,29 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
 
-// TestExpireSessionDataTableName guards the regression that had
-// expireSessionData naming a session table that does not exist on the running
-// provider — originally "sessions" on Postgres, which failed with
-// "pq: relation \"sessions\" does not exist" on every cleanup tick.
-//
-// The guard is per provider because the session store names that table
-// differently on each, so there is no single correct spelling to assert. The
-// statements are package state mutated by InitRepositoryProvider, so each case
-// re-resolves from the pristine template.
-func TestExpireSessionDataTableName(t *testing.T) {
-	template := expireSessionData
-	t.Cleanup(func() { expireSessionData = template })
-
-	for _, provider := range []string{datastore.PGSQL, datastore.MYSQL, datastore.SQLITE} {
-		expireSessionData = datastore.ModifySQLStatement(template, provider)
-
-		want := "from " + datastore.SessionsTableName(provider)
-		if !strings.Contains(expireSessionData, want) {
-			t.Errorf("%s: expireSessionData does not reference %q — got: %s", provider, want, expireSessionData)
+// TestSessionTableStatements pins the statements that join against the
+// session table to the one name migration 20260808120000 creates on every
+// provider. Before the stores were unified (GH #5733) the table was
+// "http_sessions" on Postgres and "sessions" elsewhere, and a hardcoded
+// spelling here failed on whichever providers it wasn't written for —
+// "pq: relation \"sessions\" does not exist" on every cleanup tick was the
+// original regression (GH #5730).
+func TestSessionTableStatements(t *testing.T) {
+	for name, stmt := range map[string]string{
+		"expireSessionData": expireSessionData,
+		"isValidSession":    isValidSession,
+	} {
+		if !strings.Contains(stmt, "from sessions") {
+			t.Errorf("%s does not reference the sessions table — got: %s", name, stmt)
 		}
-		if strings.Contains(expireSessionData, datastore.SessionsTablePlaceholder) {
-			t.Errorf("%s: expireSessionData still carries the unresolved placeholder", provider)
+		if strings.Contains(stmt, "http_sessions") {
+			t.Errorf("%s references the pre-unification postgres table — got: %s", name, stmt)
+		}
+		// Postgres positional parameters must not survive dialect resolution.
+		for _, provider := range []string{datastore.MYSQL, datastore.SQLITE} {
+			if out := datastore.ModifySQLStatement(stmt, provider); strings.Contains(out, "$") {
+				t.Errorf("%s not dialect-resolved for %s: %s", name, provider, out)
+			}
 		}
 	}
 }
