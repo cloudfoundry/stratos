@@ -1,7 +1,6 @@
 package cfappssh
 
 import (
-	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -23,9 +22,6 @@ import (
 
 
 const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-
 	md5FingerprintLength          = 47 // inclusive of space between bytes
 	base64Sha256FingerprintLength = 43
 )
@@ -128,12 +124,15 @@ func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
 	defer func() { _ = connection.Close() }()
 
 	// Upgrade the web socket
-	ws, pingTicker, err := api.UpgradeToWebSocket(c)
+	ws, err := api.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}
 	defer ws.CloseNow()
-	defer pingTicker.Stop()
+
+	// A pasted block of text arrives as a single KeyCode message of unbounded
+	// size, so no read limit can be safely applied to this socket
+	ws.SetReadLimit(-1)
 
 	readCtx := c.Request().Context()
 
@@ -258,11 +257,8 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 			break
 		}
 
-		ctx, cancel := context.WithTimeout(context.Background(), writeWait)
 		bytes := fmt.Sprintf("% x\n", buffer[:len])
-		err = ws.Write(ctx, websocket.MessageText, []byte(bytes))
-		cancel()
-		if err != nil {
+		if err := api.WriteText(ws, []byte(bytes)); err != nil {
 			log.Error("App SSH Failed to write nessage")
 			_ = ws.CloseNow()
 			break

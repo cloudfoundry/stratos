@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/labstack/echo/v4"
 	log "github.com/sirupsen/logrus"
@@ -34,12 +33,6 @@ type terminalSize struct {
 	Width  uint16
 	Height uint16
 }
-
-const (
-	// Time allowed to write a message to the peer.
-	writeWait = 10 * time.Second
-
-)
 
 // Start handles web-socket request to launch a Kubernetes Terminal
 func (k *KubeTerminal) Start(c echo.Context) error {
@@ -70,12 +63,15 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 	log.Debugf("Kubernetes Version: %s", version)
 
 	// Upgrade the web socket for the incoming request
-	ws, pingTicker, err := api.UpgradeToWebSocket(c)
+	ws, err := api.UpgradeToWebSocket(c)
 	if err != nil {
 		return err
 	}
 	defer ws.CloseNow()
-	defer pingTicker.Stop()
+
+	// A pasted block of text arrives as a single KeyCode message of unbounded
+	// size, so no read limit can be safely applied to this socket
+	ws.SetReadLimit(-1)
 
 	readCtx := c.Request().Context()
 
@@ -168,7 +164,7 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 			slice := make([]byte, 1)
 			slice[0] = 0
 			slice = append(slice, []byte(res.Key)...)
-			wsConn.Write(readCtx, websocket.MessageText, slice)
+			api.WriteText(wsConn, slice)
 		} else {
 			size := terminalSize{
 				Width:  uint16(res.Cols),
@@ -177,7 +173,7 @@ func (k *KubeTerminal) Start(c echo.Context) error {
 			j, _ := json.Marshal(size)
 			resizeStream := []byte{4}
 			slice := append(resizeStream, j...)
-			wsConn.Write(readCtx, websocket.MessageText, slice)
+			api.WriteText(wsConn, slice)
 		}
 	}
 }
@@ -190,11 +186,13 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn) {
 			ws.CloseNow()
 			break
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), writeWait)
+		if len(r) == 0 {
+			// Exec stream messages carry a leading channel byte; tolerate
+			// empty keepalive frames
+			continue
+		}
 		bytes := fmt.Sprintf("% x\n", r[1:])
-		err = ws.Write(ctx, websocket.MessageText, []byte(bytes))
-		cancel()
-		if err != nil {
+		if err := api.WriteText(ws, []byte(bytes)); err != nil {
 			log.Errorf("Kubernetes Terminal failed to write message: %+v", err)
 			ws.CloseNow()
 			break

@@ -92,7 +92,9 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	userGUID := echoContext.Get("user_id").(string)
 
 	log.Debug("UpgradeToWebSocket")
-	clientWebSocket, pingTicker, err := api.UpgradeToWebSocket(echoContext)
+	// No pong check: this handler goes long periods without a pending read
+	// (the push phase), during which pongs are never processed
+	clientWebSocket, err := api.UpgradeToWebSocketNoPongCheck(echoContext)
 	log.Debug("UpgradeToWebSocket done")
 	if err != nil {
 		log.Errorf("Upgrade to websocket failed due to: %+v", err)
@@ -103,7 +105,6 @@ func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
 	clientWebSocket.SetReadLimit(-1)
 	readCtx := echoContext.Request().Context()
 	defer clientWebSocket.CloseNow()
-	defer pingTicker.Stop()
 
 	// We use a simple protocol to get the source to use for cf push and any cf push cli overrides
 
@@ -780,7 +781,7 @@ func (sw *SocketWriter) Write(data []byte) (int, error) {
 
 	message, _ := getMarshalledSocketMessage(string(data), DATA)
 
-	err := sw.clientWebSocket.Write(context.Background(), websocket.MessageText, message)
+	err := api.WriteText(sw.clientWebSocket, message)
 	if err != nil {
 		log.Warnf("Failed to write data to web socket: %s", err)
 		return 0, err
@@ -797,20 +798,19 @@ func sendManifest(manifest Applications, clientWebSocket *websocket.Conn) error 
 	manifestJSON := string(manifestBytes)
 	message, _ := getMarshalledSocketMessage(manifestJSON, MANIFEST)
 
-	clientWebSocket.Write(context.Background(), websocket.MessageText, message)
-	return nil
+	return api.WriteText(clientWebSocket, message)
 }
 
 func sendErrorMessage(clientWebSocket *websocket.Conn, err error, errorType MessageType) {
 	closingMessage, _ := getMarshalledSocketMessage(fmt.Sprintf("Failed due to %s!", err), errorType)
-	if err := clientWebSocket.Write(context.Background(), websocket.MessageText, closingMessage); err != nil {
+	if err := api.WriteText(clientWebSocket, closingMessage); err != nil {
 		log.Warnf("Failed to write error message to web socket: %s", err)
 	}
 }
 
 func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 	msg, _ := getMarshalledSocketMessage("", event)
-	if err := clientWebSocket.Write(context.Background(), websocket.MessageText, msg); err != nil {
+	if err := api.WriteText(clientWebSocket, msg); err != nil {
 		log.Warnf("Failed to write message to web socket: %s", err)
 	}
 }
@@ -818,7 +818,7 @@ func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 // SendEvent sends a message over the web socket
 func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string) {
 	msg, _ := getMarshalledSocketMessage(data, event)
-	if err := clientWebSocket.Write(context.Background(), websocket.MessageText, msg); err != nil {
+	if err := api.WriteText(clientWebSocket, msg); err != nil {
 		log.Warnf("Failed to write message to web socket: %s", err)
 	}
 }

@@ -101,12 +101,11 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 	}
 
 	// Upgrade to a web socket
-	ws, pingTicker, err := api.UpgradeToWebSocket(ec)
+	ws, err := api.UpgradeToWebSocket(ec)
 	if err != nil {
 		return err
 	}
 	defer ws.CloseNow()
-	defer pingTicker.Stop()
 
 	// ws is the websocket ready for use
 
@@ -204,36 +203,30 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
 }
 
 func readLoop(c *websocket.Conn, stopchan chan<- bool, pausechan chan<- bool) {
+	defer close(stopchan)
 	for {
-
 		messageType, data, err := c.Read(context.Background())
 		if err != nil {
 			c.CloseNow()
-			close(stopchan)
-			break
+			return
 		}
 
-		switch messageType {
-		case websocket.MessageText:
-			message := ResourceMessage{}
-			err = json.Unmarshal(data, &message)
-			if err != nil {
-				log.Warnf("Failed to parse content of helm resource websocket message: %+v", err)
-				break
-			}
-
-			switch message.MessageType {
-			case PauseTrue:
-				pausechan <- true
-				break
-			case PauseFalse:
-				pausechan <- false
-				break
-			}
-		default:
+		if messageType != websocket.MessageText {
 			c.CloseNow()
-			close(stopchan)
-			break
+			return
+		}
+
+		message := ResourceMessage{}
+		if err := json.Unmarshal(data, &message); err != nil {
+			log.Warnf("Failed to parse content of helm resource websocket message: %+v", err)
+			continue
+		}
+
+		switch message.MessageType {
+		case PauseTrue:
+			pausechan <- true
+		case PauseFalse:
+			pausechan <- false
 		}
 	}
 }
@@ -248,7 +241,7 @@ func sendResource(ws *websocket.Conn, kind string, data interface{}) error {
 		}
 
 		if txt, err = json.Marshal(resp); err == nil {
-			if err = ws.Write(context.Background(), websocket.MessageText, txt); err == nil {
+			if err = api.WriteText(ws, txt); err == nil {
 				return nil
 			}
 		}
