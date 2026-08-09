@@ -16,7 +16,7 @@
     "typescript": "5.9.2"
   },
   "devDependencies": {
-    "@angular-devkit/architect": "0.2102.19"
+    "@angular-devkit/architect": "0.2201.3"
   },
   "overrides": {
     "uuid": "11.1.1",
