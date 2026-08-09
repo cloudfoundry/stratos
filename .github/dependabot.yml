@@ -1,0 +1,14 @@
+version: 2
+updates:
+  # Root JS dependencies install with bun; the npm-style default updater
+  # edits only package.json and fails the frozen bun.lock CI install.
+  - package-ecosystem: "bun"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # The devkit package keeps its own npm lockfile.
+  - package-ecosystem: "npm"
+    directory: "/src/frontend/packages/devkit"
+    schedule:
+      interval: "weekly"
