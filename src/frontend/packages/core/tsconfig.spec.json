@@ -8,5 +8,5 @@
     ]
   },
   "files": ["src/test-setup.ts", "src/polyfills.ts"],
-  "include": ["**/*.spec.ts", "**/*.d.ts"]
+  "include": ["**/*.spec.ts", "**/*.d.ts", "../../vitest.workspace.setup.ts"]
 }

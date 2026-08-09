@@ -278,8 +278,8 @@
                 {{ detail.process?.healthCheckType ?? "-" }}</app-metadata-item
               >
               <app-metadata-item icon="schedule" label="Health Check Timeout">
-                @let healthCheckTimeout = detail.process?.healthCheckTimeoutSeconds;
-                {{ healthCheckTimeout != null ? (healthCheckTimeout | uptime) : "-" }}</app-metadata-item
+                @let healthCheckTimeout = detail.process?.healthCheckTimeoutSeconds ?? null;
+                {{ healthCheckTimeout !== null ? (healthCheckTimeout | uptime) : "-" }}</app-metadata-item
               >
               @if (detail.process?.healthCheckType === "http") {
                 <app-metadata-item icon="http" label="Health Check HTTP Endpoint">{{

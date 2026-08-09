@@ -78,7 +78,6 @@ export function provideRoleAssignmentTestDeps(cfg: RoleAssignmentTestCfg): Provi
  * and role-definition labels established in role-assignment.component.html.
  */
 export class RoleAssignmentDriver {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructor(private fixture: ComponentFixture<any>) {}
 
   private get el(): HTMLElement {
