@@ -10,7 +10,7 @@
     "tsc": "tsc"
   },
   "dependencies": {
-    "@angular-devkit/build-angular": "21.2.19",
+    "@angular-devkit/build-angular": "22.1.3",
     "@angular-devkit/core": "21.2.19",
     "@angular-devkit/schematics": "21.2.19",
     "typescript": "5.9.2"
