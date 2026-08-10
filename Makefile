@@ -15,6 +15,7 @@
 #   make stamp tag              Create + push the release tag (notes from
 #                               changelog.d fragments in the tag body)
 #   make publish                Create GitHub release + upload dist/release/*
+#                               (REPLACE=yes to replace one CI already made)
 #   make unpublish TAG=vX       Delete a GitHub release (assets and
 #                               drafts included)
 #   make stamp untag TAG=vX     Delete a tag (local + remote)
@@ -62,6 +63,8 @@
 #   TAG_MATCH=<glob>            Tag family scoping nearest-tag queries
 #                               (default: v$(LINE).*)
 #   DRAFT=yes                   publish creates a draft release
+#   REPLACE=yes                 publish deletes the release(s) already on
+#                               the tag and creates in their place
 #   LATEST=auto|yes|no          Whether publish marks the release Latest
 #                               (default auto: only when TAG is the
 #                               highest full-release tag of any line)
@@ -955,6 +958,7 @@ $(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)W
 # ── Release lifecycle (tag → publish / unpublish → untag) ────
 #   make stamp tag [VERSION=X]      create + push the annotated release tag
 #   make publish [DRAFT=yes]        gh release create + upload dist/release/*
+#   make publish REPLACE=yes        same, replacing the release already there
 #   make unpublish TAG=vX           delete the GitHub release (assets included)
 #   make stamp untag TAG=vX         delete the tag (local + remote)
 #   make stamp line [LINE=X.Y]      cut maintenance branch release/X.Y.x
@@ -1069,6 +1073,14 @@ $(call register, stamp, line)
 # refuses a tag that already has one. The check goes through the API:
 # `gh release view` can't see drafts, which is exactly the duplicate
 # that needs catching.
+# REPLACE=yes is the way past that guard, and the only one: it delegates
+# to unpublish (same target, so the tag→release-id resolution lives in one
+# place) and then creates, as a single invocation. The default still
+# refuses, because a release CI already published is exactly what the
+# guard exists to keep from being overwritten by accident. The case this
+# serves is CI publishing something WRONG — release.yml runs
+# `make publish` itself on a v* tag, so by the time a human could, the
+# guard has already tripped and the recovery is a replacement.
 .PHONY: publish unpublish sweep changelog preview
 publish:
 	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
@@ -1079,8 +1091,12 @@ publish:
 	fi; \
 	EXISTING=$$(gh api --paginate 'repos/{owner}/{repo}/releases' --jq '.[].tag_name' | grep -Fxc "$$TAG" || true); \
 	if [ "$$EXISTING" -gt 0 ]; then \
-		echo "ERROR: $$TAG already has $$EXISTING GitHub release(s), drafts included — 'make unpublish TAG=$$TAG' first" >&2; \
-		exit 1; \
+		if [ "$(REPLACE)" != "yes" ]; then \
+			echo "ERROR: $$TAG already has $$EXISTING GitHub release(s), drafts included — 'make unpublish TAG=$$TAG' first, or 'make publish REPLACE=yes' to do both" >&2; \
+			exit 1; \
+		fi; \
+		echo "REPLACE=yes: replacing the $$EXISTING existing release(s) on $$TAG"; \
+		$(MAKE) --no-print-directory unpublish TAG="$$TAG" DRYRUN="$(DRYRUN)" || exit 1; \
 	fi; \
 	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
 	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft,--latest=$($(_HIDE)LATEST_RESOLVED)) $(if $(NOTES),--notes-file "$(NOTES)",--notes-from-tag) $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
@@ -1382,6 +1398,7 @@ help:
 	@echo "  make release github       GitHub release archives only"
 	@echo "  make stamp tag            Create + push the release tag"
 	@echo "  make publish              Create GitHub release + upload dist/release/*"
+	@echo "  make publish REPLACE=yes  Replace the release already on the tag"
 	@echo "  make unpublish TAG=vX     Delete the GitHub release (assets included)"
 	@echo "  make stamp untag TAG=vX   Delete the tag (local + remote)"
 	@echo ""
@@ -1455,6 +1472,7 @@ help:
 	@echo "  PLATFORM=os/arch          Override target platform"
 	@echo "  TAG=vX.Y.Z                Tag for publish/unpublish/stamp tag/untag"
 	@echo "  DRAFT=yes                 publish creates a draft release"
+	@echo "  REPLACE=yes               publish deletes the release(s) on the tag first"
 	@echo "  NOTES=<file>              Notes file for publish (default: CHANGELOG section)"
 	@echo "  RM_SITE=yes               make clean repo also removes site.mk"
 	@echo ""
