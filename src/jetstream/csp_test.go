@@ -414,8 +414,12 @@ func TestServeIndexHTMLOverridesTheStaticCacheMiddleware(t *testing.T) {
 // GET "/*". Echo must prefer the explicit route or the document goes out raw
 // and unnonced, with nothing else failing to show it.
 func TestExplicitRootRouteBeatsTheStaticHandler(t *testing.T) {
+	// Lowercase on purpose: the nonce is rand.Text(), whose base32 alphabet is
+	// uppercase letters and digits, so an uppercase sentinel can turn up inside
+	// a nonce by chance and fail a run that served the right document.
+	const staticBody = "raw-static-file"
 	dir := t.TempDir()
-	if err := os.WriteFile(filepath.Join(dir, "index.html"), []byte("RAW"), 0o600); err != nil {
+	if err := os.WriteFile(filepath.Join(dir, "index.html"), []byte(staticBody), 0o600); err != nil {
 		t.Fatalf("write index.html: %v", err)
 	}
 	p := &portalProxy{indexHTMLTemplate: `<app-root></app-root>`}
@@ -427,7 +431,7 @@ func TestExplicitRootRouteBeatsTheStaticHandler(t *testing.T) {
 	rec := httptest.NewRecorder()
 	e.ServeHTTP(rec, httptest.NewRequest(http.MethodGet, "/", nil))
 
-	if strings.Contains(rec.Body.String(), "RAW") {
+	if strings.Contains(rec.Body.String(), staticBody) {
 		t.Errorf("static handler won: %q", rec.Body.String())
 	}
 	if !strings.Contains(rec.Body.String(), "ngCspNonce=") {
