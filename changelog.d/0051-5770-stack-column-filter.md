@@ -1,2 +1,0 @@
-[Features]
-- Application lists show each app's stack and can filter by it when a foundation has more than one stack installed — the operator's "which apps are still on the old stack?" question during a stack rollover, answered from the list. Stack and Status both join the list's field-selectable filter as a checklist: pick one or several values at once, defaulting to all. A stack with no apps stays selectable, so filtering to it and seeing zero results identifies a removable stack. The Cloud Foundry picker lists each foundation's installed stacks.

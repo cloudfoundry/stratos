@@ -1,2 +1,0 @@
-[BugFixes]
-- The Username field in the Add User dialog and the Email field on the Invite Users page are full width again instead of the browser's ~20-character default. Both render the shared stacked-input component, whose form field never grew inside its flex row and whose input carried no width of its own — the field shrank to content and the input fell back to the browser default, so a long username or email scrolled out of sight as it was typed (#5758).
