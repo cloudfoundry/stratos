@@ -51,7 +51,8 @@ Valid sections, in the order they appear in the published notes:
 | `[Breaking Changes]` | Anything an operator must act on before upgrading |
 | `[Features]` | New functionality |
 | `[BugFixes]` | Fixes |
-| `[Chores]` | Dependency bumps, refactors, CI/build changes |
+| `[Maintainability]` | Keeping the codebase current: retiring an unmaintained or archived dependency, consolidating forked or vendored code, clearing scanner findings |
+| `[Chores]` | Routine dependency bumps, CI/build changes, docs |
 | `[Security Updates]` | CVE fixes (table of release/version/CVE links) |
 
 A section appears in the published notes only when at least one fragment
