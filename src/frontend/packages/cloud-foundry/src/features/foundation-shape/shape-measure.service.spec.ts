@@ -94,4 +94,36 @@ describe('ShapeMeasureService', () => {
       expect(service.inFlight().has('cf-1:ecosystem')).toBe(false);
     });
   });
+
+  describe('measureRoles', () => {
+    it('takes the whole users-and-roles join in one request', () => {
+      expect(service.rolesCost()).toBe('1 request');
+      service.measureRoles('cf-1');
+      expect(service.inFlight().has('cf-1:roles')).toBe(true);
+
+      httpMock.expectOne('/pp/v1/cf/users/cf-1').flush({
+        resources: [{ guid: 'u1', username: 'alice', cnsiGuid: 'cf-1', orgRoles: [{ orgGuid: 'o1', roles: ['org_manager'] }], spaceRoles: [] }],
+        totalResults: 1,
+      });
+      httpMock.verify();
+
+      const measured = service.roles().get('cf-1');
+      expect(measured?.users.map(u => u.username)).toEqual(['alice']);
+      expect(measured?.fetchedAt).toBeInstanceOf(Date);
+      expect(service.inFlight().has('cf-1:roles')).toBe(false);
+    });
+
+    it('records nothing when the fetch fails, so failure never reads as "no grants"', () => {
+      service.measureRoles('cf-1');
+      httpMock.expectOne('/pp/v1/cf/users/cf-1').flush('nope', { status: 403, statusText: 'Forbidden' });
+      expect(service.roles().get('cf-1')).toBeUndefined();
+      expect(service.inFlight().has('cf-1:roles')).toBe(false);
+    });
+
+    it('distinguishes a foundation with no users from a failure', () => {
+      service.measureRoles('cf-1');
+      httpMock.expectOne('/pp/v1/cf/users/cf-1').flush({ resources: [], totalResults: 0 });
+      expect(service.roles().get('cf-1')?.users).toEqual([]);
+    });
+  });
 });
