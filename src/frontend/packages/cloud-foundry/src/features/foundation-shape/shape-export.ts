@@ -76,9 +76,16 @@ export interface AgnosticExport {
   };
 }
 
-export const buildAgnosticExport = (input: AgnosticExportInput): AgnosticExport => {
-  const { shape, sessionTotals, drains, collectedAt, measuredTotals, measuredEcosystem } = input;
-
+/**
+ * Entity counts in schema_version 1 naming, from whichever passes have run —
+ * a count that never loaded is absent, never 0. Shared with the detail export
+ * (#5702) so both files answer "how big is this foundation" identically.
+ */
+export const buildTotals = (
+  sessionTotals: SessionTotals,
+  drains: Pick<ShapeDrains, 'counts' | 'servicesCounts'>,
+  measuredTotals?: MeasuredTotals
+): Record<string, number> => {
   const totals: Record<string, number> = {};
   if (drains.counts) {
     totals['organizations'] = sessionTotals.orgs;
@@ -100,6 +107,13 @@ export const buildAgnosticExport = (input: AgnosticExportInput): AgnosticExport 
       totals[key] = count;
     }
   }
+  return totals;
+};
+
+export const buildAgnosticExport = (input: AgnosticExportInput): AgnosticExport => {
+  const { shape, sessionTotals, drains, collectedAt, measuredTotals, measuredEcosystem } = input;
+
+  const totals = buildTotals(sessionTotals, drains, measuredTotals);
 
   const distributions: AgnosticExport['distributions'] = { top_share: {} };
   const d = shape.distributions;
