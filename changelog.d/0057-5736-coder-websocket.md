@@ -1,2 +1,2 @@
-[Chores]
+[Maintainability]
 - Jetstream's WebSocket layer moved from gorilla/websocket to the maintained coder/websocket v1.8.15, covering everything that streams over a socket: Cloud Foundry application SSH, application deploy, log and firehose streams, the Kubernetes terminal and the Helm release watcher. gorilla was pinned to a pseudo-version newer than its own last release with no upstream activity since March 2025, so this drops a dependency nobody maintains. Origin handling, the 27-second keepalive cadence and dead-peer teardown all behave as before; writes now route through one bounded helper rather than a hand-rolled timeout per plugin. gorilla remains an indirect dependency through noaa until the log-cache work retires it (#5736).

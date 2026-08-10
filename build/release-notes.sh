@@ -29,7 +29,13 @@ FRAG_DIR="${FRAG_DIR:-${ROOT_DIR}/changelog.d}"
 
 # Section order is the release-notes layout: Breaking Changes lead when
 # present; Security Updates (CVE table) close.
-SECTION_ORDER='Breaking Changes|Features|BugFixes|Chores|Security Updates'
+#
+# Maintainability sits between the user-facing sections and Chores: work
+# that keeps the codebase current rather than changing what the console
+# does — retiring an unmaintained dependency, consolidating forked or
+# vendored code, clearing a scanner finding. A reader upgrading wants it
+# above routine bumps, but it is not a feature or a fix.
+SECTION_ORDER='Breaking Changes|Features|BugFixes|Maintainability|Chores|Security Updates'
 
 fragments() {
   find "${FRAG_DIR}" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | LC_ALL=C sort
