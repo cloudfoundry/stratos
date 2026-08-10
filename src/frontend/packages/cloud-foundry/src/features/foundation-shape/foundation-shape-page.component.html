@@ -198,6 +198,25 @@
           }
 
           <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="text-sm">Users &amp; roles</span>
+            <span class="text-xs text-content-muted">org and space grants; named export only</span>
+            <span class="text-xs text-content-muted">({{ measure.rolesCost() }})</span>
+            <button data-test="measure-roles" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="measuring(section, 'roles')"
+              (click)="measure.measureRoles(section.guid)">
+              @if (measuring(section, 'roles')) { Measuring&hellip; }
+              @else if (measuredRoles(section)) { Re-measure }
+              @else { Measure }
+            </button>
+            @if (measuredRoles(section); as roles) {
+              <span class="text-xs text-content-muted" data-test="measured-roles">
+                {{ rolesSummary(roles) }} &mdash; measured {{ ageOf(roles.fetchedAt) }}
+              </span>
+            }
+          </div>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
             <span class="text-sm">Stacks &amp; buildpacks defined</span>
             <span class="text-xs text-content-muted">full definition lists; enables defined-vs-used</span>
             <span class="text-xs text-content-muted">({{ measure.ecosystemCost() }})</span>
@@ -258,6 +277,21 @@
               (click)="copyMarkdown(section)">
               Copy markdown
             </button>
+          </div>
+
+          <!-- Export (#5702): the same drains with names kept; confirmed at the click -->
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1" data-test="shape-export-detail">
+            <span class="text-sm">Export named data</span>
+            <span class="text-xs text-content-muted">orgs, spaces and apps by name and GUID &mdash; plus whatever is measured above</span>
+            <button data-test="export-detail-json" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300 hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="!canExportDetail(section)"
+              (click)="downloadDetailJson(section)">
+              Download detail JSON
+            </button>
+            @if (!canExportDetail(section)) {
+              <span class="text-xs text-content-muted">needs the orgs drain first</span>
+            }
           </div>
         }
       </div>

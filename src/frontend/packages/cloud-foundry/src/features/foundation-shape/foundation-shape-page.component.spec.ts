@@ -1,13 +1,13 @@
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { EndpointsSignalService } from '@stratosui/core';
+import { ConfirmationDialogService, EndpointsSignalService } from '@stratosui/core';
 import { EndpointModel } from '@stratosui/store';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import { FoundationShapePageComponent } from './foundation-shape-page.component';
-import { MeasuredEcosystem, MeasuredTotals, ShapeMeasureService } from './shape-measure.service';
-import { app, org, space } from './testing/entity-builders';
+import { MeasuredEcosystem, MeasuredRoles, MeasuredTotals, ShapeMeasureService } from './shape-measure.service';
+import { app, binding, org, serviceInstance, space, user } from './testing/entity-builders';
 
 const cfEndpoint = { guid: 'cf-1', name: 'My Cloud Foundry', cnsi_type: 'cf' } as EndpointModel;
 const adminCfEndpoint = {
@@ -37,6 +37,9 @@ const fakeDataService = () => ({
   appsLastFetched: signal<Date | null>(new Date('2026-08-01T10:00:00Z')),
   spacesLastFetched: signal<Date | null>(new Date('2026-08-01T10:00:00Z')),
   servicesCountsLastFetched: signal<Date | null>(new Date('2026-08-01T10:00:00Z')),
+  servicesDetailsLastFetched: signal<Date | null>(null),
+  serviceInstances: signal([serviceInstance('si1', 's1')]),
+  serviceCredentialBindings: signal([binding('b1', 'a1', 'si1')]),
   orgsStale: signal(false),
   appsStale: signal(false),
   spacesStale: signal(false),
@@ -52,12 +55,17 @@ describe('FoundationShapePageComponent', () => {
   let measure: {
     totals: ReturnType<typeof signal<ReadonlyMap<string, MeasuredTotals>>>;
     ecosystem: ReturnType<typeof signal<ReadonlyMap<string, MeasuredEcosystem>>>;
+    roles: ReturnType<typeof signal<ReadonlyMap<string, MeasuredRoles>>>;
     inFlight: ReturnType<typeof signal<ReadonlySet<string>>>;
     totalsCost: () => string;
     ecosystemCost: () => string;
+    rolesCost: () => string;
     measureTotals: ReturnType<typeof vi.fn>;
     measureEcosystem: ReturnType<typeof vi.fn>;
+    measureRoles: ReturnType<typeof vi.fn>;
   };
+  /** Records the confirm config and lets a test decide whether the user confirms. */
+  let confirmed: { config: { title: string; message: string } | null; accept: boolean };
 
   beforeEach(async () => {
     services = new Map();
@@ -73,12 +81,16 @@ describe('FoundationShapePageComponent', () => {
     measure = {
       totals: signal<ReadonlyMap<string, MeasuredTotals>>(new Map()),
       ecosystem: signal<ReadonlyMap<string, MeasuredEcosystem>>(new Map()),
+      roles: signal<ReadonlyMap<string, MeasuredRoles>>(new Map()),
       inFlight: signal<ReadonlySet<string>>(new Set()),
       totalsCost: () => '8 requests',
       ecosystemCost: () => '2 requests',
+      rolesCost: () => '1 request',
       measureTotals: vi.fn(),
       measureEcosystem: vi.fn(),
+      measureRoles: vi.fn(),
     };
+    confirmed = { config: null, accept: true };
 
     await TestBed.configureTestingModule({
       imports: [FoundationShapePageComponent],
@@ -90,6 +102,17 @@ describe('FoundationShapePageComponent', () => {
         },
         { provide: EndpointDataRegistry, useValue: registry },
         { provide: ShapeMeasureService, useValue: measure },
+        {
+          provide: ConfirmationDialogService,
+          useValue: {
+            open: (config: { title: string; message: string }, doFn: () => void) => {
+              confirmed.config = config;
+              if (confirmed.accept) {
+                doFn();
+              }
+            },
+          },
+        },
       ],
     }).compileComponents();
 
@@ -260,6 +283,13 @@ describe('FoundationShapePageComponent', () => {
       expect(root.querySelectorAll('[data-test="compare-select-dot"]')).toHaveLength(2);
     });
 
+    it('starts a roles measurement, stating its single-request cost', async () => {
+      expect((fixture.nativeElement as HTMLElement).textContent).toContain('1 request');
+      (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[data-test="measure-roles"]').click();
+      await fixture.whenStable();
+      expect(measure.measureRoles).toHaveBeenCalledWith('cf-1');
+    });
+
     it('renders defined stacks and buildpacks with unused stacks called out', async () => {
       measure.ecosystem.set(new Map([
         ['cf-1', {
@@ -275,6 +305,104 @@ describe('FoundationShapePageComponent', () => {
       expect(panel?.textContent).toContain('cflinuxfs3');
       expect(panel?.textContent).toContain('unused');
       expect(panel?.textContent).toContain('ruby_buildpack');
+    });
+  });
+
+  describe('detail (named) export', () => {
+    const clickDetailExport = async () => {
+      endpoints.set([adminCfEndpoint]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      (fixture.nativeElement as HTMLElement)
+        .querySelector<HTMLButtonElement>('[data-test="export-detail-json"]')
+        .click();
+      await fixture.whenStable();
+    };
+
+    beforeEach(() => {
+      // jsdom has no download implementation; the click is all this asserts on.
+      // Cleared per test — spying the same method twice reuses one mock, so
+      // call history would otherwise carry over from the previous test.
+      vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test').mockClear();
+      vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined).mockClear();
+    });
+
+    it('stays hidden from a non-admin connection, alongside the anonymous export', () => {
+      expect((fixture.nativeElement as HTMLElement).querySelector('[data-test="shape-export-detail"]')).toBeNull();
+    });
+
+    it('names the endpoint, the orgs and the apps in the tree', async () => {
+      endpoints.set([adminCfEndpoint]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const payload = component.detailPayload(component.sections()[0]);
+      expect(payload?.mode).toBe('detail');
+      expect(payload?.endpoint).toEqual({ guid: 'cf-1', name: 'My Cloud Foundry' });
+      expect(payload?.organizations.map(o => o.name)).toEqual(['org-o1', 'org-o2']);
+      expect(payload?.organizations[0].spaces?.map(s => s.name)).toEqual(['space-s1', 'space-s2']);
+      expect(payload?.organizations[0].spaces?.[0].apps?.[0]).toMatchObject({ name: 'app-a1', memory_mb: 256 });
+    });
+
+    it('refuses to build a tree before the orgs drain has run', async () => {
+      endpoints.set([adminCfEndpoint]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      services.get('cf-1').orgsLastFetched.set(null);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(component.canExportDetail(component.sections()[0])).toBe(false);
+      expect(component.detailPayload(component.sections()[0])).toBeNull();
+      const button = (fixture.nativeElement as HTMLElement)
+        .querySelector<HTMLButtonElement>('[data-test="export-detail-json"]');
+      expect(button.disabled).toBe(true);
+    });
+
+    it('asks for confirmation naming what leaves the browser', async () => {
+      await clickDetailExport();
+      expect(confirmed.config?.title).toBe('Export named foundation data');
+      expect(confirmed.config?.message).toContain('2 orgs');
+      expect(confirmed.config?.message).toContain('My Cloud Foundry');
+    });
+
+    it('downloads nothing when the confirmation is declined', async () => {
+      confirmed.accept = false;
+      await clickDetailExport();
+      expect(confirmed.config).not.toBeNull();
+      expect(URL.createObjectURL).not.toHaveBeenCalled();
+    });
+
+    it('mentions role grants in the confirmation only once they are measured', async () => {
+      measure.roles.set(new Map([
+        ['cf-1', {
+          users: [user('alice', { orgRoles: [{ orgGuid: 'o1', roles: ['org_manager'] }] })],
+          fetchedAt: new Date(),
+        }],
+      ]));
+      await clickDetailExport();
+      expect(confirmed.config?.message).toContain('user role grants');
+      expect(component.detailPayload(component.sections()[0])?.organizations[0].roles).toEqual({
+        alice: ['org_manager'],
+      });
+    });
+
+    it('leaves service data out until the services drain has run', async () => {
+      endpoints.set([adminCfEndpoint]);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      expect(component.detailPayload(component.sections()[0])?.organizations[0].spaces?.[0])
+        .not.toHaveProperty('service_instances');
+
+      services.get('cf-1').servicesDetailsLastFetched.set(new Date('2026-08-01T10:00:00Z'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const payload = component.detailPayload(component.sections()[0]);
+      expect(payload?.organizations[0].spaces?.[0].service_instances?.[0].guid).toBe('si1');
+      expect(payload?.organizations[0].spaces?.[0].apps?.[0].service_bindings?.[0].guid).toBe('b1');
+      expect(payload?.drains['services']).toBe('2026-08-01T10:00:00.000Z');
+      // 1 instance loaded against a session count of 3 — a prefix, and it says so.
+      expect(payload?.truncated).toEqual(['service_instances']);
     });
   });
 });
