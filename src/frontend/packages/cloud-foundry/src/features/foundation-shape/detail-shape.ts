@@ -62,9 +62,15 @@ export interface DetailSpace {
   guid: string;
   name: string;
   quota_guid?: string;
-  /** Server-side aggregates — the space's own view, not a count of `apps` below. */
-  app_count: number;
-  route_count: number;
+  // StSpace.appCount / routeCount are deliberately NOT exported: on the spaces
+  // this page can see they are always 0. The registry drains the space list
+  // with `enrich=none` (endpoint-data.service.ts) because the per-space count
+  // enrichment costs ~8 filtered CAPI round-trips per page and nothing renders
+  // it off that list, so getNativeSpaces skips it and the field keeps its zero
+  // value. Exporting that would put a 0 next to a populated `apps` array --
+  // observed across all 603 spaces of a foundation where two held apps. The
+  // nested array is the count that means something, and an un-run apps drain
+  // is already reported by omitting the key.
   apps?: DetailApp[];
   service_instances?: DetailServiceInstance[];
   roles?: RoleGrants;
@@ -188,8 +194,6 @@ export const buildDetailTree = (input: DetailTreeInput): DetailTree => {
     guid: space.guid,
     name: space.name,
     ...(space.quotaGuid !== undefined && { quota_guid: space.quotaGuid }),
-    app_count: space.appCount,
-    route_count: space.routeCount,
     ...(appsBySpace && {
       apps: (appsBySpace.get(space.guid) ?? []).map(app => toDetailApp(app, bindingsByApp)),
     }),
