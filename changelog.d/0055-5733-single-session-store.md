@@ -1,2 +1,2 @@
-[Changes]
+[Chores]
 - The backend now uses one session store implementation for all three database providers, replacing the per-provider stores (including a 2017 fork and a vendored copy) with a single maintained one. The session table is named `sessions` everywhere and is recreated on upgrade, so every user is signed out once when this version first starts. Signing out now also removes the session server-side on MySQL and SQLite, matching what PostgreSQL always did.
