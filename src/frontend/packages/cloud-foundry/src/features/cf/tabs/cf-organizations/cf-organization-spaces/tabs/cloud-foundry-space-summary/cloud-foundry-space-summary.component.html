@@ -67,7 +67,9 @@
         </app-tile>
         @if (((cfSpaceService.userProvidedServiceInstancesCount$ | async) ?? 0) > 0) {
           <app-tile>
-            <app-card-number-metric iconFont="stratos-icons" icon="service" label="User Service Instances"
+            <app-card-number-metric
+              link="/cloud-foundry/{{cfSpaceService.cfGuid}}/organizations/{{cfSpaceService.orgGuid}}/spaces/{{cfSpaceService.spaceGuid}}/user-service-instances"
+              iconFont="stratos-icons" icon="service" label="User Service Instances"
             value="{{ (cfSpaceService.userProvidedServiceInstancesCount$ | async)}}"></app-card-number-metric>
           </app-tile>
         }
