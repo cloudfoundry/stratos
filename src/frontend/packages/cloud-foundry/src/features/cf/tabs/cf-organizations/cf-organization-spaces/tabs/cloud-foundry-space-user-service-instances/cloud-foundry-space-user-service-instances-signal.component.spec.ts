@@ -34,6 +34,7 @@ function makeStubSignalConfigService() {
   };
   return {
     initializeForSpace: vi.fn(),
+    hasLoadedOnce: signal(true).asReadonly(),
     initialize: vi.fn(),
     loadAll: vi.fn().mockResolvedValue(undefined),
     refresh: vi.fn().mockResolvedValue(undefined),

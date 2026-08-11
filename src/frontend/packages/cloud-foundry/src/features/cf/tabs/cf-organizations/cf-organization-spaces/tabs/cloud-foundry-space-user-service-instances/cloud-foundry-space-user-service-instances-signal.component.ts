@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
@@ -65,6 +65,10 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
   /** Unfiltered total for the L5 sub-nav count. Bound in the constructor
    *  after initializeForSpace() creates the view. */
   public totalServiceInstances!: Signal<number>;
+
+  /** Sub-nav count is pending until the first drain completes — renders an
+   *  ellipsis instead of a misleading 0 (#5766). */
+  public readonly countPending: Signal<boolean> = computed(() => !this.instancesConfig.hasLoadedOnce());
 
   /** Gate the Add button on space-scoped SERVICE_INSTANCE_CREATE
    *  (SPACE_DEVELOPER). Built here in the injection context so toSignal()

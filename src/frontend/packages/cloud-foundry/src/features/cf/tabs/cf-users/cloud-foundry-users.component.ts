@@ -83,6 +83,10 @@ export class CloudFoundryUsersComponent {
    *  available at field-initializer time. */
   readonly totalUsers!: Signal<number>;
 
+  /** Sub-nav count is pending until the first users drain completes —
+   *  renders an ellipsis instead of a misleading 0 (#5766). */
+  readonly countPending: Signal<boolean> = computed(() => !this.usersConfig.hasLoadedOnce());
+
   /** Action buttons surfaced in the always-visible ListSubNavComponent
    *  "Total Users" bar. Prepended Add User + Manage Roles (primary) +
    *  two destructive Remove entries. disabled/invoke semantics are

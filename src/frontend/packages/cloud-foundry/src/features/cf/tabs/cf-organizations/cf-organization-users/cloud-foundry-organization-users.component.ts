@@ -90,6 +90,10 @@ export class CloudFoundryOrganizationUsersComponent {
    *  isn't available at field-initializer time. */
   readonly totalUsers!: Signal<number>;
 
+  /** Sub-nav count is pending until the first users drain completes —
+   *  renders an ellipsis instead of a misleading 0 (#5766). */
+  readonly countPending: Signal<boolean> = computed(() => !this.usersConfig.hasLoadedOnce());
+
   /** True when the current user holds org or space role-change rights on
    *  this endpoint. Bridged from Observable → signal via toSignal;
    *  initialValue: false keeps actions safely disabled until first emission. */

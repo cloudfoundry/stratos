@@ -2,6 +2,7 @@
   @if (listConfig(); as config) {
     <app-list-sub-nav title="Total Service Instances"
                       [count]="totalServiceInstances"
+                      [loading]="countPending"
                       [addAction]="createServiceInstanceAction"></app-list-sub-nav>
     <app-signal-list [config]="config" class="flex-1 min-h-0"></app-signal-list>
   }
