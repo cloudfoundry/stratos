@@ -130,6 +130,9 @@ export class CfServiceInstancesSignalConfigService {
   // stale-selection clearer that keeps the toolbar display in sync with the
   // filter when an endpoint disconnects mid-session.
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  /** True once the first load has completed for the current scope. Pages
+   *  use `!hasLoadedOnce()` to show a pending count in the sub-nav (#5766). */
+  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
   private readonly injector = inject(Injector);
   private readonly http = inject(HttpClient);
   private readonly deleteController = inject(EntityDeleteController);
