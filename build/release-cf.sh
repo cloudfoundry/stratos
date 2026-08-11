@@ -53,8 +53,22 @@ fi
 # composes in one pass. korifi keeps requiring its own static build below.
 CF_ARCH="${CF_ARCH:-amd64}"
 jetstream_bin="${BIN_DIR}/jetstream"
+took_fallback=false
 if [[ ! -f "${jetstream_bin}" && "${MODE}" == "cf" && -f "${BIN_DIR}/jetstream-linux-${CF_ARCH}" ]]; then
   jetstream_bin="${BIN_DIR}/jetstream-linux-${CF_ARCH}"
+  took_fallback=true
+fi
+
+# The cross-compiled artifact is whatever the last `make build backend` left
+# behind, which may predate the version being packaged now — and the zip would
+# still carry this release's name. That shipped a v5.1.0 backend inside a
+# 5.2.0-dev.1 package once. The version is linked in via ldflags, so the
+# binary itself can be asked.
+if [[ "${took_fallback}" == true ]] && ! grep -aqF "${VERSION}" "${jetstream_bin}"; then
+  error "Backend artifact predates this release — it does not carry ${VERSION}"
+  error "  Using: ${jetstream_bin}"
+  error "  Run: make build backend  (refreshes every platform artifact)"
+  fail=1
 fi
 
 if [[ ! -f "${jetstream_bin}" ]]; then
