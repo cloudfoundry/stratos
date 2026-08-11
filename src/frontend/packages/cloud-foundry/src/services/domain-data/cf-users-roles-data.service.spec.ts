@@ -169,7 +169,9 @@ describe('CfUsersRolesDataService', () => {
 
   describe('executeChanges user-cache sync (legacy cfUserReducer equivalent)', () => {
     const PAGED_P1 = '/pp/v1/cf/users/cf-1?per_page=500&page=1';
-    const SNAPSHOT = '/pp/v1/cf/users/cf-1';
+    // The snapshot drains the same paged endpoint as the paged data
+    // service now (#5805) — one page suffices for these fixtures.
+    const SNAPSHOT = '/pp/v1/cf/users/cf-1?per_page=500&page=1';
     const cachedAlice = (): StUser => ({
       guid: 'u-a', username: 'alice', cnsiGuid: 'cf-1',
       orgRoles: [{ orgGuid: 'org-1', roles: ['auditor'] }],

@@ -2,7 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import type { StUser, StUsersResponse } from './stratos-types';
+import { drainCfPages } from './drain-pages';
+import type { StUser } from './stratos-types';
 
 // Per-CNSI lazy snapshot of the V3-native users + roles join (the
 // `/pp/v1/cf/users/:cnsi` envelope returned by getNativeUsers).
@@ -56,8 +57,12 @@ export class CnsiUsersSnapshotService {
   private fetch(cnsiGuid: string): Promise<void> {
     const existing = this.inflight.get(cnsiGuid);
     if (existing) return existing;
+    // Full drain, not a single GET: the endpoint is server-paged (V3
+    // default per_page=50), so a bare fetch silently truncates to the
+    // first page and every count derived from the snapshot undercounts
+    // on foundations with >50 users (#5805).
     const p = firstValueFrom(
-      this.http.get<StUsersResponse>(`/pp/v1/cf/users/${cnsiGuid}`),
+      drainCfPages<StUser>(this.http, `/pp/v1/cf/users/${cnsiGuid}`),
     )
       .then(resp => {
         this.snapshots.get(cnsiGuid)!.set(resp?.resources ?? []);
