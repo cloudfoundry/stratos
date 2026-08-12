@@ -1,4 +1,4 @@
-[Bug Fixes]
+[BugFixes]
 - Fixed the Users count on the organization and space summary pages
   undercounting on foundations with more than 50 users. The summary tiles
   read a users snapshot that fetched only the first page of the paged
