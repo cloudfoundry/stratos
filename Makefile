@@ -1099,7 +1099,12 @@ publish:
 		$(MAKE) --no-print-directory unpublish TAG="$$TAG" DRYRUN="$(DRYRUN)" || exit 1; \
 	fi; \
 	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
-	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft,--latest=$($(_HIDE)LATEST_RESOLVED)) $(if $(NOTES),--notes-file "$(NOTES)",--notes-from-tag) $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
+	NOTES_FILE="$(NOTES)"; \
+	if [ -z "$$NOTES_FILE" ]; then \
+		NOTES_FILE=$$(mktemp); \
+		git tag -l --format='%(contents:body)' "$$TAG" > "$$NOTES_FILE"; \
+	fi; \
+	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft,--latest=$($(_HIDE)LATEST_RESOLVED)) --notes-file "$$NOTES_FILE" $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
 	$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@")
 
 # unpublish resolves the tag to release ids through the API: tag-based
