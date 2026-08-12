@@ -3,7 +3,8 @@ import { inject, Injectable, signal } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-import { StBuildpacksResponse, StStacksResponse, StUser, StUsersResponse } from '../../services/endpoint-data/stratos-types';
+import { drainCfPages } from '../../services/endpoint-data/drain-pages';
+import { StBuildpacksResponse, StStacksResponse, StUser } from '../../services/endpoint-data/stratos-types';
 
 /**
  * Measure-on-demand blocks for the foundation shape page (GH #5702): the
@@ -43,9 +44,11 @@ export interface MeasuredEcosystem {
 }
 
 /**
- * Users with their org and space role grants — the whole join arrives in the
- * one `/pp/v1/cf/users/{cnsi}` envelope, so this block costs a single request
- * however large the foundation is. It feeds the detail export's per-org and
+ * Users with their org and space role grants — each `/pp/v1/cf/users/{cnsi}`
+ * page carries the whole join for its users, drained across every page (the
+ * endpoint is server-paged at 500; a bare GET keeps only the V3-default
+ * first 50 and silently drops every later user — the same truncation #5805
+ * fixed for the summary tiles). It feeds the detail export's per-org and
  * per-space `roles`; the anonymous export never carries it.
  */
 export interface MeasuredRoles {
@@ -76,7 +79,7 @@ export class ShapeMeasureService {
   }
 
   rolesCost(): string {
-    return '1 request';
+    return '1 request per 500 users';
   }
 
   measureTotals(guid: string): void {
@@ -128,13 +131,12 @@ export class ShapeMeasureService {
     if (!this.begin(key)) {
       return;
     }
-    this.http
-      .get<StUsersResponse>(`/pp/v1/cf/users/${guid}`)
+    drainCfPages<StUser>(this.http, `/pp/v1/cf/users/${guid}`)
       .pipe(catchError(() => of(null)))
-      .subscribe(response => {
-        if (response) {
+      .subscribe(drained => {
+        if (drained) {
           this._roles.update(all =>
-            new Map(all).set(guid, { users: response.resources ?? [], fetchedAt: new Date() })
+            new Map(all).set(guid, { users: drained.resources, fetchedAt: new Date() })
           );
         }
         this.end(key);
