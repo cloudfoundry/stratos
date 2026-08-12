@@ -289,6 +289,12 @@
               (click)="downloadDetailJson(section)">
               Download detail JSON
             </button>
+            <button data-test="export-detail-xlsx" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300 hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="!canExportDetail(section)"
+              (click)="downloadDetailXlsx(section)">
+              Download detail spreadsheet
+            </button>
             @if (!canExportDetail(section)) {
               <span class="text-xs text-content-muted">needs the orgs drain first</span>
             }

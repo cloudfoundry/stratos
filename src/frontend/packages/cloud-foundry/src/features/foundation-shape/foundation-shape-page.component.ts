@@ -20,6 +20,7 @@ import writeXlsxFile from 'write-excel-file/browser';
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
 import { buildDetailExport, DetailExport } from './detail-export';
+import { buildDetailWorkbook } from './detail-export-xlsx';
 import { computeSessionShape } from './session-shape';
 import { ShapeCompareCardComponent } from './shape-compare-card.component';
 import { ShapeDistCardComponent } from './shape-dist-card.component';
@@ -308,9 +309,10 @@ export class FoundationShapePageComponent implements OnDestroy {
   /**
    * Named export: the double-check the #5702 maintainer comment asks for.
    * The dialog says what leaves the browser, because the file cannot be
-   * un-shared once it has.
+   * un-shared once it has. One gate for both file forms — the spreadsheet
+   * names exactly what the JSON names.
    */
-  downloadDetailJson(section: ShapeSection): void {
+  private confirmDetailExport(section: ShapeSection, download: (payload: DetailExport) => void): void {
     const payload = this.detailPayload(section);
     if (!payload) {
       return;
@@ -329,8 +331,21 @@ export class FoundationShapePageComponent implements OnDestroy {
         'Download named data',
         true
       ),
-      () => this.downloadFile(this.exportFileName(section, 'detail', 'json'), JSON.stringify(payload, null, 2))
+      () => download(payload)
     );
+  }
+
+  downloadDetailJson(section: ShapeSection): void {
+    this.confirmDetailExport(section, payload =>
+      this.downloadFile(this.exportFileName(section, 'detail', 'json'), JSON.stringify(payload, null, 2))
+    );
+  }
+
+  downloadDetailXlsx(section: ShapeSection): void {
+    this.confirmDetailExport(section, payload => {
+      const sheets = buildDetailWorkbook(payload).map(({ name, rows }) => ({ sheet: name, data: rows }));
+      void writeXlsxFile(sheets).toFile(this.exportFileName(section, 'detail', 'xlsx'));
+    });
   }
 
   downloadXlsx(section: ShapeSection): void {
