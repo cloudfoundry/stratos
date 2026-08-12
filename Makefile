@@ -424,7 +424,7 @@ endef
 $(call register, clean, frontend)
 
 define dev.frontend
-	BACKEND_PORT=$(BACKEND_PORT) bun run ng serve --port $(FRONTEND_PORT) --proxy-config proxy.conf.cjs
+	BACKEND_PORT=$(BACKEND_PORT) bun run ng serve --port $(FRONTEND_PORT) --host 0.0.0.0 --disable-host-check --proxy-config proxy.conf.cjs
 endef
 $(call register, dev, frontend)
 
