@@ -20,7 +20,8 @@
 #
 # Fragments are consumed by build/create-git-tag.sh, which embeds the
 # assembled notes in the annotated release tag body; `make publish` then
-# uses the tag body as the GitHub release notes (--notes-from-tag).
+# uses the tag BODY as the notes (%(contents:body) — the subject line
+# is the tag's display name and never enters the release body).
 
 set -euo pipefail
 

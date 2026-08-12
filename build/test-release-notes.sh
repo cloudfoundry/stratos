@@ -194,7 +194,7 @@ check "explicit since overrides the tag" "${FRAG_DIR}/0001-dependency-updates.md
   "$(bash "${RN}" deps v1.0.0 2>/dev/null)"
 
 # The tag body is where the notes are actually consumed — `make publish`
-# reads it with --notes-from-tag. Two silent losses have happened here, both
+# reads it with %(contents:body), subject excluded. Two silent losses have happened here, both
 # invisible in `release-notes.sh assemble` output and both caught only by
 # looking at a real tag, so assert against one the script itself created.
 echo "tag body:"

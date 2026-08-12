@@ -58,7 +58,7 @@ main() {
 
   # Create annotated tag. The tag body carries the release notes,
   # assembled from the changelog.d fragments — `make publish` consumes
-  # it via --notes-from-tag.
+  # the body alone via %(contents:body) — the subject stays out of the notes.
   local commit=$(git rev-parse --short HEAD)
   local notes
   # Reported here, before the notes are frozen into the tag body, so the
