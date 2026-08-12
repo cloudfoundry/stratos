@@ -9,6 +9,10 @@ import { FoundationShapePageComponent } from './foundation-shape-page.component'
 import { MeasuredEcosystem, MeasuredRoles, MeasuredTotals, ShapeMeasureService } from './shape-measure.service';
 import { app, binding, org, serviceInstance, space, user } from './testing/entity-builders';
 
+// jsdom cannot exercise the real workbook writer; the mock records the sheets it was handed.
+const writeXlsxMock = vi.hoisted(() => vi.fn(() => ({ toFile: vi.fn(() => Promise.resolve()) })));
+vi.mock('write-excel-file/browser', () => ({ default: writeXlsxMock }));
+
 const cfEndpoint = { guid: 'cf-1', name: 'My Cloud Foundry', cnsi_type: 'cf' } as EndpointModel;
 const adminCfEndpoint = {
   guid: 'cf-1',
@@ -309,12 +313,12 @@ describe('FoundationShapePageComponent', () => {
   });
 
   describe('detail (named) export', () => {
-    const clickDetailExport = async () => {
+    const clickDetailExport = async (button = 'export-detail-json') => {
       endpoints.set([adminCfEndpoint]);
       fixture.detectChanges();
       await fixture.whenStable();
       (fixture.nativeElement as HTMLElement)
-        .querySelector<HTMLButtonElement>('[data-test="export-detail-json"]')
+        .querySelector<HTMLButtonElement>(`[data-test="${button}"]`)
         .click();
       await fixture.whenStable();
     };
@@ -325,6 +329,7 @@ describe('FoundationShapePageComponent', () => {
       // call history would otherwise carry over from the previous test.
       vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test').mockClear();
       vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => undefined).mockClear();
+      writeXlsxMock.mockClear();
     });
 
     it('stays hidden from a non-admin connection, alongside the anonymous export', () => {
@@ -371,6 +376,20 @@ describe('FoundationShapePageComponent', () => {
       await clickDetailExport();
       expect(confirmed.config).not.toBeNull();
       expect(URL.createObjectURL).not.toHaveBeenCalled();
+    });
+
+    it('the spreadsheet form passes the same confirmation gate, then writes the flattened workbook', async () => {
+      await clickDetailExport('export-detail-xlsx');
+      expect(confirmed.config?.title).toBe('Export named foundation data');
+      const sheets = writeXlsxMock.mock.calls[0][0] as { sheet: string; data: unknown[][] }[];
+      expect(sheets.map(s => s.sheet)).toEqual(['Overview', 'Organizations', 'Spaces', 'Apps']);
+    });
+
+    it('declining the spreadsheet confirmation writes nothing', async () => {
+      confirmed.accept = false;
+      await clickDetailExport('export-detail-xlsx');
+      expect(confirmed.config).not.toBeNull();
+      expect(writeXlsxMock).not.toHaveBeenCalled();
     });
 
     it('mentions role grants in the confirmation only once they are measured', async () => {
