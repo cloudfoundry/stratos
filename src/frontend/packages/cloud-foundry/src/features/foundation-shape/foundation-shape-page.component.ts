@@ -19,6 +19,7 @@ import writeXlsxFile from 'write-excel-file/browser';
 
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../services/endpoint-data/endpoint-data.service';
+import { DetailDiffCardComponent } from './detail-diff-card.component';
 import { buildDetailExport, DetailExport } from './detail-export';
 import { buildDetailWorkbook } from './detail-export-xlsx';
 import { computeSessionShape } from './session-shape';
@@ -63,7 +64,14 @@ export const ageLabel = (date: Date | null, now: Date): string => {
   selector: 'app-foundation-shape-page',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DecimalPipe, InfoCardComponent, ShapeCompareCardComponent, ShapeDistCardComponent, ShapeShareBarComponent],
+  imports: [
+    DecimalPipe,
+    DetailDiffCardComponent,
+    InfoCardComponent,
+    ShapeCompareCardComponent,
+    ShapeDistCardComponent,
+    ShapeShareBarComponent,
+  ],
   templateUrl: './foundation-shape-page.component.html',
 })
 export class FoundationShapePageComponent implements OnDestroy {
@@ -281,6 +289,9 @@ export class FoundationShapePageComponent implements OnDestroy {
   canExportDetail(section: ShapeSection): boolean {
     return section.drains.orgs.fetchedAt !== null;
   }
+
+  /** The named-diff card builds live sides on demand through the page's registry access. */
+  readonly detailPayloadFn = (section: ShapeSection): DetailExport | null => this.detailPayload(section);
 
   // <endpoint>-foundational-shape-<mode>-<date>: the name says which endpoint
   // the file came from and, unambiguously, whether it names resources.

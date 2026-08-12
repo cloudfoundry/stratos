@@ -164,6 +164,9 @@ export const parseImportedExport = (raw: string): { exported?: AgnosticExport; e
   if (candidate.schema_version !== 1) {
     return { error: `unsupported schema_version (${String(candidate.schema_version)})` };
   }
+  if ((candidate as { mode?: string }).mode === 'detail') {
+    return { error: 'a named detail export — import it in the Named diff selector instead' };
+  }
   if (typeof candidate.totals !== 'object' || typeof candidate.distributions !== 'object') {
     return { error: 'missing totals or distributions blocks' };
   }
