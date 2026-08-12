@@ -207,7 +207,7 @@
     "eslint": "^9.39.5",
     "fs-extra": "11.4.0",
     "globby": "14.1.0",
-    "happy-dom": "^20.11.1",
+    "happy-dom": "^20.11.2",
     "js-yaml": "4.3.1",
     "jsdom": "^27.4.0",
     "json-schema-to-typescript": "15.0.4",
