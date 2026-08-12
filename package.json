@@ -209,7 +209,7 @@
     "globby": "14.1.0",
     "happy-dom": "^20.11.1",
     "js-yaml": "4.3.1",
-    "jsdom": "^27.4.0",
+    "jsdom": "^30.0.1",
     "json-schema-to-typescript": "15.0.4",
     "kind-of": "6.0.3",
     "mem": "9.0.2",
