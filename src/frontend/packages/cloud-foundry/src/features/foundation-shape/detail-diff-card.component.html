@@ -1,0 +1,102 @@
+<div class="flex flex-col gap-4 px-4 py-1" data-test="detail-diff">
+  <div>
+    <span class="text-sm font-semibold">Named diff</span>
+    <span class="text-xs text-content-muted ml-2">
+      pick two detail snapshots for a named diff &mdash; live sections (CF admin only) or exported detail files.
+      Entities match by guid; before &rarr; after.
+    </span>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-3 text-xs">
+    @for (slot of ['before', 'after']; track slot) {
+      <label class="flex items-center gap-1.5">
+        <span class="text-content-muted">{{ slot }}</span>
+        <select class="rounded border border-content-border bg-content-secondary px-1.5 py-1"
+          [attr.data-test]="'detail-diff-' + slot" [value]="selected(slot === 'before' ? 'before' : 'after')"
+          (change)="selectFrom(slot === 'before' ? 'before' : 'after', $event)">
+          <option value="">&mdash;</option>
+          @for (option of options(); track option.id) {
+            <option [value]="option.id">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+    }
+    <label class="text-content-muted cursor-pointer hover:underline">
+      Import detail export&hellip;
+      <input type="file" accept=".json,application/json" class="hidden" data-test="detail-diff-import"
+        (change)="importFile($event)">
+    </label>
+  </div>
+  @if (importError(); as error) {
+    <span class="text-xs text-danger-shade-600 dark:text-danger-shade-300" data-test="detail-diff-error">{{ error }}</span>
+  }
+
+  @if (diff(); as d) {
+    @for (warning of d.warnings; track warning) {
+      <div class="text-xs text-warning-shade-700 dark:text-warning-shade-300" data-test="detail-diff-warning">
+        {{ warning }}
+      </div>
+    }
+
+    <div class="flex flex-col gap-3" data-test="detail-diff-levels">
+      @for (level of levelVms(); track level.key) {
+        <div class="flex flex-col gap-1">
+          <div>
+            <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">{{ level.title }}</span>
+            @if (level.unmeasuredSide) {
+              <span class="text-xs text-content-muted ml-2">{{ level.unmeasuredSide }}</span>
+            } @else if (level.empty) {
+              <span class="text-xs text-content-muted ml-2">no change &middot; {{ level.unchanged }} unchanged</span>
+            } @else {
+              <span class="text-xs text-content-muted ml-2">{{ level.unchanged }} unchanged</span>
+            }
+          </div>
+          @if (!level.unmeasuredSide && !level.empty) {
+            <table class="text-xs w-auto">
+              <tbody>
+                @for (entry of level.removed; track entry.guid) {
+                  <tr data-test="detail-diff-removed">
+                    <td class="pr-2 py-0.5 text-danger-shade-700 dark:text-danger-shade-300">&minus;</td>
+                    <td class="pr-4 py-0.5">{{ entry.name }}</td>
+                    <td class="py-0.5 text-content-muted">{{ entry.path }}</td>
+                  </tr>
+                }
+                @for (entry of level.added; track entry.guid) {
+                  <tr data-test="detail-diff-added">
+                    <td class="pr-2 py-0.5 text-success-shade-700 dark:text-success-shade-300">+</td>
+                    <td class="pr-4 py-0.5">{{ entry.name }}</td>
+                    <td class="py-0.5 text-content-muted">{{ entry.path }}</td>
+                  </tr>
+                }
+                @for (entry of level.changed; track entry.guid) {
+                  <tr data-test="detail-diff-changed">
+                    <td class="pr-2 py-0.5 text-content-muted">&Delta;</td>
+                    <td class="pr-4 py-0.5">{{ entry.name }}</td>
+                    <td class="py-0.5 text-content-muted">
+                      @if (entry.path) { <span class="mr-2">{{ entry.path }}</span> }
+                      <span class="tabular-nums">{{ changesText(entry.changes) }}</span>
+                    </td>
+                  </tr>
+                }
+                @if (level.more > 0 || level.isOpen) {
+                  <tr>
+                    <td colspan="3" class="py-0.5">
+                      <button type="button" class="text-content-muted hover:underline"
+                        (click)="toggleLevel(level.key)">
+                        @if (level.isOpen) { show fewer } @else { {{ level.more }} more }
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="text-xs text-content-muted" data-test="detail-diff-prompt">
+      Select two different sides for a named diff.
+    </div>
+  }
+</div>

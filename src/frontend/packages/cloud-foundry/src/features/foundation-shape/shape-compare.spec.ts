@@ -171,6 +171,11 @@ describe('parseImportedExport', () => {
     expect(parseImportedExport('null').error).toBe('not a shape export');
   });
 
+  it('points a detail export at the named-diff selector instead of failing cryptically', () => {
+    const raw = JSON.stringify({ schema_version: 1, mode: 'detail', organizations: [], totals: {} });
+    expect(parseImportedExport(raw).error).toContain('Named diff');
+  });
+
   it('defaults missing top_share and composition so comparison never trips', () => {
     const raw = JSON.stringify({ schema_version: 1, collected_at: 'x', totals: { apps: 1 }, distributions: {} });
     const { exported } = parseImportedExport(raw);

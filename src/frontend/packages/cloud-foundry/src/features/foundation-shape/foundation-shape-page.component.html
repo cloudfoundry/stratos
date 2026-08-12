@@ -309,5 +309,7 @@
   <!-- Promotion verification: diff N shape snapshots (live or imported files) -->
   <app-info-card title="Compare shapes" id="shape-compare-anchor">
     <app-shape-compare-card #compare [sections]="sections()" />
+    <hr class="my-3 border-content-border">
+    <app-detail-diff-card [sections]="sections()" [detailPayload]="detailPayloadFn" />
   </app-info-card>
 </div>
