@@ -6,7 +6,7 @@
         >
       {{ selectedStateIcon }}</app-custom-icon>
     } @else {
-      <app-spinner [diameter]="20"></app-spinner>
+      <app-busy class="text-primary" size="1.25rem" context="stateful-icon"></app-busy>
     }
   </div>
 }

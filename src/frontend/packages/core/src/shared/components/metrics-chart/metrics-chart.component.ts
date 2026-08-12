@@ -15,7 +15,7 @@ import { BaseChartDirective } from 'ng2-charts';
 
 import { CardWrapperComponent } from '../cards/card/card.component';
 import { AppProgressBarComponent } from '../progress-bar/app-progress-bar.component';
-import { AppSpinnerComponent } from '../progress-spinner/app-spinner.component';
+import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 import { MetricsRangeSelectorComponent } from '../metrics-range-selector/metrics-range-selector.component';
 import { MetricsChartTypes, MetricsLineChartConfig, YAxisTickFormattingFunc } from './metrics-chart.types';
 import { MetricsChartManager } from './metrics.component.manager';
@@ -42,7 +42,7 @@ export interface MetricsConfig<T = any> {
     BaseChartDirective,
     CardWrapperComponent,
     AppProgressBarComponent,
-    AppSpinnerComponent
+    AppBusyComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

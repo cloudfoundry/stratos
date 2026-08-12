@@ -2,9 +2,7 @@
   <div class="card-progress-overlay absolute inset-0 flex items-center justify-center bg-black/30 dark:bg-black/50 z-10 backdrop-blur-sm">
     <div class="card-progress-overlay-inner flex flex-col items-center gap-4 p-6 bg-content-bg rounded-lg shadow-xl">
       <div class="card-progress-text text-base font-medium text-content-text">{{ label }}</div>
-      <div class="progress-spinner inline-block w-12 h-12 border-4 rounded-full animate-spin" style="border-color: color-mix(in srgb, var(--color-primary) 25%, transparent); border-top-color: var(--color-primary);" role="status" aria-live="polite">
-        <span class="sr-only">Loading...</span>
-      </div>
+      <app-busy class="text-primary" size="3rem" [context]="label" aria-live="polite"></app-busy>
     </div>
   </div>
 }

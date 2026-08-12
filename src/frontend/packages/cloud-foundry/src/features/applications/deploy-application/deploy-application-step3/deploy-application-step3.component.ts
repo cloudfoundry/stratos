@@ -15,6 +15,7 @@ import { CfDeployAppDataService } from '../../../../services/domain-data/cf-depl
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import type { StApp, StAppsResponse } from '../../../../services/endpoint-data/stratos-types';
 import { DeployApplicationDeployer } from '../deploy-application-deployer';
+import { AppBusyComponent } from '@stratosui/core';
 
 @Component({
   selector: 'app-deploy-application-step3',
@@ -26,6 +27,7 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
     style: 'height: 47vh; width: 100%;'
   },
   imports: [
+    AppBusyComponent,
     CommonModule,
     LogViewerComponent,
   ]

@@ -28,6 +28,7 @@ import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
 import { EndpointsSignalListComponent } from './endpoints-signal-list.component';
+import { AppAreaLoaderComponent } from '../../../shared/components/area-loader/area-loader.component';
 
 @Component({
   selector: 'app-endpoints-page',
@@ -36,6 +37,7 @@ import { EndpointsSignalListComponent } from './endpoints-signal-list.component'
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
+    AppAreaLoaderComponent,
     CommonModule,
     RouterModule,
     CustomTooltipDirective,

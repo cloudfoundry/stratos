@@ -35,8 +35,9 @@ import { CommonModule } from "@angular/common";
       <!-- Background track -->
       <div class="absolute inset-0 bg-content-secondary"></div>
 
-      <!-- Indeterminate animation (two bars for Material Design effect) -->
-      @if (mode === "indeterminate") {
+      <!-- Indeterminate animation. Two looks: the Material two-bar slide
+           (default) and a gradient sweep; pass variant="sweep" to pin. -->
+      @if (mode === "indeterminate" && variant !== "sweep") {
         <!-- Secondary bar (darker, behind) -->
         <div
           class="absolute h-full animate-progress-indeterminate-secondary z-10"
@@ -46,6 +47,15 @@ import { CommonModule } from "@angular/common";
         <div
           class="absolute h-full animate-progress-indeterminate-primary z-20 opacity-70"
           [ngClass]="progressBarPrimaryClass"
+        ></div>
+      }
+      @if (mode === "indeterminate" && variant === "sweep") {
+        <div
+          class="absolute inset-0 busy-shimmer bg-[length:200%_100%]"
+          style="background-image: linear-gradient(90deg,
+                   transparent,
+                   var(--color-primary),
+                   transparent);"
         ></div>
       }
 
@@ -176,6 +186,9 @@ export class ProgressBarComponent implements OnInit, OnChanges {
     | "buffer"
     | "query"
     | "solid" = "indeterminate";
+
+  /** Indeterminate look: Material two-bar slide (default) or gradient sweep. */
+  @Input() variant?: 'slide' | 'sweep';
 
   /**
    * Progress value (0-100) for determinate mode

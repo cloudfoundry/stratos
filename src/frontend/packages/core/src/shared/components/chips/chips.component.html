@@ -32,7 +32,7 @@
             @if (chip.busy && (chip.busy | async)) {
               <div
                 class="flex-none ml-[5px]">
-                <div class="spinner w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+                <app-busy size="1rem" [context]="chip.value"></app-busy>
               </div>
             }
           }

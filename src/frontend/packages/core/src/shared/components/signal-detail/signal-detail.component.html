@@ -67,7 +67,7 @@
     @if (isLoading()) {
       <div data-test="signal-detail-loading"
            class="p-6 flex items-center gap-3 text-content-muted">
-        <div class="spinner spinner-primary"></div>
+        <app-busy class="text-primary" size="1.25rem" [context]="'signal-detail'"></app-busy>
         <span>Loading…</span>
       </div>
     } @else if (hasError()) {

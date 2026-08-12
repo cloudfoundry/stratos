@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { ClickStopPropagationDirective } from '../../../core/click-stop-propagation.directive';
+import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
 export interface IAppChip<T = string> {
   key?: T;
@@ -30,6 +31,7 @@ export class AppChip<T = string> implements IAppChip<T> {
   selector: 'app-chips',
   standalone: true,
   imports: [
+    AppBusyComponent,
     CommonModule,
     RouterModule,
     ClickStopPropagationDirective

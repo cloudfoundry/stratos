@@ -22,6 +22,7 @@ import {
 } from '../../../shared/signal-list-configs/service-offering/cf-service-offerings-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import type { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
+import { AppAreaLoaderComponent } from '@stratosui/core';
 
 // Stratos Marketplace — multi-CNSI service offerings catalog.
 //
@@ -35,6 +36,7 @@ import type { StServiceOffering } from '../../../services/endpoint-data/stratos-
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AppAreaLoaderComponent,
     CommonModule,
     RouterModule,
     PageHeaderComponent,

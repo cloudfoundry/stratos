@@ -3,6 +3,8 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
+import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
+import { AppAreaLoaderComponent } from '../area-loader/area-loader.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 import { rangeIsComplete, resolveRelativeDay, SignalListRangeBoundMode, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
 
@@ -490,7 +492,7 @@ export interface SignalListConfig<T> {
 @Component({
   selector: 'app-signal-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, UsageGaugeComponent],
+  imports: [CommonModule, RouterModule, UsageGaugeComponent, AppBusyComponent, AppAreaLoaderComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './signal-list.component.html',
   host: { class: 'block h-full min-h-0' },

@@ -49,6 +49,6 @@ describe('StatefulIconComponent', () => {
     // Setter calls markForCheck(), but we need detectChanges in zoneless mode
     fixture.detectChanges();
 
-    expect(element.querySelector('app-spinner')).toBeTruthy();
+    expect(element.querySelector('app-busy')).toBeTruthy();
   });
 });

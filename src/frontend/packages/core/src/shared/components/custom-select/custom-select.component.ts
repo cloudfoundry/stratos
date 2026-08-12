@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, E
 import { NgClass } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
 
 export interface MatSelectChange {
@@ -23,7 +24,7 @@ export interface MatSelectChange {
     ><ng-content></ng-content></div>`,
   styleUrls: ['./custom-select.component.css'],
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, AppBusyComponent],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomOptionComponent implements AfterViewInit {
@@ -59,7 +60,7 @@ export class CustomOptionComponent implements AfterViewInit {
   templateUrl: './custom-select.component.html',
   styleUrls: ['./custom-select.component.css'],
   standalone: true,
-  imports: [NgClass],
+  imports: [NgClass, AppBusyComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {

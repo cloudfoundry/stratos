@@ -1,6 +1,6 @@
 @if (row.status === 'running') {
   <div class="flex items-center">
-    <app-progress-spinner class="mr-2" diameter="20" mode="indeterminate"></app-progress-spinner> Running
+    <app-busy class="text-primary" size="1.25rem" context="analysis"></app-busy> Running
   </div>
 }
 @if (row.status === 'completed') {

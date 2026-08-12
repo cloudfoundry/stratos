@@ -33,6 +33,7 @@ import { renderServiceKeyCount, serviceKeysLink } from '../../../shared/signal-l
 import { dashboardLink, renderDashboard } from '../../../shared/signal-list-configs/dashboard-link-cell';
 import { buildServiceInstanceRowActions } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+import { AppAreaLoaderComponent } from '@stratosui/core';
 
 // Stratos Services Wall — multi-CNSI service instances list (managed +
 // user-provided), foundation-wide.
@@ -50,6 +51,7 @@ import type { StServiceInstance } from '../../../services/endpoint-data/stratos-
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AppAreaLoaderComponent,
     CommonModule,
     RouterModule,
     PageHeaderComponent,

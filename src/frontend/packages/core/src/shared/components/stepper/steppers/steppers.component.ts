@@ -10,6 +10,7 @@ import { BASE_REDIRECT_QUERY, StepperRedirectPayload } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
 import { DotContentComponent } from '../../../../core/dot-content/dot-content.component';
+import { AppBusyComponent } from '../../busy-indicator/busy-indicator.component';
 
 @Component({
   selector: 'app-steppers',
@@ -19,6 +20,7 @@ import { DotContentComponent } from '../../../../core/dot-content/dot-content.co
   encapsulation: ViewEncapsulation.None,
   standalone: true,
   imports: [
+    AppBusyComponent,
     CommonModule,
     RouterModule,
     DotContentComponent

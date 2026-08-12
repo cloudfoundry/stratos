@@ -44,14 +44,14 @@ describe('LoadingPageComponent', () => {
       expect(element.textContent).toContain(component.text);
     });
 
-    it('should show progress bar until is done', () => {
-      const progressBar = element.querySelector('.loading-page__progress-bar');
-      expect(progressBar).toBeTruthy();
+    it('should show a loading indicator until is done', () => {
+      const indicator = element.querySelector('[data-test="loading-page-indicator"]');
+      expect(indicator).toBeTruthy();
     });
 
     it('should hide progress bar when is done', async () => {
-      let progressBar = element.querySelector('.loading-page__progress-bar');
-      expect(progressBar).toBeTruthy();
+      let indicator = element.querySelector('[data-test="loading-page-indicator"]');
+      expect(indicator).toBeTruthy();
 
       loadingSubject.next(false);
 
@@ -59,8 +59,8 @@ describe('LoadingPageComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      progressBar = element.querySelector('.loading-page__progress-bar');
-      expect(progressBar).toBeFalsy();
+      indicator = element.querySelector('[data-test="loading-page-indicator"]');
+      expect(indicator).toBeFalsy();
     });
   });
 

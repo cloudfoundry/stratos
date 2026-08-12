@@ -7,7 +7,7 @@
       <ng-content select="app-metrics-range-selector"></ng-content>
     </div>
     @if (isRefreshing()) {
-      <app-spinner [diameter]="20" class="metrics-chart__refreshing"></app-spinner>
+      <app-busy class="text-primary metrics-chart__refreshing" size="1.25rem" context="metrics-chart"></app-busy>
     }
     @if (isFetching()) {
       <app-progress-bar class="metrics-chart__loading" color="primary" mode="indeterminate">

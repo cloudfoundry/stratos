@@ -11,6 +11,7 @@ import { ServiceCatalogDataService, ServiceKeyView, SignalSource } from '../../.
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CredentialField, MaskedCredentialsComponent, toCredentialFields } from '../../../shared/components/masked-credentials/masked-credentials.component';
+import { AppBusyComponent } from '@stratosui/core';
 
 type RowStatus = 'idle' | 'busy' | 'error';
 
@@ -34,7 +35,7 @@ interface OfferingBindableResponse {
   templateUrl: './service-keys.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [DatePipe, PageHeaderComponent, ListSubNavComponent, MaskedCredentialsComponent],
+  imports: [AppBusyComponent, DatePipe, PageHeaderComponent, ListSubNavComponent, MaskedCredentialsComponent],
 })
 export class ServiceKeysComponent {
   private http = inject(HttpClient);

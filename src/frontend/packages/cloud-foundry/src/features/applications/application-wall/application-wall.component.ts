@@ -36,6 +36,7 @@ import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';
 import type { StApp } from '../../../services/endpoint-data/stratos-types';
+import { AppAreaLoaderComponent } from '@stratosui/core';
 
 @Component({
   selector: 'app-application-wall',
@@ -44,6 +45,7 @@ import type { StApp } from '../../../services/endpoint-data/stratos-types';
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AppAreaLoaderComponent,
     CommonModule,
     RouterModule,
     PageHeaderComponent,

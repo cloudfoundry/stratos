@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, Input, Signal, computed, signal } from '@angular/core';
 
+import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
+
 /**
  * Primary "create new <thing>" action for a list page. Rendered as a single
  * button on the right of the L5 sub-nav row, blue background with icon +
@@ -86,12 +88,19 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
 @Component({
   selector: 'app-list-sub-nav',
   standalone: true,
+  imports: [AppBusyComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div data-test="list-sub-nav"
          [class]="rowClasses">
       <div class="text-base font-semibold text-content-text whitespace-nowrap" data-test="list-sub-nav-title">
-        {{ title }}: <span class="text-content-muted font-medium">{{ isCountPending() ? '…' : count() }}</span>
+        {{ title }}: <span class="text-content-muted font-medium inline-flex items-center">
+          @if (isCountPending()) {
+            <app-busy variant="dots" size="1em" data-test="count-pending"></app-busy>
+          } @else {
+            {{ count() }}
+          }
+        </span>
       </div>
       @if (isAdding && isAdding()) {
         <!-- Inline add-form slot. When the consumer flips its isAdding signal

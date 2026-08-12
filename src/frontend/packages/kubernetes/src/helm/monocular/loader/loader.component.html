@@ -1,7 +1,7 @@
 <div>
   @if (loading) {
     <div class="text-center my-8">
-      <app-spinner></app-spinner>
+      <app-busy class="text-primary" size="2rem" context="monocular"></app-busy>
     </div>
   }
   @if (!loading) {

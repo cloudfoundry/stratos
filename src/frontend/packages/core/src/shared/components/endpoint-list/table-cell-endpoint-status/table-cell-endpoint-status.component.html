@@ -30,13 +30,13 @@
       @if (config?.showLabel) {
         <span class="mr-2">Connecting </span>
       }
-      <app-spinner [diameter]="20"></app-spinner>
+      <app-busy class="text-primary" size="1.25rem" context="endpoint-status"></app-busy>
     }
     @if (status === 'disconnecting') {
       @if (config?.showLabel) {
         <span class="mr-2">Disconnecting </span>
       }
-      <app-spinner [diameter]="20"></app-spinner>
+      <app-busy class="text-primary" size="1.25rem" context="endpoint-status"></app-busy>
     }
     @if (status === 'unknown') {
       @if (config?.showLabel) {
@@ -56,7 +56,7 @@
         @if (config?.showLabel) {
           <span class="mr-2">Synchronizing </span>
         }
-        <app-spinner [diameter]="20"></app-spinner>
+        <app-busy class="text-primary" size="1.25rem" context="endpoint-status"></app-busy>
       }
       @if (status === 'Pending') {
         @if (config?.showLabel) {

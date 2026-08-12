@@ -19,10 +19,7 @@
             }
           </select>
           @if (dd.loading?.()) {
-            <svg class="animate-spin text-content-muted" width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Loading">
-              <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3" stroke-opacity="0.25"/>
-              <path d="M22 12a10 10 0 0 1-10 10" stroke="currentColor" stroke-width="3" stroke-linecap="round"/>
-            </svg>
+            <app-busy class="text-content-muted" size="12px" [context]="dd.label"></app-busy>
           }
         </label>
       }
@@ -325,7 +322,7 @@
         -->
         <span class="inline-flex items-center justify-center w-5 h-5 align-middle">
           @if ((config.isAnyLoading() || isRefreshing()) && config.totalFilteredResults() > 0) {
-            <div class="spinner spinner-primary h-4 w-4"></div>
+            <app-busy class="text-primary" size="1rem"></app-busy>
           } @else {
             <span class="material-icons text-base leading-none">refresh</span>
           }
@@ -354,7 +351,7 @@
       <div class="flex-1"></div>
       @if (config.bulkRunning && config.bulkRunning()) {
         <span data-test="bulk-running" class="flex items-center gap-1 text-sm text-content-muted">
-          <span class="material-icons text-base leading-5 animate-spin">progress_activity</span>
+          <app-busy variant="dots" size="1em"></app-busy>
           Working…
         </span>
       }
@@ -391,12 +388,8 @@
   <div class="relative flex-1 min-h-0 flex flex-col">
   <div #scrollBody data-test="scroll-body" class="relative flex-1 overflow-auto scrollbar-none">
     @if ((config.isAnyLoading() || isRefreshing()) && config.totalFilteredResults() === 0) {
-      <div data-test="loading" class="flex items-center justify-center p-8 h-full">
-        <div class="flex items-center space-x-4 text-content-muted">
-          <div class="spinner spinner-primary !h-7 !w-7 !border-[3px]"></div>
-          <span class="text-lg">{{ config.loadingMessage ?? 'Loading…' }}</span>
-        </div>
-      </div>
+      <app-area-loader data-test="loading" class="block h-full"
+        [message]="config.loadingMessage ?? 'Loading…'"></app-area-loader>
     } @else if (config.totalFilteredResults() === 0 && config.errorsByCnsi().size > 0) {
       <!-- Failed-load state: the drain errored and automatic retries are
            exhausted. Offer an in-page Retry (same handler as the toolbar
@@ -844,7 +837,7 @@
                 <td [attr.colspan]="totalColumnCount()" class="px-3 pb-2 pt-0 text-sm">
                   <div class="flex items-start gap-2">
                     @if (rowStateBusy(row)) {
-                      <span data-test="row-busy" class="spinner spinner-primary shrink-0"></span>
+                      <app-busy data-test="row-busy" class="text-primary shrink-0" size="1rem"></app-busy>
                     } @else {
                       <span class="material-icons text-base leading-5 shrink-0" [class]="rowMessageIconClass(row)">{{ rowMessageIcon(row) }}</span>
                     }

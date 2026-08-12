@@ -52,6 +52,7 @@ import {
   ShareServiceInstanceDialogComponent,
   ShareServiceInstanceDialogData,
 } from './share-service-instance-dialog.component';
+import { AppBusyComponent } from '@stratosui/core';
 
 interface BindingRow {
   guid: string;
@@ -100,6 +101,7 @@ interface InstanceView {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    AppBusyComponent,
     CommonModule,
     PageHeaderComponent,
     MetaCardComponent,
