@@ -20,6 +20,71 @@
   }
 }
 
+/* ── Waiting-for-data animations ─────────────────────────────────
+   Single home for every loading-indicator keyframe. Components use
+   Tailwind's animate-spin/animate-pulse where they fit; the keyframes
+   below cover what Tailwind lacks. Color always flows from
+   currentColor or theme tokens, so light/dark need no per-mode rules. */
+
+/* Sequential blink for dots variants (app-busy, pending counts). */
+@keyframes busy-blink {
+  0%, 80%, 100% {
+    opacity: 0.25;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* Slow breathe for the logo variants (scale + fade). */
+@keyframes busy-breathe {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(0.82);
+    opacity: 0.55;
+  }
+}
+
+/* Background sweep for shimmer-text loaders. */
+@keyframes busy-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* One global reduced-motion policy for every waiting indicator:
+   rotation slows instead of strobing, blink/breathe settle to steady. */
+@media (prefers-reduced-motion: reduce) {
+  .animate-spin,
+  .poll-icon {
+    animation-duration: 2.5s;
+  }
+  .busy-blink-dot,
+  .busy-breathe {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.busy-blink-dot {
+  animation: busy-blink 1.2s infinite ease-in-out;
+}
+
+.busy-breathe {
+  animation: busy-breathe 1.6s infinite ease-in-out;
+}
+
+.busy-shimmer {
+  animation: busy-shimmer 2.2s infinite linear;
+}
+
 .animate-fade-in {
   animation: fade-in 0.3s ease-out;
 }

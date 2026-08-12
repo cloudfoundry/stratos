@@ -26,9 +26,7 @@
                     <div class="steppers-header-indicator relative flex items-center justify-center shrink-0">
                       <!-- Loading spinner -->
                       @if ((step.blocked || step.showBusy)) {
-                        <div
-                          class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin">
-                        </div>
+                        <app-busy class="text-primary" size="2rem" context="stepper"></app-busy>
                       } @else {
                         <app-dot-content [disabled]="step.skip"
                           class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-colors steppers-header-indicator-content"
@@ -115,9 +113,7 @@
                 [disabled]="steps[currentIndex()].busy || steps[currentIndex()].blocked || !canGoNext(currentIndex())">
                 <!-- Loading spinner -->
                 @if (showNextButtonProgress) {
-                  <div
-                    class="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin">
-                  </div>
+                  <app-busy class="text-white" size="1.25rem" context="stepper-next"></app-busy>
                 } @else {
                   <span>{{ this.getNextButtonText(currentIndex()) }}</span>
                 }

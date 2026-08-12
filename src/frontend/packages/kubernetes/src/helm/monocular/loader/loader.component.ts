@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
-import { AppSpinnerComponent } from '@stratosui/core';
+import { AppBusyComponent } from '@stratosui/core';
 
 
 @Component({
@@ -7,7 +7,7 @@ import { AppSpinnerComponent } from '@stratosui/core';
   selector: 'app-loader',
   templateUrl: './loader.component.html',
   standalone: true,
-  imports: [AppSpinnerComponent]
+  imports: [AppBusyComponent]
 })
 export class LoaderComponent {
   // Show the loader or the content

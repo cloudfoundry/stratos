@@ -23,9 +23,7 @@
           @if ((status$ | async); as status) {
             <div>
               @if (status === Status.Loading) {
-                <div class="animate-spin">
-                  <div class="h-5 w-5 border-2 border-brand-600 border-t-transparent rounded-full"></div>
-                </div>
+                <app-busy class="text-primary" size="1.25rem" [context]="endpoint.name ?? 'endpoint'"></app-busy>
               }
               @if (status === Status.Error) {
                 <div class="text-warning-shade-500" title="Data for this endpoint took too long to load">

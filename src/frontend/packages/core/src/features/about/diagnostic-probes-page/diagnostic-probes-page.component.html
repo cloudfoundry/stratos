@@ -25,7 +25,7 @@
                 [disabled]="stateFor(ep.guid).running"
                 (click)="probe(ep.guid)">
           @if (stateFor(ep.guid).running) {
-            <div class="spinner !h-4 !w-4 !border-2"></div>
+            <app-busy size="1rem"></app-busy>
             Probing…
           } @else {
             <span class="material-icons text-base leading-none">network_check</span>

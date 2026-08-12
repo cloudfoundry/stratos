@@ -5,14 +5,7 @@
 
 <!-- Show loading indicator -->
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) === false || (cloudFoundryService.hasConnectedCFEndpoints$ | async) === false) {
-  <div
-    class="flex items-center justify-center p-8"
-    role="status">
-    <div class="flex items-center space-x-3 text-content-muted">
-      <div class="spinner spinner-primary"></div>
-      <span>Loading applications...</span>
-    </div>
-  </div>
+  <app-area-loader message="Loading applications..."></app-area-loader>
 }
 
 @if ((cloudFoundryService.hasRegisteredCFEndpoints$ | async) && (cloudFoundryService.hasConnectedCFEndpoints$ | async)) {

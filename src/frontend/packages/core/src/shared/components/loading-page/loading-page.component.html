@@ -10,12 +10,26 @@
         </div>
       }
       <div class="loading-page__text">{{ text }}</div>
-      <div class="loading-page__progress">
-        <div class="loading-page__progress-bar"></div>
-      </div>
-      <!-- Spinner for better visual feedback -->
-      <div class="loading-page__spinner-container">
-        <div class="loading-page__spinner"></div>
+      <div class="flex justify-center" data-test="loading-page-indicator">
+        @switch (resolved()) {
+          @case ('logo') {
+            <!-- Breathing brand mark — theme-supplied, so custom brands
+                 pulse their own logo. -->
+            <img class="busy-breathe h-12 w-12" [src]="themeLogo()" alt="" aria-hidden="true" />
+          }
+          @default {
+            <!-- Portal rings: three concentric arcs, different speeds and
+                 directions, all currentColor — dark mode free. -->
+            <span class="relative block h-12 w-12 text-primary" aria-hidden="true">
+              <span class="absolute inset-0 rounded-full border-2 animate-spin"
+                    style="border-color: transparent; border-top-color: currentColor;"></span>
+              <span class="absolute inset-[6px] rounded-full border-2 animate-spin"
+                    style="border-color: transparent; border-right-color: currentColor; animation-duration: 1.6s; animation-direction: reverse;"></span>
+              <span class="absolute inset-[12px] rounded-full border-2 animate-spin"
+                    style="border-color: transparent; border-bottom-color: currentColor; animation-duration: 2.2s;"></span>
+            </span>
+          }
+        }
       </div>
     </div>
   </div>

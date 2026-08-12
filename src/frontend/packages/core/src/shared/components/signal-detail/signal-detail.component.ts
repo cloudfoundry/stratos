@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, Input, Signal, inject } from '@angu
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
+import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
 // Page-level action button rendered above a signal-detail surface (Edit /
 // Delete / custom verbs). On list surfaces the equivalent slot lives in the
@@ -71,7 +72,7 @@ export interface SignalDetailConfig {
   selector: 'app-signal-detail',
   templateUrl: './signal-detail.component.html',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, AppBusyComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'block' }
 })

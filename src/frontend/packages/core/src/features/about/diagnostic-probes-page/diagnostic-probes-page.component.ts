@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { EndpointModel, EndpointsDataService } from '@stratosui/store';
+import { AppBusyComponent } from '../../../shared/components/busy-indicator/busy-indicator.component';
 
 // Result DTO from GET /pp/v1/cf/diag/urilimit/:cnsiGuid (#5579).
 interface URILimitProbeResult {
@@ -31,7 +32,7 @@ interface ProbeState {
   selector: 'app-diagnostic-probes-page',
   templateUrl: './diagnostic-probes-page.component.html',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, AppBusyComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DiagnosticProbesPageComponent {

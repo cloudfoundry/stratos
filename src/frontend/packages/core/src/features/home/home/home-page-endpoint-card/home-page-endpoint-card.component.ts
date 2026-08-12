@@ -23,6 +23,7 @@ import { UserFavoriteEndpoint } from './../../../../../../store/src/types/user-f
 import { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './../../home.types';
 import {
   DefaultEndpointHomeComponent } from './../default-endpoint-home-component/default-endpoint-home-component.component';
+import { AppBusyComponent } from '../../../../shared/components/busy-indicator/busy-indicator.component';
 
 const MAX_FAVS_NORMAL = 15;
 const MAX_FAVS_COMPACT = 5;
@@ -42,6 +43,7 @@ enum Status {
   styleUrls: ['./home-page-endpoint-card.component.scss'],
   standalone: true,
   imports: [
+    AppBusyComponent,
     CommonModule,
     RouterModule,
     MultilineTitleComponent,

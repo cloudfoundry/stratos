@@ -710,22 +710,6 @@ router-outlet + * {
   background-color: var(--login-card-bg);
 }
 
-/* Loading spinner */
-.spinner {
-  @apply inline-block w-4 h-4 border-2 border-solid border-gray-200 dark:border-gray-700 border-r-transparent rounded-full animate-spin;
-}
-
-.spinner-primary {
-  border-color: var(--color-primary);
-  border-right-color: transparent;
-}
-
-/* Dark mode support for spinner-primary border */
-.dark .spinner-primary {
-  border-color: var(--color-primary);
-  border-right-color: transparent;
-}
-
 /* Table styles */
 .table {
   @apply min-w-full divide-y divide-gray-200;

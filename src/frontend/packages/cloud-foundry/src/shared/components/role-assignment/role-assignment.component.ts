@@ -31,6 +31,7 @@ import {
   computeChecked,
   diffToChanges,
 } from './role-tristate';
+import { AppBusyComponent } from '@stratosui/core';
 
 interface OrgDef {
   name: OrgUserRoleNames;
@@ -74,7 +75,7 @@ function readPersistedViewMode(): RoleAssignmentViewMode {
   standalone: true,
   templateUrl: './role-assignment.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [RoleTristateCheckboxComponent, NgTemplateOutlet],
+  imports: [AppBusyComponent, RoleTristateCheckboxComponent, NgTemplateOutlet],
 })
 export class RoleAssignmentComponent implements OnInit, OnDestroy {
   @Input({ required: true }) cfGuid!: string;

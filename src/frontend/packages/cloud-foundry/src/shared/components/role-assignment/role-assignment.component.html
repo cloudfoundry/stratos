@@ -10,7 +10,7 @@
     />
     @if (orgsLoading()) {
       <div class="flex items-center gap-2 px-3 py-4 text-sm text-content-muted">
-        <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <app-busy class="text-primary" size="1.25rem" context="role-assignment"></app-busy>
         Loading organizations…
       </div>
     } @else {
@@ -56,7 +56,7 @@
 <!-- Roles still resolving and nothing seeded yet -->
 @if (loading() && pickedOrgs().length === 0) {
   <div class="flex items-center gap-2 mt-3 px-3 py-4 text-sm text-content-muted">
-    <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+    <app-busy class="text-primary" size="1.25rem" context="role-assignment"></app-busy>
     Loading existing roles…
   </div>
 }
@@ -86,7 +86,7 @@
       <h4 class="m-0 text-xs font-semibold uppercase tracking-wide text-content-muted">Space Roles</h4>
       @if (spacesLoadingFor(org.metadata.guid)) {
         <div class="flex items-center gap-2 py-2 text-sm text-content-muted">
-          <div class="w-5 h-5 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <app-busy class="text-primary" size="1.25rem" context="role-assignment"></app-busy>
           Loading spaces…
         </div>
       } @else {

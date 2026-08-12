@@ -13,6 +13,7 @@ import { AutoscalerCredentialDataService } from '../../services/domain-data/auto
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
 import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
+import { AppBusyComponent } from '@stratosui/core';
 
 interface AutoscalerCredentialForm {
   actype: FormControl<boolean>;
@@ -35,6 +36,7 @@ interface CredentialView extends AppAutoscalerCredential {
   ],
   standalone: true,
   imports: [
+    AppBusyComponent,
     CommonModule,
     ReactiveFormsModule,
     RouterModule,

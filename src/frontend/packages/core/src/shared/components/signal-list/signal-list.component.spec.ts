@@ -81,7 +81,7 @@ describe('SignalListComponent', () => {
     // a populated table — no separate row, no layout shift.
     expect(fixture.nativeElement.querySelector('[data-test="refresh"]')).toBeNull();
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"] .spinner')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"] app-busy')).not.toBeNull();
   });
 
   it('shows the refresh icon (not spinner) when not loading', () => {
@@ -110,7 +110,7 @@ describe('SignalListComponent', () => {
     const result = component.invokeRefresh();
     fixture.detectChanges();
     expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"]')).not.toBeNull();
-    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"] .spinner')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="refresh-loading"] app-busy')).not.toBeNull();
 
     resolveRefresh();
     await result;

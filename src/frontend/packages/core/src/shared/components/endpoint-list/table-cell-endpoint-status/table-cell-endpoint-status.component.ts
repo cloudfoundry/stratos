@@ -4,7 +4,7 @@ import { EndpointModel, EndpointsDataService, endpointConnectionStatus, entityCa
 
 import { TableCellCustom } from '../../signal-list/cell-base';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
-import { AppSpinnerComponent } from '../../progress-spinner/app-spinner.component';
+import { AppBusyComponent } from '../../busy-indicator/busy-indicator.component';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',
@@ -12,7 +12,7 @@ import { AppSpinnerComponent } from '../../progress-spinner/app-spinner.componen
   standalone: true,
   imports: [
     CustomIconComponent,
-    AppSpinnerComponent
+    AppBusyComponent
 ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
