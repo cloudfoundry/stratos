@@ -192,62 +192,11 @@ html[data-theme='dark'] {
   --docsearch-key-gradient: linear-gradient(-26.5deg, #565872, #31355b);
   --docsearch-key-shadow:
     inset 0 -2px 0 0 #282d55, inset 0 0 1px 1px #51577d, 0 2px 2px 0 #0304094d;
-
-  /* Custom css */
-  .background-grid {
-    &::before {
-      opacity: 0.03;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(248 250 252)' stroke-dasharray='5 3' transform='scale(1, -1)' %3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
-    }
-  }
 }
 
 @utility blog-tags {
   & b {
     @apply hidden;
-  }
-}
-
-@layer components {
-  .background-grid {
-    @apply relative z-0 bg-slate-100;
-    @apply dark:bg-[#0c1222];
-
-    &::before {
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      content: '';
-      opacity: 0.65;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32' width='32' height='32' fill='none' stroke='rgb(226 232 240)' stroke-dasharray='5 3' transform='scale(1, -1)' %3E%3Cpath d='M0 .5H31.5V32'/%3E%3C/svg%3E");
-      mask-image: linear-gradient(transparent, black, transparent);
-    }
-  }
-
-  .background-grid--fade-in {
-    @apply bg-transparent bg-linear-to-t from-slate-100 via-slate-100;
-    @apply dark:bg-transparent dark:from-[#0c1222] dark:via-[#0c1222];
-
-    &::before {
-      @apply bg-bottom-left;
-
-      mask-image: linear-gradient(transparent, black, black);
-    }
-  }
-
-  .background-grid--fade-out {
-    @apply bg-transparent bg-linear-to-b from-slate-100 via-slate-100;
-    @apply dark:bg-transparent dark:from-[#0c1222] dark:via-[#0c1222];
-
-    &::before {
-      mask-image: linear-gradient(black, black, transparent);
-    }
-  }
-
-  .background-image {
-    &--fade-out {
-      mask-image: linear-gradient(black, black, transparent);
-    }
   }
 }
 
