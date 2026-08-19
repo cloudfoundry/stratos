@@ -284,6 +284,7 @@ const reportWith = (resources: ResourceRow[]): LoadReport => ({
   topology: 'local/other',
   requestId: null,
   protocol: 'h2',
+  requestStartMs: 10,
   responseStartMs: 12,
   domContentLoadedMs: 300,
   loadEventMs: 500,
@@ -292,6 +293,11 @@ const reportWith = (resources: ResourceRow[]): LoadReport => ({
   lcpElement: null,
   requestCount: resources.length,
   totalTransferBytes: resources.reduce((n, r) => n + r.transferBytes, 0),
+  initialRequestCount: resources.length,
+  initialTransferBytes: resources.reduce((n, r) => n + r.transferBytes, 0),
+  sinceLoadRequestCount: 0,
+  sinceLoadTransferBytes: 0,
+  phases: null,
   resources,
 });
 
@@ -360,6 +366,38 @@ describe('ResourceWaterfallComponent', () => {
     query<HTMLButtonElement>('[data-test="waterfall-group"]')?.click();
     fixture.detectChanges();
     expect(el().textContent).not.toContain('b.js');
+  });
+
+  it('shifts resources and milestones to the Stratos clock when toggled', () => {
+    render({
+      ...reportWith([row({ path: '/a.js', startMs: 250 })]),
+      requestStartMs: 200,
+      domContentLoadedMs: 300,
+      loadEventMs: 500,
+    });
+    const toggle = query<HTMLInputElement>('[data-test="waterfall-clock"]');
+    expect(toggle).toBeTruthy();
+    expect(toggle?.checked).toBe(false);
+
+    toggle?.click();
+    fixture.detectChanges();
+    expect(fixture.componentInstance.groups()[0].startMs).toBe(50);
+    expect(fixture.componentInstance.milestones().find(m => m.label === 'DCL')?.ms).toBe(100);
+    expect(fixture.componentInstance.milestones().find(m => m.label === 'Load')?.ms).toBe(300);
+  });
+
+  it('keeps the initial-load filter aligned with the shifted clock', () => {
+    render({
+      ...reportWith([row({ path: '/early.js', startMs: 400 }), row({ path: '/late.js', startMs: 501 })]),
+      requestStartMs: 200,
+      loadEventMs: 500,
+    });
+    query<HTMLInputElement>('[data-test="waterfall-clock"]')?.click();
+    query<HTMLInputElement>('[data-test="waterfall-initial-only"]')?.click();
+    fixture.detectChanges();
+    const paths = fixture.componentInstance.visibleResources().map(r => r.path);
+    expect(paths).toContain('/early.js');
+    expect(paths).not.toContain('/late.js');
   });
 
   it('resets to the first page when a new report arrives', async () => {

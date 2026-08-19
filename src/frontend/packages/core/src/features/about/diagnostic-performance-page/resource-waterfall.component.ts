@@ -203,6 +203,14 @@ export function rowLabel(path: string): string {
           [checked]="initialOnly()" (change)="initialOnly.set($any($event.target).checked)">
         Initial load only
       </label>
+      <label
+        class="flex items-center gap-1.5 cursor-pointer select-none"
+        title="Start the timeline when the document request hit the wire — browser stall, DNS, TCP and TLS subtracted. This is the part Stratos controls.">
+        <input
+          type="checkbox" data-test="waterfall-clock"
+          [checked]="stratosClock()" (change)="setClock($any($event.target).checked)">
+        Stratos clock
+      </label>
       @if (viewWindow(); as w) {
         <span data-test="waterfall-zoom-range">{{ formatTick(w.startMs) }} &ndash; {{ formatTick(w.endMs) }}</span>
         <button
@@ -334,7 +342,11 @@ export function rowLabel(path: string): string {
       Dashed lines mark page milestones: DCL = DOM content loaded, Load = load event,
       FCP = first contentful paint, LCP = largest contentful paint (hover a label for its time).
       Drag along the top axis to zoom to a time range; drag again to drill deeper,
-      double-click the axis (or Reset zoom) to zoom back out.
+      double-click the axis (or Reset zoom) to zoom back out. The browser clock starts
+      at navigation, so the empty stretch on the left is browser stall + DNS + TCP + TLS
+      before the document request &mdash; switch to the Stratos clock to subtract it.
+      On a warm (cached) load most bars are near-invisible slivers: cache hits complete
+      in ~0 ms and transfer 0 bytes.
     </div>
   `,
 })
@@ -344,12 +356,32 @@ export class ResourceWaterfallComponent {
   /** Hide fetches that started after the load event (lazy route chunks from
    *  post-load navigation) so the scale stays comparable between looks. */
   initialOnly = signal(false);
+
+  /** Stratos clock: shift every time by requestStart so the axis starts when
+   *  the document request hit the wire, hiding browser/network setup the app
+   *  cannot influence (the otherwise-unexplained empty stretch on the left). */
+  stratosClock = signal(false);
+  private clockOffsetMs = computed(() => this.stratosClock() ? this.report().requestStartMs : 0);
+  private shiftedResources = computed(() => {
+    const offset = this.clockOffsetMs();
+    return offset
+      ? this.report().resources.map(r => ({ ...r, startMs: Math.max(0, r.startMs - offset) }))
+      : this.report().resources;
+  });
+  private shiftedLoadEventMs = computed(() => {
+    const loadEventMs = this.report().loadEventMs;
+    return loadEventMs > 0 ? Math.max(0, loadEventMs - this.clockOffsetMs()) : loadEventMs;
+  });
+
   visibleResources = computed(() =>
-    this.initialOnly() ? initialLoadResources(this.report().resources, this.report().loadEventMs) : this.report().resources);
+    this.initialOnly() ? initialLoadResources(this.shiftedResources(), this.shiftedLoadEventMs()) : this.shiftedResources());
 
   groups = computed(() => groupRows(this.visibleResources()));
-  milestones = computed(() => milestoneLines(this.report()));
-  scaleMax = computed(() => waterfallScaleMax(this.report().loadEventMs, this.visibleResources(), this.milestones()));
+  milestones = computed(() => {
+    const offset = this.clockOffsetMs();
+    return milestoneLines(this.report()).map(m => ({ ...m, ms: Math.max(0, m.ms - offset) }));
+  });
+  scaleMax = computed(() => waterfallScaleMax(this.shiftedLoadEventMs(), this.visibleResources(), this.milestones()));
 
   /** Brush zoom: null = full scale. */
   viewWindow = signal<ViewWindow | null>(null);
@@ -447,6 +479,12 @@ export class ResourceWaterfallComponent {
     this.viewWindow.set(null);
     this.brush.set(null);
     this.page.set(0);
+  }
+
+  /** A zoom window taken on one clock is meaningless on the other. */
+  setClock(stratos: boolean): void {
+    this.stratosClock.set(stratos);
+    this.resetZoom();
   }
 
   prevPage(): void {
