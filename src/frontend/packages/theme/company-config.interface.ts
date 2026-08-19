@@ -65,6 +65,11 @@ export interface CompanyConfig {
     additionalInfo?: string; // Additional footer information
   };
 
+  // Debug affordances — troubleshooting UI kept out of normal deployments
+  debug?: {
+    showAllMenuItemsToggle?: boolean; // Reveal the side-nav "Show all menu items" checkbox
+  };
+
   // Deployment defaults — overridden by user/page preferences once set
   defaults?: {
     // User preference defaults (Layer 3)

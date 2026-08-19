@@ -719,6 +719,11 @@ export class StratosBrandingService {
     return this._config().company.supportEmail;
   }
 
+  /** Debug affordance: whether the side-nav "Show all menu items" checkbox is available. */
+  getShowAllMenuItemsToggle(): boolean {
+    return this._config().debug?.showAllMenuItemsToggle === true;
+  }
+
   // =========================================================================
   // Config Update Methods (from CompanyConfigService)
   // =========================================================================
