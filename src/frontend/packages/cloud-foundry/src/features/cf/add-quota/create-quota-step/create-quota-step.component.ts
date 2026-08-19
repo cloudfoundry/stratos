@@ -45,7 +45,7 @@ export class CreateQuotaStepComponent implements AfterViewInit, OnDestroy {
       try {
         await firstValueFrom(this.quotaData.createOrgQuota(this.cfGuid, body));
       } catch (err: unknown) {
-        throw new Error(`Failed to create quota: ${err instanceof Error ? err.message : String(err)}`);
+        throw new Error(`Failed to create quota: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

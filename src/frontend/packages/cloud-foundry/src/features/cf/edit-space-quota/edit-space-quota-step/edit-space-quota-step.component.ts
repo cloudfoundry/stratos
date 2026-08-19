@@ -66,7 +66,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
       try {
         await firstValueFrom(this.quotaData.updateSpaceQuota(this.cfGuid, this.spaceQuotaGuid, body));
       } catch (err: unknown) {
-        throw new Error(`Failed to update space quota: ${err instanceof Error ? err.message : String(err)}`);
+        throw new Error(`Failed to update space quota: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

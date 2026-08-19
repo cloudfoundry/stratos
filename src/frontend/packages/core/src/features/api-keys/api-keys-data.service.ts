@@ -56,7 +56,7 @@ export class ApiKeysDataService {
       this._apiKeys.update(curr => [...curr, created]);
       return created;
     } catch (err) {
-      throw new Error(this.errorMessage(err));
+      throw new Error(this.errorMessage(err), { cause: err });
     }
   }
 
@@ -72,7 +72,7 @@ export class ApiKeysDataService {
       await firstValueFrom(this.http.delete(apiKeysUrl, { params }));
       this._apiKeys.update(curr => curr.filter(k => k.guid !== guid));
     } catch (err) {
-      throw new Error(this.errorMessage(err));
+      throw new Error(this.errorMessage(err), { cause: err });
     }
   }
 

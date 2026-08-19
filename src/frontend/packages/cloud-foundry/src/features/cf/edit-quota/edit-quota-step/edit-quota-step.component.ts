@@ -66,7 +66,7 @@ export class EditQuotaStepComponent implements OnDestroy {
       try {
         await firstValueFrom(this.quotaData.updateOrgQuota(this.cfGuid, this.quotaGuid, body));
       } catch (err: unknown) {
-        throw new Error(`Failed to update quota: ${err instanceof Error ? err.message : String(err)}`);
+        throw new Error(`Failed to update quota: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

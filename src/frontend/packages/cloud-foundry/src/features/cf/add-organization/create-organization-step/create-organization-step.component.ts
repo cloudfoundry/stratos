@@ -73,7 +73,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
           this.endpointDataRegistry.release(this.cfGuid);
         }
       } catch (err: unknown) {
-        throw new Error(`Failed to create organization: ${err instanceof Error ? err.message : String(err)}`);
+        throw new Error(`Failed to create organization: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

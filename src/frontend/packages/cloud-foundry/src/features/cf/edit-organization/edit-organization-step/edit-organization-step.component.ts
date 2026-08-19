@@ -97,7 +97,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
           ...(newQuotaGuid !== this.originalQuotaGuid ? { quotaGuid: newQuotaGuid ?? undefined } : {}),
         });
       } catch (err: unknown) {
-        throw new Error(`Failed to update organization: ${err instanceof Error ? err.message : String(err)}`);
+        throw new Error(`Failed to update organization: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
       } finally {
         this.endpointDataRegistry.release(this.cfGuid);
       }

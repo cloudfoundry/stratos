@@ -225,7 +225,6 @@ export function generateJsonSchemaFromObject(title: string | undefined, object: 
   // Determine title exists
   if (typeof title !== 'string') {
     object = title;
-    title = undefined;
   } else {
     output.title = title;
   }
