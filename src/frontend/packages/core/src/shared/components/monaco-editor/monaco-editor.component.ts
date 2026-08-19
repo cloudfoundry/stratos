@@ -15,8 +15,6 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { loadMonacoEditor } from '../../../monaco-loader';
 
-declare const monaco: typeof import('monaco-editor');
-
 export interface MonacoEditorModel {
   language?: string;
   uri?: string;
@@ -61,6 +59,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
   private branding = inject(StratosBrandingService);
   private editor: import('monaco-editor').editor.IStandaloneCodeEditor | undefined;
+  private monaco: typeof import('monaco-editor') | undefined;
 
   constructor() {
     // Monaco's theme is process-global (monaco.editor.setTheme), so one
@@ -68,10 +67,10 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     // Callers that pin options.theme opt out of the sync.
     effect(() => {
       const dark = this.branding.isDarkMode();
-      if (!this.editor || this.options.theme || typeof monaco === 'undefined') {
+      if (!this.editor || this.options.theme || !this.monaco) {
         return;
       }
-      monaco.editor.setTheme(dark ? 'vs-dark' : 'vs');
+      this.monaco.editor.setTheme(dark ? 'vs-dark' : 'vs');
     });
   }
   private value = '';
@@ -84,7 +83,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
   async ngAfterViewInit(): Promise<void> {
     try {
       // Monaco is loaded on demand (not at bootstrap); idempotent across editors
-      await loadMonacoEditor();
+      this.monaco = await loadMonacoEditor();
     } catch (error) {
       console.error('Failed to load Monaco Editor:', error);
       return;
@@ -101,8 +100,9 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
   }
 
   private initMonaco(): void {
-    if (typeof monaco === 'undefined') {
-      console.error('Monaco editor is not loaded. Ensure monaco-editor is loaded globally.');
+    const monaco = this.monaco;
+    if (!monaco) {
+      console.error('Monaco editor is not loaded. loadMonacoEditor() resolved without an instance.');
       return;
     }
 
@@ -238,12 +238,9 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
   }
 
   public setLanguage(language: string): void {
-    if (typeof monaco === 'undefined') {
-      return;
-    }
     const model = this.editor?.getModel();
-    if (model) {
-      monaco.editor.setModelLanguage(model, language);
+    if (this.monaco && model) {
+      this.monaco.editor.setModelLanguage(model, language);
     }
   }
 }

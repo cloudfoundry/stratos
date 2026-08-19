@@ -6,7 +6,7 @@ A standalone Angular component that wraps Monaco Editor behind an ngx-monaco-edi
 
 - ✅ Standalone component (no module required)
 - ✅ Full ngModel two-way binding support via ControlValueAccessor
-- ✅ TypeScript type safety with @types/monaco-editor
+- ✅ TypeScript type safety (typed by the monaco-editor package itself)
 - ✅ Automatic layout handling with ResizeObserver
 - ✅ Automatic app-theme synchronization (opt out by pinning `options.theme`)
 - ✅ YAML language support (via monaco-yaml)
@@ -36,17 +36,17 @@ import { MonacoEditorComponent, MonacoEditorOptions, MonacoEditorModel } from '@
   `
 })
 export class ExampleComponent {
-  code = 'console.log("Hello World");';
+  code = '{ "hello": "world" }';
 
   editorOptions: MonacoEditorOptions = {
     theme: 'vs-dark',
-    language: 'javascript',
+    language: 'json',
     automaticLayout: true,
     minimap: { enabled: true }
   };
 
   model: MonacoEditorModel = {
-    language: 'javascript'
+    language: 'json'
   };
 
   onEditorInit(editor: MonacoEditorComponent) {
@@ -60,6 +60,7 @@ export class ExampleComponent {
 ```typescript
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { configureYaml } from '../../../monaco-loader';
 import { MonacoEditorComponent, MonacoEditorOptions, MonacoEditorModel } from '@stratos/core';
 
 @Component({
@@ -268,13 +269,17 @@ this.editor.layout();
 
 ## Language Support
 
-### Built-in Languages
-Monaco includes built-in support for:
-- JavaScript/TypeScript
-- HTML/CSS
-- JSON
-- Markdown
-- And many more...
+### Shipped Languages
+The lazy chunk is a tree-shaken subset (`edcore.main` plus explicit
+contributions in `monaco-loader.ts`) carrying only the languages Stratos
+edits:
+- JSON (full language service: validation, completion, schemas)
+- YAML (tokenizer from monaco-editor; everything else from monaco-yaml)
+- Plaintext (built in)
+
+Any other `language` id falls back to plaintext rendering. To ship another
+language, add its contribution import to the loader (and a worker wrapper
+in `monaco-workers/` if it has a language service).
 
 ### YAML Support
 YAML support is provided via `monaco-yaml`, registered once by the ESM

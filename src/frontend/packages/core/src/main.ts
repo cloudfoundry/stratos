@@ -16,5 +16,18 @@ if (environment.production) {
 performance.setResourceTimingBufferSize?.(500);
 
 // Monaco is loaded on demand by MonacoEditorComponent (all consumers are
-// post-login) — keeping its ~1MB payload off the bootstrap critical path.
-platformBrowserDynamic().bootstrapModule(AppModule);
+// post-login) — keeping its payload off the bootstrap critical path. Once
+// the app is up and the browser is idle, prefetch it so the first editor
+// surface opens without paying the chunk fetch at click time. Sessions
+// that never open an editor spend the bandwidth idly; sessions that do
+// get an instant editor — the trade is deliberate.
+platformBrowserDynamic().bootstrapModule(AppModule).then(() => {
+  const prefetch = () => import('./monaco-loader').then((m) => m.loadMonacoEditor()).catch(() => {
+    // Best-effort: a failed prefetch just means the editor loads on demand.
+  });
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(prefetch, { timeout: 30000 });
+  } else {
+    setTimeout(prefetch, 5000);
+  }
+});

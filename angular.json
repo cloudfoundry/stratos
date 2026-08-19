@@ -144,6 +144,13 @@
               "outputHashing": "all",
               "sourceMap": false,
               "extractLicenses": true,
+              "budgets": [
+                {
+                  "type": "anyScript",
+                  "maximumWarning": "2.5mb",
+                  "maximumError": "3mb"
+                }
+              ],
               "fileReplacements": [
                 {
                   "replace": "src/frontend/packages/core/src/environments/environment.ts",
