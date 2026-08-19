@@ -97,10 +97,33 @@ export async function configureJsonDiagnostics(options: DiagnosticsOptions): Pro
   (monaco as any)?.jsonDefaults?.setDiagnosticsOptions(options);
 }
 
+/**
+ * Attaches Monaco's static widget stylesheet. The builder bundles the CSS
+ * that monaco imports from JS into per-chunk .css files, but nothing loads
+ * those for a plain dynamic import() — monaco then renders on its
+ * runtime-injected styles and browser defaults only (naked ime-text-area,
+ * chromeless find widget). monaco-styles.css is built as a non-injected
+ * styles bundle named "monaco" (angular.json), so its URL is stable and
+ * same-origin — covered by style-src-elem 'self', no nonce needed.
+ */
+function attachMonacoStylesheet(): void {
+  if (document.querySelector('link[data-monaco-styles]')) {
+    return;
+  }
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  // Resolve against the app base, not the current (deep) route URL.
+  link.href = new URL('monaco.css', document.baseURI).toString();
+  link.setAttribute('data-monaco-styles', '');
+  document.head.appendChild(link);
+}
+
 async function doLoadMonacoEditor(): Promise<MonacoApi> {
   if ((window as any).monaco) {
     return (window as any).monaco;
   }
+
+  attachMonacoStylesheet();
 
   // The builder rewrites each relative `new Worker(new URL(...))` into a
   // hashed lazy chunk of its own; bare package specifiers are not resolved

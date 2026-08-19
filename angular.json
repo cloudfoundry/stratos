@@ -119,7 +119,12 @@
               "src/frontend/packages/theme/styles/main.scss",
               "src/frontend/packages/theme/theme-transitions.scss",
               "src/frontend/packages/core/src/styles.scss",
-              "node_modules/xterm/css/xterm.css"
+              "node_modules/xterm/css/xterm.css",
+              {
+                "input": "src/frontend/packages/core/src/monaco-styles.css",
+                "inject": false,
+                "bundleName": "monaco"
+              }
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
