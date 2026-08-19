@@ -8,6 +8,7 @@ import { formatBytes } from '../diagnostics-data/entity-footprint';
 import {
   LoadReport,
   ResourceRow,
+  appMs,
   buildLoadReport,
   classifyCache,
   reportToJson,
@@ -90,6 +91,12 @@ export class DiagnosticPerformancePageComponent implements OnInit {
 
   ms(value: number | null): string {
     return value === null ? 'n/a' : `${value.toFixed(0)} ms`;
+  }
+
+  /** Milestone with browser/network setup subtracted — Stratos's own time. */
+  appMs(value: number | null): string {
+    const r = this.report();
+    return (r && appMs(value, r.requestStartMs)) ?? '—';
   }
 
   formatBytes(n: number): string {

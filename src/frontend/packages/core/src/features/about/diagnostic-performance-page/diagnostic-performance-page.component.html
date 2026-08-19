@@ -26,11 +26,12 @@
     <!-- Scope note -->
     <app-card>
       <div class="px-4 py-3 text-sm text-content-muted">
-        The milestone numbers reflect this browsing session's initial page load and
-        stay put as you move around the app. The waterfall and byte totals keep
-        accumulating: every fetch since the page loaded is recorded, including lazy
-        route chunks loaded as you navigate, so the timeline grows (and its scale
-        stretches from ms to s) the longer the session runs &mdash; check
+        The milestone numbers and the Requests/Total transfer headline reflect this
+        browsing session's initial page load and stay put as you move around the
+        app; traffic after the load event (idle editor prefetch, API calls, lazy
+        route chunks) is tallied separately as &ldquo;since load&rdquo;. The
+        waterfall keeps accumulating every fetch, so the timeline grows (and its
+        scale stretches from ms to s) the longer the session runs &mdash; check
         &ldquo;Initial load only&rdquo; on the waterfall to compare like with like.
         Recording stops silently after 500 resources. Reload &amp; measure captures
         a fresh warm (cached) load; for a cold load, hard-reload the browser with
@@ -66,11 +67,11 @@
         }
         <span class="flex gap-2 items-baseline">
           <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Requests</span>
-          <span class="text-sm font-medium">{{ r.requestCount }}</span>
+          <span class="text-sm font-medium" data-test="requests-summary">{{ r.initialRequestCount }}@if (r.sinceLoadRequestCount > 0) { <span class="text-content-muted">(+{{ r.sinceLoadRequestCount }} since load)</span>}</span>
         </span>
         <span class="flex gap-2 items-baseline">
           <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">Total transfer</span>
-          <span class="text-sm font-medium">{{ formatBytes(r.totalTransferBytes) }}</span>
+          <span class="text-sm font-medium" data-test="transfer-summary">{{ formatBytes(r.initialTransferBytes) }}@if (r.sinceLoadTransferBytes > 0) { <span class="text-content-muted">(+{{ formatBytes(r.sinceLoadTransferBytes) }} since load)</span>}</span>
         </span>
       </div>
       <div class="px-4 pb-3 overflow-x-auto">
@@ -78,29 +79,43 @@
           <thead>
             <tr>
               <th class="text-left text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Milestone</th>
-              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Time</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border">Browser clock</th>
+              <th class="text-right text-xs font-semibold uppercase tracking-wider text-content-muted px-3 py-1.5 border-b border-content-border" title="Time since the document request hit the wire — browser stall, DNS, TCP and TLS subtracted. This is the part Stratos controls.">Stratos clock</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td class="px-3 py-1.5">Response start</td>
               <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.responseStartMs) }}</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap" data-test="app-clock-response">{{ appMs(r.responseStartMs) }}</td>
             </tr>
+            @if (r.phases; as p) {
+              <tr data-test="doc-phases">
+                <td class="px-3 py-1.5 text-content-muted">&nbsp;&nbsp;of which document fetch</td>
+                <td class="px-3 py-1.5 text-right whitespace-nowrap text-content-muted" colspan="2">
+                  stalled {{ ms(p.stalledMs) }} &middot; DNS {{ ms(p.dnsMs) }} &middot; TCP {{ ms(p.tcpMs) }} &middot; TLS {{ ms(p.tlsMs) }} &middot; server wait {{ ms(p.serverWaitMs) }}
+                </td>
+              </tr>
+            }
             <tr>
               <td class="px-3 py-1.5">DOMContentLoaded</td>
               <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.domContentLoadedMs) }}</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ appMs(r.domContentLoadedMs) }}</td>
             </tr>
             <tr>
               <td class="px-3 py-1.5">Load event</td>
               <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.loadEventMs) }}</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ appMs(r.loadEventMs) }}</td>
             </tr>
             <tr>
               <td class="px-3 py-1.5">First contentful paint</td>
               <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.firstContentfulPaintMs) }}</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ appMs(r.firstContentfulPaintMs) }}</td>
             </tr>
             <tr>
               <td class="px-3 py-1.5">Largest contentful paint@if (r.lcpElement) { <span class="text-content-muted">({{ r.lcpElement }})</span>}</td>
               <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ ms(r.lcpMs) }}</td>
+              <td class="px-3 py-1.5 text-right whitespace-nowrap">{{ appMs(r.lcpMs) }}</td>
             </tr>
           </tbody>
         </table>

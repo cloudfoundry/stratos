@@ -32,26 +32,94 @@ export function classifyCache(resources: ResourceRow[]): CacheVerdict {
   return { kind: cachedFraction >= 0.5 ? 'warm' : 'cold', cachedFraction };
 }
 
+/** Pre-response time of the document request, decomposed from navigation timing. */
+export interface DocPhases {
+  stalledMs: number;
+  dnsMs: number;
+  tcpMs: number;
+  tlsMs: number;
+  serverWaitMs: number;
+}
+
 export interface LoadReport {
   collectedAt: string;
   topology: 'cf-pushed' | 'local/other';
   requestId: string | null;
   protocol: string;
+  /**
+   * When the document request hit the wire — the app-clock zero. Time before
+   * this (browser stall, DNS, TCP, TLS) is environment the app cannot
+   * influence; everything after (server wait, download, bootstrap, paint)
+   * is Stratos's to optimize. 0 when navigation timing is unavailable.
+   */
+  requestStartMs: number;
   responseStartMs: number;
   domContentLoadedMs: number;
   loadEventMs: number;
   firstContentfulPaintMs: number | null;
   lcpMs: number | null;
   lcpElement: string | null;
+  /** All recorded resources — keeps accumulating after load (see splitByLoad). */
   requestCount: number;
   totalTransferBytes: number;
+  initialRequestCount: number;
+  initialTransferBytes: number;
+  sinceLoadRequestCount: number;
+  sinceLoadTransferBytes: number;
+  phases: DocPhases | null;
   resources: ResourceRow[];
 }
 
 /**
+ * Decompose the document request's pre-response time. A large stalled phase
+ * means the browser sat on the request before even resolving DNS (queueing,
+ * cache lookup, proxy/cert checks) — time no server-side change can recover.
+ * On a reused connection DNS/TCP/TLS all collapse to zero.
+ */
+export function computePhases(nav: PerformanceNavigationTiming | undefined): DocPhases | null {
+  if (!nav) { return null; }
+  const tls = nav.secureConnectionStart > 0 ? nav.connectEnd - nav.secureConnectionStart : 0;
+  return {
+    stalledMs: nav.domainLookupStart - nav.fetchStart,
+    dnsMs: nav.domainLookupEnd - nav.domainLookupStart,
+    tcpMs: (nav.secureConnectionStart > 0 ? nav.secureConnectionStart : nav.connectEnd) - nav.connectStart,
+    tlsMs: tls,
+    serverWaitMs: nav.responseStart - nav.requestStart,
+  };
+}
+
+/**
+ * Split resource totals at the load event, so the initial-load cost stays
+ * readable while background traffic (idle prefetch, API polling, lazy route
+ * chunks) accumulates separately. loadEventMs 0 means the load event has not
+ * fired yet — everything recorded so far is initial.
+ */
+export function splitByLoad(resources: ResourceRow[], loadEventMs: number): {
+  initialRequestCount: number;
+  initialTransferBytes: number;
+  sinceLoadRequestCount: number;
+  sinceLoadTransferBytes: number;
+} {
+  const cutoff = loadEventMs || Infinity;
+  let initialRequestCount = 0, initialTransferBytes = 0;
+  let sinceLoadRequestCount = 0, sinceLoadTransferBytes = 0;
+  for (const r of resources) {
+    if (r.startMs <= cutoff) {
+      initialRequestCount++;
+      initialTransferBytes += r.transferBytes;
+    } else {
+      sinceLoadRequestCount++;
+      sinceLoadTransferBytes += r.transferBytes;
+    }
+  }
+  return { initialRequestCount, initialTransferBytes, sinceLoadRequestCount, sinceLoadTransferBytes };
+}
+
+/**
  * Map resource timing entries to rows, sorted by start time.
- * cached: transferSize 0 (memory/disk cache) or a small transfer with a
- * large decoded body (304 revalidation).
+ * cached: transferSize 0 (memory/disk cache), an explicit 304, or a small
+ * transfer with a large decoded body (304 heuristic for browsers without
+ * responseStatus — real 304s report decodedBodySize 0).
  */
 export function collectResources(entries: PerformanceResourceTiming[]): ResourceRow[] {
   return entries
@@ -65,7 +133,9 @@ export function collectResources(entries: PerformanceResourceTiming[]): Resource
         transferBytes,
         decodedBytes,
         protocol: e.nextHopProtocol ?? '',
-        cached: transferBytes === 0 || (transferBytes < 400 && decodedBytes > 0),
+        cached: transferBytes === 0
+          || e.responseStatus === 304
+          || (transferBytes < 400 && decodedBytes > 0),
       };
     })
     .sort((a, b) => a.startMs - b.startMs);
@@ -163,19 +233,23 @@ export async function buildLoadReport(): Promise<LoadReport> {
     fcp ? Promise.resolve(null) : observeFcp(),
   ]);
 
+  const loadEventMs = nav?.loadEventEnd ?? 0;
   return {
     collectedAt: new Date().toISOString(),
     topology,
     requestId,
     protocol: nav?.nextHopProtocol ?? '',
+    requestStartMs: nav?.requestStart ?? 0,
     responseStartMs: nav?.responseStart ?? 0,
     domContentLoadedMs: nav?.domContentLoadedEventEnd ?? 0,
-    loadEventMs: nav?.loadEventEnd ?? 0,
+    loadEventMs,
     firstContentfulPaintMs: fcp ? fcp.startTime : observedFcpMs,
     lcpMs,
     lcpElement,
     requestCount: resources.length,
     totalTransferBytes: resources.reduce((sum, r) => sum + r.transferBytes, 0),
+    ...splitByLoad(resources, loadEventMs),
+    phases: computePhases(nav),
     resources,
   };
 }
@@ -190,6 +264,15 @@ function safeEntries<T extends PerformanceEntry>(type: string): T[] {
 
 const ms = (n: number | null): string => n === null ? 'n/a' : `${n.toFixed(0)} ms`;
 
+/** Milestone on the app clock: time since the request hit the wire. */
+export const appMs = (n: number | null, requestStartMs: number): string | null =>
+  n === null || !requestStartMs ? null : `${Math.max(0, n - requestStartMs).toFixed(0)} ms`;
+
+const withAppClock = (n: number | null, r: LoadReport): string => {
+  const app = appMs(n, r.requestStartMs);
+  return app === null ? ms(n) : `${ms(n)} (${app} from request start)`;
+};
+
 /** GitHub-pasteable markdown: summary table + top-20-by-transfer resources. */
 export function reportToMarkdown(r: LoadReport): string {
   const lines: string[] = [
@@ -200,13 +283,17 @@ export function reportToMarkdown(r: LoadReport): string {
     `| Collected at | ${r.collectedAt} |`,
     `| Topology | ${r.topology}${r.requestId ? ` (request-id ${r.requestId})` : ''} |`,
     `| Protocol | ${r.protocol || 'unknown'} |`,
-    `| Response start | ${ms(r.responseStartMs)} |`,
-    `| DOMContentLoaded | ${ms(r.domContentLoadedMs)} |`,
-    `| Load event | ${ms(r.loadEventMs)} |`,
-    `| First contentful paint | ${ms(r.firstContentfulPaintMs)} |`,
-    `| Largest contentful paint | ${ms(r.lcpMs)}${r.lcpElement ? ` (${r.lcpElement})` : ''} |`,
-    `| Requests | ${r.requestCount} |`,
-    `| Total transfer | ${r.totalTransferBytes} bytes |`,
+    `| Response start | ${withAppClock(r.responseStartMs, r)} |`,
+    ...(r.phases ? [
+      `| Document fetch | stalled ${ms(r.phases.stalledMs)} · DNS ${ms(r.phases.dnsMs)} · TCP ${ms(r.phases.tcpMs)} · TLS ${ms(r.phases.tlsMs)} · server wait ${ms(r.phases.serverWaitMs)} |`,
+    ] : []),
+    `| DOMContentLoaded | ${withAppClock(r.domContentLoadedMs, r)} |`,
+    `| Load event | ${withAppClock(r.loadEventMs, r)} |`,
+    `| First contentful paint | ${withAppClock(r.firstContentfulPaintMs, r)} |`,
+    `| Largest contentful paint | ${withAppClock(r.lcpMs, r)}${r.lcpElement ? ` (${r.lcpElement})` : ''} |`,
+    `| Requests (initial load) | ${r.initialRequestCount} |`,
+    `| Total transfer (initial load) | ${r.initialTransferBytes} bytes |`,
+    `| Since load | +${r.sinceLoadRequestCount} requests, +${r.sinceLoadTransferBytes} bytes |`,
     '',
     '#### Top resources by transfer size',
     '',
