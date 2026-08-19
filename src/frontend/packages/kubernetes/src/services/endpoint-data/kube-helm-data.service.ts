@@ -173,7 +173,7 @@ export class KubeHelmDataService {
       await firstValueFrom(this.http.post('/pp/v1/helm/install', payload));
       await this.loadReleases();
     } catch (err) {
-      throw new Error(this.errorMessage(err, 'Failed to install helm chart'));
+      throw new Error(this.errorMessage(err, 'Failed to install helm chart'), { cause: err });
     }
   }
 
@@ -188,7 +188,7 @@ export class KubeHelmDataService {
       await firstValueFrom(this.http.post(url, payload));
       await this.loadReleases();
     } catch (err) {
-      throw new Error(this.errorMessage(err, 'Failed to upgrade helm release'));
+      throw new Error(this.errorMessage(err, 'Failed to upgrade helm release'), { cause: err });
     }
   }
 
@@ -203,7 +203,7 @@ export class KubeHelmDataService {
       );
       await this.loadReleases();
     } catch (err) {
-      throw new Error(this.errorMessage(err, 'Failed to delete helm release'));
+      throw new Error(this.errorMessage(err, 'Failed to delete helm release'), { cause: err });
     }
   }
 

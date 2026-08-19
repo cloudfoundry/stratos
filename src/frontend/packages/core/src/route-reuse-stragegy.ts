@@ -22,7 +22,7 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
     const isDashboard = curr.component === DashboardBaseComponent && future.component === DashboardBaseComponent;
     const isAppComp = curr.component === AppComponent && future.component === AppComponent;
 
-    let reuse = false;
+    let reuse: boolean;
     if (curr.data.reuseRoute === true) {
       reuse = curr.data.reuseRoute && future.data.reuseRoute && !curr.component && !future.component;
     } else {

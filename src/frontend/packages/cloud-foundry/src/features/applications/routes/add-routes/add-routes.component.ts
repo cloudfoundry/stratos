@@ -538,7 +538,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       // hostCollision and never reach this branch. Other 422 details
       // (invalid host, quota exceeded, etc.) pass through verbatim;
       // orphan-on-attach-fail messages too.
-      throw new Error(this.classifyCreateError(err));
+      throw new Error(this.classifyCreateError(err), { cause: err });
     }
     this.dataService.addRoute(created);
     void this.router.navigate(['/applications', this.cfGuid, this.appGuid, 'routes']);
@@ -596,7 +596,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       await this.actions.attachRoute(selected.guid);
     } catch (err) {
       const msg = (err as Error)?.message ?? 'Failed to map route';
-      throw new Error(msg);
+      throw new Error(msg, { cause: err });
     }
     // Use the picker's locally-held StRoute (backend returns empty 200 from
     // attach). The picker's drain stamps cnsiGuid via toStRoute server-side.
