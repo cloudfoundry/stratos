@@ -49,6 +49,15 @@ import 'monaco-editor/features/readOnlyMessage/register.js';
 import 'monaco-editor/features/smartSelect/register.js';
 import 'monaco-editor/features/snippet/register.js';
 import 'monaco-editor/features/suggest/register.js';
+// monaco 0.56's feature registry omits the suggest CONTROLLER and the
+// go-to commands: features/suggest/register.js (and register.all.js)
+// import only suggestInlineCompletions, and features/gotoSymbol only the
+// mouse link path — upstream's editor.main.js imports both directly, so
+// only registry-composed builds lose completions and F12. Verified live:
+// without these, editor.action.triggerSuggest does not exist. Import the
+// contribs directly until upstream fixes the registry.
+import 'monaco-editor/editor/contrib/suggest/browser/suggestController.js';
+import 'monaco-editor/editor/contrib/gotoSymbol/browser/goToCommands.js';
 import 'monaco-editor/features/toggleTabFocusMode/register.js';
 import 'monaco-editor/features/unicodeHighlighter/register.js';
 import 'monaco-editor/features/unusualLineTerminators/register.js';
