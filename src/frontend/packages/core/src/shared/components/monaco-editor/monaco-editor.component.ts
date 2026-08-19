@@ -59,7 +59,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
   private branding = inject(StratosBrandingService);
   private editor: import('monaco-editor').editor.IStandaloneCodeEditor | undefined;
-  private monaco: typeof import('monaco-editor') | undefined;
+  private monaco: Awaited<ReturnType<typeof loadMonacoEditor>> | undefined;
 
   constructor() {
     // Monaco's theme is process-global (monaco.editor.setTheme), so one

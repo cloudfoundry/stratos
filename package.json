@@ -142,7 +142,7 @@
     "madge": "^8.0.0",
     "mappy-breakpoints": "0.2.4",
     "marked": "16.1.2",
-    "monaco-editor": "^0.52.2",
+    "monaco-editor": "^0.56.0",
     "monaco-yaml": "^5.5.1",
     "ng2-charts": "^10.0.0",
     "normalizr": "3.6.2",
@@ -226,5 +226,8 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",
     "vitest": "^4.1.10"
+  },
+  "patchedDependencies": {
+    "monaco-worker-manager@2.0.1": "patches/monaco-worker-manager@2.0.1.patch"
   }
 }

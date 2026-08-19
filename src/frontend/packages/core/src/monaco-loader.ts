@@ -12,10 +12,10 @@
  * the import path.
  */
 
-import type { languages } from 'monaco-editor';
+import type { DiagnosticsOptions } from 'monaco-editor/languages/features/json/register.js';
 import type { MonacoYaml, MonacoYamlOptions } from 'monaco-yaml';
 
-type MonacoApi = typeof import('monaco-editor');
+type MonacoApi = typeof import('./monaco-features');
 
 let monacoLoad: Promise<MonacoApi> | null = null;
 let monacoYaml: MonacoYaml | null = null;
@@ -88,11 +88,13 @@ export async function configureYaml(options: MonacoYamlOptions): Promise<void> {
  * language service ships with Monaco itself, so unlike YAML this delegates
  * straight to `jsonDefaults` — process-global, last caller wins.
  */
-export async function configureJsonDiagnostics(options: languages.json.DiagnosticsOptions): Promise<void> {
+export async function configureJsonDiagnostics(options: DiagnosticsOptions): Promise<void> {
   const monaco = await loadMonacoEditor();
   // Optional-chained: a pre-set window.monaco (the unit-test mock) carries no
   // language services — json configuration is a no-op there, like yaml above.
-  (monaco as any)?.languages?.json?.jsonDefaults?.setDiagnosticsOptions(options);
+  // jsonDefaults is re-exported by monaco-features (monaco 0.55+ moved it out
+  // of the languages.json namespace).
+  (monaco as any)?.jsonDefaults?.setDiagnosticsOptions(options);
 }
 
 async function doLoadMonacoEditor(): Promise<MonacoApi> {

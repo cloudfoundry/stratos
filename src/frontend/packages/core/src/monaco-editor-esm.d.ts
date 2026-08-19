@@ -1,10 +1,7 @@
-// monaco-editor publishes only a `module` entry (no main/exports), so the
-// loader imports concrete ESM files — which ship no declarations of their
-// own (only editor.api.d.ts). editor.api's surface is exactly the package's
-// public types; every other imported file is a side-effect-only feature or
-// language contribution, covered by the wildcard below (the specific
-// declaration wins where both match).
-declare module 'monaco-editor/esm/vs/editor/editor.api.js' {
-  export * from 'monaco-editor';
-}
-declare module 'monaco-editor/esm/*';
+// monaco-editor 0.53+ resolves subpaths through its exports map and ships
+// per-file declarations for its public entry points (editor.js, the
+// features/*/register.js modules, the language registers). Some internal
+// files a feature list reaches for (e.g. editor/browser/coreCommands.js)
+// have no declaration of their own — this wildcard types those side-effect
+// imports; any specifier with a real .d.ts wins over it.
+declare module 'monaco-editor/*';

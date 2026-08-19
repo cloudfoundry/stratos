@@ -3,18 +3,18 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { configureJsonDiagnostics, installWorkerURLPolicy } from './monaco-loader';
 
 // Resolves to the window.monaco mock installed by test-setup. The mock
-// carries no language services, so languages.json is absent by default —
+// carries no language services, so jsonDefaults is absent by default —
 // tests that assert forwarding install it and remove it again afterwards.
-declare const monaco: typeof import('monaco-editor');
+declare const monaco: { jsonDefaults?: unknown };
 
 describe('configureJsonDiagnostics', () => {
   afterEach(() => {
-    delete (monaco as any).languages;
+    delete (monaco as any).jsonDefaults;
   });
 
   it('forwards the options to jsonDefaults.setDiagnosticsOptions', async () => {
     const setDiagnosticsOptions = vi.fn();
-    (monaco as any).languages = { json: { jsonDefaults: { setDiagnosticsOptions } } };
+    (monaco as any).jsonDefaults = { setDiagnosticsOptions };
 
     const options = {
       validate: true,
