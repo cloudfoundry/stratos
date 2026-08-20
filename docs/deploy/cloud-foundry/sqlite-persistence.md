@@ -12,7 +12,26 @@ favorites, and settings are lost.
 
 [Binding a Postgres or MySQL service](db-migration.md) is the recommended fix.
 When that is not an option, the SQLite database itself can be made recoverable.
-Two approaches are described here — both depend on one hard precondition.
+Two approaches are described here — both depend on two hard preconditions.
+
+## Precondition: keep the database file across restarts
+
+By default jetstream **deletes the SQLite database file at startup** and
+recreates it empty — a clean slate is the historical assumption for the
+ephemeral-disk case. Any restore-before-launch scheme silently loses to that
+delete: the wrapper script rebuilds the database, jetstream removes it moments
+later, and every boot looks like a fresh install. Under Litestream the failure
+compounds — the replicator then streams the freshly emptied database over the
+replica's latest state, so the backup's head is overwritten by the very
+mechanism meant to protect it (earlier state remains recoverable with
+`litestream restore -txid`/`-timestamp` until compaction retires it).
+
+Set `SQLITE_KEEP_DB` as a persisted application environment variable before
+adopting either approach:
+
+```bash
+cf set-env console SQLITE_KEEP_DB true
+```
 
 ## Precondition: a stable encryption key
 
@@ -50,26 +69,45 @@ container churn with at most a second or so of data loss:
    #!/bin/bash
    set -e
    cd /home/vcap/app
-   if [ ! -f console-database.db ]; then
-     ./litestream restore -config litestream.yml -if-replica-exists \
-       /home/vcap/app/console-database.db || true
+   if timeout 5 bash -c 'echo > /dev/tcp/replica-host/22' 2>/dev/null; then
+     if [ ! -f console-database.db ]; then
+       timeout 30 ./litestream restore -config litestream.yml \
+         -if-replica-exists /home/vcap/app/console-database.db || \
+         echo "restore unavailable (rc=$?) - starting fresh"
+       echo "restore done, size=$(stat -c%s console-database.db 2>/dev/null || echo none)"
+     fi
+     exec ./litestream replicate -config litestream.yml -exec ./jetstream
    fi
-   exec ./litestream replicate -config litestream.yml -exec ./jetstream
+   echo "replica target unreachable - running without replication"
+   exec ./jetstream
    ```
 
    A fresh container restores the last replicated state before jetstream
    opens the database; `-exec` then keeps replication running for the life of
    the process and exits when jetstream exits.
 
+   The guards are not decorative. Litestream initializes its replicas
+   *before* spawning the `-exec` child, so an unreachable replica target
+   blocks jetstream from ever starting — the reachability preflight falls
+   back to an unreplicated launch instead of a crash-loop, and the `timeout`
+   on the restore bounds the health-check window. Log the restored file size:
+   `litestream restore` is silent both when it restores and when
+   `-if-replica-exists` makes it a no-op (both exit 0), and the two are
+   otherwise indistinguishable from the platform log stream.
+
 Notes:
 
 - The container needs network egress to the replica target. Cloud Foundry
   application security groups typically exclude private ranges, so a scoped
-  ASG (single destination host and port) may be required.
+  ASG (single destination host and port) may be required — and the
+  infrastructure between the cells and the target (per-VM firewalls,
+  inter-subnet routing) has to pass the traffic too. Verify with a TCP probe
+  from inside the app container, not from the target's side.
 - Litestream switches the database to WAL journal mode. Jetstream's pure-Go
-  SQLite driver supports WAL databases, but Litestream and jetstream then
-  coordinate through SQLite's cross-process locking — validate the pairing in
-  a non-production environment before relying on it.
+  SQLite driver interoperates with Litestream's WAL handling (the pairing is
+  exercised by the pattern above), coordinating through SQLite's
+  cross-process locking — still validate the combination in a non-production
+  environment before relying on it.
 - Replica credentials (SSH key or object-store keys) travel inside the
   application package; scope them to the replica target only.
 
