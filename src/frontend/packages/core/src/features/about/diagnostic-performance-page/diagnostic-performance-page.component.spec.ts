@@ -18,6 +18,7 @@ const { fixedReport } = vi.hoisted(() => {
     topology: 'cf-pushed',
     requestId: 'req-abc-123',
     protocol: 'h2',
+    requestStartMs: 10,
     responseStartMs: 12,
     domContentLoadedMs: 300,
     loadEventMs: 500,
@@ -26,6 +27,11 @@ const { fixedReport } = vi.hoisted(() => {
     lcpElement: null,
     requestCount: 2,
     totalTransferBytes: 4096,
+    initialRequestCount: 1,
+    initialTransferBytes: 3000,
+    sinceLoadRequestCount: 1,
+    sinceLoadTransferBytes: 1096,
+    phases: { stalledMs: 5, dnsMs: 1, tcpMs: 2, tlsMs: 3, serverWaitMs: 1 },
     resources: [
       { path: '/main.js', startMs: 1, durationMs: 20, transferBytes: 3000, decodedBytes: 9000, protocol: 'h2', cached: false },
       { path: '/styles.css', startMs: 2, durationMs: 5, transferBytes: 1096, decodedBytes: 2000, protocol: 'h2', cached: true },
@@ -109,6 +115,31 @@ describe('DiagnosticPerformancePageComponent', () => {
     button?.click();
     await fixture.whenStable();
     expect(writeText).toHaveBeenCalledWith(reportToMarkdown(fixedReport));
+  });
+
+  it('headlines the initial-load totals with the since-load overflow alongside', () => {
+    const el = fixture.nativeElement as HTMLElement;
+    const requests = el.querySelector('[data-test="requests-summary"]')?.textContent ?? '';
+    expect(requests).toContain('1');
+    expect(requests).toContain('+1 since load');
+    const transfer = el.querySelector('[data-test="transfer-summary"]')?.textContent ?? '';
+    expect(transfer).toContain('+');
+    expect(transfer).toContain('since load');
+  });
+
+  it('shows each milestone on the Stratos clock next to the browser clock', () => {
+    const appClock = (fixture.nativeElement as HTMLElement)
+      .querySelector('[data-test="app-clock-response"]')?.textContent ?? '';
+    // responseStartMs 12 − requestStartMs 10
+    expect(appClock).toContain('2 ms');
+  });
+
+  it('breaks the pre-response time into document fetch phases', () => {
+    const phases = (fixture.nativeElement as HTMLElement)
+      .querySelector('[data-test="doc-phases"]')?.textContent ?? '';
+    expect(phases).toContain('stalled 5 ms');
+    expect(phases).toContain('TLS 3 ms');
+    expect(phases).toContain('server wait 1 ms');
   });
 
   it('shows the cold/warm cache verdict for the load', () => {

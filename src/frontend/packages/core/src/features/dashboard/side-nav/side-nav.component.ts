@@ -70,6 +70,16 @@ export class SideNavComponent implements OnInit {
   public environment = environment;
   public showAllMenuItems = false;
 
+  /** Debug affordance (c5c1009a85): only rendered when the deployment's
+   *  company config opts in via debug.showAllMenuItemsToggle. */
+  public showMenuItemsToggle = computed(() => this.branding.getShowAllMenuItemsToggle());
+
+  /** Effective reveal flag: a saved preference counts only while the debug
+   *  toggle is available — a hidden checkbox must not leak hidden nav items. */
+  get revealHiddenItems(): boolean {
+    return this.showMenuItemsToggle() && this.showAllMenuItems;
+  }
+
   tooltipDelay = 0;
 
   private readonly SHOW_ALL_MENU_ITEMS_KEY = 'stratos-show-all-menu-items';

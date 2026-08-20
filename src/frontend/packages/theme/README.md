@@ -101,6 +101,9 @@ from these locations in order:
     "copyright": "2026 Acme Corp. All rights reserved.",
     "additionalInfo": "Version 5.0"
   },
+  "debug": {
+    "showAllMenuItemsToggle": false
+  },
   "defaults": {
     "themeMode": "light",
     "sidebarOpen": true,
@@ -168,6 +171,7 @@ from these locations in order:
 | `defaults.pageSizeTable` | number[] | No | Page size options for table view |
 | `defaults.viewMode` | `table`/`cards` | No | Default list view mode |
 | `defaults.sortDirection` | `asc`/`desc` | No | Default sort direction |
+| `debug.showAllMenuItemsToggle` | boolean | No | Debug: render the side-nav "Show all menu items" checkbox that reveals nav entries hidden by endpoint/persistence rules. Off by default |
 
 ## Service API Summary
 

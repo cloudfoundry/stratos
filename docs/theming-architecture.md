@@ -383,6 +383,12 @@ interface CompanyConfig {
     copyright?: string;      // Copyright text
     additionalInfo?: string; // Extra footer text
   };
+  debug?: {
+    // Render the side-nav "Show all menu items" checkbox, which reveals
+    // nav entries hidden by endpoint/persistence rules. A debugging
+    // affordance — off by default.
+    showAllMenuItemsToggle?: boolean;
+  };
   defaults?: {
     themeMode?: 'light' | 'dark' | 'system';
     sidebarOpen?: boolean;
