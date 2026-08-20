@@ -22,6 +22,7 @@ const sidebars = {
           items: [
             'deploy/cloud-foundry/cloud-foundry',
             'deploy/cloud-foundry/db-migration',
+            'deploy/cloud-foundry/sqlite-persistence',
             'deploy/cloud-foundry/cf-troubleshooting'
           ]
         },
