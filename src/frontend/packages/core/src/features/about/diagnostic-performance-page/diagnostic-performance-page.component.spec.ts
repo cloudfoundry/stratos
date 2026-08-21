@@ -32,6 +32,7 @@ const { fixedReport } = vi.hoisted(() => {
     sinceLoadRequestCount: 1,
     sinceLoadTransferBytes: 1096,
     phases: { stalledMs: 5, dnsMs: 1, tcpMs: 2, tlsMs: 3, serverWaitMs: 1 },
+    document: null,
     resources: [
       { path: '/main.js', startMs: 1, durationMs: 20, transferBytes: 3000, decodedBytes: 9000, protocol: 'h2', cached: false },
       { path: '/styles.css', startMs: 2, durationMs: 5, transferBytes: 1096, decodedBytes: 2000, protocol: 'h2', cached: true },
