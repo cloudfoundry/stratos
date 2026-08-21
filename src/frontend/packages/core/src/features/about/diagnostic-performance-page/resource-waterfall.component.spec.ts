@@ -2,9 +2,10 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
-import { LoadReport, ResourceRow } from '../diagnostics-data/load-performance';
+import { DocumentRow, LoadReport, ResourceRow } from '../diagnostics-data/load-performance';
 import {
   ResourceWaterfallComponent,
+  shiftDocumentRow,
   WATERFALL_GROUP_GAP_MS,
   WATERFALL_ROW_CAP,
   axisTicks,
@@ -298,7 +299,43 @@ const reportWith = (resources: ResourceRow[]): LoadReport => ({
   sinceLoadRequestCount: 0,
   sinceLoadTransferBytes: 0,
   phases: null,
+  document: null,
   resources,
+});
+
+const doc = (over: Partial<DocumentRow> = {}): DocumentRow => ({
+  path: '/',
+  startMs: 0,
+  endMs: 860,
+  transferBytes: 5000,
+  segments: [
+    { label: 'stalled', startMs: 0, durationMs: 320 },
+    { label: 'TLS', startMs: 320, durationMs: 224 },
+    { label: 'server wait', startMs: 544, durationMs: 212 },
+    { label: 'download', startMs: 756, durationMs: 104 },
+  ],
+  ...over,
+});
+
+describe('shiftDocumentRow', () => {
+  it('drops segments that end before the offset and clips one that straddles it', () => {
+    const shifted = shiftDocumentRow(doc(), 400)!;
+    expect(shifted.startMs).toBe(0);
+    expect(shifted.endMs).toBe(460);
+    expect(shifted.segments).toEqual([
+      { label: 'TLS', startMs: 0, durationMs: 144 },
+      { label: 'server wait', startMs: 144, durationMs: 212 },
+      { label: 'download', startMs: 356, durationMs: 104 },
+    ]);
+  });
+
+  it('returns the row unchanged at zero offset', () => {
+    expect(shiftDocumentRow(doc(), 0)).toEqual(doc());
+  });
+
+  it('passes null through', () => {
+    expect(shiftDocumentRow(null, 100)).toBeNull();
+  });
 });
 
 /** One resource per group: starts spaced past the gap so nothing clusters. */
@@ -322,6 +359,24 @@ describe('ResourceWaterfallComponent', () => {
       providers: [provideZonelessChangeDetection()],
     }).compileComponents();
     fixture = TestBed.createComponent(ResourceWaterfallComponent);
+  });
+
+  it('renders the document request as a pinned segmented row', () => {
+    render({ ...reportWith(spacedResources(2)), document: doc() });
+    const documentEl = query('[data-test="waterfall-document"]');
+    expect(documentEl).not.toBeNull();
+    expect(documentEl!.textContent).toContain('document');
+    expect(documentEl!.querySelectorAll('[data-test="waterfall-document-segment"]').length).toBe(4);
+  });
+
+  it('omits the document row when the report has none', () => {
+    render(reportWith(spacedResources(2)));
+    expect(query('[data-test="waterfall-document"]')).toBeNull();
+  });
+
+  it('extends the scale to cover a document outliving every resource', () => {
+    render({ ...reportWith([row({ startMs: 0, durationMs: 10 })]), loadEventMs: 100, document: doc({ endMs: 2000 }) });
+    expect(fixture.componentInstance.scaleMax()).toBeGreaterThanOrEqual(2000);
   });
 
   it('summarises resources and groups in the banner', () => {

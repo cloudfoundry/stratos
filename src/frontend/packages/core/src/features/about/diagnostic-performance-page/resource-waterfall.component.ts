@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
 
 import { formatBytes } from '../diagnostics-data/entity-footprint';
-import { LoadReport, ResourceRow } from '../diagnostics-data/load-performance';
+import { DocSegment, DocumentRow, LoadReport, ResourceRow } from '../diagnostics-data/load-performance';
 
 /** Group lines per waterfall page. */
 export const WATERFALL_ROW_CAP = 40;
@@ -113,6 +113,26 @@ export function groupRows(resources: ResourceRow[], gapMs: number = WATERFALL_GR
     }
   }
   return groups;
+}
+
+/** Clock-shift a document row: segments wholly before the offset vanish, a
+ *  straddling one is clipped, the rest slide left. Under the Stratos clock
+ *  this collapses the row to server wait + download — the app-influenced part. */
+export function shiftDocumentRow(d: DocumentRow | null, offsetMs: number): DocumentRow | null {
+  if (!d || !offsetMs) { return d; }
+  const segments = d.segments
+    .map(s => {
+      const start = Math.max(0, s.startMs - offsetMs);
+      const end = Math.max(0, s.startMs + s.durationMs - offsetMs);
+      return { ...s, startMs: start, durationMs: end - start };
+    })
+    .filter(s => s.durationMs > 0);
+  return {
+    ...d,
+    startMs: Math.max(0, d.startMs - offsetMs),
+    endMs: Math.max(0, d.endMs - offsetMs),
+    segments,
+  };
 }
 
 /** Resources that started before the load event; everything when the load
@@ -281,6 +301,28 @@ export function rowLabel(path: string): string {
         </div>
       </div>
 
+      <!-- Row 0: the document request itself, segmented by phase. It is not a
+           resource-timing entry, so without this row a slow connection draws
+           an unexplained void until the HTML arrives. -->
+      @if (windowDocument(); as d) {
+        <div
+          class="flex h-5 items-stretch hover:bg-content-secondary transition-colors"
+          data-test="waterfall-document" [title]="documentTitle(d)">
+          <div class="w-56 shrink-0 pr-2 text-xs leading-5 text-content-muted truncate">document · {{ rowLabel(d.path) }}</div>
+          <div class="relative flex-1 min-w-0">
+            @for (s of d.segments; track s.label; let first = $first; let last = $last) {
+              <div
+                data-test="waterfall-document-segment"
+                class="absolute top-1/2 -translate-y-1/2 h-2.5 bg-[#2a78d6] dark:bg-[#3987e5] min-w-[1px]"
+                [class.rounded-l]="first" [class.rounded-r]="last"
+                [style.opacity]="segmentOpacity(s.label)"
+                [style.left.%]="pct(s.startMs)"
+                [style.width.%]="spanPct(s.startMs, s.durationMs)"></div>
+            }
+          </div>
+        </div>
+      }
+
       <!-- One line per group: single-member groups render as plain resource
            rows; multi-member groups render a summary line that expands. -->
       @for (g of pagedGroups(); track g.key) {
@@ -343,8 +385,9 @@ export function rowLabel(path: string): string {
       FCP = first contentful paint, LCP = largest contentful paint (hover a label for its time).
       Drag along the top axis to zoom to a time range; drag again to drill deeper,
       double-click the axis (or Reset zoom) to zoom back out. The browser clock starts
-      at navigation, so the empty stretch on the left is browser stall + DNS + TCP + TLS
-      before the document request &mdash; switch to the Stratos clock to subtract it.
+      at navigation; the document row's leading segments show the browser stall + DNS +
+      TCP + TLS spent before the request hit the wire (hover the row for each phase's
+      time) &mdash; switch to the Stratos clock to subtract them.
       On a warm (cached) load most bars are near-invisible slivers: cache hits complete
       in ~0 ms and transfer 0 bytes.
     </div>
@@ -381,7 +424,25 @@ export class ResourceWaterfallComponent {
     const offset = this.clockOffsetMs();
     return milestoneLines(this.report()).map(m => ({ ...m, ms: Math.max(0, m.ms - offset) }));
   });
-  scaleMax = computed(() => waterfallScaleMax(this.shiftedLoadEventMs(), this.visibleResources(), this.milestones()));
+
+  /** The document request, clock-shifted; always part of the initial load so
+   *  the initial-only filter never hides it. */
+  private shiftedDocument = computed(() => shiftDocumentRow(this.report().document, this.clockOffsetMs()));
+  /** The document row when it intersects the current view window. */
+  windowDocument = computed(() => {
+    const d = this.shiftedDocument();
+    if (!d) { return null; }
+    const v = this.view();
+    return d.endMs >= v.startMs && d.startMs <= v.endMs ? d : null;
+  });
+
+  scaleMax = computed(() => {
+    const d = this.shiftedDocument();
+    const spans = d
+      ? [...this.visibleResources(), { startMs: d.startMs, durationMs: d.endMs - d.startMs }]
+      : this.visibleResources();
+    return waterfallScaleMax(this.shiftedLoadEventMs(), spans, this.milestones());
+  });
 
   /** Brush zoom: null = full scale. */
   viewWindow = signal<ViewWindow | null>(null);
@@ -503,6 +564,27 @@ export class ResourceWaterfallComponent {
       next.add(key);
     }
     this.expanded.set(next);
+  }
+
+  /** Phase-graded opacity: setup phases faint, app-influenced phases solid. */
+  segmentOpacity(label: DocSegment['label']): number {
+    switch (label) {
+      case 'stalled': return 0.3;
+      case 'DNS': return 0.42;
+      case 'TCP': return 0.55;
+      case 'TLS': return 0.68;
+      case 'server wait': return 0.85;
+      default: return 1;
+    }
+  }
+
+  documentTitle(d: DocumentRow): string {
+    return [
+      `${d.path} (document)`,
+      ...d.segments.map(s => `${s.label}: ${s.durationMs.toFixed(0)} ms`),
+      `total to last byte: ${(d.endMs - d.startMs).toFixed(0)} ms`,
+      `transfer: ${formatBytes(d.transferBytes)}`,
+    ].join('\n');
   }
 
   barTitle(r: ResourceRow): string {

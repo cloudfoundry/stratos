@@ -5,6 +5,7 @@ import {
   collectResources,
   computePhases,
   detectTopology,
+  documentRow,
   buildLoadReport,
   observeFcp,
   reportToMarkdown,
@@ -42,6 +43,7 @@ const sampleReport = (): LoadReport => ({
   sinceLoadRequestCount: 0,
   sinceLoadTransferBytes: 0,
   phases: { stalledMs: 5, dnsMs: 1, tcpMs: 2, tlsMs: 3, serverWaitMs: 1 },
+  document: null,
   resources: [
     { path: '/main.js', startMs: 1, durationMs: 20, transferBytes: 3000, decodedBytes: 9000, protocol: 'h2', cached: false },
     { path: '/styles.css', startMs: 2, durationMs: 5, transferBytes: 1096, decodedBytes: 2000, protocol: 'h2', cached: false },
@@ -156,6 +158,56 @@ describe('computePhases', () => {
 
   it('returns null without a navigation entry', () => {
     expect(computePhases(undefined)).toBeNull();
+  });
+});
+
+describe('documentRow', () => {
+  const nav = (overrides: Partial<PerformanceNavigationTiming>): PerformanceNavigationTiming => ({
+    name: 'http://localhost/',
+    startTime: 0,
+    fetchStart: 5,
+    domainLookupStart: 325,
+    domainLookupEnd: 786,
+    connectStart: 786,
+    secureConnectionStart: 883,
+    connectEnd: 1107,
+    requestStart: 1107,
+    responseStart: 1319,
+    responseEnd: 1400,
+    transferSize: 5000,
+    ...overrides,
+  } as PerformanceNavigationTiming);
+
+  it('builds a phase-segmented row spanning navigation start to response end', () => {
+    const d = documentRow(nav({}))!;
+    expect(d.path).toBe('/');
+    expect(d.startMs).toBe(0);
+    expect(d.endMs).toBe(1400);
+    expect(d.transferBytes).toBe(5000);
+    expect(d.segments).toEqual([
+      { label: 'stalled', startMs: 5, durationMs: 320 },
+      { label: 'DNS', startMs: 325, durationMs: 461 },
+      { label: 'TCP', startMs: 786, durationMs: 97 },
+      { label: 'TLS', startMs: 883, durationMs: 224 },
+      { label: 'server wait', startMs: 1107, durationMs: 212 },
+      { label: 'download', startMs: 1319, durationMs: 81 },
+    ]);
+  });
+
+  it('omits zero-length phases (reused connection: no DNS/TCP/TLS)', () => {
+    const d = documentRow(nav({
+      fetchStart: 3, domainLookupStart: 3, domainLookupEnd: 3,
+      connectStart: 3, secureConnectionStart: 0, connectEnd: 3,
+      requestStart: 10, responseStart: 50, responseEnd: 60,
+    }))!;
+    expect(d.segments).toEqual([
+      { label: 'server wait', startMs: 10, durationMs: 40 },
+      { label: 'download', startMs: 50, durationMs: 10 },
+    ]);
+  });
+
+  it('returns null without a navigation entry', () => {
+    expect(documentRow(undefined)).toBeNull();
   });
 });
 
