@@ -41,6 +41,27 @@ export interface DocPhases {
   serverWaitMs: number;
 }
 
+/** One phase of the document request, drawn as a segment of the waterfall's document row. */
+export interface DocSegment {
+  label: 'stalled' | 'DNS' | 'TCP' | 'TLS' | 'server wait' | 'download';
+  startMs: number;
+  durationMs: number;
+}
+
+/**
+ * The document (navigation) request itself. It never appears in the
+ * resource-timing buffer, so without this row the waterfall draws nothing
+ * until the HTML arrives — on a high-latency path that reads as "no activity"
+ * even though the browser was busy connecting the whole time.
+ */
+export interface DocumentRow {
+  path: string;
+  startMs: number;
+  endMs: number;
+  transferBytes: number;
+  segments: DocSegment[];
+}
+
 export interface LoadReport {
   collectedAt: string;
   topology: 'cf-pushed' | 'local/other';
@@ -67,7 +88,35 @@ export interface LoadReport {
   sinceLoadRequestCount: number;
   sinceLoadTransferBytes: number;
   phases: DocPhases | null;
+  document: DocumentRow | null;
   resources: ResourceRow[];
+}
+
+/**
+ * Build the waterfall's document row from the navigation entry: one segment
+ * per non-empty phase, from navigation start to the document's last byte.
+ * Zero-length phases (reused connection: no DNS/TCP/TLS) are omitted.
+ */
+export function documentRow(nav: PerformanceNavigationTiming | undefined): DocumentRow | null {
+  if (!nav) { return null; }
+  const tlsStart = nav.secureConnectionStart;
+  const spans: [DocSegment['label'], number, number][] = [
+    ['stalled', nav.fetchStart, nav.domainLookupStart],
+    ['DNS', nav.domainLookupStart, nav.domainLookupEnd],
+    ['TCP', nav.connectStart, tlsStart > 0 ? tlsStart : nav.connectEnd],
+    ['TLS', tlsStart > 0 ? tlsStart : 0, tlsStart > 0 ? nav.connectEnd : 0],
+    ['server wait', nav.requestStart, nav.responseStart],
+    ['download', nav.responseStart, nav.responseEnd],
+  ];
+  return {
+    path: new URL(nav.name, location.href).pathname,
+    startMs: nav.startTime,
+    endMs: nav.responseEnd,
+    transferBytes: nav.transferSize ?? 0,
+    segments: spans
+      .filter(([, start, end]) => end - start > 0)
+      .map(([label, start, end]) => ({ label, startMs: start, durationMs: end - start })),
+  };
 }
 
 /**
@@ -250,6 +299,7 @@ export async function buildLoadReport(): Promise<LoadReport> {
     totalTransferBytes: resources.reduce((sum, r) => sum + r.transferBytes, 0),
     ...splitByLoad(resources, loadEventMs),
     phases: computePhases(nav),
+    document: documentRow(nav),
     resources,
   };
 }
