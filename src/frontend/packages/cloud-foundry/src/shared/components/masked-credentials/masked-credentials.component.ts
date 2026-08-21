@@ -51,9 +51,10 @@ export function toCredentialFields(creds: Record<string, unknown>): CredentialFi
 }
 
 // Deep display-mask for structured env values (VCAP_SERVICES and friends):
-// walks objects/arrays and masks leaves whose own key looks sensitive, and
-// redacts embedded scheme://user:pass@host credentials in any string.
-// Leaf-based on purpose — hosts/ports inside a `credentials` block stay
+// walks objects/arrays and masks leaves using the same heuristics as
+// toCredentialField: redacts embedded scheme://user:pass@host credentials in
+// strings (takes precedence), and fully masks other scalars under sensitive-named
+// keys. Leaf-based on purpose — hosts/ports inside a `credentials` block stay
 // readable, matching the Service Keys view. Returns a masked copy; never
 // mutates the input.
 export function maskEnvValue(key: string, value: unknown): unknown {
@@ -68,11 +69,11 @@ export function maskEnvValue(key: string, value: unknown): unknown {
       Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, maskEnvValue(k, v)]),
     );
   }
-  if (SENSITIVE_KEY.test(key)) {
-    return FULL_MASK;
-  }
   if (typeof value === 'string' && EMBEDDED_CREDENTIAL.test(value)) {
     return redactEmbeddedCredential(value);
+  }
+  if (SENSITIVE_KEY.test(key)) {
+    return FULL_MASK;
   }
   return value;
 }
