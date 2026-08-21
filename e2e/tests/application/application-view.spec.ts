@@ -552,6 +552,49 @@ test.describe('Application View', () => {
         const menu = await list.openRowActionMenuByRow(row);
         await expect(menu.getItem('Delete')).toBeVisible();
       });
+
+      test('should mask sensitive variable values until revealed', async ({ withTestApp }) => {
+        const { page, testApp, cfApi } = withTestApp;
+
+        // Seed a secret-shaped variable (dummy value, not a real credential).
+        await cfApi.updateAppEnvironment(testApp.app.guid, { E2E_SECRET_TOKEN: 'hunter2' });
+
+        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+        await appSummary.navigateTo();
+        await appSummary.goToVariablesTab();
+
+        const list = new ListTableComponent(page, page.locator('app-variables-tab app-signal-list'));
+        const row = await list.findRowByCellContent('E2E_SECRET_TOKEN');
+
+        // Masked by default: dots visible, value absent from the DOM text.
+        await expect(row).toContainText('••••••••');
+        await expect(row).not.toContainText('hunter2');
+
+        // Explicit request reveals; toggling back re-masks.
+        await row.getByRole('button', { name: 'Show' }).click();
+        await expect(row).toContainText('hunter2');
+        await row.getByRole('button', { name: 'Hide' }).click();
+        await expect(row).not.toContainText('hunter2');
+      });
+
+      test('should mask secrets in the All Variables block until Show secrets', async ({ withTestApp }) => {
+        const { page, testApp, cfApi } = withTestApp;
+
+        await cfApi.updateAppEnvironment(testApp.app.guid, { E2E_SECRET_TOKEN: 'hunter2' });
+
+        const appSummary = new ApplicationPageSummary(page, testApp.cfGuid, testApp.app.guid);
+        await appSummary.navigateTo();
+        await appSummary.goToVariablesTab();
+
+        const card = page.locator('.card', { hasText: 'All Variables' });
+        await expect(card).toContainText('E2E_SECRET_TOKEN');
+        await expect(card).not.toContainText('hunter2');
+
+        await card.getByRole('button', { name: 'Show secrets' }).click();
+        await expect(card).toContainText('hunter2');
+        await card.getByRole('button', { name: 'Hide secrets' }).click();
+        await expect(card).not.toContainText('hunter2');
+      });
     });
 
     test.describe('Events Tab', () => {
