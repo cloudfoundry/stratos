@@ -40,6 +40,7 @@ import {
 } from '../../../../../../shared/components/variable-edit-dialog/variable-edit-dialog.component';
 import {
   CredentialField,
+  maskEnvValue,
   toCredentialField,
 } from '../../../../../../shared/components/masked-credentials/masked-credentials.component';
 import { AppVariableActionsService } from '../../../../../../shared/services/app-variable-actions.service';
@@ -177,6 +178,20 @@ export class VariablesTabComponent implements OnInit {
       }
     }
     return out;
+  });
+
+  /** Whether the All Variables block shows real secret values. Off by default;
+   *  the card-header toggle is the explicit request that flips it. */
+  readonly showAllSecrets = signal(false);
+
+  /** Display projection of `allEnvVars`: deep-masked unless secrets are shown.
+   *  Section header rows pass through untouched. */
+  readonly allEnvVarsDisplay: Signal<VariableTabAllEnvVarType[]> = computed(() => {
+    const rows = this.allEnvVars();
+    if (this.showAllSecrets()) {
+      return rows;
+    }
+    return rows.map(r => (r.section ? r : { ...r, value: maskEnvValue(r.name, r.value) }));
   });
 
   constructor() {

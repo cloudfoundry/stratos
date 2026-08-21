@@ -354,4 +354,35 @@ describe('VariablesTabComponent', () => {
       expect(component.rowDisplay(row)).toBe('8080');
     });
   });
+
+  describe('All Variables masking', () => {
+    const displayRows = () => component.allEnvVarsDisplay().filter(r => !r.section);
+    const valueOf = (name: string) => displayRows().find(r => r.name === name)!.value;
+
+    it('deep-masks sensitive values by default and reveals on Show secrets', () => {
+      envVarsSig.set({
+        environment: { DB_PASSWORD: 'pw', PORT: '8080' },
+        systemProvided: {
+          VCAP_SERVICES: { 'my-db': [{ credentials: { hostname: 'db.local', password: 'pw' } }] },
+        },
+      });
+
+      expect(valueOf('DB_PASSWORD')).toBe('••••••••');
+      expect(valueOf('PORT')).toBe('8080');
+      const vcap = valueOf('VCAP_SERVICES') as any;
+      expect(vcap['my-db'][0].credentials.password).toBe('••••••••');
+      expect(vcap['my-db'][0].credentials.hostname).toBe('db.local');
+
+      component.showAllSecrets.set(true);
+      expect(valueOf('DB_PASSWORD')).toBe('pw');
+      expect((valueOf('VCAP_SERVICES') as any)['my-db'][0].credentials.password).toBe('pw');
+    });
+
+    it('leaves section header rows untouched', () => {
+      envVarsSig.set({ environment: { DB_PASSWORD: 'pw' } });
+      const sections = component.allEnvVarsDisplay().filter(r => r.section);
+      expect(sections.length).toBe(1);
+      expect(sections[0].name).toBe('environment');
+    });
+  });
 });

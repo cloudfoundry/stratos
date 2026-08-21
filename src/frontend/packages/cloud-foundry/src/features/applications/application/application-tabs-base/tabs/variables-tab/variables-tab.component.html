@@ -18,12 +18,16 @@
 
   <div class="pt-5">
     <div class="card">
-      <div class="card-header">
+      <div class="card-header flex items-center justify-between">
         <div>All Variables</div>
+        <button type="button" class="text-link hover:underline text-xs"
+          (click)="showAllSecrets.set(!showAllSecrets())">
+          {{ showAllSecrets() ? 'Hide secrets' : 'Show secrets' }}
+        </button>
       </div>
       <div class="card-body pt-5">
         <app-code-block>
-          @for (envVar of allEnvVars(); track $index) {
+          @for (envVar of allEnvVarsDisplay(); track $index) {
             <div [class]="envVar.section ? '[&:not(:first-of-type)]:pt-[15px]' : ''">
               @if (envVar.section) {
                 <pre class="m-0 whitespace-pre-wrap">{{envVar.name}}</pre>
