@@ -123,6 +123,7 @@ export class CfAppVariablesSignalConfigService {
       },
       {
         header: 'Value', key: 'value',
+        kind: 'template', templateName: 'value',
         render: (row) => this.renderValue(row.value),
         sortField: 'value',
       },

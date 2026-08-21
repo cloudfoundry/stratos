@@ -327,4 +327,31 @@ describe('VariablesTabComponent', () => {
 
     expect(snack.error).toHaveBeenCalled();
   });
+
+  describe('value masking (list rows)', () => {
+    it('masks a sensitive row until revealed, and re-masks on toggle', () => {
+      const row = { name: 'CLIENT_SECRET', value: 's3cr3t' };
+      expect(component.rowField(row).sensitive).toBe(true);
+      expect(component.rowDisplay(row)).toBe('••••••••');
+
+      component.toggleRowReveal(row);
+      expect(component.rowRevealed(row)).toBe(true);
+      expect(component.rowDisplay(row)).toBe('s3cr3t');
+
+      component.toggleRowReveal(row);
+      expect(component.rowDisplay(row)).toBe('••••••••');
+    });
+
+    it('redacts only the password of an embedded-credential value', () => {
+      const row = { name: 'DATABASE_URL', value: 'postgres://u:pw@db/x' };
+      expect(component.rowField(row).sensitive).toBe(true);
+      expect(component.rowDisplay(row)).toBe('postgres://u:<redacted>@db/x');
+    });
+
+    it('shows a non-sensitive row plainly', () => {
+      const row = { name: 'PORT', value: '8080' };
+      expect(component.rowField(row).sensitive).toBe(false);
+      expect(component.rowDisplay(row)).toBe('8080');
+    });
+  });
 });

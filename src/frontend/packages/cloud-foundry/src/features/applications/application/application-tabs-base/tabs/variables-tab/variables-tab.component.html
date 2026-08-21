@@ -3,7 +3,17 @@
     <app-list-sub-nav title="Total Variables" [count]="totalVariables"
                       [addAction]="addVariableAction">
     </app-list-sub-nav>
-    <app-signal-list [config]="listConfig"></app-signal-list>
+    <app-signal-list [config]="listConfig">
+      <ng-template appSignalListCell="value" let-row>
+        <span class="break-all font-mono">{{ rowDisplay(row) }}</span>
+        @if (rowField(row).sensitive) {
+          <button type="button" class="text-link hover:underline text-xs ml-2 whitespace-nowrap"
+            (click)="toggleRowReveal(row)">
+            {{ rowRevealed(row) ? 'Hide' : 'Show' }}
+          </button>
+        }
+      </ng-template>
+    </app-signal-list>
   </div>
 
   <div class="pt-5">

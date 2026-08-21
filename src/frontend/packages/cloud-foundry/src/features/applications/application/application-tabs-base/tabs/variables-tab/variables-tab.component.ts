@@ -26,6 +26,9 @@ import {
 
 import { CodeBlockComponent } from '../../../../../../../../core/src/shared/components/code-block/code-block.component';
 import {
+  SignalListCellTemplateDirective,
+} from '../../../../../../../../core/src/shared/components/signal-list/signal-list-cell-template.directive';
+import {
   ListAppEnvVar,
 } from '../../../../../../shared/signal-list-configs/app-variables/cf-app-variables.types';
 import {
@@ -35,6 +38,10 @@ import {
   VariableEditDialogComponent,
   VariableEditDialogResult,
 } from '../../../../../../shared/components/variable-edit-dialog/variable-edit-dialog.component';
+import {
+  CredentialField,
+  toCredentialField,
+} from '../../../../../../shared/components/masked-credentials/masked-credentials.component';
 import { AppVariableActionsService } from '../../../../../../shared/services/app-variable-actions.service';
 import { AppDetailDataService } from '../../../../app-detail-data.service';
 
@@ -73,6 +80,7 @@ export interface VariableTabAllEnvVarType {
   imports: [
     CommonModule,
     SignalListComponent,
+    SignalListCellTemplateDirective,
     ListSubNavComponent,
     CodeBlockComponent,
   ]
@@ -101,6 +109,30 @@ export class VariablesTabComponent implements OnInit {
     const env = this.dataService.envVars()?.environment;
     return env ? Object.keys(env) : [];
   });
+
+  // ---------------------------------------------------------------------------
+  // Secret masking (list rows): sensitive-looking values render masked until
+  // the row's Show toggle is clicked. Component-local state — resets on nav.
+  // ---------------------------------------------------------------------------
+
+  private readonly revealedRows = signal<ReadonlySet<string>>(new Set<string>());
+
+  readonly rowField = (row: ListAppEnvVar): CredentialField => toCredentialField(row.name, row.value);
+
+  readonly rowRevealed = (row: ListAppEnvVar): boolean => this.revealedRows().has(row.name);
+
+  readonly rowDisplay = (row: ListAppEnvVar): string => {
+    const field = this.rowField(row);
+    return field.sensitive && !this.rowRevealed(row) ? field.displayMasked : field.value;
+  };
+
+  toggleRowReveal(row: ListAppEnvVar): void {
+    this.revealedRows.update(prev => {
+      const next = new Set(prev);
+      if (next.has(row.name)) { next.delete(row.name); } else { next.add(row.name); }
+      return next;
+    });
+  }
 
   /** L5 add action — opens the editor dialog in add mode. */
   readonly addVariableAction: ListSubNavAddAction = {
