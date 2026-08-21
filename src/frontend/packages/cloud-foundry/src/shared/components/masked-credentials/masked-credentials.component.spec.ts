@@ -120,4 +120,10 @@ describe('maskEnvValue — deep env masking', () => {
     expect(maskEnvValue('SECRET_URL', 'postgres://user:pass@host:5432/db'))
       .toBe('postgres://user:<redacted>@host:5432/db');
   });
+
+  it('recurses an object under a sensitive key rather than blanket-masking it (known leaf-based ceiling)', () => {
+    const masked = maskEnvValue('SIGNING_KEY', { material: 'raw-bytes', algorithm: 'RS256' }) as any;
+    expect(masked.material).toBe('raw-bytes');
+    expect(masked.algorithm).toBe('RS256');
+  });
 });

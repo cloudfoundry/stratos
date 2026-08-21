@@ -8,6 +8,7 @@
         <span class="break-all font-mono">{{ rowDisplay(row) }}</span>
         @if (rowField(row).sensitive) {
           <button type="button" class="text-link hover:underline text-xs ml-2 whitespace-nowrap"
+            [attr.aria-label]="(rowRevealed(row) ? 'Hide' : 'Show') + ' value for ' + row.name"
             (click)="toggleRowReveal(row)">
             {{ rowRevealed(row) ? 'Hide' : 'Show' }}
           </button>
@@ -21,6 +22,7 @@
       <div class="card-header flex items-center justify-between">
         <div>All Variables</div>
         <button type="button" class="text-link hover:underline text-xs"
+          [attr.aria-label]="(showAllSecrets() ? 'Hide' : 'Show') + ' secrets in All Variables'"
           (click)="showAllSecrets.set(!showAllSecrets())">
           {{ showAllSecrets() ? 'Hide secrets' : 'Show secrets' }}
         </button>
