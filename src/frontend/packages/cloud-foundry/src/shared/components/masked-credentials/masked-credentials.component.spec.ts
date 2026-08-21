@@ -69,6 +69,12 @@ describe('toCredentialField — single-pair classification', () => {
     const viaSet = toCredentialFields({ password: 's3cr3t' })[0];
     expect(single).toEqual(viaSet);
   });
+
+  it('redacts embedded credentials even when key is sensitive-named', () => {
+    const field = toCredentialField('SECRET_URL', 'postgres://user:pass@host:5432/db');
+    expect(field.sensitive).toBe(true);
+    expect(field.displayMasked).toBe('postgres://user:<redacted>@host:5432/db');
+  });
 });
 
 describe('maskEnvValue — deep env masking', () => {
@@ -108,5 +114,10 @@ describe('maskEnvValue — deep env masking', () => {
 
   it('masks every element of an array under a sensitive key', () => {
     expect(maskEnvValue('SIGNING_KEYS', ['k1', 'k2'])).toEqual(['••••••••', '••••••••']);
+  });
+
+  it('redacts embedded credentials even when key is sensitive-named', () => {
+    expect(maskEnvValue('SECRET_URL', 'postgres://user:pass@host:5432/db'))
+      .toBe('postgres://user:<redacted>@host:5432/db');
   });
 });
