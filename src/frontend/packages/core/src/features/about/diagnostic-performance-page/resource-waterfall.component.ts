@@ -569,6 +569,7 @@ export class ResourceWaterfallComponent {
   /** Phase-graded opacity: setup phases faint, app-influenced phases solid. */
   segmentOpacity(label: DocSegment['label']): number {
     switch (label) {
+      case 'redirect': return 0.25;
       case 'stalled': return 0.3;
       case 'DNS': return 0.42;
       case 'TCP': return 0.55;

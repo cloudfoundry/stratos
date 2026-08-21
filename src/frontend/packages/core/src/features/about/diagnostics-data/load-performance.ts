@@ -43,7 +43,7 @@ export interface DocPhases {
 
 /** One phase of the document request, drawn as a segment of the waterfall's document row. */
 export interface DocSegment {
-  label: 'stalled' | 'DNS' | 'TCP' | 'TLS' | 'server wait' | 'download';
+  label: 'redirect' | 'stalled' | 'DNS' | 'TCP' | 'TLS' | 'server wait' | 'download';
   startMs: number;
   durationMs: number;
 }
@@ -97,10 +97,17 @@ export interface LoadReport {
  * per non-empty phase, from navigation start to the document's last byte.
  * Zero-length phases (reused connection: no DNS/TCP/TLS) are omitted.
  */
-export function documentRow(nav: PerformanceNavigationTiming | undefined): DocumentRow | null {
-  if (!nav) { return null; }
+/**
+ * The single source of the document request's phase boundaries — both the
+ * phase row (computePhases) and the waterfall's document row (documentRow)
+ * read from this table so they can never diverge. TLS-less and
+ * redirect-less loads produce zero-length spans for those labels.
+ */
+function navSpans(nav: PerformanceNavigationTiming): [DocSegment['label'], number, number][] {
   const tlsStart = nav.secureConnectionStart;
-  const spans: [DocSegment['label'], number, number][] = [
+  const redirected = nav.redirectStart > 0;
+  return [
+    ['redirect', redirected ? nav.redirectStart : 0, redirected ? nav.redirectEnd : 0],
     ['stalled', nav.fetchStart, nav.domainLookupStart],
     ['DNS', nav.domainLookupStart, nav.domainLookupEnd],
     ['TCP', nav.connectStart, tlsStart > 0 ? tlsStart : nav.connectEnd],
@@ -108,12 +115,16 @@ export function documentRow(nav: PerformanceNavigationTiming | undefined): Docum
     ['server wait', nav.requestStart, nav.responseStart],
     ['download', nav.responseStart, nav.responseEnd],
   ];
+}
+
+export function documentRow(nav: PerformanceNavigationTiming | undefined): DocumentRow | null {
+  if (!nav) { return null; }
   return {
     path: new URL(nav.name, location.href).pathname,
     startMs: nav.startTime,
     endMs: nav.responseEnd,
     transferBytes: nav.transferSize ?? 0,
-    segments: spans
+    segments: navSpans(nav)
       .filter(([, start, end]) => end - start > 0)
       .map(([label, start, end]) => ({ label, startMs: start, durationMs: end - start })),
   };
@@ -127,13 +138,17 @@ export function documentRow(nav: PerformanceNavigationTiming | undefined): Docum
  */
 export function computePhases(nav: PerformanceNavigationTiming | undefined): DocPhases | null {
   if (!nav) { return null; }
-  const tls = nav.secureConnectionStart > 0 ? nav.connectEnd - nav.secureConnectionStart : 0;
+  const spans = navSpans(nav);
+  const dur = (label: DocSegment['label']): number => {
+    const [, start, end] = spans.find(([l]) => l === label)!;
+    return end - start;
+  };
   return {
-    stalledMs: nav.domainLookupStart - nav.fetchStart,
-    dnsMs: nav.domainLookupEnd - nav.domainLookupStart,
-    tcpMs: (nav.secureConnectionStart > 0 ? nav.secureConnectionStart : nav.connectEnd) - nav.connectStart,
-    tlsMs: tls,
-    serverWaitMs: nav.responseStart - nav.requestStart,
+    stalledMs: dur('stalled'),
+    dnsMs: dur('DNS'),
+    tcpMs: dur('TCP'),
+    tlsMs: dur('TLS'),
+    serverWaitMs: dur('server wait'),
   };
 }
 

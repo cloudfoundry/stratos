@@ -206,6 +206,12 @@ describe('documentRow', () => {
     ]);
   });
 
+  it('labels a document-level redirect instead of leaving a leading void', () => {
+    const d = documentRow(nav({ redirectStart: 1, redirectEnd: 200, fetchStart: 200, domainLookupStart: 325 }))!;
+    expect(d.segments[0]).toEqual({ label: 'redirect', startMs: 1, durationMs: 199 });
+    expect(d.segments[1]).toEqual({ label: 'stalled', startMs: 200, durationMs: 125 });
+  });
+
   it('returns null without a navigation entry', () => {
     expect(documentRow(undefined)).toBeNull();
   });
