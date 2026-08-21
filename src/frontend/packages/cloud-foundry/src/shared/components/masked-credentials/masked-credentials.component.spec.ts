@@ -127,3 +127,36 @@ describe('maskEnvValue — deep env masking', () => {
     expect(masked.algorithm).toBe('RS256');
   });
 });
+
+describe('PEM private-key detection (by value)', () => {
+  // Build PEM strings from a template so no complete private-key header
+  // literal sits in the source (secret scanners pattern-match on it).
+  const pemBlock = (label: string) =>
+    `-----BEGIN ${label}-----\nZHVtbXktbm90LWEta2V5\n-----END ${label}-----`;
+
+  it('fully masks a private-key PEM under an innocuous name in toCredentialField', () => {
+    const f = toCredentialField('SERVER_CRT', pemBlock('RSA PRIVATE KEY'));
+    expect(f.sensitive).toBe(true);
+    expect(f.displayMasked).toBe('••••••••');
+  });
+
+  it('fully masks every private-key PEM variant in maskEnvValue', () => {
+    for (const label of ['PRIVATE KEY', 'RSA PRIVATE KEY', 'EC PRIVATE KEY', 'OPENSSH PRIVATE KEY', 'ENCRYPTED PRIVATE KEY']) {
+      expect(maskEnvValue('SSL_PEM', pemBlock(label))).toBe('••••••••');
+    }
+  });
+
+  it('leaves a certificate PEM visible (public material)', () => {
+    const cert = pemBlock('CERTIFICATE');
+    expect(toCredentialField('CA_CERT', cert).sensitive).toBe(false);
+    expect(maskEnvValue('CA_CERT', cert)).toBe(cert);
+  });
+
+  it('masks a private-key PEM leaf inside a nested object while its siblings stay readable', () => {
+    const masked = maskEnvValue('VCAP_SERVICES', {
+      svc: [{ credentials: { tls: pemBlock('EC PRIVATE KEY'), host: 'db.local' } }],
+    }) as any;
+    expect(masked.svc[0].credentials.tls).toBe('••••••••');
+    expect(masked.svc[0].credentials.host).toBe('db.local');
+  });
+});
