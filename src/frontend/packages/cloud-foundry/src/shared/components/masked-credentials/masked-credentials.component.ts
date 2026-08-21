@@ -23,6 +23,11 @@ const SENSITIVE_KEY = /pass|secret|token|private|key|cred/i;
 // the key ("uri"/"read_uri") looks innocuous; a plain URL without credentials
 // stays visible.
 const EMBEDDED_CREDENTIAL = /:\/\/[^/\s:@]+:[^/\s@]+@/;
+// PEM private-key blocks (RSA/EC/OPENSSH/ENCRYPTED/PKCS#8) mask by VALUE so a
+// key stored under an innocuous name ("SSL_PEM", "SERVER_CRT") never renders.
+// Certificate blocks (-----BEGIN CERTIFICATE-----) are public material and
+// deliberately stay visible.
+const PEM_PRIVATE_KEY = /-----BEGIN (?:[A-Z0-9]+ )*PRIVATE KEY-----/;
 const FULL_MASK = '••••••••';
 
 // Redact only the password run in a scheme://user:pass@host URL, leaving the
@@ -36,8 +41,9 @@ function redactEmbeddedCredential(value: string): string {
 // individually (the app Variables tab) share the exact heuristics used here.
 export function toCredentialField(key: string, raw: unknown): CredentialField {
   const value = typeof raw === 'string' ? raw : JSON.stringify(raw);
-  const embedsCredential = EMBEDDED_CREDENTIAL.test(value);
-  const sensitive = SENSITIVE_KEY.test(key) || embedsCredential;
+  const isPrivateKey = PEM_PRIVATE_KEY.test(value);
+  const embedsCredential = !isPrivateKey && EMBEDDED_CREDENTIAL.test(value);
+  const sensitive = isPrivateKey || SENSITIVE_KEY.test(key) || embedsCredential;
   return {
     key,
     value,
@@ -52,9 +58,10 @@ export function toCredentialFields(creds: Record<string, unknown>): CredentialFi
 
 // Deep display-mask for structured env values (VCAP_SERVICES and friends):
 // walks objects/arrays and masks leaves using the same heuristics as
-// toCredentialField: redacts embedded scheme://user:pass@host credentials in
-// strings (takes precedence), and fully masks other scalars under sensitive-named
-// keys. Leaf-based on purpose — hosts/ports inside a `credentials` block stay
+// toCredentialField: fully masks PEM private-key blocks wherever they appear,
+// redacts embedded scheme://user:pass@host credentials in strings (takes
+// precedence over key-based masking), and fully masks other scalars under
+// sensitive-named keys. Leaf-based on purpose — hosts/ports inside a `credentials` block stay
 // readable, matching the Service Keys view. Returns a masked copy; never
 // mutates the input.
 export function maskEnvValue(key: string, value: unknown): unknown {
@@ -68,6 +75,9 @@ export function maskEnvValue(key: string, value: unknown): unknown {
     return Object.fromEntries(
       Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, maskEnvValue(k, v)]),
     );
+  }
+  if (typeof value === 'string' && PEM_PRIVATE_KEY.test(value)) {
+    return FULL_MASK;
   }
   if (typeof value === 'string' && EMBEDDED_CREDENTIAL.test(value)) {
     return redactEmbeddedCredential(value);
