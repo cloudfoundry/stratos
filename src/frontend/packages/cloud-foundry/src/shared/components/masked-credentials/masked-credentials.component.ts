@@ -32,18 +32,49 @@ function redactEmbeddedCredential(value: string): string {
   return value.replace(/(:\/\/[^/\s:@]+:)[^/\s@]+(@)/, '$1<redacted>$2');
 }
 
+// Classify ONE key/value pair. Exported so surfaces that render pairs
+// individually (the app Variables tab) share the exact heuristics used here.
+export function toCredentialField(key: string, raw: unknown): CredentialField {
+  const value = typeof raw === 'string' ? raw : JSON.stringify(raw);
+  const embedsCredential = EMBEDDED_CREDENTIAL.test(value);
+  const sensitive = SENSITIVE_KEY.test(key) || embedsCredential;
+  return {
+    key,
+    value,
+    sensitive,
+    displayMasked: embedsCredential ? redactEmbeddedCredential(value) : FULL_MASK,
+  };
+}
+
 export function toCredentialFields(creds: Record<string, unknown>): CredentialField[] {
-  return Object.entries(creds).map(([key, raw]) => {
-    const value = typeof raw === 'string' ? raw : JSON.stringify(raw);
-    const embedsCredential = EMBEDDED_CREDENTIAL.test(value);
-    const sensitive = SENSITIVE_KEY.test(key) || embedsCredential;
-    return {
-      key,
-      value,
-      sensitive,
-      displayMasked: embedsCredential ? redactEmbeddedCredential(value) : FULL_MASK,
-    };
-  });
+  return Object.entries(creds).map(([key, raw]) => toCredentialField(key, raw));
+}
+
+// Deep display-mask for structured env values (VCAP_SERVICES and friends):
+// walks objects/arrays and masks leaves whose own key looks sensitive, and
+// redacts embedded scheme://user:pass@host credentials in any string.
+// Leaf-based on purpose — hosts/ports inside a `credentials` block stay
+// readable, matching the Service Keys view. Returns a masked copy; never
+// mutates the input.
+export function maskEnvValue(key: string, value: unknown): unknown {
+  if (value == null) {
+    return value;
+  }
+  if (Array.isArray(value)) {
+    return value.map(v => maskEnvValue(key, v));
+  }
+  if (typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value as Record<string, unknown>).map(([k, v]) => [k, maskEnvValue(k, v)]),
+    );
+  }
+  if (SENSITIVE_KEY.test(key)) {
+    return FULL_MASK;
+  }
+  if (typeof value === 'string' && EMBEDDED_CREDENTIAL.test(value)) {
+    return redactEmbeddedCredential(value);
+  }
+  return value;
 }
 
 // MaskedCredentialsComponent — a read-only key/value table of credential

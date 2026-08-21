@@ -2,7 +2,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect } from 'vitest';
 
-import { MaskedCredentialsComponent, toCredentialFields } from './masked-credentials.component';
+import { MaskedCredentialsComponent, toCredentialFields, toCredentialField, maskEnvValue } from './masked-credentials.component';
 
 describe('toCredentialFields — credential masking', () => {
   const fieldFor = (key: string, value: unknown) =>
@@ -60,5 +60,53 @@ describe('MaskedCredentialsComponent — reveal toggle', () => {
     const c = TestBed.createComponent(MaskedCredentialsComponent).componentInstance;
     const field = { key: 'host', value: 'db.example.com', sensitive: false, displayMasked: '••••••••' };
     expect(c.displayValue(field)).toBe('db.example.com');
+  });
+});
+
+describe('toCredentialField — single-pair classification', () => {
+  it('classifies one pair identically to toCredentialFields', () => {
+    const single = toCredentialField('password', 's3cr3t');
+    const viaSet = toCredentialFields({ password: 's3cr3t' })[0];
+    expect(single).toEqual(viaSet);
+  });
+});
+
+describe('maskEnvValue — deep env masking', () => {
+  it('fully masks a scalar under a sensitive key', () => {
+    expect(maskEnvValue('API_TOKEN', 'abc123')).toBe('••••••••');
+    expect(maskEnvValue('DB_PASSWORD', 42)).toBe('••••••••');
+  });
+
+  it('redacts only the password in an embedded-credential string under a plain key', () => {
+    expect(maskEnvValue('DATABASE_URL', 'postgres://user:s3cr3t@host:5432/db'))
+      .toBe('postgres://user:<redacted>@host:5432/db');
+  });
+
+  it('leaves non-sensitive scalars untouched', () => {
+    expect(maskEnvValue('PORT', '8080')).toBe('8080');
+    expect(maskEnvValue('DEBUG', true)).toBe(true);
+    expect(maskEnvValue('EMPTY', null)).toBe(null);
+  });
+
+  it('walks objects and masks only sensitive leaves (VCAP_SERVICES shape)', () => {
+    const vcap = {
+      'my-db': [{
+        credentials: {
+          hostname: 'db.local',
+          password: 'pw',
+          uri: 'postgres://u:pw@db.local/db',
+        },
+      }],
+    };
+    const masked = maskEnvValue('VCAP_SERVICES', vcap) as any;
+    expect(masked['my-db'][0].credentials.hostname).toBe('db.local');
+    expect(masked['my-db'][0].credentials.password).toBe('••••••••');
+    expect(masked['my-db'][0].credentials.uri).toBe('postgres://u:<redacted>@db.local/db');
+    // input untouched
+    expect(vcap['my-db'][0].credentials.password).toBe('pw');
+  });
+
+  it('masks every element of an array under a sensitive key', () => {
+    expect(maskEnvValue('SIGNING_KEYS', ['k1', 'k2'])).toEqual(['••••••••', '••••••••']);
   });
 });
