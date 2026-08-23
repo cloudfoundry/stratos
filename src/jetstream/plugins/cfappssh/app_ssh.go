@@ -353,7 +353,9 @@ func getSSHCode(authorizeEndpoint, clientID, token string, skipSSLValidation boo
 
 	resp, err := httpClientWithoutRedirects.Do(authorizeReq)
 	if resp != nil {
-		log.Infof("%+v", resp)
+		// not logged: full response dump exposes the Location header, which carries the one-time SSH auth code
+		// log.Infof("%+v", resp)
+		log.Infof("Authorization response status: %s (headers and location not logged)", resp.Status)
 	}
 	if err == nil {
 		return "", errors.New("Authorization server did not redirect with one time code")
