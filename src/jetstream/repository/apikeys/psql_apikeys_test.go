@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
@@ -203,7 +204,8 @@ func TestGetAPIKeyBySecret(t *testing.T) {
 
 		Convey("if no matching record exists in the DB", func() {
 			rs := sqlmock.NewRows(rowFields)
-			mock.ExpectQuery(selectAPIKeyBySecret).WillReturnRows(rs)
+			// the lookup must hash the incoming secret, never query the plaintext
+			mock.ExpectQuery(selectAPIKeyBySecret).WithArgs(crypto.HashAPIKey("test")).WillReturnRows(rs)
 			results, err := repository.GetAPIKeyBySecret("test")
 
 			Convey("DB query expectations should be met", func() {
@@ -233,7 +235,7 @@ func TestGetAPIKeyBySecret(t *testing.T) {
 			mockRows := sqlmock.NewRows(rowFields).
 				AddRow(r.GUID, r.UserGUID, r.Comment, r.LastUsed)
 
-			mock.ExpectQuery(selectAPIKeyBySecret).WillReturnRows(mockRows)
+			mock.ExpectQuery(selectAPIKeyBySecret).WithArgs(crypto.HashAPIKey("test")).WillReturnRows(mockRows)
 
 			results, err := repository.GetAPIKeyBySecret("test")
 

@@ -83,7 +83,9 @@ func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*api.
 	keyGUID := uuid.NewV4().String()
 	keySecret := base64.URLEncoding.EncodeToString(randomBytes)
 
-	err = execQuery(p, sqlQueries.InsertAPIKey, keyGUID, keySecret, userID, comment)
+	// Store only a hash of the secret; the plaintext is returned to the caller
+	// once (below) and never persisted, so a database dump yields no usable keys.
+	err = execQuery(p, sqlQueries.InsertAPIKey, keyGUID, crypto.HashAPIKey(keySecret), userID, comment)
 	if err != nil {
 		return nil, fmt.Errorf("AddAPIKey: %v", err)
 	}
@@ -104,7 +106,7 @@ func (p *PgsqlAPIKeysRepository) GetAPIKeyBySecret(keySecret string) (*api.APIKe
 
 	var apiKey api.APIKey
 
-	err := p.db.QueryRow(sqlQueries.GetAPIKeyBySecret, keySecret).Scan(
+	err := p.db.QueryRow(sqlQueries.GetAPIKeyBySecret, crypto.HashAPIKey(keySecret)).Scan(
 		&apiKey.GUID,
 		&apiKey.UserGUID,
 		&apiKey.Comment,
