@@ -181,6 +181,14 @@ export class LoginPageComponent implements OnInit {
   private readonly MAX_REDIRECT_ATTEMPTS = 2;
   private readonly REDIRECT_COUNTER_KEY = 'stratos_login_redirect_attempts';
 
+  // Guards handleSuccessfulLogin against being run twice for the same login: the
+  // click handler and the existing-session auto-redirect can both observe the
+  // "logged in + valid" state in one tick and each navigate to /home. Two
+  // concurrent navigations make the router cancel one (resolving false), which
+  // drops into the window.location.href fallback — a full page reload seen as a
+  // blank + repaint after login.
+  private redirectInFlight = false;
+
   private get redirectAttempts(): number {
     return parseInt(sessionStorage.getItem(this.REDIRECT_COUNTER_KEY) || '0', 10);
   }
@@ -368,10 +376,19 @@ export class LoginPageComponent implements OnInit {
   }
 
   private async handleSuccessfulLogin(auth: AuthState): Promise<null> {
+    // Run the post-login redirect once: a duplicate call (click handler +
+    // existing-session auto-redirect firing on the same state) would race a
+    // second navigation, get cancelled to false, and hard-reload the page.
+    if (this.redirectInFlight) {
+      return null;
+    }
+    this.redirectInFlight = true;
+
     this.redirectAttempts++;
 
     // Prevent infinite redirect loop
     if (!this.underRedirectCap) {
+      this.redirectInFlight = false;
       return null;
     }
 
