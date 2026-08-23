@@ -12,6 +12,10 @@ import (
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
+// testEncKey peppers the API key hash in tests; the repository and the expected
+// lookup argument must use the same key.
+var testEncKey = []byte("0123456789abcdef0123456789abcdef")
+
 func TestNewPgsqlAPIKeysRepository(t *testing.T) {
 	Convey("Given a request for a new reference to a API keys Repository", t, func() {
 		db, _, err := sqlmock.New()
@@ -20,7 +24,7 @@ func TestNewPgsqlAPIKeysRepository(t *testing.T) {
 		}
 		defer db.Close()
 
-		repository, err := NewPgsqlAPIKeysRepository(db)
+		repository, err := NewPgsqlAPIKeysRepository(db, testEncKey)
 
 		Convey("no error should be returned", func() {
 			So(err, ShouldBeNil)
@@ -46,7 +50,7 @@ func TestAddAPIKey(t *testing.T) {
 		}
 		defer db.Close()
 
-		repository, _ := NewPgsqlAPIKeysRepository(db)
+		repository, _ := NewPgsqlAPIKeysRepository(db, testEncKey)
 
 		Convey("when the comment exceeds maximal length", func() {
 			_, err := repository.AddAPIKey(userID, strings.Repeat("a", 256))
@@ -108,7 +112,7 @@ func TestListAPIKeys(t *testing.T) {
 		}
 		defer db.Close()
 
-		repository, err := NewPgsqlAPIKeysRepository(db)
+		repository, err := NewPgsqlAPIKeysRepository(db, testEncKey)
 		if err != nil {
 			t.Errorf("an error '%s' was not expected when creating the repository", err)
 		}
@@ -197,7 +201,7 @@ func TestGetAPIKeyBySecret(t *testing.T) {
 		}
 		defer db.Close()
 
-		repository, err := NewPgsqlAPIKeysRepository(db)
+		repository, err := NewPgsqlAPIKeysRepository(db, testEncKey)
 		if err != nil {
 			t.Errorf("an error '%s' was not expected when creating the repository", err)
 		}
@@ -205,7 +209,7 @@ func TestGetAPIKeyBySecret(t *testing.T) {
 		Convey("if no matching record exists in the DB", func() {
 			rs := sqlmock.NewRows(rowFields)
 			// the lookup must hash the incoming secret, never query the plaintext
-			mock.ExpectQuery(selectAPIKeyBySecret).WithArgs(crypto.HashAPIKey("test")).WillReturnRows(rs)
+			mock.ExpectQuery(selectAPIKeyBySecret).WithArgs(crypto.HashAPIKey(testEncKey, "test")).WillReturnRows(rs)
 			results, err := repository.GetAPIKeyBySecret("test")
 
 			Convey("DB query expectations should be met", func() {
@@ -235,7 +239,7 @@ func TestGetAPIKeyBySecret(t *testing.T) {
 			mockRows := sqlmock.NewRows(rowFields).
 				AddRow(r.GUID, r.UserGUID, r.Comment, r.LastUsed)
 
-			mock.ExpectQuery(selectAPIKeyBySecret).WithArgs(crypto.HashAPIKey("test")).WillReturnRows(mockRows)
+			mock.ExpectQuery(selectAPIKeyBySecret).WithArgs(crypto.HashAPIKey(testEncKey, "test")).WillReturnRows(mockRows)
 
 			results, err := repository.GetAPIKeyBySecret("test")
 
@@ -268,7 +272,7 @@ func TestDeleteAPIKey(t *testing.T) {
 		}
 		defer db.Close()
 
-		repository, _ := NewPgsqlAPIKeysRepository(db)
+		repository, _ := NewPgsqlAPIKeysRepository(db, testEncKey)
 
 		Convey("when a matching key doesn't exist", func() {
 			mock.ExpectExec(deleteFromAPIKeys).
@@ -313,7 +317,7 @@ func TestUpdateAPIKeyLastUsed(t *testing.T) {
 		}
 		defer db.Close()
 
-		repository, _ := NewPgsqlAPIKeysRepository(db)
+		repository, _ := NewPgsqlAPIKeysRepository(db, testEncKey)
 
 		Convey("when a matching key doesn't exist", func() {
 			mock.ExpectExec(updateLastUsed).

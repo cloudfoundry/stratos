@@ -303,6 +303,8 @@ func main() {
 
 	// Config plugins get to determine if we should run migrations on this instance
 	if portalConfig.CanMigrateDatabaseSchema {
+		// The API key hashing migration peppers secrets with the encryption key.
+		datastore.SetAPIKeyHMACKey(portalConfig.EncryptionKeyInBytes)
 		// Create the database schema otherwise wait for the datbase schema
 		err = datastore.ApplyMigrations(databaseConnectionPool)
 		if err != nil {
@@ -874,7 +876,7 @@ func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessi
 	})
 
 	var err error
-	pp.APIKeysRepository, err = apikeys.NewPgsqlAPIKeysRepository(pp.DatabaseConnectionPool)
+	pp.APIKeysRepository, err = apikeys.NewPgsqlAPIKeysRepository(pp.DatabaseConnectionPool, pp.Config.EncryptionKeyInBytes)
 	if err != nil {
 		panic(fmt.Errorf("can't initialize APIKeysRepository: %v", err))
 	}

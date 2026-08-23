@@ -1,6 +1,7 @@
 package crypto
 
 import (
+	"crypto/hmac"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
@@ -39,13 +40,17 @@ func CheckPasswordHash(password string, hash []byte) error {
 	return err
 }
 
-// HashAPIKey returns a hex-encoded SHA-256 of an API key secret. API keys are
-// high-entropy random tokens, so a fast unsalted hash is sufficient (unlike
-// user passwords, which use bcrypt) and it preserves the indexed exact-match
-// lookup used to authenticate a key.
-func HashAPIKey(secret string) string {
-	sum := sha256.Sum256([]byte(secret))
-	return hex.EncodeToString(sum[:])
+// HashAPIKey returns a hex-encoded HMAC-SHA256 of an API key secret, keyed with
+// the server's encryption key as a pepper. API keys are high-entropy random
+// tokens, so a fast keyed hash is appropriate (unlike low-entropy user
+// passwords, which use bcrypt) and it preserves the indexed exact-match lookup
+// used to authenticate a key. Peppering with a key held outside the database
+// means a database dump alone cannot verify guessed secrets. Note: the hash is
+// tied to the encryption key, so changing that key invalidates stored API keys.
+func HashAPIKey(key []byte, secret string) string {
+	mac := hmac.New(sha256.New, key)
+	mac.Write([]byte(secret))
+	return hex.EncodeToString(mac.Sum(nil))
 }
 
 // Note:
