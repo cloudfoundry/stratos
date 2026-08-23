@@ -231,6 +231,21 @@ describe('LoginPageComponent', () => {
     const sanitize = (s: string) => (component as any).sanitizeSsoMessage(s);
     expect(sanitize('a'.repeat(500)).length).toBe(256);
   });
+
+  // The click handler and the existing-session auto-redirect can both observe
+  // "logged in + valid" for the same login and call handleSuccessfulLogin. Only
+  // the first may navigate; a second navigation races the first, gets cancelled
+  // to false, and hard-reloads the page (the post-login blank + repaint).
+  it('navigates once when handleSuccessfulLogin is triggered twice', async () => {
+    const navSpy = vi.spyOn((component as any).router, 'navigate').mockResolvedValue(true);
+    const auth = { redirect: undefined } as any;
+
+    await (component as any).handleSuccessfulLogin(auth);
+    await (component as any).handleSuccessfulLogin(auth);
+
+    expect(navSpy).toHaveBeenCalledTimes(1);
+    expect(navSpy).toHaveBeenCalledWith(['/home'], { queryParams: {} });
+  });
 });
 
 describe('LoginPageComponent — error banner branding', () => {
