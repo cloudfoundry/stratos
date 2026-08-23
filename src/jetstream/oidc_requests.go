@@ -29,13 +29,15 @@ func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUI
 
 	var scopes string
 
-	log.Info(userToken.Metadata)
+	// not logged: raw metadata JSON includes the OAuth client secret
+	// log.Info(userToken.Metadata)
 	if len(userToken.Metadata) > 0 {
 		metadata := &api.OAuth2Metadata{}
 		if err := json.Unmarshal([]byte(userToken.Metadata), metadata); err == nil {
-			log.Info(metadata)
-			log.Info(metadata.ClientID)
-			log.Info(metadata.ClientSecret)
+			// not logged: struct and ClientSecret carry the OAuth client secret
+			// log.Info(metadata)
+			// log.Info(metadata.ClientSecret)
+			log.Infof("OIDC token refresh using client ID %s (client secret not logged)", metadata.ClientID)
 
 			if len(metadata.ClientID) > 0 {
 				client = metadata.ClientID
