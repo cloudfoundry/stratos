@@ -267,8 +267,10 @@ func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*ap
 		}
 	}
 
-	// send the request to each CNSI
-	done := make(chan *api.CNSIRequest)
+	// send the request to each CNSI. The channel is buffered to the number of
+	// goroutines so that a doRequest can always send its result and exit, even
+	// after a timeout path below returns without draining every response.
+	done := make(chan *api.CNSIRequest, len(cnsiList))
 	for _, cnsi := range cnsiList {
 		cnsiRequest, buildErr := p.buildCNSIRequest(cnsi, portalUserGUID, req.Method, uri, body, header)
 		if buildErr != nil {
@@ -366,8 +368,10 @@ func makeLongRunningTimeoutError() []byte {
 func (p *portalProxy) DoProxyRequest(requests []api.ProxyRequestInfo) (map[string]*api.CNSIRequest, error) {
 	log.Debug("DoProxyRequest")
 
-	// send the request to each endpoint
-	done := make(chan *api.CNSIRequest)
+	// send the request to each endpoint. Buffered to the number of goroutines so
+	// an early return on a build error below cannot leave already-launched
+	// doRequest goroutines blocked forever on the send.
+	done := make(chan *api.CNSIRequest, len(requests))
 	for _, requestInfo := range requests {
 		cnsiRequest, buildErr := p.buildCNSIRequest(requestInfo.EndpointGUID, requestInfo.UserGUID, requestInfo.Method, requestInfo.URI, requestInfo.Body, requestInfo.Headers)
 		cnsiRequest.ResponseGUID = requestInfo.ResultGUID
