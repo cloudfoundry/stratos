@@ -284,7 +284,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIre
 		cfEndpointSpec, _ := p.GetEndpointTypeSpec("cf")
 		cnsiInfo, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true, "")
 		if err != nil {
-			log.Fatal("Could not get the info for Cloud Foundry", err)
+			log.Errorf("Could not get the info for Cloud Foundry: %v", err)
 			return err
 		}
 
