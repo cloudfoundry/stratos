@@ -630,6 +630,10 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
 	sessionStore.Options.Secure = true
+	// Lax (not Strict) so the cookie still rides top-level navigations such as
+	// the SSO login redirect, while withholding it from cross-site subresource
+	// requests (defence-in-depth alongside the XSRF token).
+	sessionStore.Options.SameSite = http.SameSiteLaxMode
 	if len(domain) > 0 {
 		sessionStore.Options.Domain = domain
 	}
