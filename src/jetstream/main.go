@@ -76,6 +76,10 @@ const (
 	LogAPIRequests       = "LOG_API_REQUESTS" // Defaults to true
 	VCapApplication      = "VCAP_APPLICATION"
 	defaultSessionSecret = "wheeee!"
+	// defaultEncryptionKey is the well-known key shipped in config.example and the
+	// packaged config.properties. It is detected at startup so operators are warned
+	// when the token store would be encrypted with a publicly-known value.
+	defaultEncryptionKey = "B374A26A71490437AA024E4FADD5B497FDFF1A8EA6FF12F6FB65AF2720B59CCF"
 )
 
 // defaultCSPPolicy is the Content-Security-Policy applied unless CONSOLE_CSP
@@ -540,6 +544,14 @@ func getEncryptionKey(pc api.PortalConfig) ([]byte, error) {
 
 	// If it exists in "EncryptionKey" we must be in compose; use it.
 	if len(pc.EncryptionKey) > 0 {
+		if strings.EqualFold(string(pc.EncryptionKey), defaultEncryptionKey) {
+			log.Warn("ENCRYPTION_KEY is the well-known default from config.example; " +
+				"the token store is encrypted with a publicly-known key. " +
+				"Generate a unique key with: openssl rand -hex 32. " +
+				"Changing ENCRYPTION_KEY once tokens have been stored makes all " +
+				"existing encrypted data unreadable; affected endpoints must be " +
+				"disconnected and re-connected after the key changes.")
+		}
 		key32bytes, err := hex.DecodeString(string(pc.EncryptionKey))
 		if err != nil {
 			log.Error(err)
