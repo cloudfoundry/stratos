@@ -918,6 +918,8 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 	}
 
 	e.Use(middleware.Recover())
+	// WebSocket upgrades honour the same origin allow-list as CORS.
+	api.SetWebSocketAllowedOrigins(config.AllowedOrigins)
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     config.AllowedOrigins,
 		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
