@@ -2,6 +2,8 @@ package crypto
 
 import (
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 
 	log "github.com/sirupsen/logrus"
@@ -35,6 +37,15 @@ func HashPassword(password string) ([]byte, error) {
 func CheckPasswordHash(password string, hash []byte) error {
 	err := bcrypt.CompareHashAndPassword(hash, []byte(password))
 	return err
+}
+
+// HashAPIKey returns a hex-encoded SHA-256 of an API key secret. API keys are
+// high-entropy random tokens, so a fast unsalted hash is sufficient (unlike
+// user passwords, which use bcrypt) and it preserves the indexed exact-match
+// lookup used to authenticate a key.
+func HashAPIKey(secret string) string {
+	sum := sha256.Sum256([]byte(secret))
+	return hex.EncodeToString(sum[:])
 }
 
 // Note:
