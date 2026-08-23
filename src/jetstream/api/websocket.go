@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/coder/websocket"
@@ -24,6 +25,36 @@ const (
 	// Consecutive missed pongs tolerated before the peer is considered dead
 	maxMissedPongs = 2
 )
+
+// wsOriginPatterns holds the host patterns (beyond same-origin) that may open a
+// WebSocket, derived at startup from ALLOWED_ORIGINS. It is written before any
+// request is served, so no lock is needed for the read in websocket.Accept.
+var wsOriginPatterns []string
+
+// SetWebSocketAllowedOrigins configures the origin allow-list enforced on
+// WebSocket upgrades. Call once during startup with the ALLOWED_ORIGINS config:
+// each entry's host becomes an allowed origin pattern. Same-origin requests are
+// always allowed, and coder/websocket permits requests with no Origin header
+// (non-browser clients such as CLIs), so an empty list enforces same-origin only.
+func SetWebSocketAllowedOrigins(origins []string) {
+	patterns := make([]string, 0, len(origins))
+	for _, o := range origins {
+		switch {
+		case o == "":
+			continue
+		case o == "*":
+			patterns = append(patterns, "*")
+		default:
+			if u, err := url.Parse(o); err == nil && u.Host != "" {
+				patterns = append(patterns, u.Host)
+			} else {
+				// Assume the value is already a bare host/pattern.
+				patterns = append(patterns, o)
+			}
+		}
+	}
+	wsOriginPatterns = patterns
+}
 
 // WriteText sends a text message, bounding the write so a wedged peer cannot
 // block the caller forever
@@ -55,9 +86,12 @@ func upgradeToWebSocket(echoContext echo.Context, enforcePong bool) (*websocket.
 
 	log.Debugf("Upgrading request to the WebSocket protocol...")
 	clientWebSocket, err := websocket.Accept(echoContext.Response().Writer, echoContext.Request(), &websocket.AcceptOptions{
-		// Allow connections from any Origin
-		InsecureSkipVerify: true,
-		CompressionMode:    websocket.CompressionDisabled,
+		// Reject cross-origin upgrades (Cross-Site WebSocket Hijacking): the
+		// default check allows same-origin, and OriginPatterns adds the hosts
+		// configured in ALLOWED_ORIGINS. Not setting InsecureSkipVerify keeps
+		// the origin check on.
+		OriginPatterns:  wsOriginPatterns,
+		CompressionMode: websocket.CompressionDisabled,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("Upgrading connection to a WebSocket failed: [%v]", err)
