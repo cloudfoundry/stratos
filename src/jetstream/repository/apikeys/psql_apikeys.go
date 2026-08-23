@@ -32,12 +32,14 @@ var sqlQueries = struct {
 // PgsqlAPIKeysRepository - Postgresql-backed API keys repository
 type PgsqlAPIKeysRepository struct {
 	db *sql.DB
+	// encryptionKey peppers the API key secret hash (see crypto.HashAPIKey).
+	encryptionKey []byte
 }
 
 // NewPgsqlAPIKeysRepository - get a reference to the API keys data source
-func NewPgsqlAPIKeysRepository(dcp *sql.DB) (Repository, error) {
+func NewPgsqlAPIKeysRepository(dcp *sql.DB, encryptionKey []byte) (Repository, error) {
 	log.Debug("NewPgsqlAPIKeysRepository")
-	return &PgsqlAPIKeysRepository{db: dcp}, nil
+	return &PgsqlAPIKeysRepository{db: dcp, encryptionKey: encryptionKey}, nil
 }
 
 // InitRepositoryProvider - One time init for the given DB Provider
@@ -85,7 +87,7 @@ func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*api.
 
 	// Store only a hash of the secret; the plaintext is returned to the caller
 	// once (below) and never persisted, so a database dump yields no usable keys.
-	err = execQuery(p, sqlQueries.InsertAPIKey, keyGUID, crypto.HashAPIKey(keySecret), userID, comment)
+	err = execQuery(p, sqlQueries.InsertAPIKey, keyGUID, crypto.HashAPIKey(p.encryptionKey, keySecret), userID, comment)
 	if err != nil {
 		return nil, fmt.Errorf("AddAPIKey: %v", err)
 	}
@@ -106,7 +108,7 @@ func (p *PgsqlAPIKeysRepository) GetAPIKeyBySecret(keySecret string) (*api.APIKe
 
 	var apiKey api.APIKey
 
-	err := p.db.QueryRow(sqlQueries.GetAPIKeyBySecret, crypto.HashAPIKey(keySecret)).Scan(
+	err := p.db.QueryRow(sqlQueries.GetAPIKeyBySecret, crypto.HashAPIKey(p.encryptionKey, keySecret)).Scan(
 		&apiKey.GUID,
 		&apiKey.UserGUID,
 		&apiKey.Comment,

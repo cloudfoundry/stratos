@@ -1,6 +1,7 @@
 package datastore
 
 import (
+	"crypto/hmac"
 	"crypto/sha256"
 	"database/sql"
 	"encoding/hex"
@@ -17,14 +18,25 @@ import (
 // placeholders; this guard rejects any unexpected guid rather than inlining it.
 var safeAPIKeyGUID = regexp.MustCompile(`^[0-9a-fA-F-]{36}$`)
 
+// apiKeyHMACKey is the pepper (the server encryption key) used to hash existing
+// api_keys.secret values during migration. It must match what crypto.HashAPIKey
+// uses on the live path. main sets it via SetAPIKeyHMACKey before migrations run.
+var apiKeyHMACKey []byte
+
+// SetAPIKeyHMACKey provides the pepper used by Up20260822120000 to hash existing
+// API key secrets. Call once, before ApplyMigrations.
+func SetAPIKeyHMACKey(key []byte) {
+	apiKeyHMACKey = key
+}
+
 func init() {
 	goose.AddMigration(Up20260822120000, nil)
 }
 
-// Up20260822120000 replaces the plaintext api_keys.secret values with their
-// SHA-256 hashes so a database dump no longer yields usable API keys. The
-// secrets held by users still authenticate: GetAPIKeyBySecret hashes the
-// incoming value before the lookup.
+// Up20260822120000 replaces the plaintext api_keys.secret values with a keyed
+// hash (HMAC-SHA256 peppered with the encryption key) so a database dump no
+// longer yields usable API keys. Secrets held by users still authenticate:
+// GetAPIKeyBySecret hashes the incoming value the same way before the lookup.
 func Up20260822120000(txn *sql.Tx) error {
 	rows, err := txn.Query("SELECT guid, secret FROM api_keys")
 	if err != nil {
@@ -47,12 +59,17 @@ func Up20260822120000(txn *sql.Tx) error {
 	}
 	rows.Close()
 
+	if len(keys) > 0 && len(apiKeyHMACKey) == 0 {
+		return fmt.Errorf("cannot migrate api_keys: encryption key (HMAC pepper) not set")
+	}
+
 	for _, k := range keys {
 		if !safeAPIKeyGUID.MatchString(k.guid) {
 			return fmt.Errorf("unexpected api_keys.guid format %q, aborting hash migration", k.guid)
 		}
-		sum := sha256.Sum256([]byte(k.secret))
-		hashed := hex.EncodeToString(sum[:])
+		mac := hmac.New(sha256.New, apiKeyHMACKey)
+		mac.Write([]byte(k.secret))
+		hashed := hex.EncodeToString(mac.Sum(nil))
 		if _, err := txn.Exec(fmt.Sprintf("UPDATE api_keys SET secret = '%s' WHERE guid = '%s'", hashed, k.guid)); err != nil {
 			return err
 		}
