@@ -8,7 +8,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"path/filepath"
 
 	"github.com/labstack/echo/v5"
 )
@@ -43,11 +42,10 @@ func (a *Analyzer) doRun(ec *echo.Context) error {
 	// The ID header is "user/endpoint/id" — a nested but local path. Reject
 	// any value that would escape reportsDir (e.g. "../../etc"). This also
 	// confines job.Folder, which the analyzers write reports into.
-	if !filepath.IsLocal(id) {
+	folder, err := jobFolder(a.reportsDir, id)
+	if err != nil {
 		return errors.New("Invalid ID header")
 	}
-
-	folder := filepath.Join(a.reportsDir, id)
 	if err := os.MkdirAll(folder, os.ModePerm); err != nil {
 		const msg = "could not create the folder for the analysis report"
 		slog.Error(msg, "folder", folder, "error", err)
