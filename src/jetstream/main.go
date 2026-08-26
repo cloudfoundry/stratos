@@ -259,7 +259,7 @@ func main() {
 		os.Exit(1)
 	}
 	if portalConfig.LogLevel != "" {
-		slog.Info("Setting the log level", "level", portalConfig.LogLevel)
+		slog.Info("Setting the log level", "logLevel", portalConfig.LogLevel)
 		level, levelErr := parseLogLevel(portalConfig.LogLevel)
 		if levelErr != nil {
 			// logrus.ParseLevel returned PanicLevel on a bad value and the error
@@ -971,7 +971,7 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 			LogResponseSize:  true,
 			LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
 				slog.Info("Request",
-					"time", v.StartTime.Format(time.RFC3339), "remoteIP", v.RemoteIP,
+					"start", v.StartTime.Format(time.RFC3339), "remoteIP", v.RemoteIP,
 					"method", v.Method, "path", v.URIPath, "status", v.Status,
 					"latency", v.Latency, "bytesIn", v.ContentLength, "bytesOut", v.ResponseSize)
 				return nil
