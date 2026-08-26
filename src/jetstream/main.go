@@ -208,7 +208,7 @@ func main() {
 	// Create common method for looking up config
 	envLookup := getEnvironmentLookup()
 
-	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
+	log.SetFormatter(&log.TextFormatter{FullTimestamp: true, TimestampFormat: time.UnixDate})
 
 	// Change to JSON logging if configured
 	if logToJSON, ok := envLookup.Lookup(LogToJSON); ok {

@@ -26,7 +26,7 @@ type Analyzer struct {
 }
 
 func main() {
-	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
+	log.SetFormatter(&log.TextFormatter{FullTimestamp: true, TimestampFormat: time.UnixDate})
 
 	log.SetOutput(os.Stdout)
 
