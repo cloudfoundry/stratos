@@ -14,10 +14,10 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys"
 	mock_apikeys "github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys/mock"
-	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.uber.org/mock/gomock"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
