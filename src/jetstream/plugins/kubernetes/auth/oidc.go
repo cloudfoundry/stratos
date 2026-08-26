@@ -10,7 +10,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/config"
 
-	"github.com/SermoDigital/jose/jws"
 	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
@@ -135,13 +134,13 @@ func (c *OIDCKubeAuth) GetOIDCConfig(k *config.KubeConfigUser) (*KubeConfigAuthP
 		return nil, errors.New("can not unmarshal OIDC Auth Provider configuration")
 	}
 
-	token, err := jws.ParseJWT([]byte(OIDCConfig.IDToken))
+	claims, err := jwtClaims([]byte(OIDCConfig.IDToken))
 	if err != nil {
 		log.Info(err)
 		return nil, errors.New("can not parse JWT Access token")
 	}
 
-	expiry_string, ok := token.Claims().Get("exp").(string)
+	expiry_string, ok := claims["exp"].(string)
 	if !ok {
 		return nil, errors.New("can not get Access Token expiry time claim")
 	}

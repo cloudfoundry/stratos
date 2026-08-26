@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"time"
 
-	// "github.com/SermoDigital/jose/jws"
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"

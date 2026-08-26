@@ -14,8 +14,6 @@ import (
 	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-
-	"github.com/SermoDigital/jose/jws"
 )
 
 const (
@@ -85,13 +83,13 @@ func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*
 		return nil, nil, fmt.Errorf("Could not refresh the GKE token: %v+", err)
 	}
 
-	token, err := jws.ParseJWT([]byte(oauthToken.IDToken))
+	claims, err := jwtClaims([]byte(oauthToken.IDToken))
 	if err != nil {
 		log.Info(err)
 		return nil, nil, errors.New("Can not parse JWT Access token")
 	}
 
-	email := token.Claims().Get("email")
+	email := claims["email"]
 	if emailAddress, ok := email.(string); ok {
 		gkeInfo.Email = emailAddress
 	}
