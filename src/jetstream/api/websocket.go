@@ -4,12 +4,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"time"
 
 	"github.com/coder/websocket"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -84,7 +84,7 @@ func UpgradeToWebSocketNoPongCheck(echoContext *echo.Context) (*websocket.Conn, 
 
 func upgradeToWebSocket(echoContext *echo.Context, enforcePong bool) (*websocket.Conn, error) {
 
-	log.Debugf("Upgrading request to the WebSocket protocol...")
+	slog.Debug("upgrading request to the WebSocket protocol")
 	clientWebSocket, err := websocket.Accept(echoContext.Response(), echoContext.Request(), &websocket.AcceptOptions{
 		// Reject cross-origin upgrades (Cross-Site WebSocket Hijacking): the
 		// default check allows same-origin, and OriginPatterns adds the hosts
@@ -96,7 +96,7 @@ func upgradeToWebSocket(echoContext *echo.Context, enforcePong bool) (*websocket
 	if err != nil {
 		return nil, fmt.Errorf("Upgrading connection to a WebSocket failed: [%v]", err)
 	}
-	log.Debugf("Successfully upgraded to a WebSocket connection")
+	slog.Debug("upgraded to a WebSocket connection")
 
 	// HSC-1276 - send regular Pings to prevent the WebSocket being closed on
 	// us. The request context ends when the handler returns, terminating the
@@ -125,7 +125,8 @@ func upgradeToWebSocket(echoContext *echo.Context, enforcePong bool) (*websocket
 				// pending to process it
 				missedPongs++
 				if enforcePong && missedPongs > maxMissedPongs {
-					log.Debug("WebSocket peer stopped answering pings - closing the connection")
+					slog.Debug("WebSocket peer stopped answering pings, closing the connection",
+						"missedPongs", missedPongs)
 					clientWebSocket.CloseNow()
 					return
 				}

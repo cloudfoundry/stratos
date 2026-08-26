@@ -3,10 +3,10 @@ package api
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 // JetstreamError is standard error response from JetSteam for REST APIs
@@ -59,7 +59,7 @@ func (e *JetstreamError) finalize(c *echo.Context) {
 		e.StatusMesssage = http.StatusText(e.Status)
 	}
 	if len(e.Method) == 0 {
-		log.Warn(c.Request().Method)
+		slog.Warn("jetstream error raised without a method", "method", c.Request().Method)
 		e.Method = c.Request().Method
 	}
 }
