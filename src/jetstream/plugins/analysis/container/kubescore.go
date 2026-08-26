@@ -44,6 +44,11 @@ func runKubeScore(job *AnalysisJob) error {
 		out, err := cmd.Output()
 		end := time.Now()
 
+		// Without this the job stays Busy forever, so the cleanup pass in
+		// status.go never increments its counter and never evicts it from
+		// the job map. runPopeye has always done this.
+		job.Busy = false
+
 		// Remove any config files when done
 		job.RemoveTempFiles()
 
