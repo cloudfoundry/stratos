@@ -107,3 +107,26 @@ func TestEchoLoggerEnabledTracksLogrusLevel(t *testing.T) {
 		t.Error("Enabled reported false for error while logrus is at warn")
 	}
 }
+
+func TestSlogDefaultWritesThroughLogrus(t *testing.T) {
+	hook := logrustest.NewGlobal()
+	defer hook.Reset()
+
+	previous := log.GetLevel()
+	log.SetLevel(log.DebugLevel)
+	defer log.SetLevel(previous)
+
+	// Modules already migrated to slog call the package-level functions.
+	slog.Debug("loaded configuration from file", "path", "/etc/stratos.conf")
+
+	entry := hook.LastEntry()
+	if entry == nil {
+		t.Fatal("slog.Default() did not reach logrus")
+	}
+	if entry.Level != log.DebugLevel {
+		t.Errorf("level = %v, want debug", entry.Level)
+	}
+	if entry.Data["path"] != "/etc/stratos.conf" {
+		t.Errorf("attributes not carried through: %v", entry.Data)
+	}
+}
