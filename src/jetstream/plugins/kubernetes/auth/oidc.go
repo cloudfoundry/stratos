@@ -143,17 +143,18 @@ func (c *OIDCKubeAuth) GetOIDCConfig(k *config.KubeConfigUser) (*KubeConfigAuthP
 		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
-	expiry_string, ok := claims["exp"].(string)
+	// RFC 7519 defines exp as a NumericDate - seconds since the epoch, so a
+	// JSON number, which decodes to float64. This asserted a string and then
+	// parsed it as RFC 3339, so it could never succeed against a conformant
+	// token and every OIDC connect failed here.
+	expirySeconds, ok := claims["exp"].(float64)
 	if !ok {
-		return nil, errors.New("can not get Access Token expiry time claim")
+		const msg = "can not get Access Token expiry time claim"
+		slog.Error(msg, "kubeConfigUser", k.Name, "claim", claims["exp"])
+		return nil, errors.New(msg)
 	}
 
-	expiry, err := time.Parse(time.RFC3339, expiry_string)
-	if err != nil {
-		return nil, errors.New(fmt.Sprintf("can not parse Access Token expiry time claim '%s': %s", expiry_string, err))
-	}
-
-	OIDCConfig.Expiry = expiry
+	OIDCConfig.Expiry = time.Unix(int64(expirySeconds), 0)
 
 	return OIDCConfig, nil
 }
