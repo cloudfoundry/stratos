@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,7 +18,6 @@ import (
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -91,15 +91,17 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	appID := echoContext.QueryParam("app")
 	userGUID := echoContext.Get("user_id").(string)
 
-	log.Debug("UpgradeToWebSocket")
+	slog.Debug("cf push: upgrading the deploy request to a web socket",
+		"endpoint", cnsiGUID, "org", orgGUID, "space", spaceGUID, "user", userGUID)
 	// No pong check: this handler goes long periods without a pending read
 	// (the push phase), during which pongs are never processed
 	clientWebSocket, err := api.UpgradeToWebSocketNoPongCheck(echoContext)
-	log.Debug("UpgradeToWebSocket done")
 	if err != nil {
-		log.Errorf("Upgrade to websocket failed due to: %+v", err)
+		slog.Error("cf push: upgrading the deploy request to a web socket failed",
+			"endpoint", cnsiGUID, "error", err)
 		return err
 	}
+	slog.Debug("cf push: upgraded the deploy request to a web socket", "endpoint", cnsiGUID)
 	// The file/folder upload protocol sends each file as one whole binary
 	// message, so no read limit can be safely applied to this socket
 	clientWebSocket.SetReadLimit(-1)
@@ -114,20 +116,22 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	sendEvent(clientWebSocket, SOURCE_REQUIRED)
 
 	// Wait for a message from the client
-	log.Debug("Waiting for source information from client")
+	slog.Debug("cf push: waiting for the source information from the client")
 
 	msg := SocketMessage{}
 	if err := wsjson.Read(readCtx, clientWebSocket, &msg); err != nil {
-		log.Errorf("Error reading JSON: %v+", err)
+		slog.Error("cf push: could not read the source message from the client", "error", err)
 		return err
 	}
 
-	log.Debugf("Source %v+", msg)
+	// The payload is not logged: an SCM source carries the repository access
+	// token, and a debug log is not the place for it
+	slog.Debug("cf push: received the source information", "sourceType", msg.Type)
 
 	// Temporary folder for the application source
 	tempDir, err := os.MkdirTemp("", "cf-push-")
 	if err != nil {
-		log.Errorf("Error creating temporary directory: %s", err)
+		slog.Error("cf push: could not create the temporary directory for the application source", "error", err)
 		return err
 	}
 
@@ -151,7 +155,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	}
 
 	if err != nil {
-		log.Errorf("Failed to fetch source: %v+", err)
+		slog.Error("cf push: failed to fetch the application source", "sourceType", msg.Type, "error", err)
 		// Tell the client the deploy is over — git getters send their own close
 		// events, but the file/folder path otherwise fails silently
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
@@ -162,23 +166,23 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	sendEvent(clientWebSocket, OVERRIDES_REQUIRED)
 
 	// Wait for a message from the client
-	log.Debug("Waiting for app overrides from client")
+	slog.Debug("cf push: waiting for the application overrides from the client")
 
 	msgOverrides := SocketMessage{}
 	if err := wsjson.Read(readCtx, clientWebSocket, &msgOverrides); err != nil {
-		log.Errorf("Error reading JSON: %v+", err)
+		slog.Error("cf push: could not read the application overrides message from the client", "error", err)
 		return err
 	}
 
 	if msgOverrides.Type != OVERRIDES_SUPPLIED {
-		log.Errorf("Expected app deploy override but received event with type: %v", msgOverrides.Type)
+		slog.Error("cf push: expected an application deploy override message", "type", msgOverrides.Type)
 		return errors.New("expected app deploy override message but received another type")
 	}
 
-	log.Debugf("Overrides: %v+", msgOverrides)
+	slog.Debug("cf push: received the application overrides", "overrides", msgOverrides.Message)
 	overrides := CFPushAppOverrides{}
 	if err = json.Unmarshal([]byte(msgOverrides.Message), &overrides); err != nil {
-		log.Errorf("Error marshalling json: %v+", err)
+		slog.Error("cf push: could not unmarshal the application overrides", "error", err)
 		return err
 	}
 
@@ -187,7 +191,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	// Source fetched - read manifest
 	manifest, manifestFile, err := fetchManifest(appDir, stratosProject, clientWebSocket)
 	if err != nil {
-		log.Warnf("Failed to find manifest file: %s", err)
+		slog.Warn("cf push: failed to find the manifest file", "appDir", appDir, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
@@ -196,7 +200,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 
 	err = sendManifest(manifest, clientWebSocket)
 	if err != nil {
-		log.Warnf("Failed to read or send manifest due to %s", err)
+		slog.Warn("cf push: failed to read or send the manifest", "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
@@ -206,7 +210,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	}
 	pushConfig, err := cfAppPush.getConfigData(echoContext, cnsiGUID, orgGUID, spaceGUID, spaceName, orgName, clientWebSocket)
 	if err != nil {
-		log.Warnf("Failed to initialise config due to error %+v", err)
+		slog.Warn("cf push: failed to initialise the push configuration", "endpoint", cnsiGUID, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
@@ -225,7 +229,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	// only from the manifest (there is no host/domain flag), so this is the
 	// only point at which the wizard's Route fields can take effect.
 	if err = applyRouteOverride(manifestFile, overrides); err != nil {
-		log.Warnf("Failed to apply route override: %s", err)
+		slog.Warn("cf push: failed to apply the route override",
+			"manifest", manifestFile, "host", overrides.Host, "domain", overrides.Domain, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
@@ -235,7 +240,8 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 
 	err = cfPush.Init(appDir, manifestFile, overrides)
 	if err != nil {
-		log.Warnf("Failed to parse due to: %+v", err)
+		slog.Warn("cf push: failed to parse the manifest and overrides",
+			"manifest", manifestFile, "appDir", appDir, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 		return err
 	}
@@ -244,12 +250,13 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 
 	err = cfPush.Run(cfAppPush, clientWebSocket)
 	if err != nil {
-		log.Warnf("Failed to execute due to: %+v", err)
+		slog.Warn("cf push: the push failed",
+			"endpoint", cnsiGUID, "org", orgGUID, "space", spaceGUID, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_PUSH_ERROR)
 		return err
 	}
 
-	log.Debug("Sending message to front-end to indicate push completed")
+	slog.Debug("cf push: telling the front end the push completed", "endpoint", cnsiGUID, "space", spaceGUID)
 	sendEvent(clientWebSocket, EVENT_PUSH_COMPLETED)
 
 	// For a new app the GUID isn't known until the push has created it, so
@@ -265,21 +272,21 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 
 	sendEvent(clientWebSocket, CLOSE_SUCCESS)
 
-	log.Debug("Waiting for close acknowledgement from the client")
+	slog.Debug("cf push: waiting for the close acknowledgement from the client")
 
 	ackCtx, ackCancel := context.WithTimeout(readCtx, 30*time.Second)
 	defer ackCancel()
 
 	// Wait for the client to acknowledge the close - timeout ?
 	if err := wsjson.Read(ackCtx, clientWebSocket, &msg); err != nil {
-		log.Errorf("Error reading JSON: %v+", err)
+		slog.Error("cf push: could not read the close acknowledgement from the client", "error", err)
 		return nil
 	}
 
 	if msg.Type != CLOSE_ACK {
-		log.Errorf("Expected a close acknowledgement - got: %d", msg.Type)
+		slog.Error("cf push: expected a close acknowledgement from the client", "type", msg.Type)
 	} else {
-		log.Debug("Got close acknowledgement from the client")
+		slog.Debug("cf push: got the close acknowledgement from the client")
 	}
 
 	// Close the web socket
@@ -323,7 +330,7 @@ func getFolderSource(readCtx context.Context, clientWebSocket *websocket.Conn, t
 	var transfers = info.Files
 	var lastFilePath string
 	for transfers > 0 {
-		log.Debugf("Waiting for a file: %d remaining", transfers)
+		slog.Debug("cf push: waiting for a file", "remaining", transfers)
 
 		// Send an ACK to ask the client to start sending us files
 		sendEvent(clientWebSocket, SOURCE_FILE_ACK)
@@ -331,7 +338,8 @@ func getFolderSource(readCtx context.Context, clientWebSocket *websocket.Conn, t
 		// We should get a SOURCE_FILE message next
 		msg := SocketMessage{}
 		if err := wsjson.Read(readCtx, clientWebSocket, &msg); err != nil {
-			log.Errorf("Error reading JSON: %v+", err)
+			slog.Error("cf push: could not read the file message from the client",
+				"remaining", transfers, "error", err)
 			return StratosProject{}, tempDir, err
 		}
 
@@ -340,7 +348,7 @@ func getFolderSource(readCtx context.Context, clientWebSocket *websocket.Conn, t
 			return StratosProject{}, tempDir, errors.New("unexpected web socket message type")
 		}
 
-		log.Debugf("Transferring file: %s", msg.Message)
+		slog.Debug("cf push: transferring a file", "file", msg.Message, "remaining", transfers)
 
 		// Now expecting a binary message
 		messageType, p, err := clientWebSocket.Read(readCtx)
@@ -374,12 +382,12 @@ func getFolderSource(readCtx context.Context, clientWebSocket *websocket.Conn, t
 
 	// Check to see if we received only 1 file and check if that was an archive file
 	if info.Files == 1 {
-		log.Debugf("Checking for archive file - %s", lastFilePath)
+		slog.Debug("cf push: checking whether the single uploaded file is an archive", "file", lastFilePath)
 
 		// Overwrite generic 'filefolder' type
 		info.DeploySource.SourceType = "archive"
 
-		log.Debug("Unpacking archive ......")
+		slog.Debug("cf push: unpacking the archive", "file", lastFilePath)
 		unpackPath := filepath.Join(tempDir, "application")
 		err := os.Mkdir(unpackPath, 0700)
 		if err != nil {
@@ -409,7 +417,7 @@ func getFolderSource(readCtx context.Context, clientWebSocket *websocket.Conn, t
 	if info.WaitAfterUpload {
 		msg := SocketMessage{}
 		if err := wsjson.Read(readCtx, clientWebSocket, &msg); err != nil {
-			log.Errorf("Error reading JSON: %v+", err)
+			slog.Error("cf push: could not read the deploy start acknowledgement from the client", "error", err)
 			return StratosProject{}, tempDir, err
 		}
 
@@ -498,7 +506,8 @@ func (cfAppPush *CFAppPush) getGitSCMSource(clientWebSocket *websocket.Conn, tem
 		}
 	}
 
-	log.Debugf("GitSCM SCM: %s, Source: %s, branch %s, url: %s", info.SCM, info.Project, info.Branch, loggerURL)
+	slog.Debug("cf push: SCM source",
+		"scm", info.SCM, "project", info.Project, "branch", info.Branch, "url", loggerURL)
 	cloneDetails := CloneDetails{
 		Url:         cloneURL,
 		LoggerUrl:   loggerURL,
@@ -536,7 +545,7 @@ func getGitURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Socket
 		return StratosProject{}, tempDir, err
 	}
 
-	log.Debugf("Git Url Source: %s, branch %s", info.Url, info.Branch)
+	slog.Debug("cf push: git URL source", "url", info.Url, "branch", info.Branch)
 	cloneDetails := CloneDetails{
 		Url:    info.Url,
 		Branch: info.Branch,
@@ -571,7 +580,7 @@ func getDockerURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Soc
 		return StratosProject{}, tempDir, err
 	}
 
-	log.Debugf("Docker Image: '%s', Username '%s'", info.DockerImage, info.DockerUsername)
+	slog.Debug("cf push: docker image source", "image", info.DockerImage, "username", info.DockerUsername)
 
 	// Create a manifest using the application name. This sets up the environment as if it were a git clone
 	applicationData := RawManifestApplication{
@@ -591,7 +600,7 @@ func getDockerURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Soc
 
 	err = os.WriteFile(manifestPath, marshalledYaml, 0600)
 	if err != nil {
-		log.Warnf("Failed to write manifest in path %s", manifestPath)
+		slog.Warn("cf push: failed to write the generated manifest", "path", manifestPath, "error", err)
 		return StratosProject{}, tempDir, err
 	}
 
@@ -621,7 +630,7 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext *echo.Context, cnsiGUID st
 
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGUID)
 	if err != nil {
-		log.Warnf("Failed to retrieve record for CNSI %s, error is %+v", cnsiGUID, err)
+		slog.Warn("cf push: failed to retrieve the endpoint record", "endpoint", cnsiGUID, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI)
 		return nil, err
 	}
@@ -629,16 +638,20 @@ func (cfAppPush *CFAppPush) getConfigData(echoContext *echo.Context, cnsiGUID st
 	userID, err := cfAppPush.portalProxy.GetSessionStringValue(echoContext, "user_id")
 
 	if err != nil {
-		log.Warnf("Failed to retrieve session user")
+		slog.Warn("cf push: failed to retrieve the session user", "endpoint", cnsiGUID, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_SESSION)
 		return nil, err
 	}
 
 	token, found := cfAppPush.portalProxy.GetCNSITokenRecord(cnsiGUID, userID)
 	if !found {
-		log.Warnf("Failed to retrieve record for CNSI %s", cnsiGUID)
-		sendErrorMessage(clientWebSocket, err, CLOSE_NO_CNSI_USERTOKEN)
-		return nil, errors.New("failed to find token record")
+		// err is nil on this path, so the failure message has to carry its own
+		// error rather than the one left over from the lookups above
+		tokenErr := errors.New("failed to find token record")
+		slog.Warn("cf push: failed to retrieve the token record for the endpoint user",
+			"endpoint", cnsiGUID, "user", userID)
+		sendErrorMessage(clientWebSocket, tokenErr, CLOSE_NO_CNSI_USERTOKEN)
+		return nil, tokenErr
 	}
 
 	config := &CFPushAppConfig{
@@ -665,7 +678,7 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 
 	if len(cloneDetails.Branch) == 0 {
 		err := errors.New("no branch supplied")
-		log.Infof("Failed to checkout repo %s due to %+v", cloneDetails.LoggerUrl, err)
+		slog.Info("cf push: cannot clone the repository, no branch was supplied", "url", cloneDetails.LoggerUrl)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_NO_BRANCH)
 		return "", err
 	}
@@ -677,7 +690,8 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 
 	err := vcsGit.Create(cloneDetails.SkipSSL, tempDir, cloneDetails.Url, cloneDetails.Branch)
 	if err != nil {
-		log.Infof("Failed to clone repo %s due to %+v", cloneDetails.LoggerUrl, err)
+		slog.Info("cf push: failed to clone the repository",
+			"url", cloneDetails.LoggerUrl, "branch", cloneDetails.Branch, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
 		return "", err
 	}
@@ -689,10 +703,10 @@ func cloneRepository(cloneDetails CloneDetails, clientWebSocket *websocket.Conn,
 func getCommit(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempDir string, vcsGit *vcsCmd) (string, error) {
 
 	if cloneDetails.Commit != "" {
-		log.Debugf("Checking out commit %s", cloneDetails.Commit)
+		slog.Debug("cf push: checking out the commit", "commit", cloneDetails.Commit)
 		err := vcsGit.ResetBranchToCommit(tempDir, cloneDetails.Commit)
 		if err != nil {
-			log.Infof("Failed to checkout commit %s", cloneDetails.Commit)
+			slog.Info("cf push: failed to check out the commit", "commit", cloneDetails.Commit, "error", err)
 			sendErrorMessage(clientWebSocket, err, CLOSE_FAILED_CLONE)
 			return "", err
 		}
@@ -701,7 +715,8 @@ func getCommit(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempD
 
 	head, err := vcsGit.Head(tempDir)
 	if err != nil {
-		log.Infof("Unable to fetch HEAD in branch due to %s", err)
+		slog.Info("cf push: unable to fetch HEAD in the cloned branch",
+			"url", cloneDetails.LoggerUrl, "branch", cloneDetails.Branch, "error", err)
 		return "", err
 	}
 	return strings.TrimSpace(head), nil
@@ -734,14 +749,14 @@ func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSock
 	// Read the manifest
 	data, err := os.ReadFile(manifestPath)
 	if err != nil {
-		log.Warnf("Failed to read manifest in path %s", manifestPath)
+		slog.Warn("cf push: failed to read the manifest", "path", manifestPath, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_NO_MANIFEST)
 		return manifest, manifestPath, err
 	}
 
 	err = yaml.Unmarshal(data, &manifest)
 	if err != nil {
-		log.Warnf("Failed to unmarshall manifest in path %s", manifestPath)
+		slog.Warn("cf push: failed to unmarshal the manifest", "path", manifestPath, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_INVALID_MANIFEST)
 		return manifest, manifestPath, err
 	}
@@ -761,11 +776,16 @@ func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSock
 
 		marshalledYaml, err := yaml.Marshal(manifest)
 		if err != nil {
-			log.Warnf("Failed to marshall manifest in path %v", manifest)
+			slog.Warn("cf push: failed to marshal the annotated manifest", "path", manifestPath, "error", err)
 			sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
 			return manifest, manifestPath, err
 		}
-		os.WriteFile(manifestPath, marshalledYaml, 0600)
+		// A write failure here only loses the source-origin env var, so the push
+		// carries on - but it used to be dropped silently
+		if err := os.WriteFile(manifestPath, marshalledYaml, 0600); err != nil {
+			slog.Warn("cf push: failed to write the annotated manifest, the source origin will not be recorded",
+				"path", manifestPath, "error", err)
+		}
 	}
 
 	return manifest, manifestPath, nil
@@ -783,7 +803,7 @@ func (sw *SocketWriter) Write(data []byte) (int, error) {
 
 	err := api.WriteText(sw.clientWebSocket, message)
 	if err != nil {
-		log.Warnf("Failed to write data to web socket: %s", err)
+		slog.Warn("cf push: failed to write the push output to the web socket", "bytes", len(data), "error", err)
 		return 0, err
 	}
 	return len(data), nil
@@ -803,15 +823,18 @@ func sendManifest(manifest Applications, clientWebSocket *websocket.Conn) error 
 
 func sendErrorMessage(clientWebSocket *websocket.Conn, err error, errorType MessageType) {
 	closingMessage, _ := getMarshalledSocketMessage(fmt.Sprintf("Failed due to %s!", err), errorType)
-	if err := api.WriteText(clientWebSocket, closingMessage); err != nil {
-		log.Warnf("Failed to write error message to web socket: %s", err)
+	// The write failure and the failure being reported are two different
+	// errors, so the write error does not shadow err - both go in the log line
+	if writeErr := api.WriteText(clientWebSocket, closingMessage); writeErr != nil {
+		slog.Warn("cf push: failed to write the error message to the web socket",
+			"errorType", errorType, "reportedError", err, "error", writeErr)
 	}
 }
 
 func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 	msg, _ := getMarshalledSocketMessage("", event)
 	if err := api.WriteText(clientWebSocket, msg); err != nil {
-		log.Warnf("Failed to write message to web socket: %s", err)
+		slog.Warn("cf push: failed to write the event to the web socket", "event", event, "error", err)
 	}
 }
 
@@ -819,7 +842,7 @@ func sendEvent(clientWebSocket *websocket.Conn, event MessageType) {
 func (cfAppPush *CFAppPush) SendEvent(clientWebSocket *websocket.Conn, event MessageType, data string) {
 	msg, _ := getMarshalledSocketMessage(data, event)
 	if err := api.WriteText(clientWebSocket, msg); err != nil {
-		log.Warnf("Failed to write message to web socket: %s", err)
+		slog.Warn("cf push: failed to write the event message to the web socket", "event", event, "error", err)
 	}
 }
 
@@ -833,14 +856,27 @@ func (cfAppPush *CFAppPush) resolvePushedAppGUID(cnsiGUID, userGUID, spaceGUID s
 		appName = manifest.Applications[0].Name
 	}
 	if appName == "" || spaceGUID == "" {
-		log.Warnf("Cannot resolve pushed app GUID: missing app name or space GUID")
+		slog.Warn("cf push: cannot resolve the pushed app GUID, the app name or the space GUID is missing",
+			"app", appName, "space", spaceGUID)
 		return ""
 	}
 
 	requestURL := fmt.Sprintf("/v3/apps?names=%s&space_guids=%s", url.QueryEscape(appName), url.QueryEscape(spaceGUID))
 	res, err := cfAppPush.portalProxy.DoProxySingleRequest(cnsiGUID, userGUID, "GET", requestURL, nil, nil)
-	if err != nil || res == nil || res.StatusCode != http.StatusOK {
-		log.Warnf("Failed to resolve GUID for pushed app %q: %v", appName, err)
+	if err != nil {
+		slog.Warn("cf push: the app lookup for the pushed app failed",
+			"app", appName, "space", spaceGUID, "endpoint", cnsiGUID, "error", err)
+		return ""
+	}
+	// Split from the error above: a non-200 leaves err nil, so it used to be
+	// reported as an error of "<nil>" with the status thrown away
+	if res == nil || res.StatusCode != http.StatusOK {
+		status := 0
+		if res != nil {
+			status = res.StatusCode
+		}
+		slog.Warn("cf push: the app lookup for the pushed app returned an unexpected response",
+			"app", appName, "space", spaceGUID, "endpoint", cnsiGUID, "status", status)
 		return ""
 	}
 
@@ -849,8 +885,14 @@ func (cfAppPush *CFAppPush) resolvePushedAppGUID(cnsiGUID, userGUID, spaceGUID s
 			GUID string `json:"guid"`
 		} `json:"resources"`
 	}
-	if err := json.Unmarshal(res.Response, &list); err != nil || len(list.Resources) == 0 {
-		log.Warnf("Could not find pushed app %q in space %q to notify its GUID", appName, spaceGUID)
+	if err := json.Unmarshal(res.Response, &list); err != nil {
+		slog.Warn("cf push: could not parse the app lookup response for the pushed app",
+			"app", appName, "space", spaceGUID, "error", err)
+		return ""
+	}
+	if len(list.Resources) == 0 {
+		slog.Warn("cf push: could not find the pushed app in the space to notify its GUID",
+			"app", appName, "space", spaceGUID)
 		return ""
 	}
 	return list.Resources[0].GUID

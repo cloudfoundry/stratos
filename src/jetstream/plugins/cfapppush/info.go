@@ -2,16 +2,16 @@ package cfapppush
 
 import (
 	"errors"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 
 	"code.cloudfoundry.org/cli/v8/util/configv3"
-	log "github.com/sirupsen/logrus"
 )
 
 // Get the Cloud Foundry Info
 func (c *CFPushApp) setEndpointInfo(config *configv3.Config) error {
-	log.Debug("CF Push Get CF Info")
+	slog.Debug("cf push: fetching the Cloud Foundry info", "api", c.config.APIEndpointURL)
 
 	apiEndpoint := c.config.APIEndpointURL
 	skipSSLValidation := c.config.SkipSSLValidation
