@@ -49,7 +49,15 @@ func reportPath(base string, segs ...string) (string, error) {
 			return "", err
 		}
 	}
-	return filepath.Join(append([]string{base}, segs...)...), nil
+	cleanBase := filepath.Clean(base)
+	full := filepath.Join(append([]string{cleanBase}, segs...)...)
+	// Belt-and-braces, mirroring validateContentID: the segment checks above
+	// already reject separators and dot segments, but re-checking the joined
+	// result means a future change that loosens them is still caught here.
+	if !strings.HasPrefix(full, cleanBase+string(filepath.Separator)) {
+		return "", fmt.Errorf("path %q escapes the reports directory", full)
+	}
+	return full, nil
 }
 
 // jobFolder returns the folder for a job id. The id is a nested "user/endpoint/id"
@@ -58,7 +66,12 @@ func jobFolder(base, id string) (string, error) {
 	if !filepath.IsLocal(id) {
 		return "", fmt.Errorf("job id %q is not a local path", id)
 	}
-	return filepath.Join(base, id), nil
+	cleanBase := filepath.Clean(base)
+	full := filepath.Join(cleanBase, id)
+	if !strings.HasPrefix(full, cleanBase+string(filepath.Separator)) {
+		return "", fmt.Errorf("job id %q escapes the reports directory", id)
+	}
+	return full, nil
 }
 
 func validateSegment(seg string) error {

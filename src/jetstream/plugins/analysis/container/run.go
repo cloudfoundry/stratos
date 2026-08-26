@@ -124,6 +124,7 @@ func (a *Analyzer) doRun(ec *echo.Context) error {
 	}
 
 	job.Folder = folder
+	job.Base = a.reportsDir
 	job.TempFiles = tempFiles
 
 	// Store the job so we track which jobs are running

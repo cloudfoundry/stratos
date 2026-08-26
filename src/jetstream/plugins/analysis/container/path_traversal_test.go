@@ -189,3 +189,50 @@ func TestReportPathConfinesEverySegment(t *testing.T) {
 		t.Errorf("reportPath escaped base: %q", got)
 	}
 }
+
+// The containment re-check is belt-and-braces behind the segment validation,
+// so the segment tests above cannot exercise it. Drive it directly by handing
+// the builders a base that is not a prefix of the result.
+func TestBuildersRefuseAResultOutsideTheBase(t *testing.T) {
+	if got, err := reportPath("/var/lib/reports/../elsewhere", "user"); err == nil {
+		if !strings.HasPrefix(got, "/var/lib/elsewhere/") {
+			t.Errorf("reportPath returned %q, which is outside its cleaned base", got)
+		}
+	}
+	// A job id that IsLocal accepts must still land beneath the base.
+	got, err := jobFolder("/var/lib/reports", "user/endpoint/id")
+	if err != nil {
+		t.Fatalf("jobFolder rejected a valid id: %v", err)
+	}
+	if !strings.HasPrefix(got, "/var/lib/reports/") {
+		t.Errorf("jobFolder escaped base: %q", got)
+	}
+}
+
+// RemoveTempFiles must not delete anything outside the reports directory,
+// however TempFiles came to hold such a path.
+func TestRemoveTempFilesRefusesPathsOutsideTheBase(t *testing.T) {
+	root := t.TempDir()
+	base := filepath.Join(root, "reports")
+	if err := os.MkdirAll(base, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	outside := filepath.Join(root, "keepme.txt")
+	if err := os.WriteFile(outside, []byte("keep"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	inside := filepath.Join(base, "temp.txt")
+	if err := os.WriteFile(inside, []byte("temp"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	job := &AnalysisJob{ID: "j1", Base: base, TempFiles: []string{outside, inside, base + "/../keepme.txt"}}
+	job.RemoveTempFiles()
+
+	if _, err := os.Stat(outside); err != nil {
+		t.Errorf("RemoveTempFiles deleted a file outside the reports directory: %v", err)
+	}
+	if _, err := os.Stat(inside); !os.IsNotExist(err) {
+		t.Errorf("RemoveTempFiles failed to delete a legitimate temp file (err=%v)", err)
+	}
+}
