@@ -777,7 +777,9 @@ define audit.codeql
 	@mkdir -p dist
 	@echo "── Go (src/jetstream) ──"
 	codeql database create dist/codeql-db-go --language=go --source-root=src/jetstream --overwrite
-	codeql database analyze dist/codeql-db-go codeql/go-queries --format=sarif-latest --output=dist/codeql-go.sarif
+	codeql database analyze dist/codeql-db-go codeql/go-queries \
+	  --model-packs fivetwenty/stratos-go-models --additional-packs .github/codeql \
+	  --format=sarif-latest --output=dist/codeql-go.sarif
 	@echo "── JavaScript/TypeScript (src/frontend) ──"
 	codeql database create dist/codeql-db-js --language=javascript --source-root=src/frontend --overwrite
 	codeql database analyze dist/codeql-db-js codeql/javascript-queries --format=sarif-latest --output=dist/codeql-js.sarif
