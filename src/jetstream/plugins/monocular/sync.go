@@ -50,7 +50,8 @@ func (m *Monocular) syncRepo(c *echo.Context) error {
 func (m *Monocular) Sync(action api.EndpointAction, endpoint *api.CNSIRecord) {
 	// Delete and Update are Synchronously handled
 	// Add (Sync) is handled Asynchronously via a SyncJob
-	if action == 0 {
+	switch action {
+	case 0:
 		// If the sync job is busy, it won't update the status of this new job until it completes the previous one
 		// Set the status to indicate it is pending
 		metadata := SyncMetadata{
@@ -67,10 +68,10 @@ func (m *Monocular) Sync(action api.EndpointAction, endpoint *api.CNSIRecord) {
 
 		// Schedula a sync job
 		syncChan <- job
-	} else if action == 1 {
+	case 1:
 		slog.Debug("deleting helm repository", "endpoint", endpoint.GUID, "name", endpoint.Name)
 		m.deleteChartStoreForEndpoint(endpoint.GUID)
-	} else if action == 2 {
+	case 2:
 		slog.Debug("helm repository updated, renaming the repository field in the associated charts",
 			"endpoint", endpoint.GUID, "name", endpoint.Name)
 		if err := m.ChartStore.RenameEndpoint(endpoint.GUID, endpoint.Name); err != nil {

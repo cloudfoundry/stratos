@@ -28,11 +28,9 @@ const (
 // Monocular is a plugin for Monocular
 type Monocular struct {
 	portalProxy     api.PortalProxy
-	chartSvcRoutes  http.Handler
 	ChartStore      store.ChartStore
 	FoundationDBURL string
 	SyncServiceURL  string
-	devSyncPID      int
 	CacheFolder     string
 }
 
@@ -139,16 +137,6 @@ func (m *Monocular) syncOnStartup() {
 			}
 		}
 	}
-}
-
-// ArrayContainsString checks the string array to see if it contains the specifed value
-func arrayContainsString(a []string, x string) bool {
-	for _, n := range a {
-		if x == n {
-			return true
-		}
-	}
-	return false
 }
 
 // OnEndpointNotification handles notification that endpoint has been remoevd

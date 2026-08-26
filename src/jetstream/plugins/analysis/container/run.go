@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log/slog"
 	"net/http"
 	"os"
@@ -76,8 +75,8 @@ func (a *Analyzer) doRun(ec *echo.Context) error {
 			slog.Error(msg, "analyzer", engine, "error", err)
 			return fmt.Errorf("%s: %w", msg, err)
 		}
-		defer part.Close()
-		fileBytes, err := ioutil.ReadAll(part)
+		defer func() { _ = part.Close() }()
+		fileBytes, err := io.ReadAll(part)
 		if err != nil {
 			const msg = "failed to read the content of a part of the message"
 			slog.Error(msg, "analyzer", engine, "error", err)
@@ -110,7 +109,7 @@ func (a *Analyzer) doRun(ec *echo.Context) error {
 			if err != nil {
 				return fmt.Errorf("invalid multipart filename: %v", err)
 			}
-			if err = ioutil.WriteFile(fullpath, fileBytes, os.ModePerm); err != nil {
+			if err = os.WriteFile(fullpath, fileBytes, os.ModePerm); err != nil {
 				const msg = "could not write the file data"
 				slog.Error(msg, "file", filename, "path", fullpath, "error", err)
 				return fmt.Errorf("%s: %s", msg, filename)

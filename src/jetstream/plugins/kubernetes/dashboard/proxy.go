@@ -32,7 +32,7 @@ func KubeDashboardProxy(c *echo.Context, p api.PortalProxy, config *rest.Config)
 		return sendErrorPage(c, "Failed to access Kubernetes Dashboard - could not get Stratos Session")
 	}
 
-	var kubeDashEndpointID = ""
+	var kubeDashEndpointID string
 	var token = ""
 	svc := ServiceInfo{}
 

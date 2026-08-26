@@ -114,15 +114,14 @@ func (vcs *vcsCmd) Checkout(dir string, branchRef string) error {
 }
 
 func (vcs *vcsCmd) Head(dir string) (string, error) {
-	var emptySlice []string
-	for _, cmd := range vcs.headCmd {
-		hash, err := vcs.run1(dir, cmd, emptySlice, false)
-		if err != nil {
-			return "", err
-		}
-		return string(hash), nil
+	if len(vcs.headCmd) == 0 {
+		return "", nil
 	}
-	return "", nil
+	hash, err := vcs.run1(dir, vcs.headCmd[0], nil, false)
+	if err != nil {
+		return "", err
+	}
+	return string(hash), nil
 }
 
 func (v *vcsCmd) run(dir string, cmd string, keyval ...string) error {
@@ -164,7 +163,7 @@ func (v *vcsCmd) run1(dir string, cmdline string, keyval []string, verbose bool)
 
 func expand(match map[string]string, s string) string {
 	for k, v := range match {
-		s = strings.Replace(s, "{"+k+"}", v, -1)
+		s = strings.ReplaceAll(s, "{"+k+"}", v)
 	}
 	return s
 }

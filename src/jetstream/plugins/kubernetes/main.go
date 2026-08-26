@@ -4,7 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -215,7 +215,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 		return newCNSI, nil, err
 	}
 
-	body, err := ioutil.ReadAll(res.Body)
+	body, err := io.ReadAll(res.Body)
 	if err != nil {
 		return newCNSI, nil, err
 	}

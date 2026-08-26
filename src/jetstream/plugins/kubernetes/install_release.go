@@ -21,8 +21,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
-const chartCollection = "charts"
-
 type installRequest struct {
 	Endpoint          string `json:"endpoint"`
 	MonocularEndpoint string `json:"monocularEndpoint"`
@@ -53,7 +51,9 @@ type upgradeRequest struct {
 func (c *KubernetesSpecification) InstallRelease(ec *echo.Context) error {
 	bodyReader := ec.Request().Body
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(bodyReader)
+	if _, err := buf.ReadFrom(bodyReader); err != nil {
+		return api.NewJetstreamUserErrorf("Could not read the request body: %v", err)
+	}
 
 	var params installRequest
 	err := json.Unmarshal(buf.Bytes(), &params)
@@ -135,7 +135,7 @@ func (c *KubernetesSpecification) loadChart(downloadURL string) (*chart.Chart, e
 		return nil, fmt.Errorf("Could not download Chart Archive: %s", resp.Status)
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	return loader.LoadArchive(resp.Body)
 }
@@ -198,7 +198,9 @@ func (c *KubernetesSpecification) UpgradeRelease(ec *echo.Context) error {
 
 	bodyReader := ec.Request().Body
 	buf := new(bytes.Buffer)
-	buf.ReadFrom(bodyReader)
+	if _, err := buf.ReadFrom(bodyReader); err != nil {
+		return api.NewJetstreamUserErrorf("Could not read the request body: %v", err)
+	}
 
 	var params upgradeRequest
 	err := json.Unmarshal(buf.Bytes(), &params)

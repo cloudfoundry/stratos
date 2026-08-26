@@ -13,7 +13,6 @@ import (
 var (
 	saveChartVersion   = `INSERT INTO helm_charts (endpoint, name, repo_name, version, created, app_version, description, icon_url, chart_url, source_url, digest, is_latest, update_batch) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 	updateChartVersion = `UPDATE helm_charts SET created=$1, app_version=$2, description=$3, icon_url=$4, chart_url=$5, source_url=$6, digest=$7, is_latest=$8, update_batch=$9 WHERE endpoint=$10 AND name=$11 AND repo_name=$12 AND version=$13`
-	deleteChartVersion = `DELETE FROM helm_charts WHERE endpoint = $1 AND name = $2 and version = $3`
 	deleteForEndpoint  = `DELETE FROM helm_charts WHERE endpoint = $1`
 	deleteForBatch     = `DELETE FROM helm_charts WHERE endpoint = $1 AND name = $2 and update_batch != $3`
 	renameEndpoint     = `UPDATE helm_charts SET repo_name=$1 WHERE endpoint=$2`
@@ -119,7 +118,7 @@ func (p *HelmChartDBStore) GetLatestCharts() ([]*ChartStoreRecord, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Helm Charts: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var chartList []*ChartStoreRecord
 
@@ -177,7 +176,7 @@ func (p *HelmChartDBStore) GetChartVersions(repo, name string) ([]*ChartStoreRec
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Helm Charts: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var chartList ChartStoreRecordList
 
@@ -208,7 +207,7 @@ func (p *HelmChartDBStore) GetEndpointIDs() ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Endpoint IDs: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	list := make([]string, 0)
 

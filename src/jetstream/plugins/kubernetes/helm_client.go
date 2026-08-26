@@ -3,7 +3,6 @@ package kubernetes
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log/slog"
 	"os"
 	"sync"
@@ -34,7 +33,7 @@ type HelmConfiguration struct {
 // Cleanup any resources associated with the Helm configuration
 func (f *HelmConfiguration) Cleanup() {
 	if len(f.Folder) > 0 {
-		os.RemoveAll(f.Folder)
+		_ = os.RemoveAll(f.Folder)
 	}
 }
 
@@ -72,7 +71,7 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 
 	// The folder backs the discovery cache; without it the Helm client would
 	// cache into the working directory, so this is fatal rather than ignorable
-	hc.Folder, err = ioutil.TempDir("", "helm-client-")
+	hc.Folder, err = os.MkdirTemp("", "helm-client-")
 	if err != nil {
 		const msg = "unable to create the temporary folder for the Helm client"
 		slog.Error(msg, "endpoint", endpointGUID, "user", userID, "error", err)

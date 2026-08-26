@@ -172,14 +172,14 @@ func (r *HelmReleaseGraph) ProcessPod(id string, res KubeResource, spec v1.PodSp
 	// Look through volumes
 	// name and: PersistentVolumeClaim.ClaimName or Secret.SecretName
 	for _, volume := range spec.Volumes {
-		if volume.VolumeSource.PersistentVolumeClaim != nil {
-			ref := fmt.Sprintf("PersistentVolumeClaim-%s", volume.VolumeSource.PersistentVolumeClaim.ClaimName)
+		if volume.PersistentVolumeClaim != nil {
+			ref := fmt.Sprintf("PersistentVolumeClaim-%s", volume.PersistentVolumeClaim.ClaimName)
 			r.AddLink(id, ref)
-		} else if volume.VolumeSource.Secret != nil {
-			ref := fmt.Sprintf("Secret-%s", volume.VolumeSource.Secret.SecretName)
+		} else if volume.Secret != nil {
+			ref := fmt.Sprintf("Secret-%s", volume.Secret.SecretName)
 			r.AddLink(id, ref)
-		} else if volume.VolumeSource.ConfigMap != nil {
-			ref := fmt.Sprintf("ConfigMap-%s", volume.VolumeSource.ConfigMap.Name)
+		} else if volume.ConfigMap != nil {
+			ref := fmt.Sprintf("ConfigMap-%s", volume.ConfigMap.Name)
 			r.AddLink(id, ref)
 		}
 	}

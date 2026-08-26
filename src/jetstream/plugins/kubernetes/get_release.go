@@ -32,17 +32,6 @@ type ResourceResponse struct {
 	Data json.RawMessage `json:"data"`
 }
 
-type kubeReleasesData struct {
-	Endpoint  string `json:"endpoint"`
-	Name      string `json:"releaseName"`
-	Namespace string `json:"releaseNamespace"`
-	Chart     struct {
-		Name       string `json:"chartName"`
-		Repository string `json:"repo"`
-		Version    string `json:"version"`
-	} `json:"chart"`
-}
-
 // GetRelease gets the release information for a specific Helm release
 func (c *KubernetesSpecification) GetRelease(ec *echo.Context) error {
 
@@ -105,7 +94,7 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer ws.CloseNow()
+	defer func() { _ = ws.CloseNow() }()
 
 	// ws is the websocket ready for use
 
@@ -120,40 +109,40 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 	id := fmt.Sprintf("%s-%s", endpointGUID, rel.Namespace)
 
 	// Send over the namespace details of the release
-	sendResource(ws, "ReleasePrefix", id)
+	_ = sendResource(ws, "ReleasePrefix", id)
 
 	//graph.ParseManifest(rel)
 
 	// Send the manifest for the release
-	sendResource(ws, "Resources", rel.GetResources())
+	_ = sendResource(ws, "Resources", rel.GetResources())
 
 	// // Send the manifest for the release
 	// sendResource(ws, "Test", rel.HelmManifest)
 
 	// Send the graph as we have it now
-	sendResource(ws, "Graph", graph)
+	_ = sendResource(ws, "Graph", graph)
 
 	// Loop over this until the web socket is closed
 
 	// Get the pods first and send those
 	rel.UpdatePods(c.portalProxy)
-	sendResource(ws, "Pods", rel.GetPods())
+	_ = sendResource(ws, "Pods", rel.GetPods())
 
 	//graph.Generate(pods)
 	//graph.ParseManifest(rel)
-	sendResource(ws, "Graph", graph)
+	_ = sendResource(ws, "Graph", graph)
 
 	// Send the manifest for the release again (ReplicaSets will now be added)
-	sendResource(ws, "Manifest", rel.GetResources())
+	_ = sendResource(ws, "Manifest", rel.GetResources())
 
 	// Now get all of the resources in the manifest
 	rel.UpdateResources(c.portalProxy)
-	sendResource(ws, "Resources", rel.GetResources())
+	_ = sendResource(ws, "Resources", rel.GetResources())
 
 	graph.ParseManifest(rel)
-	sendResource(ws, "Graph", graph)
+	_ = sendResource(ws, "Graph", graph)
 
-	sendResource(ws, "ManifestErrors", rel.ManifestErrors)
+	_ = sendResource(ws, "ManifestErrors", rel.ManifestErrors)
 
 	stopchan := make(chan bool)
 	pausechan := make(chan bool)
@@ -169,12 +158,10 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 		select {
 		case pause := <-pausechan:
 			paused = pause
-			break
 		case <-stopchan:
-			ws.Close(websocket.StatusNormalClosure, "")
+			_ = ws.Close(websocket.StatusNormalClosure, "")
 			return nil
 		case <-time.After(sleep):
-			break
 		}
 
 		if paused {
@@ -186,17 +173,17 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 
 		// Pods
 		rel.UpdatePods(c.portalProxy)
-		sendResource(ws, "Pods", rel.GetPods())
+		_ = sendResource(ws, "Pods", rel.GetPods())
 
 		graph.ParseManifest(rel)
-		sendResource(ws, "Graph", graph)
+		_ = sendResource(ws, "Graph", graph)
 
 		// Now get all of the resources in the manifest
 		rel.UpdateResources(c.portalProxy)
-		sendResource(ws, "Resources", rel.GetResources())
+		_ = sendResource(ws, "Resources", rel.GetResources())
 
 		graph.ParseManifest(rel)
-		sendResource(ws, "Graph", graph)
+		_ = sendResource(ws, "Graph", graph)
 
 		sleep = 10 * time.Second
 	}
@@ -207,12 +194,12 @@ func readLoop(c *websocket.Conn, stopchan chan<- bool, pausechan chan<- bool) {
 	for {
 		messageType, data, err := c.Read(context.Background())
 		if err != nil {
-			c.CloseNow()
+			_ = c.CloseNow()
 			return
 		}
 
 		if messageType != websocket.MessageText {
-			c.CloseNow()
+			_ = c.CloseNow()
 			return
 		}
 
@@ -231,6 +218,10 @@ func readLoop(c *websocket.Conn, stopchan chan<- bool, pausechan chan<- bool) {
 	}
 }
 
+// sendResource logs its own failure. Every caller streams a sequence of
+// these to a websocket and has nothing useful to do with an individual
+// error - the socket teardown is driven by the read loop - so reporting
+// here keeps the failure visible without thirteen identical checks.
 func sendResource(ws *websocket.Conn, kind string, data interface{}) error {
 	var err error
 	var txt []byte
@@ -247,5 +238,6 @@ func sendResource(ws *websocket.Conn, kind string, data interface{}) error {
 		}
 	}
 
+	slog.Warn("could not send a Helm release resource to the client", "kind", kind, "error", err)
 	return err
 }

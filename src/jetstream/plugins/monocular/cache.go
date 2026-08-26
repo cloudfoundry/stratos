@@ -8,7 +8,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -132,7 +131,7 @@ func (m *Monocular) cleanCacheFiles(endpointID string, allCharts []store.ChartSt
 
 // Is there a chart digest in the given folder with the given value?
 func hasDigestFile(chartCachePath, digest string) bool {
-	data, err := ioutil.ReadFile(path.Join(chartCachePath, digestFilename))
+	data, err := os.ReadFile(path.Join(chartCachePath, digestFilename))
 	if err == nil {
 		chk := strings.TrimSpace(string(data))
 		return chk == digest
@@ -143,12 +142,16 @@ func hasDigestFile(chartCachePath, digest string) bool {
 
 // write the chart digest to a file
 func writeDigestFile(chartCachePath, digest string) error {
-	return ioutil.WriteFile(path.Join(chartCachePath, digestFilename), []byte(digest), 0644)
+	return os.WriteFile(path.Join(chartCachePath, digestFilename), []byte(digest), 0644)
 }
 
 func (m *Monocular) getChartYaml(chart store.ChartStoreRecord) *ChartMetadata {
-	// Cache the Chart if we don't have it already
-	m.cacheChart(chart)
+	// Cache the Chart if we don't have it already. readChartYaml below
+	// returns nil if the cache is missing, so a failure here degrades rather
+	// than breaks - but it should not be silent.
+	if err := m.cacheChart(chart); err != nil {
+		slog.Warn("could not cache the chart", "chart", chart.Name, "version", chart.Version, "error", err)
+	}
 	return readChartYaml(m.getChartCacheFolder(chart))
 }
 
@@ -159,7 +162,7 @@ func readChartYaml(cacheFolder string) *ChartMetadata {
 	}
 
 	// Check we can unmarshall the request
-	data, err := ioutil.ReadFile(chartCacheYamlPath)
+	data, err := os.ReadFile(chartCacheYamlPath)
 	if err != nil {
 		return nil
 	}
@@ -245,7 +248,7 @@ func (m *Monocular) cacheChartFromURL(chartCachePath, digest, name, chartURL str
 	}
 
 	// We can delete the Chart archive - don't need it anymore
-	os.Remove(archiveFile)
+	_ = os.Remove(archiveFile)
 
 	return nil
 }
@@ -286,7 +289,7 @@ func (m *Monocular) downloadFile(filepath string, url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("Error downloading icon: %s - %d:%s", url, resp.StatusCode, resp.Status)
@@ -297,7 +300,7 @@ func (m *Monocular) downloadFile(filepath string, url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer out.Close()
+	defer func() { _ = out.Close() }()
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
@@ -318,7 +321,7 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 			"archive", archivePath, "chart", chartName, "error", err)
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	gzf, err := gzip.NewReader(f)
 	if err != nil {
@@ -352,7 +355,7 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 				if err != nil {
 					return err
 				}
-				defer out.Close()
+				defer func() { _ = out.Close() }()
 
 				if _, err := io.Copy(out, tarReader); err != nil {
 					slog.Error("helm archive extract: could not write an extracted file",
@@ -379,7 +382,7 @@ func getFileChecksum(file string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	hasher := sha256.New()
 	if _, err := io.Copy(hasher, f); err != nil {
 		return "", err

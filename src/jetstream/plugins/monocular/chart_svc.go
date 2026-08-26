@@ -128,8 +128,7 @@ func (m *Monocular) getIcon(c *echo.Context) error {
 		return nil
 	}
 
-	c.File(iconFilePath)
-	return nil
+	return c.File(iconFilePath)
 }
 
 // /chartsvc/v1/charts/:repo/:name/versions/:version
