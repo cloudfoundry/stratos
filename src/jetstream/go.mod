@@ -36,7 +36,6 @@ require (
 	github.com/fivetwenty-io/capi/v3 v3.222.4
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/context v1.1.2
 	github.com/gorilla/securecookie v1.1.2
 	github.com/gorilla/sessions v1.4.0
 	github.com/govau/cf-common v0.0.7
