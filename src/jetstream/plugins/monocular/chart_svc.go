@@ -208,7 +208,8 @@ func (m *Monocular) getChartAndVersionFile(c *echo.Context) error {
 	version := c.Param("version")
 	filename := c.Param("filename")
 
-	if !isPermittedFile(filename) {
+	safeName, ok := permittedFile(filename)
+	if !ok {
 		slog.Debug("refusing to serve a chart file that is not on the permitted list",
 			"repository", repo, "chart", chartName, "version", version, "file", filename)
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
@@ -223,7 +224,7 @@ func (m *Monocular) getChartAndVersionFile(c *echo.Context) error {
 	}
 
 	if m.cacheChart(*chart) == nil {
-		return c.File(path.Join(m.getChartCacheFolder(*chart), filename))
+		return c.File(path.Join(m.getChartCacheFolder(*chart), safeName))
 	}
 
 	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))

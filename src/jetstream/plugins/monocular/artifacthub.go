@@ -308,7 +308,8 @@ func (m *Monocular) artifactHubGetChartFileNamed(c *echo.Context, file string) e
 	chartName := c.Param("name")
 	version := c.Param("version")
 
-	if !isPermittedFile(file) {
+	safeName, ok := permittedFile(file)
+	if !ok {
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", file))
 	}
 
@@ -322,7 +323,7 @@ func (m *Monocular) artifactHubGetChartFileNamed(c *echo.Context, file string) e
 		return err
 	}
 
-	fp := path.Join(cacheFolder, file)
+	fp := path.Join(cacheFolder, safeName)
 	return c.File(fp)
 }
 
@@ -442,9 +443,9 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 	var versionPart = ""
 	if len(version) > 0 {
 		versionPart = fmt.Sprintf("/%s", version)
-		cacheName = fmt.Sprintf("%s_%s_%s.json", repo, name, version)
+		cacheName = fmt.Sprintf("%s_%s_%s.json", safeSegment(repo), safeSegment(name), safeSegment(version))
 	} else {
-		cacheName = fmt.Sprintf("%s_%s.json", repo, name)
+		cacheName = fmt.Sprintf("%s_%s.json", safeSegment(repo), safeSegment(name))
 	}
 
 	var reader io.Reader
