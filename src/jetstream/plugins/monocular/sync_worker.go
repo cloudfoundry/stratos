@@ -2,6 +2,7 @@ package monocular
 
 import (
 	"fmt"
+	"log/slog"
 	"strings"
 	"time"
 
@@ -9,7 +10,6 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 type syncResult struct {
@@ -53,12 +53,13 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 	var latestCharts []store.ChartStoreRecord
 	var allCharts []store.ChartStoreRecord
 
-	log.Infof("Helm Repository sync started for %s", repoName)
+	slog.Info("helm repository sync started", "endpoint", endpointID, "repository", repoName)
 	start := time.Now()
 
 	// Iterate over each chart in the index
 	for name, chartVersions := range index.Entries {
-		log.Debugf("Helm Repository Sync: Processing chart: %s", name)
+		slog.Debug("helm repository sync: processing a chart",
+			"endpoint", endpointID, "repository", repoName, "chart", name)
 		syncRsult := m.procesChartVersions(endpointID, url, repoName, name, chartVersions)
 		latestCharts = append(latestCharts, syncRsult.Latest)
 		allCharts = append(allCharts, syncRsult.Charts...)
@@ -66,16 +67,19 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 
 	// Cache latest charts
 	if err = m.cacheCharts(latestCharts); err != nil {
-		log.Warnf("Error caching helm charts: %+v", err)
+		slog.Warn("error caching the helm charts",
+			"endpoint", endpointID, "repository", repoName, "error", err)
 	}
 
 	// Finally, delete all files that are no longer referenced in the database
 	if err = m.cleanCacheFiles(endpointID, allCharts); err != nil {
-		log.Errorf("%s", err)
+		slog.Error("error cleaning unreferenced files from the helm chart cache",
+			"endpoint", endpointID, "repository", repoName, "error", err)
 	}
 
 	elapsed := time.Since(start).Round(time.Second)
-	log.Infof("Helm Repository sync completed for %s (%s)", repoName, elapsed)
+	slog.Info("helm repository sync completed",
+		"endpoint", endpointID, "repository", repoName, "elapsed", elapsed)
 
 	return nil
 }
@@ -102,10 +106,15 @@ func (m *Monocular) procesChartVersions(endpoint, repoURL, repoName, name string
 	// Write all versions database
 	for _, chartVersion := range chartVersions {
 		if len(chartVersion.URLs) == 0 {
-			log.Warnf("Can not index Chart %s, Version %s - Chart does not have any Chart URLs", chartVersion.Name, chartVersion.Version)
+			slog.Warn("can not index a chart version, it has no chart URLs",
+				"endpoint", endpoint, "repository", repoName,
+				"chart", chartVersion.Name, "version", chartVersion.Version)
 		} else {
 			if len(chartVersion.URLs) > 1 {
-				log.Warnf("Chart %s, Version %s - Chart has more than 1 Chart URL - only using the first URL", chartVersion.Name, chartVersion.Version)
+				slog.Warn("chart version has more than one chart URL, only using the first",
+					"endpoint", endpoint, "repository", repoName,
+					"chart", chartVersion.Name, "version", chartVersion.Version,
+					"urlCount", len(chartVersion.URLs))
 			}
 
 			// Create a record for the Chart Version that we will store in the database
@@ -135,7 +144,9 @@ func (m *Monocular) procesChartVersions(endpoint, repoURL, repoName, name string
 			}
 
 			if err := m.ChartStore.Save(record, batchID); err != nil {
-				log.Warnf("Error saving Chart %s, Version %s to the database: %+v", record.Name, record.Version, err)
+				slog.Warn("error saving a chart version to the database",
+					"endpoint", endpoint, "repository", repoName,
+					"chart", record.Name, "version", record.Version, "error", err)
 			}
 
 			// Small delay mainly for SQLite so we don't hog the database connection
@@ -145,7 +156,9 @@ func (m *Monocular) procesChartVersions(endpoint, repoURL, repoName, name string
 
 	// Delete versions not updated in this batch
 	if err := m.ChartStore.DeleteBatch(endpoint, name, batchID); err != nil {
-		log.Warnf("Error deleting old Chart batches: Name %s, Batch ID %s, error: %+v", name, batchID, err)
+		slog.Warn("error deleting the superseded chart versions for a chart",
+			"endpoint", endpoint, "repository", repoName,
+			"chart", name, "batchID", batchID, "error", err)
 	}
 
 	return result

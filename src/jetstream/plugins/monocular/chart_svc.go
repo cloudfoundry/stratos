@@ -1,22 +1,21 @@
 package monocular
 
 import (
-	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"os"
 	"path"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 // Functions to provide a Monocular compatible API with our chart store
 
 // List all helm Charts - gets the latest version for each Chart
 func (m *Monocular) listCharts(c *echo.Context) error {
-	log.Debug("List Charts called")
+	slog.Debug("listing charts")
 
 	// Check if this is a request for Artifact Hub
 	if handled, err := m.handleArtifactRequest(c, m.fetchChartsFromArtifactHub); handled {
@@ -77,7 +76,7 @@ func (m *Monocular) getChartFromStore(repo, name, version string) (*store.ChartS
 
 // Get the latest version of a given chart
 func (m *Monocular) getChart(c *echo.Context) error {
-	log.Debug("Get Chart called")
+	slog.Debug("getting a chart")
 
 	// Check if this is a request for Artifact Hub
 	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetChart); handled {
@@ -100,7 +99,7 @@ func (m *Monocular) getChart(c *echo.Context) error {
 }
 
 func (m *Monocular) getIcon(c *echo.Context) error {
-	log.Debug("Get Icon called")
+	slog.Debug("chart icon requested")
 
 	// Process ArtifactHub request
 	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetIconHandler); handled {
@@ -111,16 +110,13 @@ func (m *Monocular) getIcon(c *echo.Context) error {
 	chartName := c.Param("chartName")
 	version := c.Param("version")
 
-	if len(version) == 0 {
-		log.Debugf("Get icon for %s/%s", repo, chartName)
-	} else {
-		log.Debugf("Get icon for %s/%s-%s", repo, chartName, version)
-	}
+	slog.Debug("getting a chart icon", "repository", repo, "chart", chartName, "version", version)
 
 	chart, err := m.getChartFromStore(repo, chartName, version)
 	if err != nil {
-		log.Error("Can not find chart")
-		return errors.New("Error")
+		const msg = "can not find the chart for the requested icon"
+		slog.Error(msg, "repository", repo, "chart", chartName, "version", version, "error", err)
+		return echo.NewHTTPError(http.StatusNotFound, msg)
 	}
 
 	// This will download and cache the icon if it is not already cached - it returns the local file path to the icon file
@@ -139,7 +135,7 @@ func (m *Monocular) getIcon(c *echo.Context) error {
 // /chartsvc/v1/charts/:repo/:name/versions/:version
 // Get specific chart version
 func (m *Monocular) getChartVersion(c *echo.Context) error {
-	log.Debug("getChartAndVersion called")
+	slog.Debug("getting a specific chart version")
 
 	// Process ArtifactHub request
 	if handled, err := m.handleArtifactRequest(c, m.artifactHubGetChartVersion); handled {
@@ -208,18 +204,19 @@ func (m *Monocular) getChartVersions(c *echo.Context) error {
 
 // Get a file such as the README or valyes for a given chart version
 func (m *Monocular) getChartAndVersionFile(c *echo.Context) error {
-	log.Debug("Get Chart file called")
-
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 	version := c.Param("version")
 	filename := c.Param("filename")
 
 	if !isPermittedFile(filename) {
+		slog.Debug("refusing to serve a chart file that is not on the permitted list",
+			"repository", repo, "chart", chartName, "version", version, "file", filename)
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
 	}
 
-	log.Debugf("Get chart file: %s", filename)
+	slog.Debug("getting a chart file",
+		"repository", repo, "chart", chartName, "version", version, "file", filename)
 
 	chart, err := m.getChartFromStore(repo, chartName, version)
 	if err != nil {
@@ -242,7 +239,8 @@ func (m *Monocular) getChartValues(c *echo.Context) error {
 	// Built in Monocular
 	if endpointID == "default" {
 		filename := "values.yaml"
-		log.Debugf("Get chart file: %s", filename)
+		slog.Debug("getting the chart values file from the built-in chart store",
+			"repository", repo, "chart", chartName, "version", version, "file", filename)
 		chart, err := m.getChartFromStore(repo, chartName, version)
 		if err != nil {
 			return err

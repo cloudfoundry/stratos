@@ -2,10 +2,10 @@ package monocular
 
 import (
 	"encoding/json"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 type SyncJob struct {
@@ -28,14 +28,16 @@ func (m *Monocular) InitSync() {
 
 // syncRepo is endpoint to force a re-sync of a given Helm Repository
 func (m *Monocular) syncRepo(c *echo.Context) error {
-	log.Debug("syncRepo")
+	slog.Debug("helm repository sync requested")
 
 	// Lookup repository by GUID
 	var p = m.portalProxy
 	guid := c.Param("guid")
 	endpoint, err := p.GetCNSIRecord(guid)
 	if err != nil {
-		return api.NewJetstreamErrorf("Could not find Helm Repository: %v+", err)
+		const msg = "could not find helm repository"
+		slog.Error(msg, "endpoint", guid, "error", err)
+		return api.NewJetstreamErrorf("%s: %v", msg, err)
 	}
 
 	m.Sync(api.EndpointRegisterAction, &endpoint)
@@ -55,7 +57,7 @@ func (m *Monocular) Sync(action api.EndpointAction, endpoint *api.CNSIRecord) {
 			Status: "Pending",
 			Busy:   true,
 		}
-		m.portalProxy.UpdateEndpointMetadata(endpoint.GUID, marshalSyncMetadata(metadata))
+		m.updateMetadata(endpoint.GUID, metadata)
 
 		// Add the job to the queue to be processed
 		job := SyncJob{
@@ -66,12 +68,14 @@ func (m *Monocular) Sync(action api.EndpointAction, endpoint *api.CNSIRecord) {
 		// Schedula a sync job
 		syncChan <- job
 	} else if action == 1 {
-		log.Debugf("Deleting Helm Repository: %s", endpoint.Name)
+		slog.Debug("deleting helm repository", "endpoint", endpoint.GUID, "name", endpoint.Name)
 		m.deleteChartStoreForEndpoint(endpoint.GUID)
 	} else if action == 2 {
-		log.Debugf("Helm Repository has been updated - renaming the Helm repository field in the associated charts")
+		slog.Debug("helm repository updated, renaming the repository field in the associated charts",
+			"endpoint", endpoint.GUID, "name", endpoint.Name)
 		if err := m.ChartStore.RenameEndpoint(endpoint.GUID, endpoint.Name); err != nil {
-			log.Errorf("An error occurred renameing the Helm Repository for endpoint %s to %s - %+v", endpoint.GUID, endpoint.Name, err)
+			slog.Error("failed to rename the helm repository in the chart store",
+				"endpoint", endpoint.GUID, "name", endpoint.Name, "error", err)
 		}
 	}
 }
@@ -79,44 +83,46 @@ func (m *Monocular) Sync(action api.EndpointAction, endpoint *api.CNSIRecord) {
 func (m *Monocular) deleteChartStoreForEndpoint(id string) {
 	// Delete the records from the database
 	if err := m.ChartStore.DeleteForEndpoint(id); err != nil {
-		log.Warnf("Unable to delete Helm Charts for endpoint %s - %+v", id, err)
+		slog.Warn("unable to delete the helm charts for an endpoint", "endpoint", id, "error", err)
 	}
 
 	// Delete files from the cache
 	if err := m.deleteCacheForEndpoint(id); err != nil {
-		log.Warnf("Unable to delete Helm Chart Cache for endpoint %s - %+v", id, err)
+		slog.Warn("unable to delete the helm chart cache for an endpoint", "endpoint", id, "error", err)
 	}
 }
 
 func (m *Monocular) processSyncRequests() {
-	log.Info("Helm Repository Sync init")
+	slog.Info("helm repository sync worker started")
 	for job := range syncChan {
-		log.Debugf("Processing Helm Repository Sync Job: %s", job.Endpoint.Name)
+		slog.Debug("processing a helm repository sync job",
+			"endpoint", job.Endpoint.GUID, "name", job.Endpoint.Name)
 		metadata := SyncMetadata{
 			Status: "Synchronizing",
 			Busy:   true,
 		}
-		m.portalProxy.UpdateEndpointMetadata(job.Endpoint.GUID, marshalSyncMetadata(metadata))
+		m.updateMetadata(job.Endpoint.GUID, metadata)
 
 		chartIndexURL := job.Endpoint.APIEndpoint.String()
 		metadata.Status = "Synchronized"
 		metadata.Busy = false
 		err := m.syncHelmRepository(job.Endpoint.GUID, job.Endpoint.Name, chartIndexURL)
 		if err != nil {
-			log.Warnf("Helm Repository sync repository failed for repository %s - %v", job.Endpoint.GUID, err)
+			slog.Warn("helm repository sync failed",
+				"endpoint", job.Endpoint.GUID, "name", job.Endpoint.Name, "error", err)
 			metadata.Status = "Sync Failed"
 		}
 
 		// Update the job status
 		m.updateMetadata(job.Endpoint.GUID, metadata)
 	}
-	log.Debug("processSyncRequests finished")
+	slog.Debug("helm repository sync worker finished")
 }
 
 func (m *Monocular) updateMetadata(endpoint string, metadata SyncMetadata) {
 	err := m.portalProxy.UpdateEndpointMetadata(endpoint, marshalSyncMetadata(metadata))
 	if err != nil {
-		log.Errorf("Failed to update endpoint metadata: %v+", err)
+		slog.Error("failed to update the endpoint metadata", "endpoint", endpoint, "error", err)
 	}
 }
 
