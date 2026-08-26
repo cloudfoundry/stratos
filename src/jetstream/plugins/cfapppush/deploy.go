@@ -726,7 +726,9 @@ func getCommit(cloneDetails CloneDetails, clientWebSocket *websocket.Conn, tempD
 // Check if file exists
 func fileExists(filename string) bool {
 	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
+	if err != nil {
+		// Not just IsNotExist: any other stat error (permission denied,
+		// ENOTDIR, symlink loop) leaves info nil and panics below.
 		return false
 	}
 	return !info.IsDir()
