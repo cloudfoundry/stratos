@@ -92,6 +92,7 @@ func (r *HelmRelease) parseManifest() {
 							r.processYamlResource(t, data)
 						} else {
 							slog.Error("could not parse a custom resource in the Helm release manifest", "release", r.Name, "namespace", r.Namespace, "error", err)
+							r.ManifestErrors = true
 						}
 					} else {
 						slog.Error("could not decode a YAML object in the Helm release manifest", "release", r.Name, "namespace", r.Namespace, "error", err)
