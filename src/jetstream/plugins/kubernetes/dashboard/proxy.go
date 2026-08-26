@@ -2,6 +2,7 @@ package dashboard
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -9,18 +10,17 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	utilnet "k8s.io/apimachinery/pkg/util/net"
 	"k8s.io/client-go/rest"
 )
 
 // KubeDashboardProxy proxies a request to the Kube Dash service using the K8S API
 func KubeDashboardProxy(c *echo.Context, p api.PortalProxy, config *rest.Config) error {
-	log.Debugf("KubeDashboardProxy request for: %s", c.Request().RequestURI)
-
 	cnsiGUID := c.Param("guid")
 	prefix := "/pp/v1/apps/kubedash/ui/" + cnsiGUID + "/"
 	path := c.Request().RequestURI[len(prefix):]
+
+	slog.Debug("Kubernetes dashboard proxy request", "endpoint", cnsiGUID, "uri", c.Request().RequestURI)
 
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
@@ -71,11 +71,15 @@ func KubeDashboardProxy(c *echo.Context, p api.PortalProxy, config *rest.Config)
 	}
 
 	apiEndpoint := cnsiRecord.APIEndpoint
-	log.Debug(apiEndpoint)
 
 	target := fmt.Sprintf("%s/api/v1/namespaces/%s/services/%s:%s:/proxy/%s", apiEndpoint, svc.Namespace, svc.Scheme, svc.ServiceName, path)
-	log.Debug(target)
-	targetURL, _ := url.Parse(target)
+	slog.Debug("proxying to the Kubernetes dashboard service", "endpoint", cnsiGUID, "apiEndpoint", apiEndpoint.String(), "target", target)
+
+	targetURL, err := url.Parse(target)
+	if err != nil {
+		slog.Error("could not parse the Kubernetes dashboard proxy target", "endpoint", cnsiGUID, "target", target, "error", err)
+		return sendErrorPage(c, "Failed to access Kubernetes Dashboard - could not build the dashboard service URL")
+	}
 
 	req := c.Request()
 	w := c.Response()
@@ -94,7 +98,7 @@ func KubeDashboardProxy(c *echo.Context, p api.PortalProxy, config *rest.Config)
 	// This is essentially a hack for http://issue.k8s.io/4958.
 	// Note: Keep this code after tryUpgrade to not break that flow.
 	if len(loc.Path) == 0 {
-		log.Debug("Redirecting")
+		slog.Debug("redirecting the Kubernetes dashboard request to a trailing slash", "path", req.URL.Path)
 		var queryPart string
 		if len(req.URL.RawQuery) > 0 {
 			queryPart = "?" + req.URL.RawQuery
@@ -118,7 +122,7 @@ func KubeDashboardProxy(c *echo.Context, p api.PortalProxy, config *rest.Config)
 	proxy.Transport = transport
 	proxy.FlushInterval = defaultFlushInterval
 	proxy.ModifyResponse = func(response *http.Response) error {
-		log.Debugf("Got proxy response for: %s (Status: %d)", loc.String(), response.StatusCode)
+		slog.Debug("received a Kubernetes dashboard proxy response", "url", loc.String(), "status", response.StatusCode)
 		// For the root page, set the session cookie so that the user is automatically logged in from
 		// the login we did manually
 		if len(path) == 0 {

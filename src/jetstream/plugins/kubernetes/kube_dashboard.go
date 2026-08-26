@@ -3,10 +3,10 @@ package kubernetes
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -21,11 +21,12 @@ func (k *KubernetesSpecification) getConfig(cnsiRecord *api.CNSIRecord, tokenRec
 
 // Proxy the request
 func (k *KubernetesSpecification) kubeDashboardProxy(c *echo.Context) error {
-	log.Debug("kubeDashboardTest request")
 	var p = k.portalProxy
 
 	cnsiGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
+
+	slog.Debug("Kubernetes dashboard proxy request", "endpoint", cnsiGUID, "user", userGUID)
 
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {

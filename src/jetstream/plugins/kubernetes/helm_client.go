@@ -2,12 +2,12 @@ package kubernetes
 
 import (
 	"errors"
+	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"os"
 	"sync"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/client-go/discovery"
@@ -63,22 +63,33 @@ func (c *KubernetesSpecification) GetHelmConfiguration(endpointGUID, userID, nam
 
 	kubeconfigcontents, err := c.GetKubeConfigForEndpoint(cnsiRecord.APIEndpoint.String(), tokenRecord, namespace)
 	if err != nil {
-		log.Errorf("Helm: Could not get kubeconfig for endpoint: %s", err)
+		slog.Error("could not get the kubeconfig for the endpoint", "endpoint", endpointGUID, "user", userID, "namespace", namespace, "error", err)
 		return nil, hc, errors.New("Can not get Kubernetes config for specified endpoint")
 	}
 
 	// TODO: Some auth schemes needs to have the token refreshed - so we should do that first
 	// to ensure it is valid when we use it subsequently
 
+	// The folder backs the discovery cache; without it the Helm client would
+	// cache into the working directory, so this is fatal rather than ignorable
 	hc.Folder, err = ioutil.TempDir("", "helm-client-")
 	if err != nil {
-		log.Error("Unable to create temporary folder")
+		const msg = "unable to create the temporary folder for the Helm client"
+		slog.Error(msg, "endpoint", endpointGUID, "user", userID, "error", err)
+		return nil, hc, fmt.Errorf("%s: %w", msg, err)
 	}
 
-	rcg := newJetStreamRCGetter([]byte(kubeconfigcontents), hc.Folder, namespace)
+	rcg, err := newJetStreamRCGetter([]byte(kubeconfigcontents), hc.Folder, namespace)
+	if err != nil {
+		const msg = "unable to build the Kubernetes client config for the Helm client"
+		slog.Error(msg, "endpoint", endpointGUID, "user", userID, "namespace", namespace, "error", err)
+		return nil, hc, fmt.Errorf("%s: %w", msg, err)
+	}
 
+	// Helm's logger is a printf-style callback, so the format string has to be
+	// expanded here rather than carried as attributes
 	var nopLogger = func(a string, b ...interface{}) {
-		log.Debugf(a, b...)
+		slog.Debug(fmt.Sprintf(a, b...))
 	}
 
 	var actionConfig action.Configuration
@@ -109,18 +120,20 @@ type jetStreamRestClientGetter struct {
 	tempFolder   string
 }
 
-func newJetStreamRCGetter(kubeconfig []byte, tempFolder string, namespace string) *jetStreamRestClientGetter {
+func newJetStreamRCGetter(kubeconfig []byte, tempFolder string, namespace string) (*jetStreamRestClientGetter, error) {
 
+	// A nil clientConfig here would panic later in ToRESTConfig, so the error
+	// has to reach the caller
 	clientConfig, err := clientcmd.NewClientConfigFromBytes(kubeconfig)
 	if err != nil {
-		log.Error(err)
+		return nil, err
 	}
 
 	f := &jetStreamRestClientGetter{
 		clientConfig: clientConfig,
 		tempFolder:   tempFolder,
 	}
-	return f
+	return f, nil
 }
 
 // ToRESTConfig returns restconfig

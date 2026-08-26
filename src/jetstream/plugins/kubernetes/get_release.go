@@ -4,11 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/coder/websocket"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"helm.sh/helm/v3/pkg/action"
 
@@ -52,11 +52,11 @@ func (c *KubernetesSpecification) GetRelease(ec *echo.Context) error {
 	namespace := ec.Param("namespace")
 	userID := ec.Get("user_id").(string)
 
-	log.Debugf("Helm: Get Release: %s %s %s", endpointGUID, namespace, release)
+	slog.Debug("getting the Helm release", "endpoint", endpointGUID, "user", userID, "namespace", namespace, "release", release)
 
 	config, hc, err := c.GetHelmConfiguration(endpointGUID, userID, namespace)
 	if err != nil {
-		log.Errorf("Helm: GetRelease could not get a Helm Configuration: %s", err)
+		slog.Error("could not get a Helm configuration to get the release", "endpoint", endpointGUID, "user", userID, "namespace", namespace, "release", release, "error", err)
 		return err
 	}
 
@@ -65,7 +65,7 @@ func (c *KubernetesSpecification) GetRelease(ec *echo.Context) error {
 	status := action.NewStatus(config)
 	res, err := status.Run(release)
 	if err != nil {
-		log.Error(err)
+		slog.Error("could not get the status of the Helm release", "endpoint", endpointGUID, "namespace", namespace, "release", release, "error", err)
 		return err
 	}
 
@@ -83,11 +83,11 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 	namespace := ec.Param("namespace")
 	userID := ec.Get("user_id").(string)
 
-	log.Debugf("Helm: Get Release Status: %s %s %s", endpointGUID, namespace, release)
+	slog.Debug("getting the Helm release status", "endpoint", endpointGUID, "user", userID, "namespace", namespace, "release", release)
 
 	config, hc, err := c.GetHelmConfiguration(endpointGUID, userID, namespace)
 	if err != nil {
-		log.Errorf("Helm: GetRelease could not get a Helm Configuration: %s", err)
+		slog.Error("could not get a Helm configuration to get the release status", "endpoint", endpointGUID, "user", userID, "namespace", namespace, "release", release, "error", err)
 		return err
 	}
 
@@ -96,7 +96,7 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 	status := action.NewStatus(config)
 	res, err := status.Run(release)
 	if err != nil {
-		log.Error(err)
+		slog.Error("could not get the status of the Helm release", "endpoint", endpointGUID, "namespace", namespace, "release", release, "error", err)
 		return err
 	}
 
@@ -178,11 +178,11 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 		}
 
 		if paused {
-			log.Debug("Updating release resources paused ....")
+			slog.Debug("updating the release resources is paused", "endpoint", endpointGUID, "namespace", namespace, "release", release)
 			continue
 		}
 
-		log.Debug("Updating release resources ....")
+		slog.Debug("updating the release resources", "endpoint", endpointGUID, "namespace", namespace, "release", release)
 
 		// Pods
 		rel.UpdatePods(c.portalProxy)
@@ -218,7 +218,7 @@ func readLoop(c *websocket.Conn, stopchan chan<- bool, pausechan chan<- bool) {
 
 		message := ResourceMessage{}
 		if err := json.Unmarshal(data, &message); err != nil {
-			log.Warnf("Failed to parse content of helm resource websocket message: %+v", err)
+			slog.Warn("failed to parse the content of a Helm resource WebSocket message", "error", err)
 			continue
 		}
 

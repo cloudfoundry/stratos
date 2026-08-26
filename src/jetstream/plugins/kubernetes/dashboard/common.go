@@ -4,11 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	v1 "k8s.io/api/core/v1"
 )
@@ -49,7 +49,7 @@ type StatusResponse struct {
 
 // Determine if the specified Kube endpoint has the dashboard installed and ready
 func getKubeDashboardPod(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (*v1.Pod, error) {
-	log.Debug("kubeDashboardStatus request")
+	slog.Debug("fetching the Kubernetes dashboard pod", "endpoint", cnsiGUID, "user", userGUID, "labelSelector", labelSelector)
 
 	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/pods?labelSelector="+labelSelector, nil, nil)
 	if err != nil || response.StatusCode != 200 {
@@ -76,7 +76,7 @@ func getKubeDashboardPod(p api.PortalProxy, cnsiGUID, userGUID string, labelSele
 
 // Get the service for the kubernetes dashboard
 func getKubeDashboardService(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (ServiceInfo, error) {
-	log.Debug("getKubeDashboardService request")
+	slog.Debug("fetching the Kubernetes dashboard service", "endpoint", cnsiGUID, "user", userGUID, "labelSelector", labelSelector)
 
 	info := ServiceInfo{}
 	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/services?labelSelector="+labelSelector, nil, nil)
@@ -126,7 +126,7 @@ func getKubeDashboardServiceInfo(p api.PortalProxy, endpointGUID, userGUID strin
 
 // Get the service account for the kubernetes dashboard
 func getKubeDashboardServiceAccount(p api.PortalProxy, cnsiGUID, userGUID string, labelSelector string) (*v1.ServiceAccount, error) {
-	log.Debug("getKubeDashboardService request")
+	slog.Debug("fetching the Kubernetes dashboard service account", "endpoint", cnsiGUID, "user", userGUID, "labelSelector", labelSelector)
 
 	response, err := p.DoProxySingleRequest(cnsiGUID, userGUID, "GET", "/api/v1/serviceaccounts?labelSelector="+labelSelector, nil, nil)
 	if err != nil || response.StatusCode != 200 {
@@ -153,7 +153,7 @@ func getKubeDashboardServiceAccount(p api.PortalProxy, cnsiGUID, userGUID string
 
 // Get the service account for the kubernetes dashboard
 func getKubeDashboardSecretToken(p api.PortalProxy, cnsiGUID, userGUID string, sa *v1.ServiceAccount) (string, error) {
-	log.Debug("getKubeDashboardSecretToken request")
+	slog.Debug("fetching the Kubernetes dashboard service account token", "endpoint", cnsiGUID, "user", userGUID, "serviceAccount", sa.Name)
 
 	namespace := sa.Namespace
 

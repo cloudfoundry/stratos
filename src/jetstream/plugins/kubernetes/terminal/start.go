@@ -6,6 +6,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	//"encoding/base64"
 	"encoding/json"
@@ -13,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 
@@ -36,10 +36,10 @@ type terminalSize struct {
 
 // Start handles web-socket request to launch a Kubernetes Terminal
 func (k *KubeTerminal) Start(c *echo.Context) error {
-	log.Debug("Kube Terminal start request")
-
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
+
+	slog.Debug("Kubernetes Terminal start request", "endpoint", endpointGUID, "user", userGUID)
 
 	cnsiRecord, err := k.PortalProxy.GetCNSIRecord(endpointGUID)
 	if err != nil {
@@ -59,8 +59,12 @@ func (k *KubeTerminal) Start(c *echo.Context) error {
 	}
 
 	// Determine the Kubernetes version
-	version, _ := k.getKubeVersion(endpointGUID, userGUID)
-	log.Debugf("Kubernetes Version: %s", version)
+	version, err := k.getKubeVersion(endpointGUID, userGUID)
+	if err != nil {
+		// Not fatal - the terminal image falls back to a default kubectl
+		slog.Warn("could not determine the Kubernetes version for the terminal", "endpoint", endpointGUID, "user", userGUID, "error", err)
+	}
+	slog.Debug("determined the Kubernetes version for the terminal", "endpoint", endpointGUID, "version", version)
 
 	// Upgrade the web socket for the incoming request
 	ws, err := api.UpgradeToWebSocket(c)
@@ -90,7 +94,7 @@ func (k *KubeTerminal) Start(c *echo.Context) error {
 	sendProgressMessage(ws, "")
 
 	if err != nil {
-		log.Errorf("Kubernetes Terminal: Error creating secret or pod: %+v", err)
+		slog.Error("Kubernetes Terminal could not create the secret or the pod", "endpoint", endpointGUID, "user", userGUID, "error", err)
 		k.cleanupPodAndSecret(podData)
 
 		// Send error message
@@ -136,7 +140,7 @@ func (k *KubeTerminal) Start(c *echo.Context) error {
 
 	if err != nil {
 		k.cleanupPodAndSecret(podData)
-		log.Warn("Kube Terminal: Could not connect to pod")
+		slog.Warn("Kubernetes Terminal could not connect to the pod", "endpoint", endpointGUID, "user", userGUID, "pod", podData.PodName, "namespace", k.Namespace, "error", err)
 		// No point returning an error - we've already upgraded to web sockets, so we can't use the HTTP response now
 		return nil
 	}
@@ -193,7 +197,7 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn) {
 		}
 		bytes := fmt.Sprintf("% x\n", r[1:])
 		if err := api.WriteText(ws, []byte(bytes)); err != nil {
-			log.Errorf("Kubernetes Terminal failed to write message: %+v", err)
+			slog.Error("Kubernetes Terminal failed to write a message to the client", "error", err)
 			ws.CloseNow()
 			break
 		}

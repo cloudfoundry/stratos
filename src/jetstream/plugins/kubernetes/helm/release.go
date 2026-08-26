@@ -5,12 +5,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"reflect"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
 	"helm.sh/helm/v3/pkg/release"
 	appsv1 "k8s.io/api/apps/v1"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
@@ -91,10 +91,10 @@ func (r *HelmRelease) parseManifest() {
 						if err := yaml.Unmarshal(data, &t); err == nil {
 							r.processYamlResource(t, data)
 						} else {
-							log.Errorf("Could not parse custom resource %s", err)
+							slog.Error("could not parse a custom resource in the Helm release manifest", "release", r.Name, "namespace", r.Namespace, "error", err)
 						}
 					} else {
-						log.Error(fmt.Sprintf("Helm Manifest Parser: Error while decoding YAML object. Err was: %s", err))
+						slog.Error("could not decode a YAML object in the Helm release manifest", "release", r.Name, "namespace", r.Namespace, "error", err)
 						r.ManifestErrors = true
 					}
 				} else {
@@ -162,16 +162,16 @@ func (r *HelmRelease) processJsonResource(obj interface{}) {
 						r.processJsonResource(item)
 					}
 				} else {
-					log.Error("Helm Release Manifest: Could not parse List resource")
+					slog.Error("could not parse the List resource in the Helm release manifest", "release", r.Name, "namespace", r.Namespace, "error", err)
 				}
 			} else {
 				r.processKubeResource(obj, t)
 			}
 		} else {
-			log.Error("Helm Release Manifest: Could not parse Kubernetes resource")
+			slog.Error("could not parse the JSON Kubernetes resource in the Helm release manifest", "release", r.Name, "namespace", r.Namespace, "error", err)
 		}
 	} else {
-		log.Errorf("Helm Release ManifestL Could not marshal Kubernetes resource %s", err)
+		slog.Error("could not marshal the Kubernetes resource in the Helm release manifest", "release", r.Name, "namespace", r.Namespace, "error", err)
 	}
 }
 
@@ -180,7 +180,7 @@ func (r *HelmRelease) processYamlResource(obj interface{}, data []byte) {
 	if err := yaml.Unmarshal(data, &t); err == nil {
 		r.processKubeResource(obj, t)
 	} else {
-		log.Error("Helm Release Manifest: Could not parse Kubernetes resource")
+		slog.Error("could not parse the YAML Kubernetes resource in the Helm release manifest", "release", r.Name, "namespace", r.Namespace, "error", err)
 	}
 }
 
@@ -190,7 +190,7 @@ func (r *HelmRelease) processKubeResource(obj interface{}, t KubeResource) {
 	t.Resource = obj
 	t.Manifest = true
 	r.setResource(t)
-	log.Debugf("Got resource: %s : %s", t.Kind, t.Metadata.Name)
+	slog.Debug("got a resource from the Helm release manifest", "release", r.Name, "kind", t.Kind, "name", t.Metadata.Name)
 	r.processController(t)
 	r.addJobForResource(r.Namespace, t.Kind, t.APIVersion, t.Metadata.Name)
 }
@@ -231,7 +231,7 @@ func (r *HelmRelease) processController(kres KubeResource) {
 		r.processPodSelector(kres, o.Spec.Selector)
 	default:
 		// Ignore - not a controller
-		log.Debugf("Ignoring: non-controller type: %s", reflect.TypeOf(o))
+		slog.Debug("ignoring a non-controller resource type", "release", r.Name, "type", reflect.TypeOf(o).String(), "kind", kres.Kind, "name", kres.Metadata.Name)
 	}
 }
 
@@ -343,7 +343,7 @@ func (r *HelmRelease) processPodOwners(pod v1.Pod) {
 				r.addJobForResource(pod.Namespace, owner.Kind, owner.APIVersion, owner.Name)
 			}
 		} else {
-			log.Debugf("Unexpected Pod owner kind: %s", owner.Kind)
+			slog.Debug("unexpected Pod owner kind", "release", r.Name, "pod", pod.Name, "ownerKind", owner.Kind, "ownerName", owner.Name)
 		}
 	}
 }
@@ -368,7 +368,7 @@ func (r *HelmRelease) UpdateResources(jetstream api.PortalProxy) {
 
 		// If the status was 404, then we should remove the resource
 		if j.StatusCode == http.StatusNotFound {
-			log.Debugf("Resource has been deleted - removing: %s -> %s", j.Kind, j.Name)
+			slog.Debug("resource has been deleted, removing it", "release", r.Name, "kind", j.Kind, "name", j.Name)
 			r.deleteResource(res)
 		}
 
@@ -392,7 +392,7 @@ func (r *HelmRelease) UpdateResources(jetstream api.PortalProxy) {
 				res.Resource = obj
 				r.setResource(res)
 			} else {
-				log.Error("Could not parse resource")
+				slog.Error("could not parse the resource returned by the Kubernetes API", "release", r.Name, "kind", res.Kind, "name", res.Metadata.Name, "error", err)
 			}
 		}
 

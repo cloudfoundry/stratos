@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"regexp"
 	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth"
@@ -48,7 +48,7 @@ func (k *KubeTerminal) getClients() (corev1.PodInterface, corev1.SecretInterface
 	}
 	kubeClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Error("Could not get kube client")
+		slog.Error("could not create the Kubernetes client for the terminal", "apiServer", k.APIServer, "namespace", k.Namespace, "error", err)
 		return nil, nil, err
 	}
 
@@ -110,7 +110,7 @@ func (k *KubeTerminal) createPod(c *echo.Context, kubeConfig, kubeVersion string
 
 	_, err = secretClient.Create(ctx, secretSpec, metav1.CreateOptions{})
 	if err != nil {
-		log.Warnf("Kubernetes Terminal: Unable to create Secret: %+v", err)
+		slog.Warn("Kubernetes Terminal could not create the secret", "secret", secretName, "namespace", k.Namespace, "error", err)
 		return result, err
 	}
 
@@ -169,7 +169,7 @@ func (k *KubeTerminal) createPod(c *echo.Context, kubeConfig, kubeVersion string
 	// Create a new pod
 	pod, err := podClient.Create(ctx, podSpec, metav1.CreateOptions{})
 	if err != nil {
-		log.Warnf("Kubernetes Terminal: Unable to create Pod: %+v", err)
+		slog.Warn("Kubernetes Terminal could not create the pod", "pod", podName, "namespace", k.Namespace, "error", err)
 		// Secret will get cleaned up by caller
 		return result, err
 	}
@@ -237,7 +237,7 @@ func getHelmRepoSetupScript(portalProxy api.PortalProxy) string {
 	// Get all of the helm endpoints
 	endpoints, err := portalProxy.ListEndpoints()
 	if err != nil {
-		log.Error("Can not list Helm Repository endpoints")
+		slog.Error("could not list the Helm repository endpoints", "error", err)
 		return str
 	}
 
@@ -257,7 +257,7 @@ func sendProgressMessage(ws *websocket.Conn, progressMsg string) {
 	msg := fmt.Sprintf("\033]2;%s\007", progressMsg)
 	bytes := fmt.Sprintf("% x\n", []byte(msg))
 	if err := api.WriteText(ws, []byte(bytes)); err != nil {
-		log.Error("Could not send message to client to indicate terminal is starting")
+		slog.Error("could not send the terminal progress message to the client", "progress", progressMsg, "error", err)
 	}
 }
 
