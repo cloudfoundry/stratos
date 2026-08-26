@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,7 +17,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys"
 	mock_apikeys "github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys/mock"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"go.uber.org/mock/gomock"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
@@ -24,7 +25,7 @@ import (
 func makeMockServer(apiKeysRepo apikeys.Repository, mockStratosAuth api.StratosAuth) *portalProxy {
 	db, _, dberr := sqlmock.New()
 	if dberr != nil {
-		log.Panicf("an error '%s' was not expected when opening a stub database connection", dberr)
+		panic(fmt.Sprintf("an error '%s' was not expected when opening a stub database connection", dberr))
 	}
 
 	pp := setupPortalProxy(db)
@@ -118,7 +119,7 @@ func Test_apiKeyMiddleware(t *testing.T) {
 	t.Parallel()
 
 	// disabling logging noise
-	log.SetLevel(log.PanicLevel)
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	ctrl := gomock.NewController(t)
 	mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
