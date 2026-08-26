@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gorilla/context"
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
@@ -187,17 +186,6 @@ func compareTokens(a, b string) bool {
 		return false
 	}
 	return subtle.ConstantTimeCompare([]byte(a), []byte(b)) == 1
-}
-
-func sessionCleanupMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c *echo.Context) error {
-		log.Debug("sessionCleanupMiddleware")
-		err := h(c)
-		req := c.Request()
-		context.Clear(req)
-
-		return err
-	}
 }
 
 // This middleware is not required if Echo is upgraded to v3

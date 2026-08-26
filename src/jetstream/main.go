@@ -910,10 +910,6 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 	e.Binder = new(custombinder.CustomBinder)
 
 	// Root level middleware
-	if !isUpgrade {
-		e.Use(sessionCleanupMiddleware)
-	}
-
 	logAPIRequests := "true"
 	if envLogAPIRequests, ok := envLookup.Lookup(LogAPIRequests); ok {
 		logAPIRequests = envLogAPIRequests
