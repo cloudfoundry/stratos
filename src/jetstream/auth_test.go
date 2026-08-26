@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
-	uuid "github.com/satori/go.uuid"
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
@@ -93,7 +93,7 @@ func TestLocalLogin(t *testing.T) {
 		passwordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
-		userGUID := uuid.NewV4().String()
+		userGUID := uuid.New().String()
 
 		req := setupMockReq("POST", "", map[string]string{
 			"username": username,
@@ -150,7 +150,7 @@ func TestLocalLoginWithBadCredentials(t *testing.T) {
 		passwordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
-		userGUID := uuid.NewV4().String()
+		userGUID := uuid.New().String()
 
 		req := setupMockReq("POST", "", map[string]string{
 			"username": username,
@@ -200,7 +200,7 @@ func TestLocalLoginWithNoAdminScope(t *testing.T) {
 		passwordHash, _ := crypto.HashPassword(password)
 
 		//generate a user GUID
-		userGUID := uuid.NewV4().String()
+		userGUID := uuid.New().String()
 
 		wrongScope := "not admin scope"
 		req := setupMockReq("POST", "", map[string]string{

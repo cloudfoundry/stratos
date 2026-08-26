@@ -18,7 +18,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/testutils"
 	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v5"
-	_ "github.com/satori/go.uuid"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )

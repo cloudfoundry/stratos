@@ -9,9 +9,9 @@ import (
 	"regexp"
 	"strconv"
 
+	"github.com/google/uuid"
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -325,7 +325,7 @@ func setupInitialiseLocalUsersConfiguration(consoleConfig *api.ConsoleConfig, p 
 		return err
 	}
 
-	userGUID := uuid.NewV4().String()
+	userGUID := uuid.New().String()
 	password := consoleConfig.LocalUserPassword
 	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {

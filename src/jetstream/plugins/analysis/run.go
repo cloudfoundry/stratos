@@ -13,8 +13,8 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -46,7 +46,7 @@ func (c *Analysis) runReport(ec *echo.Context) error {
 	}
 
 	report := store.AnalysisRecord{
-		ID:           uuid.NewV4().String(),
+		ID:           uuid.New().String(),
 		EndpointID:   endpointID,
 		EndpointType: endpoint.CNSIType,
 		UserID:       userID,
