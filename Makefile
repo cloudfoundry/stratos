@@ -609,13 +609,37 @@ $(call register, clean, e2e)
 # make check coverage — unit tests with coverage
 # make check e2e      — Playwright E2E core tests
 
+# golangci-lint has to be built by a Go at least as new as jetstream's go.mod
+# target. It refuses to load its config when its own build version is lower,
+# and a release older than the toolchain cannot decode that toolchain's export
+# data either. A packaged binary is pinned to whatever Go built it, so it dies
+# on every Go bump -- hence building from source here.
+#
+# The install toolchain is pinned to the go.mod target rather than left to the
+# local Go: on a machine running an older Go, an unpinned `go install` would
+# build a binary too old for this module all over again. GOTOOLCHAIN fetches
+# the right one, so 1.26 and 1.27 developers both end up with a working linter.
+# Bump GOLANGCI_LINT_VERSION when a newer Go needs a newer release to
+# typecheck it (that release's go.mod must allow the target below).
+GOLANGCI_LINT_VERSION ?= v2.13.1
+GOLANGCI_LINT = $(shell go env GOPATH)/bin/golangci-lint
+GOLANGCI_LINT_GO = go$(shell awk '/^go /{print $$2; exit}' src/jetstream/go.mod)
+
+define ensure_golangci_lint
+	@$(GOLANGCI_LINT) --version 2>/dev/null | \
+		grep -q "$(patsubst v%,%,$(GOLANGCI_LINT_VERSION)) built with $(GOLANGCI_LINT_GO)" || \
+		(echo "Building golangci-lint $(GOLANGCI_LINT_VERSION) with $(GOLANGCI_LINT_GO)..." && \
+		 GOTOOLCHAIN=$(GOLANGCI_LINT_GO) go install \
+		   github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))
+endef
+
 define check.lint
 	@echo "Running lint checks..."
-	$(call require_tool,golangci-lint,See https://golangci-lint.run/welcome/install/ (macOS: brew install golangci-lint))
+	$(ensure_golangci_lint)
 	bun run lint
 	cd src/jetstream && go fmt ./... && go vet ./...
-	cd src/jetstream && golangci-lint run ./...
-	cd src/jetstream/api && golangci-lint run ./...
+	cd src/jetstream && $(GOLANGCI_LINT) run ./...
+	cd src/jetstream/api && $(GOLANGCI_LINT) run ./...
 endef
 $(call register, check, lint)
 
