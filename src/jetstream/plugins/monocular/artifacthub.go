@@ -91,7 +91,7 @@ func (m *Monocular) handleArtifactRequest(c *echo.Context, handler artifactHubHa
 // Fetch all charts from ArtifactHub using the Monocular-compatible search API
 // We cache the results of the search on disk for the configfured cache period
 func (m *Monocular) fetchChartsFromArtifactHub(c *echo.Context, endpointID string) error {
-	cacheFolder := path.Join(m.CacheFolder, endpointID)
+	cacheFolder := m.ahCacheFolder(endpointID)
 	indexFile := path.Join(cacheFolder, "hub_index.json")
 	if ok := useCachedFile(indexFile); ok {
 		// Just send the cached file
@@ -270,6 +270,22 @@ func (m *Monocular) artifactHubGetChartVersion(c *echo.Context, endpointID strin
 	return c.JSON(200, response)
 }
 
+// ahCacheFolder is the ArtifactHub cache directory for one endpoint, and
+// ahChartCacheFolder the per-chart directory beneath it. Every component is a
+// route parameter, so each goes through safeSegment — the same confinement
+// getChartCacheFolder applies to the repository-sync cache. Without it
+// path.Join resolves a ".." component rather than rejecting it, so a chart
+// name or version could walk out of the cache directory and take the digest
+// read, the MkdirAll, the icon write and the archive extract with it.
+func (m *Monocular) ahCacheFolder(endpointID string) string {
+	return path.Join(m.CacheFolder, safeSegment(endpointID))
+}
+
+func (m *Monocular) ahChartCacheFolder(endpointID, repo, name, version string) string {
+	return path.Join(m.ahCacheFolder(endpointID),
+		fmt.Sprintf("%s_%s_%s", safeSegment(repo), safeSegment(name), safeSegment(version)))
+}
+
 // Return an asset URL if teh asset is available in the cache
 func ahGetFileAssetURL(endpointID, repo, name, version, folder, filename string) string {
 	cachePath := path.Join(folder, filename)
@@ -351,8 +367,9 @@ func (m *Monocular) artifactHubGetIcon(c *echo.Context) error {
 	var contentType string
 
 	// Look to see if we have the icon cached - fetch it if not
-	iconFilePath := path.Join(m.CacheFolder, endpoint, fmt.Sprintf("%s_%s_%s", repo, chartName, version), "icon")
-	iconTypeFilePath := path.Join(m.CacheFolder, endpoint, fmt.Sprintf("%s_%s_%s", repo, chartName, version), "icon.type")
+	chartCache := m.ahChartCacheFolder(endpoint, repo, chartName, version)
+	iconFilePath := path.Join(chartCache, "icon")
+	iconTypeFilePath := path.Join(chartCache, "icon.type")
 	stats, err := os.Stat(iconFilePath)
 	if os.IsNotExist(err) {
 		// Not cached, so need to get chart info from ArtifactHub, cache icon and send
@@ -434,7 +451,7 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 	fetch := true
 
 	// Check for cached file
-	cacheFolder := path.Join(m.CacheFolder, endpointID)
+	cacheFolder := m.ahCacheFolder(endpointID)
 	indexFile := path.Join(cacheFolder, cacheName)
 
 	if ok := useCachedFile(indexFile); ok {
@@ -485,7 +502,7 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 func (m *Monocular) artifactHubCacheChartFiles(endpointID, repoName, repoURL, name, version, digest string) (string, error) {
 
 	// First look to see if there is a digest file
-	cacheFolder := path.Join(m.CacheFolder, endpointID, fmt.Sprintf("%s_%s_%s", repoName, name, version))
+	cacheFolder := m.ahChartCacheFolder(endpointID, repoName, name, version)
 	if hasDigestFile(cacheFolder, digest) {
 		return cacheFolder, nil
 	}
