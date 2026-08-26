@@ -63,11 +63,11 @@ func createTransport(tlsConfig *tls.Config) *http.Transport {
 	dial := (&net.Dialer{
 		Timeout:   time.Duration(defaultHTTPClientConnectionTimeout) * time.Second,
 		KeepAlive: 30 * time.Second, // should be less than any proxy connection timeout (typically 2-3 minutes)
-	}).Dial
+	}).DialContext
 
 	tr := &http.Transport{
 		Proxy:               http.ProxyFromEnvironment,
-		Dial:                dial,
+		DialContext:         dial,
 		TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
 		TLSClientConfig:     tlsConfig,
 		MaxIdleConnsPerHost: 20, // Increased from 6 to handle burst parallel API requests

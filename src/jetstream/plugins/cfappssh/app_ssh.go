@@ -127,7 +127,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer ws.CloseNow()
+	defer func() { _ = ws.CloseNow() }()
 
 	// A pasted block of text arrives as a single KeyCode message of unbounded
 	// size, so no read limit can be safely applied to this socket

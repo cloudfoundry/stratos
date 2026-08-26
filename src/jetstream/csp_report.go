@@ -254,7 +254,7 @@ func forwardCSPReport(collector string, enriched map[string]any) {
 		slog.Error("could not deliver a CSP violation report", "collector", collector, "error", err)
 		return
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode >= http.StatusBadRequest {
 		slog.Error("collector rejected a CSP violation report", "collector", collector, "status", resp.StatusCode)

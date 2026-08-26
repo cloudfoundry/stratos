@@ -48,16 +48,16 @@ func Up20260822120000(txn *sql.Tx) error {
 	for rows.Next() {
 		var r apiKeyRow
 		if err := rows.Scan(&r.guid, &r.secret); err != nil {
-			rows.Close()
+			_ = rows.Close()
 			return err
 		}
 		keys = append(keys, r)
 	}
 	if err := rows.Err(); err != nil {
-		rows.Close()
+		_ = rows.Close()
 		return err
 	}
-	rows.Close()
+	_ = rows.Close()
 
 	if len(keys) > 0 && len(apiKeyHMACKey) == 0 {
 		return fmt.Errorf("cannot migrate api_keys: encryption key (HMAC pepper) not set")

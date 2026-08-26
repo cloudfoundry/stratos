@@ -9,13 +9,6 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
-// securityGroupSpaceBinder is the capi call shared by the running- and
-// staging-space bulk-bind handlers: both take the security group GUID and the
-// list of space GUIDs and return the resulting to-many relationship. Passing
-// the bind function in keeps the two handlers a one-line dispatch apart —
-// running vs staging is purely which CF sub-resource the call targets.
-type securityGroupSpaceBinder func(ctx context.Context, sgGUID string, spaceGUIDs []string) (*capi.ToManyRelationship, error)
-
 // bindSecurityGroupRunningSpaces handles
 // POST /pp/v1/cf/security_groups/{cnsiGuid}/{sgGuid}/relationships/running_spaces
 // — bulk-bind a security group to N spaces for the running lifecycle.
