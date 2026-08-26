@@ -9,7 +9,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // nativeRoleChange is one role assignment delta for a single (user, scope).
@@ -48,7 +48,7 @@ type nativeRoleChangeResult struct {
 // effect: per change it either creates a role (add) or resolves the role
 // GUID via a filtered list then deletes it (remove). Changes may span
 // multiple users (the multi-user / bulk path).
-func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c echo.Context) error {
+func (cf *CloudFoundrySpecification) applyNativeRoleChanges(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

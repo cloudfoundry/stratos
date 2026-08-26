@@ -7,7 +7,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // identityProvider is the minimal shape projected to the Add User origin picker.
@@ -25,7 +25,7 @@ type identityProvider struct {
 // A UAA 403 is passed through as HTTP 403 so the frontend can degrade to a
 // free-text origin field rather than showing an error.
 // Any other non-200 response from UAA is returned as 502.
-func (cf *CloudFoundrySpecification) getIdentityProviders(ctx echo.Context) error {
+func (cf *CloudFoundrySpecification) getIdentityProviders(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

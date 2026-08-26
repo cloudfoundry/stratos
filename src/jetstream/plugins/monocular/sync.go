@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,7 +27,7 @@ func (m *Monocular) InitSync() {
 }
 
 // syncRepo is endpoint to force a re-sync of a given Helm Repository
-func (m *Monocular) syncRepo(c echo.Context) error {
+func (m *Monocular) syncRepo(c *echo.Context) error {
 	log.Debug("syncRepo")
 
 	// Lookup repository by GUID

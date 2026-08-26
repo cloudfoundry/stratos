@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -35,7 +35,7 @@ type terminalSize struct {
 }
 
 // Start handles web-socket request to launch a Kubernetes Terminal
-func (k *KubeTerminal) Start(c echo.Context) error {
+func (k *KubeTerminal) Start(c *echo.Context) error {
 	log.Debug("Kube Terminal start request")
 
 	endpointGUID := c.Param("guid")

@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -48,8 +48,7 @@ func TestAssociateUser_ResolvesThenCreates(t *testing.T) {
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/users/cnsi-1/associate",
 		`{"username":"alice","origin":"ldap"}`)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).associateUser(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -92,8 +91,7 @@ func TestAssociateUser_AlreadyAssociatedIsSuccess(t *testing.T) {
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/users/cnsi-1/associate",
 		`{"username":"bob","origin":"uaa"}`)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).associateUser(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -128,13 +126,12 @@ func TestAssociateUser_UserNotFound(t *testing.T) {
 	e := echo.New()
 	ctx, _ := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/users/cnsi-1/associate",
 		`{"username":"ghost","origin":"uaa"}`)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	err := newPhase1CPlugin(ts.URL).associateUser(ctx)
 	require.Error(t, err)
 	httpErr, ok := err.(*echo.HTTPError)
 	require.True(t, ok)
 	assert.Equal(t, http.StatusNotFound, httpErr.Code)
-	assert.Contains(t, httpErr.Message.(string), "ghost")
+	assert.Contains(t, httpErr.Message, "ghost")
 }

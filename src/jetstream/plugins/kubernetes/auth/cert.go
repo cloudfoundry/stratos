@@ -14,7 +14,7 @@ import (
 
 	// "github.com/SermoDigital/jose/jws"
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
@@ -50,7 +50,7 @@ func (c *CertKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Tok
 	return nil
 }
 
-func (c *CertKubeAuth) extractCerts(ec echo.Context) (*KubeCertificate, error) {
+func (c *CertKubeAuth) extractCerts(ec *echo.Context) (*KubeCertificate, error) {
 
 	certB64 := strings.Join(strings.Fields(ec.FormValue("cert")), "")
 	certKeyB64 := strings.Join(strings.Fields(ec.FormValue("certKey")), "")
@@ -74,7 +74,7 @@ func (c *CertKubeAuth) extractCerts(ec echo.Context) (*KubeCertificate, error) {
 	}, nil
 }
 
-func (c *CertKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+func (c *CertKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("Kube Certs - FetchToken")
 
 	kubeCertAuth, err := c.extractCerts(ec)

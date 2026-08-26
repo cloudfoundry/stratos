@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -66,8 +66,7 @@ func TestGetNativeFeatureFlags_ReturnsMappedFlags(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/feature_flags/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeFeatureFlags(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -123,8 +122,7 @@ func TestGetNativeFeatureFlags_EmptyResult(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/feature_flags/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeFeatureFlags(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -164,8 +162,7 @@ func TestGetNativeFeatureFlags_PerPagePassthrough(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/feature_flags/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeFeatureFlags(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -203,8 +200,7 @@ func TestGetNativeFeatureFlags_OmitsPagingWhenAbsent(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/feature_flags/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeFeatureFlags(c))
 	assert.False(t, q.PerPagePresent, "per_page must be absent when caller omits it")
@@ -229,8 +225,7 @@ func TestGetNativeFeatureFlags_CountsFastPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/feature_flags/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeFeatureFlags(c))
 	assert.Equal(t, http.StatusOK, rec.Code)

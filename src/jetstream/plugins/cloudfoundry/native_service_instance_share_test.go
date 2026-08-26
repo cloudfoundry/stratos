@@ -9,14 +9,14 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 // newShareContext builds an echo context for the shared_spaces route with the
 // given JSON body, matching how native_routes.go registers the handler.
-func newShareContext(e *echo.Echo, body string) (echo.Context, *httptest.ResponseRecorder) {
+func newShareContext(e *echo.Echo, body string) (*echo.Context, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(http.MethodPost,
 		"/pp/v1/cf/service_instances/cnsi-1/si-1/relationships/shared_spaces",
 		strings.NewReader(body))
@@ -24,8 +24,7 @@ func newShareContext(e *echo.Echo, body string) (echo.Context, *httptest.Respons
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_instances/:cnsiGuid/:siGuid/relationships/shared_spaces")
-	c.SetParamNames("cnsiGuid", "siGuid")
-	c.SetParamValues("cnsi-1", "si-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "siGuid", Value: "si-1"}})
 	return c, rec
 }
 

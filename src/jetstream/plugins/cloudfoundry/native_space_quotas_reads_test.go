@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -83,8 +83,7 @@ func TestGetNativeSpaceQuotas_ReturnsMappedQuotas(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space_quotas/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeSpaceQuotas(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -150,8 +149,7 @@ func TestGetNativeSpaceQuotas_EmptyResult(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space_quotas/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeSpaceQuotas(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -189,8 +187,7 @@ func TestGetNativeSpaceQuotas_PerPagePassthrough(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space_quotas/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeSpaceQuotas(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -228,8 +225,7 @@ func TestGetNativeSpaceQuotas_OmitsPagingWhenAbsent(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space_quotas/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeSpaceQuotas(c))
 	assert.False(t, q.PerPagePresent, "per_page must be absent when caller omits it")
@@ -254,8 +250,7 @@ func TestGetNativeSpaceQuotas_CountsFastPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space_quotas/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeSpaceQuotas(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -314,8 +309,7 @@ func TestGetNativeSpaceQuotaDetail_ReturnsMappedQuota(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space_quotas/:cnsiGuid/:quotaGuid")
-	c.SetParamNames("cnsiGuid", "quotaGuid")
-	c.SetParamValues("cnsi-1", "sq-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "quotaGuid", Value: "sq-1"}})
 
 	require.NoError(t, plugin.getNativeSpaceQuotaDetail(c))
 	assert.Equal(t, http.StatusOK, rec.Code)

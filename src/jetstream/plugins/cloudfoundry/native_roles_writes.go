@@ -8,7 +8,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // createNativeRole handles POST /pp/v1/cf/roles/{cnsiGuid} —
@@ -26,7 +26,7 @@ import (
 //	}
 //
 // V3 returns 201 with the new role resource — sync write.
-func (cf *CloudFoundrySpecification) createNativeRole(c echo.Context) error {
+func (cf *CloudFoundrySpecification) createNativeRole(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -80,7 +80,7 @@ func (cf *CloudFoundrySpecification) createNativeRole(c echo.Context) error {
 // and return 202 with {id, state, startedAt} so the frontend can poll
 // /pp/v1/stratos/jobs/{id}. Same pattern as deleteNativeOrg /
 // deleteNativeApp.
-func (cf *CloudFoundrySpecification) deleteNativeRole(c echo.Context) error {
+func (cf *CloudFoundrySpecification) deleteNativeRole(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	roleGUID := c.Param("roleGuid")
 	if cnsiGUID == "" || roleGUID == "" {

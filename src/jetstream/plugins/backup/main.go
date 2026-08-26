@@ -8,7 +8,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -63,7 +63,7 @@ func (br *BackupRestore) Init() error {
 	return nil
 }
 
-func (br *BackupRestore) backupEndpoints(c echo.Context) error {
+func (br *BackupRestore) backupEndpoints(c *echo.Context) error {
 	log.Debug("backupEndpoints")
 
 	userID, err := br.portalProxy.GetSessionStringValue(c, "user_id")
@@ -87,7 +87,7 @@ func (br *BackupRestore) backupEndpoints(c echo.Context) error {
 	return ctb.BackupEndpoints(c)
 }
 
-func (br *BackupRestore) restoreEndpoints(c echo.Context) error {
+func (br *BackupRestore) restoreEndpoints(c *echo.Context) error {
 	log.Debug("restoreEndpoints")
 
 	userID, err := br.portalProxy.GetSessionStringValue(c, "user_id")

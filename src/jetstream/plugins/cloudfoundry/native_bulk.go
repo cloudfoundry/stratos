@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Bulk item states. CF v3 has no batch endpoints, so a Stratos bulk request
@@ -69,7 +69,7 @@ type bulkGUIDsBody struct {
 // decodeBulkGUIDs decodes and validates the {"guids": [...]} body shared by
 // the bulk endpoints. Empty and oversized (> bulkMaxItems) lists are caller
 // errors — there is nothing sensible to fan out.
-func decodeBulkGUIDs(c echo.Context) ([]string, error) {
+func decodeBulkGUIDs(c *echo.Context) ([]string, error) {
 	var body bulkGUIDsBody
 	if err := json.NewDecoder(c.Request().Body).Decode(&body); err != nil {
 		return nil, echo.NewHTTPError(http.StatusBadRequest, fmt.Sprintf("invalid body: %v", err))

@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -40,7 +40,7 @@ type PassthroughError struct {
 	ErrorResponse *json.RawMessage        `json:"errorResponse"`
 }
 
-func getEchoURL(c echo.Context) url.URL {
+func getEchoURL(c *echo.Context) url.URL {
 	log.Debug("getEchoURL")
 	u := c.Request().URL
 
@@ -48,7 +48,7 @@ func getEchoURL(c echo.Context) url.URL {
 	return *u
 }
 
-func getEchoHeaders(c echo.Context) http.Header {
+func getEchoHeaders(c *echo.Context) http.Header {
 	log.Debug("getEchoHeaders")
 	h := make(http.Header)
 	originalHeader := c.Request().Header
@@ -64,7 +64,7 @@ func getEchoHeaders(c echo.Context) http.Header {
 	return h
 }
 
-func makeRequestURI(c echo.Context) *url.URL {
+func makeRequestURI(c *echo.Context) *url.URL {
 	log.Debug("makeRequestURI")
 	uri := getEchoURL(c)
 	prefix := strings.TrimSuffix(c.Path(), "*")
@@ -73,7 +73,7 @@ func makeRequestURI(c echo.Context) *url.URL {
 	return &uri
 }
 
-func getPortalUserGUID(c echo.Context) (string, error) {
+func getPortalUserGUID(c *echo.Context) (string, error) {
 	log.Debug("getPortalUserGUID")
 	portalUserGUIDIntf := c.Get("user_id")
 	if portalUserGUIDIntf == nil {
@@ -82,7 +82,7 @@ func getPortalUserGUID(c echo.Context) (string, error) {
 	return portalUserGUIDIntf.(string), nil
 }
 
-func getRequestParts(c echo.Context) (*http.Request, []byte, error) {
+func getRequestParts(c *echo.Context) (*http.Request, []byte, error) {
 	log.Debug("getRequestParts")
 	var body []byte
 	var err error
@@ -219,7 +219,7 @@ func fwdCNSIStandardHeaders(cnsiRequest *api.CNSIRequest, req *http.Request) {
 	}
 }
 
-func (p *portalProxy) proxy(c echo.Context) error {
+func (p *portalProxy) proxy(c *echo.Context) error {
 	log.Debug("proxy")
 	responses, err := p.ProxyRequest(c, makeRequestURI(c))
 	if err != nil {
@@ -229,7 +229,7 @@ func (p *portalProxy) proxy(c echo.Context) error {
 	return p.SendProxiedResponse(c, responses)
 }
 
-func (p *portalProxy) ProxyRequest(c echo.Context, uri *url.URL) (map[string]*api.CNSIRequest, error) {
+func (p *portalProxy) ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*api.CNSIRequest, error) {
 	log.Debug("ProxyRequest")
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	shouldPassthrough := c.Request().Header.Get("x-cap-passthrough") == "true"
@@ -442,7 +442,7 @@ func (p *portalProxy) DoProxySingleRequestWithToken(cnsiGUID string, token *api.
 	return res, nil
 }
 
-func (p *portalProxy) SendProxiedResponse(c echo.Context, responses map[string]*api.CNSIRequest) error {
+func (p *portalProxy) SendProxiedResponse(c *echo.Context, responses map[string]*api.CNSIRequest) error {
 	shouldPassthrough := c.Request().Header.Get("x-cap-passthrough") == "true"
 
 	var cnsiList []string
@@ -563,7 +563,7 @@ func (p *portalProxy) doRequest(cnsiRequest *api.CNSIRequest, done chan<- *api.C
 	}
 }
 
-func (p *portalProxy) ProxySingleRequest(c echo.Context) error {
+func (p *portalProxy) ProxySingleRequest(c *echo.Context) error {
 	log.Debug("ProxySingleRequest")
 
 	cnsi := c.Param("uuid")

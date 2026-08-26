@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeServiceBrokers handles GET /pp/v1/cf/service_brokers/{cnsiGuid}.
@@ -29,7 +29,7 @@ import (
 // `?guids=<csv>` is a first-class batch branch on top of the tier dispatch
 // — used by lazy-fetch consumers that already know the broker GUIDs they
 // want. Tier still applies inside the batch branch.
-func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -105,7 +105,7 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokers(ctx echo.Context) er
 // summary+ resolves the space ref via a follow-up Spaces.Get — same
 // posture as the list path's space batch. One extra round trip,
 // soft-fails to a guid-only space ref if the spaces fetch errors.
-func (c *CloudFoundrySpecification) getNativeServiceBrokerDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceBrokerDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	brokerGUID := ctx.Param("brokerGuid")
 	if cnsiGUID == "" || brokerGUID == "" {
@@ -153,7 +153,7 @@ func (c *CloudFoundrySpecification) getNativeServiceBrokerDetail(ctx echo.Contex
 // the list endpoint can't carry an include chain (CAPI rejects ?include=
 // on /v3/service_brokers). Soft-fail: errors return an empty map and let
 // toStServiceBroker emit guid-only space refs.
-func batchFetchBrokerSpaces(ctx echo.Context, cfClient capi.Client, brokers []capi.ServiceBroker) map[string]capi.Space {
+func batchFetchBrokerSpaces(ctx *echo.Context, cfClient capi.Client, brokers []capi.ServiceBroker) map[string]capi.Space {
 	out := map[string]capi.Space{}
 	guids := []string{}
 	seen := map[string]bool{}

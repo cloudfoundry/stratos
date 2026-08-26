@@ -8,7 +8,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -20,7 +20,7 @@ import (
 const CFAdminIdentifier = "cloud_controller.admin"
 
 // Start SSO flow for an Endpoint
-func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
+func (p *portalProxy) ssoLoginToCNSI(c *echo.Context) error {
 	log.Debug("ssoLoginToCNSI")
 	endpointGUID := c.QueryParam("guid")
 	if len(endpointGUID) == 0 {
@@ -94,7 +94,7 @@ func (p *portalProxy) ssoLoginToCNSI(c echo.Context) error {
 // @Failure 401 {object} api.ErrorResponseBody "Error response"
 // @Security ApiKeyAuth
 // @Router /tokens [post]
-func (p *portalProxy) loginToCNSI(c echo.Context) error {
+func (p *portalProxy) loginToCNSI(c *echo.Context) error {
 	log.Debug("loginToCNSI")
 
 	var systemSharedToken = false
@@ -133,7 +133,7 @@ func (p *portalProxy) loginToCNSI(c echo.Context) error {
 	return err
 }
 
-func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*api.LoginRes, error) {
+func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemSharedToken bool) (*api.LoginRes, error) {
 
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
@@ -163,8 +163,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 			return nil, echo.NewHTTPError(
 				http.StatusBadRequest,
 				"Failed to retrieve list of CNSIs",
-				"Failed to retrieve list of CNSIs: %v", err,
-			)
+			).Wrap(fmt.Errorf("failed to retrieve list of CNSIs: %v", err))
 		}
 
 		for _, cnsi := range cnsiList {
@@ -270,7 +269,7 @@ func (p *portalProxy) DoLoginToCNSI(c echo.Context, cnsiGUID string, systemShare
 		"Endpoint connection not supported")
 }
 
-func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIrecord api.CNSIRecord) error {
+func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c *echo.Context, theCNSIrecord api.CNSIRecord) error {
 	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return errors.New("could not find correct session value")
@@ -322,7 +321,7 @@ func santizeInfoForSystemSharedTokenUser(cnsiUser *api.ConnectedUser, isSysystem
 	}
 }
 
-func (p *portalProxy) ConnectOAuth2(c echo.Context, cnsiRecord api.CNSIRecord) (*api.TokenRecord, error) {
+func (p *portalProxy) ConnectOAuth2(c *echo.Context, cnsiRecord api.CNSIRecord) (*api.TokenRecord, error) {
 	uaaRes, u, _, err := p.FetchOAuth2Token(cnsiRecord, c)
 	if err != nil {
 		return nil, err
@@ -331,7 +330,7 @@ func (p *portalProxy) ConnectOAuth2(c echo.Context, cnsiRecord api.CNSIRecord) (
 	return &tokenRecord, nil
 }
 
-func (p *portalProxy) FetchOAuth2Token(cnsiRecord api.CNSIRecord, c echo.Context) (*api.UAAResponse, *api.JWTUserTokenInfo, *api.CNSIRecord, error) {
+func (p *portalProxy) FetchOAuth2Token(cnsiRecord api.CNSIRecord, c *echo.Context) (*api.UAAResponse, *api.JWTUserTokenInfo, *api.CNSIRecord, error) {
 	endpoint := cnsiRecord.AuthorizationEndpoint
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
@@ -371,7 +370,7 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord api.CNSIRecord, c echo.Context
 // @Failure 401 {object} api.ErrorResponseBody "Error response"
 // @Security ApiKeyAuth
 // @Router /tokens/{cnsi_guid} [delete]
-func (p *portalProxy) logoutOfCNSI(c echo.Context) error {
+func (p *portalProxy) logoutOfCNSI(c *echo.Context) error {
 	log.Debug("logoutOfCNSI")
 
 	cnsiGUID := c.Param("cnsi_guid")

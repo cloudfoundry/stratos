@@ -13,7 +13,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 )
@@ -31,7 +31,7 @@ type KubeConfigExporter interface {
 
 const idHeaderName = "X-Stratos-Analaysis-ID"
 
-func (c *Analysis) runReport(ec echo.Context) error {
+func (c *Analysis) runReport(ec *echo.Context) error {
 	log.Debug("runReport")
 
 	analyzer := ec.Param("analyzer")
@@ -82,7 +82,7 @@ func (c *Analysis) runReport(ec echo.Context) error {
 
 }
 
-func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID string, dbStore store.AnalysisStore, report *store.AnalysisRecord) error {
+func (c *Analysis) doRunReport(ec *echo.Context, analyzer, endpointID, userID string, dbStore store.AnalysisStore, report *store.AnalysisRecord) error {
 
 	// Get Kube Config
 	k8s := c.portalProxy.GetPlugin("kubernetes")

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -209,12 +209,11 @@ func instanceResource(guid, name, instanceType, spaceGUID, planGUID string, ups 
 	return res
 }
 
-func newServiceInstancesContext(e *echo.Echo, target string) (echo.Context, *httptest.ResponseRecorder) {
+func newServiceInstancesContext(e *echo.Echo, target string) (*echo.Context, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(http.MethodGet, target, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 	return ctx, rec
 }
 
@@ -462,8 +461,7 @@ func TestGetNativeServiceInstanceDetail_Details(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1/si-77?return=details", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "instanceGuid")
-	ctx.SetParamValues("cnsi-1", "si-77")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "instanceGuid", Value: "si-77"}})
 	plugin := newServiceInstancesPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceInstanceDetail(ctx))
@@ -569,8 +567,7 @@ func TestGetNativeServiceInstancesForSpace_AppliesSpaceFilter(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/space-A/service_instances?return=summary", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "spaceGuid")
-	ctx.SetParamValues("cnsi-1", "space-A")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "space-A"}})
 	plugin := newServiceInstancesPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceInstancesForSpace(ctx))
@@ -595,8 +592,7 @@ func TestGetNativeServiceInstancesForSpace_Counts(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/space-A/service_instances?return=counts", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "spaceGuid")
-	ctx.SetParamValues("cnsi-1", "space-A")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "space-A"}})
 	plugin := newServiceInstancesPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceInstancesForSpace(ctx))
@@ -614,8 +610,7 @@ func TestGetNativeServiceInstancesForSpace_RequiresSpaceGUID(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1//service_instances", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "spaceGuid")
-	ctx.SetParamValues("cnsi-1", "")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: ""}})
 	plugin := newServiceInstancesPlugin("http://unused")
 
 	err := plugin.getNativeServiceInstancesForSpace(ctx)
@@ -636,8 +631,7 @@ func TestGetNativeServiceInstancesForBroker_TwoStepComposition(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/cnsi-1/broker-1/service_instances?return=summary", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "brokerGuid")
-	ctx.SetParamValues("cnsi-1", "broker-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "brokerGuid", Value: "broker-1"}})
 	plugin := newServiceInstancesPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceInstancesForBroker(ctx))
@@ -664,8 +658,7 @@ func TestGetNativeServiceInstancesForBroker_BrokerWithNoPlansShortCircuits(t *te
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/cnsi-1/broker-empty/service_instances", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "brokerGuid")
-	ctx.SetParamValues("cnsi-1", "broker-empty")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "brokerGuid", Value: "broker-empty"}})
 	plugin := newServiceInstancesPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceInstancesForBroker(ctx))
@@ -690,8 +683,7 @@ func TestGetNativeServiceInstancesForBroker_CountsShortCircuitsWhenNoPlans(t *te
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/cnsi-1/broker-empty/service_instances?return=counts", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "brokerGuid")
-	ctx.SetParamValues("cnsi-1", "broker-empty")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "brokerGuid", Value: "broker-empty"}})
 	plugin := newServiceInstancesPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceInstancesForBroker(ctx))
@@ -708,8 +700,7 @@ func TestGetNativeServiceInstancesForBroker_RequiresBrokerGUID(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/cnsi-1//service_instances", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "brokerGuid")
-	ctx.SetParamValues("cnsi-1", "")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "brokerGuid", Value: ""}})
 	plugin := newServiceInstancesPlugin("http://unused")
 
 	err := plugin.getNativeServiceInstancesForBroker(ctx)
@@ -794,8 +785,7 @@ func TestGetNativeServiceInstancesForSpace_TypeFilterLayered_Counts(t *testing.T
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/space-A/service_instances?return=counts&type=user-provided", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "spaceGuid")
-	ctx.SetParamValues("cnsi-1", "space-A")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "space-A"}})
 	plugin := newServiceInstancesPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceInstancesForSpace(ctx))
@@ -817,8 +807,7 @@ func TestGetNativeServiceInstancesForSpace_TypeFilterLayered_List(t *testing.T) 
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/space-A/service_instances?return=summary&type=user-provided", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "spaceGuid")
-	ctx.SetParamValues("cnsi-1", "space-A")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "space-A"}})
 	plugin := newServiceInstancesPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceInstancesForSpace(ctx))
@@ -846,8 +835,7 @@ func TestGetNativeServiceInstanceParameters(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1/si-1/parameters", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "instanceGuid")
-	ctx.SetParamValues("cnsi-1", "si-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "instanceGuid", Value: "si-1"}})
 
 	require.NoError(t, newServiceInstancesPlugin(srv.URL).getNativeServiceInstanceParameters(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -878,8 +866,7 @@ func TestGetNativeServiceInstanceParameters_BrokerError(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1/si-1/parameters", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "instanceGuid")
-	ctx.SetParamValues("cnsi-1", "si-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "instanceGuid", Value: "si-1"}})
 
 	err := newServiceInstancesPlugin(srv.URL).getNativeServiceInstanceParameters(ctx)
 	// Either an echo error or a non-2xx recorded status — never a 200 with an
@@ -908,8 +895,7 @@ func TestGetNativeUserProvidedCredentials(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_instances/cnsi-1/si-1/credentials", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "instanceGuid")
-	ctx.SetParamValues("cnsi-1", "si-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "instanceGuid", Value: "si-1"}})
 
 	require.NoError(t, newServiceInstancesPlugin(srv.URL).getNativeUserProvidedCredentials(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)

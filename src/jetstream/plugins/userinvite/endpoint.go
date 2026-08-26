@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -15,12 +15,12 @@ func (invite *UserInvite) GetType() string {
 }
 
 // Register is not implemented
-func (invite *UserInvite) Register(echoContext echo.Context) error {
+func (invite *UserInvite) Register(echoContext *echo.Context) error {
 	return errors.New("Not implemented")
 }
 
 // Connect is not implemented
-func (invite *UserInvite) Connect(echoContext echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
+func (invite *UserInvite) Connect(echoContext *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	return nil, false, errors.New("Not implemented")
 }
 
@@ -34,7 +34,7 @@ func (invite *UserInvite) Validate(userGUID string, cnsiRecord api.CNSIRecord, t
 }
 
 // UpdateMetadata will add metadata for each Cloud Foundry endpoint to indicate if user invitation is allowed
-func (invite *UserInvite) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
+func (invite *UserInvite) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
 	log.Debug("User Invite:: UpdateMetadata")
 	endpoints, err := invite.portalProxy.ListEndpointsByUser(UserInviteUserID)
 	if err == nil {

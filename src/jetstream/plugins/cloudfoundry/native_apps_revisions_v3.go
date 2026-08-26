@@ -21,7 +21,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -65,7 +65,7 @@ type PartialFlags struct {
 // Extracts cnsiGuid+appGuid from echo, builds an authenticated capi
 // client, and delegates to assembleRevisions for the orchestration.
 // Route registration lives in native_routes.go (Task 9).
-func (c *CloudFoundrySpecification) getAppRevisions(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getAppRevisions(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing cnsiGuid")

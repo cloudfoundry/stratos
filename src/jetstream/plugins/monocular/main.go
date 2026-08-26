@@ -9,7 +9,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -223,7 +223,7 @@ func (m *Monocular) AddSessionGroupRoutes(echoGroup *echo.Group) {
 }
 
 // isExternalMonocularRequest .. Should this request go out to an external monocular instance? IF so returns external monocular endpoint
-func (m *Monocular) isExternalMonocularRequest(c echo.Context) (*api.CNSIRecord, error) {
+func (m *Monocular) isExternalMonocularRequest(c *echo.Context) (*api.CNSIRecord, error) {
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 
 	// If this has a cnsi then test if it for an external monocular instance
@@ -247,7 +247,7 @@ func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*api.CNSIRec
 	}
 
 	if m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] != "true" {
-		return nil, echo.NewHTTPError(http.StatusInternalServerError, errors.New("Artifact Hub is disabled"))
+		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Artifact Hub is disabled")
 	}
 
 	return nil, nil

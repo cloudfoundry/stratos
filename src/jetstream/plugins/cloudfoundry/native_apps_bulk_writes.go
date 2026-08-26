@@ -5,7 +5,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -24,7 +24,7 @@ import (
 // (plugin ordering / tests), an accepted delete is reported as PENDING with
 // no job — the CF-side outcome is unknowable without the tracker, and
 // PENDING is the honest analogue of deleteNativeApp's bare-202 fallback.
-func (cf *CloudFoundrySpecification) bulkDeleteNativeApps(c echo.Context) error {
+func (cf *CloudFoundrySpecification) bulkDeleteNativeApps(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

@@ -6,14 +6,14 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func serveThroughSecurityHeaders(t *testing.T, p *portalProxy) http.Header {
 	t.Helper()
 	rec := httptest.NewRecorder()
 	c := echo.New().NewContext(httptest.NewRequest(http.MethodGet, "/", nil), rec)
-	handler := p.securityHeaders(func(echo.Context) error { return nil })
+	handler := p.securityHeaders(func(*echo.Context) error { return nil })
 	if err := handler(c); err != nil {
 		t.Fatalf("securityHeaders: %v", err)
 	}

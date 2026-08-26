@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
@@ -61,7 +61,7 @@ func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Toke
 }
 
 // FetchToken will create a token for the GKE Authentication using the POSTed data
-func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (GKE)")
 
 	body := ec.FormValue("gkeconfig")

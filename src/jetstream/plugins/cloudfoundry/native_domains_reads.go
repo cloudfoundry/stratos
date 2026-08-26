@@ -6,13 +6,13 @@ import (
 	"slices"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeDomains handles GET /pp/v1/cf/domains/{cnsiGuid}.
 // Bounded list with ?guids batch + ?return=counts fast path. Single
 // CAPI call per request — no auto-drain.
-func (c *CloudFoundrySpecification) getNativeDomains(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeDomains(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -85,7 +85,7 @@ func (c *CloudFoundrySpecification) getNativeDomains(ctx echo.Context) error {
 //     but that filter matches the *owning* org only, so on a real CF
 //     it returns zero rows for orgs that rely on shared/global domains
 //     (most orgs). The org-scoped endpoint is the correct source.
-func (c *CloudFoundrySpecification) getNativeOrgDomains(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeOrgDomains(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
 	if cnsiGUID == "" || orgGUID == "" {
@@ -130,7 +130,7 @@ func (c *CloudFoundrySpecification) getNativeOrgDomains(ctx echo.Context) error 
 
 // getNativeDomainDetail handles GET /pp/v1/cf/domains/{cnsiGuid}/{domainGuid}.
 // Single-resource sibling for detail views.
-func (c *CloudFoundrySpecification) getNativeDomainDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeDomainDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	domainGUID := ctx.Param("domainGuid")
 	if cnsiGUID == "" || domainGUID == "" {

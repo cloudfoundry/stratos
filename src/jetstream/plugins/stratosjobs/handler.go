@@ -3,7 +3,7 @@ package stratosjobs
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // stratosSchemaVersion mirrors the header the CF native handlers set.
@@ -18,7 +18,7 @@ const stratosSchemaVersion = "1"
 // own poller. Unknown job ids return 404; the frontend wrapper treats 404
 // as "status unknown — refetch the target entity" per the HA-degradation
 // rule.
-func (s *StratosJobs) getJob(ctx echo.Context) error {
+func (s *StratosJobs) getJob(ctx *echo.Context) error {
 	id := ctx.Param("jobId")
 	if id == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "jobId is required")

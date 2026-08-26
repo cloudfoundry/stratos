@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -44,7 +44,7 @@ func TestInfoConfigurationIncludesConcurrencyFields(t *testing.T) {
 // setupGetInfoTest creates a portalProxy with the given concurrency values, a
 // mock auth service that returns a non-admin user for GetUser, and an echo
 // context with a valid session.  The caller is responsible for closing db.
-func setupGetInfoTest(t *testing.T, cardConcurrency, requestConcurrency int) (*portalProxy, echo.Context, *sql.DB, sqlmock.Sqlmock, *gomock.Controller) {
+func setupGetInfoTest(t *testing.T, cardConcurrency, requestConcurrency int) (*portalProxy, *echo.Context, *sql.DB, sqlmock.Sqlmock, *gomock.Controller) {
 	t.Helper()
 
 	ctrl := gomock.NewController(t)

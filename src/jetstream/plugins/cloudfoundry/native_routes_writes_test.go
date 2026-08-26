@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -47,8 +47,7 @@ func TestDeleteNativeRoute_BareFallbackWhenAsyncUnwired(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/routes/:cnsiGuid/:routeGuid")
-	c.SetParamNames("cnsiGuid", "routeGuid")
-	c.SetParamValues("cnsi-1", "route-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "routeGuid", Value: "route-1"}})
 
 	require.NoError(t, plugin.deleteNativeRoute(c))
 	assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -84,8 +83,7 @@ func TestDeleteNativeRoute_PropagatesCapiError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/routes/:cnsiGuid/:routeGuid")
-	c.SetParamNames("cnsiGuid", "routeGuid")
-	c.SetParamValues("cnsi-1", "missing")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "routeGuid", Value: "missing"}})
 
 	require.NoError(t, plugin.deleteNativeRoute(c))
 	assert.Equal(t, http.StatusNotFound, rec.Code)
@@ -133,8 +131,7 @@ func TestUnmapRouteFromApp_FindsDestinationAndDeletes(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/routes/:cnsiGuid/:routeGuid/apps/:appGuid")
-	c.SetParamNames("cnsiGuid", "routeGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "route-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "routeGuid", Value: "route-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.unmapRouteFromApp(c))
 	assert.Equal(t, http.StatusNoContent, rec.Code)
@@ -180,8 +177,7 @@ func TestUnmapRouteFromApp_NotFoundIfAppNotBound(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/routes/:cnsiGuid/:routeGuid/apps/:appGuid")
-	c.SetParamNames("cnsiGuid", "routeGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "route-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "routeGuid", Value: "route-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	err := plugin.unmapRouteFromApp(c)
 	require.Error(t, err)
@@ -229,8 +225,7 @@ func TestUnmapRouteFromApp_PropagatesListError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/routes/:cnsiGuid/:routeGuid/apps/:appGuid")
-	c.SetParamNames("cnsiGuid", "routeGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "route-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "routeGuid", Value: "route-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.unmapRouteFromApp(c))
 	assert.Equal(t, http.StatusNotFound, rec.Code)
@@ -275,8 +270,7 @@ func TestUnmapRouteFromApp_PropagatesDeleteError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/routes/:cnsiGuid/:routeGuid/apps/:appGuid")
-	c.SetParamNames("cnsiGuid", "routeGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "route-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "routeGuid", Value: "route-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.unmapRouteFromApp(c))
 	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)

@@ -14,7 +14,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -67,7 +67,7 @@ type RestoreRequest struct {
 	IgnoreDbVersion bool   `json:"ignoreDbVersion"`
 }
 
-func (ctb *cnsiTokenBackup) BackupEndpoints(c echo.Context) error {
+func (ctb *cnsiTokenBackup) BackupEndpoints(c *echo.Context) error {
 	log.Debug("BackupEndpoints")
 
 	// Create the backup request struct from the body
@@ -186,7 +186,7 @@ func (ctb *cnsiTokenBackup) getCNSITokenRecordsBackup(endpointID string) ([]api.
 	return trs, true
 }
 
-func (ctb *cnsiTokenBackup) RestoreEndpoints(c echo.Context) error {
+func (ctb *cnsiTokenBackup) RestoreEndpoints(c *echo.Context) error {
 	log.Debug("RestoreEndpoints")
 
 	// Create the restore request struct from the body

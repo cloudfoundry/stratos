@@ -13,7 +13,7 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth"
@@ -95,7 +95,7 @@ func (c *KubernetesSpecification) GetClientId() string {
 	return c.portalProxy.Env().String(defaultKubeClientID, "k8s")
 }
 
-func (c *KubernetesSpecification) Register(echoContext echo.Context) error {
+func (c *KubernetesSpecification) Register(echoContext *echo.Context) error {
 	log.Debug("Kubernetes Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
@@ -117,7 +117,7 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord api.CNSIR
 	return nil
 }
 
-func (c *KubernetesSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userID string) (*api.TokenRecord, bool, error) {
+func (c *KubernetesSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userID string) (*api.TokenRecord, bool, error) {
 	log.Debug("Kubernetes Connect...")
 
 	connectType := ec.FormValue("connect_type")
@@ -273,10 +273,10 @@ func parseErrorResponse(body []byte) error {
 	return errors.New("Could not understand response from Kubernetes endpoint")
 }
 
-func (c *KubernetesSpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
+func (c *KubernetesSpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
 }
 
-func (c *KubernetesSpecification) RequiresCert(ec echo.Context) error {
+func (c *KubernetesSpecification) RequiresCert(ec *echo.Context) error {
 	log.Debug("Request Kube API Versions")
 
 	var response struct {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // deleteNativeSpace handles DELETE /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid}
@@ -18,7 +18,7 @@ import (
 // returns 202 + Location → /v3/jobs/{guid}; Stratos fast-paths for the
 // brief window or hands off a {id, state, startedAt} envelope for the
 // frontend to poll.
-func (c *CloudFoundrySpecification) deleteNativeSpace(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) deleteNativeSpace(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	spaceGUID := ctx.Param("spaceGuid")
 	if cnsiGUID == "" || spaceGUID == "" {
@@ -77,7 +77,7 @@ func (c *CloudFoundrySpecification) deleteNativeSpace(ctx echo.Context) error {
 // Sync write: V3 returns 201 with the created space. Body is forwarded
 // as capi.SpaceCreateRequest (V3 wire shape: {name, relationships:{
 // organization:{data:{guid}}}}).
-func (c *CloudFoundrySpecification) createNativeSpace(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) createNativeSpace(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -124,7 +124,7 @@ func (c *CloudFoundrySpecification) createNativeSpace(ctx echo.Context) error {
 // the field is present the handler chains that call: a non-empty GUID
 // assigns the segment, "" unassigns it (reverting the space to the
 // org's default). Absent field leaves the relationship untouched.
-func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) updateNativeSpace(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	spaceGUID := ctx.Param("spaceGuid")
 	if cnsiGUID == "" || spaceGUID == "" {
@@ -176,7 +176,7 @@ func (c *CloudFoundrySpecification) updateNativeSpace(ctx echo.Context) error {
 // the edit-space-step wizard chains PATCH /v3/spaces (name) + this call
 // (ssh) to match the legacy V2 PATCH /v2/spaces/{guid} that handled both
 // inline.
-func (c *CloudFoundrySpecification) setSpaceSshFeature(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) setSpaceSshFeature(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	spaceGUID := ctx.Param("spaceGuid")
 	if cnsiGUID == "" || spaceGUID == "" {

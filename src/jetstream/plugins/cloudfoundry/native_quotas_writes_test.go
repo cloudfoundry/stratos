@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -48,8 +48,7 @@ func TestDeleteNativeOrgQuota_BareFallbackWhenAsyncUnwired(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/organization_quotas/:cnsiGuid/:quotaGuid")
-	c.SetParamNames("cnsiGuid", "quotaGuid")
-	c.SetParamValues("cnsi-1", "quota-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "quotaGuid", Value: "quota-1"}})
 
 	require.NoError(t, plugin.deleteNativeOrgQuota(c))
 	assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -85,8 +84,7 @@ func TestDeleteNativeOrgQuota_PropagatesCapiError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/organization_quotas/:cnsiGuid/:quotaGuid")
-	c.SetParamNames("cnsiGuid", "quotaGuid")
-	c.SetParamValues("cnsi-1", "quota-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "quotaGuid", Value: "quota-1"}})
 
 	require.NoError(t, plugin.deleteNativeOrgQuota(c))
 	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
@@ -124,8 +122,7 @@ func TestDeleteNativeSpaceQuota_BareFallbackWhenAsyncUnwired(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space_quotas/:cnsiGuid/:quotaGuid")
-	c.SetParamNames("cnsiGuid", "quotaGuid")
-	c.SetParamValues("cnsi-1", "squota-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "quotaGuid", Value: "squota-1"}})
 
 	require.NoError(t, plugin.deleteNativeSpaceQuota(c))
 	assert.Equal(t, http.StatusAccepted, rec.Code)

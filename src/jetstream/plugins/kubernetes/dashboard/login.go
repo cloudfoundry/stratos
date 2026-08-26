@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -21,7 +21,7 @@ type loginOKResponse struct {
 }
 
 // KubeDashboardLogin will check and log into the Kubernetes Dashboard then redirect to the Dashboard UI
-func KubeDashboardLogin(c echo.Context, p api.PortalProxy) error {
+func KubeDashboardLogin(c *echo.Context, p api.PortalProxy) error {
 	log.Debug("kubeDashboardLogin request")
 
 	endpointGUID := c.Param("guid")

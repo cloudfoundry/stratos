@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -171,7 +171,7 @@ func withSpec(t *testing.T, ts *httptest.Server) *CloudFoundrySpecification {
 	}
 }
 
-func newDetailRequest(t *testing.T, returnMode string) (*httptest.ResponseRecorder, echo.Context) {
+func newDetailRequest(t *testing.T, returnMode string) (*httptest.ResponseRecorder, *echo.Context) {
 	t.Helper()
 	e := echo.New()
 	url := "/pp/v1/cf/apps/cnsi-1/app-1"
@@ -181,8 +181,7 @@ func newDetailRequest(t *testing.T, returnMode string) (*httptest.ResponseRecord
 	req := httptest.NewRequest(http.MethodGet, url, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "appGuid")
-	ctx.SetParamValues("cnsi-1", "app-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 	return rec, ctx
 }
 
@@ -360,8 +359,7 @@ func TestGetNativeAppEnv_ReturnsStEnvVars(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1/app-1/env", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "appGuid")
-	ctx.SetParamValues("cnsi-1", "app-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, withSpec(t, ts).getNativeAppEnv(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)

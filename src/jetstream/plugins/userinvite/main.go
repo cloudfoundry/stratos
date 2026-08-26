@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -111,7 +111,7 @@ func (userinvite *UserInvite) Init() error {
 	return nil
 }
 
-func (userinvite *UserInvite) initClientToken(context echo.Context) error {
+func (userinvite *UserInvite) initClientToken(context *echo.Context) error {
 	// Do we have a valid cf guid?
 	if userinvite.portalProxy.GetConfig().CloudFoundryInfo == nil ||
 		len(userinvite.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID) == 0 {

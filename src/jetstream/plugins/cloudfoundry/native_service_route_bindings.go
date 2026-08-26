@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -42,7 +42,7 @@ import (
 //
 // Graceful fallback: if the stratosjobs plugin isn't wired, async creates
 // return bare 202 (frontend 404-on-poll treats that as UNKNOWN).
-func (cf *CloudFoundrySpecification) createServiceRouteBinding(c echo.Context) error {
+func (cf *CloudFoundrySpecification) createServiceRouteBinding(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -114,7 +114,7 @@ func (cf *CloudFoundrySpecification) createServiceRouteBinding(c echo.Context) e
 //
 // Graceful fallback: if the stratosjobs plugin isn't wired, async deletes
 // return bare 202 (frontend 404-on-poll treats that as UNKNOWN).
-func (cf *CloudFoundrySpecification) deleteServiceRouteBinding(c echo.Context) error {
+func (cf *CloudFoundrySpecification) deleteServiceRouteBinding(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	bindingGUID := c.Param("bindingGuid")
 	if cnsiGUID == "" || bindingGUID == "" {
@@ -179,7 +179,7 @@ func (cf *CloudFoundrySpecification) deleteServiceRouteBinding(c echo.Context) e
 // Optional query filters (passed straight to v3): service_instance_guids,
 // route_guids. Returns a StratosPagedResponse of the raw v3 route bindings;
 // the frontend adapter shapes them when the UI is wired.
-func (cf *CloudFoundrySpecification) getNativeServiceRouteBindings(c echo.Context) error {
+func (cf *CloudFoundrySpecification) getNativeServiceRouteBindings(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -223,7 +223,7 @@ func (cf *CloudFoundrySpecification) getNativeServiceRouteBindings(c echo.Contex
 //
 // Surfaces the broker-specific route-binding parameters (v3 GET
 // .../parameters). Read-only; no job handoff.
-func (cf *CloudFoundrySpecification) getNativeServiceRouteBindingParameters(c echo.Context) error {
+func (cf *CloudFoundrySpecification) getNativeServiceRouteBindingParameters(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	bindingGUID := c.Param("bindingGuid")
 	if cnsiGUID == "" || bindingGUID == "" {

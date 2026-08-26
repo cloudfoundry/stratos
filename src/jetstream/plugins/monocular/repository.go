@@ -5,14 +5,14 @@ import (
 	"io/ioutil"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
 type helmStatusInfo map[string]bool
 
 // getRepoStatuses will get the status of the Helm Endpoints requested
-func (m *Monocular) getRepoStatuses(c echo.Context) error {
+func (m *Monocular) getRepoStatuses(c *echo.Context) error {
 	log.Debug("getRepoStatuses")
 
 	// Get the list of endpoints we are looking at

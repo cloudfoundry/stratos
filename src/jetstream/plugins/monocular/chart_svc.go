@@ -8,14 +8,14 @@ import (
 	"path"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
 // Functions to provide a Monocular compatible API with our chart store
 
 // List all helm Charts - gets the latest version for each Chart
-func (m *Monocular) listCharts(c echo.Context) error {
+func (m *Monocular) listCharts(c *echo.Context) error {
 	log.Debug("List Charts called")
 
 	// Check if this is a request for Artifact Hub
@@ -76,7 +76,7 @@ func (m *Monocular) getChartFromStore(repo, name, version string) (*store.ChartS
 }
 
 // Get the latest version of a given chart
-func (m *Monocular) getChart(c echo.Context) error {
+func (m *Monocular) getChart(c *echo.Context) error {
 	log.Debug("Get Chart called")
 
 	// Check if this is a request for Artifact Hub
@@ -99,7 +99,7 @@ func (m *Monocular) getChart(c echo.Context) error {
 	return c.JSON(200, body)
 }
 
-func (m *Monocular) getIcon(c echo.Context) error {
+func (m *Monocular) getIcon(c *echo.Context) error {
 	log.Debug("Get Icon called")
 
 	// Process ArtifactHub request
@@ -128,7 +128,7 @@ func (m *Monocular) getIcon(c echo.Context) error {
 	iconFilePath, _ := m.cacheChartIcon(*chart)
 	if len(iconFilePath) == 0 {
 		// No icon or error downloading
-		http.Redirect(c.Response().Writer, c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
+		http.Redirect(c.Response(), c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
 		return nil
 	}
 
@@ -138,7 +138,7 @@ func (m *Monocular) getIcon(c echo.Context) error {
 
 // /chartsvc/v1/charts/:repo/:name/versions/:version
 // Get specific chart version
-func (m *Monocular) getChartVersion(c echo.Context) error {
+func (m *Monocular) getChartVersion(c *echo.Context) error {
 	log.Debug("getChartAndVersion called")
 
 	// Process ArtifactHub request
@@ -169,7 +169,7 @@ func (m *Monocular) getChartVersion(c echo.Context) error {
 
 // /chartsvc/v1/charts/:repo/:name/versions
 // Get all chart versions for a given chart
-func (m *Monocular) getChartVersions(c echo.Context) error {
+func (m *Monocular) getChartVersions(c *echo.Context) error {
 
 	// Check if this is a request for Artifact Hub
 	var err error
@@ -207,7 +207,7 @@ func (m *Monocular) getChartVersions(c echo.Context) error {
 }
 
 // Get a file such as the README or valyes for a given chart version
-func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
+func (m *Monocular) getChartAndVersionFile(c *echo.Context) error {
 	log.Debug("Get Chart file called")
 
 	repo := c.Param("repo")
@@ -233,7 +233,7 @@ func (m *Monocular) getChartAndVersionFile(c echo.Context) error {
 	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
 }
 
-func (m *Monocular) getChartValues(c echo.Context) error {
+func (m *Monocular) getChartValues(c *echo.Context) error {
 	endpointID := c.Param("endpoint")
 	repo := c.Param("repo")
 	chartName := c.Param("name")

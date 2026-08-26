@@ -12,7 +12,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -32,15 +32,18 @@ func newBulkTestPlugin(capiURL string) *CloudFoundrySpecification {
 
 // newBulkContext builds an echo context for a POST bulk endpoint with the
 // given body and path params.
-func newBulkContext(path string, body string, paramNames, paramValues []string) (echo.Context, *httptest.ResponseRecorder) {
+func newBulkContext(path string, body string, paramNames, paramValues []string) (*echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/pp/v1"+strings.NewReplacer(":cnsiGuid", paramValues[0]).Replace(path), strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1" + path)
-	c.SetParamNames(paramNames...)
-	c.SetParamValues(paramValues...)
+	pathValues := make(echo.PathValues, 0, len(paramNames))
+	for i, name := range paramNames {
+		pathValues = append(pathValues, echo.PathValue{Name: name, Value: paramValues[i]})
+	}
+	c.SetPathValues(pathValues)
 	return c, rec
 }
 

@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // CfRelationBucketEntry is the legacy V2-envelope shape the cf-current-
@@ -79,7 +79,7 @@ var spaceBucketKeys = []string{
 //   - Pathological (space role row missing org relationship): zero extra
 //     requests — space→org recovers from the include=space block riding
 //     along on the /v3/roles response.
-func (c *CloudFoundrySpecification) getNativeCurrentUserRoles(ctx echo.Context) (err error) {
+func (c *CloudFoundrySpecification) getNativeCurrentUserRoles(ctx *echo.Context) (err error) {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	rows := 0
 	start := time.Now()

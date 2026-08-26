@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -47,7 +47,7 @@ const stratosUpstreamStatusHeader = "X-Stratos-Upstream-Status"
 // paths: nativeCFError (raw-error middleware path) and handleCapiError
 // (handlers that write a mapped status directly). Returns the reason so
 // callers can branch if needed.
-func setNativeCFErrorHeaders(ctx echo.Context, err error) cfErrorReason {
+func setNativeCFErrorHeaders(ctx *echo.Context, err error) cfErrorReason {
 	reason := classifyCfError(err)
 	if reason != reasonUnclassified {
 		ctx.Response().Header().Set(stratosErrorReasonHeader, string(reason))
@@ -72,7 +72,7 @@ type nativeCFErrorBody struct {
 // and returns a 502 echo error whose body is a '{'-led JSON object the
 // frontend parses to drive the right banner. The cnsiGUID is always included
 // so the endpoint can be named regardless of reason.
-func nativeCFError(c echo.Context, cnsiGUID string, err error) error {
+func nativeCFError(c *echo.Context, cnsiGUID string, err error) error {
 	reason := setNativeCFErrorHeaders(c, err)
 	body := nativeCFErrorBody{
 		Reason:         string(reason),
@@ -96,7 +96,7 @@ func nativeCFError(c echo.Context, cnsiGUID string, err error) error {
 // and requests without a cnsiGuid pass through unchanged, preserving existing
 // status codes and the legacy plain-text body.
 func classifyNativeErrors(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(ctx echo.Context) error {
+	return func(ctx *echo.Context) error {
 		err := next(ctx)
 		if err == nil {
 			return nil

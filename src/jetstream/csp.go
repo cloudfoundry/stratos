@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // cspNoncePlaceholder is the literal token a CSP policy carries where the
@@ -106,7 +106,7 @@ func policyWithReporting(policy string) string {
 //
 // p.indexHTMLTemplate must be the pristine template — injectNonce is not
 // re-appliable, so the result is never written back over it.
-func (p *portalProxy) serveIndexHTML(c echo.Context) error {
+func (p *portalProxy) serveIndexHTML(c *echo.Context) error {
 	nonce := rand.Text()
 	config := p.GetConfig()
 

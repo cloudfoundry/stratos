@@ -4,7 +4,7 @@ package cloudfoundry
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // entitleIsolationSegmentOrgs handles POST
@@ -21,7 +21,7 @@ import (
 // Response is the CF relationships envelope (capi.ToManyRelationship =
 // {data:[{guid}]}), returned as-is with a schema-version header — matching
 // shareServiceInstanceSpaces / applyOrgQuotaToOrgs.
-func (cf *CloudFoundrySpecification) entitleIsolationSegmentOrgs(c echo.Context) error {
+func (cf *CloudFoundrySpecification) entitleIsolationSegmentOrgs(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	isoGUID := c.Param("isoGuid")
 	if cnsiGUID == "" || isoGUID == "" {

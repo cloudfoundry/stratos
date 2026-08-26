@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/google/uuid"
@@ -44,7 +44,7 @@ func isSSLRelatedError(err error) (bool, string) {
 	return false, ""
 }
 
-func (p *portalProxy) RegisterEndpoint(c echo.Context, fetchInfo api.InfoFunc) error {
+func (p *portalProxy) RegisterEndpoint(c *echo.Context, fetchInfo api.InfoFunc) error {
 	log.Debug("registerEndpoint")
 
 	params := new(api.RegisterEndpointParams)
@@ -195,7 +195,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 // @Security ApiKeyAuth
 // @Router /endpoints/{id} [delete]
 // TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls
-func (p *portalProxy) unregisterCluster(c echo.Context) error {
+func (p *portalProxy) unregisterCluster(c *echo.Context) error {
 	cnsiGUID := c.Param("id")
 	log.WithField("cnsiGUID", cnsiGUID).Debug("unregisterCluster")
 
@@ -228,7 +228,7 @@ func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
 	return nil
 }
 
-func (p *portalProxy) buildCNSIList(c echo.Context) ([]*api.CNSIRecord, error) {
+func (p *portalProxy) buildCNSIList(c *echo.Context) ([]*api.CNSIRecord, error) {
 	log.Debug("buildCNSIList")
 
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
@@ -363,7 +363,7 @@ func (p *portalProxy) listCNSIByAPIEndpoint(apiEndpoint string) ([]*api.CNSIReco
 // @Failure 401 {object} api.ErrorResponseBody "Error response"
 // @Security ApiKeyAuth
 // @Router /endpoints [get]
-func (p *portalProxy) listCNSIs(c echo.Context) error {
+func (p *portalProxy) listCNSIs(c *echo.Context) error {
 	log.Debug("listCNSIs")
 	cnsiList, err := p.buildCNSIList(c)
 	if err != nil {
@@ -731,7 +731,7 @@ func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
 // @Failure 401 {object} api.ErrorResponseBody "Error response"
 // @Security ApiKeyAuth
 // @Router /endpoints/{id} [post]
-func (p *portalProxy) updateEndpoint(ec echo.Context) error {
+func (p *portalProxy) updateEndpoint(ec *echo.Context) error {
 	log.Debug("updateEndpoint")
 
 	params := new(api.UpdateEndpointParams)

@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeFeatureFlags handles GET /pp/v1/cf/feature_flags/{cnsiGuid}.
@@ -21,7 +21,7 @@ import (
 // onto each row so multi-CNSI rendering keys by (cnsi, name)
 // consistently with every other St* DTO. Unlike most resources, feature
 // flags have no GUID — name is the identity — and no created_at.
-func (c *CloudFoundrySpecification) getNativeFeatureFlags(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeFeatureFlags(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

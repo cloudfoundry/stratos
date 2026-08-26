@@ -8,12 +8,12 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
-func (uf *UserFavorites) getAll(c echo.Context) error {
+func (uf *UserFavorites) getAll(c *echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
@@ -44,7 +44,7 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 	return err
 }
 
-func (uf *UserFavorites) delete(c echo.Context) error {
+func (uf *UserFavorites) delete(c *echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
@@ -66,7 +66,7 @@ func (uf *UserFavorites) delete(c echo.Context) error {
 	return err
 }
 
-func (uf *UserFavorites) create(c echo.Context) error {
+func (uf *UserFavorites) create(c *echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {

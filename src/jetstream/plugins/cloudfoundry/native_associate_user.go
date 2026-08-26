@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type associateUserRequest struct {
@@ -23,7 +23,7 @@ type associateUserRequest struct {
 // Already-associated (CF returns 422 / capi.ErrUnprocessable) is treated as a
 // benign success — the user is already a member. Only a hard failure (any
 // other error from the capi client) is surfaced as an error.
-func (cf *CloudFoundrySpecification) associateUser(c echo.Context) error {
+func (cf *CloudFoundrySpecification) associateUser(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

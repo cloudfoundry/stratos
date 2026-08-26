@@ -14,13 +14,13 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	yaml "gopkg.in/yaml.v2"
 )
 
 // Artifact Hub support
 
-type artifactHubHandler func(c echo.Context, endpointID string) error
+type artifactHubHandler func(c *echo.Context, endpointID string) error
 
 const (
 	searchURL = "https://artifacthub.io/api/chartsvc/v1/charts/search"
@@ -77,7 +77,7 @@ type ahInfo struct {
 type ahVersions []ahVersion
 
 // Look to see if the request is for ArtifactHub - if it is, invoke the specified request handler
-func (m *Monocular) handleArtifactRequest(c echo.Context, handler artifactHubHandler) (bool, error) {
+func (m *Monocular) handleArtifactRequest(c *echo.Context, handler artifactHubHandler) (bool, error) {
 	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
 	if err != nil {
 		return true, echo.NewHTTPError(http.StatusBadRequest, err.Error())
@@ -92,7 +92,7 @@ func (m *Monocular) handleArtifactRequest(c echo.Context, handler artifactHubHan
 
 // Fetch all charts from ArtifactHub using the Monocular-compatible search API
 // We cache the results of the search on disk for the configfured cache period
-func (m *Monocular) fetchChartsFromArtifactHub(c echo.Context, endpointID string) error {
+func (m *Monocular) fetchChartsFromArtifactHub(c *echo.Context, endpointID string) error {
 	cacheFolder := path.Join(m.CacheFolder, endpointID)
 	indexFile := path.Join(cacheFolder, "hub_index.json")
 	if ok := useCachedFile(indexFile); ok {
@@ -162,7 +162,7 @@ func (m *Monocular) fetchChartsFromArtifactHub(c echo.Context, endpointID string
 
 // Get a specific Chart from ArtifactHub
 // We cache metadata on disk in the artifactHubGetPackageInfo function
-func (m *Monocular) artifactHubGetChart(c echo.Context, endpointID string) error {
+func (m *Monocular) artifactHubGetChart(c *echo.Context, endpointID string) error {
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 	version := c.Param("version")
@@ -212,7 +212,7 @@ func (m *Monocular) artifactHubGetChart(c echo.Context, endpointID string) error
 // Get the metadata for a specific version of a chart
 // We need to download the Chart archive and unpack it in order to get the chart URL and information
 // about whether the Chart has a schema
-func (m *Monocular) artifactHubGetChartVersion(c echo.Context, endpointID string) error {
+func (m *Monocular) artifactHubGetChartVersion(c *echo.Context, endpointID string) error {
 	repo := c.Param("repo")
 	chartName := c.Param("name")
 	version := c.Param("version")
@@ -280,13 +280,13 @@ func ahGetFileAssetURL(endpointID, repo, name, version, folder, filename string)
 }
 
 // Get a file for the given chart (readme, valuees, schema)
-func (m *Monocular) artifactHubGetChartFile(c echo.Context) error {
+func (m *Monocular) artifactHubGetChartFile(c *echo.Context) error {
 	file := c.Param("file")
 	return m.artifactHubGetChartFileNamed(c, file)
 }
 
 // Same as abuve, but allow name to be passed in, so we can use this internally too
-func (m *Monocular) artifactHubGetChartFileNamed(c echo.Context, file string) error {
+func (m *Monocular) artifactHubGetChartFileNamed(c *echo.Context, file string) error {
 	endpointID := c.Param("endpoint")
 	repo := c.Param("repo")
 	chartName := c.Param("name")
@@ -311,7 +311,7 @@ func (m *Monocular) artifactHubGetChartFileNamed(c echo.Context, file string) er
 }
 
 // Get available versions for a Chart
-func (m *Monocular) artifactHubGetChartVersions(c echo.Context, endpointID, repo, chartName string) ([]*store.ChartStoreRecord, error) {
+func (m *Monocular) artifactHubGetChartVersions(c *echo.Context, endpointID, repo, chartName string) ([]*store.ChartStoreRecord, error) {
 	var versions store.ChartStoreRecordList
 	info, err := m.artifactHubGetPackageInfo(endpointID, repo, chartName, "")
 	if err != nil {
@@ -338,11 +338,11 @@ func (m *Monocular) artifactHubGetChartVersionsFromInfo(info *ahInfo, repo, char
 }
 
 // Get the icon for a Chart
-func (m *Monocular) artifactHubGetIconHandler(c echo.Context, endpointID string) error {
+func (m *Monocular) artifactHubGetIconHandler(c *echo.Context, endpointID string) error {
 	return m.artifactHubGetIcon(c)
 }
 
-func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
+func (m *Monocular) artifactHubGetIcon(c *echo.Context) error {
 	endpoint := c.Param("guid")
 	repo := c.Param("repo")
 	chartName := c.Param("name")
@@ -406,14 +406,13 @@ func (m *Monocular) artifactHubGetIcon(c echo.Context) error {
 		return sendPlaceHolderIcon(c)
 	}
 	c.Response().Header().Set("Content-Type", contentType)
-	c.Response().Status = 200
 	c.Response().Write(iconFile)
 
 	return nil
 }
 
-func sendPlaceHolderIcon(c echo.Context) error {
-	http.Redirect(c.Response().Writer, c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
+func sendPlaceHolderIcon(c *echo.Context) error {
+	http.Redirect(c.Response(), c.Request(), "/core/assets/custom/placeholder.png", http.StatusTemporaryRedirect)
 	return nil
 }
 

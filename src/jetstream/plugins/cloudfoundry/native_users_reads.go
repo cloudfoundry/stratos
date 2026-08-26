@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeUsers handles GET /pp/v1/cf/users/{cnsiGuid}.
@@ -39,7 +39,7 @@ import (
 // orgs). The bucketing trusts the role's organization relationship
 // when present and falls back to the included space's org when it
 // isn't.
-func (c *CloudFoundrySpecification) getNativeUsers(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeUsers(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -105,7 +105,7 @@ func (c *CloudFoundrySpecification) getNativeUsers(ctx echo.Context) error {
 // hit the bulk /v3/users endpoint and needs to resolve a single user by
 // GUID — replaces the legacy cfEntityCatalog.user.store.getEntityService
 // observable.
-func (c *CloudFoundrySpecification) getNativeUserDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeUserDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID := ctx.Param("userGuid")
 	if cnsiGUID == "" || userGUID == "" {

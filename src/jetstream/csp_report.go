@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,7 +32,7 @@ const cspReportPath = "/pp/v1/csp-report"
 // able to reach Stratos can post to it. Real reports are well under a
 // kilobyte; the limit exists so an oversized body cannot be used to make
 // Jetstream do work.
-const cspReportBodyLimit = "16K"
+const cspReportBodyLimit int64 = 16 * 1024
 
 // cspReportLogBudget caps how many violation lines one minute may add to the
 // log, so the same unauthenticated route cannot be used to fill an operator's
@@ -133,7 +133,7 @@ func truncateField(s string) string {
 // configured. The response carries no body: nothing the browser does depends
 // on it, and a report that cannot be parsed is still not the reporter's fault
 // to act on.
-func (p *portalProxy) receiveCSPReport(c echo.Context) error {
+func (p *portalProxy) receiveCSPReport(c *echo.Context) error {
 	var envelope cspReportEnvelope
 	if err := json.NewDecoder(c.Request().Body).Decode(&envelope); err != nil {
 		// Logged at debug: a malformed body is either a browser Stratos does
@@ -176,7 +176,7 @@ func (p *portalProxy) receiveCSPReport(c echo.Context) error {
 
 	if collector := p.GetConfig().CSPReportCollector; collector != "" {
 		// Everything the forward needs is read here, on the request
-		// goroutine: an echo.Context must not outlive its handler.
+		// goroutine: an *echo.Context must not outlive its handler.
 		authenticated := false
 		if _, err := p.GetSession(c); err == nil {
 			authenticated = true

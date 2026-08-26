@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -88,7 +88,7 @@ func newUPSPlugin(serverURL string) *CloudFoundrySpecification {
 	}
 }
 
-func newUPSContext(e *echo.Echo, method, target, body string) (echo.Context, *httptest.ResponseRecorder) {
+func newUPSContext(e *echo.Echo, method, target, body string) (*echo.Context, *httptest.ResponseRecorder) {
 	var bodyReader io.Reader
 	if body != "" {
 		bodyReader = strings.NewReader(body)
@@ -110,8 +110,7 @@ func TestCreateUserProvidedServiceInstance(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newUPSContext(e, http.MethodPost, "/pp/v1/cf/user_provided_service_instances/test-cnsi", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 	plugin := newUPSPlugin(ts.URL)
 
 	require.NoError(t, plugin.createUserProvidedServiceInstance(ctx))
@@ -146,8 +145,7 @@ func TestCreateUserProvidedServiceInstance_RequiresName(t *testing.T) {
 
 	e := echo.New()
 	ctx, _ := newUPSContext(e, http.MethodPost, "/pp/v1/cf/user_provided_service_instances/test-cnsi", `{"spaceGuid":"space-1"}`)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 	plugin := newUPSPlugin(ts.URL)
 
 	err := plugin.createUserProvidedServiceInstance(ctx)
@@ -165,8 +163,7 @@ func TestUpdateUserProvidedServiceInstance(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newUPSContext(e, http.MethodPatch, "/pp/v1/cf/user_provided_service_instances/test-cnsi/ups-1", body)
-	ctx.SetParamNames("cnsiGuid", "siGuid")
-	ctx.SetParamValues("test-cnsi", "ups-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "siGuid", Value: "ups-1"}})
 	plugin := newUPSPlugin(ts.URL)
 
 	require.NoError(t, plugin.updateUserProvidedServiceInstance(ctx))

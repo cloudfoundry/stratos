@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,8 +68,7 @@ func TestGetAppStats_FullShapePreservesUsageQuotasUptime(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/app-stats/cnsi-1/app-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "appGuid")
-	ctx.SetParamValues("cnsi-1", "app-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -142,8 +141,7 @@ func TestGetAppStats_RetriesOnceOn401(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/app-stats/cnsi-1/app-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "appGuid")
-	ctx.SetParamValues("cnsi-1", "app-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -194,8 +192,7 @@ func TestGetAppStatsBatch_RetriesOnceOn401(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/app-stats/cnsi-1?app_guids=app-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{

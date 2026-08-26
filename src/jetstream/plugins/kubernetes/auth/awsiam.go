@@ -9,7 +9,7 @@ import (
 
 	// "github.com/SermoDigital/jose/jws"
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
@@ -74,7 +74,7 @@ func (c *AWSIAMUserInfo) IsExpired() bool {
 	return true
 }
 
-func (c *AWSKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+func (c *AWSKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchIAMToken")
 
 	// Place the IAM properties into a JSON Struct and store that in the Refresh Token

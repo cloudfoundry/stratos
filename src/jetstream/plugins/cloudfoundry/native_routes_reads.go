@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getAppRoutes handles GET /pp/v1/cf/apps/{cnsiGuid}/{appGuid}/routes.
@@ -25,7 +25,7 @@ import (
 //
 // Route.URL is CF-rendered (host + domain + optional port + path) so the
 // frontend can display it as-is without re-composing from parts.
-func (c *CloudFoundrySpecification) getAppRoutes(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getAppRoutes(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	appGUID := ctx.Param("appGuid")
 	if cnsiGUID == "" || appGUID == "" {

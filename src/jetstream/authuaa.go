@@ -11,7 +11,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/stringutils"
@@ -35,7 +35,7 @@ func (a *uaaAuth) ShowConfig(config *api.ConsoleConfig) {
 }
 
 // Login provides UAA-auth specific Stratos login
-func (a *uaaAuth) Login(c echo.Context) error {
+func (a *uaaAuth) Login(c *echo.Context) error {
 	log.Debug("UAA Login")
 	//This check will remain in until auth is factored down into its own package
 	if api.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != api.Remote {
@@ -66,7 +66,7 @@ func (a *uaaAuth) Login(c echo.Context) error {
 }
 
 // Logout provides UAA-auth specific Stratos login
-func (a *uaaAuth) Logout(c echo.Context) error {
+func (a *uaaAuth) Logout(c *echo.Context) error {
 	return a.logout(c)
 }
 
@@ -118,10 +118,10 @@ func (a *uaaAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 
 }
 
-func (a *uaaAuth) BeforeVerifySession(c echo.Context) {}
+func (a *uaaAuth) BeforeVerifySession(c *echo.Context) {}
 
 // VerifySession verifies the session the specified UAA user and refreshes the token if necessary
-func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
+func (a *uaaAuth) VerifySession(c *echo.Context, sessionUser string, sessionExpireTime int64) error {
 
 	tr, err := a.p.GetUAATokenRecord(sessionUser)
 
@@ -163,7 +163,7 @@ func (a *uaaAuth) VerifySession(c echo.Context, sessionUser string, sessionExpir
 }
 
 // logout performs the underlying logout from the UAA endpoint
-func (a *uaaAuth) logout(c echo.Context) error {
+func (a *uaaAuth) logout(c *echo.Context) error {
 	log.Debug("logout")
 
 	a.p.removeEmptyCookie(c)
@@ -187,7 +187,7 @@ func (a *uaaAuth) logout(c echo.Context) error {
 }
 
 // loginToUAA performs the underlying login to the UAA endpoint
-func (p *portalProxy) loginToUAA(c echo.Context) (*api.LoginRes, error) {
+func (p *portalProxy) loginToUAA(c *echo.Context) (*api.LoginRes, error) {
 	log.Debug("loginToUAA")
 	uaaRes, u, err := p.login(c, p.Config.ConsoleConfig.SkipSSLValidation, p.Config.ConsoleConfig.ConsoleClient, p.Config.ConsoleConfig.ConsoleClientSecret, p.getUAAIdentityEndpoint())
 	var resp *api.LoginRes
@@ -441,7 +441,7 @@ func (p *portalProxy) RefreshUAAToken(userGUID string) (t api.TokenRecord, err e
 
 // ssoLoginToUAA is a callback invoked after the UAA login flow has completed and during logout
 // We use a single callback so this can be allow-listed in the client
-func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
+func (p *portalProxy) ssoLoginToUAA(c *echo.Context) error {
 	state := c.QueryParam("state")
 
 	stateErr := validateSSORedirectState(state, p.Config.SSOAllowList)
@@ -475,7 +475,7 @@ func (p *portalProxy) ssoLoginToUAA(c echo.Context) error {
 }
 
 // ssoLogoutOfUAA performs SSO logout from the UAA
-func (p *portalProxy) ssoLogoutOfUAA(c echo.Context) error {
+func (p *portalProxy) ssoLogoutOfUAA(c *echo.Context) error {
 	if !p.Config.SSOLogin {
 		err := api.NewHTTPShadowError(
 			http.StatusNotFound,
@@ -514,7 +514,7 @@ func (p *portalProxy) hasSSOOption(option string) bool {
 }
 
 // initSSOlogin performs SSO Login via UAA
-func (p *portalProxy) initSSOlogin(c echo.Context) error {
+func (p *portalProxy) initSSOlogin(c *echo.Context) error {
 	if !p.Config.SSOLogin {
 		err := api.NewHTTPShadowError(
 			http.StatusNotFound,

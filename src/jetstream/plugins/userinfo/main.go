@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Module init will register plugin
@@ -63,7 +63,7 @@ func (userInfo *UserInfo) Init() error {
 	return nil
 }
 
-func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
+func (userInfo *UserInfo) getProvider(c *echo.Context) Provider {
 	log.Debugf("getUserInfoProvider: %v", userInfo.portalProxy.GetConfig().AuthEndpointType)
 	if api.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == api.Local {
 		return InitLocalUserInfo(userInfo.portalProxy)
@@ -74,7 +74,7 @@ func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
 	return InitUaaUserInfo(userInfo.portalProxy, c)
 }
 
-func (userInfo *UserInfo) preFlightChecks(c echo.Context) (string, error) {
+func (userInfo *UserInfo) preFlightChecks(c *echo.Context) (string, error) {
 	// Check session
 	_, err := userInfo.portalProxy.GetSessionInt64Value(c, "exp")
 	if err != nil {
@@ -99,7 +99,7 @@ func (userInfo *UserInfo) preFlightChecks(c echo.Context) (string, error) {
 }
 
 // get user info for the current user
-func (userInfo *UserInfo) userInfo(c echo.Context) error {
+func (userInfo *UserInfo) userInfo(c *echo.Context) error {
 	id, err := userInfo.preFlightChecks(c)
 	if err != nil {
 		return err
@@ -120,7 +120,7 @@ func (userInfo *UserInfo) userInfo(c echo.Context) error {
 }
 
 // update the user info for the current user
-func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
+func (userInfo *UserInfo) updateUserInfo(c *echo.Context) error {
 	_, err := userInfo.preFlightChecks(c)
 	if err != nil {
 		return err
@@ -160,7 +160,7 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 }
 
 // update the user info for the current user
-func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
+func (userInfo *UserInfo) updateUserPassword(c *echo.Context) error {
 	id, err := userInfo.preFlightChecks(c)
 	if err != nil {
 		return err

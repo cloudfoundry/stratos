@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -62,8 +62,7 @@ func TestGetNativeUsers_PerPagePassthrough(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/users/cnsi-1?per_page=25&page=2", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeUsers(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -112,8 +111,7 @@ func TestGetNativeUsers_OmitsPagingWhenAbsent(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/users/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeUsers(c))
 	assert.False(t, sawPerPage)
@@ -198,8 +196,7 @@ func TestGetNativeUsers_BoundedRoleJoin(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/users/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 	require.NoError(t, plugin.getNativeUsers(c))
 
 	// Bounded — the role fetch carries only the page's user GUIDs.
@@ -267,8 +264,7 @@ func TestGetNativeUsers_CountsFastPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/users/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeUsers(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -351,8 +347,7 @@ func TestGetNativeUsers_SpaceOrgFromIncludedSpaces(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/users/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 	require.NoError(t, plugin.getNativeUsers(c))
 
 	assert.Equal(t, "space", rolesIncludeParam, "/v3/roles must request include=space on the wire")

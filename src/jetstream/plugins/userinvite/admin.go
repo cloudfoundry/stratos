@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -24,7 +24,7 @@ const cloudControllerAdminScope = "cloud_controller.admin"
 
 // Admin functions for managing User Invite credentials for a given Cloud Foundry
 
-func (invite *UserInvite) status(c echo.Context) error {
+func (invite *UserInvite) status(c *echo.Context) error {
 	log.Debug("Invite Status")
 	cfGUID := c.Param("id")
 
@@ -64,7 +64,7 @@ func (invite *UserInvite) status(c echo.Context) error {
 }
 
 // Configure
-func (invite *UserInvite) configure(c echo.Context) error {
+func (invite *UserInvite) configure(c *echo.Context) error {
 	log.Debug("Configure Invite token")
 	cfGUID := c.Param("id")
 
@@ -110,7 +110,7 @@ func arrayContainsString(a []string, x string) bool {
 	return false
 }
 
-func (invite *UserInvite) remove(c echo.Context) error {
+func (invite *UserInvite) remove(c *echo.Context) error {
 	log.Debug("Delete Invite token")
 	cfGUID := c.Param("id")
 

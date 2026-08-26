@@ -3,7 +3,7 @@ package cloudfoundry
 
 import (
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // fetchAppCountsForSpaces issues one /v3/apps call filtered to the given
@@ -12,7 +12,7 @@ import (
 // count. Spaces with zero apps are absent from the map (caller defaults to
 // 0); callers should treat missing as zero. Mirrors fetchSpacesByGUIDs /
 // fetchWebProcessesForApps in style and pagination shape.
-func fetchAppCountsForSpaces(ctx echo.Context, cfClient capi.Client, spaceGUIDs []string) (map[string]int, error) {
+func fetchAppCountsForSpaces(ctx *echo.Context, cfClient capi.Client, spaceGUIDs []string) (map[string]int, error) {
 	counts := make(map[string]int, len(spaceGUIDs))
 	if len(spaceGUIDs) == 0 {
 		return counts, nil
@@ -51,7 +51,7 @@ func fetchAppCountsForSpaces(ctx echo.Context, cfClient capi.Client, spaceGUIDs 
 // space_guid via each route's Relationships.Space. Returns a map
 // space_guid → route count. Same lazy-non-fatal pattern as the apps
 // counterpart.
-func fetchRouteCountsForSpaces(ctx echo.Context, cfClient capi.Client, spaceGUIDs []string) (map[string]int, error) {
+func fetchRouteCountsForSpaces(ctx *echo.Context, cfClient capi.Client, spaceGUIDs []string) (map[string]int, error) {
 	counts := make(map[string]int, len(spaceGUIDs))
 	if len(spaceGUIDs) == 0 {
 		return counts, nil

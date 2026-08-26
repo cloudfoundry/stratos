@@ -6,7 +6,7 @@ import (
 	"fmt"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
@@ -44,7 +44,7 @@ func (c *KubeBasicAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.To
 	return nil
 }
 
-func (c *KubeBasicAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+func (c *KubeBasicAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 
 	log.Info("FetchToken")
 

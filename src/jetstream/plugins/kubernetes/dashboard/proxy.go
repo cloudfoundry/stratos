@@ -8,14 +8,14 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	utilnet "k8s.io/apimachinery/pkg/util/net"
 	"k8s.io/client-go/rest"
 )
 
 // KubeDashboardProxy proxies a request to the Kube Dash service using the K8S API
-func KubeDashboardProxy(c echo.Context, p api.PortalProxy, config *rest.Config) error {
+func KubeDashboardProxy(c *echo.Context, p api.PortalProxy, config *rest.Config) error {
 	log.Debugf("KubeDashboardProxy request for: %s", c.Request().RequestURI)
 
 	cnsiGUID := c.Param("guid")
@@ -78,7 +78,7 @@ func KubeDashboardProxy(c echo.Context, p api.PortalProxy, config *rest.Config) 
 	targetURL, _ := url.Parse(target)
 
 	req := c.Request()
-	w := c.Response().Writer
+	w := c.Response()
 
 	loc := targetURL
 	loc.RawQuery = req.URL.RawQuery

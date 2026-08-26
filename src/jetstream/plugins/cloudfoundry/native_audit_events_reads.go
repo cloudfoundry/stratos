@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeAuditEvents handles GET /pp/v1/cf/audit_events/{cnsiGuid}.
@@ -24,7 +24,7 @@ import (
 //
 // ?return=counts fast path: per_page=1, returns just the totalResults so
 // badges/summaries don't have to fetch a full page.
-func (c *CloudFoundrySpecification) getNativeAuditEvents(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeAuditEvents(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -94,7 +94,7 @@ func (c *CloudFoundrySpecification) getNativeAuditEvents(ctx echo.Context) error
 // applied upstream so V3 returns only events scoped to the requested org.
 // Sort is fixed to -created_at (newest first) since org-event consumers
 // always show the most recent activity at the top.
-func (c *CloudFoundrySpecification) getNativeOrgAuditEvents(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeOrgAuditEvents(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
 	if cnsiGUID == "" {
@@ -159,7 +159,7 @@ func (c *CloudFoundrySpecification) getNativeOrgAuditEvents(ctx echo.Context) er
 // Space-scoped variant — symmetric to getNativeOrgAuditEvents, filters
 // upstream by space_guids instead. Same passthrough + ?return=counts
 // contract.
-func (c *CloudFoundrySpecification) getNativeSpaceAuditEvents(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeSpaceAuditEvents(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	spaceGUID := ctx.Param("spaceGuid")
 	if cnsiGUID == "" {

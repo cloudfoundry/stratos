@@ -2,12 +2,13 @@ package auth
 
 import (
 	"encoding/json"
+	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func TestFetchCertAuth(t *testing.T) {
@@ -24,13 +25,12 @@ func TestFetchCertAuth(t *testing.T) {
 	form.Set("certKey", parts[1])
 
 	e := echo.New()
-	req := httptest.NewRequest(echo.POST, "/pp/v1/auth/login/cnsi?cnsi_guid=testGuid&connect_type=kube-cert-auth&system_shared=false", strings.NewReader(form.Encode()))
+	req := httptest.NewRequest(http.MethodPost, "/pp/v1/auth/login/cnsi?cnsi_guid=testGuid&connect_type=kube-cert-auth&system_shared=false", strings.NewReader(form.Encode()))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
 
 	engineReq := req
 	rec := httptest.NewRecorder()
-	res := echo.NewResponse(rec, e)
-	c := e.NewContext(engineReq, res)
+	c := e.NewContext(engineReq, rec)
 
 	kubeCertAuth, err := kubeSpec.extractCerts(c)
 	if err != nil {

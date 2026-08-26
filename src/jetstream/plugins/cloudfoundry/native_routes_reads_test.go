@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -83,8 +83,7 @@ func TestGetAppRoutes_ReturnsMappedRoutes(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.getAppRoutes(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -181,8 +180,7 @@ func TestToStRoute_PopulatesAppGUIDsFromInlineDestinations(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/routes/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeRouteCount(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -242,8 +240,7 @@ func TestGetAppRoutes_EmptyResult(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.getAppRoutes(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -283,8 +280,7 @@ func TestGetAppRoutes_PropagatesError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	// handleCapiError writes the upstream status directly and returns nil;
 	// the caller propagates by reflecting the error response to the UI.
@@ -332,8 +328,7 @@ func TestGetAppRoutes_PerPagePassthrough(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.getAppRoutes(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -378,8 +373,7 @@ func TestGetAppRoutes_OmitsPagingWhenAbsent(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.getAppRoutes(c))
 	assert.False(t, sawPerPage)
@@ -405,8 +399,7 @@ func TestGetAppRoutes_CountsFastPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.getAppRoutes(c))
 	assert.Equal(t, http.StatusOK, rec.Code)

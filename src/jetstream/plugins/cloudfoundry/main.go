@@ -12,7 +12,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -79,7 +79,7 @@ func (c *CloudFoundrySpecification) GetType() string {
 	return EndpointType
 }
 
-func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
+func (c *CloudFoundrySpecification) Register(echoContext *echo.Context) error {
 	log.Info("CloudFoundry Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
@@ -88,7 +88,7 @@ func (c *CloudFoundrySpecification) Validate(userGUID string, cnsiRecord api.CNS
 	return nil
 }
 
-func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
+func (c *CloudFoundrySpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	log.Info("CloudFoundry Connect...")
 
 	params := new(api.LoginToCNSIParams)
@@ -218,7 +218,7 @@ func (c *CloudFoundrySpecification) Init() error {
 	return nil
 }
 
-func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
+func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 
 	// Error is ignored: it is also set when no record exists, which is handled
 	// below via the empty CNSIType
@@ -424,5 +424,5 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 	return newCNSI, endpointInfo, nil
 }
 
-func (c *CloudFoundrySpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
+func (c *CloudFoundrySpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
 }

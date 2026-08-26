@@ -10,13 +10,13 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
 const idHeaderName = "X-Stratos-Analaysis-ID"
 
-func (a *Analyzer) run(ec echo.Context) error {
+func (a *Analyzer) run(ec *echo.Context) error {
 	err := a.doRun(ec)
 	if err != nil {
 		log.Error(err)
@@ -24,7 +24,7 @@ func (a *Analyzer) run(ec echo.Context) error {
 	return err
 }
 
-func (a *Analyzer) doRun(ec echo.Context) error {
+func (a *Analyzer) doRun(ec *echo.Context) error {
 
 	log.Debug("Run analyzer!")
 

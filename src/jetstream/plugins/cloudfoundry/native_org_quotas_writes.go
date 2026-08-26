@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -18,7 +18,7 @@ import (
 // Sync write: V3 returns 201 with the created quota. Body shape is
 // capi.OrganizationQuotaCreateRequest = {name, apps?, services?, routes?,
 // domains?, metadata?}.
-func (c *CloudFoundrySpecification) createNativeOrgQuota(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) createNativeOrgQuota(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -58,7 +58,7 @@ func (c *CloudFoundrySpecification) createNativeOrgQuota(ctx echo.Context) error
 // changing the quota on an existing one.
 //
 // Body shape: { "data": [{ "guid": "<org_guid>" }, ...] }.
-func (c *CloudFoundrySpecification) applyOrgQuotaToOrgs(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) applyOrgQuotaToOrgs(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	if cnsiGUID == "" || quotaGUID == "" {
@@ -117,7 +117,7 @@ func (c *CloudFoundrySpecification) applyOrgQuotaToOrgs(ctx echo.Context) error 
 // 202 with {id, state, startedAt} when the job outlives the window.
 // Falls back to bare 202 if the async-job contract isn't wired (plugin
 // ordering / tests).
-func (c *CloudFoundrySpecification) deleteNativeOrgQuota(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) deleteNativeOrgQuota(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	if cnsiGUID == "" || quotaGUID == "" {
@@ -172,7 +172,7 @@ func (c *CloudFoundrySpecification) deleteNativeOrgQuota(ctx echo.Context) error
 
 // updateNativeOrgQuota handles PATCH /pp/v1/cf/organization_quotas/{cnsiGuid}/{quotaGuid} —
 // Stratos-shape wrapper around CF V3 PATCH /v3/organization_quotas/{guid}.
-func (c *CloudFoundrySpecification) updateNativeOrgQuota(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) updateNativeOrgQuota(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	if cnsiGUID == "" || quotaGUID == "" {

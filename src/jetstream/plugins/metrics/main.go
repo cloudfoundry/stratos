@@ -12,7 +12,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/tokens"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -122,7 +122,7 @@ func (m *MetricsSpecification) GetClientId() string {
 	return m.portalProxy.Env().String(CLIENT_ID_KEY, "metrics")
 }
 
-func (m *MetricsSpecification) Register(echoContext echo.Context) error {
+func (m *MetricsSpecification) Register(echoContext *echo.Context) error {
 	log.Debug("Metrics Register...")
 	return m.portalProxy.RegisterEndpoint(echoContext, m.Info)
 }
@@ -131,7 +131,7 @@ func (m *MetricsSpecification) Validate(userGUID string, cnsiRecord api.CNSIReco
 	return nil
 }
 
-func (m *MetricsSpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
+func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	log.Debug("Metrics Connect...")
 
 	params := new(api.LoginToCNSIParams)
@@ -347,7 +347,7 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool, 
 	return newCNSI, v2InfoResponse, nil
 }
 
-func (m *MetricsSpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
+func (m *MetricsSpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
 
 	metricsProviders := make([]MetricsMetadata, 0)
 	// Go through the metrics endpoints and get the corresponding services from the token metadata

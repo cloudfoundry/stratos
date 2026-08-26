@@ -8,14 +8,14 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // KubeAuthProvider is the interface for Kubernetes Authentication Providers
 type KubeAuthProvider interface {
 	GetName() string
 	AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error
-	FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error)
+	FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error)
 
 	RegisterJetstreamAuthType(portal api.PortalProxy)
 }

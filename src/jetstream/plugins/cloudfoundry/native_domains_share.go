@@ -4,7 +4,7 @@ package cloudfoundry
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // shareDomainOrgs handles
@@ -19,7 +19,7 @@ import (
 // returns the resulting to-many relationship (the full shared-org set). The
 // whole request succeeds or fails together; CF's error envelope flows through
 // handleCapiError unchanged.
-func (cf *CloudFoundrySpecification) shareDomainOrgs(c echo.Context) error {
+func (cf *CloudFoundrySpecification) shareDomainOrgs(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	domainGUID := c.Param("domainGuid")
 	if cnsiGUID == "" || domainGUID == "" {

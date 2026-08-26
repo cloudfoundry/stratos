@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeServicePlanVisibility handles
@@ -14,7 +14,7 @@ import (
 //
 // Reads the current visibility envelope for one plan and returns a
 // flat Stratos-shape record. No filters, no drain — single CAPI call.
-func (c *CloudFoundrySpecification) getNativeServicePlanVisibility(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServicePlanVisibility(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	planGUID := ctx.Param("planGuid")
 	if cnsiGUID == "" || planGUID == "" {
@@ -49,7 +49,7 @@ func (c *CloudFoundrySpecification) getNativeServicePlanVisibility(ctx echo.Cont
 //
 // One Echo handler, dispatched on method, so the routes can share a
 // path and the wire shape mirrors CAPI's two-mode semantics.
-func (c *CloudFoundrySpecification) applyNativeServicePlanVisibility(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) applyNativeServicePlanVisibility(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	planGUID := ctx.Param("planGuid")
 	if cnsiGUID == "" || planGUID == "" {
@@ -109,7 +109,7 @@ func (c *CloudFoundrySpecification) applyNativeServicePlanVisibility(ctx echo.Co
 //
 // Removes one org from the plan's organization-scoped visibility list.
 // Returns 204 on success.
-func (c *CloudFoundrySpecification) removeOrgFromNativeServicePlanVisibility(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) removeOrgFromNativeServicePlanVisibility(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	planGUID := ctx.Param("planGuid")
 	orgGUID := ctx.Param("orgGuid")

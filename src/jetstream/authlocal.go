@@ -11,7 +11,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
@@ -31,7 +31,7 @@ func (a *localAuth) ShowConfig(config *api.ConsoleConfig) {
 }
 
 // Login provides Local-auth specific Stratos login
-func (a *localAuth) Login(c echo.Context) error {
+func (a *localAuth) Login(c *echo.Context) error {
 
 	//This check will remain in until auth is factored down into its own package
 	if api.AuthEndpointTypes[a.p.Config.ConsoleConfig.AuthEndpointType] != api.Local {
@@ -61,7 +61,7 @@ func (a *localAuth) Login(c echo.Context) error {
 }
 
 // Logout provides Local-auth specific Stratos login
-func (a *localAuth) Logout(c echo.Context) error {
+func (a *localAuth) Logout(c *echo.Context) error {
 	return a.logout(c)
 }
 
@@ -116,10 +116,10 @@ func (a *localAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 	return connectdUser, nil
 }
 
-func (a *localAuth) BeforeVerifySession(c echo.Context) {}
+func (a *localAuth) BeforeVerifySession(c *echo.Context) {}
 
 // VerifySession verifies the session the specified local user, currently just verifies user exists
-func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
+func (a *localAuth) VerifySession(c *echo.Context, sessionUser string, sessionExpireTime int64) error {
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(a.databaseConnectionPool)
 	if err != nil {
 		log.Errorf("Database error getting repo for Local users: %v", err)
@@ -131,7 +131,7 @@ func (a *localAuth) VerifySession(c echo.Context, sessionUser string, sessionExp
 }
 
 // localLogin verifies local user credentials against our DB
-func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
+func (a *localAuth) localLogin(c *echo.Context) (string, string, error) {
 	log.Debug("doLocalLogin")
 
 	username := c.FormValue("username")
@@ -183,7 +183,7 @@ func (a *localAuth) localLogin(c echo.Context) (string, string, error) {
 }
 
 // generateLoginSuccessResponse
-func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string, username string) error {
+func (a *localAuth) generateLoginSuccessResponse(c *echo.Context, userGUID string, username string) error {
 	log.Debug("generateLoginResponse")
 
 	var err error
@@ -225,7 +225,7 @@ func (a *localAuth) generateLoginSuccessResponse(c echo.Context, userGUID string
 }
 
 // logout
-func (a *localAuth) logout(c echo.Context) error {
+func (a *localAuth) logout(c *echo.Context) error {
 	log.Debug("logout")
 
 	a.p.removeEmptyCookie(c)

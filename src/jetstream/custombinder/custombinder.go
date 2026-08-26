@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // CustomBinder -- custom binder that works on requests other than form-encoded and application/json
@@ -20,9 +20,14 @@ type BindUnmarshaler interface {
 }
 
 // Bind -- bind the parameters using the custom binder
-func (b *CustomBinder) Bind(i interface{}, c echo.Context) error {
+//
+// NOTE: both branches below return, so everything after them is unreachable and
+// has been since well before the v5 migration. Ported as-is rather than fixed
+// here, so that this change stays a straight port; activating that path needs
+// its own change and its own testing.
+func (b *CustomBinder) Bind(c *echo.Context, i any) error {
 	db := new(echo.DefaultBinder)
-	err := db.Bind(i, c)
+	err := db.Bind(c, i)
 
 	if err != nil {
 		return nil
@@ -33,17 +38,15 @@ func (b *CustomBinder) Bind(i interface{}, c echo.Context) error {
 	// If Content-Type is neither form-encoded nor application/json -- extract the parameters
 	// from the query string and leave the request body alone.
 
-	names := c.ParamNames()
-	values := c.ParamValues()
 	params := map[string][]string{}
-	for i, name := range names {
-		params[name] = []string{values[i]}
+	for _, pathValue := range c.PathValues() {
+		params[pathValue.Name] = []string{pathValue.Value}
 	}
 	if err := b.bindData(i, params, "param"); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error()).SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error()).Wrap(err)
 	}
 	if err = b.bindData(i, c.QueryParams(), "query"); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error()).SetInternal(err)
+		return echo.NewHTTPError(http.StatusBadRequest, err.Error()).Wrap(err)
 	}
 
 	return nil

@@ -10,7 +10,7 @@ import (
 	"strconv"
 
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -31,7 +31,7 @@ const (
 	systemGroupName        = "env"
 )
 
-func parseConsoleConfigFromForm(c echo.Context) (*api.ConsoleConfig, error) {
+func parseConsoleConfigFromForm(c *echo.Context) (*api.ConsoleConfig, error) {
 	consoleConfig := new(api.ConsoleConfig)
 
 	// Local admin user configuration?
@@ -71,7 +71,7 @@ func parseConsoleConfigFromForm(c echo.Context) (*api.ConsoleConfig, error) {
 
 // Check the initial parameter set and fetch the list of available scopes
 // This does not persist the configuration to the database at this stage
-func (p *portalProxy) setupGetAvailableScopes(c echo.Context) error {
+func (p *portalProxy) setupGetAvailableScopes(c *echo.Context) error {
 
 	// Check if already set up
 	if p.GetConfig().ConsoleConfig.IsSetupComplete() {
@@ -199,7 +199,7 @@ func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *
 }
 
 // Save the console setup data to the database
-func (p *portalProxy) setupSaveConfig(c echo.Context) error {
+func (p *portalProxy) setupSaveConfig(c *echo.Context) error {
 
 	log.Debug("setupSaveConfig")
 
@@ -365,13 +365,13 @@ func (p *portalProxy) SetupMiddleware() echo.MiddlewareFunc {
 
 		if setupComplete {
 			// No-op in case the instance has been setup
-			return func(c echo.Context) error {
+			return func(c *echo.Context) error {
 				return h(c)
 			}
 		}
 
 		// Check URL - only let setup and vesions requests through
-		return func(c echo.Context) error {
+		return func(c *echo.Context) error {
 			requestURLPath := c.Request().URL.Path
 
 			isSetupRequest, _ := regexp.MatchString(setupRequestRegex, requestURLPath)

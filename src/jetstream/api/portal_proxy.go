@@ -7,33 +7,33 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type PortalProxy interface {
 	GetHttpClient(skipSSLValidation bool, caCert string) http.Client
 	GetHttpClientForRequest(req *http.Request, skipSSLValidation bool, caCert string) http.Client
 	GetGuardedHttpClient(skipSSLValidation bool) http.Client
-	RegisterEndpoint(c echo.Context, fetchInfo InfoFunc) error
+	RegisterEndpoint(c *echo.Context, fetchInfo InfoFunc) error
 	DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, createSystemEndpoint bool, caCert string, fetchInfo InfoFunc) (CNSIRecord, error)
 	GetEndpointTypeSpec(typeName string) (EndpointPlugin, error)
 
 	// Auth
 	GetStratosAuthService() StratosAuth
-	ConnectOAuth2(c echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
+	ConnectOAuth2(c *echo.Context, cnsiRecord CNSIRecord) (*TokenRecord, error)
 	InitEndpointTokenRecord(expiry int64, authTok string, refreshTok string, disconnect bool) TokenRecord
 
 	// Session
-	GetSession(c echo.Context) (*sessions.Session, error)
-	GetSessionValue(c echo.Context, key string) (interface{}, error)
-	GetSessionInt64Value(c echo.Context, key string) (int64, error)
-	GetSessionStringValue(c echo.Context, key string) (string, error)
-	SaveSession(c echo.Context, session *sessions.Session) error
+	GetSession(c *echo.Context) (*sessions.Session, error)
+	GetSessionValue(c *echo.Context, key string) (interface{}, error)
+	GetSessionInt64Value(c *echo.Context, key string) (int64, error)
+	GetSessionStringValue(c *echo.Context, key string) (string, error)
+	SaveSession(c *echo.Context, session *sessions.Session) error
 	GetSessionDataStore() SessionDataStore
 
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t TokenRecord, err error)
-	DoLoginToCNSI(c echo.Context, cnsiGUID string, systemSharedToken bool) (*LoginRes, error)
-	DoLoginToCNSIwithConsoleUAAtoken(c echo.Context, theCNSIrecord CNSIRecord) error
+	DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemSharedToken bool) (*LoginRes, error)
+	DoLoginToCNSIwithConsoleUAAtoken(c *echo.Context, theCNSIrecord CNSIRecord) error
 
 	// Expose internal portal proxy records to extensions
 	GetCNSIRecord(guid string) (CNSIRecord, error)
@@ -54,11 +54,11 @@ type PortalProxy interface {
 	GetUserTokenInfo(tok string) (u *JWTUserTokenInfo, err error)
 
 	// Proxy API requests
-	ProxyRequest(c echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
+	ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*CNSIRequest, error)
 	DoProxyRequest(requests []ProxyRequestInfo) (map[string]*CNSIRequest, error)
 	DoProxySingleRequest(cnsiGUID, userGUID, method, requestUrl string, headers http.Header, body []byte) (*CNSIRequest, error)
 	DoProxySingleRequestWithToken(cnsiGUID string, token *TokenRecord, method, requestURL string, headers http.Header, body []byte) (*CNSIRequest, error)
-	SendProxiedResponse(c echo.Context, responses map[string]*CNSIRequest) error
+	SendProxiedResponse(c *echo.Context, responses map[string]*CNSIRequest) error
 
 	// Database Connection
 	GetDatabaseConnection() *sql.DB
@@ -76,7 +76,7 @@ type PortalProxy interface {
 	SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord TokenRecord) error
 	DeleteEndpointToken(cnsiGUID string, userGUID string) error
 	AddLoginHook(priority int, function LoginHookFunc) error
-	ExecuteLoginHooks(c echo.Context) error
+	ExecuteLoginHooks(c *echo.Context) error
 
 	// Plugins
 	GetPlugin(name string) interface{}

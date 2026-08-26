@@ -6,7 +6,7 @@ import (
 	"sync"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -56,7 +56,7 @@ type StAppStatsResponse struct {
 // app GUID but isn't guaranteed to be) and calls CF V3
 // /v3/processes/{guid}/stats, trimming the (potentially large) stats
 // payload down to just index + state per instance.
-func (c *CloudFoundrySpecification) getAppStats(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getAppStats(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	appGUID := ctx.Param("appGuid")
 	if cnsiGUID == "" || appGUID == "" {
@@ -123,7 +123,7 @@ const maxParallelStatsCalls = 8
 //  3. Per-app failures are dropped from the response rather than
 //     failing the whole batch — same lazy-non-fatal pattern as the
 //     single-app endpoint's HTTP error branch.
-func (c *CloudFoundrySpecification) getAppStatsBatch(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getAppStatsBatch(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

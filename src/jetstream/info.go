@@ -7,7 +7,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -20,7 +20,7 @@ type Endpoint struct {
 	CNSIType string             `json:"type"`
 }
 
-func (p *portalProxy) info(c echo.Context) error {
+func (p *portalProxy) info(c *echo.Context) error {
 
 	s, err := p.getInfo(c)
 	if err != nil {
@@ -30,7 +30,7 @@ func (p *portalProxy) info(c echo.Context) error {
 	return c.JSON(http.StatusOK, s)
 }
 
-func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
+func (p *portalProxy) getInfo(c *echo.Context) (*api.Info, error) {
 	// get the version
 	versions, err := p.getVersionsData()
 	if err != nil {

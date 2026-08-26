@@ -7,13 +7,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 // LoginHookFunc - function that can be hooked into a successful user login
-type LoginHookFunc func(c echo.Context) error
+type LoginHookFunc func(c *echo.Context) error
 
 // LogoutResponse is sent upon user logout.
 // It contains a flag to indicate whether or not the user was signed in with SSO
@@ -55,7 +55,7 @@ func (p *portalProxy) GetStratosAuthService() api.StratosAuth {
 }
 
 // login is used for both endpoint and direct UAA login
-func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *api.UAAResponse, u *api.JWTUserTokenInfo, err error) {
+func (p *portalProxy) login(c *echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *api.UAAResponse, u *api.JWTUserTokenInfo, err error) {
 	log.Debug("login")
 	if c.Request().Method == http.MethodGet {
 		code := c.QueryParam("code")
@@ -87,10 +87,10 @@ func (p *portalProxy) login(c echo.Context, skipSSLValidation bool, client strin
 	return uaaRes, u, nil
 }
 
-func (p *portalProxy) consoleLogin(c echo.Context) error {
+func (p *portalProxy) consoleLogin(c *echo.Context) error {
 	return p.StratosAuthService.Login(c)
 }
 
-func (p *portalProxy) consoleLogout(c echo.Context) error {
+func (p *portalProxy) consoleLogout(c *echo.Context) error {
 	return p.StratosAuthService.Logout(c)
 }

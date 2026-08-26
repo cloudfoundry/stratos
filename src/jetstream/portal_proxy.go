@@ -11,7 +11,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type portalProxy struct {
@@ -34,7 +34,7 @@ type portalProxy struct {
 	}
 	StratosAuthService   api.StratosAuth
 	APIKeysRepository    apikeys.Repository
-	PluginRegisterRoutes map[string]func(echo.Context) error
+	PluginRegisterRoutes map[string]func(*echo.Context) error
 	StoreFactory         api.StoreFactory
 	// indexHTMLTemplate is the pristine index.html, read once at startup;
 	// serveIndexHTML injects a per-response CSP nonce into a copy of it. Empty

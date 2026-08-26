@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -68,7 +68,7 @@ func newPhase1CPlugin(serverURL string) *CloudFoundrySpecification {
 	}
 }
 
-func newPhase1CContext(e *echo.Echo, method, target, body string) (echo.Context, *httptest.ResponseRecorder) {
+func newPhase1CContext(e *echo.Echo, method, target, body string) (*echo.Context, *httptest.ResponseRecorder) {
 	var br io.Reader
 	if body != "" {
 		br = strings.NewReader(body)
@@ -100,8 +100,7 @@ func TestUpdateNativeOrg_PatchAndReturnsMappedOrg(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/orgs/cnsi-1/org-1", `{"name":"renamed"}`)
-	ctx.SetParamNames("cnsiGuid", "orgGuid")
-	ctx.SetParamValues("cnsi-1", "org-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "orgGuid", Value: "org-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeOrg(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -120,8 +119,7 @@ func TestUpdateNativeOrg_RequiresParams(t *testing.T) {
 	defer ts.Close()
 	e := echo.New()
 	ctx, _ := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/orgs//", `{"name":"x"}`)
-	ctx.SetParamNames("cnsiGuid", "orgGuid")
-	ctx.SetParamValues("", "")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: ""}, {Name: "orgGuid", Value: ""}})
 	err := newPhase1CPlugin(ts.URL).updateNativeOrg(ctx)
 	require.Error(t, err)
 	httpErr, ok := err.(*echo.HTTPError)
@@ -152,8 +150,7 @@ func TestCreateNativeSpace_PostAndReturnsMappedSpace(t *testing.T) {
 	body := `{"name":"my-space","relationships":{"organization":{"data":{"guid":"org-1"}}}}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/spaces/cnsi-1", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).createNativeSpace(ctx))
 	assert.Equal(t, http.StatusCreated, rec.Code)
@@ -172,8 +169,7 @@ func TestCreateNativeSpace_RequiresOrganizationRelationship(t *testing.T) {
 	defer ts.Close()
 	e := echo.New()
 	ctx, _ := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/spaces/cnsi-1", `{"name":"sp"}`)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 	err := newPhase1CPlugin(ts.URL).createNativeSpace(ctx)
 	require.Error(t, err)
 	httpErr, _ := err.(*echo.HTTPError)
@@ -198,8 +194,7 @@ func TestUpdateNativeSpace_PatchAndReturnsMapped(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/spaces/cnsi-1/sp-1", `{"name":"renamed"}`)
-	ctx.SetParamNames("cnsiGuid", "spaceGuid")
-	ctx.SetParamValues("cnsi-1", "sp-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "sp-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeSpace(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -233,8 +228,7 @@ func TestUpdateNativeSpace_ForwardsIsolationSegment(t *testing.T) {
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/spaces/cnsi-1/sp-1",
 		`{"name":"renamed","isolation_segment_guid":"iso-1"}`)
-	ctx.SetParamNames("cnsiGuid", "spaceGuid")
-	ctx.SetParamValues("cnsi-1", "sp-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "sp-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeSpace(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -271,8 +265,7 @@ func TestUpdateNativeSpace_UnassignsIsolationSegment(t *testing.T) {
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/spaces/cnsi-1/sp-1",
 		`{"isolation_segment_guid":""}`)
-	ctx.SetParamNames("cnsiGuid", "spaceGuid")
-	ctx.SetParamValues("cnsi-1", "sp-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "sp-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeSpace(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -305,8 +298,7 @@ func TestCreateNativeRoute_PostAndReturnsMapped(t *testing.T) {
 	body := `{"host":"myhost","relationships":{"space":{"data":{"guid":"sp-1"}},"domain":{"data":{"guid":"dom-1"}}}}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/routes/cnsi-1", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).createNativeRoute(ctx))
 	assert.Equal(t, http.StatusCreated, rec.Code)
@@ -343,8 +335,7 @@ func TestCreateNativeApp_PostAndReturnsMapped(t *testing.T) {
 	body := `{"name":"my-app","relationships":{"space":{"data":{"guid":"sp-1"}}}}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/apps/cnsi-1", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).createNativeApp(ctx))
 	assert.Equal(t, http.StatusCreated, rec.Code)
@@ -375,8 +366,7 @@ func TestCreateNativeOrgQuota_PostAndReturnsMapped(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/organization_quotas/cnsi-1", `{"name":"my-quota"}`)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).createNativeOrgQuota(ctx))
 	assert.Equal(t, http.StatusCreated, rec.Code)
@@ -402,8 +392,7 @@ func TestUpdateNativeOrgQuota_PatchAndReturnsMapped(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/organization_quotas/cnsi-1/oq-1", `{"name":"renamed"}`)
-	ctx.SetParamNames("cnsiGuid", "quotaGuid")
-	ctx.SetParamValues("cnsi-1", "oq-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "quotaGuid", Value: "oq-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeOrgQuota(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -432,8 +421,7 @@ func TestCreateNativeSpaceQuota_PostAndReturnsMapped(t *testing.T) {
 	body := `{"name":"my-sq","relationships":{"organization":{"data":{"guid":"org-1"}},"spaces":{"data":[]}}}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/space_quotas/cnsi-1", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).createNativeSpaceQuota(ctx))
 	assert.Equal(t, http.StatusCreated, rec.Code)
@@ -463,8 +451,7 @@ func TestUpdateNativeSpaceQuota_PatchAndReturnsMapped(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/space_quotas/cnsi-1/sq-1", `{"name":"renamed"}`)
-	ctx.SetParamNames("cnsiGuid", "quotaGuid")
-	ctx.SetParamValues("cnsi-1", "sq-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "quotaGuid", Value: "sq-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeSpaceQuota(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -489,8 +476,7 @@ func TestCreateManagedServiceInstance_AsyncBareFallback(t *testing.T) {
 	body := `{"type":"managed","name":"si","relationships":{"space":{"data":{"guid":"sp-1"}},"service_plan":{"data":{"guid":"plan-1"}}}}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/service_instances/cnsi-1", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).createManagedServiceInstance(ctx))
 	// Without async-job wiring (asyncTracker/asyncTranslator are nil) handler
@@ -506,8 +492,7 @@ func TestCreateManagedServiceInstance_RejectsUserProvided(t *testing.T) {
 	body := `{"type":"user-provided","name":"x","relationships":{"space":{"data":{"guid":"sp-1"}}}}`
 	e := echo.New()
 	ctx, _ := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/service_instances/cnsi-1", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 	err := newPhase1CPlugin(ts.URL).createManagedServiceInstance(ctx)
 	require.Error(t, err)
 	httpErr, _ := err.(*echo.HTTPError)
@@ -526,8 +511,7 @@ func TestUpdateManagedServiceInstance_AsyncBareFallback(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/service_instances/cnsi-1/si-1", `{"name":"renamed"}`)
-	ctx.SetParamNames("cnsiGuid", "siGuid")
-	ctx.SetParamValues("cnsi-1", "si-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "siGuid", Value: "si-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateManagedServiceInstance(ctx))
 	assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -551,8 +535,7 @@ func TestUpdateManagedServiceInstance_Empty202_ParsesJobFromLocation(t *testing.
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/service_instances/cnsi-1/si-1", `{"parameters":{"foo":"bar"}}`)
-	ctx.SetParamNames("cnsiGuid", "siGuid")
-	ctx.SetParamValues("cnsi-1", "si-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "siGuid", Value: "si-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateManagedServiceInstance(ctx))
 	assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -599,8 +582,7 @@ func TestUpdateManagedServiceInstance_Empty202_BrokerFailed(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/service_instances/cnsi-1/si-1", `{"parameters":{"foo":"bar"}}`)
-	ctx.SetParamNames("cnsiGuid", "siGuid")
-	ctx.SetParamValues("cnsi-1", "si-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "siGuid", Value: "si-1"}})
 
 	require.NoError(t, plugin.updateManagedServiceInstance(ctx))
 	assert.Equal(t, http.StatusBadGateway, rec.Code)
@@ -646,8 +628,7 @@ func TestUpdateManagedServiceInstance_Empty202_Succeeded(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/service_instances/cnsi-1/si-1", `{"parameters":{"foo":"bar"}}`)
-	ctx.SetParamNames("cnsiGuid", "siGuid")
-	ctx.SetParamValues("cnsi-1", "si-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "siGuid", Value: "si-1"}})
 
 	require.NoError(t, plugin.updateManagedServiceInstance(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -676,8 +657,7 @@ func TestCreateNativeRole_OrgScopedSync(t *testing.T) {
 	body := `{"type":"organization_manager","relationships":{"user":{"data":{"guid":"user-1"}},"organization":{"data":{"guid":"org-1"}}}}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).createNativeRole(ctx))
 	assert.Equal(t, http.StatusCreated, rec.Code)
@@ -709,8 +689,7 @@ func TestCreateNativeRole_RequiresExactlyOneScope(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			e := echo.New()
 			ctx, _ := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1", tc.body)
-			ctx.SetParamNames("cnsiGuid")
-			ctx.SetParamValues("cnsi-1")
+			ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 			err := newPhase1CPlugin(ts.URL).createNativeRole(ctx)
 			require.Error(t, err)
 			httpErr, _ := err.(*echo.HTTPError)
@@ -737,8 +716,7 @@ func TestDeleteNativeRole_AsyncJob(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodDelete, "/pp/v1/cf/roles/cnsi-1/role-1", "")
-	ctx.SetParamNames("cnsiGuid", "roleGuid")
-	ctx.SetParamValues("cnsi-1", "role-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "roleGuid", Value: "role-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).deleteNativeRole(ctx))
 	assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -762,8 +740,7 @@ func TestUpdateNativeOrg_PropagatesUpstreamError(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPatch, "/pp/v1/cf/orgs/cnsi-1/org-1", `{"name":"taken"}`)
-	ctx.SetParamNames("cnsiGuid", "orgGuid")
-	ctx.SetParamValues("cnsi-1", "org-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "orgGuid", Value: "org-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).updateNativeOrg(ctx))
 	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)

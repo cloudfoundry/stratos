@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -76,7 +76,7 @@ func newVisibilityPlugin(serverURL string) *CloudFoundrySpecification {
 	}
 }
 
-func newVisibilityContext(e *echo.Echo, method, target, body string) (echo.Context, *httptest.ResponseRecorder) {
+func newVisibilityContext(e *echo.Echo, method, target, body string) (*echo.Context, *httptest.ResponseRecorder) {
 	var bodyReader io.Reader
 	if body != "" {
 		bodyReader = strings.NewReader(body)
@@ -96,8 +96,7 @@ func TestGetNativeServicePlanVisibility(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newVisibilityContext(e, http.MethodGet, "/pp/v1/cf/service_plans/test-cnsi/plan-1/visibility", "")
-	ctx.SetParamNames("cnsiGuid", "planGuid")
-	ctx.SetParamValues("test-cnsi", "plan-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "planGuid", Value: "plan-1"}})
 	plugin := newVisibilityPlugin(ts.URL)
 
 	require.NoError(t, plugin.getNativeServicePlanVisibility(ctx))
@@ -121,8 +120,7 @@ func TestApplyNativeServicePlanVisibility_Replace(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newVisibilityContext(e, http.MethodPost, "/pp/v1/cf/service_plans/test-cnsi/plan-1/visibility", body)
-	ctx.SetParamNames("cnsiGuid", "planGuid")
-	ctx.SetParamValues("test-cnsi", "plan-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "planGuid", Value: "plan-1"}})
 	plugin := newVisibilityPlugin(ts.URL)
 
 	require.NoError(t, plugin.applyNativeServicePlanVisibility(ctx))
@@ -138,8 +136,7 @@ func TestApplyNativeServicePlanVisibility_Merge(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newVisibilityContext(e, http.MethodPatch, "/pp/v1/cf/service_plans/test-cnsi/plan-1/visibility", body)
-	ctx.SetParamNames("cnsiGuid", "planGuid")
-	ctx.SetParamValues("test-cnsi", "plan-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "planGuid", Value: "plan-1"}})
 	plugin := newVisibilityPlugin(ts.URL)
 
 	require.NoError(t, plugin.applyNativeServicePlanVisibility(ctx))
@@ -153,8 +150,7 @@ func TestRemoveOrgFromNativeServicePlanVisibility(t *testing.T) {
 
 	e := echo.New()
 	ctx, rec := newVisibilityContext(e, http.MethodDelete, "/pp/v1/cf/service_plans/test-cnsi/plan-1/visibility/org-1", "")
-	ctx.SetParamNames("cnsiGuid", "planGuid", "orgGuid")
-	ctx.SetParamValues("test-cnsi", "plan-1", "org-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "planGuid", Value: "plan-1"}, {Name: "orgGuid", Value: "org-1"}})
 	plugin := newVisibilityPlugin(ts.URL)
 
 	require.NoError(t, plugin.removeOrgFromNativeServicePlanVisibility(ctx))
