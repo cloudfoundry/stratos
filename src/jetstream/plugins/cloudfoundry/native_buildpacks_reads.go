@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeBuildpacks handles GET /pp/v1/cf/buildpacks/{cnsiGuid}.
@@ -20,7 +20,7 @@ import (
 // → StBuildpack along the way, and stamp cnsiGuid onto each row so
 // multi-CNSI rows + favorites can be keyed by (cnsi, buildpack)
 // consistently with every other St* DTO.
-func (c *CloudFoundrySpecification) getNativeBuildpacks(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeBuildpacks(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +17,7 @@ import (
 // newEntitleContext builds an echo context for the isolation-segment
 // entitle-organizations route with the given JSON body, matching how
 // native_routes.go registers the handler.
-func newEntitleContext(e *echo.Echo, body string) (echo.Context, *httptest.ResponseRecorder) {
+func newEntitleContext(e *echo.Echo, body string) (*echo.Context, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(http.MethodPost,
 		"/pp/v1/cf/isolation_segments/cnsi-1/iso-1/relationships/organizations",
 		strings.NewReader(body))
@@ -25,8 +25,7 @@ func newEntitleContext(e *echo.Echo, body string) (echo.Context, *httptest.Respo
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/isolation_segments/:cnsiGuid/:isoGuid/relationships/organizations")
-	c.SetParamNames("cnsiGuid", "isoGuid")
-	c.SetParamValues("cnsi-1", "iso-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "isoGuid", Value: "iso-1"}})
 	return c, rec
 }
 

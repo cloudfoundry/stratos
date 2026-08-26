@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // createUserProvidedServiceInstance handles
@@ -19,7 +19,7 @@ import (
 // Request body shape: StUserProvidedServiceRequest. `name` and
 // `spaceGuid` are required. The handler translates the flat
 // `spaceGuid` into the v3 relationships envelope CAPI expects.
-func (c *CloudFoundrySpecification) createUserProvidedServiceInstance(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) createUserProvidedServiceInstance(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -89,7 +89,7 @@ func (c *CloudFoundrySpecification) createUserProvidedServiceInstance(ctx echo.C
 // sync — like create, the CAPI client returns the resource directly.
 // `type` is intentionally NOT sent on update — v3 forbids changing the
 // instance discriminator.
-func (c *CloudFoundrySpecification) updateUserProvidedServiceInstance(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) updateUserProvidedServiceInstance(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	siGUID := ctx.Param("siGuid")
 	if cnsiGUID == "" || siGUID == "" {

@@ -9,7 +9,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeServicePlans handles GET /pp/v1/cf/service_plans/{cnsiGuid}.
@@ -35,7 +35,7 @@ import (
 //
 // `?guids=<csv>` is the batch branch used by lazy-fetch consumers that
 // already know the plan GUIDs they want.
-func (c *CloudFoundrySpecification) getNativeServicePlans(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServicePlans(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -122,7 +122,7 @@ func (c *CloudFoundrySpecification) getNativeServicePlans(ctx echo.Context) erro
 // summary+ resolves the offering and broker refs via follow-up batched
 // list calls (one for the offering, one for the broker). Soft-fails to
 // guid-only refs on error.
-func (c *CloudFoundrySpecification) getNativeServicePlanDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServicePlanDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	planGUID := ctx.Param("planGuid")
 	if cnsiGUID == "" || planGUID == "" {
@@ -310,7 +310,7 @@ func mapPlanSchemas(s capi.ServicePlanSchemas) *StPlanSchemas {
 //
 // `?service_offering=<csv>` from the existing query layer also composes when
 // callers want plans for a specific (offering ∩ broker) tuple.
-func (c *CloudFoundrySpecification) getNativeServicePlansForBroker(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServicePlansForBroker(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	brokerGUID := ctx.Param("brokerGuid")
 	if cnsiGUID == "" || brokerGUID == "" {
@@ -391,7 +391,7 @@ func (c *CloudFoundrySpecification) getNativeServicePlansForBroker(ctx echo.Cont
 // when an include chain can't reach broker rows (CAPI rejects
 // `service_offering.service_broker` on /v3/service_plans). Soft-fail: errors
 // return an empty map and toStServicePlan emits guid-only broker refs.
-func batchFetchBrokersForOfferings(ctx echo.Context, cfClient capi.Client, offerings map[string]capi.ServiceOffering) map[string]capi.ServiceBroker {
+func batchFetchBrokersForOfferings(ctx *echo.Context, cfClient capi.Client, offerings map[string]capi.ServiceOffering) map[string]capi.ServiceBroker {
 	out := map[string]capi.ServiceBroker{}
 	guids := []string{}
 	seen := map[string]bool{}

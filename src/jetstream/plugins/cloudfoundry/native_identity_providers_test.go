@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -50,8 +50,7 @@ func TestIdentityProviders_ListsOrigins(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/identity-providers/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getIdentityProviders(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -100,8 +99,7 @@ func TestIdentityProviders_403PassedThrough(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/identity-providers/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	err := plugin.getIdentityProviders(ctx)
 	require.Error(t, err)

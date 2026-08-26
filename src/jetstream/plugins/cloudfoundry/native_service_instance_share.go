@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // shareServiceInstanceSpaces handles POST
@@ -22,7 +22,7 @@ import (
 // Response is the CF shared-spaces relationships envelope
 // (capi.ServiceInstanceSharedSpacesRelationships = {data:[{guid}], links}),
 // returned as-is with a schema-version header — matching applyOrgQuotaToOrgs.
-func (cf *CloudFoundrySpecification) shareServiceInstanceSpaces(c echo.Context) error {
+func (cf *CloudFoundrySpecification) shareServiceInstanceSpaces(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	siGUID := c.Param("siGuid")
 	if cnsiGUID == "" || siGUID == "" {

@@ -13,8 +13,8 @@ import (
 // isn't duplicated when both counts are needed. Mirrors the lazy-non-fatal
 // pattern of fetchAppCountsForSpaces.
 //
-// Takes context.Context (not echo.Context) so callers can spawn this
-// inside an errgroup goroutine — echo.Context is not safe for concurrent
+// Takes context.Context (not *echo.Context) so callers can spawn this
+// inside an errgroup goroutine — *echo.Context is not safe for concurrent
 // use, but the request's context.Context is.
 func fetchSpacesForOrgs(ctx context.Context, cfClient capi.Client, orgGUIDs []string) (counts map[string]int, spaceToOrg map[string]string, err error) {
 	counts = make(map[string]int, len(orgGUIDs))

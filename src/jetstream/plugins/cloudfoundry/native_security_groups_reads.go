@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeSecurityGroups handles GET /pp/v1/cf/security_groups/{cnsiGuid}.
@@ -22,7 +22,7 @@ import (
 // consistently with every other St* DTO. Rule arrays and space bind
 // arrays are reduced to counts on the list shape; the future detail
 // screen will own the full rule table.
-func (c *CloudFoundrySpecification) getNativeSecurityGroups(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeSecurityGroups(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

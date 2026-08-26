@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -29,7 +29,7 @@ import (
 // window, 202 with {id, state, startedAt} for client-side polling
 // otherwise. Falls back to bare 202 if the async-job contract isn't
 // wired (plugin ordering / tests).
-func (cf *CloudFoundrySpecification) deleteServiceInstance(c echo.Context) error {
+func (cf *CloudFoundrySpecification) deleteServiceInstance(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	siGUID := c.Param("siGuid")
 	if cnsiGUID == "" || siGUID == "" {
@@ -100,7 +100,7 @@ func (cf *CloudFoundrySpecification) deleteServiceInstance(c echo.Context) error
 //
 // User-provided instances should go through createUserProvidedServiceInstance —
 // this handler rejects type="user-provided" with 400.
-func (cf *CloudFoundrySpecification) createManagedServiceInstance(c echo.Context) error {
+func (cf *CloudFoundrySpecification) createManagedServiceInstance(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -268,7 +268,7 @@ func checkManagedSIUpdateOutcome(ctx context.Context, cfClient capi.Client, siGU
 //
 // User-provided instances use updateUserProvidedServiceInstance which
 // returns the resource directly (sync).
-func (cf *CloudFoundrySpecification) updateManagedServiceInstance(c echo.Context) error {
+func (cf *CloudFoundrySpecification) updateManagedServiceInstance(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	siGUID := c.Param("siGuid")
 	if cnsiGUID == "" || siGUID == "" {

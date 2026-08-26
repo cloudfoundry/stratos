@@ -18,19 +18,19 @@ import (
 	"github.com/cloudfoundry/sonde-go/events"
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/coder/websocket"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
-func (c *CloudFoundrySpecification) appStream(echoContext echo.Context) error {
+func (c *CloudFoundrySpecification) appStream(echoContext *echo.Context) error {
 	return c.commonStreamHandler(echoContext, appStreamHandler)
 }
 
-func (c *CloudFoundrySpecification) firehose(echoContext echo.Context) error {
+func (c *CloudFoundrySpecification) firehose(echoContext *echo.Context) error {
 	return c.commonStreamHandler(echoContext, firehoseStreamHandler)
 }
 
-func (c *CloudFoundrySpecification) commonStreamHandler(echoContext echo.Context, bespokeStreamHandler func(echo.Context, *AuthorizedConsumer, *websocket.Conn) error) error {
+func (c *CloudFoundrySpecification) commonStreamHandler(echoContext *echo.Context, bespokeStreamHandler func(*echo.Context, *AuthorizedConsumer, *websocket.Conn) error) error {
 	ac, err := c.openNoaaConsumer(echoContext)
 	if err != nil {
 		return err
@@ -96,7 +96,7 @@ func dopplerTLSConfig(cnsiRecord api.CNSIRecord) *tls.Config {
 }
 
 // Refresh the Authorization token if needed and create a new Noaa consumer
-func (c *CloudFoundrySpecification) openNoaaConsumer(echoContext echo.Context) (*AuthorizedConsumer, error) {
+func (c *CloudFoundrySpecification) openNoaaConsumer(echoContext *echo.Context) (*AuthorizedConsumer, error) {
 
 	ac := &AuthorizedConsumer{}
 
@@ -233,7 +233,7 @@ func drainFirehoseEvents(eventChan <-chan *events.Envelope, callback func(msg *e
 	}
 }
 
-func appStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWebSocket *websocket.Conn) error {
+func appStreamHandler(echoContext *echo.Context, ac *AuthorizedConsumer, clientWebSocket *websocket.Conn) error {
 	// Get the CNSI and app IDs from route parameters
 	cnsiGUID := echoContext.Param("cnsiGuid")
 	appGUID := echoContext.Param("appGuid")
@@ -273,7 +273,7 @@ func appStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWe
 	return nil
 }
 
-func firehoseStreamHandler(echoContext echo.Context, ac *AuthorizedConsumer, clientWebSocket *websocket.Conn) error {
+func firehoseStreamHandler(echoContext *echo.Context, ac *AuthorizedConsumer, clientWebSocket *websocket.Conn) error {
 	log.Debug("firehose")
 
 	// Get the CNSI and app IDs from route parameters

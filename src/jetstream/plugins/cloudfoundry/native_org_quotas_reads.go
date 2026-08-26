@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeOrgQuotas handles GET /pp/v1/cf/organization_quotas/{cnsiGuid}.
@@ -21,7 +21,7 @@ import (
 // fields are *int (null means "no limit"); we coerce nil → -1 server-
 // side so the wire shape stays flat ints and the frontend renders -1
 // as "Unlimited" without null-guarding each cell.
-func (c *CloudFoundrySpecification) getNativeOrgQuotas(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeOrgQuotas(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -75,7 +75,7 @@ func (c *CloudFoundrySpecification) getNativeOrgQuotas(ctx echo.Context) error {
 // Returns a single org quota by GUID as a flat StOrgQuota. Drives the
 // "Quota Definition" link in the org Summary header and any other
 // single-quota lookup that previously hit V2's quota_definitions/{guid}.
-func (c *CloudFoundrySpecification) getNativeOrgQuotaDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeOrgQuotaDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	if cnsiGUID == "" || quotaGUID == "" {

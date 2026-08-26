@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -16,11 +16,11 @@ import (
 // UaaUserInfo for UAA User Info
 type UaaUserInfo struct {
 	portalProxy api.PortalProxy
-	echo        echo.Context
+	echo        *echo.Context
 }
 
 // InitUaaUserInfo creates a new UAA user info provider
-func InitUaaUserInfo(portalProxy api.PortalProxy, c echo.Context) Provider {
+func InitUaaUserInfo(portalProxy api.PortalProxy, c *echo.Context) Provider {
 	return &UaaUserInfo{portalProxy: portalProxy, echo: c}
 }
 

@@ -6,10 +6,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
-func newTestContext(path, rawQuery string) echo.Context {
+func newTestContext(path, rawQuery string) *echo.Context {
 	e := echo.New()
 	req := httptest.NewRequest("GET", path+"?"+rawQuery, nil)
 	rec := httptest.NewRecorder()

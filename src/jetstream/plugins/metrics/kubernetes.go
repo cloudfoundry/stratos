@@ -6,11 +6,11 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Metrics API endpoints - admin - for a Containers
-func (m *MetricsSpecification) getPodMetrics(c echo.Context) error {
+func (m *MetricsSpecification) getPodMetrics(c *echo.Context) error {
 
 	prometheusOp := c.Param("op")
 	// podId := c.Param("podId")

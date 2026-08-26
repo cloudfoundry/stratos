@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
@@ -33,7 +33,7 @@ func (c *KubeTokenAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.To
 	return nil
 }
 
-func (c *KubeTokenAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+func (c *KubeTokenAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (KubeTokenAuth)")
 	token := strings.Join(strings.Fields(ec.FormValue("token")), "")
 	tokenRecord := NewKubeTokenAuthTokenRecord(c.portalProxy, token)

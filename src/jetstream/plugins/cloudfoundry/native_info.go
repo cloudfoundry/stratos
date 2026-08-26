@@ -16,7 +16,7 @@ package cloudfoundry
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 )
@@ -73,7 +73,7 @@ type StratosCFInfo struct {
 // since fw-capi .7 added Link.Meta), and projecting the response into
 // Stratos shape. Both calls run sequentially — payloads are small
 // (<2 KiB combined) and parallelism would only save one RTT.
-func (c *CloudFoundrySpecification) getNativeCFInfo(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeCFInfo(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "missing cnsiGuid")

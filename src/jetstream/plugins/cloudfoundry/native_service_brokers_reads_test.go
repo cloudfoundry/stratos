@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -121,12 +121,11 @@ func brokerResource(guid, name, url, spaceGUID string) map[string]interface{} {
 	return res
 }
 
-func newServiceBrokersContext(e *echo.Echo, target string) (echo.Context, *httptest.ResponseRecorder) {
+func newServiceBrokersContext(e *echo.Echo, target string) (*echo.Context, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(http.MethodGet, target, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 	return ctx, rec
 }
 
@@ -304,8 +303,7 @@ func TestGetNativeServiceBrokerDetail_Details(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/service_brokers/test-cnsi/broker-77?return=details", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "brokerGuid")
-	ctx.SetParamValues("test-cnsi", "broker-77")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "brokerGuid", Value: "broker-77"}})
 	plugin := newServiceBrokersPlugin(ts.URL)
 
 	require.NoError(t, plugin.getNativeServiceBrokerDetail(ctx))

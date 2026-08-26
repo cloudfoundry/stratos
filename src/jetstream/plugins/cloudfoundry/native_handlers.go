@@ -13,7 +13,7 @@ import (
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/fivetwenty-io/capi/v3/pkg/cfclient"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -26,7 +26,7 @@ const stratosSchemaVersion = "1"
 type nativeCFProxy interface {
 	GetCNSIRecord(guid string) (api.CNSIRecord, error)
 	GetCNSITokenRecord(cnsiGUID string, userGUID string) (api.TokenRecord, bool)
-	GetSessionStringValue(ctx echo.Context, key string) (string, error)
+	GetSessionStringValue(ctx *echo.Context, key string) (string, error)
 	RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (api.TokenRecord, error)
 	DoProxySingleRequestWithToken(cnsiGUID string, token *api.TokenRecord, method, requestURL string, headers http.Header, body []byte) (*api.CNSIRequest, error)
 	GetUserTokenInfo(token string) (*api.JWTUserTokenInfo, error)
@@ -34,7 +34,7 @@ type nativeCFProxy interface {
 }
 
 // getUserGUID extracts the logged-in user GUID from the session.
-func (c *CloudFoundrySpecification) getUserGUID(ctx echo.Context) (string, error) {
+func (c *CloudFoundrySpecification) getUserGUID(ctx *echo.Context) (string, error) {
 	return c.nativeProxy().GetSessionStringValue(ctx, "user_id")
 }
 
@@ -42,7 +42,7 @@ func (c *CloudFoundrySpecification) getUserGUID(ctx echo.Context) (string, error
 // token Jetstream stored for the given CF endpoint. getUserGUID() returns
 // the Stratos session user; this returns the user_id claim from the CF
 // token — the value /v3/roles?user_guids= filters expect.
-func (c *CloudFoundrySpecification) getCFUserGUIDForEndpoint(ctx echo.Context, cnsiGUID string) (string, error) {
+func (c *CloudFoundrySpecification) getCFUserGUIDForEndpoint(ctx *echo.Context, cnsiGUID string) (string, error) {
 	sessionUser, err := c.getUserGUID(ctx)
 	if err != nil {
 		return "", echo.NewHTTPError(http.StatusUnauthorized, "could not determine session user")
@@ -375,7 +375,7 @@ func toStSpace(r capi.Space, cnsiGUID string) StSpace {
 //   - (default): single CAPI page passthrough, Stratos paged envelope.
 //     Caller's per_page/page forward verbatim to /v3/organizations; absent,
 //     V3 server defaults apply.
-func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeOrgs(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID, err := c.getUserGUID(ctx)
 	if err != nil {
@@ -430,7 +430,7 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 	// (errgroup). The apps-to-org attribution needs the space→org map
 	// but the HTTP drain itself doesn't, so we split the drain from the
 	// attribution and fan them out in parallel. fetchSpacesForOrgs and
-	// drainAppsForOrgs both take context.Context (not echo.Context) so
+	// drainAppsForOrgs both take context.Context (not *echo.Context) so
 	// they're safe to call from goroutines; fw-capi's underlying
 	// retryablehttp.Client is concurrent-safe. Each goroutine writes to
 	// disjoint output vars and eg.Wait() establishes happens-before for
@@ -440,7 +440,7 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 	// slightly-worse p50 vs sequential — most likely because the
 	// upstream CAPI is the bottleneck and two concurrent drains
 	// contend on its connection pool. Kept parallel anyway because:
-	// (1) it eliminates a latent goroutine-safety landmine (echo.Context
+	// (1) it eliminates a latent goroutine-safety landmine (*echo.Context
 	// is not concurrent-safe), (2) it leaves the door open for future
 	// fw-capi / CAPI improvements that benefit from parallelism, and
 	// (3) the real perf win lives in the frontend cache short-circuit
@@ -501,7 +501,7 @@ func (c *CloudFoundrySpecification) getNativeOrgs(ctx echo.Context) error {
 //     Apps-Attached column resolver). Triggers the enrichment-skip path
 //     (no per-app process / space / route fan-out) and returns the flat
 //     StAppsResponse envelope since the caller only needs guid → name.
-func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeApps(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	userGUID, err := c.getUserGUID(ctx)
 	if err != nil {
@@ -727,7 +727,7 @@ func (c *CloudFoundrySpecification) getNativeApps(ctx echo.Context) error {
 //
 // Either filter triggers the enrichment-skip path (no per-space app/route
 // counts) since the App Wall name resolver only needs name → guid mapping.
-func (c *CloudFoundrySpecification) getNativeSpaces(ctx echo.Context) (err error) {
+func (c *CloudFoundrySpecification) getNativeSpaces(ctx *echo.Context) (err error) {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	rows := 0
 	start := time.Now()
@@ -944,7 +944,7 @@ func listAllRoutes(ctx context.Context, cfClient capi.Client, spaceGUIDs string)
 // The query-param dispatch mirrors getNativeOrgs/getNativeApps/getNativeSpaces.
 // "counts" retains the original wire format on the same URL so endpoint-data
 // consumers don't need to change URLs.
-func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeRouteCount(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	// space_guids forwards CF v3's /v3/routes?space_guids= filter to narrow
 	// the drain. Used by slice 3.5's map-routes picker so production tenants
@@ -1011,7 +1011,7 @@ func (c *CloudFoundrySpecification) getNativeRouteCount(ctx echo.Context) error 
 	})
 }
 
-func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
 	userGUID, err := c.getUserGUID(ctx)
@@ -1045,7 +1045,7 @@ func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx echo.Context) error {
 // space resource). The feature fetch is best-effort: on failure we log
 // and return AllowSSH=false rather than failing the whole detail call —
 // the SSH/env-var UI just falls back to its disabled state.
-func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	spaceGUID := ctx.Param("spaceGuid")
 	userGUID, err := c.getUserGUID(ctx)
@@ -1093,7 +1093,7 @@ func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx echo.Context) error
 // Returns spaces for one org as a single CAPI page passthrough. Caller's
 // per_page/page forward verbatim to /v3/spaces?organization_guids={orgGuid};
 // absent, V3 server defaults apply.
-func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeOrgSpaces(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
 	userGUID, err := c.getUserGUID(ctx)

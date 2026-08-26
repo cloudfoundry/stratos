@@ -13,7 +13,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -330,7 +330,7 @@ func (p *noTokenProxy) GetCNSITokenRecord(_, _ string) (api.TokenRecord, bool) {
 	return api.TokenRecord{}, false
 }
 
-func (p *noTokenProxy) GetSessionStringValue(_ echo.Context, _ string) (string, error) {
+func (p *noTokenProxy) GetSessionStringValue(_ *echo.Context, _ string) (string, error) {
 	return "", nil
 }
 

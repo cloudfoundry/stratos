@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -27,7 +27,7 @@ import (
 // resource (the mapping) does not exist, so the handler returns 404 without
 // attempting a DELETE. Upstream errors on either step flow through
 // handleCapiError to preserve CF's error envelope classification.
-func (cf *CloudFoundrySpecification) unmapRouteFromApp(c echo.Context) error {
+func (cf *CloudFoundrySpecification) unmapRouteFromApp(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	routeGUID := c.Param("routeGuid")
 	appGUID := c.Param("appGuid")
@@ -82,7 +82,7 @@ func (cf *CloudFoundrySpecification) unmapRouteFromApp(c echo.Context) error {
 // 202 with {id, state, startedAt} when the job outlives the window.
 // Falls back to bare 202 if the async-job contract isn't wired (plugin
 // ordering / tests).
-func (cf *CloudFoundrySpecification) deleteNativeRoute(c echo.Context) error {
+func (cf *CloudFoundrySpecification) deleteNativeRoute(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	routeGUID := c.Param("routeGuid")
 	if cnsiGUID == "" || routeGUID == "" {
@@ -141,7 +141,7 @@ func (cf *CloudFoundrySpecification) deleteNativeRoute(c echo.Context) error {
 // Sync write: V3 returns 201 with the created route. Body shape is
 // capi.RouteCreateRequest (V3 wire shape: {host?, path?, port?,
 // relationships:{space:{...}, domain:{...}}}).
-func (cf *CloudFoundrySpecification) createNativeRoute(c echo.Context) error {
+func (cf *CloudFoundrySpecification) createNativeRoute(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

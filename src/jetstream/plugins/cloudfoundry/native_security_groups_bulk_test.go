@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -150,13 +150,12 @@ func TestBindSecurityGroupSpaces_Validation(t *testing.T) {
 // newSecurityGroupBulkContext builds an echo context for a security-group
 // bulk-bind POST with cnsiGuid=cnsi-1 and sgGuid=sg-1 path params (the sibling
 // newBulkContext only wires cnsiGuid).
-func newSecurityGroupBulkContext(relPath, body string) (echo.Context, *httptest.ResponseRecorder) {
+func newSecurityGroupBulkContext(relPath, body string) (*echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	req := httptest.NewRequest(http.MethodPost, "/pp/v1"+relPath, strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetParamNames("cnsiGuid", "sgGuid")
-	c.SetParamValues("cnsi-1", "sg-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "sgGuid", Value: "sg-1"}})
 	return c, rec
 }

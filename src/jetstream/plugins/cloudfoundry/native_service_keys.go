@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -38,7 +38,7 @@ import (
 // Type="key" (ignoring any client-supplied type) so this endpoint can only ever
 // mint keys. capi's Create returns *ServiceCredentialBinding (sync 201) or *Job
 // (async); the async path drives RunFastPath like createServiceBinding.
-func (cf *CloudFoundrySpecification) createServiceKey(c echo.Context) error {
+func (cf *CloudFoundrySpecification) createServiceKey(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -106,7 +106,7 @@ func (cf *CloudFoundrySpecification) createServiceKey(c echo.Context) error {
 // Delegates to ServiceCredentialBindings().Delete (a key is just a credential
 // binding). Async 202 + Location → *Job → RunFastPath; nil job → synthetic
 // COMPLETE so writeWithJob resolves without polling.
-func (cf *CloudFoundrySpecification) deleteServiceKey(c echo.Context) error {
+func (cf *CloudFoundrySpecification) deleteServiceKey(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	keyGUID := c.Param("keyGuid")
 	if cnsiGUID == "" || keyGUID == "" {
@@ -168,7 +168,7 @@ func (cf *CloudFoundrySpecification) deleteServiceKey(c echo.Context) error {
 // Lists credential bindings filtered to type=key. Optional query filter:
 // service_instance_guids (scope to one SI). Returns a StratosPagedResponse of
 // the raw v3 bindings; the frontend adapter shapes them when the UI is wired.
-func (cf *CloudFoundrySpecification) getNativeServiceKeys(c echo.Context) error {
+func (cf *CloudFoundrySpecification) getNativeServiceKeys(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -210,7 +210,7 @@ func (cf *CloudFoundrySpecification) getNativeServiceKeys(c echo.Context) error 
 // Surfaces the key's credentials (v3 GET .../details) — the reason service keys
 // exist. Read-only; no job handoff. Sensitive payload: returned verbatim to the
 // authenticated caller, never logged.
-func (cf *CloudFoundrySpecification) getNativeServiceKeyDetails(c echo.Context) error {
+func (cf *CloudFoundrySpecification) getNativeServiceKeyDetails(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	keyGUID := c.Param("keyGuid")
 	if cnsiGUID == "" || keyGUID == "" {
@@ -242,7 +242,7 @@ func (cf *CloudFoundrySpecification) getNativeServiceKeyDetails(c echo.Context) 
 //
 // Surfaces the broker-specific parameters the key was created with (v3 GET
 // .../parameters). Read-only; no job handoff.
-func (cf *CloudFoundrySpecification) getNativeServiceKeyParameters(c echo.Context) error {
+func (cf *CloudFoundrySpecification) getNativeServiceKeyParameters(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	keyGUID := c.Param("keyGuid")
 	if cnsiGUID == "" || keyGUID == "" {

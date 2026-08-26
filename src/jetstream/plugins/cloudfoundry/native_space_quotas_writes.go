@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -18,7 +18,7 @@ import (
 // Sync write: V3 returns 201 with the created quota. Body shape is
 // capi.SpaceQuotaV3CreateRequest = {name, apps?, services?, routes?,
 // relationships:{organization:{data:{guid}}, spaces:{data:[...]}}, metadata?}.
-func (c *CloudFoundrySpecification) createNativeSpaceQuota(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) createNativeSpaceQuota(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -56,7 +56,7 @@ func (c *CloudFoundrySpecification) createNativeSpaceQuota(ctx echo.Context) err
 
 // updateNativeSpaceQuota handles PATCH /pp/v1/cf/space_quotas/{cnsiGuid}/{quotaGuid} —
 // Stratos-shape wrapper around CF V3 PATCH /v3/space_quotas/{guid}.
-func (c *CloudFoundrySpecification) updateNativeSpaceQuota(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) updateNativeSpaceQuota(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	if cnsiGUID == "" || quotaGUID == "" {
@@ -102,7 +102,7 @@ func (c *CloudFoundrySpecification) updateNativeSpaceQuota(ctx echo.Context) err
 // 202 with {id, state, startedAt} when the job outlives the window.
 // Falls back to bare 202 if the async-job contract isn't wired (plugin
 // ordering / tests).
-func (c *CloudFoundrySpecification) deleteNativeSpaceQuota(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) deleteNativeSpaceQuota(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	if cnsiGUID == "" || quotaGUID == "" {
@@ -165,7 +165,7 @@ func (c *CloudFoundrySpecification) deleteNativeSpaceQuota(ctx echo.Context) err
 // CF v3 dropped space-quota assignment at space-create time (the V2
 // `space_quota_definition_guid` field on spaces); the wizard now
 // chains create-space + apply-quota.
-func (c *CloudFoundrySpecification) applySpaceQuotaToSpaces(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) applySpaceQuotaToSpaces(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	if cnsiGUID == "" || quotaGUID == "" {
@@ -209,7 +209,7 @@ func (c *CloudFoundrySpecification) applySpaceQuotaToSpaces(ctx echo.Context) er
 // Edit-space-step calls this when the user clears the quota on an existing
 // space; v3 has no single endpoint to "switch" quota on a space, so the
 // flow becomes remove-old + apply-new.
-func (c *CloudFoundrySpecification) removeSpaceQuotaFromSpace(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) removeSpaceQuotaFromSpace(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	spaceGUID := ctx.Param("spaceGuid")

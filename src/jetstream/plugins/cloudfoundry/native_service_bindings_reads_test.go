@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -104,7 +104,7 @@ func newBindingsPlugin(serverURL string) *CloudFoundrySpecification {
 	}
 }
 
-// bindingsInvoke wires up echo.Context for the bindings list handler.
+// bindingsInvoke wires up *echo.Context for the bindings list handler.
 func bindingsInvoke(plugin *CloudFoundrySpecification, query string) (*httptest.ResponseRecorder, error) {
 	e := echo.New()
 	url := "/pp/v1/cf/apps/cnsi-1/app-1/service_bindings"
@@ -115,8 +115,7 @@ func bindingsInvoke(plugin *CloudFoundrySpecification, query string) (*httptest.
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/service_bindings")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 	err := plugin.getAppServiceBindings(c)
 	return rec, err
 }

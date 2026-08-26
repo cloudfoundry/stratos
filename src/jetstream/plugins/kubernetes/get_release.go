@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"helm.sh/helm/v3/pkg/action"
@@ -44,7 +44,7 @@ type kubeReleasesData struct {
 }
 
 // GetRelease gets the release information for a specific Helm release
-func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
+func (c *KubernetesSpecification) GetRelease(ec *echo.Context) error {
 
 	// Need to get a config object for the target endpoint
 	endpointGUID := ec.Param("endpoint")
@@ -75,7 +75,7 @@ func (c *KubernetesSpecification) GetRelease(ec echo.Context) error {
 // GetReleaseStatus will get release status for the given release
 // This is a web socket request and will return info over the websocket
 // polling until disconnected
-func (c *KubernetesSpecification) GetReleaseStatus(ec echo.Context) error {
+func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 
 	// Need to get a config object for the target endpoint
 	endpointGUID := ec.Param("endpoint")

@@ -11,12 +11,12 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
-func serviceKeyCtx(method, target, body string, paramNames, paramVals []string) (echo.Context, *httptest.ResponseRecorder) {
+func serviceKeyCtx(method, target, body string, paramNames, paramVals []string) (*echo.Context, *httptest.ResponseRecorder) {
 	e := echo.New()
 	var req *http.Request
 	if body == "" {
@@ -27,8 +27,11 @@ func serviceKeyCtx(method, target, body string, paramNames, paramVals []string) 
 	}
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetParamNames(paramNames...)
-	c.SetParamValues(paramVals...)
+	pathValues := make(echo.PathValues, 0, len(paramNames))
+	for i, name := range paramNames {
+		pathValues = append(pathValues, echo.PathValue{Name: name, Value: paramVals[i]})
+	}
+	c.SetPathValues(pathValues)
 	return c, rec
 }
 

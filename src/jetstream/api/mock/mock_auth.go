@@ -9,7 +9,7 @@ import (
 
 	api "github.com/cloudfoundry/stratos/src/jetstream/api"
 	gomock "github.com/golang/mock/gomock"
-	echo "github.com/labstack/echo/v4"
+	echo "github.com/labstack/echo/v5"
 )
 
 // MockStratosAuth is a mock of StratosAuth interface.
@@ -36,7 +36,7 @@ func (m *MockStratosAuth) EXPECT() *MockStratosAuthMockRecorder {
 }
 
 // BeforeVerifySession mocks base method.
-func (m *MockStratosAuth) BeforeVerifySession(c echo.Context) {
+func (m *MockStratosAuth) BeforeVerifySession(c *echo.Context) {
 	m.ctrl.T.Helper()
 	m.ctrl.Call(m, "BeforeVerifySession", c)
 }
@@ -78,7 +78,7 @@ func (mr *MockStratosAuthMockRecorder) GetUsername(userGUID interface{}) *gomock
 }
 
 // Login mocks base method.
-func (m *MockStratosAuth) Login(c echo.Context) error {
+func (m *MockStratosAuth) Login(c *echo.Context) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Login", c)
 	ret0, _ := ret[0].(error)
@@ -92,7 +92,7 @@ func (mr *MockStratosAuthMockRecorder) Login(c interface{}) *gomock.Call {
 }
 
 // Logout mocks base method.
-func (m *MockStratosAuth) Logout(c echo.Context) error {
+func (m *MockStratosAuth) Logout(c *echo.Context) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Logout", c)
 	ret0, _ := ret[0].(error)
@@ -118,7 +118,7 @@ func (mr *MockStratosAuthMockRecorder) ShowConfig(config interface{}) *gomock.Ca
 }
 
 // VerifySession mocks base method.
-func (m *MockStratosAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
+func (m *MockStratosAuth) VerifySession(c *echo.Context, sessionUser string, sessionExpireTime int64) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifySession", c, sessionUser, sessionExpireTime)
 	ret0, _ := ret[0].(error)

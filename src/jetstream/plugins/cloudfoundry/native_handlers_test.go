@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -38,7 +38,7 @@ func (m *mockNativeCFProxy) GetCNSITokenRecord(_, _ string) (api.TokenRecord, bo
 	return m.tokenRecord, true
 }
 
-func (m *mockNativeCFProxy) GetSessionStringValue(_ echo.Context, key string) (string, error) {
+func (m *mockNativeCFProxy) GetSessionStringValue(_ *echo.Context, key string) (string, error) {
 	if key == "user_id" {
 		return m.userID, nil
 	}
@@ -107,8 +107,7 @@ func TestGetNativeOrgs(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/orgs/test-cnsi", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -173,8 +172,7 @@ func TestGetNativeOrgs_PerPagePassthrough(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/orgs/test-cnsi?per_page=2&page=1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -234,8 +232,7 @@ func TestGetNativeApps(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -321,8 +318,7 @@ func TestGetNativeApps_DefaultPathIncludesLastRefreshedAt(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -393,8 +389,7 @@ func TestGetNativeApps_DefaultPathDropletsFetchFailureIsNonFatal(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -453,8 +448,7 @@ func TestGetNativeApps_PerPagePassthrough(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/test-cnsi?per_page=3&page=1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -499,8 +493,7 @@ func TestGetNativeRouteCount(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/test-cnsi", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -552,8 +545,7 @@ func TestGetNativeRouteCount_SpaceGuidsFilter(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/test-cnsi?return=counts&space_guids=space-1", nil)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
-		ctx.SetParamNames("cnsiGuid")
-		ctx.SetParamValues("test-cnsi")
+		ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 		plugin := &CloudFoundrySpecification{
 			testProxy: &mockNativeCFProxy{
@@ -592,8 +584,7 @@ func TestGetNativeRouteCount_SpaceGuidsFilter(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/test-cnsi?return=counts&organization_guids=org-A", nil)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
-		ctx.SetParamNames("cnsiGuid")
-		ctx.SetParamValues("test-cnsi")
+		ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 		plugin := &CloudFoundrySpecification{
 			testProxy: &mockNativeCFProxy{
@@ -634,8 +625,7 @@ func TestGetNativeRouteCount_SpaceGuidsFilter(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/test-cnsi?space_guids=space-1,space-2", nil)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
-		ctx.SetParamNames("cnsiGuid")
-		ctx.SetParamValues("test-cnsi")
+		ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 		plugin := &CloudFoundrySpecification{
 			testProxy: &mockNativeCFProxy{
@@ -673,8 +663,7 @@ func TestGetNativeRouteCount_SpaceGuidsFilter(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/routes/test-cnsi", nil)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
-		ctx.SetParamNames("cnsiGuid")
-		ctx.SetParamValues("test-cnsi")
+		ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 
 		plugin := &CloudFoundrySpecification{
 			testProxy: &mockNativeCFProxy{
@@ -714,8 +703,7 @@ func TestGetNativeOrgDetail(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/org/cnsi-1/org-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "orgGuid")
-	ctx.SetParamValues("cnsi-1", "org-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "orgGuid", Value: "org-1"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -767,8 +755,7 @@ func TestGetNativeSpaceDetail(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/sp-1", nil)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
-		ctx.SetParamNames("cnsiGuid", "spaceGuid")
-		ctx.SetParamValues("cnsi-1", "sp-1")
+		ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "sp-1"}})
 
 		plugin := &CloudFoundrySpecification{
 			testProxy: &mockNativeCFProxy{
@@ -839,8 +826,7 @@ func TestGetNativeSpaceDetail(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/sp-3", nil)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
-		ctx.SetParamNames("cnsiGuid", "spaceGuid")
-		ctx.SetParamValues("cnsi-1", "sp-3")
+		ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "sp-3"}})
 
 		plugin := &CloudFoundrySpecification{
 			testProxy: &mockNativeCFProxy{
@@ -888,8 +874,7 @@ func TestGetNativeSpaceDetail(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1/sp-2", nil)
 		rec := httptest.NewRecorder()
 		ctx := e.NewContext(req, rec)
-		ctx.SetParamNames("cnsiGuid", "spaceGuid")
-		ctx.SetParamValues("cnsi-1", "sp-2")
+		ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "sp-2"}})
 
 		plugin := &CloudFoundrySpecification{
 			testProxy: &mockNativeCFProxy{
@@ -945,8 +930,7 @@ func TestGetNativeOrgSpaces(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/org/cnsi-1/org-1/spaces", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "orgGuid")
-	ctx.SetParamValues("cnsi-1", "org-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "orgGuid", Value: "org-1"}})
 
 	plugin := &CloudFoundrySpecification{
 		testProxy: &mockNativeCFProxy{
@@ -998,8 +982,7 @@ func TestGetNativeOrgs_OmitsPagingWhenAbsent(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/orgs/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeOrgs(ctx))
 	assert.False(t, sawPerPage, "per_page must be absent on upstream when caller omits it")
@@ -1036,8 +1019,7 @@ func TestGetNativeApps_OmitsPagingWhenAbsent(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeApps(ctx))
 	assert.False(t, sawPerPage)
@@ -1074,8 +1056,7 @@ func TestGetNativeSpaces_OmitsPagingWhenAbsent(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeSpaces(ctx))
 	assert.False(t, sawPerPage)
@@ -1112,8 +1093,7 @@ func TestGetNativeOrgSpaces_OmitsPagingWhenAbsent(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/org/cnsi-1/org-1/spaces", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "orgGuid")
-	ctx.SetParamValues("cnsi-1", "org-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "orgGuid", Value: "org-1"}})
 
 	require.NoError(t, plugin.getNativeOrgSpaces(ctx))
 	assert.False(t, sawPerPage)
@@ -1139,8 +1119,7 @@ func TestGetNativeOrgSpaces_CountsFastPath(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/org/cnsi-1/org-1/spaces?return=counts", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "orgGuid")
-	ctx.SetParamValues("cnsi-1", "org-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "orgGuid", Value: "org-1"}})
 
 	require.NoError(t, plugin.getNativeOrgSpaces(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -1210,8 +1189,7 @@ func TestGetNativeSpaces_OrganizationGuidsFilter(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1?organization_guids=org-1,org-2&per_page=500&page=1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeSpaces(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -1281,8 +1259,7 @@ func TestGetNativeSpaces_EnrichNoneSkipsCounts(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/spaces/cnsi-1?enrich=none&per_page=500&page=1", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeSpaces(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -1358,8 +1335,7 @@ func TestGetNativeApps_GuidsFilter(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/apps/cnsi-1?guids=app-1,app-2", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeApps(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)

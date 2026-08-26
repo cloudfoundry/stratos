@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // wireSizeMaxBufferBytes caps how much response body the wire-size middleware
@@ -24,7 +24,7 @@ const wireSizeMaxBufferBytes = 10 * 1024 * 1024
 //     where gzip corrupted passthrough Content-Type for Firefox. Also the
 //     biggest response-size case; skipping removes the memory-pressure
 //     concern of buffering before flushing.
-func ppMiddlewareSkipper(c echo.Context) bool {
+func ppMiddlewareSkipper(c *echo.Context) bool {
 	if c.Request().Header.Get("Upgrade") == "websocket" {
 		return true
 	}
@@ -52,7 +52,7 @@ type WireSizeMetrics struct {
 // Non-JSON responses pass through unmeasured. WebSocket upgrade requests are
 // skipped entirely — hijacking a buffered writer breaks the upgrade.
 func (p *portalProxy) wireSizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		if !p.GetConfig().DiagnosticsEnabled {
 			return next(c)
 		}
@@ -62,14 +62,20 @@ func (p *portalProxy) wireSizeMiddleware(next echo.HandlerFunc) echo.HandlerFunc
 
 		start := time.Now()
 
-		origWriter := c.Response().Writer
+		// v5 hands out the http.ResponseWriter, so reach the echo *Response to
+		// swap the writer underneath it.
+		response, unwrapErr := echo.UnwrapResponse(c.Response())
+		if unwrapErr != nil {
+			return next(c)
+		}
+		origWriter := response.ResponseWriter
 		bw := &bufferingResponseWriter{
 			ResponseWriter: origWriter,
 			buf:            &bytes.Buffer{},
 			limit:          wireSizeMaxBufferBytes,
 		}
-		c.Response().Writer = bw
-		defer func() { c.Response().Writer = origWriter }()
+		response.ResponseWriter = bw
+		defer func() { response.ResponseWriter = origWriter }()
 
 		if err := next(c); err != nil {
 			return err

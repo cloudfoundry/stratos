@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -80,8 +80,7 @@ func TestGetNativeAuditEvents_ReturnsMappedEvents(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/audit_events/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -146,8 +145,7 @@ func TestGetNativeAuditEvents_EmptyResult(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/audit_events/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -204,8 +202,7 @@ func TestGetNativeAuditEvents_PerPagePassthrough(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/audit_events/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -259,8 +256,7 @@ func TestGetNativeAuditEvents_CountsFastPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/audit_events/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -317,8 +313,7 @@ func TestGetNativeOrgAuditEvents_PerPagePassthrough(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/org/:cnsiGuid/:orgGuid/events")
-	c.SetParamNames("cnsiGuid", "orgGuid")
-	c.SetParamValues("cnsi-1", "org-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "orgGuid", Value: "org-1"}})
 
 	require.NoError(t, plugin.getNativeOrgAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -369,8 +364,7 @@ func TestGetNativeOrgAuditEvents_CountsFastPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/org/:cnsiGuid/:orgGuid/events")
-	c.SetParamNames("cnsiGuid", "orgGuid")
-	c.SetParamValues("cnsi-1", "org-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "orgGuid", Value: "org-1"}})
 
 	require.NoError(t, plugin.getNativeOrgAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -425,8 +419,7 @@ func TestGetNativeSpaceAuditEvents_PerPagePassthrough(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space/:cnsiGuid/:spaceGuid/events")
-	c.SetParamNames("cnsiGuid", "spaceGuid")
-	c.SetParamValues("cnsi-1", "space-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "space-1"}})
 
 	require.NoError(t, plugin.getNativeSpaceAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -470,8 +463,7 @@ func TestGetNativeSpaceAuditEvents_CountsFastPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/space/:cnsiGuid/:spaceGuid/events")
-	c.SetParamNames("cnsiGuid", "spaceGuid")
-	c.SetParamValues("cnsi-1", "space-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "spaceGuid", Value: "space-1"}})
 
 	require.NoError(t, plugin.getNativeSpaceAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -520,8 +512,7 @@ func TestGetNativeAuditEvents_OmitsPagingWhenAbsent(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/audit_events/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeAuditEvents(c))
 	assert.Equal(t, http.StatusOK, rec.Code)

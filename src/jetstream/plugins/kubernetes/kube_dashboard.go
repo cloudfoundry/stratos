@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
 
@@ -20,7 +20,7 @@ func (k *KubernetesSpecification) getConfig(cnsiRecord *api.CNSIRecord, tokenRec
 }
 
 // Proxy the request
-func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardProxy(c *echo.Context) error {
 	log.Debug("kubeDashboardTest request")
 	var p = k.portalProxy
 
@@ -50,7 +50,7 @@ func (k *KubernetesSpecification) kubeDashboardProxy(c echo.Context) error {
 }
 
 // Determine if the specified Kube endpoint has the dashboard installed and ready
-func (k *KubernetesSpecification) kubeDashboardStatus(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardStatus(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
@@ -71,14 +71,14 @@ func (k *KubernetesSpecification) kubeDashboardStatus(c echo.Context) error {
 }
 
 // Login to the kubernetes dashboard and then redirect to the UI
-func (k *KubernetesSpecification) kubeDashboardLogin(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardLogin(c *echo.Context) error {
 	var p = k.portalProxy
 	err := dashboard.KubeDashboardLogin(c, p)
 	return err
 }
 
 // Creates service account for dashboard access
-func (k *KubernetesSpecification) kubeDashboardCreateServiceAccount(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardCreateServiceAccount(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
@@ -94,7 +94,7 @@ func (k *KubernetesSpecification) kubeDashboardCreateServiceAccount(c echo.Conte
 }
 
 // Delete service account used for Dashboard access
-func (k *KubernetesSpecification) kubeDashboardDeleteServiceAccount(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardDeleteServiceAccount(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
@@ -110,7 +110,7 @@ func (k *KubernetesSpecification) kubeDashboardDeleteServiceAccount(c echo.Conte
 }
 
 // Install dashboard in a cluster
-func (k *KubernetesSpecification) kubeDashboardInstallDashboard(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardInstallDashboard(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
@@ -126,7 +126,7 @@ func (k *KubernetesSpecification) kubeDashboardInstallDashboard(c echo.Context) 
 }
 
 // Delete dashboard in a cluster
-func (k *KubernetesSpecification) kubeDashboardDeleteDashboard(c echo.Context) error {
+func (k *KubernetesSpecification) kubeDashboardDeleteDashboard(c *echo.Context) error {
 	var p = k.portalProxy
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)

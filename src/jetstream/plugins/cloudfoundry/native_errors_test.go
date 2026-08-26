@@ -13,7 +13,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -97,36 +97,35 @@ func TestUpstreamStatusOf(t *testing.T) {
 func TestClassifyNativeErrorsMiddleware(t *testing.T) {
 	e := echo.New()
 
-	runWithCnsi := func(handler echo.HandlerFunc) (echo.Context, error) {
+	runWithCnsi := func(handler echo.HandlerFunc) (*echo.Context, error) {
 		req := httptest.NewRequest(http.MethodGet, "/cf/spaces/cnsi-9", nil)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames("cnsiGuid")
-		c.SetParamValues("cnsi-9")
+		c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-9"}})
 		return c, classifyNativeErrors(handler)(c)
 	}
 
 	t.Run("raw classifiable error is shaped with header + JSON body", func(t *testing.T) {
-		c, err := runWithCnsi(func(ctx echo.Context) error {
+		c, err := runWithCnsi(func(ctx *echo.Context) error {
 			return api.ErrHTTPRequest{Status: 503}
 		})
 		he, ok := err.(*echo.HTTPError)
 		require.True(t, ok, "raw error should be shaped into *echo.HTTPError")
 		assert.Equal(t, http.StatusBadGateway, he.Code)
 		assert.Equal(t, "unreachable", c.Response().Header().Get(stratosErrorReasonHeader))
-		msg, _ := he.Message.(string)
+		msg := he.Message
 		assert.True(t, strings.HasPrefix(msg, "{"), "shaped body must be JSON")
 	})
 
 	t.Run("existing echo.HTTPError passes through untouched", func(t *testing.T) {
 		orig := echo.NewHTTPError(http.StatusForbidden, "no token for endpoint")
-		c, err := runWithCnsi(func(ctx echo.Context) error { return orig })
+		c, err := runWithCnsi(func(ctx *echo.Context) error { return orig })
 		assert.Same(t, orig, err)
 		assert.Empty(t, c.Response().Header().Get(stratosErrorReasonHeader))
 	})
 
 	t.Run("nil passes through", func(t *testing.T) {
-		_, err := runWithCnsi(func(ctx echo.Context) error { return nil })
+		_, err := runWithCnsi(func(ctx *echo.Context) error { return nil })
 		assert.NoError(t, err)
 	})
 
@@ -135,9 +134,8 @@ func TestClassifyNativeErrorsMiddleware(t *testing.T) {
 		req := httptest.NewRequest(http.MethodGet, "/cf/orgs/cnsi-9", nil).WithContext(reqCtx)
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
-		c.SetParamNames("cnsiGuid")
-		c.SetParamValues("cnsi-9")
-		err := classifyNativeErrors(func(ctx echo.Context) error {
+		c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-9"}})
+		err := classifyNativeErrors(func(ctx *echo.Context) error {
 			cancel() // browser navigates away mid-handler
 			return fmt.Errorf("executing request: %w", context.Canceled)
 		})(c)
@@ -152,7 +150,7 @@ func TestClassifyNativeErrorsMiddleware(t *testing.T) {
 		rec := httptest.NewRecorder()
 		c := e.NewContext(req, rec)
 		raw := errors.New("boom")
-		err := classifyNativeErrors(func(ctx echo.Context) error { return raw })(c)
+		err := classifyNativeErrors(func(ctx *echo.Context) error { return raw })(c)
 		assert.Same(t, raw, err)
 	})
 }
@@ -248,8 +246,7 @@ func TestNativeCFError(t *testing.T) {
 			require.True(t, ok, "must return *echo.HTTPError")
 			assert.Equal(t, http.StatusBadGateway, he.Code)
 
-			msg, ok := he.Message.(string)
-			require.True(t, ok, "message must be a string")
+			msg := he.Message
 			assert.True(t, strings.HasPrefix(msg, "{"), "body must lead with '{' for the JSON discriminator, got %q", msg)
 
 			var body nativeCFErrorBody

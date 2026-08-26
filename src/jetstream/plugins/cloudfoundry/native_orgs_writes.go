@@ -8,14 +8,14 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // createNativeOrg handles POST /pp/v1/cf/orgs/{cnsiGuid} — Stratos-shape
 // wrapper around CF V3 POST /v3/organizations. Sync write: V3 returns 201
 // with the created organization. Body shape mirrors
 // capi.OrganizationCreateRequest = {name, suspended?, metadata?}.
-func (c *CloudFoundrySpecification) createNativeOrg(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) createNativeOrg(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -56,7 +56,7 @@ func (c *CloudFoundrySpecification) createNativeOrg(ctx echo.Context) error {
 // deleteNativeApp. Callers see either 200 with a terminal StratosJob
 // (resolved inside the fast-path window) or 202 with {id, state,
 // startedAt} for client-side polling.
-func (c *CloudFoundrySpecification) deleteNativeOrg(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) deleteNativeOrg(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
 	if cnsiGUID == "" || orgGUID == "" {
@@ -116,7 +116,7 @@ func (c *CloudFoundrySpecification) deleteNativeOrg(ctx echo.Context) error {
 // decodes the request body into capi.OrganizationUpdateRequest (which
 // matches the V3 wire shape one-for-one), forwards it, and returns the
 // mapped Stratos-shape StOrg.
-func (c *CloudFoundrySpecification) updateNativeOrg(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) updateNativeOrg(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	orgGUID := ctx.Param("orgGuid")
 	if cnsiGUID == "" || orgGUID == "" {

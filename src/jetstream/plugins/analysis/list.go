@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -19,7 +19,7 @@ import (
 const mainReportFile = "report.json"
 
 // listReports will list the analysis repotrs that have run
-func (c *Analysis) listReports(ec echo.Context) error {
+func (c *Analysis) listReports(ec *echo.Context) error {
 	log.Debug("listReports")
 	var p = c.portalProxy
 
@@ -47,7 +47,7 @@ func (c *Analysis) listReports(ec echo.Context) error {
 }
 
 // getReportsByPath will list the completed analysis repotrs that have run for the specified path
-func (c *Analysis) getReportsByPath(ec echo.Context) error {
+func (c *Analysis) getReportsByPath(ec *echo.Context) error {
 	log.Debug("getReportsByPath")
 	var p = c.portalProxy
 
@@ -89,7 +89,7 @@ func populateSummary(report *store.AnalysisRecord) {
 	}
 }
 
-func (c *Analysis) getLatestReport(ec echo.Context) error {
+func (c *Analysis) getLatestReport(ec *echo.Context) error {
 	log.Debug("getLatestReport")
 	var p = c.portalProxy
 
@@ -116,8 +116,7 @@ func (c *Analysis) getLatestReport(ec echo.Context) error {
 	}
 
 	if ec.Request().Method == "HEAD" {
-		ec.Response().Status = 200
-		return nil
+		return ec.NoContent(200)
 	}
 
 	// Get the report contents from the analysis server
@@ -130,7 +129,7 @@ func (c *Analysis) getLatestReport(ec echo.Context) error {
 	return ec.JSON(200, report)
 }
 
-func (c *Analysis) getReport(ec echo.Context) error {
+func (c *Analysis) getReport(ec *echo.Context) error {
 	log.Debug("getReport")
 	var p = c.portalProxy
 
@@ -163,7 +162,7 @@ func (c *Analysis) getReport(ec echo.Context) error {
 	return ec.JSON(200, report)
 }
 
-func (c *Analysis) deleteReports(ec echo.Context) error {
+func (c *Analysis) deleteReports(ec *echo.Context) error {
 	log.Debug("deleteReports")
 	var p = c.portalProxy
 

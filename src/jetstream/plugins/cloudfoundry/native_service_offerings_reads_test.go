@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -145,7 +145,7 @@ func newServiceOfferingPlugin(serverURL string) *CloudFoundrySpecification {
 	}
 }
 
-// listInvoke wires up echo.Context for the list handler with the given
+// listInvoke wires up *echo.Context for the list handler with the given
 // raw query string (no leading '?').
 func listInvoke(plugin *CloudFoundrySpecification, query string) (*httptest.ResponseRecorder, error) {
 	e := echo.New()
@@ -156,8 +156,7 @@ func listInvoke(plugin *CloudFoundrySpecification, query string) (*httptest.Resp
 	req := httptest.NewRequest(http.MethodGet, url, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 	return rec, plugin.getNativeServiceOfferings(ctx)
 }
 
@@ -171,8 +170,7 @@ func detailInvoke(plugin *CloudFoundrySpecification, query string) (*httptest.Re
 	req := httptest.NewRequest(http.MethodGet, url, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "offeringGuid")
-	ctx.SetParamValues("test-cnsi", "offering-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "offeringGuid", Value: "offering-1"}})
 	return rec, plugin.getNativeServiceOfferingDetail(ctx)
 }
 
@@ -344,8 +342,7 @@ func TestGetNativeServiceOfferings_CountsFastPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_offerings/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeServiceOfferings(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -499,8 +496,7 @@ func TestGetNativeServiceOfferingsForBroker_AppliesBrokerFilter(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/test-cnsi/broker-1/offerings?return=summary", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "brokerGuid")
-	ctx.SetParamValues("test-cnsi", "broker-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "brokerGuid", Value: "broker-1"}})
 	plugin := newServiceOfferingPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceOfferingsForBroker(ctx))
@@ -525,8 +521,7 @@ func TestGetNativeServiceOfferingsForBroker_Counts(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/test-cnsi/broker-1/offerings?return=counts", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "brokerGuid")
-	ctx.SetParamValues("test-cnsi", "broker-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "brokerGuid", Value: "broker-1"}})
 	plugin := newServiceOfferingPlugin(srv.URL)
 
 	require.NoError(t, plugin.getNativeServiceOfferingsForBroker(ctx))
@@ -547,8 +542,7 @@ func TestGetNativeServiceOfferingsForBroker_RequiresBrokerGUID(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/brokers/test-cnsi//offerings", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "brokerGuid")
-	ctx.SetParamValues("test-cnsi", "")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "brokerGuid", Value: ""}})
 	plugin := newServiceOfferingPlugin("http://unused")
 
 	err := plugin.getNativeServiceOfferingsForBroker(ctx)

@@ -1,7 +1,7 @@
 package kubernetes
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"helm.sh/helm/v3/pkg/action"
@@ -10,7 +10,7 @@ import (
 )
 
 // ListReleases will list the helm releases for all endpoints
-func (c *KubernetesSpecification) ListReleases(ec echo.Context) error {
+func (c *KubernetesSpecification) ListReleases(ec *echo.Context) error {
 	log.Debug("ListReleases")
 
 	// Need to get a config object for the target endpoint

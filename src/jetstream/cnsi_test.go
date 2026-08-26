@@ -17,6 +17,7 @@ import (
 	mock_api "github.com/cloudfoundry/stratos/src/jetstream/api/mock"
 	"github.com/cloudfoundry/stratos/src/jetstream/testutils"
 	"github.com/golang/mock/gomock"
+	"github.com/labstack/echo/v5"
 	_ "github.com/satori/go.uuid"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
@@ -802,8 +803,7 @@ func TestUpdateEndpointBindsPathID(t *testing.T) {
 	_, _, ctx, pp, db, _ := setupHTTPTest(req)
 	defer db.Close()
 
-	ctx.SetParamNames("id")
-	ctx.SetParamValues(mockCNSIGUID)
+	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: mockCNSIGUID}})
 
 	err := pp.updateEndpoint(ctx)
 	if err == nil {
@@ -828,8 +828,7 @@ func TestUpdateEndpointBodyIDOverridesPath(t *testing.T) {
 	_, _, ctx, _, db, _ := setupHTTPTest(req)
 	defer db.Close()
 
-	ctx.SetParamNames("id")
-	ctx.SetParamValues("path-id")
+	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: "path-id"}})
 
 	params := new(api.UpdateEndpointParams)
 	if err := ctx.Bind(params); err != nil {

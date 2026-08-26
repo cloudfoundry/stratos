@@ -8,7 +8,7 @@ import (
 
 	api "github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	"github.com/gorilla/sessions"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type AuthHandlerFunc func(tokenRec TokenRecord, cnsi CNSIRecord) (*http.Response, error)
@@ -220,7 +220,7 @@ type LocalLoginRes struct {
 	User *ConnectedUser `json:"user"`
 }
 
-type LoginHookFunc func(c echo.Context) error
+type LoginHookFunc func(c *echo.Context) error
 type LoginHook struct {
 	Priority int
 	Function LoginHookFunc
@@ -529,11 +529,11 @@ type UpdateEndpointParams struct {
 	CACert        string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
 }
 
-// BindOnce -- allows to call echo.Context.Bind() multiple times on the same request
+// BindOnce -- allows to call *echo.Context.Bind() multiple times on the same request
 // After calling Bind(), request body stream is closed and the context can't be bound again.
 // Bound struct is stored in the context store after the first call and retrieved from store
 // on subsequent calls.
-func BindOnce(params interface{}, c echo.Context) error {
+func BindOnce(params interface{}, c *echo.Context) error {
 	typeStr := reflect.TypeOf(params).String()
 	ctxType := c.Get("magicBindType")
 	if ctxType != nil && ctxType != typeStr {

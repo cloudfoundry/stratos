@@ -19,7 +19,7 @@ import (
 	"github.com/gorilla/securecookie"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -48,7 +48,7 @@ type mockPGStore struct {
 
 type MockEndpointRequest struct {
 	HTTPTestServer *httptest.Server
-	EchoContext    echo.Context
+	EchoContext    *echo.Context
 	EndpointName   string
 	GUID           string
 	InsertArgs     []driver.Value
@@ -99,7 +99,7 @@ const mockTokenGUID = "mock-token-guid"
 
 const mockURLString = "http://localhost:9999/some/fake/url/"
 
-func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, echo.Context) {
+func setupEchoContext(res http.ResponseWriter, req *http.Request) (*echo.Echo, *echo.Context) {
 	e := echo.New()
 	ctx := e.NewContext(req, res)
 
@@ -221,7 +221,7 @@ func createEndpointRowArgs(endpointName string, APIEndpoint string, authEndpoint
 	return []driver.Value{base64.RawURLEncoding.EncodeToString(h.Sum(nil)), endpointName, "cf", APIEndpoint, authEndpoint, tokenEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", creatorGUID, ""}
 }
 
-func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
+func setupHTTPTest(req *http.Request) (*httptest.ResponseRecorder, *echo.Echo, *echo.Context, *portalProxy, *sql.DB, sqlmock.Sqlmock) {
 	res := httptest.NewRecorder()
 	e, ctx := setupEchoContext(res, req)
 	db, mock, dberr := sqlmock.New()

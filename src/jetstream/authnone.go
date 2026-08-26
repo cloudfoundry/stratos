@@ -8,7 +8,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -33,12 +33,12 @@ func (a *noAuth) ShowConfig(config *api.ConsoleConfig) {
 }
 
 // Login provides no-auth specific Stratos login
-func (a *noAuth) Login(c echo.Context) error {
+func (a *noAuth) Login(c *echo.Context) error {
 	return errors.New("can not login when there is no auth")
 }
 
 // Logout provides no-auth specific Stratos login
-func (a *noAuth) Logout(c echo.Context) error {
+func (a *noAuth) Logout(c *echo.Context) error {
 	return a.logout(c)
 }
 
@@ -62,7 +62,7 @@ func (a *noAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 	return connectdUser, nil
 }
 
-func (a *noAuth) BeforeVerifySession(c echo.Context) {
+func (a *noAuth) BeforeVerifySession(c *echo.Context) {
 	expiry := sessionNeverExpires
 
 	if _, err := a.p.GetSession(c); err != nil {
@@ -91,12 +91,12 @@ func (a *noAuth) BeforeVerifySession(c echo.Context) {
 }
 
 // VerifySession for no authentication - always passes
-func (a *noAuth) VerifySession(c echo.Context, sessionUser string, sessionExpireTime int64) error {
+func (a *noAuth) VerifySession(c *echo.Context, sessionUser string, sessionExpireTime int64) error {
 	return nil
 }
 
 // logout
-func (a *noAuth) logout(c echo.Context) error {
+func (a *noAuth) logout(c *echo.Context) error {
 	log.Debug("logout")
 
 	a.p.removeEmptyCookie(c)

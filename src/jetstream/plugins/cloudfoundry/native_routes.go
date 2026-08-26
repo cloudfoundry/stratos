@@ -1,7 +1,7 @@
 // src/jetstream/plugins/cloudfoundry/native_routes.go
 package cloudfoundry
 
-import "github.com/labstack/echo/v4"
+import "github.com/labstack/echo/v5"
 
 // addNativeRoutes registers Stratos-native CF v3 routes on the CF plugin.
 // Called from AddSessionGroupRoutes.
@@ -105,7 +105,7 @@ func (c *CloudFoundrySpecification) addNativeRoutes(echoGroup *echo.Group) {
 	// A10 Revisions UI: list + rollback. Rollback's signature mirrors
 	// restageApp (pre-extracted GUIDs), so we wrap it for echo.
 	nativeGroup.GET("/cf/apps/:cnsiGuid/:appGuid/revisions", c.getAppRevisions)
-	nativeGroup.POST("/cf/apps/:cnsiGuid/:appGuid/rollback", func(ctx echo.Context) error {
+	nativeGroup.POST("/cf/apps/:cnsiGuid/:appGuid/rollback", func(ctx *echo.Context) error {
 		return c.rollbackApp(ctx, ctx.Param("cnsiGuid"), ctx.Param("appGuid"))
 	})
 

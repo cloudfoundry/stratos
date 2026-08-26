@@ -7,7 +7,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/config"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
@@ -35,7 +35,7 @@ func (c *KubeConfigAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.T
 	return fmt.Errorf("Not supported: %s", tokenRec.AuthType)
 }
 
-func (c *KubeConfigAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+func (c *KubeConfigAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (KubeConfigAuth)")
 
 	body := ec.FormValue("kubeconfig")

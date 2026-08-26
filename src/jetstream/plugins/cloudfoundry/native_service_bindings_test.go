@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -59,8 +59,7 @@ func TestCreateServiceBinding_ForwardsBody(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_bindings/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.createServiceBinding(c))
 	assert.Equal(t, http.StatusCreated, rec.Code)
@@ -111,8 +110,7 @@ func TestCreateServiceBinding_PropagatesCapiError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_bindings/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.createServiceBinding(c))
 	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
@@ -148,8 +146,7 @@ func TestCreateServiceBinding_RejectsInvalidBody(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_bindings/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	err := plugin.createServiceBinding(c)
 	require.Error(t, err)
@@ -205,8 +202,7 @@ func TestCreateServiceBinding_FastPathResolvesAsyncBind(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_bindings/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.createServiceBinding(c))
 	assert.Equal(t, http.StatusOK, rec.Code, "fast-path resolve should surface 200, not 202 handoff")
@@ -253,8 +249,7 @@ func TestCreateServiceBinding_AsyncFallbackWithoutTracker(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_bindings/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.createServiceBinding(c))
 	assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -296,8 +291,7 @@ func TestDeleteServiceBinding_ForwardsByGuid(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_bindings/:cnsiGuid/:bindingGuid")
-	c.SetParamNames("cnsiGuid", "bindingGuid")
-	c.SetParamValues("cnsi-1", "binding-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "bindingGuid", Value: "binding-1"}})
 
 	require.NoError(t, plugin.deleteServiceBinding(c))
 	assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -333,8 +327,7 @@ func TestDeleteServiceBinding_PropagatesCapiError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/service_bindings/:cnsiGuid/:bindingGuid")
-	c.SetParamNames("cnsiGuid", "bindingGuid")
-	c.SetParamValues("cnsi-1", "missing")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "bindingGuid", Value: "missing"}})
 
 	require.NoError(t, plugin.deleteServiceBinding(c))
 	assert.Equal(t, http.StatusNotFound, rec.Code)

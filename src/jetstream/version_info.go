@@ -6,7 +6,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +35,7 @@ func (p *portalProxy) getVersionsData() (*api.Versions, error) {
 	return resp, nil
 }
 
-func (p *portalProxy) getVersions(c echo.Context) error {
+func (p *portalProxy) getVersions(c *echo.Context) error {
 	v, err := p.getVersionsData()
 	if err != nil {
 		log.Error(err.Error())

@@ -13,13 +13,12 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/coder/websocket"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 )
 
 // See: https://docs.cloudfoundry.org/devguide/deploy-apps/ssh-apps.html
-
 
 const (
 	md5FingerprintLength          = 47 // inclusive of space between bytes
@@ -33,7 +32,7 @@ type KeyCode struct {
 	Rows int    `json:"rows"`
 }
 
-func (cfAppSsh *CFAppSSH) appSSH(c echo.Context) error {
+func (cfAppSsh *CFAppSSH) appSSH(c *echo.Context) error {
 	// Need to get info for the endpoint
 	// Get the CNSI and app IDs from route parameters
 	cnsiGUID := c.Param("cnsiGuid")

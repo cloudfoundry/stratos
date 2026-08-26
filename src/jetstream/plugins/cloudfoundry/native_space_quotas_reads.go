@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeSpaceQuotas handles GET /pp/v1/cf/space_quotas/{cnsiGuid}.
@@ -19,7 +19,7 @@ import (
 // Mirrors the org-quota handler, with two shape differences: space
 // quotas don't gate domains, and each quota stamps an OrganizationGUID
 // pointing at its parent org. -1 = "Unlimited" convention is the same.
-func (c *CloudFoundrySpecification) getNativeSpaceQuotas(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeSpaceQuotas(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -73,7 +73,7 @@ func (c *CloudFoundrySpecification) getNativeSpaceQuotas(ctx echo.Context) error
 // Returns a single space quota by GUID as a flat StSpaceQuota. Drives
 // the Space Quota detail page (and any single-quota lookup that
 // previously hit V2's space_quota_definitions/{guid}).
-func (c *CloudFoundrySpecification) getNativeSpaceQuotaDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeSpaceQuotaDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	quotaGUID := ctx.Param("quotaGuid")
 	if cnsiGUID == "" || quotaGUID == "" {

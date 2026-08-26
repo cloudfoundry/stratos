@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -70,7 +70,7 @@ func WriteText(conn *websocket.Conn, data []byte) error {
 // Pongs are only processed while a read is pending, so this variant is for
 // handlers that keep a standing read on the connection; use
 // UpgradeToWebSocketNoPongCheck otherwise.
-func UpgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, error) {
+func UpgradeToWebSocket(echoContext *echo.Context) (*websocket.Conn, error) {
 	return upgradeToWebSocket(echoContext, true)
 }
 
@@ -78,14 +78,14 @@ func UpgradeToWebSocket(echoContext echo.Context) (*websocket.Conn, error) {
 // long periods without a pending read (e.g. app deploy during the push
 // phase): missed pongs are expected there and only a failure to write the
 // ping closes the connection.
-func UpgradeToWebSocketNoPongCheck(echoContext echo.Context) (*websocket.Conn, error) {
+func UpgradeToWebSocketNoPongCheck(echoContext *echo.Context) (*websocket.Conn, error) {
 	return upgradeToWebSocket(echoContext, false)
 }
 
-func upgradeToWebSocket(echoContext echo.Context, enforcePong bool) (*websocket.Conn, error) {
+func upgradeToWebSocket(echoContext *echo.Context, enforcePong bool) (*websocket.Conn, error) {
 
 	log.Debugf("Upgrading request to the WebSocket protocol...")
-	clientWebSocket, err := websocket.Accept(echoContext.Response().Writer, echoContext.Request(), &websocket.AcceptOptions{
+	clientWebSocket, err := websocket.Accept(echoContext.Response(), echoContext.Request(), &websocket.AcceptOptions{
 		// Reject cross-origin upgrades (Cross-Site WebSocket Hijacking): the
 		// default check allows same-origin, and OriginPatterns adds the hosts
 		// configured in ALLOWED_ORIGINS. Not setting InsecureSkipVerify keeps

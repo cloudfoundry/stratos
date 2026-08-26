@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -27,7 +27,7 @@ var (
 )
 
 // Metrics endpoints - non-admin - for a Cloud Foundry Application
-func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
+func (m *MetricsSpecification) getCloudFoundryAppMetrics(c *echo.Context) error {
 	// Permission check: probe the CF v3 app endpoint for each CNSI in scope.
 	// CF returns 200 if the caller has any role on the app's space and 404
 	// otherwise (404 is also returned for non-existent apps — the same
@@ -59,7 +59,7 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c echo.Context) error {
 	return m.makePrometheusRequest(c, cnsiList, "application_id=\""+appID+"\"")
 }
 
-func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string, addJob bool) []api.ProxyRequestInfo {
+func makePrometheusRequestInfos(c *echo.Context, userGUID string, metrics map[string]EndpointMetricsRelation, prometheusOp string, queries string, addJob bool) []api.ProxyRequestInfo {
 	// Construct the metadata for proxying
 	requests := make([]api.ProxyRequestInfo, 0)
 	for _, metric := range metrics {
@@ -90,7 +90,7 @@ func makePrometheusRequestInfos(c echo.Context, userGUID string, metrics map[str
 	return requests
 }
 
-func makePrometheusRequestURI(c echo.Context, prometheusOp string, modify string) *url.URL {
+func makePrometheusRequestURI(c *echo.Context, prometheusOp string, modify string) *url.URL {
 	uri := getEchoURL(c)
 	uri.Path = "/api/v1/" + prometheusOp
 	values := uri.Query()
@@ -116,13 +116,13 @@ func makePrometheusRequestURI(c echo.Context, prometheusOp string, modify string
 	return &uri
 }
 
-func getEchoURL(c echo.Context) url.URL {
+func getEchoURL(c *echo.Context) url.URL {
 	u := c.Request().URL
 	return *u
 }
 
 // Metrics API endpoints - admin - for a Cloud Foundry deployment
-func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
+func (m *MetricsSpecification) getCloudFoundryMetrics(c *echo.Context) error {
 	userGUID, err := m.portalProxy.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return errors.New("Could not find session user_id")
@@ -166,7 +166,7 @@ func (m *MetricsSpecification) getCloudFoundryMetrics(c echo.Context) error {
 	return m.makePrometheusRequest(c, cnsiList, "")
 }
 
-func (m *MetricsSpecification) makePrometheusRequest(c echo.Context, cnsiList []string, queries string) error {
+func (m *MetricsSpecification) makePrometheusRequest(c *echo.Context, cnsiList []string, queries string) error {
 	prometheusOp := c.Param("op")
 
 	// get the user
@@ -200,7 +200,7 @@ func isAllowedCellMetricsQuery(query string) bool {
 }
 
 // Metrics endpoints - cells - with white list of cell prometheus query values
-func (m *MetricsSpecification) getCloudFoundryCellMetrics(c echo.Context) error {
+func (m *MetricsSpecification) getCloudFoundryCellMetrics(c *echo.Context) error {
 
 	uri := getEchoURL(c)
 	values := uri.Query()

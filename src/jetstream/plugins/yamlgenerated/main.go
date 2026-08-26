@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"gopkg.in/yaml.v2"
 
 	log "github.com/sirupsen/logrus"
@@ -69,7 +69,7 @@ func (gep GeneratedEndpointPlugin) GetType() string {
 	return gep.endpointType
 }
 
-func (gep GeneratedEndpointPlugin) Register(ec echo.Context) error {
+func (gep GeneratedEndpointPlugin) Register(ec *echo.Context) error {
 	return gep.portalProxy.RegisterEndpoint(ec, gep.Info)
 }
 
@@ -77,7 +77,7 @@ func (gep GeneratedEndpointPlugin) Validate(userGUID string, cnsiRecord api.CNSI
 	return nil
 }
 
-func (gep GeneratedEndpointPlugin) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
+func (gep GeneratedEndpointPlugin) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	params := new(api.LoginToCNSIParams)
 	err := api.BindOnce(params, ec)
 	if err != nil {
@@ -208,7 +208,7 @@ func (gep GeneratedEndpointPlugin) Info(apiEndpoint string, skipSSLValidation bo
 }
 
 // UpdateMetadata allows the pluigin to update the metadata for endpoints - not used in the generic case
-func (gep GeneratedEndpointPlugin) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
+func (gep GeneratedEndpointPlugin) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
 	// no-op
 }
 

@@ -1,14 +1,15 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -66,14 +67,22 @@ func (a *Analyzer) Start() {
 
 	// Start a simple web server
 	e := echo.New()
-	e.HideBanner = true
-	e.HidePort = true
-	customLoggerConfig := middleware.LoggerConfig{
-		Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
-			`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
-			`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
-	}
-	e.Use(middleware.LoggerWithConfig(customLoggerConfig))
+	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+		LogRemoteIP:      true,
+		LogMethod:        true,
+		LogURIPath:       true,
+		LogStatus:        true,
+		LogLatency:       true,
+		LogContentLength: true,
+		LogResponseSize:  true,
+		LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
+			log.Infof(`Request: [%s] Remote-IP:"%s" Method:"%s" Path:"%s" `+
+				`Status:%d Latency:%s Bytes-In:%s Bytes-Out:%d`,
+				v.StartTime.Format(time.RFC3339), v.RemoteIP, v.Method, v.URIPath,
+				v.Status, v.Latency, v.ContentLength, v.ResponseSize)
+			return nil
+		},
+	}))
 	e.Use(middleware.Recover())
 
 	a.registerRoutes(e)
@@ -81,7 +90,11 @@ func (a *Analyzer) Start() {
 	var engineErr error
 	address := fmt.Sprintf("%s:%d", defaultAddress, defaultPort)
 	log.Infof("Starting HTTP Server at address: %s", address)
-	engineErr = e.Start(address)
+	engineErr = echo.StartConfig{
+		Address:    address,
+		HideBanner: true,
+		HidePort:   true,
+	}.Start(context.Background(), e)
 
 	if engineErr != nil {
 		engineErrStr := fmt.Sprintf("%s", engineErr)
@@ -110,7 +123,7 @@ func (a *Analyzer) registerRoutes(e *echo.Echo) {
 }
 
 func setSecureCacheContentMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		c.Response().Header().Set("cache-control", "no-store")
 		c.Response().Header().Set("pragma", "no-cache")
 		return h(c)

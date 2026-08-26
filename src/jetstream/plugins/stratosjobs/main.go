@@ -4,7 +4,7 @@ import (
 	"errors"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // PluginName is the lookup key other plugins use to reach this plugin via

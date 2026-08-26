@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -48,13 +48,13 @@ func (e JetstreamError) HTTPError() *echo.HTTPError {
 }
 
 // HTTPErrorInContext formats the error as an echo HTTPError filling in missing params from the contexts
-func (e JetstreamError) HTTPErrorInContext(c echo.Context) *echo.HTTPError {
+func (e JetstreamError) HTTPErrorInContext(c *echo.Context) *echo.HTTPError {
 	e.finalize(c)
 	return e.HTTPError()
 }
 
 // Finalize will fill in missing fields from the context before the error is sent to the client
-func (e *JetstreamError) finalize(c echo.Context) {
+func (e *JetstreamError) finalize(c *echo.Context) {
 	if len(e.StatusMesssage) == 0 {
 		e.StatusMesssage = http.StatusText(e.Status)
 	}

@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -92,7 +92,7 @@ var v2ToV3SpaceRole = map[string]string{
 }
 
 // Send an invite
-func (invite *UserInvite) invite(c echo.Context) error {
+func (invite *UserInvite) invite(c *echo.Context) error {
 	log.Debug("Invite User")
 	cfGUID := c.Param("id")
 
@@ -148,7 +148,7 @@ func (invite *UserInvite) invite(c echo.Context) error {
 	return err
 }
 
-func (invite *UserInvite) processUserInvites(c echo.Context, endpoint api.CNSIRecord, userInviteRequest *UserInviteReq) (*UserInviteResponse, error) {
+func (invite *UserInvite) processUserInvites(c *echo.Context, endpoint api.CNSIRecord, userInviteRequest *UserInviteReq) (*UserInviteResponse, error) {
 	cfGUID := c.Param("id")
 	userGUID := c.Get("user_id").(string)
 
@@ -213,7 +213,7 @@ func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteR
 }
 
 // UAAUserInvite makes the request to the UAA to create accounts and invite links
-func (invite *UserInvite) UAAUserInvite(c echo.Context, endpoint api.CNSIRecord, uaaInviteReq *UserInviteReq) (*UserInviteResponse, error) {
+func (invite *UserInvite) UAAUserInvite(c *echo.Context, endpoint api.CNSIRecord, uaaInviteReq *UserInviteReq) (*UserInviteResponse, error) {
 	log.Debug("Requesting invite links from UAA")
 
 	// See if we can get a token for the invite user
@@ -461,7 +461,7 @@ func updateUserInviteRecordForError(user UserInviteUser, msg string, cfError *CF
 	return user
 }
 
-func getReturnURL(c echo.Context) string {
+func getReturnURL(c *echo.Context) string {
 	// Return URL is base URL of the request
 	returnURL := c.Request().Header.Get("origin")
 	if len(returnURL) == 0 {
@@ -475,7 +475,7 @@ func getReturnURL(c echo.Context) string {
 }
 
 // Check that the user has permissions required - i.e. is an Org Manager of the Org
-func (invite *UserInvite) checkPermissions(c echo.Context, endpoint api.CNSIRecord, userInviteRequest *UserInviteReq) error {
+func (invite *UserInvite) checkPermissions(c *echo.Context, endpoint api.CNSIRecord, userInviteRequest *UserInviteReq) error {
 	cfGUID := c.Param("id")
 	userGUID := c.Get("user_id").(string)
 

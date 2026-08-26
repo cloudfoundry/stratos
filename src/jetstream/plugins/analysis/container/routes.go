@@ -8,17 +8,17 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
 // Ping endpoint
-func (a *Analyzer) ping(ec echo.Context) error {
+func (a *Analyzer) ping(ec *echo.Context) error {
 	return nil
 }
 
 // Get a given report
-func (a *Analyzer) report(ec echo.Context) error {
+func (a *Analyzer) report(ec *echo.Context) error {
 
 	user := ec.Param("user")
 	endpoint := ec.Param("endpoint")
@@ -46,7 +46,7 @@ func (a *Analyzer) report(ec echo.Context) error {
 }
 
 // Delete a given report
-func (a *Analyzer) delete(ec echo.Context) error {
+func (a *Analyzer) delete(ec *echo.Context) error {
 	log.Debug("delete report")
 
 	user := ec.Param("user")
@@ -67,7 +67,7 @@ func (a *Analyzer) delete(ec echo.Context) error {
 }
 
 // Delete all reports for a given endpoint
-func (a *Analyzer) deleteEndpoint(ec echo.Context) error {
+func (a *Analyzer) deleteEndpoint(ec *echo.Context) error {
 	log.Debug("delete reports for endpoint")
 
 	endpoint := ec.Param("endpoint")

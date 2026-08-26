@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -123,7 +123,7 @@ func probeURITargetLen(client *http.Client, apiBase string, targetLen int) (bool
 // probeEndpointURILimit handles GET /pp/v1/cf/diag/urilimit/:cnsiGuid —
 // the diagnostics-page button. Reports probed vs configured and the
 // recommended STRATOS_CF_GUID_CHUNK for this endpoint's chain.
-func (c *CloudFoundrySpecification) probeEndpointURILimit(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) probeEndpointURILimit(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	record, err := c.nativeProxy().GetCNSIRecord(cnsiGUID)
 	if err != nil {

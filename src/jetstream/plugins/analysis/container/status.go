@@ -5,11 +5,11 @@ import (
 	"errors"
 	"io/ioutil"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
-func (a *Analyzer) status(ec echo.Context) error {
+func (a *Analyzer) status(ec *echo.Context) error {
 	err := a.doStatus(ec)
 	if err != nil {
 		log.Error(err)
@@ -17,7 +17,7 @@ func (a *Analyzer) status(ec echo.Context) error {
 	return err
 }
 
-func (a *Analyzer) doStatus(ec echo.Context) error {
+func (a *Analyzer) doStatus(ec *echo.Context) error {
 	log.Debug("Status")
 	req := ec.Request()
 

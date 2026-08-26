@@ -8,7 +8,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -35,8 +35,7 @@ func TestApplyNativeRoleChanges_AddCreatesRole(t *testing.T) {
 	body := `{"changes":[{"userGuid":"user-1","orgGuid":"org-1","type":"organization_manager","add":true}]}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -70,8 +69,7 @@ func TestApplyNativeRoleChanges_RemoveResolvesGuidThenDeletes(t *testing.T) {
 	body := `{"changes":[{"userGuid":"user-1","orgGuid":"org-1","type":"organization_manager","add":false}]}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -125,8 +123,7 @@ func TestApplyNativeRoleChanges_OrgUserAddedBeforeOtherRoles(t *testing.T) {
 		`]}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -176,8 +173,7 @@ func TestApplyNativeRoleChanges_AddByUsernameResolvesGuidThenCreatesRole(t *test
 	body := `{"changes":[{"username":"newbie","origin":"uaa","spaceGuid":"sp-1","type":"space_developer","add":true}]}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -230,8 +226,7 @@ func TestApplyNativeRoleChanges_AddByUsernameUserNotFound(t *testing.T) {
 	body := `{"changes":[{"username":"ghost","origin":"uaa","orgGuid":"org-1","type":"organization_user","add":true}]}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -284,8 +279,7 @@ func TestApplyNativeRoleChanges_RemoveByUsername(t *testing.T) {
 	body := `{"changes":[{"username":"bob","origin":"uaa","spaceGuid":"sp-1","type":"space_developer","add":false}]}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("cnsi-1")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)

@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -95,21 +95,19 @@ func domainResource(guid, name string, internal bool, owningOrgGUID string, shar
 	}
 }
 
-func newDomainsContext(e *echo.Echo, target string) (echo.Context, *httptest.ResponseRecorder) {
+func newDomainsContext(e *echo.Echo, target string) (*echo.Context, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(http.MethodGet, target, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid")
-	ctx.SetParamValues("test-cnsi")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}})
 	return ctx, rec
 }
 
-func newOrgDomainsContext(e *echo.Echo, target, orgGUID string) (echo.Context, *httptest.ResponseRecorder) {
+func newOrgDomainsContext(e *echo.Echo, target, orgGUID string) (*echo.Context, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(http.MethodGet, target, nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "orgGuid")
-	ctx.SetParamValues("test-cnsi", orgGUID)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "orgGuid", Value: orgGUID}})
 	return ctx, rec
 }
 
@@ -239,8 +237,7 @@ func TestGetNativeDomainDetail(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/domains/test-cnsi/dom-99", nil)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "domainGuid")
-	ctx.SetParamValues("test-cnsi", "dom-99")
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "test-cnsi"}, {Name: "domainGuid", Value: "dom-99"}})
 	plugin := newDomainsPlugin(ts.URL)
 
 	require.NoError(t, plugin.getNativeDomainDetail(ctx))

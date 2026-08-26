@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // permissionsPolicy switches off the browser features Stratos never uses, so
@@ -70,7 +70,7 @@ const defaultHSTSPolicy = "max-age=63072000; includeSubDomains"
 // per-response nonce, so serveIndexHTML sets it on the single document that
 // needs one. See csp.go.
 func (p *portalProxy) securityHeaders(next echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		header := c.Response().Header()
 		header.Set("Permissions-Policy", permissionsPolicy)
 		header.Set("Cross-Origin-Opener-Policy", crossOriginOpenerPolicy)

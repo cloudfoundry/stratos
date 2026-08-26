@@ -28,11 +28,11 @@ import (
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
@@ -84,8 +84,10 @@ const (
 
 // defaultCSPPolicy is the Content-Security-Policy applied unless CONSOLE_CSP
 // opts out or supplies its own. It is scoped to what the Stratos SPA needs:
+//
 //   - default/connect from same origin ('self'); same-origin 'self'
 //     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
+//
 //   - script-src carries the per-response nonce and 'strict-dynamic', which is
 //     the CSP Level 3 mechanism for scripts: the nonce authorises the module
 //     scripts the build appends to index.html (serveIndexHTML stamps them),
@@ -96,34 +98,41 @@ const (
 //     source left beside it reads as a grant that does not hold. That is the
 //     directive's whole point — an injected <script src="/…"> is same-origin
 //     and still refused, because origin no longer confers trust.
+//
 //   - 'report-sample' on both directives that can refuse inline content
 //     (script-src, style-src-elem) — without it a browser reports a blocked
 //     inline script or style as blocked-uri "inline" and nothing else, which
 //     names no file and no content. It grants nothing, so it does not weaken
 //     'strict-dynamic' beside it. style-src does not carry it: 'unsafe-inline'
 //     means nothing ever violates it to sample.
+//
 //   - object-src 'none' — plugin content (<object>, <embed>) is a script
 //     execution path that script-src does not govern. Stated explicitly
 //     because falling back to default-src 'self' would still permit it from
 //     this origin, and the console embeds no plugin content at all.
+//
 //   - style-src-elem carries a per-response nonce, so <style> elements are
 //     enforced without 'unsafe-inline'. serveIndexHTML nonces the ones in
 //     index.html; Angular nonces its own from ngCspNonce; installStyleNonce
 //     (frontend polyfills) nonces the ones Monaco and xterm create, neither of
 //     which accepts a nonce itself. A <style> arriving as markup carries none
 //     and is refused, which is the point.
+//
 //   - style-src keeps 'unsafe-inline', but style-src-elem now overrides it for
 //     elements, so what it still permits is inline style ATTRIBUTES (Monaco's
 //     per-line positioning, xterm's truecolor cells). CSP has no nonce or hash
 //     mechanism for dynamic attributes, so no policy change can tighten this.
 //     It also remains the whole style policy on pre-CSP3 browsers.
+//
 //   - data: images/fonts (inlined icons) and Google Fonts font files
+//
 //   - worker-src 'self' — Monaco's language workers are same-origin module
 //     workers built from `new Worker(new URL(…), {type: 'module'})`, hashed
 //     chunks like the rest of the app (monaco-loader.ts). It granted blob: as
 //     well until the AMD loader went away in #5561; a blob: worker inherits
 //     the creating document's policy, so re-granting it is a way back to
 //     running script the nonce never authorised.
+//
 //   - require-trusted-types-for 'script' closes the sinks script-src cannot
 //     see. A nonce governs how script ARRIVES; it says nothing about a string
 //     assigned to innerHTML by script that is already trusted, which is the
@@ -137,7 +146,9 @@ const (
 //     that adds a tenth. The allowlist is what stops an attacker who already
 //     runs script from minting their own policy — which, at that point, is no
 //     longer the boundary that matters.
+//
 //   - frame-ancestors 'self' mirrors the existing X-Frame-Options: SAMEORIGIN
+//
 // Operators can instead set CONSOLE_CSP to a full policy string to use verbatim.
 const defaultCSPPolicy = "default-src 'self'; " +
 	"script-src " + cspNoncePlaceholder + " 'strict-dynamic' " + cspReportSample + "; " +
@@ -884,7 +895,7 @@ func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessi
 	return pp
 }
 
-func echoShouldNotLog(ec echo.Context) bool {
+func echoShouldNotLog(ec *echo.Context) bool {
 	// Don't log readiness probes
 	return ec.Request().RequestURI == "/pp/v1/ping"
 }
@@ -892,8 +903,6 @@ func echoShouldNotLog(ec echo.Context) bool {
 func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool, envLookup *env.VarSet) error {
 	log.Debug("start")
 	e := echo.New()
-	e.HideBanner = true
-	e.HidePort = true
 
 	e.Binder = new(custombinder.CustomBinder)
 
@@ -907,14 +916,23 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		logAPIRequests = envLogAPIRequests
 	}
 	if logAPIRequests == "true" {
-		customLoggerConfig := middleware.LoggerConfig{
-			Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
-				`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
-				`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
-		}
-		customLoggerConfig.Skipper = echoShouldNotLog
-
-		e.Use(middleware.LoggerWithConfig(customLoggerConfig))
+		e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+			Skipper:          echoShouldNotLog,
+			LogRemoteIP:      true,
+			LogMethod:        true,
+			LogURIPath:       true,
+			LogStatus:        true,
+			LogLatency:       true,
+			LogContentLength: true,
+			LogResponseSize:  true,
+			LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
+				log.Infof(`Request: [%s] Remote-IP:"%s" Method:"%s" Path:"%s" `+
+					`Status:%d Latency:%s Bytes-In:%s Bytes-Out:%d`,
+					v.StartTime.Format(time.RFC3339), v.RemoteIP, v.Method, v.URIPath,
+					v.Status, v.Latency, v.ContentLength, v.ResponseSize)
+				return nil
+			},
+		}))
 	} else {
 		log.Warn("Disabled logging of API requests received by Jetstream")
 	}
@@ -924,7 +942,7 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 	api.SetWebSocketAllowedOrigins(config.AllowedOrigins)
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     config.AllowedOrigins,
-		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 		AllowCredentials: true,
 	}))
 	// No ContentSecurityPolicy here: the policy carries a per-response nonce,
@@ -954,8 +972,12 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		p.registerRoutes(e, needSetupMiddleware)
 	}
 
+	// The serve context governs server lifetime; the upgrade watcher cancels it.
+	serveContext, shutdown := context.WithCancel(context.Background())
+	defer shutdown()
+
 	if isUpgrade {
-		go stopEchoWhenUpgraded(e, p.Env())
+		go stopEchoWhenUpgraded(shutdown, p.Env())
 	}
 
 	if !isUpgrade {
@@ -970,16 +992,21 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 
 	var engineErr error
 	address := config.TLSAddress
+	startConfig := echo.StartConfig{
+		Address:    address,
+		HideBanner: true,
+		HidePort:   true,
+	}
 	if config.HTTPS {
 		certFile, certKeyFile, err := detectTLSCert(config)
 		if err != nil {
 			return err
 		}
 		log.Infof("Starting HTTPS Server at address: %s", address)
-		engineErr = e.StartTLS(address, certFile, certKeyFile)
+		engineErr = startConfig.StartTLS(serveContext, e, certFile, certKeyFile)
 	} else {
 		log.Infof("Starting HTTP Server at address: %s", address)
-		engineErr = e.Start(address)
+		engineErr = startConfig.Start(serveContext, e)
 	}
 
 	if engineErr != nil {
@@ -1032,7 +1059,7 @@ func (p *portalProxy) GetEndpointTypeSpec(typeName string) (api.EndpointPlugin, 
 // @Failure 401 {object} api.ErrorResponseBody "Error response"
 // @Security ApiKeyAuth
 // @Router /endpoints [post]
-func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
+func (p *portalProxy) pluginRegisterRouter(c *echo.Context) error {
 	log.Debug("pluginRegisterRouter")
 
 	params := new(api.RegisterEndpointParams)
@@ -1207,7 +1234,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	adminGroup := sessionGroup
 	adminGroup.Use(p.adminMiddleware)
 
-	p.PluginRegisterRoutes = make(map[string]func(echo.Context) error)
+	p.PluginRegisterRoutes = make(map[string]func(*echo.Context) error)
 
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
@@ -1271,7 +1298,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 			log.Warnf("Unable to read index.html; serving the UI without a CSP nonce: %v", readErr)
 		}
 		staticGroup.Static("/", staticDir)
-		e.HTTPErrorHandler = p.getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
+		e.HTTPErrorHandler = p.getUICustomHTTPErrorHandler(staticDir, echo.DefaultHTTPErrorHandler(false))
 		log.Info("Serving static UI resources")
 	} else {
 		// Not serving UI - use V2 Error compatability error handler
@@ -1287,7 +1314,7 @@ func (p *portalProxy) AddLoginHook(priority int, function api.LoginHookFunc) err
 	return nil
 }
 
-func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
+func (p *portalProxy) ExecuteLoginHooks(c *echo.Context) error {
 	hooks := p.GetConfig().LoginHooks
 	sort.SliceStable(hooks, func(i, j int) bool {
 		return hooks[i].Priority < hooks[j].Priority
@@ -1310,10 +1337,14 @@ func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
 func (p *portalProxy) getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPErrorHandler) echo.HTTPErrorHandler {
-	return func(err error, c echo.Context) {
-		code := http.StatusInternalServerError
-		if he, ok := err.(*echo.HTTPError); ok {
-			code = he.Code
+	return func(c *echo.Context, err error) {
+		// echo.StatusCode handles both *echo.HTTPError and the router's
+		// predefined errors (echo.ErrNotFound and friends), which are no longer
+		// *HTTPError in v5. A plain type assertion would miss them and turn
+		// every deep-link 404 into a 500, breaking SPA routing.
+		code := echo.StatusCode(err)
+		if code == 0 {
+			code = http.StatusInternalServerError
 		}
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
@@ -1332,34 +1363,32 @@ func (p *portalProxy) getUICustomHTTPErrorHandler(staticDir string, defaultHandl
 				log.Warnf("Unable to serve index.html: %v", fileErr)
 			}
 			// Let the default handler handle it
-			defaultHandler(err, c)
+			defaultHandler(c, err)
 		} else {
 			// Use V2 Error compatability error handler
-			echoV2DefaultHTTPErrorHandler(err, c)
+			echoV2DefaultHTTPErrorHandler(c, err)
 		}
 	}
 }
 
 // EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
 // i.e. no wrapping in 'message' JSON object
-func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
+func echoV2DefaultHTTPErrorHandler(c *echo.Context, err error) {
 
-	code := http.StatusInternalServerError
+	// See the note in getUICustomHTTPErrorHandler: v5's predefined router
+	// errors do not satisfy *echo.HTTPError, so ask for the status code.
+	code := echo.StatusCode(err)
+	if code == 0 {
+		code = http.StatusInternalServerError
+	}
 	msg := http.StatusText(code)
-	if he, ok := err.(*echo.HTTPError); ok {
-		code = he.Code
-		if msgStr, ok := he.Message.(string); ok {
-			msg = msgStr
-		} else {
-			msg = he.Error()
-		}
-		if he.Internal != nil {
-			err = fmt.Errorf("%v, %v", err, he.Internal)
-		}
+	if he, ok := err.(*echo.HTTPError); ok && he.Message != "" {
+		msg = he.Message
 	}
 
 	// Send response
-	if !c.Response().Committed {
+	response, unwrapErr := echo.UnwrapResponse(c.Response())
+	if unwrapErr != nil || !response.Committed {
 		var writeErr error
 		if c.Request().Method == http.MethodHead { // Issue #608
 			writeErr = c.NoContent(code)
@@ -1367,13 +1396,13 @@ func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
 			writeErr = c.String(code, msg)
 		}
 		if writeErr != nil {
-			c.Logger().Error(writeErr)
+			c.Logger().Error("could not write error response", "error", writeErr)
 		}
 	}
 
 	// Always log error
 	if err != nil {
-		c.Logger().Error(err)
+		c.Logger().Error("request failed", "error", err)
 	}
 }
 
@@ -1410,14 +1439,14 @@ func isConsoleUpgrading(env *env.VarSet) bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
+func stopEchoWhenUpgraded(shutdown context.CancelFunc, env *env.VarSet) {
 	for isConsoleUpgrading(env) {
 		time.Sleep(1 * time.Second)
 	}
 	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
-	if err := e.Close(); err != nil {
-		log.Warnf("Unable to shut down Upgrade web server instance: %v", err)
-	}
+	// v5 drives server lifetime from the context handed to StartConfig, so
+	// cancelling it is what shuts the upgrade listener down.
+	shutdown()
 }
 
 // GetStoreFactory gets the store factory

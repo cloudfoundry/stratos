@@ -16,7 +16,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 )
@@ -79,7 +79,7 @@ const (
 	stratosProjectKey = "STRATOS_PROJECT"
 )
 
-func (cfAppPush *CFAppPush) deploy(echoContext echo.Context) error {
+func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 
 	cnsiGUID := echoContext.Param("cnsiGuid")
 	orgGUID := echoContext.Param("orgGuid")
@@ -617,7 +617,7 @@ func getMarshalledSocketMessage(data string, messageType MessageType) ([]byte, e
 	return marshalledJSON, err
 }
 
-func (cfAppPush *CFAppPush) getConfigData(echoContext echo.Context, cnsiGUID string, orgGUID string, spaceGUID string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*CFPushAppConfig, error) {
+func (cfAppPush *CFAppPush) getConfigData(echoContext *echo.Context, cnsiGUID string, orgGUID string, spaceGUID string, spaceName string, orgName string, clientWebSocket *websocket.Conn) (*CFPushAppConfig, error) {
 
 	cnsiRecord, err := cfAppPush.portalProxy.GetCNSIRecord(cnsiGUID)
 	if err != nil {

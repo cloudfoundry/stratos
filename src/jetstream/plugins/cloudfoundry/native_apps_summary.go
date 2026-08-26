@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // derivedSortFields are StApp fields sourced from /v3/processes (memory,
@@ -61,7 +61,7 @@ var stratosReservedSummaryParams = map[string]bool{
 // needs for pagination meta and in-memory slicing — resolved because the
 // params only carry paging when the caller supplied per_page (absent
 // paging stays off the upstream call so V3 applies its own defaults).
-func parseSummaryQueryParams(ctx echo.Context) (*capi.QueryParams, int, int) {
+func parseSummaryQueryParams(ctx *echo.Context) (*capi.QueryParams, int, int) {
 	perPage, page, present := parsePerPageAndPage(ctx)
 	params := applyPagingParams(capi.NewQueryParams(), perPage, page, present)
 
@@ -111,7 +111,7 @@ var routesDerivedFields = []string{"routes"}
 // a map keyed by app GUID so per-app composition is a cheap lookup. Returns
 // an error on any CAPI failure; the caller converts this into an envelope-
 // level _meta.errors entry rather than failing the whole response.
-func fetchWebProcessesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []string) (map[string]capi.Process, error) {
+func fetchWebProcessesForApps(ctx *echo.Context, cfClient capi.Client, appGUIDs []string) (map[string]capi.Process, error) {
 	if len(appGUIDs) == 0 {
 		return map[string]capi.Process{}, nil
 	}
@@ -150,7 +150,7 @@ func fetchWebProcessesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs [
 // resolve each app's space GUID to an org GUID via the space's relationship
 // envelope. Returns an error on any CAPI failure; caller converts into an
 // envelope-level _meta.errors entry rather than failing the whole response.
-func fetchSpacesByGUIDs(ctx echo.Context, cfClient capi.Client, spaceGUIDs []string) (map[string]capi.Space, error) {
+func fetchSpacesByGUIDs(ctx *echo.Context, cfClient capi.Client, spaceGUIDs []string) (map[string]capi.Space, error) {
 	if len(spaceGUIDs) == 0 {
 		return map[string]capi.Space{}, nil
 	}
@@ -185,7 +185,7 @@ func fetchSpacesByGUIDs(ctx echo.Context, cfClient capi.Client, spaceGUIDs []str
 // fanout that resolves SpaceName. Eliminates a frontend orgs-catalog
 // fetch + per-row resolver previously needed just to render the
 // "CF / Org / Space" cell on the app wall.
-func fetchOrgsByGUIDs(ctx echo.Context, cfClient capi.Client, orgGUIDs []string) (map[string]capi.Organization, error) {
+func fetchOrgsByGUIDs(ctx *echo.Context, cfClient capi.Client, orgGUIDs []string) (map[string]capi.Organization, error) {
 	if len(orgGUIDs) == 0 {
 		return map[string]capi.Organization{}, nil
 	}
@@ -223,7 +223,7 @@ func fetchOrgsByGUIDs(ctx echo.Context, cfClient capi.Client, orgGUIDs []string)
 // envelope-level _meta.errors entry rather than failing the whole
 // response. Each app's bucket is allocated lazily — apps with no routes
 // stay absent from the map (callers default to []).
-func fetchRoutesForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []string) (map[string][]StAppRoute, error) {
+func fetchRoutesForApps(ctx *echo.Context, cfClient capi.Client, appGUIDs []string) (map[string][]StAppRoute, error) {
 	if len(appGUIDs) == 0 {
 		return map[string][]StAppRoute{}, nil
 	}
@@ -279,7 +279,7 @@ var dropletDerivedFields = []string{"lastRefreshedAt"}
 // than "current droplet": rollbacks and droplet copies can repoint the
 // current droplet at an old row, but can't change which row is newest.
 // Apps that never staged have no entry — legit absence, not a failure.
-func fetchDropletsForApps(ctx echo.Context, cfClient capi.Client, appGUIDs []string) (map[string]string, error) {
+func fetchDropletsForApps(ctx *echo.Context, cfClient capi.Client, appGUIDs []string) (map[string]string, error) {
 	if len(appGUIDs) == 0 {
 		return map[string]string{}, nil
 	}
@@ -457,7 +457,7 @@ func envelopeMetaForCompositionErrors(procErr, spaceErr, routesErr, dropletsErr 
 // returns HTTP 200 with app-level fields intact — per-row
 // _meta.unavailable lists affected fields, envelope _meta.errors explains
 // root causes.
-func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfClient capi.Client) error {
+func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx *echo.Context, cfClient capi.Client) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	params, perPage, page := parseSummaryQueryParams(ctx)
 
@@ -563,7 +563,7 @@ func (c *CloudFoundrySpecification) getNativeAppsSummary(ctx echo.Context, cfCli
 // app set — no cross-CF buffer (cross-CF merge is the frontend primitive's
 // concern in WU 4).
 func (c *CloudFoundrySpecification) getNativeAppsSummaryDerivedSort(
-	ctx echo.Context,
+	ctx *echo.Context,
 	cfClient capi.Client,
 	params *capi.QueryParams,
 	sortField string,

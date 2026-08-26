@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // rolesPayload generates n synthetic v3 role rows for the given user GUID
@@ -89,8 +89,7 @@ func runOneHandlerCall(b *testing.B, srvURL string) time.Duration {
 	req := httptest.NewRequest(http.MethodGet, "/pp/v1/cf/current-user-roles/cnsi-1", nil)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	start := time.Now()
 	if err := plugin.getNativeCurrentUserRoles(c); err != nil {

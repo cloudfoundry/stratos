@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 
 	v1 "k8s.io/api/core/v1"
@@ -242,7 +242,7 @@ func tryDecodeSecrets(data []byte) (bool, v1.SecretList, error) {
 
 // Send an error page that will get loaded into the IFRAME and the onload handler will detect
 // it and show a Stratos error message
-func sendErrorPage(c echo.Context, msg string) error {
+func sendErrorPage(c *echo.Context, msg string) error {
 	html := fmt.Sprintf("<html><body><stratos-error>%s</stratos-error></body></html>", msg)
 	c.Response().Write([]byte(html))
 	return nil

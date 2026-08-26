@@ -3,7 +3,7 @@ package cloudfoundry
 import (
 	"strings"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // ReturnMode is the four-tier wire-shape selector used by every
@@ -39,7 +39,7 @@ const (
 // values fall back to ReturnBase so older consumers don't 400 against
 // servers that grow new modes — the contract is "I'll send you the
 // safest tier I understand". Comparison is case-insensitive.
-func parseReturnMode(ctx echo.Context) ReturnMode {
+func parseReturnMode(ctx *echo.Context) ReturnMode {
 	switch strings.ToLower(ctx.QueryParam("return")) {
 	case "counts":
 		return ReturnCounts

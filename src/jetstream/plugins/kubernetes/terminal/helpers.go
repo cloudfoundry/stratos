@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -58,7 +58,7 @@ func (k *KubeTerminal) getClients() (corev1.PodInterface, corev1.SecretInterface
 }
 
 // Create a pod for a user to run the Kube terminal
-func (k *KubeTerminal) createPod(c echo.Context, kubeConfig, kubeVersion string, ws *websocket.Conn) (*PodCreationData, error) {
+func (k *KubeTerminal) createPod(c *echo.Context, kubeConfig, kubeVersion string, ws *websocket.Conn) (*PodCreationData, error) {
 	// Unique ID for the secret and pod name
 	id := uuid.NewV4().String()
 	id = strings.ReplaceAll(id, "-", "")

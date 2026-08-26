@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -51,8 +51,7 @@ func TestDeleteNativeApp_Forwards_v3_Apps_Delete(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.deleteNativeApp(c))
 	assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -89,8 +88,7 @@ func TestDeleteNativeApp_PropagatesCapiError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "missing")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "missing"}})
 
 	require.NoError(t, plugin.deleteNativeApp(c))
 	assert.Equal(t, http.StatusNotFound, rec.Code)
@@ -147,8 +145,7 @@ func TestAppAction_ForwardsLifecycleVerbs(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 			c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
-			c.SetParamNames("cnsiGuid", "appGuid", "action")
-			c.SetParamValues("cnsi-1", "app-1", tc.action)
+			c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "action", Value: tc.action}})
 
 			require.NoError(t, plugin.appAction(c))
 			assert.Equal(t, http.StatusAccepted, rec.Code)
@@ -176,8 +173,7 @@ func TestRestageApp_NoTrackerReturns503(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
-	c.SetParamNames("cnsiGuid", "appGuid", "action")
-	c.SetParamValues("cnsi-1", "app-1", "restage")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "action", Value: "restage"}})
 
 	err := plugin.appAction(c)
 	require.Error(t, err)
@@ -207,8 +203,7 @@ func TestRestageApp_RejectsInvalidStrategy(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
-	c.SetParamNames("cnsiGuid", "appGuid", "action")
-	c.SetParamValues("cnsi-1", "app-1", "restage")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "action", Value: "restage"}})
 
 	err := plugin.appAction(c)
 	require.Error(t, err)
@@ -251,8 +246,7 @@ func TestRestageApp_FastPathResolvesOnNoEligiblePackage(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
-	c.SetParamNames("cnsiGuid", "appGuid", "action")
-	c.SetParamValues("cnsi-1", "app-empty", "restage")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-empty"}, {Name: "action", Value: "restage"}})
 
 	require.NoError(t, plugin.appAction(c))
 	assert.Equal(t, http.StatusBadGateway, rec.Code)
@@ -290,8 +284,7 @@ func TestAppAction_RejectsUnknownVerb(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
-	c.SetParamNames("cnsiGuid", "appGuid", "action")
-	c.SetParamValues("cnsi-1", "app-1", "frobnicate")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "action", Value: "frobnicate"}})
 
 	err := plugin.appAction(c)
 	require.Error(t, err)
@@ -330,15 +323,14 @@ func TestAppAction_PropagatesCapiError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
-	c.SetParamNames("cnsiGuid", "appGuid", "action")
-	c.SetParamValues("cnsi-1", "app-1", "start")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "action", Value: "start"}})
 
 	require.NoError(t, plugin.appAction(c))
 	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
 	assert.Contains(t, rec.Body.String(), "UnprocessableEntity")
 }
 
-// patchAppHelper wires a mock CF v3 server + plugin + echo.Context for the
+// patchAppHelper wires a mock CF v3 server + plugin + *echo.Context for the
 // PATCH-handler tests. It returns the recorder so callers can assert status +
 // body, and exposes the plugin so tests invoke the handler directly.
 func patchAppHelper(t *testing.T, handler http.HandlerFunc, body string) (*httptest.ResponseRecorder, error) {
@@ -360,8 +352,7 @@ func patchAppHelper(t *testing.T, handler http.HandlerFunc, body string) (*httpt
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	return rec, plugin.patchApp(c)
 }
@@ -504,8 +495,7 @@ func TestDeleteAppInstance_CallsCapiInstanceDelete(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/instances/:index")
-	c.SetParamNames("cnsiGuid", "appGuid", "index")
-	c.SetParamValues("cnsi-1", "app-1", "2")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "index", Value: "2"}})
 
 	require.NoError(t, plugin.deleteAppInstance(c))
 	assert.Equal(t, http.StatusNoContent, rec.Code)
@@ -548,8 +538,7 @@ func TestDeleteAppInstance_PropagatesCapiError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/instances/:index")
-	c.SetParamNames("cnsiGuid", "appGuid", "index")
-	c.SetParamValues("cnsi-1", "app-1", "99")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "index", Value: "99"}})
 
 	require.NoError(t, plugin.deleteAppInstance(c))
 	assert.Equal(t, http.StatusNotFound, rec.Code)
@@ -599,8 +588,7 @@ func TestAssignRouteToApp_PostsDestination(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes/:routeGuid")
-	c.SetParamNames("cnsiGuid", "appGuid", "routeGuid")
-	c.SetParamValues("cnsi-1", "app-1", "route-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "routeGuid", Value: "route-1"}})
 
 	require.NoError(t, plugin.assignRouteToApp(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -641,8 +629,7 @@ func TestAssignRouteToApp_PropagatesCapiError(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/routes/:routeGuid")
-	c.SetParamNames("cnsiGuid", "appGuid", "routeGuid")
-	c.SetParamValues("cnsi-1", "app-1", "route-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "routeGuid", Value: "route-1"}})
 
 	require.NoError(t, plugin.assignRouteToApp(c))
 	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
@@ -673,8 +660,7 @@ func TestDeleteAppInstance_RejectsNonIntegerIndex(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/instances/:index")
-	c.SetParamNames("cnsiGuid", "appGuid", "index")
-	c.SetParamValues("cnsi-1", "app-1", "not-a-number")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "index", Value: "not-a-number"}})
 
 	err := plugin.deleteAppInstance(c)
 	require.Error(t, err)
@@ -703,8 +689,7 @@ func TestRollbackApp_NoTrackerReturns503(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/rollback")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	err := plugin.rollbackApp(c, "cnsi-1", "app-1")
 	require.Error(t, err)
@@ -734,8 +719,7 @@ func TestRollbackApp_RejectsMissingRevisionGuid(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/rollback")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	err := plugin.rollbackApp(c, "cnsi-1", "app-1")
 	require.Error(t, err)
@@ -766,8 +750,7 @@ func TestRollbackApp_RejectsInvalidStrategy(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/rollback")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	err := plugin.rollbackApp(c, "cnsi-1", "app-1")
 	require.Error(t, err)
@@ -814,8 +797,7 @@ func TestRollbackApp_FastPathResolvesOnDeploymentRejected(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/rollback")
-	c.SetParamNames("cnsiGuid", "appGuid")
-	c.SetParamValues("cnsi-1", "app-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.rollbackApp(c, "cnsi-1", "app-1"))
 	assert.Equal(t, http.StatusBadGateway, rec.Code)
@@ -898,8 +880,7 @@ func TestRestageApp_RollingFastPathReachesDeployment(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/apps/:cnsiGuid/:appGuid/actions/:action")
-	c.SetParamNames("cnsiGuid", "appGuid", "action")
-	c.SetParamValues("cnsi-1", "app-1", "restage")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}, {Name: "action", Value: "restage"}})
 
 	require.NoError(t, plugin.appAction(c))
 	assert.Equal(t, http.StatusOK, rec.Code, "rolling restage should fast-path resolve to COMPLETE")

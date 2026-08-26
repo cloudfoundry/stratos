@@ -6,7 +6,7 @@ import (
 	"net/url"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,7 +21,7 @@ func (m *Monocular) GetClientId() string {
 }
 
 // Register will register a new endpoint of the type Helm
-func (m *Monocular) Register(echoContext echo.Context) error {
+func (m *Monocular) Register(echoContext *echo.Context) error {
 	log.Debug("Helm Repository Register...")
 	return m.portalProxy.RegisterEndpoint(echoContext, m.Info)
 }
@@ -32,7 +32,7 @@ func (m *Monocular) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRe
 }
 
 // Connect to the endpoint
-func (m *Monocular) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
+func (m *Monocular) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	// Note: Helm Repositories don't support connecting
 	return nil, false, errors.New("Connecting not support for a Helm Repository")
 }
@@ -71,5 +71,5 @@ func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool, caCert stri
 }
 
 // UpdateMetadata not needed for Helm endpoints
-func (m *Monocular) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
+func (m *Monocular) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
 }

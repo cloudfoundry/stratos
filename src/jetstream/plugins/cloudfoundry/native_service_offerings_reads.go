@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeServiceOfferings handles GET /pp/v1/cf/service_offerings/{cnsiGuid}.
@@ -30,7 +30,7 @@ import (
 //
 // Broker join soft-fail: a missing or malformed `included` block leaves
 // Broker refs guid-only rather than 502'ing the whole marketplace.
-func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -125,7 +125,7 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferings(ctx echo.Context) 
 // summary+ keeps a single-guid broker fetch via drainBrokersForOfferings.
 // Cheap (one extra round trip) and worth keeping until the capi/v3
 // client grows include= on Get too.
-func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	offeringGUID := ctx.Param("offeringGuid")
 	if cnsiGUID == "" || offeringGUID == "" {
@@ -174,7 +174,7 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingDetail(ctx echo.Cont
 // only difference is the path-derived `?service_broker_guids=<guid>` filter.
 // CF v3 supports the filter natively on `/v3/service_offerings`, so this is a
 // single round trip (plus the `?include=service_broker` join at summary+).
-func (c *CloudFoundrySpecification) getNativeServiceOfferingsForBroker(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceOfferingsForBroker(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	brokerGUID := ctx.Param("brokerGuid")
 	if cnsiGUID == "" || brokerGUID == "" {
@@ -264,7 +264,7 @@ func brokersFromIncluded(list *capi.ListResponse[capi.ServiceOffering]) map[stri
 // than 502'ing the whole response. Used only by the single-resource
 // detail handler today — the list path reads brokers from v3's
 // `included` block via brokersFromIncluded instead.
-func drainBrokersForOfferings(ctx echo.Context, cfClient capi.Client, offerings []capi.ServiceOffering) map[string]capi.ServiceBroker {
+func drainBrokersForOfferings(ctx *echo.Context, cfClient capi.Client, offerings []capi.ServiceOffering) map[string]capi.ServiceBroker {
 	brokerGUIDSet := make(map[string]struct{}, len(offerings))
 	for _, o := range offerings {
 		if guid := relationshipGUID(o.Relationships.ServiceBroker); guid != "" {

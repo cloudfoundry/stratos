@@ -11,7 +11,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/config"
 
 	"github.com/SermoDigital/jose/jws"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
@@ -63,7 +63,7 @@ func (c *OIDCKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Tok
 	return nil
 }
 
-func (c *OIDCKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+func (c *OIDCKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	log.Debug("FetchToken (OIDC)")
 
 	body := ec.FormValue("kubeconfig")

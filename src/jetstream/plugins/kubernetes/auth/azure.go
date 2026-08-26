@@ -9,7 +9,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/config"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 const authConnectTypeKubeConfigAz = "kubeconfig-az"
@@ -29,7 +29,7 @@ func (c *AzureKubeAuth) GetName() string {
 	return authConnectTypeKubeConfigAz
 }
 
-func (p *AzureKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+func (p *AzureKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 	body := ec.FormValue("kubeconfig")
 	if len(body) == 0 {
 		return nil, nil, errors.New("kubeconfig content is required")

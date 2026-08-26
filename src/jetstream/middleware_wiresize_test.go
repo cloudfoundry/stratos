@@ -7,7 +7,7 @@ import (
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 func newTestPortalProxy(diagEnabled bool) *portalProxy {
@@ -23,7 +23,7 @@ func runThroughMiddleware(t *testing.T, p *portalProxy, contentType string, stat
 	t.Helper()
 	e := echo.New()
 	e.Use(p.wireSizeMiddleware)
-	e.GET("/test", func(c echo.Context) error {
+	e.GET("/test", func(c *echo.Context) error {
 		c.Response().Header().Set(echo.HeaderContentType, contentType)
 		c.Response().WriteHeader(status)
 		_, err := c.Response().Write(body)
@@ -105,8 +105,8 @@ func TestWireSizeMiddleware_SkipsPassthroughPaths(t *testing.T) {
 	p := newTestPortalProxy(true)
 	e := echo.New()
 	e.Use(p.wireSizeMiddleware)
-	e.GET("/pp/v1/proxy/v2/info", func(c echo.Context) error {
-		if _, ok := c.Response().Writer.(*bufferingResponseWriter); ok {
+	e.GET("/pp/v1/proxy/v2/info", func(c *echo.Context) error {
+		if _, ok := c.Response().(*bufferingResponseWriter); ok {
 			t.Error("wireSize middleware must not wrap writer on /pp/v1/proxy/ paths")
 		}
 		c.Response().Header().Set(echo.HeaderContentType, "application/json")
@@ -128,10 +128,10 @@ func TestWireSizeMiddleware_SkipsWebSocketUpgrade(t *testing.T) {
 	p := newTestPortalProxy(true)
 	e := echo.New()
 	e.Use(p.wireSizeMiddleware)
-	e.GET("/ws", func(c echo.Context) error {
+	e.GET("/ws", func(c *echo.Context) error {
 		// Simulate a WebSocket-upgrade-adjacent handler: it doesn't write a body
 		// here, but the middleware must not wrap the writer so hijack works.
-		if _, ok := c.Response().Writer.(*bufferingResponseWriter); ok {
+		if _, ok := c.Response().(*bufferingResponseWriter); ok {
 			t.Error("wireSize middleware should not wrap the writer on WebSocket upgrade")
 		}
 		return c.NoContent(http.StatusSwitchingProtocols)

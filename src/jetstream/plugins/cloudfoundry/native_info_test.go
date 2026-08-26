@@ -9,7 +9,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -84,8 +84,7 @@ func TestGetNativeCFInfo_HappyPath(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/info/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("cnsi-1")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, plugin.getNativeCFInfo(c))
 	assert.Equal(t, http.StatusOK, rec.Code)
@@ -129,8 +128,7 @@ func TestGetNativeCFInfo_RejectsMissingCnsiGuid(t *testing.T) {
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 	c.SetPath("/pp/v1/cf/info/:cnsiGuid")
-	c.SetParamNames("cnsiGuid")
-	c.SetParamValues("")
+	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: ""}})
 
 	err := plugin.getNativeCFInfo(c)
 	require.Error(t, err)

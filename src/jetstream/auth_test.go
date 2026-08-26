@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	uuid "github.com/satori/go.uuid"
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"

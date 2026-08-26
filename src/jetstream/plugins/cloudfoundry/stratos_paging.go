@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // V3 CAPI defaults — match the upstream defaults so handlers without a
@@ -23,7 +23,7 @@ const (
 // (so V3 applies its own defaults). Negative or non-numeric per_page values
 // fall back to the V3 default and are treated as not-present so a malformed
 // query never poisons the upstream call.
-func parsePerPageAndPage(ctx echo.Context) (int, int, bool) {
+func parsePerPageAndPage(ctx *echo.Context) (int, int, bool) {
 	perPage := v3DefaultPerPage
 	page := v3DefaultPage
 	present := false
@@ -113,7 +113,7 @@ type StratosError struct {
 // Terminal links are nil (serialised as JSON null) when they don't apply —
 // no previous on page 1, no next on the last page, and first/last both nil
 // when the result set is empty.
-func BuildPaginationMeta(c echo.Context, currentPage, perPage, totalResults int) PaginationMeta {
+func BuildPaginationMeta(c *echo.Context, currentPage, perPage, totalResults int) PaginationMeta {
 	pm := PaginationMeta{
 		TotalResults: totalResults,
 	}

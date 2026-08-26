@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -25,7 +25,7 @@ import (
 // (plugin ordering / tests), an accepted delete is reported as PENDING with
 // no job — the CF-side outcome is unknowable without the tracker, and
 // PENDING is the honest analogue of deleteNativeRoute's bare-202 fallback.
-func (cf *CloudFoundrySpecification) bulkDeleteNativeRoutes(c echo.Context) error {
+func (cf *CloudFoundrySpecification) bulkDeleteNativeRoutes(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -90,7 +90,7 @@ func (cf *CloudFoundrySpecification) bulkDeleteNativeRoutes(c echo.Context) erro
 // route in one call. Outcomes are per-item: COMPLETE on 200, FAILED with the
 // CF error envelope mapped (never failing the whole request); the response
 // is always a 200 BulkResult envelope.
-func (cf *CloudFoundrySpecification) bulkUnmapNativeRoutes(c echo.Context) error {
+func (cf *CloudFoundrySpecification) bulkUnmapNativeRoutes(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -130,7 +130,7 @@ func (cf *CloudFoundrySpecification) bulkUnmapNativeRoutes(c echo.Context) error
 // per-destination DELETE fan-out the frontend would otherwise have to do
 // (unmapRouteFromApp once per bound app). 204 on success; upstream errors
 // flow through handleCapiError to preserve CF's error envelope.
-func (cf *CloudFoundrySpecification) unmapAllRouteDestinations(c echo.Context) error {
+func (cf *CloudFoundrySpecification) unmapAllRouteDestinations(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	routeGUID := c.Param("routeGuid")
 	if cnsiGUID == "" || routeGUID == "" {

@@ -11,7 +11,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // allowedAppActions is the set of lifecycle verbs the POST app-action handler
@@ -32,7 +32,7 @@ var allowedAppActions = map[string]bool{
 // terminal StratosJob body; otherwise we register the job in the tracker
 // and return 202 with {id, state, startedAt} so the frontend can poll
 // /pp/v1/stratos/jobs/{id}.
-func (c *CloudFoundrySpecification) deleteNativeApp(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) deleteNativeApp(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	appGUID := ctx.Param("appGuid")
 	if cnsiGUID == "" || appGUID == "" {
@@ -104,7 +104,7 @@ func (c *CloudFoundrySpecification) deleteNativeApp(ctx echo.Context) error {
 // stratosjobs fast-path wrapper — same pattern as deleteNativeApp — so
 // the UI sees either 200 with terminal state (fast-path resolve) or
 // 202 + {id, state, startedAt} handoff for client polling.
-func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) appAction(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	appGUID := ctx.Param("appGuid")
 	action := ctx.Param("action")
@@ -214,7 +214,7 @@ func (c *CloudFoundrySpecification) appAction(ctx echo.Context) error {
 //   - 202 + handoff job when the orchestrator handed off; the frontend
 //     polls /pp/v1/stratosjobs/{id} and renders ref.Stages from the
 //     terminal result.
-func (c *CloudFoundrySpecification) restageApp(ctx echo.Context, cnsiGUID, appGUID string) error {
+func (c *CloudFoundrySpecification) restageApp(ctx *echo.Context, cnsiGUID, appGUID string) error {
 	userGUID, err := c.getUserGUID(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
@@ -307,7 +307,7 @@ type RollbackRequest struct {
 //   - 200 + {state, result?, errors?} on fast-path drain.
 //   - 202 + handoff job otherwise; frontend polls
 //     /pp/v1/stratosjobs/{id}.
-func (c *CloudFoundrySpecification) rollbackApp(ctx echo.Context, cnsiGUID, appGUID string) error {
+func (c *CloudFoundrySpecification) rollbackApp(ctx *echo.Context, cnsiGUID, appGUID string) error {
 	userGUID, err := c.getUserGUID(ctx)
 	if err != nil {
 		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
@@ -378,7 +378,7 @@ func (c *CloudFoundrySpecification) rollbackApp(ctx echo.Context, cnsiGUID, appG
 // accepted and forwarded to CF as a single /v3/processes/{guid}/actions/scale
 // call on the resolved web process. CF returns 202 + job; we hand to
 // RunFastPath.
-func (c *CloudFoundrySpecification) scaleApp(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) scaleApp(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	appGUID := ctx.Param("appGuid")
 	if cnsiGUID == "" || appGUID == "" {
@@ -467,7 +467,7 @@ func (c *CloudFoundrySpecification) scaleApp(ctx echo.Context) error {
 // CF returns 204 No Content on success and the capi wrapper returns nil; we
 // mirror that status to the caller. Errors are routed through handleCapiError
 // to preserve the CF error envelope classification.
-func (cf *CloudFoundrySpecification) deleteAppInstance(c echo.Context) error {
+func (cf *CloudFoundrySpecification) deleteAppInstance(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	appGUID := c.Param("appGuid")
 	indexRaw := c.Param("index")
@@ -507,7 +507,7 @@ func (cf *CloudFoundrySpecification) deleteAppInstance(c echo.Context) error {
 // handleCapiError classifies a capi error into an HTTP status and writes a
 // response body preserving the CF error envelope when present. Returns nil
 // (writes directly to the response) so callers can `return handleCapiError(…)`.
-func handleCapiError(ctx echo.Context, err error) error {
+func handleCapiError(ctx *echo.Context, err error) error {
 	status := statusFromCapiError(err)
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -571,7 +571,7 @@ type metaError struct {
 // contract (some fields landed, some did not) surfaceable to the UI without
 // having to parse an HTTP status that can't express per-field outcome. A fully
 // successful PATCH returns {"guid":"<appGuid>"} without _meta.
-func (cf *CloudFoundrySpecification) patchApp(c echo.Context) error {
+func (cf *CloudFoundrySpecification) patchApp(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	appGUID := c.Param("appGuid")
 	if cnsiGUID == "" || appGUID == "" {
@@ -682,7 +682,7 @@ func (cf *CloudFoundrySpecification) patchApp(c echo.Context) error {
 // this as Routes().InsertDestinations which returns the updated destinations
 // list on 200 OK. We mirror that status to the Stratos caller and route any
 // CAPI error envelope through handleCapiError to preserve classification.
-func (cf *CloudFoundrySpecification) assignRouteToApp(c echo.Context) error {
+func (cf *CloudFoundrySpecification) assignRouteToApp(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	appGUID := c.Param("appGuid")
 	routeGUID := c.Param("routeGuid")
@@ -744,7 +744,7 @@ func lookupWebProcessGUID(ctx context.Context, cfClient capi.Client, appGUID str
 // Sync write: V3 returns 201 with the created app. Body shape is
 // capi.AppCreateRequest = {name, relationships:{space:{data:{guid}}},
 // lifecycle?, environment_variables?, metadata?}.
-func (cf *CloudFoundrySpecification) createNativeApp(c echo.Context) error {
+func (cf *CloudFoundrySpecification) createNativeApp(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")

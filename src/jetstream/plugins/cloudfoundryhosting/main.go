@@ -11,7 +11,7 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -245,7 +245,7 @@ func (ch *CFHosting) Init() error {
 
 // EchoMiddleware is the Echo server middleware provided by this plugin
 func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 
 		// If request is a WebSocket request, don't do anything special
 		upgrade := c.Request().Header.Get("Upgrade")
@@ -278,7 +278,7 @@ func (ch *CFHosting) EchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 // For cloud foundry session affinity
 // Ensure we add a cookie named "JSESSIONID" for Cloud Foundry session affinity
 func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
-	return func(c echo.Context) error {
+	return func(c *echo.Context) error {
 		// Make sure there is a JSESSIONID cookie set to the session ID
 		session, err := ch.portalProxy.GetSession(c)
 		if err == nil {
@@ -293,7 +293,7 @@ func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc 
 			}
 			sessionGUID := fmt.Sprintf("%s", guid)
 			// Set the JSESSIONID coolie for Cloud Foundry session affinity
-			w := c.Response().Writer
+			w := c.Response()
 			cookie := sessions.NewCookie(cfSessionCookieName, sessionGUID, session.Options)
 			// CF hosting always terminates TLS (X-Forwarded-Proto is enforced above)
 			cookie.Secure = true

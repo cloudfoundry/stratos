@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
@@ -12,7 +12,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
 )
 
-func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
+func (p *portalProxy) FindUserGUID(c *echo.Context) (string, error) {
 	username := c.FormValue("username")
 
 	if len(username) == 0 {
@@ -34,7 +34,7 @@ func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
 	return guid, nil
 }
 
-func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
+func (p *portalProxy) AddLocalUser(c *echo.Context) (string, error) {
 	log.Debug("AddLocalUser")
 
 	username := c.FormValue("username")

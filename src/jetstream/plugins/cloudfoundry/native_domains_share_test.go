@@ -8,22 +8,21 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 // newShareDomainContext builds an echo context for the bulk share handler
 // with a JSON {"guids":[...]} body and the cnsiGuid/domainGuid path params.
-func newShareDomainContext(e *echo.Echo, cnsiGUID, domainGUID, body string) (echo.Context, *httptest.ResponseRecorder) {
+func newShareDomainContext(e *echo.Echo, cnsiGUID, domainGUID, body string) (*echo.Context, *httptest.ResponseRecorder) {
 	req := httptest.NewRequest(http.MethodPost,
 		"/pp/v1/cf/domains/"+cnsiGUID+"/"+domainGUID+"/relationships/shared_organizations",
 		strings.NewReader(body))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	ctx := e.NewContext(req, rec)
-	ctx.SetParamNames("cnsiGuid", "domainGuid")
-	ctx.SetParamValues(cnsiGUID, domainGUID)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: cnsiGUID}, {Name: "domainGuid", Value: domainGUID}})
 	return ctx, rec
 }
 

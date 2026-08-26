@@ -7,7 +7,7 @@ import (
 	"net/http"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 )
@@ -35,7 +35,7 @@ import (
 //
 // Graceful fallback: if the stratosjobs plugin isn't wired, async creates
 // return bare 202 (frontend 404-on-poll treats that as UNKNOWN).
-func (cf *CloudFoundrySpecification) createServiceBinding(c echo.Context) error {
+func (cf *CloudFoundrySpecification) createServiceBinding(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -113,7 +113,7 @@ func (cf *CloudFoundrySpecification) createServiceBinding(c echo.Context) error 
 //
 // Graceful fallback: if the stratosjobs plugin isn't wired, async deletes
 // return bare 202 (frontend 404-on-poll treats that as UNKNOWN).
-func (cf *CloudFoundrySpecification) deleteServiceBinding(c echo.Context) error {
+func (cf *CloudFoundrySpecification) deleteServiceBinding(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	bindingGUID := c.Param("bindingGuid")
 	if cnsiGUID == "" || bindingGUID == "" {

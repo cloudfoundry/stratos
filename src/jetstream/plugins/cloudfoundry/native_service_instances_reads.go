@@ -8,7 +8,7 @@ import (
 	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // getNativeServiceInstances handles GET /pp/v1/cf/service_instances/{cnsiGuid}.
@@ -44,7 +44,7 @@ import (
 // materialized (no loader fills the bindings slice), and deriving it
 // client-side would mean draining every binding on the endpoint to render
 // one page. The join mirrors the org-spaces appCount batch.
-func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	if cnsiGUID == "" {
 		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid is required")
@@ -106,7 +106,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstances(ctx echo.Context) 
 // only) via one guid-batched /v3/service_credential_bindings call. Lazy
 // non-fatal: a join failure leaves BoundApps nil rather than failing the
 // list — same posture as the org-spaces appCount batch.
-func attachBoundApps(ctx echo.Context, cfClient capi.Client, instances []StServiceInstance, mode ReturnMode) {
+func attachBoundApps(ctx *echo.Context, cfClient capi.Client, instances []StServiceInstance, mode ReturnMode) {
 	if (mode != ReturnSummary && mode != ReturnDetails) || len(instances) == 0 {
 		return
 	}
@@ -128,7 +128,7 @@ func attachBoundApps(ctx echo.Context, cfClient capi.Client, instances []StServi
 // draining all pages, and buckets bound-app refs per service_instance guid.
 // Instances with no bindings are absent from the map. Same guid-batch +
 // pagination shape as fetchAppCountsForSpaces.
-func fetchBoundAppsForServiceInstances(ctx echo.Context, cfClient capi.Client, siGUIDs []string) (map[string][]StAppRef, error) {
+func fetchBoundAppsForServiceInstances(ctx *echo.Context, cfClient capi.Client, siGUIDs []string) (map[string][]StAppRef, error) {
 	bound := make(map[string][]StAppRef, len(siGUIDs))
 	if len(siGUIDs) == 0 {
 		return bound, nil
@@ -188,7 +188,7 @@ func fetchBoundAppsForServiceInstances(ctx echo.Context, cfClient capi.Client, s
 // Used by both the cnsi-wide and the path-scoped (space) handlers so the
 // UPS-only count paths and the picker's "list UPS in space" query can
 // share one wire contract.
-func applyServiceInstanceFilters(ctx echo.Context, params *capi.QueryParams) *capi.QueryParams {
+func applyServiceInstanceFilters(ctx *echo.Context, params *capi.QueryParams) *capi.QueryParams {
 	if t := ctx.QueryParam("type"); t != "" {
 		params = params.WithFilter("type", t)
 	}
@@ -283,7 +283,7 @@ func resolveInstanceIncludes(list *capi.ListResponse[capi.ServiceInstance], mode
 // so summary+ resolves the chain via per-detail follow-up Gets. Each
 // follow-up is soft-fail: errors leave the corresponding ref in
 // guid-only form rather than 502'ing the whole response.
-func (c *CloudFoundrySpecification) getNativeServiceInstanceDetail(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceInstanceDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	instanceGUID := ctx.Param("instanceGuid")
 	if cnsiGUID == "" || instanceGUID == "" {
@@ -484,7 +484,7 @@ func toStServiceInstance(si capi.ServiceInstance, cnsiGUID string, inc instanceI
 //
 // `?guids=<csv>` and `type=` query filters layer on top of the path filter
 // when callers narrow further (e.g. managed-only on a space-services tab).
-func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	spaceGUID := ctx.Param("spaceGuid")
 	if cnsiGUID == "" || spaceGUID == "" {
@@ -567,7 +567,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForSpace(ctx echo.C
 // TODO(capi-fork): a `service_broker_guids` filter on `/v3/service_instances`
 // would collapse this to one CAPI call. Worth probing CF v3 server-side as a
 // generic improvement (see KS reference_capi_openapi_spec_include.md).
-func (c *CloudFoundrySpecification) getNativeServiceInstancesForBroker(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceInstancesForBroker(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	brokerGUID := ctx.Param("brokerGuid")
 	if cnsiGUID == "" || brokerGUID == "" {
@@ -656,7 +656,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstancesForBroker(ctx echo.
 // per_page=5000 caps the probe at one page — pathologically large brokers
 // would need pagination, but in practice broker plan counts are well under
 // 100. Returns an empty slice (not error) when the broker has no plans.
-func listPlanGUIDsForBroker(ctx echo.Context, cfClient capi.Client, brokerGUID string) ([]string, error) {
+func listPlanGUIDsForBroker(ctx *echo.Context, cfClient capi.Client, brokerGUID string) ([]string, error) {
 	params := capi.NewQueryParams().
 		WithPerPage(5000).
 		WithFilter("service_broker_guids", brokerGUID)
@@ -700,7 +700,7 @@ func mapLastOperation(lo *capi.ServiceInstanceLastOperation) *StLastOperation {
 // Many brokers don't enable instances_retrievable, so CF returns an error here
 // for a perfectly healthy instance — that propagates via handleCapiError and
 // the UI distinguishes "not available" from "no parameters" (an empty object).
-func (c *CloudFoundrySpecification) getNativeServiceInstanceParameters(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeServiceInstanceParameters(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	instanceGUID := ctx.Param("instanceGuid")
 	if cnsiGUID == "" || instanceGUID == "" {
@@ -734,7 +734,7 @@ func (c *CloudFoundrySpecification) getNativeServiceInstanceParameters(ctx echo.
 // user-provided instance was created with. UPS-only — CF rejects it for a
 // managed instance, surfaced via handleCapiError. The values are sensitive;
 // the UI masks them by default and reveals per-field on explicit request.
-func (c *CloudFoundrySpecification) getNativeUserProvidedCredentials(ctx echo.Context) error {
+func (c *CloudFoundrySpecification) getNativeUserProvidedCredentials(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	instanceGUID := ctx.Param("instanceGuid")
 	if cnsiGUID == "" || instanceGUID == "" {

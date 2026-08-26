@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -29,7 +29,7 @@ func (p *portalProxy) checkIfAPIKeysEnabled(userGUID string) error {
 	return nil
 }
 
-func (p *portalProxy) addAPIKey(c echo.Context) error {
+func (p *portalProxy) addAPIKey(c *echo.Context) error {
 	log.Debug("addAPIKey")
 
 	userGUID := c.Get("user_id").(string)
@@ -52,7 +52,7 @@ func (p *portalProxy) addAPIKey(c echo.Context) error {
 	return c.JSON(http.StatusOK, apiKey)
 }
 
-func (p *portalProxy) listAPIKeys(c echo.Context) error {
+func (p *portalProxy) listAPIKeys(c *echo.Context) error {
 	log.Debug("listAPIKeys")
 
 	userGUID := c.Get("user_id").(string)
@@ -70,7 +70,7 @@ func (p *portalProxy) listAPIKeys(c echo.Context) error {
 	return c.JSON(http.StatusOK, apiKeys)
 }
 
-func (p *portalProxy) deleteAPIKey(c echo.Context) error {
+func (p *portalProxy) deleteAPIKey(c *echo.Context) error {
 	log.Debug("deleteAPIKey")
 
 	userGUID := c.Get("user_id").(string)
