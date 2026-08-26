@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 	"reflect"
 	"time"
 
@@ -12,7 +13,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 )
 
 var sqlQueries = struct {
@@ -38,7 +38,7 @@ type PgsqlAPIKeysRepository struct {
 
 // NewPgsqlAPIKeysRepository - get a reference to the API keys data source
 func NewPgsqlAPIKeysRepository(dcp *sql.DB, encryptionKey []byte) (Repository, error) {
-	log.Debug("NewPgsqlAPIKeysRepository")
+	slog.Debug("NewPgsqlAPIKeysRepository")
 	return &PgsqlAPIKeysRepository{db: dcp, encryptionKey: encryptionKey}, nil
 }
 
@@ -62,14 +62,14 @@ func InitRepositoryProvider(databaseProvider string) {
 
 // AddAPIKey - Add a new API key to the datastore.
 func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*api.APIKey, error) {
-	log.Debug("AddAPIKey")
+	slog.Debug("AddAPIKey", "user", userID)
 
 	var err error
 
 	// Validate args
 	if len(comment) > 255 {
 		msg := "comment maximum length is 255 characters"
-		log.Debug(msg)
+		slog.Debug(msg, "user", userID)
 		err = errors.New(msg)
 	}
 
@@ -104,7 +104,7 @@ func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*api.
 
 // GetAPIKeyBySecret - gets user ID for an API key
 func (p *PgsqlAPIKeysRepository) GetAPIKeyBySecret(keySecret string) (*api.APIKey, error) {
-	log.Debug("GetAPIKeyBySecret")
+	slog.Debug("GetAPIKeyBySecret")
 
 	var apiKey api.APIKey
 
@@ -124,11 +124,11 @@ func (p *PgsqlAPIKeysRepository) GetAPIKeyBySecret(keySecret string) (*api.APIKe
 
 // ListAPIKeys - list API keys for a given user GUID
 func (p *PgsqlAPIKeysRepository) ListAPIKeys(userID string) ([]api.APIKey, error) {
-	log.Debug("ListAPIKeys")
+	slog.Debug("ListAPIKeys", "user", userID)
 
 	rows, err := p.db.Query(sqlQueries.ListAPIKeys, userID)
 	if err != nil {
-		log.Errorf("unable to list API keys: %v", err)
+		slog.Error("unable to list API keys", "user", userID, "error", err)
 		return nil, err
 	}
 
@@ -137,7 +137,7 @@ func (p *PgsqlAPIKeysRepository) ListAPIKeys(userID string) ([]api.APIKey, error
 		var apiKey api.APIKey
 		err = rows.Scan(&apiKey.GUID, &apiKey.UserGUID, &apiKey.Comment, &apiKey.LastUsed)
 		if err != nil {
-			log.Errorf("Scan: %v", err)
+			slog.Error("unable to scan an API key row", "user", userID, "error", err)
 			return nil, err
 		}
 		result = append(result, apiKey)
@@ -148,7 +148,7 @@ func (p *PgsqlAPIKeysRepository) ListAPIKeys(userID string) ([]api.APIKey, error
 
 // DeleteAPIKey - delete an API key identified by its GUID
 func (p *PgsqlAPIKeysRepository) DeleteAPIKey(userGUID string, keyGUID string) error {
-	log.Debug("DeleteAPIKey")
+	slog.Debug("DeleteAPIKey", "user", userGUID, "key", keyGUID)
 
 	err := execQuery(p, sqlQueries.DeleteAPIKey, userGUID, keyGUID)
 	if err != nil {
@@ -160,7 +160,7 @@ func (p *PgsqlAPIKeysRepository) DeleteAPIKey(userGUID string, keyGUID string) e
 
 // UpdateAPIKeyLastUsed - sets API key last_used field to current time
 func (p *PgsqlAPIKeysRepository) UpdateAPIKeyLastUsed(keyGUID string) error {
-	log.Debug("UpdateAPIKeyLastUsed")
+	slog.Debug("UpdateAPIKeyLastUsed", "key", keyGUID)
 
 	err := execQuery(p, sqlQueries.UpdateAPIKeyLastUsed, time.Now().UTC(), keyGUID)
 	if err != nil {

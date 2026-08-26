@@ -3,10 +3,9 @@ package sessiondata
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"strconv"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
@@ -50,14 +49,14 @@ func InitRepositoryProvider(databaseProvider string) {
 
 // GetValues returns all values from the config table as a map
 func (c *SessionDataRepository) GetValues(session, group string) (map[string]string, error) {
-	log.Debug("SessionDataRepository GetValues")
+	slog.Debug("SessionDataRepository GetValues")
 	rows, err := c.db.Query(getSessionDataValues, session, group)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve session data records: %v", err)
 	}
 	defer func() {
 		if err := rows.Close(); err != nil {
-			log.Warnf("Unable to close rows: %v", err)
+			slog.Warn("unable to close rows", "error", err)
 		}
 	}()
 
@@ -85,7 +84,7 @@ func (c *SessionDataRepository) GetValues(session, group string) (map[string]str
 
 // DeleteValues deletes all values for the session and group
 func (c *SessionDataRepository) DeleteValues(session, group string) error {
-	log.Debug("SessionDataRepository DeleteValue")
+	slog.Debug("SessionDataRepository DeleteValue")
 	if _, err := c.db.Exec(deleteSessionGroupData, session, group); err != nil {
 		return fmt.Errorf("Unable to delete session data values: %v", err)
 	}
@@ -102,9 +101,9 @@ func (c *SessionDataRepository) SetValues(session, group string, values map[stri
 
 	for key, value := range values {
 		if _, err := c.db.Exec(insertSessionDataValue, session, group, key, value, autoExpire); err != nil {
-			msg := "Unable to INSERT session data value: %v"
-			log.Debugf(msg, err)
-			return fmt.Errorf(msg, err)
+			const msg = "unable to INSERT session data value"
+			slog.Debug(msg, "session", session, "group", group, "key", key, "error", err)
+			return fmt.Errorf("%s: %w", msg, err)
 		}
 	}
 

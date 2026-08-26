@@ -4,11 +4,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
-	log "github.com/sirupsen/logrus"
 )
 
 var findPasswordHash = `SELECT password_hash
@@ -30,7 +30,7 @@ type PgsqlLocalUsersRepository struct {
 
 // NewPgsqlLocalUsersRepository - get a reference to the local users data source
 func NewPgsqlLocalUsersRepository(dcp *sql.DB) (Repository, error) {
-	log.Debug("NewPgsqlLocalUsersRepository")
+	slog.Debug("NewPgsqlLocalUsersRepository")
 	return &PgsqlLocalUsersRepository{db: dcp}, nil
 }
 
@@ -50,10 +50,10 @@ func InitRepositoryProvider(databaseProvider string) {
 
 // FindPasswordHash returns the password hash from the datastore, for the given user
 func (p *PgsqlLocalUsersRepository) FindPasswordHash(userGUID string) ([]byte, error) {
-	log.Debug("FindPasswordHash")
+	slog.Debug("FindPasswordHash", "user", userGUID)
 	if userGUID == "" {
 		msg := "Unable to find password hash without a valid User GUID."
-		log.Debug(msg)
+		slog.Debug(msg)
 		return nil, errors.New(msg)
 	}
 
@@ -66,19 +66,19 @@ func (p *PgsqlLocalUsersRepository) FindPasswordHash(userGUID string) ([]byte, e
 	row := p.db.QueryRow(findPasswordHash, userGUID)
 	err := row.Scan(&passwordHash)
 	if err != nil {
-		msg := "Unable to Find password hash: %v"
-		log.Debugf(msg, err)
-		return nil, fmt.Errorf(msg, err)
+		const msg = "unable to find the password hash"
+		slog.Debug(msg, "user", userGUID, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 	return passwordHash, nil
 }
 
 // FindUserGUID returns the user GUID from the datastore for the given username.
 func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error) {
-	log.Debug("FinduserGUID")
+	slog.Debug("FinduserGUID", "username", username)
 	if username == "" {
 		msg := "Unable to find user GUID without a valid username."
-		log.Debug(msg)
+		slog.Debug(msg)
 		return "", errors.New(msg)
 	}
 
@@ -90,9 +90,9 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 	// Get the password hash from the db
 	err := p.db.QueryRow(findUserGUID, username).Scan(&userGUID)
 	if err != nil {
-		msg := "Unable to Find user GUID: %v"
-		log.Debugf(msg, err)
-		return "", fmt.Errorf(msg, err)
+		const msg = "unable to find the user GUID"
+		slog.Debug(msg, "username", username, "error", err)
+		return "", fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return userGUID.String, nil
@@ -100,13 +100,13 @@ func (p *PgsqlLocalUsersRepository) FindUserGUID(username string) (string, error
 
 // FindUser finds and returns meatdata for the given user
 func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (api.LocalUser, error) {
-	log.Debug("FindUser")
+	slog.Debug("FindUser", "user", userGUID)
 
 	var user api.LocalUser
 	user.UserGUID = userGUID
 	if userGUID == "" {
 		msg := "Unable to find user without a valid user GUID"
-		log.Debug(msg)
+		slog.Debug(msg)
 		return user, errors.New(msg)
 	}
 
@@ -121,9 +121,9 @@ func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (api.LocalUser, er
 	// Look for the user
 	err := p.db.QueryRow(findUser, userGUID).Scan(&user.Username, &email, &scope, &givenName, &familyName)
 	if err != nil {
-		msg := "Unable to find user: %v"
-		log.Debugf(msg, err)
-		return user, fmt.Errorf(msg, err)
+		const msg = "unable to find the user"
+		slog.Debug(msg, "user", userGUID, "error", err)
+		return user, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	if email.Valid {
@@ -147,10 +147,10 @@ func (p *PgsqlLocalUsersRepository) FindUser(userGUID string) (api.LocalUser, er
 
 // FindUserScope selects the user_scope field from the local_users table in the db, for the given user.
 func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, error) {
-	log.Debug("FindUserScope")
+	slog.Debug("FindUserScope", "user", userGUID)
 	if userGUID == "" {
 		msg := "Unable to find user scope without a valid user GUID."
-		log.Debug(msg)
+		slog.Debug(msg)
 		return "", errors.New(msg)
 	}
 
@@ -172,7 +172,7 @@ func (p *PgsqlLocalUsersRepository) FindUserScope(userGUID string) (string, erro
 // UpdateLastLoginTime called when a local user logs in.
 // It updates the last_login timestamp field in the local_users table for the given user.
 func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTime time.Time) error {
-	log.Debug("UpdateLastLoginTime")
+	slog.Debug("UpdateLastLoginTime", "user", userGUID)
 
 	if loginTime.IsZero() || userGUID == "" {
 		msg := "Unable to update last local user login time without a valid time or user GUID."
@@ -193,7 +193,8 @@ func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTi
 	} else if rowsUpdates < 1 {
 		err = errors.New("unable to update last local user login time: no rows were updated")
 	} else if rowsUpdates > 1 {
-		log.Warn("unable to update last local user login time: More than 1 row was updated (expected only 1)")
+		slog.Warn("unable to update last local user login time: more than 1 row was updated (expected only 1)",
+			"user", userGUID, "rows", rowsUpdates)
 	}
 
 	return err
@@ -201,11 +202,11 @@ func (p *PgsqlLocalUsersRepository) UpdateLastLoginTime(userGUID string, loginTi
 
 // FindLastLoginTime selects the last_login field from the local_users table in the db, for the given user.
 func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Time, error) {
-	log.Debug("FindLastLoginTime")
+	slog.Debug("FindLastLoginTime", "user", userGUID)
 
 	if userGUID == "" {
 		msg := "unable to find last login time without a valid user GUID"
-		log.Debug(msg)
+		slog.Debug(msg)
 		return time.Unix(0, 0), errors.New(msg)
 	}
 
@@ -217,9 +218,9 @@ func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Tim
 	// Get the user scope from the db
 	err := p.db.QueryRow(findLastLoginTime, userGUID).Scan(&loginTime)
 	if err != nil {
-		msg := "unable to Find last login time: %v"
-		log.Debug(msg)
-		return loginTime, fmt.Errorf(msg, err)
+		const msg = "unable to find the last login time"
+		slog.Debug(msg, "user", userGUID, "error", err)
+		return loginTime, fmt.Errorf("%s: %w", msg, err)
 	}
 	return loginTime, nil
 }
@@ -228,25 +229,25 @@ func (p *PgsqlLocalUsersRepository) FindLastLoginTime(userGUID string) (time.Tim
 // Email is optional
 func (p *PgsqlLocalUsersRepository) AddLocalUser(user api.LocalUser) error {
 
-	log.Debug("AddLocalUser")
+	slog.Debug("AddLocalUser", "user", user.UserGUID, "username", user.Username)
 
 	//Validate args
 	var err error
 	if user.UserGUID == "" {
 		msg := "unable to add new local user without a valid User GUID"
-		log.Debug(msg)
+		slog.Debug(msg)
 		err = errors.New(msg)
 	} else if len(user.PasswordHash) == 0 {
 		msg := "unable to add new local user without a valid password hash"
-		log.Debug(msg)
+		slog.Debug(msg)
 		err = errors.New(msg)
 	} else if user.Username == "" {
 		msg := "unable to add new local user without a valid User name"
-		log.Debug(msg)
+		slog.Debug(msg)
 		err = errors.New(msg)
 	} else if user.Scope == "" {
 		msg := "unable to add new local user without a valid user scope"
-		log.Debug(msg)
+		slog.Debug(msg)
 		err = errors.New(msg)
 	}
 	if err != nil {
@@ -256,9 +257,9 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(user api.LocalUser) error {
 	// Add the new local user to the DB
 	var result sql.Result
 	if result, err = p.db.Exec(insertLocalUser, user.UserGUID, user.PasswordHash, user.Username, user.Email, user.Scope, user.GivenName, user.FamilyName); err != nil {
-		msg := "unable to INSERT local user: %v"
-		log.Debugf(msg, err)
-		err = fmt.Errorf(msg, err)
+		const msg = "unable to INSERT local user"
+		slog.Debug(msg, "user", user.UserGUID, "error", err)
+		err = fmt.Errorf("%s: %w", msg, err)
 	}
 
 	if err == nil {
@@ -270,7 +271,8 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(user api.LocalUser) error {
 		} else if rowsUpdates < 1 {
 			err = errors.New("unable to INSERT local user: no rows were updated")
 		} else if rowsUpdates > 1 {
-			log.Warn("INSERT local user: More than 1 row was updated (expected only 1)")
+			slog.Warn("INSERT local user: more than 1 row was updated (expected only 1)",
+				"user", user.UserGUID, "rows", rowsUpdates)
 		}
 	}
 
@@ -278,25 +280,25 @@ func (p *PgsqlLocalUsersRepository) AddLocalUser(user api.LocalUser) error {
 }
 
 func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user api.LocalUser) error {
-	log.Debug("UpdateLocalUser")
+	slog.Debug("UpdateLocalUser", "user", user.UserGUID, "username", user.Username)
 
 	//Validate args
 	var err error
 	if user.UserGUID == "" {
 		msg := "unable to update local user without a valid User GUID"
-		log.Debug(msg)
+		slog.Debug(msg)
 		err = errors.New(msg)
 	} else if len(user.PasswordHash) == 0 {
 		msg := "unable to update local user without a valid password hash"
-		log.Debug(msg)
+		slog.Debug(msg)
 		err = errors.New(msg)
 	} else if user.Username == "" {
 		msg := "unable to update local user without a valid User name"
-		log.Debug(msg)
+		slog.Debug(msg)
 		err = errors.New(msg)
 	} else if user.Scope == "" {
 		msg := "unable to update local user without a valid user scope"
-		log.Debug(msg)
+		slog.Debug(msg)
 		err = errors.New(msg)
 	}
 	if err != nil {
@@ -306,9 +308,9 @@ func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user api.LocalUser) error {
 	// Update the local user to the DB
 	var result sql.Result
 	if result, err = p.db.Exec(updateLocalUser, user.PasswordHash, user.Username, user.Email, user.Scope, user.GivenName, user.FamilyName, user.UserGUID); err != nil {
-		msg := "unable to UPDATE local user: %v"
-		log.Debugf(msg, err)
-		err = fmt.Errorf(msg, err)
+		const msg = "unable to UPDATE local user"
+		slog.Debug(msg, "user", user.UserGUID, "error", err)
+		err = fmt.Errorf("%s: %w", msg, err)
 	}
 
 	if err == nil {
@@ -320,7 +322,8 @@ func (p *PgsqlLocalUsersRepository) UpdateLocalUser(user api.LocalUser) error {
 		} else if rowsUpdates < 1 {
 			err = errors.New("unable to UPDATE local user: no rows were updated")
 		} else if rowsUpdates > 1 {
-			log.Warn("UPDATE local user: More than 1 row was updated (expected only 1)")
+			slog.Warn("UPDATE local user: more than 1 row was updated (expected only 1)",
+				"user", user.UserGUID, "rows", rowsUpdates)
 		}
 	}
 

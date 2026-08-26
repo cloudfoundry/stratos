@@ -4,9 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/custom_errors"
@@ -25,13 +24,13 @@ type PostgresGooseDBVersionRepository struct {
 
 // NewPostgresGooseDBVersionRepository will create a new instance of the PostgresInstanceRepository
 func NewPostgresGooseDBVersionRepository(dcp *sql.DB) (Repository, error) {
-	log.Debug("NewPostgresGooseDBVersionRepository")
+	slog.Debug("NewPostgresGooseDBVersionRepository")
 	return &PostgresGooseDBVersionRepository{db: dcp}, nil
 }
 
 // GetCurrentVersion - Returns the latest GooseDBVersionRecord
 func (p *PostgresGooseDBVersionRepository) GetCurrentVersion() (api.GooseDBVersionRecord, error) {
-	log.Debug("GetCurrentVersion")
+	slog.Debug("GetCurrentVersion")
 
 	dbVersion := new(api.GooseDBVersionRecord)
 
@@ -51,14 +50,14 @@ func (p *PostgresGooseDBVersionRepository) GetCurrentVersion() (api.GooseDBVersi
 
 // List - Returns a list of all versions
 func (p *PostgresGooseDBVersionRepository) List() ([]*api.GooseDBVersionRecord, error) {
-	log.Debug("List")
+	slog.Debug("List")
 	rows, err := p.db.Query(listVersions)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Goose Version records: %v", err)
 	}
 	defer func() {
 		if err := rows.Close(); err != nil {
-			log.Warnf("Unable to close rows: %v", err)
+			slog.Warn("unable to close rows", "error", err)
 		}
 	}()
 

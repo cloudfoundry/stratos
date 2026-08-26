@@ -4,9 +4,8 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
@@ -78,7 +77,7 @@ func (c *ConsoleConfigRepository) GetValue(group, key string) (string, bool, err
 
 func (c *ConsoleConfigRepository) SetValue(group, name, value string) error {
 
-	log.Debug("Config SetValue")
+	slog.Debug("Config SetValue")
 
 	_, ok, err := c.GetValue(group, name)
 	if err != nil {
@@ -87,15 +86,15 @@ func (c *ConsoleConfigRepository) SetValue(group, name, value string) error {
 
 	if !ok {
 		if _, err := c.db.Exec(insertConfigValue, group, name, value); err != nil {
-			msg := "Unable to INSERT config value: %v"
-			log.Debugf(msg, err)
-			return fmt.Errorf(msg, err)
+			const msg = "unable to INSERT config value"
+			slog.Debug(msg, "group", group, "name", name, "error", err)
+			return fmt.Errorf("%s: %w", msg, err)
 		}
 	} else {
 		if _, err := c.db.Exec(updateConfigValue, value, group, name); err != nil {
-			msg := "Unable to UPDATE config value: %v"
-			log.Debugf(msg, err)
-			return fmt.Errorf(msg, err)
+			const msg = "unable to UPDATE config value"
+			slog.Debug(msg, "group", group, "name", name, "error", err)
+			return fmt.Errorf("%s: %w", msg, err)
 		}
 	}
 
@@ -104,7 +103,7 @@ func (c *ConsoleConfigRepository) SetValue(group, name, value string) error {
 
 // DeleteValue deletes a value from the config table
 func (c *ConsoleConfigRepository) DeleteValue(group, key string) error {
-	log.Debug("Config Delete")
+	slog.Debug("Config Delete")
 	if _, err := c.db.Exec(deleteConfigValue, group, key); err != nil {
 		return fmt.Errorf("Unable to delete config value: %v", err)
 	}
@@ -115,7 +114,7 @@ func (c *ConsoleConfigRepository) DeleteValue(group, key string) error {
 // GetValues returns all values from the config table as a map
 func (c *ConsoleConfigRepository) GetValues(group string) (map[string]string, error) {
 
-	log.Debug("Config GetValues")
+	slog.Debug("Config GetValues")
 	rows, err := c.db.Query(getAllConfigValues, group)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve config records: %v", err)
@@ -147,7 +146,7 @@ func (c *ConsoleConfigRepository) GetValues(group string) (map[string]string, er
 }
 
 func (c *ConsoleConfigRepository) GetConsoleConfig() (*api.ConsoleConfig, error) {
-	log.Debug("Get ConsoleConfig")
+	slog.Debug("Get ConsoleConfig")
 	rows, err := c.db.Query(getConsoleConfig)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve console config record: %v", err)
@@ -198,7 +197,7 @@ func (c *ConsoleConfigRepository) GetConsoleConfig() (*api.ConsoleConfig, error)
 
 // DeleteConsoleConfig will delete all row(s) from the legacy config_config table
 func (c *ConsoleConfigRepository) DeleteConsoleConfig() error {
-	log.Debug("DeleteConsoleConfig")
+	slog.Debug("DeleteConsoleConfig")
 	if _, err := c.db.Exec(deleteConsoleConfig); err != nil {
 		return fmt.Errorf("Unable to delete all data from console_config: %v", err)
 	}
