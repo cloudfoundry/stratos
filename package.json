@@ -178,7 +178,7 @@
     "@angular/language-service": "22.1.2",
     "@cypress/request": "4.0.1",
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "^1.61.1",
+    "@playwright/test": "^1.62.1",
     "@schematics/angular": "22.1.4",
     "@tailwindcss/forms": "^0.5.11",
     "@tailwindcss/postcss": "^4.3.3",
