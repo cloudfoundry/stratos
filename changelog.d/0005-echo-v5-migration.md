@@ -4,20 +4,28 @@
   a concrete request context, `log/slog` for logging, a rearranged error
   handler — that the move had to happen in one step across the backend
   and every plugin.
-- Retired the unmaintained `SermoDigital/jose` dependency from the
-  Kubernetes auth plugin. It was used only to read a single claim out of
-  a token the platform had already issued, which the standard library
-  does directly.
+- Retired four unmaintained or superseded dependencies:
+  `SermoDigital/jose` (no upstream release since 2019) is gone from the
+  Kubernetes auth plugin, which used it only to read one claim from a
+  token the platform had already issued; `satori/go.uuid` (abandoned) is
+  replaced by `google/uuid`, which the backend already depended on for
+  the same purpose; `golang/mock` (archived) moves to its successor
+  `go.uber.org/mock`; and `gorilla/context`, obsolete since Go 1.7, is
+  gone along with the middleware that existed only to call it.
 
 [BugFixes]
-- API request logs keep the format they had under Echo v4, but now pass
-  through Jetstream's own logger, so `LOG_LEVEL` applies to them. Setting
-  a level above `info` suppresses them; they remain gated by
-  `LOG_API_REQUESTS` as before.
+- Jetstream logs through one logger again. Echo v5 logs via `log/slog`
+  and defaults to writing JSON to standard output, which meant its
+  messages interleaved with Jetstream's own text-formatted logs on the
+  same stream and ignored `LOG_LEVEL`. Echo's output is now routed into
+  the application logger, so format and level apply to everything.
+  API request logs keep the format they had under Echo v4 and remain
+  gated by `LOG_API_REQUESTS`; they now also respect `LOG_LEVEL`.
 
 [Chores]
-- Jetstream now builds with Go 1.27. This required forking the
-  unmaintained `SermoDigital/jose`, reached through the CF CLI, which
-  registers an invalid hash id from an init function and panics before
-  `main` under 1.27. The fork is a stopgap until the CF CLI moves to a
-  maintained JWT library.
+- Jetstream now builds with Go 1.27. Go 1.27 rejects the invalid hash id
+  that `SermoDigital/jose` registers from an init function, which panics
+  before `main` and crash-loops the binary. The dependency is reached
+  through the CF CLI rather than our own code, so it is pinned to a fork
+  with that registration removed until the CF CLI moves to a maintained
+  JWT library.
