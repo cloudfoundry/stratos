@@ -2,12 +2,12 @@ package main
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 func (p *portalProxy) getVersionsData() (*api.Versions, error) {
@@ -38,7 +38,7 @@ func (p *portalProxy) getVersionsData() (*api.Versions, error) {
 func (p *portalProxy) getVersions(c *echo.Context) error {
 	v, err := p.getVersionsData()
 	if err != nil {
-		log.Error(err.Error())
+		slog.Error("could not build the version response", "error", err)
 		return echo.NewHTTPError(http.StatusServiceUnavailable, err.Error())
 	}
 	return c.JSON(http.StatusOK, v)

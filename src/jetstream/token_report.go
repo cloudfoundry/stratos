@@ -1,10 +1,10 @@
 package main
 
 import (
+	"log/slog"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
 )
 
 // countDeadTokens counts stored connected tokens that need user
@@ -30,15 +30,15 @@ func countDeadTokens(tokens []api.BackupTokenRecord, now time.Time) int {
 func (p *portalProxy) reportDeadTokensAtBoot() {
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
-		log.Warnf("token boot report skipped: %v", err)
+		slog.Warn("token boot report skipped", "reason", "no token store", "error", err)
 		return
 	}
 	tokens, err := tokenRepo.ListAllEnabledConnectedCNSITokens(p.Config.EncryptionKeyInBytes)
 	if err != nil {
-		log.Warnf("token boot report skipped: %v", err)
+		slog.Warn("token boot report skipped", "reason", "could not list tokens", "error", err)
 		return
 	}
 	if dead := countDeadTokens(tokens, time.Now()); dead > 0 {
-		log.Infof("Endpoint tokens needing user re-authentication: %d of %d connected", dead, len(tokens))
+		slog.Info("Endpoint tokens needing user re-authentication", "dead", dead, "connected", len(tokens))
 	}
 }

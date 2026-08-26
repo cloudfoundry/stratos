@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -12,7 +13,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
@@ -135,7 +135,7 @@ func saveConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api
 
 func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
 
-	log.Debug("saveLocalUserConsoleConfig")
+	slog.Debug("saveLocalUserConsoleConfig")
 
 	if err := consoleRepo.SetValue(systemGroupName, "AUTH_ENDPOINT_TYPE", "local"); err != nil {
 		return err
@@ -165,7 +165,7 @@ func saveLocalUserConsoleConfig(consoleRepo console_config.Repository, consoleCo
 
 func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *api.ConsoleConfig) error {
 	// Don't dump the whole struct — it contains the client secret
-	log.Debugf("Saving ConsoleConfig for UAA endpoint: %v", consoleConfig.UAAEndpoint)
+	slog.Debug("Saving ConsoleConfig", "uaaEndpoint", consoleConfig.UAAEndpoint)
 
 	if err := consoleRepo.SetValue(systemGroupName, "UAA_ENDPOINT", consoleConfig.UAAEndpoint.String()); err != nil {
 		return err
@@ -201,7 +201,7 @@ func saveUAAConsoleConfig(consoleRepo console_config.Repository, consoleConfig *
 // Save the console setup data to the database
 func (p *portalProxy) setupSaveConfig(c *echo.Context) error {
 
-	log.Debug("setupSaveConfig")
+	slog.Debug("setupSaveConfig")
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(p.DatabaseConnectionPool)
 	if err != nil {
@@ -248,7 +248,7 @@ func (p *portalProxy) setupSaveConfig(c *echo.Context) error {
 }
 
 func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.ConsoleConfig, error) {
-	log.Debug("initialiseConsoleConfig")
+	slog.Debug("initialiseConsoleConfig")
 
 	consoleConfig := &api.ConsoleConfig{}
 	if err := config.Load(consoleConfig, envLookup.Lookup); err != nil {
@@ -278,7 +278,7 @@ func (p *portalProxy) initialiseConsoleConfig(envLookup *env.VarSet) (*api.Conso
 			if consoleConfig.AuthorizationEndpoint == nil {
 				// No Authorization endpoint
 				consoleConfig.AuthorizationEndpoint = consoleConfig.UAAEndpoint
-				log.Debugf("Using UAA Endpoint for Auth Endpoint: %s", consoleConfig.AuthorizationEndpoint)
+				slog.Debug("Using the UAA endpoint as the auth endpoint", "authEndpoint", consoleConfig.AuthorizationEndpoint)
 			}
 		default:
 			//Auth endpoint type has been set to an invalid value
@@ -321,7 +321,7 @@ func setupInitialiseLocalUsersConfiguration(consoleConfig *api.ConsoleConfig, p 
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Unable to initialise Stratos local users config due to: %+v", err)
+		slog.Error("unable to initialise the Stratos local users config", "error", err)
 		return err
 	}
 
@@ -329,7 +329,7 @@ func setupInitialiseLocalUsersConfiguration(consoleConfig *api.ConsoleConfig, p 
 	password := consoleConfig.LocalUserPassword
 	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {
-		log.Errorf("Unable to initialise Stratos local user due to: %+v", err)
+		slog.Error("unable to initialise the Stratos local user", "username", consoleConfig.LocalUser, "error", err)
 		return err
 	}
 	scope := consoleConfig.LocalUserScope
@@ -345,7 +345,7 @@ func setupInitialiseLocalUsersConfiguration(consoleConfig *api.ConsoleConfig, p 
 
 	err = localUsersRepo.AddLocalUser(user)
 	if err != nil {
-		log.Errorf("Unable to add Stratos local user due to: %+v", err)
+		slog.Error("unable to add the Stratos local user", "user", userGUID, "username", consoleConfig.LocalUser, "error", err)
 	}
 
 	return err
@@ -410,19 +410,19 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
-		log.Warn("Failed to connect to Database!")
+		slog.Warn("Failed to connect to the database", "error", err)
 		return false
 	}
 
 	// This will reload the env config
 	if err := console_config.InitializeConfEnvProvider(consoleRepo); err != nil {
-		log.Warnf("Unable to initialize config environment provider: %v", err)
+		slog.Warn("unable to initialize the config environment provider", "error", err)
 	}
 
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
 	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env())
 	if err != nil {
-		log.Errorf("Unable to load console config; %+v", err)
+		slog.Error("unable to load the console config", "error", err)
 		return false
 	}
 
@@ -433,7 +433,8 @@ func checkSetupComplete(portalProxy *portalProxy) bool {
 		portalProxy.Config.SSOLogin = consoleConfig.UseSSO
 		portalProxy.Config.AuthEndpointType = consoleConfig.AuthEndpointType
 		if err := portalProxy.InitStratosAuthService(api.AuthEndpointTypes[consoleConfig.AuthEndpointType]); err != nil {
-			log.Errorf("Unable to initialise Stratos auth service: %v", err)
+			slog.Error("unable to initialise the Stratos auth service",
+				"authEndpointType", consoleConfig.AuthEndpointType, "error", err)
 		}
 	}
 

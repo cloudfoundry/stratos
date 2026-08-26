@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 // Endpoint - This represents the CNSI endpoint
@@ -141,7 +141,7 @@ func (p *portalProxy) getInfo(c *echo.Context) (*api.Info, error) {
 			s.Endpoints[cnsiType][cnsi.GUID] = endpoint
 		} else {
 			// definitions of YAML-defined plugins may be removed
-			log.Warnf("Unknown endpoint type %q encountered in the DB", cnsiType)
+			slog.Warn("unknown endpoint type encountered in the DB", "type", cnsiType, "endpoint", cnsi.GUID)
 		}
 	}
 
