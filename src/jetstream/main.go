@@ -903,6 +903,9 @@ func echoShouldNotLog(ec *echo.Context) bool {
 func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool, envLookup *env.VarSet) error {
 	log.Debug("start")
 	e := echo.New()
+	// Echo v5 logs through slog and defaults to JSON on stdout; route it into
+	// the application logger so format and LOG_LEVEL are consistent.
+	e.Logger = newEchoLogger()
 
 	e.Binder = new(custombinder.CustomBinder)
 

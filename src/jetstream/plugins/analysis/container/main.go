@@ -67,6 +67,9 @@ func (a *Analyzer) Start() {
 
 	// Start a simple web server
 	e := echo.New()
+	// Echo v5 logs through slog and defaults to JSON on stdout; route it into
+	// the application logger so format and level are consistent.
+	e.Logger = newEchoLogger()
 	e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
 		LogRemoteIP:      true,
 		LogMethod:        true,
