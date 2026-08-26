@@ -1,0 +1,15 @@
+# CodeQL configuration.
+#
+# The query suite is deliberately left at CodeQL's default: setting `queries:`
+# here would change what CI runs without changing what `make audit codeql`
+# runs locally, and the two matching is what makes a local result trustworthy.
+#
+# The Go model pack is the one addition. It declares the path-confining
+# helpers as path-injection barriers, which the query cannot infer for itself
+# (see .github/codeql/stratos-go-models/ext/ for the reasoning). `make audit
+# codeql` passes the same pack, so local and CI stay comparable.
+name: stratos
+
+packs:
+  go:
+    - fivetwenty/stratos-go-models
