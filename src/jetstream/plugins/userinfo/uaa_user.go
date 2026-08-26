@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -45,20 +45,20 @@ func (userInfo *UaaUserInfo) UpdatePassword(id string, passwordInfo *passwordCha
 }
 
 func (userInfo *UaaUserInfo) uaa(target string, body []byte) (int, []byte, *http.Header, error) {
-	log.Debug("uaa request")
+	slog.Debug("uaa request", "target", target)
 
 	// Check session
 	_, err := userInfo.portalProxy.GetSessionInt64Value(userInfo.echo, "exp")
 	if err != nil {
 		msg := "Could not find session date"
-		log.Error(msg)
+		slog.Error(msg, "error", err)
 		return http.StatusForbidden, nil, nil, echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
 	sessionUser, err := userInfo.portalProxy.GetSessionStringValue(userInfo.echo, "user_id")
 	if err != nil {
 		msg := "Could not find user_id in Session"
-		log.Error(msg)
+		slog.Error(msg, "error", err)
 		return http.StatusForbidden, nil, nil, echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
@@ -118,11 +118,11 @@ func (userInfo *UaaUserInfo) uaa(target string, body []byte) (int, []byte, *http
 
 func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoReq *http.Request, body []byte) (int, []byte, *http.Header, error) {
 	// Proxy the request to the UAA on behalf of the user
-	log.Debugf("doAPIRequest: %s", url)
+	slog.Debug("doAPIRequest", "url", url, "user", sessionUser)
 
 	tokenRec, err := userInfo.portalProxy.GetUAATokenRecord(sessionUser)
 	if err != nil {
-		log.Debug("Can not locate token for user")
+		slog.Debug("Can not locate token for user", "user", sessionUser, "error", err)
 		return 0, nil, nil, echo.NewHTTPError(http.StatusForbidden, "Can not locate token for user")
 	}
 
@@ -148,14 +148,14 @@ func (userInfo *UaaUserInfo) doAPIRequest(sessionUser string, url string, echoRe
 	client := userInfo.portalProxy.GetHttpClient(userInfo.portalProxy.GetConfig().ConsoleConfig.SkipSSLValidation, "")
 	res, err = client.Do(req)
 	if err != nil {
-		log.Debugf("Request failed: %v", err)
+		slog.Debug("request failed", "url", url, "error", err)
 		return 0, nil, nil, fmt.Errorf("Request failed: %v", err)
 	}
 
 	data, err := io.ReadAll(res.Body)
 	defer func() { _ = res.Body.Close() }()
 
-	log.Debug("User profile request completed OK")
+	slog.Debug("User profile request completed OK", "url", url)
 	return res.StatusCode, data, &res.Header, err
 }
 
@@ -169,7 +169,7 @@ func copyHeaderIfSet(src *http.Request, dest *http.Request, name string) {
 }
 
 func fwdResponseHeaders(src *http.Header, dest http.Header) {
-	log.Debug("fwdResponseHeaders")
+	slog.Debug("fwdResponseHeaders")
 
 	if src == nil {
 		return

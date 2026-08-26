@@ -2,9 +2,8 @@
 package cloudfoundry
 
 import (
+	"log/slog"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
@@ -215,7 +214,7 @@ func (c *CloudFoundrySpecification) getServiceInstanceServiceBindings(ctx *echo.
 func bindingJoinsFromIncluded(list *capi.ListResponse[capi.ServiceCredentialBinding]) (map[string]capi.ServiceInstance, map[string]capi.App) {
 	inc, err := capi.ServiceCredentialBindingIncludedFrom(list)
 	if err != nil {
-		log.Warnf("service_credential_bindings: could not decode included block: %v", err)
+		slog.Warn("service_credential_bindings: could not decode the included block", "err", err)
 		return map[string]capi.ServiceInstance{}, map[string]capi.App{}
 	}
 	return keyByGUID(inc.ServiceInstances, func(si capi.ServiceInstance) string { return si.GUID }),

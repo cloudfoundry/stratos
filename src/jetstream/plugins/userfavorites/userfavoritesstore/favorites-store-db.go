@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
@@ -38,7 +37,7 @@ func NewFavoritesDBStore(dcp *sql.DB) (FavoritesStore, error) {
 
 // List - Returns a list of all user favorites
 func (p *FavoritesDBStore) List(userGUID string) ([]*UserFavoriteRecord, error) {
-	log.Debug("List")
+	slog.Debug("List", "user", userGUID)
 	rows, err := p.db.Query(getFavorites, userGUID)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve User Favorite records: %v", err)

@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -13,7 +14,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/tokens"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 // Module init will register plugin
@@ -123,7 +123,7 @@ func (m *MetricsSpecification) GetClientId() string {
 }
 
 func (m *MetricsSpecification) Register(echoContext *echo.Context) error {
-	log.Debug("Metrics Register...")
+	slog.Debug("Metrics Register...")
 	return m.portalProxy.RegisterEndpoint(echoContext, m.Info)
 }
 
@@ -132,7 +132,7 @@ func (m *MetricsSpecification) Validate(userGUID string, cnsiRecord api.CNSIReco
 }
 
 func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
-	log.Debug("Metrics Connect...")
+	slog.Debug("Metrics Connect...")
 
 	params := new(api.LoginToCNSIParams)
 	err := api.BindOnce(params, ec)
@@ -168,15 +168,15 @@ func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIReco
 		RefreshToken: auth.Username,
 	}
 
-	log.Debug("Looking for Stratos metrics metadata resource....")
+	slog.Debug("Looking for the Stratos metrics metadata resource....")
 
 	// Metadata indicates which Cloud Foundry/Kubernetes endpoints the metrics endpoint can supply data for
 	metricsMetadataEndpoint := fmt.Sprintf("%s/stratos", cnsiRecord.APIEndpoint)
 	req, err := http.NewRequest("GET", metricsMetadataEndpoint, nil)
 	if err != nil {
-		msg := "Failed to create request for the Metrics Endpoint: %v"
-		log.Errorf(msg, err)
-		return nil, false, fmt.Errorf(msg, err)
+		const msg = "failed to create the request for the metrics endpoint"
+		slog.Error(msg, "url", metricsMetadataEndpoint, "error", err)
+		return nil, false, fmt.Errorf("%s: %w", msg, err)
 	}
 	m.addAuth(req, auth)
 
@@ -184,7 +184,7 @@ func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIReco
 	res, err := h.Do(req)
 	// Error performing the request?
 	if err != nil {
-		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		slog.Error("error performing the http request", "url", metricsMetadataEndpoint, "response", res, "error", err)
 		errMessage := ""
 		if res.StatusCode == http.StatusUnauthorized {
 			errMessage = ": Unauthorized"
@@ -199,28 +199,29 @@ func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIReco
 
 	// If we got anything other than a 200, then we did not find the Stratos Metrics metadata file
 	if res.StatusCode != http.StatusOK {
-		log.Debug("Did not find Stratos Metrics metadata file")
-		log.Debug("Checking if this is a prometheus endpoint")
+		slog.Debug("Did not find the Stratos Metrics metadata file, checking if this is a prometheus endpoint",
+			"status", res.StatusCode)
 		// This could be a bosh-prometheus endpoint, verify that this is a prometheus endpoint
 		statusEndpoint := fmt.Sprintf("%s/api/v1/status/config", cnsiRecord.APIEndpoint)
 		req, err = http.NewRequest("GET", statusEndpoint, nil)
 		if err != nil {
-			msg := "Failed to create request for the Metrics Endpoint: %v"
-			log.Errorf(msg, err)
-			return nil, false, fmt.Errorf(msg, err)
+			const msg = "failed to create the request for the metrics endpoint"
+			slog.Error(msg, "url", statusEndpoint, "error", err)
+			return nil, false, fmt.Errorf("%s: %w", msg, err)
 		}
 		m.addAuth(req, auth)
 
 		// Get for /api/v1/status/config
 		response, err := h.Do(req)
 		if err != nil {
-			log.Errorf("Error fetching /api/v1/status/config - response: %v, error: %v", response, err)
+			slog.Error("error fetching /api/v1/status/config", "url", statusEndpoint, "response", response, "error", err)
 			return nil, false, api.LogHTTPError(res, err)
 		}
 
 		defer func() { _ = response.Body.Close() }()
 		if response.StatusCode != http.StatusOK {
-			log.Errorf("Error fetching /api/v1/status/config - response: %v, error: %v", response, err)
+			slog.Error("unexpected status fetching /api/v1/status/config",
+				"url", statusEndpoint, "status", response.StatusCode)
 			return nil, false, api.LogHTTPError(res, err)
 		}
 
@@ -246,44 +247,45 @@ func (m *MetricsSpecification) createMetadata(metricEndpoint *url.URL, httpClien
 	basicMetricRequest := fmt.Sprintf("%s/api/v1/query?query=firehose_total_metrics_received", metricEndpoint)
 	req, err := http.NewRequest("GET", basicMetricRequest, nil)
 	if err != nil {
-		msg := "Failed to create request for the Metrics Endpoint: %v"
-		log.Errorf(msg, err)
-		return "", fmt.Errorf(msg, err)
+		const msg = "failed to create the request for the metrics endpoint"
+		slog.Error(msg, "url", basicMetricRequest, "error", err)
+		return "", fmt.Errorf("%s: %w", msg, err)
 	}
 	m.addAuth(req, auth)
 	res, err := httpClient.Do(req)
 	if err != nil {
-		log.Errorf("Error performing http request: %v", err)
+		slog.Error("error performing the http request", "url", basicMetricRequest, "error", err)
 		return "", api.LogHTTPError(res, err)
 	}
 	defer func() { _ = res.Body.Close() }()
 	if res.StatusCode != http.StatusOK {
-		log.Errorf("Error performing http request - response: %v", res)
+		slog.Error("unexpected status performing the http request", "url", basicMetricRequest, "status", res.StatusCode)
 		return "", api.LogHTTPError(res, err)
 	}
 	body, err := io.ReadAll(res.Body)
 	if err != nil {
-		log.Errorf("Unexpected response: %v", err)
+		slog.Error("could not read the metrics response body", "url", basicMetricRequest, "error", err)
 		return "", api.LogHTTPError(res, err)
 	}
 
 	queryResponse := &PrometheusQueryResponse{}
 	err = json.Unmarshal(body, queryResponse)
 	if err != nil {
-		log.Errorf("Failed to unmarshal response: %v", err)
+		slog.Error("failed to unmarshal the metrics response", "url", basicMetricRequest, "error", err)
 		return "", api.LogHTTPError(res, err)
 	}
 	if len(queryResponse.Data.Result) == 0 {
-		log.Errorf("No series detecthed! No Firehose exporter currently connected")
+		slog.Error("no series detected: no Firehose exporter is currently connected")
 		return "", api.LogHTTPError(res, err)
 	}
 
 	if len(queryResponse.Data.Result) > 1 {
-		log.Warnf("Multiple series detected, its possible multiple cloud-foundries are being monitored. Selecting the first one")
+		slog.Warn("multiple series detected, possibly multiple Cloud Foundries are being monitored - selecting the first",
+			"series", len(queryResponse.Data.Result))
 	}
 
 	if queryResponse.Data.Result[0].Metric.Environment == "" {
-		log.Errorf("No environmnent detected in %v", queryResponse)
+		slog.Error("no environment detected in the query response", "response", queryResponse)
 		return "", api.LogHTTPError(res, err)
 	}
 
@@ -319,7 +321,7 @@ func (m *MetricsSpecification) Init() error {
 }
 
 func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
-	log.Debug("Metrics Info")
+	slog.Debug("Metrics Info")
 	var v2InfoResponse api.V2Info
 	var newCNSI api.CNSIRecord
 
@@ -364,7 +366,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *api.Info, userGUID string, e
 					info.URL = item.URL
 					info.Job = item.Job
 					info.Environment = item.Environment
-					log.Debugf("Metrics provider: %+v", info)
+					slog.Debug("Metrics provider", "provider", info)
 					metricsProviders = append(metricsProviders, info)
 				}
 			}
@@ -375,7 +377,7 @@ func (m *MetricsSpecification) UpdateMetadata(info *api.Info, userGUID string, e
 	for _, values := range info.Endpoints {
 		for _, endpoint := range values {
 			// Look to see if we can find the metrics provider for this URL
-			log.Debugf("Processing endpoint: %+v", endpoint.CNSIRecord)
+			slog.Debug("Processing endpoint", "endpoint", endpoint.CNSIRecord)
 			if provider, ok := hasMetricsProvider(metricsProviders, endpoint.DopplerLoggingEndpoint); ok {
 				endpoint.Metadata["metrics"] = provider.EndpointGUID
 				endpoint.Metadata["metrics_job"] = provider.Job
@@ -508,8 +510,7 @@ func (m *MetricsSpecification) getMetricsEndpoints(userGUID string, cnsiList []s
 				break
 			}
 			// K8s
-			log.Debugf("Processing endpoint: %+v", info)
-			log.Debugf("Processing endpoint Metrics provider: %+v", metricProviderInfo)
+			slog.Debug("Processing endpoint", "endpoint", info, "metricsProvider", metricProviderInfo)
 			if compareURL(info.APIEndpoint.String(), metricProviderInfo.URL) {
 				relate := EndpointMetricsRelation{}
 				relate.endpoint = info

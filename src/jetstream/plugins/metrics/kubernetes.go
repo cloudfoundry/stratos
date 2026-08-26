@@ -2,9 +2,8 @@ package metrics
 
 import (
 	"errors"
+	"log/slog"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v5"
 )
@@ -25,7 +24,7 @@ func (m *MetricsSpecification) getPodMetrics(c *echo.Context) error {
 	// For each CNSI, find the metrics endpoint that we need to talk to
 	metrics, err2 := m.getMetricsEndpoints(userGUID, cnsiList)
 	if err2 != nil {
-		log.Error("Error getting metrics", err2)
+		slog.Error("error getting the metrics endpoints", "user", userGUID, "error", err2)
 
 		return errors.New("Can not get metric endpoint metadata")
 	}

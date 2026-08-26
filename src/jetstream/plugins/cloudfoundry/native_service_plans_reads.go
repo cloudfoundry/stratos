@@ -2,11 +2,10 @@
 package cloudfoundry
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
@@ -175,7 +174,7 @@ func (c *CloudFoundrySpecification) getNativeServicePlanDetail(ctx *echo.Context
 func offeringsFromIncluded(list *capi.ListResponse[capi.ServicePlan]) map[string]capi.ServiceOffering {
 	inc, err := capi.ServicePlanIncludedFrom(list)
 	if err != nil {
-		log.Warnf("service_plans: could not decode included block: %v", err)
+		slog.Warn("service_plans: could not decode the included block", "err", err)
 		return map[string]capi.ServiceOffering{}
 	}
 	return keyByGUID(inc.ServiceOfferings, func(o capi.ServiceOffering) string { return o.GUID })

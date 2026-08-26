@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -13,8 +14,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
 	"gopkg.in/yaml.v2"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // GeneratedPlugin represents a generated plugin
@@ -214,30 +213,30 @@ func (gep GeneratedEndpointPlugin) UpdateMetadata(info *api.Info, userGUID strin
 
 // MakePluginsFromConfig will generate plugins for the yaml-configured endpoints
 func MakePluginsFromConfig() {
-	log.Debug("MakePluginsFromConfig")
+	slog.Debug("MakePluginsFromConfig")
 
 	var config []pluginConfig
 
 	yamlFile, err := os.ReadFile("plugins.yaml")
 	if err != nil {
-		log.Errorf("Can't generate plugins from YAML: %v ", err)
+		slog.Error("cannot generate plugins from YAML", "file", "plugins.yaml", "error", err)
 		return
 	}
 
 	err = yaml.Unmarshal(yamlFile, &config)
 	if err != nil {
-		log.Errorf("Failed to unmarshal YAML: %v ", err)
+		slog.Error("failed to unmarshal the plugins YAML", "file", "plugins.yaml", "error", err)
 		return
 	}
 
 	plugins := make(map[string]GeneratedEndpointPlugin)
 	for _, plugin := range config {
 		if len(plugin.Name) == 0 {
-			log.Errorf("Plugin must have a name")
+			slog.Error("plugin must have a name")
 			return
 		}
 
-		log.Debugf("Processing plugin for endpoint %s and sub-type %s", plugin.Name, plugin.SubType)
+		slog.Debug("Processing plugin", "endpointType", plugin.Name, "subType", plugin.SubType)
 
 		// Create a plugin if needed then add this sub type to the plugin
 		ep, ok := plugins[plugin.Name]
@@ -248,7 +247,8 @@ func MakePluginsFromConfig() {
 
 		// Add this subtype to the plugin - subtype can be empty
 		if _, ok := ep.subTypes[plugin.SubType]; ok {
-			log.Warnf("Sub-type %s already declared for endpoint type %s - ignoring", plugin.Name, plugin.SubType)
+			slog.Warn("sub-type already declared for this endpoint type - ignoring",
+				"endpointType", plugin.Name, "subType", plugin.SubType)
 		} else {
 			ep.subTypes[plugin.SubType] = plugin
 		}
@@ -256,7 +256,7 @@ func MakePluginsFromConfig() {
 }
 
 func createPluginForEndpointType(endpointType string) GeneratedEndpointPlugin {
-	log.Debugf("Generating plugin %s", endpointType)
+	slog.Debug("Generating plugin", "endpointType", endpointType)
 	gep := GeneratedEndpointPlugin{}
 	gep.endpointType = endpointType
 	gep.subTypes = make(map[string]pluginConfig)
@@ -271,7 +271,7 @@ func createPluginForEndpointType(endpointType string) GeneratedEndpointPlugin {
 		endpointType,
 		[]string{},
 		func(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
-			log.Debugf("%s -- initializing", endpointType)
+			slog.Debug("initializing plugin", "endpointType", endpointType)
 			gep.portalProxy = portalProxy
 			return gp, nil
 		},

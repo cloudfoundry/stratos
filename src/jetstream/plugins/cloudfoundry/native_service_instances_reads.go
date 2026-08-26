@@ -2,10 +2,9 @@
 package cloudfoundry
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
@@ -265,7 +264,7 @@ func resolveInstanceIncludes(list *capi.ListResponse[capi.ServiceInstance], mode
 	if err != nil {
 		// Soft-fail: a malformed included block degrades rows to guid-only
 		// refs rather than 502'ing the whole list.
-		log.Warnf("service_instances: could not decode included block: %v", err)
+		slog.Warn("service_instances: could not decode the included block", "err", err)
 		return out
 	}
 	out.plans = keyByGUID(inc.ServicePlans, func(p capi.ServicePlan) string { return p.GUID })

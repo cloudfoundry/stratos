@@ -2,11 +2,10 @@ package userinvite
 
 import (
 	"errors"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // GetType - return empty string as we don't introduce a new enpoint type
@@ -35,13 +34,13 @@ func (invite *UserInvite) Validate(userGUID string, cnsiRecord api.CNSIRecord, t
 
 // UpdateMetadata will add metadata for each Cloud Foundry endpoint to indicate if user invitation is allowed
 func (invite *UserInvite) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
-	log.Debug("User Invite:: UpdateMetadata")
+	slog.Debug("User Invite:: UpdateMetadata", "user", userGUID)
 	endpoints, err := invite.portalProxy.ListEndpointsByUser(UserInviteUserID)
 	if err == nil {
 		// Update all of the Cloud Foundry endpoints that have an invite token set to indicate that user invitation is enabled
 		if info.Endpoints["cf"] != nil {
 			for guid, ep := range info.Endpoints["cf"] {
-				log.Debugf("Checking endpoint: %s", guid)
+				slog.Debug("Checking endpoint", "endpoint", guid)
 				ep.Metadata["userInviteAllowed"] = hasInviteToken(endpoints, guid)
 			}
 		}

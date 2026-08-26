@@ -3,11 +3,11 @@ package cloudfoundry
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 // Operator-triggered probe of an endpoint's composite URI-length ceiling
@@ -153,7 +153,9 @@ func (c *CloudFoundrySpecification) probeEndpointURILimit(ctx *echo.Context) err
 		RecommendedChunk: recommended,
 		Requests:         requests,
 	}
-	log.Infof("URI-limit probe cnsi=%s: chain accepts %d bytes (capped=%v, %d requests); configured %s=%d uses %d bytes; recommended %d",
-		cnsiGUID, limit, capped, requests, guidChunkEnv, configured, result.ConfiguredBytes, recommended)
+	slog.Info("URI-limit probe",
+		"cnsi", cnsiGUID, "accepts_bytes", limit, "capped", capped, "requests", requests,
+		"setting", guidChunkEnv, "configured", configured, "configured_bytes", result.ConfiguredBytes,
+		"recommended", recommended)
 	return ctx.JSON(http.StatusOK, result)
 }

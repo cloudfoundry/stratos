@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -116,7 +116,7 @@ func (analysis *Analysis) OnEndpointNotification(action api.EndpointAction, endp
 		dbStore, err := store.NewAnalysisDBStore(analysis.portalProxy.GetDatabaseConnection())
 		if err == nil {
 			if err := dbStore.DeleteForEndpoint(endpoint.GUID); err != nil {
-				log.Errorf("Failed deleting reports for endpoint %s: %v", endpoint.GUID, err)
+				slog.Error("failed deleting the reports for the endpoint", "endpoint", endpoint.GUID, "error", err)
 			}
 
 			// Now ask the analysis engine to to delete all files on disk
@@ -125,19 +125,19 @@ func (analysis *Analysis) OnEndpointNotification(action api.EndpointAction, endp
 			client := &http.Client{Timeout: 30 * time.Second}
 			rsp, err := client.Do(r)
 			if err != nil {
-				log.Errorf("Failed deleting reports from Analyzer service: %v", err)
+				slog.Error("failed deleting the reports from the Analyzer service", "url", deleteURL, "error", err)
 				return
 			}
 
 			if rsp.StatusCode != http.StatusOK {
-				log.Errorf("Failed deleting reports from Analyzer service: %d", rsp.StatusCode)
+				slog.Error("failed deleting the reports from the Analyzer service", "url", deleteURL, "status", rsp.StatusCode)
 			}
 
 			if rsp.Body != nil {
 				defer func() { _ = rsp.Body.Close() }()
 				_, err = io.ReadAll(rsp.Body)
 				if err != nil {
-					log.Errorf("Could not read response: %v", err)
+					slog.Error("could not read the Analyzer service response", "url", deleteURL, "error", err)
 				}
 			}
 		}

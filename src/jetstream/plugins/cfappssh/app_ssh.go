@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/url"
@@ -14,7 +15,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/coder/websocket"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -59,7 +59,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c *echo.Context) error {
 	if err != nil {
 		return sendSSHError("[cfPlugin.Info] Can not get Cloud Foundry info: %s", err.Error())
 	}
-	log.Debugf("CF Info: %+v", info)
+	slog.Debug("CF info", "info", info)
 
 	endpointInfo, ok := info.(api.EndpointInfo)
 	if !ok {
@@ -89,7 +89,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c *echo.Context) error {
 	// SSH works regardless of how long the app has been running.
 	processGUID, err := getWebProcessGUID(apiEndpoint.String(), appGUID, refreshedTokenRec.AuthToken, cnsiRecord.SkipSSLValidation)
 	if err != nil {
-		log.Warnf("Could not get web process GUID for app %s, falling back to app GUID: %s", appGUID, err)
+		slog.Warn("could not get the web process GUID, falling back to the app GUID", "app", appGUID, "error", err)
 		processGUID = appGUID
 	}
 
@@ -162,7 +162,7 @@ func (cfAppSsh *CFAppSSH) appSSH(c *echo.Context) error {
 	go pumpStdout(ws, stdout, stdoutDone)
 	go func() {
 		if err := session.Shell(); err != nil {
-			log.Errorf("App SSH failed to start shell: %v", err)
+			slog.Error("App SSH failed to start the shell", "error", err)
 		}
 	}()
 
@@ -170,36 +170,31 @@ func (cfAppSsh *CFAppSSH) appSSH(c *echo.Context) error {
 	for {
 		_, r, err := ws.Read(readCtx)
 		if err != nil {
-			log.Error("Error reading message from web socket")
-			log.Warnf("%+v", err)
+			slog.Error("error reading a message from the web socket", "error", err)
 			return err
 		}
 
 		res := KeyCode{}
 		if err := json.Unmarshal(r, &res); err != nil {
-			log.Warnf("App SSH: could not parse message from web socket: %+v", err)
+			slog.Warn("App SSH: could not parse a message from the web socket", "error", err)
 			continue
 		}
 
 		if res.Cols == 0 {
 			if _, err := stdin.Write([]byte(res.Key)); err != nil {
-				log.Errorf("App SSH: error writing to session stdin: %v", err)
+				slog.Error("App SSH: error writing to the session stdin", "error", err)
 			}
 		} else {
 			// Terminal resize request
 			if err := windowChange(session, res.Rows, res.Cols); err != nil {
-				log.Error("Can not resize the PTY")
+				slog.Error("Can not resize the PTY", "rows", res.Rows, "cols", res.Cols, "error", err)
 			}
 		}
 	}
 }
 
 func sendSSHError(format string, a ...interface{}) error {
-	if len(a) == 0 {
-		log.Error("App SSH Error: " + format)
-	} else {
-		log.Errorf("App SSH Error: "+format, a)
-	}
+	slog.Error("App SSH Error: " + fmt.Sprintf(format, a...))
 	return echo.NewHTTPError(http.StatusInternalServerError, fmt.Sprintf(format, a...))
 }
 
@@ -250,7 +245,7 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 		len, err := r.Read(buffer)
 		if err != nil {
 			if err != io.EOF {
-				log.Errorf("App SSH encountered an error reading from stdout; %v", err)
+				slog.Error("App SSH encountered an error reading from stdout", "error", err)
 			}
 			_ = ws.CloseNow()
 			break
@@ -258,7 +253,7 @@ func pumpStdout(ws *websocket.Conn, r io.Reader, done chan struct{}) {
 
 		bytes := fmt.Sprintf("% x\n", buffer[:len])
 		if err := api.WriteText(ws, []byte(bytes)); err != nil {
-			log.Error("App SSH Failed to write nessage")
+			slog.Error("App SSH failed to write a message", "error", err)
 			_ = ws.CloseNow()
 			break
 		}
@@ -354,7 +349,7 @@ func getSSHCode(authorizeEndpoint, clientID, token string, skipSSLValidation boo
 	if resp != nil {
 		// not logged: full response dump exposes the Location header, which carries the one-time SSH auth code
 		// log.Infof("%+v", resp)
-		log.Infof("Authorization response status: %s (headers and location not logged)", resp.Status)
+		slog.Info("Authorization response (headers and location not logged)", "status", resp.Status)
 	}
 	if err == nil {
 		return "", errors.New("Authorization server did not redirect with one time code")

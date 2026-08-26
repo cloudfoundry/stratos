@@ -3,11 +3,11 @@ package userinvite
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -25,7 +25,7 @@ const cloudControllerAdminScope = "cloud_controller.admin"
 // Admin functions for managing User Invite credentials for a given Cloud Foundry
 
 func (invite *UserInvite) status(c *echo.Context) error {
-	log.Debug("Invite Status")
+	slog.Debug("Invite Status")
 	cfGUID := c.Param("id")
 
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
@@ -65,7 +65,7 @@ func (invite *UserInvite) status(c *echo.Context) error {
 
 // Configure
 func (invite *UserInvite) configure(c *echo.Context) error {
-	log.Debug("Configure Invite token")
+	slog.Debug("Configure Invite token")
 	cfGUID := c.Param("id")
 
 	clientID := c.FormValue("client_id")
@@ -111,7 +111,7 @@ func arrayContainsString(a []string, x string) bool {
 }
 
 func (invite *UserInvite) remove(c *echo.Context) error {
-	log.Debug("Delete Invite token")
+	slog.Debug("Delete Invite token")
 	cfGUID := c.Param("id")
 
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
