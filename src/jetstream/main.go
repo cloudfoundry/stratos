@@ -32,7 +32,6 @@ import (
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
-	log "github.com/sirupsen/logrus"
 	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -207,7 +206,7 @@ func getEnvironmentLookup() *env.VarSet {
 var logLevel slog.LevelVar
 
 // setupLogging installs the process-wide slog handler. Everything else in the
-// tree - including the plugins still on logrus - logs through it.
+// tree logs through it.
 func setupLogging(envLookup *env.VarSet) {
 	opts := &slog.HandlerOptions{Level: &logLevel}
 	var handler slog.Handler = slog.NewTextHandler(os.Stdout, opts)
@@ -215,12 +214,11 @@ func setupLogging(envLookup *env.VarSet) {
 		handler = slog.NewJSONHandler(os.Stdout, opts)
 	}
 	slog.SetDefault(slog.New(handler))
-	installLogrusBridge(logLevel.Level())
 }
 
-// parseLogLevel accepts the level names logrus did, so an existing LOG_LEVEL
-// keeps working. slog has no trace/fatal/panic, so they fold into the nearest
-// level that exists.
+// parseLogLevel accepts the level names logrus accepted, so an existing
+// LOG_LEVEL keeps working. slog has no trace/fatal/panic, so they fold into
+// the nearest level that exists.
 func parseLogLevel(name string) (slog.Level, error) {
 	switch strings.ToLower(strings.TrimSpace(name)) {
 	case "trace", "debug":
@@ -267,7 +265,6 @@ func main() {
 			slog.Warn("keeping the current log level", "error", levelErr)
 		} else {
 			logLevel.Set(level)
-			log.SetLevel(logrusLevel(level))
 		}
 	}
 

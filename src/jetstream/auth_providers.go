@@ -2,8 +2,6 @@ package main
 
 import "github.com/cloudfoundry/stratos/src/jetstream/api"
 
-// log "github.com/sirupsen/logrus"
-
 // AddAuthProvider adds a new auth provider
 func (p *portalProxy) AddAuthProvider(name string, provider api.AuthProvider) {
 	p.AuthProviders[name] = provider
