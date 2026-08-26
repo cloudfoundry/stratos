@@ -2,11 +2,10 @@ package terminal
 
 import (
 	"context"
+	"log/slog"
 	"math/rand"
 	"strconv"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -23,11 +22,11 @@ func (k *KubeTerminal) cleanup() {
 	// Use a random initial wait before cleaning up
 	// If we had more than one backend, this helps to ensure they are not all trying to cleanup at the same time
 	wait := rand.Intn(30)
-	log.Debugf("Kubernetes Terminal cleanup will start in %d minutes", wait)
+	slog.Debug("Kubernetes Terminal cleanup scheduled", "waitMinutes", wait)
 
 	for {
 		time.Sleep(time.Duration(wait) * time.Minute)
-		log.Debug("Cleaning up stale Kubernetes Terminal pods and secrets ...")
+		slog.Debug("cleaning up stale Kubernetes Terminal pods and secrets", "namespace", k.Namespace)
 
 		// Get all pods with a given label
 		podClient, secretClient, err := k.getClients()
@@ -46,15 +45,14 @@ func (k *KubeTerminal) cleanup() {
 						if err == nil {
 							isValid, err := k.PortalProxy.GetSessionDataStore().IsValidSession(i)
 							if err == nil && !isValid {
-								log.Debugf("Deleting pod %s", pod.Name)
+								slog.Debug("deleting a stale Kubernetes Terminal pod", "pod", pod.Name, "namespace", k.Namespace, "session", i)
 								podClient.Delete(ctx, pod.Name, metaV1.DeleteOptions{})
 							}
 						}
 					}
 				}
 			} else {
-				log.Debug("Kube Terminal Cleanup: Could not get pods")
-				log.Debug(err)
+				slog.Warn("Kubernetes Terminal cleanup could not list the pods", "namespace", k.Namespace, "error", err)
 			}
 
 			// Only want the secrets that are kube terminals
@@ -66,20 +64,18 @@ func (k *KubeTerminal) cleanup() {
 						if err == nil {
 							isValid, err := k.PortalProxy.GetSessionDataStore().IsValidSession(i)
 							if err == nil && !isValid {
-								log.Debugf("Deleting secret %s", secret.Name)
+								slog.Debug("deleting a stale Kubernetes Terminal secret", "secret", secret.Name, "namespace", k.Namespace, "session", i)
 								secretClient.Delete(ctx, secret.Name, metaV1.DeleteOptions{})
 							}
 						}
 					}
 				}
 			} else {
-				log.Warn("Kube Terminal Cleanup: Could not get secrets")
-				log.Warn(err)
+				slog.Warn("Kubernetes Terminal cleanup could not list the secrets", "namespace", k.Namespace, "error", err)
 			}
 
 		} else {
-			log.Warn("Kube Terminal Cleanup: Could not get clients")
-			log.Warn(err)
+			slog.Warn("Kubernetes Terminal cleanup could not get the Kubernetes clients", "namespace", k.Namespace, "error", err)
 		}
 
 		wait = waitPeriod

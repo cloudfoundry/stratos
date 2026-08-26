@@ -2,11 +2,11 @@ package helm
 
 import (
 	"fmt"
+	"log/slog"
 
 	"reflect"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	appsv1 "k8s.io/api/apps/v1"
 	appsv1beta1 "k8s.io/api/apps/v1beta1"
 	appsv1beta2 "k8s.io/api/apps/v1beta2"
@@ -59,7 +59,7 @@ func (r *HelmReleaseGraph) AddLink(source, target string) {
 		Target: target,
 	}
 	r.Links[link.ID] = link
-	log.Debugf("Adding link %s -> %s", source, target)
+	slog.Debug("adding a link to the release graph", "source", source, "target", target)
 }
 
 // ParseManifest
@@ -124,7 +124,7 @@ func (r *HelmReleaseGraph) ParseManifest(release *HelmRelease) {
 			target := getShortResourceId(item.Kind, o.Name)
 			r.ParseClusterRoleBinding(target, o)
 		default:
-			log.Debugf("Graph: Unknown type: %s", reflect.TypeOf(o))
+			slog.Debug("unknown resource type in the release graph", "type", reflect.TypeOf(o).String(), "kind", item.Kind)
 		}
 
 		// Add or replace the node in the map

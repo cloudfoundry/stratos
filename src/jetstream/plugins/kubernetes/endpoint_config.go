@@ -3,8 +3,7 @@ package kubernetes
 import (
 	"errors"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -107,7 +106,7 @@ func (c *KubernetesSpecification) GetKubeConfigForEndpoint(masterURL string, tok
 
 func (c *KubernetesSpecification) addAuthInfoForEndpoint(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
 
-	log.Debug("addAuthInfoForEndpoint")
+	slog.Debug("adding the auth info for a Kubernetes endpoint", "authType", tokenRec.AuthType, "token", tokenRec.TokenGUID)
 	var authProvider = c.GetAuthProvider(tokenRec.AuthType)
 	if authProvider == nil {
 		return fmt.Errorf("Unsupported auth type: %s", tokenRec.AuthType)

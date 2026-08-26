@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"path"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth"
 
@@ -96,12 +96,12 @@ func (c *KubernetesSpecification) GetClientId() string {
 }
 
 func (c *KubernetesSpecification) Register(echoContext *echo.Context) error {
-	log.Debug("Kubernetes Register...")
+	slog.Debug("registering a Kubernetes endpoint")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
 func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRecord api.TokenRecord) error {
-	log.Debugf("Validating Kubernetes endpoint connection for user: %s", userGUID)
+	slog.Debug("validating the Kubernetes endpoint connection", "endpoint", cnsiRecord.GUID, "user", userGUID)
 	response, err := c.portalProxy.DoProxySingleRequest(cnsiRecord.GUID, userGUID, "GET", "api/v1/pods?limit=1", nil, nil)
 	if err != nil {
 		return err
@@ -118,7 +118,7 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord api.CNSIR
 }
 
 func (c *KubernetesSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userID string) (*api.TokenRecord, bool, error) {
-	log.Debug("Kubernetes Connect...")
+	slog.Debug("connecting to a Kubernetes endpoint", "endpoint", cnsiRecord.GUID, "user", userID)
 
 	connectType := ec.FormValue("connect_type")
 
@@ -196,7 +196,7 @@ func (c *KubernetesSpecification) AddSessionGroupRoutes(echoGroup *echo.Group) {
 
 func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
 
-	log.Debug("Kubernetes Info")
+	slog.Debug("fetching the Kubernetes endpoint info", "apiEndpoint", apiEndpoint)
 	var v2InfoResponse api.V2Info
 	var newCNSI api.CNSIRecord
 
@@ -207,7 +207,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 		return newCNSI, nil, err
 	}
 
-	log.Debug("Request Kube API Versions")
+	slog.Debug("requesting the Kubernetes API versions", "apiEndpoint", apiEndpoint)
 	var httpClient = c.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 	res, err := httpClient.Get(apiEndpoint + "/api")
 	if err != nil {
@@ -222,7 +222,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 
 	if res.StatusCode < 400 {
 		// No auth on kube set up, expect a successful APIVersions response - KubeAPIVersions
-		log.Debug("Kube API Versions Succeeded")
+		slog.Debug("the Kubernetes API versions request succeeded", "apiEndpoint", apiEndpoint, "status", res.StatusCode)
 		apiVersions := KubeAPIVersions{}
 		err := json.Unmarshal(body, &apiVersions)
 		if err != nil {
@@ -240,7 +240,7 @@ func (c *KubernetesSpecification) Info(apiEndpoint string, skipSSLValidation boo
 		return newCNSI, nil, fmt.Errorf("Dissallowed response code from `/api` call: %+v", res.StatusCode)
 	}
 
-	log.Debug("Kube API Versions Acceptable Response")
+	slog.Debug("the Kubernetes API versions response is acceptable", "apiEndpoint", apiEndpoint, "status", res.StatusCode)
 	newCNSI.TokenEndpoint = apiEndpoint
 	newCNSI.AuthorizationEndpoint = apiEndpoint
 
@@ -269,7 +269,7 @@ func parseErrorResponse(body []byte) error {
 
 	// Not one of the types we recognise
 
-	log.Debug(string(body))
+	slog.Debug("unrecognised response from the Kubernetes endpoint", "body", string(body))
 	return errors.New("Could not understand response from Kubernetes endpoint")
 }
 
@@ -277,7 +277,7 @@ func (c *KubernetesSpecification) UpdateMetadata(info *api.Info, userGUID string
 }
 
 func (c *KubernetesSpecification) RequiresCert(ec *echo.Context) error {
-	log.Debug("Request Kube API Versions")
+	slog.Debug("checking whether the Kubernetes endpoint requires a client certificate", "url", ec.QueryParam("url"))
 
 	var response struct {
 		Status   int

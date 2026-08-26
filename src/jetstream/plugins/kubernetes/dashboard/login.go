@@ -3,11 +3,11 @@ package dashboard
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -22,10 +22,10 @@ type loginOKResponse struct {
 
 // KubeDashboardLogin will check and log into the Kubernetes Dashboard then redirect to the Dashboard UI
 func KubeDashboardLogin(c *echo.Context, p api.PortalProxy) error {
-	log.Debug("kubeDashboardLogin request")
-
 	endpointGUID := c.Param("guid")
 	userGUID := c.Get("user_id").(string)
+
+	slog.Debug("Kubernetes dashboard login request", "endpoint", endpointGUID, "user", userGUID)
 
 	// Get the dashboard status
 	status, _ := KubeDashboardStatus(p, endpointGUID, userGUID, true)

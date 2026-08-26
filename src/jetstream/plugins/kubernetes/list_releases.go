@@ -1,8 +1,9 @@
 package kubernetes
 
 import (
+	"log/slog"
+
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"helm.sh/helm/v3/pkg/action"
 
@@ -11,11 +12,11 @@ import (
 
 // ListReleases will list the helm releases for all endpoints
 func (c *KubernetesSpecification) ListReleases(ec *echo.Context) error {
-	log.Debug("ListReleases")
-
 	// Need to get a config object for the target endpoint
 	// endpointGUID := ec.Param("endpoint")
 	userID := ec.Get("user_id").(string)
+
+	slog.Debug("listing the Helm releases for every connected endpoint", "user", userID)
 
 	resp, err := c.ProxyKubernetesAPI(userID, c.listReleases)
 	if err != nil {
@@ -32,11 +33,11 @@ func (c *KubernetesSpecification) listReleases(ep *api.ConnectedEndpoint, done c
 		Result:   nil,
 	}
 
-	log.Debugf("listReleases: START: %s", ep.GUID)
+	slog.Debug("listing the Helm releases for an endpoint", "endpoint", ep.GUID, "user", ep.Account)
 
 	config, hc, err := c.GetHelmConfiguration(ep.GUID, ep.Account, "")
 	if err != nil {
-		log.Errorf("Helm: ListReleases could not get a Helm Configuration: %s", err)
+		slog.Error("could not get a Helm configuration to list the releases", "endpoint", ep.GUID, "user", ep.Account, "error", err)
 		done <- response
 		return
 	}
@@ -45,18 +46,17 @@ func (c *KubernetesSpecification) listReleases(ep *api.ConnectedEndpoint, done c
 
 	list := action.NewList(config)
 
-	log.Debugf("listReleases: REQUEST: %s", ep.GUID)
+	slog.Debug("requesting the Helm release list", "endpoint", ep.GUID)
 
 	res, err := list.Run()
 	if err != nil {
-		log.Debugf("listReleases: ERROR: %s", ep.GUID)
-		log.Error(err)
+		slog.Error("could not list the Helm releases", "endpoint", ep.GUID, "user", ep.Account, "error", err)
 
 		done <- response
 		return
 	}
 
-	log.Debugf("listReleases: OK: %s", ep.GUID)
+	slog.Debug("listed the Helm releases", "endpoint", ep.GUID, "count", len(res))
 	response.Result = res
 
 	done <- response

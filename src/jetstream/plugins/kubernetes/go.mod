@@ -8,7 +8,6 @@ require (
 	github.com/coder/websocket v1.8.15
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v5 v5.3.1
-	github.com/sirupsen/logrus v1.9.4
 	github.com/smartystreets/goconvey v1.6.4
 	gopkg.in/yaml.v2 v2.4.0
 	helm.sh/helm/v3 v3.21.4
@@ -120,6 +119,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/santhosh-tekuri/jsonschema/v6 v6.0.2 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
+	github.com/sirupsen/logrus v1.9.4 // indirect
 	github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d // indirect
 	github.com/spf13/afero v1.15.0 // indirect
 	github.com/spf13/cast v1.10.0 // indirect

@@ -5,10 +5,10 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/url"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	"sigs.k8s.io/yaml"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -118,7 +118,7 @@ func (c *KubernetesSpecification) InstallRelease(ec *echo.Context) error {
 
 // Load the Helm chart for the given repository, name and version
 func (c *KubernetesSpecification) loadChart(downloadURL string) (*chart.Chart, error) {
-	log.Debugf("Helm Chart Download URL: %s", downloadURL)
+	slog.Debug("loading the Helm chart", "url", downloadURL)
 
 	target, err := url.Parse(downloadURL)
 	if err != nil || (target.Scheme != "https" && target.Scheme != "http") || target.Host == "" {

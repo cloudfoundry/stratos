@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v2"
 )
 
@@ -60,7 +60,7 @@ type apiVersionAndKind struct {
 
 // CreateServiceAccount will create a service account for accessing the Kubernetes Dashboard
 func CreateServiceAccount(p api.PortalProxy, endpointGUID, userGUID string) error {
-	log.Debug("CreateServiceAccount")
+	slog.Debug("creating the Kubernetes dashboard service account", "endpoint", endpointGUID, "user", userGUID)
 
 	svc, err := getKubeDashboardServiceInfo(p, endpointGUID, userGUID)
 	if err != nil {
@@ -103,7 +103,7 @@ func replaceNamespace(definition, namespace string) []byte {
 
 // DeleteServiceAccount will delete the service account
 func DeleteServiceAccount(p api.PortalProxy, endpointGUID, userGUID string) error {
-	log.Debug("DeleteServiceAccount")
+	slog.Debug("deleting the Kubernetes dashboard service account", "endpoint", endpointGUID, "user", userGUID)
 
 	svcAccount, err := getKubeDashboardServiceAccount(p, endpointGUID, userGUID, stratosServiceAccountSelector)
 	if err != nil {
@@ -152,7 +152,7 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 		kubeDashboardImage = dashboardInstallYAMLDownloadURL
 	}
 
-	log.Debugf("InstallDashboard: %s", kubeDashboardImage)
+	slog.Debug("installing the Kubernetes dashboard", "endpoint", endpointGUID, "user", userGUID, "url", kubeDashboardImage)
 
 	http := p.GetHttpClient(false, "")
 	resp, err := http.Get(kubeDashboardImage)
@@ -225,7 +225,7 @@ func isClusterAPI(api string) bool {
 
 // DeleteDashboard will delete the dashboard from Kubernetes cluster
 func DeleteDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
-	log.Debug("DeleteDashboard")
+	slog.Debug("deleting the Kubernetes dashboard", "endpoint", endpointGUID, "user", userGUID)
 
 	// Delete the service
 	svc, err := getKubeDashboardServiceInfo(p, endpointGUID, userGUID)

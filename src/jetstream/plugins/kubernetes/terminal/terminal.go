@@ -3,12 +3,11 @@ package terminal
 import (
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 
 	jetstream_api "github.com/cloudfoundry/stratos/src/jetstream/api"
 	jetstream_config "github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/api"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -41,7 +40,7 @@ type KubeTerminal struct {
 func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 	// Only enabled in tech preview
 	if !p.GetConfig().EnableTechPreview {
-		log.Info("Kube Terminal not enabled - requires tech preview")
+		slog.Info("Kubernetes Terminal not enabled, it requires tech preview")
 		return nil
 	}
 
@@ -49,13 +48,13 @@ func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 		PortalProxy: p,
 	}
 	if err := jetstream_config.Load(kt, p.Env().Lookup); err != nil {
-		log.Warnf("Unable to load Kube Terminal configuration. %v", err)
+		slog.Warn("unable to load the Kubernetes Terminal configuration", "error", err)
 		return nil
 	}
 
 	// Check that we have everything we need
 	if len(kt.Image) == 0 || len(kt.Namespace) == 0 {
-		log.Warn("Kube Terminal configuration is not complete")
+		slog.Warn("the Kubernetes Terminal configuration is not complete", "image", kt.Image, "namespace", kt.Namespace)
 		return nil
 	}
 
@@ -63,7 +62,7 @@ func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 	host, hostFound := p.Env().Lookup(serviceHostEnvVar)
 	port, portFound := p.Env().Lookup(servicePortEnvVar)
 	if !hostFound || !portFound {
-		log.Warn("Kubernetes API Server configuration not found (host and/or port env vars not set)")
+		slog.Warn("Kubernetes API server configuration not found", "hostEnvVar", serviceHostEnvVar, "hostFound", hostFound, "portEnvVar", servicePortEnvVar, "portFound", portFound)
 		return nil
 	}
 	kt.APIServer = fmt.Sprintf("https://%s:%s", host, port)
@@ -74,7 +73,7 @@ func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 		// Check env var
 		tkn, found := p.Env().Lookup(serviceTokenEnvVar)
 		if !found {
-			log.Warnf("Unable to load Service Account token. %v", err)
+			slog.Warn("unable to load the service account token", "file", serviceAccountTokenFile, "envVar", serviceTokenEnvVar, "error", err)
 			return nil
 		}
 		token = []byte(tkn)
@@ -88,9 +87,9 @@ func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 	if caCert, err := ioutil.ReadFile(serviceAccountCAFile); err == nil {
 		kt.CACert = caCert
 	} else {
-		log.Warnf("Unable to load Kubernetes CA certificate - API server TLS verification disabled. %v", err)
+		slog.Warn("unable to load the Kubernetes CA certificate, API server TLS verification is disabled", "file", serviceAccountCAFile, "error", err)
 	}
 
-	log.Debug("Kubernetes Terminal configured")
+	slog.Debug("Kubernetes Terminal configured", "apiServer", kt.APIServer, "namespace", kt.Namespace, "image", kt.Image)
 	return kt
 }
