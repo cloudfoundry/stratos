@@ -633,20 +633,39 @@ define ensure_golangci_lint
 		   github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))
 endef
 
+# Every Go module in the backend, discovered rather than listed: the plugins
+# are separate modules, and naming them by hand is how five of the seven came
+# to be linted by nothing at all.
+GO_MODULES = $(shell find src/jetstream -name go.mod -not -path "*/node_modules/*" -exec dirname {} \;)
+
+# go_check_all runs the Go checks over every module. It is shared by lint and
+# gate: gate has to run the Go linters too (its own summary line has always
+# claimed it did), but bun run gate-check already covers ESLint, so only this
+# half is common to both.
+define go_check_all
+	@for m in $(GO_MODULES); do \
+		echo "==> $$m"; \
+		(cd $$m && go fmt ./... && go vet ./... && $(GOLANGCI_LINT) run ./...) || exit 1; \
+	done
+endef
+
 define check.lint
 	@echo "Running lint checks..."
 	$(ensure_golangci_lint)
 	bun run lint
-	cd src/jetstream && go fmt ./... && go vet ./...
-	cd src/jetstream && $(GOLANGCI_LINT) run ./...
-	cd src/jetstream/api && $(GOLANGCI_LINT) run ./...
+	$(go_check_all)
 endef
 $(call register, check, lint)
 
 define check.gate
 	@echo "Running gate checks (lint + unit tests + production build)..."
+	$(ensure_golangci_lint)
 	bun run gate-check
-	cd src/jetstream && go test ./... -v -count=1
+	$(go_check_all)
+	@for m in $(GO_MODULES); do \
+		echo "==> test $$m"; \
+		(cd $$m && go test ./... -count=1) || exit 1; \
+	done
 endef
 $(call register, check, gate)
 
