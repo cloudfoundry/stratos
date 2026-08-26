@@ -234,7 +234,7 @@ func getScriptFolder() string {
 		return scripts
 	}
 
-	scripts = filepath.Join(dir, "plugins±", "analysis", "container", "scripts")
+	scripts = filepath.Join(dir, "plugins", "analysis", "container", "scripts")
 	if _, err := os.Stat(scripts); !os.IsNotExist(err) {
 		return scripts
 	}
