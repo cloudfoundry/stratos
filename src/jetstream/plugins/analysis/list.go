@@ -192,9 +192,11 @@ func (c *Analysis) deleteReports(ec *echo.Context) error {
 			client := &http.Client{Timeout: 30 * time.Second}
 			rsp, err := client.Do(r)
 			if err != nil {
-				slog.Warn("could not delete the analysis report", "report", job.ID, "url", deleteURL, "error", err)
+				slog.Warn("the request to delete the analysis report failed",
+					"report", job.ID, "url", deleteURL, "error", err)
 			} else if rsp.StatusCode != http.StatusOK {
-				slog.Warn("could not delete the analysis report", "report", job.ID, "url", deleteURL, "status", rsp.StatusCode)
+				slog.Warn("the analysis server refused to delete the report",
+					"report", job.ID, "url", deleteURL, "status", rsp.StatusCode)
 			}
 		}
 		if err := dbStore.Delete(userID, id); err != nil {

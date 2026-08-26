@@ -4,21 +4,21 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log/slog"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 func (a *Analyzer) status(ec *echo.Context) error {
 	err := a.doStatus(ec)
 	if err != nil {
-		log.Error(err)
+		slog.Error("the analysis status request failed", "error", err)
 	}
 	return err
 }
 
 func (a *Analyzer) doStatus(ec *echo.Context) error {
-	log.Debug("Status")
+	slog.Debug("analysis status request")
 	req := ec.Request()
 
 	// Body contains an array of IDs that the client thinks are running
@@ -69,6 +69,7 @@ func (a *Analyzer) doStatus(ec *echo.Context) error {
 		delete(a.jobs, id)
 	}
 
-	ec.JSON(200, response)
-	return nil
+	// The encode error used to be discarded, so a failure to serialise the
+	// response was reported to the caller as a success.
+	return ec.JSON(200, response)
 }

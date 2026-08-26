@@ -3,17 +3,16 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func runKubeScore(job *AnalysisJob) error {
 
-	log.Debug("Running kube-score job")
+	slog.Debug("a kube-score job was requested", "job", job.ID)
 
 	job.Busy = true
 	job.Type = "kubescore"
@@ -24,7 +23,7 @@ func runKubeScore(job *AnalysisJob) error {
 	// guard here is defense-in-depth so a future caller that bypasses the
 	// multipart handler still can't splice shell syntax into the script.
 	if err := validateNamespace(job.Config.Namespace); err != nil {
-		log.Warnf("kubescore rejected invalid namespace: %v", err)
+		slog.Warn("kube-score rejected an invalid namespace", "job", job.ID, "error", err)
 		job.Status = "error"
 		return err
 	}
@@ -32,7 +31,7 @@ func runKubeScore(job *AnalysisJob) error {
 	scriptPath := filepath.Join(getScriptFolder(), "kubescore-runner.sh")
 	args := []string{scriptPath, job.KubeConfigPath, job.Config.Namespace}
 
-	log.Infof("Running kube score job: %s", job.Path)
+	slog.Info("running a kube-score job", "job", job.ID, "path", job.Path)
 
 	go func() {
 		// Use our custom script which is a wrapper around kubescore
@@ -45,22 +44,32 @@ func runKubeScore(job *AnalysisJob) error {
 		out, err := cmd.Output()
 		end := time.Now()
 
-		log.Infof("Completed kube score job: %s", job.Path)
-
 		// Remove any config files when done
 		job.RemoveTempFiles()
 
 		job.Duration = int(end.Sub(start).Seconds())
 
+		// The completion line used to be logged before err was checked, so a
+		// failed run still reported "Completed".
 		if err != nil {
 			// There was an error
 			// Remove the folder
-			os.Remove(job.Folder)
+			if removeErr := os.Remove(job.Folder); removeErr != nil {
+				slog.Warn("could not remove the folder of a failed kube-score job",
+					"job", job.ID, "folder", job.Folder, "error", removeErr)
+			}
 			job.Status = "error"
+			slog.Error("kube-score job failed",
+				"job", job.ID, "path", job.Path, "duration", job.Duration, "error", err)
 		} else {
 			reportFile := filepath.Join(job.Folder, "report.log")
-			ioutil.WriteFile(reportFile, out, os.ModePerm)
+			if writeErr := ioutil.WriteFile(reportFile, out, os.ModePerm); writeErr != nil {
+				slog.Error("could not write the kube-score report",
+					"job", job.ID, "file", reportFile, "error", writeErr)
+			}
 			job.Status = "completed"
+			slog.Info("completed kube-score job",
+				"job", job.ID, "path", job.Path, "duration", job.Duration)
 		}
 	}()
 
