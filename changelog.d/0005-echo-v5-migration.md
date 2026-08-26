@@ -14,3 +14,10 @@
   through Jetstream's own logger, so `LOG_LEVEL` applies to them. Setting
   a level above `info` suppresses them; they remain gated by
   `LOG_API_REQUESTS` as before.
+
+[Chores]
+- Jetstream now builds with Go 1.27. This required forking the
+  unmaintained `SermoDigital/jose`, reached through the CF CLI, which
+  registers an invalid hash id from an init function and panics before
+  `main` under 1.27. The fork is a stopgap until the CF CLI moves to a
+  maintained JWT library.
