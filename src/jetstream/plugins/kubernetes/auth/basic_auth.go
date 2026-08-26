@@ -4,10 +4,10 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -46,7 +46,7 @@ func (c *KubeBasicAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.To
 
 func (c *KubeBasicAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
 
-	log.Info("FetchToken")
+	slog.Debug("FetchToken (Basic Auth)", "endpoint", cnsiRecord.GUID)
 
 	username := ec.FormValue("username")
 	password := ec.FormValue("password")

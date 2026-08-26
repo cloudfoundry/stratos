@@ -1,12 +1,12 @@
 package auth
 
 import (
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -27,14 +27,14 @@ func (c *KubeTokenAuth) GetName() string {
 }
 
 func (c *KubeTokenAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
-	log.Debug("AddAuthInfo: KubeTokenAuth")
+	slog.Debug("AddAuthInfo: KubeTokenAuth", "token", tokenRec.TokenGUID)
 	// Just add the token in
 	info.Token = tokenRec.AuthToken
 	return nil
 }
 
 func (c *KubeTokenAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("FetchToken (KubeTokenAuth)")
+	slog.Debug("FetchToken (KubeTokenAuth)", "endpoint", cnsiRecord.GUID)
 	token := strings.Join(strings.Fields(ec.FormValue("token")), "")
 	tokenRecord := NewKubeTokenAuthTokenRecord(c.portalProxy, token)
 	return tokenRecord, &cnsiRecord, nil
@@ -47,7 +47,7 @@ func NewKubeTokenAuthTokenRecord(portalProxy api.PortalProxy, token string) *api
 }
 
 func (c *KubeTokenAuth) doTokenFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("K8S Token auth: doTokenFlowRequest")
+	slog.Debug("K8S Token auth: doTokenFlowRequest", "endpoint", cnsiRequest.GUID, "user", cnsiRequest.UserGUID)
 
 	authHandler := func(tokenRec api.TokenRecord, cnsi api.CNSIRecord) (*http.Response, error) {
 		// Token auth has no token refresh or expiry - so much simpler than the OAuth flow
@@ -67,7 +67,7 @@ func (c *KubeTokenAuth) RegisterJetstreamAuthType(portal api.PortalProxy) {
 }
 
 func (c *KubeTokenAuth) GetUserFromToken(cnsiGUID string, tokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
-	log.Debug("GetUserFromToken (KubeTokenAuth)")
+	slog.Debug("GetUserFromToken (KubeTokenAuth)", "endpoint", cnsiGUID, "token", tokenRecord.TokenGUID)
 
 	// See if we can get token info - if we can, use it
 	_, err := c.portalProxy.GetUserTokenInfo(tokenRecord.AuthToken)
@@ -77,7 +77,10 @@ func (c *KubeTokenAuth) GetUserFromToken(cnsiGUID string, tokenRecord *api.Token
 
 	parts := strings.Split(tokenRecord.AuthToken, ":")
 	if len(parts) != 2 {
-		log.Errorf("Could not get user information from token: %s", tokenRecord.TokenGUID)
+		// err is why the token info lookup above failed; it is the reason we
+		// fell back to splitting the raw token, so report it here.
+		slog.Error("could not get the user information from the token",
+			"endpoint", cnsiGUID, "token", tokenRecord.TokenGUID, "error", err)
 		return nil, false
 	}
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -11,7 +12,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/config"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -63,7 +63,7 @@ func (c *OIDCKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Tok
 }
 
 func (c *OIDCKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("FetchToken (OIDC)")
+	slog.Debug("FetchToken (OIDC)", "endpoint", cnsiRecord.GUID)
 
 	body := ec.FormValue("kubeconfig")
 	if len(body) == 0 {
@@ -93,8 +93,9 @@ func (c *OIDCKubeAuth) GetTokenFromKubeConfigUser(cnsiRecord api.CNSIRecord, kub
 
 	oidcConfig, err := c.GetOIDCConfig(kubeConfigUser)
 	if err != nil {
-		log.Info(err)
-		return nil, nil, errors.New("Can not unmarshal OIDC Auth Provider configuration")
+		// GetOIDCConfig has already logged the specific cause; wrap so it
+		// survives rather than reporting every failure as an unmarshal error.
+		return nil, nil, fmt.Errorf("could not read the OIDC auth provider configuration for endpoint %s: %w", cnsiRecord.GUID, err)
 	}
 	tokenRecord := c.portalProxy.InitEndpointTokenRecord(oidcConfig.Expiry.Unix(), oidcConfig.IDToken, oidcConfig.RefreshToken, false)
 	tokenRecord.AuthType = api.AuthTypeOIDC
@@ -117,7 +118,7 @@ func (c *OIDCKubeAuth) GetTokenFromKubeConfigUser(cnsiRecord api.CNSIRecord, kub
 
 // GetUserFromToken gets the username from the GKE Token
 func (c *OIDCKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
-	log.Debug("GetUserFromToken (OIDC)")
+	slog.Debug("GetUserFromToken (OIDC)", "endpoint", cnsiGUID, "token", tokenRecord.TokenGUID)
 	return c.portalProxy.GetCNSIUserFromOAuthToken(cnsiGUID, tokenRecord)
 }
 
@@ -130,14 +131,16 @@ func (c *OIDCKubeAuth) GetOIDCConfig(k *config.KubeConfigUser) (*KubeConfigAuthP
 	OIDCConfig := &KubeConfigAuthProviderOIDC{}
 	err := config.UnMarshalHelper(k.User.AuthProvider.Config, OIDCConfig)
 	if err != nil {
-		log.Info(err)
-		return nil, errors.New("can not unmarshal OIDC Auth Provider configuration")
+		const msg = "can not unmarshal the OIDC auth provider configuration"
+		slog.Error(msg, "kubeConfigUser", k.Name, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	claims, err := jwtClaims([]byte(OIDCConfig.IDToken))
 	if err != nil {
-		log.Info(err)
-		return nil, errors.New("can not parse JWT Access token")
+		const msg = "can not parse the OIDC JWT access token"
+		slog.Error(msg, "kubeConfigUser", k.Name, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	expiry_string, ok := claims["exp"].(string)
@@ -156,7 +159,7 @@ func (c *OIDCKubeAuth) GetOIDCConfig(k *config.KubeConfigUser) (*KubeConfigAuthP
 }
 
 func (c *OIDCKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("DoFlowRequest (OIDC)")
+	slog.Debug("DoFlowRequest (OIDC)", "endpoint", cnsiRequest.GUID, "user", cnsiRequest.UserGUID)
 	return c.portalProxy.DoOidcFlowRequest(cnsiRequest, req)
 }
 
