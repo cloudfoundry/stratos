@@ -135,7 +135,7 @@ func setWithProperType(valueKind reflect.Kind, val string, structField reflect.V
 	}
 
 	switch valueKind {
-	case reflect.Ptr:
+	case reflect.Pointer:
 		return setWithProperType(structField.Elem().Kind(), val, structField.Elem())
 	case reflect.Int:
 		return setIntField(val, 0, structField)
@@ -173,7 +173,7 @@ func setWithProperType(valueKind reflect.Kind, val string, structField reflect.V
 
 func unmarshalField(valueKind reflect.Kind, val string, field reflect.Value) (bool, error) {
 	switch valueKind {
-	case reflect.Ptr:
+	case reflect.Pointer:
 		return unmarshalFieldPtr(val, field)
 	default:
 		return unmarshalFieldNonPtr(val, field)

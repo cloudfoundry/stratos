@@ -39,10 +39,10 @@ var wsOriginPatterns []string
 func SetWebSocketAllowedOrigins(origins []string) {
 	patterns := make([]string, 0, len(origins))
 	for _, o := range origins {
-		switch {
-		case o == "":
+		switch o {
+		case "":
 			continue
-		case o == "*":
+		case "*":
 			patterns = append(patterns, "*")
 		default:
 			if u, err := url.Parse(o); err == nil && u.Host != "" {
@@ -127,12 +127,12 @@ func upgradeToWebSocket(echoContext *echo.Context, enforcePong bool) (*websocket
 				if enforcePong && missedPongs > maxMissedPongs {
 					slog.Debug("WebSocket peer stopped answering pings, closing the connection",
 						"missedPongs", missedPongs)
-					clientWebSocket.CloseNow()
+					_ = clientWebSocket.CloseNow()
 					return
 				}
 			default:
 				// The ping could not be written - the connection is dead
-				clientWebSocket.CloseNow()
+				_ = clientWebSocket.CloseNow()
 				return
 			}
 		}

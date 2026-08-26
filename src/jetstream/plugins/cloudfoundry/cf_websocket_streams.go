@@ -41,7 +41,7 @@ func (c *CloudFoundrySpecification) commonStreamHandler(echoContext *echo.Contex
 	if err != nil {
 		return err
 	}
-	defer clientWebSocket.CloseNow()
+	defer func() { _ = clientWebSocket.CloseNow() }()
 
 	// Drain and discard incoming messages from the WebSocket client,
 	// effectively making our WebSocket read-only; the standing read also

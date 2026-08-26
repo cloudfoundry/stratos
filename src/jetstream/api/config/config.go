@@ -105,7 +105,7 @@ var urlType *url.URL
 func Load(intf interface{}, envLookup env.Lookup) error {
 	value := reflect.ValueOf(intf)
 
-	if value.Kind() != reflect.Ptr {
+	if value.Kind() != reflect.Pointer {
 		return errors.New("config: must provide pointer to struct value")
 	}
 
