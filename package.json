@@ -222,7 +222,7 @@
     "ps-node": "0.1.6",
     "q": "^1.5.1",
     "sass": "^1.101.7",
-    "sass-loader": "^13.3.3",
+    "sass-loader": "^17.0.0",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.65.0",
