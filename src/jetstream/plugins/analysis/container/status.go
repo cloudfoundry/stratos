@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log/slog"
 
 	"github.com/labstack/echo/v5"
@@ -25,8 +25,8 @@ func (a *Analyzer) doStatus(ec *echo.Context) error {
 	// We send back updated status for each
 
 	// Get the list of IDs
-	defer req.Body.Close()
-	body, err := ioutil.ReadAll(req.Body)
+	defer func() { _ = req.Body.Close() }()
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		return errors.New("Could not read body")
 	}

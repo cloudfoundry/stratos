@@ -2,8 +2,8 @@ package terminal
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log/slog"
+	"os"
 
 	jetstream_api "github.com/cloudfoundry/stratos/src/jetstream/api"
 	jetstream_config "github.com/cloudfoundry/stratos/src/jetstream/api/config"
@@ -68,7 +68,7 @@ func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 	kt.APIServer = fmt.Sprintf("https://%s:%s", host, port)
 
 	// Read the Service Account Token
-	token, err := ioutil.ReadFile(serviceAccountTokenFile)
+	token, err := os.ReadFile(serviceAccountTokenFile)
 	if err != nil {
 		// Check env var
 		tkn, found := p.Env().Lookup(serviceTokenEnvVar)
@@ -84,7 +84,7 @@ func NewKubeTerminal(p jetstream_api.PortalProxy) *KubeTerminal {
 	// Read the in-cluster CA so the API server's certificate can be verified.
 	// Absent only in the env-var-token dev setup, which falls back to
 	// skipping verification.
-	if caCert, err := ioutil.ReadFile(serviceAccountCAFile); err == nil {
+	if caCert, err := os.ReadFile(serviceAccountCAFile); err == nil {
 		kt.CACert = caCert
 	} else {
 		slog.Warn("unable to load the Kubernetes CA certificate, API server TLS verification is disabled", "file", serviceAccountCAFile, "error", err)

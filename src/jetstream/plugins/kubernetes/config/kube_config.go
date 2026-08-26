@@ -160,7 +160,7 @@ func UnMarshalHelper(values map[string]interface{}, intf interface{}) error {
 
 	value := reflect.ValueOf(intf)
 
-	if value.Kind() != reflect.Ptr {
+	if value.Kind() != reflect.Pointer {
 		return errors.New("config: must provide pointer to struct value")
 	}
 

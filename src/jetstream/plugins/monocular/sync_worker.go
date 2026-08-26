@@ -39,7 +39,7 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 		return fmt.Errorf("Could not download Helm Repository Index: %s", resp.Status)
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Marshal to the index structure
 	var index IndexFile

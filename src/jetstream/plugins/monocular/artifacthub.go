@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"os"
 	"path"
@@ -74,8 +74,6 @@ type ahInfo struct {
 	Maintainers       []ChartMaintainer `json:"maintainers"`
 }
 
-type ahVersions []ahVersion
-
 // Look to see if the request is for ArtifactHub - if it is, invoke the specified request handler
 func (m *Monocular) handleArtifactRequest(c *echo.Context, handler artifactHubHandler) (bool, error) {
 	externalMonocularEndpoint, err := m.isExternalMonocularRequest(c)
@@ -106,7 +104,7 @@ func (m *Monocular) fetchChartsFromArtifactHub(c *echo.Context, endpointID strin
 	if err != nil {
 		return err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("Error retrieving Helm Chart list from ArtifactHub - %d:%s", resp.StatusCode, resp.Status)
@@ -153,7 +151,9 @@ func (m *Monocular) fetchChartsFromArtifactHub(c *echo.Context, endpointID strin
 	// Cache this response on disk, so next time we use it again
 	if err := m.ensureFolder(cacheFolder); err == nil {
 		if json, err := json.Marshal(response); err == nil {
-			ioutil.WriteFile(indexFile, json, 0644)
+			if err := os.WriteFile(indexFile, json, 0644); err != nil {
+				slog.Warn("could not cache the Artifact Hub index", "path", indexFile, "error", err)
+			}
 		}
 	}
 
@@ -230,7 +230,7 @@ func (m *Monocular) artifactHubGetChartVersion(c *echo.Context, endpointID strin
 		return err
 	}
 
-	chartURL, err := ioutil.ReadFile(path.Join(cacheFolder, "chart_url"))
+	chartURL, err := os.ReadFile(path.Join(cacheFolder, "chart_url"))
 	if err != nil {
 		return err
 	}
@@ -369,7 +369,7 @@ func (m *Monocular) artifactHubGetIcon(c *echo.Context) error {
 		if len(hubInfo.IconID) == 0 {
 			out, err := os.Create(iconFilePath)
 			if err == nil {
-				out.Close()
+				_ = out.Close()
 			}
 			return sendPlaceHolderIcon(c)
 		}
@@ -386,7 +386,9 @@ func (m *Monocular) artifactHubGetIcon(c *echo.Context) error {
 		}
 
 		// Write out the content type
-		ioutil.WriteFile(iconTypeFilePath, []byte(contentType), 0644)
+		if err := os.WriteFile(iconTypeFilePath, []byte(contentType), 0644); err != nil {
+			slog.Warn("could not cache the chart icon content type", "path", iconTypeFilePath, "error", err)
+		}
 	}
 
 	// If the file is 0 length
@@ -396,19 +398,19 @@ func (m *Monocular) artifactHubGetIcon(c *echo.Context) error {
 
 	// Read the content type
 	if len(contentType) == 0 {
-		if data, err := ioutil.ReadFile(iconTypeFilePath); err == nil {
+		if data, err := os.ReadFile(iconTypeFilePath); err == nil {
 			contentType = string(data)
 		}
 	}
 
-	iconFile, err := ioutil.ReadFile(iconFilePath)
+	iconFile, err := os.ReadFile(iconFilePath)
 	if err != nil {
 		return sendPlaceHolderIcon(c)
 	}
 	c.Response().Header().Set("Content-Type", contentType)
-	c.Response().Write(iconFile)
+	_, err = c.Response().Write(iconFile)
 
-	return nil
+	return err
 }
 
 func sendPlaceHolderIcon(c *echo.Context) error {
@@ -439,7 +441,7 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 		// Just use the cached file
 		f, err := os.Open(indexFile)
 		if err == nil {
-			defer f.Close()
+			defer func() { _ = f.Close() }()
 			reader = f
 			fetch = false
 		}
@@ -452,7 +454,7 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 		if err != nil {
 			return nil, err
 		}
-		defer resp.Body.Close()
+		defer func() { _ = resp.Body.Close() }()
 
 		if resp.StatusCode != http.StatusOK {
 			return nil, fmt.Errorf("Error retrieving Helm Chart info from ArtifactHub - %d:%s", resp.StatusCode, resp.Status)
@@ -470,7 +472,9 @@ func (m *Monocular) artifactHubGetPackageInfo(endpointID, repo, name, version st
 	if fetch {
 		if err := m.ensureFolder(cacheFolder); err == nil {
 			if json, err := json.Marshal(result); err == nil {
-				ioutil.WriteFile(indexFile, json, 0644)
+				if err := os.WriteFile(indexFile, json, 0644); err != nil {
+					slog.Warn("could not cache the Artifact Hub index", "path", indexFile, "error", err)
+				}
 			}
 		}
 	}
@@ -502,7 +506,9 @@ func (m *Monocular) artifactHubCacheChartFiles(endpointID, repoName, repoURL, na
 	}
 
 	// Write the chart URL to a file as well, so we don't have to do this again
-	ioutil.WriteFile(path.Join(cacheFolder, "chart_url"), []byte(chartURL), 0644)
+	if err := os.WriteFile(path.Join(cacheFolder, "chart_url"), []byte(chartURL), 0644); err != nil {
+		slog.Warn("could not cache the chart URL", "folder", cacheFolder, "error", err)
+	}
 	return cacheFolder, nil
 }
 
@@ -513,7 +519,7 @@ func useCachedFile(file string) bool {
 		expiryTime := stats.ModTime().Add(hubCacheExpiry)
 		if expiryTime.Before(time.Now()) {
 			// Delete the file
-			os.Remove(file)
+			_ = os.Remove(file)
 		} else {
 			return true
 		}
@@ -545,7 +551,7 @@ func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
 		return "", fmt.Errorf("Could not download Helm Repository Index: %s", resp.Status)
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Marshal to the index structure
 	var index IndexFile

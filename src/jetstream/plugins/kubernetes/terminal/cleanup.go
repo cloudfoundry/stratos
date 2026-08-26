@@ -46,7 +46,9 @@ func (k *KubeTerminal) cleanup() {
 							isValid, err := k.PortalProxy.GetSessionDataStore().IsValidSession(i)
 							if err == nil && !isValid {
 								slog.Debug("deleting a stale Kubernetes Terminal pod", "pod", pod.Name, "namespace", k.Namespace, "session", i)
-								podClient.Delete(ctx, pod.Name, metaV1.DeleteOptions{})
+								if err := podClient.Delete(ctx, pod.Name, metaV1.DeleteOptions{}); err != nil {
+									slog.Warn("could not delete a stale Kubernetes Terminal pod", "pod", pod.Name, "namespace", k.Namespace, "session", i, "error", err)
+								}
 							}
 						}
 					}
@@ -65,7 +67,9 @@ func (k *KubeTerminal) cleanup() {
 							isValid, err := k.PortalProxy.GetSessionDataStore().IsValidSession(i)
 							if err == nil && !isValid {
 								slog.Debug("deleting a stale Kubernetes Terminal secret", "secret", secret.Name, "namespace", k.Namespace, "session", i)
-								secretClient.Delete(ctx, secret.Name, metaV1.DeleteOptions{})
+								if err := secretClient.Delete(ctx, secret.Name, metaV1.DeleteOptions{}); err != nil {
+									slog.Warn("could not delete a stale Kubernetes Terminal secret", "secret", secret.Name, "namespace", k.Namespace, "session", i, "error", err)
+								}
 							}
 						}
 					}

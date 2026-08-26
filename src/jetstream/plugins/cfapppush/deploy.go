@@ -106,7 +106,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	// message, so no read limit can be safely applied to this socket
 	clientWebSocket.SetReadLimit(-1)
 	readCtx := echoContext.Request().Context()
-	defer clientWebSocket.CloseNow()
+	defer func() { _ = clientWebSocket.CloseNow() }()
 
 	// We use a simple protocol to get the source to use for cf push and any cf push cli overrides
 
@@ -135,7 +135,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 		return err
 	}
 
-	defer os.RemoveAll(tempDir)
+	defer func() { _ = os.RemoveAll(tempDir) }()
 
 	var appDir string
 	var stratosProject StratosProject
@@ -290,7 +290,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	}
 
 	// Close the web socket
-	clientWebSocket.Close(websocket.StatusNormalClosure, "")
+	_ = clientWebSocket.Close(websocket.StatusNormalClosure, "")
 
 	return nil
 }
@@ -385,7 +385,7 @@ func getFolderSource(readCtx context.Context, clientWebSocket *websocket.Conn, t
 		slog.Debug("cf push: checking whether the single uploaded file is an archive", "file", lastFilePath)
 
 		// Overwrite generic 'filefolder' type
-		info.DeploySource.SourceType = "archive"
+		info.SourceType = "archive"
 
 		slog.Debug("cf push: unpacking the archive", "file", lastFilePath)
 		unpackPath := filepath.Join(tempDir, "application")

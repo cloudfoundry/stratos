@@ -18,7 +18,7 @@ func unarchive(src, dst string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	ctx := context.Background()
 	format, input, err := archives.Identify(ctx, src, f)
@@ -69,7 +69,7 @@ func unarchive(src, dst string) error {
 				// matters more, but a failed close is still worth surfacing
 				return errors.Join(err, out.Close())
 			}
-			defer in.Close()
+			defer func() { _ = in.Close() }()
 			_, err = io.Copy(out, in)
 			// Close errors on a written file can mean lost data - don't drop them
 			if closeErr := out.Close(); err == nil {

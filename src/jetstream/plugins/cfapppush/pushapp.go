@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"strconv"
 	"strings"
 
@@ -14,7 +15,6 @@ import (
 	"code.cloudfoundry.org/cli/v8/actor/v7action"
 	"code.cloudfoundry.org/cli/v8/actor/v7pushaction"
 	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccversion"
-	"code.cloudfoundry.org/cli/v8/cf/commandregistry"
 	"code.cloudfoundry.org/cli/v8/command"
 	"code.cloudfoundry.org/clock"
 
@@ -23,8 +23,6 @@ import (
 	"code.cloudfoundry.org/cli/v8/util/progressbar"
 	"code.cloudfoundry.org/cli/v8/util/ui"
 	"github.com/coder/websocket"
-
-	"code.cloudfoundry.org/cli/v8/cf/flags"
 
 	"code.cloudfoundry.org/cli/v8/command/flag"
 	"code.cloudfoundry.org/cli/v8/command/translatableerror"
@@ -37,8 +35,6 @@ import (
 // CFPushApp abstracts the push functionality form the CLI library
 type CFPushApp struct {
 	pushCommand *v7.PushCommand
-	flagContext flags.FlagContext
-	deps        commandregistry.Dependency
 	config      *CFPushAppConfig
 	portalProxy api.PortalProxy
 }
@@ -107,7 +103,6 @@ type CFPush interface {
 
 // PushError is the return error type from pushing
 type PushError struct {
-	error
 	Type ErrorType
 	Err  error
 }
@@ -376,7 +371,10 @@ func generateTranslationFunc(rawTranslation []byte) (ui.TranslateFunc, error) {
 
 		var buffer bytes.Buffer
 		formattedTemplate := template.Must(template.New("Display Text").Parse(translated))
-		formattedTemplate.Execute(&buffer, keys)
+		if err := formattedTemplate.Execute(&buffer, keys); err != nil {
+			slog.Warn("could not render a display string", "translationID", translationID, "error", err)
+			return translated
+		}
 
 		return buffer.String()
 	}, nil

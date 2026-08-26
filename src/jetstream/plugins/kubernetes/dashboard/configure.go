@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -163,10 +163,10 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 		return fmt.Errorf("Could not download YAML to install the dashboard: %s", resp.Status)
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Read the entire body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("Could not read YAML to install the dashboard: %s", err.Error())
 	}
@@ -195,7 +195,7 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 
 		if isClusterAPI(info.Kind) {
 			if info.Kind == "Namespace" {
-				resource = fmt.Sprintf("api/v1/namespaces")
+				resource = "api/v1/namespaces"
 			} else {
 				resource = fmt.Sprintf("%s/%ss", api, strings.ToLower(info.Kind))
 			}
@@ -210,7 +210,7 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 
 		if response.StatusCode != 201 {
 			// Don't fail if creation of a cluster-level resoures fails beacuse it already exists
-			if !(response.StatusCode == 409 && isClusterAPI(info.Kind)) {
+			if response.StatusCode != 409 || !isClusterAPI(info.Kind) {
 				return fmt.Errorf("Unable to delete %s - unexpected response from API: %d", info.Kind, response.StatusCode)
 			}
 		}
@@ -234,11 +234,12 @@ func DeleteDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 		// Don't wory if this fails, it will get deleted when the namespace is deleted
 		// We delete it here specifically so we know that it has gone since this is what we use
 		// to determine if the Dashboard is installed
-		p.DoProxySingleRequest(endpointGUID, userGUID, "DELETE", svcTarget, nil, nil)
+		_, _ = p.DoProxySingleRequest(endpointGUID, userGUID, "DELETE", svcTarget, nil, nil)
 	}
 
-	// Delete the service account
-	DeleteServiceAccount(p, endpointGUID, userGUID)
+	// Delete the service account. Best effort, as above: the namespace delete
+	// below removes it anyway.
+	_ = DeleteServiceAccount(p, endpointGUID, userGUID)
 
 	// Delete the namespace 'kubernetes-dashboard'
 	target := "api/v1/namespaces/kubernetes-dashboard?propagationPolicy=Background"

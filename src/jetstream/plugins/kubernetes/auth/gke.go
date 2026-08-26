@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log/slog"
 	"net/http"
 	"net/url"
@@ -178,8 +178,8 @@ func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSe
 	}
 
 	// Parse the response
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
+	defer func() { _ = resp.Body.Close() }()
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return tokenInfo, err
 	}

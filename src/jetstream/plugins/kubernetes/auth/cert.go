@@ -135,11 +135,11 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 		dial := (&net.Dialer{
 			Timeout:   time.Duration(30) * time.Second,
 			KeepAlive: 30 * time.Second,
-		}).Dial
+		}).DialContext
 
 		sslTransport := &http.Transport{
 			Proxy:               http.ProxyFromEnvironment,
-			Dial:                dial,
+			DialContext:         dial,
 			TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: cnsi.SkipSSLValidation,

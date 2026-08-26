@@ -198,9 +198,8 @@ func hasAnnotation(annotations map[string]string, key, value string) bool {
 
 func tryDecodePodList(data []byte) (bool, v1.PodList, error) {
 	var pods v1.PodList
-	var err error
 
-	err = json.Unmarshal(data, &pods)
+	err := json.Unmarshal(data, &pods)
 	if err != nil {
 		return false, pods, err
 	}
@@ -209,9 +208,8 @@ func tryDecodePodList(data []byte) (bool, v1.PodList, error) {
 
 func tryDecodeServiceList(data []byte) (bool, v1.ServiceList, error) {
 	var svcs v1.ServiceList
-	var err error
 
-	err = json.Unmarshal(data, &svcs)
+	err := json.Unmarshal(data, &svcs)
 	if err != nil {
 		return false, svcs, err
 	}
@@ -220,9 +218,8 @@ func tryDecodeServiceList(data []byte) (bool, v1.ServiceList, error) {
 
 func tryDecodeServiceAccountList(data []byte) (bool, v1.ServiceAccountList, error) {
 	var svcAccounts v1.ServiceAccountList
-	var err error
 
-	err = json.Unmarshal(data, &svcAccounts)
+	err := json.Unmarshal(data, &svcAccounts)
 	if err != nil {
 		return false, svcAccounts, err
 	}
@@ -231,9 +228,8 @@ func tryDecodeServiceAccountList(data []byte) (bool, v1.ServiceAccountList, erro
 
 func tryDecodeSecrets(data []byte) (bool, v1.SecretList, error) {
 	var secrets v1.SecretList
-	var err error
 
-	err = json.Unmarshal(data, &secrets)
+	err := json.Unmarshal(data, &secrets)
 	if err != nil {
 		return false, secrets, err
 	}
@@ -244,6 +240,6 @@ func tryDecodeSecrets(data []byte) (bool, v1.SecretList, error) {
 // it and show a Stratos error message
 func sendErrorPage(c *echo.Context, msg string) error {
 	html := fmt.Sprintf("<html><body><stratos-error>%s</stratos-error></body></html>", msg)
-	c.Response().Write([]byte(html))
-	return nil
+	_, err := c.Response().Write([]byte(html))
+	return err
 }

@@ -67,8 +67,9 @@ func (k *KubernetesSpecification) kubeDashboardStatus(c *echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, writeErr := c.Response().Write(jsonString)
+
+	return writeErr
 }
 
 // Login to the kubernetes dashboard and then redirect to the UI
@@ -90,8 +91,9 @@ func (k *KubernetesSpecification) kubeDashboardCreateServiceAccount(c *echo.Cont
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{ \"created\": true }"))
-	return nil
+	_, writeErr := c.Response().Write([]byte("{ \"created\": true }"))
+
+	return writeErr
 }
 
 // Delete service account used for Dashboard access
@@ -106,8 +108,9 @@ func (k *KubernetesSpecification) kubeDashboardDeleteServiceAccount(c *echo.Cont
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{ \"deleted\": true }"))
-	return nil
+	_, writeErr := c.Response().Write([]byte("{ \"deleted\": true }"))
+
+	return writeErr
 }
 
 // Install dashboard in a cluster
@@ -122,8 +125,9 @@ func (k *KubernetesSpecification) kubeDashboardInstallDashboard(c *echo.Context)
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{ \"installation\": true }"))
-	return nil
+	_, writeErr := c.Response().Write([]byte("{ \"installation\": true }"))
+
+	return writeErr
 }
 
 // Delete dashboard in a cluster
@@ -138,6 +142,7 @@ func (k *KubernetesSpecification) kubeDashboardDeleteDashboard(c *echo.Context) 
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{ \"deleted\": true }"))
-	return nil
+	_, writeErr := c.Response().Write([]byte("{ \"deleted\": true }"))
+
+	return writeErr
 }

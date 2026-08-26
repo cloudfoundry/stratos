@@ -2,7 +2,7 @@ package monocular
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"io"
 	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -18,8 +18,8 @@ func (m *Monocular) getRepoStatuses(c *echo.Context) error {
 	// Get the list of endpoints we are looking at
 	// Need to extract the parameters from the request body
 	req := c.Request()
-	defer req.Body.Close()
-	body, err := ioutil.ReadAll(req.Body)
+	defer func() { _ = req.Body.Close() }()
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		const msg = "could not read the request body"
 		slog.Error(msg, "error", err)

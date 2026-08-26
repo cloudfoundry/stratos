@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"io/ioutil"
 	"log/slog"
 	"net/http"
 	"os"
@@ -77,7 +76,7 @@ func (a *Analyzer) deleteEndpoint(ec *echo.Context) error {
 	}
 
 	// Iterate over all user folders
-	items, err := ioutil.ReadDir(a.reportsDir)
+	items, err := os.ReadDir(a.reportsDir)
 	if err != nil {
 		// The read error used to be swallowed here, so the 500 the caller got
 		// never said which directory could not be listed.

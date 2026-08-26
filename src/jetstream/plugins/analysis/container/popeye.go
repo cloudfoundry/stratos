@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -79,7 +79,7 @@ func runPopeye(job *AnalysisJob) error {
 				"job", job.ID, "path", job.Path, "duration", job.Duration, "error", err)
 		} else {
 			reportFile := filepath.Join(job.Folder, "report.json")
-			if writeErr := ioutil.WriteFile(reportFile, out, os.ModePerm); writeErr != nil {
+			if writeErr := os.WriteFile(reportFile, out, os.ModePerm); writeErr != nil {
 				slog.Error("could not write the popeye report",
 					"job", job.ID, "file", reportFile, "error", writeErr)
 			}
@@ -107,9 +107,9 @@ func parsePopeyeReport(file string) (*popEyeSummary, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer jsonFile.Close()
+	defer func() { _ = jsonFile.Close() }()
 
-	data, err := ioutil.ReadAll(jsonFile)
+	data, err := io.ReadAll(jsonFile)
 	if err != nil {
 		return nil, err
 	}

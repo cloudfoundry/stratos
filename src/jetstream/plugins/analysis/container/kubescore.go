@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log/slog"
 	"os"
 	"os/exec"
@@ -68,7 +67,7 @@ func runKubeScore(job *AnalysisJob) error {
 				"job", job.ID, "path", job.Path, "duration", job.Duration, "error", err)
 		} else {
 			reportFile := filepath.Join(job.Folder, "report.log")
-			if writeErr := ioutil.WriteFile(reportFile, out, os.ModePerm); writeErr != nil {
+			if writeErr := os.WriteFile(reportFile, out, os.ModePerm); writeErr != nil {
 				slog.Error("could not write the kube-score report",
 					"job", job.ID, "file", reportFile, "error", writeErr)
 			}

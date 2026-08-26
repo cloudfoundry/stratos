@@ -212,23 +212,25 @@ func setResourcMetadata(metadata *metav1.ObjectMeta, sessionID string) {
 }
 
 // Cleanup the pod and secret
-func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) error {
+func (k *KubeTerminal) cleanupPodAndSecret(podData *PodCreationData) {
 	ctx := context.Background()
 	if podData == nil {
 		// Already been cleaned up
-		return nil
+		return
 	}
 
 	if len(podData.PodName) > 0 {
 		//captureBashHistory(podData)
-		podData.PodClient.Delete(ctx, podData.PodName, metav1.DeleteOptions{})
+		if err := podData.PodClient.Delete(ctx, podData.PodName, metav1.DeleteOptions{}); err != nil {
+			slog.Warn("could not delete the Kubernetes Terminal pod", "pod", podData.PodName, "error", err)
+		}
 	}
 
 	if len(podData.SecretName) > 0 {
-		podData.SecretClient.Delete(ctx, podData.SecretName, metav1.DeleteOptions{})
+		if err := podData.SecretClient.Delete(ctx, podData.SecretName, metav1.DeleteOptions{}); err != nil {
+			slog.Warn("could not delete the Kubernetes Terminal secret", "secret", podData.SecretName, "error", err)
+		}
 	}
-
-	return nil
 }
 
 func getHelmRepoSetupScript(portalProxy api.PortalProxy) string {
@@ -276,7 +278,7 @@ func (k *KubeTerminal) getKubeVersion(endpointID, userID string) (string, error)
 	if len(nodes.Items) > 0 {
 		// Get the version number - remove any 'v' perfix or '+' suffix
 		version := nodes.Items[0].Status.NodeInfo.KubeletVersion
-		reg, err := regexp.Compile("[^0-9\\.]+")
+		reg, err := regexp.Compile(`[^0-9.]+`)
 		if err == nil {
 			version = reg.ReplaceAllString(version, "")
 		}

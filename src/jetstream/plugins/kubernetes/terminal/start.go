@@ -71,7 +71,7 @@ func (k *KubeTerminal) Start(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	defer ws.CloseNow()
+	defer func() { _ = ws.CloseNow() }()
 
 	// A pasted block of text arrives as a single KeyCode message of unbounded
 	// size, so no read limit can be safely applied to this socket
@@ -132,7 +132,7 @@ func (k *KubeTerminal) Start(c *echo.Context) error {
 	})
 
 	if err == nil {
-		defer wsConn.CloseNow()
+		defer func() { _ = wsConn.CloseNow() }()
 		// Terminal output from the API server can arrive in arbitrarily large
 		// messages - this is a trusted upstream, so no read limit
 		wsConn.SetReadLimit(-1)
@@ -155,20 +155,26 @@ func (k *KubeTerminal) Start(c *echo.Context) error {
 			k.cleanupPodAndSecret(podData)
 			podData = nil
 
-			wsConn.CloseNow()
-			ws.Close(websocket.StatusNormalClosure, "")
+			_ = wsConn.CloseNow()
+			_ = ws.Close(websocket.StatusNormalClosure, "")
 
 			// No point returning an error - we've already upgraded to web sockets, so we can't use the HTTP response now
 			return nil
 		}
 
 		res := KeyCode{}
-		json.Unmarshal(r, &res)
+		if err := json.Unmarshal(r, &res); err != nil {
+			// Zero-valued res would otherwise be sent on as an empty keystroke
+			slog.Warn("Kubernetes Terminal could not parse a client message", "endpoint", endpointGUID, "user", userGUID, "error", err)
+			continue
+		}
 		if res.Cols == 0 {
 			slice := make([]byte, 1)
 			slice[0] = 0
 			slice = append(slice, []byte(res.Key)...)
-			api.WriteText(wsConn, slice)
+			if err := api.WriteText(wsConn, slice); err != nil {
+				slog.Warn("Kubernetes Terminal could not forward a keystroke", "endpoint", endpointGUID, "user", userGUID, "error", err)
+			}
 		} else {
 			size := terminalSize{
 				Width:  uint16(res.Cols),
@@ -177,7 +183,9 @@ func (k *KubeTerminal) Start(c *echo.Context) error {
 			j, _ := json.Marshal(size)
 			resizeStream := []byte{4}
 			slice := append(resizeStream, j...)
-			api.WriteText(wsConn, slice)
+			if err := api.WriteText(wsConn, slice); err != nil {
+				slog.Warn("Kubernetes Terminal could not forward a resize", "endpoint", endpointGUID, "user", userGUID, "error", err)
+			}
 		}
 	}
 }
@@ -187,7 +195,7 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn) {
 		_, r, err := source.Read(context.Background())
 		if err != nil {
 			// Close - unblocks the client read loop so it cleans up the pod
-			ws.CloseNow()
+			_ = ws.CloseNow()
 			break
 		}
 		if len(r) == 0 {
@@ -198,7 +206,7 @@ func pumpStdout(ws *websocket.Conn, source *websocket.Conn) {
 		bytes := fmt.Sprintf("% x\n", r[1:])
 		if err := api.WriteText(ws, []byte(bytes)); err != nil {
 			slog.Error("Kubernetes Terminal failed to write a message to the client", "error", err)
-			ws.CloseNow()
+			_ = ws.CloseNow()
 			break
 		}
 	}

@@ -317,7 +317,7 @@ func (r *HelmRelease) UpdatePods(jetstream api.PortalProxy) {
 // are created as part of the Deployment resource
 // Look through the pod and add the ReplicaSets to the manifest
 func (r *HelmRelease) processPodOwners(pod v1.Pod) {
-	for _, owner := range pod.ObjectMeta.OwnerReferences {
+	for _, owner := range pod.OwnerReferences {
 		if owner.Kind == "ReplicaSet" {
 			// This is an incompelte ReplicaSet, but enough for us to use to go get more metadata
 			resource := appsv1.ReplicaSet{}
