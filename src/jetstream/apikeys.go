@@ -2,17 +2,17 @@ package main
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 func (p *portalProxy) checkIfAPIKeysEnabled(userGUID string) error {
 	switch p.Config.APIKeysEnabled {
 	case config.APIKeysConfigEnum.Disabled:
-		log.Info("API keys are disabled")
+		slog.Info("API keys are disabled", "user", userGUID)
 		return errors.New("API keys are disabled")
 	case config.APIKeysConfigEnum.AdminOnly:
 		user, err := p.StratosAuthService.GetUser(userGUID)
@@ -21,7 +21,7 @@ func (p *portalProxy) checkIfAPIKeysEnabled(userGUID string) error {
 		}
 
 		if !user.Admin {
-			log.Info("API keys are disabled for non-admin users")
+			slog.Info("API keys are disabled for non-admin users", "user", userGUID)
 			return errors.New("API keys are disabled for non-admin users")
 		}
 	}
@@ -30,7 +30,7 @@ func (p *portalProxy) checkIfAPIKeysEnabled(userGUID string) error {
 }
 
 func (p *portalProxy) addAPIKey(c *echo.Context) error {
-	log.Debug("addAPIKey")
+	slog.Debug("addAPIKey")
 
 	userGUID := c.Get("user_id").(string)
 	comment := c.FormValue("comment")
@@ -45,7 +45,7 @@ func (p *portalProxy) addAPIKey(c *echo.Context) error {
 
 	apiKey, err := p.APIKeysRepository.AddAPIKey(userGUID, comment)
 	if err != nil {
-		log.Errorf("Error adding API key: %v", err)
+		slog.Error("error adding an API key", "user", userGUID, "error", err)
 		return errors.New("Error adding API key")
 	}
 
@@ -53,7 +53,7 @@ func (p *portalProxy) addAPIKey(c *echo.Context) error {
 }
 
 func (p *portalProxy) listAPIKeys(c *echo.Context) error {
-	log.Debug("listAPIKeys")
+	slog.Debug("listAPIKeys")
 
 	userGUID := c.Get("user_id").(string)
 
@@ -63,7 +63,7 @@ func (p *portalProxy) listAPIKeys(c *echo.Context) error {
 
 	apiKeys, err := p.APIKeysRepository.ListAPIKeys(userGUID)
 	if err != nil {
-		log.Errorf("Error listing API keys: %v", err)
+		slog.Error("error listing API keys", "user", userGUID, "error", err)
 		return errors.New("Error listing API keys")
 	}
 
@@ -71,7 +71,7 @@ func (p *portalProxy) listAPIKeys(c *echo.Context) error {
 }
 
 func (p *portalProxy) deleteAPIKey(c *echo.Context) error {
-	log.Debug("deleteAPIKey")
+	slog.Debug("deleteAPIKey")
 
 	userGUID := c.Get("user_id").(string)
 	keyGUID := c.FormValue("guid")
@@ -85,7 +85,7 @@ func (p *portalProxy) deleteAPIKey(c *echo.Context) error {
 	}
 
 	if err := p.APIKeysRepository.DeleteAPIKey(userGUID, keyGUID); err != nil {
-		log.Errorf("Error deleting API key: %v", err)
+		slog.Error("error deleting an API key", "user", userGUID, "key", keyGUID, "error", err)
 		return errors.New("Error deleting API key")
 	}
 

@@ -3,21 +3,21 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
 )
 
 func (p *portalProxy) DoOidcFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("DoOidcFlowRequest")
+	slog.Debug("DoOidcFlowRequest")
 
 	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOidcToken)
 	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
 func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("RefreshOidcToken")
+	slog.Debug("RefreshOidcToken", "endpoint", cnsiGUID, "user", userGUID)
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("info could not be found for user with GUID %s", userGUID)
@@ -37,7 +37,7 @@ func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUI
 			// not logged: struct and ClientSecret carry the OAuth client secret
 			// log.Info(metadata)
 			// log.Info(metadata.ClientSecret)
-			log.Infof("OIDC token refresh using client ID %s (client secret not logged)", metadata.ClientID)
+			slog.Info("OIDC token refresh (client secret not logged)", "clientID", metadata.ClientID)
 
 			if len(metadata.ClientID) > 0 {
 				client = metadata.ClientID

@@ -3,9 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v5"
 
@@ -56,7 +55,7 @@ func (p *portalProxy) GetStratosAuthService() api.StratosAuth {
 
 // login is used for both endpoint and direct UAA login
 func (p *portalProxy) login(c *echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *api.UAAResponse, u *api.JWTUserTokenInfo, err error) {
-	log.Debug("login")
+	slog.Debug("login")
 	if c.Request().Method == http.MethodGet {
 		code := c.QueryParam("code")
 		state := c.QueryParam("state")

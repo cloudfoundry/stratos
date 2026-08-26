@@ -3,13 +3,13 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
 )
 
 // refreshMutexes serializes concurrent RefreshOAuthToken calls for the same
@@ -38,7 +38,7 @@ func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *api.CNSIRequest, req *http.R
 			if got401 || expTime.Before(time.Now()) {
 				refreshedTokenRec, err := refreshOAuthTokenFunc(cnsi.SkipSSLValidation, cnsiRequest.GUID, cnsiRequest.UserGUID, cnsi.ClientId, cnsi.ClientSecret, cnsi.TokenEndpoint)
 				if err != nil {
-					log.Info(err)
+					slog.Info("could not refresh the token", "endpoint", cnsiRequest.GUID, "user", cnsiRequest.UserGUID, "error", err)
 					return nil, fmt.Errorf("couldn't refresh token for CNSI with GUID %s", cnsiRequest.GUID)
 				}
 				tokenRec = refreshedTokenRec
@@ -64,14 +64,14 @@ func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *api.CNSIRequest, req *http.R
 }
 
 func (p *portalProxy) DoOAuthFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("DoOAuthFlowRequest")
+	slog.Debug("DoOAuthFlowRequest")
 	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOAuthToken)
 	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 
 }
 
 func (p *portalProxy) getCNSIRequestRecords(r *api.CNSIRequest) (t api.TokenRecord, c api.CNSIRecord, err error) {
-	log.Debug("getCNSIRequestRecords")
+	slog.Debug("getCNSIRequestRecords")
 
 	var ok bool
 
@@ -132,37 +132,38 @@ func isTokenRejectedErr(err error) bool {
 }
 
 func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("refreshToken")
+	slog.Debug("refreshToken", "endpoint", cnsiGUID, "user", userGUID)
 	mu := refreshMutex(cnsiGUID, userGUID)
 	waitStart := time.Now()
 	mu.Lock()
 	defer mu.Unlock()
 	if waited := time.Since(waitStart); waited > 10*time.Millisecond {
-		log.Infof("[diag refresh] mutex acquired cnsi=%s user=%s waited=%s", cnsiGUID, userGUID, waited)
+		slog.Info("[diag refresh] mutex acquired", "endpoint", cnsiGUID, "user", userGUID, "waited", waited)
 	}
 
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
-		log.Warnf("[diag refresh] token record missing cnsi=%s user=%s", cnsiGUID, userGUID)
+		slog.Warn("[diag refresh] token record missing", "endpoint", cnsiGUID, "user", userGUID)
 		return t, fmt.Errorf("info could not be found for user with GUID %s", userGUID)
 	}
 
 	// Double-check: if another goroutine refreshed while we waited on the
 	// mutex, the stored token is already fresh — skip the UAA round-trip.
 	if userToken.TokenExpiry > 0 && time.Unix(userToken.TokenExpiry, 0).After(time.Now()) {
-		log.Infof("[diag refresh] SKIP — token already fresh cnsi=%s user=%s expiry=%d",
-			cnsiGUID, userGUID, userToken.TokenExpiry)
+		slog.Info("[diag refresh] SKIP - token already fresh",
+			"endpoint", cnsiGUID, "user", userGUID, "expiry", userToken.TokenExpiry)
 		return userToken, nil
 	}
 
-	log.Infof("[diag refresh] calling UAA cnsi=%s user=%s endpoint=%s has_refresh=%t",
-		cnsiGUID, userGUID, tokenEndpoint, userToken.RefreshToken != "")
+	slog.Info("[diag refresh] calling UAA",
+		"endpoint", cnsiGUID, "user", userGUID, "tokenEndpoint", tokenEndpoint,
+		"hasRefresh", userToken.RefreshToken != "")
 
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 
 	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, "")
 	if err != nil {
-		log.Warnf("[diag refresh] UAA call FAILED cnsi=%s user=%s err=%v", cnsiGUID, userGUID, err)
+		slog.Warn("[diag refresh] UAA call FAILED", "endpoint", cnsiGUID, "user", userGUID, "error", err)
 		// OAUTH TOKENS ONLY: this function is the OAuth refresh path, but it
 		// is reached for every stored token row regardless of auth type
 		// (startCNSITokenRefreshRoutines has no auth_type filter) — basic-auth
@@ -189,7 +190,7 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 				dead.TokenExpiry = now
 			}
 			if updErr := p.updateTokenAuth(userGUID, dead); updErr != nil {
-				log.Warnf("could not record rejected token for cnsi=%s user=%s: %v", cnsiGUID, userGUID, updErr)
+				slog.Warn("could not record the rejected token", "endpoint", cnsiGUID, "user", userGUID, "error", updErr)
 			}
 		}
 		// %w (not %v) so the underlying api.ErrHTTPRequest stays unwrappable —
@@ -200,7 +201,7 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 
 	u, err := p.GetUserTokenInfo(uaaRes.AccessToken)
 	if err != nil {
-		log.Warnf("[diag refresh] GetUserTokenInfo FAILED cnsi=%s user=%s err=%v", cnsiGUID, userGUID, err)
+		slog.Warn("[diag refresh] GetUserTokenInfo FAILED", "endpoint", cnsiGUID, "user", userGUID, "error", err)
 		return t, fmt.Errorf("could not get user token info from access token")
 	}
 
@@ -221,11 +222,12 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 	tokenRecord.TokenGUID = userToken.TokenGUID
 	err = p.updateTokenAuth(userGUID, tokenRecord)
 	if err != nil {
-		log.Warnf("[diag refresh] DB update FAILED cnsi=%s user=%s err=%v", cnsiGUID, userGUID, err)
+		slog.Warn("[diag refresh] DB update FAILED", "endpoint", cnsiGUID, "user", userGUID, "error", err)
 		return t, fmt.Errorf("couldn't update token: %v", err)
 	}
 
-	log.Infof("[diag refresh] UAA OK cnsi=%s user=%s new_expiry=%d has_new_refresh=%t",
-		cnsiGUID, userGUID, tokenRecord.TokenExpiry, tokenRecord.RefreshToken != "")
+	slog.Info("[diag refresh] UAA OK",
+		"endpoint", cnsiGUID, "user", userGUID, "newExpiry", tokenRecord.TokenExpiry,
+		"hasNewRefresh", tokenRecord.RefreshToken != "")
 	return tokenRecord, nil
 }

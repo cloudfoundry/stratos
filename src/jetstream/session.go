@@ -4,13 +4,13 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gorilla/sessions"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
@@ -65,7 +65,7 @@ func (p *portalProxy) NewSession(c *echo.Context) (*sessions.Session, error) {
 }
 
 func (p *portalProxy) GetSession(c *echo.Context) (*sessions.Session, error) {
-	log.Debug("getSession")
+	slog.Debug("getSession")
 	req := c.Request()
 	// If we have already got the session, it will be available on the echo Context
 	session := c.Get(jetStreamSessionContextKey)
@@ -83,7 +83,7 @@ func (p *portalProxy) GetSession(c *echo.Context) (*sessions.Session, error) {
 }
 
 func (p *portalProxy) GetSessionValue(c *echo.Context, key string) (interface{}, error) {
-	log.Debug("getSessionValue")
+	slog.Debug("getSessionValue", "key", key)
 	session, err := p.GetSession(c)
 	if err != nil {
 		return nil, err
@@ -99,7 +99,7 @@ func (p *portalProxy) GetSessionValue(c *echo.Context, key string) (interface{},
 }
 
 func (p *portalProxy) GetSessionInt64Value(c *echo.Context, key string) (int64, error) {
-	log.Debug("GetSessionInt64Value")
+	slog.Debug("GetSessionInt64Value", "key", key)
 	intf, err := p.GetSessionValue(c, key)
 	if err != nil {
 		return 0, err
@@ -109,7 +109,7 @@ func (p *portalProxy) GetSessionInt64Value(c *echo.Context, key string) (int64, 
 }
 
 func (p *portalProxy) GetSessionStringValue(c *echo.Context, key string) (string, error) {
-	log.Debug("GetSessionStringValue")
+	slog.Debug("GetSessionStringValue", "key", key)
 	intf, err := p.GetSessionValue(c, key)
 	if err != nil {
 		return "", err
@@ -119,7 +119,7 @@ func (p *portalProxy) GetSessionStringValue(c *echo.Context, key string) (string
 }
 
 func (p *portalProxy) SaveSession(c *echo.Context, session *sessions.Session) error {
-	log.Debug("SaveSession")
+	slog.Debug("SaveSession")
 	// Update the cached session and mark that it has been updated
 
 	// We're not calling the real session save, so we need to set the session expiry ourselves
@@ -151,8 +151,7 @@ func (p *portalProxy) writeSessionHook(c *echo.Context) func() {
 			if session, ok := sessionIntf.(*sessions.Session); ok {
 				err := p.SessionStore.Save(c.Request(), c.Response(), session)
 				if err != nil {
-					log.Error("Failed to save session")
-					log.Error(err)
+					slog.Error("Failed to save the session", "error", err)
 				}
 			}
 		}
@@ -160,10 +159,10 @@ func (p *portalProxy) writeSessionHook(c *echo.Context) func() {
 }
 
 func (p *portalProxy) setSessionValues(c *echo.Context, values map[string]interface{}) error {
-	log.Debug("setSessionValues")
+	slog.Debug("setSessionValues")
 	session, err := p.GetSession(c)
 	if err != nil {
-		log.Debug("No session - can not set session values")
+		slog.Debug("No session - can not set session values", "error", err)
 		return err
 	}
 
@@ -175,7 +174,7 @@ func (p *portalProxy) setSessionValues(c *echo.Context, values map[string]interf
 }
 
 func (p *portalProxy) unsetSessionValue(c *echo.Context, sessionKey string) error {
-	log.Debug("unsetSessionValues")
+	slog.Debug("unsetSessionValues", "key", sessionKey)
 	session, err := p.GetSession(c)
 	if err != nil {
 		return err
@@ -187,7 +186,7 @@ func (p *portalProxy) unsetSessionValue(c *echo.Context, sessionKey string) erro
 }
 
 func (p *portalProxy) clearSession(c *echo.Context) error {
-	log.Debug("clearSession")
+	slog.Debug("clearSession")
 	session, err := p.GetSession(c)
 	if err != nil {
 		return err
@@ -212,7 +211,7 @@ func (p *portalProxy) handleSessionExpiryHeader(c *echo.Context) error {
 	expOn, err := p.GetSessionValue(c, "expires_on")
 	if err != nil {
 		msg := "Could not get session expiry"
-		log.Error(msg+" - ", err)
+		slog.Error(msg, "error", err)
 		return echo.NewHTTPError(http.StatusInternalServerError, msg)
 	}
 	c.Response().Header().Set(sessionExpiresOnHeader, strconv.FormatInt(expOn.(time.Time).Unix(), 10))
@@ -247,7 +246,7 @@ func (p *portalProxy) ensureXSRFToken(c *echo.Context) {
 		sessionValues := make(map[string]interface{})
 		sessionValues[XSRFTokenSessionName] = token
 		if err := p.setSessionValues(c, sessionValues); err != nil {
-			log.Warnf("Unable to save XSRF token to session: %v", err)
+			slog.Warn("unable to save the XSRF token to the session", "error", err)
 		}
 	}
 
@@ -257,7 +256,7 @@ func (p *portalProxy) ensureXSRFToken(c *echo.Context) {
 }
 
 func (p *portalProxy) verifySession(c *echo.Context) error {
-	log.Debug("verifySession")
+	slog.Debug("verifySession")
 
 	p.StratosAuthService.BeforeVerifySession(c)
 
@@ -331,7 +330,7 @@ func (p *portalProxy) verifySession(c *echo.Context) error {
 }
 
 func (p *portalProxy) retrieveToken(c *echo.Context) error {
-	log.Debug("retrieveToken")
+	slog.Debug("retrieveToken")
 
 	p.StratosAuthService.BeforeVerifySession(c)
 
