@@ -457,7 +457,10 @@ $(call register, build, backend, $(_HIDE)gen-plugins)
 
 define test.backend
 	@echo "Running backend tests..."
-	cd src/jetstream && go test ./... -v -count=1
+	@for m in $(GO_MODULES); do \
+		echo "==> test $$m"; \
+		(cd $$m && go test ./... -v -count=1) || exit 1; \
+	done
 endef
 $(call register, test, backend)
 
@@ -645,7 +648,9 @@ GO_MODULES = $(shell find src/jetstream -name go.mod -not -path "*/node_modules/
 define go_check_all
 	@for m in $(GO_MODULES); do \
 		echo "==> $$m"; \
-		(cd $$m && go fmt ./... && go vet ./... && $(GOLANGCI_LINT) run ./...) || exit 1; \
+		(cd $$m && \
+		  { [ -z "$$(gofmt -l .)" ] || { echo "not gofmt-clean:"; gofmt -l .; false; }; } && \
+		  go vet ./... && $(GOLANGCI_LINT) run ./...) || exit 1; \
 	done
 endef
 
@@ -656,6 +661,7 @@ define check.lint
 	$(go_check_all)
 endef
 $(call register, check, lint)
+
 
 define check.gate
 	@echo "Running gate checks (lint + unit tests + production build)..."

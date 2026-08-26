@@ -195,6 +195,12 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: Setup Go
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
+        with:
+          go-version: ${{ env.GO_VERSION }}
+          cache-dependency-path: src/jetstream/go.sum
+
       - name: Setup Node.js
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -222,7 +228,10 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run linting
-        run: bun run lint
+        # `make check lint` is what runs locally: ESLint plus go fmt, go vet
+        # and golangci-lint over every backend module. Running `bun run lint`
+        # here instead left the Go linters out of CI entirely.
+        run: make check lint
 
   test-frontend:
     name: Frontend Tests
