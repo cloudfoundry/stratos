@@ -1,5 +1,14 @@
 version: "2"
 
+# golangci-lint caps its own output by default (max-same-issues 3,
+# max-issues-per-linter 50), which silently hides findings once a category
+# repeats: the plugin modules reported 119 findings while actually holding
+# many more. A capped report reads as "nearly clean" while the tail stays
+# invisible, so both caps are lifted.
+issues:
+  max-same-issues: 0
+  max-issues-per-linter: 0
+
 linters:
   settings:
     staticcheck:
