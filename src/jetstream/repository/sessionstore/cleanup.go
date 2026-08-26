@@ -1,9 +1,8 @@
 package sessionstore
 
 import (
+	"log/slog"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var defaultInterval = time.Minute * 5
@@ -37,7 +36,7 @@ func (s *Store) cleanup(interval time.Duration, quit <-chan struct{}, done chan<
 			return
 		case <-ticker.C:
 			if err := s.deleteExpired(); err != nil {
-				log.Warnf("sessionstore: unable to delete expired sessions: %v", err)
+				slog.Warn("sessionstore: unable to delete expired sessions", "error", err)
 			}
 		}
 	}

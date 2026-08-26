@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/govau/cf-common/env"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -40,12 +40,12 @@ func ParseCFEnvs(db *DatabaseConfig, env *env.VarSet) (bool, error) {
 	var vcapServices map[string][]VCAPService
 	err := json.Unmarshal([]byte(vcapServicesStr), &vcapServices)
 	if err != nil {
-		log.Warnf("Unable to convert %s env var into JSON. Error: %s", SERVICES_ENV, err)
+		slog.Warn("unable to convert the env var into JSON", "var", SERVICES_ENV, "error", err)
 		return false, nil
 	}
 
 	if len(vcapServices) == 0 {
-		log.Info("No DB configurations defined, will use SQLite")
+		slog.Info("No DB configurations defined, will use SQLite")
 		return false, nil
 	}
 	return findDatabaseConfig(vcapServices, db, env), nil
@@ -54,17 +54,17 @@ func ParseCFEnvs(db *DatabaseConfig, env *env.VarSet) (bool, error) {
 func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfig, env *env.VarSet) bool {
 	var service VCAPService
 	configs := findDatabaseConfigurations(vcapServices)
-	log.Infof("Found %d database service instances", len(configs))
+	slog.Info("Found database service instances", "count", len(configs))
 	for _, s := range configs {
 		// If only 1 db service, then use it
 		if len(configs) == 1 {
 			service = s
-			log.Infof("Using first database service instance: %s", service.Name)
+			slog.Info("Using the first database service instance", "service", service.Name)
 		} else {
 			// Use it if it has our service tag
 			if stringInSlice(STRATOS_TAG, s.Tags) {
 				service = s
-				log.Infof("Using tagged database service instance: %s", service.Name)
+				slog.Info("Using the tagged database service instance", "service", service.Name)
 			}
 		}
 	}
@@ -73,7 +73,7 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 	if len(service.Name) > 0 {
 		dbCredentials := service.Credentials
 
-		log.Infof("Attempting to apply Cloud Foundry database service config from VCAP_SERVICES credentials")
+		slog.Info("Attempting to apply Cloud Foundry database service config from VCAP_SERVICES credentials")
 
 		// 1) Check db config in credentials
 		db.Username = getDBCredentialsValue(dbCredentials["username"])
@@ -92,64 +92,66 @@ func findDatabaseConfig(vcapServices map[string][]VCAPService, db *DatabaseConfi
 				db.Database = getDBCredentialsValue(dbCredentials["dbname"])
 			}
 			if db.SSLMode == string(SSLVerifyCA) {
-				log.Infof("Attempting to use SSL for database connection")
+				slog.Info("Attempting to use SSL for the database connection")
 				if (dbCredentials["cacrt"] != nil) && (dbCredentials["cacrt"] != "") { // Check if CA certificate is present
-					log.Infof("Found service CA in VCAP_SERICES, will use it to verify the database connection")
+					slog.Info("Found a service CA in VCAP_SERVICES, will use it to verify the database connection")
 					tempFile, err := os.CreateTemp("", "postgres-ssl-*.crt")
 					if err != nil {
-						log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not create temp file: %s", err.Error())
+						slog.Warn("failed to store the Cloud Foundry service certificate in a temp file", "reason", "could not create the temp file", "error", err)
 						return false
 					}
 					_, err = tempFile.WriteString(getDBCredentialsValue(dbCredentials["cacrt"]))
 					if err != nil {
-						log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not write to temp file: %s", err.Error())
+						slog.Warn("failed to store the Cloud Foundry service certificate in a temp file", "reason", "could not write to the temp file", "error", err)
 						return false
 					}
 
 					err = tempFile.Close()
 					if err != nil {
-						log.Warnf("Failed store Cloud Foundry service certificate in temp file; could not save temp file after writing: %s", err.Error())
+						slog.Warn("failed to store the Cloud Foundry service certificate in a temp file", "reason", "could not save the temp file after writing", "error", err)
 						return false
 					}
 
 					db.SSLRootCertificate = tempFile.Name()
 				} else {
-					log.Infof("No CA certificate found in VCAP_SERVICES, using system CA certificates")
+					slog.Info("No CA certificate found in VCAP_SERVICES, using system CA certificates")
 				}
 			}
 		} else if isMySQLService(service) {
 			db.DatabaseProvider = "mysql"
 			db.Database = getDBCredentialsValue(dbCredentials["name"])
 		} else {
-			log.Infof("Cloud Foundry database service contains unsupported db type")
+			slog.Info("Cloud Foundry database service contains an unsupported db type")
 			return false
 		}
 		err := validateRequiredDatabaseParams(db.Username, db.Password, db.Database, db.Host, db.Port)
 
 		if err != nil {
 			// 2) Check for db config in credentials uri
-			log.Infof("Failed to find required Cloud Foundry database service config, falling back on credential's `%v`\n%v", DB_URI, err)
+			slog.Info("Failed to find the required Cloud Foundry database service config, falling back on the credential",
+				"credential", DB_URI, "error", err)
 			uri := getDBCredentialsValue(dbCredentials[DB_URI])
 			if len(uri) == 0 {
-				log.Warnf("Failed to find Cloud Foundry service credential's `%v`", DB_URI)
+				slog.Warn("Failed to find the Cloud Foundry service credential", "credential", DB_URI)
 				return false
 			}
 
 			db.Username, db.Password, db.Host, db.Port, db.Database, db.QueryParams, err = findDatabaseConfigurationFromURI(uri, defaultDBProviderPort(service))
 
 			if err != nil {
-				log.Warnf("Failed to find Cloud Foundry service config from `%v` (failed to parse)", DB_URI)
+				slog.Warn("Failed to find the Cloud Foundry service config", "credential", DB_URI, "reason", "failed to parse")
 				return false
 			}
 
 			err := validateRequiredDatabaseParams(db.Username, db.Password, db.Database, db.Host, db.Port)
 			if err != nil {
-				log.Warnf("Failed to find Cloud Foundry service config from `%v` (missing values)\n%v", DB_URI, err)
+				slog.Warn("Failed to find the Cloud Foundry service config",
+					"credential", DB_URI, "reason", "missing values", "error", err)
 				return false
 			}
 		}
 
-		log.Infof("Applied Cloud Foundry database service config (provider: %s)", db.DatabaseProvider)
+		slog.Info("Applied the Cloud Foundry database service config", "provider", db.DatabaseProvider)
 		return true
 	}
 	return false

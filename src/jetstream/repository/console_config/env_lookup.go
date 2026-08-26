@@ -1,10 +1,10 @@
 package console_config
 
 import (
+	"log/slog"
 	"strconv"
 
 	"github.com/govau/cf-common/env"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -48,31 +48,31 @@ func MigrateSetupData(portal api.PortalProxy, configStore Repository) error {
 	// Determine if we need to migrate data first
 	_, ok, err := configStore.GetValue(systemGroupName, configSetupNeededMarker)
 	if err != nil {
-		log.Errorf("MigrateSetupData: Unable to check migration marker: %v", err)
+		slog.Error("MigrateSetupData: unable to check the migration marker", "error", err)
 		return err
 	} else if !ok {
-		log.Debug("MigrateSetupData: marker not present - no need to run migrations")
+		slog.Debug("MigrateSetupData: marker not present - no need to run migrations")
 		return nil
 	}
 
 	// If we got a value, then we should migrate
 	if !portal.GetConfig().CanMigrateDatabaseSchema {
-		log.Info("Will not migrate setup data on this instance")
+		slog.Info("Will not migrate setup data on this instance")
 		return nil
 	}
 
-	log.Info("Migrating setup data to config store")
+	slog.Info("Migrating setup data to config store")
 
 	// Load the set  up config from the old table, first
 
 	config, err := configStore.GetConsoleConfig()
 	if err != nil {
-		log.Warn("Unable to load Setup configuration from the database")
+		slog.Warn("Unable to load Setup configuration from the database")
 		return err
 	}
 
 	if config == nil {
-		log.Info("Can not migrate setup data - setup table is empty")
+		slog.Info("Can not migrate setup data - setup table is empty")
 
 		// Remove the marker
 		return configStore.DeleteValue(systemGroupName, configSetupNeededMarker)
@@ -116,14 +116,14 @@ func MigrateSetupData(portal api.PortalProxy, configStore Repository) error {
 	// Delete the content form the legacy table
 	err = configStore.DeleteConsoleConfig()
 	if err != nil {
-		log.Warnf("Unable to delete legacy console config data: %+v", err)
+		slog.Warn("unable to delete legacy console config data", "error", err)
 		return err
 	}
 
 	// Delete the migration marker
 	err = configStore.DeleteValue(systemGroupName, configSetupNeededMarker)
 	if err != nil {
-		log.Warnf("Unable to delete setup config migration marker: %+v", err)
+		slog.Warn("unable to delete the setup config migration marker", "error", err)
 		return err
 	}
 

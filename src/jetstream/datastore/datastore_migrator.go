@@ -3,8 +3,7 @@ package datastore
 import (
 	"database/sql"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 
 	"github.com/pressly/goose"
 )
@@ -21,13 +20,14 @@ func ApplyMigrations(db *sql.DB) error {
 		return fmt.Errorf("failed to get database version: %s", err.Error())
 	}
 
-	log.Println("========================")
-	log.Println("= Stratos DB Migration =")
-	log.Println("========================")
-	log.Printf("Database provider: %v", goose.GetDialect())
-	log.Printf("Current %d", current)
+	slog.Info("========================")
+	slog.Info("= Stratos DB Migration =")
+	slog.Info("========================")
+	slog.Info("Starting DB migration", "provider", goose.GetDialect(), "currentVersion", current)
 
-	goose.SetLogger(log.StandardLogger())
+	// goose.Logger wants Print/Printf/Println/Fatal/Fatalf; a *log.Logger fed
+	// from the slog handler satisfies it and keeps goose's output on-stream.
+	goose.SetLogger(slog.NewLogLogger(slog.Default().Handler(), slog.LevelInfo))
 
 	migrations, err := goose.CollectMigrations(".", minVersion, maxVersion)
 	if err != nil {
@@ -47,7 +47,7 @@ func ApplyMigrations(db *sql.DB) error {
 		next, err := migrations.Next(current)
 		if err != nil {
 			if err == goose.ErrNoNextVersion {
-				log.Printf("No migrations to run. current version: %d\n", current)
+				slog.Info("No migrations to run", "currentVersion", current)
 				return nil
 			}
 			return err

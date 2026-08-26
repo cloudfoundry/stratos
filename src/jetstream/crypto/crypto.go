@@ -6,8 +6,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -66,13 +65,13 @@ func HashAPIKey(key []byte, secret string) string {
 
 // EncryptToken - Encrypt a token being
 func EncryptToken(key []byte, t string) ([]byte, error) {
-	log.Debug("encryptToken")
+	slog.Debug("encryptToken")
 	var plaintextToken = []byte(t)
 	ciphertextToken, err := Encrypt(key, plaintextToken)
 	if err != nil {
-		msg := "Unable to encrypt token: %v"
-		log.Printf(msg, err)
-		return nil, fmt.Errorf(msg, err)
+		const msg = "unable to encrypt token"
+		slog.Error(msg, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return ciphertextToken, nil
@@ -80,12 +79,12 @@ func EncryptToken(key []byte, t string) ([]byte, error) {
 
 // DecryptToken - Decrypt a token
 func DecryptToken(key, t []byte) (string, error) {
-	log.Debug("decryptToken")
+	slog.Debug("decryptToken")
 	plaintextToken, err := Decrypt(key, t)
 	if err != nil {
-		msg := "Unable to decrypt token: %v"
-		log.Printf(msg, err)
-		return "", fmt.Errorf(msg, err)
+		const msg = "unable to decrypt token"
+		slog.Error(msg, "error", err)
+		return "", fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return string(plaintextToken), nil
