@@ -4,10 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sort"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -66,13 +66,17 @@ func (p *HelmChartDBStore) Save(chart ChartStoreRecord, batchID string) error {
 	// Get the existing record - if it has the same digest, then no need to store it
 	record, err := p.GetChart(chart.Repository, chart.Name, chart.Version)
 	if err == nil && record.Digest == chart.Digest {
-		log.Debugf("Chart already exists %s/%s-%s with digest %s", chart.Repository, chart.Name, chart.Version, chart.Digest)
+		slog.Debug("chart version already stored with the same digest",
+			"repository", chart.Repository, "chart", chart.Name,
+			"version", chart.Version, "digest", chart.Digest)
 		_, err := p.db.Exec(updateChartDigest, chart.Created, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
 		return err
 	}
 
 	if err == nil {
-		log.Debugf("Chart already exists %s/%s-%s with different digest %s", chart.Repository, chart.Name, chart.Version, chart.Digest)
+		slog.Debug("chart version already stored with a different digest, updating it",
+			"repository", chart.Repository, "chart", chart.Name,
+			"version", chart.Version, "digest", chart.Digest, "storedDigest", record.Digest)
 		// The record already exists, so update it
 		_, err := p.db.Exec(updateChartVersion, chart.Created, chart.AppVersion, truncate(chart.Description), truncate(chart.IconURL), truncate(chart.ChartURL), truncate(sourceURL), chart.Digest, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
 		return err

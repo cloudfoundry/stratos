@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,7 +18,6 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	log "github.com/sirupsen/logrus"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -43,16 +43,18 @@ func (m *Monocular) deleteCacheForEndpoint(endpointID string) error {
 // cacheCharts will cache charts in the local folder cache
 func (m *Monocular) cacheCharts(charts []store.ChartStoreRecord) error {
 	var errorCount = 0
-	log.Debug("Cacheing charts")
+	slog.Debug("caching charts", "count", len(charts))
 	for _, chart := range charts {
-		log.Debugf("Processing: %s", chart.Name)
+		slog.Debug("caching chart", "chart", chart.Name, "version", chart.Version)
 		if err := m.cacheChart(chart); err != nil {
 			errorCount++
-			log.Warnf("Error cacheing chart: %s - %+v", chart.Name, err)
+			slog.Warn("error caching a chart",
+				"chart", chart.Name, "version", chart.Version, "error", err)
 		}
 		if _, err := m.cacheChartIcon(chart); err != nil {
 			errorCount++
-			log.Warnf("Error cacheing chart icon: %s - %+v", chart.Name, err)
+			slog.Warn("error caching a chart icon",
+				"chart", chart.Name, "version", chart.Version, "error", err)
 		}
 
 	}
@@ -103,19 +105,23 @@ func (m *Monocular) cleanCacheFiles(endpointID string, allCharts []store.ChartSt
 	// Don't delete the top-level cache folder for the endpoint
 	validFiles[endpointCacheFolder] = true
 	errorCount := 0
-	filepath.Walk(endpointCacheFolder, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(endpointCacheFolder, func(path string, info os.FileInfo, err error) error {
 		if err == nil && info.IsDir() {
 			if _, ok := validFiles[path]; !ok {
 				// Filename does not exist in the map of valid file names
-				log.Debugf("Need to delete unused cache folder: %s", path)
+				slog.Debug("deleting an unused cache folder", "folder", path)
 				if err := os.RemoveAll(path); err != nil {
-					log.Errorf("Could not delete folder %s - %+v", path, err)
+					slog.Error("could not delete a cache folder", "folder", path, "error", err)
 					errorCount++
 				}
 			}
 		}
 		return nil
-	})
+	}); err != nil {
+		slog.Error("could not walk the cache folder for an endpoint",
+			"endpoint", endpointID, "folder", endpointCacheFolder, "error", err)
+		errorCount++
+	}
 
 	if errorCount > 0 {
 		return fmt.Errorf("Error(s) occurred cleaning unused folders from the cache folder for endpoint %s", endpointID)
@@ -198,11 +204,12 @@ func (m *Monocular) ensureFolder(path string) error {
 // Chart.yaml, README.md, values.yaml, values.schema.json
 // Download the icon as well
 func (m *Monocular) cacheChart(chart store.ChartStoreRecord) error {
-	log.Debugf("Cacheing chart: %s, %s", chart.Name, chart.Version)
+	slog.Debug("caching a chart", "chart", chart.Name, "version", chart.Version)
 
 	chartCachePath := m.getChartCacheFolder(chart)
 	if err := m.ensureFolder(chartCachePath); err != nil {
-		log.Warnf("Could not create folder for chart downloads: %+v", err)
+		slog.Warn("could not create the folder for chart downloads",
+			"chart", chart.Name, "version", chart.Version, "folder", chartCachePath, "error", err)
 		return err
 	}
 
@@ -212,7 +219,8 @@ func (m *Monocular) cacheChart(chart store.ChartStoreRecord) error {
 func (m *Monocular) cacheChartFromURL(chartCachePath, digest, name, chartURL string) error {
 	// Check to see if we have the same digest
 	if ok := hasDigestFile(chartCachePath, digest); ok {
-		log.Debug("Skipping download - already have archive with the same digest")
+		slog.Debug("skipping the download, the cached archive has the same digest",
+			"chart", name, "digest", digest)
 		return nil
 	}
 
@@ -244,17 +252,24 @@ func (m *Monocular) cacheChartFromURL(chartCachePath, digest, name, chartURL str
 
 // Cache a chart icon
 func (m *Monocular) cacheChartIcon(chart store.ChartStoreRecord) (string, error) {
-	log.Debugf("Cacheing chart icon: %s, %s", chart.Name, chart.Version)
+	slog.Debug("caching a chart icon", "chart", chart.Name, "version", chart.Version)
 	if len(chart.IconURL) > 0 {
-		log.Debugf("Downloading chart icon: %s", chart.IconURL)
+		slog.Debug("downloading a chart icon",
+			"chart", chart.Name, "version", chart.Version, "iconURL", chart.IconURL)
 		// If icon file already exists then don't download again
 		iconFilePath := m.getIconCacheFile(chart)
 		if _, err := os.Stat(iconFilePath); os.IsNotExist(err) {
 			if err := m.ensureFolder(path.Dir(iconFilePath)); err != nil {
-				log.Error(err)
-			} else if _, err := m.downloadFile(iconFilePath, chart.IconURL); err != nil {
-				log.Errorf("Could not download chart icon: %+v", err)
-				return "", fmt.Errorf("Could not download Chart icon: %+v", err)
+				const msg = "could not create the folder for the chart icon"
+				slog.Error(msg, "chart", chart.Name, "version", chart.Version,
+					"folder", path.Dir(iconFilePath), "error", err)
+				return "", fmt.Errorf("%s: %w", msg, err)
+			}
+			if _, err := m.downloadFile(iconFilePath, chart.IconURL); err != nil {
+				const msg = "could not download the chart icon"
+				slog.Error(msg, "chart", chart.Name, "version", chart.Version,
+					"iconURL", chart.IconURL, "error", err)
+				return "", fmt.Errorf("%s: %w", msg, err)
 			}
 		}
 		return iconFilePath, nil
@@ -299,14 +314,16 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 
 	f, err := os.Open(archivePath)
 	if err != nil {
-		log.Errorf("Helm: Archive extract file: Could not open file %s - %+v", archivePath, err)
+		slog.Error("helm archive extract: could not open the archive",
+			"archive", archivePath, "chart", chartName, "error", err)
 		return err
 	}
 	defer f.Close()
 
 	gzf, err := gzip.NewReader(f)
 	if err != nil {
-		log.Errorf("Helm: Archive extract file: Could not open zip file %s - %+v", archivePath, err)
+		slog.Error("helm archive extract: could not open the archive as gzip",
+			"archive", archivePath, "chart", chartName, "error", err)
 		return err
 	}
 
@@ -318,7 +335,8 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 		}
 
 		if err != nil {
-			log.Errorf("Helm: Archive extract file: Could not process archive file %s - %+v", archivePath, err)
+			slog.Error("helm archive extract: could not read the next archive entry",
+				"archive", archivePath, "chart", chartName, "error", err)
 			return err
 		}
 
@@ -336,7 +354,11 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 				}
 				defer out.Close()
 
-				io.Copy(out, tarReader)
+				if _, err := io.Copy(out, tarReader); err != nil {
+					slog.Error("helm archive extract: could not write an extracted file",
+						"archive", archivePath, "chart", chartName, "file", downloadPath, "error", err)
+					return err
+				}
 
 				// If we have extracted all of the files we are looking for, then return early, rather than
 				// going through the rest of the files

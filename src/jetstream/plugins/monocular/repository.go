@@ -3,17 +3,17 @@ package monocular
 import (
 	"encoding/json"
 	"io/ioutil"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 type helmStatusInfo map[string]bool
 
 // getRepoStatuses will get the status of the Helm Endpoints requested
 func (m *Monocular) getRepoStatuses(c *echo.Context) error {
-	log.Debug("getRepoStatuses")
+	slog.Debug("getting helm repository sync statuses")
 
 	// Get the list of endpoints we are looking at
 	// Need to extract the parameters from the request body
@@ -21,6 +21,8 @@ func (m *Monocular) getRepoStatuses(c *echo.Context) error {
 	defer req.Body.Close()
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
+		const msg = "could not read the request body"
+		slog.Error(msg, "error", err)
 		return api.NewJetstreamError("Could not read request body")
 	}
 
@@ -39,6 +41,8 @@ func (m *Monocular) getRepoStatuses(c *echo.Context) error {
 			info[guid] = newVal
 		}
 	} else {
+		const msg = "could not parse the helm endpoint IDs"
+		slog.Error(msg, "error", err)
 		return api.NewJetstreamError("Could not parse Helm Endpoint IDs")
 	}
 

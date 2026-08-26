@@ -3,11 +3,11 @@ package monocular
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 // GetType returns the endpoint type supported by this plugin
@@ -22,7 +22,7 @@ func (m *Monocular) GetClientId() string {
 
 // Register will register a new endpoint of the type Helm
 func (m *Monocular) Register(echoContext *echo.Context) error {
-	log.Debug("Helm Repository Register...")
+	slog.Debug("registering a helm repository endpoint")
 	return m.portalProxy.RegisterEndpoint(echoContext, m.Info)
 }
 
@@ -39,7 +39,7 @@ func (m *Monocular) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId 
 
 // Info checks the endpoint type and fetches any metadata
 func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
-	log.Debug("Helm Repository Info")
+	slog.Debug("fetching helm repository info", "apiEndpoint", apiEndpoint)
 	var v2InfoResponse api.V2Info
 	var newCNSI api.CNSIRecord
 
