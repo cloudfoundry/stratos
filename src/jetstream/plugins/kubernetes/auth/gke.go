@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -12,7 +13,6 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -60,7 +60,7 @@ func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Toke
 
 // FetchToken will create a token for the GKE Authentication using the POSTed data
 func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("FetchToken (GKE)")
+	slog.Debug("FetchToken (GKE)", "endpoint", cnsiRecord.GUID)
 
 	body := ec.FormValue("gkeconfig")
 	if len(body) == 0 {
@@ -85,8 +85,9 @@ func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*
 
 	claims, err := jwtClaims([]byte(oauthToken.IDToken))
 	if err != nil {
-		log.Info(err)
-		return nil, nil, errors.New("Can not parse JWT Access token")
+		const msg = "can not parse the GKE JWT access token"
+		slog.Error(msg, "endpoint", cnsiRecord.GUID, "error", err)
+		return nil, nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	email := claims["email"]
@@ -107,7 +108,7 @@ func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*
 
 // GetUserFromToken gets the username from the GKE Token
 func (c *GKEKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
-	log.Debug("GetUserFromToken (GKE)")
+	slog.Debug("GetUserFromToken (GKE)", "endpoint", cnsiGUID, "token", tokenRecord.TokenGUID)
 
 	gkeInfo := &GKEConfig{}
 	err := json.Unmarshal([]byte(tokenRecord.RefreshToken), &gkeInfo)
@@ -122,7 +123,7 @@ func (c *GKEKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *api.TokenRe
 }
 
 func (c *GKEKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doGKEFlowRequest")
+	slog.Debug("doGKEFlowRequest", "endpoint", cnsiRequest.GUID, "user", cnsiRequest.UserGUID)
 
 	authHandler := c.portalProxy.OAuthHandlerFunc(cnsiRequest, req, c.RefreshGKEToken)
 	return c.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
@@ -130,7 +131,7 @@ func (c *GKEKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Requ
 
 // RefreshGKEToken will refresh a GKE token
 func (c *GKEKubeAuth) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("RefreshGKEToken")
+	slog.Debug("RefreshGKEToken", "endpoint", cnsiGUID, "user", userGUID)
 	now := time.Now()
 
 	userToken, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
@@ -160,7 +161,7 @@ func (c *GKEKubeAuth) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID
 }
 
 func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSecret, refreshToken string) (u api.UAAResponse, err error) {
-	log.Debug("refreshGKEToken")
+	slog.Debug("refreshGKEToken")
 	tokenInfo := api.UAAResponse{}
 
 	// Go and get a new access token

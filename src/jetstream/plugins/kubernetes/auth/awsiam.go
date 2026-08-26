@@ -5,12 +5,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -78,7 +78,7 @@ func (c *AWSIAMUserInfo) Retrieve(context.Context) (aws.Credentials, error) {
 }
 
 func (c *AWSKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("FetchIAMToken")
+	slog.Debug("FetchIAMToken", "endpoint", cnsiRecord.GUID)
 
 	// Place the IAM properties into a JSON Struct and store that in the Refresh Token
 	// Then use the refresh method to get a current access token
@@ -160,14 +160,14 @@ func (c *AWSKubeAuth) RegisterJetstreamAuthType(portal api.PortalProxy) {
 }
 
 func (c *AWSKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doAWSIAMFlowRequest")
+	slog.Debug("doAWSIAMFlowRequest", "endpoint", cnsiRequest.GUID, "user", cnsiRequest.UserGUID)
 
 	authHandler := c.portalProxy.OAuthHandlerFunc(cnsiRequest, req, c.RefreshIAMToken)
 	return c.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
 func (c *AWSKubeAuth) RefreshIAMToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("RefreshIAMToken")
+	slog.Debug("RefreshIAMToken", "endpoint", cnsiGUID, "user", userGUID)
 
 	userToken, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {

@@ -3,12 +3,12 @@ package auth
 import (
 	"encoding/base64"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/config"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -31,12 +31,13 @@ func (c *KubeConfigAuth) GetName() string {
 }
 
 func (c *KubeConfigAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.TokenRecord) error {
-	log.Error("KubeConfigAuth: AddAuthInfo: Not supported")
-	return fmt.Errorf("Not supported: %s", tokenRec.AuthType)
+	const msg = "KubeConfigAuth: AddAuthInfo: not supported"
+	slog.Error(msg, "authType", tokenRec.AuthType, "token", tokenRec.TokenGUID)
+	return fmt.Errorf("%s: %s", msg, tokenRec.AuthType)
 }
 
 func (c *KubeConfigAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("FetchToken (KubeConfigAuth)")
+	slog.Debug("FetchToken (KubeConfigAuth)", "endpoint", cnsiRecord.GUID)
 
 	body := ec.FormValue("kubeconfig")
 	if len(body) == 0 {

@@ -7,6 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"strings"
@@ -14,7 +15,6 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -74,7 +74,7 @@ func (c *CertKubeAuth) extractCerts(ec *echo.Context) (*KubeCertificate, error) 
 }
 
 func (c *CertKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("Kube Certs - FetchToken")
+	slog.Debug("Kube Certs - FetchToken", "endpoint", cnsiRecord.GUID)
 
 	kubeCertAuth, err := c.extractCerts(ec)
 	if err != nil {
@@ -107,7 +107,7 @@ func (c *CertKubeAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *api.Toke
 }
 
 func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doCertAuthFlowRequest")
+	slog.Debug("doCertAuthFlowRequest", "endpoint", cnsiRequest.GUID, "user", cnsiRequest.UserGUID)
 
 	authHandler := func(tokenRec api.TokenRecord, cnsi api.CNSIRecord) (*http.Response, error) {
 
@@ -128,7 +128,7 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 
 		if len(cnsi.CACert) > 0 {
 			if ok := rootCAs.AppendCertsFromPEM([]byte(cnsi.CACert)); !ok {
-				log.Warn("Could not append the CA - using system certs only")
+				slog.Warn("could not append the endpoint CA, using system certs only", "endpoint", cnsi.GUID)
 			}
 		}
 
@@ -174,7 +174,7 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 }
 
 func (c *CertKubeAuth) RefreshCertAuth(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("RefreshCertAuth")
+	slog.Debug("RefreshCertAuth", "endpoint", cnsiGUID, "user", userGUID)
 	// This shouldn't be called since cert-auth K8S shouldn't expire
 
 	userToken, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
