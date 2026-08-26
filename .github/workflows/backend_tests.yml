@@ -14,7 +14,7 @@ permissions:
   contents: read
 
 env:
-  GO_VERSION: '1.26'
+  GO_VERSION: '1.27'
 
 jobs:
   test_suite:

@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/stratos/src/jetstream
 
-go 1.26.3
+go 1.27.0
 
 replace (
 	github.com/cloudfoundry/stratos/src/jetstream/api => ./api
@@ -243,3 +243,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+replace github.com/SermoDigital/jose => github.com/norman-abramovitz/fw-jose v0.9.2-go127.1

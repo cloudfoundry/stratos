@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush
 
-go 1.26.3
+go 1.27.0
 
 replace (
 	github.com/cloudfoundry/cli-plugin-repo => code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e
@@ -112,3 +112,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.3.0 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+replace github.com/SermoDigital/jose => github.com/norman-abramovitz/fw-jose v0.9.2-go127.1
