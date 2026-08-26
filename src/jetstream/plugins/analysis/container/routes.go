@@ -5,7 +5,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -29,14 +28,11 @@ func (a *Analyzer) report(ec *echo.Context) error {
 		return errors.New("Can't serve that file")
 	}
 
-	for _, seg := range []string{user, endpoint, id, name} {
-		if err := validateSegment(seg); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, "Invalid report path")
-		}
+	file, err := reportPath(a.reportsDir, user, endpoint, id, name)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid report path")
 	}
-
-	file := filepath.Join(a.reportsDir, user, endpoint, id, name)
-	_, err := os.Stat(file)
+	_, err = os.Stat(file)
 	if os.IsNotExist(err) {
 		return echo.NewHTTPError(404, "No such file")
 	}
@@ -51,12 +47,10 @@ func (a *Analyzer) delete(ec *echo.Context) error {
 	id := ec.Param("id")
 	slog.Debug("deleting an analysis report", "user", user, "endpoint", endpoint, "report", id)
 
-	for _, seg := range []string{user, endpoint, id} {
-		if err := validateSegment(seg); err != nil {
-			return echo.NewHTTPError(http.StatusBadRequest, "Invalid report path")
-		}
+	folder, err := reportPath(a.reportsDir, user, endpoint, id)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "Invalid report path")
 	}
-	folder := filepath.Join(a.reportsDir, user, endpoint, id)
 	if err := os.RemoveAll(folder); err != nil {
 		slog.Warn("could not delete the analysis report folder",
 			"folder", folder, "user", user, "endpoint", endpoint, "report", id, "error", err)
@@ -87,7 +81,10 @@ func (a *Analyzer) deleteEndpoint(ec *echo.Context) error {
 	for _, item := range items {
 		if item.IsDir() {
 			// This is a user's folder - see if they have a folder for the endpoint
-			folder := filepath.Join(a.reportsDir, item.Name(), endpoint)
+			folder, pathErr := reportPath(a.reportsDir, item.Name(), endpoint)
+			if pathErr != nil {
+				continue
+			}
 			if folderExists(folder) {
 				if err := os.RemoveAll(folder); err != nil {
 					slog.Warn("could not delete the analysis report folder for an endpoint",

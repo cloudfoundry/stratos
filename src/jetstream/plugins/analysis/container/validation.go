@@ -38,6 +38,29 @@ func validateNamespace(ns string) error {
 // (user/endpoint/id/file) that is empty, contains a path separator, or is
 // "." / "..". Each parameter forms one directory level under reportsDir;
 // without this a bare ".." parameter traverses out of the reports tree.
+// reportPath validates every segment and returns the joined path beneath
+// base. It is the only way a report path is built, so a caller cannot
+// validate and then join something else by mistake. It is also the point the
+// CodeQL model pack declares as a path-injection barrier: the query has no
+// hook for a guard function, only for one that returns the confined value.
+func reportPath(base string, segs ...string) (string, error) {
+	for _, seg := range segs {
+		if err := validateSegment(seg); err != nil {
+			return "", err
+		}
+	}
+	return filepath.Join(append([]string{base}, segs...)...), nil
+}
+
+// jobFolder returns the folder for a job id. The id is a nested "user/endpoint/id"
+// path, so it is confined with filepath.IsLocal rather than per-segment.
+func jobFolder(base, id string) (string, error) {
+	if !filepath.IsLocal(id) {
+		return "", fmt.Errorf("job id %q is not a local path", id)
+	}
+	return filepath.Join(base, id), nil
+}
+
 func validateSegment(seg string) error {
 	if seg == "" {
 		return errors.New("empty path segment")
