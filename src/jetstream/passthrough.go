@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"path"
@@ -13,7 +14,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -41,7 +41,7 @@ type PassthroughError struct {
 }
 
 func getEchoURL(c *echo.Context) url.URL {
-	log.Debug("getEchoURL")
+	slog.Debug("getEchoURL")
 	u := c.Request().URL
 
 	// dereference so we get a copy
@@ -49,7 +49,7 @@ func getEchoURL(c *echo.Context) url.URL {
 }
 
 func getEchoHeaders(c *echo.Context) http.Header {
-	log.Debug("getEchoHeaders")
+	slog.Debug("getEchoHeaders")
 	h := make(http.Header)
 	originalHeader := c.Request().Header
 	for k, v := range originalHeader {
@@ -65,7 +65,7 @@ func getEchoHeaders(c *echo.Context) http.Header {
 }
 
 func makeRequestURI(c *echo.Context) *url.URL {
-	log.Debug("makeRequestURI")
+	slog.Debug("makeRequestURI")
 	uri := getEchoURL(c)
 	prefix := strings.TrimSuffix(c.Path(), "*")
 	uri.Path = strings.TrimPrefix(uri.Path, prefix)
@@ -74,7 +74,7 @@ func makeRequestURI(c *echo.Context) *url.URL {
 }
 
 func getPortalUserGUID(c *echo.Context) (string, error) {
-	log.Debug("getPortalUserGUID")
+	slog.Debug("getPortalUserGUID")
 	portalUserGUIDIntf := c.Get("user_id")
 	if portalUserGUIDIntf == nil {
 		return "", errors.New("corrupted session")
@@ -83,7 +83,7 @@ func getPortalUserGUID(c *echo.Context) (string, error) {
 }
 
 func getRequestParts(c *echo.Context) (*http.Request, []byte, error) {
-	log.Debug("getRequestParts")
+	slog.Debug("getRequestParts")
 	var body []byte
 	var err error
 	req := c.Request()
@@ -96,7 +96,7 @@ func getRequestParts(c *echo.Context) (*http.Request, []byte, error) {
 }
 
 func buildJSONResponse(cnsiList []string, responses map[string]*api.CNSIRequest) map[string]*json.RawMessage {
-	log.Debug("buildJSONResponse")
+	slog.Debug("buildJSONResponse")
 	jsonResponse := make(map[string]*json.RawMessage)
 	for _, guid := range cnsiList {
 		var response []byte
@@ -157,7 +157,7 @@ func isValidJSON(data []byte) bool {
 }
 
 func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method string, uri *url.URL, body []byte, header http.Header) (api.CNSIRequest, error) {
-	log.Debug("buildCNSIRequest")
+	slog.Debug("buildCNSIRequest")
 	cnsiRequest := api.CNSIRequest{
 		GUID:     cnsiGUID,
 		UserGUID: userGUID,
@@ -189,7 +189,7 @@ func (p *portalProxy) buildCNSIRequest(cnsiGUID string, userGUID string, method 
 }
 
 func (p *portalProxy) validateCNSIList(cnsiList []string) error {
-	log.Debug("validateCNSIList")
+	slog.Debug("validateCNSIList")
 	for _, cnsiGUID := range cnsiList {
 		if _, err := p.GetCNSIRecord(cnsiGUID); err != nil {
 			return err
@@ -200,7 +200,7 @@ func (p *portalProxy) validateCNSIList(cnsiList []string) error {
 }
 
 func fwdCNSIStandardHeaders(cnsiRequest *api.CNSIRequest, req *http.Request) {
-	log.Debug("fwdCNSIStandardHeaders")
+	slog.Debug("fwdCNSIStandardHeaders")
 	for k, v := range cnsiRequest.Header {
 		switch {
 		// Skip these
@@ -220,7 +220,7 @@ func fwdCNSIStandardHeaders(cnsiRequest *api.CNSIRequest, req *http.Request) {
 }
 
 func (p *portalProxy) proxy(c *echo.Context) error {
-	log.Debug("proxy")
+	slog.Debug("proxy")
 	responses, err := p.ProxyRequest(c, makeRequestURI(c))
 	if err != nil {
 		return err
@@ -230,7 +230,7 @@ func (p *portalProxy) proxy(c *echo.Context) error {
 }
 
 func (p *portalProxy) ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*api.CNSIRequest, error) {
-	log.Debug("ProxyRequest")
+	slog.Debug("ProxyRequest")
 	cnsiList := strings.Split(c.Request().Header.Get("x-cap-cnsi-list"), ",")
 	shouldPassthrough := c.Request().Header.Get("x-cap-passthrough") == "true"
 	longRunning := c.Request().Header.Get(longRunningTimeoutHeader) == "true"
@@ -312,7 +312,7 @@ func (p *portalProxy) ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*a
 				responses[res.GUID] = res
 			case <-deadline:
 				// Return whatever we have so far rather than blocking
-				log.Warn("Proxy request timed out waiting for all responses")
+				slog.Warn("Proxy request timed out waiting for all responses", "received", len(responses), "expected", len(cnsiList))
 				return responses, nil
 			}
 		}
@@ -359,14 +359,14 @@ func makeLongRunningTimeoutError() []byte {
 	passthroughError.ErrorResponse = (*json.RawMessage)(&errorResponse)
 	res, e := json.Marshal(passthroughError)
 	if e != nil {
-		log.Errorf("makeLongRunningTimeoutError: could not marshal JSON: %+v", e)
+		slog.Error("makeLongRunningTimeoutError: could not marshal JSON", "error", e)
 	}
 	return res
 }
 
 // TODO: This should be used by the function above
 func (p *portalProxy) DoProxyRequest(requests []api.ProxyRequestInfo) (map[string]*api.CNSIRequest, error) {
-	log.Debug("DoProxyRequest")
+	slog.Debug("DoProxyRequest")
 
 	// send the request to each endpoint. Buffered to the number of goroutines so
 	// an early return on a build error below cannot leave already-launched
@@ -463,7 +463,7 @@ func (p *portalProxy) SendProxiedResponse(c *echo.Context, responses map[string]
 		// we don't care if this fails
 		_, err := c.Response().Write(res.Response)
 		if err != nil {
-			log.Errorf("Failed to write passthrough response %v", err)
+			slog.Error("failed to write the passthrough response", "error", err)
 		}
 
 		return nil
@@ -473,13 +473,13 @@ func (p *portalProxy) SendProxiedResponse(c *echo.Context, responses map[string]
 	e := json.NewEncoder(c.Response())
 	err := e.Encode(jsonResponse)
 	if err != nil {
-		log.Errorf("Failed to encode JSON: %v\n%#v\n", err, jsonResponse)
+		slog.Error("failed to encode the JSON response", "error", err)
 	}
 	return err
 }
 
 func (p *portalProxy) doRequest(cnsiRequest *api.CNSIRequest, done chan<- *api.CNSIRequest) {
-	log.Debugf("doRequest for URL: %s", cnsiRequest.URL.String())
+	slog.Debug("doRequest", "url", cnsiRequest.URL.String(), "endpoint", cnsiRequest.GUID)
 	var body io.Reader
 	var res *http.Response
 	var req *http.Request
@@ -553,9 +553,10 @@ func (p *portalProxy) doRequest(cnsiRequest *api.CNSIRequest, done chan<- *api.C
 			contentType = res.Header.Get("Content-Type")
 			contentLength = res.ContentLength
 		}
-		log.Warnf("Passthrough response: URL: %s, Status Code: %d, Status: %s, Content Type: %s, Length: %d",
-			cnsiRequest.URL.String(), cnsiRequest.StatusCode, cnsiRequest.Status, contentType, contentLength)
-		log.Warn(string(cnsiRequest.Response))
+		slog.Warn("Passthrough response",
+			"url", cnsiRequest.URL.String(), "statusCode", cnsiRequest.StatusCode,
+			"status", cnsiRequest.Status, "contentType", contentType, "length", contentLength,
+			"response", string(cnsiRequest.Response))
 	}
 
 	if done != nil {
@@ -564,7 +565,7 @@ func (p *portalProxy) doRequest(cnsiRequest *api.CNSIRequest, done chan<- *api.C
 }
 
 func (p *portalProxy) ProxySingleRequest(c *echo.Context) error {
-	log.Debug("ProxySingleRequest")
+	slog.Debug("ProxySingleRequest")
 
 	cnsi := c.Param("uuid")
 
@@ -615,7 +616,7 @@ func (p *portalProxy) ProxySingleRequest(c *echo.Context) error {
 	// we don't care if this fails
 	_, writeErr := c.Response().Write(res.Response)
 	if writeErr != nil {
-		log.Errorf("Failed to write passthrough response %v", err)
+		slog.Error("failed to write the passthrough response", "error", writeErr)
 	}
 
 	return nil

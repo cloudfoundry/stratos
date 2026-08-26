@@ -3,15 +3,14 @@ package main
 import (
 	"encoding/base64"
 	"errors"
+	"log/slog"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 func (p *portalProxy) doHttpBasicFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doHttpBasicFlowRequest")
+	slog.Debug("doHttpBasicFlowRequest")
 
 	authHandler := func(tokenRec api.TokenRecord, cnsi api.CNSIRecord) (*http.Response, error) {
 		// Http Basic has no token refresh or expiry - so much simpler than the OAuth flow
@@ -24,18 +23,18 @@ func (p *portalProxy) doHttpBasicFlowRequest(cnsiRequest *api.CNSIRequest, req *
 }
 
 func (p *portalProxy) doBearerFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doBearerFlowRequest")
+	slog.Debug("doBearerFlowRequest")
 	return p.doAuthHeaderFlowRequest("bearer", cnsiRequest, req)
 }
 
 func (p *portalProxy) doTokenFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doTokenFlowRequest")
+	slog.Debug("doTokenFlowRequest")
 	return p.doAuthHeaderFlowRequest("token", cnsiRequest, req)
 }
 
 // Auth where a toekn is passed in the HTTP Authorization
 func (p *portalProxy) doAuthHeaderFlowRequest(headerPrefix string, cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doAuthHeaderFlowRequest")
+	slog.Debug("doAuthHeaderFlowRequest")
 
 	authHandler := func(tokenRec api.TokenRecord, cnsi api.CNSIRecord) (*http.Response, error) {
 		authTokenDecodedBytes, err := base64.StdEncoding.DecodeString(tokenRec.AuthToken)

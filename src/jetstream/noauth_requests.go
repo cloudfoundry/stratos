@@ -1,14 +1,14 @@
 package main
 
 import (
+	"log/slog"
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
 )
 
 func (p *portalProxy) doNoAuthFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doNoAuthFlowRequest")
+	slog.Debug("doNoAuthFlowRequest")
 
 	authHandler := func(tokenRec api.TokenRecord, cnsi api.CNSIRecord) (*http.Response, error) {
 		// No need to add any headers or do any authentication

@@ -3,13 +3,13 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"regexp"
 	"sync"
 	"time"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 // cspReportPath is where the browser posts Content-Security-Policy violation
@@ -139,7 +139,7 @@ func (p *portalProxy) receiveCSPReport(c *echo.Context) error {
 		// Logged at debug: a malformed body is either a browser Stratos does
 		// not know or someone probing the route, and neither is worth a line
 		// an operator has to read.
-		log.Debugf("Discarded an unparseable CSP violation report: %v", err)
+		slog.Debug("Discarded an unparseable CSP violation report", "error", err)
 		return c.NoContent(http.StatusBadRequest)
 	}
 
@@ -147,8 +147,8 @@ func (p *portalProxy) receiveCSPReport(c *echo.Context) error {
 
 	if logIt, dropped := cspLogBudget.allow(time.Now()); logIt {
 		if dropped > 0 {
-			log.WithField("security_event", "csp-violation").Warnf(
-				"SECURITY: %d further Content-Security-Policy violations were not logged in the previous minute", dropped)
+			slog.Warn("SECURITY: further Content-Security-Policy violations were not logged in the previous minute",
+				"security_event", "csp-violation", "dropped", dropped)
 		}
 
 		// original-policy is deliberately absent: it is the longest field in
@@ -161,17 +161,16 @@ func (p *portalProxy) receiveCSPReport(c *echo.Context) error {
 		// it is worth having: blocked_uri reads "inline" for every one of them.
 		// The policy asks for it via 'report-sample'; the browser sends the
 		// first 40 characters, truncateField bounds it in case one does not,
-		// and logrus quotes what it contains.
-		log.WithFields(log.Fields{
-			"security_event":     "csp-violation",
-			"document_uri":       truncateField(report.DocumentURI),
-			"violated_directive": truncateField(report.ViolatedDirective),
-			"blocked_uri":        truncateField(report.BlockedURI),
-			"source_file":        truncateField(report.SourceFile),
-			"line_number":        report.LineNumber,
-			"disposition":        truncateField(report.Disposition),
-			"script_sample":      truncateField(report.ScriptSample),
-		}).Warn("SECURITY: Content-Security-Policy violation reported by browser")
+		// and the handler quotes what it contains.
+		slog.Warn("SECURITY: Content-Security-Policy violation reported by browser",
+			"security_event", "csp-violation",
+			"document_uri", truncateField(report.DocumentURI),
+			"violated_directive", truncateField(report.ViolatedDirective),
+			"blocked_uri", truncateField(report.BlockedURI),
+			"source_file", truncateField(report.SourceFile),
+			"line_number", report.LineNumber,
+			"disposition", truncateField(report.Disposition),
+			"script_sample", truncateField(report.ScriptSample))
 	}
 
 	if collector := p.GetConfig().CSPReportCollector; collector != "" {
@@ -238,26 +237,26 @@ const cspForwardTimeout = 5 * time.Second
 func forwardCSPReport(collector string, enriched map[string]any) {
 	body, err := json.Marshal(enriched)
 	if err != nil {
-		log.Errorf("Could not encode a CSP violation report for %s: %v", collector, err)
+		slog.Error("could not encode a CSP violation report", "collector", collector, "error", err)
 		return
 	}
 
 	client := &http.Client{Timeout: cspForwardTimeout}
 	req, err := http.NewRequest(http.MethodPost, collector, bytes.NewReader(body))
 	if err != nil {
-		log.Errorf("Could not build the CSP violation report request for %s: %v", collector, err)
+		slog.Error("could not build the CSP violation report request", "collector", collector, "error", err)
 		return
 	}
 	req.Header.Set("Content-Type", "application/json")
 
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Errorf("Could not deliver a CSP violation report to %s: %v", collector, err)
+		slog.Error("could not deliver a CSP violation report", "collector", collector, "error", err)
 		return
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode >= http.StatusBadRequest {
-		log.Errorf("Collector %s rejected a CSP violation report with status %d", collector, resp.StatusCode)
+		slog.Error("collector rejected a CSP violation report", "collector", collector, "status", resp.StatusCode)
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -12,7 +13,6 @@ import (
 	"time"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/google/uuid"
 
@@ -45,7 +45,7 @@ func isSSLRelatedError(err error) (bool, string) {
 }
 
 func (p *portalProxy) RegisterEndpoint(c *echo.Context, fetchInfo api.InfoFunc) error {
-	log.Debug("registerEndpoint")
+	slog.Debug("registerEndpoint")
 
 	params := new(api.RegisterEndpointParams)
 	err := api.BindOnce(params, c)
@@ -55,7 +55,7 @@ func (p *portalProxy) RegisterEndpoint(c *echo.Context, fetchInfo api.InfoFunc) 
 
 	skipSSLValidation, err := strconv.ParseBool(params.SkipSSLValidation)
 	if err != nil {
-		log.Errorf("Failed to parse skip_ssl_validation value: %s", err)
+		slog.Error("failed to parse the skip_ssl_validation value", "value", skipSSLValidation, "error", err)
 		// default to false
 		skipSSLValidation = false
 	}
@@ -100,7 +100,7 @@ func (p *portalProxy) RegisterEndpoint(c *echo.Context, fetchInfo api.InfoFunc) 
 }
 
 func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, skipSSLValidation bool, clientId string, clientSecret string, userId string, ssoAllowed bool, subType string, createSystemEndpoint bool, caCert string, fetchInfo api.InfoFunc) (api.CNSIRecord, error) {
-	log.Debug("DoRegisterEndpoint")
+	slog.Debug("DoRegisterEndpoint", "name", cnsiName, "apiEndpoint", apiEndpoint)
 
 	if len(cnsiName) == 0 || len(apiEndpoint) == 0 {
 		return api.CNSIRecord{}, api.NewHTTPShadowError(
@@ -197,7 +197,7 @@ func (p *portalProxy) DoRegisterEndpoint(cnsiName string, apiEndpoint string, sk
 // TODO (wchrisjohnson) We need do this as a TRANSACTION, vs a set of single calls
 func (p *portalProxy) unregisterCluster(c *echo.Context) error {
 	cnsiGUID := c.Param("id")
-	log.WithField("cnsiGUID", cnsiGUID).Debug("unregisterCluster")
+	slog.Debug("unregisterCluster", "endpoint", cnsiGUID)
 
 	if len(cnsiGUID) == 0 {
 		return api.NewHTTPShadowError(
@@ -210,26 +210,26 @@ func (p *portalProxy) unregisterCluster(c *echo.Context) error {
 }
 
 func (p *portalProxy) doUnregisterCluster(cnsiGUID string) error {
-	log.Debug("doUnregisterCluster")
+	slog.Debug("doUnregisterCluster", "endpoint", cnsiGUID)
 
 	if err := p.unsetCNSIRecord(cnsiGUID); err != nil {
 		return err
 	}
 
 	if err := p.unsetCNSITokenRecords(cnsiGUID); err != nil {
-		log.Warnf("Unable to remove tokens for unregistered endpoint %s: %v", cnsiGUID, err)
+		slog.Warn("unable to remove the tokens for the unregistered endpoint", "endpoint", cnsiGUID, "error", err)
 	}
 
 	ufe := userfavoritesendpoints.Constructor(p, cnsiGUID)
 	if err := ufe.RemoveFavorites(); err != nil {
-		log.Warnf("Unable to remove favorites for unregistered endpoint %s: %v", cnsiGUID, err)
+		slog.Warn("unable to remove the favorites for the unregistered endpoint", "endpoint", cnsiGUID, "error", err)
 	}
 
 	return nil
 }
 
 func (p *portalProxy) buildCNSIList(c *echo.Context) ([]*api.CNSIRecord, error) {
-	log.Debug("buildCNSIList")
+	slog.Debug("buildCNSIList")
 
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 		userID, err := p.GetSessionValue(c, "user_id")
@@ -282,7 +282,7 @@ func (p *portalProxy) buildCNSIList(c *echo.Context) ([]*api.CNSIRecord, error) 
 }
 
 func (p *portalProxy) ListEndpoints() ([]*api.CNSIRecord, error) {
-	log.Debug("ListEndpoints")
+	slog.Debug("ListEndpoints")
 	var cnsiList []*api.CNSIRecord
 	var err error
 
@@ -301,7 +301,7 @@ func (p *portalProxy) ListEndpoints() ([]*api.CNSIRecord, error) {
 
 // ListAdminEndpoints - return a CNSI list with endpoints created by the current user and all admins
 func (p *portalProxy) ListAdminEndpoints(userID string) ([]*api.CNSIRecord, error) {
-	log.Debug("ListAdminEndpoints")
+	slog.Debug("ListAdminEndpoints", "user", userID)
 	// Initialise cnsiList to ensure empty struct (marshals to null) is not returned
 	cnsiList := []*api.CNSIRecord{}
 	var userList []string
@@ -330,7 +330,7 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*api.CNSIRecord, erro
 
 // listCNSIByAPIEndpoint - receives a URL as string
 func (p *portalProxy) listCNSIByAPIEndpoint(apiEndpoint string) ([]*api.CNSIRecord, error) {
-	log.Debug("listCNSIByAPIEndpoint")
+	slog.Debug("listCNSIByAPIEndpoint", "apiEndpoint", apiEndpoint)
 
 	var err error
 	cnsiList := []*api.CNSIRecord{}
@@ -364,7 +364,7 @@ func (p *portalProxy) listCNSIByAPIEndpoint(apiEndpoint string) ([]*api.CNSIReco
 // @Security ApiKeyAuth
 // @Router /endpoints [get]
 func (p *portalProxy) listCNSIs(c *echo.Context) error {
-	log.Debug("listCNSIs")
+	slog.Debug("listCNSIs")
 	cnsiList, err := p.buildCNSIList(c)
 	if err != nil {
 		return api.NewHTTPShadowError(
@@ -385,7 +385,7 @@ func (p *portalProxy) listCNSIs(c *echo.Context) error {
 }
 
 func marshalCNSIlist(cnsiList []*api.CNSIRecord) ([]byte, error) {
-	log.Debug("marshalCNSIlist")
+	slog.Debug("marshalCNSIlist")
 	jsonString, err := json.Marshal(cnsiList)
 	if err != nil {
 		return nil, api.NewHTTPShadowError(
@@ -398,26 +398,26 @@ func marshalCNSIlist(cnsiList []*api.CNSIRecord) ([]byte, error) {
 }
 
 func (p *portalProxy) UpdateEndpointMetadata(guid string, metadata string) error {
-	log.Debug("UpdateEndpointMetadata")
+	slog.Debug("UpdateEndpointMetadata", "endpoint", guid)
 
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
-		log.Errorf(dbReferenceError, err)
+		slog.Error("unable to establish a database reference", "error", err)
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = cnsiRepo.UpdateMetadata(guid, metadata)
 	if err != nil {
-		msg := "unable to update endpoint metadata: %v"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to update the endpoint metadata"
+		slog.Error(msg, "endpoint", guid, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return nil
 }
 
 func (p *portalProxy) GetCNSIRecord(guid string) (api.CNSIRecord, error) {
-	log.Debug("GetCNSIRecord")
+	slog.Debug("GetCNSIRecord", "endpoint", guid)
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
 		return api.CNSIRecord{}, err
@@ -435,7 +435,7 @@ func (p *portalProxy) GetCNSIRecord(guid string) (api.CNSIRecord, error) {
 }
 
 func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (api.CNSIRecord, error) {
-	log.Debug("GetAdminCNSIRecordByEndpoint")
+	slog.Debug("GetAdminCNSIRecordByEndpoint", "apiEndpoint", endpoint)
 	var rec *api.CNSIRecord
 
 	endpointList, err := p.listCNSIByAPIEndpoint(endpoint)
@@ -461,28 +461,28 @@ func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (api.CNSIRec
 }
 
 func (p *portalProxy) setCNSIRecord(guid string, c api.CNSIRecord) error {
-	log.Debug("setCNSIRecord")
+	slog.Debug("setCNSIRecord", "endpoint", guid)
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
-		log.Errorf(dbReferenceError, err)
+		slog.Error("unable to establish a database reference", "error", err)
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = cnsiRepo.Save(guid, c, p.Config.EncryptionKeyInBytes)
 	if err != nil {
-		msg := "unable to save a CNSI Token: %v"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to save the CNSI record"
+		slog.Error(msg, "endpoint", guid, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return nil
 }
 
 func (p *portalProxy) unsetCNSIRecord(guid string) error {
-	log.Debug("unsetCNSIRecord")
+	slog.Debug("unsetCNSIRecord", "endpoint", guid)
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
-		log.Errorf(dbReferenceError, err)
+		slog.Error("unable to establish a database reference", "error", err)
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
@@ -492,9 +492,9 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 	// Delete the endpoint
 	err = cnsiRepo.Delete(guid)
 	if err != nil {
-		msg := "unable to delete a CNSI record: %v"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to delete the CNSI record"
+		slog.Error(msg, "endpoint", guid, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	if lookupErr == nil {
@@ -510,7 +510,7 @@ func (p *portalProxy) unsetCNSIRecord(guid string) error {
 }
 
 func (p *portalProxy) SaveEndpointToken(cnsiGUID string, userGUID string, tokenRecord api.TokenRecord) error {
-	log.Debug("SaveEndpointToken")
+	slog.Debug("SaveEndpointToken", "endpoint", cnsiGUID, "user", userGUID)
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return err
@@ -520,7 +520,7 @@ func (p *portalProxy) SaveEndpointToken(cnsiGUID string, userGUID string, tokenR
 }
 
 func (p *portalProxy) DeleteEndpointToken(cnsiGUID string, userGUID string) error {
-	log.Debug("DeleteEndpointToken")
+	slog.Debug("DeleteEndpointToken", "endpoint", cnsiGUID, "user", userGUID)
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return err
@@ -530,7 +530,7 @@ func (p *portalProxy) DeleteEndpointToken(cnsiGUID string, userGUID string) erro
 }
 
 func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (api.TokenRecord, bool) {
-	log.Debug("GetCNSITokenRecord")
+	slog.Debug("GetCNSITokenRecord", "endpoint", cnsiGUID, "user", userGUID)
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return api.TokenRecord{}, false
@@ -545,7 +545,7 @@ func (p *portalProxy) GetCNSITokenRecord(cnsiGUID string, userGUID string) (api.
 }
 
 func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGUID string) (api.TokenRecord, bool) {
-	log.Debug("GetCNSITokenRecordWithDisconnected")
+	slog.Debug("GetCNSITokenRecordWithDisconnected", "endpoint", cnsiGUID, "user", userGUID)
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return api.TokenRecord{}, false
@@ -560,16 +560,16 @@ func (p *portalProxy) GetCNSITokenRecordWithDisconnected(cnsiGUID string, userGU
 }
 
 func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*api.ConnectedEndpoint, error) {
-	log.Debug("ListCEndpointsByUser")
+	slog.Debug("ListCEndpointsByUser", "user", userGUID)
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
-		log.Errorf(dbReferenceError, err)
+		slog.Error("unable to establish a database reference", "error", err)
 		return nil, fmt.Errorf(dbReferenceError, err)
 	}
 
 	cnsiList, err := cnsiRepo.ListByUser(userGUID)
 	if err != nil {
-		log.Debugf("Error was: %+v", err)
+		slog.Debug("unable to list the endpoints", "user", userGUID, "error", err)
 		return nil, err
 	}
 
@@ -578,37 +578,37 @@ func (p *portalProxy) ListEndpointsByUser(userGUID string) ([]*api.ConnectedEndp
 
 // Uopdate the Access Token, Refresh Token and Token Expiry for a token
 func (p *portalProxy) updateTokenAuth(userGUID string, t api.TokenRecord) error {
-	log.Debug("updateTokenAuth")
+	slog.Debug("updateTokenAuth", "user", userGUID)
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
-		log.Errorf(dbReferenceError, err)
+		slog.Error("unable to establish a database reference", "error", err)
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = tokenRepo.UpdateTokenAuth(userGUID, t, p.Config.EncryptionKeyInBytes)
 	if err != nil {
-		msg := "unable to update Token: %v"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to update the token"
+		slog.Error(msg, "user", userGUID, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return nil
 }
 
 func (p *portalProxy) startCNSITokenRefreshRoutines() error {
-	log.Debug("startCNSITokenRefreshRoutines")
+	slog.Debug("startCNSITokenRefreshRoutines")
 
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
-		log.Errorf(dbReferenceError, err)
+		slog.Error("unable to establish a database reference", "error", err)
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	tokens, err := tokenRepo.ListAllEnabledConnectedCNSITokens(p.Config.EncryptionKeyInBytes)
 	if err != nil {
-		msg := "unable to list enabled and connected cnsi tokens: %v"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to list the enabled and connected CNSI tokens"
+		slog.Error(msg, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	for _, token := range tokens {
@@ -620,7 +620,7 @@ func (p *portalProxy) startCNSITokenRefreshRoutines() error {
 }
 
 func (p *portalProxy) refreshToken(token api.BackupTokenRecord) {
-	log.Debug("refreshToken")
+	slog.Debug("refreshToken", "endpoint", token.EndpointGUID, "user", token.UserGUID)
 	defer p.refreshRoutines.wg.Done()
 	for {
 		endpoint, err := p.GetCNSIRecord(token.EndpointGUID)
@@ -629,11 +629,12 @@ func (p *portalProxy) refreshToken(token api.BackupTokenRecord) {
 			// Depends on the implementation of EndpointRepository interface from api/cnsis.go,
 			// but all current implementations pass through to repository/cnsis/pgsql_cnsis.go line 308 eventually
 			if err.Error() == "No match for that Endpoint" {
-				log.Infof("endpoint '%v' no longer exists, shutting down token refresher routine", token.EndpointGUID)
+				slog.Info("endpoint no longer exists, shutting down the token refresher routine", "endpoint", token.EndpointGUID)
 				return
 			}
 			// If any other error occurred, log it and retry
-			log.Errorf("could not get retrieve endpoint record to refresh cnsi token '%v': %v", token.TokenRecord.TokenGUID, err)
+			slog.Error("could not retrieve the endpoint record to refresh the CNSI token",
+				"endpoint", token.EndpointGUID, "token", token.TokenRecord.TokenGUID, "error", err)
 			continue
 		}
 		expiry := time.Unix(token.TokenRecord.TokenExpiry, 0)
@@ -645,7 +646,8 @@ func (p *portalProxy) refreshToken(token api.BackupTokenRecord) {
 
 		updatedTokenRecord, err := p.RefreshOAuthToken(endpoint.SkipSSLValidation, token.EndpointGUID, token.UserGUID, endpoint.ClientId, endpoint.ClientSecret, endpoint.TokenEndpoint)
 		if err != nil {
-			log.Errorf("could not refresh cnsi token '%v': %v", token.TokenRecord.TokenGUID, err)
+			slog.Error("could not refresh the CNSI token",
+				"endpoint", token.EndpointGUID, "token", token.TokenRecord.TokenGUID, "error", err)
 			continue
 		}
 		token.TokenRecord = updatedTokenRecord
@@ -653,18 +655,18 @@ func (p *portalProxy) refreshToken(token api.BackupTokenRecord) {
 }
 
 func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t api.TokenRecord) error {
-	log.Debug("setCNSITokenRecord")
+	slog.Debug("setCNSITokenRecord", "endpoint", cnsiGUID, "user", userGUID)
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
-		log.Errorf(dbReferenceError, err)
+		slog.Error("unable to establish a database reference", "error", err)
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = tokenRepo.SaveCNSIToken(cnsiGUID, userGUID, t, p.Config.EncryptionKeyInBytes)
 	if err != nil {
-		msg := "unable to save a CNSI Token: %v"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to save the CNSI token"
+		slog.Error(msg, "endpoint", cnsiGUID, "user", userGUID, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	if p.Config.AutoRefreshCNSITokens {
@@ -676,38 +678,36 @@ func (p *portalProxy) setCNSITokenRecord(cnsiGUID string, userGUID string, t api
 }
 
 func (p *portalProxy) unsetCNSITokenRecord(cnsiGUID string, userGUID string) error {
-	log.Debug("unsetCNSITokenRecord")
+	slog.Debug("unsetCNSITokenRecord", "endpoint", cnsiGUID, "user", userGUID)
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
-		msg := "unable to establish a database reference: '%v'"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		slog.Error("unable to establish a database reference", "error", err)
+		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = tokenRepo.DeleteCNSIToken(cnsiGUID, userGUID)
 	if err != nil {
-		msg := "unable to delete a CNSI Token: %v"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to delete the CNSI token"
+		slog.Error(msg, "endpoint", cnsiGUID, "user", userGUID, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return nil
 }
 
 func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
-	log.Debug("unsetCNSITokenRecord")
+	slog.Debug("unsetCNSITokenRecords", "endpoint", cnsiGUID)
 	tokenRepo, err := p.GetStoreFactory().TokenStore()
 	if err != nil {
-		msg := "unable to establish a database reference: '%v'"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		slog.Error("unable to establish a database reference", "error", err)
+		return fmt.Errorf(dbReferenceError, err)
 	}
 
 	err = tokenRepo.DeleteCNSITokens(cnsiGUID)
 	if err != nil {
-		msg := "unable to delete a CNSI Token: %v"
-		log.Errorf(msg, err)
-		return fmt.Errorf(msg, err)
+		const msg = "unable to delete the CNSI tokens"
+		slog.Error(msg, "endpoint", cnsiGUID, "error", err)
+		return fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return nil
@@ -732,7 +732,7 @@ func (p *portalProxy) unsetCNSITokenRecords(cnsiGUID string) error {
 // @Security ApiKeyAuth
 // @Router /endpoints/{id} [post]
 func (p *portalProxy) updateEndpoint(ec *echo.Context) error {
-	log.Debug("updateEndpoint")
+	slog.Debug("updateEndpoint")
 
 	params := new(api.UpdateEndpointParams)
 	if err := ec.Bind(params); err != nil {
@@ -749,7 +749,7 @@ func (p *portalProxy) updateEndpoint(ec *echo.Context) error {
 
 	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
 	if err != nil {
-		log.Errorf(dbReferenceError, err)
+		slog.Error("unable to establish a database reference", "error", err)
 		return fmt.Errorf(dbReferenceError, err)
 	}
 
