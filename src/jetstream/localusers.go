@@ -3,8 +3,8 @@ package main
 import (
 	"errors"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -47,7 +47,7 @@ func (p *portalProxy) AddLocalUser(c *echo.Context) (string, error) {
 	}
 
 	//Generate a user GUID and hash the password
-	userGUID := uuid.NewV4().String()
+	userGUID := uuid.New().String()
 	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {
 		log.Errorf("Error hashing user password: %v", err)

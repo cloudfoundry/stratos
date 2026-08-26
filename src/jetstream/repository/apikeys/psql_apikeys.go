@@ -11,7 +11,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -82,7 +82,7 @@ func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*api.
 		return nil, err
 	}
 
-	keyGUID := uuid.NewV4().String()
+	keyGUID := uuid.New().String()
 	keySecret := base64.URLEncoding.EncodeToString(randomBytes)
 
 	// Store only a hash of the secret; the plaintext is returned to the caller

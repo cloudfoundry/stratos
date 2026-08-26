@@ -6,9 +6,9 @@ require (
 	github.com/Masterminds/semver/v3 v3.4.0
 	github.com/cloudfoundry/stratos/src/jetstream v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
+	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/pressly/goose v2.7.0+incompatible
-	github.com/satori/go.uuid v1.2.0
 	github.com/sirupsen/logrus v1.9.4
 	gopkg.in/yaml.v2 v2.4.0
 )

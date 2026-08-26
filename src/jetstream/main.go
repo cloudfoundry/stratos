@@ -26,11 +26,11 @@ import (
 	//_ "github.com/cloudfoundry/stratos/src/jetstream/docs"
 
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
@@ -309,7 +309,7 @@ func main() {
 		// We should not be using the default value - this indicates that it has not been set by the user
 		// So for saftey, set a random value
 		log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value")
-		portalConfig.SessionStoreSecret = uuid.NewV4().String()
+		portalConfig.SessionStoreSecret = uuid.New().String()
 	}
 
 	// Config plugins get to determine if we should run migrations on this instance

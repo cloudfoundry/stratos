@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -60,7 +60,7 @@ func (k *KubeTerminal) getClients() (corev1.PodInterface, corev1.SecretInterface
 // Create a pod for a user to run the Kube terminal
 func (k *KubeTerminal) createPod(c *echo.Context, kubeConfig, kubeVersion string, ws *websocket.Conn) (*PodCreationData, error) {
 	// Unique ID for the secret and pod name
-	id := uuid.NewV4().String()
+	id := uuid.New().String()
 	id = strings.ReplaceAll(id, "-", "")
 	// Names for the secret and pod
 	secretName := fmt.Sprintf("terminal-%s", id)

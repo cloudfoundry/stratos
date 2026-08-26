@@ -9,10 +9,10 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
 	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
-	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -58,7 +58,7 @@ func ConfigInit(envLookup *env.VarSet, jetstreamConfig *api.PortalConfig) {
 		if isSQLite {
 			// If SQLIte - create a random value to use, since each app instance has its own DB
 			// and sessions should not be accessible across different instances
-			jetstreamConfig.SessionStoreSecret = uuid.NewV4().String()
+			jetstreamConfig.SessionStoreSecret = uuid.New().String()
 		}
 		// If not SQLite then we are using a shared DB
 		// Just drop through and we'll later use a random value and log a warning
@@ -285,7 +285,7 @@ func (ch *CFHosting) SessionEchoMiddleware(h echo.HandlerFunc) echo.HandlerFunc 
 			// We have a session
 			guid, err := ch.portalProxy.GetSessionValue(c, cfSessionCookieName)
 			if err != nil || guid == nil {
-				guid = uuid.NewV4().String()
+				guid = uuid.New().String()
 				session.Values[cfSessionCookieName] = guid
 				if err := ch.portalProxy.SaveSession(c, session); err != nil {
 					log.Warnf("Unable to save session for Cloud Foundry session affinity: %v", err)

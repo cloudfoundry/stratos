@@ -8,7 +8,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -143,7 +143,7 @@ func (p *PgsqlTokenRepository) SaveAuthToken(userGUID string, tr api.TokenRecord
 	case 0:
 
 		log.Debug("Performing INSERT of encrypted tokens")
-		tokenGUID := uuid.NewV4().String()
+		tokenGUID := uuid.New().String()
 		if _, err := p.db.Exec(insertAuthToken, tokenGUID, userGUID, "uaa", ciphertextAuthToken,
 			ciphertextRefreshToken, tr.TokenExpiry); err != nil {
 			msg := "Unable to INSERT UAA token: %v"
@@ -287,7 +287,7 @@ func (p *PgsqlTokenRepository) SaveCNSIToken(cnsiGUID string, userGUID string, t
 
 	switch count {
 	case 0:
-		tokenGUID := uuid.NewV4().String()
+		tokenGUID := uuid.New().String()
 		if _, insertErr := p.db.Exec(insertCNSIToken, tokenGUID, cnsiGUID, userGUID, "cnsi", ciphertextAuthToken,
 			ciphertextRefreshToken, tr.TokenExpiry, tr.Disconnected, tr.AuthType, tr.Metadata, linkedToken); insertErr != nil {
 

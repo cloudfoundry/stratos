@@ -8,7 +8,7 @@ import (
 	yaml "gopkg.in/yaml.v2"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	uuid "github.com/satori/go.uuid"
+	"github.com/google/uuid"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -97,7 +97,7 @@ func (m *Monocular) procesChartVersions(endpoint, repoURL, repoName, name string
 
 	// Generate a new batch update id - we use this to remove any charts that we not updated in this sync - these
 	// will have an old batch update id afetr processing
-	batchID := uuid.NewV4().String()
+	batchID := uuid.New().String()
 
 	// Write all versions database
 	for _, chartVersion := range chartVersions {
