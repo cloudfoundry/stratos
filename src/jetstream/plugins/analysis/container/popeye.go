@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"errors"
 	"io/ioutil"
+	"log/slog"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type popEyeSummary struct {
@@ -23,20 +22,20 @@ type popEyeResult struct {
 
 func runPopeye(job *AnalysisJob) error {
 
-	log.Debug("Running popeye job")
+	slog.Debug("a popeye job was requested", "job", job.ID)
 
 	job.Busy = true
 	job.Type = "popeye"
 	job.Format = "popeye"
 	setJobNameAndPath(job, "Popeye")
 
-	log.Infof("Running popeye job: %s", job.Path)
+	slog.Info("running a popeye job", "job", job.ID, "path", job.Path)
 
 	// Namespace is validated at the HTTP boundary in run.go (FWT-923). The
 	// guard here is defense-in-depth so a future caller that bypasses the
 	// multipart handler still can't smuggle an argv option into popeye.
 	if err := validateNamespace(job.Config.Namespace); err != nil {
-		log.Warnf("popeye rejected invalid namespace: %v", err)
+		slog.Warn("popeye rejected an invalid namespace", "job", job.ID, "error", err)
 		job.Status = "error"
 		return err
 	}
@@ -60,26 +59,42 @@ func runPopeye(job *AnalysisJob) error {
 
 		job.Busy = false
 
-		log.Infof("Completed kube score job: %s", job.Path)
-
 		// Remove any config files when done
 		job.RemoveTempFiles()
 
 		job.Duration = int(end.Sub(start).Seconds())
 
+		// This used to log "Completed kube score job" - the wrong analyzer -
+		// and it did so before err was checked, so a failed run still
+		// reported completion.
 		if err != nil {
 			// There was an error
 			// Remove the folder
-			os.Remove(job.Folder)
+			if removeErr := os.Remove(job.Folder); removeErr != nil {
+				slog.Warn("could not remove the folder of a failed popeye job",
+					"job", job.ID, "folder", job.Folder, "error", removeErr)
+			}
 			job.Status = "error"
+			slog.Error("popeye job failed",
+				"job", job.ID, "path", job.Path, "duration", job.Duration, "error", err)
 		} else {
 			reportFile := filepath.Join(job.Folder, "report.json")
-			ioutil.WriteFile(reportFile, out, os.ModePerm)
+			if writeErr := ioutil.WriteFile(reportFile, out, os.ModePerm); writeErr != nil {
+				slog.Error("could not write the popeye report",
+					"job", job.ID, "file", reportFile, "error", writeErr)
+			}
 			job.Status = "completed"
+			slog.Info("completed popeye job",
+				"job", job.ID, "path", job.Path, "duration", job.Duration)
 
 			// Parse the report
-			if summary, err := parsePopeyeReport(reportFile); err == nil {
+			if summary, parseErr := parsePopeyeReport(reportFile); parseErr == nil {
 				job.Result = serializePopeyeReport(summary)
+			} else {
+				// The parse failure used to be discarded, leaving job.Result
+				// empty with no indication why.
+				slog.Warn("could not parse the popeye report",
+					"job", job.ID, "file", reportFile, "error", parseErr)
 			}
 		}
 	}()

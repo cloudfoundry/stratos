@@ -2,10 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"log/slog"
 	"os"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 type kubeAnalyzerConfig struct {
@@ -38,11 +37,11 @@ type AnalysisJob struct {
 
 // RemoveTempFiles will remove any temporary files
 func (job *AnalysisJob) RemoveTempFiles() {
-	log.Debug("Removing temporary files")
+	slog.Debug("removing the temporary files", "job", job.ID, "count", len(job.TempFiles))
 	for _, name := range job.TempFiles {
 		err := os.Remove(name)
 		if err != nil {
-			log.Errorf("Could not delete file: %s", name)
+			slog.Error("could not delete a temporary file", "job", job.ID, "file", name, "error", err)
 		}
 	}
 }
