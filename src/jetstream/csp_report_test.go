@@ -1,8 +1,11 @@
 package main
 
 import (
+	"bytes"
+	"context"
 	"encoding/json"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,8 +14,6 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
-	log "github.com/sirupsen/logrus"
-	"github.com/sirupsen/logrus/hooks/test"
 )
 
 const reportBody = `{"csp-report":{
@@ -34,18 +35,64 @@ func postReport(t *testing.T, p *portalProxy, body string) (*httptest.ResponseRe
 	return rec, p.receiveCSPReport(echo.New().NewContext(req, rec))
 }
 
-// captureLogs redirects logrus for one test and restores it afterwards, so a
-// failure here cannot silence logging for the rest of the package.
-func captureLogs(t *testing.T) *test.Hook {
-	t.Helper()
-	hook := test.NewGlobal()
-	previous := log.GetLevel()
-	log.SetLevel(log.DebugLevel)
-	t.Cleanup(func() {
-		hook.Reset()
-		log.SetLevel(previous)
+// logEntry is one captured slog record, flattened to what these tests assert
+// on: the level, the message, the attributes by key, and the line a real
+// handler produced for it.
+type logEntry struct {
+	Level    slog.Level
+	Message  string
+	Data     map[string]any
+	rendered string
+}
+
+// String returns the line as a handler actually wrote it. The forged-line
+// tests turn on the handler's quoting, so rendering them any other way would
+// test the helper instead of the code.
+func (e *logEntry) String() (string, error) { return e.rendered, nil }
+
+// logCapture collects records off a slog handler installed for one test.
+type logCapture struct{ entries []*logEntry }
+
+func (c *logCapture) Enabled(context.Context, slog.Level) bool { return true }
+
+func (c *logCapture) Handle(ctx context.Context, record slog.Record) error {
+	entry := &logEntry{Level: record.Level, Message: record.Message, Data: map[string]any{}}
+	record.Attrs(func(attr slog.Attr) bool {
+		entry.Data[attr.Key] = attr.Value.Any()
+		return true
 	})
-	return hook
+
+	// Render through the real handler so the escaping under test is the
+	// escaping production performs.
+	var line bytes.Buffer
+	if err := slog.NewTextHandler(&line, nil).Handle(ctx, record); err != nil {
+		return err
+	}
+	entry.rendered = strings.TrimRight(line.String(), "\n")
+
+	c.entries = append(c.entries, entry)
+	return nil
+}
+
+func (c *logCapture) WithAttrs([]slog.Attr) slog.Handler { return c }
+func (c *logCapture) WithGroup(string) slog.Handler      { return c }
+
+func (c *logCapture) LastEntry() *logEntry {
+	if len(c.entries) == 0 {
+		return nil
+	}
+	return c.entries[len(c.entries)-1]
+}
+
+// captureLogs redirects slog for one test and restores it afterwards, so a
+// failure here cannot silence logging for the rest of the package.
+func captureLogs(t *testing.T) *logCapture {
+	t.Helper()
+	capture := &logCapture{}
+	previous := slog.Default()
+	slog.SetDefault(slog.New(capture))
+	t.Cleanup(func() { slog.SetDefault(previous) })
+	return capture
 }
 
 func TestReceiveCSPReportLogsTheViolation(t *testing.T) {
@@ -64,7 +111,7 @@ func TestReceiveCSPReportLogsTheViolation(t *testing.T) {
 	if entry == nil {
 		t.Fatal("a violation must produce a log entry")
 	}
-	if entry.Level != log.WarnLevel {
+	if entry.Level != slog.LevelWarn {
 		t.Errorf("violations are logged at WARN, got %v", entry.Level)
 	}
 	if !strings.HasPrefix(entry.Message, "SECURITY:") {
@@ -369,7 +416,7 @@ func TestForwardCSPReportSurvivesAnUnreachableCollector(t *testing.T) {
 	forwardCSPReport(url, map[string]any{"csp-report": cspViolationReport{}})
 
 	entry := hook.LastEntry()
-	if entry == nil || entry.Level != log.ErrorLevel {
+	if entry == nil || entry.Level != slog.LevelError {
 		t.Fatalf("a failed forward should be logged as an error, got %v", entry)
 	}
 }

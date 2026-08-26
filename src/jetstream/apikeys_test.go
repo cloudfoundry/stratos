@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"io"
+	"log/slog"
 	"net/http"
 	"testing"
 
@@ -11,7 +13,6 @@ import (
 	mock_api "github.com/cloudfoundry/stratos/src/jetstream/api/mock"
 	mock_apikeys "github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys/mock"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"go.uber.org/mock/gomock"
 )
@@ -20,7 +21,7 @@ func Test_addAPIKey(t *testing.T) {
 	t.Parallel()
 
 	// disabling logging noise
-	log.SetLevel(log.PanicLevel)
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	Convey("Given a request to add an API key", t, func() {
 		userID := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
@@ -224,7 +225,7 @@ func Test_listAPIKeys(t *testing.T) {
 	t.Parallel()
 
 	// disabling logging noise
-	log.SetLevel(log.PanicLevel)
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	ctrl := gomock.NewController(t)
 	mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
@@ -313,7 +314,7 @@ func Test_deleteAPIKeys(t *testing.T) {
 	t.Parallel()
 
 	// disabling logging noise
-	log.SetLevel(log.PanicLevel)
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	ctrl := gomock.NewController(t)
 	mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)

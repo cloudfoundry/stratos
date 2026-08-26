@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"log/slog"
 	"testing"
 	"time"
 
 	"github.com/google/uuid"
-	log "github.com/sirupsen/logrus"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -156,7 +156,7 @@ func TestFindPasswordHash(t *testing.T) {
 
 		localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(db)
 		if err != nil {
-			log.Errorf("Database error getting repo for Local users: %v", err)
+			slog.Error("database error getting the repo for local users", "error", err)
 		}
 
 		username := "testuser"
@@ -174,7 +174,7 @@ func TestFindPasswordHash(t *testing.T) {
 		user := api.LocalUser{UserGUID: userGUID, PasswordHash: generatedPasswordHash, Username: username, Email: email, Scope: scope}
 		err = localUsersRepo.AddLocalUser(user)
 		if err != nil {
-			log.Errorf("Error hashing user password: %v", err)
+			slog.Error("error hashing the user password", "error", err)
 		}
 
 		expectedHashRow := sqlmock.NewRows([]string{"password_hash"}).AddRow(generatedPasswordHash)
