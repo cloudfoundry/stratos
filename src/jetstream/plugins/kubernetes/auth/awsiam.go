@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -12,10 +13,10 @@ import (
 	log "github.com/sirupsen/logrus"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/sts"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/aws/aws-sdk-go-v2/credentials/stscreds"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"sigs.k8s.io/aws-iam-authenticator/pkg/token"
 )
 
@@ -62,15 +63,18 @@ func (c *AWSKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Toke
 	return nil
 }
 
-func (c *AWSIAMUserInfo) Retrieve() (credentials.Value, error) {
-	return credentials.Value{
+// Retrieve implements the SDK v2 aws.CredentialsProvider interface.
+//
+// The v1 implementation paired this with IsExpired() returning true, which
+// forced the SDK to call Retrieve on every use. v2 has no such method and none
+// is needed: these are static fields on this struct, so leaving CanExpire false
+// lets the credentials cache keep what is returned here.
+func (c *AWSIAMUserInfo) Retrieve(context.Context) (aws.Credentials, error) {
+	return aws.Credentials{
 		AccessKeyID:     c.AccessKey,
 		SecretAccessKey: c.SecretKey,
+		Source:          "StratosAWSIAMUserInfo",
 	}, nil
-}
-
-func (c *AWSIAMUserInfo) IsExpired() bool {
-	return true
 }
 
 func (c *AWSKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
@@ -126,17 +130,19 @@ func (c *AWSKubeAuth) getTokenIAM(info AWSIAMUserInfo) (string, error) {
 		return "", fmt.Errorf("AWS IAM: Failed to create generator due to %+v", err)
 	}
 
-	sess, err := session.NewSessionWithOptions(session.Options{
-		AssumeRoleTokenProvider: token.StdinStderrTokenProvider,
-		SharedConfigState:       session.SharedConfigEnable,
-	})
+	// LoadDefaultConfig reads shared config by default, which is what
+	// session.SharedConfigEnable did under v1.
+	cfg, err := config.LoadDefaultConfig(context.Background(),
+		config.WithCredentialsProvider(&info),
+		config.WithAssumeRoleCredentialOptions(func(o *stscreds.AssumeRoleOptions) {
+			o.TokenProvider = token.StdinStderrTokenProvider
+		}),
+	)
 	if err != nil {
-		return "", fmt.Errorf("AWS IAM: Failed to create new session %+v", err)
+		return "", fmt.Errorf("AWS IAM: Failed to load AWS config %+v", err)
 	}
 
-	creds := credentials.NewCredentials(&info)
-	stsAPI := sts.New(sess, &aws.Config{Credentials: creds})
-	tok, err := generator.GetWithSTS(info.Cluster, stsAPI)
+	tok, err := generator.GetWithSTS(info.Cluster, sts.NewFromConfig(cfg))
 	if err != nil {
 		return "", fmt.Errorf("AWS IAM: Failed to get token due to: %+v ", err)
 	}
