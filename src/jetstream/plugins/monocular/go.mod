@@ -3,7 +3,7 @@ module github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular
 go 1.27.0
 
 require (
-	github.com/Masterminds/semver/v3 v3.4.0
+	github.com/Masterminds/semver/v3 v3.5.0
 	github.com/cloudfoundry/stratos/src/jetstream v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
 	github.com/google/uuid v1.6.0
@@ -24,7 +24,7 @@ require (
 	github.com/govau/cf-common v0.0.7 // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
-	github.com/lib/pq v1.10.9 // indirect
+	github.com/lib/pq v1.12.3 // indirect
 	github.com/ncruces/go-sqlite3 v0.35.2 // indirect
 	github.com/ncruces/go-sqlite3-wasm/v3 v3.2.35303 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
