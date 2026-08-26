@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 	html "html/template"
+	"log/slog"
 	"path"
 	text "text/template"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 
 	"github.com/govau/cf-common/env"
-	log "github.com/sirupsen/logrus"
 )
 
 // SMTPConfig represents email configuration
@@ -124,21 +124,20 @@ func (userinvite *UserInvite) loadTemplates(c *Config) error {
 	var err error
 	c.SubjectTemplate, err = text.New("subject").Parse(c.TemplateConfig.Subject)
 	if err != nil {
-		log.Warn("Could not parse template for User Invite Subject")
-		log.Warn(err)
+		slog.Warn("could not parse the User Invite subject template", "error", err)
 	}
 
 	textFile := path.Join(c.TemplateConfig.TemplateDir, c.TemplateConfig.PlainTextTemplate)
-	log.Debugf("Loading plain text email template from: %s", textFile)
+	slog.Debug("Loading the plain text email template", "file", textFile)
 	textTmpl, err := text.ParseFiles(textFile)
 	if err != nil {
-		log.Warn("User Invite failed to load Plain Text template")
+		slog.Warn("User Invite failed to load the plain text template", "file", textFile, "error", err)
 		return err
 	}
 	c.PlainTextTemplate = textTmpl
 
 	htmlFile := path.Join(c.TemplateConfig.TemplateDir, c.TemplateConfig.HTMLTemplate)
-	log.Debugf("Loading HTML email template from: %s", htmlFile)
+	slog.Debug("Loading the HTML email template", "file", htmlFile)
 	htmlTmpl, err := html.ParseFiles(htmlFile)
 	if err == nil {
 		c.HTMLTemplate = htmlTmpl

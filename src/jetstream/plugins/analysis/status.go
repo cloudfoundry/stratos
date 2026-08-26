@@ -5,18 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // Start a poller to check the status
 func (c *Analysis) initStatusCheck() {
 
-	log.Info("Analysis Plugin: Starting status check ...")
+	slog.Info("Analysis Plugin: Starting status check ...")
 
 	// Just loop forever, checking the status of running jobs every 10s
 	go func() {
@@ -24,14 +23,14 @@ func (c *Analysis) initStatusCheck() {
 			time.Sleep(10 * time.Second)
 			err := c.checkStatus()
 			if err != nil {
-				log.Errorf("Error checking status: %v", err)
+				slog.Error("error checking the analysis status", "error", err)
 			}
 		}
 	}()
 }
 
 func (c *Analysis) checkStatus() error {
-	log.Debug("Checking status....")
+	slog.Debug("Checking status....")
 	p := c.portalProxy
 	// Create a record in the reports datastore
 	dbStore, err := store.NewAnalysisDBStore(p.GetDatabaseConnection())
@@ -51,13 +50,13 @@ func (c *Analysis) checkStatus() error {
 
 	ids := make([]string, 0)
 	for _, job := range running {
-		log.Debugf("Got running job: %s", job.ID)
+		slog.Debug("Got a running job", "job", job.ID)
 		ids = append(ids, job.ID)
 	}
 
 	data, err := json.Marshal(ids)
 	if err != nil {
-		log.Errorf("Could not marshal IDs: %v", err)
+		slog.Error("could not marshal the job IDs", "jobs", len(ids), "error", err)
 		return fmt.Errorf("Could not marshal IDs: %v", err)
 	}
 
@@ -78,7 +77,7 @@ func (c *Analysis) checkStatus() error {
 	defer func() { _ = rsp.Body.Close() }()
 	response, err := io.ReadAll(rsp.Body)
 	if err != nil {
-		log.Errorf("Could not read response: %v", err)
+		slog.Error("could not read the Analyzer status response", "url", statusURL, "error", err)
 		return fmt.Errorf("Could not read response: %v", err)
 	}
 
@@ -94,13 +93,13 @@ func (c *Analysis) checkStatus() error {
 			job.Duration = status.Duration
 			job.Status = status.Status
 			if err := dbStore.UpdateReport(job.UserID, job); err != nil {
-				log.Warnf("Unable to update status for job %s: %v", job.ID, err)
+				slog.Warn("unable to update the job status", "job", job.ID, "status", job.Status, "error", err)
 			}
 		} else {
 			// The analysis server did not know about our job, os mark as error
 			job.Status = "error"
 			if err := dbStore.UpdateReport(job.UserID, job); err != nil {
-				log.Warnf("Unable to update status for job %s: %v", job.ID, err)
+				slog.Warn("unable to mark the job as errored", "job", job.ID, "error", err)
 			}
 		}
 	}

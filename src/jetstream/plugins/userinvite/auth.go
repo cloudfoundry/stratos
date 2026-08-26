@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
@@ -12,7 +13,6 @@ import (
 	"unicode"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -54,9 +54,9 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint a
 
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(form.Encode()))
 	if err != nil {
-		msg := "Failed to create request for UAA: %v"
-		log.Warnf(msg, err)
-		return nil, nil, fmt.Errorf(msg, err)
+		const msg = "failed to create the request for UAA"
+		slog.Warn(msg, "url", authEndpoint, "error", err)
+		return nil, nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	client := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation, endpoint.CACert)
@@ -64,7 +64,7 @@ func (invite *UserInvite) refreshToken(clientID, clientSecret string, endpoint a
 
 	res, err := client.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
-		log.Warnf("User Invite: Error performing http request - response: %v, error: %v", res, err)
+		slog.Warn("User Invite: error performing the http request", "url", authEndpoint, "response", res, "error", err)
 
 		// Try and get the error details form the WWW-Authenticate hehader
 		errMsg := "Error checking UAA Client"
@@ -175,18 +175,18 @@ func parseAuthHeader(v string) map[string]string {
 }
 
 func (invite *UserInvite) doUAAClientAuthFlow(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doUAAClientAuthFlow")
+	slog.Debug("doUAAClientAuthFlow")
 	authHandler := invite.portalProxy.OAuthHandlerFunc(cnsiRequest, req, invite.refreshUAAClientToken)
 	return invite.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
 func (invite *UserInvite) getCNSIUserFromUAAClientToken(cnsiGUID string, cfTokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
-	log.Debug("getCNSIUserFromUAAClientToken")
+	slog.Debug("getCNSIUserFromUAAClientToken", "endpoint", cnsiGUID)
 	return &api.ConnectedUser{}, true
 }
 
 func (invite *UserInvite) refreshUAAClientToken(skipSSLValidation bool, cnsiGUID, userGUID, clientID, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("refreshUAAClientToken")
+	slog.Debug("refreshUAAClientToken", "endpoint", cnsiGUID)
 	refreshedToken := &api.TokenRecord{}
 
 	// See if we can get a token for the invite user

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 
 	"golang.org/x/crypto/pbkdf2"
@@ -15,7 +16,6 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 type cnsiTokenBackup struct {
@@ -68,7 +68,7 @@ type RestoreRequest struct {
 }
 
 func (ctb *cnsiTokenBackup) BackupEndpoints(c *echo.Context) error {
-	log.Debug("BackupEndpoints")
+	slog.Debug("BackupEndpoints")
 
 	// Create the backup request struct from the body
 	body, err := io.ReadAll(c.Request().Body)
@@ -103,7 +103,7 @@ func (ctb *cnsiTokenBackup) BackupEndpoints(c *echo.Context) error {
 }
 
 func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, error) {
-	log.Debug("createBackup")
+	slog.Debug("createBackup")
 	allEndpoints, err := ctb.p.ListEndpoints()
 	if err != nil {
 		return nil, api.NewHTTPShadowError(http.StatusBadGateway, "Failed to fetch endpoints", "Failed to fetch endpoints: %+v", err)
@@ -172,7 +172,7 @@ func (ctb *cnsiTokenBackup) createBackup(data *BackupRequest) (*BackupContent, e
 }
 
 func (ctb *cnsiTokenBackup) getCNSITokenRecordsBackup(endpointID string) ([]api.BackupTokenRecord, bool) {
-	log.Debug("getCNSITokenRecordsBackup")
+	slog.Debug("getCNSITokenRecordsBackup")
 	tokenRepo, err := ctb.p.GetStoreFactory().TokenStore()
 	if err != nil {
 		return make([]api.BackupTokenRecord, 0), false
@@ -187,7 +187,7 @@ func (ctb *cnsiTokenBackup) getCNSITokenRecordsBackup(endpointID string) ([]api.
 }
 
 func (ctb *cnsiTokenBackup) RestoreEndpoints(c *echo.Context) error {
-	log.Debug("RestoreEndpoints")
+	slog.Debug("RestoreEndpoints")
 
 	// Create the restore request struct from the body
 	body, err := io.ReadAll(c.Request().Body)
@@ -210,7 +210,7 @@ func (ctb *cnsiTokenBackup) RestoreEndpoints(c *echo.Context) error {
 }
 
 func (ctb *cnsiTokenBackup) restoreBackup(backup *RestoreRequest) error {
-	log.Debug("restoreBackup")
+	slog.Debug("restoreBackup")
 
 	data := &BackupContent{}
 	if err := json.Unmarshal([]byte(backup.Data), data); err != nil {
@@ -338,7 +338,7 @@ func decryptPayload(payloadEncrypted []byte, password string) (*string, error) {
 		var err error
 		secret, err = createHash(password)
 		if err != nil {
-			log.Warningf("Could not create hash: %+v", err)
+			slog.Warn("could not create the legacy backup hash", "error", err)
 			return nil, fmt.Errorf("Could not create hash")
 		}
 	}

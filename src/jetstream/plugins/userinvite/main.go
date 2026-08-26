@@ -3,11 +3,11 @@ package userinvite
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 )
 
 // Module init will register plugin
@@ -142,6 +142,6 @@ func (userinvite *UserInvite) initClientToken(context *echo.Context) error {
 		return fmt.Errorf("Failed to verify invite client id and secret: %v", err)
 	}
 
-	log.Info("Invite User UAA client initialized")
+	slog.Info("Invite User UAA client initialized")
 	return nil
 }

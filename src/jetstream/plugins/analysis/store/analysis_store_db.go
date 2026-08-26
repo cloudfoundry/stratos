@@ -3,8 +3,7 @@ package store
 import (
 	"database/sql"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
@@ -47,7 +46,7 @@ func NewAnalysisDBStore(dcp *sql.DB) (AnalysisStore, error) {
 
 // List - Returns a list of all user Analysis Reports for the given endpoint
 func (p *AnalysisDBStore) List(userGUID, endpointID string) ([]*AnalysisRecord, error) {
-	log.Debug("List")
+	slog.Debug("List", "user", userGUID)
 	rows, err := p.db.Query(listReports, userGUID, endpointID)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Analysis Reports records: %v", err)
@@ -58,7 +57,7 @@ func (p *AnalysisDBStore) List(userGUID, endpointID string) ([]*AnalysisRecord, 
 }
 
 func (p *AnalysisDBStore) ListCompletedByPath(userGUID, endpointID, path string) ([]*AnalysisRecord, error) {
-	log.Debug("ListCompletedByPath")
+	slog.Debug("ListCompletedByPath", "user", userGUID, "path", path)
 	rows, err := p.db.Query(listCompletedReportsByPath, userGUID, endpointID, path)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Analysis Reports records: %v", err)
@@ -69,7 +68,7 @@ func (p *AnalysisDBStore) ListCompletedByPath(userGUID, endpointID, path string)
 }
 
 func (p *AnalysisDBStore) ListRunning() ([]*AnalysisRecord, error) {
-	log.Debug("ListRunning")
+	slog.Debug("ListRunning")
 	rows, err := p.db.Query(listRunningReports)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Analysis Reports records: %v", err)
@@ -101,14 +100,14 @@ func list(rows *sql.Rows) ([]*AnalysisRecord, error) {
 
 // Get - Get a specific Analysis Report by ID
 func (p *AnalysisDBStore) Get(userGUID, ID string) (*AnalysisRecord, error) {
-	log.Debug("Get")
+	slog.Debug("Get", "user", userGUID, "report", ID)
 
 	report := AnalysisRecord{}
 	err := p.db.QueryRow(getReport, userGUID, ID).Scan(&report.ID, &report.EndpointType, &report.EndpointID, &report.UserID, &report.Name, &report.Path, &report.Type, &report.Format, &report.Created, &report.Read, &report.Status, &report.Duration, &report.Result)
 	if err != nil {
-		msg := "Unable to Get Analysis Report record: %v"
-		log.Debugf(msg, err)
-		return nil, fmt.Errorf(msg, err)
+		const msg = "unable to get the analysis report record"
+		slog.Debug(msg, "user", userGUID, "report", ID, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return &report, nil
@@ -116,14 +115,14 @@ func (p *AnalysisDBStore) Get(userGUID, ID string) (*AnalysisRecord, error) {
 
 // GetLatestCompleted - Get latest report for the specified path
 func (p *AnalysisDBStore) GetLatestCompleted(userGUID, endpointID, path string) (*AnalysisRecord, error) {
-	log.Debug("GetLatestCompleted")
+	slog.Debug("GetLatestCompleted", "user", userGUID, "endpoint", endpointID, "path", path)
 
 	report := AnalysisRecord{}
 	err := p.db.QueryRow(getLatestReport, userGUID, endpointID, path).Scan(&report.ID, &report.EndpointType, &report.EndpointID, &report.UserID, &report.Name, &report.Path, &report.Type, &report.Format, &report.Created, &report.Read, &report.Status, &report.Duration, &report.Result)
 	if err != nil {
-		msg := "Unable to get laetst completed Analysis Report record: %v"
-		log.Debugf(msg, err)
-		return nil, fmt.Errorf(msg, err)
+		const msg = "unable to get the latest completed analysis report record"
+		slog.Debug(msg, "user", userGUID, "endpoint", endpointID, "path", path, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return &report, nil

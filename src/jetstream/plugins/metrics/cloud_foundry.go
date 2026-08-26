@@ -2,12 +2,12 @@ package metrics
 
 import (
 	"errors"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -112,7 +112,7 @@ func makePrometheusRequestURI(c *echo.Context, prometheusOp string, modify strin
 		}
 	}
 	uri.RawQuery = values.Encode()
-	log.Debugf("Sending prometheus query: %+v", uri.String())
+	slog.Debug("Sending a prometheus query", "uri", uri.String())
 	return &uri
 }
 

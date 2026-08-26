@@ -2,10 +2,9 @@
 package cloudfoundry
 
 import (
+	"log/slog"
 	"net/http"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
@@ -252,7 +251,7 @@ func (c *CloudFoundrySpecification) getNativeServiceOfferingsForBroker(ctx *echo
 func brokersFromIncluded(list *capi.ListResponse[capi.ServiceOffering]) map[string]capi.ServiceBroker {
 	inc, err := capi.ServiceOfferingIncludedFrom(list)
 	if err != nil {
-		log.Warnf("service_offerings: could not decode included block: %v", err)
+		slog.Warn("service_offerings: could not decode the included block", "err", err)
 		return map[string]capi.ServiceBroker{}
 	}
 	return keyByGUID(inc.ServiceBrokers, func(b capi.ServiceBroker) string { return b.GUID })

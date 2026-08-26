@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 	"time"
@@ -12,15 +13,13 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
 	"github.com/labstack/echo/v5"
-
-	log "github.com/sirupsen/logrus"
 )
 
 const mainReportFile = "report.json"
 
 // listReports will list the analysis repotrs that have run
 func (c *Analysis) listReports(ec *echo.Context) error {
-	log.Debug("listReports")
+	slog.Debug("listReports")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -48,7 +47,7 @@ func (c *Analysis) listReports(ec *echo.Context) error {
 
 // getReportsByPath will list the completed analysis repotrs that have run for the specified path
 func (c *Analysis) getReportsByPath(ec *echo.Context) error {
-	log.Debug("getReportsByPath")
+	slog.Debug("getReportsByPath")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -90,7 +89,7 @@ func populateSummary(report *store.AnalysisRecord) {
 }
 
 func (c *Analysis) getLatestReport(ec *echo.Context) error {
-	log.Debug("getLatestReport")
+	slog.Debug("getLatestReport")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -130,7 +129,7 @@ func (c *Analysis) getLatestReport(ec *echo.Context) error {
 }
 
 func (c *Analysis) getReport(ec *echo.Context) error {
-	log.Debug("getReport")
+	slog.Debug("getReport")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -163,7 +162,7 @@ func (c *Analysis) getReport(ec *echo.Context) error {
 }
 
 func (c *Analysis) deleteReports(ec *echo.Context) error {
-	log.Debug("deleteReports")
+	slog.Debug("deleteReports")
 	var p = c.portalProxy
 
 	// Need to get a config object for the target endpoint
@@ -193,13 +192,13 @@ func (c *Analysis) deleteReports(ec *echo.Context) error {
 			client := &http.Client{Timeout: 30 * time.Second}
 			rsp, err := client.Do(r)
 			if err != nil {
-				log.Warnf("Could not delete analysis report for: %s", job.ID)
+				slog.Warn("could not delete the analysis report", "report", job.ID, "url", deleteURL, "error", err)
 			} else if rsp.StatusCode != http.StatusOK {
-				log.Warnf("Could not delete analysis report for: %s", job.ID)
+				slog.Warn("could not delete the analysis report", "report", job.ID, "url", deleteURL, "status", rsp.StatusCode)
 			}
 		}
 		if err := dbStore.Delete(userID, id); err != nil {
-			log.Warnf("Could not delete analysis report %s from store: %v", id, err)
+			slog.Warn("could not delete the analysis report from the store", "report", id, "user", userID, "error", err)
 		}
 	}
 

@@ -6,13 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -93,7 +93,7 @@ var v2ToV3SpaceRole = map[string]string{
 
 // Send an invite
 func (invite *UserInvite) invite(c *echo.Context) error {
-	log.Debug("Invite User")
+	slog.Debug("Invite User")
 	cfGUID := c.Param("id")
 
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
@@ -180,7 +180,7 @@ func (invite *UserInvite) processUserInvites(c *echo.Context, endpoint api.CNSIR
 }
 
 func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteRequest *UserInviteReq, user UserInviteUser, endpoint api.CNSIRecord) (UserInviteUser, bool) {
-	log.Debugf("Creating CF User for: %s", user.Email)
+	slog.Debug("Creating a CF user", "email", user.Email, "endpoint", cfGUID)
 	// Create the user in Cloud Foundry
 	if cfError, err := invite.CreateCloudFoundryUser(cfGUID, userGUID, user.UserID); err != nil {
 		return updateUserInviteRecordForError(user, "Failed to create user in Cloud Foundry", cfError), true
@@ -204,7 +204,7 @@ func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteR
 		if err = invite.SendEmail(user.Email, user.InviteLink, endpoint); err != nil {
 			user.Success = false
 			user.ErrorMessage = "Unable to send invitation email to user"
-			log.Warnf("Could not send user invite email: %v", err)
+			slog.Warn("could not send the user invite email", "email", user.Email, "error", err)
 			user.ErrorCode = "Stratos-EmailSendFailure"
 			return user, true
 		}
@@ -214,7 +214,7 @@ func (invite *UserInvite) processUserInvite(cfGUID, userGUID string, userInviteR
 
 // UAAUserInvite makes the request to the UAA to create accounts and invite links
 func (invite *UserInvite) UAAUserInvite(c *echo.Context, endpoint api.CNSIRecord, uaaInviteReq *UserInviteReq) (*UserInviteResponse, error) {
-	log.Debug("Requesting invite links from UAA")
+	slog.Debug("Requesting invite links from UAA")
 
 	// See if we can get a token for the invite user
 	token, ok := invite.portalProxy.GetCNSITokenRecord(endpoint.GUID, UserInviteUserID)
@@ -257,9 +257,9 @@ func (invite *UserInvite) UAAUserInvite(c *echo.Context, endpoint api.CNSIRecord
 	// Make request to the UAA to invite the users
 	req, err := http.NewRequest("POST", inviteURL, bytes.NewReader(uaaReqJSON))
 	if err != nil {
-		msg := "Failed to create request for UAA: %v"
-		log.Errorf(msg, err)
-		return nil, fmt.Errorf(msg, err)
+		const msg = "failed to create the request for UAA"
+		slog.Error(msg, "url", inviteURL, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("Authorization", "bearer "+token.AuthToken)
@@ -268,7 +268,7 @@ func (invite *UserInvite) UAAUserInvite(c *echo.Context, endpoint api.CNSIRecord
 	httpClient := invite.portalProxy.GetHttpClientForRequest(req, endpoint.SkipSSLValidation, endpoint.CACert)
 	res, err := httpClient.Do(req)
 	if err != nil || res.StatusCode != http.StatusOK {
-		log.Errorf("Error performing http request - response: %v, error: %v", res, err)
+		slog.Error("error performing the http request", "url", inviteURL, "response", res, "error", err)
 		return nil, api.LogHTTPError(res, err)
 	}
 
@@ -312,7 +312,7 @@ func (invite *UserInvite) CreateCloudFoundryUser(cnsiGUID, userID, newUserGUID s
 
 	cfError := parseCFError(res.Response)
 	if res.StatusCode == http.StatusUnprocessableEntity && isAlreadyExistsError(cfError) {
-		log.Debug("CF User already created")
+		slog.Debug("CF user already created", "user", newUserGUID)
 		return nil, nil
 	}
 	return cfError, errors.New("Failed to create user in Cloud Foundry")
@@ -334,7 +334,7 @@ func (invite *UserInvite) AssociateUserWithOrg(cnsiGUID, userID, newUserGUID, or
 
 	cfError := parseCFError(res.Response)
 	if res.StatusCode == http.StatusUnprocessableEntity && isAlreadyExistsError(cfError) {
-		log.Debug("CF user already in org")
+		slog.Debug("CF user already in the org", "user", newUserGUID, "org", orgGUID)
 		return nil, nil
 	}
 	return cfError, errors.New("Failed to associate user with Org")
@@ -384,7 +384,7 @@ func (invite *UserInvite) AssociateSpaceRoleForUser(cnsiGUID, userID, newUserGUI
 
 	cfError := parseCFError(res.Response)
 	if res.StatusCode == http.StatusUnprocessableEntity && isAlreadyExistsError(cfError) {
-		log.Debugf("CF user already has space role %s", v3Role)
+		slog.Debug("CF user already has the space role", "user", newUserGUID, "role", v3Role)
 		return nil, nil
 	}
 	return cfError, fmt.Errorf("Failed to associate user with Space Role (%s)", roleName)

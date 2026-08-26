@@ -2,12 +2,11 @@
 package cloudfoundry
 
 import (
+	"log/slog"
 	"os"
 	"strconv"
 	"strings"
 	"sync/atomic"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // CF v3 list requests take guid-list filters (space_guids=, guids=,
@@ -53,7 +52,8 @@ func guidChunkSize() int {
 	if v, err := strconv.Atoi(s); err == nil && v > 0 {
 		return v
 	}
-	log.Warnf("%s=%q is not a positive integer or \"auto\"; using default %d", guidChunkEnv, guidChunkSetting, guidChunkDefault)
+	slog.Warn("setting is not a positive integer or \"auto\"; using the default",
+		"setting", guidChunkEnv, "value", guidChunkSetting, "default", guidChunkDefault)
 	return guidChunkDefault
 }
 
@@ -128,7 +128,8 @@ func forEachGuidChunk(filterKey string, guids []string, fn func(chunk []string) 
 					size = guidChunkFloor
 				}
 				adaptedChunkSize.Store(int64(size))
-				log.Warnf("%s=auto: adapted guid chunk width to %d after a 414 and retrying", guidChunkEnv, size)
+				slog.Warn("adapted the guid chunk width after a 414 and retrying",
+					"setting", guidChunkEnv, "width", size)
 				continue // retry the same slice at the reduced width
 			}
 			return err
@@ -144,6 +145,7 @@ func warnOnURITooLarge(err error, filterKey string, chunkLen int) {
 	if upstreamStatusOf(err) != 414 {
 		return
 	}
-	log.Warnf("guid-filter request (%s, %d guids) rejected with 414: configured %s (%d) exceeds what the platform chain accepts — re-run the endpoint probe on the diagnostics page and lower the setting",
-		filterKey, chunkLen, guidChunkEnv, guidChunkSize())
+	slog.Warn("guid-filter request rejected with 414: the configured chunk width exceeds what the platform chain accepts - "+
+		"re-run the endpoint probe on the diagnostics page and lower the setting",
+		"filter", filterKey, "guids", chunkLen, "setting", guidChunkEnv, "current", guidChunkSize())
 }
