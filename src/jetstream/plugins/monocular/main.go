@@ -254,7 +254,11 @@ func (m *Monocular) validateExternalMonocularEndpoint(cnsi string) (*api.CNSIRec
 		return &endpoint, nil
 	}
 
-	if m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] != "true" {
+	// The predecessor of this flag was helmHubEnabled, where != "true" meant
+	// "not enabled". The rename to artifactHubDisabled inverted the meaning
+	// but kept the comparison, so this rejected the request whenever Artifact
+	// Hub was enabled - which is the default.
+	if m.portalProxy.GetConfig().PluginConfig[artifactHubDisabled] == "true" {
 		return nil, echo.NewHTTPError(http.StatusInternalServerError, "Artifact Hub is disabled")
 	}
 
