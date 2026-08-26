@@ -12,6 +12,14 @@
   the same purpose; `golang/mock` (archived) moves to its successor
   `go.uber.org/mock`; and `gorilla/context`, obsolete since Go 1.7, is
   gone along with the middleware that existed only to call it.
+- Dropped the archived AWS SDK v1. It was reachable only through
+  aws-iam-authenticator, which has since moved to SDK v2; the Kubernetes
+  IAM auth path moves with it.
+- Upgraded Helm to v3.21.4 and the Kubernetes client libraries to v0.36.
+  Kubernetes minor releases remove APIs, so these move as a set. This
+  also repairs dependency maintenance in the Kubernetes plugin, where
+  `go mod tidy` could not run at all: the previous Helm pulled a kubectl
+  that imports an API removed in k8s v0.36.
 
 [BugFixes]
 - Jetstream logs through one logger again. Echo v5 logs via `log/slog`
