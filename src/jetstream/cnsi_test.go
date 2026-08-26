@@ -16,9 +16,9 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	mock_api "github.com/cloudfoundry/stratos/src/jetstream/api/mock"
 	"github.com/cloudfoundry/stratos/src/jetstream/testutils"
-	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v5"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.uber.org/mock/gomock"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 

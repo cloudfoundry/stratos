@@ -35,7 +35,6 @@ require (
 	github.com/domodwyer/mailyak v3.1.1+incompatible
 	github.com/fivetwenty-io/capi/v3 v3.222.4
 	github.com/go-sql-driver/mysql v1.9.2
-	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/context v1.1.2
 	github.com/gorilla/securecookie v1.1.2
@@ -53,6 +52,7 @@ require (
 	github.com/smartystreets/goconvey v1.8.1
 	github.com/stretchr/testify v1.11.1
 	github.com/swaggo/echo-swagger/v2 v2.0.1
+	go.uber.org/mock v0.6.0
 	golang.org/x/crypto v0.54.0
 	golang.org/x/sync v0.22.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0

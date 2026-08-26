@@ -10,9 +10,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v5"
+	"go.uber.org/mock/gomock"
 
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 

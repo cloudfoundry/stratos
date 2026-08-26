@@ -10,10 +10,10 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	mock_api "github.com/cloudfoundry/stratos/src/jetstream/api/mock"
 	mock_apikeys "github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys/mock"
-	"github.com/golang/mock/gomock"
 	"github.com/labstack/echo/v5"
 	log "github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.uber.org/mock/gomock"
 )
 
 func Test_addAPIKey(t *testing.T) {
