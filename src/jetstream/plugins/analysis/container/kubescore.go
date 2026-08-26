@@ -58,7 +58,13 @@ func runKubeScore(job *AnalysisJob) error {
 		if err != nil {
 			// There was an error
 			// Remove the folder
-			if removeErr := os.Remove(job.Folder); removeErr != nil {
+			folder, ok := job.confinedFolder()
+			if !ok {
+				slog.Error("refusing to touch a job folder outside the reports directory",
+					"job", job.ID, "folder", job.Folder)
+				return
+			}
+			if removeErr := os.Remove(folder); removeErr != nil {
 				slog.Warn("could not remove the folder of a failed kube-score job",
 					"job", job.ID, "folder", job.Folder, "error", removeErr)
 			}
@@ -66,7 +72,13 @@ func runKubeScore(job *AnalysisJob) error {
 			slog.Error("kube-score job failed",
 				"job", job.ID, "path", job.Path, "duration", job.Duration, "error", err)
 		} else {
-			reportFile := filepath.Join(job.Folder, "report.log")
+			folder, ok := job.confinedFolder()
+			if !ok {
+				slog.Error("refusing to write a report outside the reports directory",
+					"job", job.ID, "folder", job.Folder)
+				return
+			}
+			reportFile := filepath.Join(folder, "report.log")
 			if writeErr := os.WriteFile(reportFile, out, os.ModePerm); writeErr != nil {
 				slog.Error("could not write the kube-score report",
 					"job", job.ID, "file", reportFile, "error", writeErr)
