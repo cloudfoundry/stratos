@@ -2,6 +2,7 @@ package cfapppush
 
 import (
 	"errors"
+	"log/slog"
 	"time"
 
 	"code.cloudfoundry.org/cli/v8/api/cloudcontroller"
@@ -9,7 +10,6 @@ import (
 	"code.cloudfoundry.org/cli/v8/command"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
 )
 
 // PushConnectionWrapper can wrap a given connection allowing the wrapper to modify
@@ -46,7 +46,8 @@ func (cw PushConnectionWrapper) Make(request *cloudcontroller.Request, passedRes
 	var invalidToken ccerror.InvalidAuthTokenError
 	if errors.As(err, &invalidToken) && cw.forceRefreshToken() {
 		if resetErr := request.ResetBody(); resetErr != nil {
-			log.Warnf("cf push: cannot replay request after token refresh (body not seekable): %s", resetErr)
+			slog.Warn("cf push: cannot replay the request after a token refresh, the body is not seekable",
+				"endpoint", cw.config.EndpointID, "user", cw.config.UserID, "error", resetErr)
 			return err
 		}
 		cw.cmdConfig.SetAccessToken("bearer " + cw.config.AuthToken)
@@ -78,12 +79,14 @@ func (cw PushConnectionWrapper) ensureFreshToken() {
 func (cw PushConnectionWrapper) forceRefreshToken() bool {
 	cnsiRecord, err := cw.portalProxy.GetCNSIRecord(cw.config.EndpointID)
 	if err != nil {
-		log.Warnf("cf push: could not load endpoint record to refresh token: %s", err)
+		slog.Warn("cf push: could not load the endpoint record to refresh the token",
+			"endpoint", cw.config.EndpointID, "error", err)
 		return false
 	}
 	refreshedTokenRec, err := cw.portalProxy.RefreshOAuthToken(cnsiRecord.SkipSSLValidation, cnsiRecord.GUID, cw.config.UserID, cnsiRecord.ClientId, cnsiRecord.ClientSecret, cnsiRecord.TokenEndpoint)
 	if err != nil {
-		log.Warnf("cf push: failed to refresh CF token: %s", err)
+		slog.Warn("cf push: failed to refresh the Cloud Foundry token",
+			"endpoint", cw.config.EndpointID, "user", cw.config.UserID, "error", err)
 		return false
 	}
 	cw.config.AuthToken = refreshedTokenRec.AuthToken

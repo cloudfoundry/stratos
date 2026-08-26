@@ -5,13 +5,12 @@ package cfapppush
 import (
 	"bytes"
 	"fmt"
+	"log/slog"
 	"net/url"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 )
 
 // Separators before substituted user-controlled values force git to treat
@@ -107,7 +106,7 @@ func (vcs *vcsCmd) ResetBranchToCommit(dir string, commit string) error {
 func (vcs *vcsCmd) Checkout(dir string, branchRef string) error {
 	for _, cmd := range vcs.checkoutCmd {
 		if err := vcs.run(dir, cmd, "branch", branchRef); err != nil {
-			log.Warnf("checkout error was: %s", err)
+			slog.Warn("git checkout failed", "dir", dir, "branch", branchRef, "error", err)
 			return err
 		}
 	}
@@ -144,7 +143,7 @@ func (v *vcsCmd) run1(dir string, cmdline string, keyval []string, verbose bool)
 
 	_, err := exec.LookPath(v.cmd)
 	if err != nil {
-		log.Warnf("Missing command. Make sure %s is in your path", v.cmd)
+		slog.Warn("missing command, make sure it is on the PATH", "command", v.cmd, "error", err)
 		return nil, err
 	}
 
