@@ -4,12 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 
 	"github.com/labstack/echo/v5"
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
@@ -21,7 +21,7 @@ const CFAdminIdentifier = "cloud_controller.admin"
 
 // Start SSO flow for an Endpoint
 func (p *portalProxy) ssoLoginToCNSI(c *echo.Context) error {
-	log.Debug("ssoLoginToCNSI")
+	slog.Debug("ssoLoginToCNSI")
 	endpointGUID := c.QueryParam("guid")
 	if len(endpointGUID) == 0 {
 		return api.NewHTTPShadowError(
@@ -95,7 +95,7 @@ func (p *portalProxy) ssoLoginToCNSI(c *echo.Context) error {
 // @Security ApiKeyAuth
 // @Router /tokens [post]
 func (p *portalProxy) loginToCNSI(c *echo.Context) error {
-	log.Debug("loginToCNSI")
+	slog.Debug("loginToCNSI")
 
 	var systemSharedToken = false
 
@@ -104,7 +104,7 @@ func (p *portalProxy) loginToCNSI(c *echo.Context) error {
 	if err != nil {
 		return err
 	}
-	log.Trace("loginToCNSI:params = ", params)
+	slog.Debug("loginToCNSI", "params", params)
 
 	if len(params.CNSIGUID) == 0 {
 		return api.NewHTTPShadowError(
@@ -171,7 +171,7 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 				_, ok := p.GetCNSITokenRecord(cnsi.GUID, userID)
 				if ok {
 					if clearErr := p.ClearCNSIToken(*cnsi, userID); clearErr != nil {
-						log.Warnf("Unable to clear token for endpoint %s: %v", cnsi.GUID, clearErr)
+						slog.Warn("unable to clear the token for the endpoint", "endpoint", cnsi.GUID, "user", userID, "error", clearErr)
 					}
 				}
 			}
@@ -229,7 +229,7 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 			if err != nil {
 				// Clear the token
 				if clearErr := p.ClearCNSIToken(cnsiRecord, userID); clearErr != nil {
-					log.Warnf("Unable to clear token for endpoint %s: %v", cnsiGUID, clearErr)
+					slog.Warn("unable to clear the token for the endpoint", "endpoint", cnsiGUID, "user", userID, "error", clearErr)
 				}
 				return nil, api.NewHTTPShadowError(
 					http.StatusBadRequest,
@@ -283,7 +283,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c *echo.Context, theCNSIr
 		cfEndpointSpec, _ := p.GetEndpointTypeSpec("cf")
 		cnsiInfo, _, err := cfEndpointSpec.Info(theCNSIrecord.APIEndpoint.String(), true, "")
 		if err != nil {
-			log.Errorf("Could not get the info for Cloud Foundry: %v", err)
+			slog.Error("could not get the info for Cloud Foundry", "endpoint", theCNSIrecord.GUID, "error", err)
 			return err
 		}
 
@@ -301,7 +301,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c *echo.Context, theCNSIr
 			if dbErr == nil {
 				theCNSIrecord.SSOAllowed = true
 				if updateErr := repo.Update(theCNSIrecord, p.Config.EncryptionKeyInBytes); updateErr != nil {
-					log.Warnf("Unable to update endpoint %s to allow SSO login: %v", theCNSIrecord.GUID, updateErr)
+					slog.Warn("unable to update the endpoint to allow SSO login", "endpoint", theCNSIrecord.GUID, "error", updateErr)
 				}
 			}
 			// Return error from the login
@@ -309,7 +309,7 @@ func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c *echo.Context, theCNSIr
 		}
 		return fmt.Errorf("the auto-registered endpoint UAA server does not match console UAA server")
 	}
-	log.Warn("Could not find current user UAA token")
+	slog.Warn("Could not find the current user UAA token")
 	return err
 }
 
@@ -371,7 +371,7 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord api.CNSIRecord, c *echo.Contex
 // @Security ApiKeyAuth
 // @Router /tokens/{cnsi_guid} [delete]
 func (p *portalProxy) logoutOfCNSI(c *echo.Context) error {
-	log.Debug("logoutOfCNSI")
+	slog.Debug("logoutOfCNSI")
 
 	cnsiGUID := c.Param("cnsi_guid")
 
@@ -426,14 +426,14 @@ func (p *portalProxy) ClearCNSIToken(cnsiRecord api.CNSIRecord, userGUID string)
 	// If cnsi is cf AND cf is auto-register only clear the entry
 	p.Config.AutoRegisterCFUrl = strings.TrimRight(p.Config.AutoRegisterCFUrl, "/")
 	if cnsiRecord.CNSIType == "cf" && p.GetConfig().AutoRegisterCFUrl == cnsiRecord.APIEndpoint.String() {
-		log.Debug("Setting token record as disconnected")
+		slog.Debug("Setting the token record as disconnected", "endpoint", cnsiRecord.GUID, "user", userGUID)
 
 		tokenRecord := p.InitEndpointTokenRecord(0, "cleared_token", "cleared_token", true)
 		if err := p.setCNSITokenRecord(cnsiRecord.GUID, userGUID, tokenRecord); err != nil {
 			return fmt.Errorf("unable to clear token: %s", err)
 		}
 	} else {
-		log.Debug("Deleting Token")
+		slog.Debug("Deleting the token", "endpoint", cnsiRecord.GUID, "user", userGUID)
 		if err := p.deleteCNSIToken(cnsiRecord.GUID, userGUID); err != nil {
 			return fmt.Errorf("unable to delete token: %s", err)
 		}
@@ -448,13 +448,13 @@ func (p *portalProxy) GetCNSIUser(cnsiGUID string, userGUID string) (*api.Connec
 }
 
 func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*api.ConnectedUser, *api.TokenRecord, bool) {
-	log.Debug("GetCNSIUserAndToken")
+	slog.Debug("GetCNSIUserAndToken", "endpoint", cnsiGUID, "user", userGUID)
 
 	// get the uaa token record
 	cfTokenRecord, ok := p.GetCNSITokenRecord(cnsiGUID, userGUID)
 	if !ok {
 		msg := "Unable to retrieve CNSI token record."
-		log.Debug(msg)
+		slog.Debug(msg, "endpoint", cnsiGUID, "user", userGUID)
 		return nil, nil, false
 	}
 
@@ -467,7 +467,7 @@ func (p *portalProxy) GetCNSIUserAndToken(cnsiGUID string, userGUID string) (*ap
 }
 
 func (p *portalProxy) GetCNSIUserFromToken(cnsiGUID string, cfTokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
-	log.Debug("GetCNSIUserFromToken")
+	slog.Debug("GetCNSIUserFromToken", "endpoint", cnsiGUID)
 
 	// Custom handler for the Auth type available?
 	authProvider := p.GetAuthProvider(cfTokenRecord.AuthType)
@@ -492,8 +492,8 @@ func (p *portalProxy) GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *
 	// get the scope out of the JWT token data
 	userTokenInfo, err := p.GetUserTokenInfo(cfTokenRecord.AuthToken)
 	if err != nil {
-		msg := "Unable to find scope information in the CNSI UAA Auth Token: %s"
-		log.Errorf(msg, err)
+		slog.Error("unable to find scope information in the CNSI UAA Auth Token",
+			"endpoint", cnsiGUID, "error", err)
 		return nil, false
 	}
 
@@ -508,8 +508,7 @@ func (p *portalProxy) GetCNSIUserFromOAuthToken(cnsiGUID string, cfTokenRecord *
 	// is the user an CF admin?
 	cnsiRecord, err := p.GetCNSIRecord(cnsiGUID)
 	if err != nil {
-		msg := "Unable to load CNSI record: %s"
-		log.Errorf(msg, err)
+		slog.Error("unable to load the CNSI record", "endpoint", cnsiGUID, "error", err)
 		return nil, false
 	}
 	// TODO should be an extension point
@@ -536,11 +535,11 @@ func (p *portalProxy) InitEndpointTokenRecord(expiry int64, authTok string, refr
 }
 
 func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
-	log.Debug("deleteCNSIToken")
+	slog.Debug("deleteCNSIToken", "endpoint", cnsiID, "user", userGUID)
 
 	err := p.unsetCNSITokenRecord(cnsiID, userGUID)
 	if err != nil {
-		log.Errorf("%v", err)
+		slog.Error("unable to unset the CNSI token record", "endpoint", cnsiID, "user", userGUID, "error", err)
 		return err
 	}
 

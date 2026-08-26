@@ -3,10 +3,9 @@ package main
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"math"
 	"net/http"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/labstack/echo/v5"
 
@@ -29,7 +28,7 @@ type noAuth struct {
 }
 
 func (a *noAuth) ShowConfig(config *api.ConsoleConfig) {
-	log.Info("... !!!!! No Authentication !!!!!")
+	slog.Info("... !!!!! No Authentication !!!!!")
 }
 
 // Login provides no-auth specific Stratos login
@@ -69,9 +68,9 @@ func (a *noAuth) BeforeVerifySession(c *echo.Context) {
 		// No session, so create one
 		session, newErr := a.p.NewSession(c)
 		if newErr != nil {
-			log.Warnf("Unable to create session: %v", newErr)
+			slog.Warn("unable to create the session", "error", newErr)
 		} else if saveErr := a.p.SaveSession(c, session); saveErr != nil {
-			log.Warnf("Unable to save session: %v", saveErr)
+			slog.Warn("unable to save the session", "error", saveErr)
 		}
 	}
 
@@ -85,7 +84,7 @@ func (a *noAuth) BeforeVerifySession(c *echo.Context) {
 	if err := a.p.setSessionValues(c, sessionValues); err == nil {
 		//Makes sure the client gets the right session expiry time
 		if err := a.p.handleSessionExpiryHeader(c); err != nil {
-			log.Warnf("Unable to set session expiry header: %v", err)
+			slog.Warn("unable to set the session expiry header", "error", err)
 		}
 	}
 }
@@ -97,18 +96,18 @@ func (a *noAuth) VerifySession(c *echo.Context, sessionUser string, sessionExpir
 
 // logout
 func (a *noAuth) logout(c *echo.Context) error {
-	log.Debug("logout")
+	slog.Debug("logout")
 
 	a.p.removeEmptyCookie(c)
 
 	// Remove the XSRF Token from the session
 	if err := a.p.unsetSessionValue(c, XSRFTokenSessionName); err != nil {
-		log.Warnf("Unable to remove XSRF token from session: %v", err)
+		slog.Warn("unable to remove the XSRF token from the session", "error", err)
 	}
 
 	err := a.p.clearSession(c)
 	if err != nil {
-		log.Errorf("Unable to clear session: %v", err)
+		slog.Error("unable to clear the session", "error", err)
 	}
 
 	// Send JSON document
