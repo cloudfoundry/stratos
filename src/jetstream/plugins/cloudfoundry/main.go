@@ -195,6 +195,10 @@ func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNS
 }
 
 func (c *CloudFoundrySpecification) Init() error {
+	// Read the paging overrides here rather than in a package-level
+	// initialiser, which would run before the log handler is installed.
+	resolvePagingConfig()
+
 	// Add login hook to automatically register and connect to the Cloud Foundry when the user logs in
 	if err := c.portalProxy.AddLoginHook(0, c.cfLoginHook); err != nil {
 		return err
