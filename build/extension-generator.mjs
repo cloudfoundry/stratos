@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
+import { load as loadYaml } from 'js-yaml';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
@@ -77,7 +77,7 @@ class ExtensionGenerator {
 
     if (fs.existsSync(stratosYamlPath)) {
       try {
-        this.config = yaml.load(fs.readFileSync(stratosYamlPath, 'utf8'));
+        this.config = loadYaml(fs.readFileSync(stratosYamlPath, 'utf8'));
         this.log(`Loaded config from: ${stratosYamlPath}`);
       } catch (e) {
         this.error(`Failed to parse stratos.yaml: ${e.message}`);
