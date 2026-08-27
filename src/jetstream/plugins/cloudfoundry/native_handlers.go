@@ -218,18 +218,39 @@ func keyByGUID[T any](items []T, guid func(T) string) map[string]T {
 
 // ---- handlers ----
 
-// fullPagePerRequest is the page size used when draining every page of a CF
-// list endpoint. Default 500 so each request completes well under the 30s
-// CAPI client timeout (adepttech /v3/spaces at per_page=5000 clocked
-// ~27s/request). Override via env var STRATOS_CF_PER_PAGE for environments
-// with different CAPI performance characteristics.
-var fullPagePerRequest = envIntWithDefault("STRATOS_CF_PER_PAGE", 500)
+const (
+	// defaultPerPage is the page size used when draining every page of a CF
+	// list endpoint. 500 so each request completes well under the 30s CAPI
+	// client timeout (adepttech /v3/spaces at per_page=5000 clocked
+	// ~27s/request). Override via env var STRATOS_CF_PER_PAGE for
+	// environments with different CAPI performance characteristics.
+	defaultPerPage = 500
 
-// maxParallelPages bounds the concurrency of the page-2..N fetch after the
-// first page returns TotalPages. Default 5. Override via env var
-// STRATOS_CF_MAX_PARALLEL_PAGES if the CAPI tolerates more/fewer concurrent
-// requests.
-var maxParallelPages = envIntWithDefault("STRATOS_CF_MAX_PARALLEL_PAGES", 5)
+	// defaultMaxParallelPages bounds the concurrency of the page-2..N fetch
+	// after the first page returns TotalPages. Override via env var
+	// STRATOS_CF_MAX_PARALLEL_PAGES if the CAPI tolerates more/fewer
+	// concurrent requests.
+	defaultMaxParallelPages = 5
+)
+
+// These hold the defaults until resolvePagingConfig runs. They are not
+// initialised from the environment here: a package-level initialiser runs
+// before main installs the slog handler, so the two lines reporting the
+// resolved values were written by slog's default logger and came out in the
+// standard log package's format — plain text even under LOG_TO_JSON, which
+// gives a log collector two unparseable records on every boot.
+var (
+	fullPagePerRequest = defaultPerPage
+	maxParallelPages   = defaultMaxParallelPages
+)
+
+// resolvePagingConfig reads the paging overrides from the environment. It is
+// called from the plugin's Init, which runs after the log handler is
+// installed, so the values it reports are formatted like every other record.
+func resolvePagingConfig() {
+	fullPagePerRequest = envIntWithDefault("STRATOS_CF_PER_PAGE", defaultPerPage)
+	maxParallelPages = envIntWithDefault("STRATOS_CF_MAX_PARALLEL_PAGES", defaultMaxParallelPages)
+}
 
 // logCapiTiming emits a structured log line for one CAPI list call. Used at
 // every cfClient.X.List() call site in the drain helpers so a future 504
