@@ -22,6 +22,20 @@
   that imports an API removed in k8s v0.36.
 
 [BugFixes]
+- Jetstream serves its own HTTPS again where it terminates TLS itself.
+  Echo v5 resolves a certificate path through a filesystem rooted at the
+  working directory, which rejects an absolute path outright, and the
+  certificate was still being passed as a path — so no HTTPS listener
+  started at all. The Kubernetes chart, and the dev and CI configurations,
+  all use path shapes that hit this. Deployments on Cloud Foundry were
+  unaffected, since the router terminates TLS there.
+- Helm chart files and chart icons no longer 404 on Kubernetes. File
+  serving now goes through the same rooted filesystem, which accepts an
+  absolute path only beneath the working directory; the chart sets a cache
+  folder outside it, so every chart file and icon answered 404 for a file
+  plainly present on disk. Analysis reports and an absolute `UI_PATH` had
+  the same exposure whenever the process was not started from an ancestor
+  directory.
 - Jetstream logs through one logger again. Echo v5 logs via `log/slog`
   and defaults to writing JSON to standard output, which meant its
   messages interleaved with Jetstream's own text-formatted logs on the
