@@ -847,6 +847,26 @@ func detectTLSCert(pc api.PortalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
+// tlsKeyPair reads the certificate and key so that Echo is handed their
+// contents rather than their paths. Echo v4 read a path with os.ReadFile, but
+// Echo v5 reads it through an fs.FS rooted at the working directory, and
+// io/fs.ValidPath rejects both absolute paths and any ".." element. The
+// Kubernetes chart mounts the certificate at an absolute path, so every path
+// the chart or the dev config supplies failed there with "invalid argument"
+// and the HTTPS server never started. Echo takes []byte as the material
+// itself, which sidesteps the filesystem entirely.
+func tlsKeyPair(certFile, certKeyFile string) ([]byte, []byte, error) {
+	cert, err := os.ReadFile(certFile)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to read the certificate %s: %w", certFile, err)
+	}
+	certKey, err := os.ReadFile(certKeyFile)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to read the certificate key %s: %w", certKeyFile, err)
+	}
+	return cert, certKey, nil
+}
+
 func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options, env *env.VarSet) *portalProxy {
 	slog.Debug("newPortalProxy")
 
@@ -1043,8 +1063,12 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		if err != nil {
 			return err
 		}
+		cert, certKey, err := tlsKeyPair(certFile, certKeyFile)
+		if err != nil {
+			return err
+		}
 		slog.Info("Starting the HTTPS server", "address", address)
-		engineErr = startConfig.StartTLS(serveContext, e, certFile, certKeyFile)
+		engineErr = startConfig.StartTLS(serveContext, e, cert, certKey)
 	} else {
 		slog.Info("Starting the HTTP server", "address", address)
 		engineErr = startConfig.Start(serveContext, e)
