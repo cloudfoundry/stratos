@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 
@@ -356,9 +357,26 @@ func (p *portalProxy) getUAATokenWithRefreshToken(skipSSLValidation bool, refres
 	return p.getUAAToken(body, skipSSLValidation, client, clientSecret, authEndpoint)
 }
 
+// tokenEndpointPattern constrains a UAA/OIDC token endpoint to an absolute
+// http(s) URL with a plain host[:port] and a plain path. User info, query and
+// fragment are all excluded: a token POST needs none of them, and each is a
+// way to steer the request somewhere other than the host the operator thinks
+// they configured.
+var tokenEndpointPattern = regexp.MustCompile(
+	`^https?://(?:[A-Za-z0-9.-]+|\[[0-9A-Fa-f:.]+\])(?::[0-9]{1,5})?(?:/[A-Za-z0-9._~%-]*)*$`)
+
 // getUAAToken
 func (p *portalProxy) getUAAToken(body url.Values, skipSSLValidation bool, client, clientSecret, authEndpoint string) (*api.UAAResponse, error) {
 	slog.Debug("getUAAToken", "authEndpoint", authEndpoint)
+
+	// Checked here rather than where the endpoint is built: setupGetAvailableScopes
+	// takes it straight off the unauthenticated first-run setup form, so the only
+	// place every caller is covered is the one that makes the request.
+	if !tokenEndpointPattern.MatchString(authEndpoint) {
+		slog.Error("refusing to request a token from a malformed endpoint", "authEndpoint", authEndpoint)
+		return nil, fmt.Errorf("invalid UAA token endpoint: %q", authEndpoint)
+	}
+
 	req, err := http.NewRequest("POST", authEndpoint, strings.NewReader(body.Encode()))
 	if err != nil {
 		const msg = "failed to create request for UAA"
