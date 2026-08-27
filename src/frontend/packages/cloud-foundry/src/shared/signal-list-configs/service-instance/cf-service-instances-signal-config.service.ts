@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
+import { endpointDropdownOptions } from '../endpoint-dropdown-options';
 import { EndpointErrorEventsService } from '@stratosui/store';
 import { CnsiServiceInstancesSource } from '../../../services/data-sources/cnsi-service-instances-source';
 import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
@@ -168,13 +169,7 @@ export class CfServiceInstancesSignalConfigService {
       ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as EndpointModel[] })
       : signal<EndpointModel[]>([]).asReadonly();
 
-    this.cnsiOptions = computed(() => {
-      const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-      for (const ep of this.connectedEndpoints() ?? []) {
-        opts.push({ label: ep.name ?? ep.guid, value: ep.guid ?? null });
-      }
-      return opts;
-    });
+    this.cnsiOptions = computed(() => endpointDropdownOptions(this.connectedEndpoints()));
 
     this.endpointNames = computed(() => {
       const m = new Map<string, string>();
