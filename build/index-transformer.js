@@ -8,7 +8,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import yaml from 'js-yaml';
+import { load as loadYaml } from 'js-yaml';
 import { fileURLToPath } from 'url';
 import { dirname } from 'path';
 
@@ -45,7 +45,7 @@ function readStratosConfig(rootDir) {
 
   if (fs.existsSync(stratosYamlPath)) {
     try {
-      return yaml.load(fs.readFileSync(stratosYamlPath, 'utf8'));
+      return loadYaml(fs.readFileSync(stratosYamlPath, 'utf8'));
     } catch (e) {
       console.warn('⚠️ Failed to read stratos.yaml:', e.message);
     }
