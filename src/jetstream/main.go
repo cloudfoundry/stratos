@@ -1422,7 +1422,7 @@ func (p *portalProxy) getUICustomHTTPErrorHandler(staticDir string, defaultHandl
 			if p.indexHTMLTemplate != "" {
 				fileErr = p.serveIndexHTML(c)
 			} else {
-				fileErr = c.File(path.Join(staticDir, "index.html"))
+				fileErr = api.ServeFile(c, path.Join(staticDir, "index.html"))
 			}
 			if fileErr != nil {
 				slog.Warn("unable to serve index.html", "error", fileErr)

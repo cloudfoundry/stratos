@@ -37,7 +37,7 @@ func (a *Analyzer) report(ec *echo.Context) error {
 		return echo.NewHTTPError(404, "No such file")
 	}
 
-	return ec.File(file)
+	return serveFile(ec, file)
 }
 
 // Delete a given report

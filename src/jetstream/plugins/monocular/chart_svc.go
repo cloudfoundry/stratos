@@ -7,6 +7,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/labstack/echo/v5"
 )
@@ -128,7 +129,7 @@ func (m *Monocular) getIcon(c *echo.Context) error {
 		return nil
 	}
 
-	return c.File(iconFilePath)
+	return api.ServeFile(c, iconFilePath)
 }
 
 // /chartsvc/v1/charts/:repo/:name/versions/:version
@@ -224,7 +225,7 @@ func (m *Monocular) getChartAndVersionFile(c *echo.Context) error {
 	}
 
 	if m.cacheChart(*chart) == nil {
-		return c.File(path.Join(m.getChartCacheFolder(*chart), safeName))
+		return api.ServeFile(c, path.Join(m.getChartCacheFolder(*chart), safeName))
 	}
 
 	return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
@@ -247,7 +248,7 @@ func (m *Monocular) getChartValues(c *echo.Context) error {
 		}
 
 		if m.cacheChart(*chart) == nil {
-			return c.File(path.Join(m.getChartCacheFolder(*chart), filename))
+			return api.ServeFile(c, path.Join(m.getChartCacheFolder(*chart), filename))
 		}
 		return echo.NewHTTPError(http.StatusNotFound, fmt.Sprintf("Can not find file %s for the specified chart", filename))
 	}
