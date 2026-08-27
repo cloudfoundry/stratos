@@ -48,6 +48,9 @@ export interface SessionDataConfig {
   APIKeysEnabled?: APIKeysEnabled;
   // Default value for Home View - show only favorited endpoints?
   homeViewShowFavoritesOnly?: boolean;
+  // Hide the Sign Out button in the side nav. Cosmetic only — the header
+  // user menu keeps its own logout, gated separately by CAN_NOT_LOGOUT.
+  hideNavLogout?: boolean;
   userEndpointsEnabled?: UserEndpointsEnabled;
 }
 export interface SessionData {

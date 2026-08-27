@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from '@stratosui/store/testing';
@@ -8,6 +8,7 @@ import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CustomizationService, MDAppModule } from '@stratosui/core';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 import { SideNavComponent } from './side-nav.component';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
 
 
 describe('SideNavComponent', () => {
@@ -42,6 +43,37 @@ describe('SideNavComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // HIDE_NAV_LOGOUT is delivered in the session config; the side nav reads it
+  // to drop its own Sign Out button while the header menu keeps logout.
+  describe('hideNavLogout', () => {
+    const build = (config: Record<string, unknown> | undefined) => {
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        imports: [RouterTestingModule, MDAppModule, CoreTestingModule, createBasicStoreModule(), SideNavComponent],
+        providers: [
+          CustomizationService,
+          provideZonelessChangeDetection(),
+          { provide: AuthSignalService, useValue: { sessionData: signal(config ? { config } : null), logout: () => undefined } },
+        ]
+      });
+      const f = TestBed.createComponent(SideNavComponent);
+      f.detectChanges();
+      return f.componentInstance;
+    };
+
+    it('is false when the flag is unset', () => {
+      expect(build({ enableTechPreview: false }).hideNavLogout()).toBe(false);
+    });
+
+    it('is false when there is no session yet', () => {
+      expect(build(undefined).hideNavLogout()).toBe(false);
+    });
+
+    it('is true when HIDE_NAV_LOGOUT is on', () => {
+      expect(build({ hideNavLogout: true }).hideNavLogout()).toBe(true);
+    });
   });
 
   it('hides the "Show all menu items" debug checkbox by default', () => {
