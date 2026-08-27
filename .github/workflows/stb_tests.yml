@@ -16,10 +16,12 @@ on:
       - main
       - develop
       - 'angular**'
+      - 'release/**'
   push:
     branches:
       - develop
       - main
+      - 'release/**'
     paths:
       - 'tools/stb/**'
 

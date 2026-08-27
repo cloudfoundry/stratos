@@ -5,10 +5,12 @@ on:
     branches:
       - develop
       - main
+      - 'release/**'
   pull_request:
     branches:
       - develop
       - main
+      - 'release/**'
   workflow_dispatch:  # on-demand: Actions tab "Run workflow" or `gh workflow run codeql.yml --ref develop`
   schedule:
     - cron: '0 6 * * 1'  # weekly, Monday 06:00 UTC — catches advisories on idle branches
