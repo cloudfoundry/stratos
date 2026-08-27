@@ -1,4 +1,6 @@
-<form class="space-y-4">
+<!-- Not a <form>: this component renders itself for nested schemas, and a
+     form inside a form is invalid HTML. Nothing here submits. -->
+<div class="space-y-4">
   @for (f of fields(); track f.pointer) {
     <div class="form-group">
       <label [for]="f.pointer" class="block text-sm font-medium text-content-text mb-1">
@@ -215,4 +217,4 @@
       }
     </div>
   }
-</form>
+</div>
