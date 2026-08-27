@@ -244,7 +244,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: [core, store, cloud-foundry, kubernetes, git, shared, extension]
+        package: [core, store, cloud-foundry, kubernetes, cf-autoscaler, git, shared, extension]
     steps:
       - name: Checkout code
         if: needs.changes.outputs.non_stb == 'true'
