@@ -299,6 +299,7 @@ type Info struct {
 		ListAllowLoadMaxed         bool   `json:"listAllowLoadMaxed,omitempty"`
 		APIKeysEnabled             string `json:"APIKeysEnabled"`
 		HomeViewShowFavoritesOnly  bool   `json:"homeViewShowFavoritesOnly"`
+		HideNavLogout              bool   `json:"hideNavLogout"`
 		UserEndpointsEnabled       string `json:"userEndpointsEnabled"`
 		EndpointCardConcurrency    int    `json:"endpointCardConcurrency"`
 		EndpointRequestConcurrency int    `json:"endpointRequestConcurrency"`
@@ -474,6 +475,7 @@ type PortalConfig struct {
 	CanMigrateDatabaseSchema           bool
 	APIKeysEnabled                     api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
 	HomeViewShowFavoritesOnly          bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	HideNavLogout                      bool                         `configName:"HIDE_NAV_LOGOUT"`
 	EndpointCardConcurrency            int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
 	EndpointRequestConcurrency         int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
 	UserEndpointsEnabled               api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
