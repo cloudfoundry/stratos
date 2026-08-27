@@ -12,6 +12,16 @@
   accepted still works, including `trace`, `fatal` and `panic`.
 
 [BugFixes]
+- Deployed logs are no longer written with ANSI colour escapes. Colour was
+  forced on rather than detected, so every line from a deployed Jetstream
+  carried escape codes — visible in `cf logs`, where nothing is a terminal.
+  A developer running the binary in a terminal still gets colour. The
+  analysis container had the same problem.
+- Two boot lines reporting the resolved Cloud Foundry paging overrides were
+  written before the log handler was installed, so they came out through
+  the standard library formatter. Under `LOG_TO_JSON` a collector got two
+  unparseable records on every start. Boot output is JSON all the way down
+  now.
 - A `LOG_LEVEL` typo used to silence the backend almost completely.
   logrus returned its panic level for an unrecognised name and the
   error was discarded, so `LOG_LEVEL=inof` suppressed nearly every
