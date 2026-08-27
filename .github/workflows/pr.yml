@@ -13,10 +13,12 @@ on:
       - main
       - develop
       - 'angular**'
+      - 'release/**'
   push:
     branches:
       - develop
       - main
+      - 'release/**'
 
 # One live run per ref: a push to a PR branch (or develop/main) cancels the
 # in-flight run for the same ref, so overlapping runs never contend for
