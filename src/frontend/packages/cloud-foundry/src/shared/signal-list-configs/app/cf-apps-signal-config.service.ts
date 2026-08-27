@@ -3,6 +3,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { EndpointModel } from '@stratosui/store';
+import { endpointDropdownOptions } from '../endpoint-dropdown-options';
 import { EndpointErrorEventsService } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../services/data-sources/cnsi-apps-source';
 import { CnsiStacksSource } from '../../../services/data-sources/cnsi-stacks-source';
@@ -271,13 +272,7 @@ export class CfAppsSignalConfigService {
       : signal<EndpointModel[]>([]).asReadonly();
 
     // CF options come from the connected endpoints list directly.
-    this.cnsiOptions = computed(() => {
-      const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
-      for (const ep of this.connectedEndpoints() ?? []) {
-        opts.push({ label: ep.name ?? ep.guid, value: ep.guid ?? null });
-      }
-      return opts;
-    });
+    this.cnsiOptions = computed(() => endpointDropdownOptions(this.connectedEndpoints()));
 
     // Endpoint guid → name, for rendering cnsi references as names
     // (e.g., in the app-wall CF/Org/Space column).
