@@ -78,6 +78,9 @@ console:
     listMaxSize:
     # If the maximum list size is met give the user the option to fetch all results regardless
     listAllowLoadMaxed: false
+    # Hide the Sign Out button in the side navigation. Presentation only - the
+    # user menu in the page header keeps its own Sign Out
+    hideNavLogout: false
 
   # Use local admin user instead of UAA - set to a password to enable
   localAdminPassword: ~
