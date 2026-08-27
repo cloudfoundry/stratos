@@ -62,6 +62,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 	s.Configuration.ListAllowLoadMaxed = p.Config.UIListAllowLoadMaxed
 	s.Configuration.APIKeysEnabled = string(p.Config.APIKeysEnabled)
 	s.Configuration.HomeViewShowFavoritesOnly = p.Config.HomeViewShowFavoritesOnly
+	s.Configuration.HideNavLogout = p.Config.HideNavLogout
 	s.Configuration.UserEndpointsEnabled = string(p.Config.UserEndpointsEnabled)
 	s.Configuration.EndpointCardConcurrency = p.Config.EndpointCardConcurrency
 	s.Configuration.EndpointRequestConcurrency = p.Config.EndpointRequestConcurrency

@@ -109,6 +109,7 @@
     }
 
     <!-- Logout Button -->
+    @if ((canLogout$ | async) && !hideNavLogout()) {
     <div class="nav-logout border-t border-nav-border p-3">
       <button
         class="logout-button w-full flex items-center p-2 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
@@ -124,6 +125,7 @@
         </span>
       </button>
     </div>
+    }
 
     <!-- Navigation Footer -->
     @if (copyright()) {
