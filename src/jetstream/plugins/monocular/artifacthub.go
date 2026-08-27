@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/labstack/echo/v5"
 	yaml "gopkg.in/yaml.v2"
@@ -95,7 +96,7 @@ func (m *Monocular) fetchChartsFromArtifactHub(c *echo.Context, endpointID strin
 	indexFile := path.Join(cacheFolder, "hub_index.json")
 	if ok := useCachedFile(indexFile); ok {
 		// Just send the cached file
-		return c.File(indexFile)
+		return api.ServeFile(c, indexFile)
 	}
 
 	// Fetch index of charts usign the search API
@@ -324,7 +325,7 @@ func (m *Monocular) artifactHubGetChartFileNamed(c *echo.Context, file string) e
 	}
 
 	fp := path.Join(cacheFolder, safeName)
-	return c.File(fp)
+	return api.ServeFile(c, fp)
 }
 
 // Get available versions for a Chart
