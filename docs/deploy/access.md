@@ -69,3 +69,23 @@ Password: `hscadmin`
 `stratos.admon`
 
 5. The Console is now ready to be used
+
+## Signing out
+
+Stratos offers Sign Out in two places: at the foot of the side navigation, and
+in the user menu in the page header.
+
+The side navigation button can be hidden on its own by setting
+`HIDE_NAV_LOGOUT` to `true`. This is presentation only — the user menu keeps
+its Sign Out, so the ability to log out is unchanged. Use it where the extra
+button is redundant or crowds the navigation.
+
+| Deployment | How to set it |
+|------------|---------------|
+| Cloud Foundry | `cf set-env console HIDE_NAV_LOGOUT true`, then restage |
+| Kubernetes (Helm) | `--set console.ui.hideNavLogout=true` |
+| Docker, single container | `docker run -e HIDE_NAV_LOGOUT=true ...` |
+
+Both buttons disappear when there is no session to end. Running with
+`AUTH_ENDPOINT_TYPE=none` grants the `stratos.noauth` scope, and Stratos hides
+Sign Out everywhere regardless of `HIDE_NAV_LOGOUT`.
