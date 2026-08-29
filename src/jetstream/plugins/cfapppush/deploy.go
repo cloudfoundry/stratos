@@ -18,7 +18,7 @@ import (
 	"github.com/coder/websocket"
 	"github.com/coder/websocket/wsjson"
 	"github.com/labstack/echo/v5"
-	yaml "gopkg.in/yaml.v2"
+	yaml "go.yaml.in/yaml/v4"
 )
 
 // Success
@@ -591,7 +591,7 @@ func getDockerURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Soc
 		Applications: []RawManifestApplication{applicationData},
 	}
 
-	marshalledYaml, err := yaml.Marshal(manifest)
+	marshalledYaml, err := yaml.Dump(manifest)
 	if err != nil {
 		return StratosProject{}, tempDir, err
 	}
@@ -756,7 +756,7 @@ func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSock
 		return manifest, manifestPath, err
 	}
 
-	err = yaml.Unmarshal(data, &manifest)
+	err = yaml.Load(data, &manifest)
 	if err != nil {
 		slog.Warn("cf push: failed to unmarshal the manifest", "path", manifestPath, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_INVALID_MANIFEST)
@@ -776,7 +776,7 @@ func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSock
 			manifest.Applications[i] = app
 		}
 
-		marshalledYaml, err := yaml.Marshal(manifest)
+		marshalledYaml, err := yaml.Dump(manifest)
 		if err != nil {
 			slog.Warn("cf push: failed to marshal the annotated manifest", "path", manifestPath, "error", err)
 			sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)

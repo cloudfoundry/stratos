@@ -9,7 +9,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/pressly/goose v2.7.0+incompatible
-	gopkg.in/yaml.v2 v2.4.0
+	go.yaml.in/yaml/v4 v4.0.0-rc.6
 )
 
 require (
@@ -22,17 +22,14 @@ require (
 	github.com/gorilla/sessions v1.4.0 // indirect
 	github.com/govau/cf-common v0.0.7 // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12 // indirect
-	github.com/kr/pretty v0.3.1 // indirect
 	github.com/lib/pq v1.12.3 // indirect
 	github.com/ncruces/go-sqlite3 v0.35.2 // indirect
 	github.com/ncruces/go-sqlite3-wasm/v3 v3.2.35303 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/rogpeppe/go-internal v1.10.0 // indirect
 	github.com/samber/lo v1.50.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.40.0 // indirect
-	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
 
 replace github.com/cloudfoundry/stratos/src/jetstream => ../../

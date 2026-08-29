@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	yaml "gopkg.in/yaml.v2"
+	yaml "go.yaml.in/yaml/v4"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/google/uuid"
@@ -44,8 +44,10 @@ func (m *Monocular) syncHelmRepository(endpointID, repoName, url string) error {
 	// Marshal to the index structure
 	var index IndexFile
 
-	decoder := yaml.NewDecoder(resp.Body)
-	err = decoder.Decode(&index)
+	loader, err := yaml.NewLoader(resp.Body)
+	if err == nil {
+		err = loader.Load(&index)
+	}
 	if err != nil {
 		return fmt.Errorf("Error marshalling Helm Repository Index: %+v", err)
 	}
