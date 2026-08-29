@@ -482,7 +482,7 @@ define dev.backend
 		echo "Building backend for host platform..."; \
 		$(MAKE) build backend PLATFORM=$($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH); \
 	fi
-	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) SESSION_STORE_EXPIRY=$(SESSION_STORE_EXPIRY) ../../$($(_HIDE)BIN_DIR)/jetstream
+	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) SESSION_STORE_EXPIRY=$(SESSION_STORE_EXPIRY) ALLOWED_ORIGINS=$(ALLOWED_ORIGINS) ../../$($(_HIDE)BIN_DIR)/jetstream
 endef
 $(call register, dev, backend)
 
@@ -1376,6 +1376,14 @@ $(call declare_verb, dump)
 # ── Development ports ─────────────────────────────────────────
 BACKEND_PORT  ?= 5443
 FRONTEND_PORT ?= 5440
+
+# The dev frontend is served by ng serve on its own port, so a WebSocket
+# upgrade from it is cross-origin to the backend. jetstream rejects those
+# unless the origin is allow-listed, which otherwise makes cf push fail in
+# the dev stack with "Origin ... is not authorized for Host ...". A packaged
+# console serves the UI from jetstream itself, so this is dev-only. Both
+# host forms are listed because the browser may resolve either.
+ALLOWED_ORIGINS ?= https://localhost:$(FRONTEND_PORT),https://127.0.0.1:$(FRONTEND_PORT)
 
 # ── Simple verbs (no modifiers) ──────────────────────────────
 .PHONY: stage install lint
