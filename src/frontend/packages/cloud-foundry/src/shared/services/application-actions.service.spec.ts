@@ -494,4 +494,46 @@ describe('AppApplicationActionsService', () => {
 
     expect(appsStub._removeRow).not.toHaveBeenCalled();
   });
+
+  // ---------------------------------------------------------------------------
+  // Confirm-dialog naming
+  //
+  // The delete wizard passes whatever names it had resolved at submit time. On
+  // the cold path (direct URL / refresh into /delete) org and space need extra
+  // fetches that may not have landed, so they arrive empty while app and
+  // endpoint are already resolved. Each field must fall back independently to
+  // the live data service - a partially-filled target must not suppress the
+  // fallback for the fields it is missing.
+  // ---------------------------------------------------------------------------
+
+  it('fills missing org/space in the delete dialog from the data service', async () => {
+    void svc.deleteWithCleanup([], [], {
+      appName: 'cold-path-app',
+      endpointName: 'cold-path-cf',
+      orgName: '',
+      spaceName: '',
+    });
+    await tick();
+
+    const cfg = confirmDialogStub.open.mock.calls[0][0] as { message: string };
+    expect(cfg.message).toContain('org "test-org"');
+    expect(cfg.message).toContain('space "test-space"');
+    expect(cfg.message).not.toContain('"?"');
+  });
+
+  it('keeps caller-supplied names when the target is fully resolved', async () => {
+    void svc.deleteWithCleanup([], [], {
+      appName: 'hot-path-app',
+      endpointName: 'hot-path-cf',
+      orgName: 'hot-path-org',
+      spaceName: 'hot-path-space',
+    });
+    await tick();
+
+    const cfg = confirmDialogStub.open.mock.calls[0][0] as { message: string };
+    expect(cfg.message).toContain('"hot-path-app"');
+    expect(cfg.message).toContain('"hot-path-cf"');
+    expect(cfg.message).toContain('org "hot-path-org"');
+    expect(cfg.message).toContain('space "hot-path-space"');
+  });
 });
