@@ -17,7 +17,7 @@ require (
 	github.com/coder/websocket v1.8.15
 	github.com/labstack/echo/v5 v5.3.1
 	github.com/mholt/archives v0.1.5
-	gopkg.in/yaml.v2 v2.4.0
+	go.yaml.in/yaml/v4 v4.0.0-rc.6
 )
 
 require (
@@ -99,6 +99,7 @@ require (
 	google.golang.org/protobuf v1.36.11 // indirect
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 	k8s.io/apimachinery v0.35.3 // indirect
 	k8s.io/client-go v0.35.3 // indirect
 	k8s.io/klog/v2 v2.130.1 // indirect

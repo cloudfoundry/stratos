@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v4"
 )
 
 const dashboardInstallYAMLDownloadURL = "https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.3/aio/deploy/recommended.yaml"
@@ -171,10 +171,19 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 		return fmt.Errorf("Could not read YAML to install the dashboard: %s", err.Error())
 	}
 
-	r := bytes.NewReader(body)
-	dec := yaml.NewDecoder(r)
-	var t interface{}
-	for dec.Decode(&t) == nil {
+	loader, err := yaml.NewLoader(bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("Could not parse YAML during dashboard installation %s", err.Error())
+	}
+	for {
+		var t interface{}
+		if err := loader.Load(&t); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return fmt.Errorf("Could not parse YAML during dashboard installation %s", err.Error())
+		}
+
 		jsonDoc, err := YAMLToJSONWithLabel(t)
 		if err != nil {
 			return fmt.Errorf("Could not convert YAML to JSON during dashboard installation %s", err.Error())

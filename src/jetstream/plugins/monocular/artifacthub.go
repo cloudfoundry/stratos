@@ -16,7 +16,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
 	"github.com/labstack/echo/v5"
-	yaml "gopkg.in/yaml.v2"
+	yaml "go.yaml.in/yaml/v4"
 )
 
 // Artifact Hub support
@@ -574,8 +574,10 @@ func (m *Monocular) getChartURL(repoURL, name, version string) (string, error) {
 
 	// Marshal to the index structure
 	var index IndexFile
-	decoder := yaml.NewDecoder(resp.Body)
-	err = decoder.Decode(&index)
+	loader, err := yaml.NewLoader(resp.Body)
+	if err == nil {
+		err = loader.Load(&index)
+	}
 	if err != nil {
 		return "", fmt.Errorf("Error marshalling Helm Repository Index: %+v", err)
 	}

@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v4"
 )
 
 const modulePath = "github.com/cloudfoundry/stratos/src/jetstream/plugins"
@@ -28,7 +28,7 @@ func main() {
 	}
 
 	var cfg config
-	if err := yaml.Unmarshal(data, &cfg); err != nil {
+	if err := yaml.Load(data, &cfg); err != nil {
 		fmt.Fprintf(os.Stderr, "error parsing plugin-config.yaml: %v\n", err)
 		os.Exit(1)
 	}

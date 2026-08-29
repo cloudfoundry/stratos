@@ -17,7 +17,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	yaml "gopkg.in/yaml.v2"
+	yaml "go.yaml.in/yaml/v4"
 )
 
 // Local Helm Chart Cache
@@ -174,7 +174,7 @@ func readChartYaml(cacheFolder string) *ChartMetadata {
 
 	// Parse as yaml
 	var chartYaml ChartMetadata
-	err = yaml.Unmarshal(data, &chartYaml)
+	err = yaml.Load(data, &chartYaml)
 	if err != nil {
 		return nil
 	}

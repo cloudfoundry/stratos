@@ -13,7 +13,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v4"
 )
 
 // GeneratedPlugin represents a generated plugin
@@ -223,7 +223,7 @@ func MakePluginsFromConfig() {
 		return
 	}
 
-	err = yaml.Unmarshal(yamlFile, &config)
+	err = yaml.Load(yamlFile, &config)
 	if err != nil {
 		slog.Error("failed to unmarshal the plugins YAML", "file", "plugins.yaml", "error", err)
 		return

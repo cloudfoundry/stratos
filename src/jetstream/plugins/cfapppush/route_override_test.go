@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	yaml "gopkg.in/yaml.v2"
+	yaml "go.yaml.in/yaml/v4"
 )
 
 func TestComposeRoute(t *testing.T) {
@@ -48,16 +48,16 @@ func writeManifest(t *testing.T, body string) string {
 
 // firstApp parses a manifest file and returns the first application as a
 // generic map, so tests can assert on arbitrary keys.
-func firstApp(t *testing.T, path string) map[interface{}]interface{} {
+func firstApp(t *testing.T, path string) map[string]interface{} {
 	t.Helper()
 	data, err := os.ReadFile(path)
 	if err != nil {
 		t.Fatalf("failed to read manifest: %v", err)
 	}
 	var doc struct {
-		Applications []map[interface{}]interface{} `yaml:"applications"`
+		Applications []map[string]interface{} `yaml:"applications"`
 	}
-	if err := yaml.Unmarshal(data, &doc); err != nil {
+	if err := yaml.Load(data, &doc); err != nil {
 		t.Fatalf("failed to parse manifest: %v", err)
 	}
 	if len(doc.Applications) == 0 {
@@ -90,7 +90,7 @@ func TestApplyRouteOverride_ConvertsHostDomainToRoutes(t *testing.T) {
 	if !ok || len(routes) != 1 {
 		t.Fatalf("expected exactly one route, got %#v", app["routes"])
 	}
-	route := routes[0].(map[interface{}]interface{})
+	route := routes[0].(map[string]interface{})
 	if route["route"] != "web.apps.example.com" {
 		t.Errorf("route = %v, want web.apps.example.com", route["route"])
 	}
@@ -126,7 +126,7 @@ func TestApplyRouteOverride_DomainOnly(t *testing.T) {
 	}
 	app := firstApp(t, path)
 	routes := app["routes"].([]interface{})
-	if len(routes) != 1 || routes[0].(map[interface{}]interface{})["route"] != "apps.example.com" {
+	if len(routes) != 1 || routes[0].(map[string]interface{})["route"] != "apps.example.com" {
 		t.Errorf("expected single apex route, got %#v", app["routes"])
 	}
 }
@@ -140,7 +140,7 @@ func TestApplyRouteOverride_FoldsPathIntoRoute(t *testing.T) {
 	}
 	app := firstApp(t, path)
 	routes := app["routes"].([]interface{})
-	if len(routes) != 1 || routes[0].(map[interface{}]interface{})["route"] != "web.apps.example.com/api" {
+	if len(routes) != 1 || routes[0].(map[string]interface{})["route"] != "web.apps.example.com/api" {
 		t.Errorf("expected route with path, got %#v", app["routes"])
 	}
 }
