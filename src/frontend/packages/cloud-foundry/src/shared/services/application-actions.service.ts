@@ -367,26 +367,26 @@ export class AppApplicationActionsService {
     confirmLabel: string,
     preResolved?: { appName: string; endpointName: string; orgName: string; spaceName: string },
   ): { cfg: ConfirmationDialogConfig; target: string } {
-    // Three resolution paths in priority order:
-    //   1. preResolved — caller already has the names (delete wizard)
+    // Three resolution paths in priority order, applied per field:
+    //   1. preResolved — caller already has the name (delete wizard)
     //   2. sync signal reads — hot path, action bar firing on app summary
     //   3. fallback to appGuid / cfGuid / "?" — only if signals aren't
     //      populated yet, which on the live action bar shouldn't happen
-    let appName: string;
-    let cfName: string;
-    let orgName: string;
-    let spaceName: string;
-    if (preResolved?.appName && preResolved?.endpointName) {
-      appName = preResolved.appName;
-      cfName = preResolved.endpointName;
-      orgName = preResolved.orgName || '?';
-      spaceName = preResolved.spaceName || '?';
-    } else {
-      appName = this.dataService.app()?.entity?.name ?? this.applicationService.appGuid;
-      cfName = this.cfEndpointService.endpoint()?.entity?.name ?? this.applicationService.cfGuid;
-      orgName = this.dataService.org()?.name ?? '?';
-      spaceName = this.dataService.space()?.name ?? '?';
-    }
+    //
+    // Per field, not all-or-nothing: the delete wizard passes whatever it had
+    // at submit time, and on a cold load (direct URL / refresh into /delete)
+    // org and space need fetches that may not have landed while app and
+    // endpoint already have. Gating all four on those two left the dialog
+    // reading org "?" / space "?" even though the data service had since
+    // resolved both.
+    const appName = preResolved?.appName
+      || this.dataService.app()?.entity?.name
+      || this.applicationService.appGuid;
+    const cfName = preResolved?.endpointName
+      || this.cfEndpointService.endpoint()?.entity?.name
+      || this.applicationService.cfGuid;
+    const orgName = preResolved?.orgName || this.dataService.org()?.name || '?';
+    const spaceName = preResolved?.spaceName || this.dataService.space()?.name || '?';
     const message =
       `${verb} "${appName}" on Cloud Foundry "${cfName}" — org "${orgName}" / space "${spaceName}"?`;
     const cfg = new ConfirmationDialogConfig(`${title}: ${appName}`, message, confirmLabel);
