@@ -294,6 +294,9 @@ complex selectors, animations).
 Stratos supports PostgreSQL, MySQL/MariaDB, and SQLite. For local development,
 SQLite is the default (zero setup).
 
+PostgreSQL 14 and later is supported — the versions the upstream
+[`lib/pq`](https://github.com/lib/pq) driver tests against.
+
 For MySQL/MariaDB (closer to production) using the repo's `docker-compose.yml`:
 
 ```bash
