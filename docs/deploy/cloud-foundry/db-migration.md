@@ -13,15 +13,21 @@ the steps below to implement.
 
     > **NOTE** Stratos supports postgresql and mysql DBs. Stratos will enumerate the bound service instances to detect the database type - see  [below](#note-on-service-bindings) for more detail.
 
-    Use `cf create-service` to create a service instance for the DB - for example:
+    > **NOTE** For PostgreSQL, use a plan offering **PostgreSQL 14 or later** — the
+    > versions the upstream [`lib/pq`](https://github.com/lib/pq) driver tests
+    > against. Older majors are out of upstream support and are not tested.
+
+    First list what your marketplace offers, since service and plan names differ
+    between foundations:
     ```
-    cf create-service postgresql v9.4 console_db
+    cf marketplace
     ```
-    * In this example, `postgresql` is the service name for the Postgres DB service, `v9.4` is the service plan and `console_db` is the name for the service instance that will be created. 
-    * To view services and service plans:
-      ```
-      cf marketplace
-      ```
+
+    Then use `cf create-service` to create a service instance for the DB - for example:
+    ```
+    cf create-service postgresql <plan> console_db
+    ```
+    * In this example, `postgresql` is the service name for the Postgres DB service, `<plan>` is the service plan you picked from the marketplace and `console_db` is the name for the service instance that will be created.
 
     You can also create an [User-Provided Service Instance](https://docs.cloudfoundry.org/devguide/services/user-provided.html):
     ```bash

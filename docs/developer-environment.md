@@ -138,6 +138,9 @@ Stratos connects to external SQL databases. It does not bundle a database server
 | PostgreSQL | `pgsql` | Via container | Recommended |
 | MySQL / MariaDB | `mysql` | Via container | Supported |
 
+PostgreSQL 14 and later is supported — the versions the upstream
+[`lib/pq`](https://github.com/lib/pq) driver tests against.
+
 Any PostgreSQL-compatible (CockroachDB, Aurora, AlloyDB) or MySQL-compatible
 (MariaDB, Aurora MySQL, PlanetScale) service works with existing drivers.
 
