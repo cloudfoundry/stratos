@@ -32,11 +32,8 @@ cd stratos
 # 2. Install dependencies
 make install
 
-# 3. Generate dev SSL certificates
-mkdir -p dev-ssl
-openssl req -x509 -newkey rsa:4096 -keyout dev-ssl/server.key \
-  -out dev-ssl/server.crt -days 365 -nodes \
-  -subj '/CN=localhost'
+# 3. Generate the dev TLS certificate
+make dev cert
 
 # 4. Create backend configuration
 cp src/jetstream/config.example src/jetstream/config.properties
@@ -62,7 +59,37 @@ itself the first time it's run. Running `make build` first would cross-compile
 for every platform, which is unnecessary for local dev (see
 [Development](build-and-packaging.md#development)).
 
-Open https://127.0.0.1:5440 (accept the self-signed certificate warning).
+Open https://localhost:5440. The certificate is self-signed, so the browser
+warns until you trust it once — see [Dev TLS certificate](#dev-tls-certificate).
+
+### Dev TLS certificate
+
+Both dev servers serve HTTPS from `dev-ssl/server.crt` and `dev-ssl/server.key`.
+The pair is generated per developer and is not in the repository — a private key
+committed to a public repo is a private key everyone has. `make dev cert` writes
+it, and `make dev frontend` / `make dev backend` generate it automatically if it
+is missing.
+
+The certificate names `localhost`, `127.0.0.1` and `::1` in its
+`subjectAltName`. That matters: browsers have required SAN since Chrome 58 and
+ignore a bare `CN`, so a certificate without one is rejected with
+`ERR_CERT_COMMON_NAME_INVALID` however much you trust it.
+
+It is self-signed, so browsers still warn until it is trusted once:
+
+```bash
+# macOS
+sudo security add-trusted-cert -d -r trustRoot \
+  -k /Library/Keychains/System.keychain dev-ssl/server.crt
+
+# Linux (Debian/Ubuntu)
+sudo cp dev-ssl/server.crt /usr/local/share/ca-certificates/stratos-dev.crt
+sudo update-ca-certificates
+```
+
+Restart the browser afterwards. To undo it on macOS, remove the certificate
+from Keychain Access. If you would rather not touch the trust store, click
+through the interstitial instead — the console works either way.
 
 ### Common Commands
 

@@ -475,11 +475,14 @@ ticket. See `developer-environment.md` for tool installation.
 
 **Generate Certificates:**
 ```bash
-# Self-signed (development only)
+# Self-signed (development only). subjectAltName is required — browsers
+# ignore CN and reject a certificate without it.
 openssl req -x509 -newkey rsa:4096 \
   -keyout key.pem -out cert.pem \
   -days 365 -nodes \
-  -subj "/CN=stratos.example.com"
+  -subj "/CN=stratos.example.com" \
+  -addext "subjectAltName=DNS:stratos.example.com" \
+  -addext "extendedKeyUsage=serverAuth"
 
 # Production: Use cert-manager with Let's Encrypt
 ```
