@@ -17,7 +17,14 @@ export interface DashboardState {
   timeoutSession: boolean;
   pollingEnabled: boolean;
   sidenavOpen: boolean;
+  /**
+   * Measured from the viewport, not chosen by the user. Owned by the
+   * breakpoint observer in `DashboardBaseComponent`: never persisted, and
+   * left untouched by hydration. A user-settable layout preference would be
+   * a new field, not a reuse of these two.
+   */
   isMobile: boolean;
+  /** @see isMobile — viewport-derived, not persisted. */
   isMobileNavOpen: boolean;
   sideNavPinned: boolean;
   /** @deprecated Theme mode now managed by StratosBrandingService via localStorage */
@@ -74,7 +81,11 @@ export class DashboardDataService {
     if (raw) {
       try {
         const parsed = JSON.parse(raw) as Partial<DashboardState>;
-        this._state.set({ ...defaultDashboardState, ...parsed });
+        // Viewport fields are measured, not remembered.
+        // The breakpoint observer has already run by the time prefs arrive,
+        // so the live values win over whatever storage happens to hold.
+        const { isMobile, isMobileNavOpen } = this._state();
+        this._state.set({ ...defaultDashboardState, ...parsed, isMobile, isMobileNavOpen });
       } catch {
         // Ignore malformed prefs — keep defaults.
       }
@@ -152,7 +163,8 @@ export class DashboardDataService {
     this._state.set(next);
     if (this.hydrated && this.storageKey) {
       try {
-        localStorage.setItem(this.storageKey, JSON.stringify(next));
+        const { isMobile, isMobileNavOpen, ...persisted } = next;
+        localStorage.setItem(this.storageKey, JSON.stringify(persisted));
       } catch {
         // Quota / disabled storage — non-fatal.
       }
