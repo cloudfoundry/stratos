@@ -7,6 +7,11 @@
   without a SAN. Browsers have required `subjectAltName` since Chrome 58 and
   ignore a bare `CN`, so both were rejected with `ERR_CERT_COMMON_NAME_INVALID`
   no matter how they were trusted.
+- `make dev backend` no longer rebuilds the backend on every run on macOS. It
+  compared `file dist/bin/jetstream` against `uname -s`, but `file` reports
+  `Mach-O` and never `Darwin`, so the check never matched and each start paid
+  for a full rebuild. It now matches the binary format, as the equivalent check
+  for the E2E server already did.
 
 [Maintainability]
 - `make dev cert` generates the development TLS key pair, and `make dev
