@@ -143,6 +143,9 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       filter((entity): entity is EndpointModel => !!entity && !!entity.cnsi_type),
       // strict: the filter above guarantees cnsi_type is set on every emission.
       map(entity => entityCatalog.getEndpoint(entity.cnsi_type!, entity.sub_type)),
+      // An endpoint type with no registered entity yields no catalog entry —
+      // drop the emission rather than throwing and tearing down the stream.
+      filter(entity => !!entity),
       map(d => d.definition)
     );
 

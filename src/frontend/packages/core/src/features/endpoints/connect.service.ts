@@ -51,8 +51,8 @@ export const isEndpointConnected = (endpoint: EndpointModel): boolean => {
   if (!endpoint.cnsi_type) {
     return endpoint.connectionStatus === 'connected';
   }
-  const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
-  return endpoint.connectionStatus === 'connected' || !!epType.unConnectable;
+  const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type)?.definition;
+  return endpoint.connectionStatus === 'connected' || !!epType?.unConnectable;
 };
 
 export class ConnectEndpointService {

@@ -520,7 +520,7 @@ export class EntityCatalog {
       endpointType,
       EntityCatalogHelpers.endpointType,
       subType
-    ) as StratosCatalogEndpointEntity;
+    ) as StratosCatalogEndpointEntity | undefined;
   }
 
   public getAllEntitiesForEndpointType(endpointType: string) {

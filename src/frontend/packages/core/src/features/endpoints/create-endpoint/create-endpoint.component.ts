@@ -176,9 +176,9 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
     const epSubType = getIdFromRoute(activatedRoute, 'subtype');
     const endpoint = entityCatalog.getEndpoint(epType, epSubType);
 
-    this.component = endpoint.definition.registrationComponent;
-    this.showConnectStep = !endpoint.definition.unConnectable ?
-      endpoint.definition.authTypes && !!endpoint.definition.authTypes.length :
+    this.component = endpoint?.definition?.registrationComponent;
+    this.showConnectStep = !endpoint?.definition?.unConnectable ?
+      !!endpoint?.definition?.authTypes?.length :
       false;
   }
 

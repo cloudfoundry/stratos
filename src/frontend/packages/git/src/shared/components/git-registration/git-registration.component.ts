@@ -226,8 +226,8 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     this.userProfileService = userProfileService;
 
     this.epSubType = getIdFromRoute(activatedRoute, 'subtype');
-    const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB).definition.label || 'Github';
-    const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB).definition.label || 'Gitlab';
+    const githubLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITHUB)?.definition?.label || 'Github';
+    const gitlabLabel = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, GIT_ENDPOINT_SUB_TYPES.GITLAB)?.definition?.label || 'Gitlab';
 
     // No endpoint context here — only getPublicApi() is needed. An empty
     // guid is the falsy "no endpoint" sentinel BaseSCM.getEndpoint() already
@@ -389,7 +389,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     this.showEndpointFields = !defn.url;
 
     const entityDefn = entityCatalog.getEndpoint(GIT_ENDPOINT_TYPE, this.epSubType);
-    this.urlValidation = entityDefn.definition?.urlValidationRegexString;
+    this.urlValidation = entityDefn?.definition?.urlValidationRegexString;
   }
 
   ngOnDestroy() {

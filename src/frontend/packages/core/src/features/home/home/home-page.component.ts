@@ -113,7 +113,7 @@ export class HomePageComponent implements OnInit {
     return ordered.filter(ep => {
       // strict: cnsi_type is populated on every connected endpoint; '' default keeps the lookup well-formed
       const defn = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
-      const connected = defn.definition.unConnectable || ep.connectionStatus === 'connected';
+      const connected = defn?.definition?.unConnectable || ep.connectionStatus === 'connected';
       return connected;
     });
   });
@@ -320,13 +320,13 @@ export class HomePageComponent implements OnInit {
     const eps = this.connectedEndpoints().filter(ep => {
       // strict: cnsi_type is populated on every connected endpoint; '' default keeps the lookup well-formed
       const defn = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
-      return !!defn.definition.homeCard;
+      return !!defn?.definition?.homeCard;
     });
 
     const wideCount = eps.filter(ep => {
       // strict: cnsi_type is populated on every connected endpoint; '' default keeps the lookup well-formed
       const defn = entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type);
-      return (defn.definition.homeCard?.columnSpan || 1) > 1;
+      return (defn?.definition?.homeCard?.columnSpan || 1) > 1;
     }).length;
     const mostlyWide = wideCount > eps.length / 2;
 

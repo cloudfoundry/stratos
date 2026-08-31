@@ -37,9 +37,8 @@ export class BackupConnectionCellComponent extends TableCellCustom<EndpointModel
     if (!this.row.cnsi_type) {
       return;
     }
-    const epType = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type);
-    const epEntity = epType.definition;
-    this.connectable = !epEntity.unConnectable;
+    const epEntity = entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type)?.definition;
+    this.connectable = !epEntity?.unConnectable;
     if (!this.row.user) {
       this.userConnectionWarning = 'User not connected';
     } else if (this.row.user.guid === SystemSharedUserGuid) {
