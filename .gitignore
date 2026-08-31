@@ -163,6 +163,7 @@ website/versions-repo
 /electron/dist
 /electron/node_modules
 /electron/out
+/dev-ssl/
 /electron/dev-ssl
 /electron/jetstream
 /electron/version

@@ -184,9 +184,10 @@ endif
 # but only for verbs that use these modifiers (not clean/dump).
 # korifi counts as a build modifier here (make build korifi = static
 # backend only), so it must suppress the default like the others;
-# tag/untag/line are stamp modifiers and suppress it the same way.
+# tag/untag/line are stamp modifiers and suppress it the same way, as does
+# cert (make dev cert only writes the TLS key pair).
 ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter korifi tag untag line,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter korifi tag untag line cert,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
 endif
@@ -282,6 +283,7 @@ endif
 $(_HIDE)WANT_TAG   :=
 $(_HIDE)WANT_UNTAG :=
 $(_HIDE)WANT_LINE  :=
+$(_HIDE)WANT_CERT  :=
 
 ifneq ($(filter tag,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_TAG := yes
@@ -291,6 +293,9 @@ ifneq ($(filter untag,$(MAKECMDGOALS)),)
 endif
 ifneq ($(filter line,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_LINE := yes
+endif
+ifneq ($(filter cert,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_CERT := yes
 endif
 
 # cf modifier defaults to linux/amd64 unless PLATFORM is set
@@ -378,8 +383,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line
-frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line:
+.PHONY: frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert
+frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -423,7 +428,47 @@ define clean.frontend
 endef
 $(call register, clean, frontend)
 
+# ── Dev TLS certificate ──────────────────────────────────────
+
+# Both dev servers (ng serve via angular.json, and jetstream via
+# config.properties) read dev-ssl/server.{crt,key}. The certificate must carry
+# a subjectAltName naming localhost: browsers have required SAN since Chrome 58
+# and ignore a bare CN, so a CN-only certificate fails with
+# ERR_CERT_COMMON_NAME_INVALID no matter how it is trusted. The certificate is
+# per-developer and gitignored — trusting one is a local decision, and a shared
+# key in the repo is a key everyone has.
+define dev.cert
+	@mkdir -p dev-ssl
+	@echo "Generating dev TLS certificate (SAN: localhost, 127.0.0.1, ::1)..."
+	@openssl req -x509 -newkey rsa:2048 -sha256 -days 398 -nodes \
+		-keyout dev-ssl/server.key -out dev-ssl/server.crt \
+		-subj '/CN=localhost/O=Stratos Development' \
+		-addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:0:0:0:0:0:0:0:1' \
+		-addext 'extendedKeyUsage=serverAuth' \
+		-addext 'basicConstraints=critical,CA:TRUE' >/dev/null 2>&1
+	@chmod 600 dev-ssl/server.key
+	@echo "Wrote dev-ssl/server.crt and dev-ssl/server.key (valid 398 days)."
+	@echo ""
+	@echo "It is self-signed, so the browser still warns until it is trusted once:"
+	@echo "  macOS: sudo security add-trusted-cert -d -r trustRoot \\"
+	@echo "           -k /Library/Keychains/System.keychain dev-ssl/server.crt"
+	@echo "  Linux: sudo cp dev-ssl/server.crt /usr/local/share/ca-certificates/stratos-dev.crt \\"
+	@echo "           && sudo update-ca-certificates"
+endef
+$(call register, dev, cert)
+
+# Regenerate when absent, or when the certificate on disk predates the SAN
+# requirement — an old CN-only cert is silently useless to every browser.
+define _ensure_dev_cert
+	@if [ ! -f dev-ssl/server.crt ] || [ ! -f dev-ssl/server.key ] || \
+		! openssl x509 -in dev-ssl/server.crt -noout -ext subjectAltName 2>/dev/null \
+			| grep -q 'DNS:localhost'; then \
+		$(MAKE) --no-print-directory dev cert; \
+	fi
+endef
+
 define dev.frontend
+	$(_ensure_dev_cert)
 	BACKEND_PORT=$(BACKEND_PORT) bun run ng serve --port $(FRONTEND_PORT) --host 0.0.0.0 --disable-host-check --proxy-config proxy.conf.cjs
 endef
 $(call register, dev, frontend)
@@ -471,6 +516,7 @@ endef
 $(call register, clean, backend)
 
 define dev.backend
+	$(_ensure_dev_cert)
 	@NEED_BUILD=false; \
 	if [ ! -f $($(_HIDE)BIN_DIR)/jetstream ]; then \
 		NEED_BUILD=true; \
@@ -1514,6 +1560,7 @@ help:
 	@echo "Development:"
 	@echo "  make dev frontend         Start frontend dev server (port $(FRONTEND_PORT))"
 	@echo "  make dev backend          Start backend dev server (port $(BACKEND_PORT))"
+	@echo "  make dev cert             Generate the dev TLS certificate for localhost"
 	@echo "  make dev website          Start documentation site dev server"
 	@echo "  make build website        Build the documentation website"
 	@echo "  make build booklets       Render docs booklets (epub/PDF, needs quarto)"
