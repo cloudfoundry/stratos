@@ -96,7 +96,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       // strict: this view only renders for a connected kubernetes endpoint,
       // so its model always carries a cnsi_type
       const endpointConfig = entityCatalog.getEndpoint(endpoint.entity.cnsi_type!, endpoint.entity.sub_type);
-      const { logoUrl, label } = endpointConfig.definition;
+      const { logoUrl, label } = endpointConfig?.definition ?? {};
       // const { imagePath, label } = entityCatalog.getEndpoint(endpoint.entity.cnsi_type, endpoint.entity.sub_type);
 
       // const { imagePath, label } = getEndpointType(endpoint.entity.cnsi_type, endpoint.entity.sub_type);

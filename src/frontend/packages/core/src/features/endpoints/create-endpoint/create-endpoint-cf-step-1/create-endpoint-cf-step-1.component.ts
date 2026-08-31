@@ -92,7 +92,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   clientRedirectURI!: string;
 
   endpointTypeSupportsSSO = false;
-  endpoint: StratosCatalogEndpointEntity;
+  endpoint?: StratosCatalogEndpointEntity;
   show = false;
 
   showCACertField = false;
@@ -142,6 +142,11 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   // resolves once the busy edge transitions, so we no longer need pairwise/
   // filter/map gymnastics here.
   private async runRegistration(): Promise<StepOnNextResult> {
+    if (!this.endpoint) {
+      // Route named an endpoint type with no registered entity — nothing to
+      // register against, so fail the step rather than throwing.
+      return { success: false, redirect: false, message: 'Unknown endpoint type' };
+    }
     const { subType, type } = this.endpoint.getTypeAndSubtype();
 
     // SSL settings — when a CA cert is provided we trust it as the override
@@ -213,17 +218,17 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     );
   }
 
-  setUrlValidation(endpoint: StratosCatalogEndpointEntity) {
+  setUrlValidation(endpoint?: StratosCatalogEndpointEntity) {
     this.urlValidation = endpoint ? (endpoint.definition.urlValidationRegexString ?? '') : '';
     this.setAdvancedFields(endpoint);
   }
 
   // Only show the Client ID and Client Secret fields if the endpoint type is Cloud Foundry
-  setAdvancedFields(endpoint: StratosCatalogEndpointEntity) {
-    this.showAdvancedFields = endpoint.definition.type === 'cf';
+  setAdvancedFields(endpoint?: StratosCatalogEndpointEntity) {
+    this.showAdvancedFields = endpoint?.definition?.type === 'cf';
 
     // Only allow SSL if the endpoint type is Cloud Foundry
-    this.endpointTypeSupportsSSO = endpoint.definition.type === 'cf';
+    this.endpointTypeSupportsSSO = endpoint?.definition?.type === 'cf';
   }
 
   toggleAdvancedOptions() {

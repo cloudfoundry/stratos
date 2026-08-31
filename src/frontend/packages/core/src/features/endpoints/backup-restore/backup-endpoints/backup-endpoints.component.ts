@@ -292,6 +292,6 @@ export class BackupEndpointsComponent implements OnDestroy {
     if (!endpoint.cnsi_type) {
       return '';
     }
-    return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition.label ?? endpoint.cnsi_type;
+    return entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type)?.definition?.label ?? endpoint.cnsi_type;
   }
 }

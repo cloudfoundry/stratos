@@ -94,9 +94,10 @@ export class BackupEndpointsService {
     if (!endpoint.cnsi_type) {
       return false;
     }
-    const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type).definition;
+    const epType = entityCatalog.getEndpoint(endpoint.cnsi_type, endpoint.sub_type)?.definition;
+    // An unregistered type can't be described, let alone backed up.
     // The endpoint type supports connection details
-    if (epType.unConnectable) {
+    if (!epType || epType.unConnectable) {
       return false;
     }
 

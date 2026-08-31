@@ -33,9 +33,11 @@ export function mapMetricsData(ep: MetricsEndpointProvider): MetricsEndpointInfo
       known: true,
       name: endpoint.name,
       url: getFullEndpointApiUrl(endpoint),
-      type: catalogEndpoint.definition.label,
+      // An unregistered type has no catalog entry; keep the row, blank the
+      // labelling, rather than hiding a real endpoint.
+      type: catalogEndpoint?.definition?.label,
       icon: {
-        name: catalogEndpoint.definition.icon,
+        name: catalogEndpoint?.definition?.icon,
         font: 'stratos-icons'
       },
       metadata: {
