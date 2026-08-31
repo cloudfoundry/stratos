@@ -518,9 +518,10 @@ $(call register, clean, backend)
 define dev.backend
 	$(_ensure_dev_cert)
 	@NEED_BUILD=false; \
+	case "$$(uname -s)" in Darwin) BINFMT="Mach-O";; *) BINFMT="ELF";; esac; \
 	if [ ! -f $($(_HIDE)BIN_DIR)/jetstream ]; then \
 		NEED_BUILD=true; \
-	elif ! file $($(_HIDE)BIN_DIR)/jetstream | grep -qi "$$(uname -s)"; then \
+	elif ! file $($(_HIDE)BIN_DIR)/jetstream | grep -q "$$BINFMT"; then \
 		echo "Backend binary is not for this platform, rebuilding..."; \
 		NEED_BUILD=true; \
 	fi; \
