@@ -18,7 +18,7 @@
     @if (endpointDetails$ | async; as details) {
       <app-entity-summary-title [imagePath]="details.imagePath ?? null"
         [title]="details.name" [subTitle]="details.label">
-        <app-tile-grid class="max-w-[350px]">
+        <app-tile-grid class="max-w-[760px]">
           <app-tile-group class="tile-group-3-cols">
             <app-tile>
               <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/nodes"
