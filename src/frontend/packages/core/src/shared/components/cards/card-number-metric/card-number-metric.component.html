@@ -3,7 +3,7 @@
     @if (!textOnly) {
       <div
         class="card p-4 relative"
-        [ngClass]="{'border-0 shadow-none bg-transparent': mode === 'plain'}">
+        [ngClass]="{'border-0 shadow-none bg-transparent number-metric-card__plain': mode === 'plain'}">
         <app-card-status [status$]="status$"></app-card-status>
         <div class="flex items-start space-x-4">
           @if (icon) {

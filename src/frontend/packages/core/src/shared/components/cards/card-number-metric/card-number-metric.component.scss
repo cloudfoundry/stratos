@@ -68,7 +68,10 @@
 .number-metric-card__plain.card {
   border-radius: 0;
   box-shadow: none;
-  padding: 6px 12px;
+  // No side padding: plain mode draws no card chrome, so horizontal padding
+  // only inflates the metric's min-content width (161px -> 129px without it)
+  // and costs a column when these are tiled in a narrow card.
+  padding: 16px 0;
 
   .number-metric-card__usage-count {
     font-size: 20px;
