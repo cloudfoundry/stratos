@@ -327,6 +327,16 @@ export class KubeEntityCatalog {
             link: ['/kubernetes', endpointID, 'resource', 'namespace'],
             icon: 'namespace',
             iconFont: 'stratos-icons'
+          },
+          {
+            // Mirrors CF's 'View Cloud Foundry Info'. Without it the cluster
+            // summary has no named route from the card — the endpoint page is
+            // only reachable by clicking the card header, which nothing
+            // advertises.
+            title: 'View Kubernetes Info',
+            link: ['/kubernetes', endpointID],
+            icon: 'kubernetes',
+            iconFont: 'stratos-icons'
           }
         ],
         fullView: false,
