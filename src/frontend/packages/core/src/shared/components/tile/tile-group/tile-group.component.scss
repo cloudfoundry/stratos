@@ -5,90 +5,35 @@ app-tile-group {
   gap: $tile-grid-gap;
   width: 100%;
 
-  // Default: 1 column (mobile-first)
-  grid-template-columns: 1fr;
+  // Columns are fitted to the group's own width, not the viewport's. auto-fit
+  // collapses the tracks it cannot fill, so a group of N tiles renders as N
+  // equal columns wherever there is room and folds down as the container
+  // narrows — which is what the tile-group-<n>-cols classes were for. Those
+  // classes are still set (TileGroupComponent host-binds them from the tile
+  // count) but no longer need a rule each; keying them off viewport media
+  // queries gave a home card in a 292px box three 79px columns.
+  //
+  // 130px is the measured min-content of the widest number metric (a
+  // "Namespaces" label above a 5-digit count), so a fitted column can never
+  // be narrower than the content it holds.
+  grid-template-columns: repeat(auto-fit, minmax(min(130px, 100%), 1fr));
 
-  // Auto-fit fallback — MUST come before specific column rules so they take precedence
-  &.tile-group-auto {
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  }
-
-  // Specific column classes (override auto when both present)
+  // Single column is an explicit layout choice, not a fitting result: these
+  // groups hold full-width content (lists, tables) that must never sit
+  // side-by-side.
   &.tile-group-1-cols {
     grid-template-columns: 1fr;
-  }
-
-  &.tile-group-2-cols {
-    grid-template-columns: 1fr;
-
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
-
-  &.tile-group-3-cols {
-    grid-template-columns: 1fr;
-
-    @media (min-width: 640px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (min-width: 1024px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-  }
-
-  &.tile-group-4-cols {
-    grid-template-columns: 1fr;
-
-    @media (min-width: 640px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (min-width: 1024px) {
-      grid-template-columns: repeat(4, 1fr);
-    }
-  }
-
-  &.tile-group-5-cols {
-    grid-template-columns: 1fr;
-
-    @media (min-width: 640px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (min-width: 1024px) {
-      grid-template-columns: repeat(5, 1fr);
-    }
-  }
-
-  &.tile-group-6-cols {
-    grid-template-columns: 1fr;
-
-    @media (min-width: 640px) {
-      grid-template-columns: repeat(2, 1fr);
-    }
-
-    @media (min-width: 768px) {
-      grid-template-columns: repeat(3, 1fr);
-    }
-
-    @media (min-width: 1280px) {
-      grid-template-columns: repeat(6, 1fr);
-    }
-  }
-
-  // Compact gap variant
-  &.tile-group-compact {
-    gap: 1rem;
   }
 
   // Legacy gutter support (converted to gap)
   &.tile-group-gutters {
     gap: $tile-grid-gap;
+  }
+
+  // Compact gap variant. Declared after the gutter rule because
+  // TileGroupComponent host-binds tile-group-gutters on every group, so an
+  // earlier declaration would never win and compact would be a no-op.
+  &.tile-group-compact {
+    gap: 0.5rem;
   }
 }
