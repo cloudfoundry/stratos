@@ -13,3 +13,7 @@
   summary page was previously reachable only by clicking the card's header,
   which nothing advertised, and its own counts are now laid out to match the
   card they are reached from.
+- The Kubernetes page now offers the same interface as the Cloud Foundry one.
+  Cluster names are links in both card and line mode — they were plain text, so
+  the page listed clusters without giving any way to open one — and a `User`
+  column has been added to match.
