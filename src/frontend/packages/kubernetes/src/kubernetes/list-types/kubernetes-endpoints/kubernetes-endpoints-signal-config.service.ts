@@ -151,14 +151,18 @@ export class KubernetesEndpointsSignalConfigService {
     };
 
     const columns: SignalListColumn<EndpointModel>[] = [
-      // Name, Address, Status, and Actions below all match the
-      // /cloud-foundry picker's columns exactly, so both surfaces render
-      // identically in card and table mode.
+      // Name, Address, User, Status and Actions mirror the /cloud-foundry
+      // picker, so both surfaces render identically in card and table mode.
+      // Name is a link there and must be one here: it is the only route from
+      // this page into a cluster, and as plain text the page listed clusters
+      // it gave you no way to open. 'link' is rendered by both the card and
+      // the table renderer, so the one column serves both modes.
       {
         header: 'Name',
         key: 'name',
         sortField: 'name',
-        kind: 'text',
+        kind: 'link',
+        link: (ep: EndpointModel) => ['/kubernetes', ep.guid ?? ''],
         render: (ep: EndpointModel) => ep.name ?? '',
         widthHint: '24rem',
       },
@@ -169,6 +173,14 @@ export class KubernetesEndpointsSignalConfigService {
         kind: 'text',
         render: (ep: EndpointModel) => ep.api_endpoint?.Host ?? '—',
         widthHint: '32rem',
+      },
+      {
+        header: 'User',
+        key: 'user',
+        sortField: (ep: EndpointModel) => ep.user?.name ?? '',
+        kind: 'text',
+        render: (ep: EndpointModel) => ep.user?.name ?? '—',
+        widthHint: '12rem',
       },
       {
         header: 'Status', key: 'status',
@@ -203,8 +215,8 @@ export class KubernetesEndpointsSignalConfigService {
       columns,
       // strict: registered endpoint rows always carry a guid (matches backup-endpoints getRowKey)
       getRowKey: (ep: EndpointModel) => ep.guid!,
-      emptyMessage: 'There are no endpoints',
-      emptyFilterMessage: 'No endpoints match the current filters',
+      emptyMessage: 'There are no connected or expired Kubernetes endpoints',
+      emptyFilterMessage: 'No Kubernetes endpoints match the current filters',
       pageSizeOptions: {
         table: [10, 25, 50, 100],
         card: [6, 12, 24, 48, 96],
