@@ -2,3 +2,19 @@
   display: block;
   width: 100%;
 }
+
+// Line the counts up with the Favorites/Shortcuts panel below them, the way
+// the CF card's counts line up with its recent-apps panel. That panel is a
+// sibling of this card's content wrapper, so it starts at the card-body edge
+// while this grid is inset by the wrapper's 24px padding plus its own 16px.
+// Cancelling both also buys back 80px, which is what lets three counts share
+// a row instead of two.
+app-tile-grid {
+  // width:auto (not the inherited 100%) so the negative margins widen the grid
+  // rather than just shifting it left.
+  margin-left: -24px;
+  margin-right: -24px;
+  padding-left: 0;
+  padding-right: 0;
+  width: auto;
+}
