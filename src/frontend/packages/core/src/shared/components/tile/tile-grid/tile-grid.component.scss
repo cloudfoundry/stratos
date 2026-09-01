@@ -1,4 +1,8 @@
 app-tile-grid {
+  // Establishes the query container the tile groups size themselves against,
+  // so a group in a narrow card steps its columns down instead of taking its
+  // count from the viewport. Inline-size only: block size stays content-driven.
+  container-type: inline-size;
   display: grid;
   grid-template-columns: 1fr;
   grid-auto-rows: min-content;

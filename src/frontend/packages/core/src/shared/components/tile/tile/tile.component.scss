@@ -1,4 +1,8 @@
 app-tile {
+  // Also a query container: a tile group is not always inside an app-tile-grid
+  // (a routed template may nest one directly in an app-tile), and without a
+  // container ancestor every container query silently fails to match.
+  container-type: inline-size;
   display: flex;
   flex-direction: column;
   min-width: 0; // Prevent grid blowout
