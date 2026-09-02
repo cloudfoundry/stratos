@@ -211,7 +211,7 @@
     "happy-dom": "^20.11.2",
     "js-yaml": "5.4.1",
     "jsdom": "^30.0.1",
-    "json-schema-to-typescript": "15.0.4",
+    "json-schema-to-typescript": "16.0.0",
     "kind-of": "6.0.3",
     "mem": "9.0.2",
     "mktemp": "2.0.3",
