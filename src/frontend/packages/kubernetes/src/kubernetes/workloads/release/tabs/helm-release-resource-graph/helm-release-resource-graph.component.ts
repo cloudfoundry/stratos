@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
-import { Edge, GraphComponent, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
+import { Edge, GraphComponent, LayoutService, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
@@ -68,6 +68,10 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
   styleUrls: ['./helm-release-resource-graph.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
+  // ngx-graph 12+ declares LayoutService without providedIn and only the
+  // deprecated NgxGraphModule provides it; the standalone GraphComponent
+  // injects it, so the consumer has to supply it.
+  providers: [LayoutService],
   imports: [
     CommonModule,
     AppProgressBarComponent,
@@ -84,8 +88,10 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
   // see: https://swimlane.github.io/ngx-graph/#/#quick-start
 
-  public nodes: CustomHelmReleaseGraphNode[] = [];
-  public links: Edge[] = [];
+  // Signals: the view is OnPush under zoneless change detection, so plain
+  // fields written from the socket subscription never re-rendered the graph.
+  public nodes = signal<CustomHelmReleaseGraphNode[]>([]);
+  public links = signal<Edge[]>([]);
 
   private updateSignal: WritableSignal<boolean> = signal<boolean>(false);
   update$ = toObservable(this.updateSignal);
@@ -95,13 +101,11 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   private fitSignal: WritableSignal<NgxGraphZoomOptions> = signal<NgxGraphZoomOptions>({});
   fit$ = toObservable(this.fitSignal);
 
-  public layout = 'dagre';
+  public layout = signal('dagre');
 
   public layoutIndex = 0;
 
   private graph?: Subscription;
-
-  private didInitialFit = false;
 
   public path: string;
 
@@ -158,7 +162,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
 
         newNodes.push(newNode);
       });
-      this.nodes = newNodes;
+      this.nodes.set(newNodes);
 
       const newLinks: HelmReleaseGraphLink[] = [];
       Object.values(g.links).forEach((link: any) => {
@@ -169,13 +173,8 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
           target: link.target
         });
       });
-      this.links = newLinks;
+      this.links.set(newLinks);
       this.updateSignal.set(true);
-
-      if (!this.didInitialFit) {
-        this.didInitialFit = true;
-        setTimeout(() => this.fitGraph(), 10);
-      }
     });
   }
 
@@ -244,7 +243,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
       this.layoutIndex = 0;
     }
 
-    this.layout = layouts[this.layoutIndex];
+    this.layout.set(layouts[this.layoutIndex]);
   }
 
   private getColor(status: string): Colors {
