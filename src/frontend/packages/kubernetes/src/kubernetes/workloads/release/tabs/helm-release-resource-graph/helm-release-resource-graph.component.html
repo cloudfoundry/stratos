@@ -19,7 +19,7 @@
 </app-page-sub-nav>
 
 @if (nodes && nodes.length) {
-  <ngx-graph class="chart-container" [draggingEnabled]="false" [links]="links"
+  <ngx-graph class="chart-container" [enableDrag]="false" [links]="links"
     [nodes]="nodes" [update$]="update$" [zoomToFit$]="fit$" [layout]="layout">
     <ng-template #nodeTemplate let-node>
       <svg:g class="node" (click)="onNodeClick(node)">

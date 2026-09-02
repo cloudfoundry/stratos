@@ -4,7 +4,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AppProgressBarComponent } from '../../../../../../../core/src/shared/components/progress-bar/app-progress-bar.component';
 import { CustomIconComponent } from '../../../../../../../core/src/shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../../../../core/src/shared/components/custom-tooltip/custom-tooltip.directive';
-import { Edge, NgxGraphModule, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
+import { Edge, GraphComponent, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
@@ -73,7 +73,7 @@ interface CustomHelmReleaseGraphNodeData extends HelmReleaseGraphNodeData {
     AppProgressBarComponent,
     CustomIconComponent,
     CustomTooltipDirective,
-    NgxGraphModule,
+    GraphComponent,
     PageSubNavComponent,
     AnalysisReportRunnerComponent,
     AnalysisReportSelectorComponent,

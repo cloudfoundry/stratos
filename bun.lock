@@ -14,7 +14,7 @@
         "@angular/platform-browser-dynamic": "22.1.4",
         "@angular/platform-server": "22.1.4",
         "@angular/router": "22.1.4",
-        "@swimlane/ngx-graph": "11.0.0",
+        "@swimlane/ngx-graph": "13.0.0",
         "ajv": "^8.20.0",
         "chart.js": "^4.5.1",
         "core-js": "3.50.0",
@@ -866,7 +866,7 @@
 
     "@stratos/builders": ["@stratos/builders@workspace:tools/builders/prebuild-application"],
 
-    "@swimlane/ngx-graph": ["@swimlane/ngx-graph@11.0.0", "", { "dependencies": { "d3-dispatch": "^3.0.1", "d3-ease": "^3.0.1", "d3-force": "^3.0.0", "d3-scale": "^4.0.2", "d3-selection": "^3.0.0", "d3-shape": "^3.2.0", "d3-timer": "^3.0.1", "d3-transition": "^3.0.1", "dagre": "^0.8.5", "transformation-matrix": "^2.16.1", "tslib": "^2.3.1", "webcola": "^3.4.0" }, "peerDependencies": { "@angular/animations": "18.x || 19.x || 20.x", "@angular/cdk": "18.x || 19.x || 20.x", "@angular/common": "18.x || 19.x || 20.x", "@angular/core": "18.x || 19.x || 20.x", "rxjs": "7.x" } }, "sha512-QmJxh97KlC70eDWGCZcyl5vzNGaRo7rGcNeLAB2o0RKSnMPm/kdMzRKFeu40zvmpyWVw2oTEjhwdVQ/08GqIyQ=="],
+    "@swimlane/ngx-graph": ["@swimlane/ngx-graph@13.0.0", "", { "dependencies": { "d3-dispatch": "^3.0.1", "d3-ease": "^3.0.1", "d3-force": "^3.0.0", "d3-scale": "^4.0.2", "d3-selection": "^3.0.0", "d3-shape": "^3.2.0", "d3-timer": "^3.0.1", "d3-transition": "^3.0.1", "dagre": "^0.8.5", "transformation-matrix": "^2.16.1", "tslib": "^2.3.1", "webcola": "^3.4.0" }, "peerDependencies": { "@angular/animations": ">=19.0.0 <23.0.0", "@angular/cdk": ">=19.0.0 <23.0.0", "@angular/common": ">=19.0.0 <23.0.0", "@angular/core": ">=19.0.0 <23.0.0", "rxjs": "7.x" } }, "sha512-mfpBnIDu/vGUFOjpCHY8P4W9bV8WEB8SPEWhvjuIBgQqe03PpNh8863WlVCwGc52kXAHByOJTfxJmZX+IOhPBw=="],
 
     "@tailwindcss/forms": ["@tailwindcss/forms@0.5.11", "", { "dependencies": { "mini-svg-data-uri": "^1.2.3" }, "peerDependencies": { "tailwindcss": ">=3.0.0 || >= 3.0.0-alpha.1 || >= 4.0.0-alpha.20 || >= 4.0.0-beta.1" } }, "sha512-h9wegbZDPurxG22xZSoWtdzc41/OlNEUQERNqI/0fOwa2aVlWGu7C35E/x6LDyD3lgtztFSSjKZyuVM0hxhbgA=="],
 
