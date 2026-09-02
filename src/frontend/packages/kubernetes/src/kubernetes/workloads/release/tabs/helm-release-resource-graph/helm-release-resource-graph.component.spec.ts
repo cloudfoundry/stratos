@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { NgxGraphModule } from '@swimlane/ngx-graph';
+import { GraphComponent } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 
 import { HelmReleaseProviders, KubernetesBaseTestModules, KubeBaseGuidMock } from '../../../../kubernetes.testing.module';
@@ -20,7 +20,7 @@ describe('HelmReleaseResourceGraphComponent', () => {
     await TestBed.configureTestingModule({
       imports: [
         KubernetesBaseTestModules,
-        NgxGraphModule,
+        GraphComponent,
 
         HelmReleaseResourceGraphComponent,
         AnalysisReportSelectorComponent,
