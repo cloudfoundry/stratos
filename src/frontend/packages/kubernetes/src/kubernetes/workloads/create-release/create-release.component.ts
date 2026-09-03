@@ -90,7 +90,9 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   private createdNamespace = false;
 
   private chart: HelmChartReference;
-  public config!: ChartValuesConfig; // strict: assigned from the chart-version fetch in the constructor before the editor renders
+  // Signal: resolved from the chart-version fetch after construction; an OnPush
+  // view under zoneless CD only repaints for signal writes.
+  readonly config = signal<ChartValuesConfig | undefined>(undefined);
   private route = inject(ActivatedRoute);
   public endpointsService = inject(EndpointsService);
   private chartsService = inject(ChartsService);
@@ -116,12 +118,23 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
     this.cancelUrl = this.chartsService.getChartSummaryRoute(chart.repo, chart.name, chart.version, this.route);
     this.chart = chart;
 
+    // The route may omit the version (`install/:endpoint/:repo/:name`); resolve
+    // the chart's latest version in that case rather than requesting
+    // `versions/undefined`.
+    const version$: Observable<string> = chart.version
+      ? of(chart.version)
+      : this.chartsService.getChart(chart.repo, chart.name).pipe(map(c => c.relationships.latestChartVersion.data.version));
+
     // Fetch the Chart Version metadata so we can get the correct URL for the Chart's JSON Schema
-    this.chartsService.getVersion(this.chart.repo, this.chart.name, this.chart.version).pipe(take(1)).subscribe(ch => {
-      this.config = {
-        valuesUrl: `/pp/v1/monocular/values/${this.chart.endpoint}/${this.chart.repo}/${chart.name}/${this.chart.version}`,
+    version$.pipe(
+      take(1),
+      switchMap(version => this.chartsService.getVersion(chart.repo, chart.name, version).pipe(map(ch => ({ ch, version })))),
+    ).subscribe(({ ch, version }) => {
+      this.chart = { ...chart, version };
+      this.config.set({
+        valuesUrl: `/pp/v1/monocular/values/${chart.endpoint}/${chart.repo}/${chart.name}/${version}`,
         schemaUrl: this.chartsService.getChartSchemaURL(ch, ch.relationships.chart.data.name, ch.relationships.chart.data.repo)
-      };
+      });
     });
 
     this.setupDetailsStep();

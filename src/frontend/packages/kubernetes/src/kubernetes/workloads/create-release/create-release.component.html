@@ -61,6 +61,6 @@
       </form>
     </app-step>
     <app-step [title]="'Overrides'" [signalHandle]="overridesStepHandle">
-      <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
+      <app-chart-values-editor #editor [config]="config()"></app-chart-values-editor>
     </app-step>
   </app-steppers>
