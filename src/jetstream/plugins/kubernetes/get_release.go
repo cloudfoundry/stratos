@@ -102,7 +102,14 @@ func (c *KubernetesSpecification) GetReleaseStatus(ec *echo.Context) error {
 	// this back incrementally
 
 	// Parse the manifest
-	rel := helm.NewHelmRelease(res, endpointGUID, userID, c.portalProxy)
+	// Discovery gives each kind its real plural and scope; without it the
+	// release falls back to guessing from the kind name.
+	mapper, err := config.RESTClientGetter.ToRESTMapper()
+	if err != nil {
+		slog.Warn("could not build a REST mapper for the Helm release; resource URLs will be guessed", "endpoint", endpointGUID, "release", release, "error", err)
+		mapper = nil
+	}
+	rel := helm.NewHelmRelease(res, endpointGUID, userID, mapper)
 
 	graph := helm.NewHelmReleaseGraph(rel)
 
