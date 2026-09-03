@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
@@ -175,7 +175,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private appAutoscalerPolicySnackBarRef!: TailwindSnackBarRef<any>;
   private appAutoscalerScalingHistorySnackBarRef!: TailwindSnackBarRef<any>;
 
-  appAutoscalerAppMetrics: Record<string, Observable<{ entity: AppAutoscalerMetricDataLocal }[]>> = {};
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly appAutoscalerAppMetrics = signal<Record<string, Observable<{ entity: AppAutoscalerMetricDataLocal }[]>>>({});
 
   paramsMetrics: AutoscalerTabPaginationParams = {
     'start-time': ((new Date()).getTime() - 60000).toString() + '000000',
@@ -339,10 +340,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.paramsMetrics['start-time'] = ((new Date()).getTime() - 60000).toString() + '000000';
       this.paramsMetrics['end-time'] = (new Date()).getTime().toString() + '000000';
       if (appAutoscalerPolicy.scaling_rules_map) {
-        this.appAutoscalerAppMetrics = Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, Observable<{ entity: AppAutoscalerMetricDataLocal }[]>>, metricName: string) => {
+        this.appAutoscalerAppMetrics.set(Object.keys(appAutoscalerPolicy.scaling_rules_map).reduce((metricMap: Record<string, Observable<{ entity: AppAutoscalerMetricDataLocal }[]>>, metricName: string) => {
           metricMap[metricName] = this.getAppMetric(metricName, appAutoscalerPolicy.scaling_rules_map[metricName], this.paramsMetrics);
           return metricMap;
-        }, {});
+        }, {}));
       }
     });
   }

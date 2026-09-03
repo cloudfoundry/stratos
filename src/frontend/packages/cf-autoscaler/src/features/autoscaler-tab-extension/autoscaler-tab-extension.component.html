@@ -49,7 +49,7 @@
                     @for (metric of appAutoscalerAppMetricNames$ | async; track metric) {
                       <div class="pr-10">
                         <app-metadata-item class="my-0" label={{metric.name}}>
-                          @if (appAutoscalerAppMetrics[metric.name] | async; as metricData) {
+                          @if (appAutoscalerAppMetrics()[metric.name] | async; as metricData) {
                             <canvas baseChart [type]="'doughnut'"
                               [data]="getGaugeData(metricData)"
                               [options]="gaugeOptions"
