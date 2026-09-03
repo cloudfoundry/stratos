@@ -1,24 +1,24 @@
-<div class="flex flex-col" [class.opacity-50]="disabled" [class.pointer-events-none]="disabled">
+<div class="flex flex-col" [class.opacity-50]="disabled()" [class.pointer-events-none]="disabled()">
   <input [accept]="accept" type="file" (change)="onNativeInputFileSelect($event)" #inputFile hidden />
   @if (!buttonLabel) {
     <div class="form-field file-input__form-field">
       <div class="file-input__field input flex items-center justify-between"
-        [class.opacity-50]="disabled"
-        [class.cursor-not-allowed]="disabled">
+        [class.opacity-50]="disabled()"
+        [class.cursor-not-allowed]="disabled()">
         <input type="text" class="flex-1 bg-transparent border-none outline-none text-[inherit] font-[inherit] p-0 min-w-0"
           [placeholder]="placeholder || 'No file selected'"
           [value]="name"
-          [disabled]="disabled"
+          [disabled]="disabled()"
           (change)="onPathInput($event)" />
         @if (fileCount) {
           <button class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
-            [disabled]="disabled" (click)="clearFile($event)"
+            [disabled]="disabled()" (click)="clearFile($event)"
             title="Clear file">
             <span class="material-icons text-sm">close</span>
           </button>
         }
         <button class="btn btn-sm btn-secondary ml-1 flex-none leading-[inherit] min-w-[auto] px-1" type="button"
-          [disabled]="disabled" (click)="selectFile($event)"
+          [disabled]="disabled()" (click)="selectFile($event)"
           title="Browse for file">
           <span class="material-icons text-sm">more_horiz</span>
         </button>
@@ -26,7 +26,7 @@
     </div>
   }
   @if (buttonLabel) {
-    <button (click)="selectFile($event)" class="btn btn-primary" [disabled]="disabled">
+    <button (click)="selectFile($event)" class="btn btn-primary" [disabled]="disabled()">
       {{ buttonLabel }}
     </button>
   }

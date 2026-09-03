@@ -59,7 +59,8 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   editProfileForm: FormGroup<EditProfileForm>;
   showPassword: boolean[] = [];
 
-  needsPasswordForEmailChange: boolean;
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly needsPasswordForEmailChange = signal(false);
 
   // FWT-957: signal-native step handle. Form-edit step (Shape 2):
   // valid tracks `form.valid && form.dirty`; submit awaits the legacy
@@ -77,7 +78,6 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
       newPassword: new FormControl('', { nonNullable: true }),
       confirmPassword: new FormControl('', { nonNullable: true }) });
 
-    this.needsPasswordForEmailChange = false;
 
     // Track form validity + dirty as a signal so the step's Next button
     // mirrors the legacy `[valid]="editProfileForm.valid && editProfileForm.dirty"`.
@@ -126,14 +126,14 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
   // Only allow password change if user has the 'password.write' group
   public canChangePassword = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.PASSWORD_CHANGE);
 
-  public passwordRequired = false;
+  readonly passwordRequired = signal(false);
 
   ngOnInit() {
     this.userProfileService.userProfile$.pipe(take(1), defaultIfEmpty(null)).subscribe(profile => {
       if (!profile) { return; }
       // UAA needs the user's password for email changes. Local user does not
       // Both need it for password change
-      this.needsPasswordForEmailChange = (profile.origin === 'uaa');
+      this.needsPasswordForEmailChange.set(profile.origin === 'uaa');
       this.profile = profile;
       this.emailAddress = this.userProfileService.getPrimaryEmailAddress(profile);
       this.editProfileForm.patchValue({
@@ -155,9 +155,9 @@ export class EditProfileInfoComponent implements OnInit, OnDestroy {
     this.sub = this.editProfileForm.valueChanges.subscribe(values => {
       // Old password is required if either email or new pw is specified (uaa)
       // or only if new pw is specified (local account)
-      const required = this.needsPasswordForEmailChange ?
+      const required = this.needsPasswordForEmailChange() ?
         (values.emailAddress !== this.emailAddress || !!(values.newPassword ?? '').length) : !!(values.newPassword ?? '').length;
-      this.passwordRequired = required;
+      this.passwordRequired.set(required);
       if (required !== this.lastRequired) {
         this.lastRequired = required;
         const validators = required ? [Validators.required] : [];

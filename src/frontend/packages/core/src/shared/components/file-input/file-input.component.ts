@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject, signal } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -35,15 +35,16 @@ export class FileInputComponent implements OnInit, OnDestroy {
   public name = '';
 
   private formGroupControl!: FormGroupName;
-  public disabled = false;
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly disabled = signal(false);
   private sub?: Subscription;
 
   ngOnInit(): void {
     if (this.parent instanceof FormGroupName) {
       this.formGroupControl = this.parent as FormGroupName;
-      this.disabled = this.formGroupControl.control.disabled;
+      this.disabled.set(this.formGroupControl.control.disabled);
       this.sub = this.formGroupControl.control.statusChanges.subscribe(a => {
-        this.disabled = a === 'DISABLED';
+        this.disabled.set(a === 'DISABLED');
       });
     }
   }

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { RouterModule } from '@angular/router';
 
@@ -26,15 +26,16 @@ export class EulaPageComponent {
     }
   ];
 
-  public eulaHtml = '';
+  // A signal so the OnPush view repaints when the fetch resolves under zoneless CD.
+  public readonly eulaHtml = signal('');
 
   // Load the EULA
   constructor() {
     const http = inject(HttpClient);
 
     http.get('/core/assets/eula.html', {responseType: 'text'}).subscribe(
-      (html: string) => this.eulaHtml = html,
-      () => this.eulaHtml = 'An error occurred retrieving the EULA'
+      (html: string) => this.eulaHtml.set(html),
+      () => this.eulaHtml.set('An error occurred retrieving the EULA')
     );
   }
 
