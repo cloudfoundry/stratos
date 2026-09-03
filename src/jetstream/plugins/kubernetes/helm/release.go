@@ -18,18 +18,12 @@ import (
 	batchv1 "k8s.io/api/batch/v1"
 	v1 "k8s.io/api/core/v1"
 	extv1beta1 "k8s.io/api/extensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/kubernetes/scheme"
 	"sigs.k8s.io/yaml"
 )
-
-var resourcesWithoutStatus = map[string]bool{
-	"RoleBinding":        false,
-	"Role":               false,
-	"ClusterRole":        false,
-	"ClusterRoleBinding": false,
-	"PodSecurityPolicy":  false,
-}
 
 // HelmRelease represents a Helm Release deployed via Helm
 type HelmRelease struct {
@@ -40,6 +34,9 @@ type HelmRelease struct {
 	Jobs           []KubeResourceJob          `json:"-"`
 	PodJobs        map[string]KubeResourceJob `json:"-"`
 	ManifestErrors bool                       `json:"-"`
+	// mapper resolves a kind's REST plural and scope through API discovery.
+	// nil (tests, discovery failure) falls back to a name-based guess.
+	mapper meta.RESTMapper
 }
 
 // KubeResource is a simple struct to pull out core common metadata for a Kube resource
@@ -59,11 +56,12 @@ func (r *KubeResource) getID() string {
 }
 
 // NewHelmRelease represents extended info about a Helm Release
-func NewHelmRelease(info *release.Release, endpoint, user string, jetstream api.PortalProxy) *HelmRelease {
+func NewHelmRelease(info *release.Release, endpoint, user string, mapper meta.RESTMapper) *HelmRelease {
 	r := &HelmRelease{
 		Release:  info,
 		Endpoint: endpoint,
 		User:     user,
+		mapper:   mapper,
 	}
 	r.Resources = make(map[string]KubeResource)
 	r.PodJobs = make(map[string]KubeResourceJob)
@@ -197,13 +195,16 @@ func (r *HelmRelease) processKubeResource(obj interface{}, t KubeResource) {
 }
 
 func (r *HelmRelease) addJobForResource(namespace, kind, apiVersion, name string) {
+	if r.isClusterScoped(kind, apiVersion) {
+		namespace = ""
+	}
 	job := KubeResourceJob{
 		ID:         fmt.Sprintf("%s-%s#Pods", kind, name),
 		Endpoint:   r.Endpoint,
 		User:       r.User,
 		Namespace:  namespace,
 		Name:       name,
-		URL:        getRestURL(namespace, kind, apiVersion, name),
+		URL:        r.restURL(namespace, kind, apiVersion, name),
 		APIVersion: apiVersion,
 		Kind:       kind,
 	}
@@ -402,33 +403,62 @@ func (r *HelmRelease) UpdateResources(jetstream api.PortalProxy) {
 	}
 }
 
-func getRestURL(namespace, kind, apiVersion, name string) string {
-	var restURL string
-	base := "api"
-	if len(strings.Split(apiVersion, "/")) > 1 {
-		base = "apis"
+// restMapping asks discovery for the kind's plural and scope. ok is false
+// when there is no mapper or the kind is unknown to the cluster.
+func (r *HelmRelease) restMapping(kind, apiVersion string) (*meta.RESTMapping, bool) {
+	if r.mapper == nil {
+		return nil, false
+	}
+	gv, err := schema.ParseGroupVersion(apiVersion)
+	if err != nil {
+		return nil, false
+	}
+	m, err := r.mapper.RESTMapping(schema.GroupKind{Group: gv.Group, Kind: kind}, gv.Version)
+	if err != nil {
+		slog.Debug("no REST mapping for kind, guessing its URL", "kind", kind, "apiVersion", apiVersion, "error", err)
+		return nil, false
+	}
+	return m, true
+}
 
-		v, ok := resourcesWithoutStatus[kind]
-		if !ok || v {
-			name += "/status"
+func (r *HelmRelease) isClusterScoped(kind, apiVersion string) bool {
+	m, ok := r.restMapping(kind, apiVersion)
+	return ok && m.Scope.Name() == meta.RESTScopeNameRoot
+}
+
+// restURL builds the API path for one resource. A plain GET on the resource
+// returns its status too, so there is no /status subresource in the path;
+// not every kind has one and those that do not answered 404.
+func (r *HelmRelease) restURL(namespace, kind, apiVersion, name string) string {
+	base := "api"
+	if strings.Contains(apiVersion, "/") {
+		base = "apis"
+	}
+
+	plural := pluralize(strings.ToLower(kind))
+	if m, ok := r.restMapping(kind, apiVersion); ok {
+		plural = m.Resource.Resource
+		if m.Scope.Name() == meta.RESTScopeNameRoot {
+			namespace = ""
 		}
 	}
 
-	kindPlural := pluralize(strings.ToLower(kind))
-	if len(namespace) == 0 {
-		// This is not a namespaced resource
-		restURL = fmt.Sprintf("/%s/%s/%s/%s", base, apiVersion, kindPlural, name)
-	} else {
-		restURL = fmt.Sprintf("/%s/%s/namespaces/%s/%s/%s", base, apiVersion, namespace, kindPlural, name)
+	if namespace == "" {
+		return fmt.Sprintf("/%s/%s/%s/%s", base, apiVersion, plural, name)
 	}
-
-	return restURL
+	return fmt.Sprintf("/%s/%s/namespaces/%s/%s/%s", base, apiVersion, namespace, plural, name)
 }
 
+// pluralize is the fallback when discovery cannot name the resource. It
+// covers the Kubernetes built-ins; anything irregular should come from the
+// mapper.
 func pluralize(resource string) string {
-	if strings.HasSuffix(resource, "y") {
-		return fmt.Sprintf("%sies", resource[:len(resource)-1])
+	switch {
+	case strings.HasSuffix(resource, "y"):
+		return resource[:len(resource)-1] + "ies"
+	case strings.HasSuffix(resource, "s"), strings.HasSuffix(resource, "x"),
+		strings.HasSuffix(resource, "ch"), strings.HasSuffix(resource, "sh"):
+		return resource + "es"
 	}
-
-	return fmt.Sprintf("%ss", resource)
+	return resource + "s"
 }
