@@ -7,7 +7,7 @@
 
   <app-card class="overflow-auto block mb-8 max-w-[260px]">
     <div>
-      <app-chart-details-versions [versions]=versions [currentVersion]=currentVersion></app-chart-details-versions>
+      <app-chart-details-versions [versions]="versions()" [currentVersion]=currentVersion></app-chart-details-versions>
     </div>
     @if (chart.attributes.home) {
       <div>
@@ -37,7 +37,7 @@
         }
       </div>
     }
-    @if (schema) {
+    @if (schema()) {
       <div>
         <h1 class="text-base">Schema</h1>
         <div class="text-sm">This chart contains a values schema</div>

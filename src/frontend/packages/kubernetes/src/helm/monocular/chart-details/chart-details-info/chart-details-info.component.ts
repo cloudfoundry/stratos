@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
 import { CardWrapperComponent } from '@stratosui/core';
 import { of } from 'rxjs';
 import { take, catchError,  } from 'rxjs/operators';
@@ -24,8 +24,10 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
 })
 export class ChartDetailsInfoComponent implements OnInit {
   @Input() chart!: Chart;
-  versions!: ChartVersion[];
-  schema: unknown = null;
+  // Signals: both arrive from HTTP after the first render, and an OnPush view
+  // under zoneless CD only repaints for signal writes.
+  readonly versions = signal<ChartVersion[]>([]);
+  readonly schema = signal<unknown>(null);
 
   private pCurrentVersion!: ChartVersion;
 
@@ -58,7 +60,7 @@ export class ChartDetailsInfoComponent implements OnInit {
     this.chartsService
       .getVersions(chart.attributes.repo.name, chart.attributes.name)
       .subscribe(versions => {
-        this.versions = versions;
+        this.versions.set(versions);
       });
   }
 
@@ -84,7 +86,7 @@ export class ChartDetailsInfoComponent implements OnInit {
       take(1),
       catchError(() => of(null))
     ).subscribe(schema => {
-      this.schema = schema;
+      this.schema.set(schema);
     });
   }
 
