@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -73,7 +73,8 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   formChangeSub: Subscription;
   setClientInfo = false;
   show = false;
-  showCACertField = false;
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly showCACertField = signal(false);
   lastSkipSSLValue = false;
 
   // Signal-handle exposed to the parent stepper template (FWT-957)
@@ -156,7 +157,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     ).subscribe(endpoint => {
       this.setAdvancedFields(endpoint);
       this.lastSkipSSLValue = endpoint.skip_ssl_validation ?? false;
-      this.showCACertField = !!endpoint.caCert;
+      this.showCACertField.set(!!endpoint.caCert);
       this.updateSSLFieldCheckbox();
       this.editEndpoint.setValue({
         name: endpoint.name,
@@ -201,8 +202,8 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       filter((endpoint): endpoint is EndpointModel => !!endpoint),
       take(1),
       switchMap(endpoint => {
-        const caCert = this.showCACertField ? this.editEndpoint.value.caCert : undefined;
-        const skipSSL = this.showCACertField ? false : this.editEndpoint.value.skipSSL ?? false;
+        const caCert = this.showCACertField() ? this.editEndpoint.value.caCert : undefined;
+        const skipSSL = this.showCACertField() ? false : this.editEndpoint.value.skipSSL ?? false;
         // W36-B Wave 3: dispatch the update via EndpointsDataService.
         // The service returns Promise<ActionState> with the resolved
         // final state — the previous pairwise+busy-edge dance over the
@@ -242,8 +243,8 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   }
 
   toggleCACertField() {
-    this.showCACertField = !this.showCACertField;
-    if (this.showCACertField) {
+    this.showCACertField.update(shown => !shown);
+    if (this.showCACertField()) {
       this.lastSkipSSLValue = this.editEndpoint.value.skipSSL ?? false;
       this.editEndpoint.controls.skipSSL.setValue(false);
     } else {
@@ -253,7 +254,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   }
 
   private updateSSLFieldCheckbox() {
-    if (this.showCACertField) {
+    if (this.showCACertField()) {
       this.editEndpoint.controls.skipSSL.disable();
     } else {
       this.editEndpoint.controls.skipSSL.enable();

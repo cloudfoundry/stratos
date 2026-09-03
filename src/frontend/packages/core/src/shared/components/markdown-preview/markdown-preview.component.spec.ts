@@ -1,5 +1,5 @@
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
@@ -19,16 +19,16 @@ describe('MarkdownPreviewComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        HttpClient, HttpHandler, SidePanelService,
+        SidePanelService,
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
       imports: [
         MarkdownPreviewComponent,
         SidepanelPreviewComponent,
         MDAppModule,
         RouterTestingModule,
-        HttpClientModule,
-        HttpClientTestingModule,
         CoreTestingModule,
         createBasicStoreModule(),
       ]
@@ -44,5 +44,17 @@ describe('MarkdownPreviewComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Regression: the document arrives from an HTTP response after the first
+  // render. Under zoneless change detection an OnPush view only repaints for
+  // signal writes, so a plain field assigned in the subscribe left the help
+  // panel empty.
+  it('renders the fetched markdown', async () => {
+    component.setProps({ documentUrl: '/help.md' });
+    TestBed.inject(HttpTestingController).expectOne('/help.md').flush('Some **help** text');
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.markdown-preview__content')?.textContent).toContain('Some help text');
   });
 });

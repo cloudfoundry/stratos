@@ -48,7 +48,8 @@ export class FavoritesMetaCardComponent {
   // strict: assigned in the @Input set favoriteEntity setter
   public icon!: FavoriteIconData;
 
-  public valid = true;
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly valid = signal(true);
 
   // Reactive favorite, so the rendered name tracks freshly-fetched entity data.
   private readonly favoriteSig = signal<UserFavorite<IFavoriteMetadata> | null>(null);
@@ -152,7 +153,7 @@ export class FavoritesMetaCardComponent {
     const isValidObs = getIsValid ?
     runInInjectionContext(this.injector, () => getIsValid(this.favorite)) : of(true);
     isValidObs.pipe(take(1), defaultIfEmpty(false)).subscribe(isValid => {
-      this.valid = isValid;
+      this.valid.set(isValid);
       if (!isValid) {
         const confirmation = new ConfirmationDialogConfig(
           'Remove this Favorite?',

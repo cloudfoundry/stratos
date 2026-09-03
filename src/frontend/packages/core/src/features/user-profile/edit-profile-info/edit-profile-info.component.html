@@ -19,18 +19,18 @@
         <app-form-field>
           <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Primary Email Address" formControlName="emailAddress">
         </app-form-field>
-        @if ((canChangePassword | async) === false && needsPasswordForEmailChange) {
+        @if ((canChangePassword | async) === false && needsPasswordForEmailChange()) {
           <p>Current password is required when
           changing email address</p>
         }
-        @if ((canChangePassword | async) && needsPasswordForEmailChange) {
+        @if ((canChangePassword | async) && needsPasswordForEmailChange()) {
           <p>Current password is required when changing
           email address or password</p>
         }
-        @if (needsPasswordForEmailChange) {
+        @if (needsPasswordForEmailChange()) {
           <app-form-field>
             <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Current Password" [type]="!showPassword[1] ? 'password' : 'text'"
-              formControlName="currentPassword" [required]="passwordRequired">
+              formControlName="currentPassword" [required]="passwordRequired()">
             <span matSuffix>
               <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
             </span>
@@ -39,10 +39,10 @@
         @if ((canChangePassword | async)) {
           <div class="flex flex-col max-w-full">
             <p>Change Password (Leave blank to keep current password)</p>
-            @if (!needsPasswordForEmailChange) {
+            @if (!needsPasswordForEmailChange()) {
               <app-form-field>
                 <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Current Password" [type]="!showPassword[2] ? 'password' : 'text'"
-                  formControlName="currentPassword" [required]="passwordRequired">
+                  formControlName="currentPassword" [required]="passwordRequired()">
                 <span matSuffix>
                   <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
                 </span>

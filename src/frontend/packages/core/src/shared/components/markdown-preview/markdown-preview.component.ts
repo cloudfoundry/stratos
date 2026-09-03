@@ -1,6 +1,6 @@
 
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild, inject, signal } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { PreviewableComponent } from '../../previewable-component';
@@ -24,16 +24,18 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   private domSanitizer = inject(DomSanitizer);
 
 
-  markdownHtml!: string;
+  // Signals: both are written asynchronously (HTTP response, a timeout) and an
+  // OnPush view under zoneless CD only repaints for signal writes.
+  readonly markdownHtml = signal('');
   private _documentUrl!: string;
   // null is a sentinel meaning "title not yet derived from the document"
-  title: string | null = '';
+  readonly title = signal<string | null>('');
 
   @Input()
   set documentUrl(value: string) {
     if (value && this._documentUrl !== value) {
       this._documentUrl = value;
-      this.title = null;
+      this.title.set(null);
       this.loadDocument();
     }
   }
@@ -66,7 +68,7 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
             return `<a target="_blank" href="${href}" ${title ? `title="${title}"` : ''}>${text}</a>`;
           };
           const result = marked(markText, { renderer });
-          this.markdownHtml = typeof result === 'string' ? result : '';
+          this.markdownHtml.set(typeof result === 'string' ? result : '');
         }
       },
       (error: any) => console.warn(`Failed to fetch markdown with url ${this._documentUrl}: `, error));
@@ -75,16 +77,16 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   public markdownRendered() {
     // Find the page title and move it to the header
     const h1 = this.markdown.nativeElement.getElementsByTagName('h1');
-    if (this.title === null) {
+    if (this.title() === null) {
       if (h1.length > 0) {
         window.setTimeout(() => {
           const titleElement = h1[0];
           const titleText = titleElement.innerText;
           titleElement.remove();
-          this.title = titleText;
+          this.title.set(titleText);
         }, 100);
       } else {
-        this.title = 'Help';
+        this.title.set('Help');
       }
     }
   }
