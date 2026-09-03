@@ -73,7 +73,7 @@
     <app-form-field class="stepper-form__tags">
       <app-label>Tags</app-label>
       <div class="flex flex-wrap gap-2 p-2 border border-content-border rounded-md min-h-[42px] bg-content-bg">
-        @for (tag of tags; track tag) {
+        @for (tag of tags(); track tag) {
           <span
             class="inline-flex items-center px-3 py-1 text-sm font-medium text-content-text bg-content-secondary rounded-full hover:bg-content-border"
           >

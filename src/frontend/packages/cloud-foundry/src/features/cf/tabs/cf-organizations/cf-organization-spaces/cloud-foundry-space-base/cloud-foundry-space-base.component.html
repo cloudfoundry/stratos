@@ -1,4 +1,4 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks" tabsHeader="Space"
+<app-page-header [breadcrumbs]="breadcrumbs$ | async" [tabs]="tabLinks()" tabsHeader="Space"
   [favorite]="favorite()">
   <h1>{{ spaceDataService.space()?.name }}</h1>
 </app-page-header>

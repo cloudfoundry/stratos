@@ -221,8 +221,8 @@ describe('AddRoutesComponent', () => {
   it('submit in HTTP create mode calls createAndAttachRoute with host/path + relationships (no port)', async () => {
     // Wire up the form for an HTTP submission.
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addHTTPRoute.patchValue({ host: 'newhost', path: 'subpath' });
 
     await component.runSubmit();
@@ -238,8 +238,8 @@ describe('AddRoutesComponent', () => {
 
   it('submit in TCP create mode calls createAndAttachRoute with port + relationships (no host/path)', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addTCPRoute.patchValue({ port: '5005', useRandomPort: false });
 
     await component.runSubmit();
@@ -254,8 +254,8 @@ describe('AddRoutesComponent', () => {
 
   it('submit in TCP create mode with useRandomPort=true omits port', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addTCPRoute.patchValue({ port: '', useRandomPort: true });
 
     await component.runSubmit();
@@ -266,8 +266,8 @@ describe('AddRoutesComponent', () => {
 
   it('on createAndAttachRoute success: dataService.addRoute called with returned StRoute, then router navigates back to routes list', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addHTTPRoute.patchValue({ host: 'h', path: '' });
 
     const created = makeRoute({ guid: 'created-1', url: 'h.example.com' });
@@ -283,8 +283,8 @@ describe('AddRoutesComponent', () => {
 
   it('on createAndAttachRoute orphan failure: error propagates with Orphan route message; no navigation', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addHTTPRoute.patchValue({ host: 'h', path: '' });
 
     createAndAttach.mockRejectedValueOnce(
@@ -299,8 +299,8 @@ describe('AddRoutesComponent', () => {
 
   it('on 422 RouteHostTaken: surfaces generic name-unavailable message', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addHTTPRoute.patchValue({ host: 'taken', path: '' });
 
     const httpErr = Object.assign(new Error('Http failure response'), {
@@ -314,8 +314,8 @@ describe('AddRoutesComponent', () => {
 
   it('on 422 with non-uniqueness code: passes CF detail through', async () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addHTTPRoute.patchValue({ host: 'invalid', path: '' });
 
     const httpErr = Object.assign(new Error('Quota exceeded'), {
@@ -349,8 +349,8 @@ describe('AddRoutesComponent', () => {
 
   it('submit gate: valid form + no collision → valid', () => {
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addHTTPRoute.patchValue({ host: 'unique', path: '' });
     fixture.detectChanges();
     expect(component.hostCollision()).toBeNull();
@@ -362,8 +362,8 @@ describe('AddRoutesComponent', () => {
       makeRoute({ guid: 'taken-1', host: 'taken', path: '', domainGuid: 'domain-http', appGuids: [] }),
     ]);
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addHTTPRoute.patchValue({ host: 'taken', path: '' });
     fixture.detectChanges();
     expect(component.hostCollision()?.guid).toBe('taken-1');
@@ -383,8 +383,8 @@ describe('AddRoutesComponent', () => {
       makeRoute({ guid: 'tcp-taken', domainGuid: 'domain-tcp', host: '', path: '', port: 5555, appGuids: [] }),
     ]);
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-tcp', supportedProtocols: ['tcp'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addTCPRoute.patchValue({ port: '5555', useRandomPort: false });
     fixture.detectChanges();
     expect(component.hostCollision()?.guid).toBe('tcp-taken');
@@ -398,8 +398,8 @@ describe('AddRoutesComponent', () => {
       makeRoute({ guid: 'mine', host: 'myhost', path: '', domainGuid: 'domain-http', appGuids: ['mockAppGuid'] }),
     ]);
     component.spaceGuid = 'mockSpaceGuid';
-    component.selectedDomain = { guid: 'domain-http', supportedProtocols: ['http'] } as any;
-    component.domainFormGroup.patchValue({ domain: component.selectedDomain });
+    component.selectedDomain.set({ guid: 'domain-http', supportedProtocols: ['http'] } as any);
+    component.domainFormGroup.patchValue({ domain: component.selectedDomain() });
     component.addHTTPRoute.patchValue({ host: 'myhost', path: '' });
     fixture.detectChanges();
     expect(component.hostCollision()).toBeNull();
