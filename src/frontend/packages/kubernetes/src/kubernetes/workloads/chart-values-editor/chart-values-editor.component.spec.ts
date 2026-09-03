@@ -1,5 +1,5 @@
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
@@ -20,20 +20,16 @@ describe('ChartValuesEditorComponent', () => {
   let fixture: ComponentFixture<ChartValuesEditorComponent>;
 
   beforeEach(async () => {
-    await TestBed.configureTestingModule({providers: [
-
-        HttpClient,
-        HttpHandler,
+    await TestBed.configureTestingModule({
+      providers: [
         ConfirmationDialogService,
-
-      provideZonelessChangeDetection(),
-    ],
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
       imports: [
         MDAppModule,
-        HttpClientModule,
-        HttpClientTestingModule,
         createBasicStoreModule(),
-
         ChartValuesEditorComponent,
       ]
     }).compileComponents();
@@ -43,6 +39,21 @@ describe('ChartValuesEditorComponent', () => {
     fixture = TestBed.createComponent(ChartValuesEditorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  // Regression: `config` is set through an @Input setter, which Angular
+  // invokes during change detection - outside any injection context. The
+  // monaco-loaded observable must therefore be built as a field, not inside
+  // the setter path, or init() throws NG0203 before it ever requests the
+  // chart values and the editor sits on "Loading ..." forever.
+  it('requests the chart values when config arrives through the input setter', () => {
+    const http = TestBed.inject(HttpTestingController);
+
+    fixture.componentRef.setInput('config', { valuesUrl: '/values.yaml', schemaUrl: null });
+    expect(() => fixture.detectChanges()).not.toThrow();
+
+    expect(component.initing).toBe(false);
+    http.expectOne('/values.yaml').flush('replicas: 1\n');
   });
 
   it('should create', () => {

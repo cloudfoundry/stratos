@@ -118,6 +118,9 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
 
   // Signal for tracking if the Monaco editor has loaded
   private monacoLoaded = signal<boolean>(false);
+  // Built here, in a field initializer, because init() runs from the `config`
+  // input setter - outside any injection context - where toObservable() throws.
+  private readonly monacoLoaded$ = toObservable(this.monacoLoaded);
 
   private resizeSub?: Subscription;
 
@@ -177,7 +180,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     );
 
     // We need the schame, value sand the monaco editor to be all loaded before we're ready
-    this.loading$ = combineLatest(schema$, values$, toObservable(this.monacoLoaded)).pipe(
+    this.loading$ = combineLatest(schema$, values$, this.monacoLoaded$).pipe(
       filter(([schema, values, loaded]: [any, any, boolean]) => schema !== undefined && values !== undefined && loaded),
       tap(([schema, values, _loaded]: [any, any, boolean]) => {
         this.schema = schema;
