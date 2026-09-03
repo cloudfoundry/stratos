@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, computed, Injector, OnInit, Signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, Injector, OnInit, Signal, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -71,7 +71,8 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
   isLoading$ = toObservable(this.spaceDataService.isLoading);
 
 
-  tabLinks: IPageSideNavTab[] = [
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly tabLinks = signal<IPageSideNavTab[]>([
     {
       link: 'summary',
       label: 'Summary',
@@ -111,7 +112,7 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       label: 'Events',
       icon: 'watch_later'
     }
-  ];
+  ]);
 
   public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
@@ -153,13 +154,16 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
       filter(s => !!s),
       take(1),
     ).subscribe(space => {
-      this.tabLinks.push({
-        link: 'space-quota',
-        label: 'Quota',
-        icon: 'data_usage',
-        hidden$: of(!space!.quotaGuid),
-      });
-      this.tabLinks = this.tabLinks.concat(getTabsFromExtensions(StratosTabType.CloudFoundrySpace));
+      this.tabLinks.update(tabs => [
+        ...tabs,
+        {
+          link: 'space-quota',
+          label: 'Quota',
+          icon: 'data_usage',
+          hidden$: of(!space!.quotaGuid),
+        },
+        ...getTabsFromExtensions(StratosTabType.CloudFoundrySpace),
+      ]);
     });
   }
 

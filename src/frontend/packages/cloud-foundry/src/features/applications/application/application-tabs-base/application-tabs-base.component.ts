@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EffectRef, Injector, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext } from '@angular/core';
+import { Component, EffectRef, Injector, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
@@ -129,7 +129,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       map(can => !can),
     );
 
-    this.tabLinks = [
+    this.tabLinks.set([
       { link: 'summary', label: 'Summary', iconFont: 'stratos-icons', icon: 'application' },
       { link: 'log-stream', label: 'Log Stream', icon: 'featured_play_list' },
       { link: 'revisions', label: 'Revisions', icon: 'history' },
@@ -137,25 +137,25 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       { link: 'variables', label: 'Variables', icon: 'list', hidden$: appDoesNotHaveEnvVars$ },
       { link: 'services', label: 'Services', iconFont: 'stratos-icons', icon: 'service' },
       { link: 'events', label: 'Events', icon: 'watch_later' },
-    ];
+    ]);
 
     this.endpointsService.hasMetrics(applicationService.cfGuid).subscribe((hasMetrics: boolean) => {
       if (hasMetrics) {
-        this.tabLinks = [
-          ...this.tabLinks,
+        this.tabLinks.update(tabs => [
+          ...tabs,
           {
             link: 'metrics',
             label: 'Metrics',
             icon: 'equalizer'
           }
-        ];
+        ]);
       }
     });
 
     // Add any tabs from extensions
     const tabs = getTabsFromExtensions(StratosTabType.Application);
     tabs.map((extensionTab) => {
-      this.tabLinks.push(extensionTab);
+      this.tabLinks.update(tabs => [...tabs, extensionTab]);
     });
 
     // Ensure Git SCM tab gets updated if the app is redeployed from a different SCM Type
@@ -170,15 +170,15 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
           const scm = scmService.getSCM(gitscm as GitSCMType, stratProject.deploySource.endpointGuid);
           const iconInfo = scm.getIcon();
           // Add tab or update existing tab
-          const tab = this.tabLinks.find(t => t.link === 'gitscm');
+          const tab = this.tabLinks().find(t => t.link === 'gitscm');
           if (!tab) {
-            this.tabLinks.push({ link: 'gitscm', label: scm.getLabel(), iconFont: iconInfo.fontName, icon: iconInfo.iconName });
+            this.tabLinks.update(tabs => [...tabs, { link: 'gitscm', label: scm.getLabel(), iconFont: iconInfo.fontName, icon: iconInfo.iconName }]);
           } else {
             tab.label = scm.getLabel();
             tab.iconFont = iconInfo.fontName;
             tab.icon = iconInfo.iconName;
           }
-          this.tabLinks = [...this.tabLinks];
+          this.tabLinks.update(tabs => [...tabs]);
         }
       });
   }
@@ -189,7 +189,8 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   summaryDataChanging$!: Observable<boolean>;
   stratosProjectSub!: Subscription;
 
-  tabLinks: IPageSideNavTab[];
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly tabLinks = signal<IPageSideNavTab[]>([]);
 
   // Where an app-detail error bounce (app deleted elsewhere / 404 / permission
   // lost) should land: back to the per-CF applications tab when the app was
@@ -354,7 +355,7 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   // the app text for the base route / unknown tabs.
   loadingText(): string {
     const last = this.router.url.split('?')[0].split('/').filter(Boolean).pop();
-    const tab = (this.tabLinks ?? []).find(t => t.link === last);
+    const tab = this.tabLinks().find(t => t.link === last);
     return tab ? `Retrieving ${tab.label}` : 'Retrieving application';
   }
 

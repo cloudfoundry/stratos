@@ -194,7 +194,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public allServiceInstanceNames!: string[];
   public subs: Subscription[] = [];
   public isUpdate: boolean;
-  public tags: { label: string }[] = [];
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly tags = signal<{ label: string }[]>([]);
   public validate = signal(false);
   private subscriptions: Subscription[] = [];
 
@@ -287,7 +288,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     this.createEditServiceInstance.reset();
     this.bindExistingInstance.reset();
     if (mode === CreateServiceFormMode.CreateServiceInstance) {
-      this.tags = [];
+      this.tags.set([]);
     }
   };
 
@@ -365,7 +366,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
           route_service_url: si.routeServiceUrl ?? '',
           tags: []
         });
-        this.tags = this.tagsArrayToChips(si.tags);
+        this.tags.set(this.tagsArrayToChips(si.tags));
         this.originalFormValue = this.getServiceData();
       });
     }
@@ -484,7 +485,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
 
   private getTagsArray() {
-    return this.tags && Array.isArray(this.tags) ? this.tags.map(tag => tag.label) : [];
+    return this.tags().map(tag => tag.label);
   }
 
   private tagsArrayToChips(tagsArray: string[]) {
@@ -499,23 +500,23 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     const label = (input.value || '').trim();
 
     if (label) {
-      this.tags.push({ label });
+      this.tags.update(tags => [...tags, { label }]);
       this.updateTagsFormControl();
       input.value = '';
     }
   }
 
   public removeTag(tag: any): void {
-    const index = this.tags.indexOf(tag);
+    const index = this.tags().indexOf(tag);
 
     if (index >= 0) {
-      this.tags.splice(index, 1);
+      this.tags.update(tags => tags.filter((_, i) => i !== index));
       this.updateTagsFormControl();
     }
   }
 
   private updateTagsFormControl(): void {
-    const tagsArray = this.tags.map(t => t.label);
+    const tagsArray = this.tags().map(t => t.label);
     this.createEditServiceInstance.controls.tags.setValue(tagsArray);
     this.createEditServiceInstance.controls.tags.markAsTouched();
     // Mark the form as dirty to trigger change detection

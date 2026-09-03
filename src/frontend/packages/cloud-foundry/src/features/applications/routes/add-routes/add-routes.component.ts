@@ -135,7 +135,8 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
   appGuid: string;
   cfGuid: string;
   spaceGuid!: string;
-  selectedDomain!: StDomain;
+  // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
+  readonly selectedDomain = signal<StDomain | undefined>(undefined);
   appUrl: string;
 
   useRandomPort = false;
@@ -418,11 +419,11 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       this.applicationService.orgDomains$.pipe(
         filter(domains => Array.isArray(domains) && domains.length > 0),
       ).subscribe(domains => {
-        if (this.selectedDomain) {
+        if (this.selectedDomain()) {
           return;
         }
-        this.selectedDomain = domains[0];
-        this.domainFormGroup.patchValue({ domain: this.selectedDomain });
+        this.selectedDomain.set(domains[0]);
+        this.domainFormGroup.patchValue({ domain: domains[0] });
       }),
     );
 
@@ -431,7 +432,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this.domainFormGroup.controls.domain.valueChanges.subscribe(domain => {
         if (domain && typeof domain !== 'string') {
-          this.selectedDomain = domain;
+          this.selectedDomain.set(domain);
         }
       })
     );
