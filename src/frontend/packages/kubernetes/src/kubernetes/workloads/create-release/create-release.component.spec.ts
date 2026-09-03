@@ -187,3 +187,62 @@ describe('CreateReleaseComponent', () => {
     httpMock.verify();
   });
 });
+
+describe('CreateReleaseComponent without a version in the route', () => {
+  const namespaceDataStub = {
+    create: vi.fn(),
+    refresh: vi.fn(),
+    allNamespacesAcrossEndpoints: (_g: readonly string[]) => signal([]) as Signal<unknown[]>,
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        CreateReleaseComponent,
+        AppTestModule,
+        createBasicStoreModule(),
+        KubernetesTestingModule,
+        HelmTestingModule,
+        MockChartValuesEditorComponent,
+      ],
+      providers: [
+        provideRouter([]),
+        provideNoopAnimations(),
+        provideHttpClient(withInterceptorsFromDi()),
+        provideHttpClientTesting(),
+        TabNavService,
+        ConfirmationDialogService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { endpoint: 'ep', repo: 'test-repo', name: 'test-chart' },
+              queryParams: {}
+            }
+          }
+        },
+        { provide: ChartsService, useValue: new MockChartService() },
+        { provide: ConfigService, useValue: { appName: 'appName' } },
+        { provide: KubeNamespaceDataService, useValue: namespaceDataStub },
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [NO_ERRORS_SCHEMA]
+    }).compileComponents();
+  });
+
+  // Regression: `install/:endpoint/:repo/:name` (no version) used to request
+  // `versions/undefined` and 500. Resolve the chart's latest version instead.
+  it('resolves the latest chart version for the values URL', () => {
+    const fixture = TestBed.createComponent(CreateReleaseComponent);
+    fixture.detectChanges();
+
+    // The component provides its own ChartsService, so drive it over HTTP.
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.expectOne('/pp/v1/chartsvc/v1/charts/test-repo/test-chart')
+      .flush({ data: { relationships: { latestChartVersion: { data: { version: '9.9.9' } } } } });
+    httpMock.expectOne('/pp/v1/chartsvc/v1/charts/test-repo/test-chart/versions/9.9.9')
+      .flush({ data: { attributes: { version: '9.9.9', urls: [] }, relationships: { chart: { data: { name: 'test-chart', repo: { name: 'test-repo' } } } } } });
+
+    expect(fixture.componentInstance.config()?.valuesUrl).toBe('/pp/v1/monocular/values/ep/test-repo/test-chart/9.9.9');
+  });
+});
