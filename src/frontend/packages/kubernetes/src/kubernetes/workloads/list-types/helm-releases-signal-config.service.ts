@@ -166,7 +166,7 @@ export class HelmReleasesSignalConfigService {
   }
 
   async loadAll(): Promise<void> {
-    if (this.helmData.releasesLastFetched() === null) {
+    if (this.helmData.releasesLastFetched()() === null) {
       await this.helmData.loadReleases();
     }
   }
