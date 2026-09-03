@@ -182,7 +182,7 @@ export class MonocularChartsSignalConfigService {
   });
 
   async loadAll(): Promise<void> {
-    if (this.helmData.chartsLastFetched() === null) {
+    if (this.helmData.chartsLastFetched()() === null) {
       await this.helmData.loadCharts();
     }
   }

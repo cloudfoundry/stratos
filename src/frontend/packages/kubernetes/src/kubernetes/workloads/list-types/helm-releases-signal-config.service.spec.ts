@@ -64,6 +64,20 @@ describe('HelmReleasesSignalConfigService', () => {
     expect(svc.view.pagedItems()).toHaveLength(3);
   });
 
+  // Regression: the data service's *LastFetched() accessors return a Signal,
+  // so comparing the accessor result itself to null never matched and
+  // loadAll() silently skipped the initial fetch (the catalog rendered
+  // "There are no charts" with no request ever made).
+  it('loadAll fetches on first call and skips once fetched', async () => {
+    svc.initialize();
+    const first = svc.loadAll();
+    httpMock.expectOne(RELEASES_URL).flush(releasesPayload);
+    await first;
+    expect(svc.view.pagedItems().length).toBeGreaterThan(0);
+    await svc.loadAll();
+    httpMock.expectNone(RELEASES_URL);
+  });
+
   it('filters by nameFilter', async () => {
     svc.initialize();
     const loading = svc.refresh();
