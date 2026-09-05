@@ -11,3 +11,9 @@
   behind a `CF-UnableToPerform`. Two related delete and unbind links and
   the failed-row highlight on the detach page had the same missing
   colours.
+- The failure banner stripped the markup Cloud Foundry embeds when it
+  quotes a broker's raw response, so a router timeout reads as a sentence
+  rather than an HTML page. Expanding a service key whose creation failed
+  said "Failed to load credentials: unknown error"; it now says the key
+  has no credentials and does not offer to copy them, and other credential
+  load failures name the HTTP status instead of "unknown error".

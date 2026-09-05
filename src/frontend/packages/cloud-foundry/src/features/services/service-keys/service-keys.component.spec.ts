@@ -102,6 +102,33 @@ describe('ServiceKeysComponent — busy-state spinners', () => {
     expect(spinner(fixture.nativeElement)).not.toBeNull();
   });
 
+  it('does not fetch credentials for a key whose creation failed, and says so', () => {
+    const http = TestBed.inject(HttpTestingController);
+    keysVal.set([{ guid: 'k-f', name: 'broken', createdAt: '2026-09-05T09:12:29Z', lastOperationState: 'failed' }]);
+    fixture.detectChanges();
+    expect(fixture.nativeElement.textContent).not.toContain('Copy all (JSON)');
+
+    component.toggleOpen('k-f');
+    fixture.detectChanges();
+    http.expectNone(r => r.url.includes('/details'));
+    expect(fixture.nativeElement.textContent).toContain('This key was not created, so it has no credentials.');
+    expect(fixture.nativeElement.textContent).not.toContain('Failed to load credentials');
+  });
+
+  it('names the HTTP failure when credentials cannot be loaded', async () => {
+    const http = TestBed.inject(HttpTestingController);
+    keysVal.set([{ guid: 'k-1', name: 'ok', createdAt: '2026-09-05T09:12:29Z', lastOperationState: 'succeeded' }]);
+    fixture.detectChanges();
+    component.toggleOpen('k-1');
+    http.expectOne(r => r.url.endsWith('/k-1/details')).flush(
+      { error: 'Service key not found' }, { status: 404, statusText: 'Not Found' },
+    );
+    await new Promise(resolve => setTimeout(resolve, 0));
+    fixture.detectChanges();
+    expect(component.credsError('k-1')).toBe('Service key not found (404)');
+    expect(fixture.nativeElement.textContent).not.toContain('unknown error');
+  });
+
   it('shows a spinner on the delete action while deleting', () => {
     keysVal.set([{ guid: 'k1', name: 'key-one', createdAt: '' }]);
     fixture.detectChanges();
