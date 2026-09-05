@@ -1,6 +1,6 @@
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -176,5 +176,66 @@ describe('ServiceKeysComponent — context-aware breadcrumbs', () => {
   it('omits the space-services trail until the instance (with its space/org) has loaded', () => {
     const c = setup(null, [{ guid: 'cf-1', name: 'prod-cf' }]);
     expect(c.breadcrumbs().find(b => b.key === 'space-services')).toBeUndefined();
+  });
+});
+
+describe('ServiceKeysComponent — createKey patches the list from the response', () => {
+  let component: ServiceKeysComponent;
+  let fixture: ComponentFixture<ServiceKeysComponent>;
+  let http: HttpTestingController;
+  let listFetches: number;
+  const existing: ServiceKeyView = { guid: 'k-1', name: 'first', createdAt: '2026-01-01T00:00:00Z', lastOperationState: 'succeeded' };
+
+  beforeEach(async () => {
+    listFetches = 0;
+    await TestBed.configureTestingModule({
+      imports: [ServiceKeysComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: ActivatedRoute, useValue: { snapshot: { params: { endpointId: 'cf-1', serviceInstanceId: 'si-1' } } } },
+        {
+          provide: ServiceCatalogDataService,
+          useValue: {
+            serviceInstance: () => source(null),
+            serviceKeysForInstance: () => { listFetches++; return source([existing]); },
+          },
+        },
+      ],
+    }).compileComponents();
+    fixture = TestBed.createComponent(ServiceKeysComponent);
+    component = fixture.componentInstance;
+    http = TestBed.inject(HttpTestingController);
+    fixture.detectChanges();
+  });
+
+  it('appends the created key from a 201 body without refetching the list', async () => {
+    component.newKeyName.set('second');
+    const done = component.createKey();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_keys/cf-1').flush(
+      { guid: 'k-2', type: 'key', name: 'second', created_at: '2026-02-02T00:00:00Z', last_operation: { state: 'succeeded' } },
+      { status: 201, statusText: 'Created' },
+    );
+    await done;
+
+    expect(component.keys().map(k => k.guid)).toEqual(['k-1', 'k-2']);
+    expect(component.keys()[1]).toEqual({ guid: 'k-2', name: 'second', createdAt: '2026-02-02T00:00:00Z', lastOperationState: 'succeeded' });
+    expect(listFetches).toBe(1);
+  });
+
+  it('falls back to a refetch when the response is a completed job rather than the key', async () => {
+    component.newKeyName.set('async');
+    const done = component.createKey();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_keys/cf-1').flush(
+      { state: 'COMPLETE', result: { guid: 'job-9', operation: 'service_key.create', state: 'COMPLETE' } },
+      { status: 200, statusText: 'OK' },
+    );
+    await done;
+
+    expect(component.keys().map(k => k.guid)).toEqual(['k-1']);
+    expect(listFetches).toBe(2);
   });
 });

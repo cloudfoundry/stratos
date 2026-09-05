@@ -7,7 +7,9 @@ import { firstValueFrom } from 'rxjs';
 import { IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
-import { ServiceCatalogDataService, ServiceKeyView, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
+import {
+  RawServiceKey, ServiceCatalogDataService, ServiceKeyView, SignalSource, toServiceKeyView,
+} from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CredentialField, MaskedCredentialsComponent, toCredentialFields } from '../../../shared/components/masked-credentials/masked-credentials.component';
@@ -92,7 +94,11 @@ export class ServiceKeysComponent {
   private keysSource = signal<SignalSource<ServiceKeyView[]>>(
     { value: signal<ServiceKeyView[]>([]).asReadonly(), isLoading: signal(false).asReadonly(), error: signal(null).asReadonly() },
   );
-  readonly keys: Signal<ServiceKeyView[]> = computed(() => this.keysSource().value());
+  // Keys added since the last fetch, appended from the create response so
+  // the list updates without a refetch; reload() drops them once the
+  // server list is re-read.
+  private addedKeys = signal<ServiceKeyView[]>([]);
+  readonly keys: Signal<ServiceKeyView[]> = computed(() => [...this.keysSource().value(), ...this.addedKeys()]);
   readonly loading: Signal<boolean> = computed(() => this.keysSource().isLoading());
 
   readonly newKeyName = signal('');
@@ -161,6 +167,7 @@ export class ServiceKeysComponent {
   }
 
   reload(): void {
+    this.addedKeys.set([]);
     this.keysSource.set(this.catalog.serviceKeysForInstance(this.cfGuid, this.siGuid));
   }
 
@@ -235,13 +242,19 @@ export class ServiceKeysComponent {
       relationships: { service_instance: { data: { guid: this.siGuid } } },
     };
     try {
-      await writeWithJob(
+      const r = await writeWithJob<RawServiceKey>(
         this.http,
         this.http.post(`/pp/v1/cf/service_keys/${this.cfGuid}`, body, { observe: 'response' as const }),
       );
       this.newKeyName.set('');
       this.isAdding.set(false);
-      this.reload();
+      // A sync broker answers with the key itself; an async one resolves to
+      // the CF job, which has no key fields, so the list is re-read instead.
+      if (r.state?.type === 'key' && r.state.guid) {
+        this.addedKeys.update(keys => [...keys, toServiceKeyView(r.state as RawServiceKey)]);
+      } else {
+        this.reload();
+      }
     } catch (err: unknown) {
       this.errorMessage.set(`Failed to create key: ${this.messageOf(err)}`);
     } finally {
