@@ -51,6 +51,17 @@ export class CfUsersPagedDataService {
 
   markStale(cnsi: string): void { this.ensure(cnsi).stale.set(true); }
 
+  // Insert a user the cache has never seen (a set-by-username add: the
+  // real guid only arrives in the role-change response). Mounted lists
+  // pick the new member up without a refetch; callers still markStale so
+  // the next full load reconciles with server truth. No-op on a known guid.
+  upsertUser(cnsi: string, user: StUser): void {
+    const s = this.states.get(cnsi);
+    if (!s || s.allUsers().some(u => u.guid === user.guid)) { return; }
+    s.allUsers.update(users => [...users, user]);
+    s.count.update(n => n + 1);
+  }
+
   // Inline-patch a cached user's role buckets after a role mutation — the
   // signal-native equivalent of the legacy cfUserReducer ADD/REMOVE_CF_ROLE
   // update. Mounted user lists and cache-first reads (getUser seeds the

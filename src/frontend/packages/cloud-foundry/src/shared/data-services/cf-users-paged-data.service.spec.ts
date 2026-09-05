@@ -128,4 +128,26 @@ describe('CfUsersPagedDataService', () => {
       expect(svc.lastFetched(CNSI)()).not.toBeNull();
     });
   });
+
+  describe('upsertUser (insert a user the cache has never seen)', () => {
+    const seed = async () => {
+      const p = firstValueFrom(svc.loadUsers(CNSI));
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await p;
+    };
+
+    it('appends an unknown user and bumps the count', async () => {
+      await seed();
+      svc.upsertUser(CNSI, { ...mkUser('b'), origin: 'uaa' });
+      expect(svc.usersSignal(CNSI)().map(u => u.guid)).toEqual(['a', 'b']);
+      expect(svc.count(CNSI)()).toBe(2);
+    });
+
+    it('is a no-op for a guid already in the cache', async () => {
+      await seed();
+      svc.upsertUser(CNSI, { ...mkUser('a'), orgRoles: [{ orgGuid: 'org-1', roles: ['manager'] }] });
+      expect(svc.usersSignal(CNSI)()[0].orgRoles).toEqual([]);
+      expect(svc.count(CNSI)()).toBe(1);
+    });
+  });
 });

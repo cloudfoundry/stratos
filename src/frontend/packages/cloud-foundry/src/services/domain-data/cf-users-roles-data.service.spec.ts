@@ -218,7 +218,37 @@ describe('CfUsersRolesDataService', () => {
       await reload;
     });
 
-    it('only marks the cache stale for set-by-username changes (synthetic guids are unknown to the cache)', async () => {
+    it('inserts a set-by-username user into the cache from the returned role guid (#5883)', async () => {
+      await seedPagedCache();
+      const synthetic = { guid: 'newbie/cf-1/org-1', username: 'newbie' } as unknown as StUser;
+      svc.setIsSetByUsername(true);
+      svc.setUsers('cf-1', [synthetic], 'ldap');
+      svc.setChanges([
+        { userGuid: 'newbie/cf-1/org-1', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' },
+      ]);
+      const done = svc.executeChanges();
+      httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes').flush({
+        results: [{ index: 0, success: true, role: { guid: 'r-1', relationships: { user: { data: { guid: 'u-new' } } } } }],
+      });
+      await done;
+
+      // The org Users list reads this cache: the new member shows without a refetch.
+      const users = paged.usersSignal('cf-1')();
+      expect(users.map(u => u.guid)).toEqual(['u-a', 'u-new']);
+      expect(users[1]).toEqual(expect.objectContaining({
+        username: 'newbie', presentationName: 'newbie', origin: 'ldap', cnsiGuid: 'cf-1',
+        orgRoles: [{ orgGuid: 'org-1', roles: ['manager'] }], spaceRoles: [],
+      }));
+      expect(users[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['auditor'] }]);
+      expect(paged.count('cf-1')()).toBe(2);
+
+      // Still stale: the next list visit reconciles with server truth.
+      const reload = firstValueFrom(paged.loadUsers('cf-1'));
+      httpMock.expectOne(PAGED_P1).flush({ resources: [cachedAlice()], pagination: { totalResults: 1, totalPages: 1 } });
+      await reload;
+    });
+
+    it('leaves the cache untouched when a set-by-username result carries no role guid', async () => {
       await seedPagedCache();
       const synthetic = { guid: 'newbie/cf-1/org-1', username: 'newbie' } as unknown as StUser;
       svc.setIsSetByUsername(true);
@@ -230,7 +260,7 @@ describe('CfUsersRolesDataService', () => {
       httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes').flush({ results: [{ index: 0, success: true }] });
       await done;
 
-      expect(paged.usersSignal('cf-1')()[0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['auditor'] }]);
+      expect(paged.usersSignal('cf-1')().map(u => u.guid)).toEqual(['u-a']);
       const reload = firstValueFrom(paged.loadUsers('cf-1'));
       httpMock.expectOne(PAGED_P1).flush({ resources: [cachedAlice()], pagination: { totalResults: 1, totalPages: 1 } });
       await reload;

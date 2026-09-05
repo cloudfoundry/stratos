@@ -231,14 +231,23 @@ export class CfUsersRolesDataService {
     // markStale additionally forces the next full load to reconcile with
     // server truth (the backend can apply implied changes the diff doesn't
     // carry, e.g. org-user membership ordering). Set-by-username changes
-    // carry synthetic guids the cache can't address (the legacy reducer
-    // skipped them too), so they rely on staleness alone.
-    const succeeded = results.filter(r => r.success && changes[r.index]).map(r => changes[r.index]);
+    // carry synthetic guids the cache can't address, so the real guid is
+    // read off the returned role and the user inserted first (#5883); a
+    // result without one falls back to staleness alone.
+    const succeeded = results.filter(r => r.success && changes[r.index]);
     if (succeeded.length) {
-      if (!byUsername) {
-        for (const c of succeeded) {
-          this.pagedUsers.applyRoleChange(cfGuid, c.userGuid, c.orgGuid, c.spaceGuid, bucketRoleName(c), c.add);
+      for (const r of succeeded) {
+        const c = changes[r.index];
+        let userGuid = c.userGuid;
+        if (byUsername) {
+          userGuid = r.role?.relationships?.user?.data?.guid ?? '';
+          if (!userGuid) { continue; }
+          const username = usernameByGuid?.get(c.userGuid) ?? '';
+          this.pagedUsers.upsertUser(cfGuid, {
+            guid: userGuid, username, presentationName: username, origin, cnsiGuid: cfGuid, orgRoles: [], spaceRoles: [],
+          });
         }
+        this.pagedUsers.applyRoleChange(cfGuid, userGuid, c.orgGuid, c.spaceGuid, bucketRoleName(c), c.add);
       }
       this.pagedUsers.markStale(cfGuid);
       this.usersSnapshot.refreshIfLoaded(cfGuid);
@@ -301,6 +310,9 @@ interface NativeRoleChangeResult {
   error?: string;
   jobId?: string;
   state?: string;
+  // The created V3 role on a successful add — its user relationship is
+  // the only place the real guid of a set-by-username user comes back.
+  role?: { guid: string; relationships?: { user?: { data?: { guid?: string } } } };
 }
 
 // Maps a wizard role change to the V3 batch wire shape. Space scope sends
