@@ -85,12 +85,12 @@ func (c *CloudFoundrySpecification) applyNativeServicePlanVisibility(ctx *echo.C
 	case http.MethodPost:
 		vis, verr = cfClient.ServicePlans().ApplyVisibility(ctx.Request().Context(), planGUID, &capi.ServicePlanVisibilityApplyRequest{
 			Type:          body.Type,
-			Organizations: body.Organizations,
+			Organizations: visibilityOrgs(body.Organizations),
 		})
 	case http.MethodPatch:
 		vis, verr = cfClient.ServicePlans().UpdateVisibility(ctx.Request().Context(), planGUID, &capi.ServicePlanVisibilityUpdateRequest{
 			Type:          body.Type,
-			Organizations: body.Organizations,
+			Organizations: visibilityOrgs(body.Organizations),
 		})
 	default:
 		return echo.NewHTTPError(http.StatusMethodNotAllowed, "use POST (replace) or PATCH (apply/merge)")
@@ -156,6 +156,19 @@ func toStServicePlanVisibility(v capi.ServicePlanVisibility) StServicePlanVisibi
 			GUID: v.Space.GUID,
 			Name: v.Space.Name,
 		}
+	}
+	return out
+}
+
+// visibilityOrgs wraps bare org GUIDs in the {"guid": ...} objects CF's
+// visibility endpoints require (fw-capi 3.229.1 fixed the wire format).
+func visibilityOrgs(guids []string) []capi.ServicePlanVisibilityOrg {
+	if len(guids) == 0 {
+		return nil
+	}
+	out := make([]capi.ServicePlanVisibilityOrg, 0, len(guids))
+	for _, g := range guids {
+		out = append(out, capi.ServicePlanVisibilityOrg{GUID: g})
 	}
 	return out
 }
