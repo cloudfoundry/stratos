@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component, Signal, computed, inject, signal } 
 import { ActivatedRoute, Router } from '@angular/router';
 
 import {
+  DialogErrorComponent,
   IHeaderBreadcrumb,
   PageHeaderComponent,
   SignalStepHandle,
@@ -31,7 +32,7 @@ import { StServiceInstance } from '../../../services/endpoint-data/stratos-types
   templateUrl: './route-service.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageHeaderComponent, SteppersComponent, StepComponent],
+  imports: [PageHeaderComponent, SteppersComponent, StepComponent, DialogErrorComponent],
 })
 export class RouteServiceComponent {
   private http = inject(HttpClient);
