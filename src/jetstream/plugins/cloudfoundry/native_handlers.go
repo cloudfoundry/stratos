@@ -174,11 +174,15 @@ func listWithRouterFlapRetry[T any](ctx context.Context, op string, fn func() (T
 }
 
 // normaliseStringMap ensures nil maps are returned as empty maps (not null in JSON).
-func normaliseStringMap(m map[string]string) map[string]string {
-	if m == nil {
-		return map[string]string{}
+// normaliseStringMap flattens a CF metadata map (map[string]*string since
+// fw-capi 3.229.1, where nil means "delete this key" on PATCH) into the plain
+// map the frontend consumes. A nil value reads as an empty string.
+func normaliseStringMap(m map[string]*string) map[string]string {
+	out := make(map[string]string, len(m))
+	for k, v := range m {
+		out[k] = capi.StringValue(v)
 	}
-	return m
+	return out
 }
 
 // metaLabels/metaAnnotations safely extract labels/annotations from a *capi.Metadata (may be nil).
