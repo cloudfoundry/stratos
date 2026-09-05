@@ -12,9 +12,11 @@ import {
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import {
+  RawRouteServiceBinding,
   RouteServiceBindingView,
   ServiceCatalogDataService,
   SignalSource,
+  toRouteServiceBindingView,
 } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 
@@ -49,7 +51,11 @@ export class RouteServiceComponent {
   private bindingSource = signal<SignalSource<RouteServiceBindingView | null>>(
     { value: signal<RouteServiceBindingView | null>(null).asReadonly(), isLoading: signal(false).asReadonly(), error: signal(null).asReadonly() },
   );
-  readonly binding: Signal<RouteServiceBindingView | null> = computed(() => this.bindingSource().value());
+  // The binding created by the last bind, taken from the create response so
+  // the page updates without a refetch; reload() clears it once the server
+  // binding is re-read.
+  private boundNow = signal<RouteServiceBindingView | null>(null);
+  readonly binding: Signal<RouteServiceBindingView | null> = computed(() => this.boundNow() ?? this.bindingSource().value());
   readonly loading: Signal<boolean> = computed(() => this.bindingSource().isLoading());
 
   // Managed service instances in the route's space — the bind picker, and the
@@ -88,6 +94,7 @@ export class RouteServiceComponent {
   }
 
   reload(): void {
+    this.boundNow.set(null);
     this.bindingSource.set(this.catalog.routeServiceBinding(this.cfGuid, this.routeGuid));
   }
 
@@ -118,13 +125,20 @@ export class RouteServiceComponent {
           service_instance: { data: { guid: siGuid } },
         },
       };
-      await writeWithJob(
+      const r = await writeWithJob<RawRouteServiceBinding>(
         this.http,
         this.http.post(`/pp/v1/cf/service_route_bindings/${this.cfGuid}`, body, { observe: 'response' as const }),
       );
       this.rebinding.set(false);
       this.selectedSiGuid.set(null);
-      this.reload();
+      // A user-provided instance binds synchronously and answers with the
+      // binding; a managed one resolves to the CF job, which carries no
+      // binding fields, so the page re-reads instead.
+      if (r.state?.guid && r.state.relationships?.service_instance?.data?.guid) {
+        this.boundNow.set(toRouteServiceBindingView(r.state));
+      } else {
+        this.reload();
+      }
     } catch (err: unknown) {
       this.errorMessage.set(`Failed to bind service: ${this.messageOf(err)}`);
       throw err instanceof Error ? err : new Error(this.messageOf(err));

@@ -28,7 +28,7 @@ export interface RouteServiceBindingView {
   lastOperationState?: string;
 }
 
-interface RawRouteServiceBinding {
+export interface RawRouteServiceBinding {
   guid: string;
   route_service_url?: string;
   last_operation?: { state?: string };
@@ -39,7 +39,7 @@ interface RawRouteServiceBindingsResponse {
   resources?: RawRouteServiceBinding[];
 }
 
-function toRouteServiceBindingView(raw: RawRouteServiceBinding): RouteServiceBindingView {
+export function toRouteServiceBindingView(raw: RawRouteServiceBinding): RouteServiceBindingView {
   return {
     guid: raw.guid,
     serviceInstanceGuid: raw.relationships?.service_instance?.data?.guid ?? '',
@@ -58,8 +58,9 @@ export interface ServiceKeyView {
   lastOperationState?: string;
 }
 
-interface RawServiceKey {
+export interface RawServiceKey {
   guid: string;
+  type?: string;
   name?: string;
   created_at?: string;
   last_operation?: { state?: string };
@@ -69,7 +70,7 @@ interface RawServiceKeysResponse {
   resources?: RawServiceKey[];
 }
 
-function toServiceKeyView(raw: RawServiceKey): ServiceKeyView {
+export function toServiceKeyView(raw: RawServiceKey): ServiceKeyView {
   return {
     guid: raw.guid,
     name: raw.name ?? '',
