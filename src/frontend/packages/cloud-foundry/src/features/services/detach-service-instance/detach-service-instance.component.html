@@ -28,7 +28,7 @@
                       'bg-content-3 text-content-1': row.status === 'pending',
                       'bg-info-subtle text-info-strong animate-pulse': row.status === 'busy',
                       'bg-success-subtle text-success-strong': row.status === 'success',
-                      'bg-danger-subtle text-danger-strong': row.status === 'error'
+                      'bg-danger-shade-50 text-danger-shade-700': row.status === 'error'
                     }"
                     [attr.aria-label]="row.status"
                     [attr.title]="row.errorMessage || row.status">

@@ -4,11 +4,8 @@
 
 <div class="px-6 py-4 space-y-4">
   @if (errorMessage(); as err) {
-    <div class="rounded border border-danger-strong bg-danger-subtle px-3 py-2 text-danger-strong" role="alert">
-      {{ err }}
-    </div>
+    <app-dialog-error [show]="true" [message]="err" role="alert" />
   }
-
   @if (loading()) {
     <p class="text-content-muted">Loading route service…</p>
   } @else if (showStepper()) {
@@ -42,7 +39,7 @@
         <div class="flex items-center gap-4">
           <button type="button" class="text-link hover:underline disabled:opacity-50"
             [disabled]="busy()" (click)="startRebind()">Rebind</button>
-          <button type="button" class="text-danger-strong hover:underline disabled:opacity-50"
+          <button type="button" class="text-danger-shade-600 hover:underline disabled:opacity-50"
             [disabled]="busy()" (click)="unbind()">{{ busy() ? 'Unbinding…' : 'Unbind' }}</button>
         </div>
       </div>

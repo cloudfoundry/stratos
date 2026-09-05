@@ -62,7 +62,18 @@ export class StratosJobError extends Error {
 
   constructor(job: StratosJob) {
     const first = job.errors?.[0];
-    super(first ? `${first.code}: ${first.message}` : `job ${job.id} failed`);
+    // Prefer the human detail CF attaches (the broker's own explanation)
+    // over the bare error code; the code stays reachable through `job`.
+    // CF embeds a broker's raw response body in the detail, markup and all;
+    // keep the words, drop the tags.
+    const detail = typeof first?.detail === 'string'
+      ? first.detail.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
+      : '';
+    super(
+      !first ? `job ${job.id} failed`
+        : detail ? `${first.message}. ${detail}`
+          : `${first.code}: ${first.message}`,
+    );
     this.name = 'StratosJobError';
     this.job = job;
   }
