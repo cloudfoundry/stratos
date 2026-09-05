@@ -6,7 +6,9 @@
   in their orgs. Adds now go to `POST /v3/roles` by username and origin
   and Cloud Foundry resolves the user itself, as the CF API intends for
   org managers. Removes still resolve the GUID, since a role is deleted by
-  GUID and the user is a listable member by then.
+  GUID and the user is a listable member by then. The org Users list now
+  shows the new member as soon as the add succeeds, using the user GUID
+  from the created role, instead of waiting for a manual refresh.
 
 [Chores]
 - fw-capi bumped v3.222.4 → v3.229.1, absorbing its breaking metadata
