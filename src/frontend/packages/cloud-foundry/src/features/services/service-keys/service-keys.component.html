@@ -26,9 +26,7 @@
 
 <div class="px-6 py-4 space-y-4">
   @if (errorMessage(); as err) {
-    <div class="rounded border border-danger-strong bg-danger-subtle px-3 py-2 text-danger-strong" role="alert">
-      {{ err }}
-    </div>
+    <app-dialog-error [show]="true" [message]="err" role="alert" />
   }
 
   @if (notBindable()) {
@@ -70,7 +68,7 @@
               {{ copiedAllGuid() === key.guid ? 'Copied' : 'Copy all (JSON)' }}
             </button>
             <button type="button"
-              class="inline-flex items-center gap-1.5 text-danger-strong hover:underline disabled:opacity-50 shrink-0"
+              class="inline-flex items-center gap-1.5 text-danger-shade-600 hover:underline disabled:opacity-50 shrink-0"
               [disabled]="rowStatus(key.guid) === 'busy'"
               (click)="deleteKey(key.guid)">
               @if (rowStatus(key.guid) === 'busy') {
@@ -89,7 +87,7 @@
                   Loading credentials…
                 </p>
               } @else if (credsError(key.guid); as cerr) {
-                <p class="text-danger-strong">Failed to load credentials: {{ cerr }}</p>
+                <p class="text-danger-shade-700">Failed to load credentials: {{ cerr }}</p>
               } @else if (credentialFields(key.guid).length === 0) {
                 <p class="text-content-muted">No credentials returned for this key.</p>
               } @else {

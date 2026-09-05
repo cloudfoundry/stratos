@@ -226,6 +226,32 @@ describe('ServiceKeysComponent — createKey patches the list from the response'
     expect(listFetches).toBe(1);
   });
 
+  it('shows a failed job\'s title and detail in the shared error banner', async () => {
+    component.newKeyName.set('broken');
+    const done = component.createKey();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_keys/cf-1').flush(
+      { id: 'job-1', kind: 'cf.service_key.create', state: 'RUNNING', startedAt: 't', updatedAt: 't' },
+      { status: 202, statusText: 'Accepted' },
+    );
+    // pollJob waits its first backoff step before the first GET.
+    await new Promise(resolve => setTimeout(resolve, 700));
+    http.expectOne(r => r.method === 'GET' && r.url === '/pp/v1/stratos/jobs/job-1').flush({
+      id: 'job-1', kind: 'cf.service_key.create', state: 'FAILED', startedAt: 't', updatedAt: 't',
+      errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'The service broker returned an invalid response. Status Code: 504 Gateway Timeout' }],
+    });
+    await done;
+    fixture.detectChanges();
+
+    expect(component.errorMessage()).toBe(
+      'Failed to create key: CF-UnableToPerform. The service broker returned an invalid response. Status Code: 504 Gateway Timeout',
+    );
+    const banner = fixture.nativeElement.querySelector('.dialog-error') as HTMLElement | null;
+    expect(banner?.textContent).toContain('CF-UnableToPerform. The service broker');
+    expect(banner?.querySelector('.material-icons')?.textContent).toBe('warning');
+    expect(component.keys().map(k => k.guid)).toEqual(['k-1']);
+    expect(listFetches).toBe(1);
+  });
+
   it('falls back to a refetch when the response is a completed job rather than the key', async () => {
     component.newKeyName.set('async');
     const done = component.createKey();

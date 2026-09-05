@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, Signal, computed, effect, inject, s
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
-import { IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
+import { DialogErrorComponent, IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import {
@@ -37,7 +37,7 @@ interface OfferingBindableResponse {
   templateUrl: './service-keys.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [AppBusyComponent, DatePipe, PageHeaderComponent, ListSubNavComponent, MaskedCredentialsComponent],
+  imports: [AppBusyComponent, DatePipe, PageHeaderComponent, ListSubNavComponent, MaskedCredentialsComponent, DialogErrorComponent],
 })
 export class ServiceKeysComponent {
   private http = inject(HttpClient);
