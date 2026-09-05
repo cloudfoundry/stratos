@@ -62,11 +62,13 @@
               <span class="text-sm text-content-muted shrink-0">{{ key.createdAt | date:'medium' }}</span>
               <span class="text-sm text-content-muted shrink-0">{{ key.lastOperationState || '—' }}</span>
             </button>
-            <button type="button"
-              class="text-link hover:underline shrink-0"
-              (click)="copyAllCredentials(key.guid)">
-              {{ copiedAllGuid() === key.guid ? 'Copied' : 'Copy all (JSON)' }}
-            </button>
+            @if (!isFailed(key.guid)) {
+              <button type="button"
+                class="text-link hover:underline shrink-0"
+                (click)="copyAllCredentials(key.guid)">
+                {{ copiedAllGuid() === key.guid ? 'Copied' : 'Copy all (JSON)' }}
+              </button>
+            }
             <button type="button"
               class="inline-flex items-center gap-1.5 text-danger-shade-600 hover:underline disabled:opacity-50 shrink-0"
               [disabled]="rowStatus(key.guid) === 'busy'"
@@ -81,7 +83,9 @@
           <!-- Body: credentials, lazily loaded on first expand. -->
           @if (isOpen(key.guid)) {
             <div class="px-4 py-3 border-t border-content-border">
-              @if (credsLoading(key.guid)) {
+              @if (isFailed(key.guid)) {
+                <p class="text-content-muted">This key was not created, so it has no credentials.</p>
+              } @else if (credsLoading(key.guid)) {
                 <p class="flex items-center gap-2 text-content-muted">
                   <app-busy size="1rem" context="service-keys"></app-busy>
                   Loading credentials…

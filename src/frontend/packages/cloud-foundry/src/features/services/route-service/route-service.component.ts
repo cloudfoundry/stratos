@@ -12,6 +12,7 @@ import {
 } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { StratosJobError } from '../../../services/async-jobs/async-job.types';
+import { httpErrorResponseToSafeString } from '@stratosui/store';
 import {
   RawRouteServiceBinding,
   RouteServiceBindingView,
@@ -167,8 +168,8 @@ export class RouteServiceComponent {
   }
 
   private messageOf(err: unknown): string {
-    if (err instanceof StratosJobError) return err.message;
-    if (err instanceof Error) return err.message;
-    return 'unknown error';
+    if (err instanceof StratosJobError || err instanceof Error) return err.message;
+    // HttpErrorResponse is not an Error: report its body and status.
+    return httpErrorResponseToSafeString(err) || 'unknown error';
   }
 }

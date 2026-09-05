@@ -14,6 +14,7 @@ import { StServiceInstance } from '../../../services/endpoint-data/stratos-types
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CredentialField, MaskedCredentialsComponent, toCredentialFields } from '../../../shared/components/masked-credentials/masked-credentials.component';
 import { AppBusyComponent } from '@stratosui/core';
+import { httpErrorResponseToSafeString } from '@stratosui/store';
 
 type RowStatus = 'idle' | 'busy' | 'error';
 
@@ -171,10 +172,13 @@ export class ServiceKeysComponent {
     this.keysSource.set(this.catalog.serviceKeysForInstance(this.cfGuid, this.siGuid));
   }
 
+  /** A key whose create never completed has nothing to fetch. */
+  isFailed = (guid: string): boolean => this.keys().find(k => k.guid === guid)?.lastOperationState === 'failed';
+
   toggleOpen(guid: string): void {
     const opening = !this.isOpen(guid);
     this.openByGuid.update(prev => ({ ...prev, [guid]: opening }));
-    if (opening && this.credsByGuid()[guid] === undefined && !this.credsLoading(guid)) {
+    if (opening && !this.isFailed(guid) && this.credsByGuid()[guid] === undefined && !this.credsLoading(guid)) {
       void this.loadCredentials(guid);
     }
   }
@@ -289,12 +293,10 @@ export class ServiceKeysComponent {
   }
 
   private messageOf(err: unknown): string {
-    if (err instanceof StratosJobError) {
+    if (err instanceof StratosJobError || err instanceof Error) {
       return err.message;
     }
-    if (err instanceof Error) {
-      return err.message;
-    }
-    return 'unknown error';
+    // HttpErrorResponse is not an Error: report its body and status.
+    return httpErrorResponseToSafeString(err) || 'unknown error';
   }
 }
