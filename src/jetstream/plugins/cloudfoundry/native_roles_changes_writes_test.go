@@ -142,51 +142,50 @@ func TestApplyNativeRoleChanges_OrgUserAddedBeforeOtherRoles(t *testing.T) {
 // because the resolve-then-assign flow makes multiple upstream calls and
 // captureServer only retains the last request's body (it drains r.Body in the
 // wrapper before the per-route handler runs).
-func TestApplyNativeRoleChanges_AddByUsernameResolvesGuidThenCreatesRole(t *testing.T) {
-	var userListQuery, roleCreateBody string
-	postedUsers := false
+// Add-by-username sends {username, origin} to POST /v3/roles and never lists
+// /v3/users first. CF resolves the user; an org manager can therefore add a
+// user from another origin whom GET /v3/users would not show them (#5883).
+func TestApplyNativeRoleChanges_AddByUsernameSendsUsernameToCF(t *testing.T) {
+	var roleCreateBody string
+	listedUsers := false
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		b, _ := io.ReadAll(r.Body)
 		switch {
 		case r.URL.Path == "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
-		case r.Method == http.MethodPost && r.URL.Path == "/v3/users":
-			postedUsers = true
-			w.WriteHeader(http.StatusUnprocessableEntity)
 		case r.Method == http.MethodGet && r.URL.Path == "/v3/users":
-			userListQuery = r.URL.RawQuery
+			listedUsers = true
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"pagination": map[string]interface{}{"total_pages": 1},
-				"resources":  []map[string]interface{}{{"guid": "user-existing", "username": "newbie"}},
+				"resources":  []map[string]interface{}{},
 			})
 		case r.Method == http.MethodPost && r.URL.Path == "/v3/roles":
 			roleCreateBody = string(b)
 			w.WriteHeader(http.StatusCreated)
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{"guid": "role-1", "type": "space_developer"})
+			_ = json.NewEncoder(w).Encode(map[string]interface{}{"guid": "role-1", "type": "organization_user"})
 		default:
 			http.NotFound(w, r)
 		}
 	}))
 	defer ts.Close()
 
-	body := `{"changes":[{"username":"newbie","origin":"uaa","spaceGuid":"sp-1","type":"space_developer","add":true}]}`
+	body := `{"changes":[{"username":"jane","origin":"ldap","orgGuid":"org-1","type":"organization_user","add":true}]}`
 	e := echo.New()
 	ctx, rec := newPhase1CContext(e, http.MethodPost, "/pp/v1/cf/roles/cnsi-1/changes", body)
 	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}})
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
-
-	assert.False(t, postedUsers, "must not POST /v3/users — set-roles-by-username resolves an existing user")
-	assert.Contains(t, userListQuery, "usernames=newbie")
-	assert.Contains(t, userListQuery, "origins=uaa")
+	assert.False(t, listedUsers, "an add must not depend on listing /v3/users")
 
 	var roleSent map[string]interface{}
 	require.NoError(t, json.Unmarshal([]byte(roleCreateBody), &roleSent))
-	rel := roleSent["relationships"].(map[string]interface{})
-	data := rel["user"].(map[string]interface{})["data"].(map[string]interface{})
-	assert.Equal(t, "user-existing", data["guid"], "role must be assigned to the resolved user GUID")
+	data := roleSent["relationships"].(map[string]interface{})["user"].(map[string]interface{})["data"].(map[string]interface{})
+	assert.Equal(t, "jane", data["username"])
+	assert.Equal(t, "ldap", data["origin"])
+	_, hasGUID := data["guid"]
+	assert.False(t, hasGUID, "no guid may accompany a username")
 
 	var resp struct {
 		Results []struct {
@@ -198,25 +197,19 @@ func TestApplyNativeRoleChanges_AddByUsernameResolvesGuidThenCreatesRole(t *test
 	assert.True(t, resp.Results[0].Success)
 }
 
-// When the username does not resolve to an existing user, the change fails
-// with a clear error and no role is created — the user must be created or
-// invited first.
-func TestApplyNativeRoleChanges_AddByUsernameUserNotFound(t *testing.T) {
-	roleCreated := false
+// When CF rejects the by-username add (the user does not exist and the
+// deployment does not auto-create), CF's own error reaches the result and no
+// role is recorded as created.
+func TestApplyNativeRoleChanges_AddByUsernameCFRejects(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		_, _ = io.ReadAll(r.Body)
 		switch {
 		case r.URL.Path == "/v3":
 			_, _ = w.Write([]byte(`{"links":{}}`))
-		case r.Method == http.MethodGet && r.URL.Path == "/v3/users":
-			_ = json.NewEncoder(w).Encode(map[string]interface{}{
-				"pagination": map[string]interface{}{"total_pages": 1},
-				"resources":  []map[string]interface{}{},
-			})
 		case r.Method == http.MethodPost && r.URL.Path == "/v3/roles":
-			roleCreated = true
-			w.WriteHeader(http.StatusCreated)
+			w.WriteHeader(http.StatusUnprocessableEntity)
+			_, _ = w.Write([]byte(`{"errors":[{"detail":"No user exists with the username 'ghost' and origin 'uaa'.","title":"CF-UnprocessableEntity","code":10008}]}`))
 		default:
 			http.NotFound(w, r)
 		}
@@ -230,7 +223,6 @@ func TestApplyNativeRoleChanges_AddByUsernameUserNotFound(t *testing.T) {
 
 	require.NoError(t, newPhase1CPlugin(ts.URL).applyNativeRoleChanges(ctx))
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.False(t, roleCreated, "no role should be created when the user does not resolve")
 
 	var resp struct {
 		Results []struct {
@@ -241,7 +233,7 @@ func TestApplyNativeRoleChanges_AddByUsernameUserNotFound(t *testing.T) {
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
 	require.Len(t, resp.Results, 1)
 	assert.False(t, resp.Results[0].Success)
-	assert.Contains(t, resp.Results[0].Error, "not found")
+	assert.Contains(t, resp.Results[0].Error, "No user exists")
 }
 
 // Remove-by-username (lost legacy functionality, restored): resolve the user

@@ -257,3 +257,5 @@ require (
 )
 
 replace github.com/SermoDigital/jose => github.com/norman-abramovitz/fw-jose v0.9.2-go127.1
+
+replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20260905040439-d2f943f1a352
