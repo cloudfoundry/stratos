@@ -44,17 +44,17 @@
               <div class="flex flex-row">
                 <div class="flex-1">
                   <app-metadata-item class="mt-0" icon="memory" label="Memory Quota"
-                    >{{ $safeNavigationMigration(detail.process?.memoryMb) | mbToHumanSize }}
+                    >{{ detail.process?.memoryMb | mbToHumanSize }}
                   </app-metadata-item>
                   <app-metadata-item icon="storage" label="Disk Quota"
-                    >{{ $safeNavigationMigration(detail.process?.diskMb) | mbToHumanSize }}
+                    >{{ detail.process?.diskMb | mbToHumanSize }}
                   </app-metadata-item>
                   <app-metadata-item icon="date_range" label="Created">
                     {{ detail.app.createdAt | date: "medium" }}</app-metadata-item
                   >
                   <app-metadata-item icon="access_time" label="Modified">
                     {{
-                      detail.pkg?.updatedAt ? ($safeNavigationMigration(detail.pkg?.updatedAt) | date: "medium") : "-"
+                      detail.pkg?.updatedAt ? (detail.pkg.updatedAt | date: "medium") : "-"
                     }}
                   </app-metadata-item>
                   <app-metadata-item icon="virtual_guest" iconFont="stratos-icons" label="SSH Enabled">
@@ -72,7 +72,7 @@
                     {{ data.serviceBindingsCount() || "0" }}
                   </app-metadata-item>
                   <app-metadata-item icon="route" iconFont="stratos-icons" label="Routes">
-                    {{ detail.app.routes?.length || "0" }}
+                    {{ detail.app.routes.length || "0" }}
                   </app-metadata-item>
                 </div>
               </div>
@@ -263,7 +263,7 @@
                 {{ detail.process?.command || "-" }}</app-metadata-item
               >
               <app-metadata-item icon="power" label="Ports">{{
-                detail.process?.ports?.length ? detail.process?.ports?.join(", ") : "-"
+                detail.process?.ports.length ? detail.process.ports.join(", ") : "-"
               }}</app-metadata-item>
             </div>
           </div>
@@ -283,7 +283,7 @@
               >
               @if (detail.process?.healthCheckType === "http") {
                 <app-metadata-item icon="http" label="Health Check HTTP Endpoint">{{
-                  detail.process?.healthCheckEndpoint
+                  detail.process.healthCheckEndpoint
                 }}</app-metadata-item>
               }
             </div>

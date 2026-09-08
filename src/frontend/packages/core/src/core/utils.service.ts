@@ -66,7 +66,7 @@ export class UtilsService {
     return fixed;
   }
 
-  mbToHumanSize(mb: number): string {
+  mbToHumanSize(mb: number | null | undefined): string {
     // Handle null/undefined
     if (mb == null) {
       return '';

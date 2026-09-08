@@ -92,7 +92,7 @@
                             </option>
                           }
                         </datalist>
-                        @if (sourceSelectionForm.controls.projectName?.errors?.githubProjectDoesNotExist && !sourceSelectionForm.controls.projectName?.errors?.githubProjectError) {
+                        @if (sourceControl('projectName')?.errors?.githubProjectDoesNotExist && !sourceControl('projectName')?.errors?.githubProjectError) {
                           <div class="text-danger text-sm mt-1"
                             >
                             Repository not found. Check the owner/name is exact (it is
@@ -100,9 +100,9 @@
                             access token is authorized for it.
                           </div>
                         }
-                        @if (sourceSelectionForm.controls.projectName?.errors?.githubProjectError) {
+                        @if (sourceControl('projectName')?.errors?.githubProjectError; as githubProjectError) {
                           <div class="text-danger text-sm mt-1">
-                            {{sourceSelectionForm.controls.projectName.errors.githubProjectError}}
+                            {{ githubProjectError }}
                           </div>
                         }
                       </div>
@@ -185,7 +185,7 @@
                 <label class="block text-sm text-content-muted mb-1" for="dockerAppName">Application name <span class="text-danger">*</span></label>
                 <input id="dockerAppName" class="input" [disabled]="isRedeploy" [(ngModel)]="dockerAppName" placeholder="my-app"
                   name="dockerAppName" required>
-                @if (sourceSelectionForm.controls.dockerAppName?.errors?.required) {
+                @if (sourceControl('dockerAppName')?.errors?.required) {
                   <div class="text-danger text-sm mt-1">
                     Application name is required
                   </div>
@@ -195,12 +195,12 @@
                 <label class="block text-sm text-content-muted mb-1" for="dockerImg">Docker image <span class="text-danger">*</span></label>
                 <input id="dockerImg" class="input" [disabled]="isRedeploy" [(ngModel)]="dockerImg" placeholder="repo/image:tag" name="dockerImg"
                   required>
-                @if (sourceSelectionForm.controls.dockerImg?.errors?.required) {
+                @if (sourceControl('dockerImg')?.errors?.required) {
                   <div class="text-danger text-sm mt-1">
                     Image is required
                   </div>
                 }
-                @if (sourceSelectionForm.controls.dockerImg?.errors?.dockerImageInvalid) {
+                @if (sourceControl('dockerImg')?.errors?.dockerImageInvalid) {
                   <div class="text-danger text-sm mt-1">
                     Invalid Image
                   </div>

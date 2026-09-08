@@ -16,12 +16,12 @@
       [formGroup]="createNewInstanceForm">
       <app-form-field>
         <input class="w-full placeholder:!text-transparent focus:outline-none" appInput formControlName="name" placeholder="Name" required>
-        @if (createNewInstanceForm.controls.name?.hasError('nameTaken')) {
+        @if (createNewInstanceForm.controls.name.hasError('nameTaken')) {
           <app-error>
             A service instance with this name already exists. Please enter a different one.
           </app-error>
         }
-        @if (createNewInstanceForm.controls.name?.hasError('maxlength')) {
+        @if (createNewInstanceForm.controls.name.hasError('maxlength')) {
           <app-error>
             A service instance name cannot exceed 50 characters.
           </app-error>

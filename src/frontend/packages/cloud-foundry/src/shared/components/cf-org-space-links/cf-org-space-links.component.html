@@ -1,21 +1,21 @@
-@if ($safeNavigationMigration(service?.multipleConnectedEndpoints$) | async) {
-  <a [routerLink]="$safeNavigationMigration(service?.getCfURL())">{{
-    $safeNavigationMigration(service?.getCfName()) | async
+@if (service.multipleConnectedEndpoints$ | async) {
+  <a [routerLink]="service.getCfURL()">{{
+    service.getCfName() | async
   }}</a>
-  @if ($safeNavigationMigration(service?.getOrgName()) | async) {
+  @if (service.getOrgName() | async) {
     <span> / </span>
   }
 }
-@if ($safeNavigationMigration(service?.getOrgName()) | async) {
-  <a [routerLink]="$safeNavigationMigration(service?.getOrgURL())">{{
-    $safeNavigationMigration(service?.getOrgName()) | async
+@if (service.getOrgName() | async) {
+  <a [routerLink]="service.getOrgURL()">{{
+    service.getOrgName() | async
   }}</a>
-  @if ($safeNavigationMigration(service?.getSpaceName()) | async) {
+  @if (service.getSpaceName() | async) {
     <span> / </span>
   }
 }
-@if ($safeNavigationMigration(service?.getSpaceName()) | async) {
-  <a [routerLink]="$safeNavigationMigration(service?.getSpaceURL())" [queryParams]="spaceBreadCrumbs">{{
-    $safeNavigationMigration(service?.getSpaceName()) | async
+@if (service.getSpaceName() | async) {
+  <a [routerLink]="service.getSpaceURL()" [queryParams]="spaceBreadCrumbs">{{
+    service.getSpaceName() | async
   }}</a>
 }

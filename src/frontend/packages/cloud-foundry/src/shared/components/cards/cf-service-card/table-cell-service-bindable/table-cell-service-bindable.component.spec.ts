@@ -3,6 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { BooleanIndicatorComponent } from '@stratosui/core';
 import { TableCellServiceBindableComponent } from './table-cell-service-bindable.component';
+import { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 
 describe('TableCellServiceBindableComponent', () => {
   let component: TableCellServiceBindableComponent;
@@ -17,6 +18,7 @@ describe('TableCellServiceBindableComponent', () => {
 
     fixture = TestBed.createComponent(TableCellServiceBindableComponent);
     component = fixture.componentInstance;
+    component.row = { bindable: true } as StServiceOffering;
     fixture.detectChanges();
   });
 

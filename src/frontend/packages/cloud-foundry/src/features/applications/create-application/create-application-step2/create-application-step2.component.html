@@ -3,12 +3,12 @@
   <div>
     <app-form-field class="relative">
       <input class="w-full placeholder:!text-transparent focus:outline-none" required appInput placeholder="Application Name" formControlName="appName" autocomplete="off" [appApplicationNameUnique]="appNameChecking">
-      @if (form.controls.appName?.hasError('appNameTaken')) {
+      @if (form.controls.appName.hasError('appNameTaken')) {
         <app-error>
           This name has been taken, please try another.
         </app-error>
       }
-      @if (!form.controls.appName?.hasError('required')) {
+      @if (!form.controls.appName.hasError('required')) {
         <div class="absolute right-2 top-1/2 -translate-y-1/2">
           <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
         </div>

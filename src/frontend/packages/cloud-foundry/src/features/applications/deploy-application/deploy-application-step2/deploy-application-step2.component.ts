@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
-import { FormsModule, NgForm } from '@angular/forms';
+import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {
   BaseSCM,
@@ -186,6 +186,13 @@ export class DeployApplicationStep2Component
 
   // strict: static @ViewChild, resolved by Angular before ngOnInit/ngAfterContentInit run.
   @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm!: NgForm;
+
+  // Template-driven controls register in a microtask after their input renders,
+  // so the first change-detection pass of a block can look one up before it
+  // exists; NgForm.controls' index signature types the lookup as always present.
+  sourceControl(name: string): AbstractControl | undefined {
+    return this.sourceSelectionForm.controls[name];
+  }
   subscriptions: Array<Subscription> = [];
 
   @ViewChild('fsChooser') fsChooser: any;
