@@ -5,7 +5,9 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { ActivatedRoute } from '@angular/router';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { seedEndpointsDataService } from '@stratosui/store/testing';
+
+import { KubernetesBaseTestModules, kubeTestEndpoint } from '../../kubernetes.testing.module';
 import { KubedashConfigurationComponent } from './kubedash-configuration.component';
 
 describe('KubedashConfigurationComponent', () => {
@@ -35,6 +37,7 @@ describe('KubedashConfigurationComponent', () => {
   });
 
   beforeEach(() => {
+    seedEndpointsDataService([kubeTestEndpoint]);
     fixture = TestBed.createComponent(KubedashConfigurationComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
