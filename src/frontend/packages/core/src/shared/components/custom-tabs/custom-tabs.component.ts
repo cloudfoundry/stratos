@@ -10,6 +10,7 @@ import {
   ViewChild,
   TemplateRef,
 } from "@angular/core";
+import { NgTemplateOutlet } from "@angular/common";
 
 export interface MatTabChangeEvent {
   index: number;
@@ -37,7 +38,7 @@ export class CustomTabComponent {
   templateUrl: "./custom-tabs.component.html",
   styleUrls: ["./custom-tabs.component.scss"],
   standalone: true,
-  imports: [],
+  imports: [NgTemplateOutlet],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabGroupComponent implements AfterContentInit {

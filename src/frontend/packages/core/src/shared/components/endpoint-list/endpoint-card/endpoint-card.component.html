@@ -20,7 +20,7 @@
         </div>
       }
       <div class="endpoint-card__title-text">
-        <app-multiline-title class="endpoint-card__title-link">{{ row?.name }}</app-multiline-title>
+        <app-multiline-title class="endpoint-card__title-link">{{ row.name }}</app-multiline-title>
         <div class="endpoint-card__title-subtext">
           {{!endpointCatalogEntity ? 'Unknown' : endpointCatalogEntity.definition.label}}
           <!--
@@ -64,7 +64,7 @@
     <app-meta-card-item>
       <app-meta-card-key>Creator</app-meta-card-key>
       <app-meta-card-value>
-        <div>{{ row.creator?.name }}</div>
+        <div>{{ row.creator.name }}</div>
       </app-meta-card-value>
     </app-meta-card-item>
   }

@@ -68,7 +68,9 @@ describe('EndpointCardComponent', () => {
       guid: 'test-endpoint-guid',
       cnsi_type: 'metrics',
       name: 'Test Metrics Endpoint',
-      connectionStatus: 'connected'
+      connectionStatus: 'connected',
+      // Always present on the wire: jetstream fills creator for every endpoint.
+      creator: { name: 'System Endpoint', admin: false, system: true },
     } as EndpointModel;
     fixture.detectChanges();
   });
