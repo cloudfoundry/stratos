@@ -14,22 +14,22 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
-	github.com/cloudfoundry-community/go-cfenv v1.19.0 // indirect
+	github.com/cloudfoundry-community/go-cfenv v1.24.2 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
-	github.com/go-sql-driver/mysql v1.9.2 // indirect
+	github.com/go-sql-driver/mysql v1.10.1 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.4.0 // indirect
 	github.com/govau/cf-common v0.0.7 // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12 // indirect
 	github.com/lib/pq v1.12.3 // indirect
-	github.com/ncruces/go-sqlite3 v0.35.2 // indirect
-	github.com/ncruces/go-sqlite3-wasm/v3 v3.2.35303 // indirect
+	github.com/ncruces/go-sqlite3 v0.35.4 // indirect
+	github.com/ncruces/go-sqlite3-wasm/v5 v5.0.35304 // indirect
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/samber/lo v1.50.0 // indirect
-	golang.org/x/sys v0.47.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	github.com/samber/lo v1.53.0 // indirect
+	golang.org/x/sys v0.48.0 // indirect
+	golang.org/x/text v0.42.0 // indirect
 )
 
 replace github.com/cloudfoundry/stratos/src/jetstream => ../../
