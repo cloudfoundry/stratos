@@ -26,7 +26,7 @@ export default defineConfig({
       join(__dirname, '../../vitest.workspace.setup.ts'), // Workspace-level platform init
       join(__dirname, 'src/test-setup.ts'), // Package-specific setup
     ],
-    include: ['src/**/*.spec.ts'],
+    include: ['src/**/*.spec.ts', '../theme/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
     // Fix for Angular 20 zoneless + Vitest circular dependency errors
     teardown: {
