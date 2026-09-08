@@ -35,15 +35,15 @@
         [appApplicationNameUniqueRequest]="getUniqueRequest"
         required
       />
-      @if (createEditServiceInstance.controls.name?.hasError("appNameTaken")) {
+      @if (createEditServiceInstance.controls.name.hasError("appNameTaken")) {
         <app-error> A service instance with this name already exists. Please enter a different one. </app-error>
       }
-      @if (createEditServiceInstance.controls.name?.hasError("maxlength")) {
+      @if (createEditServiceInstance.controls.name.hasError("maxlength")) {
         <app-error> A service instance name cannot exceed 50 characters. </app-error>
       }
-      @if (!createEditServiceInstance.controls.name?.hasError("maxlength")) {
+      @if (!createEditServiceInstance.controls.name.hasError("maxlength")) {
         <div class="inline-icon inline-icon__form">
-          <app-stateful-icon [state]="$safeNavigationMigration(appNameChecking?.status)"></app-stateful-icon>
+          <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
         </div>
       }
     </app-form-field>
@@ -55,7 +55,7 @@
         type="url"
         placeholder="Route Service URL"
       />
-      @if (createEditServiceInstance.controls.route_service_url?.hasError("pattern")) {
+      @if (createEditServiceInstance.controls.route_service_url.hasError("pattern")) {
         <app-error>Invalid URL</app-error>
       }
     </app-form-field>
@@ -66,7 +66,7 @@
         formControlName="syslog_drain_url"
         placeholder="Syslog Drain URL"
       />
-      @if (createEditServiceInstance.controls.syslog_drain_url?.hasError("pattern")) {
+      @if (createEditServiceInstance.controls.syslog_drain_url.hasError("pattern")) {
         <app-error>Invalid URL</app-error>
       }
     </app-form-field>

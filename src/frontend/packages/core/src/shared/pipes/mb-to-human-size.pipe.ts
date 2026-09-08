@@ -9,7 +9,7 @@ standalone: true
 export class MbToHumanSizePipe implements PipeTransform {
   private utilsService = inject(UtilsService);
 
-  transform(mb: number): string {
+  transform(mb: number | null | undefined): string {
     return this.utilsService.mbToHumanSize(mb);
   }
 

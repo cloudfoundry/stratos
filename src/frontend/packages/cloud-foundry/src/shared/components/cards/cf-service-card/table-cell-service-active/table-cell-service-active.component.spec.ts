@@ -6,6 +6,7 @@ import {
   BooleanIndicatorComponent,
 } from '../../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { TableCellServiceActiveComponent } from './table-cell-service-active.component';
+import { StServiceOffering } from '../../../../../services/endpoint-data/stratos-types';
 
 describe('TableCellServiceActiveComponent', () => {
   let component: TableCellServiceActiveComponent;
@@ -20,6 +21,7 @@ describe('TableCellServiceActiveComponent', () => {
 
     fixture = TestBed.createComponent(TableCellServiceActiveComponent);
     component = fixture.componentInstance;
+    component.row = { available: true } as StServiceOffering;
     fixture.detectChanges();
   });
 
