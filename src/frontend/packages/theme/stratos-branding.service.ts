@@ -1,4 +1,4 @@
-import { Injectable, signal, inject } from '@angular/core';
+import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
 import { CompanyConfig } from './company-config.interface';
@@ -72,6 +72,7 @@ const defaultCompanyConfig: CompanyConfig = {
 })
 export class StratosBrandingService {
   private http = inject(HttpClient);
+  private destroyRef = inject(DestroyRef);
 
   // --- Theme signals ---
   private _theme = signal<StratosTheme>(defaultTheme);
@@ -126,7 +127,9 @@ export class StratosBrandingService {
 
     // Initialize media query listener for system theme preference
     this.mediaQueryList = window.matchMedia('(prefers-color-scheme: dark)');
-    this.mediaQueryList.addEventListener('change', this.onSystemThemeChange.bind(this));
+    const onSystemThemeChange = this.onSystemThemeChange.bind(this);
+    this.mediaQueryList.addEventListener('change', onSystemThemeChange);
+    this.destroyRef.onDestroy(() => this.mediaQueryList.removeEventListener('change', onSystemThemeChange));
 
     // Apply config layer CSS vars using defaultTheme (Layer 1)
     this.applyTheme(defaultTheme);
@@ -137,9 +140,10 @@ export class StratosBrandingService {
     this.hydrateDocumentationTarget();
 
     // Remove initializing class after a small delay to enable transitions
-    setTimeout(() => {
+    const initTimer = setTimeout(() => {
       document.body.classList.remove('theme-initializing');
     }, 100);
+    this.destroyRef.onDestroy(() => clearTimeout(initTimer));
   }
 
   // =========================================================================
