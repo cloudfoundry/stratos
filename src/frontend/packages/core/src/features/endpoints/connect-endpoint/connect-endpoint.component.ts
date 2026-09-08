@@ -40,7 +40,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
   private pDisabled = false;
   private pConnectService!: ConnectEndpointService;
-  @Input() set connectService(service: ConnectEndpointService) {
+  // A host may bind this before its own service exists (create-endpoint's
+  // connect step); the setter ignores the unset value and waits for the real one.
+  @Input() set connectService(service: ConnectEndpointService | undefined) {
     if (!service || this.pConnectService) {
       return;
     }

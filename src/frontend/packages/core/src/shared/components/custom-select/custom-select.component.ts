@@ -24,7 +24,7 @@ export interface MatSelectChange {
     ><ng-content></ng-content></div>`,
   styleUrls: ['./custom-select.component.css'],
   standalone: true,
-  imports: [NgClass, AppBusyComponent],
+  imports: [NgClass],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomOptionComponent implements AfterViewInit {

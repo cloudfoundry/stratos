@@ -82,7 +82,7 @@
               </div>
               <div class="flex gap-2">
                 <dt class="text-content-muted w-20 shrink-0">Built</dt>
-                <dd class="text-content-text min-w-0 truncate" [title]="session.version?.build_date">{{ session.version?.build_date ? (session.version?.build_date | date:"yyyy-MM-dd HH:mm 'UTC'":"UTC") : '—' }}</dd>
+                <dd class="text-content-text min-w-0 truncate" [title]="session.version?.build_date">{{ session.version?.build_date ? (session.version.build_date | date:"yyyy-MM-dd HH:mm 'UTC'":"UTC") : '—' }}</dd>
               </div>
               <div class="flex gap-2">
                 <dt class="text-content-muted w-20 shrink-0">Branch</dt>

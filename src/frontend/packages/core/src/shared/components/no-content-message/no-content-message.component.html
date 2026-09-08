@@ -11,16 +11,16 @@
   }
   <div class="second-line">
     @if (secondLine?.link) {
-      <a [routerLink]="$safeNavigationMigration(secondLine?.link)">{{ secondLine?.linkText }}</a>
+      <a [routerLink]="secondLine.link">{{ secondLine.linkText }}</a>
     }
     {{ secondLine?.text }}
   </div>
   @for (line of otherLines; track line) {
     <div class="second-line">
-      @if (line?.link) {
-        <a [routerLink]="$safeNavigationMigration(line?.link)">{{ line?.linkText }}</a>
+      @if (line.link) {
+        <a [routerLink]="line.link">{{ line.linkText }}</a>
       }
-      {{ line?.text }}
+      {{ line.text }}
     </div>
   }
   <ng-content></ng-content>

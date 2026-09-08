@@ -40,7 +40,9 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   public validate!: Observable<boolean>;
   // Unset until an auth type with a help document is selected.
   public helpDocumentUrl: string | undefined;
-  public connectService!: ConnectEndpointService;
+  // Unset until the stepper calls onEnter; the step's template can render
+  // before that (it is projected as soon as the step becomes current).
+  public connectService?: ConnectEndpointService;
 
   // FWT-959 Part 2: signal-backed mirrors of `valid` and `doConnect` so
   // parent steppers can wire them into a SignalStepHandle without polling
@@ -69,7 +71,7 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     this.cdr.markForCheck();
   };
 
-  onNext = (): Observable<StepOnNextResult> => this.doConnect ? this.connectService.submit().pipe(
+  onNext = (): Observable<StepOnNextResult> => this.doConnect && this.connectService ? this.connectService.submit().pipe(
     map(res => ({
       success: res.success,
       message: res.errorMessage,
