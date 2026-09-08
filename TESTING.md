@@ -553,7 +553,7 @@ uname -a
 bun run test:core 2>&1 | head -50
 
 # Config check
-ls -la vitest.workspace.ts src/frontend/packages/core/vitest.config.ts
+ls -la vitest.workspace.ts src/frontend/packages/core/vitest.config.mts
 ```
 
 ---

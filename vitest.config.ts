@@ -27,7 +27,7 @@ export default defineConfig({
     include: [],
     projects: [
       {
-        extends: 'src/frontend/packages/core/vitest.config.ts',
+        extends: 'src/frontend/packages/core/vitest.config.mts',
         test: { name: 'core', exclude: COMMON_EXCLUDE },
       },
       {
@@ -39,7 +39,7 @@ export default defineConfig({
         test: { name: 'cloud-foundry', exclude: COMMON_EXCLUDE },
       },
       {
-        extends: 'src/frontend/packages/kubernetes/vitest.config.ts',
+        extends: 'src/frontend/packages/kubernetes/vitest.config.mts',
         test: { name: 'kubernetes', exclude: COMMON_EXCLUDE },
       },
       {
@@ -47,15 +47,15 @@ export default defineConfig({
         test: { name: 'cf-autoscaler', exclude: COMMON_EXCLUDE },
       },
       {
-        extends: 'src/frontend/packages/git/vitest.config.ts',
+        extends: 'src/frontend/packages/git/vitest.config.mts',
         test: { name: 'git', exclude: COMMON_EXCLUDE },
       },
       {
-        extends: 'src/frontend/packages/shared/vitest.config.ts',
+        extends: 'src/frontend/packages/shared/vitest.config.mts',
         test: { name: 'shared', exclude: COMMON_EXCLUDE },
       },
       {
-        extends: 'src/frontend/packages/extension/vitest.config.ts',
+        extends: 'src/frontend/packages/extension/vitest.config.mts',
         test: { name: 'extension', exclude: COMMON_EXCLUDE },
       },
     ],

@@ -5,7 +5,7 @@ import { join } from 'path';
 export default defineConfig({
   plugins: [angular()],
   test: {
-    root: join(__dirname),
+    root: join(import.meta.dirname),
     name: 'extension',
     globals: false, // Recommended for Angular 20 + Vitest 4 (avoid global namespace pollution)
     environment: 'happy-dom',
@@ -23,8 +23,8 @@ export default defineConfig({
       },
     },
     setupFiles: [
-      join(__dirname, '../../vitest.workspace.setup.ts'), // Workspace-level platform init
-      join(__dirname, 'src/test-setup.ts'), // Package-specific setup
+      join(import.meta.dirname, '../../vitest.workspace.setup.ts'), // Workspace-level platform init
+      join(import.meta.dirname, 'src/test-setup.ts'), // Package-specific setup
     ],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
@@ -35,7 +35,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html', 'lcov'],
-      reportsDirectory: join(__dirname, '../../coverage/extension'),
+      reportsDirectory: join(import.meta.dirname, '../../coverage/extension'),
       include: ['src/**/*.ts'],
       exclude: ['src/**/*.spec.ts', 'src/test-setup.ts', 'src/**/*.d.ts'],
     },
@@ -45,16 +45,16 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@stratosui/theme': join(__dirname, '../theme/index.ts'),
-      '@stratosui/core': join(__dirname, '../core/src/public-api.ts'),
-      '@stratosui/store/testing': join(__dirname, '../store/testing'),
-      '@stratosui/store': join(__dirname, '../store/src/public-api.ts'),
-      '@stratosui/shared': join(__dirname, '../shared/src/public-api.ts'),
-      '@stratosui/cloud-foundry': join(__dirname, '../cloud-foundry/src/public_api.ts'),
-      '@stratosui/cf-autoscaler': join(__dirname, '../cf-autoscaler/src/public_api.ts'),
-      '@stratosui/kubernetes': join(__dirname, '../kubernetes/src/public-api.ts'),
-      '@stratosui/git': join(__dirname, '../git/src/public_api.ts'),
-      '@test-framework': join(__dirname, 'test-framework'),
+      '@stratosui/theme': join(import.meta.dirname, '../theme/index.ts'),
+      '@stratosui/core': join(import.meta.dirname, '../core/src/public-api.ts'),
+      '@stratosui/store/testing': join(import.meta.dirname, '../store/testing'),
+      '@stratosui/store': join(import.meta.dirname, '../store/src/public-api.ts'),
+      '@stratosui/shared': join(import.meta.dirname, '../shared/src/public-api.ts'),
+      '@stratosui/cloud-foundry': join(import.meta.dirname, '../cloud-foundry/src/public_api.ts'),
+      '@stratosui/cf-autoscaler': join(import.meta.dirname, '../cf-autoscaler/src/public_api.ts'),
+      '@stratosui/kubernetes': join(import.meta.dirname, '../kubernetes/src/public-api.ts'),
+      '@stratosui/git': join(import.meta.dirname, '../git/src/public_api.ts'),
+      '@test-framework': join(import.meta.dirname, 'test-framework'),
     },
   },
   ssr: {
