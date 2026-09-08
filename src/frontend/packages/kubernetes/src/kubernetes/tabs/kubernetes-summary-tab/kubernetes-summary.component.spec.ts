@@ -4,7 +4,9 @@ import { Signal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { TabNavService } from '../../../../../core/src/tab-nav.service';
-import { KubeBaseGuidMock, KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { seedEndpointsDataService } from '@stratosui/store/testing';
+
+import { KubeBaseGuidMock, KubernetesBaseTestModules, kubeTestEndpoint } from '../../kubernetes.testing.module';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
 import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
@@ -42,6 +44,7 @@ describe('KubernetesSummaryTabComponent', () => {
   });
 
   beforeEach(() => {
+    seedEndpointsDataService([kubeTestEndpoint]);
     fixture = TestBed.createComponent(KubernetesSummaryTabComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

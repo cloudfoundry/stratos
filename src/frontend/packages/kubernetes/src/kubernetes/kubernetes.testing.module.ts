@@ -7,13 +7,14 @@ import { SharedModule } from '../../../core/src/shared/shared.module';
 import { TabNavService } from '../../../core/src/tab-nav.service';
 import {
   CATALOGUE_ENTITIES,
+  EndpointModel,
   entityCatalog,
   EntityCatalogFeatureModule,
   EntityCatalogProvidersModule,
   TestEntityCatalog,
 } from '@stratosui/store';
 import { generateStratosEntities } from '../../../store/src/stratos-entity-generator';
-import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { STORE_TEST_PROVIDERS, testSCFEndpoint } from '@stratosui/store/testing';
 import { HelmReleaseActivatedRouteMock, HelmReleaseGuidMock } from '../helm/helm-testing.module';
 import { kubeEntityCatalog } from './kubernetes-entity-generator';
 import { BaseKubeGuid } from './kubernetes-page.types';
@@ -78,3 +79,17 @@ export const HelmReleaseProviders = [
 ];
 
 export const KubeBaseGuidMock = { provide: BaseKubeGuid, useValue: { guid: 'anything' } };
+
+/**
+ * The endpoint behind KubeBaseGuidMock's guid. Specs whose component reads
+ * `KubernetesEndpointService.endpoint$` must seed it, or `waitFor('anything')`
+ * rejects and the template's async pipe rethrows it as an unhandled error:
+ * `seedEndpointsDataService([kubeTestEndpoint])` before `createComponent`.
+ */
+export const kubeTestEndpoint: EndpointModel = {
+  ...testSCFEndpoint,
+  guid: 'anything',
+  name: 'kube-test',
+  cnsi_type: 'k8s',
+  connectionStatus: 'connected',
+};
