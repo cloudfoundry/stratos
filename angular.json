@@ -80,7 +80,8 @@
               "dagre",
               "webcola",
               "intersect",
-              "expect-type"
+              "expect-type",
+              "path-browserify"
             ],
             "tsConfig": "src/frontend/packages/core/tsconfig.app.json",
             "loader": {
