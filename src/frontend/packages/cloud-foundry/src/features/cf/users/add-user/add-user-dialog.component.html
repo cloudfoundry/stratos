@@ -65,9 +65,14 @@
 
   <!-- ── Scope & roles sub-section ─────────────────────────────────────────
        Delegated to the shared RoleAssignmentComponent widget (Phase 4 D7).
-       Roles are OPTIONAL (canSubmit gates on identity only). -->
-  <section class="flex flex-col gap-3 border-t pt-3" aria-label="Scope and roles">
-    <div class="text-sm font-medium text-content-text">Scope &amp; roles (optional)</div>
+       Roles are optional for a CF admin; anyone else must grant one. -->
+  <section class="flex flex-col gap-3 border-t pt-3 max-h-[45vh] overflow-y-auto custom-scrollbar" aria-label="Scope and roles">
+    <div class="text-sm font-medium text-content-text">Scope &amp; roles ({{ rolesRequired() ? 'required' : 'optional' }})</div>
+    @if (rolesRequired()) {
+      <p class="text-xs text-content-muted" data-test="add-user-roles-required">
+        Cloud Foundry lets only an administrator add a user without granting a role. Tick at least one role to add this user.
+      </p>
+    }
     <app-role-assignment
       [cfGuid]="data.cfGuid"
       [users]="pendingUsers"

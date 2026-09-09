@@ -459,16 +459,21 @@ export class TailwindDialogService {
     panel.style.left = `${rect.left}px`;
     panel.style.top = `${rect.top}px`;
 
-    // Cap resize at the viewport edge from the panel's current top-left. Native
-    // CSS resize grows down-right from the anchored corner, so a plain
-    // `max-height: 90vh` still lets `top + height` spill past the bottom of the
-    // viewport. Tying the max to (viewport − position) keeps the bottom-right
-    // on-screen. Recomputed after a move (below), since the anchor changes.
+    // Cap the panel at the viewport edge from its pinned top-left. The panel
+    // is pinned where it was centred at open, and content arriving later (a
+    // roles widget, a Monaco editor, a native resize) grows it from there, so
+    // a plain `max-height: 90vh` still lets `top + height` spill past the
+    // bottom of the viewport and put the action buttons out of reach. Tying
+    // the max to (viewport − position) keeps the bottom on-screen; a
+    // configured pixel maxHeight still wins when it is smaller. Recomputed
+    // after a move (below), since the anchor changes.
+    const configuredMaxHeight = /px$/.test(config.maxHeight ?? '') ? parseFloat(config.maxHeight!) : Infinity;
     const clampSizeToViewport = () => {
-      if (!config.resizable) return;
       const r = panel.getBoundingClientRect();
-      panel.style.maxWidth = `${Math.max(0, window.innerWidth - r.left)}px`;
-      panel.style.maxHeight = `${Math.max(0, window.innerHeight - r.top)}px`;
+      panel.style.maxHeight = `${Math.min(configuredMaxHeight, Math.max(0, window.innerHeight - r.top))}px`;
+      if (config.resizable) {
+        panel.style.maxWidth = `${Math.max(0, window.innerWidth - r.left)}px`;
+      }
     };
 
     if (config.resizable) {

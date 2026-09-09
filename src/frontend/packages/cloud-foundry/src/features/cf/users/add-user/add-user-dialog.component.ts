@@ -25,6 +25,7 @@ import { CfIdentityProvidersService } from '../../../../shared/data-services/cf-
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { UserInviteService } from '../../user-invites/user-invite.service';
 import { TailwindSnackBarService } from '@stratosui/core';
+import { EndpointsDataService } from '@stratosui/store';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { CnsiUsersSnapshotService } from '../../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
@@ -87,6 +88,7 @@ export class AddUserDialogComponent {
   }];
 
   private idps = inject(CfIdentityProvidersService);
+  private endpoints = inject(EndpointsDataService);
 
   // Services assembled into AddUsersDeps for the orchestrator call in submit().
   private rolesData = inject(CfUsersRolesDataService);
@@ -122,11 +124,22 @@ export class AddUserDialogComponent {
   protected spaceLocked: Signal<boolean> = computed(() => !!this.data.spaceGuid);
 
   /**
-   * Submit is enabled once at least one valid identity is entered.
-   * Roles are optional — role selection does NOT gate submission.
+   * Cloud Foundry lets only an admin add a user without granting a role:
+   * POST /v3/users is admin-only, and a manager's only way to bring in an
+   * existing UAA user is a role granted by username. So outside admin,
+   * associate mode needs at least one role before it can submit.
+   */
+  protected rolesRequired: Signal<boolean> = computed(
+    () => this.mode() === 'associate' && !this.endpoints.endpointById(this.data.cfGuid)()?.user?.admin,
+  );
+
+  /**
+   * Submit is enabled once at least one valid identity is entered, plus a
+   * role whenever rolesRequired() says the CF would refuse a role-less add.
    */
   protected canSubmit: Signal<boolean> = computed(
-    () => this.identitiesValid() && this.identities().length > 0 && !this.submitting(),
+    () => this.identitiesValid() && this.identities().length > 0 && !this.submitting()
+      && (!this.rolesRequired() || this.roleChanges().length > 0),
   );
 
   // ── StackedInputActions wiring ────────────────────────────────────────────
