@@ -1,4 +1,5 @@
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -38,10 +39,11 @@ describe('MetricsComponent', () => {
         CoreModule,
         SharedModule,
         NoopAnimationsModule,
-        HttpClientModule,
         MetricsComponent,
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         {
           provide: MetricsService,
           useValue: {

@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -27,6 +28,7 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(
           generateCfBaseTestModulesNoShared(),
@@ -77,6 +79,7 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       provideZonelessChangeDetection(),
       provideRouter([]),
       provideHttpClient(),
+      provideHttpClientTesting(),
       ...STORE_TEST_PROVIDERS,
       importProvidersFrom(generateCfBaseTestModulesNoShared()),
       CsiModeService,
@@ -174,6 +177,7 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         ...STORE_TEST_PROVIDERS,
         importProvidersFrom(generateCfBaseTestModulesNoShared()),
         CsiModeService,

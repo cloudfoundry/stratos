@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
@@ -81,10 +81,10 @@ function buildTestBed(activeRoute: Partial<ActiveRouteCfOrgSpace>) {
       provideZonelessChangeDetection(),
       provideRouter([]),
       provideHttpClient(),
+      provideHttpClientTesting(),
       provideNoopAnimations(),
       ...STORE_TEST_PROVIDERS,
       importProvidersFrom(
-        HttpClientTestingModule,
         EntityCatalogTestModule,
         CloudFoundryReducersModule
       ),

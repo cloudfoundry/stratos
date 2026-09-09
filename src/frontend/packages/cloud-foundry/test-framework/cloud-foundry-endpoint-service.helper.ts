@@ -1,3 +1,4 @@
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import {
   provideHttpClient,
   HttpClient,
@@ -160,6 +161,7 @@ export function generateCfBaseTestModulesNoShared() {
 export const CF_BASE_TEST_PROVIDERS = [
   provideRouter([]),
   provideHttpClient(withXhr()),
+  provideHttpClientTesting(),
 ];
 
 export function generateCfBaseTestModules() {

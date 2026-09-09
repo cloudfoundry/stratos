@@ -416,10 +416,10 @@ $(call register, build, frontend, $(_HIDE)stamp.frontend)
 #   PROJECT=<vitest project(s)>  e.g. PROJECT=core or PROJECT="core git"
 #   SCOPE=<path filter(s)>       e.g. SCOPE=src/frontend/packages/core/src/shared/components/stepper
 # The npm `test` script hard-codes every --project, so narrowed runs
-# invoke vitest directly with the same unhandled-errors flag.
+# invoke vitest directly.
 define test.frontend
 	@echo "Running frontend tests..."
-	$(if $(strip $(PROJECT)$(SCOPE)),bun run vitest run --dangerouslyIgnoreUnhandledErrors $(foreach p,$(PROJECT),--project $(p)) $(SCOPE),bun run test)
+	$(if $(strip $(PROJECT)$(SCOPE)),bun run vitest run $(foreach p,$(PROJECT),--project $(p)) $(SCOPE),bun run test)
 endef
 $(call register, test, frontend)
 

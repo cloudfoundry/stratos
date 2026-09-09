@@ -3,6 +3,7 @@ import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -21,6 +22,7 @@ describe('CommitListWrapperComponent', () => {
       providers: [
         ...STORE_TEST_PROVIDERS,
         provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection(),
         DatePipe,
         GitSCMService,

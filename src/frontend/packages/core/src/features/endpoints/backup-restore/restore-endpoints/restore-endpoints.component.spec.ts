@@ -1,4 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -25,6 +26,7 @@ describe('RestoreEndpointsComponent', () => {
         TabNavService,
         ...STORE_TEST_PROVIDERS,
         provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection(),
       ],
     });

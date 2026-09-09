@@ -3,6 +3,7 @@ import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
@@ -57,6 +58,7 @@ describe('EditQuotaStepComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         ...STORE_TEST_PROVIDERS,
         EntityCatalogHelper,
         {

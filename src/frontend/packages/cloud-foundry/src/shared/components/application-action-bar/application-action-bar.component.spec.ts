@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, inject, provideZonelessChangeDetection, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { CdkPortalOutlet } from '@angular/cdk/portal';
 import { describe, it, expect, vi } from 'vitest';
@@ -106,6 +107,7 @@ describe('AppApplicationActionBarComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: ApplicationService, useValue: applicationServiceMock },
         { provide: AppApplicationActionsService, useValue: actionsMock },
         { provide: AppLifecycleProgressService, useValue: { setAnchor: vi.fn() } },

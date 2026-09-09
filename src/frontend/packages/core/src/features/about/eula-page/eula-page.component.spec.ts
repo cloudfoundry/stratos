@@ -1,4 +1,5 @@
-import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach } from 'vitest';
@@ -20,11 +21,12 @@ describe('EulaPageComponent', () => {
         CoreTestingModule,
         RouterTestingModule,
         NoopAnimationsModule,
-        HttpClientTestingModule,
         createBasicStoreModule(),
         EulaPageComponent,
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         TabNavService,
         CurrentUserPermissionsService,
         ...STORE_TEST_PROVIDERS,

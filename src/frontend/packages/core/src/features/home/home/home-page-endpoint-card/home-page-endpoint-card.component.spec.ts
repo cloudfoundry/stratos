@@ -2,7 +2,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { HttpClientModule } from '@angular/common/http';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
 import { EndpointModel, UserFavoriteManager, UserFavorite, IEndpointFavMetadata } from '@stratosui/store';
@@ -23,10 +24,11 @@ describe('HomePageEndpointCardComponent', () => {
         createBasicStoreModule(),
         RouterTestingModule,
         NoopAnimationsModule,
-        HttpClientModule,
         HomePageEndpointCardComponent,
       ],
       providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
         ...(STORE_TEST_PROVIDERS || []),
         SidePanelService,
         UserFavoriteManager,

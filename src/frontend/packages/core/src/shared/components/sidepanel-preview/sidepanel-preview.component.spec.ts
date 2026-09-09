@@ -1,5 +1,5 @@
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
@@ -18,15 +18,15 @@ describe('SidepanelPreviewComponent', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
-        HttpClient, HttpHandler, SidePanelService,
+        SidePanelService,
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ],
       imports: [
         SidepanelPreviewComponent,
         MDAppModule,
         RouterTestingModule,
-        HttpClientModule,
-        HttpClientTestingModule,
         CoreTestingModule,
         createBasicStoreModule(),
       ]
