@@ -4,11 +4,17 @@ title: Deploying in Kubernetes
 sidebar_label: Overview 
 ---
 
-Stratos can be deployed to Kubernetes using [Helm](https://github.com/kubernetes/helm).
+Stratos can be deployed to Kubernetes using [Helm](https://helm.sh).
 
-As part of the Stratos release process, a Helm chart is generated and added to the release artifacts for a given release. In addition, we maintain a Helm Chart repository that can be used to install Stratos from:
-
-`https://cloudfoundry.github.io/stratos`
+> [!WARNING]
+> The Kubernetes deployment path does not currently work. The chart in this
+> repository (`deploy/kubernetes/console`) references container images that have
+> not been built since 2020 and cannot be rebuilt from the current source tree,
+> and there is no published Stratos Helm chart repository. The `stratos/console`
+> chart named in the installation guide is not available anywhere. See
+> [#5907](https://github.com/cloudfoundry/stratos/issues/5907) for the status of
+> this path. Use the [Cloud Foundry](cloud-foundry/cloud-foundry.md) or
+> [all-in-one Docker](all-in-one.md) deployment instead.
 
 You will need a suitable Kubernetes environment and a machine from which to run the deployment commands.
 

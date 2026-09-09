@@ -379,13 +379,7 @@ cd stratos-v5.0.0-linux-amd64
 
 **Check Images Exist:**
 ```bash
-# Pull UI image
-docker pull ghcr.io/cloudfoundry/stratos-ui:5.0.0
-
-# Pull backend image
-docker pull ghcr.io/cloudfoundry/stratos-backend:5.0.0
-
-# Pull all-in-one
+# Pull all-in-one — the only image the release publishes
 docker pull ghcr.io/cloudfoundry/stratos:5.0.0
 ```
 
@@ -397,20 +391,19 @@ docker image ls ghcr.io/cloudfoundry/stratos
 # Expected tags:
 # - 5.0.0 (exact version)
 # - 5.0 (minor version)
-# - 5 (major version)
-# - latest (production only)
+# - latest (latest release only)
 ```
 
 **Test Image:**
 ```bash
-# Run container
-docker run -d -p 8080:80 ghcr.io/cloudfoundry/stratos-ui:5.0.0
+# Run container (serves HTTPS on 5443 outside Cloud Foundry)
+docker run -d -p 8443:5443 ghcr.io/cloudfoundry/stratos:5.0.0
 
 # Verify it works
-curl http://localhost:8080
+curl -k https://localhost:8443/pp/v1/info
 
 # Cleanup
-docker stop $(docker ps -q --filter ancestor=ghcr.io/cloudfoundry/stratos-ui:5.0.0)
+docker stop $(docker ps -q --filter ancestor=ghcr.io/cloudfoundry/stratos:5.0.0)
 ```
 
 ### Functional Testing
@@ -608,27 +601,30 @@ gh release upload v5.0.0 corrected-file.tar.gz
 
 ### Docker Build Failed
 
-**Check Docker Workflow:**
+The release builds one image: the all-in-one image, in the
+`build-all-in-one-image` job of `release.yml`. It packages the
+release-built jetstream and UI — there is no source build inside the image.
+
+**Check the job:**
 ```bash
-# View Docker runs
-gh run list --workflow=docker.yml
+# View release runs
+gh run list --workflow=release.yml
 
 # View specific run
 gh run view [run-id] --log
 ```
 
-**Manual Docker Build:**
+**Build it manually:**
 ```bash
-# If automated build fails, build manually
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -f deploy/Dockerfile.ui \
-  -t ghcr.io/cloudfoundry/stratos-ui:5.0.0 \
-  --push .
+# Reproduces what the job does, from a clean tree
+make build frontend
+make build backend PLATFORM=linux/amd64
+./deploy/all-in-one/stage-aio.sh
 
-docker buildx build --platform linux/amd64,linux/arm64 \
-  -f deploy/Dockerfile.bk \
-  -t ghcr.io/cloudfoundry/stratos-backend:5.0.0 \
-  --push .
+docker build -f deploy/all-in-one/Dockerfile \
+  -t ghcr.io/cloudfoundry/stratos:5.0.0 \
+  dist/aio-package
+docker push ghcr.io/cloudfoundry/stratos:5.0.0
 ```
 
 ### Need to Recall Release
