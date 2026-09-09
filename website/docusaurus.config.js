@@ -158,6 +158,14 @@ const config = {
       {
         indexPages: true,
         docsRouteBasePath: '/docs',
+        // docsDir/blogDir feed the index content hash, and are resolved
+        // against website/. They are NOT the indexing paths — routes are
+        // indexed from the build output regardless. Left at their defaults
+        // ('docs', 'blog') they point at directories this site does not
+        // have, so the hash came back null and the index shipped at a
+        // stable URL that caches stale across a docs change.
+        docsDir: '../docs',
+        indexBlog: false,
         hashed: true,
         language: ['en'],
         highlightSearchTermsOnTargetPage: false,
