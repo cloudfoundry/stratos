@@ -237,7 +237,10 @@ export class CFApiHelper {
         type: 'buildpack',
         data: {
           buildpacks: params.buildpacks || [],
-          stack: params.stack || 'cflinuxfs3'
+          // No stack unless asked for: the CF then applies its own default,
+          // whatever that foundation ships (cflinuxfs3 no longer exists on
+          // current ones, and naming a missing stack is a 422).
+          ...(params.stack ? { stack: params.stack } : {})
         }
       },
       metadata: {
