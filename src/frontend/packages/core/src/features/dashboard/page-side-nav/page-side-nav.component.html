@@ -13,7 +13,8 @@
         @if (tab && !tab.link) {
           <div class="page-side-nav__item-sep">{{ tab?.label }}</div>
         }
-        @if (tab && tab.link && (tab.hidden$ | async) !== true) {
+        <!-- null = the gate has not answered yet; keep the tab out until it does. -->
+        @if (tab && tab.link && (tab.hidden$ | async) === false) {
           <a class="page-side-nav__item"
             [attr.data-test]="'page-tab-' + tab.label"
             [routerLink]="[tab.link]" queryParamsHandling="preserve"
