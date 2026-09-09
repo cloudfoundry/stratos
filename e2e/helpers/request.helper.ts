@@ -94,19 +94,25 @@ export class RequestHelper {
    * is extracted and used to recreate the API request context.
    */
   async createSession(userType: ConsoleUserType): Promise<void> {
-    if (!this.context) {
-      await this.init();
-    }
-
     const creds = userType === ConsoleUserType.admin
       ? { username: this.secrets.console.admin.username, password: this.secrets.console.admin.password }
       : { username: this.secrets.console.user.username, password: this.secrets.console.user.password };
+    await this.createSessionWithCredentials(creds.username, creds.password);
+  }
 
+  /**
+   * Log in as any console identity — the role projects use the CF users the
+   * secrets profile lists under creds.roles, which are neither console user.
+   */
+  async createSessionWithCredentials(username: string, password: string): Promise<void> {
+    if (!this.context) {
+      await this.init();
+    }
     const result = await apiLogin(
       this.context!,
       this.baseURL,
-      creds.username,
-      creds.password,
+      username,
+      password,
       this.authType || 'local'
     );
 
