@@ -2,7 +2,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import * as path from 'path';
-import { CF_GUIDS_FILE } from '../auth.constants';
+import { CF_GUIDS_FILE, CfRole } from '../auth.constants';
 
 /**
  * Secrets Helper
@@ -273,6 +273,24 @@ export class SecretsHelper {
         return secrets;
       },
     };
+  }
+
+  /**
+   * Credentials for one of the CF role identities the role projects log in
+   * as, read straight off the endpoint's `creds.roles.<role>` entry. A
+   * missing or placeholder entry throws so a role suite never runs as some
+   * other identity (the same stance as E2E_NO_NONADMIN_CREDS in
+   * endpoint-management.helper.ts).
+   */
+  static roleCreds(endpointName: string, role: CfRole): { username: string; password: string } {
+    const endpoint = this.load().cloudFoundry.find((ep: any) => ep.name === endpointName);
+    const creds = endpoint?.creds?.roles?.[role];
+    if (!creds?.username || !creds?.password || /^<.*>$/.test(creds.password)) {
+      throw new Error(
+        `E2E_NO_ROLE_CREDS: profile has no cloudFoundry creds.roles.${role} for endpoint '${endpointName}' — refusing to run the ${role} suite as another identity`
+      );
+    }
+    return { username: creds.username, password: creds.password };
   }
 
   /**

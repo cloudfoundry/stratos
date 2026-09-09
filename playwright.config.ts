@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+import { CF_ROLES, roleProjectName, roleSpecDir, roleStatePath } from './e2e/auth.constants';
+
 // Default secrets profile — auto-detect from base URL, fall back to 'local'
 if (!process.env.E2E_PROFILE) {
   const baseUrl = process.env.E2E_BASE_URL || '';
@@ -12,6 +14,34 @@ if (!process.env.E2E_PROFILE) {
 if (!process.env.E2E_RUN_START) {
   process.env.E2E_RUN_START = String(Date.now());
 }
+
+// Auth mode passthrough for the e2e backend. The role projects need UAA
+// (`AUTH_ENDPOINT_TYPE=remote`) auth, where a console user is a CF user;
+// jetstream reads the process environment before config.properties, so
+// exporting these before the run switches only the e2e backend.
+const AUTH_ENV_KEYS = ['AUTH_ENDPOINT_TYPE', 'UAA_ENDPOINT', 'CONSOLE_CLIENT', 'CONSOLE_ADMIN_SCOPE', 'SSO_LOGIN', 'SKIP_SSL_VALIDATION'];
+const AUTH_ENV: Record<string, string> = Object.fromEntries(
+  AUTH_ENV_KEYS.filter(k => process.env[k] !== undefined).map(k => [k, process.env[k] as string])
+);
+
+const CHROME_LAUNCH_ARGS = ['--no-sandbox', '--disable-dev-shm-usage', '--disable-infobars', '--allow-insecure-localhost'];
+
+// The browser projects run everything under e2e/tests on the admin session,
+// so the role suites are kept out of them and run once per role instead.
+const ROLE_TESTS = /tests\/roles\//;
+
+// Role suites: e2e/tests/roles/<role>/ plus the every-role spec, run as that
+// role's saved session (see e2e/auth.roles.setup.ts).
+const roleProjects = () => CF_ROLES.map(role => ({
+  name: roleProjectName(role),
+  dependencies: ['setup-roles'],
+  testMatch: [new RegExp(`tests/roles/${roleSpecDir(role)}/`), /tests\/roles\/every-role\.spec\.ts/],
+  use: {
+    ...devices['Desktop Chrome'],
+    storageState: roleStatePath(role),
+    launchOptions: { args: CHROME_LAUNCH_ARGS },
+  },
+}));
 
 // Test environment ports (separate from dev to avoid conflicts)
 const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
@@ -116,33 +146,39 @@ export default defineConfig({
       use: { storageState: undefined },
     },
     {
+      // One saved session per CF role; see e2e/auth.roles.setup.ts. Nothing
+      // here registers endpoints, so the four tests can run in parallel.
+      name: 'setup-roles',
+      testDir: './e2e',
+      testMatch: /auth\.roles\.setup\.ts/,
+      dependencies: ['setup'],
+      use: { storageState: undefined },
+    },
+    ...roleProjects(),
+    {
       name: 'chromium',
       dependencies: ['setup'],
+      testIgnore: ROLE_TESTS,
       use: {
         ...devices['Desktop Chrome'],
         // Default to admin state — fixtures override per-test as needed
         storageState: 'e2e/.auth/admin.json',
         // Chrome-specific options matching Protractor config
-        launchOptions: {
-          args: [
-            '--no-sandbox',
-            '--disable-dev-shm-usage',
-            '--disable-infobars',
-            '--allow-insecure-localhost',
-          ],
-        },
+        launchOptions: { args: CHROME_LAUNCH_ARGS },
       },
     },
 
     {
       name: 'firefox',
       dependencies: ['setup'],
+      testIgnore: ROLE_TESTS,
       use: { ...devices['Desktop Firefox'], storageState: 'e2e/.auth/admin.json' },
     },
 
     {
       name: 'webkit',
       dependencies: ['setup'],
+      testIgnore: ROLE_TESTS,
       use: { ...devices['Desktop Safari'], storageState: 'e2e/.auth/admin.json' },
     },
   ],
@@ -177,6 +213,7 @@ export default defineConfig({
         timeout: 30000,
         env: {
           SESSION_STORE_EXPIRY: '360',
+          ...AUTH_ENV,
         },
       },
       {

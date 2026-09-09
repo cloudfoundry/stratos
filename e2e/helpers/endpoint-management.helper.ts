@@ -211,6 +211,28 @@ export class EndpointManagementHelper {
   }
 
   /**
+   * Connect every registered CF endpoint for an already-authenticated session
+   * with explicit CF credentials — the role projects' identities, which are
+   * neither the admin nor the nonAdmin console user. Needs password-grant
+   * auth: under SSO the token POST is refused, and that is the right outcome
+   * (a role suite must never fall back to another identity).
+   */
+  async connectAllEndpointsWithCredentials(
+    request: RequestHelper,
+    creds: { username: string; password: string },
+  ): Promise<void> {
+    const endpoints = await request.get('/api/v1/endpoints');
+    for (const endpoint of endpoints || []) {
+      if (endpoint.cnsi_type !== 'cf') continue;
+      await request.postForm('/api/v1/tokens', {
+        cnsi_guid: endpoint.guid,
+        username: creds.username,
+        password: creds.password,
+      });
+    }
+  }
+
+  /**
    * Connect a specific endpoint by name
    */
   async connectEndpoint(endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin): Promise<void> {

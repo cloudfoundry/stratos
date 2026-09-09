@@ -83,6 +83,29 @@ test('should display applications', async ({ page }) => {
 });
 ```
 
+## Role suites
+
+`e2e/tests/roles/` holds one directory per CF role plus `every-role.spec.ts`,
+run by the `role-*` projects in `playwright.config.ts`, each on its own saved
+session (`e2e/.auth/role-<role>.json`, written by `e2e/auth.roles.setup.ts`).
+They assert what a role can do, what the console must refuse, and carry a
+canary per file written to assert the leak and marked with `test.fail()`, so
+the run only stays green while the refusal holds.
+
+The console must use UAA auth (`AUTH_ENDPOINT_TYPE=remote`), where a console
+user is a CF user: local auth has one console user and cannot express roles.
+jetstream reads the environment before `config.properties`, so:
+
+```bash
+AUTH_ENDPOINT_TYPE=remote UAA_ENDPOINT=https://uaa.example.com \
+CONSOLE_CLIENT=cf CONSOLE_ADMIN_SCOPE=cloud_controller.admin SKIP_SSL_VALIDATION=true \
+E2E_PROFILE=<profile> bunx playwright test --project='role-*'
+```
+
+Each CF endpoint entry in the profile needs a `creds.roles` block (see
+`secrets.yaml.template`); a role whose entry is missing fails its setup
+rather than running as another identity.
+
 ## Migration History
 
 This project migrated from Protractor to Playwright in 2024 during the Angular 20 upgrade. Legacy Protractor artifacts may still exist in `src/test-e2e/` but are no longer active.
