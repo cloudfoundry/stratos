@@ -1,9 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
+import { EndpointsDataService } from '@stratosui/store';
 
 import { MAT_DIALOG_DATA, TailwindDialogRef, TailwindSnackBarService } from '@stratosui/core';
 
@@ -31,6 +32,8 @@ const TEST_HARNESS_CFG = {
 
 interface MakeOpts {
   idpsOrigins?: string[];
+  /** Whether the console user is a CF admin on the endpoint (default true). */
+  admin?: boolean;
 }
 
 function make(data: AddUserDialogData, opts: MakeOpts = {}): {
@@ -56,6 +59,7 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}): {
       { provide: TailwindSnackBarService, useValue: { open: vi.fn(), error: vi.fn() } },
       { provide: CfUsersPagedDataService, useValue: {} },
       { provide: CnsiUsersSnapshotService, useValue: {} },
+      { provide: EndpointsDataService, useValue: { endpointById: () => signal({ user: { admin: opts.admin ?? true } }) } },
       // Real RoleAssignmentComponent services (no stub, no overrideComponent).
       ...provideRoleAssignmentTestDeps(TEST_HARNESS_CFG),
     ],
@@ -93,6 +97,30 @@ describe('AddUserDialogComponent', () => {
   it('canSubmit is false when there are no valid identities', () => {
     const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false });
     expect(cmp.canSubmit()).toBe(false);
+  });
+
+  it('needs a role before a non-admin can submit', () => {
+    const { cmp } = make(
+      { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
+      { admin: false },
+    );
+    const c = cmp as any;
+    c.identities.set(['alice']);
+    c.identitiesValid.set(true);
+    expect(c.rolesRequired()).toBe(true);
+    expect(c.canSubmit()).toBe(false);
+
+    c.onRoleChangeSet([{ userGuid: '', orgGuid: 'org-1', orgName: 'Org One', add: true, role: OrgUserRoleNames.MANAGER }]);
+    expect(c.canSubmit()).toBe(true);
+  });
+
+  it('lets a CF admin submit without a role', () => {
+    const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false }, { admin: true });
+    const c = cmp as any;
+    c.identities.set(['alice']);
+    c.identitiesValid.set(true);
+    expect(c.rolesRequired()).toBe(false);
+    expect(c.canSubmit()).toBe(true);
   });
 
   it('locks org when opened with an orgGuid', () => {

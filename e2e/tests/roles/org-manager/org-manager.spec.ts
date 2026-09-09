@@ -80,6 +80,23 @@ test.describe('org manager', () => {
     await expect(page.getByText(name, { exact: true })).toHaveCount(0);
   });
 
+  test('must grant a role to add a user', async ({ roleContext }) => {
+    const { page, cfGuid } = roleContext;
+    const orgPage = CfOrgLevelPage.forEndpoint(page, cfGuid, orgGuid);
+    await orgPage.navigateTo();
+    await orgPage.goToUsersTab();
+    await page.locator('[data-test="cf-users-add"]').click();
+
+    // Cloud Foundry lets only an admin add a user without a role, so the
+    // dialog says so and refuses to submit until one is ticked.
+    const dialog = page.locator('[role="dialog"]');
+    await dialog.locator('[data-test="stacked-input"]').first().fill(TARGET_USER);
+    await expect(dialog.locator('[data-test="add-user-roles-required"]')).toBeVisible();
+    await expect(dialog.locator('[data-test="add-user-submit"]')).toBeDisabled();
+    await dialog.locator('[data-test="add-user-cancel"]').click();
+    await expect(dialog).toHaveCount(0);
+  });
+
   test('adds a user to the org by username and sees the row at once', async ({ roleContext }) => {
     const { page, cfGuid } = roleContext;
     const orgPage = CfOrgLevelPage.forEndpoint(page, cfGuid, orgGuid);
