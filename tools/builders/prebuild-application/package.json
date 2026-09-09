@@ -14,7 +14,7 @@
     "@angular-devkit/core": ">=22.0.0 <23.0.0",
     "@angular-devkit/build-angular": ">=22.0.0 <23.0.0",
     "rxjs": "^7.8.2",
-    "glob": "^11.0.0"
+    "glob": "^13.0.6"
   },
   "devDependencies": {
     "@types/node": "^24.2.1"
