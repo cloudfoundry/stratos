@@ -24,9 +24,9 @@
     </div>
   }
   <div class="confirm-dialog__actions flex gap-2 justify-end mt-6">
-    <button class="btn btn-secondary" (click)="onNoClick()" cdkFocusInitial>Cancel</button>
+    <button class="btn btn-secondary" (click)="onNoClick()" cdkFocusInitial data-test="confirm-dialog-cancel">Cancel</button>
     @if (data.confirm) {
-      <button class="confirm-dialog__confirm"
+      <button class="confirm-dialog__confirm" data-test="confirm-dialog-confirm"
         [class]="data.critical || textToMatch ? 'btn btn-danger' : 'btn btn-primary'"
         (click)="onConfirmClick()"
         [disabled]="textToMatch && textToMatch !== matchValue">{{
