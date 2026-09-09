@@ -17,7 +17,7 @@
     "glob": "^13.0.6"
   },
   "devDependencies": {
-    "@types/node": "^24.2.1"
+    "@types/node": "^26.4.1"
   },
   "scripts": {
     "prepare": "tsc",

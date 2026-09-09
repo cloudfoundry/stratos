@@ -188,7 +188,7 @@
     "@types/hammerjs": "^2.0.46",
     "@types/intersect": "^1.0.3",
     "@types/js-yaml": "4.0.9",
-    "@types/node": "24.2.1",
+    "@types/node": "26.4.1",
     "@types/pngjs": "^6.0.5",
     "@types/webpack": "^5.28.5",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
