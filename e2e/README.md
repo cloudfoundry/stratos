@@ -106,6 +106,11 @@ Each CF endpoint entry in the profile needs a `creds.roles` block (see
 `secrets.yaml.template`); a role whose entry is missing fails its setup
 rather than running as another identity.
 
+The suite reads `secrets.yaml` from the repo root (git-ignored), not a copy
+under `e2e/`. After a `@playwright/test` bump, run `bunx playwright install
+chromium` once: each Playwright version wants its own browser build, and a
+missing one fails every project at the admin setup.
+
 ## Migration History
 
 This project migrated from Protractor to Playwright in 2024 during the Angular 20 upgrade. Legacy Protractor artifacts may still exist in `src/test-e2e/` but are no longer active.

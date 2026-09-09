@@ -35,6 +35,10 @@ const ROLE_TESTS = /tests\/roles\//;
 const roleProjects = () => CF_ROLES.map(role => ({
   name: roleProjectName(role),
   dependencies: ['setup-roles'],
+  // A role file seeds shared state (an app, a target user's roles) in
+  // beforeAll, so its tests run in order on one worker; the four role
+  // projects still run alongside each other.
+  fullyParallel: false,
   testMatch: [new RegExp(`tests/roles/${roleSpecDir(role)}/`), /tests\/roles\/every-role\.spec\.ts/],
   use: {
     ...devices['Desktop Chrome'],

@@ -55,7 +55,9 @@ test.describe('space auditor', () => {
     await spacePage.goToUsersTab();
     await expect(page.locator('[data-test="list-sub-nav"]')).toBeVisible();
     await expectAbsent(page, 'cf-users-add');
-    await expectAbsent(page, 'cf-space-users-bulk-manage-roles');
+    // Bulk Manage Roles stays in the toolbar for every role and is disabled
+    // until the role may change roles; here it may not, so it never enables.
+    await expect(page.locator('[data-test="cf-space-users-bulk-manage-roles"]')).toBeDisabled();
   });
 
   test('cannot edit or delete the space', async ({ roleContext }) => {
@@ -84,6 +86,10 @@ test.describe('space auditor', () => {
     test.fail(true, 'env vars are the space developer\'s; passing here means the tab leaked');
     const { page, cfGuid } = roleContext;
     await page.goto(`/applications/${cfGuid}/${appGuid}/summary`);
-    await expect(page.locator('[data-test="page-tab-Variables"]')).toBeVisible();
+    // The tab list renders before the permission check answers, so settle
+    // first: the leak this guards against is the tab staying once it has.
+    await expect(page.locator('[data-test="page-tab-Summary"]')).toBeVisible();
+    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await expect(page.locator('[data-test="page-tab-Variables"]')).toBeVisible({ timeout: 2000 });
   });
 });
