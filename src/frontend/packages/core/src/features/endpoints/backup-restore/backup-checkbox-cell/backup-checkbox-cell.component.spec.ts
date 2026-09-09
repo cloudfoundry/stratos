@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { EndpointModel } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -24,6 +25,7 @@ describe('BackupCheckboxCellComponent', () => {
         BackupEndpointsService,
         provideZonelessChangeDetection(),
         provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     });
     TestBed.compileComponents();

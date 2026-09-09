@@ -8,6 +8,8 @@ console.log('[WORKSPACE SETUP] Vitest imports loaded');
 import '@angular/compiler';
 console.log('[WORKSPACE SETUP] Angular compiler loaded');
 import { provideZonelessChangeDetection, NgModule } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 console.log('[WORKSPACE SETUP] Angular core loaded');
 import {
   BrowserTestingModule,
@@ -154,7 +156,16 @@ if (typeof window !== 'undefined' && typeof WebSocket !== 'undefined') {
 }
 
 @NgModule({
-  providers: [provideZonelessChangeDetection()],
+  providers: [
+    provideZonelessChangeDetection(),
+    // Angular hands every injector a root HttpClient on the fetch backend even
+    // when nothing provides one, so a spec that never mentions HttpClient still
+    // sends real requests (the branding service's company-config.json, for
+    // one) that happy-dom aborts at teardown with an AbortError trace. Put the
+    // testing backend on the platform so requests are held, never sent.
+    provideHttpClient(),
+    provideHttpClientTesting(),
+  ],
 })
 export class ZonelessTestModule {}
 

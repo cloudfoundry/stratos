@@ -3,6 +3,7 @@ import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/co
 import { describe, it, expect, beforeEach } from 'vitest';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 import { TabNavService } from '@stratosui/core';
@@ -25,6 +26,7 @@ describe('CliInfoApplicationComponent', () => {
         importProvidersFrom(generateCfStoreModules()),
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         generateTestApplicationServiceProvider(cfId, appId),
         ApplicationStateService,
         ApplicationEnvVarsHelper,

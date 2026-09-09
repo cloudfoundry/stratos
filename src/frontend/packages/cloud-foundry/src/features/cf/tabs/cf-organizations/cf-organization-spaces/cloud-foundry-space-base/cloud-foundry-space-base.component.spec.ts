@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { of } from 'rxjs';
@@ -120,6 +121,7 @@ describe('CloudFoundrySpaceBaseComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
         { provide: CloudFoundrySpaceService, useValue: mockSpaceService },
         { provide: CloudFoundryOrganizationService, useValue: mockOrgService },

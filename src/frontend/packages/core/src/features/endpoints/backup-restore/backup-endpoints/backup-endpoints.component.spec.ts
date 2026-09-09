@@ -1,4 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
@@ -48,6 +49,7 @@ describe('BackupEndpointsComponent', () => {
         ...STORE_TEST_PROVIDERS,
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection(),
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA]

@@ -1,6 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { provideRouter, ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -95,6 +96,7 @@ describe('RemoveUserComponent', () => {
         provideZonelessChangeDetection(),
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         ...STORE_TEST_PROVIDERS,
         { provide: ActiveRouteCfOrgSpace, useValue: mockActiveRoute },
         { provide: ActivatedRoute, useValue: mockActivatedRoute },

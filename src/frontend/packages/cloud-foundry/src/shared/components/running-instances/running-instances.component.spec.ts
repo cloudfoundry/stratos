@@ -1,5 +1,5 @@
 import { provideHttpClient } from '@angular/common/http';
-import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -20,13 +20,13 @@ describe('RunningInstancesComponent', () => {
       imports: [
         RunningInstancesComponent,
         NoopAnimationsModule,
-        HttpClientTestingModule,
         EntityCatalogModule.forFeature(() => generateCFEntities()),
       ],
       providers: [
         ...STORE_TEST_PROVIDERS,
         provideRouter([]),
         provideHttpClient(),
+        provideHttpClientTesting(),
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();

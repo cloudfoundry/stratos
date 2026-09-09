@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
@@ -23,6 +24,7 @@ describe('CloudFoundryTabsBaseComponent', () => {
           provideZonelessChangeDetection(),
           provideRouter([]),
           provideHttpClient(),
+          provideHttpClientTesting(),
           provideNoopAnimations(),
           ...STORE_TEST_PROVIDERS,
           importProvidersFrom(
