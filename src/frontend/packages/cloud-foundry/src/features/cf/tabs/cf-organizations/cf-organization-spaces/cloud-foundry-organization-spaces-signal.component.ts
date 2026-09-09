@@ -19,7 +19,9 @@ import {
   UserFavoriteManager,
 } from '@stratosui/store';
 
+import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { CfSpacesSignalConfigService } from '../../../../../shared/signal-list-configs/space/cf-spaces-signal-config.service';
+import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import type { StSpace } from '../../../../../services/endpoint-data/stratos-types';
@@ -91,9 +93,16 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
     this.spacesConfig.initialize(cfGuid, orgGuid);
     (this as { totalSpaces: Signal<number> }).totalSpaces =
       this.spacesConfig.view.totalItems;
+    // Creating a space is the org manager's; every other role sees the list
+    // without the action, as the sibling create actions already do.
+    const canCreateSpace = toSignal(
+      inject(CurrentUserPermissionsService).can(CfCurrentUserPermissions.SPACE_CREATE, cfGuid, orgGuid),
+      { initialValue: false },
+    );
     this.createSpaceAction = {
       label: 'Create Space',
       icon: 'add',
+      visible: canCreateSpace,
       invoke: () => router.navigate([
         '/cloud-foundry', cfGuid, 'organizations', orgGuid, 'add-space',
       ]),
