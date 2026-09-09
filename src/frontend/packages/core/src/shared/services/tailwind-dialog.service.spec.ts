@@ -558,6 +558,41 @@ describe('TailwindDialogService', () => {
       vi.useRealTimers();
     });
 
+    it('should cap a pinned panel at the viewport bottom even when not resizable', async () => {
+      // A drag handle pins the panel where it was centred at open; content that
+      // arrives later grows it from there, so the cap must follow the position.
+      const rect = { top: 490, left: 380, width: 640, height: 600, right: 1020, bottom: 1090, x: 380, y: 490, toJSON: () => ({}) } as DOMRect;
+      const spy = vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(rect);
+      vi.useFakeTimers();
+      try {
+        const dialogRef = service.open(TestDraggableDialogComponent);
+        await vi.advanceTimersByTimeAsync(0);
+
+        const panel = document.querySelector('.rounded-lg') as HTMLElement;
+        expect(panel.style.resize).toBe('');
+        expect(panel.style.maxHeight).toBe(`${window.innerHeight - 490}px`);
+
+        dialogRef.close();
+        await vi.advanceTimersByTimeAsync(300);
+      } finally {
+        vi.useRealTimers();
+        spy.mockRestore();
+      }
+    });
+
+    it('should keep a configured pixel maxHeight that is smaller than the viewport cap', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDraggableDialogComponent, { maxHeight: '300px' });
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      expect(panel.style.maxHeight).toBe('300px');
+
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+
     it('should be draggable by default (no config)', async () => {
       vi.useFakeTimers();
       const dialogRef = service.open(TestDraggableDialogComponent);
