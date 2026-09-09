@@ -1,10 +1,10 @@
 <app-page-sub-nav>
-  <button class="btn btn-icon" name="edit-org" *appCfUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid"
+  <button class="btn btn-icon" name="edit-org" data-test="org-edit" *appCfUserPermission="permsOrgEdit;endpointGuid:cfEndpointService.cfGuid"
     routerLink="/cloud-foundry/{{cfEndpointService.cfGuid}}/organizations/{{cfOrgService.orgGuid}}/edit-org"
     matTooltip="Edit Organization">
     <span class="material-icons">mode_edit</span>
   </button>
-  <button class="btn btn-icon" name="delete"
+  <button class="btn btn-icon" name="delete" data-test="org-delete"
     *appCfUserPermission="permsOrgDelete;endpointGuid:cfOrgService.cfGuid;organizationGuid:cfOrgService.orgGuid;"
     (click)="deleteOrgWarn()" matTooltip="Delete Organization">
     <span class="material-icons">delete</span>

@@ -2,7 +2,7 @@
   <form class="input-action__form stepper-form">
     <app-form-field>
       <input appInput class="w-full placeholder:!text-transparent focus:outline-none" [placeholder]="config.text.placeholder"
-        [formControl]="textFormControl" #inputElement [name]="position">
+        [formControl]="textFormControl" #inputElement [name]="position" data-test="stacked-input">
       @if (textFormControl.hasError('email') && !textFormControl.hasError('required')) {
         <app-error>
           Please enter a valid email address
