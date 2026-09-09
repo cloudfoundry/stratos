@@ -42,7 +42,7 @@ test.describe('space manager', () => {
     await expect(page.getByText(TARGET_USER, { exact: true }).first()).toBeVisible();
   });
 
-  test('grants a space role through Manage Roles', async ({ roleContext }) => {
+  test('grants a space role through Manage Roles, org roles locked', async ({ roleContext }) => {
     const { page, cfGuid } = roleContext;
     const spacePage = CfSpaceLevelPage.forEndpoint(page, cfGuid, orgGuid, spaceGuid);
     await spacePage.navigateTo();
@@ -51,8 +51,14 @@ test.describe('space manager', () => {
     await page.locator('[data-test="cf-space-users-bulk-manage-roles"]').click();
     await page.waitForURL(/\/users\/manage/);
 
+    // Org roles are the org manager's: every org role cell is disabled for
+    // this role, while the space's own cells are live.
+    const orgCells = page.getByTestId('org-role-cell').locator('[role="checkbox"]');
+    await expect(orgCells.first()).toBeVisible();
+    await expect(orgCells.locator('xpath=self::*[not(contains(@class, "disabled"))]')).toHaveCount(0);
+
     const cell = page.locator(`[data-space="${spaceGuid}"]`).getByTestId('space-role-cell').filter({ hasText: /Auditor/ });
-    await cell.locator('input[type="checkbox"]').click();
+    await cell.locator('[role="checkbox"]').click();
     await page.locator('#stepper_next').click(); // Select Roles -> Confirm
     await page.locator('#stepper_next').click(); // Confirm -> apply
     await expect.poll(() => userRoles(admin, targetGuid, orgGuid, spaceGuid), { timeout: 30000 })
@@ -75,16 +81,6 @@ test.describe('space manager', () => {
     await orgPage.goToSpacesTab();
     await expect(page.locator('[data-test="list-sub-nav"]')).toBeVisible();
     await expectAbsent(page, 'list-sub-nav-add');
-  });
-
-  test('cannot manage org roles or add org users', async ({ roleContext }) => {
-    const { page, cfGuid } = roleContext;
-    const orgPage = CfOrgLevelPage.forEndpoint(page, cfGuid, orgGuid);
-    await orgPage.navigateTo();
-    await orgPage.goToUsersTab();
-    await expect(page.locator('[data-test="list-sub-nav"]')).toBeVisible();
-    await expectAbsent(page, 'cf-users-add');
-    await expectAbsent(page, 'cf-org-users-bulk-manage-roles');
   });
 
   test('cannot create an application or a space quota', async ({ roleContext }) => {

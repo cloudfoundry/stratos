@@ -1,5 +1,5 @@
 import { CfTopLevelPage } from '../../pages/cloud-foundry/cf-level/cf-top-level.page';
-import { expect, expectAbsent, proxied, test } from './roles.fixture';
+import { connectedUser, expect, expectAbsent, proxied, test } from './roles.fixture';
 
 /**
  * Checks every role project runs, each as its own session. The canary is
@@ -30,8 +30,7 @@ test.describe('every role', () => {
 
   test('canary: the session is the admin user', async ({ roleContext, secrets }) => {
     test.fail(true, 'a role project must never run on the admin identity');
-    const endpoints: any[] = await (await roleContext.page.request.get('/api/v1/endpoints')).json();
-    const cf = endpoints.find(ep => ep.guid === roleContext.cfGuid);
-    expect(cf.user?.name).toBe(secrets.console.admin.username);
+    const tokenUser = await connectedUser(roleContext.page, { guid: roleContext.cfGuid, cnsi_type: 'cf' });
+    expect(tokenUser).toBe(secrets.console.admin.username);
   });
 });

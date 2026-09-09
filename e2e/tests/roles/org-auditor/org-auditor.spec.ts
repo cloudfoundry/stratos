@@ -52,7 +52,9 @@ test.describe('org auditor', () => {
     await orgPage.goToUsersTab();
     await expect(page.locator('[data-test="list-sub-nav"]')).toBeVisible();
     await expectAbsent(page, 'cf-users-add');
-    await expectAbsent(page, 'cf-org-users-bulk-manage-roles');
+    // Bulk Manage Roles stays in the toolbar for every role and is disabled
+    // until the role may change roles; here it may not, so it never enables.
+    await expect(page.locator('[data-test="cf-org-users-bulk-manage-roles"]')).toBeDisabled();
   });
 
   test('cannot create a space', async ({ roleContext }) => {
@@ -85,12 +87,13 @@ test.describe('org auditor', () => {
     expect(response.status()).toBe(403);
   });
 
-  test('canary: sees Manage Roles', async ({ roleContext }) => {
+  test('canary: sees Add User', async ({ roleContext }) => {
     test.fail(true, 'an auditor changes nothing; passing here means the control leaked');
     const { page, cfGuid } = roleContext;
     const orgPage = CfOrgLevelPage.forEndpoint(page, cfGuid, orgGuid);
     await orgPage.navigateTo();
     await orgPage.goToUsersTab();
-    await expect(page.locator('[data-test="cf-org-users-bulk-manage-roles"]')).toBeVisible();
+    await expect(page.locator('[data-test="list-sub-nav"]')).toBeVisible();
+    await expect(page.locator('[data-test="cf-users-add"]')).toBeVisible();
   });
 });

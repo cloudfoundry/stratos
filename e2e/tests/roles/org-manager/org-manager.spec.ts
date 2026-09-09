@@ -1,4 +1,3 @@
-import { StepperBase } from '../../../helpers/stepper-base';
 import { SecretsHelper } from '../../../helpers/secrets-helpers';
 import { CfOrgLevelPage } from '../../../pages/cloud-foundry/org-level/cf-org-level.page';
 import { CfSpaceLevelPage } from '../../../pages/cloud-foundry/space-level/cf-space-level.page';
@@ -64,7 +63,7 @@ test.describe('org manager', () => {
     await orgPage.goToSpacesTab();
     await page.locator('[data-test="list-sub-nav-add"]').click();
     await page.waitForURL(/\/add-space/);
-    await new StepperBase(page).fillStepperField('spaceName', name);
+    await page.locator('[formcontrolname="spaceName"]').fill(name);
     await page.locator('#stepper_next').click();
     await page.waitForURL(/\/spaces$/);
     const spaceLink = page.getByText(name, { exact: true }).first();
@@ -74,6 +73,8 @@ test.describe('org manager', () => {
     await spaceLink.click();
     await page.waitForURL(/\/spaces\/[^/]+/);
     await page.locator('[data-test="space-delete"]').click();
+    // Deleting a space is type-to-confirm.
+    await page.locator('#typeToConfirm').fill(name);
     await page.locator('[data-test="confirm-dialog-confirm"]').click();
     await page.waitForURL(/\/spaces$/);
     await expect(page.getByText(name, { exact: true })).toHaveCount(0);
@@ -86,9 +87,13 @@ test.describe('org manager', () => {
     await orgPage.goToUsersTab();
     await page.locator('[data-test="cf-users-add"]').click();
 
+    // Tick the org User role so the add goes through the by-username roles
+    // path (the dialog's no-role path calls a separate associate route).
     const dialog = page.locator('[role="dialog"]');
     await dialog.locator('[data-test="stacked-input"]').first().fill(TARGET_USER);
-    await dialog.getByTestId('org-role-cell').filter({ hasText: /^\s*User\s*$/ }).locator('input[type="checkbox"]').click();
+    const userCell = dialog.getByTestId('org-role-cell').filter({ hasText: /^\s*User\s*$/ });
+    await userCell.locator('[role="checkbox"]').click();
+    await expect(userCell.locator('[role="checkbox"]')).toHaveAttribute('aria-checked', 'true');
     await dialog.locator('[data-test="add-user-submit"]').click();
     await expect(dialog).toHaveCount(0);
 
