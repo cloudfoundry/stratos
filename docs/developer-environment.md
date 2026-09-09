@@ -265,7 +265,7 @@ GitHub Actions workflows:
 |----------|------|---------|
 | Frontend tests | `.github/workflows/frontend_tests.yml` | Push/PR to develop/main |
 | Backend tests | `.github/workflows/backend_tests.yml` | Push/PR to develop/main |
-| Docker builds | `.github/workflows/docker.yml` | Release + manual dispatch |
+| Release + all-in-one image | `.github/workflows/release.yml` | Version tag |
 
 ### Known CI Drift
 

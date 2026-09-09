@@ -13,23 +13,15 @@ Stratos can be installed to a Kubernetes cluster using Helm. Either Helm 2 or He
 Ensure the [Helm](https://github.com/helm/helm) client and [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) CLIs are installed. If you are using Helm 2, ensure you've initialized Tiller into your cluster with the appropriate
 Service Account.
 
-The Helm chart is published to the Stratos Helm repository.
-
-You will need to have the Stratos Helm repository added to your Helm setup, if you do not, run:
-
-```
-helm repo add stratos https://cloudfoundry.github.io/stratos
-```
-
-Check the repository was successfully added by searching for the `console`, for example:
-
-```
-helm search repo console
-NAME               	CHART VERSION   APP VERSION	DESCRIPTION                                  
-stratos/console    	3.2.0           3.2.0      	A Helm chart for deploying Stratos UI Console
-```
-
-> Note: Version numbers will depend on the version of Stratos available from the Helm repository
+> [!WARNING]
+> The Kubernetes deployment path does not currently work. The chart in this
+> repository (`deploy/kubernetes/console`) references container images that have
+> not been built since 2020 and cannot be rebuilt from the current source tree,
+> and there is no published Stratos Helm chart repository. The `stratos/console`
+> chart named throughout this document is not available anywhere. See
+> [#5907](https://github.com/cloudfoundry/stratos/issues/5907) for the status of
+> this path. Use the [Cloud Foundry](../cloud-foundry/cloud-foundry.md) or
+> [all-in-one Docker](../all-in-one.md) deployment instead.
 
 > Note: Commands shown in this document are for Helm version 3. For Helm version 2, when installing, instead of supplying the name via the `--name` flag, it is supplied as the first argument, before the chart name.
 

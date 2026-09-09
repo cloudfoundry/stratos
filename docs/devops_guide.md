@@ -37,6 +37,14 @@ docker run -d \
 
 ### Production Setup (Separate Containers)
 
+> [!WARNING]
+> The separate `stratos-ui` and `stratos-backend` component images are **not
+> published**. They have not been built since 2020 and cannot be rebuilt from the
+> current source tree, so every command in this section and in the Docker Compose
+> and Kubernetes sections below refers to images that do not exist. See
+> [#5907](https://github.com/cloudfoundry/stratos/issues/5907). The published
+> image is the all-in-one `ghcr.io/cloudfoundry/stratos` shown above.
+
 **UI Container:**
 ```bash
 docker run -d \
@@ -175,15 +183,14 @@ docker-compose ps
 
 ### Helm Installation
 
-**Add Helm Repository:**
-```bash
-# Add Stratos Helm repo
-helm repo add stratos https://cloudfoundry.github.io/stratos
-helm repo update
-
-# Search for chart
-helm search repo stratos
-```
+> [!WARNING]
+> The Kubernetes deployment path does not currently work. The chart in this
+> repository (`deploy/kubernetes/console`) references container images that have
+> not been built since 2020 and cannot be rebuilt from the current source tree,
+> and there is no published Stratos Helm chart repository. The `stratos/console`
+> chart named in the commands below is not available anywhere. See
+> [#5907](https://github.com/cloudfoundry/stratos/issues/5907) for the status of
+> this path. Use the Cloud Foundry or all-in-one Docker deployment instead.
 
 **Install Stratos:**
 ```bash

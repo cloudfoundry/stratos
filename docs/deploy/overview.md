@@ -12,8 +12,15 @@ Stratos can be deployed in the following environments:
 2. Kubernetes, using a Helm chart. See [guide](kubernetes.md)
 3. Docker, single container deploying all components. See [guide](all-in-one.md)
 
+> [!WARNING]
+> The Kubernetes deployment does not currently work — no chart or component
+> images are published, and the images the chart expects cannot be rebuilt from
+> the current source tree. See
+> [#5907](https://github.com/cloudfoundry/stratos/issues/5907). Cloud Foundry and
+> Docker are the working deployment options.
+
 > [!NOTE]
-> Not all features are enabled in every environment - the Kubernetes deployment supports all features, but Cloud Foundry and Docker deployments do not support some features.
+> Not all features are enabled in every environment - the Kubernetes deployment is designed to support all features, but Cloud Foundry and Docker deployments do not support some features.
 
 ### Deployed in Cloud Foundry as an application
 
