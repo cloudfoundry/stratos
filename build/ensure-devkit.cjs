@@ -23,7 +23,7 @@ function buildDevkit() {
   try {
     // Install devkit dependencies with npm (isolated from workspace)
     log('Installing devkit dependencies...');
-    execSync('npm install --legacy-peer-deps', {
+    execSync('npm ci', {
       cwd: DEVKIT_PKG,
       stdio: 'inherit',
       env: {...process.env, npm_config_workspace: ''}
