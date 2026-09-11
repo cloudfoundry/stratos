@@ -196,7 +196,7 @@
     "@vitest/coverage-v8": "^4.1.11",
     "@vitest/ui": "4.1.10",
     "acorn": "8.18.0",
-    "adm-zip": "0.6.0",
+    "adm-zip": "0.6.1",
     "angular-eslint": "22.5.0",
     "autoprefixer": "^10.5.5",
     "baseline-browser-mapping": "^2.11.21",
