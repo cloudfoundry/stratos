@@ -335,7 +335,7 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord api.CNSIRecord, c *echo.Contex
 
 	tokenEndpoint := fmt.Sprintf("%s/oauth/token", endpoint)
 
-	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.ClientId, cnsiRecord.ClientSecret, tokenEndpoint)
+	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.CACert, cnsiRecord.ClientId, cnsiRecord.ClientSecret, tokenEndpoint)
 
 	if err != nil {
 		if httpError, ok := err.(api.ErrHTTPRequest); ok {

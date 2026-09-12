@@ -88,7 +88,7 @@ func (p *portalProxy) setupGetAvailableScopes(c *echo.Context) error {
 
 	// Authenticate with UAA
 	authEndpoint := fmt.Sprintf("%s/oauth/token", consoleConfig.UAAEndpoint)
-	uaaRes, err := p.getUAATokenWithCreds(consoleConfig.SkipSSLValidation, username, password, consoleConfig.ConsoleClient, consoleConfig.ConsoleClientSecret, authEndpoint)
+	uaaRes, err := p.getUAATokenWithCreds(consoleConfig.SkipSSLValidation, "", username, password, consoleConfig.ConsoleClient, consoleConfig.ConsoleClientSecret, authEndpoint)
 	if err != nil {
 		errInfo, ok := err.(api.ErrHTTPRequest)
 		if ok {

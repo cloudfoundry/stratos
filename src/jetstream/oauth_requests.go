@@ -161,7 +161,15 @@ func (p *portalProxy) RefreshOAuthToken(skipSSLValidation bool, cnsiGUID, userGU
 
 	tokenEndpointWithPath := fmt.Sprintf("%s/oauth/token", tokenEndpoint)
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, "")
+	// A refresh talks to the endpoint's own token server, so it needs the same
+	// CA the endpoint was registered with. Looked up here rather than added to
+	// the signature: RefreshOAuthToken is part of the plugin-facing interface.
+	caCert := ""
+	if rec, recErr := p.GetCNSIRecord(cnsiGUID); recErr == nil {
+		caCert = rec.CACert
+	}
+
+	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, caCert, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, "")
 	if err != nil {
 		slog.Warn("[diag refresh] UAA call FAILED", "endpoint", cnsiGUID, "user", userGUID, "error", err)
 		// OAUTH TOKENS ONLY: this function is the OAuth refresh path, but it

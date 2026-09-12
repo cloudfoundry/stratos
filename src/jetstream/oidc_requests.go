@@ -52,7 +52,14 @@ func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUI
 		}
 	}
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, scopes)
+	// As in the OAuth refresh path: the endpoint's CA has to reach its token
+	// server, or a foundation with a private CA cannot refresh.
+	caCert := ""
+	if rec, recErr := p.GetCNSIRecord(cnsiGUID); recErr == nil {
+		caCert = rec.CACert
+	}
+
+	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, caCert, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, scopes)
 	if err != nil {
 		return t, fmt.Errorf("token refresh request failed: %v", err)
 	}
