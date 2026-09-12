@@ -11,6 +11,10 @@
 #   ./deploy/all-in-one/stage-aio.sh
 #   docker build -f deploy/all-in-one/Dockerfile -t stratos-aio dist/aio-package
 #
+# The payload carries one Linux binary per architecture; TARGETARCH selects
+# which becomes ./jetstream, so the same context builds linux/amd64 and
+# linux/arm64. A plain `docker build` sets TARGETARCH to the host arch.
+#
 # One image serves both `docker run` (no VCAP -> HTTPS :5443 with dev-certs)
 # and `cf push -o <image>` (the cloudfoundryhosting plugin detects
 # VCAP_APPLICATION -> HTTP on $PORT). Same binary; runtime decides.
@@ -25,7 +29,8 @@ RUN apt-get update \
 
 WORKDIR /srv
 
-COPY --chown=jetstream:jetstream jetstream ./jetstream
+ARG TARGETARCH
+COPY --chown=jetstream:jetstream jetstream-linux-${TARGETARCH} ./jetstream
 COPY --chown=jetstream:jetstream ui ./ui
 COPY --chown=jetstream:jetstream templates ./templates
 COPY --chown=jetstream:jetstream plugins.yaml ./plugins.yaml

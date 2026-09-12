@@ -9,12 +9,14 @@
 # frontend') first. Produces dist/aio-package/, which is the Docker build
 # context for deploy/all-in-one/Dockerfile.
 #
-# The all-in-one image is linux/amd64 only for now (the cf zip is too).
+# The image is multi-arch (linux/amd64 and linux/arm64); the cf zip is not.
 
 set -euo pipefail
 
 VERSION="${1:-$(node -p "require('./package.json').version" 2>/dev/null || echo "dev")}"
 AIO_ARCH="${AIO_ARCH:-amd64}"
+# Architectures to stage when their binaries are present.
+AIO_ARCHES="${AIO_ARCHES:-amd64 arm64}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
@@ -40,21 +42,30 @@ else
   fail=1
 fi
 
-# Backend binary — the AIO image is Linux; prefer an explicit dist/bin/jetstream
-# (from make build PLATFORM=linux/amd64), fall back to the cross-compiled one.
-jetstream_bin="${BIN_DIR}/jetstream"
-if [[ ! -f "${jetstream_bin}" ]] && [[ -f "${BIN_DIR}/jetstream-linux-${AIO_ARCH}" ]]; then
-  jetstream_bin="${BIN_DIR}/jetstream-linux-${AIO_ARCH}"
-fi
+# Backend binaries — the image is multi-arch, so stage one Linux ELF per
+# architecture as jetstream-linux-<arch>; the Dockerfile picks by TARGETARCH.
+# `make build` cross-compiles all of them; `make build backend
+# PLATFORM=linux/<arch>` produces only dist/bin/jetstream, which is used for
+# AIO_ARCH when no per-arch binary is present.
+staged_arches=()
+for arch in ${AIO_ARCHES}; do
+  candidate="${BIN_DIR}/jetstream-linux-${arch}"
+  if [[ ! -f "${candidate}" ]] && [[ "${arch}" == "${AIO_ARCH}" ]]; then
+    # Single-platform local build: dist/bin/jetstream, but only if it is
+    # actually a Linux ELF (a plain `make build backend` leaves a host binary).
+    if [[ -f "${BIN_DIR}/jetstream" ]] && file "${BIN_DIR}/jetstream" | grep -q "ELF"; then
+      candidate="${BIN_DIR}/jetstream"
+    fi
+  fi
+  if [[ -f "${candidate}" ]] && file "${candidate}" | grep -q "ELF"; then
+    staged_arches+=("${arch}:${candidate}")
+  fi
+done
 
-if [[ ! -f "${jetstream_bin}" ]]; then
-  error "Backend binary not found at dist/bin/jetstream"
-  error "  Run: make build backend PLATFORM=linux/${AIO_ARCH}"
-  fail=1
-elif ! file "${jetstream_bin}" | grep -q "ELF"; then
-  error "Backend binary is not a Linux binary — the AIO image needs a Linux ELF"
-  error "  Current binary: $(file "${jetstream_bin}")"
-  error "  Run: make build backend PLATFORM=linux/${AIO_ARCH}"
+if [[ ${#staged_arches[@]} -eq 0 ]]; then
+  error "No Linux backend binary found for any of: ${AIO_ARCHES}"
+  error "  Run: make build            (cross-compiles every platform)"
+  error "  or:  make build backend PLATFORM=linux/${AIO_ARCH}"
   fail=1
 fi
 
@@ -71,9 +82,12 @@ log "Staging all-in-one package (${VERSION})..."
 rm -rf "${PKG_DIR}"
 mkdir -p "${PKG_DIR}"
 
-# Backend binary (ENTRYPOINT runs ./jetstream from /srv)
-cp "${jetstream_bin}" "${PKG_DIR}/jetstream"
-chmod +x "${PKG_DIR}/jetstream"
+# Backend binaries, one per architecture (the Dockerfile copies the one
+# matching TARGETARCH to ./jetstream, which the ENTRYPOINT runs from /srv)
+for entry in "${staged_arches[@]}"; do
+  cp "${entry#*:}" "${PKG_DIR}/jetstream-linux-${entry%%:*}"
+done
+chmod +x "${PKG_DIR}"/jetstream-linux-*
 
 # Frontend assets
 cp -r "${ui_src}" "${PKG_DIR}/ui"
