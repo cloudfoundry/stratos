@@ -129,8 +129,8 @@ To specify the Cloud Foundry API endpoint, add the `CF_API_URL` variable to the 
 ```
 applications:
 - name: console
-  memory: 256M
-  disk_quota: 256M
+  memory: 512M
+  disk_quota: 1024M
   host: console
   timeout: 180
   buildpack: binary_buildpack
@@ -147,8 +147,8 @@ To force the console to use secured communication with the Cloud Foundry API end
 ```
 applications:
 - name: console
-  memory: 256M
-  disk_quota: 256M
+  memory: 512M
+  disk_quota: 1024M
   host: console
   timeout: 180
   buildpack: binary_buildpack
