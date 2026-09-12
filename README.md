@@ -143,19 +143,20 @@ of this repository.
 To run those `.zip` packages inside Cloud Foundry, unzip it, write a manifest,
 and `cf push` it.
 
-You are not required to have
-[stratos-buildpack](https://github.com/SUSE/stratos-buildpack), you can use
-binary buildpack.
+The zip already contains the `jetstream` binary and the compiled UI, so the push
+uses `binary_buildpack` and builds nothing during staging. The old
+`stratos-buildpack` source-push path is no longer used.
 
-Here is an example app manifest that worked for us:
+Here is an example app manifest:
 ```yaml
 applications:
   - name: console
-    memory: 128M
-    disk_quota: 192M
+    memory: 256M
+    disk_quota: 1024M
     host: console
     timeout: 180
     buildpack: binary_buildpack
+    command: ./jetstream
     health-check-type: port
 ```
 
