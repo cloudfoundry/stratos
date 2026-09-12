@@ -54,14 +54,14 @@ func (p *portalProxy) GetStratosAuthService() api.StratosAuth {
 }
 
 // login is used for both endpoint and direct UAA login
-func (p *portalProxy) login(c *echo.Context, skipSSLValidation bool, client string, clientSecret string, endpoint string) (uaaRes *api.UAAResponse, u *api.JWTUserTokenInfo, err error) {
+func (p *portalProxy) login(c *echo.Context, skipSSLValidation bool, caCert string, client string, clientSecret string, endpoint string) (uaaRes *api.UAAResponse, u *api.JWTUserTokenInfo, err error) {
 	slog.Debug("login")
 	if c.Request().Method == http.MethodGet {
 		code := c.QueryParam("code")
 		state := c.QueryParam("state")
 		// If this is login for a CNSI, then the redirect URL is slightly different
 		cnsiGUID := c.QueryParam("guid")
-		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, code, client, clientSecret, endpoint, state, cnsiGUID)
+		uaaRes, err = p.getUAATokenWithAuthorizationCode(skipSSLValidation, caCert, code, client, clientSecret, endpoint, state, cnsiGUID)
 	} else {
 		params := new(api.LoginToCNSIParams)
 		bindErr := api.BindOnce(params, c)
@@ -72,7 +72,7 @@ func (p *portalProxy) login(c *echo.Context, skipSSLValidation bool, client stri
 		if len(params.Username) == 0 || len(params.Password) == 0 {
 			return uaaRes, u, errors.New("needs username and password")
 		}
-		uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, params.Username, params.Password, client, clientSecret, endpoint)
+		uaaRes, err = p.getUAATokenWithCreds(skipSSLValidation, caCert, params.Username, params.Password, client, clientSecret, endpoint)
 	}
 	if err != nil {
 		return uaaRes, u, err
