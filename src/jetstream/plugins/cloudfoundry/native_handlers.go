@@ -67,7 +67,7 @@ func (c *CloudFoundrySpecification) nativeProxy() nativeCFProxy {
 }
 
 // newCapiClient creates a capi client authenticated with Jetstream's stored token.
-// Uses cfclient.NewWithToken so no UAA discovery occurs — the token is passed directly.
+// Uses an explicit AccessToken so no UAA discovery occurs — the token is passed directly.
 //
 // Proactively refreshes the stored token if it has expired before handing it
 // to capi. Without this check, cfclient sends a dead token and CF returns
@@ -102,7 +102,23 @@ func newCapiClient(ctx context.Context, proxy nativeCFProxy, cnsiGUID, userGUID 
 		slog.Info("[diag refresh] OK", "cnsi", cnsiGUID, "user", userGUID, "new_expiry", refreshed.TokenExpiry)
 		tokenRecord = refreshed
 	}
-	client, err := cfclient.NewWithToken(ctx, cnsiRecord.APIEndpoint.String(), tokenRecord.AuthToken)
+	// The endpoint's CA has to travel with the client. Without it a
+	// foundation using a private CA — a lab, or CF on Kubernetes — fails
+	// every native read with "x509: certificate signed by unknown authority"
+	// while the endpoint still shows as connected, so the console reports it
+	// unreachable and points at the network rather than at trust.
+	//
+	// SkipSSLValidation is deliberately NOT forwarded. capi gates
+	// SkipTLSVerify behind CAPI_DEV_MODE and treats CACertPEM as the
+	// supported route for a real foundation, so registering the endpoint
+	// with its CA is what makes these reads work. Setting skip-ssl alone
+	// leaves this path failing on purpose rather than silently disabling
+	// verification for every native call.
+	client, err := cfclient.New(ctx, &capi.Config{
+		APIEndpoint: cnsiRecord.APIEndpoint.String(),
+		AccessToken: tokenRecord.AuthToken,
+		CACertPEM:   cnsiRecord.CACert,
+	})
 	if err != nil {
 		// Raw error so the middleware can classify (e.g. an unreachable API
 		// endpoint surfaces as a transport/net error → unreachable).
