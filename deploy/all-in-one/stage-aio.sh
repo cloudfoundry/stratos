@@ -49,15 +49,19 @@ fi
 # AIO_ARCH when no per-arch binary is present.
 staged_arches=()
 for arch in ${AIO_ARCHES}; do
-  candidate="${BIN_DIR}/jetstream-linux-${arch}"
-  if [[ ! -f "${candidate}" ]] && [[ "${arch}" == "${AIO_ARCH}" ]]; then
-    # Single-platform local build: dist/bin/jetstream, but only if it is
-    # actually a Linux ELF (a plain `make build backend` leaves a host binary).
-    if [[ -f "${BIN_DIR}/jetstream" ]] && file "${BIN_DIR}/jetstream" | grep -q "ELF"; then
-      candidate="${BIN_DIR}/jetstream"
-    fi
+  candidate=""
+  # An explicit dist/bin/jetstream wins for AIO_ARCH: it is what
+  # `make build backend PLATFORM=linux/<arch>` just produced, and it must not
+  # be shadowed by an older cross-compiled jetstream-linux-<arch> beside it.
+  # Only usable if it is a Linux ELF — a plain `make build backend` leaves a
+  # host binary there.
+  if [[ "${arch}" == "${AIO_ARCH}" ]] && [[ -f "${BIN_DIR}/jetstream" ]] \
+     && file "${BIN_DIR}/jetstream" | grep -q "ELF"; then
+    candidate="${BIN_DIR}/jetstream"
+  elif [[ -f "${BIN_DIR}/jetstream-linux-${arch}" ]]; then
+    candidate="${BIN_DIR}/jetstream-linux-${arch}"
   fi
-  if [[ -f "${candidate}" ]] && file "${candidate}" | grep -q "ELF"; then
+  if [[ -n "${candidate}" ]] && file "${candidate}" | grep -q "ELF"; then
     staged_arches+=("${arch}:${candidate}")
   fi
 done
