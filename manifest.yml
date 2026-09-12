@@ -6,7 +6,7 @@
 # Procfile) and writes its own manifest alongside; this file is the equivalent for
 # pushing that staged directory from the repo root. There is no build during
 # staging, which is why binary_buildpack is enough. 512M matches what
-# cloud.gov runs in production; the 1024M disk leaves room for log growth.
+# production deployments run; the 1024M disk leaves room for log growth.
 applications:
   - name: console
     memory: 512M
