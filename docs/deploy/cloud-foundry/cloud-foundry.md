@@ -126,7 +126,7 @@ Each Stratos [GitHub release](https://github.com/cloudfoundry/stratos/releases) 
     `cf push` with no arguments uses the bundled `manifest.yml` and the current folder as the application bits. As with the other methods, the console auto-detects the host Cloud Foundry API from `VCAP_APPLICATION`; if your platform does not provide `cf_api_url`, set it manually as described in the [troubleshooting note](cf-troubleshooting.md#console-fails-to-start).
 
 > [!NOTE]
-> The package is Linux/amd64. There is no build step in this path, so the historic source-push memory figures do not apply - the bundled manifest's `512M` is what cloud.gov runs in production.
+> The package is Linux/amd64. There is no build step in this path, so the historic source-push memory figures do not apply - the bundled manifest's `512M` is what production deployments run.
 
 ### Deploy Stratos from source
 
