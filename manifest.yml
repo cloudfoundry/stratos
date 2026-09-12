@@ -5,10 +5,11 @@
 # That stages dist/cf-package (jetstream binary, compiled ui/, config.properties,
 # Procfile) and writes its own manifest alongside; this file is the equivalent for
 # pushing that staged directory from the repo root. There is no build during
-# staging, which is why binary_buildpack and 256M are enough.
+# staging, which is why binary_buildpack is enough. 512M matches what
+# cloud.gov runs in production; the 1024M disk leaves room for log growth.
 applications:
   - name: console
-    memory: 256M
+    memory: 512M
     disk_quota: 1024M
     host: console
     timeout: 180

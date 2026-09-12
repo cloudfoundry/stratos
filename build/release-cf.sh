@@ -162,7 +162,7 @@ else
   cat > "${PKG_DIR}/manifest.yml" <<'MANIFEST'
 applications:
   - name: console
-    memory: 256M
+    memory: 512M
     disk_quota: 1024M
     timeout: 180
     buildpack: binary_buildpack

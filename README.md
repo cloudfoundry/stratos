@@ -151,7 +151,7 @@ Here is an example app manifest:
 ```yaml
 applications:
   - name: console
-    memory: 256M
+    memory: 512M
     disk_quota: 1024M
     host: console
     timeout: 180
