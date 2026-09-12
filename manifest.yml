@@ -1,10 +1,20 @@
+# Pushes the packaged console, not the source tree. Build it first:
+#
+#   make build release cf
+#
+# That stages dist/cf-package (jetstream binary, compiled ui/, config.properties,
+# Procfile) and writes its own manifest alongside; this file is the equivalent for
+# pushing that staged directory from the repo root. There is no build during
+# staging, which is why binary_buildpack and 256M are enough.
 applications:
   - name: console
-    memory: 1512M
+    memory: 256M
     disk_quota: 1024M
     host: console
     timeout: 180
-    buildpack: https://github.com/cloudfoundry/stratos-buildpack#v5
+    path: dist/cf-package
+    buildpack: binary_buildpack
+    command: ./jetstream
     health-check-type: port
     env:
       # FWT-934: enable admin-gated /pp/v1/admin/diagnostics endpoint so we can
@@ -18,8 +28,6 @@ applications:
 #       CF_API_FORCE_SECURE: true
 # Turn on backend debugging
 #       LOG_LEVEL: debug
-# Turn on staging debugging in stratos-buildpack
-# STRATOS_BP_DEBUG: true #Remove line to turn off debugging
 # Tune CAPI list-pagination (see build-and-packaging.md "Runtime tuning")
 #       STRATOS_CF_PER_PAGE: 1000
 #       STRATOS_CF_MAX_PARALLEL_PAGES: 8

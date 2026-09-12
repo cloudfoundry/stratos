@@ -133,7 +133,8 @@ applications:
   disk_quota: 256M
   host: console
   timeout: 180
-  buildpack: https://github.com/cloudfoundry/stratos-buildpack
+  buildpack: binary_buildpack
+  command: ./jetstream
   health-check-type: port
   env:
     CF_API_URL: https://<<CLOUD FOUNDRY API ENDPOINT>>>
@@ -150,7 +151,8 @@ applications:
   disk_quota: 256M
   host: console
   timeout: 180
-  buildpack: https://github.com/cloudfoundry/stratos-buildpack
+  buildpack: binary_buildpack
+  command: ./jetstream
   health-check-type: port
   env:
     CF_API_FORCE_SECURE: true
