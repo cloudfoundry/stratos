@@ -390,6 +390,7 @@ LOG_LEVEL=info|debug|warn|error
 
 # Features
 AUTO_REG_CF_URL=https://api.cf.example.com
+AUTO_REG_CF_CA_CERT_PATH=/srv/certs/ca.crt
 SSO_LOGIN=true|false
 SSO_OPTIONS=provider1,provider2
 ```

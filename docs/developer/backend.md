@@ -112,9 +112,29 @@ To automatically register a Cloud Foundry add the environment variable/config se
 
 ```
 AUTO_REG_CF_URL=<api url of cf>
+AUTO_REG_CF_NAME=<name shown in the console>
 ```
 
 Jetstream will then attempt to auto-connect to it with the credentials supplied when logging into Stratos.
+
+If the foundation uses a private certificate authority, give the endpoint its CA
+as well. Without one the endpoint registers, reports itself connected, and then
+fails every read with `x509: certificate signed by unknown authority`;
+`SKIP_SSL_VALIDATION` is not a substitute, because the CF API client will not
+honour it.
+
+```
+AUTO_REG_CF_CA_CERT=<PEM>
+AUTO_REG_CF_CA_CERT_PATH=<path to a PEM file>
+```
+
+The path form is what a Kubernetes deployment wants, where the CA arrives as a
+mounted secret. It takes precedence over the inline value, and a path that
+cannot be read is an error rather than a silent fall back to no CA.
+
+These apply when the endpoint is first registered. An endpoint already
+auto-registered without a CA keeps the empty one — remove it from the console
+and let it register again.
 
 #### Running Jetstream in a container
 
