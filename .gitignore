@@ -101,6 +101,7 @@ src/backend/*/vendor/
 /secrets.yaml
 /secrets.*.yaml
 /secrets.yaml.enc
+/e2e/secrets.yaml
 cl.resume
 build/dev_config.json
 e2e-reports/
