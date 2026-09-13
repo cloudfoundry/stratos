@@ -182,19 +182,16 @@ endif
 
 # Default: frontend + backend when none specified (unless e2e),
 # but only for verbs that use these modifiers (not clean/dump).
-# korifi counts as a build modifier here (make build korifi = static
-# backend only), so it must suppress the default like the others;
-# tag/untag/line are stamp modifiers and suppress it the same way, as does
+# tag/untag/line are stamp modifiers and suppress the default, as does
 # cert (make dev cert only writes the TLS key pair).
 ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter korifi tag untag line cert,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter tag untag line cert,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_FRONTEND := yes
   $(_HIDE)WANT_BACKEND  := yes
 endif
 endif
 
 $(_HIDE)WANT_CF     :=
-$(_HIDE)WANT_KORIFI :=
 $(_HIDE)WANT_GITHUB :=
 $(_HIDE)WANT_AIO    :=
 $(_HIDE)WANT_PAGES  :=
@@ -205,9 +202,6 @@ endif
 ifneq ($(filter pages,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_PAGES := yes
 endif
-ifneq ($(filter korifi,$(MAKECMDGOALS)),)
-  $(_HIDE)WANT_KORIFI := yes
-endif
 ifneq ($(filter github,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_GITHUB := yes
 endif
@@ -215,7 +209,7 @@ ifneq ($(filter aio,$(MAKECMDGOALS)),)
   $(_HIDE)WANT_AIO := yes
 endif
 ifneq ($(filter release,$(MAKECMDGOALS)),)
-ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)WANT_GITHUB)$($(_HIDE)WANT_AIO),)
+ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_GITHUB)$($(_HIDE)WANT_AIO),)
   $(_HIDE)WANT_CF     := yes
   $(_HIDE)WANT_GITHUB := yes
 endif
@@ -309,19 +303,6 @@ ifeq ($($(_HIDE)WANT_CF),yes)
   endif
 endif
 
-# korifi modifier targets linux at the host arch unless PLATFORM is set
-# (a local kind cluster runs the host arch; real clusters override,
-# e.g. make build korifi PLATFORM=linux/amd64)
-ifeq ($($(_HIDE)WANT_KORIFI),yes)
-  ifndef PLATFORM
-    PLATFORM := linux/$($(_HIDE)HOST_ARCH)
-    $(_HIDE)TARGET_OS   := linux
-    $(_HIDE)TARGET_ARCH := $($(_HIDE)HOST_ARCH)
-    $(_HIDE)GO_ENV      := GOOS=linux GOARCH=$($(_HIDE)HOST_ARCH)
-    $(_HIDE)CURRENT_PLATFORM := linux/$($(_HIDE)HOST_ARCH)
-  endif
-endif
-
 $(_HIDE)WANT_CLEAN_DIST :=
 $(_HIDE)WANT_CLEAN_REPO :=
 $(_HIDE)WANT_LINT       :=
@@ -383,8 +364,8 @@ endif
 
 # No-op targets so modifiers don't error
 # Note: lint has its own standalone recipe — not listed here.
-.PHONY: frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert
-frontend backend website booklets cf korifi github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert:
+.PHONY: frontend backend website booklets cf github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert
+frontend backend website booklets cf github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert:
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
@@ -981,37 +962,6 @@ define release.cf
 endef
 $(call register, release, cf)
 
-# ── Korifi ────────────────────────────────────────────────────
-# Korifi runs droplets on the Paketo jammy run image, which has no
-# glibc loader at the paths a dynamically linked cgo binary expects.
-# This target predates the pure-Go ncruces sqlite driver (see
-# sqlitestore.go) — that was the original reason cgo was needed here,
-# and it no longer applies: a plain CGO_ENABLED=0 build (build.backend's
-# approach) is already static with no glibc dependency, verified against
-# this same GOOS/GOARCH. Left as the static-cgo/zig build for now since
-# Korifi has no active maintainer to validate a change here; the target
-# still needs to build, just isn't worth touching further right now.
-# Korifi also has no binary_buildpack; the package manifest uses
-# paketo-buildpacks/procfile instead.
-
-define build.korifi
-	$(call require_tool,zig,Required for the static cgo cross-compile — install via: brew install zig)
-	@echo "Building static backend for $($(_HIDE)CURRENT_PLATFORM) (Korifi)..."
-	@mkdir -p $($(_HIDE)BIN_DIR)
-	cd src/jetstream && CGO_ENABLED=1 GOOS=linux GOARCH=$($(_HIDE)TARGET_ARCH) \
-		CC="zig cc -target $(if $(filter arm64,$($(_HIDE)TARGET_ARCH)),aarch64,x86_64)-linux-musl" \
-		go build -ldflags "$($(_HIDE)GO_LDFLAGS) -linkmode external -extldflags -static" \
-		-o ../../$($(_HIDE)BIN_DIR)/jetstream
-	@echo "Backend built (static): $($(_HIDE)BIN_DIR)/jetstream"
-endef
-$(call register, build, korifi, $(_HIDE)gen-plugins)
-
-define release.korifi
-	@chmod +x build/release-cf.sh
-	@./build/release-cf.sh "$($(_HIDE)SEMVER_VERSION)" korifi
-endef
-$(call register, release, korifi)
-
 # ── GitHub release ────────────────────────────────────────────
 
 define release.github
@@ -1032,14 +982,14 @@ $(call register, release, aio)
 
 # ── Release checksums ────────────────────────────────────────
 # Checksums are a property of the artifacts: every artifact-producing
-# release invocation ends by staging the loose cf/korifi zips into
+# release invocation ends by staging the loose cf zip into
 # dist/release and regenerating a single SHA256SUMS over everything
 # there. Exact-version filenames so stale zips from earlier builds are
 # never picked up. Standalone regen (post-unpublish asset fix):
 # ./build/create-checksums.sh
 define release.checksums
 	@mkdir -p $($(_HIDE)RELEASE_DIR)
-	@for z in $($(_HIDE)DIST_DIR)/stratos-cf-$($(_HIDE)SEMVER_VERSION).zip $($(_HIDE)DIST_DIR)/stratos-korifi-$($(_HIDE)SEMVER_VERSION).zip; do \
+	@for z in $($(_HIDE)DIST_DIR)/stratos-cf-$($(_HIDE)SEMVER_VERSION).zip; do \
 		if [ -f "$$z" ]; then cp "$$z" $($(_HIDE)RELEASE_DIR)/; fi; \
 	done
 	@chmod +x build/create-checksums.sh
@@ -1049,7 +999,7 @@ $(call register_always, release, checksums)
 # Appended after every artifact modifier registration so it runs last;
 # gated on an artifact actually landing in dist/ (aio only stages a
 # docker build context — nothing to checksum).
-$(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_KORIFI)$($(_HIDE)WANT_GITHUB),$(_HIDE)release.checksums)
+$(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_GITHUB),$(_HIDE)release.checksums)
 
 # ── Release lifecycle (tag → publish / unpublish → untag) ────
 #   make stamp tag [VERSION=X]      create + push the annotated release tag
@@ -1334,7 +1284,7 @@ $(_HIDE)finalize-and-reexec:
 	@./build/version-bump.sh bump release
 	@echo "Re-running: $(MAKE) $(MAKECMDGOALS)"
 	@$(MAKE) FINAL= $(MAKECMDGOALS)
-$(filter-out frontend backend cf korifi github dist version e2e actions packages secrets lint gate tests coverage tree history licenses tag untag line,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
+$(filter-out frontend backend cf github dist version e2e actions packages secrets lint gate tests coverage tree history licenses tag untag line,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
 else ifneq ($(FINAL),)
 $(error Unknown FINAL value '$(FINAL)' — supported: strip)
 endif
@@ -1380,7 +1330,7 @@ endif
 #                         (defined in the E2E section, above)
 
 define clean.release
-	rm -rf $($(_HIDE)DIST_DIR)/release $($(_HIDE)DIST_DIR)/cf-package $($(_HIDE)DIST_DIR)/korifi-package $($(_HIDE)DIST_DIR)/install $($(_HIDE)DIST_DIR)/stratos-cf-*.zip $($(_HIDE)DIST_DIR)/stratos-korifi-*.zip
+	rm -rf $($(_HIDE)DIST_DIR)/release $($(_HIDE)DIST_DIR)/cf-package $($(_HIDE)DIST_DIR)/install $($(_HIDE)DIST_DIR)/stratos-cf-*.zip
 endef
 
 define clean.dist
@@ -1481,7 +1431,6 @@ help:
 	@echo "  make build frontend       Build frontend only"
 	@echo "  make build backend        Cross-compile all backend platforms"
 	@echo "  make build backend PLATFORM=linux/amd64  Build single platform"
-	@echo "  make build korifi         Static cgo backend for Korifi (linux/host-arch)"
 	@echo ""
 	@echo "Testing:"
 	@echo "  make test                 Run all tests"
@@ -1503,7 +1452,6 @@ help:
 	@echo "Release:"
 	@echo "  make release              Create CF zip + GitHub archives (+ SHA256SUMS)"
 	@echo "  make release cf           CF-pushable zip only"
-	@echo "  make release korifi       Korifi-pushable zip (Paketo procfile manifest)"
 	@echo "  make release github       GitHub release archives only"
 	@echo "  make changelog            Warn about dependency bumps missing from changelog.d"
 	@echo "  make preview              Render the assembled release notes as the release page will show them"
