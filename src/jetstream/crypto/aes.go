@@ -78,8 +78,15 @@ func Decrypt(key, ciphertext []byte) (plaintext []byte, err error) {
 func ReadEncryptionKey(v, f string) ([]byte, error) {
 	slog.Debug("ReadEncryptionKey")
 
+	// Indexing f[0] to spot an absolute path panics when the filename is
+	// empty, which main.go reaches whenever the volume is configured and the
+	// filename is not.
+	if f == "" {
+		return nil, errors.New("no encryption key filename was configured")
+	}
+
 	encryptionKey := fmt.Sprintf("/%s/%s", v, f)
-	if string(f[0]) == "/" {
+	if strings.HasPrefix(f, "/") {
 		encryptionKey = fmt.Sprintf("%s/%s", v, f)
 	}
 	key64chars, err := os.ReadFile(encryptionKey)
