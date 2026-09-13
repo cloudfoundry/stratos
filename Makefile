@@ -900,7 +900,11 @@ $(call register, audit, packages)
 define audit.secrets
 	@echo "Running secret scan (gitleaks)..."
 	$(call require_tool,gitleaks,Run: brew install gitleaks)
-	@gitleaks dir . --no-banner --redact || true
+	@gitleaks dir . --no-banner --redact || { \
+		echo "ERROR: gitleaks reported findings above." >&2; \
+		echo "       Rotate anything real. Add a reviewed false positive to .gitleaks.toml." >&2; \
+		exit 1; \
+	}
 endef
 $(call register, audit, secrets)
 

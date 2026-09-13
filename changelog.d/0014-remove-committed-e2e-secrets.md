@@ -9,3 +9,7 @@
   developer's own gitignored credentials and the third-party Helm chart
   cache. Those paths are allow-listed by exact path, leaving the scan
   clean and any finding in a trackable file visible.
+- `make audit secrets` now fails when gitleaks reports a finding, instead
+  of printing it and exiting 0. The full-history scan
+  (`make audit history`) stays advisory: it carries years of accepted
+  SUSE-era test fixtures.
