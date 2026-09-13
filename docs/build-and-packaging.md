@@ -150,7 +150,7 @@ artifact values produce clear errors from `playwright test` itself.
 | `make release` | All of the above | Create both CF zip and GitHub archives | Both |
 
 Every artifact-producing `release` invocation finishes by staging the
-cf/korifi zip (when present) into `dist/release/` and regenerating a single
+cf zip (when present) into `dist/release/` and regenerating a single
 `SHA256SUMS` over everything there. `./build/create-checksums.sh` remains
 callable standalone for the exceptional regen case (fix an asset after
 `make unpublish`, re-checksum, re-publish).
@@ -336,10 +336,9 @@ hardcodes `CGO_ENABLED=0`, so it never invokes a C cross-compiler — Go's own
 toolchain ships every `GOOS`/`GOARCH` combination self-contained, making
 the build host-arch-independent by construction: an Apple Silicon (arm64)
 machine cross-compiles `linux/amd64` exactly as readily as an amd64 machine
-cross-compiles `linux/arm64`, verified directly. The one exception is
-`build.korifi`, which deliberately uses `CGO_ENABLED=1` + `zig` for a
-static-cgo build — that path does need a real (portable) C cross-compiler,
-which is precisely why it reaches for `zig` instead of the host's own `cc`.
+cross-compiles `linux/arm64`, verified directly. No build path needs a C
+cross-compiler: the sqlite driver is pure Go (`ncruces`), so nothing in the
+tree asks for cgo.
 
 ### Documentation (docs/ → HTML or PDF/epub)
 
