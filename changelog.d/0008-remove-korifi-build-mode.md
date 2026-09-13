@@ -1,4 +1,4 @@
-[Chores]
+[Maintainability]
 - Removed the `korifi` build modifier and the matching `release-cf.sh`
   mode. Korifi is retired — RFC-0060 was accepted on 2026-07-10 — and CF
   on Kubernetes is its replacement. `make build korifi` was the only
