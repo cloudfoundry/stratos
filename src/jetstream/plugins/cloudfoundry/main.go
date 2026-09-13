@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"net/url"
+	"os"
 	"strings"
 
 	"errors"
@@ -249,10 +250,16 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 			autoRegName = "Cloud Foundry"
 		}
 
-		slog.Info("Auto-registering the Cloud Foundry endpoint", "url", cfAPI, "name", autoRegName)
+		caCert, err := resolveAutoRegisterCACert(*c.portalProxy.GetConfig())
+		if err != nil {
+			slog.Error("could not auto-register the Cloud Foundry endpoint", "url", cfAPI, "err", err)
+			return nil
+		}
+
+		slog.Info("Auto-registering the Cloud Foundry endpoint", "url", cfAPI, "name", autoRegName, "withCACert", caCert != "")
 
 		// Auto-register the Cloud Foundry
-		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, "", false, "", false, "", cfEndpointSpec.Info)
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, "", false, "", false, caCert, cfEndpointSpec.Info)
 		if err != nil {
 			slog.Error("could not auto-register the Cloud Foundry endpoint", "url", cfAPI, "err", err)
 			return nil
@@ -293,6 +300,28 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 		}
 	}
 	return nil
+}
+
+// resolveAutoRegisterCACert returns the CA the auto-registered endpoint should
+// trust. Without one, a foundation using a private authority registers fine and
+// then fails every read with x509 while still reporting itself connected
+// (#5922); skip-ssl is not a substitute, as capi will not honour it.
+//
+// A path wins over an inline value and is what a Kubernetes deployment uses,
+// where the CA arrives as a mounted secret — the same precedence detectTLSCert
+// applies to CONSOLE_PROXY_CERT_PATH. A configured path that cannot be read is
+// an error rather than a fallback to no CA, which would resurrect the silent
+// failure this prevents.
+func resolveAutoRegisterCACert(pc api.PortalConfig) (string, error) {
+	if pc.AutoRegisterCFCACertPath == "" {
+		return pc.AutoRegisterCFCACert, nil
+	}
+
+	caPEM, err := os.ReadFile(pc.AutoRegisterCFCACertPath)
+	if err != nil {
+		return "", fmt.Errorf("could not read the auto-registration CA certificate: %w", err)
+	}
+	return string(caPEM), nil
 }
 
 func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, api.CNSIRecord, error) {
