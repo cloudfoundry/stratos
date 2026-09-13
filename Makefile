@@ -759,14 +759,31 @@ define audit.website
 endef
 $(call register, audit, website)
 
+# gosec exits non-zero both when it finds issues (advisory here, hence the
+# tolerated failure) and when it cannot run at all. Those are not the same
+# thing: a gosec built against an older Go fails every package with
+# "internal error: package ... without types", and `|| true` reported that as
+# a clean audit while nothing was scanned. Findings stay advisory; a scanner
+# that did not run is an error.
+define run_gosec
+	@out=$$(cd $(1) && gosec $(2) ./... 2>&1); \
+	printf '%s\n' "$$out"; \
+	if printf '%s' "$$out" | grep -q 'internal error:'; then \
+		echo "ERROR: gosec could not scan $(1) — it is likely built against an older Go than $$(go env GOVERSION)." >&2; \
+		echo "       Rebuild it: go install github.com/securego/gosec/v2/cmd/gosec@latest" >&2; \
+		exit 1; \
+	fi; \
+	exit 0
+endef
+
 define audit.backend
 	@echo "Running backend security scans..."
 	$(call require_tool,gosec,Run: go install github.com/securego/gosec/v2/cmd/gosec@latest)
 	$(call require_tool,trivy,See https://github.com/aquasecurity/trivy)
 	$(call require_tool,govulncheck,Run: go install golang.org/x/vuln/cmd/govulncheck@latest)
 	@echo "── gosec ──"
-	cd src/jetstream && gosec -quiet ./... || true
-	cd src/jetstream/api && gosec -quiet ./... || true
+	$(call run_gosec,src/jetstream,-quiet)
+	$(call run_gosec,src/jetstream/api,-quiet)
 	@echo "── trivy ──"
 	trivy fs --scanners vuln,misconfig src/jetstream || true
 	@echo "── govulncheck ──"
@@ -890,8 +907,8 @@ $(call register, audit, secrets)
 define audit.tests
 	@echo "Running gosec including test files..."
 	$(call require_tool,gosec,Run: go install github.com/securego/gosec/v2/cmd/gosec@latest)
-	cd src/jetstream && gosec -quiet -tests -track-suppressions ./... || true
-	cd src/jetstream/api && gosec -quiet -tests -track-suppressions ./... || true
+	$(call run_gosec,src/jetstream,-quiet -tests -track-suppressions)
+	$(call run_gosec,src/jetstream/api,-quiet -tests -track-suppressions)
 endef
 $(call register, audit, tests)
 
