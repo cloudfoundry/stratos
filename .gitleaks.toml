@@ -22,6 +22,13 @@ paths = [
   '''^dist/''',
   '''^\.angular/''',
   '''node_modules/''',
+  # Third-party Helm charts pulled into the jetstream chart cache at test time.
+  '''\.helm-cache/''',
+  # The developer's own E2E credentials. `.gitignore` keeps these out of the
+  # index, but `gitleaks dir` walks the filesystem, so every run flagged them.
+  # Allow-listed by exact path so a secret in any *trackable* file still shows.
+  '''^secrets\.yaml$''',
+  '''^secrets\.yaml\.enc$''',
   # Self-signed localhost TLS pair for local development. No longer committed
   # (generated per developer by `make dev cert`); the path stays allow-listed
   # so history scans do not flag the pair that used to be tracked.
