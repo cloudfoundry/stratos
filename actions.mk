@@ -20,7 +20,6 @@ $(_HIDE)FLAG_backend     := $($(_HIDE)WANT_BACKEND)
 $(_HIDE)FLAG_website     := $($(_HIDE)WANT_WEBSITE)
 $(_HIDE)FLAG_booklets    := $($(_HIDE)WANT_BOOKLETS)
 $(_HIDE)FLAG_cf          := $($(_HIDE)WANT_CF)
-$(_HIDE)FLAG_korifi      := $($(_HIDE)WANT_KORIFI)
 $(_HIDE)FLAG_github      := $($(_HIDE)WANT_GITHUB)
 $(_HIDE)FLAG_aio         := $($(_HIDE)WANT_AIO)
 $(_HIDE)FLAG_pages       := $($(_HIDE)WANT_PAGES)
@@ -51,7 +50,7 @@ $(_HIDE)FLAG_line        := $($(_HIDE)WANT_LINE)
 $(_HIDE)FLAG_cert        := $($(_HIDE)WANT_CERT)
 
 # Known modifiers — the set checked during validation in declare_verb
-$(_HIDE)KNOWN_MODS := frontend backend website booklets cf korifi github aio pages e2e dist repo version actions packages secrets lint gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert
+$(_HIDE)KNOWN_MODS := frontend backend website booklets cf github aio pages e2e dist repo version actions packages secrets lint gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert
 
 # Known verbs — populated by declare_verb, checked for collisions
 $(_HIDE)KNOWN_VERBS :=
