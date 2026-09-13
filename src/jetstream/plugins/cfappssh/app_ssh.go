@@ -224,13 +224,35 @@ type windowChangeRequestMsg struct {
 	Height  uint32
 }
 
+// maxTerminalDimension caps rows and columns. Well beyond any real terminal,
+// small enough that the pixel size below cannot overflow uint32.
+const maxTerminalDimension = 10000
+
+// windowDimensions clamps the browser-supplied row and column counts. They
+// arrive as JSON over the websocket and are otherwise unvalidated, so a
+// negative value would wrap when converted (-1 becomes 4294967295) and a large
+// one would truncate once multiplied by the cell size.
+func windowDimensions(h, w int) (uint32, uint32) {
+	clamp := func(v int) uint32 {
+		if v < 1 {
+			return 1
+		}
+		if v > maxTerminalDimension {
+			return maxTerminalDimension
+		}
+		return uint32(v)
+	}
+	return clamp(h), clamp(w)
+}
+
 func windowChange(s *ssh.Session, h, w int) error {
+	rows, cols := windowDimensions(h, w)
 
 	req := windowChangeRequestMsg{
-		Columns: uint32(w),
-		Rows:    uint32(h),
-		Width:   uint32(w * 8),
-		Height:  uint32(h * 8),
+		Columns: cols,
+		Rows:    rows,
+		Width:   cols * 8,
+		Height:  rows * 8,
 	}
 	ok, err := s.SendRequest("window-change", true, ssh.Marshal(&req))
 	if err == nil && !ok {
