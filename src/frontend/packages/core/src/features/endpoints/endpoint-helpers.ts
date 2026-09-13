@@ -14,8 +14,8 @@ export function getEndpointUsername(endpoint: EndpointModel) {
 
 // An endpoint is only effectively connected while its stored token is still
 // usable. An expired token must read as Disconnected rather than a broken
-// card — e.g. korifi pasted tokens have no refresh, so every session ends in
-// expiry (#5588). This expiry math now lives in `computeConnectionStatus`
+// card — e.g. pasted Kubernetes tokens have no refresh, so every session
+// ends in expiry (#5588). This expiry math now lives in `computeConnectionStatus`
 // (store package, endpoint.types.ts) and is baked into `connectionStatus` at
 // hydration time — the manual token_renewable/token_expiry check that used
 // to live here is redundant with that computed status. Sole caller is the
