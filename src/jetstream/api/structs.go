@@ -451,6 +451,8 @@ type PortalConfig struct {
 	EncryptionKey                      string   `configName:"ENCRYPTION_KEY"`
 	AutoRegisterCFUrl                  string   `configName:"AUTO_REG_CF_URL"`
 	AutoRegisterCFName                 string   `configName:"AUTO_REG_CF_NAME"`
+	AutoRegisterCFCACert               string   `configName:"AUTO_REG_CF_CA_CERT"`
+	AutoRegisterCFCACertPath           string   `configName:"AUTO_REG_CF_CA_CERT_PATH"`
 	SSOLogin                           bool     `configName:"SSO_LOGIN"`
 	SSOOptions                         string   `configName:"SSO_OPTIONS"`
 	SSOAllowList                       string   `configName:"SSO_ALLOWLIST,SSO_WHITELIST"`
