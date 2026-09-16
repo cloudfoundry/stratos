@@ -22,7 +22,7 @@
   "description": "Stratos Store",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.0.0",
-    "@analogjs/vitest-angular": "^2.0.0"
+    "@analogjs/vite-plugin-angular": "^2.7.2",
+    "@analogjs/vitest-angular": "^2.7.2"
   }
 }
