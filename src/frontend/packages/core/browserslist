@@ -1,4 +1,4 @@
-# This file is currently used by autoprefixer to adjust CSS to support the below specified browsers
+# Used by @angular/build to derive the esbuild compile target for JS and CSS.
 # For additional information regarding the format and rule options, please see:
 # https://github.com/browserslist/browserslist#queries
 #
