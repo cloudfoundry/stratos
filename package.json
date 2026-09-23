@@ -176,6 +176,7 @@
     "@angular/language-service": "22.1.6",
     "@cypress/request": "4.0.1",
     "@eslint/js": "^10.0.1",
+    "@oxc-project/runtime": "0.121.0",
     "@playwright/test": "^1.63.0",
     "@schematics/angular": "22.1.8",
     "@tailwindcss/forms": "^0.5.11",
@@ -193,8 +194,8 @@
     "@types/webpack": "^5.28.5",
     "@typescript-eslint/eslint-plugin": "^8.70.0",
     "@typescript-eslint/parser": "^8.70.0",
-    "@vitest/coverage-v8": "^4.1.11",
-    "@vitest/ui": "4.1.10",
+    "@vitest/coverage-v8": "^5.0.1",
+    "@vitest/ui": "5.0.1",
     "acorn": "8.18.0",
     "adm-zip": "0.6.1",
     "angular-eslint": "22.5.0",
@@ -221,7 +222,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.0",
-    "vitest": "^4.1.11"
+    "vitest": "^5.0.1"
   },
   "patchedDependencies": {
     "monaco-worker-manager@2.0.1": "patches/monaco-worker-manager@2.0.1.patch"
