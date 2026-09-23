@@ -1,10 +1,10 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 /**
  * Generate an HTML gallery from a single screenshot set.
  * Shows light and dark mode side by side for each page.
  *
- * Usage: bunx tsx e2e/scripts/gallery-screenshots.ts <label>
- * Example: bunx tsx e2e/scripts/gallery-screenshots.ts dev46
+ * Usage: node e2e/scripts/gallery-screenshots.ts <label>
+ * Example: node e2e/scripts/gallery-screenshots.ts dev46
  */
 
 import * as fs from 'fs';
@@ -15,8 +15,8 @@ const SCREENSHOT_DIR = path.resolve('e2e-screenshots');
 function getLabel(): string {
   const label = process.argv[2];
   if (!label) {
-    console.error('Usage: bunx tsx e2e/scripts/gallery-screenshots.ts <label>');
-    console.error('Example: bunx tsx e2e/scripts/gallery-screenshots.ts dev46');
+    console.error('Usage: node e2e/scripts/gallery-screenshots.ts <label>');
+    console.error('Example: node e2e/scripts/gallery-screenshots.ts dev46');
     process.exit(1);
   }
   return label;

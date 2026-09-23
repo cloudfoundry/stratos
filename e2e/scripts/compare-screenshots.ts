@@ -1,10 +1,10 @@
-#!/usr/bin/env tsx
+#!/usr/bin/env node
 /**
  * Compare screenshots from two Stratos deployments.
  * Generates an HTML report with side-by-side images and pixel diffs.
  *
- * Usage: bunx tsx e2e/scripts/compare-screenshots.ts <label1> <label2>
- * Example: bunx tsx e2e/scripts/compare-screenshots.ts v4 v5
+ * Usage: node e2e/scripts/compare-screenshots.ts <label1> <label2>
+ * Example: node e2e/scripts/compare-screenshots.ts v4 v5
  */
 
 import * as fs from 'fs';
@@ -17,8 +17,8 @@ const SCREENSHOT_DIR = path.resolve('e2e-screenshots');
 function getArgs(): { label1: string; label2: string } {
   const [,, label1, label2] = process.argv;
   if (!label1 || !label2) {
-    console.error('Usage: bunx tsx e2e/scripts/compare-screenshots.ts <label1> <label2>');
-    console.error('Example: bunx tsx e2e/scripts/compare-screenshots.ts v4 v5');
+    console.error('Usage: node e2e/scripts/compare-screenshots.ts <label1> <label2>');
+    console.error('Example: node e2e/scripts/compare-screenshots.ts v4 v5');
     process.exit(1);
   }
   return { label1, label2 };
