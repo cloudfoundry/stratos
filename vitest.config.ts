@@ -1,7 +1,7 @@
 import { defineConfig } from 'vitest/config';
 
 /**
- * Root Vitest configuration with projects (vitest 4 syntax)
+ * Root Vitest configuration with projects
  *
  * Migrated from vitest.workspace.ts (deprecated in vitest 4) — the
  * `projects` field below replaces `defineWorkspace`. E2E tests are
