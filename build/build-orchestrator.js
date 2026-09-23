@@ -27,8 +27,7 @@ const tools = [
     script: '../src/frontend/packages/devkit/src/backend.ts',
     required: true,
     description: 'Generates extra_plugins.go for Jetstream backend',
-    watchPaths: ['src/jetstream/plugin-config.yaml'],
-    useTsx: true  // Run with tsx for TypeScript support
+    watchPaths: ['src/jetstream/plugin-config.yaml']
   },
   {
     name: 'Extension Generator',
@@ -125,10 +124,9 @@ async function runTool(tool, context = {}) {
     const projectRoot = path.resolve(__dirname, '..');
     const toolArgs = tool.args ? (Array.isArray(tool.args) ? tool.args : [tool.args]) : [];
 
-    // Use tsx for TypeScript files, node for JavaScript. Pass argv as an
+    // Node runs .ts tools directly by stripping the types. Pass argv as an
     // array to execFileSync so paths/args are never parsed by a shell.
-    const [cmd, ...runnerPrefix] = tool.useTsx ? ['npx', 'tsx'] : ['node'];
-    execFileSync(cmd, [...runnerPrefix, toolPath, ...toolArgs], {
+    execFileSync('node', [toolPath, ...toolArgs], {
       stdio: 'inherit',
       cwd: projectRoot,
       env: {
