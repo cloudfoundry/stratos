@@ -6,6 +6,6 @@
   devkit reads them for dependency names only — but the stale numbers were
   enough for dependency scanning to report five advisories against Angular
   packages that ship at a patched version, two of them rated high. The
-  manifests were re-synced to 22.1.6 when the root moved again; they
-  carry no lockfile of their own, so every root bump has to be followed
-  by hand.
+  manifests were re-synced to 22.1.6 and then 22.1.7 as the root moved;
+  they carry no lockfile of their own, so every root bump has to be
+  followed by hand.
