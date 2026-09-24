@@ -517,6 +517,8 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
 
+  private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
+
   protected readonly Math = Math;
 
   // True when there is MORE content below the current scroll position —
@@ -912,6 +914,24 @@ export class SignalListComponent<T> implements AfterViewInit {
     if (this.openActionsRowKey() !== null) {
       this.openActionsRowKey.set(null);
     }
+  }
+
+  // Escape closes the open menu and puts focus back on the kebab that
+  // opened it, as the button advertises (aria-haspopup="menu"). It is
+  // handled on the host while focus is inside the list (on the kebab or an
+  // item in the menu) and stopped there: dialogs and the side panel close on
+  // any Escape that reaches the document, and one press should only close
+  // the innermost popup. The document listener covers focus being nowhere
+  // (Safari does not focus a clicked button). No-op when no menu is open, so
+  // Escape still reaches whatever else wants it.
+  @HostListener('keydown.escape', ['$event'])
+  @HostListener('document:keydown.escape', ['$event'])
+  onEscapeForActions(ev: Event): void {
+    if (this.openActionsRowKey() === null) return;
+    ev.stopPropagation();
+    const kebab = this.host.nativeElement.querySelector<HTMLElement>('[data-test="row-actions"][aria-expanded="true"]');
+    this.openActionsRowKey.set(null);
+    kebab?.focus();
   }
 
   isFavorite(col: SignalListColumn<T>, row: T): boolean {
