@@ -6,7 +6,7 @@ Build-time CSS theming tool for stratos. Operators load snapshot scenes, edit to
 
 ```bash
 cd tools/stb
-npm install
+bun install
 npm run dev
 ```
 
