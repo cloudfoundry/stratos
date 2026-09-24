@@ -65,7 +65,7 @@
           [value]="searchTerm"
           (input)="onSearchInput($event)"
           (click)="$event.stopPropagation()"
-          (keydown)="$event.stopPropagation()" />
+          (keydown)="onSearchKeydown($event)" />
       </div>
     }
     <div class="options-container" role="listbox" tabindex="-1"

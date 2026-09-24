@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi, onTestFinished } from 'vitest';
 
 import { CustomOptionComponent, CustomSelectComponent } from './custom-select.component';
 
@@ -93,5 +93,90 @@ describe('CustomSelectComponent with object-valued options', () => {
       trigger.click();
       fixture.detectChanges();
     }).not.toThrow();
+  });
+});
+
+// Seven options: above the search threshold, so the filter input renders.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select placeholder="Org">
+      @for (name of names; track name) {
+        <app-option [value]="name">{{ name }}</app-option>
+      }
+    </app-select>
+  `,
+})
+class SearchableHostComponent {
+  names = ['alpha', 'bravo', 'charlie', 'delta', 'echo', 'foxtrot', 'golf'];
+}
+
+describe('CustomSelectComponent and the Escape key', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    });
+  });
+
+  // Dialogs and the side panel close on any Escape that reaches the
+  // document, so each case also records whether the key got that far.
+  function open() {
+    const fixture = TestBed.createComponent(SearchableHostComponent);
+    fixture.detectChanges();
+    const trigger: HTMLElement = fixture.nativeElement.querySelector('[role="combobox"]');
+    trigger.focus();
+    trigger.click();
+    fixture.detectChanges();
+    const reachedDocument = vi.fn();
+    document.addEventListener('keydown', reachedDocument);
+    onTestFinished(() => document.removeEventListener('keydown', reachedDocument));
+    return { fixture, trigger, reachedDocument };
+  }
+  const escape = (target: EventTarget) =>
+    target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+  it('closes the open list from the trigger and keeps the key from the document', () => {
+    const { fixture, trigger, reachedDocument } = open();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+
+    escape(trigger);
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(trigger);
+    expect(reachedDocument).not.toHaveBeenCalled();
+  });
+
+  it('closes the list from the filter input, clears the filter, and refocuses the trigger', () => {
+    const { fixture, trigger, reachedDocument } = open();
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input[aria-label="Filter options"]');
+    input.focus();
+    input.value = 'fox';
+    input.dispatchEvent(new Event('input'));
+    fixture.detectChanges();
+
+    escape(input);
+    fixture.detectChanges();
+
+    expect(trigger.getAttribute('aria-expanded')).toBe('false');
+    expect(document.activeElement).toBe(trigger);
+    expect(reachedDocument).not.toHaveBeenCalled();
+    // Reopening shows the full list again.
+    trigger.click();
+    fixture.detectChanges();
+    const shown = [...fixture.nativeElement.querySelectorAll('.custom-option-content')]
+      .filter((el: HTMLElement) => el.style.display !== 'none');
+    expect(shown.length).toBe(7);
+  });
+
+  it('lets Escape through when the list is closed', () => {
+    const { fixture, trigger, reachedDocument } = open();
+    escape(trigger);
+    fixture.detectChanges();
+    reachedDocument.mockClear();
+
+    escape(trigger);
+    expect(reachedDocument).toHaveBeenCalledTimes(1);
   });
 });
