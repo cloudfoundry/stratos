@@ -102,19 +102,12 @@ fi
 
 # Step 3: Setup development configuration
 print_status "Step 3/5: Setting up development configuration..."
-if [ ! -f "build/dev-setup.js" ]; then
-    print_error "dev-setup.js not found"
+if [ ! -f "build/dev-setup.cjs" ]; then
+    print_error "dev-setup.cjs not found"
     exit 1
 fi
 
-# Run dev-setup as CommonJS (temporarily rename to .cjs)
-mv build/dev-setup.js build/dev-setup.cjs 2>/dev/null || true
-if [ -f "build/dev-setup.cjs" ]; then
-    node build/dev-setup.cjs
-    mv build/dev-setup.cjs build/dev-setup.js
-else
-    node build/dev-setup.js
-fi
+node build/dev-setup.cjs
 
 if [ -f "proxy.conf.js" ]; then
     print_success "Development configuration created"

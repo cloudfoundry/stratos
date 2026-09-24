@@ -702,7 +702,7 @@ dates and VCS identifiers. The package itself carries a unified version.
 
 ### Frontend build metadata
 
-Captured at prebuild via `build/store-git-metadata.js` into
+Captured at prebuild via `build/store-git-metadata.cjs` into
 `.stratos-git-metadata.json`:
 
 | Field | Description |
