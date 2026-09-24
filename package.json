@@ -193,8 +193,6 @@
     "@types/node": "26.4.1",
     "@types/pngjs": "^6.0.5",
     "@types/webpack": "^5.28.5",
-    "@typescript-eslint/eslint-plugin": "^8.70.0",
-    "@typescript-eslint/parser": "^8.70.0",
     "@vitest/coverage-v8": "^5.0.1",
     "@vitest/ui": "5.0.1",
     "acorn": "8.18.0",
@@ -222,7 +220,7 @@
     "sass-loader": "^17.0.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.70.0",
+    "typescript-eslint": "^8.70.1",
     "vitest": "^5.0.1"
   },
   "patchedDependencies": {
