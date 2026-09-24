@@ -399,6 +399,38 @@ The bare `make security` target was retired in favour of `make audit backend`
 (combined gosec + trivy + govulncheck). The old name now prints a renamed-to
 message via `deprecated.mk`.
 
+#### Explaining a lockfile change
+
+A dependency bump can rewrite thousands of lockfile lines. `scripts/lockdiff.mjs`
+compares two lockfiles by package (name@version) instead of by line and
+names the origin of every added or removed package: the changed package
+that brought it into the tree. It reads `bun.lock` and npm
+`package-lock.json`, and takes `<rev>:<path>` to read a version from git:
+
+```bash
+node scripts/lockdiff.mjs origin/develop:bun.lock bun.lock
+node scripts/lockdiff.mjs origin/develop:src/frontend/packages/devkit/package-lock.json \
+  src/frontend/packages/devkit/package-lock.json --detail
+```
+
+When a change has more than one cause (a version bump plus removing
+`overrides`, say), resolve it one cause at a time, starting from the
+existing lockfile, and check each step:
+
+1. Make one change, then `npm install --package-lock-only` (or `bun install`).
+2. Run `lockdiff` against the previous step and note what the change
+   brought in. One commit per step keeps each lockfile diff to one cause.
+3. Finish with `npm dedupe --package-lock-only`. Incremental resolution
+   keeps earlier choices where they still fit, so the steps leave duplicate
+   copies behind, and the result depends on the order of the steps. Dedupe
+   removes the duplicates without re-resolving the rest.
+
+Regenerate the lockfile from scratch only when dedupe cannot settle the
+tree. A regeneration also moves every package that has a newer release
+within its range, which nothing asked for, and discards the existing
+resolutions. If you do regenerate, run `lockdiff` against the deduped
+result to see exactly which packages that moved.
+
 ### Version Management
 
 Stratos follows [SemVer 2.0.0](https://semver.org/) with a full prerelease
