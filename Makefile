@@ -107,6 +107,14 @@ define stamp.frontend
 	@echo "Generated $($(_HIDE)BUILD_INFO_TS)"
 endef
 
+# The unit tests import build-info.ts, which is untracked, so a fresh
+# clone or worktree has none and the checks below fail in hundreds of
+# specs. As a file target with no prerequisites it is stamped only when
+# missing: an existing file, such as the one a running dev server
+# watches, is left alone. CI stamps explicitly before its tests.
+$($(_HIDE)BUILD_INFO_TS):
+	$(stamp.frontend)
+
 define dump.version.extra
 	@echo "GO_LDFLAGS        $($(_HIDE)GO_LDFLAGS)"
 	@echo "LINE              $(LINE)"
@@ -701,20 +709,20 @@ define check.gate
 		(cd $$m && go test ./... -count=1) || exit 1; \
 	done
 endef
-$(call register, check, gate)
+$(call register, check, gate, $($(_HIDE)BUILD_INFO_TS))
 
 define check.tests
 	@echo "Running unit tests..."
 	bun run test
 	cd src/jetstream && go test ./... -v -count=1
 endef
-$(call register, check, tests)
+$(call register, check, tests, $($(_HIDE)BUILD_INFO_TS))
 
 define check.coverage
 	@echo "Running unit tests with coverage..."
 	bun run test -- --coverage
 endef
-$(call register, check, coverage)
+$(call register, check, coverage, $($(_HIDE)BUILD_INFO_TS))
 
 define check.e2e
 	$(_ensure_host_backend)
