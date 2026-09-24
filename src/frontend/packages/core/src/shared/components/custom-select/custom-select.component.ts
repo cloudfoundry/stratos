@@ -339,6 +339,25 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     this.disabled = isDisabled;
   }
 
+  // Escape closes the open list and returns focus to the trigger
+  // (aria-haspopup="listbox"). It is handled on the host, where focus is
+  // while the list is in use, and stopped there: dialogs and the side panel
+  // close on any Escape that reaches the document, and one press should only
+  // close the innermost popup. With the list closed, Escape passes through.
+  @HostListener('keydown.escape', ['$event'])
+  onEscape(event: Event) {
+    if (!this.isOpen) return;
+    event.stopPropagation();
+    this.toggle();
+    this.selectTrigger.nativeElement.focus();
+  }
+
+  /** The filter input keeps its keys to itself (Enter and Space must not
+   *  reach the option list), except Escape, which closes the list. */
+  onSearchKeydown(event: KeyboardEvent) {
+    if (event.key !== 'Escape') event.stopPropagation();
+  }
+
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
     if (!this.isOpen) return;
