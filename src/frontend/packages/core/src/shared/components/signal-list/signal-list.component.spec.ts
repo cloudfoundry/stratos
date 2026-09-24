@@ -72,6 +72,78 @@ describe('SignalListComponent', () => {
     expect(menu.querySelector('[data-test="rename-row"]')).not.toBeNull();
   });
 
+  describe('row-action menu and the Escape key', () => {
+    function withActions() {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        columns: [
+          { header: 'Name', render: r => r.name },
+          { header: '', kind: 'actions', render: () => '', actions: () => [{ label: 'Delete', invoke: () => {} }] },
+        ],
+      };
+      fixture.detectChanges();
+      return fixture;
+    }
+    const menu = (el: HTMLElement) => el.querySelector('[data-test="row-actions-menu"]');
+    const escape = (target: EventTarget) =>
+      target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+    it('closes the open menu and returns focus to its kebab button', () => {
+      const fixture = withActions();
+      const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
+      kebab.click();
+      fixture.detectChanges();
+      // A keyboard user is inside the menu when they press Escape.
+      const item = menu(fixture.nativeElement)!.querySelector('[data-test="row-action-Delete"]') as HTMLButtonElement;
+      item.focus();
+
+      escape(item);
+      fixture.detectChanges();
+
+      expect(menu(fixture.nativeElement)).toBeNull();
+      expect(kebab.getAttribute('aria-expanded')).toBe('false');
+      expect(document.activeElement).toBe(kebab);
+    });
+
+    // Dialogs and the side panel close on any Escape that reaches the
+    // document. With the menu open, one press must close only the menu.
+    it('keeps the Escape that closes the menu from reaching the document', () => {
+      const fixture = withActions();
+      const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
+      kebab.click();
+      fixture.detectChanges();
+      const item = menu(fixture.nativeElement)!.querySelector('[data-test="row-action-Delete"]') as HTMLButtonElement;
+      item.focus();
+      const reachedDocument = vi.fn();
+      document.addEventListener('keydown', reachedDocument);
+      try {
+        escape(item);
+        fixture.detectChanges();
+        expect(menu(fixture.nativeElement)).toBeNull();
+        expect(reachedDocument).not.toHaveBeenCalled();
+
+        // With nothing open, Escape is not the list's to keep.
+        escape(kebab);
+        expect(reachedDocument).toHaveBeenCalledTimes(1);
+      } finally {
+        document.removeEventListener('keydown', reachedDocument);
+      }
+    });
+
+    it('does nothing, and leaves focus alone, when no menu is open', () => {
+      const fixture = withActions();
+      const refresh = fixture.nativeElement.querySelector('[data-test="refresh"]') as HTMLButtonElement;
+      refresh.focus();
+
+      escape(refresh);
+      fixture.detectChanges();
+
+      expect(menu(fixture.nativeElement)).toBeNull();
+      expect(document.activeElement).toBe(refresh);
+    });
+  });
+
   it('swaps the refresh button into the refreshing-state indicator when items present and isAnyLoading is true', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = { ...fixture.componentInstance.config, isAnyLoading: signal(true).asReadonly() };
