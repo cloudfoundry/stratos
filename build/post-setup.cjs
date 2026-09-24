@@ -87,29 +87,24 @@ function buildCustomBuilders() {
     return true;
   }
 
+  // The builders are a workspace of the root package, so the root install
+  // has already installed their dependencies and linked
+  // node_modules/@stratos/builders to the package directory. Only the
+  // compile is left. Running `bun install` here would re-enter the root
+  // install, whose postinstall is this script: with dist still missing,
+  // that recursed without bound.
   try {
-    // Install dependencies
-    log('  Installing builder dependencies...');
-    execSync('bun install', {
-      cwd: buildersDir,
-      stdio: 'inherit'
-    });
-
-    // Build TypeScript
     log('  Compiling TypeScript...');
     execSync('bun run build', {
       cwd: buildersDir,
       stdio: 'inherit'
     });
 
-    // Copy dist to node_modules
-    const distSrc = path.join(buildersDir, 'dist');
-    if (fs.existsSync(distSrc)) {
-      fs.cpSync(distSrc, buildersDist, { recursive: true });
+    if (fs.existsSync(buildersDist)) {
       log('✓ Custom builders built successfully');
       return true;
     } else {
-      error('Build succeeded but dist directory not found');
+      error(`Build succeeded but ${path.relative(ROOT_DIR, buildersDist)} not found`);
       return false;
     }
   } catch (err) {
