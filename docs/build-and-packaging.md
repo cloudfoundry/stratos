@@ -420,15 +420,22 @@ existing lockfile, and check each step:
 1. Make one change, then `npm install --package-lock-only` (or `bun install`).
 2. Run `lockdiff` against the previous step and note what the change
    brought in. One commit per step keeps each lockfile diff to one cause.
-3. Finish with `npm dedupe --package-lock-only`. Incremental resolution
-   keeps earlier choices where they still fit, so the steps leave duplicate
-   copies behind, and the result depends on the order of the steps. Dedupe
-   removes the duplicates without re-resolving the rest.
+3. For an npm lockfile, finish with `npm dedupe --package-lock-only`.
+   Incremental resolution keeps earlier choices where they still fit, so
+   the steps leave duplicate copies behind, and the result depends on the
+   order of the steps. Dedupe removes the duplicates without re-resolving
+   the rest.
 
-Regenerate the lockfile from scratch only when dedupe cannot settle the
+bun has no dedupe. Stale copies in `bun.lock` stay until something that
+depends on them changes. Do not remove entries from `bun.lock` by hand to
+force them out: bun then re-resolves far more than the removed entries.
+Removing 13 stale entries once moved 304 packages, direct dependencies
+included, which amounts to a regeneration.
+
+Regenerate a lockfile from scratch only when nothing narrower settles the
 tree. A regeneration also moves every package that has a newer release
 within its range, which nothing asked for, and discards the existing
-resolutions. If you do regenerate, run `lockdiff` against the deduped
+resolutions. If you do regenerate, run `lockdiff` against the previous
 result to see exactly which packages that moved.
 
 ### Version Management
