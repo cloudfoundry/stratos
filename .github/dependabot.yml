@@ -18,6 +18,12 @@ updates:
       # with the framework upgrade, not on their own.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+      # The root @angular/build is the copy the Analog Vitest plugin loads.
+      # Analog 2.7.2 breaks on 22.2 (analogjs/analog#2575), so it stays on
+      # 22.1.x; the application builder has its own nested 22.2 copy.
+      # Remove once an Analog release supports @angular/build 22.2.
+      - dependency-name: "@angular/build"
+        versions: [">=22.2.0"]
 
   # The devkit package keeps its own npm lockfile.
   - package-ecosystem: "npm"
