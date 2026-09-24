@@ -2,8 +2,8 @@
   "name": "@stratosui/cf-autoscaler",
   "version": "0.0.1",
   "peerDependencies": {
-    "@angular/common": "22.1.7",
-    "@angular/core": "22.1.7",
+    "@angular/common": "22.2.0",
+    "@angular/core": "22.2.0",
     "@stratosui/cloud-foundry": "^0.0.1"
   },
   "stratos": {
