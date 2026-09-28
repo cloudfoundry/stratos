@@ -1,7 +1,9 @@
 [Chores]
 - Dependabot runs from one configuration file again. The repository had
-  both `.github/dependabot.yml` and `.github/dependabot.yaml`; only the
-  first was in effect, so the backend Go modules and the website got no
-  version updates, and the `chore(deps)` commit prefix the release
-  notes rely on was not pinned. The merged file restores both and adds
-  a weekly grouped update across all seven Go modules.
+  both `.github/dependabot.yml` and `.github/dependabot.yaml`, and only
+  the first was in effect, so these were lost:
+  - version updates for the backend Go modules
+  - version updates for the website
+  - the pinned `chore(deps)` commit prefix the release notes rely on
+- The merged file restores them and adds a weekly grouped update across
+  all seven Go modules.
