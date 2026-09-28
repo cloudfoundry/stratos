@@ -114,7 +114,12 @@ frag=$(bash "${RN}" deps 2>/dev/null)
 check "deps fragment is named for the slug" "${FRAG_DIR}/0001-dependency-updates.md" "${frag}"
 check "bumps deduped, prefix stripped, non-deps commits ignored" \
   "[Chores]
-- Dependency updates: left from 1 to 2; right from 3 to 4." "$(cat "${frag}")"
+- Dependency updates:
+
+| Package | From | To |
+|---------|------|----|
+| left    | 1    | 2  |
+| right   | 3    | 4  |" "$(cat "${frag}")"
 # A fragment git has no record of is being written right now.
 check "uncommitted fragment counts as covered" "" "$(bash "${RN}" check 2>&1 >/dev/null)"
 commit_frag 2026-01-10T00:00:00 'changelog: cover the bumps'
@@ -193,6 +198,25 @@ check "window starts at the newest tag" \
 check "explicit since overrides the tag" "${FRAG_DIR}/0001-dependency-updates.md" \
   "$(bash "${RN}" deps v1.0.0 2>/dev/null)"
 
+# A subject that is not "<pkg> from <a> to <b>" (a group bump, dependency work
+# done by hand under the prefix) has no From/To to tabulate, so it is listed
+# under the table rather than forced into a row.
+rm -f "${FRAG_DIR}/0001-dependency-updates.md"
+at 2026-02-04T00:00:00 commit -q --allow-empty -m 'chore(deps): bump the angular group with 18 updates'
+at 2026-02-05T00:00:00 commit -q --allow-empty \
+  -m 'chore(deps): bump qs from 6.15.0 to 6.16.0 in /src/frontend/packages/devkit'
+check "from/to bumps tabulate, other subjects list below" \
+  "[Chores]
+- Dependency updates:
+
+| Package                             | From   | To     |
+|-------------------------------------|--------|--------|
+| qs in /src/frontend/packages/devkit | 6.15.0 | 6.16.0 |
+
+- Other dependency changes:
+  - the angular group with 18 updates" "$(cat "$(bash "${RN}" deps 2>/dev/null)")"
+rm -f "${FRAG_DIR}/0001-dependency-updates.md"
+
 # The tag body is where the notes are actually consumed — `make publish`
 # reads it with %(contents:body), subject excluded. Two silent losses have happened here, both
 # invisible in `release-notes.sh assemble` output and both caught only by
@@ -201,7 +225,10 @@ echo "tag body:"
 mkdir -p "${ROOT_DIR}/build"
 cp "${SCRIPT_DIR}/release-notes.sh" "${SCRIPT_DIR}/create-git-tag.sh" "${ROOT_DIR}/build/"
 rm -f "${FRAG_DIR}"/*.md
-printf '[Breaking Changes]\n- breaks X\n\n[BugFixes]\n- fix A\n' > "${FRAG_DIR}/0001-tagged.md"
+# The fixture carries a table: fragments lay lists out as tables, and a
+# message cleanup that ate blank lines or pipes would break them only here.
+printf '[Breaking Changes]\n- breaks X\n\n[BugFixes]\n- fix A:\n\n| Item | Detail |\n|------|--------|\n| a    | b      |\n' \
+  > "${FRAG_DIR}/0001-tagged.md"
 commit_frag 2026-03-01T00:00:00 'changelog: tag-body fixture'
 TAG_MATCH='v*' bash "${ROOT_DIR}/build/create-git-tag.sh" v9.9.9 >/dev/null 2>&1
 

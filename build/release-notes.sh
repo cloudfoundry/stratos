@@ -143,13 +143,45 @@ cmd_deps() {
   fi
   local file
   file=$(next_file "${DEPS_SLUG}")
-  {
-    echo '[Chores]'
-    printf -- '- Dependency updates: %s.\n' \
-      "$(echo "${subjects}" | paste -sd ';' - | sed 's/;/; /g')"
-  } > "${file}"
+  echo "${subjects}" | deps_fragment > "${file}"
   echo "${file}"
-  echo "Drafted from $(echo "${subjects}" | wc -l | tr -d ' ') bump(s) in $(dep_range "${1:-}") — edit into prose before release." >&2
+  echo "Drafted from $(echo "${subjects}" | wc -l | tr -d ' ') bump(s) in $(dep_range "${1:-}") — review it before release." >&2
+}
+
+# Bumps read as a Package/From/To table, padded so the columns also line up
+# in the plain-text tag body; a run-on sentence of twenty bumps does not.
+# Subjects without a from/to (group bumps, hand-written dependency work) list
+# under the table.
+deps_fragment() {
+  awk '
+    match($0, /^[^ ]+ from [^ ]+ to [^ ]+( in [^ ]+)?$/) {
+      split($0, f, " ")
+      n++; pkg[n] = f[1] (f[7] != "" ? " in " f[7] : ""); from[n] = f[3]; to[n] = f[5]
+      next
+    }
+    { other[++m] = $0 }
+    function pad(s, w) { return sprintf("%-" w "s", s) }
+    function rule(w) { s = ""; for (i = 0; i < w + 2; i++) s = s "-"; return s }
+    END {
+      print "[Chores]"
+      print "- Dependency updates:"
+      if (n) {
+        wp = length("Package"); wf = length("From"); wt = length("To")
+        for (i = 1; i <= n; i++) {
+          if (length(pkg[i]) > wp) wp = length(pkg[i])
+          if (length(from[i]) > wf) wf = length(from[i])
+          if (length(to[i]) > wt) wt = length(to[i])
+        }
+        print ""
+        print "| " pad("Package", wp) " | " pad("From", wf) " | " pad("To", wt) " |"
+        print "|" rule(wp) "|" rule(wf) "|" rule(wt) "|"
+        for (i = 1; i <= n; i++)
+          print "| " pad(pkg[i], wp) " | " pad(from[i], wf) " | " pad(to[i], wt) " |"
+      }
+      if (m && n) { print ""; print "- Other dependency changes:" }
+      for (i = 1; i <= m; i++) print "  - " other[i]
+    }
+  '
 }
 
 # When was dependency work last written up? Answering with a timestamp rather
