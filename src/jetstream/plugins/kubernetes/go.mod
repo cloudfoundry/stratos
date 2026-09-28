@@ -7,7 +7,7 @@ require (
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth v0.0.0-20250312201517-2a076063346f
 	github.com/coder/websocket v1.8.15
 	github.com/google/uuid v1.6.0
-	github.com/labstack/echo/v5 v5.3.1
+	github.com/labstack/echo/v5 v5.4.0
 	github.com/smartystreets/goconvey v1.8.1
 	go.yaml.in/yaml/v4 v4.0.0-rc.6
 	helm.sh/helm/v3 v3.21.4
