@@ -18,7 +18,12 @@
 
 [Chores]
 - The backend moved to Go 1.27.1, and the CI tools image from Go
-  1.26.5 to 1.27.1. Dependency updates: fw-capi 3.229.2, go-sqlite3
+  1.26.5 to 1.27.1. Dependency updates: capi 3.229.2, go-sqlite3
   0.35.6, Helm 3.22.0 with the Kubernetes client libraries 0.37.1,
   the AWS SDK for Go v2 1.47.1 and `code.cloudfoundry.org/clock`
   1.89.0.
+- The CF API client, capi, is taken from the upstream 3.229.2 release
+  instead of a fork. The fork carried the "create a role by username
+  and origin" change ahead of its release; 3.229.2 includes it. Sixteen
+  `replace` directives that no longer affected the build were removed
+  from the backend modules.
