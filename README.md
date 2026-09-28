@@ -43,7 +43,7 @@ Please visit our new [documentation site](https://stratos.app/). There you can d
 - **Node.js 24 or 26** - Required for the build system. The `engines` field is
   `^24 || ^26`, so 25 is not supported.
 - **Bun 1.3.14+** - Package manager ([installation guide](https://bun.sh))
-- **Go 1.27.0+** - For backend development
+- **Go 1.27.1+** - For backend development
 
 These are taken from `engines` in `package.json` and the `go` directive in
 `src/jetstream/go.mod`, which are the versions the build and CI actually use.
