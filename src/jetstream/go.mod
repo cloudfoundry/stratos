@@ -40,7 +40,7 @@ require (
 	github.com/gorilla/sessions v1.4.0
 	github.com/govau/cf-common v0.0.7
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12
-	github.com/labstack/echo/v5 v5.3.1
+	github.com/labstack/echo/v5 v5.4.0
 	github.com/lib/pq v1.12.3
 	github.com/ncruces/go-sqlite3 v0.35.4
 	github.com/pressly/goose v2.7.0+incompatible

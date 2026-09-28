@@ -7,7 +7,7 @@ require (
 	github.com/cloudfoundry/stratos/src/jetstream v0.0.0-00010101000000-000000000000
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
 	github.com/google/uuid v1.6.0
-	github.com/labstack/echo/v5 v5.3.1
+	github.com/labstack/echo/v5 v5.4.0
 	github.com/pressly/goose v2.7.0+incompatible
 	go.yaml.in/yaml/v4 v4.0.0-rc.6
 )

@@ -15,7 +15,7 @@ require (
 	code.cloudfoundry.org/clock v1.87.0
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
 	github.com/coder/websocket v1.8.15
-	github.com/labstack/echo/v5 v5.3.1
+	github.com/labstack/echo/v5 v5.4.0
 	github.com/mholt/archives v0.1.5
 	go.yaml.in/yaml/v4 v4.0.0-rc.6
 )
