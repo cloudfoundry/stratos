@@ -2,13 +2,7 @@ module github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush
 
 go 1.27.1
 
-replace (
-	github.com/cloudfoundry/cli-plugin-repo => code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e
-	github.com/cloudfoundry/stratos/src/jetstream/api => ../../api
-	github.com/moby/moby => github.com/moby/moby v20.10.25+incompatible
-	github.com/sabhiram/go-gitignore => github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
-	github.com/vito/go-interact => github.com/vito/go-interact v1.0.0
-)
+replace github.com/cloudfoundry/stratos/src/jetstream/api => ../../api
 
 require (
 	code.cloudfoundry.org/cli/v8 v8.19.0
