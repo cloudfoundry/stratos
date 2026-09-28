@@ -68,7 +68,7 @@ Preview the assembled notes any time:
 
 Dependabot opens PRs but never runs this tooling, so its bumps are read out
 of the commit log instead of being authored per PR — they are identified by
-the `chore(deps)` commit prefix pinned in `.github/dependabot.yaml`.
+the `chore(deps)` commit prefix pinned in `.github/dependabot.yml`.
 
 ```bash
 ./build/release-notes.sh check   # how many bumps since the last release tag

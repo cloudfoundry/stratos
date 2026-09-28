@@ -122,7 +122,7 @@ dep_range() {
 }
 
 # Bump subjects in the window, prefix stripped, deduped, oldest first.
-# Keyed on the commit-message prefix pinned in .github/dependabot.yaml,
+# Keyed on the commit-message prefix pinned in .github/dependabot.yml,
 # which also catches dependency work done by hand under the same prefix —
 # for a changelog bullet that is wanted, not a miss.
 dep_subjects() {

@@ -1,4 +1,11 @@
 version: 2
+
+# The commit-message prefix is pinned on every ecosystem below, not left to
+# Dependabot's default: build/release-notes.sh reads the bumps for a release
+# window straight out of the commit log with `--grep '^chore(deps'`, since
+# Dependabot opens PRs but never runs the fragment tooling itself. Change a
+# prefix here and those bumps stop reaching the release notes.
+
 updates:
   # Root JS dependencies install with bun; the npm-style default updater
   # edits only package.json and fails the frozen bun.lock CI install.
@@ -6,6 +13,9 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
     groups:
       # The Angular packages only work in lockstep; one-at-a-time bumps
       # produce mutually incompatible PRs.
@@ -24,6 +34,9 @@ updates:
     directory: "/src/frontend/packages/devkit"
     schedule:
       interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
     groups:
       angular-devkit:
         patterns:
@@ -33,3 +46,47 @@ updates:
       # The devkit TypeScript follows the root toolchain's major.
       - dependency-name: "typescript"
         update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: "bun"
+    directory: "/website"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    open-pull-requests-limit: 2
+    groups: # one grouped PR so the site's dep tree doesn't dominate the list
+      website:
+        patterns:
+          - "*"
+
+  # Every go.mod is listed: `directory` covers one module and gomod does not
+  # recurse, so the single src/jetstream entry left the other six unwatched.
+  # x/text CVE-2026-56852, x/net CVE-2026-46600 and oras-go CVE-2026-50163
+  # all sat in those modules and had to be found with a local trivy run.
+  # Keep this list in step with `find src/jetstream -name go.mod`.
+  - package-ecosystem: "gomod"
+    directories:
+      - "/src/jetstream"
+      - "/src/jetstream/api"
+      - "/src/jetstream/plugins/analysis/container"
+      - "/src/jetstream/plugins/cfapppush"
+      - "/src/jetstream/plugins/kubernetes"
+      - "/src/jetstream/plugins/kubernetes/auth"
+      - "/src/jetstream/plugins/monocular"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    groups:
+      # One PR a week across all seven modules: they share most of their
+      # graph, and a bump landed in one module but not its neighbours
+      # leaves the replace-linked build on mixed versions.
+      go:
+        patterns:
+          - "*"
+    ignore:
+      # The modules require each other through replace directives, so
+      # their pseudo-versions carry no meaning.
+      - dependency-name: "github.com/cloudfoundry/stratos/*"
