@@ -58,6 +58,33 @@ Valid sections, in the order they appear in the published notes:
 A section appears in the published notes only when at least one fragment
 contributes to it. Unknown section headers fail assembly loudly.
 
+### Lists read as columns, not sentences
+
+When an entry covers several items, lay them out instead of chaining them
+into one sentence:
+
+- **Version moves** → a table with `From` and `To` columns.
+- **Named items with a meaning** (advisories, removed pins, renamed
+  files) → a two-column table, such as `Advisory | What it fixes`.
+- **A short list of plain items** → a nested list under the bullet.
+
+Keep the explanation as bullets around the table. Pad the columns so they
+line up: the notes are also read as plain text in the release tag. Long
+links go in reference form (`[GHSA-xxxx]` in the cell, the URL below the
+table) so the table stays narrow.
+
+```markdown
+[Chores]
+- Backend dependency updates:
+
+| Component  | From   | To     |
+|------------|--------|--------|
+| Helm       | 3.21.4 | 3.22.0 |
+| go-sqlite3 | 0.35.4 | 0.35.6 |
+
+- capi now comes from its upstream release instead of a fork.
+```
+
 Preview the assembled notes any time:
 
 ```bash
@@ -80,8 +107,11 @@ worth a build yet?". It also runs automatically during `make stamp tag`,
 before the notes are frozen into the tag body, and warns there if bumps
 landed that no fragment mentions. It only ever warns — it never blocks.
 
-`deps` writes a draft, one bump per clause. Edit it into prose before the
-release; the prose is what ships. Both commands take an optional starting
+`deps` writes a draft: a `Package | From | To` table of the bumps, with
+any subject that has no from/to (a group bump, dependency work done by
+hand) listed under it. Review it before the release — merge rows, add
+context, move a security bump to `[Security Updates]`; the fragment is
+what ships. Both commands take an optional starting
 ref (`./build/release-notes.sh deps v5.0.0-dev.147`) when the window should
 not be the last tag.
 
