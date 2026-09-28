@@ -10,20 +10,20 @@
 [![Latest Release](https://img.shields.io/github/v/release/cloudfoundry/stratos)](https://github.com/cloudfoundry/stratos/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-# Roadmap
+## Roadmap
 
-Angualr 20 upgrade of frontend code is completed, working on supporting elements.
+Angular 22 upgrade of frontend code is completed, working on supporting elements.
 
 1. Convert GoLang backend (Jetstream) to use Cloud Foundry V3 API and remove V2 API calls
 1. Convert Frontend to call either Jetstream API or V3 API directly. V3 API calls can require more roundtrips than the V2 APIs they replace.
 
 (Please note:  The official repository is at cloudfoundry/stratos and the cloudfoundry-community/stratos will track this but may be used for some testing purposes)
 
-# About
+## About
 
 Stratos is an Open Source Web-based UI (Console) for managing Cloud Foundry. It allows users and administrators to both manage applications running in the Cloud Foundry cluster and perform cluster management tasks.
 
-![Stratos Application view](website/static/images/screenshots/app-summary.png)
+![Stratos Application view](docs/images/screenshots/app-summary.png)
 
 Please visit our new [documentation site](https://stratos.app/). There you can discover (* This is currently being updated from the 4.4.0 docs)
 
@@ -32,7 +32,7 @@ Please visit our new [documentation site](https://stratos.app/). There you can d
     1. [Cloud Foundry](https://stratos.app/docs/deploy/cloud-foundry/cloud-foundry), as an application. (Recommended)
     1. [Kubernetes](https://stratos.app/docs/deploy/kubernetes), using a Helm chart.
     1. [Docker](https://stratos.app/docs/deploy/all-in-one), as a single container deploying all components.
-1. Configuring advanced features such a [Single Sign On](https://stratos.app/docs/advanced/sso) and Cloud Foundry '[invite to org](https://stratos.app/docs/advanced/invite-user-guide)'.
+1. Configuring advanced features such as [Single Sign On](https://stratos.app/docs/advanced/sso) and Cloud Foundry '[invite to org](https://stratos.app/docs/advanced/invite-user-guide)'.
 1. Guides for [developers](https://stratos.app/docs/developer/introduction).
 1. How to [extend](https://stratos.app/docs/extensions/introduction) Stratos [functionality](https://stratos.app/docs/extensions/frontend) and apply a custom [theme](https://stratos.app/docs/extensions/theming).
 
@@ -43,7 +43,7 @@ Please visit our new [documentation site](https://stratos.app/). There you can d
 - **Node.js 24 or 26** - Required for the build system. The `engines` field is
   `^24 || ^26`, so 25 is not supported.
 - **Bun 1.3.14+** - Package manager ([installation guide](https://bun.sh))
-- **Go 1.26.3+** - For backend development
+- **Go 1.27.0+** - For backend development
 
 These are taken from `engines` in `package.json` and the `go` directive in
 `src/jetstream/go.mod`, which are the versions the build and CI actually use.
@@ -71,6 +71,7 @@ make dev-frontend
 ```
 
 **What bootstrap does:**
+
 1. Verifies prerequisites (Node.js, Bun, Go)
 2. Builds the devkit package (required by Angular CLI)
 3. Generates extension module imports
@@ -79,6 +80,7 @@ make dev-frontend
 6. Cleans up workspace
 
 **Troubleshooting:**
+
 - If `bun install` fails with missing files: Run `make bootstrap` first
 - If builds fail with "File not found" errors: Run `make bootstrap`
 - Bootstrap only needs to run once per checkout
@@ -127,10 +129,9 @@ For more detailed information, see [CLAUDE.md](CLAUDE.md).
 
 Tested with Browserstack
 
-<a href="https://www.browserstack.com"><img width="240px" src="website/static/images/Browserstack-logo.svg" alt="Browserstack"></a>
+<a href="https://www.browserstack.com"><img width="240px" src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" alt="Browserstack"></a>
 
-# Stratos UI pre-packager
-
+## Stratos UI pre-packager
 
 This feature helps in pre-building the
 [Stratos](https://github.com/cloudfoundry/stratos) web application
@@ -148,6 +149,7 @@ uses `binary_buildpack` and builds nothing during staging. The old
 `stratos-buildpack` source-push path is no longer used.
 
 Here is an example app manifest:
+
 ```yaml
 applications:
   - name: console
@@ -160,10 +162,12 @@ applications:
     health-check-type: port
 ```
 
-For best results rather than pushing manually instead use within the (Genesis CF Kit)[https://github.com/genesis-community/cf-genesis-kit] like so:
-```
+For best results rather than pushing manually instead use within the [Genesis CF Kit](https://github.com/genesis-community/cf-genesis-kit) like so:
+
+```bash
 genesis <env-name> do stratos sgs
 ```
+
 Note: `sgs` creates security groups the first time, upgrades do not use `sgs`.
 
 ## Packaging
@@ -190,7 +194,7 @@ VERSION="4.8.1" bin/package
 
 This produces per-target zips in `dist/`:
 
-```
+```text
 dist/stratos-cf-<version>-<os>-<arch>.zip
 ```
 
@@ -202,11 +206,11 @@ cf push -f dist/cf-package-<os>-<arch>/manifest.yml \
 ```
 
 ### NOTE
+
 The original packaging code was based on work from the
 [Orange Cloud Foundry Github Repository](https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/).
 Many thanks to Benjamin & Arthur, we appreciate you both!
 
 ## License
 
-The work done has been re-licensed under MIT License. The license file can be found [here](LICENSE).
-
+The work done has been re-licensed under the [MIT License](LICENSE).
