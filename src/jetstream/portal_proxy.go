@@ -8,9 +8,9 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys"
 	"github.com/gorilla/sessions"
-	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
 )
 

@@ -14,13 +14,10 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.2.0 // indirect
-	github.com/cloudfoundry-community/go-cfenv v1.24.3 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
 	github.com/go-sql-driver/mysql v1.10.1 // indirect
-	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/gorilla/sessions v1.4.0 // indirect
-	github.com/govau/cf-common v0.0.7 // indirect
 	github.com/kat-co/vala v0.0.0-20170210184112-42e1d8b61f12 // indirect
 	github.com/lib/pq v1.12.3 // indirect
 	github.com/ncruces/go-sqlite3 v0.35.6 // indirect

@@ -14,8 +14,8 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/custom_errors"
 	"github.com/samber/lo"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
-	"github.com/govau/cf-common/env"
 
 	// Mysql driver
 	_ "github.com/go-sql-driver/mysql"

@@ -11,11 +11,11 @@ import (
 	"strconv"
 
 	"github.com/google/uuid"
-	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/console_config"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
