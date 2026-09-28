@@ -9,7 +9,7 @@ There are two main forms of contribution: reporting issues and performing code c
 If you find a problem with Stratos, report it using [GitHub issues](https://github.com/cloudfoundry/stratos/issues/new).
 
 Before reporting a new issue, please take a moment to check whether it has already been reported
-[here](https://github.com/cloudfoundry/stratos/issues). If this is the case, please:
+in the [issue tracker](https://github.com/cloudfoundry/stratos/issues). If this is the case, please:
 
 - Read all the comments to confirm that it's the same issue you're having.
 - Refrain from adding "same thing here" or "+1" comments. Just hit the
@@ -109,11 +109,11 @@ user would notice, add one.
 
 ### Development environment
 
-| Tool | Version |
-|------|---------|
+| Tool | Version        |
+|------|----------------|
 | Node | `^24` or `^26` |
-| bun  | `>= 1.3.14` |
-| Go   | `1.26.3` |
+| bun  | `>= 1.3.14`    |
+| Go   | `1.27.0`       |
 
 `bun install` at the repository root sets up the frontend and the build
 tooling. `make help` lists every available target.
@@ -180,7 +180,7 @@ signature certifies that you wrote the change or otherwise have the right to pas
 it on as an open-source change. The rules are pretty simple: if you can certify
 the below (from [developercertificate.org](http://developercertificate.org/)):
 
-```
+```text
 Developer Certificate of Origin
 Version 1.1
 
@@ -220,7 +220,9 @@ By making a contribution to this project, I certify that:
 
 Then you just add a line to each git commit message:
 
-    Signed-off-by: Joe Smith <joe.smith@email.com>
+```text
+Signed-off-by: Joe Smith <joe.smith@email.com>
+```
 
 Use your real name (sorry, no pseudonyms or anonymous contributions.)
 
