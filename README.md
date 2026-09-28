@@ -129,7 +129,7 @@ For more detailed information, see [CLAUDE.md](CLAUDE.md).
 
 Tested with Browserstack
 
-<a href="https://www.browserstack.com"><img width="240px" src="https://www.browserstack.com/images/layout/browserstack-logo-600x315.png" alt="Browserstack"></a>
+<a href="https://www.browserstack.com"><img width="240px" src="docs/images/Browserstack-logo.svg" alt="Browserstack"></a>
 
 ## Stratos UI pre-packager
 
