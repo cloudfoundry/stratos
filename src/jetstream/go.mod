@@ -4,21 +4,10 @@ go 1.27.1
 
 replace (
 	github.com/cloudfoundry/stratos/src/jetstream/api => ./api
-	github.com/cloudfoundry/stratos/src/jetstream/api/config => ./api/config
-	github.com/cloudfoundry/stratos/src/jetstream/crypto => ./crypto
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/cfapppush => ./plugins/cfapppush
-	github.com/cloudfoundry/stratos/src/jetstream/plugins/cloudfoundry => ./plugins/cloudfoundry
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes => ./plugins/kubernetes
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/auth => ./plugins/kubernetes/auth
-	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes/terminal => ./plugins/kubernetes/terminal
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular => ./plugins/monocular
-)
-
-// ported from plugins/kubernetes
-replace (
-	code.cloudfoundry.org/go-log-cache => code.cloudfoundry.org/go-log-cache v1.0.1-0.20211011162012-ede82a99d3cc
-	github.com/sabhiram/go-gitignore => github.com/sabhiram/go-gitignore v0.0.0-20180611051255-d3107576ba94
-	github.com/vito/go-interact => github.com/vito/go-interact v1.0.0
 )
 
 require (
