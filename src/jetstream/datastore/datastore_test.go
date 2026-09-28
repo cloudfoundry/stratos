@@ -10,7 +10,7 @@ import (
 
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/govau/cf-common/env"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	. "github.com/smartystreets/goconvey/convey"
 )
 

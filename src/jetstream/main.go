@@ -29,13 +29,13 @@ import (
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
 	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/govau/cf-common/env"
 	"github.com/labstack/echo/v5"
 	"github.com/labstack/echo/v5/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry/stratos/src/jetstream/factory"
@@ -188,7 +188,7 @@ func getEnvironmentLookup() *env.VarSet {
 	// If running in CloudFoundry, fallback to a user provided service (if set)
 	cfApp, err := cfenv.Current()
 	if err == nil {
-		envLookup.AppendSource(env.NewLookupFromUPS(cfApp, os.Getenv("CF_UPS_NAME")))
+		envLookup.AppendSource(upsLookup(cfApp, os.Getenv("CF_UPS_NAME")))
 	}
 
 	// Fallback to a "config.properties" files in our directory
@@ -198,6 +198,27 @@ func getEnvironmentLookup() *env.VarSet {
 	envLookup.AppendSource(config.NewSecretsDirLookup("/etc/secrets"))
 
 	return envLookup
+}
+
+// upsLookup reads settings from the credentials of the bound service called
+// name, typically a user-provided service. Without that binding it finds
+// nothing. Credentials are JSON values, so each is formatted as a string;
+// arrays and objects do not survive that and cannot be used as settings.
+func upsLookup(app *cfenv.App, name string) env.Lookup {
+	if app == nil {
+		return env.NoopLookup
+	}
+	service, err := app.Services.WithName(name)
+	if err != nil {
+		return env.NoopLookup
+	}
+	return func(key string) (string, bool) {
+		val, ok := service.Credentials[key]
+		if !ok {
+			return "", false
+		}
+		return fmt.Sprintf("%v", val), true
+	}
 }
 
 // logLevel backs the installed handler so LOG_LEVEL can be applied after the

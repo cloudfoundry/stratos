@@ -4,9 +4,8 @@ import (
 	"log/slog"
 	"strconv"
 
-	"github.com/govau/cf-common/env"
-
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 )
 
 const (
