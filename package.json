@@ -201,7 +201,7 @@
     "browserstack-local": "1.5.15",
     "copy-webpack-plugin": "14.0.0",
     "eslint": "^10.11.0",
-    "fs-extra": "11.4.0",
+    "fs-extra": "11.4.1",
     "happy-dom": "^20.14.0",
     "js-yaml": "5.4.2",
     "jsdom": "^30.0.1",
