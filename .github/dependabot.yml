@@ -23,6 +23,12 @@ updates:
         patterns:
           - "@angular*"
           - "@schematics/*"
+      # Vitest 5 peers @vitest/coverage-v8 and @vitest/ui at exactly its
+      # own version, so a vitest-only PR (5963) leaves them mismatched.
+      vitest:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
     ignore:
       # TypeScript majors are pinned by Angular's supported range; they move
       # with the framework upgrade, not on their own.
