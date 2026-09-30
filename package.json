@@ -102,7 +102,7 @@
     "serialize-javascript": "^7.0.5",
     "ip-address": "^10.3.1",
     "picomatch": "^4.0.4",
-    "fast-uri": "^3.1.5",
+    "fast-uri": "^3.1.8",
     "qs": "^6.15.3",
     "follow-redirects": "^1.16.0",
     "@tootallnate/once": "^3.0.1",
