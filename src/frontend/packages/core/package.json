@@ -20,7 +20,7 @@
     "core-js": "3.50.0",
     "lodash-es": "4.18.1",
     "mappy-breakpoints": "0.2.4",
-    "marked": "18.0.12",
+    "marked": "18.0.14",
     "intersect": "1.0.1",
     "normalizr": "3.6.2",
     "rxjs": "7.8.2",
