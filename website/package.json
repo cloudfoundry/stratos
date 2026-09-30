@@ -66,7 +66,7 @@
     "brace-expansion": "^1.1.17",
     "undici": "^7.29.0",
     "serialize-javascript": "^7.0.5",
-    "fast-uri": "^3.1.5",
+    "fast-uri": "^3.1.8",
     "svgo": "^3.3.4",
     "postcss": "^8.5.25"
   }
