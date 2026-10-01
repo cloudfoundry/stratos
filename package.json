@@ -1,6 +1,6 @@
 {
   "name": "stratos",
-  "version": "5.5.4+build.20260923.35f81d6270",
+  "version": "5.5.5+build.20261001.e80ce014a5",
   "type": "module",
   "description": "Stratos Console",
   "main": "index.js",
