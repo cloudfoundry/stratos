@@ -105,7 +105,10 @@ the `chore(deps)` commit prefix pinned in `.github/dependabot.yml`.
 `check` is safe to run at any time and answers "has enough piled up to be
 worth a build yet?". It also runs automatically during `make stamp tag`,
 before the notes are frozen into the tag body, and warns there if bumps
-landed that no fragment mentions. It only ever warns — it never blocks.
+landed that no fragment mentions. A fragment counts as covering every bump
+older than it, so `check` also notes each bumped package that no fragment
+names (`NOTE: not named in any fragment: eslint`) — confirm the prose
+covers it, or add a row. It only ever warns — it never blocks.
 
 `deps` writes a draft: a `Package | From | To` table of the bumps, with
 any subject that has no from/to (a group bump, dependency work done by

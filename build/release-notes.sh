@@ -218,11 +218,18 @@ newest_dep_bump_time() {
 # release" is the question that decides whether a patch build is due, and it
 # needs answering between releases, not only at tag time.
 cmd_check() {
-  local n frag bump why
+  local n unnamed
   n=$(dep_subjects "${1:-}" | wc -l | tr -d ' ')
   echo "changelog.d: ${n} dependency bump(s) in $(dep_range "${1:-}")"
   [ "${n}" -gt 0 ] || return 0
 
+  warn_if_behind "${1:-}"
+  unnamed=$(unnamed_packages "${1:-}" | paste -sd ',' - | sed 's/,/, /g')
+  [ -z "${unnamed}" ] || echo "NOTE: not named in any fragment: ${unnamed}" >&2
+}
+
+warn_if_behind() {
+  local frag bump why
   frag=$(newest_deps_fragment_time || true)
   [ "${frag}" = uncommitted ] && return 0
   bump=$(newest_dep_bump_time "${1:-}" || true)
@@ -232,6 +239,27 @@ cmd_check() {
   [ -n "${frag}" ] && why='some landed after the newest fragment that mentions them'
   echo "WARNING: ${why}, so they will not" >&2
   echo "         appear in the release notes. Draft them: ./build/release-notes.sh deps" >&2
+}
+
+# The timestamp above says a fragment is newer than every bump, not that it
+# describes them: a later dependency fragment silences it for every earlier
+# bump, which is how eslint 10.11.0 nearly missed the v5.5.5 notes. Package
+# names survive the rewrite of a draft into a curated table, so a bump whose
+# package no fragment names is listed — as a note, since prose that names no
+# package is still valid coverage. A name only counts as a whole word
+# (typescript-eslint does not name eslint). A group bump has no single
+# package to look for and is left to the timestamp.
+unnamed_packages() {
+  local files pkg re
+  files=$(fragments)
+  dep_subjects "${1:-}" \
+    | awk '/^[^ ]+ from [^ ]+ to [^ ]+( in [^ ]+)?$/ && !seen[$1]++ {print $1}' \
+    | while read -r pkg; do
+        re=${pkg//./\\.}
+        # shellcheck disable=SC2086  # fragment paths contain no whitespace
+        [ -n "${files}" ] && grep -qE "(^|[^[:alnum:]@/._-])${re}([^[:alnum:]/._-]|\$)" ${files} && continue
+        echo "${pkg}"
+      done
 }
 
 cmd_assemble() {
