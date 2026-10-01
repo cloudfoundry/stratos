@@ -126,10 +126,14 @@ commit_frag 2026-01-10T00:00:00 'changelog: cover the bumps'
 check "drafted fragment silences check" "" "$(bash "${RN}" check 2>&1 >/dev/null)"
 # The draft is meant to be rewritten; prose that drops the raw subjects must
 # still count as covered, or every well-curated release warns.
-check "hand-written prose still counts as covered" "" \
+check "hand-written prose still counts as covered" "0" \
   "$(printf '[Chores]\n- Routine dependency updates (#1, #2).\n' > "${frag}"
      commit_frag 2026-01-11T00:00:00 'changelog: rewrite into prose'
-     bash "${RN}" check 2>&1 >/dev/null)"
+     bash "${RN}" check 2>&1 >/dev/null | grep -c '^WARNING')"
+# Covered is not the same as described: prose that names no package gets a
+# note listing them, so a reviewer can confirm the prose really covers them.
+check "packages the prose does not name are noted" \
+  "NOTE: not named in any fragment: left, right" "$(bash "${RN}" check 2>&1 >/dev/null)"
 check "unrelated fragment does not count as covered" "1" \
   "$(printf '[Features]\n- a feature\n' > "${frag}"
      commit_frag 2026-01-12T00:00:00 'changelog: unrelated'
@@ -146,8 +150,8 @@ check "count reported on stdout regardless of coverage" \
 echo "check ordering:"
 printf '[Chores]\n- Routine dependency updates (#1, #2).\n' > "${frag}"
 commit_frag 2026-01-13T00:00:00 'changelog: cover the bumps again'
-check "fragment newer than every bump is covered" "" \
-  "$(bash "${RN}" check 2>&1 >/dev/null)"
+check "fragment newer than every bump is covered" "0" \
+  "$(bash "${RN}" check 2>&1 >/dev/null | grep -c '^WARNING')"
 at 2026-01-14T00:00:00 commit -q --allow-empty -m 'chore(deps): bump late from 5 to 6'
 check "bump landing after the fragment warns" "1" \
   "$(bash "${RN}" check 2>&1 >/dev/null | grep -c '^WARNING')"
@@ -155,15 +159,38 @@ check "the warning says the fragment is behind, not missing" "1" \
   "$(bash "${RN}" check 2>&1 >/dev/null | grep -c 'landed after')"
 printf '[Chores]\n- Routine dependency updates (#1, #2, #3).\n' > "${frag}"
 commit_frag 2026-01-15T00:00:00 'changelog: cover the late bump'
-check "re-touching the fragment re-covers it" "" \
-  "$(bash "${RN}" check 2>&1 >/dev/null)"
+check "re-touching the fragment re-covers it" "0" \
+  "$(bash "${RN}" check 2>&1 >/dev/null | grep -c '^WARNING')"
 # A fragment left over from an already-published window is older than every
 # bump in the current one, so it no longer silences the report.
 at 2026-01-16T00:00:00 commit -q --allow-empty -m 'chore(deps): bump newer from 7 to 8'
 check "stale fragment from a past window does not cover" "1" \
   "$(bash "${RN}" check 2>&1 >/dev/null | grep -c '^WARNING')"
+# A later dependency fragment silences the timestamp check for every earlier
+# bump, described or not — v5.5.5 nearly shipped without eslint 10.11.0 that
+# way. Package names survive a rewrite of the draft, so a bump whose package
+# no fragment names is listed, without turning it into a warning.
+echo "check names:"
+at 2026-01-18T00:00:00 commit -q --allow-empty -m 'chore(deps-dev): bump eslint from 10.10.0 to 10.11.0'
+# shellcheck disable=SC2016  # literal backticks: markdown code spans
+printf '[Chores]\n- Dependency updates:\n\n| Package | From | To |\n|---|---|---|\n| `left` | 1 | 2 |\n| `right` | 3 | 4 |\n| `late` | 5 | 6 |\n| `newer` | 7 | 8 |\n| `typescript-eslint` | 1 | 2 |\n' > "${frag}"
+commit_frag 2026-01-19T00:00:00 'changelog: a later fragment that misses eslint'
+check "a later fragment still silences the warning" "0" \
+  "$(bash "${RN}" check 2>&1 >/dev/null | grep -c '^WARNING')"
+check "the bump it does not name is noted, not a name it contains" \
+  "NOTE: not named in any fragment: eslint" "$(bash "${RN}" check 2>&1 >/dev/null)"
+# A group bump has no single package to look for; the timestamp covers it.
+at 2026-01-20T00:00:00 commit -q --allow-empty -m 'chore(deps): bump the website group with 8 updates'
+printf '\n- The website group moved too.\n' >> "${frag}"
+commit_frag 2026-01-21T00:00:00 'changelog: cover the group bump'
+check "group bumps are not noted" \
+  "NOTE: not named in any fragment: eslint" "$(bash "${RN}" check 2>&1 >/dev/null)"
+# shellcheck disable=SC2016  # literal backticks: markdown code spans
+printf '| `eslint` | 10.10.0 | 10.11.0 |\n' >> "${frag}"
+commit_frag 2026-01-21T12:00:00 'changelog: name eslint'
+check "naming every package clears the note" "" "$(bash "${RN}" check 2>&1 >/dev/null)"
 rm "${frag}"
-commit_frag 2026-01-17T00:00:00 'changelog: sweep'
+commit_frag 2026-01-22T00:00:00 'changelog: sweep'
 
 # Assembly order follows when a fragment LANDED, not its NNNN prefix. A
 # contributor cannot know the merge order at authoring time, so a fragment
