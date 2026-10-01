@@ -192,8 +192,8 @@
     "@types/node": "26.6.3",
     "@types/pngjs": "^6.0.5",
     "@types/webpack": "^5.28.5",
-    "@vitest/coverage-v8": "^5.0.2",
-    "@vitest/ui": "5.0.2",
+    "@vitest/coverage-v8": "^5.0.3",
+    "@vitest/ui": "5.0.3",
     "acorn": "8.18.0",
     "adm-zip": "0.6.1",
     "angular-eslint": "22.5.0",
@@ -215,7 +215,7 @@
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.70.1",
-    "vitest": "^5.0.2"
+    "vitest": "^5.0.3"
   },
   "patchedDependencies": {
     "monaco-worker-manager@2.0.1": "patches/monaco-worker-manager@2.0.1.patch"
