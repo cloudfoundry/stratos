@@ -210,7 +210,7 @@
     "ng-packagr": "22.2.3",
     "pixelmatch": "^7.2.0",
     "pngjs": "^7.0.0",
-    "sass": "^1.105.0",
+    "sass": "^1.105.1",
     "sass-loader": "^17.0.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
