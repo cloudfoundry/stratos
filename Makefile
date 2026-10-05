@@ -396,7 +396,7 @@ include $($(_HIDE)ACTIONS).mk
 
 define build.frontend
 	@echo "Building frontend (production)..."
-	bun run build
+	node scripts/check-build-warnings.mjs
 	@echo "Frontend built: $($(_HIDE)DIST_DIR)/frontend/browser/"
 endef
 $(call register, build, frontend, $(_HIDE)stamp.frontend)
