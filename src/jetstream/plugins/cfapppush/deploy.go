@@ -189,7 +189,7 @@ func (cfAppPush *CFAppPush) deploy(echoContext *echo.Context) error {
 	stratosProject.DeployOverrides = overrides
 
 	// Source fetched - read manifest
-	manifest, manifestFile, err := fetchManifest(appDir, stratosProject, clientWebSocket)
+	manifest, manifestFile, err := fetchManifest(appDir, overrides.Name, stratosProject, clientWebSocket)
 	if err != nil {
 		slog.Warn("cf push: failed to find the manifest file", "appDir", appDir, "error", err)
 		sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
@@ -583,24 +583,7 @@ func getDockerURLSource(clientWebSocket *websocket.Conn, tempDir string, msg Soc
 	slog.Debug("cf push: docker image source", "image", info.DockerImage, "username", info.DockerUsername)
 
 	// Create a manifest using the application name. This sets up the environment as if it were a git clone
-	applicationData := RawManifestApplication{
-		Name: info.ApplicationName,
-	}
-
-	manifest := Applications{
-		Applications: []RawManifestApplication{applicationData},
-	}
-
-	marshalledYaml, err := yaml.Dump(manifest)
-	if err != nil {
-		return StratosProject{}, tempDir, err
-	}
-
-	manifestPath := fmt.Sprintf("%s/manifest.yml", tempDir)
-
-	err = os.WriteFile(manifestPath, marshalledYaml, 0600)
-	if err != nil {
-		slog.Warn("cf push: failed to write the generated manifest", "path", manifestPath, "error", err)
+	if _, err = writeMinimalManifest(tempDir, info.ApplicationName); err != nil {
 		return StratosProject{}, tempDir, err
 	}
 
@@ -734,17 +717,62 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
-// This assumes manifest lives in the root of the app
-func fetchManifest(repoPath string, stratosProject StratosProject, clientWebSocket *websocket.Conn) (Applications, string, error) {
+var errNoManifest = errors.New("no manifest.yml or manifest.yaml was found and no application name was given")
+
+// writeMinimalManifest writes a manifest.yml naming a single application into
+// dir and returns its path.
+func writeMinimalManifest(dir, appName string) (string, error) {
+	manifest := Applications{
+		Applications: []RawManifestApplication{{Name: appName}},
+	}
+	marshalledYaml, err := yaml.Dump(manifest)
+	if err != nil {
+		return "", err
+	}
+	manifestPath := filepath.Join(dir, "manifest.yml")
+	if err := os.WriteFile(manifestPath, marshalledYaml, 0600); err != nil {
+		slog.Warn("cf push: failed to write the generated manifest", "path", manifestPath, "error", err)
+		return "", err
+	}
+	return manifestPath, nil
+}
+
+// locateManifest finds manifest.yml or manifest.yaml in the root of the app.
+// Like `cf push <name>`, a missing manifest is not an error when an app name
+// was given: a minimal manifest is generated from the name instead, so the
+// source metadata and route override still have a manifest to go into.
+func locateManifest(repoPath, appName string) (string, bool, error) {
+	for _, name := range []string{"manifest.yml", "manifest.yaml"} {
+		if manifestPath := filepath.Join(repoPath, name); fileExists(manifestPath) {
+			return manifestPath, false, nil
+		}
+	}
+	if strings.TrimSpace(appName) == "" {
+		return "", false, errNoManifest
+	}
+	manifestPath, err := writeMinimalManifest(repoPath, appName)
+	return manifestPath, err == nil, err
+}
+
+func fetchManifest(repoPath string, appName string, stratosProject StratosProject, clientWebSocket *websocket.Conn) (Applications, string, error) {
 
 	var manifest Applications
 
-	// Can be either manifest.yml or manifest.yaml
-	manifestPath := filepath.Join(repoPath, "manifest.yml")
-	if !fileExists(manifestPath) {
-		manifestPath = filepath.Join(repoPath, "manifest.yaml")
-		if !fileExists(manifestPath) {
-			return manifest, manifestPath, fmt.Errorf("can not find manifest file")
+	manifestPath, generated, err := locateManifest(repoPath, appName)
+	if err != nil {
+		slog.Warn("cf push: no manifest to deploy with", "path", repoPath, "error", err)
+		closeType := CLOSE_FAILURE
+		if errors.Is(err, errNoManifest) {
+			closeType = CLOSE_NO_MANIFEST
+		}
+		sendErrorMessage(clientWebSocket, err, closeType)
+		return manifest, manifestPath, err
+	}
+	if generated {
+		slog.Info("cf push: no manifest found, deploying with a generated one", "path", manifestPath)
+		warning, _ := getMarshalledSocketMessage("Warning: no manifest.yml or manifest.yaml was found, deploying with the settings from the wizard\n", DATA)
+		if err := api.WriteText(clientWebSocket, warning); err != nil {
+			slog.Warn("cf push: failed to write the no-manifest warning to the web socket", "error", err)
 		}
 	}
 
