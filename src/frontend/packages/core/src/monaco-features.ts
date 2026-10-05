@@ -21,7 +21,9 @@
  * Stratos. (The diff editor widget is not imported here either, but
  * editor.js pulls it in via createDiffEditor — dropping it needs an
  * upstream change.) Re-diff this list against features/register.all.js
- * on every monaco upgrade.
+ * on every monaco upgrade, and compare the editor chunk's size before and
+ * after against the anyScript budget in angular.json: an upgrade that
+ * grows the chunk past it fails the production build.
  */
 import 'monaco-editor/editor/browser/coreCommands.js';
 import 'monaco-editor/features/codeEditor/register.js';
