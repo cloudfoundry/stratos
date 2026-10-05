@@ -402,7 +402,7 @@ export class DeployApplicationDeployer {
         break;
       case SocketEventTypes.CLOSE_NO_MANIFEST:
         this.onClose(log, 'Deploy Failed - No manifest present!',
-          'Failed to deploy app! Please make sure that a valid manifest.yaml is present.');
+          'Failed to deploy app! Add a manifest.yml to the source or enter an application name.');
         break;
       case SocketEventTypes.CLOSE_FAILED_CLONE:
         this.onClose(log, 'Deploy Failed - Failed to clone repository!',
