@@ -171,14 +171,39 @@ describe('CfAppRoutesSignalConfigService', () => {
     const { svc } = configure();
     const cols = svc.buildColumns();
     const keys = cols.map(c => c.key);
-    expect(keys).toEqual(['host', 'domain', 'path', 'port', 'apps', 'actions']);
+    expect(keys).toEqual(['url', 'host', 'domain', 'path', 'port', 'apps', 'actions']);
   });
 
   it('columns expose sortField for host, domain, path, port, apps', () => {
     const { svc } = configure();
     const cols = svc.buildColumns();
     const sortable = cols.filter(c => c.sortField != null).map(c => c.key);
-    expect(sortable).toEqual(['host', 'domain', 'path', 'port', 'apps']);
+    expect(sortable).toEqual(['url', 'host', 'domain', 'path', 'port', 'apps']);
+  });
+
+  // The full route URL, linked so it can be opened or copied: the legacy
+  // route cell did this and the signal-list migration dropped it.
+  it('Route column renders the full URL and links HTTP routes over https', () => {
+    const { svc } = configure();
+    const routeCol = svc.buildColumns().find(c => c.key === 'url')!;
+    const row = makeRoute();
+    expect(routeCol.render(row)).toBe('my-app.example.com/path');
+    expect(routeCol.externalLink?.(row)).toBe('https://my-app.example.com/path');
+  });
+
+  it('Route column keeps a URL that already has a scheme', () => {
+    const { svc } = configure();
+    const routeCol = svc.buildColumns().find(c => c.key === 'url')!;
+    expect(routeCol.externalLink?.(makeRoute({ url: 'http://my-app.example.com' })))
+      .toBe('http://my-app.example.com');
+  });
+
+  it('Route column does not link TCP routes', () => {
+    const { svc } = configure();
+    const routeCol = svc.buildColumns().find(c => c.key === 'url')!;
+    const row = makeRoute({ host: '', path: '', port: 9000, url: 'tcp.example.com:9000' });
+    expect(routeCol.render(row)).toBe('tcp.example.com:9000');
+    expect(routeCol.externalLink?.(row)).toBeNull();
   });
 
   it('Host column renders StRoute.host', () => {
