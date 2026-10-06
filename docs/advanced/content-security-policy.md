@@ -168,6 +168,11 @@ CONSOLE_CSP_GIT_HOSTS=https://api.github.com,https://gitlab.com
 | Self-hosted GitLab | `https://<your GitLab host>`  |
 
 - It is empty by default, so the built-in policy is exactly as shown above.
+- It is configuration of the console itself, like `CONSOLE_CSP`: it changes
+  the policy on the console's own pages, which is where the wizard runs, and
+  has no effect on the applications you deploy. Only someone who can change
+  the console's environment can set it, and it takes effect when the console
+  restarts. Nothing in the console's interface or API changes it.
 - Each entry must be an origin: `https://`, a host, and optionally a port. No
   path, quotes, spaces or semicolons. Jetstream will not start with an entry
   that isn't one, and names the entry in its error, rather than writing it
