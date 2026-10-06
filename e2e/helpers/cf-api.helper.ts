@@ -360,6 +360,14 @@ export class CFApiHelper {
   }
 
   /**
+   * GUIDs of the routes currently mapped to an app
+   */
+  async getAppRouteGuids(appGuid: string): Promise<string[]> {
+    if (!this.cfApiBase) await this.init();
+    const resp = await this.pget(`${this.cfApiBase}/apps/${appGuid}/routes?per_page=5000`);
+    return (resp?.resources ?? []).map((r: { guid: string }) => r.guid);
+  }
+
   /**
    * Read a CF feature flag (e.g. `diego_docker`). Operators toggle these per
    * foundation, so a spec exercising a flagged feature reads the target's
