@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Lint docs/**/*.md against the GFM-intersection subset: markdown that
 // renders identically on GitHub and in the website generator (MDX).
 // Rules:

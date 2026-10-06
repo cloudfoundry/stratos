@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // The package.json files under src/frontend/packages/ install nothing. They
 // are not workspaces and carry no lockfile, and the devkit reads them for
 // dependency NAMES only (src/lib/packages.ts iterates Object.keys) — the

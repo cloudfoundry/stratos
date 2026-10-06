@@ -6,7 +6,7 @@
 #                 nearest git tag, leading 'v' stripped, patch incremented
 #                 ("the next release"). Repos with their own source set it
 #                 before or after the include, e.g.:
-#                   VERSION_CMD := node -p "require('./package.json').version"
+#                   VERSION_CMD := bun -p "require('./package.json').version"
 #   BUILD_TZ      Timezone for BUILD_DATE_TZ: 'local' (default) or a zone
 #                 name (e.g. UTC, America/New_York).
 #   _HIDE         Internal-name prefix, default '_' (hides internals from

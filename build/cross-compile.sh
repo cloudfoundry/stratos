@@ -9,7 +9,7 @@ if [ ! -f Makefile ] || [ ! -d src/jetstream ]; then
   exit 1
 fi
 
-VERSION=${1:-$(node -p "require('./package.json').version")}
+VERSION=${1:-$(bun -p "require('./package.json').version")}
 BUILD_DATE=${2:-$(date -u +"%Y-%m-%dT%H:%M:%SZ")}
 GIT_COMMIT=${3:-$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")}
 

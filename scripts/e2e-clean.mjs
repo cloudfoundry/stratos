@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Standalone label-sweep behind `make e2e clean`. Deletes every CF resource
 // carrying the stratos-e2e-test metadata label, direct against the CF API
 // (no Stratos proxy, no Playwright). Delete order mirrors CFApiHelper.cleanupTestResources()
@@ -22,8 +22,8 @@
 // come from secrets.yaml (E2E_PROFILE-selected profile) and never leave
 // this process — not logged, not passed to a subprocess, not put in argv.
 //
-// Usage: node scripts/e2e-clean.mjs [--dry-run]
-//        DRYRUN=yes|true|1|on node scripts/e2e-clean.mjs   (as used by `make e2e clean`)
+// Usage: bun scripts/e2e-clean.mjs [--dry-run]
+//        DRYRUN=yes|true|1|on bun scripts/e2e-clean.mjs   (as used by `make e2e clean`)
 
 import { readFileSync, existsSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'

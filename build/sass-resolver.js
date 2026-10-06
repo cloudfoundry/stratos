@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * sass-resolver.js
  *
@@ -12,9 +12,9 @@
  * This is safer than trying to integrate with esbuild's plugin system during migration.
  *
  * Usage:
- *   node sass-resolver.js --analyze    # Analyze SCSS files for tilde imports
- *   node sass-resolver.js --resolve    # Resolve imports (creates backup first)
- *   node sass-resolver.js --restore    # Restore from backups
+ *   bun sass-resolver.js --analyze    # Analyze SCSS files for tilde imports
+ *   bun sass-resolver.js --resolve    # Resolve imports (creates backup first)
+ *   bun sass-resolver.js --restore    # Restore from backups
  *
  * Patterns resolved:
  *   ~@stratosui/theme/styles/main  → ../../packages/theme/styles/main
@@ -520,9 +520,9 @@ async function main() {
 
       default:
         console.log('Usage:');
-        console.log('  node sass-resolver.js --analyze    Analyze SCSS files');
-        console.log('  node sass-resolver.js --resolve    Resolve imports');
-        console.log('  node sass-resolver.js --restore    Restore from backups');
+        console.log('  bun sass-resolver.js --analyze    Analyze SCSS files');
+        console.log('  bun sass-resolver.js --resolve    Resolve imports');
+        console.log('  bun sass-resolver.js --restore    Restore from backups');
         console.log('');
         process.exit(1);
     }

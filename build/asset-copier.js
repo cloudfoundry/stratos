@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * asset-copier.js (Mock)
  * Copies assets to dist directory

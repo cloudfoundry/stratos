@@ -13,7 +13,7 @@
 
 set -euo pipefail
 
-VERSION="${1:-$(node -p "require('./package.json').version" 2>/dev/null || echo "dev")}"
+VERSION="${1:-$(bun -p "require('./package.json').version" 2>/dev/null || echo "dev")}"
 AIO_ARCH="${AIO_ARCH:-amd64}"
 # Architectures to stage when their binaries are present.
 AIO_ARCHES="${AIO_ARCHES:-amd64 arm64}"

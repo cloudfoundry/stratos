@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Advisory component→e2e coverage map (#5619 section 3). Given changed file
 // paths (argv, or stdin one-per-line), reports which e2e specs exercise the
 // changed components, derived mechanically from the data-test contract: a
@@ -7,7 +7,7 @@
 // e2e import graph to the specs that use them. Advisory only — always
 // exits 0; the output tells a reviewer which specs are worth running.
 //
-// Usage: git diff --name-only develop...HEAD | node scripts/e2e-impact.mjs
+// Usage: git diff --name-only develop...HEAD | bun scripts/e2e-impact.mjs
 // For components deleted in the diff, tokens are harvested from the base
 // ref ($IMPACT_BASE, default 'develop') so their specs still surface.
 
@@ -22,8 +22,8 @@ process.chdir(fileURLToPath(new URL('..', import.meta.url)))
 const FILES_ONLY = process.argv.includes('--files')
 const argFiles = process.argv.slice(2).filter((a) => a !== '--files')
 if (!argFiles.length && process.stdin.isTTY) {
-  console.error('Usage: git diff --name-only develop...HEAD | node scripts/e2e-impact.mjs [--files]')
-  console.error('   or: node scripts/e2e-impact.mjs [--files] <changed-file> [...]')
+  console.error('Usage: git diff --name-only develop...HEAD | bun scripts/e2e-impact.mjs [--files]')
+  console.error('   or: bun scripts/e2e-impact.mjs [--files] <changed-file> [...]')
   process.exit(1)
 }
 const input = argFiles.length ? argFiles : readFileSync(0, 'utf8').split('\n')

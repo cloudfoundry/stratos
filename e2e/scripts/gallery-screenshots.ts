@@ -1,10 +1,10 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * Generate an HTML gallery from a single screenshot set.
  * Shows light and dark mode side by side for each page.
  *
- * Usage: node e2e/scripts/gallery-screenshots.ts <label>
- * Example: node e2e/scripts/gallery-screenshots.ts dev46
+ * Usage: bun e2e/scripts/gallery-screenshots.ts <label>
+ * Example: bun e2e/scripts/gallery-screenshots.ts dev46
  */
 
 import * as fs from 'fs';
@@ -15,8 +15,8 @@ const SCREENSHOT_DIR = path.resolve('e2e-screenshots');
 function getLabel(): string {
   const label = process.argv[2];
   if (!label) {
-    console.error('Usage: node e2e/scripts/gallery-screenshots.ts <label>');
-    console.error('Example: node e2e/scripts/gallery-screenshots.ts dev46');
+    console.error('Usage: bun e2e/scripts/gallery-screenshots.ts <label>');
+    console.error('Example: bun e2e/scripts/gallery-screenshots.ts dev46');
     process.exit(1);
   }
   return label;

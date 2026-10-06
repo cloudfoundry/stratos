@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * index-transformer.js
  * Transforms index.html to inject git metadata and theme loading assets
@@ -180,7 +180,7 @@ if (import.meta.url.endsWith(process.argv[1].replace(/\\/g, '/'))) {
 
   if (args.length === 0 || args.includes('--help') || args.includes('-h')) {
     console.log(`
-Usage: node index-transformer.js [options] <input> [output]
+Usage: bun index-transformer.js [options] <input> [output]
 
 Options:
   --root <path>   Root directory of the project (default: current directory)
@@ -192,13 +192,13 @@ Arguments:
 
 Examples:
   # Transform in place
-  node index-transformer.js src/frontend/packages/core/src/index.html
+  bun index-transformer.js src/frontend/packages/core/src/index.html
 
   # Transform to different file
-  node index-transformer.js src/index.html dist/index.html
+  bun index-transformer.js src/index.html dist/index.html
 
   # Specify root directory
-  node index-transformer.js --root /path/to/stratos src/index.html
+  bun index-transformer.js --root /path/to/stratos src/index.html
 `);
     process.exit(0);
   }

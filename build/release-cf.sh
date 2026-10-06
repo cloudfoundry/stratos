@@ -9,7 +9,7 @@
 
 set -euo pipefail
 
-VERSION="${1:-$(node -p "require('./package.json').version" 2>/dev/null || echo "dev")}"
+VERSION="${1:-$(bun -p "require('./package.json').version" 2>/dev/null || echo "dev")}"
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"

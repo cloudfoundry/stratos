@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Runs the production frontend build and fails it on any warning that
 // scripts/build-warnings-allowed.mjs does not list. The Angular build exits 0
 // on a warning, so a budget overrun or a new compiler warning used to pass

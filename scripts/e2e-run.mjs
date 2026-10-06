@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 // Tiered e2e runner behind `make test e2e TIER=... GROUP=...` — see
 // TESTING.md "Tiered E2E runs". Selections are additive: tier-computed
 // spec sets (diff-driven, via e2e-impact.mjs) and group directories union
@@ -52,7 +52,7 @@ const groupOf = (spec) => spec.split(path.sep)[2] // e2e/tests/<group>/...
 
 function impactedSpecs() {
   const diff = execFileSync('git', ['diff', '--name-only', `${opt.base}...HEAD`], { encoding: 'utf8' })
-  const r = spawnSync('node', ['scripts/e2e-impact.mjs', '--files'], { input: diff, encoding: 'utf8' })
+  const r = spawnSync('bun', ['scripts/e2e-impact.mjs', '--files'], { input: diff, encoding: 'utf8' })
   if (r.status !== 0) { console.error('e2e-impact.mjs failed:\n' + r.stderr); process.exit(2) }
   return r.stdout.split('\n').map((l) => l.trim()).filter(Boolean)
 }

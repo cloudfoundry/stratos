@@ -190,7 +190,7 @@ The pre-build orchestrator script must:
 Example orchestrator:
 
 ```javascript
-#!/usr/bin/env node
+#!/usr/bin/env bun
 const { execSync } = require('child_process');
 
 console.log('Running pre-build tools...');

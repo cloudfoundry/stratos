@@ -4,7 +4,7 @@
 
 set -euo pipefail
 
-VERSION=${1:-$(node -p "require('./package.json').version")}
+VERSION=${1:-$(bun -p "require('./package.json').version")}
 
 # Colors
 BLUE='\033[0;34m'

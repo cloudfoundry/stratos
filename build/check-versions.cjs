@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * Version Check Script
  *
@@ -38,7 +38,18 @@ function info(msg) {
 }
 
 function checkNodeVersion() {
-  const nodeVersion = process.version;
+  // Ask the Node on PATH, the runtime Angular CLI and vitest use. This script
+  // runs under bun, whose process.version is its own Node-compatibility level,
+  // not the installed Node.
+  let nodeVersion;
+  try {
+    nodeVersion = execSync('node --version', { encoding: 'utf8' }).trim();
+  } catch (e) {
+    error('Node.js is not installed or not in PATH (Angular CLI and vitest run on it)');
+    console.log('  • Using asdf: asdf install nodejs');
+    console.log('  • Download: https://nodejs.org/');
+    return false;
+  }
   const nodeMajor = parseInt(nodeVersion.split('.')[0].substring(1));
 
   if (nodeMajor < 24) {
