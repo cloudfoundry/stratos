@@ -88,11 +88,10 @@ const (
 //   - default/connect from same origin ('self'); same-origin 'self'
 //     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
 //
-//   - connect-src also allows the public GitHub and GitLab APIs: with no Git
-//     endpoint registered, the deploy wizard calls them from the browser
-//     (scm-base.ts getAPI). GitHub Enterprise and self-hosted GitLab hosts
-//     can't be known here; register them as endpoints (calls then go through
-//     the backend) or add them with CONSOLE_CSP.
+//   - connect-src names no Git host. With no Git endpoint selected, the deploy
+//     wizard calls the Git host from the browser (scm-base.ts getAPI); a
+//     deployment opts each host in with CONSOLE_CSP_GIT_HOSTS. A registered
+//     endpoint goes through the backend, which 'self' already covers.
 //
 //   - script-src carries the per-response nonce and 'strict-dynamic', which is
 //     the CSP Level 3 mechanism for scripts: the nonce authorises the module
@@ -171,7 +170,7 @@ const defaultCSPPolicy = "default-src 'self'; " +
 	// 'self' also covers same-origin WebSocket (wss:// on an HTTPS page), so
 	// the backend log/stream sockets connect without a bare ws:/wss: wildcard
 	// (which scanners flag as overly permissive — it would allow any host).
-	"connect-src 'self' https://api.github.com https://gitlab.com; " +
+	"connect-src 'self'; " +
 	"worker-src 'self'; " +
 	"frame-ancestors 'self'; " +
 	"base-uri 'self'; " +

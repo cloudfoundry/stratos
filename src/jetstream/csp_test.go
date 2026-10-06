@@ -5,7 +5,6 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
-	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -530,26 +529,12 @@ func TestDefaultCSPPolicyForbidsPluginContent(t *testing.T) {
 	}
 }
 
-// The deploy wizard's public GitHub and GitLab modes call the provider's API
-// straight from the browser (scm-base.ts getAPI, no registered endpoint), so
-// connect-src 'self' alone blocks them and the wizard shows "Git request
-// failed" (#5987). The origins are read from the frontend's defaults so the
-// policy follows them if they ever change.
-func TestDefaultCSPPolicyConnectsToPublicGitAPIs(t *testing.T) {
-	sources := directiveSources(t, defaultCSPPolicy, "connect-src")
-	for _, file := range []string{"github.helpers.ts", filepath.Join("scm", "gitlab-scm.ts")} {
-		path := filepath.Join("..", "frontend", "packages", "git", "src", "shared", file)
-		raw, err := os.ReadFile(path)
-		if err != nil {
-			t.Fatalf("cannot read %s: %v", path, err)
-		}
-		origin := regexp.MustCompile(`'(https://[^/']+)`).FindStringSubmatch(string(raw))
-		if origin == nil {
-			t.Fatalf("no default https API URL found in %s", path)
-		}
-		if !slices.Contains(sources, origin[1]) {
-			t.Errorf("connect-src must allow %s (default API in %s): %q", origin[1], file, defaultCSPPolicy)
-		}
+// The built-in policy names no Git host: browser calls to one are what
+// CONSOLE_CSP_GIT_HOSTS opts into, deployment by deployment. Every host listed
+// here would be one an injected script could send data to on every deployment.
+func TestDefaultCSPPolicyConnectsOnlyToSelf(t *testing.T) {
+	if sources := directiveSources(t, defaultCSPPolicy, "connect-src"); !slices.Equal(sources, []string{"'self'"}) {
+		t.Errorf("connect-src must be exactly 'self', got %v", sources)
 	}
 }
 
