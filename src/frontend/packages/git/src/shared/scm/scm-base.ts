@@ -85,6 +85,24 @@ export abstract class BaseSCM {
     );
   }
 
+  // A request the browser never completed (status 0) to a host other than the
+  // console's own: most often the Content-Security-Policy refusing it, which
+  // the app cannot tell apart from the network being down. Names the host and
+  // the two ways to allow it. Same-origin failures (the backend proxy) return
+  // undefined so the caller keeps its own message.
+  protected unreachableHostMessage(error: unknown): string | undefined {
+    const { status, url } = (error ?? {}) as { status?: number; url?: string | null };
+    if (status !== 0 || !url) {
+      return undefined;
+    }
+    const origin = new URL(url, window.location.href).origin;
+    if (origin === window.location.origin) {
+      return undefined;
+    }
+    return `Could not reach ${origin}. If the console blocks it, ask your administrator to add ${origin} to ` +
+      'CONSOLE_CSP_GIT_HOSTS, or to register it as a Git endpoint.';
+  }
+
   protected parseErrorAsString(res: unknown): string {
     const response = this.parseHttpPipeError(res);
     return response.message || '';
