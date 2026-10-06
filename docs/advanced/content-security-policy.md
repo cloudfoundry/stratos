@@ -48,8 +48,8 @@ object-src 'none';
 style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
 style-src-elem 'self' 'nonce-PLACEHOLDER' 'report-sample' https://fonts.googleapis.com;
 font-src 'self' data: https://fonts.gstatic.com;
-img-src 'self' data:;
-connect-src 'self';
+img-src 'self' data: https://avatars.githubusercontent.com https://gitlab.com https://secure.gravatar.com;
+connect-src 'self' https://api.github.com https://gitlab.com;
 worker-src 'self';
 frame-ancestors 'self';
 base-uri 'self';
@@ -63,6 +63,13 @@ A few of these are worth explaining:
 - `connect-src 'self'` covers same-origin WebSockets, so the application log
   and stream sockets connect without needing a `ws:`/`wss:` wildcard. A bare
   wildcard would permit any host and security scanners flag it.
+- `connect-src` also names the public GitHub and GitLab APIs, and `img-src`
+  the hosts their avatars come from. With no Git endpoint registered, the
+  deploy wizard's public GitHub and GitLab modes call those APIs from the
+  browser and show the owner and commit author avatars they return. GitHub
+  Enterprise and self-hosted GitLab hosts can't be listed in advance: register
+  them as endpoints, which sends their calls through the backend, or add their
+  hosts in your own `CONSOLE_CSP`.
 - `object-src 'none'` forbids plugin content — `<object>`, `<embed>` — which
   is a way of executing script that `script-src` does not cover. It is stated
   rather than left to `default-src`, because falling back to `'self'` would
