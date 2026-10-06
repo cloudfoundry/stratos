@@ -360,6 +360,26 @@ export class CFApiHelper {
   }
 
   /**
+  /**
+   * Read a CF feature flag (e.g. `diego_docker`). Operators toggle these per
+   * foundation, so a spec exercising a flagged feature reads the target's
+   * actual setting rather than assuming it.
+   */
+  async isFeatureFlagEnabled(name: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    const resp = await this.pget(`${this.cfApiBase}/feature_flags/${name}`);
+    return resp?.enabled === true;
+  }
+
+  /**
+   * Set a CF feature flag (admin only). Callers restore the previous value.
+   */
+  async setFeatureFlag(name: string, enabled: boolean): Promise<void> {
+    if (!this.cfApiBase) await this.init();
+    await this.ppatch(`${this.cfApiBase}/feature_flags/${name}`, { enabled });
+  }
+
+  /**
    * Wait for app to reach desired state
    */
   async waitForAppState(appGuid: string, desiredState: 'STOPPED' | 'STARTED', timeoutMs: number = 60000): Promise<void> {
