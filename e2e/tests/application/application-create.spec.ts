@@ -107,9 +107,10 @@ test.describe('Application Create', () => {
       const createPage = new AppCreateWizardPage(page);
       await createPage.navigateTo();
       await createPage.selectCfWithData();
+      await createPage.clearSelection('org');
 
-      // CF chosen but org/space still empty → cannot proceed.
-      expect(await createPage.isNextEnabled()).toBe(false);
+      // CF chosen but no org → cannot proceed.
+      await expect(page.locator('#stepper_next')).toBeDisabled();
     });
 
     test('should require space selection', async ({ withTestApp }) => {
@@ -118,9 +119,10 @@ test.describe('Application Create', () => {
       const createPage = new AppCreateWizardPage(page);
       await createPage.navigateTo();
       await createPage.selectCfAndOrgWithData();
+      await createPage.clearSelection('space');
 
-      // CF + org chosen, space still empty → cannot proceed.
-      expect(await createPage.isNextEnabled()).toBe(false);
+      // CF + org chosen but no space → cannot proceed.
+      await expect(page.locator('#stepper_next')).toBeDisabled();
 
       // Selecting the space completes step 1 → Next enables.
       await createPage.selectFirstRealSpace();

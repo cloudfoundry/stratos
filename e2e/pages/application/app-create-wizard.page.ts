@@ -120,6 +120,22 @@ export class AppCreateWizardPage extends BasePage {
   async selectSpace(name: string): Promise<void> { await this.selectOption('space', name); }
 
   /**
+   * Pick a select's "None" option. The wizard auto-picks a lone org or space,
+   * so a user who sees exactly one never sees them empty; clearing explicitly
+   * puts step 1 back in the unselected state whatever the CF's contents.
+   */
+  async clearSelection(id: 'org' | 'space'): Promise<void> {
+    const none = this.optionsFor(id).filter({ hasText: /^\s*None\s*$/ }).first();
+    // The auto-pick can land (and close the listbox) between open and click,
+    // so retry the pair as selectOption does.
+    await expect(async () => {
+      await this.openSelect(id);
+      await none.waitFor({ state: 'visible', timeout: 3000 });
+      await none.click({ timeout: 2000 });
+    }).toPass({ timeout: 30000 });
+  }
+
+  /**
    * Select the first CF endpoint whose org list actually populates. The dev
    * stack registers several CFs but only one is connected with data in the
    * browser session, and the fixture's cfGuid does not always point at it.
