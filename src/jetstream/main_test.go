@@ -349,3 +349,25 @@ func TestLoadPortalConfigCSPGitHostsRefusesNonOrigins(t *testing.T) {
 		}
 	}
 }
+
+// gitlab.com is already a built-in avatar host, and listing it for the wizard
+// must not name it twice in img-src.
+func TestLoadPortalConfigCSPGitHostsNamesEachSourceOnce(t *testing.T) {
+	var pc api.PortalConfig
+	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"CONSOLE_CSP_GIT_HOSTS": "https://api.github.com,https://gitlab.com,https://gitlab.com",
+	})))
+	if err != nil {
+		t.Fatalf("Unable to load portal config: %v", err)
+	}
+	for _, directive := range []string{"connect-src", "img-src"} {
+		sources := directiveSources(t, result.CSPPolicy, directive)
+		seen := map[string]bool{}
+		for _, source := range sources {
+			if seen[source] {
+				t.Errorf("%s names %s twice: %v", directive, source, sources)
+			}
+			seen[source] = true
+		}
+	}
+}

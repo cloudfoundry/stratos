@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -48,17 +49,24 @@ func cspGitHosts(entries []string) ([]string, error) {
 
 // builtInCSPPolicy is defaultCSPPolicy with the deploy wizard's Git hosts
 // added: to connect-src, so the browser may call them, and to img-src, so the
-// avatars they return show.
+// avatars they return show. A host a directive already names (gitlab.com is a
+// built-in avatar host) or one listed twice is added once.
 func builtInCSPPolicy(gitHosts []string) string {
 	if len(gitHosts) == 0 {
 		return defaultCSPPolicy
 	}
-	extra := " " + strings.Join(gitHosts, " ")
 	directives := strings.Split(defaultCSPPolicy, "; ")
 	for i, directive := range directives {
-		if name, _, _ := strings.Cut(directive, " "); name == "connect-src" || name == "img-src" {
-			directives[i] = directive + extra
+		sources := strings.Fields(directive)
+		if sources[0] != "connect-src" && sources[0] != "img-src" {
+			continue
 		}
+		for _, host := range gitHosts {
+			if !slices.Contains(sources, host) {
+				sources = append(sources, host)
+			}
+		}
+		directives[i] = strings.Join(sources, " ")
 	}
 	return strings.Join(directives, "; ")
 }
