@@ -211,10 +211,9 @@ export class DeployApplicationStep2Component
       const endpointGuid = this.activeEndpointGuid;
       this.gitData.getRepository(this.scm, this.repository)
         .waitForValue$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
-        // A gitscm save needs a resolved repo and branch. An endpoint guid is
-        // only required for Public mode; Private/Enterprise carry the token.
+        // A gitscm save needs a resolved repo and branch. The endpoint is
+        // optional: without one the backend clones the repo URL directly.
         if (!repo || !branch) { return; }
-        if (this.gitMode === 'public' && !endpointGuid) { return; }
         this.deployData.saveAppDetails({
           projectName: this.repository,
           branch,
