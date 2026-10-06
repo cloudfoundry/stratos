@@ -40,6 +40,16 @@ interface StAppStatsResponse {
 export interface UsagePoint { t: number; cpu: number; mem: number; disk: number; }
 
 /**
+ * A route URL usable as an `<a href>`. CF v3 renders route URLs bare
+ * (`host.domain[/path]`), which a browser treats as a relative path back to
+ * Stratos. A URL that already has a scheme is kept; otherwise HTTPS is
+ * assumed (modern CF deployments serve HTTP routes over TLS).
+ */
+export function routeHref(url: string): string {
+  return /^[a-z][a-z0-9+.-]*:\/\//i.test(url) ? url : `https://${url}`;
+}
+
+/**
  * AppDetailDataService — component-scoped page data source for the app detail page.
  *
  * Stratos data model is the canonical wire contract. The primary signals
@@ -224,10 +234,7 @@ export class AppDetailDataService {
   readonly url = computed((): string | null => {
     const routes = this._appDetail()?.app.routes ?? [];
     const raw = routes[0]?.url;
-    if (!raw) {
-      return null;
-    }
-    return /^[a-z][a-z0-9+.-]*:\/\//i.test(raw) ? raw : `https://${raw}`;
+    return raw ? routeHref(raw) : null;
   });
 
   /**
