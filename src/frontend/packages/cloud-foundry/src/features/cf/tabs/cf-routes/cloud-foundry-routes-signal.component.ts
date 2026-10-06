@@ -27,6 +27,7 @@ import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoi
 import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
 import type { StApp, StRoute } from '../../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { routeHref } from '../../../applications/app-detail-data.service';
 
 // Signal-native replacement for CloudFoundryRoutesComponent at
 // /cloud-foundry/:cnsi/routes. CNSI-wide — shows every route the CF
@@ -102,19 +103,16 @@ export class CloudFoundryRoutesSignalComponent {
       r.url && r.url.length > 0 ? r.url : ((r.host ?? '') + (r.path ?? ''));
 
     const displayUrl = (r: StRoute): string => {
-      // Prefix with http:// for HTTP routes to match the legacy UI's
-      // Route column, which always rendered the full URL with scheme.
-      // TCP routes aren't HTTP so they render as host:port without scheme.
+      // The full URL with scheme, as the legacy UI's Route column showed it,
+      // https like the app's Visit button. TCP routes aren't HTTP so they
+      // render as host:port without scheme.
       const base = routeBase(r);
       if (r.port != null) return `${base}:${r.port}`;
       // A route on a domain root (no host/path/url and no port) has nothing to
       // display; fall back to a short guid so the row is still distinguishable.
       // The full guid is on hover (urlTooltip).
       if (base === '') return `(unnamed) ${r.guid.slice(0, 8)}`;
-      // Avoid double-prepending if CF has already rendered scheme into url
-      // (shouldn't today, but future-proof).
-      if (/^https?:\/\//i.test(base)) return base;
-      return `http://${base}`;
+      return routeHref(base);
     };
 
     // Hover tooltip for the Route title: full guid for unnamed routes (the
@@ -220,6 +218,9 @@ export class CloudFoundryRoutesSignalComponent {
           kind: 'text',
           render: displayUrl,
           tooltip: urlTooltip,
+          // Domain-root routes show a guid placeholder: nothing to link or copy.
+          externalLink: (r: StRoute) => r.port == null && routeBase(r) !== '' ? displayUrl(r) : null,
+          copyValue: (r: StRoute) => routeBase(r) === '' && r.port == null ? null : displayUrl(r),
           widthHint: '22rem',
         },
         {

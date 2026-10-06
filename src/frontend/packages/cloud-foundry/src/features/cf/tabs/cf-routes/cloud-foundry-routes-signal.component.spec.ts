@@ -119,6 +119,20 @@ describe('CloudFoundryRoutesSignalComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // The route URL is truncated in the card title, so it is linked and has a
+  // copy button carrying the full URL; TCP routes are not HTTP and get no link.
+  it('Route column links HTTP routes over https and copies the full URL', () => {
+    const col = component.listConfig()!.columns.find(c => c.key === 'url')!;
+    const http = route();
+    expect(col.render(http)).toBe('https://my-app.example.com');
+    expect(col.externalLink?.(http)).toBe('https://my-app.example.com');
+    expect(col.copyValue?.(http)).toBe('https://my-app.example.com');
+    const tcp = route({ url: 'tcp.example.com', host: '', port: 9000 });
+    expect(col.render(tcp)).toBe('tcp.example.com:9000');
+    expect(col.externalLink?.(tcp)).toBeNull();
+    expect(col.copyValue?.(tcp)).toBe('tcp.example.com:9000');
+  });
+
   it('exposes a checkbox selection column and Unmap + Delete bulk actions', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();

@@ -189,6 +189,7 @@ describe('CfAppRoutesSignalConfigService', () => {
     const row = makeRoute();
     expect(routeCol.render(row)).toBe('my-app.example.com/path');
     expect(routeCol.externalLink?.(row)).toBe('https://my-app.example.com/path');
+    expect(routeCol.copyValue?.(row)).toBe('https://my-app.example.com/path');
   });
 
   it('Route column keeps a URL that already has a scheme', () => {
@@ -204,6 +205,7 @@ describe('CfAppRoutesSignalConfigService', () => {
     const row = makeRoute({ host: '', path: '', port: 9000, url: 'tcp.example.com:9000' });
     expect(routeCol.render(row)).toBe('tcp.example.com:9000');
     expect(routeCol.externalLink?.(row)).toBeNull();
+    expect(routeCol.copyValue?.(row)).toBe('tcp.example.com:9000');
   });
 
   it('Host column renders StRoute.host', () => {

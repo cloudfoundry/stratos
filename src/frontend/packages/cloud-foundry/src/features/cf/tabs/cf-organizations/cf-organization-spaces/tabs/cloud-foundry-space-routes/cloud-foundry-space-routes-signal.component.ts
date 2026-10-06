@@ -28,6 +28,7 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
 import { runBulkWithProgress } from '../../../../../../../services/async-jobs/bulk-progress';
 import { extractHttpErrorMessage } from '../../../../../../../services/extract-error-message';
 import type { StApp, StRoute } from '../../../../../../../services/endpoint-data/stratos-types';
+import { routeHref } from '../../../../../../applications/app-detail-data.service';
 
 // Signal-native replacement for CloudFoundrySpaceRoutesComponent.
 // Scoped to one space under one org under one CF endpoint (all three guids
@@ -107,16 +108,15 @@ export class CloudFoundrySpaceRoutesSignalComponent {
       r.url && r.url.length > 0 ? r.url : ((r.host ?? '') + (r.path ?? ''));
 
     const displayUrl = (r: StRoute): string => {
-      // Match legacy UI: full URL with scheme. TCP routes render as
-      // host:port (no scheme); HTTP routes get an http:// prefix.
+      // Match legacy UI: full URL with scheme (https, like the app's Visit
+      // button). TCP routes render as host:port (no scheme).
       const base = routeBase(r);
       if (r.port != null) return `${base}:${r.port}`;
       // A route on a domain root (no host/path/url and no port) has nothing to
       // display; fall back to a short guid so the row is still distinguishable.
       // The full guid is on hover (urlTooltip).
       if (base === '') return `(unnamed) ${r.guid.slice(0, 8)}`;
-      if (/^https?:\/\//i.test(base)) return base;
-      return `http://${base}`;
+      return routeHref(base);
     };
 
     // Hover tooltip for the Route title: full guid for unnamed routes (the
@@ -187,6 +187,9 @@ export class CloudFoundrySpaceRoutesSignalComponent {
           kind: 'text',
           render: displayUrl,
           tooltip: urlTooltip,
+          // Domain-root routes show a guid placeholder: nothing to link or copy.
+          externalLink: (r: StRoute) => r.port == null && routeBase(r) !== '' ? displayUrl(r) : null,
+          copyValue: (r: StRoute) => routeBase(r) === '' && r.port == null ? null : displayUrl(r),
           widthHint: '24rem',
         },
         {
