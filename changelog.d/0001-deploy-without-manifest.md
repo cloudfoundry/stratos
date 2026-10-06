@@ -7,3 +7,10 @@
 - A failed application deploy now keeps showing the specific reason
   (invalid manifest, missing endpoint, ...). A generic "Deploy Failed!"
   sent after it no longer replaces it.
+- The deploy wizard's public GitHub and GitLab sources work again. The
+  default Content-Security-Policy blocked their API calls, so no project
+  could be found ("Git request failed"), and blocked the owner and commit
+  avatars. GitHub Enterprise and self-hosted GitLab hosts still need a
+  registered endpoint or their hosts in `CONSOLE_CSP`.
+- An application's Routes tab shows each route's full URL again, linked
+  so it can be opened or copied. TCP routes stay plain text.
