@@ -268,7 +268,7 @@ describe('DeployApplicationStep2Component', () => {
   // through the registered endpoint's stored creds (which 404s on a private
   // repo the typed token can actually see). Only Public mode should carry the
   // endpoint guid.
-  describe('projectExistsEndpointGuid (private/enterprise must not proxy via registered endpoint)', () => {
+  describe('activeEndpointGuid (private/enterprise must not proxy via registered endpoint)', () => {
     beforeEach(() => {
       fixture = TestBed.createComponent(DeployApplicationStep2Component);
       component = fixture.componentInstance;
@@ -283,17 +283,17 @@ describe('DeployApplicationStep2Component', () => {
 
     it('uses the registered endpoint guid in Public mode', () => {
       component.gitMode = 'public';
-      expect(component.projectExistsEndpointGuid).toBe('747ed39a-endpoint-guid');
+      expect(component.activeEndpointGuid).toBe('747ed39a-endpoint-guid');
     });
 
     it('drops the endpoint guid in Private mode (use the typed token directly)', () => {
       component.gitMode = 'private';
-      expect(component.projectExistsEndpointGuid).toBe('');
+      expect(component.activeEndpointGuid).toBe('');
     });
 
     it('drops the endpoint guid in Enterprise mode (use the typed token directly)', () => {
       component.gitMode = 'enterprise';
-      expect(component.projectExistsEndpointGuid).toBe('');
+      expect(component.activeEndpointGuid).toBe('');
     });
 
     it('rebuilds the SCM with no endpoint guid when switching to Private', () => {
