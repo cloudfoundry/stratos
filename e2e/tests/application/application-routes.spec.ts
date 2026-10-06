@@ -69,20 +69,12 @@ test.describe('Application Routes', () => {
       await appSummary.navigateTo();
       await appSummary.goToRoutesTab();
 
-      // Wait for routes to load
-      await page.waitForTimeout(1500);
-
-      // Verify route is displayed with host
-      const routeText = page.locator('text=' + testHost);
-      await expect(routeText).toBeVisible({ timeout: 10000 });
-
-      // Verify domain is visible (should be part of the route display)
-      const routeRow = page.locator('mat-row, tr').filter({ hasText: testHost });
-      await expect(routeRow).toBeVisible();
-
-      // Get the full route text which should include domain
-      const routeFullText = await routeRow.textContent();
-      expect(routeFullText).toContain(testHost);
+      // The host has its own cell; the launch link carries the full route
+      // URL (host + domain), so the host text appears twice in the row.
+      const routeRow = page.locator('app-routes-tab tr').filter({ hasText: testHost });
+      await expect(routeRow.getByRole('cell', { name: testHost, exact: true })).toBeVisible({ timeout: 10000 });
+      await expect(routeRow.getByRole('link', { name: new RegExp(testHost) }))
+        .toHaveAttribute('href', new RegExp(`^https?://${testHost}\\.[^/]+`));
     });
 
     test('should show route type (http/tcp)', async ({ withTestApp }) => {
