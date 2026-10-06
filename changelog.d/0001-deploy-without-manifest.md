@@ -12,5 +12,7 @@
   could be found ("Git request failed"), and blocked the owner and commit
   avatars. GitHub Enterprise and self-hosted GitLab hosts still need a
   registered endpoint or their hosts in `CONSOLE_CSP`.
-- An application's Routes tab shows each route's full URL again, linked
-  so it can be opened or copied. TCP routes stay plain text.
+- Route lists (an application's Routes tab, and the Cloud Foundry and
+  space Routes pages) show each route's full URL as a link with a copy
+  button, in card and table view. TCP routes copy as host:port. Route
+  URLs now show `https://`, matching the Visit button.
