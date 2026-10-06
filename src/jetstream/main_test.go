@@ -1,6 +1,8 @@
 package main
 
 import (
+	"slices"
+	"strings"
 	"testing"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -274,5 +276,76 @@ func TestLoadPortalConfigCustomHSTS(t *testing.T) {
 	}
 	if result.HSTSPolicy != custom {
 		t.Errorf("Expected the custom HSTS policy verbatim, got %q", result.HSTSPolicy)
+	}
+}
+
+// CONSOLE_CSP_GIT_HOSTS adds the deploy wizard's Git hosts to the built-in
+// policy: connect-src so the browser may call them, img-src so their avatars
+// show. Nothing else in the policy moves.
+func TestLoadPortalConfigCSPGitHosts(t *testing.T) {
+	var pc api.PortalConfig
+	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"CONSOLE_CSP_GIT_HOSTS": "https://api.github.com, https://git.example.com:8443/",
+	})))
+	if err != nil {
+		t.Fatalf("Unable to load portal config: %v", err)
+	}
+	for _, directive := range []string{"connect-src", "img-src"} {
+		sources := directiveSources(t, result.CSPPolicy, directive)
+		for _, host := range []string{"https://api.github.com", "https://git.example.com:8443"} {
+			if !slices.Contains(sources, host) {
+				t.Errorf("%s must allow %s: %v", directive, host, sources)
+			}
+		}
+	}
+	for _, directive := range strings.Split(policyWithReporting(defaultCSPPolicy), "; ") {
+		if strings.HasPrefix(directive, "connect-src ") || strings.HasPrefix(directive, "img-src ") {
+			continue
+		}
+		if !strings.Contains(result.CSPPolicy, directive) {
+			t.Errorf("only connect-src and img-src may change, lost %q: %q", directive, result.CSPPolicy)
+		}
+	}
+}
+
+// A custom CONSOLE_CSP is used verbatim, so the setting cannot apply to it.
+func TestLoadPortalConfigCSPGitHostsIgnoredWithCustomPolicy(t *testing.T) {
+	var pc api.PortalConfig
+	const custom = "default-src 'self'"
+	result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"CONSOLE_CSP":           custom,
+		"CONSOLE_CSP_GIT_HOSTS": "https://api.github.com",
+	})))
+	if err != nil {
+		t.Fatalf("Unable to load portal config: %v", err)
+	}
+	if result.CSPPolicy != policyWithReporting(custom) {
+		t.Errorf("a custom policy must stay as given, got %q", result.CSPPolicy)
+	}
+}
+
+// Each entry is written into the policy header, so anything but a bare https
+// origin is refused rather than spliced in: a ';' would start a directive of
+// its own.
+func TestLoadPortalConfigCSPGitHostsRefusesNonOrigins(t *testing.T) {
+	var pc api.PortalConfig
+	for _, val := range []string{
+		"http://git.example.com",
+		"git.example.com",
+		"https://",
+		"https://git.example.com/api/v4",
+		"https://git.example.com; script-src *",
+		"https://'unsafe-inline'",
+		"https://git example.com",
+		"https://user@git.example.com",
+		"https://git.example.com?x=1",
+		"*",
+	} {
+		_, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+			"CONSOLE_CSP_GIT_HOSTS": val,
+		})))
+		if err == nil || !strings.Contains(err.Error(), "CONSOLE_CSP_GIT_HOSTS") {
+			t.Errorf("CONSOLE_CSP_GIT_HOSTS=%q must be refused with an error naming the setting, got %v", val, err)
+		}
 	}
 }

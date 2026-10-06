@@ -442,6 +442,7 @@ type PortalConfig struct {
 	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
 	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
 	CSPPolicy                          string   `configName:"CONSOLE_CSP"`
+	CSPGitHosts                        []string `configName:"CONSOLE_CSP_GIT_HOSTS"`
 	CSPReportOnlyPolicy                string   `configName:"CONSOLE_CSP_REPORT_ONLY"`
 	CSPReportCollector                 string   `configName:"CONSOLE_CSP_REPORT_COLLECTOR"`
 	HSTSPolicy                         string   `configName:"CONSOLE_HSTS"`

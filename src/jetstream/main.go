@@ -762,16 +762,26 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 	//   - anything else -> treated as a full policy string, used verbatim
 	// The explicit off-values are normalized to "" so a well-meaning
 	// CONSOLE_CSP=off never leaks as a literal Content-Security-Policy value.
+	// CONSOLE_CSP_GIT_HOSTS adds the deploy wizard's Git hosts to the built-in
+	// policy only; a policy of the operator's own is used as given.
+	gitHosts, err := cspGitHosts(pc.CSPGitHosts)
+	if err != nil {
+		return pc, err
+	}
+	pc.CSPGitHosts = gitHosts
 	switch {
 	case pc.CSPPolicy == "",
 		strings.EqualFold(pc.CSPPolicy, "default"),
 		strings.EqualFold(pc.CSPPolicy, "on"):
-		pc.CSPPolicy = defaultCSPPolicy
+		pc.CSPPolicy = builtInCSPPolicy(gitHosts)
 	case strings.EqualFold(pc.CSPPolicy, "off"),
 		strings.EqualFold(pc.CSPPolicy, "none"),
 		strings.EqualFold(pc.CSPPolicy, "false"),
 		strings.EqualFold(pc.CSPPolicy, "disabled"):
 		pc.CSPPolicy = ""
+	}
+	if len(gitHosts) > 0 && pc.CSPPolicy != builtInCSPPolicy(gitHosts) {
+		slog.Warn("CONSOLE_CSP_GIT_HOSTS is ignored: CONSOLE_CSP replaces or disables the built-in policy, so add the Git hosts to your own policy instead")
 	}
 
 	// Violation reporting. Resolved here rather than per response so that the
