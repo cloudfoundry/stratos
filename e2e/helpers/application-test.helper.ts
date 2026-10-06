@@ -180,7 +180,11 @@ export class ApplicationTestHelper {
    * routes, so an unmapped route left behind is invisible debris.
    */
   async cleanupTestApp(testApp: TestApp): Promise<void> {
-    for (const routeGuid of testApp.routeGuids) {
+    // Tracked routes plus any still mapped to the app: routes created through
+    // the UI (add-route stepper) are never tracked, and app delete does not
+    // cascade to them.
+    const mapped = await this.cfApi.getAppRouteGuids(testApp.app.guid).catch(() => [] as string[]);
+    for (const routeGuid of new Set([...testApp.routeGuids, ...mapped])) {
       try {
         await this.cfApi.deleteRoute(routeGuid);
       } catch (error) {
