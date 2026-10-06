@@ -77,7 +77,7 @@
     "e2e:screenshot:v5": "E2E_BASE_URL=https://console.run.adepttech.ca E2E_PROFILE=adepttech STRATOS_SCREENSHOT_LABEL=v5 playwright test e2e/tests/core/screenshots.spec.ts",
     "e2e:screenshot:compare": "node e2e/scripts/compare-screenshots.ts v4 v5",
     "climate": "codeclimate analyze $(git diff --name-only main)",
-    "gate-check": "bun run lint && bun run test && node scripts/check-build-warnings.mjs",
+    "gate-check": "bun run lint && bun run test && bun scripts/check-build-warnings.mjs",
     "store-git-metadata": "node build/store-git-metadata.cjs",
     "build-devkit": "cd src/frontend/packages/devkit && bun run build",
     "clean-symlinks": "node build/clean-symlinks.cjs",
