@@ -8,8 +8,8 @@
       <span class="text-content-text font-medium">{{commit.commit?.author?.name}}</span>
     }
     @if (showAvatar && commit.author.avatar_url) {
-      <img src="{{commit.author.avatar_url}}" alt="Avatar for {{commit.commit?.author?.name}}"
-        class="w-6 h-6 rounded-full shrink-0">
+      <img #avatar src="{{commit.author.avatar_url}}" alt="Avatar for {{commit.commit?.author?.name}}"
+        (error)="avatar.hidden = true" class="w-6 h-6 rounded-full shrink-0">
     }
   </div>
 }

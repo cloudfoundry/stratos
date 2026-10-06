@@ -55,6 +55,15 @@ describe('GithubCommitAuthorComponent', () => {
     expect(img!.src).toBe(component.commit.author!.avatar_url);
   });
 
+  // An avatar host the page's Content-Security-Policy refuses (a GitHub
+  // Enterprise host not in CONSOLE_CSP_GIT_HOSTS) must not leave a broken
+  // image and its alt text in the row.
+  it('hides the avatar when it fails to load', () => {
+    const img = element.querySelector('img')!;
+    img.dispatchEvent(new Event('error'));
+    expect(img.hidden).toBe(true);
+  });
+
   it('should render author name', () => {
     // strict: fixture always sets commit.commit with an author name.
     expect(element.textContent).toContain(component.commit.commit!.author.name);

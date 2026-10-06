@@ -60,7 +60,9 @@
                   <h3 class="text-lg font-semibold">Repository Details</h3>
                   <div>
                     <img
+                      #ownerAvatar
                       src="{{ gitSCMRepo.owner.avatar_url }}"
+                      (error)="ownerAvatar.hidden = true"
                       alt="Repository owner avatar"
                       class="h-12 w-12 rounded-full"
                     />
@@ -110,7 +112,9 @@
                   <h3 class="text-lg font-semibold">Commit Details</h3>
                   <div>
                     <img
+                      #authorAvatar
                       src="{{ commitInfo.author?.avatar_url }}"
+                      (error)="authorAvatar.hidden = true"
                       alt="Commit author avatar"
                       class="h-12 w-12 rounded-full"
                     />
