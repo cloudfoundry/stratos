@@ -1,4 +1,4 @@
-#!/usr/bin/env node
+#!/usr/bin/env bun
 /**
  * Post-install setup tasks
  * Runs after all dependencies are installed
@@ -30,7 +30,7 @@ function runScript(scriptName, scriptPath) {
   try {
     if (cjsPath !== scriptPath) fs.renameSync(scriptPath, cjsPath);
     try {
-      execFileSync('node', [cjsPath], {cwd: ROOT_DIR, stdio: 'inherit'});
+      execFileSync('bun', [cjsPath], {cwd: ROOT_DIR, stdio: 'inherit'});
     } finally {
       if (cjsPath !== scriptPath) {
         try { fs.renameSync(cjsPath, scriptPath); } catch { /* nothing to restore */ }

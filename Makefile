@@ -80,7 +80,7 @@
 # Stratos versions from package.json — the current version, not the
 # core's next-tag default. `make bump` edits package.json at recipe
 # time; the core keeps version resolution lazy so chains stay correct.
-VERSION_CMD := node -p "require('./package.json').version" 2>/dev/null
+VERSION_CMD := bun -p "require('./package.json').version" 2>/dev/null
 
 include version.mk
 
@@ -617,7 +617,7 @@ define test.e2e
 	$(_ensure_host_backend)
 	@if [ -n "$(TIER)$(GROUP)" ]; then \
 		echo "Running tiered E2E tests..."; \
-		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )node scripts/e2e-run.mjs \
+		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )bun scripts/e2e-run.mjs \
 			$(if $(TIER),--tier $(TIER) )$(if $(GROUP),--group $(GROUP) )--browsers $(or $(E2E_BROWSERS),all) \
 			$(if $(PR),--pr $(PR) )$(call _e2e_toggle,dry-run,$(DRYRUN)); \
 	else \
@@ -636,7 +636,7 @@ $(call register, test, e2e)
 # of any test/check recipe; an operator runs it between runs.
 define clean.e2e
 	@echo "Sweeping stratos-e2e-test labeled CF resources..."
-	DRYRUN=$(DRYRUN) node scripts/e2e-clean.mjs
+	DRYRUN=$(DRYRUN) bun scripts/e2e-clean.mjs
 endef
 $(call register, clean, e2e)
 

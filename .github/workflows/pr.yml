@@ -91,10 +91,10 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
-          node-version: ${{ env.NODE_VERSION }}
-      - run: node scripts/lint-docs.mjs
+          bun-version: ${{ env.BUN_VERSION }}
+      - run: bun scripts/lint-docs.mjs
 
   # The website previously had no PR coverage on develop: the legacy docs
   # workflow (since removed) only triggered on master, so a website change
@@ -167,9 +167,9 @@ jobs:
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: oven-sh/setup-bun@f4d14e03ff726c06358e5557344e1da148b56cf7 # v1.2.2
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          bun-version: ${{ env.BUN_VERSION }}
       - name: Report covering specs
         env:
           BASE: ${{ github.base_ref }}
@@ -177,12 +177,12 @@ jobs:
           # the PR from the base ref, so their stranded specs still surface.
           IMPACT_BASE: origin/${{ github.base_ref }}
         run: |
-          # pipefail: a failing git diff must fail the job, not feed node an
+          # pipefail: a failing git diff must fail the job, not feed bun an
           # empty stdin that reads as a green "no frontend changes".
           set -o pipefail
           {
             echo '```'
-            git diff --name-only "origin/${BASE}...HEAD" | node scripts/e2e-impact.mjs
+            git diff --name-only "origin/${BASE}...HEAD" | bun scripts/e2e-impact.mjs
             echo '```'
           } | tee -a "${GITHUB_STEP_SUMMARY}"
 
