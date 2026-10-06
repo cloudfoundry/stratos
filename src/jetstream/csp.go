@@ -2,7 +2,9 @@ package main
 
 import (
 	"crypto/rand"
+	"fmt"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -20,6 +22,46 @@ const cspNoncePlaceholder = "'nonce-PLACEHOLDER'"
 // It only has an effect in a directive that can refuse inline content, which is
 // why style-src does not carry it — 'unsafe-inline' means nothing violates it.
 const cspReportSample = "'report-sample'"
+
+// gitHostOrigin is the only shape a CONSOLE_CSP_GIT_HOSTS entry may take. Each
+// entry is written into the policy header, so anything looser could carry a
+// source or a directive of its own: a ';' starts a new directive, a quote a
+// keyword such as 'unsafe-inline', a '*' every host.
+var gitHostOrigin = regexp.MustCompile(`^https://[A-Za-z0-9.-]+(:[0-9]+)?/?$`)
+
+// cspGitHosts validates CONSOLE_CSP_GIT_HOSTS and returns its origins without
+// a trailing slash. Blank entries are skipped, so "a, b," reads as two hosts.
+func cspGitHosts(entries []string) ([]string, error) {
+	var hosts []string
+	for _, entry := range entries {
+		entry = strings.TrimSpace(entry)
+		if entry == "" {
+			continue
+		}
+		if !gitHostOrigin.MatchString(entry) {
+			return nil, fmt.Errorf("CONSOLE_CSP_GIT_HOSTS: %q is not an https origin; use https://host or https://host:port, with no path", entry)
+		}
+		hosts = append(hosts, strings.TrimSuffix(entry, "/"))
+	}
+	return hosts, nil
+}
+
+// builtInCSPPolicy is defaultCSPPolicy with the deploy wizard's Git hosts
+// added: to connect-src, so the browser may call them, and to img-src, so the
+// avatars they return show.
+func builtInCSPPolicy(gitHosts []string) string {
+	if len(gitHosts) == 0 {
+		return defaultCSPPolicy
+	}
+	extra := " " + strings.Join(gitHosts, " ")
+	directives := strings.Split(defaultCSPPolicy, "; ")
+	for i, directive := range directives {
+		if name, _, _ := strings.Cut(directive, " "); name == "connect-src" || name == "img-src" {
+			directives[i] = directive + extra
+		}
+	}
+	return strings.Join(directives, "; ")
+}
 
 // moduleScriptTail is the closing run every script tag the Angular build emits
 // ends with: <script src="main-<hash>.js" type="module"></script>. The hash

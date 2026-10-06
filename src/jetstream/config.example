@@ -46,6 +46,11 @@ ENABLE_TECH_PREVIEW=false
 # metrics or auth endpoint on another origin, say -- needs its own string here.
 # CONSOLE_CSP=off
 
+# Git hosts the deploy wizard may call from the browser, added to the built-in
+# policy (connect-src, and img-src for avatars). Comma-separated https origins,
+# no path. Ignored when CONSOLE_CSP holds a policy of your own.
+# CONSOLE_CSP_GIT_HOSTS=https://api.github.com,https://gitlab.com
+
 # Violations of the policy above are always logged by Jetstream as a security
 # warning, whether or not anything below is set. Set a URL here to have a copy
 # of each report forwarded to your own collector as well -- a security team's
