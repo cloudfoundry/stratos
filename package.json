@@ -28,7 +28,6 @@
     "prebuild-ui": "bun run build && bun run prebuild-zip",
     "prebuild-zip": "node build/prebuild-zip.js",
     "pre-build-only": "node build/build-orchestrator.js",
-    "test-build": "ng build stratos --configuration development --skip-pre-build",
     "ng": "ng",
     "prestart": "node build/build-orchestrator.js",
     "start": "ng serve",
