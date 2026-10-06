@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"regexp"
 	"slices"
 	"strings"
 	"testing"
@@ -526,5 +527,40 @@ func TestDefaultCSPPolicyForbidsPluginContent(t *testing.T) {
 	sources := directiveSources(t, defaultCSPPolicy, "object-src")
 	if !slices.Equal(sources, []string{"'none'"}) {
 		t.Errorf("object-src must be exactly 'none', got %v", sources)
+	}
+}
+
+// The deploy wizard's public GitHub and GitLab modes call the provider's API
+// straight from the browser (scm-base.ts getAPI, no registered endpoint), so
+// connect-src 'self' alone blocks them and the wizard shows "Git request
+// failed" (#5987). The origins are read from the frontend's defaults so the
+// policy follows them if they ever change.
+func TestDefaultCSPPolicyConnectsToPublicGitAPIs(t *testing.T) {
+	sources := directiveSources(t, defaultCSPPolicy, "connect-src")
+	for _, file := range []string{"github.helpers.ts", filepath.Join("scm", "gitlab-scm.ts")} {
+		path := filepath.Join("..", "frontend", "packages", "git", "src", "shared", file)
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatalf("cannot read %s: %v", path, err)
+		}
+		origin := regexp.MustCompile(`'(https://[^/']+)`).FindStringSubmatch(string(raw))
+		if origin == nil {
+			t.Fatalf("no default https API URL found in %s", path)
+		}
+		if !slices.Contains(sources, origin[1]) {
+			t.Errorf("connect-src must allow %s (default API in %s): %q", origin[1], file, defaultCSPPolicy)
+		}
+	}
+}
+
+// The same wizard cards and the app's Git tab render the owner and commit
+// author avatars the provider returns (avatar_url): GitHub serves them from
+// avatars.githubusercontent.com, GitLab from its own host or Gravatar.
+func TestDefaultCSPPolicyAllowsGitAvatars(t *testing.T) {
+	sources := directiveSources(t, defaultCSPPolicy, "img-src")
+	for _, host := range []string{"https://avatars.githubusercontent.com", "https://gitlab.com", "https://secure.gravatar.com"} {
+		if !slices.Contains(sources, host) {
+			t.Errorf("img-src must allow %s for Git avatars: %q", host, defaultCSPPolicy)
+		}
 	}
 }
