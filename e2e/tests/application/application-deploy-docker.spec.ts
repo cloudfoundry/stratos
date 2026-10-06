@@ -12,6 +12,26 @@ import { createCustomName } from '../../helpers/test-utils';
 test.describe('Application Deploy (Docker)', () => {
 
   test.describe('Basic Docker Setup', () => {
+    // Docker apps are a per-foundation opt-in: CF answers 403
+    // CF-FeatureDisabled to every docker create while diego_docker is off.
+    // Turn it on for each test and put it back after; serial keeps the flag
+    // in one worker's hands.
+    test.describe.configure({ mode: 'serial' });
+    let dockerWasEnabled = true;
+
+    test.beforeEach(async ({ cfApi }) => {
+      dockerWasEnabled = await cfApi.isFeatureFlagEnabled('diego_docker');
+      if (!dockerWasEnabled) {
+        await cfApi.setFeatureFlag('diego_docker', true);
+      }
+    });
+
+    test.afterEach(async ({ cfApi }) => {
+      if (!dockerWasEnabled) {
+        await cfApi.setFeatureFlag('diego_docker', false);
+      }
+    });
+
     test('should create Docker-based app', async ({ cfApi, secrets }) => {
       const spaceGuid = secrets.cloudFoundry[0].testSpaceGuid;
 
