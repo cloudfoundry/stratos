@@ -25,6 +25,10 @@ The `CONSOLE_CSP` environment variable controls the header.
 
 Values are matched without regard to case.
 
+`CONSOLE_CSP_GIT_HOSTS` adds Git hosts to the built-in policy, so the deploy
+wizard can reach them without replacing the whole policy. See
+[Deploying from GitHub and GitLab](#deploying-from-github-and-gitlab) below.
+
 Two further variables control violation reporting, described under
 [Violation reporting](#violation-reporting) below.
 
@@ -49,7 +53,7 @@ style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
 style-src-elem 'self' 'nonce-PLACEHOLDER' 'report-sample' https://fonts.googleapis.com;
 font-src 'self' data: https://fonts.gstatic.com;
 img-src 'self' data: https://avatars.githubusercontent.com https://gitlab.com https://secure.gravatar.com;
-connect-src 'self' https://api.github.com https://gitlab.com;
+connect-src 'self';
 worker-src 'self';
 frame-ancestors 'self';
 base-uri 'self';
@@ -63,13 +67,16 @@ A few of these are worth explaining:
 - `connect-src 'self'` covers same-origin WebSockets, so the application log
   and stream sockets connect without needing a `ws:`/`wss:` wildcard. A bare
   wildcard would permit any host and security scanners flag it.
-- `connect-src` also names the public GitHub and GitLab APIs, and `img-src`
-  the hosts their avatars come from. With no Git endpoint registered, the
-  deploy wizard's public GitHub and GitLab modes call those APIs from the
-  browser and show the owner and commit author avatars they return. GitHub
-  Enterprise and self-hosted GitLab hosts can't be listed in advance: register
-  them as endpoints, which sends their calls through the backend, or add their
-  hosts in your own `CONSOLE_CSP`.
+- `connect-src` names no Git host. The deploy wizard's GitHub and GitLab
+  sources reach a Git host either through the console's backend, which `'self'`
+  already covers, or from the browser, which only works for hosts you list in
+  `CONSOLE_CSP_GIT_HOSTS`. See
+  [Deploying from GitHub and GitLab](#deploying-from-github-and-gitlab).
+- `img-src` names the hosts that GitHub, GitLab.com and Gravatar serve avatars
+  from, so the owner and commit author pictures in the deploy wizard and an
+  application's Git tab show. Images can't run script, so allowing them costs
+  little. A GitHub Enterprise or self-hosted GitLab host's avatars show once
+  that host is in `CONSOLE_CSP_GIT_HOSTS`; until then the picture is left out.
 - `object-src 'none'` forbids plugin content — `<object>`, `<embed>` — which
   is a way of executing script that `script-src` does not cover. It is stated
   rather than left to `default-src`, because falling back to `'self'` would
@@ -121,6 +128,87 @@ A few of these are worth explaining:
   CSP offers no nonce or hash for attributes whose values are computed at
   runtime, so this cannot be tightened by configuration; it needs the libraries
   to set those styles through the CSSOM instead, which CSP exempts.
+
+## Deploying from GitHub and GitLab
+
+The deploy wizard's GitHub and GitLab sources list repositories, branches and
+commits from the Git host. Depending on the tab you use, that request goes
+through the console's backend or straight from your browser to the Git host.
+Only requests from the browser are subject to this policy.
+
+| Wizard source | Request goes | What it needs |
+|---------------|--------------|---------------|
+| GitHub or GitLab, **Public** tab, with a registered endpoint | Through the backend | Nothing in this policy. The console's server must be able to reach the host. |
+| GitHub or GitLab, **Public** tab, no endpoint registered | From the browser to `api.github.com` or `gitlab.com` | That host in `CONSOLE_CSP_GIT_HOSTS`. |
+| GitHub or GitLab, **Private** tab (token typed into the wizard) | From the browser to `api.github.com` or `gitlab.com` | That host in `CONSOLE_CSP_GIT_HOSTS`. |
+| **GitHub Enterprise** or **Self-hosted GitLab** tab | From the browser to the URL you enter | That host in `CONSOLE_CSP_GIT_HOSTS`. |
+| **Public Git URL** | The backend clones the repository | Nothing in this policy. |
+
+A token typed into the Private or Enterprise tab goes from the browser to the
+Git host and never reaches the console's server. A registered endpoint instead
+stores each user's token in the console and sends their requests through the
+backend. An administrator decides which hosts are registered, and the browser
+needs no access to them.
+
+### Allowing Git hosts
+
+Set `CONSOLE_CSP_GIT_HOSTS` to a comma-separated list of `https://` origins.
+Each one is added to `connect-src`, so the browser may call it, and to
+`img-src`, so its avatars show:
+
+```
+CONSOLE_CSP_GIT_HOSTS=https://api.github.com,https://gitlab.com
+```
+
+| Wizard Git source  | Add                           |
+|--------------------|-------------------------------|
+| GitHub.com         | `https://api.github.com`      |
+| GitLab.com         | `https://gitlab.com`          |
+| GitHub Enterprise  | `https://<your GHE host>`     |
+| Self-hosted GitLab | `https://<your GitLab host>`  |
+
+- It is empty by default, so the built-in policy is exactly as shown above.
+- Each entry must be an origin: `https://`, a host, and optionally a port. No
+  path, quotes, spaces or semicolons. Jetstream will not start with an entry
+  that isn't one, and names the entry in its error, rather than writing it
+  into the header.
+- It applies to the built-in policy only. If `CONSOLE_CSP` holds a policy of
+  your own, or turns the policy off, the setting is ignored and Jetstream logs
+  a warning at startup, because your policy is used verbatim. Add the hosts to
+  your policy instead.
+- Every host you add is one an injected script could also send data to. List
+  only the hosts your users deploy from.
+
+### Moving from a custom CONSOLE_CSP
+
+Before this setting existed, the only way to allow a Git host was to replace
+the whole policy with `CONSOLE_CSP`. A copy made that way keeps whatever the
+built-in policy was when it was made and misses everything added since, such
+as the script nonce, `'strict-dynamic'` and Trusted Types.
+
+If your `CONSOLE_CSP` differs from the built-in policy only by its Git hosts,
+remove it and list the hosts in `CONSOLE_CSP_GIT_HOSTS`. You then run the
+built-in policy, and you get its future updates when you upgrade.
+
+### When it doesn't work
+
+| What you see | Why | Fix |
+|--------------|-----|-----|
+| Any GitHub or GitLab tab: "Could not reach `<host>`" | The browser refused the request, usually because the host isn't in `CONSOLE_CSP_GIT_HOSTS` | Add the host, or register it as a Git endpoint |
+| Jetstream log: `violated_directive=connect-src` and `blocked_uri` naming a Git host | The same refusal, as the server sees it (see [Violation reporting](#violation-reporting)) | As above |
+| Git avatars missing for a GitHub Enterprise or self-hosted GitLab host | Its host isn't in `img-src` | Add the host to `CONSOLE_CSP_GIT_HOSTS` |
+| "Git request failed" followed by a status such as `(401)` or `(404)` | The Git host answered and refused, so the policy is not involved | Check the token and its scopes, and the repository name |
+
+### For contributors
+
+`getAPI()` in `src/frontend/packages/git/src/shared/scm/scm-base.ts` chooses
+the route: a registered endpoint goes to `/api/v1/proxy/<endpoint guid>`, and
+otherwise the request goes from the browser to the public or Enterprise API
+URL. Jetstream builds the policy once at startup (`loadPortalConfig` in
+`src/jetstream/main.go`): `builtInCSPPolicy` in `src/jetstream/csp.go` adds the
+origins from `CONSOLE_CSP_GIT_HOSTS` to the built-in policy. The message for a
+host the browser could not reach comes from `unreachableHostMessage` in
+`src/frontend/packages/git/src/shared/scm/scm-base.ts`.
 
 ## Violation reporting
 
@@ -220,6 +308,9 @@ the built-in policy does not name. A custom metrics endpoint or an authenticatio
 service on another host are the usual reasons. Start from the policy above and
 add the origin to the directive that needs it, rather than writing one from
 scratch, or you will find features failing one at a time.
+
+For Git hosts, use `CONSOLE_CSP_GIT_HOSTS` instead; it keeps the built-in
+policy. See [Deploying from GitHub and GitLab](#deploying-from-github-and-gitlab).
 
 If the console misbehaves after an upgrade and you need it working before you
 have time to investigate, `CONSOLE_CSP=off` sends no header at all. Look in the
