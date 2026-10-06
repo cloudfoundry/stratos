@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 import { AppAreaLoaderComponent } from '../area-loader/area-loader.component';
+import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 import { SignalListCellTemplateDirective } from './signal-list-cell-template.directive';
 import { rangeIsComplete, resolveRelativeDay, SignalListRangeBoundMode, SignalListRangeValue, SignalListRangeValueType } from './range-filter';
 
@@ -181,6 +182,10 @@ export interface SignalListColumn<T> {
   // cell the signal-list migration dropped. Does not make the row clickable
   // (rowLink only follows `kind: 'link'` + `link`).
   externalLink?: (row: T) => string | null;
+  // Optional, kind-agnostic. Returns the text a copy button beside the cell
+  // (or card title) puts on the clipboard, or null for no button. Used by the
+  // route lists, whose full URL is truncated in the cell.
+  copyValue?: (row: T) => string | null;
   // Optional, kind-agnostic. Overrides the hover `title` (tooltip) for this
   // column's cell/card-title; defaults to the rendered text. Used by the
   // routes card to show a route's full guid on hover while the visible title
@@ -492,7 +497,7 @@ export interface SignalListConfig<T> {
 @Component({
   selector: 'app-signal-list',
   standalone: true,
-  imports: [CommonModule, RouterModule, UsageGaugeComponent, AppBusyComponent, AppAreaLoaderComponent],
+  imports: [CommonModule, RouterModule, UsageGaugeComponent, AppBusyComponent, AppAreaLoaderComponent, CopyToClipboardComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './signal-list.component.html',
   host: { class: 'block h-full min-h-0' },

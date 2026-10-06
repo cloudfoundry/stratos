@@ -446,7 +446,9 @@
                   <div class="font-semibold text-base text-content-text mb-2 flex items-center justify-between gap-2">
                     @if (titleColumn(); as tc) {
                       <span class="truncate min-w-0" [attr.title]="tc.tooltip ? tc.tooltip(row) : tc.render(row)">
-                        @if (tc.kind === 'link' && tc.link && tc.link(row); as target) {
+                        @if (tc.externalLink && tc.externalLink(row); as href) {
+                          <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ tc.render(row) }}</a>
+                        } @else if (tc.kind === 'link' && tc.link && tc.link(row); as target) {
                           <a [routerLink]="target" [queryParams]="tc.linkQueryParams ? tc.linkQueryParams(row) : null" (click)="$event.stopPropagation()" class="text-accent hover:underline">{{ tc.render(row) }}</a>
                         } @else {
                           {{ tc.render(row) }}
@@ -454,6 +456,9 @@
                       </span>
                     }
                     <div class="flex items-center gap-0 shrink-0">
+                      @if (titleColumn()?.copyValue?.(row); as cv) {
+                        <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
+                      }
                       @if (favoriteColumn(); as fc) {
                         <button
                           data-test="favorite-star"
@@ -590,6 +595,9 @@
                   <div class="flex justify-between items-center gap-2 text-sm py-0.5">
                     <span class="text-content-muted">{{ col.header }}</span>
                     <span class="text-content-text text-right truncate" [attr.title]="col.render(row)">
+                      @if (col.copyValue?.(row); as cv) {
+                        <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
+                      }
                       @if (col.externalLink && col.externalLink(row); as href) {
                         <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
                           <span class="material-icons text-base leading-none">launch</span>{{ col.render(row) }}
@@ -738,6 +746,9 @@
                     [class.truncate]="col.kind !== 'radio' && col.kind !== 'checkbox' && col.kind !== 'gauge' && col.kind !== 'template'"
                     [class.overflow-visible]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template'"
                     [attr.title]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : col.render(row)">
+                  @if (col.copyValue?.(row); as cv) {
+                    <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
+                  }
                   @if (col.externalLink && col.externalLink(row); as href) {
                     <a [href]="href" target="_blank" rel="noopener" (click)="$event.stopPropagation()" class="text-accent hover:underline inline-flex items-center gap-1">
                       <span class="material-icons text-base leading-none">launch</span>{{ col.render(row) }}

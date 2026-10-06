@@ -133,11 +133,12 @@ export class CfAppRoutesSignalConfigService {
   buildColumns(): SignalListColumn<StRoute>[] {
     const columns: SignalListColumn<StRoute>[] = [
       {
-        // The full route, linked so it can be opened or its address copied.
+        // The full route, linked so it can be opened, with a copy button.
         // TCP routes (port > 0) aren't HTTP, so they stay plain text.
         header: 'Route', key: 'url',
         render: (row) => row.url ?? '',
         externalLink: (row) => row.url && !((row.port ?? 0) > 0) ? routeHref(row.url) : null,
+        copyValue: (row) => !row.url ? null : (row.port ?? 0) > 0 ? row.url : routeHref(row.url),
         sortField: 'url',
       },
       {

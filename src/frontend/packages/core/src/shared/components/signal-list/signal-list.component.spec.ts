@@ -1168,6 +1168,65 @@ describe('SignalListComponent', () => {
       expect(anchor!.getAttribute('target')).toBe('_blank');
       expect(anchor!.textContent).toContain('View');
     });
+
+    // A card's title is its first column. Route lists put the route URL
+    // there, so the title has to honour externalLink and copyValue too.
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`,
+    })
+    class RouteHost {
+      items = signal([{ url: 'app.example.com/p' }]);
+      config: SignalListConfig<{ url: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(1).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: signal(0),
+        pageSize: signal(10),
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          {
+            header: 'Route', key: 'url',
+            render: r => r.url,
+            externalLink: r => `https://${r.url}`,
+            copyValue: r => `https://${r.url}`,
+          },
+          { header: 'Other', key: 'other', render: () => 'x' },
+        ],
+        getRowKey: r => r.url,
+      };
+    }
+
+    function copyButtons(fixture: { nativeElement: HTMLElement }): HTMLButtonElement[] {
+      return Array.from(fixture.nativeElement.querySelectorAll('app-copy-to-clipboard button'));
+    }
+
+    it('links the card title when its column has externalLink', () => {
+      const fixture = TestBed.createComponent(RouteHost);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+      fixture.detectChanges();
+      const anchor = fixture.nativeElement.querySelector('a[href="https://app.example.com/p"]') as HTMLAnchorElement | null;
+      expect(anchor).not.toBeNull();
+      expect(anchor!.getAttribute('target')).toBe('_blank');
+      expect(anchor!.textContent).toContain('app.example.com/p');
+    });
+
+    it('puts a copy button beside a copyValue column in card view', () => {
+      const fixture = TestBed.createComponent(RouteHost);
+      fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+      fixture.detectChanges();
+      expect(copyButtons(fixture).length).toBe(1);
+      expect(copyButtons(fixture)[0].getAttribute('aria-label')).toBe('Copy https://app.example.com/p');
+    });
+
+    it('puts a copy button beside a copyValue column in table view', () => {
+      const fixture = TestBed.createComponent(RouteHost);
+      fixture.detectChanges();
+      expect(copyButtons(fixture).length).toBe(1);
+      expect(copyButtons(fixture)[0].getAttribute('aria-label')).toBe('Copy https://app.example.com/p');
+    });
   });
 
   describe('bulk-action bar (bulkActions slot)', () => {
