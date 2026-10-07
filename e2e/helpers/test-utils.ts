@@ -1,4 +1,5 @@
 import { Page } from '@playwright/test';
+import { randomBytes } from 'node:crypto';
 
 /**
  * Test Utilities
@@ -27,7 +28,7 @@ export function createCustomName(prefix: string, isoTime?: string): string {
   // Millisecond timestamps collide across parallel workers (CF answers 422
   // CF-UniquenessError), so add a short random suffix.
   const timestamp = new Date().toISOString().replace(/[-:.]+/g, '');
-  return `${prefix}-${timestamp}-${Math.random().toString(36).slice(2, 6)}`;
+  return `${prefix}-${timestamp}-${randomBytes(2).toString('hex')}`;
 }
 
 /**
