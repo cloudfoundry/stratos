@@ -13,7 +13,7 @@ replace (
 require (
 	code.cloudfoundry.org/go-log-cache/v2 v2.0.7
 	code.cloudfoundry.org/go-loggregator/v9 v9.2.1
-	github.com/cloudfoundry-community/go-cfenv v1.24.3
+	github.com/cloudfoundry-community/go-cfenv v1.24.4
 	github.com/cloudfoundry/noaa/v2 v2.6.0
 	github.com/cloudfoundry/sonde-go v0.0.0-20260818080958-d46298cd8513
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-20250312201517-2a076063346f
@@ -48,7 +48,7 @@ require (
 require (
 	code.cloudfoundry.org/bytefmt v0.86.0 // indirect
 	code.cloudfoundry.org/cli/v8 v8.19.0 // indirect
-	code.cloudfoundry.org/clock v1.89.0 // indirect
+	code.cloudfoundry.org/clock v1.90.0 // indirect
 	code.cloudfoundry.org/jsonry v1.1.4 // indirect
 	code.cloudfoundry.org/tlsconfig v0.65.0 // indirect
 	code.cloudfoundry.org/ykk v0.0.0-20170424192843-e4df4ce2fd4d // indirect
@@ -130,7 +130,7 @@ require (
 	github.com/gofrs/flock v0.13.0 // indirect
 	github.com/google/btree v1.1.3 // indirect
 	github.com/google/gnostic-models v0.7.1 // indirect
-	github.com/google/pprof v0.0.0-20260906184651-6331bc6350fe // indirect
+	github.com/google/pprof v0.0.0-20260926063103-aaccee046517 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/websocket v1.5.4-0.20250319132907-e064f32e3674 // indirect
 	github.com/gosuri/uitable v0.0.4 // indirect
