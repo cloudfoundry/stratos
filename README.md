@@ -34,7 +34,7 @@ Please visit our new [documentation site](https://stratos.app/). There you can d
     1. [Docker](https://stratos.app/docs/deploy/all-in-one), as a single container deploying all components.
 1. Configuring advanced features such as [Single Sign On](https://stratos.app/docs/advanced/sso) and Cloud Foundry '[invite to org](https://stratos.app/docs/advanced/invite-user-guide)'.
 1. Guides for [developers](https://stratos.app/docs/developer/introduction).
-1. How to [extend](https://stratos.app/docs/extensions/introduction) Stratos [functionality](https://stratos.app/docs/extensions/frontend) and apply a custom [theme](https://stratos.app/docs/extensions/theming).
+1. How to [extend](https://stratos.app/docs/extensions/introduction) Stratos [functionality](https://stratos.app/docs/extensions/frontend) and apply a custom [theme](https://stratos.app/docs/theming-architecture).
 
 ## Developer Workflow
 
@@ -50,86 +50,40 @@ These are taken from `engines` in `package.json` and the `go` directive in
 
 ### First-Time Setup
 
-On a fresh checkout, run the bootstrap script **once** to initialize the development environment:
-
 ```bash
 git clone https://github.com/cloudfoundry/stratos.git
 cd stratos
-
-# One-time bootstrap (builds required infrastructure)
-./bootstrap
-# OR
-make bootstrap
-# OR
-bun run bootstrap
-
-# Install dependencies
-bun install
-
-# Start development server
-make dev-frontend
+make install          # bun install; its postinstall step builds the devkit
 ```
 
-**What bootstrap does:**
+The backend needs `src/jetstream/config.properties` with an encryption key and
+a login method before its first start. The
+[contributor guide](docs/contributing_guide.md#first-time-setup) has the exact
+steps, including a local `admin` user and the dev TLS certificate.
 
-1. Verifies prerequisites (Node.js, Bun, Go)
-2. Builds the devkit package (required by Angular CLI)
-3. Generates extension module imports
-4. Creates development proxy configuration
-5. Stamps `build-info.ts` so vitest can run without a full build
-6. Cleans up workspace
-
-**Troubleshooting:**
-
-- If `bun install` fails with missing files: Run `make bootstrap` first
-- If builds fail with "File not found" errors: Run `make bootstrap`
-- Bootstrap only needs to run once per checkout
+On a fresh worktree, `./bootstrap` also stamps `build-info.ts` so the unit
+tests can run before the first build.
 
 ### Development Commands
 
-```bash
-# Frontend development server (https://127.0.0.1:5440)
-make dev-frontend
-# OR
-bun run start
-
-# Build for production
-make build              # Both frontend and backend
-make build-frontend     # Frontend only
-make build-backend      # Backend only
-
-# Testing
-bun test                # All frontend tests
-bun run test-frontend:core
-bun run test-frontend:cloud-foundry
-bun run test-backend    # Backend tests
-bun run e2e             # End-to-end tests
-
-# Linting
-bun run lint
-```
-
-### Full Stack Development
-
-Run these in separate terminals:
+Run every command from the repository root. `make help` lists them all.
 
 ```bash
-# Terminal 1: Frontend (port 5440)
-make dev-frontend
+# Development servers, in separate terminals
+make dev backend        # https://localhost:5443
+make dev frontend       # https://localhost:5440
 
-# Terminal 2: Backend API (port 5443)
-make dev-backend
+# Build
+make build              # Frontend and every backend platform
+make build frontend     # Frontend only
+make build backend PLATFORM=linux/amd64   # One backend platform
 
-# Access at: https://127.0.0.1:5440
+# Tests and checks
+make test frontend      # Unit tests (Vitest)
+make test backend       # Go tests
+make test e2e           # End-to-end tests (Playwright)
+make check gate         # Lint and unit tests, as CI runs them
 ```
-
-For more detailed information, see [CLAUDE.md](CLAUDE.md).
-
-## Acknowledgements
-
-Tested with Browserstack
-
-<a href="https://www.browserstack.com"><img width="240px" src="docs/images/Browserstack-logo.svg" alt="Browserstack"></a>
 
 ## Stratos UI pre-packager
 
@@ -172,44 +126,16 @@ Note: `sgs` creates security groups the first time, upgrades do not use `sgs`.
 
 ## Packaging
 
-Requires `node`, `go`, and `zip`.
-
-Build and package for all targets (linux/amd64, linux/arm64):
+Build the release packages with:
 
 ```bash
-bin/package
+make build release      # CF zip and GitHub release archives, with SHA256SUMS
+make build release cf   # Only the cf push-ready zip (linux/amd64)
 ```
 
-To skip the build step and package from existing artifacts:
-
-```bash
-bin/package --skip-build
-```
-
-To override the version (default: from `package.json`):
-
-```bash
-VERSION="4.8.1" bin/package
-```
-
-This produces per-target zips in `dist/`:
-
-```text
-dist/stratos-cf-<version>-<os>-<arch>.zip
-```
-
-Deploy with:
-
-```bash
-cf push -f dist/cf-package-<os>-<arch>/manifest.yml \
-  -p dist/stratos-cf-<version>-<os>-<arch>.zip
-```
-
-### NOTE
-
-The original packaging code was based on work from the
-[Orange Cloud Foundry Github Repository](https://github.com/orange-cloudfoundry/stratos-ui-cf-packager/).
-Many thanks to Benjamin & Arthur, we appreciate you both!
+`VERSION=<semver>` overrides the version taken from `package.json`. The CF zip
+is written to `dist/stratos-cf-<version>.zip`; see
+[CF Release Build Process](docs/developer-environment.md#cf-release-build-process).
 
 ## License
 
