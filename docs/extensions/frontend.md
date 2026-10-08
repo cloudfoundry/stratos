@@ -215,9 +215,9 @@ The files for the default indicator can be found in the `src/frontend/packages/t
 
 An example of a different loading indicator is included with the ACME sample in `src/frontend/packages/example-theme/loader`.
 
-The customization task will insert the appropriate CSS and HTML files into the main index.html file when it runs.
+Each build inserts the CSS and HTML files into the built `index.html` (`dist/frontend/browser/index.html`); the source file is never changed.
 
-Take a look at the template for the `index.html` file in `src/frontend/packages/core/misc/custom/index.html`. The CSS file is inserted where the marker `/** @@LOADING_CSS@@ **/` is and the HTML file where `<!-- @@LOADING_HTML@@ -->` is.
+Take a look at the source `index.html` in `src/frontend/packages/core/src/index.html`. The CSS file is inserted where the marker `/** @@LOADING_CSS@@ **/` is and the HTML file where `<!-- @@LOADING_HTML@@ -->` is.
 
 ### Login Page
 

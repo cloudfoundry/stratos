@@ -7,8 +7,10 @@
  * 1. Extension Generator → _custom-import.module.ts
  * 2. SASS Resolver → processed SCSS (if needed)
  * 3. Asset Copier → dist/assets
- * 4. Index Transformer → inject metadata
- * 5. Signal ready for Angular build
+ * 4. Signal ready for Angular build
+ *
+ * index.html metadata is injected after the build, into the build output,
+ * by the prebuild-application builder (tools/builders/prebuild-application).
  */
 
 import { execFileSync } from 'child_process';
@@ -50,14 +52,6 @@ const tools = [
     required: true,
     description: 'Copies assets to dist directory',
     watchPaths: ['src/**/assets/**/*']
-  },
-  {
-    name: 'Index Transformer',
-    script: './index-transformer.js',
-    args: ['src/frontend/packages/core/src/index.html'],
-    required: false,
-    description: 'Transforms index.html with metadata injection',
-    watchPaths: ['src/index.html', 'package.json']
   }
 ];
 
