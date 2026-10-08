@@ -91,7 +91,7 @@ if [ ! -f "build/extension-generator.mjs" ]; then
     exit 1
 fi
 
-node build/extension-generator.mjs
+bun build/extension-generator.mjs
 
 if [ -f "src/frontend/packages/core/src/_custom-import.module.ts" ]; then
     print_success "Extension module generated"
@@ -107,7 +107,7 @@ if [ ! -f "build/dev-setup.cjs" ]; then
     exit 1
 fi
 
-node build/dev-setup.cjs
+bun build/dev-setup.cjs
 
 if [ -f "proxy.conf.js" ]; then
     print_success "Development configuration created"
