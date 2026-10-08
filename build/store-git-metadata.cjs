@@ -29,9 +29,27 @@ if (!fs.existsSync(GIT_FOLDER)) {
   console.log('  + Unable to store git repository metadata - .git folder not found');
   return;
 }
+// A detached checkout (a release build checks out its tag) has no branch;
+// name the tag on HEAD instead, else the short commit. Keep in step with
+// BUILD_VCS_BRANCH in version.mk, which the About page shows.
+function gitBranch() {
+  const quiet = { stdio: ['ignore', 'pipe', 'ignore'] };
+  for (const cmd of ['git symbolic-ref -q --short HEAD', 'git describe --tags --exact-match HEAD', 'git rev-parse --short HEAD']) {
+    try {
+      const out = execSync(cmd, quiet).toString().trim();
+      if (out) {
+        return out;
+      }
+    } catch (e) {
+      // not on a branch / no tag here; try the next form
+    }
+  }
+  return '';
+}
+
 var gitMetadata = {
   project: execGit('git config --get remote.origin.url'),
-  branch: execGit('git rev-parse --abbrev-ref HEAD'),
+  branch: gitBranch(),
   commit: execGit('git rev-parse HEAD')
 };
 

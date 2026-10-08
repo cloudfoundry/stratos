@@ -86,7 +86,10 @@ $(_HIDE)BUILD_VCS_URL     := $(shell git remote get-url origin 2>/dev/null || ec
 $(_HIDE)BUILD_VCS_ID      := $(shell git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 $(_HIDE)BUILD_VCS_ID_FULL := $(shell git rev-parse HEAD 2>/dev/null || echo "unknown")
 $(_HIDE)BUILD_VCS_ID_DATE := $(shell TZ=UTC0 git log -1 --date=format-local:"%Y-%m-%dT%H:%M:%SZ" --format=%cd 2>/dev/null || echo "unknown")
-$(_HIDE)BUILD_VCS_BRANCH  := $(shell git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "unknown")
+# A detached checkout (a release build checks out its tag) has no branch;
+# name the tag on HEAD instead, else the short commit. Keep in step with
+# build/store-git-metadata.cjs, which records the same for index.html.
+$(_HIDE)BUILD_VCS_BRANCH  := $(shell git symbolic-ref -q --short HEAD 2>/dev/null || git describe --tags --exact-match HEAD 2>/dev/null || git rev-parse --short HEAD 2>/dev/null || echo "unknown")
 
 # ── Dump action ──────────────────────────────────────────────
 define dump.version
