@@ -9,3 +9,10 @@
   change may still hold an old rewritten copy; setup says so, and
   `git checkout -- src/frontend/packages/core/src/index.html` restores
   it.
+
+[Chores]
+- Removed the unused devkit `application` and `dev-server` builders.
+  Their directory moved the compiled devkit under `dist-devkit/src/`,
+  so `bun run prepare-backend` and the setup step that generates the
+  backend plugin list could not find `dist-devkit/backend.js`. Both run
+  again.
