@@ -69,7 +69,7 @@
         "@types/hammerjs": "^2.0.46",
         "@types/intersect": "^1.0.3",
         "@types/js-yaml": "4.0.9",
-        "@types/node": "26.6.3",
+        "@types/node": "26.6.4",
         "@types/pngjs": "^6.0.5",
         "@types/webpack": "^5.28.5",
         "@vitest/coverage-v8": "^5.0.3",
@@ -108,7 +108,7 @@
         "rxjs": "^7.8.2",
       },
       "devDependencies": {
-        "@types/node": "^26.6.3",
+        "@types/node": "^26.6.4",
       },
     },
   },
@@ -901,7 +901,7 @@
 
     "@types/mime": ["@types/mime@1.3.5", "", {}, "sha512-/pyBZWSLD2n0dcHE3hq8s8ZvcETHtEuF+3E7XVt0Ig2nvsVQXdghHVcEkIWjy9A0wKfTn97a/PSDYohKIlnP/w=="],
 
-    "@types/node": ["@types/node@26.6.3", "", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-dsqMQQoeTLqu9wynDD00q573mNzso3IdQOAfHRJqLCcmCFPoGo9A1bDpUcv/9tnKpErQWv9uKeGfl37EIS02Yg=="],
+    "@types/node": ["@types/node@26.6.4", "", { "dependencies": { "undici-types": "~8.9.0" } }, "sha512-ldVPDCzj7fsaGZrLB0NuHuTvJcsNasysBAqMolr/cgxrLd1xbqxIr3XJiPnHHJUCxj5sNF1vnRj9aWnrVh5Jcg=="],
 
     "@types/pngjs": ["@types/pngjs@6.0.5", "", { "dependencies": { "@types/node": "*" } }, "sha512-0k5eKfrA83JOZPppLtS2C7OUtyNAl2wKNxfyYl9Q5g9lPkgBl/9hNyAu6HuEH2J4XmIv2znEpkDd0SaZVxW6iQ=="],
 
