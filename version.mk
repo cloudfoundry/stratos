@@ -107,5 +107,6 @@ define dump.version
 	@echo "BUILD_VCS_URL     $($(_HIDE)BUILD_VCS_URL)"
 	@echo "BUILD_VCS_ID      $($(_HIDE)BUILD_VCS_ID)"
 	@echo "BUILD_VCS_ID_DATE $($(_HIDE)BUILD_VCS_ID_DATE)"
+	@echo "BUILD_VCS_BRANCH  $($(_HIDE)BUILD_VCS_BRANCH)"
 	$(dump.version.extra)
 endef
