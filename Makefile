@@ -645,7 +645,9 @@ $(call register, clean, e2e)
 # make check lint     — ESLint + go vet + golangci-lint
 # make check gate     — lint + unit tests + production build (= bun run gate-check)
 # make check tests    — unit tests only
-# make check coverage — unit tests with coverage
+# make check coverage — unit tests with coverage, frontend + backend
+# make check frontend coverage — Vitest coverage only (coverage/frontend/)
+# make check backend coverage  — Go coverage only (coverage/backend/)
 # make check e2e      — Playwright E2E core tests
 
 # golangci-lint has to be built by a Go at least as new as jetstream's go.mod
@@ -718,9 +720,40 @@ define check.tests
 endef
 $(call register, check, tests, $($(_HIDE)BUILD_INFO_TS))
 
-define check.coverage
-	@echo "Running unit tests with coverage..."
+# frontend/backend pick a side of coverage; with neither, both run, as for
+# build and test. They are valid on check only next to coverage, so a bare
+# `make check frontend` still warns rather than running lint + gate.
+$(_HIDE)COV_FRONTEND = $(or $($(_HIDE)WANT_FRONTEND),$(if $($(_HIDE)WANT_BACKEND),,yes))
+$(_HIDE)COV_BACKEND  = $(or $($(_HIDE)WANT_BACKEND),$(if $($(_HIDE)WANT_FRONTEND),,yes))
+ifeq ($($(_HIDE)WANT_COVERAGE),yes)
+$(call allow, check, frontend)
+$(call allow, check, backend)
+endif
+
+define coverage_frontend
+	@echo "Running frontend unit tests with coverage..."
 	bun run test -- --coverage
+endef
+
+# One profile per Go module (they are separate modules, so one go test run
+# cannot span them); the TOTAL line sums statements across all of them.
+define coverage_backend
+	@echo "Running backend unit tests with coverage..."
+	@rm -rf coverage/backend && mkdir -p coverage/backend
+	@for m in $(GO_MODULES); do \
+		p=$(CURDIR)/coverage/backend/$$(echo $$m | tr / _).out; \
+		echo "==> coverage $$m"; \
+		(cd $$m && go test ./... -count=1 -coverprofile=$$p && \
+		  go tool cover -func=$$p | tail -1) || exit 1; \
+	done
+	@cat coverage/backend/*.out | awk '!/^mode:/ { s += $$(2); if ($$(3) > 0) c += $$(2) } \
+		END { printf "TOTAL backend: %.1f%% of %d statements\n", 100 * c / s, s }'
+endef
+
+# The two halves live in their own defines: $(if) splits on commas.
+define check.coverage
+$(if $($(_HIDE)COV_FRONTEND),$(coverage_frontend))
+$(if $($(_HIDE)COV_BACKEND),$(coverage_backend))
 endef
 $(call register, check, coverage, $($(_HIDE)BUILD_INFO_TS))
 
@@ -1475,7 +1508,9 @@ help:
 	@echo "  make check lint           Lint checks only"
 	@echo "  make check gate           Lint + unit tests (gate-check)"
 	@echo "  make check tests          Unit tests only"
-	@echo "  make check coverage       Unit tests with coverage"
+	@echo "  make check coverage       Unit tests with coverage (frontend + backend)"
+	@echo "  make check frontend coverage   Frontend coverage only (coverage/frontend/)"
+	@echo "  make check backend coverage    Backend coverage only (coverage/backend/)"
 	@echo "  make check e2e            Playwright E2E core tests"
 	@echo ""
 	@echo "Release:"

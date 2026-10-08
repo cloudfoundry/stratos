@@ -75,7 +75,9 @@ by default rather than sweeping it with everything else untracked.
 | `make check lint` | Lint checks (ESLint + `go fmt` + `go vet` + `golangci-lint` on both Go modules). Requires `golangci-lint` installed. Note: `go fmt` may modify files. |
 | `make check gate` | Full pre-push quality gate — mirrors what CI runs on each PR (ESLint + Vitest frontend tests + Go unit tests). Run this before every push. |
 | `make check tests` | Unit tests only |
-| `make check coverage` | Frontend unit tests with coverage (Vitest). No Go coverage. |
+| `make check coverage` | Unit tests with coverage, frontend (Vitest) and backend (Go) |
+| `make check frontend coverage` | Frontend coverage only; report in `coverage/frontend/` |
+| `make check backend coverage` | Backend coverage only: one Go profile per module in `coverage/backend/`, per-module and total statement coverage printed |
 | `make check e2e` | Playwright E2E core tests |
 
 ESLint and Vitest need no separate install — both are plain `devDependencies`
