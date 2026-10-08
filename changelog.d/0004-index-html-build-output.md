@@ -1,3 +1,14 @@
+[Maintainability]
+- Removed unused build tooling: `stratos-buildpack.yml`,
+  `deploy/cloud-foundry/build.sh` and `deploy/cloud-foundry/start.sh`.
+  They served the old custom Stratos buildpack, which built Stratos from
+  source during `cf push`. Stratos no longer deploys that way: the Cloud
+  Foundry deploy pushes the pre-built `stratos-cf-<version>.zip` with
+  the `binary_buildpack` and never runs these files. Nothing changes for
+  a deploy that follows the current instructions.
+- The last release that has them is v5.5.5. To restore them:
+  `git checkout v5.5.5 -- stratos-buildpack.yml deploy/cloud-foundry/build.sh deploy/cloud-foundry/start.sh`
+
 [BugFixes]
 - Every frontend build now writes the `stratos.yaml` title, git branch,
   commit and build date into the built `index.html`. Before, the build
