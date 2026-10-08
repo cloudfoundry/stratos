@@ -70,7 +70,7 @@
     "e2e:ui": "playwright test --ui",
     "e2e:debug": "playwright test --debug",
     "e2e:headed": "playwright test --headed",
-    "e2e:dev": "E2E_BASE_URL=https://localhost:4200 playwright test",
+    "e2e:dev": "E2E_BASE_URL=https://localhost:5440 playwright test",
     "e2e:local": "E2E_BASE_URL=https://localhost playwright test",
     "e2e:report": "playwright show-report e2e-reports/html",
     "e2e:screenshot:v4": "E2E_BASE_URL=https://console481.run.adepttech.ca E2E_PROFILE=adepttech STRATOS_SCREENSHOT_LABEL=v4 playwright test e2e/tests/core/screenshots.spec.ts",

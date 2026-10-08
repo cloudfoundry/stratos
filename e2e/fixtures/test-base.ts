@@ -341,7 +341,10 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     }
 
     // Create request helper with pre-authenticated state
-    const request = new RequestHelper(baseURL || 'http://localhost:4200');
+    if (!baseURL) {
+      throw new Error('cfApi needs baseURL; playwright.config.ts sets it');
+    }
+    const request = new RequestHelper(baseURL);
     await withDeadline(request.initFromStorageState(ADMIN_STATE), 15000, 'cfApi initFromStorageState');
 
     // Get registered endpoints
