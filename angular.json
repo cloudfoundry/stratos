@@ -15,7 +15,7 @@
             "prebuildScripts": [
               {
                 "name": "Clean symlinks",
-                "script": "node build/clean-symlinks.cjs",
+                "script": "bun build/clean-symlinks.cjs",
                 "phase": 1,
                 "cache": true,
                 "cacheKey": ["src/frontend/packages/**/package.json"],
@@ -24,7 +24,7 @@
               },
               {
                 "name": "Store git metadata",
-                "script": "node build/store-git-metadata.cjs",
+                "script": "bun build/store-git-metadata.cjs",
                 "phase": 1,
                 "cache": true,
                 "cacheKey": [".git/HEAD", ".git/refs/heads/**"],
@@ -33,7 +33,7 @@
               },
               {
                 "name": "Generate custom imports",
-                "script": "node build/extension-generator.mjs",
+                "script": "bun build/extension-generator.mjs",
                 "phase": 2,
                 "cache": true,
                 "cacheKey": ["custom-src/**/*", "src/frontend/packages/core/custom-extensions.json"],
@@ -42,7 +42,7 @@
               },
               {
                 "name": "Prepare backend",
-                "script": "node dist-devkit/src/backend.js",
+                "script": "bun dist-devkit/src/backend.js",
                 "phase": 2,
                 "cache": true,
                 "cacheKey": ["dist-devkit/src/backend.js", "src/jetstream/**/*.go"],
