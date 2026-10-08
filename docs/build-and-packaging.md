@@ -408,8 +408,8 @@ that brought it into the tree. It reads `bun.lock` and npm
 `package-lock.json`, and takes `<rev>:<path>` to read a version from git:
 
 ```bash
-node scripts/lockdiff.mjs origin/develop:bun.lock bun.lock
-node scripts/lockdiff.mjs origin/develop:src/frontend/packages/devkit/package-lock.json \
+bun scripts/lockdiff.mjs origin/develop:bun.lock bun.lock
+bun scripts/lockdiff.mjs origin/develop:src/frontend/packages/devkit/package-lock.json \
   src/frontend/packages/devkit/package-lock.json --detail
 ```
 

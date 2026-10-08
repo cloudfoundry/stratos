@@ -155,13 +155,13 @@ Everything else stays in its existing group directory.
 
 **This ordering is enforced only by the tiered runner** (`make test e2e
 TIER=…` / `make test e2e GROUP=…`, which delegates to
-`scripts/e2e-run.mjs`). A bare `npx playwright test` or `make test e2e`
+`scripts/e2e-run.mjs`). A bare `bun run playwright test` or `make test e2e`
 (with no `TIER`/`GROUP` set) runs the plain Playwright test-runner
 directly — `dependent/` is not ordered last and can interleave with the
 parallel pool, reintroducing the blast-radius risk above.
 
 `make check e2e` also bypasses the tiered runner: it scopes directly to
-`npx playwright test e2e/tests/core/`, so it no longer covers the
+`bun run playwright test e2e/tests/core/`, so it no longer covers the
 endpoint lifecycle spec at all — `endpoints.spec.ts` lives in
 `dependent/`, outside that path.
 

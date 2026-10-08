@@ -309,7 +309,7 @@ productVersion: 2.0.0
 
 In this example, we will walk through extending the Stratos front-end. A new tab will be added to the Cloud Foundry Application page.
 
-This walk-through assumes that you have installed the Angular CLI globally - this can be done with `npm install -g @angular/cli`.
+This walk-through uses the Angular CLI that comes with the project's dependencies; run it as `bunx ng`.
 
 ### Create a new extensions package
 

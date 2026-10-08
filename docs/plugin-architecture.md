@@ -257,8 +257,8 @@ cd src/jetstream && go generate ./...
         → writes extra_plugins.go
 ```
 
-The Makefile's `build-backend` target runs `go generate` automatically
-before `go build`.
+`make build backend` runs `go generate` automatically before
+`go build`.
 
 ### Frontend Build (prebuild)
 
@@ -266,13 +266,13 @@ The frontend prebuild pipeline also reads `plugin-config.yaml` to
 generate the same `extra_plugins.go`:
 
 ```
-npm prebuild
+bun run prebuild
   └── build-orchestrator.js
         └── backend.ts → reads plugin-config.yaml
                         → validates plugin dirs exist
                         → writes extra_plugins.go
 
-npm build (ng build)
+bun run build (ng build)
   └── Angular CLI compiles frontend
 ```
 
