@@ -130,37 +130,21 @@ Each Stratos [GitHub release](https://github.com/cloudfoundry/stratos/releases) 
 
 ### Deploy Stratos from source
 
-To do so, `clone` the **stratos** repository, `cd` into the newly cloned repository and `push` to Cloud Foundry. This can be done with:
+Build the same `cf push`-ready package a release contains, then push it. You need the tools in
+[Required Runtimes](../../developer-environment.md#required-runtimes) installed locally.
 
 ```
 git clone https://github.com/cloudfoundry/stratos
 cd stratos
-git checkout tags/stable -b stable
-./build/store-git-metadata.sh
+git checkout <release tag>     # for example v5.5.5; omit to build the current develop branch
+make install
+make build release cf
 cf push
 ```
 
-If the cf push exceeds the time allowed see the instructions [here](#pre-building-the-ui)
-
-#### Pre-building the UI
-
-Due to the memory usage of the Angular compiler (see below), when deployed to Cloud Foundry via `cf push`, Stratos does not use AOT (Ahead-of-Time) compilation.
-
-If you wish to enable AOT or reduce the push time, you can pre-build the UI before pushing.
-
-This can be done with:
-
-```
-git clone https://github.com/cloudfoundry/stratos
-cd stratos
-npm install
-npm run prebuild-ui
-cf push
-```
-
-You will need a recent version of Node installed locally to do this.
-
-The `prebuild-ui` npm script performs a build of the front-end UI and then zips up the resulting folder into a package named `stratos-frontend-prebuild.zip`. The Stratos buildpack will unpack this zip file and use its contents instead of building the UI during staging, when this file is present.
+`make build release cf` builds the UI, cross-compiles the backend for Linux/amd64 and stages both in `dist/cf-package`. The repository's
+`manifest.yml` pushes that directory with the `binary_buildpack`, so nothing is built during staging. See
+[CF Release Build Process](../../developer-environment.md#cf-release-build-process) for the individual steps.
 
 
 #### Memory Usage
