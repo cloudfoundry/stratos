@@ -22,7 +22,7 @@
           },
           "script": {
             "type": "string",
-            "description": "Command to execute (e.g., 'node build/script.js')"
+            "description": "Command to execute (e.g., 'bun build/script.js')"
           },
           "phase": {
             "type": "number",
