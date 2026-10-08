@@ -33,6 +33,16 @@ This can be done by adding the following to the docker run command shown in the 
 ```
 -e SESSION_STORE_SECRET=<alphanumeric secret>
 ```
+## Branding
+
+The image serves its UI from `/srv/ui`. To brand the console, mount your own `company-config.json` over the shipped one, for example:
+
+```
+-v $(pwd)/company-config.json:/srv/ui/assets/company-config.json:ro
+```
+
+The title shown before the app starts is in `/srv/ui/index.html`; mount an edited copy the same way. See [How to Rebrand](../branding-architecture.md#how-to-rebrand).
+
 ## Configuring a local user account in place of a UAA
 
 By default the All-in-one image requires a UAA for user authentication. If this is not desired, the image can be configured to use a Stratos local user account. Edit the file ```deploy/all-in-one/config.all-in-one.properties``` and uncomment the following lines before building the container.

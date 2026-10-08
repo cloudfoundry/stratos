@@ -266,9 +266,15 @@ components and are not cleared on upgrade.
 
 The tab title shown before the app starts, and on the page shown when
 JavaScript is disabled, is the `title` from `stratos.yaml`, written into
-`index.html` at build time (default `Stratos`). A pre-built package
-carries the default; change it by editing `<title>` and the
+`index.html` at build time (default `Stratos`). This first level can
+differ from the company name shown once the app starts. A pre-built
+package carries the default; change it by editing `<title>` and the
 `message title` element in `ui/index.html`.
+
+> [!NOTE]
+> Branding is still being built out. Hand-editing `ui/index.html` and
+> `ui/assets/company-config.json` is the interim method; once the
+> branding tool is ready, it will make these edits instead.
 
 See the theme package `README.md` for the complete
 `company-config.json` schema with all fields documented.
