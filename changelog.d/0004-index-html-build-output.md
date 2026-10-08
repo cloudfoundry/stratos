@@ -20,6 +20,10 @@
   change may still hold an old rewritten copy; setup says so, and
   `git checkout -- src/frontend/packages/core/src/index.html` restores
   it.
+- Release builds now record the release tag as the branch, so the
+  About page shows the tag (such as `v5.5.5`) rather than `HEAD`. Release CI checks out
+  the tag, which leaves no branch; a build from a checkout with no
+  branch and no tag records the short commit.
 
 [Chores]
 - Removed the unused devkit `application` and `dev-server` builders.
