@@ -5,77 +5,72 @@ sidebar_label: Tests
 
 ## Test
 
+Run every command from the repository root. Stratos tooling runs through
+[Bun](https://bun.sh); the `make` targets are the supported entry points.
+[TESTING.md](https://github.com/cloudfoundry/stratos/blob/develop/TESTING.md)
+has the full testing guide.
+
 ### Lint
 
-Run `npm run lint` to execute tslint lint checking.
+Run `make check lint` to run the frontend and backend linters: ESLint over the
+frontend packages and `e2e/`, then `gofmt`, `go vet` and `golangci-lint` over
+each Go module.
 
 ### Unit tests
 
-Run `npm test` to execute the unit tests via [Vitest](https://vitest.dev). Coverage information can be found in `./coverage`
+Run `make test frontend` to execute the unit tests via [Vitest](https://vitest.dev).
 
-To execute an individual package run `npm run test:<package name>`. For example:
-- `npm run test:core` - Test core package
-- `npm run test:store` - Test store package
-- `npm run test:cloud-foundry` - Test Cloud Foundry package
+To narrow a run, name the Vitest project and, optionally, a path:
 
-To run tests in watch mode: `npm run test:watch`
+- `make test frontend PROJECT=core`: test the core package
+- `make test frontend PROJECT="core git"`: test several packages
+- `make test frontend PROJECT=core SCOPE=src/frontend/packages/core/src/shared/components/stepper`: test one directory
+
+The projects are `core`, `store`, `cloud-foundry`, `kubernetes`,
+`cf-autoscaler`, `git`, `shared` and `extension`.
+
+Other unit-test commands:
+
+- `make check coverage`: run the unit tests with coverage; the report is written to `./coverage`
+- `bun run test:watch`: run Vitest in watch mode
+- `bun run test:ui`: run Vitest with its browser UI
+
+Before opening a pull request, run `make check gate` (lint plus unit tests).
 
 ### End-to-end tests
 
-Run `npm run e2e` to execute the end-to-end tests via [Playwright](https://playwright.dev/).
+Run `make test e2e` to execute the end-to-end tests via
+[Playwright](https://playwright.dev/). It runs Chromium by default and starts a
+local backend unless `E2E_BASE_URL` points at a deployed Stratos.
 
-Additional E2E commands:
-- `npm run e2e:dev` - Run tests against local instance on `https://127.0.0.1:4200`
-- `npm run e2e:ui` - Run tests with Playwright UI mode
-- `npm run e2e:debug` - Run tests in debug mode
-- `npm run e2e:headed` - Run tests in headed mode (see browser)
-- `npm run e2e:report` - View test report
+Useful options:
 
-More information on the E2E tests and pre-requisites for running them is available here - [E2E Tests](developers-guide-e2e-tests.md).
+- `make test e2e DRYRUN=yes`: list the tests that would run, without running them
+- `make test e2e E2E_BROWSERS=chromium,firefox`: choose browsers (`all` runs every configured browser)
+- `make test e2e E2E_BASE_URL=https://<your-stratos>`: run against a deployed Stratos
+- `make check e2e`: run only the core suites
+- `make e2e clean`: remove the CF resources that test runs left behind
 
-### Code Climate
+For interactive work, call Playwright through the package scripts:
 
-We use [Code Climate](https://codeclimate.com/github/cloudfoundry-incubator/stratos) to check for general code quality issues. This executes against Pull
-Requests on creation/push.
+- `bun run e2e:ui`: run tests with Playwright UI mode
+- `bun run e2e:debug`: run tests in debug mode
+- `bun run e2e:headed`: run tests in headed mode (see the browser)
+- `bun run e2e:report`: view the last test report
 
-#### Running Code Climate locally
-> Generally we would not advise doing this and just rely on the code climate gate to run when pull requests are submitted
+More information on the E2E tests and the prerequisites for running them is
+available here - [E2E Tests](developers-guide-e2e-tests.md).
 
-To run locally see instructions [here](https://github.com/codeclimate/codeclimate) to install Code Climate CLI
-and engine via docker. Once set ensure you're in the root of the project and execute the following (it may take a while)
+### Continuous integration
 
-```
-codeclimate analyze
-```
+Each pull request, and each push to it, runs these GitHub Actions checks:
 
-> [!NOTE]
-> Unfortunately this highlights all current issues and not those that are the diff between any master and feature branch. Analyze
-> can be ran against a single/sub set of files, again with all current issues, but a little more digestible.
+- Lint check (`make check lint`)
+- Frontend unit tests, one job per Vitest project
+- Backend unit tests (`make test backend`)
+- Build check (`make build frontend`, `make build backend`)
+- CodeQL analysis for Go and JavaScript/TypeScript
+- Docs lint, website build and booklets build
+- Advisory checks: E2E impact (which E2E specs cover the change) and the changelog fragment
 
-```
-codeclimate analyze <path to file/s>
-```
-
-In a feature branch to compare files that have changed to master, for instance, use the following
-
-```
-git checkout feature-branch-A
-codeclimate analyze $(git diff --name-only master)
-```
-
-You can also run the above command via npm
-
-```
-npm run climate
-```
-
-### Stratos Continue Integration
-For each new pull request and any subsequent pushes to it the following actions are executed
-- Code quality analysis via Code Climate - https://codeclimate.com/
-- Jenkins CI run, covering..
-  - Frontend lint check
-  - Backend lint check
-  - Frontend unit tests
-  - Backend unit tests
-  - End to end tests
-- Security anaylsis via Snyk - https://snyk.io/
+End-to-end tests are not part of the pull request checks.
