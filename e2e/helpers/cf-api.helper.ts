@@ -217,6 +217,18 @@ export class CFApiHelper {
     return this.request.delete(url, this.proxyHeaders);
   }
 
+  /** True if GET url succeeds, false on 404; any other failure throws. */
+  private async exists(url: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    try {
+      await this.pget(url);
+      return true;
+    } catch (error) {
+      if (String(error).includes(' failed: 404 ')) return false;
+      throw error;
+    }
+  }
+
   // ============================================================================
   // Application Operations
   // ============================================================================
@@ -275,6 +287,11 @@ export class CFApiHelper {
   /**
    * Get application by GUID
    */
+  async appExists(appGuid: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    return this.exists(`${this.cfApiBase}/apps/${appGuid}`);
+  }
+
   async getApp(appGuid: string): Promise<CFApp> {
     if (!this.cfApiBase) await this.init();
     return await this.pget(`${this.cfApiBase}/apps/${appGuid}`);
@@ -629,6 +646,11 @@ export class CFApiHelper {
     await this.pdelete(`${this.cfApiBase}/routes/${routeGuid}`);
   }
 
+  async routeExists(routeGuid: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    return this.exists(`${this.cfApiBase}/routes/${routeGuid}`);
+  }
+
   // ============================================================================
   // Service Operations
   // ============================================================================
@@ -677,6 +699,16 @@ export class CFApiHelper {
   async deleteServiceInstance(serviceInstanceGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
     await this.pdelete(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
+  }
+
+  async serviceInstanceExists(serviceInstanceGuid: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    return this.exists(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
+  }
+
+  async serviceBindingExists(bindingGuid: string): Promise<boolean> {
+    if (!this.cfApiBase) await this.init();
+    return this.exists(`${this.cfApiBase}/service_credential_bindings/${bindingGuid}`);
   }
 
   /**
