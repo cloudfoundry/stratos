@@ -11,7 +11,7 @@ We use Go Modules for dependency management.
 
 You will need the following installed/available:
 
-* go 1.12 or later.
+* Go at the version in [Required Runtimes](../developer-environment.md#required-runtimes).
 
 *For authentication, **either***
 
@@ -23,13 +23,13 @@ You will need the following installed/available:
 
 #### Build
 
-From the `src/jetstream` folder, build the Stratos back-end with:
+From the repository root, build the Stratos back-end for your machine with:
 
 ```
-npm run build-backend
+make build backend PLATFORM=<os>/<arch>    # for example darwin/arm64 or linux/amd64
 ```
 
-The back-end executable is named `jetstream` and should be created within the `src/jetstream` folder.
+The back-end executable is `dist/bin/jetstream`. `make dev backend` builds it for your machine automatically the first time, so the normal dev cycle needs no separate build.
 
 ### Configuration
 

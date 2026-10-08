@@ -13,7 +13,7 @@ In order to customize Stratos, you will need to fork the Stratos GitHub reposito
 
 ### Frontend
 
-Frontend customizations are placed in angular packages in the folder named `src/frontend/packages`. In the future you will be able to host these packages in npm and bring them into Stratos in the usual npm dependency way. There are no additional processes or build steps required for Stratos to then integrate these packages. All steps will be automatically applied under the hood during `npm install` and when `ng build`/`ng serve` runs.
+Frontend customizations are placed in angular packages in the folder named `src/frontend/packages`. In the future you will be able to host these packages in npm and bring them into Stratos in the usual npm dependency way. There are no additional processes or build steps required for Stratos to then integrate these packages. All steps are applied automatically during `bun install` (run by `make install`) and when `make build frontend` or `make dev frontend` runs.
 
 Information on custom theming can be found in the [theming page](../theming-architecture.md).
 
