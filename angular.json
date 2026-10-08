@@ -41,10 +41,10 @@
               },
               {
                 "name": "Prepare backend",
-                "script": "bun dist-devkit/src/backend.js",
+                "script": "bun dist-devkit/backend.js",
                 "phase": 2,
                 "cache": true,
-                "cacheKey": ["dist-devkit/src/backend.js", "src/jetstream/**/*.go"],
+                "cacheKey": ["dist-devkit/backend.js", "src/jetstream/**/*.go"],
                 "timeout": 60000,
                 "required": false
               }
