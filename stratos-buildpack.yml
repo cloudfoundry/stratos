@@ -1,3 +1,0 @@
----
-default_process_types:
-  web: ./deploy/cloud-foundry/start.sh
