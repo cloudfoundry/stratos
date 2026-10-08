@@ -68,6 +68,7 @@
     "serialize-javascript": "^7.0.5",
     "fast-uri": "^3.1.8",
     "svgo": "^3.3.4",
-    "postcss": "^8.5.25"
+    "postcss": "^8.5.25",
+    "source-map-js": "^1.2.2"
   }
 }
