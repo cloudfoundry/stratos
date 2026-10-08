@@ -4,24 +4,18 @@ title: Remove Stratos Packages
 sidebar_label: Remove Packages
 ---
 
-Frontend packages and their associated backend plugins can be removed at build time via configuration.
+Frontend packages and backend plugins can be removed at build time. They are configured separately: removing a frontend package does
+not remove the backend plugins it uses.
 
-## Frontend Package to Backend Plugin Dependencies
+All of the methods below act when Stratos is built. A Cloud Foundry push of a release package (`binary_buildpack`) builds nothing
+during staging, so set them before running `make build release cf`, not in `manifest.yml`.
 
-Stratos NPM packages define a list of backend plugins that they require in order to function. These are found in the package's `package.json` in
-the `stratos` section `backend` property. For instance the [Stratos Cloud Foundry](https://github.com/cloudfoundry/stratos/blob/main/src/frontend/packages/cloud-foundry/package.json)
- package depends on multiple backend plugins.
+## Remove frontend packages
 
-If a backend package is not referenced by a package that is built and is not in the 'default' plugins [list](https://github.com/cloudfoundry/stratos/blob/main/src/jetstream/default_plugins.go)
- then it will not be included in the backend build. Therefore omitting a frontend package will also most likely remove it's dependent plugins.
+### Via stratos.yaml
 
-> [!IMPORTANT]
-> To ensure backend plugins are excluded correctly the npm target `prepare-backend` should run before building the backend the usual way with
->  `build-backend`. If pushing Stratos to Cloud Foundry this step will be completed automatically after `npm install` runs within the buildpack.
-
-## Remove via stratos.yaml
-Frontend packages can be removed from the build by adding them to the `excludes` section of `./stratos.yaml`. For example, to exclude
-kubernetes and associated features add the kubernetes package to the excludes section before Stratos builds.
+Frontend packages can be removed from the build by listing them under `packages.exclude` in `./stratos.yaml` at the repository root.
+For example, to exclude Kubernetes and its features:
 
 ```
 packages:
@@ -29,18 +23,24 @@ packages:
     - '@stratosui/kubernetes'
 ```
 
-## Remove via environment variable
-Similarly to adding to the exclude section in stratos.yaml, added a frontend package to the `STRATOS_BUILD_REMOVE` environment variable will
- achieve the same outcome but easier to use when pushing Stratos to Cloud Foundry. For instance updating the env section of your `manifest.yml`
- file as follows will exclude kubernetes and associated features from the build.
+To keep the file elsewhere, point `STRATOS_YAML` at it.
+
+### Via environment variable
+
+Listing a frontend package in the `STRATOS_BUILD_REMOVE` environment variable has the same effect. Separate several packages with
+commas. For example:
 
 ```
-applications:
-  - name: console
-    <snip>
-    env:
-      STRATOS_BUILD_REMOVE: "@stratosui/kubernetes"
+STRATOS_BUILD_REMOVE=@stratosui/kubernetes make build release cf
 ```
-## Remove by deletion
-Functionality can be removed by simply deleting the package from the folder structure. This should have the same effect as both methods above,
- including automatically excluding any unreferences backend plugins.
+
+### By deletion
+
+Deleting a package from `src/frontend/packages` also removes it from the build.
+
+## Remove backend plugins
+
+The backend plugins compiled into Jetstream are listed in [`src/jetstream/plugin-config.yaml`](https://github.com/cloudfoundry/stratos/blob/develop/src/jetstream/plugin-config.yaml).
+The plugins in the default [list](https://github.com/cloudfoundry/stratos/blob/develop/src/jetstream/default_plugins.go) are always
+included. To remove a plugin, delete its entry from `plugin-config.yaml` before building the backend; `make build backend` regenerates
+`extra_plugins.go` from that file. See [Plugin Architecture](../plugin-architecture.md) for details.
