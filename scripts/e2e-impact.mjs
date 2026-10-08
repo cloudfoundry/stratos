@@ -202,5 +202,5 @@ if (FILES_ONLY) {
     for (const s of specs) console.log(`  ${s}`)
   }
   const all = [...new Set(report.flatMap((r) => r.specs))].sort()
-  console.log(`\nRun scoped: npx playwright test --project=setup --project=chromium ${all.join(' ')}`)
+  console.log(`\nRun scoped: bun run playwright test --project=setup --project=chromium ${all.join(' ')}`)
 }

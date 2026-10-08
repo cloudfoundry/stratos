@@ -116,10 +116,10 @@ let totals = { expected: 0, unexpected: 0, flaky: 0, skipped: 0 }
 let exitCode = 0
 for (const run of runs) {
   const argv = ['playwright', 'test', ...run.args]
-  console.log(`\n>>> ${run.label}\n    npx ${argv.join(' ')}`)
+  console.log(`\n>>> ${run.label}\n    bun run ${argv.join(' ')}`)
   if (opt.dryRun) continue
   rmSync('e2e-reports/results.json', { force: true }) // a crashed run must not inherit the previous run's report
-  const r = spawnSync('npx', argv, { stdio: 'inherit' })
+  const r = spawnSync('bun', ['run', ...argv], { stdio: 'inherit' })
   if (r.status !== 0) exitCode = 1
   try {
     const j = JSON.parse(readFileSync('e2e-reports/results.json', 'utf8'))
