@@ -250,13 +250,25 @@ components and are not cleared on upgrade.
 
 ## How to Rebrand
 
-1. Create or edit `/assets/company-config.json` in your deployment
-   (or in the theme package source at
-   `src/frontend/packages/theme/assets/company-config.json`)
+1. Edit `company-config.json`:
+   - a pre-built package (the `stratos-cf-<version>.zip` release, or
+     the all-in-one image) serves it from `ui/assets/company-config.json`;
+     edit it there before `cf push`, or mount your own copy over it.
+     No build needed.
+   - a source build copies it from
+     `src/frontend/packages/theme/company-config.json`.
 2. Set company name, logos, colors, navigation appearance, layout
-   colors, login page, and copyright
+   colors, login page, and copyright. `company.displayName` (or
+   `company.name`) becomes the browser tab title once the app starts.
 3. Optionally set `defaults` for user/page preferences
-4. Build with `make build cf` and deploy -- zero code changes
+4. For a source build, run `make build` then `make release cf` and
+   deploy -- zero code changes
+
+The tab title shown before the app starts, and on the page shown when
+JavaScript is disabled, is the `title` from `stratos.yaml`, written into
+`index.html` at build time (default `Stratos`). A pre-built package
+carries the default; change it by editing `<title>` and the
+`message title` element in `ui/index.html`.
 
 See the theme package `README.md` for the complete
 `company-config.json` schema with all fields documented.

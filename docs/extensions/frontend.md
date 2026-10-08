@@ -301,7 +301,7 @@ productVersion: 2.0.0
 
 |Property|Description|
 |--|--|
-|title| Official product title, shown in `About` page and other custom places|
+|title| Product title written into the built `index.html` (default `Stratos`): the browser tab title until the app starts, and the title on the page shown when JavaScript is disabled. Once the app starts, the tab shows the company name from `company-config.json` (see [Branding Architecture](../branding-architecture.md)).|
 |productVersion| Use when building `helm` charts|
 
 
