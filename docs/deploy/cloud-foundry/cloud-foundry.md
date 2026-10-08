@@ -117,6 +117,8 @@ Each Stratos [GitHub release](https://github.com/cloudfoundry/stratos/releases) 
 
     Set a route/domain for your foundation if `console.<DOMAIN>` is not what you want, and see [Running Stratos in Production Environments](#running-stratos-in-production-environments) above for session store, SQLite and user-invite guidance. If your platform does not validate against real certificates you may also need `SKIP_SSL_VALIDATION`; in production with valid certificates leave it `false`.
 
+    To brand the console, edit `ui/assets/company-config.json` and the title in `ui/index.html` now, before pushing; see [How to Rebrand](../../branding-architecture.md#how-to-rebrand).
+
 3. Push from the unpacked folder:
 
     ```
