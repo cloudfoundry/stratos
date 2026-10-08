@@ -87,7 +87,7 @@ include version.mk
 # Stratos-specific build metadata and stamps — the per-repo config the
 # vendorable core deliberately excludes.
 $(_HIDE)BUILD_NODE_VERSION := $(shell node --version 2>/dev/null || echo "unknown")
-$(_HIDE)BUILD_TS_VERSION   := $(shell npx tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
+$(_HIDE)BUILD_TS_VERSION   := $(shell bun run tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
 $(_HIDE)BUILD_BUN_VERSION  := $(shell bun --version 2>/dev/null || echo "unknown")
 
 # Lazy (=) so the backend binary's baked-in version reflects the post-bump
@@ -622,7 +622,7 @@ define test.e2e
 			$(if $(PR),--pr $(PR) )$(call _e2e_toggle,dry-run,$(DRYRUN)); \
 	else \
 		echo "Running Playwright E2E tests..."; \
-		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test \
+		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )bun run playwright test \
 			$(call _e2e_browsers,$(E2E_BROWSERS)) \
 			$(call _e2e_flag,trace,$(E2E_TRACE)) \
 			$(call _e2e_toggle,list,$(DRYRUN)); \
@@ -727,7 +727,7 @@ $(call register, check, coverage, $($(_HIDE)BUILD_INFO_TS))
 define check.e2e
 	$(_ensure_host_backend)
 	@echo "Running Playwright E2E core tests..."
-	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test e2e/tests/core/ \
+	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )bun run playwright test e2e/tests/core/ \
 		$(call _e2e_browsers,$(E2E_BROWSERS)) \
 		$(call _e2e_flag,trace,$(E2E_TRACE)) \
 		$(call _e2e_toggle,list,$(DRYRUN))
