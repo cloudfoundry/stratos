@@ -110,60 +110,23 @@ Given the output of the script, the following template can be used to update the
 ```
 
 ### Tidying up test generated CF entities
-If tests are stopped before completing or fail to clean old test artifacts will exist in the CF. To clean some of these please see the script
-at [deploy/ci/automation/e2e-clean-remnants.sh](https://github.com/cloudfoundry/stratos/blob/main/deploy/ci/automation/e2e-clean-remnants.sh)
+If tests are stopped before completing or fail to clean old test artifacts will exist in the CF. Run `make e2e clean` to remove the
+CF resources the tests label `stratos-e2e-test` (add `DRYRUN=yes` to see what it would delete).
 
 ## Running the tests
 
-To run the tests against an instance of Stratos execute
+To run the tests, starting a local Stratos for them on dedicated ports, execute
 ```bash
-npm run e2e
+make test e2e
 ```
 
-If running Stratos on `https://127.0.0.1:4200` then instead execute
+To run them against a Stratos that is already running, set `E2E_BASE_URL`. For the dev frontend started with `make dev frontend`:
 ```bash
-npm run e2e-dev
+make test e2e E2E_BASE_URL=https://localhost:5440
 ```
 
 Additional test commands:
-- `npm run e2e:ui` - Run tests with Playwright UI mode
-- `npm run e2e:debug` - Run tests in debug mode
-- `npm run e2e:headed` - Run tests in headed mode (see browser)
-- `npm run e2e:report` - View test report
-
-
-## Running tests on Browserstack
-
-You can run the E2E tests on Browserstack instead of with a local browser.
-
-To do so, configure the following environment variables:
-
-|Variable|Required|Description|
-|---|---|---|
-|BROWSERSTACK_USER|Yes|Your Browserstack user ID|
-|BROWSERSTACK_KEY|Yes|Your Browserstack key|
-|BROWSERSTACK_TARGET|Yes|The Browser (and OS) to use (see below)|
-|BROWSERSTACK_PROJECT|No|Project name|
-|BROWSERSTACK_BUILD|No|Build name|
-|BROWSERSTACK_NAME|No|Name|
-|BROWSERSTACK_RESOLUTION|No|Screen resolution to use|
-
-For more information on project, build and name, see: https://www.browserstack.com/automate/capabilities.
-
-The `BROWSERSTACK_TARGET` environment variable can be just a Browser name, e.g. `Chrome`, or a name and version (separated by a space), e.g. `Chrome 69`.
-
-You can also specify which OS to use by separating the OS and browser with a `/`, e.g. `Windows/Chrome`. You can also specify the OS version by separating with a space, e.g. `Windows 10/Chrome`. You can fully described the OS and Browser with `Windows 10/Chrome 69`.
-
-For more information on supported Operating Systems/devices and browsers, see https://www.browserstack.com/list-of-browsers-and-platforms?product=js_testing and https://playwright.dev/docs/test-runners.
-
-As an example, to run the E2E tests against a locally run Stratos dev system, use:
-
-```
-BROWSERSTACK_TARGET="Chrome" npm run e2e-dev
-```
-
-> Note: This assumes you have set the `BROWSERSTACK_USER` and `BROWSERSTACK_KEY` environment variables already.
-
-Running the tests in this manner uses the browserstack-local npm package to allow the tests to run against your local system. To ensure that `BrowserStackLocal` processes are not left running if a test run is aborted, all `BrowserStackLocal` processes are terminated when the E2E test process exits.
-
-> Note: When the E2E tests are run using BrowserStack, the test reporter is modified to include timing information to help correlate tests to the captured video of the test run.
+- `bun run e2e:ui` - Run tests with Playwright UI mode
+- `bun run e2e:debug` - Run tests in debug mode
+- `bun run e2e:headed` - Run tests in headed mode (see browser)
+- `bun run e2e:report` - View test report
