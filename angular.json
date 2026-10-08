@@ -26,8 +26,7 @@
                 "name": "Store git metadata",
                 "script": "bun build/store-git-metadata.cjs",
                 "phase": 1,
-                "cache": true,
-                "cacheKey": [".git/HEAD", ".git/refs/heads/**"],
+                "cache": false,
                 "timeout": 30000,
                 "required": true
               },
