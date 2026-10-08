@@ -23,7 +23,7 @@ export class RequestHelper {
   private secrets = SecretsHelper.load();
   private authType?: AuthType;
 
-  constructor(baseURL: string = 'https://127.0.0.1:4200') {
+  constructor(baseURL: string) {
     this.baseURL = baseURL;
   }
 
