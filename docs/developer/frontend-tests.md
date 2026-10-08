@@ -31,7 +31,8 @@ The projects are `core`, `store`, `cloud-foundry`, `kubernetes`,
 
 Other unit-test commands:
 
-- `make check coverage`: run the unit tests with coverage; the report is written to `./coverage`
+- `make check frontend coverage`: run the unit tests with coverage; the report is written to
+  `./coverage/frontend`. Every source file in the projects counts, including files no test loads.
 - `bun run test:watch`: run Vitest in watch mode
 - `bun run test:ui`: run Vitest with its browser UI
 

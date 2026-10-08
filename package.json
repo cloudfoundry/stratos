@@ -63,7 +63,7 @@
     "test-frontend:cf-autoscaler": "vitest run --project=cf-autoscaler",
     "test-frontend:kubernetes": "vitest run --project=kubernetes",
     "test-frontend:git": "vitest run --project=git",
-    "posttest": "echo 'Coverage reports in coverage/ directory'",
+    "posttest": "echo 'Coverage reports in coverage/frontend/ directory'",
     "lint": "eslint --report-unused-disable-directives-severity warn src/frontend/packages/{core,store,cloud-foundry,kubernetes,cf-autoscaler,git,shared,extension}/src/ e2e/ && bun test --config=scripts/tests/bunfig.toml tools/eslint-rules/tests scripts/tests && bun scripts/lint-e2e-data-test.mjs && bun scripts/lint-e2e-ratchet.mjs && bun scripts/lint-nested-pins.mjs",
     "lint:docs": "bun scripts/lint-docs.mjs",
     "e2e": "playwright test",

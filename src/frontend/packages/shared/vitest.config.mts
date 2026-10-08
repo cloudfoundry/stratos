@@ -32,13 +32,6 @@ export default defineConfig({
     teardown: {
       destroyAfterEach: true,
     },
-    coverage: {
-      provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov'],
-      reportsDirectory: join(import.meta.dirname, '../../coverage/shared'),
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/*.spec.ts', 'src/test-setup.ts', 'src/**/*.d.ts'],
-    },
     reporters: ['default'], // '../../../../build/vitest-stratos-reporter.ts' - disabled for Vitest 4 compatibility
     testTimeout: 15000, // Increased for Angular TestBed initialization with zoneless detection
     hookTimeout: 15000, // Increased for beforeAll/afterAll hooks
