@@ -137,30 +137,20 @@ function generateExtensionModule() {
   return runScript('extension-generator', extensionGenPath);
 }
 
-function applySkipWorktreeFlags() {
-  log('Applying skip-worktree flags to build-modified files...');
-  const filesToSkip = [
-    'src/frontend/packages/core/src/index.html'
-  ];
-
-  let appliedCount = 0;
-  for (const file of filesToSkip) {
-    const filePath = path.join(ROOT_DIR, file);
-    if (fs.existsSync(filePath)) {
-      try {
-        execSync(`git update-index --skip-worktree "${file}"`, {
-          cwd: ROOT_DIR,
-          stdio: 'pipe'
-        });
-        appliedCount++;
-      } catch (err) {
-        // Silently ignore errors (file may not be tracked or already has flag)
-      }
+// The build used to rewrite src/frontend/packages/core/src/index.html in
+// place and hid that with skip-worktree. It now writes only the build
+// output, so drop the flag from older checkouts and point at the stale copy.
+function clearSkipWorktreeFlag() {
+  const file = 'src/frontend/packages/core/src/index.html';
+  try {
+    execSync(`git update-index --no-skip-worktree "${file}"`, { cwd: ROOT_DIR, stdio: 'pipe' });
+    execSync(`git diff --quiet -- "${file}"`, { cwd: ROOT_DIR, stdio: 'pipe' });
+  } catch (err) {
+    // Not a git checkout, or the file differs from HEAD
+    if (err.status === 1) {
+      log(`⚠️  ${file} differs from git; a build before this change rewrote it.`);
+      log(`   Restore it with: git checkout -- ${file}`);
     }
-  }
-
-  if (appliedCount > 0) {
-    log(`✓ Applied skip-worktree flags to ${appliedCount} file(s)`);
   }
 }
 
@@ -206,8 +196,8 @@ function main() {
   // Create proxy config if needed
   createProxyConfig();
 
-  // Apply skip-worktree flags to build-modified files
-  applySkipWorktreeFlags();
+  // Undo the skip-worktree flag older setups applied
+  clearSkipWorktreeFlag();
 
   log('');
   log('✅ Post-install setup complete!');
