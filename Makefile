@@ -662,7 +662,7 @@ $(call register, clean, e2e)
 # the right one, so 1.26 and 1.27 developers both end up with a working linter.
 # Bump GOLANGCI_LINT_VERSION when a newer Go needs a newer release to
 # typecheck it (that release's go.mod must allow the target below).
-GOLANGCI_LINT_VERSION ?= v2.13.1
+GOLANGCI_LINT_VERSION ?= v2.14.0
 GOLANGCI_LINT = $(shell go env GOPATH)/bin/golangci-lint
 GOLANGCI_LINT_GO = go$(shell awk '/^go /{print $$2; exit}' src/jetstream/go.mod)
 
