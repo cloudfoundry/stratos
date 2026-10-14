@@ -215,7 +215,7 @@ func TestRestageApp_RejectsInvalidStrategy(t *testing.T) {
 // TestRestageApp_FastPathResolvesOnNoEligiblePackage exercises the
 // orchestrator end-to-end through the handler when the very first stage
 // (package_lookup) terminally fails. The fast-path window resolves
-// before handoff, so the handler returns 502 with the FAILED envelope —
+// before handoff, so the handler returns 422 with the FAILED envelope —
 // matching the shape used by other write handlers.
 func TestRestageApp_FastPathResolvesOnNoEligiblePackage(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -249,7 +249,8 @@ func TestRestageApp_FastPathResolvesOnNoEligiblePackage(t *testing.T) {
 	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-empty"}, {Name: "action", Value: "restage"}})
 
 	require.NoError(t, plugin.appAction(c))
-	assert.Equal(t, http.StatusBadGateway, rec.Code)
+	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+	assert.Equal(t, stratosjobs.ReasonOperationFailed, rec.Header().Get(stratosjobs.ErrorReasonHeader))
 
 	var body map[string]interface{}
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))
@@ -763,7 +764,7 @@ func TestRollbackApp_RejectsInvalidStrategy(t *testing.T) {
 // orchestrator end-to-end through the rollback handler when CF rejects
 // /v3/deployments with 422. Mirror of
 // TestRestageApp_FastPathResolvesOnNoEligiblePackage — the fast-path
-// window resolves before handoff and the handler returns 502 with the
+// window resolves before handoff and the handler returns 422 with the
 // FAILED envelope.
 func TestRollbackApp_FastPathResolvesOnDeploymentRejected(t *testing.T) {
 	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -800,7 +801,8 @@ func TestRollbackApp_FastPathResolvesOnDeploymentRejected(t *testing.T) {
 	c.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
 
 	require.NoError(t, plugin.rollbackApp(c, "cnsi-1", "app-1"))
-	assert.Equal(t, http.StatusBadGateway, rec.Code)
+	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+	assert.Equal(t, stratosjobs.ReasonOperationFailed, rec.Header().Get(stratosjobs.ErrorReasonHeader))
 
 	var body map[string]interface{}
 	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &body))

@@ -75,10 +75,7 @@ func (cf *CloudFoundrySpecification) deleteServiceInstance(c *echo.Context) erro
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return c.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(c, res.Errors)
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
@@ -165,10 +162,7 @@ func (cf *CloudFoundrySpecification) createManagedServiceInstance(c *echo.Contex
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return c.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(c, res.Errors)
 		}
 		// CF's create job completes (state=COMPLETE) regardless of broker
 		// outcome — the actual provision result lands on the new
@@ -178,10 +172,7 @@ func (cf *CloudFoundrySpecification) createManagedServiceInstance(c *echo.Contex
 		// = "failed". Re-fetch the SI from the job links and surface a
 		// proper failure envelope when the broker rejected the create.
 		if siErr := checkManagedSICreateOutcome(reqCtx, cfClient, res.Result); siErr != nil {
-			return c.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  stratosjobs.JobStateFailed,
-				"errors": []stratosjobs.StratosError{*siErr},
-			})
+			return stratosjobs.WriteFailed(c, []stratosjobs.StratosError{*siErr})
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
@@ -317,19 +308,13 @@ func (cf *CloudFoundrySpecification) updateManagedServiceInstance(c *echo.Contex
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return c.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(c, res.Errors)
 		}
 		// Same job-completes-anyway quirk as create — re-check the SI's
 		// last_operation so a broker rejection surfaces as a failure
 		// instead of a false "updated" confirmation.
 		if siErr := checkManagedSIUpdateOutcome(reqCtx, cfClient, siGUID); siErr != nil {
-			return c.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  stratosjobs.JobStateFailed,
-				"errors": []stratosjobs.StratosError{*siErr},
-			})
+			return stratosjobs.WriteFailed(c, []stratosjobs.StratosError{*siErr})
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,

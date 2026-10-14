@@ -81,10 +81,7 @@ func (c *CloudFoundrySpecification) deleteNativeApp(ctx *echo.Context) error {
 		// failed server-side — 502 signals "upstream refused"; body carries
 		// the CF error envelope).
 		if res.State == stratosjobs.JobStateFailed {
-			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(ctx, res.Errors)
 		}
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
@@ -171,10 +168,7 @@ func (c *CloudFoundrySpecification) appAction(ctx *echo.Context) error {
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(ctx, res.Errors)
 		}
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
@@ -259,10 +253,7 @@ func (c *CloudFoundrySpecification) restageApp(ctx *echo.Context, cnsiGUID, appG
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(ctx, res.Errors)
 		}
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
@@ -356,10 +347,7 @@ func (c *CloudFoundrySpecification) rollbackApp(ctx *echo.Context, cnsiGUID, app
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(ctx, res.Errors)
 		}
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
@@ -444,10 +432,7 @@ func (c *CloudFoundrySpecification) scaleApp(ctx *echo.Context) error {
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(ctx, res.Errors)
 		}
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
