@@ -8,6 +8,7 @@ import {
 } from '@stratosui/core';
 
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 
 // Services this builder needs from the host list component. Each list already
 // injects these; passing them in keeps the builder free of Angular DI so it
@@ -99,7 +100,7 @@ export function buildServiceInstanceRowActions(
         try {
           await deps.deleteServiceInstance(si.cnsiGuid, si.guid);
         } catch (err: unknown) {
-          deps.snackBar.error(`Delete failed: ${err instanceof Error ? err.message : String(err)}`);
+          deps.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
         }
       });
     },

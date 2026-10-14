@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 
-import { StratosJobError } from '../../../../services/async-jobs/async-job.types';
+import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 import {
   RevisionsService,
   RevisionRow,
@@ -59,13 +59,7 @@ export class RollbackDialogComponent {
         this.ref.close({ ok: true, stateChanged: true });
       }
     } catch (err: unknown) {
-      if (err instanceof StratosJobError) {
-        this.errorMessage.set(
-          err.job?.errors?.[0]?.message ?? 'Rollback failed',
-        );
-      } else {
-        this.errorMessage.set('Rollback failed');
-      }
+      this.errorMessage.set(extractHttpErrorMessage(err));
     } finally {
       this.inFlight.set(false);
     }
