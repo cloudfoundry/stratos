@@ -251,6 +251,22 @@ describe('cfApiInterceptor', () => {
     expect(calls).toHaveLength(0); // component handles its own 404
   });
 
+  it('operation_failed reason (a job the endpoint ran and failed) → no endpoint banner', async () => {
+    // The endpoint answered; the broker behind it rejected the operation.
+    // The component that made the call reports that failure.
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.post(`/pp/v1/cf/service_instances/${cnsi}`, {}).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/service_instances/${cnsi}`).flush(
+      JSON.stringify({ state: 'FAILED', errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'Operation failed' }] }),
+      { status: 422, statusText: 'Unprocessable Entity', headers: { 'X-Stratos-Error-Reason': 'operation_failed' } },
+    );
+
+    expect(calls).toHaveLength(0);
+  });
+
   it('no reason header → neutral "request failed" banner naming the endpoint', async () => {
     const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
     endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });

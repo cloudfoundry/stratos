@@ -44,10 +44,12 @@ function extractCnsiGuid(url: string): string | null {
 }
 
 // Headers the Jetstream native-CF error paths set to classify a failure.
-// REASON is only emitted for called-out reasons (unreachable / auth_expired);
+// REASON is only emitted for called-out reasons: the endpoint faults below,
+// or operation_failed for a job the endpoint ran and failed (stratosjobs);
 // UPSTREAM_STATUS carries the real CF/UAA code (e.g. 503) since the Stratos
 // response status is often a mapped 502.
 const STRATOS_ERROR_REASON_HEADER = 'X-Stratos-Error-Reason';
+const ENDPOINT_FAULT_REASONS: ReadonlySet<string> = new Set(['auth_expired', 'unreachable']);
 const STRATOS_UPSTREAM_STATUS_HEADER = 'X-Stratos-Upstream-Status';
 
 interface NativeCfErrorBody {
@@ -124,10 +126,11 @@ export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
         // GUID is a tail-end disambiguator for shared display names).
         if (cnsiGuid && err instanceof HttpErrorResponse) {
           const reason = err.headers?.get(STRATOS_ERROR_REASON_HEADER) ?? '';
-          // Act on classified failures (any status) or gateway 502s. Normal CF
-          // errors (404/422/...) carry no reason and aren't 502 — leave those
-          // to the component that made the call.
-          if (reason || err.status === 502) {
+          // Act on endpoint faults: a reason that names one (any status), or
+          // an unclassified gateway 502. Other reasons (operation_failed: the
+          // endpoint answered, the operation it ran failed) and normal CF
+          // errors (404/422/...) are left to the component that made the call.
+          if (ENDPOINT_FAULT_REASONS.has(reason) || (!reason && err.status === 502)) {
             const endpoint = endpointsSignal.endpoints()[cnsiGuid];
             // Prefer the endpoint name; fall back to the GUID only when the
             // name is unknown. The GUID is otherwise omitted — the error code
