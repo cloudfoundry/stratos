@@ -6,6 +6,7 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
+import { answerServiceWrite, RESOLVE_PATHS, serviceWriteContract } from '@test-framework/cf';
 import { ServiceKeysComponent } from './service-keys.component';
 import { ServiceCatalogDataService, ServiceKeyView } from '../../../services/endpoint-data/service-catalog-data.service';
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
@@ -291,4 +292,30 @@ describe('ServiceKeysComponent — createKey patches the list from the response'
     expect(component.keys().map(k => k.guid)).toEqual(['k-1']);
     expect(listFetches).toBe(2);
   });
+
+  // Recorded backend answers: a sync or async broker, on either resolve
+  // path, creates and deletes keys the same way. CF answers a managed key
+  // create with a job, so the list is re-read rather than patched.
+  for (const broker of ['sync', 'async']) {
+    for (const path of RESOLVE_PATHS) {
+      it(`creates a key: ${broker} broker, ${path} path`, async () => {
+        component.newKeyName.set('recorded');
+        const done = component.createKey();
+        await answerServiceWrite(http, '/pp/v1/cf/service_keys/cf-1', serviceWriteContract(`${broker}-service-key-create`), path);
+        await done;
+
+        expect(component.errorMessage()).toBeNull();
+        expect(listFetches).toBe(2);
+      });
+
+      it(`deletes a key: ${broker} broker, ${path} path`, async () => {
+        const done = component.deleteKey('k-1');
+        await answerServiceWrite(http, '/pp/v1/cf/service_keys/cf-1/k-1', serviceWriteContract(`${broker}-service-key-delete`), path);
+        await done;
+
+        expect(component.errorMessage()).toBeNull();
+        expect(listFetches).toBe(2);
+      });
+    }
+  }
 });
