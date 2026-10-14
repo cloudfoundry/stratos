@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { firstValueFrom, of as observableOf } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { StepComponent } from './step.component';
 
@@ -125,6 +126,16 @@ describe('StepComponent', () => {
       const result = await firstValueFrom(component.invokeNext(0));
       expect(result.success).toBe(false);
       expect(result.message).toBe('plain string fail');
+    });
+
+    it('signal-handle submit() rejecting with an HTTP error shows the reason CF gave', async () => {
+      component.signalHandle = {
+        valid: signal(true).asReadonly(),
+        submit: () => Promise.reject(new HttpErrorResponse({ error: { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'Name must be unique' }] }, status: 422, statusText: 'Unprocessable Entity' })),
+      };
+      const result = await firstValueFrom(component.invokeNext(0));
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Name must be unique');
     });
 
     it('signal-handle submit() resolving with {ignoreSuccess:true} threads it through', async () => {
