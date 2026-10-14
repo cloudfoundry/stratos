@@ -518,6 +518,7 @@ define dev.backend
 		echo "Building backend for host platform..."; \
 		$(MAKE) build backend PLATFORM=$($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH); \
 	fi
+	@./build/dev-db-info.sh src/jetstream
 	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) SESSION_STORE_EXPIRY=$(SESSION_STORE_EXPIRY) ALLOWED_ORIGINS=$(ALLOWED_ORIGINS) ../../$($(_HIDE)BIN_DIR)/jetstream
 endef
 $(call register, dev, backend)
