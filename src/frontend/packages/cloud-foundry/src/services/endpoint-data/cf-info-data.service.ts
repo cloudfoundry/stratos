@@ -6,6 +6,7 @@ import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/opera
 import { ICfV2Info } from '../../cf-api.types';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { StError } from './stratos-types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // V3-native CF info data source. Hits /pp/v1/cf/info/:cnsiGuid (handled by
 // getNativeCFInfo in native_info.go) which projects /v3/info + the root
@@ -80,7 +81,7 @@ export class CfInfoDataService {
     this._errors.update(errors => [...errors, {
       resource,
       severity: 'error' as const,
-      message: err instanceof Error ? err.message : String(err),
+      message: extractHttpErrorMessage(err),
       recoverable: true,
       detail: err,
     }]);

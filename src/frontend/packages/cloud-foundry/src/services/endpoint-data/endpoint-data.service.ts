@@ -18,6 +18,7 @@ import {
   StServicePlan,
   StSpace,
 } from './stratos-types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 export class EndpointDataService {
   // Counts + recent apps populated by load() (home card fast path).
@@ -785,7 +786,7 @@ export class EndpointDataService {
     this._errors.update(errors => [...errors, {
       resource,
       severity: 'error' as const,
-      message: err instanceof Error ? err.message : String(err),
+      message: extractHttpErrorMessage(err),
       recoverable: true,
       detail: err,
     }]);

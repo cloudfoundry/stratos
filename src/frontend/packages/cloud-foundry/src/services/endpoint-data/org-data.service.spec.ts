@@ -61,6 +61,18 @@ describe('OrgDataService', () => {
     expect(service.isLoading()).toBeFalsy();
   });
 
+  it('records the reason CF gave when a fetch fails', async () => {
+    service.load().subscribe({ error: () => {} });
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(
+      { errors: [{ code: 10010, title: 'CF-OrganizationNotFound', detail: 'Organization not found' }] },
+      { status: 404, statusText: 'Not Found' },
+    );
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: [] });
+    await Promise.resolve();
+
+    expect(service.errors().find(e => e.resource === 'org')?.message).toBe('Organization not found');
+  });
+
   it('dedupes concurrent load() calls into a single HTTP fan-out', async () => {
     const mockOrg = { guid: 'org-1', name: 'My Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] };
     const mockSpaces: any[] = [];

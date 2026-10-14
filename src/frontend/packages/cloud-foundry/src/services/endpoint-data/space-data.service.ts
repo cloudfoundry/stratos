@@ -4,6 +4,7 @@ import { EMPTY, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { StError, StSpace } from './stratos-types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // V3-native space-detail data source. Backs CloudFoundrySpaceService.space$
 // once the V2-includes URL path is retired (Phase B of the
@@ -77,7 +78,7 @@ export class SpaceDataService {
     this._errors.update(errors => [...errors, {
       resource,
       severity: 'error' as const,
-      message: err instanceof Error ? err.message : String(err),
+      message: extractHttpErrorMessage(err),
       recoverable: true,
       detail: err,
     }]);

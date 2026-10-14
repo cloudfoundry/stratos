@@ -36,6 +36,7 @@ import {
   RelationDescriptorRegistry,
 } from './signal-relation-tree';
 import { SignalRelationPostProcessorRegistry } from './signal-relation-post-processor';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 interface FetchConfig {
   cnsiGuid: string;
@@ -217,7 +218,7 @@ export class SignalRelationFetcherService {
             includeRelations,
           );
         } catch (err) {
-          const msg = err instanceof Error ? err.message : String(err);
+          const msg = extractHttpErrorMessage(err);
           const errorEntry = {
             resource: `${parentEntityType}->${node.childEntityType}:${parent.guid}`,
             message: msg,
