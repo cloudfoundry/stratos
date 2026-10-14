@@ -9,9 +9,9 @@ import { AppDetailDataService } from '../../features/applications/app-detail-dat
 import { AppLifecycleStateService } from '../../features/applications/app-lifecycle-state.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { AppStatsDataRegistry } from '../../services/endpoint-data/app-stats-data.registry';
-import { extractHttpErrorMessage } from '../../services/extract-error-message';
 import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
 import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 /**
  * AppApplicationActionsService

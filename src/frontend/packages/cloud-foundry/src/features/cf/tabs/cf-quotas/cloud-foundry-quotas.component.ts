@@ -20,7 +20,7 @@ import { CfOrgQuotasSignalConfigService } from '../../../../shared/signal-list-c
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // Signal-native CF Org Quotas tab. Read-only list of org-level quota
 // definitions on the foundation. Replaces the legacy ListConfig +

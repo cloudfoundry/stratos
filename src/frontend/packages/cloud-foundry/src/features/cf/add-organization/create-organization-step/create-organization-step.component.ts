@@ -12,7 +12,7 @@ import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-sour
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
 import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 interface CreateOrganizationForm {
   orgName: FormControl<string>;

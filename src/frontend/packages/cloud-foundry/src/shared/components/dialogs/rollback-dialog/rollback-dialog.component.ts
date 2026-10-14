@@ -7,11 +7,11 @@ import {
 } from '@angular/core';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 import {
   RevisionsService,
   RevisionRow,
 } from '../../../services/revisions.service';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 export interface RollbackDialogData {
   revision: RevisionRow;

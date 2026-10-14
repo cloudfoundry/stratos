@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { StratosJobError, StratosJob, stripMarkup } from './async-job.types';
+import { StratosJobError, StratosJob } from './async-job.types';
 
 const job = (errors: StratosJob['errors']): StratosJob => ({
   id: 'j-1', kind: 'cf.service_key.create', state: 'FAILED', startedAt: 't', updatedAt: 't', errors,
@@ -26,12 +26,5 @@ describe('StratosJobError message', () => {
 
   it('names the job when there are no errors at all', () => {
     expect(new StratosJobError(job(undefined)).message).toBe('job j-1 failed');
-  });
-});
-
-describe('stripMarkup', () => {
-  it('keeps the words, drops the tags and collapses whitespace', () => {
-    expect(stripMarkup('<p>Plan <b>small</b>\n  is   gone</p>')).toBe('Plan small is gone');
-    expect(stripMarkup('no markup here')).toBe('no markup here');
   });
 });

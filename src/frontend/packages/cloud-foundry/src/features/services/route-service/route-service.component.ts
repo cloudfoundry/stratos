@@ -11,7 +11,6 @@ import {
   SteppersComponent,
 } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
-import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 import {
   RawRouteServiceBinding,
   RouteServiceBindingView,
@@ -20,6 +19,7 @@ import {
   toRouteServiceBindingView,
 } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // RouteServiceComponent — per-route "route service" management, reached via the
 // /services/route-service/:endpointId/:routeGuid route (Route Service row action

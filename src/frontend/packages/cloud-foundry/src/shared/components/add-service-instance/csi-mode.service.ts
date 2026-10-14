@@ -7,8 +7,8 @@ import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/se
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
-import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',

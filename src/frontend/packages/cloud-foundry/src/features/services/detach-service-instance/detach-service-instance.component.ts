@@ -10,7 +10,6 @@ import {
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
-import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
@@ -18,6 +17,7 @@ import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-d
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 type BindingStatus = 'pending' | 'busy' | 'success' | 'error';
 

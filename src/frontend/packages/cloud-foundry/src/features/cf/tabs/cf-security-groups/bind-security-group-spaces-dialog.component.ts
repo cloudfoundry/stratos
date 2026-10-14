@@ -16,12 +16,12 @@ import {
 } from '@stratosui/core';
 
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 import type { StSpace } from '../../../../services/endpoint-data/stratos-types';
 import {
   CfSecurityGroupsSignalConfigService,
   SecurityGroupSpaceBindLifecycle,
 } from '../../../../shared/signal-list-configs/cf-security-groups/cf-security-groups-signal-config.service';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // ─── Dialog data ──────────────────────────────────────────────────────────────
 

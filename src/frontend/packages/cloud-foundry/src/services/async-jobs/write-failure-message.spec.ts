@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { describe, expect, it } from 'vitest';
-import { StratosJobError } from './async-jobs/async-job.types';
-import { extractHttpErrorMessage } from './extract-error-message';
+import { StratosJobError } from './async-job.types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 const httpError = (error: unknown, status = 502, statusText = 'Bad Gateway'): HttpErrorResponse =>
   new HttpErrorResponse({ error, status, statusText });

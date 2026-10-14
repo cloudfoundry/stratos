@@ -32,7 +32,6 @@ import { TailwindSnackBarService } from '../../../../../../core/src/shared/servi
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult } from '../../../../services/async-jobs/async-job.types';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -40,6 +39,7 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiState, CsiStateService } from '../csi-state.service';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // Local view of the schema-form config while it is being assembled: the
 // broker schema may not have arrived (or may not exist for the plan).
