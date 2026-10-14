@@ -3,12 +3,12 @@
 @if (mode === 'schema') {
   <div class="schema-form">
     <div class="flex gap-4 mb-4">
-      <label class="inline-flex items-center cursor-pointer" for="schema-view-form">
-        <input id="schema-view-form" type="radio" [ngModel]="schemaView()" (ngModelChange)="schemaView.set($event)" value="schemaForm" (change)="onSchemaViewChanged()" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-1 focus:ring-primary">
+      <label class="inline-flex items-center cursor-pointer" [for]="viewToggleId + '-form'">
+        <input [id]="viewToggleId + '-form'" type="radio" [name]="viewToggleId" value="schemaForm" [checked]="schemaView() === 'schemaForm'" (change)="schemaView.set('schemaForm'); onSchemaViewChanged()" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-1 focus:ring-primary">
         <span class="ml-2 text-sm font-medium text-content-text">Form</span>
       </label>
-      <label class="inline-flex items-center cursor-pointer" for="schema-view-json">
-        <input id="schema-view-json" type="radio" [ngModel]="schemaView()" (ngModelChange)="schemaView.set($event)" value="schemaJson" (change)="onSchemaViewChanged()" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-1 focus:ring-primary">
+      <label class="inline-flex items-center cursor-pointer" [for]="viewToggleId + '-json'">
+        <input [id]="viewToggleId + '-json'" type="radio" [name]="viewToggleId" value="schemaJson" [checked]="schemaView() === 'schemaJson'" (change)="schemaView.set('schemaJson'); onSchemaViewChanged()" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-1 focus:ring-primary">
         <span class="ml-2 text-sm font-medium text-content-text">JSON</span>
       </label>
     </div>
