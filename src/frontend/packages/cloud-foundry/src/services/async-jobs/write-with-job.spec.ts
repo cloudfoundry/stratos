@@ -1,7 +1,7 @@
-import { HttpClient, provideHttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 import type { StratosJob } from './async-job.types';
 import { StratosJobError } from './async-job.types';
 import { writeWithJob } from './write-with-job';
@@ -179,6 +179,42 @@ describe('writeWithJob', () => {
     ctrl.expectOne('/pp/v1/stratos/jobs/job-f').flush(failed);
 
     await expect(promise).rejects.toBeInstanceOf(StratosJobError);
+  });
+
+  // The message shows the broker's words only; the CF code and title it
+  // leaves out go to the console, on both paths.
+  describe('logs the CF error code a failure message leaves out', () => {
+    const errors = [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'Operation failed' }];
+    let warn: MockInstance<typeof console.warn>;
+    beforeEach(() => { warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined); });
+    afterEach(() => warn.mockRestore());
+    const logged = (): string => warn.mock.calls.flat().map(a => (typeof a === 'string' ? a : JSON.stringify(a))).join(' ');
+
+    it('on the fast path', async () => {
+      const promise = writeWithJob(http, http.post('/pp/v1/cf/service_instances/cnsi', {}, { observe: 'response' }), noDelay);
+      ctrl.expectOne('/pp/v1/cf/service_instances/cnsi').flush(
+        { state: 'FAILED', errors },
+        { status: 502, statusText: 'Bad Gateway' },
+      );
+      await expect(promise).rejects.toBeInstanceOf(HttpErrorResponse);
+      expect(logged()).toContain('cf.v3.10009');
+      expect(logged()).toContain('CF-UnableToPerform');
+    });
+
+    it('on the polled path', async () => {
+      const promise = writeWithJob(http, http.post('/pp/v1/cf/service_instances/cnsi', {}, { observe: 'response' }), noDelay);
+      ctrl.expectOne('/pp/v1/cf/service_instances/cnsi').flush(
+        { id: 'job-p', kind: 'cf.service_instance.create', state: 'PROCESSING', startedAt: '', updatedAt: '' } satisfies StratosJob,
+        { status: 202, statusText: 'Accepted' },
+      );
+      await tick();
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-p').flush(
+        { id: 'job-p', kind: 'cf.service_instance.create', state: 'FAILED', startedAt: '', updatedAt: '', errors } satisfies StratosJob,
+      );
+      await expect(promise).rejects.toBeInstanceOf(StratosJobError);
+      expect(logged()).toContain('cf.v3.10009');
+      expect(logged()).toContain('CF-UnableToPerform');
+    });
   });
 
   it('returns UNKNOWN when polling receives 404', async () => {

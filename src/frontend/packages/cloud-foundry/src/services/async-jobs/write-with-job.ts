@@ -1,8 +1,9 @@
-import { HttpClient, HttpResponse } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
 import { Observable, firstValueFrom, timer } from 'rxjs';
 import type {
   AsyncJobResult,
   JobState,
+  StratosError,
   StratosJob,
 } from './async-job.types';
 import { StratosJobError } from './async-job.types';
@@ -51,7 +52,15 @@ export async function writeWithJob<T>(
   call: Observable<HttpResponse<unknown>>,
   opts: WriteWithJobOptions = {},
 ): Promise<AsyncJobResult<T>> {
-  const resp = await firstValueFrom(call);
+  let resp: HttpResponse<unknown>;
+  try {
+    resp = await firstValueFrom(call);
+  } catch (err: unknown) {
+    // A failure inside the fast-path window arrives as an HTTP error whose
+    // body carries the same errors[] a polled job would.
+    if (err instanceof HttpErrorResponse) logFailure(err.url ?? 'write', (err.error as { errors?: LoggedError[] } | null)?.errors);
+    throw err;
+  }
 
   // 200-family (including 204): sync-fast. Body is the canonical fast-path
   // envelope `{state: 'COMPLETE', result: T}`; unwrap so the caller sees T
@@ -82,6 +91,17 @@ export async function writeWithJob<T>(
     // No detail, so the message is this title: name the status in it.
     errors: [{ code: `http.${resp.status}`, message: `HTTP ${resp.status} ${resp.statusText || 'request failed'}` }],
   });
+}
+
+// Failure messages show the broker's own words (see StratosJobError and
+// extractHttpErrorMessage); the CF code and title they leave out go to the
+// console here, the one place both paths pass through.
+// A CF passthrough body names the title `title`, a Stratos job `message`.
+type LoggedError = Partial<StratosError> & { title?: string };
+
+function logFailure(what: string, errors: LoggedError[] | undefined): void {
+  const first = errors?.[0];
+  if (first) console.warn(`${what} failed: ${first.code} ${first.message ?? first.title}`, errors);
 }
 
 // Recognises the canonical Stratos fast-path 200 envelope and returns
@@ -131,6 +151,7 @@ export async function pollJob<T>(
       return { status: 'COMPLETE', state: job.result as T | undefined, jobId };
     }
     if (job.state === 'FAILED') {
+      logFailure(job.kind, job.errors);
       throw new StratosJobError(job);
     }
 
