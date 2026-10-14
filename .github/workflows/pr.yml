@@ -100,12 +100,13 @@ jobs:
   # workflow (since removed) only triggered on master, so a website change
   # (e.g. a dependency bump with a stale bun.lock) could merge green
   # without ever being built. Frozen-lockfile install + full build
-  # catches both.
+  # catches both. The site renders docs/, so a docs-only change can break
+  # it too (a broken link fails the build): run on the deploy's paths.
   website-build:
     name: Website Build
     runs-on: ubuntu-latest
     needs: changes
-    if: needs.changes.outputs.website == 'true'
+    if: needs.changes.outputs.website == 'true' || needs.changes.outputs.docs == 'true'
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
         with:
