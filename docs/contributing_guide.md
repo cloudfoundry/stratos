@@ -177,19 +177,21 @@ git commit
 ```
 
 Commit message style:
-- Subject line: max 48 characters, imperative mood
-- Body: max 72 characters wide, explain *why* not *what*
+- Subject line: `type(scope): summary` in the imperative mood, as described
+  in [CONTRIBUTING.md](../CONTRIBUTING.md#commits). Aim for 50 characters;
+  never go over 72, where GitHub truncates the subject.
+- Body: max 72 characters wide, after a blank line; explain *why* not *what*
 - One atomic concept per commit
 - Keep style changes separate from functional changes
 
 ```
-Add user profile export to about page
+feat(core): export user profiles from the about page
 
 Profile export allows admins to download user data as CSV
-for audit compliance. Requested in issue #123.
-```
+for audit compliance.
 
-Do **not** use the `<type>: <subject>` format (e.g., `feat: add export`).
+Fixes #123
+```
 
 ### 6. Push and Create Pull Request
 
@@ -384,7 +386,7 @@ Before submitting a PR:
 - [ ] Tests added for new features, updated for bug fixes
 - [ ] All tests pass locally (`make test`)
 - [ ] Linting passes (`make lint`)
-- [ ] Commit messages use imperative mood, 48-char subjects
+- [ ] Commit subjects use `type(scope): summary`, imperative mood, 72 characters at most
 - [ ] PR targets the `develop` branch
 - [ ] PR description is clear with testing notes
 - [ ] No sensitive data in commits (.env, credentials, keys)
