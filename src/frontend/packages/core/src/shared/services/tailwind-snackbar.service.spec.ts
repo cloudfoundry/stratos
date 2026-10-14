@@ -45,6 +45,29 @@ describe('TailwindSnackBarService', () => {
     expect(dismissed).toEqual(['shown']);
   });
 
+  // White on --color-danger measured 3.76:1 (light) / 2.77:1 (dark) and the
+  // primary-blue action 1.02:1; danger-700 gives white 4.98:1 (WCAG AA).
+  it('error snackbars are readable: dark red, white action and close', () => {
+    service.error('broker failed');
+    const bar = document.querySelector('.snackbar-error') as HTMLElement;
+    expect(bar.classList).toContain('!bg-danger-700');
+    expect(bar.classList).not.toContain('!bg-danger');
+    const action = bar.querySelector('.snackbar-action') as HTMLElement;
+    const close = bar.querySelector('.snackbar-close') as HTMLElement;
+    expect(action.classList).toContain('text-white');
+    expect(action.classList).not.toContain('text-primary');
+    expect(close.classList).toContain('text-white');
+    expect(close.classList).not.toContain('text-gray-400');
+  });
+
+  it('other snackbars keep the primary action and grey close on the dark toast', () => {
+    service.open('saved', 'Undo');
+    const bar = document.querySelector('.snackbar-action')!.parentElement as HTMLElement;
+    expect(bar.classList).not.toContain('snackbar-error');
+    expect(bar.querySelector('.snackbar-action')!.classList).toContain('text-primary');
+    expect(bar.querySelector('.snackbar-close')!.classList).toContain('text-gray-400');
+  });
+
   it('show with a close message does not auto-dismiss', () => {
     vi.useFakeTimers();
     const ref = service.show('note', 'Dismiss');
