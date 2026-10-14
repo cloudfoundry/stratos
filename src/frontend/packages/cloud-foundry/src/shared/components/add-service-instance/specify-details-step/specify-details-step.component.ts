@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
@@ -31,7 +31,8 @@ import { StepOnNextResult } from '../../../../../../core/src/shared/components/s
 import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
-import { AsyncJobResult, StratosJobError } from '../../../../services/async-jobs/async-job.types';
+import { AsyncJobResult } from '../../../../services/async-jobs/async-job.types';
+import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -407,7 +408,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     } catch (err: unknown) {
       return {
         success: false,
-        message: `Failed to ${verb} service instance: ${extractErrorMessage(err)}`,
+        message: `Failed to ${verb} service instance: ${extractHttpErrorMessage(err)}`,
       };
     }
 
@@ -553,33 +554,3 @@ function extractCreatedSiGuid(result: AsyncJobResult<unknown>): string | undefin
   return m?.[1];
 }
 
-function extractErrorMessage(err: unknown): string {
-  if (err instanceof StratosJobError) return err.message;
-  if (err instanceof HttpErrorResponse) {
-    const body = err.error;
-    if (body && typeof body === 'object') {
-      // Backend can respond with three shapes:
-      //  - CF passthrough: { errors: [{ detail, title, code }] }
-      //  - Stratos job envelope: { state, errors: [{ message, code, detail }] }
-      //  - handleCapiError fallback: { error: "..." }
-      // Walk all three so the user sees what actually broke instead of
-      // Angular's generic "Http failure response for ... 502 OK".
-      const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
-      const first = errors?.[0];
-      if (first) {
-        if (typeof first.detail === 'string' && first.detail) return first.detail;
-        if (first.title) return first.title;
-        if (first.message) return first.message;
-      }
-      const top = body as { message?: string; error?: string };
-      if (top.message) return top.message;
-      if (top.error) return top.error;
-    }
-    if (typeof body === 'string' && body) return body;
-    return err.statusText && err.statusText !== 'OK'
-      ? `HTTP ${err.status} ${err.statusText}`
-      : `HTTP ${err.status}`;
-  }
-  if (err instanceof Error) return err.message;
-  return 'unknown error';
-}
