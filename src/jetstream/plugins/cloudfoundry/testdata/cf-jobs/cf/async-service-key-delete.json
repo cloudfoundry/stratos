@@ -1,0 +1,14 @@
+{
+  "guid": "eef78f56-4328-476d-b0ee-fad61b18729b",
+  "created_at": "2026-10-14T04:29:56Z",
+  "updated_at": "2026-10-14T04:31:00Z",
+  "operation": "service_keys.delete",
+  "state": "COMPLETE",
+  "errors": [],
+  "warnings": [],
+  "links": {
+    "self": {
+      "href": "https://api.example.com/v3/jobs/eef78f56-4328-476d-b0ee-fad61b18729b"
+    }
+  }
+}
