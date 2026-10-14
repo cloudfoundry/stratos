@@ -6,7 +6,7 @@ import { AppDetailPrefs } from './app-detail-prefs.service';
 import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService, ApplicationStateData } from '../../shared/services/application-state.service';
 import { IApp, IAppSummary } from '../../cf-api.types';
-import { APIResource } from '@stratosui/store';
+import { APIResource, extractHttpErrorMessage } from '@stratosui/store';
 import { CnsiAppsSource } from '../../services/data-sources/cnsi-apps-source';
 import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 import { EnvVarStratosProject } from './application/application-tabs-base/tabs/build-tab/application-env-vars.service';
@@ -795,7 +795,7 @@ export class AppDetailDataService {
   // ---------------------------------------------------------------------------
 
   private toStratosError(kind: EntityKind, err: unknown): StratosError {
-    const detail = err instanceof Error ? err.message : String(err);
+    const detail = extractHttpErrorMessage(err);
     return {
       scope: 'envelope',
       code: 'FETCH_ERROR',

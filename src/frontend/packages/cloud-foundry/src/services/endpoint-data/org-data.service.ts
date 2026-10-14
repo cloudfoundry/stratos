@@ -4,6 +4,7 @@ import { EMPTY, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { StError, StOrgDetail, StSpace } from './stratos-types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 export class OrgDataService {
   private readonly _org = signal<StOrgDetail | null>(null);
@@ -104,7 +105,7 @@ export class OrgDataService {
     this._errors.update(errors => [...errors, {
       resource,
       severity: 'error' as const,
-      message: err instanceof Error ? err.message : String(err),
+      message: extractHttpErrorMessage(err),
       recoverable: true,
       detail: err,
     }]);

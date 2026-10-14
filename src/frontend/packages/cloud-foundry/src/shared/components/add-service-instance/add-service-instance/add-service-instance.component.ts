@@ -55,6 +55,7 @@ import { CsiState, CsiStateService } from '../csi-state.service';
 import { SelectPlanStepComponent } from '../select-plan-step/select-plan-step.component';
 import { SpecifyDetailsStepComponent } from '../specify-details-step/specify-details-step.component';
 import { SpecifyUserProvidedDetailsComponent } from '../specify-user-provided-details/specify-user-provided-details.component';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 @Component({
   selector: 'app-add-service-instance',
@@ -662,7 +663,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       app = await this.loadAppDetail(cfId, appId);
     } catch (error) {
       return this.failSetup(
-        `setupForAppServiceMode: Failed to fetch application detail (appId=${appId}, cfId=${cfId}): ${error instanceof Error ? error.message : String(error)}`,
+        `setupForAppServiceMode: Failed to fetch application detail (appId=${appId}, cfId=${cfId}): ${extractHttpErrorMessage(error)}`,
         'Failed to load application details. Please try again.',
       );
     }
@@ -732,7 +733,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       si = await this.loadServiceInstanceForEdit(endpointId, serviceInstanceId);
     } catch (error) {
       return this.failSetup(
-        `runManagedEditSetup: Failed to fetch service instance (id=${serviceInstanceId}, cnsi=${endpointId}): ${error instanceof Error ? error.message : String(error)}`,
+        `runManagedEditSetup: Failed to fetch service instance (id=${serviceInstanceId}, cnsi=${endpointId}): ${extractHttpErrorMessage(error)}`,
         'Failed to load service instance for editing. Please try again.',
       );
     }
@@ -765,7 +766,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       space = await this.loadSpaceForInstance(endpointId, spaceGuid);
     } catch (error) {
       return this.failSetup(
-        `runManagedEditSetup: Failed to fetch space (spaceGuid=${spaceGuid}, cnsi=${endpointId}): ${error instanceof Error ? error.message : String(error)}`,
+        `runManagedEditSetup: Failed to fetch space (spaceGuid=${spaceGuid}, cnsi=${endpointId}): ${extractHttpErrorMessage(error)}`,
         'Failed to load space information for service instance.',
       );
     }
@@ -852,7 +853,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       }
     } catch (error) {
       return this.failSetup(
-        `initialiseForMarketplaceMode: Error during service configuration (endpointId=${endpointId}, serviceId=${serviceId}): ${error instanceof Error ? error.message : String(error)}`,
+        `initialiseForMarketplaceMode: Error during service configuration (endpointId=${endpointId}, serviceId=${serviceId}): ${extractHttpErrorMessage(error)}`,
         'Failed to configure service instance creation.',
       );
     }
@@ -884,7 +885,7 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       endpoints = await this.awaitNonEmpty(this.cfOrgSpaceService.cf.list);
     } catch (error) {
       return this.failSetup(
-        `initialiseForMarketplaceMode: Failed to await connected CF endpoints (endpointId=${endpointId}): ${error instanceof Error ? error.message : String(error)}`,
+        `initialiseForMarketplaceMode: Failed to await connected CF endpoints (endpointId=${endpointId}): ${extractHttpErrorMessage(error)}`,
         'Failed to initialize service creation. Please ensure your Cloud Foundry connection is active.',
       );
     }
