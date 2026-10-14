@@ -178,8 +178,10 @@ git commit
 
 Commit message style:
 - Subject line: `type(scope): summary` in the imperative mood, as described
-  in [CONTRIBUTING.md](../CONTRIBUTING.md#commits). Aim for 50 characters;
-  never go over 72, where GitHub truncates the subject.
+  in
+  [CONTRIBUTING.md](https://github.com/cloudfoundry/stratos/blob/develop/CONTRIBUTING.md#commits).
+  Aim for 50 characters; never go over 72, where GitHub truncates the
+  subject.
 - Body: max 72 characters wide, after a blank line; explain *why* not *what*
 - One atomic concept per commit
 - Keep style changes separate from functional changes
