@@ -543,7 +543,7 @@ func TestUpdateManagedServiceInstance_Empty202_ParsesJobFromLocation(t *testing.
 
 // The update job reaches COMPLETE regardless of broker outcome (same CF
 // quirk as create) — checkManagedSIUpdateOutcome must re-read the SI's
-// last_operation and surface a broker rejection as 502 instead of a false
+// last_operation and surface a broker rejection as 422 instead of a false
 // "updated" confirmation. This preserves the GH#5431 UX coverage on the
 // native path now that the empty-202 recovery shim is gone.
 func TestUpdateManagedServiceInstance_Empty202_BrokerFailed(t *testing.T) {
@@ -585,7 +585,8 @@ func TestUpdateManagedServiceInstance_Empty202_BrokerFailed(t *testing.T) {
 	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "siGuid", Value: "si-1"}})
 
 	require.NoError(t, plugin.updateManagedServiceInstance(ctx))
-	assert.Equal(t, http.StatusBadGateway, rec.Code)
+	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+	assert.Equal(t, stratosjobs.ReasonOperationFailed, rec.Header().Get(stratosjobs.ErrorReasonHeader))
 	assert.Contains(t, rec.Body.String(), `"FAILED"`)
 	assert.Contains(t, rec.Body.String(), "broker rejected the parameters")
 }

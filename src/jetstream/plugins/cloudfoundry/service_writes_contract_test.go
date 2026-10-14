@@ -302,7 +302,7 @@ func TestServiceWritesContract(t *testing.T) {
 			t.Parallel()
 			got := runContract(t, f.wc, f.capture, f.running, f.si)
 
-			assert.Equal(t, http.StatusBadGateway, got.FastPath.Status, "fast path: %s", got.FastPath.Body)
+			assert.Equal(t, http.StatusUnprocessableEntity, got.FastPath.Status, "fast path: %s", got.FastPath.Body)
 			var fast fastPathOutcome
 			require.NoError(t, json.Unmarshal(got.FastPath.Body, &fast))
 			var polled stratosjobs.StratosJob

@@ -142,10 +142,7 @@ func (c *CloudFoundrySpecification) deleteNativeSpaceQuota(ctx *echo.Context) er
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
 		if res.State == stratosjobs.JobStateFailed {
-			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
-				"state":  res.State,
-				"errors": res.Errors,
-			})
+			return stratosjobs.WriteFailed(ctx, res.Errors)
 		}
 		return ctx.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,

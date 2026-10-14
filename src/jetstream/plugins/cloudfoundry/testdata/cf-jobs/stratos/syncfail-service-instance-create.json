@@ -1,6 +1,6 @@
 {
   "fastPath": {
-    "status": 502,
+    "status": 422,
     "body": {
       "errors": [
         {

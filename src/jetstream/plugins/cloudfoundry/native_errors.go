@@ -11,6 +11,7 @@ import (
 	"strconv"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
 )
@@ -35,7 +36,7 @@ func isRouterRouteMissing(err error) bool {
 // stratosErrorReasonHeader carries the machine-readable failure classification
 // to the frontend. Present only for the called-out reasons (unreachable,
 // auth_expired); absent for unclassified errors.
-const stratosErrorReasonHeader = "X-Stratos-Error-Reason"
+const stratosErrorReasonHeader = stratosjobs.ErrorReasonHeader
 
 // stratosUpstreamStatusHeader carries the upstream CF/UAA HTTP status (e.g.
 // 503) when recoverable, so the frontend can show the real error code even
