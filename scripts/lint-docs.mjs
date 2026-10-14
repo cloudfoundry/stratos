@@ -11,9 +11,13 @@
 //   link-resolves  relative links/images must point at existing files
 //   link-md-ext    relative doc links need an explicit .md extension
 //                  (extensionless doc-id links do not navigate on GitHub)
+//   link-in-docs   relative doc links must stay inside docs/: the site
+//                  renders only docs/, so a link out (../CONTRIBUTING.md)
+//                  works on GitHub and fails the website build. Link
+//                  repo files by their GitHub URL instead.
 
 import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs'
-import { join, dirname, resolve } from 'node:path'
+import { join, dirname, resolve, relative, isAbsolute } from 'node:path'
 
 const DOCS_DIR = 'docs'
 // Well-formed elements both GitHub and MDX render.
@@ -93,8 +97,11 @@ function lintFile(file) {
       const [, bang, target] = m
       if (/^(https?:|mailto:|\/)/.test(target)) continue
       const abs = resolve(dirname(file), target)
+      const rel = relative(resolve(DOCS_DIR), abs)
       if (!existsSync(abs)) {
         problems.push([file, no, 'link-resolves', `"${target}" does not exist`])
+      } else if (!bang && (rel.startsWith('..') || isAbsolute(rel))) {
+        problems.push([file, no, 'link-in-docs', `"${target}" leaves docs/ - the website cannot resolve it; use its GitHub URL`])
       } else if (!bang && statSync(abs).isFile() && !/\.[a-z]+$/i.test(target)) {
         problems.push([file, no, 'link-md-ext', `"${target}" needs an explicit file extension`])
       }
