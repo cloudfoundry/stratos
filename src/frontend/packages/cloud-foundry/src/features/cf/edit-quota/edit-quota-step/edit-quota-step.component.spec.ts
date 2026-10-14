@@ -2,9 +2,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import { FormGroup, FormControl } from '@angular/forms';
 import { provideRouter } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { throwError } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 
 import {
@@ -18,6 +19,8 @@ import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '@test-framework/cf';
 import { EditQuotaStepComponent } from './edit-quota-step.component';
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
+import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
+import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 
 // Mock QuotaDefinitionFormComponent since it has complex dependencies
 @Component({
@@ -101,5 +104,15 @@ describe('EditQuotaStepComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('names what CF rejected when the update fails', async () => {
+    vi.spyOn(TestBed.inject(QuotaDataService), 'updateOrgQuota').mockReturnValue(throwError(() => new HttpErrorResponse({
+      error: { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'Quota Definition name must be unique' }] },
+      status: 422, statusText: 'Unprocessable Entity',
+    })));
+    component.form = new MockQuotaDefinitionFormComponent() as unknown as QuotaDefinitionFormComponent;
+
+    await expect(component.signalHandle.submit!()).rejects.toThrow('Failed to update quota: Quota Definition name must be unique');
   });
 });

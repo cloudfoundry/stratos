@@ -17,6 +17,7 @@ import {
 } from '../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
+import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 
 const enum OrgStatus {
   ACTIVE = 'active',
@@ -97,7 +98,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
           ...(newQuotaGuid !== this.originalQuotaGuid ? { quotaGuid: newQuotaGuid ?? undefined } : {}),
         });
       } catch (err: unknown) {
-        throw new Error(`Failed to update organization: ${err instanceof Error ? err.message : String(err)}`, { cause: err });
+        throw new Error(`Failed to update organization: ${extractHttpErrorMessage(err)}`, { cause: err });
       } finally {
         this.endpointDataRegistry.release(this.cfGuid);
       }
