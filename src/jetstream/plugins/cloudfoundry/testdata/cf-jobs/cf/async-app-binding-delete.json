@@ -1,0 +1,14 @@
+{
+  "guid": "f1ed0644-648c-4edc-959d-66e851a731ba",
+  "created_at": "2026-10-14T04:31:01Z",
+  "updated_at": "2026-10-14T04:32:05Z",
+  "operation": "service_bindings.delete",
+  "state": "COMPLETE",
+  "errors": [],
+  "warnings": [],
+  "links": {
+    "self": {
+      "href": "https://api.example.com/v3/jobs/f1ed0644-648c-4edc-959d-66e851a731ba"
+    }
+  }
+}
