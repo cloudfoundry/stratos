@@ -6,8 +6,8 @@ import { Observable, defer, firstValueFrom, from } from 'rxjs';
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
-import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
+import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 
 export enum CreateServiceInstanceMode {
@@ -217,7 +217,7 @@ export class CsiModeService {
       return { success: true };
     } catch (err: unknown) {
       if (!isOperationInProgressError(err)) {
-        return { success: false, message: extractErrorMessage(err) };
+        return { success: false, message: extractHttpErrorMessage(err) };
       }
     }
 
@@ -233,7 +233,7 @@ export class CsiModeService {
         await fireBind();
         return { success: true };
       } catch (err: unknown) {
-        return { success: false, message: extractErrorMessage(err) };
+        return { success: false, message: extractHttpErrorMessage(err) };
       }
     }
     // Slow broker. Detach the bind so the wizard doesn't keep spinning;
@@ -261,7 +261,7 @@ export class CsiModeService {
         await fireBind();
         this.snackBar.open(`Service instance bound to app.`, undefined, { duration: 10_000 });
       } catch (err: unknown) {
-        this.snackBar.error(`Service instance ready, but bind failed: ${extractErrorMessage(err)}`);
+        this.snackBar.error(`Service instance ready, but bind failed: ${extractHttpErrorMessage(err)}`);
       }
       return;
     }
@@ -345,31 +345,3 @@ function isOperationInProgressError(err: unknown): boolean {
   return typeof first?.detail === 'string' && first.detail.includes('operation in progress');
 }
 
-function extractErrorMessage(err: unknown): string {
-  if (err instanceof StratosJobError) return err.message;
-  if (err instanceof HttpErrorResponse) {
-    const body = err.error;
-    if (body && typeof body === 'object') {
-      // Handles three backend shapes: CF passthrough errors[].detail/title,
-      // Stratos job envelope errors[].message, and handleCapiError's
-      // top-level {error}. Without this the user sees Angular's generic
-      // "Http failure response for ... 502 OK" with no clue what broke.
-      const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
-      const first = errors?.[0];
-      if (first) {
-        if (typeof first.detail === 'string' && first.detail) return first.detail;
-        if (first.title) return first.title;
-        if (first.message) return first.message;
-      }
-      const top = body as { message?: string; error?: string };
-      if (top.message) return top.message;
-      if (top.error) return top.error;
-    }
-    if (typeof body === 'string' && body) return body;
-    return err.statusText && err.statusText !== 'OK'
-      ? `HTTP ${err.status} ${err.statusText}`
-      : `HTTP ${err.status}`;
-  }
-  if (err instanceof Error) return err.message;
-  return 'unknown error';
-}
