@@ -6,6 +6,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
+import { answerServiceWrite, RESOLVE_PATHS, serviceWriteContract } from '@test-framework/cf';
+
 import { CsiModeService } from './csi-mode.service';
 
 function configure(routeParams: Record<string, string>) {
@@ -252,5 +254,22 @@ describe('CsiModeService', () => {
       await expect(finalResult).resolves.toEqual({ success: true });
       httpMock.verify();
     });
+
+    // Recorded backend answers: a sync or async broker, on either resolve
+    // path, binds the same way.
+    for (const broker of ['sync', 'async']) {
+      for (const path of RESOLVE_PATHS) {
+        it(`binds: ${broker} broker, ${path} path`, async () => {
+          const svc = TestBed.inject(CsiModeService);
+          const httpMock = TestBed.inject(HttpTestingController);
+
+          const finalResult = firstValueFrom(svc.createApplicationServiceBinding('si-1', 'cnsi-1', 'app-1', {}));
+          await answerServiceWrite(httpMock, '/pp/v1/cf/service_bindings/cnsi-1', serviceWriteContract(`${broker}-app-binding-create`), path);
+
+          await expect(finalResult).resolves.toEqual({ success: true });
+          httpMock.verify();
+        });
+      }
+    }
   });
 });

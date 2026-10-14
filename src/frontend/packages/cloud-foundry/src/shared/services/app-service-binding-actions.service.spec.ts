@@ -3,6 +3,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
+import { answerServiceWrite, RESOLVE_PATHS, serviceWriteContract } from '@test-framework/cf';
+
 import { ApplicationService } from '../../features/applications/application.service';
 import { AppServiceBindingActionsService } from './app-service-binding-actions.service';
 
@@ -45,6 +47,21 @@ describe('AppServiceBindingActionsService', () => {
     expect(svc.inFlight()).toBe(false);
     expect(svc.transitioningBindingGuid()).toBeNull();
   });
+
+  // Recorded backend answers: a sync or async broker, on either resolve
+  // path, unbinds the same way.
+  for (const broker of ['sync', 'async']) {
+    for (const path of RESOLVE_PATHS) {
+      it(`unbinds: ${broker} broker, ${path} path`, async () => {
+        const promise = svc.unbindService('bind-1');
+        await answerServiceWrite(ctrl, '/pp/v1/cf/service_bindings/cnsi-1/bind-1', serviceWriteContract(`${broker}-app-binding-delete`), path);
+
+        await expect(promise).resolves.toBeUndefined();
+        expect(svc.inFlight()).toBe(false);
+        expect(svc.transitioningBindingGuid()).toBeNull();
+      });
+    }
+  }
 
   it('rejects when invoked while another verb is in flight', async () => {
     const first = svc.unbindService('bind-1');
