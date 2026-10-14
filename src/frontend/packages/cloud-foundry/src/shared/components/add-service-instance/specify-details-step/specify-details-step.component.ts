@@ -538,14 +538,16 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 }
 
 // Pulls the new service-instance guid out of writeWithJob's terminal result.
-// translateCFJobResult emits `links.service_instance: '/v3/service_instances/<guid>'`
-// on managed creates; writeWithJob normalises both fast-path and polled
+// CF names the job link after its resource type, so a create or update job
+// carries `links.service_instances: '/v3/service_instances/<guid>'` (plural;
+// only the delete job uses `service_instance`). translateCFJobResult passes it
+// through unchanged, and writeWithJob normalises both fast-path and polled
 // shapes to that bare-result level. UNKNOWN status / missing links return
 // undefined and the caller skips auto-bind.
 function extractCreatedSiGuid(result: AsyncJobResult<unknown>): string | undefined {
   if (result.status !== 'COMPLETE' || !result.state) return undefined;
   const links = (result.state as { links?: Record<string, string> }).links;
-  const href = links?.service_instance;
+  const href = links?.service_instances;
   if (!href) return undefined;
   const m = href.match(/\/([^/]+)\/?$/);
   return m?.[1];

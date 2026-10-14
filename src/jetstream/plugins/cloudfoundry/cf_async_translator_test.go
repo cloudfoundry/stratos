@@ -41,13 +41,13 @@ func TestTranslateCFJobResult_CompleteEmitsJobIdentity(t *testing.T) {
 // TestTranslateCFJobResult_CompleteSurfacesResourceLinks covers the create-path
 // case: CF v3 jobs emit a links.<resource>.href on terminal COMPLETE so
 // consumers can extract the new resource's guid without refetching. Generic
-// across operations — service_instance, app, route, etc. all flow through.
+// across operations — service_instances, apps, routes, etc. all flow through.
 func TestTranslateCFJobResult_CompleteSurfacesResourceLinks(t *testing.T) {
 	job := &capi.Job{Operation: "service_instance.create", State: "COMPLETE"}
 	job.GUID = "job-create-1"
 	job.Links = capi.Links{
-		"self":             {Href: "https://cf.example.com/v3/jobs/job-create-1"},
-		"service_instance": {Href: "https://cf.example.com/v3/service_instances/si-new-guid"},
+		"self":              {Href: "https://cf.example.com/v3/jobs/job-create-1"},
+		"service_instances": {Href: "https://cf.example.com/v3/service_instances/si-new-guid"},
 	}
 
 	got := translateCFJobResult(job)
@@ -59,7 +59,7 @@ func TestTranslateCFJobResult_CompleteSurfacesResourceLinks(t *testing.T) {
 
 	links, ok := m["links"].(map[string]string)
 	require.True(t, ok, "links should be a string→string map, got %T", m["links"])
-	assert.Equal(t, "https://cf.example.com/v3/service_instances/si-new-guid", links["service_instance"])
+	assert.Equal(t, "https://cf.example.com/v3/service_instances/si-new-guid", links["service_instances"])
 	assert.Equal(t, "https://cf.example.com/v3/jobs/job-create-1", links["self"])
 }
 
@@ -69,8 +69,8 @@ func TestTranslateCFJobResult_CompleteSurfacesResourceLinks(t *testing.T) {
 func TestTranslateCFJobResult_DropsEmptyHrefs(t *testing.T) {
 	job := &capi.Job{State: "COMPLETE"}
 	job.Links = capi.Links{
-		"self":             {Href: ""},
-		"service_instance": {Href: ""},
+		"self":              {Href: ""},
+		"service_instances": {Href: ""},
 	}
 
 	got := translateCFJobResult(job)
