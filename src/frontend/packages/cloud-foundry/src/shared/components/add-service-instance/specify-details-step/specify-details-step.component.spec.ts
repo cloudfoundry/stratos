@@ -7,7 +7,14 @@ import { firstValueFrom, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+import {
+  answerServiceWrite,
+  generateCfBaseTestModulesNoShared,
+  RESOLVE_PATHS,
+  ResolvePath,
+  serviceWriteContract,
+  ServiceWriteContract,
+} from '@test-framework/cf';
 import { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -359,5 +366,79 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  // Recorded backend answers (see @test-framework/cf service-write-contract):
+  // a synchronous or asynchronous broker, resolved on the fast or the polled
+  // path, must give the user the same outcome.
+  describe('same outcome for sync and async brokers on both resolve paths', () => {
+    const CREATE_URL = '/pp/v1/cf/service_instances/cnsi-1';
+    const UPDATE_URL = '/pp/v1/cf/service_instances/cnsi-1/si-existing';
+
+    async function runOnNext(opts: Parameters<typeof setup>[0], url: string, contract: ServiceWriteContract, path: ResolvePath) {
+      const ctx = setup(opts);
+      const finalResult = firstValueFrom(ctx.component.onNext());
+      await answerServiceWrite(ctx.httpMock, url, contract, path);
+      const out = await finalResult;
+      // Drain unrelated background loaders the cf test module fires on bootstrap.
+      ctx.httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+      return { out, ...ctx };
+    }
+
+    // The new instance's guid as CF reported it, found without assuming
+    // which link key carries it.
+    function createdGuid(contract: ServiceWriteContract): string {
+      const m = JSON.stringify(contract.fastPath.body).match(/\/v3\/service_instances\/([0-9a-f-]{36})/);
+      if (!m) {
+        throw new Error('recorded create names no service instance');
+      }
+      return m[1];
+    }
+
+    for (const broker of ['sync', 'async']) {
+      for (const path of RESOLVE_PATHS) {
+        const name = `${broker} broker, ${path} path`;
+
+        it(`creates: ${name}`, async () => {
+          const { out } = await runOnNext({}, CREATE_URL, serviceWriteContract(`${broker}-service-instance-create`), path);
+          expect(out).toEqual({ success: true, redirect: true });
+        });
+
+        // #6001: the wizard reads `links.service_instance`, CF sends
+        // `service_instances`, so the bind is skipped. Fixed by #6004.
+        it.fails(`creates and binds the selected app: ${name} (#6001)`, async () => {
+          const contract = serviceWriteContract(`${broker}-service-instance-create`);
+          const { out, csiStateStub, modeServiceStub } = await runOnNext({ bindAppGuid: 'app-1' }, CREATE_URL, contract, path);
+          expect(out).toEqual({ success: true, redirect: true });
+          expect(csiStateStub.setServiceInstanceGuid).toHaveBeenCalledWith(createdGuid(contract));
+          expect(modeServiceStub.createApplicationServiceBinding).toHaveBeenCalledWith(
+            createdGuid(contract), 'cnsi-1', 'app-1', undefined,
+          );
+        });
+
+        it(`updates: ${name}`, async () => {
+          const { out } = await runOnNext({ isEditMode: true }, UPDATE_URL, serviceWriteContract(`${broker}-service-instance-update`), path);
+          expect(out).toEqual({ success: true, redirect: true });
+        });
+      }
+    }
+
+    const failures: [string, string, Parameters<typeof setup>[0]][] = [
+      ['failasync-service-instance-create', CREATE_URL, {}],
+      ['syncfail-service-instance-create', CREATE_URL, {}],
+      ['failasync-service-instance-update', UPDATE_URL, { isEditMode: true }],
+    ];
+    for (const [contractName, url, opts] of failures) {
+      // #6002: the fast path shows CF's error detail, the polled path
+      // prefixes its title ("CF-UnableToPerform. …").
+      it.fails(`reports the broker failure the same way on both paths: ${contractName} (#6002)`, async () => {
+        const contract = serviceWriteContract(contractName);
+        const fast = await runOnNext(opts, url, contract, 'fast');
+        const polled = await runOnNext(opts, url, contract, 'polled');
+        expect(fast.out.success).toBe(false);
+        expect(polled.out.success).toBe(false);
+        expect(polled.out.message).toEqual(fast.out.message);
+      });
+    }
   });
 });
