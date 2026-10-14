@@ -804,7 +804,7 @@ func fetchManifest(repoPath string, appName string, stratosProject StratosProjec
 			manifest.Applications[i] = app
 		}
 
-		marshalledYaml, err := yaml.Dump(manifest)
+		marshalledYaml, err := addManifestEnvVar(data, manifest, stratosProjectKey, envVarMetaData)
 		if err != nil {
 			slog.Warn("cf push: failed to marshal the annotated manifest", "path", manifestPath, "error", err)
 			sendErrorMessage(clientWebSocket, err, CLOSE_FAILURE)
@@ -819,6 +819,64 @@ func fetchManifest(repoPath string, appName string, stratosProject StratosProjec
 	}
 
 	return manifest, manifestPath, nil
+}
+
+// addManifestEnvVar sets env[key] on every application in the manifest
+// document data and leaves the rest of it as written: Applications models only
+// some manifest fields, so writing the struct back would drop the others. An
+// application without an env block of its own gets one built from apps, which
+// already holds key and any env it inherits through a YAML merge key.
+func addManifestEnvVar(data []byte, apps Applications, key, value string) ([]byte, error) {
+	var doc yaml.Node
+	if err := yaml.Load(data, &doc); err != nil {
+		return nil, err
+	}
+	if len(doc.Content) == 0 {
+		return data, nil
+	}
+	seq := mappingValue(doc.Content[0], "applications")
+	if seq == nil || seq.Kind != yaml.SequenceNode {
+		return data, nil
+	}
+	for i, app := range seq.Content {
+		if app.Kind != yaml.MappingNode || i >= len(apps.Applications) {
+			continue
+		}
+		env := mappingValue(app, "env")
+		if env != nil && env.Kind == yaml.MappingNode {
+			if v := mappingValue(env, key); v != nil {
+				*v = yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: value}
+			} else {
+				env.Content = append(env.Content,
+					&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: key},
+					&yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: value})
+			}
+			continue
+		}
+		built := &yaml.Node{}
+		if err := built.Encode(apps.Applications[i].EnvironmentVariables); err != nil {
+			return nil, err
+		}
+		if env != nil {
+			*env = *built
+		} else {
+			app.Content = append(app.Content, &yaml.Node{Kind: yaml.ScalarNode, Tag: "!!str", Value: "env"}, built)
+		}
+	}
+	return yaml.Dump(&doc)
+}
+
+// mappingValue returns the value node for key in mapping m, or nil.
+func mappingValue(m *yaml.Node, key string) *yaml.Node {
+	if m.Kind != yaml.MappingNode {
+		return nil
+	}
+	for i := 0; i+1 < len(m.Content); i += 2 {
+		if m.Content[i].Value == key {
+			return m.Content[i+1]
+		}
+	}
+	return nil
 }
 
 func (sw *SocketWriter) Write(data []byte) (int, error) {
