@@ -135,8 +135,6 @@ for (const mode of RESPONSE_MODES) {
 
     test('binds the app chosen in the wizard', async ({ connectedEndpointsAdminPage, cfApi, secrets, applicationHelper }) => {
       test.skip(!broker, 'no services.testBroker in the secrets profile');
-      // #6001: the wizard reads the wrong job link and skips the bind. Fixed by #6004.
-      test.fail(true, '#6001');
       const { page, cfGuid, spaceGuid } = connectedEndpointsAdminPage;
       const name = `e2e-${mode}-bind-${Date.now()}`;
       const testApp = await applicationHelper.createTestApp(`e2e-${mode}-bind-app`);

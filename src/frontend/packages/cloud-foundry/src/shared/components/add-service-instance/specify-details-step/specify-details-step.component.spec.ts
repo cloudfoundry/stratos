@@ -404,9 +404,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
           expect(out).toEqual({ success: true, redirect: true });
         });
 
-        // #6001: the wizard reads `links.service_instance`, CF sends
-        // `service_instances`, so the bind is skipped. Fixed by #6004.
-        it.fails(`creates and binds the selected app: ${name} (#6001)`, async () => {
+        it(`creates and binds the selected app: ${name}`, async () => {
           const contract = serviceWriteContract(`${broker}-service-instance-create`);
           const { out, csiStateStub, modeServiceStub } = await runOnNext({ bindAppGuid: 'app-1' }, CREATE_URL, contract, path);
           expect(out).toEqual({ success: true, redirect: true });
