@@ -84,6 +84,11 @@ export interface CFServiceInstance {
   guid: string;
   name: string;
   type: 'managed' | 'user_provided';
+  last_operation?: {
+    type: string;
+    state: 'initial' | 'in progress' | 'succeeded' | 'failed';
+    description?: string;
+  };
   relationships: {
     space: {
       data: {
@@ -704,6 +709,31 @@ export class CFApiHelper {
   async serviceInstanceExists(serviceInstanceGuid: string): Promise<boolean> {
     if (!this.cfApiBase) await this.init();
     return this.exists(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
+  }
+
+  async findServiceOfferingGuid(name: string, spaceGuid: string): Promise<string | null> {
+    if (!this.cfApiBase) await this.init();
+    const response = await this.pget(
+      `${this.cfApiBase}/service_offerings?names=${encodeURIComponent(name)}&space_guids=${spaceGuid}`
+    );
+    return response.resources?.[0]?.guid ?? null;
+  }
+
+  async findServiceInstanceByName(spaceGuid: string, name: string): Promise<CFServiceInstance | null> {
+    if (!this.cfApiBase) await this.init();
+    const response = await this.pget(
+      `${this.cfApiBase}/service_instances?space_guids=${spaceGuid}&names=${encodeURIComponent(name)}`
+    );
+    return response.resources?.[0] ?? null;
+  }
+
+  /** App bindings of a service instance: guid and bound app guid. */
+  async getAppBindings(serviceInstanceGuid: string): Promise<{ guid: string; appGuid: string }[]> {
+    if (!this.cfApiBase) await this.init();
+    const response = await this.pget(
+      `${this.cfApiBase}/service_credential_bindings?type=app&service_instance_guids=${serviceInstanceGuid}`
+    );
+    return (response.resources || []).map((b: any) => ({ guid: b.guid, appGuid: b.relationships?.app?.data?.guid }));
   }
 
   async serviceBindingExists(bindingGuid: string): Promise<boolean> {
