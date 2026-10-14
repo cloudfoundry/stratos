@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { Component, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
@@ -343,5 +344,53 @@ describe('SchemaFormComponent editor text changes', () => {
     editor.valueChange.emit('{ not json');
     expect(c.parseValid()).toBe(false);
     expect(c.data()).toBeNull();                 // never fed a bad parse
+  });
+});
+
+// The Form/JSON toggle is view state, not form data. Inside a parent
+// [formGroup] (the create-service-instance step), radios bound with ngModel
+// tried to register with that group and Angular warned NG01354 for each.
+@Component({
+  standalone: true,
+  imports: [ReactiveFormsModule, SchemaFormComponent],
+  template: `<form [formGroup]="group"><app-schema-form [config]="config" /></form>`,
+})
+class SchemaFormInFormGroupHost {
+  group = new FormGroup({ name: new FormControl('') });
+  config = { schema: { type: 'object', properties: { size: { type: 'integer' } } } };
+}
+
+describe('SchemaFormComponent view toggle', () => {
+  beforeEach(() => TestBed.configureTestingModule({
+    providers: [provideZonelessChangeDetection()],
+  }));
+
+  it('does not register with a parent form group (no NG01354)', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+    const fixture = TestBed.createComponent(SchemaFormInFormGroupHost);
+    await fixture.whenStable();
+    const ng01354 = warn.mock.calls.filter(args => String(args[0]).includes('NG01354'));
+    warn.mockRestore();
+    expect(ng01354).toEqual([]);
+  });
+
+  it('switches view when a radio is clicked, and checks only that radio', async () => {
+    const fixture = TestBed.createComponent(SchemaFormInFormGroupHost);
+    await fixture.whenStable();
+    const form = fixture.nativeElement.querySelector('input[type=radio][value=schemaForm]') as HTMLInputElement;
+    const json = fixture.nativeElement.querySelector('input[type=radio][value=schemaJson]') as HTMLInputElement;
+    const c = fixture.debugElement.query(By.directive(SchemaFormComponent)).componentInstance as SchemaFormComponent;
+    expect(form.checked).toBe(true);
+
+    json.click();
+    await fixture.whenStable();
+    expect(c.schemaView()).toBe('schemaJson');
+    expect(json.checked).toBe(true);
+    expect(form.checked).toBe(false);
+
+    form.click();
+    await fixture.whenStable();
+    expect(c.schemaView()).toBe('schemaForm');
+    expect(form.checked).toBe(true);
   });
 });

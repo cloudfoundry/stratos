@@ -1,6 +1,5 @@
 
 import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Input, Output, computed, inject, signal, effect } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import {
   MonacoEditorComponent,
   MonacoEditorOptions,
@@ -31,15 +30,19 @@ export class SchemaFormConfig {
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    FormsModule,
     SchemaWidgetRendererComponent,
     MonacoEditorComponent,
   ],
 })
 export class SchemaFormComponent {
+  private static nextId = 0;
 
   mode!: 'JSON' | 'schema';
   readonly schemaView = signal<'schemaForm' | 'schemaJson'>('schemaForm');
+  // The Form/JSON radios' group name and id prefix: one per instance, since
+  // the create-service-instance wizard has two of these forms (instance and
+  // binding parameters).
+  readonly viewToggleId = `schema-view-${SchemaFormComponent.nextId++}`;
   readonly renderError = signal<string | null>(null);
   private readonly snackBar = inject(TailwindSnackBarService);
   private schema: object | undefined;
