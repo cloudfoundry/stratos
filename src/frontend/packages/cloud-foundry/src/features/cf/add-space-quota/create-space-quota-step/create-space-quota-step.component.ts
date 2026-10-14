@@ -8,7 +8,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
 import { formToSpaceQuotaCreateBody } from '../../quota-definition-form/quota-form-mapping';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 @Component({
   selector: 'app-create-space-quota-step',

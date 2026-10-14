@@ -19,7 +19,7 @@ import {
 import { DomainDataService } from '../../../services/endpoint-data/domain-data.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { StOrg } from '../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // ─── Dialog data ──────────────────────────────────────────────────────────────
 

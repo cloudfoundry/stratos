@@ -53,6 +53,47 @@ export function httpErrorResponseToSafeString(err: any): string {
   return err.message;
 }
 
+// An upstream error detail can quote a whole HTML error page (CF embeds a
+// broker's raw response body); keep the words, drop the tags. Messages are
+// always shown as text, so this is for legibility, not safety.
+export const stripMarkup = (text: string): string =>
+  text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
+/**
+ * The most useful human-readable message in whatever a request threw, for
+ * display after a caller's own lead-in. Handles three backend body shapes:
+ *   - CF passthrough: { errors: [{ detail, title, code }] }
+ *   - Stratos job envelope: { state, errors: [{ message, code, detail }] }
+ *   - handleCapiError fallback: { error: "..." }
+ * An HttpErrorResponse is not an Error, so `err.message`/`String(err)` give
+ * Angular's "Http failure response for ..." or "[object Object]" instead.
+ */
+export function extractHttpErrorMessage(err: unknown): string {
+  if (err instanceof HttpErrorResponse) {
+    const body = err.error;
+    if (body && typeof body === 'object') {
+      const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
+      const first = errors?.[0];
+      if (first) {
+        const detail = typeof first.detail === 'string' ? stripMarkup(first.detail) : '';
+        if (detail) return detail;
+        if (first.title) return first.title;
+        if (first.message) return first.message;
+      }
+      const top = body as { message?: string; error?: string };
+      if (top.message) return top.message;
+      if (top.error) return top.error;
+    }
+    if (typeof body === 'string' && body) return body;
+    return err.statusText && err.statusText !== 'OK'
+      ? `HTTP ${err.status} ${err.statusText}`
+      : `HTTP ${err.status}`;
+  }
+  if (err instanceof Error) return err.message;
+  if (typeof err === 'string' && err) return err;
+  return 'unknown error';
+}
+
 // TODO It would be nice if the BE could return a unique para for us to check for. #3827
 // There is always a chance that this will return a false positive (more so with extensions).
 export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): JetStreamErrorResponse | null {

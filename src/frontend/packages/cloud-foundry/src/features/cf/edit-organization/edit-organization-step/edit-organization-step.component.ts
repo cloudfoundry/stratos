@@ -17,7 +17,7 @@ import {
 } from '../../../../shared/services/cloud-foundry-user-provided-services.service';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryOrganizationService } from '../../services/cloud-foundry-organization.service';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 const enum OrgStatus {
   ACTIVE = 'active',

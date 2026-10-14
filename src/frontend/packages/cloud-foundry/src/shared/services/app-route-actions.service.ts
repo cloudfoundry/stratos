@@ -7,7 +7,7 @@ import type { StRoute } from '../../services/endpoint-data/stratos-types';
 import { EntityDeleteController } from '../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../services/deletes/run-cf-delete';
 import { routeEntityType } from '../../cf-entity-types';
-import { extractHttpErrorMessage } from '../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 /**
  * Stratos-shape mirror of CF V3's `capi.RouteCreateRequest`. Sent as the

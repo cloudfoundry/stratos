@@ -6,6 +6,8 @@
 //
 // Design doc: KS stratos/docs/2026-04-22-async-job-contract.md
 
+import { stripMarkup } from '@stratosui/store';
+
 export type JobState = 'PROCESSING' | 'COMPLETE' | 'FAILED';
 
 export const isTerminalJobState = (s: JobState): boolean =>
@@ -53,12 +55,6 @@ export interface AsyncJobResult<T> {
   state: T | undefined;
   jobId?: string;
 }
-
-// CF embeds a broker's raw response body in an error detail, markup and
-// all; keep the words, drop the tags. Messages are always shown as text,
-// so this is for legibility, not safety.
-export const stripMarkup = (text: string): string =>
-  text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
 // StratosJobError is thrown when a polled job terminates in FAILED. It
 // carries the full terminal StratosJob so consumers can render CF-specific

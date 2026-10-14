@@ -13,8 +13,7 @@ import { StServiceInstance } from '../../../services/endpoint-data/stratos-types
 import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoints-data.service';
 import { CredentialField, MaskedCredentialsComponent, toCredentialFields } from '../../../shared/components/masked-credentials/masked-credentials.component';
 import { AppBusyComponent } from '@stratosui/core';
-import { httpErrorResponseToSafeString } from '@stratosui/store';
-import { extractHttpErrorMessage } from '../../../services/extract-error-message';
+import { httpErrorResponseToSafeString, extractHttpErrorMessage } from '@stratosui/store';
 
 type RowStatus = 'idle' | 'busy' | 'error';
 

@@ -19,7 +19,7 @@ import {
 
 import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
 import { StSpace } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // ─── Dialog data ────────────────────────────────────────────────────────────
 

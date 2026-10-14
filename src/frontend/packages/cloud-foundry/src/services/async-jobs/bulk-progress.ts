@@ -2,8 +2,8 @@ import { HttpClient } from '@angular/common/http';
 import { WritableSignal } from '@angular/core';
 import { TailwindSnackBarRef, TailwindSnackBarService } from '@stratosui/core';
 import { pollJob } from './write-with-job';
-import { extractHttpErrorMessage } from '../extract-error-message';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 export interface BulkTally {
   settled: number;

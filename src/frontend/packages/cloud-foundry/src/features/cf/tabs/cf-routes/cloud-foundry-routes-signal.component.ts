@@ -20,13 +20,13 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  extractHttpErrorMessage,
 } from '@stratosui/store';
 
 import { BulkResult, CfRoutesSignalConfigService } from '../../../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
 import type { StApp, StRoute } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../../services/extract-error-message';
 import { routeHref } from '../../../applications/app-detail-data.service';
 
 // Signal-native replacement for CloudFoundryRoutesComponent at

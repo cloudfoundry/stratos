@@ -8,7 +8,7 @@ import {
 } from '@stratosui/core';
 
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '../../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // Services this builder needs from the host list component. Each list already
 // injects these; passing them in keeps the builder free of Angular DI so it

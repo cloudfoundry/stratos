@@ -53,7 +53,7 @@ import {
   ShareServiceInstanceDialogData,
 } from './share-service-instance-dialog.component';
 import { AppBusyComponent } from '@stratosui/core';
-import { extractHttpErrorMessage } from '../../../services/extract-error-message';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 interface BindingRow {
   guid: string;
