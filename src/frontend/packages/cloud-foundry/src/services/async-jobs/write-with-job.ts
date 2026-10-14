@@ -79,7 +79,8 @@ export async function writeWithJob<T>(
     state: 'FAILED' as JobState,
     startedAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
-    errors: [{ code: `http.${resp.status}`, message: resp.statusText || 'request failed' }],
+    // No detail, so the message is this title: name the status in it.
+    errors: [{ code: `http.${resp.status}`, message: `HTTP ${resp.status} ${resp.statusText || 'request failed'}` }],
   });
 }
 

@@ -427,9 +427,9 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       ['failasync-service-instance-update', UPDATE_URL, { isEditMode: true }],
     ];
     for (const [contractName, url, opts] of failures) {
-      // #6002: the fast path shows CF's error detail, the polled path
-      // prefixes its title ("CF-UnableToPerform. …").
-      it.fails(`reports the broker failure the same way on both paths: ${contractName} (#6002)`, async () => {
+      // Both paths show Stratos's lead-in and the broker's own words; the
+      // CF code and title go to the console (#6002).
+      it(`reports the broker failure the same way on both paths: ${contractName}`, async () => {
         const contract = serviceWriteContract(contractName);
         const fast = await runOnNext(opts, url, contract, 'fast');
         const polled = await runOnNext(opts, url, contract, 'polled');

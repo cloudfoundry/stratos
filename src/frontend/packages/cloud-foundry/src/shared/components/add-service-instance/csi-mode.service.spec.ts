@@ -207,7 +207,7 @@ describe('CsiModeService', () => {
 
       await expect(finalResult).resolves.toEqual({
         success: false,
-        message: 'cf.service_binding.create: broker rejected the bind',
+        message: 'broker rejected the bind',
       });
       httpMock.verify();
     });
