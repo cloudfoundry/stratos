@@ -1,0 +1,42 @@
+{
+  "fastPath": {
+    "status": 502,
+    "body": {
+      "errors": [
+        {
+          "code": "cf.v3.10009",
+          "message": "CF-UnableToPerform",
+          "detail": "create managed could not be completed: Operation failed"
+        }
+      ],
+      "state": "FAILED"
+    }
+  },
+  "handoff": {
+    "status": 202,
+    "body": {
+      "id": "stratos-job-1",
+      "kind": "cf.service_instance.create",
+      "startedAt": "2026-01-01T00:00:00Z",
+      "state": "PROCESSING",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  },
+  "poll": {
+    "status": 200,
+    "body": {
+      "errors": [
+        {
+          "code": "cf.v3.10009",
+          "detail": "create managed could not be completed: Operation failed",
+          "message": "CF-UnableToPerform"
+        }
+      ],
+      "id": "stratos-job-1",
+      "kind": "cf.service_instance.create",
+      "startedAt": "2026-01-01T00:00:00Z",
+      "state": "FAILED",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  }
+}

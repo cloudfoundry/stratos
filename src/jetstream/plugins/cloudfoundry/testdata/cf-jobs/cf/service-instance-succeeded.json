@@ -1,0 +1,59 @@
+{
+  "guid": "a35c69cb-031e-4595-98c9-c1bd85c30ab5",
+  "created_at": "2026-10-14T03:55:51Z",
+  "updated_at": "2026-10-14T03:55:55Z",
+  "name": "e2e-overview-smoke",
+  "tags": [],
+  "last_operation": {
+    "type": "create",
+    "state": "succeeded",
+    "description": "Operation succeeded",
+    "updated_at": "2026-10-14T03:56:55Z",
+    "created_at": "2026-10-14T03:56:55Z"
+  },
+  "type": "managed",
+  "maintenance_info": {
+    "version": "1.0.0"
+  },
+  "upgrade_available": false,
+  "dashboard_url": "https://broker.example.com/dashboard?time=2026-10-14T03:55:55.629Z",
+  "relationships": {
+    "space": {
+      "data": {
+        "guid": "d9483518-225e-4133-955f-e05f4338a2a1"
+      }
+    },
+    "service_plan": {
+      "data": {
+        "guid": "1c79731d-7b1b-475d-ba2a-5ed8eb23c6a3"
+      }
+    }
+  },
+  "metadata": {
+    "labels": {},
+    "annotations": {}
+  },
+  "links": {
+    "self": {
+      "href": "https://api.example.com/v3/service_instances/a35c69cb-031e-4595-98c9-c1bd85c30ab5"
+    },
+    "space": {
+      "href": "https://api.example.com/v3/spaces/d9483518-225e-4133-955f-e05f4338a2a1"
+    },
+    "service_credential_bindings": {
+      "href": "https://api.example.com/v3/service_credential_bindings?service_instance_guids=a35c69cb-031e-4595-98c9-c1bd85c30ab5"
+    },
+    "service_route_bindings": {
+      "href": "https://api.example.com/v3/service_route_bindings?service_instance_guids=a35c69cb-031e-4595-98c9-c1bd85c30ab5"
+    },
+    "service_plan": {
+      "href": "https://api.example.com/v3/service_plans/1c79731d-7b1b-475d-ba2a-5ed8eb23c6a3"
+    },
+    "parameters": {
+      "href": "https://api.example.com/v3/service_instances/a35c69cb-031e-4595-98c9-c1bd85c30ab5/parameters"
+    },
+    "shared_spaces": {
+      "href": "https://api.example.com/v3/service_instances/a35c69cb-031e-4595-98c9-c1bd85c30ab5/relationships/shared_spaces"
+    }
+  }
+}

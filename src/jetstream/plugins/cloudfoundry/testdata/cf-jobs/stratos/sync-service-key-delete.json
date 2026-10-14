@@ -1,0 +1,42 @@
+{
+  "fastPath": {
+    "status": 200,
+    "body": {
+      "result": {
+        "jobGuid": "0a24fa35-db6a-4720-87dd-68077bd90b91",
+        "links": {
+          "self": "https://api.example.com/v3/jobs/0a24fa35-db6a-4720-87dd-68077bd90b91"
+        },
+        "operation": "service_keys.delete"
+      },
+      "state": "COMPLETE"
+    }
+  },
+  "handoff": {
+    "status": 202,
+    "body": {
+      "id": "stratos-job-1",
+      "kind": "cf.service_key.delete",
+      "startedAt": "2026-01-01T00:00:00Z",
+      "state": "PROCESSING",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  },
+  "poll": {
+    "status": 200,
+    "body": {
+      "id": "stratos-job-1",
+      "kind": "cf.service_key.delete",
+      "result": {
+        "jobGuid": "0a24fa35-db6a-4720-87dd-68077bd90b91",
+        "links": {
+          "self": "https://api.example.com/v3/jobs/0a24fa35-db6a-4720-87dd-68077bd90b91"
+        },
+        "operation": "service_keys.delete"
+      },
+      "startedAt": "2026-01-01T00:00:00Z",
+      "state": "COMPLETE",
+      "updatedAt": "2026-01-01T00:00:00Z"
+    }
+  }
+}
