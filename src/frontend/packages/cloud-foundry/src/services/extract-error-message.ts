@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 
-import { StratosJobError } from './async-jobs/async-job.types';
+import { StratosJobError, stripMarkup } from './async-jobs/async-job.types';
 
 // Pulls the most useful human-readable message out of whatever the backend
 // or framework threw. Handles three backend response shapes:
@@ -17,7 +17,8 @@ export function extractHttpErrorMessage(err: unknown): string {
       const errors = (body as { errors?: Array<{ detail?: unknown; title?: string; message?: string }> }).errors;
       const first = errors?.[0];
       if (first) {
-        if (typeof first.detail === 'string' && first.detail) return first.detail;
+        const detail = typeof first.detail === 'string' ? stripMarkup(first.detail) : '';
+        if (detail) return detail;
         if (first.title) return first.title;
         if (first.message) return first.message;
       }

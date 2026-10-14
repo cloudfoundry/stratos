@@ -54,6 +54,12 @@ export interface AsyncJobResult<T> {
   jobId?: string;
 }
 
+// CF embeds a broker's raw response body in an error detail, markup and
+// all; keep the words, drop the tags. Messages are always shown as text,
+// so this is for legibility, not safety.
+export const stripMarkup = (text: string): string =>
+  text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+
 // StratosJobError is thrown when a polled job terminates in FAILED. It
 // carries the full terminal StratosJob so consumers can render CF-specific
 // error details where useful.
@@ -62,18 +68,11 @@ export class StratosJobError extends Error {
 
   constructor(job: StratosJob) {
     const first = job.errors?.[0];
-    // Prefer the human detail CF attaches (the broker's own explanation)
-    // over the bare error code; the code stays reachable through `job`.
-    // CF embeds a broker's raw response body in the detail, markup and all;
-    // keep the words, drop the tags.
-    const detail = typeof first?.detail === 'string'
-      ? first.detail.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim()
-      : '';
-    super(
-      !first ? `job ${job.id} failed`
-        : detail ? `${first.message}. ${detail}`
-          : `${first.code}: ${first.message}`,
-    );
+    // The message is the broker's own explanation when CF attaches one,
+    // else CF's title; callers add their own lead-in. The code and title
+    // stay reachable through `job`, and writeWithJob logs them.
+    const detail = typeof first?.detail === 'string' ? stripMarkup(first.detail) : '';
+    super(!first ? `job ${job.id} failed` : detail || first.message);
     this.name = 'StratosJobError';
     this.job = job;
   }

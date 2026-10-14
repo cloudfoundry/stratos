@@ -254,7 +254,7 @@ describe('ServiceKeysComponent — createKey patches the list from the response'
     expect(listFetches).toBe(1);
   });
 
-  it('shows a failed job\'s title and detail in the shared error banner', async () => {
+  it('shows a failed job\'s detail in the shared error banner', async () => {
     component.newKeyName.set('broken');
     const done = component.createKey();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_keys/cf-1').flush(
@@ -271,10 +271,10 @@ describe('ServiceKeysComponent — createKey patches the list from the response'
     fixture.detectChanges();
 
     expect(component.errorMessage()).toBe(
-      'Failed to create key: CF-UnableToPerform. The service broker returned an invalid response. Status Code: 504 Gateway Timeout',
+      'Failed to create key: The service broker returned an invalid response. Status Code: 504 Gateway Timeout',
     );
     const banner = fixture.nativeElement.querySelector('.dialog-error') as HTMLElement | null;
-    expect(banner?.textContent).toContain('CF-UnableToPerform. The service broker');
+    expect(banner?.textContent).toContain('Failed to create key: The service broker');
     expect(banner?.querySelector('.material-icons')?.textContent).toBe('warning');
     expect(component.keys().map(k => k.guid)).toEqual(['k-1']);
     expect(listFetches).toBe(1);
