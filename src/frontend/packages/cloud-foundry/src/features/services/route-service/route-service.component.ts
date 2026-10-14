@@ -11,8 +11,7 @@ import {
   SteppersComponent,
 } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
-import { StratosJobError } from '../../../services/async-jobs/async-job.types';
-import { httpErrorResponseToSafeString } from '@stratosui/store';
+import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 import {
   RawRouteServiceBinding,
   RouteServiceBindingView,
@@ -142,8 +141,8 @@ export class RouteServiceComponent {
         this.reload();
       }
     } catch (err: unknown) {
-      this.errorMessage.set(`Failed to bind service: ${this.messageOf(err)}`);
-      throw err instanceof Error ? err : new Error(this.messageOf(err));
+      this.errorMessage.set(`Failed to bind service: ${extractHttpErrorMessage(err)}`);
+      throw err instanceof Error ? err : new Error(extractHttpErrorMessage(err));
     } finally {
       this.busy.set(false);
     }
@@ -161,15 +160,10 @@ export class RouteServiceComponent {
       );
       this.reload();
     } catch (err: unknown) {
-      this.errorMessage.set(`Failed to unbind service: ${this.messageOf(err)}`);
+      this.errorMessage.set(`Failed to unbind service: ${extractHttpErrorMessage(err)}`);
     } finally {
       this.busy.set(false);
     }
   }
 
-  private messageOf(err: unknown): string {
-    if (err instanceof StratosJobError || err instanceof Error) return err.message;
-    // HttpErrorResponse is not an Error: report its body and status.
-    return httpErrorResponseToSafeString(err) || 'unknown error';
-  }
 }

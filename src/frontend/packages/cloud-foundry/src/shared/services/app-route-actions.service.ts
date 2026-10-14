@@ -7,6 +7,7 @@ import type { StRoute } from '../../services/endpoint-data/stratos-types';
 import { EntityDeleteController } from '../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../services/deletes/run-cf-delete';
 import { routeEntityType } from '../../cf-entity-types';
+import { extractHttpErrorMessage } from '../../services/extract-error-message';
 
 /**
  * Stratos-shape mirror of CF V3's `capi.RouteCreateRequest`. Sent as the
@@ -200,7 +201,7 @@ export class AppRouteActionsService {
       return created;
     } catch (err) {
       const orphanErr = new Error(
-        `Route created but attach failed. Orphan route in space: guid=${created.guid} url=${created.url}. Original error: ${(err as Error).message}`,
+        `Route created but attach failed. Orphan route in space: guid=${created.guid} url=${created.url}. Original error: ${extractHttpErrorMessage(err)}`,
       );
       (orphanErr as { orphanRoute?: StRoute }).orphanRoute = created;
       throw orphanErr;

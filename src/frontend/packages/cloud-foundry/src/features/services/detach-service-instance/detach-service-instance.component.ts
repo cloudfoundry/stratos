@@ -10,7 +10,7 @@ import {
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
-import { StratosJobError } from '../../../services/async-jobs/async-job.types';
+import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
@@ -147,11 +147,7 @@ export class DetachServiceInstanceComponent implements OnDestroy {
       });
       this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'success' }));
     } catch (err: unknown) {
-      const message = err instanceof StratosJobError
-        ? err.message
-        : err instanceof Error
-          ? err.message
-          : 'unknown error';
+      const message = extractHttpErrorMessage(err);
       this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'error' }));
       this.errorByGuid.update(prev => ({ ...prev, [bindingGuid]: message }));
     }

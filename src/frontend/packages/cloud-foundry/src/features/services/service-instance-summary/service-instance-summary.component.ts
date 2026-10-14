@@ -53,6 +53,7 @@ import {
   ShareServiceInstanceDialogData,
 } from './share-service-instance-dialog.component';
 import { AppBusyComponent } from '@stratosui/core';
+import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 
 interface BindingRow {
   guid: string;
@@ -299,7 +300,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
         // Re-issue the one-shot fetch so the unbound app drops out.
         this.bindingsSource.set(this.serviceCatalog.serviceBindingsForInstance(this.cfGuid, this.siGuid));
       } catch (err: unknown) {
-        this.snackBar.error(`Unbind failed: ${err instanceof Error ? err.message : String(err)}`);
+        this.snackBar.error(`Unbind failed: ${extractHttpErrorMessage(err)}`);
       }
     });
   }

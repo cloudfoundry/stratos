@@ -6,7 +6,6 @@ import { firstValueFrom } from 'rxjs';
 
 import { DialogErrorComponent, IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
-import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import {
   RawServiceKey, ServiceCatalogDataService, ServiceKeyView, SignalSource, toServiceKeyView,
 } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -15,6 +14,7 @@ import { CfEndpointsDataService } from '../../../services/domain-data/cf-endpoin
 import { CredentialField, MaskedCredentialsComponent, toCredentialFields } from '../../../shared/components/masked-credentials/masked-credentials.component';
 import { AppBusyComponent } from '@stratosui/core';
 import { httpErrorResponseToSafeString } from '@stratosui/store';
+import { extractHttpErrorMessage } from '../../../services/extract-error-message';
 
 type RowStatus = 'idle' | 'busy' | 'error';
 
@@ -214,7 +214,8 @@ export class ServiceKeysComponent {
       );
       this.credsByGuid.update(prev => ({ ...prev, [guid]: details?.credentials ?? {} }));
     } catch (err: unknown) {
-      this.credsErrorByGuid.update(prev => ({ ...prev, [guid]: this.messageOf(err) }));
+      // A read, not a write: name the HTTP status with the reason.
+      this.credsErrorByGuid.update(prev => ({ ...prev, [guid]: httpErrorResponseToSafeString(err) || 'unknown error' }));
     } finally {
       this.credsLoadingByGuid.update(prev => ({ ...prev, [guid]: false }));
     }
@@ -260,7 +261,7 @@ export class ServiceKeysComponent {
         this.reload();
       }
     } catch (err: unknown) {
-      this.errorMessage.set(`Failed to create key: ${this.messageOf(err)}`);
+      this.errorMessage.set(`Failed to create key: ${extractHttpErrorMessage(err)}`);
     } finally {
       this.creating.set(false);
     }
@@ -284,7 +285,7 @@ export class ServiceKeysComponent {
       this.reload();
     } catch (err: unknown) {
       this.setStatus(guid, 'error');
-      this.errorMessage.set(`Failed to delete key: ${this.messageOf(err)}`);
+      this.errorMessage.set(`Failed to delete key: ${extractHttpErrorMessage(err)}`);
     }
   }
 
@@ -292,11 +293,4 @@ export class ServiceKeysComponent {
     this.statusByGuid.update(prev => ({ ...prev, [guid]: status }));
   }
 
-  private messageOf(err: unknown): string {
-    if (err instanceof StratosJobError || err instanceof Error) {
-      return err.message;
-    }
-    // HttpErrorResponse is not an Error: report its body and status.
-    return httpErrorResponseToSafeString(err) || 'unknown error';
-  }
 }

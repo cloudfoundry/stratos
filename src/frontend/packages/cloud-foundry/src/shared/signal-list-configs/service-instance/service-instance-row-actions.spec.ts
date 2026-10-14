@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
+import { HttpErrorResponse } from '@angular/common/http';
 
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { buildServiceInstanceRowActions, ServiceInstanceRowActionDeps } from './service-instance-row-actions';
@@ -43,5 +44,23 @@ describe('buildServiceInstanceRowActions — Service Keys breadcrumb context', (
     expect(d.router.navigate).toHaveBeenCalledWith(
       ['/services', 'service', 'cf-1', 'si-1', 'keys'],
     );
+  });
+});
+
+describe('buildServiceInstanceRowActions — Delete failure', () => {
+  it('shows the broker detail when the delete fails on the fast path', async () => {
+    const httpError = new HttpErrorResponse({
+      error: { state: 'FAILED', errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'deprovision could not be completed: instance is busy' }] },
+      status: 502, statusText: 'Bad Gateway',
+    });
+    let confirmed: (() => Promise<void>) | undefined;
+    const d = deps({
+      confirmDialog: { open: vi.fn((_c: unknown, cb: () => Promise<void>) => { confirmed = cb; }) } as unknown as ServiceInstanceRowActionDeps['confirmDialog'],
+      deleteServiceInstance: vi.fn().mockRejectedValue(httpError),
+    });
+    buildServiceInstanceRowActions(managed(), d).find(a => a.label === 'Delete')!.invoke();
+    await confirmed!();
+
+    expect(d.snackBar.error).toHaveBeenCalledWith('Delete failed: deprovision could not be completed: instance is busy');
   });
 });

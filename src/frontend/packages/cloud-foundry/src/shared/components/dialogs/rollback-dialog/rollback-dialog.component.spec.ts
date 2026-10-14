@@ -3,7 +3,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { MAT_DIALOG_DATA, TailwindDialogRef } from '@stratosui/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 
 import { RollbackDialogComponent } from './rollback-dialog.component';
@@ -144,6 +144,29 @@ describe('RollbackDialogComponent', () => {
     await component.confirm();
 
     expect(component.errorMessage()).toBe('Deployment canceled');
+    expect(dialogRefMock.close).not.toHaveBeenCalled();
+  });
+
+  it('shows the CF detail of a failed job rather than its title', async () => {
+    revisionsServiceMock.rollback.mockRejectedValue(new StratosJobError({
+      id: 'job-124', kind: 'rollback', state: 'FAILED', startedAt: '', updatedAt: '',
+      errors: [{ code: 'cf.v3.10008', message: 'CF-UnprocessableEntity', detail: 'Revision is not deployable' }],
+    }));
+
+    await component.confirm();
+
+    expect(component.errorMessage()).toBe('Revision is not deployable');
+  });
+
+  it('shows the CF detail when the rollback fails on the fast path', async () => {
+    revisionsServiceMock.rollback.mockRejectedValue(new HttpErrorResponse({
+      error: { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'Revision is not deployable' }] },
+      status: 422, statusText: 'Unprocessable Entity',
+    }));
+
+    await component.confirm();
+
+    expect(component.errorMessage()).toBe('Revision is not deployable');
     expect(dialogRefMock.close).not.toHaveBeenCalled();
   });
 

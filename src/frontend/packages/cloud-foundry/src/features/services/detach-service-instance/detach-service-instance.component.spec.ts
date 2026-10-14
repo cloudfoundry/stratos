@@ -167,6 +167,26 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  it('shows the broker detail when a delete fails on the fast path', async () => {
+    const { component, httpMock } = await bootstrap([makeBinding('bind-bad', 'app-1')]);
+
+    const submitPromise = component.confirmStepHandle.submit!();
+    httpMock.expectOne(`/pp/v1/cf/service_bindings/${cfGuid}/bind-bad`).flush(
+      {
+        state: 'FAILED',
+        errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'unbind could not be completed: <b>binding still referenced</b>' }],
+      },
+      { status: 502, statusText: 'Bad Gateway' },
+    );
+
+    await submitPromise;
+    const failedRow = component.rows().find(r => r.guid === 'bind-bad');
+    expect(failedRow?.status).toBe('error');
+    expect(failedRow?.errorMessage).toBe('unbind could not be completed: binding still referenced');
+
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
   it('navigates to /services on second click after deleteStarted', async () => {
     const { component, httpMock } = await bootstrap([makeBinding('b1', 'app-1')]);
 

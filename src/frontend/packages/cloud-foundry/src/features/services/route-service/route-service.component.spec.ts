@@ -83,4 +83,16 @@ describe('RouteServiceComponent — bind patches the binding from the response',
     expect(component.binding()).toBeNull();
     expect(bindingFetches).toBe(2);
   });
+
+  it('shows the broker detail when the bind fails on the fast path', async () => {
+    component.selectedSiGuid.set('si-1');
+    const done = component.bindStepHandle.submit();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      { state: 'FAILED', errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'bind could not be completed: route services disabled' }] },
+      { status: 502, statusText: 'Bad Gateway' },
+    );
+    await expect(done).rejects.toThrow('bind could not be completed: route services disabled');
+
+    expect(component.errorMessage()).toBe('Failed to bind service: bind could not be completed: route services disabled');
+  });
 });
