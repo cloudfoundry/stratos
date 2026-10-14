@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal
 import { from, Observable, of as observableOf } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
@@ -305,7 +306,7 @@ export class StepComponent {
           },
           (err: unknown) => ({
             success: false,
-            message: err instanceof Error ? err.message : String(err),
+            message: extractHttpErrorMessage(err),
           } as StepOnNextResult),
         ),
       );

@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { TailwindSnackBarService } from '../../services/tailwind-snackbar.service';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 // Page-level action button rendered above a signal-detail surface (Edit /
 // Delete / custom verbs). On list surfaces the equivalent slot lives in the
@@ -116,12 +117,12 @@ export class SignalDetailComponent {
       const result = act.invoke();
       if (result && typeof (result as Promise<void>).then === 'function') {
         (result as Promise<void>).catch((err: unknown) => {
-          const msg = err instanceof Error ? err.message : String(err);
+          const msg = extractHttpErrorMessage(err);
           this.snackBar.error(`${act.label} failed: ${msg}`);
         });
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
+      const msg = extractHttpErrorMessage(err);
       this.snackBar.error(`${act.label} failed: ${msg}`);
     }
   }
@@ -168,7 +169,7 @@ export class SignalDetailComponent {
   errorMessage(): string {
     const err = this.config.error?.();
     if (err == null) return '';
-    return err instanceof Error ? err.message : String(err);
+    return extractHttpErrorMessage(err);
   }
 
   hasError(): boolean {

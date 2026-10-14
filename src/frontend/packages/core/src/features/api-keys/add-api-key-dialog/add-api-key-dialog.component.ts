@@ -12,7 +12,7 @@ import {
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { ApiKey } from '@stratosui/store';
+import { ApiKey, extractHttpErrorMessage } from '@stratosui/store';
 
 import { AppInputDirective, CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { DialogErrorComponent } from '../../../shared/components/dialog-error/dialog-error.component';
@@ -64,7 +64,7 @@ export class AddApiKeyDialogComponent {
       const created = await this.dataService.create(this.formGroup.controls.comment.value);
       this.dialogRef.close(created);
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : String(err);
+      const message = extractHttpErrorMessage(err);
       this.hasErrored.set(`Failed to create key: ${message}`);
       this.isBusy.set(false);
     }
