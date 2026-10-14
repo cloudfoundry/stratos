@@ -17,3 +17,9 @@
   | Any wizard step whose submit failed with an HTTP error | `[object Object]` |
   | A detail page's error banner and header actions, adding an API key | `[object Object]` |
   | Failed loads of an organization, space, endpoint, application or CF info | `[object Object]` |
+- A service broker rejecting an operation no longer also raises the
+  "Cloud Foundry endpoint ... Request failed" banner: the backend now
+  answers a failed operation as 422 with the reason `operation_failed`
+  instead of 502, and the endpoint banner is kept for endpoint faults.
+- Error snackbars are readable: a darker red background with a white
+  action and close button (the action was blue on red, 1:1 contrast).
