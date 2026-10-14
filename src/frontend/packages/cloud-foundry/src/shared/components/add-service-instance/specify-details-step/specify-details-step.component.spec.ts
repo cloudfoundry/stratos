@@ -255,7 +255,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         result: {
           jobGuid: 'job-1',
           operation: 'service_instance.create',
-          links: { service_instance: 'https://cf/v3/service_instances/si-new' },
+          links: { service_instances: 'https://cf/v3/service_instances/si-new' },
         },
       },
       { status: 200, statusText: 'OK' },
@@ -279,7 +279,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         result: {
           jobGuid: 'job-1',
           operation: 'service_instance.create',
-          links: { service_instance: 'https://cf/v3/service_instances/si-new' },
+          links: { service_instances: 'https://cf/v3/service_instances/si-new' },
         },
       },
       { status: 200, statusText: 'OK' },
