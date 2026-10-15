@@ -35,7 +35,8 @@ type Tracker interface {
 	// Resolve is the poll entry point: it refreshes the job like Refresh,
 	// first rebuilding it from its id for userGUID when this replica does
 	// not hold it. Returns (nil, false) when the id is unknown and cannot
-	// be rebuilt, or the backend reports the job does not exist.
+	// be rebuilt, the job belongs to another user (see
+	// OwnedRefTranslator), or the backend reports the job does not exist.
 	Resolve(ctx context.Context, id string, userGUID string) (*StratosJob, bool)
 
 	// Get returns the job by id. Returns (nil, false) if unknown / evicted.
@@ -61,6 +62,7 @@ type trackedJob struct {
 	job        StratosJob
 	translator JobTranslator
 	ref        interface{}
+	owner      string // Stratos user the ref polls as; "" when unknown
 	terminalAt *time.Time
 }
 
@@ -169,6 +171,7 @@ func (t *InMemoryTracker) insert(id, kind string, translator JobTranslator, ref 
 		},
 		translator: translator,
 		ref:        ref,
+		owner:      refOwner(translator, ref),
 	}
 	t.mu.Unlock()
 	if t.metrics != nil {
@@ -176,16 +179,41 @@ func (t *InMemoryTracker) insert(id, kind string, translator JobTranslator, ref 
 	}
 }
 
-// Resolve refreshes the job, rebuilding it from its id first when this
-// replica does not hold it.
+// refOwner names the user ref polls as, or "" when the translator cannot.
+func refOwner(translator JobTranslator, ref interface{}) string {
+	if o, ok := translator.(OwnedRefTranslator); ok {
+		return o.RefOwner(ref)
+	}
+	return ""
+}
+
+// Resolve refreshes the job for its owner, rebuilding it from its id
+// first when this replica does not hold it. Another user's job reads as
+// unknown, the same answer as an id that never existed.
 func (t *InMemoryTracker) Resolve(ctx context.Context, id string, userGUID string) (*StratosJob, bool) {
-	t.mu.RLock()
-	_, ok := t.jobs[id]
-	t.mu.RUnlock()
-	if !ok && !t.rebuild(id, userGUID) {
+	owner, ok := t.ownerOf(id)
+	if !ok {
+		if !t.rebuild(id, userGUID) {
+			return nil, false
+		}
+		// Re-read: a concurrent poll may have inserted the job first.
+		owner, ok = t.ownerOf(id)
+	}
+	if !ok || owner == "" || owner != userGUID {
 		return nil, false
 	}
 	return t.Refresh(ctx, id)
+}
+
+// ownerOf returns the owner of the job held under id.
+func (t *InMemoryTracker) ownerOf(id string) (string, bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	tj, ok := t.jobs[id]
+	if !ok {
+		return "", false
+	}
+	return tj.owner, true
 }
 
 // rebuild decodes id with the codec registered for its prefix and inserts

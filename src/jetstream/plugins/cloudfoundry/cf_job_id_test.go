@@ -211,3 +211,42 @@ func TestCFJob_ReplicaAnswersNotFoundWhenCFHasNoJob(t *testing.T) {
 	_, ok := replica.Resolve(context.Background(), "cf.app.delete.cnsi-1."+testJobGUID, "user-1")
 	assert.False(t, ok)
 }
+
+// Every translator names the user its ref polls as, so the tracker serves
+// each job to that user only.
+func TestJobTranslators_NameTheRefOwner(t *testing.T) {
+	cases := map[string]struct {
+		tr  stratosjobs.OwnedRefTranslator
+		ref interface{}
+	}{
+		"cf job":   {&CFJobTranslator{}, CFJobRef{CnsiGUID: "cnsi-1", UserGUID: "user-1", JobGUID: "job-1"}},
+		"restage":  {&RestageJobTranslator{}, &RestageRef{CNSIGuid: "cnsi-1", UserGuid: "user-1"}},
+		"rollback": {&RollbackJobTranslator{}, &RollbackRef{CNSIGuid: "cnsi-1", UserGuid: "user-1"}},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, "user-1", tc.tr.RefOwner(tc.ref))
+			assert.Equal(t, "", tc.tr.RefOwner("wrong ref type"))
+		})
+	}
+}
+
+func TestCFJob_OtherUserCannotPollJob(t *testing.T) {
+	wc := serviceWriteCases[0]
+	cf := newFakeCF(t, "async-"+wc.op, "async-"+wc.op+"-polling", wc.resource+"-succeeded")
+	handoff, plugin := runWrite(t, wc, cf)
+	require.Equal(t, http.StatusAccepted, handoff.Status, "%s", handoff.Body)
+	var handed stratosjobs.StratosJob
+	require.NoError(t, json.Unmarshal(handoff.Body, &handed))
+
+	_, ok := plugin.asyncTracker.Resolve(context.Background(), handed.ID, "user-2")
+	assert.False(t, ok, "the creating replica must not serve user-1's job to user-2")
+
+	replica := stratosjobs.NewInMemoryTracker(stratosjobs.InMemoryTrackerConfig{})
+	t.Cleanup(replica.Stop)
+	replica.Register(NewCFJobTranslator(plugin))
+	_, ok = replica.Resolve(context.Background(), handed.ID, "user-1")
+	require.True(t, ok)
+	_, ok = replica.Resolve(context.Background(), handed.ID, "user-2")
+	assert.False(t, ok, "a replica must not serve the job it rebuilt for user-1 to user-2")
+}

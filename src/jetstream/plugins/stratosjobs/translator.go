@@ -57,3 +57,13 @@ type JobIDCodec interface {
 	EncodeID(kind string, ref interface{}) (id string, ok bool)
 	DecodeID(id string, userGUID string) (kind string, ref interface{}, ok bool)
 }
+
+// OwnedRefTranslator is an optional capability naming the Stratos user a
+// ref polls the backend as. The tracker records that user as the job's
+// owner and Resolve serves the job to its owner only, so a session that
+// learns another user's job id cannot read that job through the owner's
+// credentials. A job whose translator lacks it has no owner and Resolve
+// serves it to nobody.
+type OwnedRefTranslator interface {
+	RefOwner(ref interface{}) string
+}

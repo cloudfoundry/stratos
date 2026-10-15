@@ -81,6 +81,11 @@ func (c *codecTranslator) DecodeID(id, userGUID string) (string, interface{}, bo
 	return id[:i], backendRef{JobID: id[i+1:], User: userGUID}, true
 }
 
+func (c *codecTranslator) RefOwner(ref interface{}) string {
+	r, _ := ref.(backendRef)
+	return r.User
+}
+
 func newMetricsTracker(t *testing.T) (*InMemoryTracker, *Metrics) {
 	t.Helper()
 	m, err := RegisterMetrics(prometheus.NewRegistry())
@@ -279,6 +284,54 @@ func TestRegister_IgnoresTranslatorWithoutCodec(t *testing.T) {
 	}})
 
 	if job, ok := tr.Resolve(context.Background(), "stub.thing.job-1", "user-a"); ok {
+		t.Fatalf("expected not found, got %+v", job)
+	}
+}
+
+// A job is served only to the user it polls as. Before this, any session
+// that knew an id got the job, polled with its creator's token.
+func TestResolve_OtherUserIsNotFound(t *testing.T) {
+	tl := newCodecTranslator()
+	tl.set("job-1", JobStateProcessing)
+	tr := newTestTracker(t, time.Now)
+	tr.Register(tl)
+	id := tr.Create("fake.thing.create", tl, backendRef{JobID: "job-1", User: "user-a"})
+
+	if job, ok := tr.Resolve(context.Background(), id, "user-b"); ok {
+		t.Fatalf("expected user-b to get not found, got %+v", job)
+	}
+	if tl.fetches != 0 {
+		t.Errorf("expected no backend call for another user's job, got %d", tl.fetches)
+	}
+	if _, ok := tr.Resolve(context.Background(), id, "user-a"); !ok {
+		t.Error("expected the owner to resolve the job")
+	}
+}
+
+func TestResolve_OtherUserIsNotFoundForRebuiltJob(t *testing.T) {
+	tl := newCodecTranslator()
+	tl.set("job-1", JobStateProcessing)
+	replica := newTestTracker(t, time.Now)
+	replica.Register(tl)
+
+	if _, ok := replica.Resolve(context.Background(), "fake.thing.create.job-1", "user-a"); !ok {
+		t.Fatal("expected user-a to rebuild the job")
+	}
+	if job, ok := replica.Resolve(context.Background(), "fake.thing.create.job-1", "user-b"); ok {
+		t.Fatalf("expected user-b to get not found, got %+v", job)
+	}
+}
+
+// A translator that cannot name the user its ref polls as gets no owner,
+// and a job without an owner is served to nobody.
+func TestResolve_JobWithoutOwnerIsNotFound(t *testing.T) {
+	tr := newTestTracker(t, time.Now)
+	tl := &stubTranslator{fn: func(int) (JobState, []StratosError, interface{}, error) {
+		return JobStateComplete, nil, nil, nil
+	}}
+	id := tr.Create("cf.app.delete", tl, "ref")
+
+	if job, ok := tr.Resolve(context.Background(), id, "user-a"); ok {
 		t.Fatalf("expected not found, got %+v", job)
 	}
 }

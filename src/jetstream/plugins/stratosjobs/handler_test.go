@@ -91,3 +91,20 @@ func TestGetJob_NoSessionUserIs401(t *testing.T) {
 	_, err := getJobAs(t, &StratosJobs{tracker: tr}, "fake.thing.create.job-1", "")
 	requireStatus(t, err, http.StatusUnauthorized)
 }
+
+func TestGetJob_OtherUserIs404(t *testing.T) {
+	tl := newCodecTranslator()
+	tl.set("job-1", JobStateComplete)
+	tr := newTestTracker(t, time.Now)
+	tr.Register(tl)
+	id := tr.Create("fake.thing.create", tl, backendRef{JobID: "job-1", User: "user-a"})
+	s := &StratosJobs{tracker: tr}
+
+	_, err := getJobAs(t, s, id, "user-b")
+	requireStatus(t, err, http.StatusNotFound)
+
+	rec, err := getJobAs(t, s, id, "user-a")
+	if err != nil || rec.Code != http.StatusOK {
+		t.Fatalf("expected the owner to get 200, got %d, %v", rec.Code, err)
+	}
+}
