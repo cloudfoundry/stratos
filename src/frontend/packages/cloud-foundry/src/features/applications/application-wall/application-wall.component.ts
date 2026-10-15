@@ -37,6 +37,7 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
 import { goToAppWall } from '../../cf/cf.helpers';
 import type { StApp } from '../../../services/endpoint-data/stratos-types';
 import { AppAreaLoaderComponent } from '@stratosui/core';
+import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 
 @Component({
   selector: 'app-application-wall',
@@ -108,10 +109,15 @@ export class ApplicationWallComponent implements OnInit {
     const state = (app.state ?? '').toUpperCase();
     const isStarted = state === 'STARTED';
     const isStopped = state === 'STOPPED';
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
         await this.appsConfig.refresh();
+        if (outcome === 'unknown') {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Applications list'));
+        }
       } catch (err: any) {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
       }
@@ -149,7 +155,7 @@ export class ApplicationWallComponent implements OnInit {
           true,
         );
         this.confirmDialog.open(confirm, async () => {
-          await runAction('Delete', () => this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
+          await runAction('Delete', () => this.appsConfig.deleteApp(app.cnsiGuid, app.guid, app.name), app.name);
         });
       },
     });

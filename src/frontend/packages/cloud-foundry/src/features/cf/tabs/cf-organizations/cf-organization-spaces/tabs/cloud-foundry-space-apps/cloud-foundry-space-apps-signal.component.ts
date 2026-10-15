@@ -34,6 +34,7 @@ import { CloudFoundryEndpointService } from '../../../../../services/cloud-found
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { runBulkWithProgress } from '../../../../../../../services/async-jobs/bulk-progress';
 import type { StApp } from '../../../../../../../services/endpoint-data/stratos-types';
+import { unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native space-apps tab. Scoped to one space under one CF
 // endpoint (cfGuid + spaceGuid supplied by the route-level services).
@@ -417,10 +418,15 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   // restart/restage stay on the app detail page until a follow-up
   // migration brings them in here too.
   private buildAppActions = (app: StApp): readonly SignalListRowAction<StApp>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
         await this.appsConfig.refresh();
+        if (outcome === 'unknown') {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Applications list'));
+        }
       } catch (err: any) {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
       }
@@ -440,7 +446,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
             await runAction('Delete', () =>
               result?.checkboxChecked
                 ? this.appsConfig.bulkDeleteAppsWithCleanup(app.cnsiGuid, [app.guid]).then(() => {})
-                : this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
+                : this.appsConfig.deleteApp(app.cnsiGuid, app.guid, app.name), app.name);
           });
         },
       },

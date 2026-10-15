@@ -184,7 +184,7 @@ export class CfAppServiceBindingsSignalConfigService {
       {
         label: 'Unbind', icon: 'block', danger: true,
         disabled,
-        invoke: () => this.actionsService.unbindService(row.guid),
+        invoke: async () => { await this.actionsService.unbindService(row.guid); },
       },
     ];
   };

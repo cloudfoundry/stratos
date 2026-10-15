@@ -10,6 +10,7 @@ import {
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
+import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
@@ -19,7 +20,8 @@ import { StServiceCredentialBinding, StServiceInstance } from '../../../services
 import { DetachAppsComponent } from './detach-apps/detach-apps.component';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
-type BindingStatus = 'pending' | 'busy' | 'success' | 'error';
+// unknown: the unbind ended but its result could not be determined.
+type BindingStatus = 'pending' | 'busy' | 'success' | 'error' | 'unknown';
 
 interface BindingRow {
   guid: string;
@@ -111,7 +113,7 @@ export class DetachServiceInstanceComponent implements OnDestroy {
       });
 
       // Fire all deletes in parallel; settle whichever way each lands.
-      await Promise.all(bindings.map(b => this.detachOne(b.guid)));
+      await Promise.all(bindings.map(b => this.detachOne(b)));
     },
   };
 
@@ -134,17 +136,25 @@ export class DetachServiceInstanceComponent implements OnDestroy {
     this._selectedBindings.set(selectedBindings);
   }
 
-  private async detachOne(bindingGuid: string): Promise<void> {
+  private async detachOne(binding: StServiceCredentialBinding): Promise<void> {
+    const bindingGuid = binding.guid;
     try {
       // Route through the EntityDeleteController chokepoint so the canonical
       // EDS._serviceCredentialBindings list updates and the graph-derived
       // invalidation fires (bound apps/SI re-fetch their binding rollups).
-      await runCfDelete(this.deleteController, this.http, {
+      const outcome = await runCfDelete(this.deleteController, this.http, {
         cnsiGuid: this.cfGuid,
         entityKind: serviceCredentialBindingEntityType,
         deleteGuid: bindingGuid,
         path: `/pp/v1/cf/service_bindings/${this.cfGuid}/${bindingGuid}`,
       });
+      if (outcome === 'unknown') {
+        const message = unknownOutcomeMessage(
+          `Unbind "${binding.app?.name ?? bindingGuid}"`, 'The service instance\'s page');
+        this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'unknown' }));
+        this.errorByGuid.update(prev => ({ ...prev, [bindingGuid]: message }));
+        return;
+      }
       this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'success' }));
     } catch (err: unknown) {
       const message = extractHttpErrorMessage(err);

@@ -56,7 +56,7 @@ describe('AppServiceBindingActionsService', () => {
         const promise = svc.unbindService('bind-1');
         await answerServiceWrite(ctrl, '/pp/v1/cf/service_bindings/cnsi-1/bind-1', serviceWriteContract(`${broker}-app-binding-delete`), path);
 
-        await expect(promise).resolves.toBeUndefined();
+        await expect(promise).resolves.toBe('deleted');
         expect(svc.inFlight()).toBe(false);
         expect(svc.transitioningBindingGuid()).toBeNull();
       });

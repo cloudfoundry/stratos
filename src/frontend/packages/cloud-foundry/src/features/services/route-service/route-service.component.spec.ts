@@ -95,4 +95,66 @@ describe('RouteServiceComponent — bind patches the binding from the response',
 
     expect(component.errorMessage()).toBe('Failed to bind service: bind could not be completed: route services disabled');
   });
+
+  // A write that ended with an unknown result (here: a 202 without a job id)
+  // is reported as such and the binding re-read, never shown as bound.
+  it('says a bind ended with an unknown result and re-reads the binding', async () => {
+    component.selectedSiGuid.set('si-1');
+    const done = component.bindStepHandle.submit();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(null, { status: 202, statusText: 'Accepted' });
+    const message = 'Bind "logger": the operation ended, but its result could not be determined. This page shows the current state.';
+    await expect(done).resolves.toEqual({ success: false, message });
+
+    expect(component.errorMessage()).toBe(message);
+    expect(component.binding()).toBeNull();
+    expect(bindingFetches).toBe(2);
+  });
+
+  it('says an unbind ended with an unknown result and re-reads the binding', async () => {
+    component.selectedSiGuid.set('si-1');
+    const bound = component.bindStepHandle.submit();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      {
+        guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
+        relationships: { route: { data: { guid: 'r-1' } }, service_instance: { data: { guid: 'si-1' } } },
+      },
+      { status: 201, statusText: 'Created' },
+    );
+    await bound;
+
+    const done = component.unbind();
+    http.expectOne(r => r.method === 'DELETE' && r.url === '/pp/v1/cf/service_route_bindings/cf-1/b-1').flush(null, { status: 202, statusText: 'Accepted' });
+    await done;
+
+    expect(component.errorMessage()).toBe(
+      'Unbind "logger": the operation ended, but its result could not be determined. This page shows the current state.',
+    );
+    expect(bindingFetches).toBe(2);
+  });
+
+  it('does not bind after the unbind leg of a rebind ends with an unknown result', async () => {
+    component.selectedSiGuid.set('si-1');
+    const bound = component.bindStepHandle.submit();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      {
+        guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
+        relationships: { route: { data: { guid: 'r-1' } }, service_instance: { data: { guid: 'si-1' } } },
+      },
+      { status: 201, statusText: 'Created' },
+    );
+    await bound;
+
+    component.startRebind();
+    component.selectedSiGuid.set('si-1');
+    const done = component.bindStepHandle.submit();
+    http.expectOne(r => r.method === 'DELETE' && r.url === '/pp/v1/cf/service_route_bindings/cf-1/b-1').flush(null, { status: 202, statusText: 'Accepted' });
+    const out = await done;
+
+    expect(out).toMatchObject({ success: false });
+    http.expectNone(r => r.method === 'POST');
+    expect(component.errorMessage()).toBe(
+      'Unbind "logger": the operation ended, but its result could not be determined. This page shows the current state.',
+    );
+    expect(component.rebinding()).toBe(false);
+  });
 });

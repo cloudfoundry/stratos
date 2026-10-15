@@ -24,6 +24,7 @@ import { CardCfRecentAppsComponent } from '../../../../../../../features/home/ca
 import { CfUserPermissionDirective } from '../../../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { CardCfSpaceDetailsComponent } from '../../../../../../../shared/components/cards/card-cf-space-details/card-cf-space-details.component';
 import { PollingIndicatorComponent } from '../../../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
+import { unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
 
 @Component({
   selector: 'app-cloud-foundry-space-summary',
@@ -101,7 +102,14 @@ export class CloudFoundrySpaceSummaryComponent {
     const cnsi = this.cfSpaceService.cfGuid;
     const spaceGuid = this.cfSpaceService.spaceGuid;
     try {
-      await this.spacesConfig.deleteSpace(cnsi, spaceGuid);
+      const outcome = await this.spacesConfig.deleteSpace(cnsi, spaceGuid);
+      if (outcome === 'unknown') {
+        // Ended, result unknown: stay rather than leave as if deleted.
+        const name = this.cfSpaceService.spaceDataService.space()?.name ?? spaceGuid;
+        this.snackBar.error(
+          unknownOutcomeMessage(`Delete space "${name}"`, 'The organization\'s Spaces list'), 'Close');
+        return;
+      }
       this.redirectToOrgSpaces();
     } catch (err: any) {
       const msg = err?.message ?? err;

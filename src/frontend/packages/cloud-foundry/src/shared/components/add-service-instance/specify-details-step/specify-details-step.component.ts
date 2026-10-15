@@ -32,12 +32,13 @@ import { TailwindSnackBarService } from '../../../../../../core/src/shared/servi
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult } from '../../../../services/async-jobs/async-job.types';
+import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
-import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
+import { BindResult, CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiState, CsiStateService } from '../csi-state.service';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
@@ -412,14 +413,22 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       };
     }
 
+    if (result.status === 'UNKNOWN') {
+      // Ended, result unknown: never claim it was created or updated, and
+      // say a requested bind was not attempted.
+      const leadIn = `${isEditMode ? 'Update' : 'Create'} service instance "${state.name}"`;
+      const notBound = !isEditMode && state.bindAppGuid ? ' It was not bound to the application.' : '';
+      return { success: false, message: unknownOutcomeMessage(leadIn, 'The Services list') + notBound };
+    }
+
     if (isEditMode) {
       return this.routeToServices(`Service instance "${state.name}" updated.`);
     }
 
     // Create path: try to extract the new SI's guid for the bind-after-create
-    // follow-up. UNKNOWN (HA-degradation) and slow-async paths without a
-    // resource link both leave the guid undefined — in that case the SI will
-    // appear in the services wall once CF settles and the user binds manually.
+    // follow-up. A slow-async path without a resource link leaves the guid
+    // undefined — in that case the SI will appear in the services wall once
+    // CF settles and the user binds manually.
     const newGuid = extractCreatedSiGuid(result);
     if (newGuid) {
       this.csiState.setServiceInstanceGuid(newGuid);
@@ -439,7 +448,16 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       state.cfGuid!,
       state.bindAppGuid,
       state.bindAppParams,
-    ).pipe(take(1)).toPromise() as { success: boolean; message?: string };
+    ).pipe(take(1)).toPromise() as BindResult;
+    if (bindResult?.unknown) {
+      return {
+        success: false,
+        message: unknownOutcomeMessage(
+          `Service instance "${siName}" was created. Binding it to the application`,
+          'The application\'s Services tab',
+        ),
+      };
+    }
     if (!bindResult?.success) {
       return {
         success: false,

@@ -187,6 +187,29 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  it('marks a binding whose unbind ended with an unknown result as unknown, not success', async () => {
+    const { component, httpMock } = await bootstrap([makeBinding('bind-u', 'app-1')]);
+
+    const submitPromise = component.confirmStepHandle.submit!();
+    httpMock.expectOne(`/pp/v1/cf/service_bindings/${cfGuid}/bind-u`).flush(
+      { id: 'job-u', state: 'PROCESSING', startedAt: '2026-05-09T00:00:00Z' },
+      { status: 202, statusText: 'Accepted' },
+    );
+    await Promise.resolve();
+    // The backend no longer knows the job: ended, result unknown.
+    httpMock.expectOne('/pp/v1/stratos/jobs/job-u').flush(null, { status: 404, statusText: 'Not Found' });
+
+    await submitPromise;
+    const row = component.rows().find(r => r.guid === 'bind-u');
+    expect(row?.status).toBe('unknown');
+    expect(row?.errorMessage).toBe(
+      'Unbind "app-1": the operation ended, but its result could not be determined. '
+      + 'The service instance\'s page shows the current state.',
+    );
+
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
   it('navigates to /services on second click after deleteStarted', async () => {
     const { component, httpMock } = await bootstrap([makeBinding('b1', 'app-1')]);
 
