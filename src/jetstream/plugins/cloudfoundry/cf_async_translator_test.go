@@ -244,8 +244,86 @@ func TestCFJobTranslatorFetch_ResourceLastOperation(t *testing.T) {
 	}
 }
 
-// TestCFJobTranslatorFetch_FailedJobSkipsResource guards that a job CF
-// itself failed keeps CF's errors: the outcome check only runs on COMPLETE.
+// TestCFJobTranslatorFetch_FailedBindingJobReportsBroker covers a binding
+// job CF itself failed. CF (API 3.226, overview-broker failasync) fails it
+// with its own exception name and keeps the broker's description on the
+// binding's last_operation; Fetch reports the broker's description, and
+// keeps CF's error when the binding cannot be read.
+func TestCFJobTranslatorFetch_FailedBindingJobReportsBroker(t *testing.T) {
+	cases := []struct {
+		name      string
+		operation string
+		link      string
+		path      string
+		status    int // binding GET status; 0 means 200 with a failed last_operation
+		code      string
+		detail    string
+	}{
+		{
+			name: "key create", operation: "service_keys.create",
+			link: "service_credential_binding", path: "/v3/service_credential_bindings/b-1",
+			code: "cf.service_credential_binding.last_operation.failed", detail: "Operation failed",
+		},
+		{
+			name: "app binding create", operation: "service_bindings.create",
+			link: "service_credential_binding", path: "/v3/service_credential_bindings/b-1",
+			code: "cf.service_credential_binding.last_operation.failed", detail: "Operation failed",
+		},
+		{
+			name: "route binding create", operation: "service_route_bindings.create",
+			link: "service_route_binding", path: "/v3/service_route_bindings/b-1",
+			code: "cf.service_route_binding.last_operation.failed", detail: "Operation failed",
+		},
+		{
+			name: "binding gone", operation: "service_keys.create",
+			link: "service_credential_binding", path: "/v3/service_credential_bindings/b-1",
+			status: http.StatusNotFound,
+			code:   "cf.v3.10009", detail: "create could not be completed: VCAP::CloudController::V3::LastOperationFailedState",
+		},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			ts := newCaptureServer(map[string]capiHandler{
+				"GET /v3/jobs/job-1": func(w http.ResponseWriter, _ *http.Request) {
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"guid": "job-1", "operation": tc.operation, "state": "FAILED",
+						"errors": []map[string]interface{}{{
+							"code": 10009, "title": "CF-UnableToPerform",
+							"detail": "create could not be completed: VCAP::CloudController::V3::LastOperationFailedState",
+						}},
+						"links": map[string]interface{}{tc.link: map[string]string{"href": "https://api.example.com" + tc.path}},
+					})
+				},
+				"GET " + tc.path: func(w http.ResponseWriter, _ *http.Request) {
+					if tc.status != 0 {
+						w.WriteHeader(tc.status)
+						_, _ = w.Write([]byte(`{"errors":[{"code":10010,"title":"CF-ResourceNotFound","detail":"not found"}]}`))
+						return
+					}
+					_ = json.NewEncoder(w).Encode(map[string]interface{}{
+						"guid":           "b-1",
+						"last_operation": map[string]interface{}{"type": "create", "state": "failed", "description": "Operation failed"},
+					})
+				},
+			})
+			defer ts.Close()
+
+			translator := NewCFJobTranslator(newPhase1CPlugin(ts.URL))
+			state, errs, result, err := translator.Fetch(context.Background(),
+				CFJobRef{CnsiGUID: "cnsi-1", UserGUID: "user-1", JobGUID: "job-1"})
+			require.NoError(t, err)
+			assert.Equal(t, stratosjobs.JobStateFailed, state)
+			assert.Nil(t, result)
+			require.Len(t, errs, 1)
+			assert.Equal(t, tc.code, errs[0].Code)
+			assert.Equal(t, tc.detail, errs[0].Detail)
+		})
+	}
+}
+
+// TestCFJobTranslatorFetch_FailedJobSkipsResource guards that a service
+// instance job CF itself failed keeps CF's errors, which already carry the
+// broker's description: only a failed binding job is re-read.
 func TestCFJobTranslatorFetch_FailedJobSkipsResource(t *testing.T) {
 	resourceGets := 0
 	ts := newCaptureServer(map[string]capiHandler{
