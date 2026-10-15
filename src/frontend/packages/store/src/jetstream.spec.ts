@@ -6,6 +6,15 @@ describe('stripMarkup', () => {
     expect(stripMarkup('<p>Plan <b>small</b>\n  is   gone</p>')).toBe('Plan small is gone');
     expect(stripMarkup('no markup here')).toBe('no markup here');
   });
+
+  // The text is a server's error body. A run of '<' with no '>' made the
+  // old pattern backtrack quadratically: 100k characters took seconds.
+  it('stays linear on unclosed tags', () => {
+    const start = performance.now();
+    expect(stripMarkup('<'.repeat(100_000) + 'x')).toBe('<'.repeat(100_000) + 'x');
+    expect(performance.now() - start).toBeLessThan(500);
+    expect(stripMarkup('a < b <i>c</i>')).toBe('a < b c');
+  });
 });
 
 describe('extractHttpErrorMessage (non-HTTP errors)', () => {

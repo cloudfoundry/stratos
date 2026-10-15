@@ -55,9 +55,11 @@ export function httpErrorResponseToSafeString(err: any): string {
 
 // An upstream error detail can quote a whole HTML error page (CF embeds a
 // broker's raw response body); keep the words, drop the tags. Messages are
-// always shown as text, so this is for legibility, not safety.
+// always shown as text, so this is for legibility, not safety. A tag may
+// not contain '<': with only '>' excluded, a run of '<' and no '>' (the
+// body is the server's) backtracks quadratically.
 export const stripMarkup = (text: string): string =>
-  text.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  text.replace(/<[^<>]+>/g, ' ').replace(/\s+/g, ' ').trim();
 
 /**
  * The most useful human-readable message in whatever a request threw, for
