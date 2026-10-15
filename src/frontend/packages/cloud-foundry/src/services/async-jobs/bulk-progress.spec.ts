@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
-import { HttpClient, HttpResponse } from '@angular/common/http';
-import { of } from 'rxjs';
+import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
+import { of, throwError } from 'rxjs';
 import { pollBulkResult, runBulkWithProgress } from './bulk-progress';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import type { StratosJob } from './async-job.types';
@@ -50,8 +50,8 @@ describe('pollBulkResult', () => {
 
   it('counts PENDING-without-job and poll-UNKNOWN as unconfirmed', async () => {
     const http = {
-      // pollJob maps a thrown/404 GET to UNKNOWN
-      get: vi.fn(() => { throw new Error('404'); }),
+      // pollJob ends a job the backend does not know (404) as UNKNOWN
+      get: vi.fn(() => throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' }))),
     } as unknown as HttpClient;
     const t = await pollBulkResult(http, bulk([
       { guid: 'a', state: 'PENDING' },                                  // no job handoff
