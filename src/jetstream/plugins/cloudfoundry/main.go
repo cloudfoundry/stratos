@@ -212,6 +212,9 @@ func (c *CloudFoundrySpecification) Init() error {
 		if jobsPlugin, ok := plug.(*stratosjobs.StratosJobs); ok {
 			c.asyncTracker = jobsPlugin.Tracker()
 			c.asyncTranslator = NewCFJobTranslator(c)
+			// Lets this replica resolve CF job ids minted by another one
+			// (or by itself before a restart).
+			c.asyncTracker.Register(c.asyncTranslator)
 			c.restageTranslator = NewRestageJobTranslator(c)
 			c.rollbackTranslator = NewRollbackJobTranslator(c)
 		} else {

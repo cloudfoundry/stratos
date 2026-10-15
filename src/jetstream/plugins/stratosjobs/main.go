@@ -23,11 +23,14 @@ func init() {
 type StratosJobs struct {
 	portalProxy api.PortalProxy
 	tracker     Tracker
+	// sessionUser overrides the session lookup in tests; nil reads the
+	// user from the portal proxy's session.
+	sessionUser func(ctx *echo.Context) (string, error)
 }
 
-// Init constructs the plugin, starts the in-memory tracker. The tracker
-// implementation is fixed to in-memory for now — the DB-backed variant
-// needed for multi-replica k8s arrives in a later pass.
+// Init constructs the plugin, starts the in-memory tracker. A poll that
+// lands on another replica resolves through ids the translators encode
+// (JobIDCodec), so the tracker needs no shared store.
 func Init(portalProxy api.PortalProxy) (api.StratosPlugin, error) {
 	return &StratosJobs{
 		portalProxy: portalProxy,
