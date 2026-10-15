@@ -20,11 +20,13 @@
 - An operation's status is shown only to the user who started it.
 - Creating a service binding or service key now reports the broker's
   failure when the broker fails the operation after accepting it, as
-  service instances already did.
-- The service instance wizard names the instance in its messages. It
-  said `Service instance "Service instance" created.`, named a renamed
-  instance by its old name, and said "created and bound" when binding an
-  existing instance.
+  service instances already did, in the broker's own words rather than
+  Cloud Foundry's internal error name.
+- The service instance wizard names the instance in its messages,
+  failures included. It said `Service instance "Service instance"
+  created.`, named a renamed instance by its old name, and said "created
+  and bound" when binding an existing instance. A bind that fails after
+  the instance was created now says the instance was created.
 - The backend no longer keeps an unfinished operation in memory forever
   once nobody is checking on it: after an hour without a status check it
   is dropped. An operation someone keeps checking is kept however long it
