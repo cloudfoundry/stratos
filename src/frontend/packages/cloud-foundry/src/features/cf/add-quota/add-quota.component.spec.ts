@@ -9,7 +9,6 @@ import { TabNavService } from '@stratosui/core';
 import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '@test-framework/cf';
-import { LongRunningCfOperationsService } from '../../../shared/data-services/long-running-cf-op.service';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { AddQuotaComponent } from './add-quota.component';
 
@@ -46,7 +45,6 @@ describe('AddQuotaComponent', () => {
           }
         },
         TabNavService,
-        LongRunningCfOperationsService,
       ]
     });
 

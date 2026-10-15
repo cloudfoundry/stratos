@@ -13,7 +13,6 @@ import { DetailCachesDeleteCleanup } from './services/deletes/detail-caches-clea
 import { FavoritesRecentsDeleteCleanup } from './services/deletes/favorites-recents-cleanup.service';
 import { setCfInfoHelperInjector } from './services/endpoint-data/cf-info-helper';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
-import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { CloudFoundryUserProvidedServicesService } from './shared/services/cloud-foundry-user-provided-services.service';
 import { CloudFoundryStoreModule } from './store/cloud-foundry.store.module';
 import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
@@ -29,7 +28,6 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
   providers: [
     ...cfCurrentUserPermissionsService,
     CloudFoundryService,
-    LongRunningCfOperationsService,
     CloudFoundryUserProvidedServicesService,
   ]
 })
