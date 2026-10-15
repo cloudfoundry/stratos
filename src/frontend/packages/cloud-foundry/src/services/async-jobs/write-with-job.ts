@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpResponse } from '@angular/common/http';
-import { Observable, firstValueFrom, timer } from 'rxjs';
+import { Observable, firstValueFrom, fromEvent, race, switchMap, throwError, timer } from 'rxjs';
 import type {
   AsyncJobResult,
   JobState,
@@ -30,10 +30,14 @@ import { StratosJobError } from './async-job.types';
  * Polling uses:
  *   - 500ms, 1s, 2s, cap 3s backoff
  *   - onProgress callback for UI wiring (button spinners, stepper progress)
- *   - 404 on poll → status UNKNOWN (the HA-degradation rule: k8s multi-
- *     replica deploys without session affinity can route the GET to a
- *     replica that doesn't know the job; caller refetches the target
- *     entity to determine actual state)
+ *   - a poll that could not be answered (network error, 5xx, 429, a 200
+ *     without a body) is not an outcome: the job is still running, so
+ *     polling carries on with the same backoff
+ *   - 404 or another 4xx on poll → status UNKNOWN: the backend does not
+ *     know the job, so the operation has ended but its result cannot be
+ *     determined; the caller says so and refetches the target entity
+ *   - opts.signal lets a caller stop waiting; the promise then rejects
+ *     with a DOMException named 'AbortError', which is not an outcome
  *
  * Generic parameter T is the shape of the final state on COMPLETE — e.g.,
  * void for delete, StApp for start/stop. Both paths converge on the same
@@ -45,6 +49,8 @@ export interface WriteWithJobOptions {
   onProgress?: (job: StratosJob) => void;
   /** Backoff sequence in ms (capped at last value). Default: [500, 1000, 2000, 3000]. */
   backoffMs?: readonly number[];
+  /** Stop waiting: rejects with a DOMException named 'AbortError'. */
+  signal?: AbortSignal;
 }
 
 export async function writeWithJob<T>(
@@ -54,7 +60,7 @@ export async function writeWithJob<T>(
 ): Promise<AsyncJobResult<T>> {
   let resp: HttpResponse<unknown>;
   try {
-    resp = await firstValueFrom(call);
+    resp = await settle(call, opts.signal);
   } catch (err: unknown) {
     // A failure inside the fast-path window arrives as an HTTP error whose
     // body carries the same errors[] a polled job would.
@@ -73,8 +79,8 @@ export async function writeWithJob<T>(
   if (resp.status === 202) {
     const handoff = resp.body as StratosJob | null;
     if (!handoff?.id) {
-      // Server broke contract. Treat as UNKNOWN so caller refetches;
-      // better than throwing and leaving the UI in an ambiguous state.
+      // Server broke contract: there is no job to ask about, so the
+      // operation has ended with a result nobody can determine.
       return { status: 'UNKNOWN', state: undefined };
     }
     return pollJob<T>(http, handoff.id, opts);
@@ -120,6 +126,33 @@ function unwrapFastPathBody(body: unknown): unknown {
   return body;
 }
 
+// Whether a failed poll leaves the job's fate unknown for good. A 404 is
+// the backend saying it does not know the job (ids resolve on any replica,
+// so it is gone); any other 4xx but 429 means asking again cannot help.
+// Everything else - no connection (status 0), a 5xx, 429, a non-HTTP error
+// such as a timeout - says nothing about the job, which is still running.
+function endsPolling(err: unknown): boolean {
+  return err instanceof HttpErrorResponse
+    && err.status >= 400 && err.status < 500 && err.status !== 429;
+}
+
+const abortError = (): DOMException => new DOMException('Stopped waiting for the job', 'AbortError');
+
+// firstValueFrom that gives up when the caller aborts. Unsubscribing
+// cancels an in-flight request; the job itself carries on server-side.
+function settle<T>(source: Observable<T>, signal: AbortSignal | undefined): Promise<T> {
+  if (!signal) {
+    return firstValueFrom(source);
+  }
+  if (signal.aborted) {
+    return Promise.reject(abortError());
+  }
+  const aborted$ = fromEvent(signal, 'abort').pipe(
+    switchMap(() => throwError(abortError)),
+  );
+  return firstValueFrom(race(source, aborted$));
+}
+
 export async function pollJob<T>(
   http: HttpClient,
   jobId: string,
@@ -127,32 +160,43 @@ export async function pollJob<T>(
 ): Promise<AsyncJobResult<T>> {
   const backoff = opts.backoffMs ?? [500, 1000, 2000, 3000];
   const url = `/pp/v1/stratos/jobs/${encodeURIComponent(jobId)}`;
+  // Logged once when polls start failing and once when they recover, so a
+  // long outage does not flood the console.
+  let failing = false;
 
   for (let i = 0; ; i++) {
-    let job: StratosJob;
+    let job: StratosJob | null = null;
     try {
-      const resp = await firstValueFrom(http.get<StratosJob>(url, { observe: 'response' }));
-      if (resp.status === 200 && resp.body) {
-        job = resp.body;
-      } else {
-        // Non-200 with a body — treat as unknown.
+      const resp = await settle(http.get<StratosJob>(url, { observe: 'response' }), opts.signal);
+      // A 2xx without a job body tells us nothing; ask again.
+      job = resp.status === 200 && resp.body ? resp.body : null;
+    } catch (err: unknown) {
+      if (opts.signal?.aborted) {
+        throw err;
+      }
+      if (endsPolling(err)) {
         return { status: 'UNKNOWN', state: undefined, jobId };
       }
-    } catch (_err) {
-      // 404 → status unknown per HA-degradation rule. Other errors (e.g.,
-      // network failures) also surface as UNKNOWN so the UI can refetch
-      // instead of stranding on an exception during a polling loop.
-      return { status: 'UNKNOWN', state: undefined, jobId };
+      if (!failing) {
+        failing = true;
+        console.warn(`job ${jobId}: polling failed, retrying`, err);
+      }
     }
 
-    opts.onProgress?.(job);
+    if (job) {
+      if (failing) {
+        failing = false;
+        console.warn(`job ${jobId}: polling recovered`);
+      }
+      opts.onProgress?.(job);
 
-    if (job.state === 'COMPLETE') {
-      return { status: 'COMPLETE', state: job.result as T | undefined, jobId };
-    }
-    if (job.state === 'FAILED') {
-      logFailure(job.kind, job.errors);
-      throw new StratosJobError(job);
+      if (job.state === 'COMPLETE') {
+        return { status: 'COMPLETE', state: job.result as T | undefined, jobId };
+      }
+      if (job.state === 'FAILED') {
+        logFailure(job.kind, job.errors);
+        throw new StratosJobError(job);
+      }
     }
 
     const wait = backoff[Math.min(i, backoff.length - 1)];
@@ -161,9 +205,12 @@ export async function pollJob<T>(
     // function — just yield a microtask instead so the HttpTestingController
     // sees the next request deterministically.
     if (wait > 0) {
-      await firstValueFrom(timer(wait));
+      await settle(timer(wait), opts.signal);
     } else {
       await Promise.resolve();
+      if (opts.signal?.aborted) {
+        throw abortError();
+      }
     }
   }
 }
