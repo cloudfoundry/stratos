@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, DestroyRef, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -48,6 +48,11 @@ import { extractHttpErrorMessage } from '@stratosui/store';
 // SchemaFormComponent.config tolerates an absent schema.
 type SchemaFormConfigState = Omit<SchemaFormConfig, 'schema'> & { schema?: object };
 
+// How long the wizard holds the user on a write. The broker decides how long
+// CF takes: a 15 s broker operation already takes about a minute in CF, and
+// real brokers take minutes. After this the wizard hands the write off.
+const HAND_OFF_AFTER_MS = 30_000;
+
 @Component({
   selector: 'app-specify-details-step',
   templateUrl: './specify-details-step.component.html',
@@ -75,6 +80,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   modeService = inject(CsiModeService);
   private http = inject(HttpClient);
   private snackBar = inject(TailwindSnackBarService);
+  private destroyRef = inject(DestroyRef);
   // toObservable() must run inside an injection context — lift to a class
   // field. Reused by selectCreateInstance$ and onNext below.
   private csiState$ = toObservable(this.csiState.state);
@@ -366,9 +372,54 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     return this.csiState$.pipe(
       filter(p => !!p),
       take(1),
-      switchMap(state => from(this.executeWrite(state))),
+      switchMap(state => from(this.handOffIfSlow(this.executeWrite(state)))),
     );
   };
+
+  // A write still running after HAND_OFF_AFTER_MS is handed off: the wizard
+  // closes and names where to watch it, tracking carries on, and the outcome
+  // is reported wherever the user is. Leaving the wizard (Cancel, another
+  // page) hands it off the same way, so a late failure is never lost.
+  private async handOffIfSlow(outcome: Promise<StepOnNextResult>): Promise<StepOnNextResult> {
+    let handedOff = false;
+    const handOff = () => {
+      if (handedOff) return;
+      handedOff = true;
+      // A success reports itself (routeToServices); a failure or unknown
+      // result would go to a step nobody is looking at.
+      outcome.then(r => { if (!r.success) this.snackBar.error(r.message ?? 'The operation failed.'); });
+    };
+    const stopWatchingDestroy = this.destroyRef.onDestroy(handOff);
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const slow = new Promise<null>(resolve => { timeout = setTimeout(() => resolve(null), HAND_OFF_AFTER_MS); });
+
+    const first = await Promise.race([outcome, slow]);
+    clearTimeout(timeout);
+    if (first) {
+      if (!handedOff) stopWatchingDestroy();
+      return first;
+    }
+    stopWatchingDestroy();
+    handOff();
+    this.snackBar.open(
+      `${this.writeDescription()} carries on in the background. ${this.whereToWatch()} shows its progress, `
+        + 'and a message will say how it ended.',
+      'Dismiss', { duration: 10000 },
+    );
+    return { success: true, redirect: true };
+  }
+
+  private writeDescription(): string {
+    if (this.bindExistingInstance) {
+      return 'Binding the service instance to the application';
+    }
+    const verb = this.modeService.isEditServiceInstanceMode() ? 'Updating' : 'Creating';
+    return `${verb} service instance "${this.createNewInstanceForm.controls.name.value}"`;
+  }
+
+  private whereToWatch(): string {
+    return this.modeService.isAppServicesMode() ? 'The application\'s Services tab' : 'The Services list';
+  }
 
   routeToServices = (successMessage?: string): StepOnNextResult => {
     if (successMessage) {
