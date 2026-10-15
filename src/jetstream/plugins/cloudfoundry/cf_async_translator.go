@@ -43,6 +43,13 @@ func NewCFJobTranslator(cf *CloudFoundrySpecification) *CFJobTranslator {
 // diagnostics / filtering; not load-bearing.
 func (t *CFJobTranslator) Kind() string { return "cf" }
 
+// RefOwner implements stratosjobs.OwnedRefTranslator: the job is the
+// session user's whose token polls it.
+func (t *CFJobTranslator) RefOwner(ref interface{}) string {
+	cfRef, _ := ref.(CFJobRef)
+	return cfRef.UserGUID
+}
+
 // Fetch polls /v3/jobs/{guid} and maps its state onto the Stratos state
 // machine.
 //

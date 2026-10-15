@@ -48,6 +48,15 @@ func NewRestageJobTranslator(cf *CloudFoundrySpecification) *RestageJobTranslato
 // Kind returns the stable kind prefix for restage jobs.
 func (t *RestageJobTranslator) Kind() string { return RestageJobKind }
 
+// RefOwner implements stratosjobs.OwnedRefTranslator: the restage is the
+// session user's whose token drives it.
+func (t *RestageJobTranslator) RefOwner(ref interface{}) string {
+	if rRef, ok := ref.(*RestageRef); ok {
+		return rRef.UserGuid
+	}
+	return ""
+}
+
 // Fetch advances the restage state machine by one stage and translates
 // the orchestrator's outcome onto the Stratos job tuple.
 //
