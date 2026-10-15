@@ -412,6 +412,78 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  describe('a write that outlasts the wait', () => {
+    const failedJob = {
+      id: 'job-slow', kind: 'service_instance.create', state: 'FAILED', startedAt: '2026-10-15T00:00:00Z',
+      errors: [{ code: 'CF-UnableToPerform', message: 'CF-UnableToPerform', detail: 'the broker said no' }],
+    };
+
+    async function startSlowCreate() {
+      vi.useFakeTimers();
+      const ctx = setup();
+      const open = vi.spyOn((ctx.component as any).snackBar, 'open');
+      const error = vi.spyOn((ctx.component as any).snackBar, 'error');
+      const result = firstValueFrom(ctx.component.onNext());
+      ctx.httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+        { id: 'job-slow', state: 'PROCESSING', startedAt: '2026-10-15T00:00:00Z' },
+        { status: 202, statusText: 'Accepted' },
+      );
+      await vi.advanceTimersByTimeAsync(0);
+      return { ...ctx, open, error, result };
+    }
+
+    function answerPoll(httpMock: HttpTestingController, body: object) {
+      httpMock.expectOne('/pp/v1/stratos/jobs/job-slow').flush(body, { status: 200, statusText: 'OK' });
+    }
+
+    it('hands off to the Services list, keeps tracking, and reports a later failure', async () => {
+      const { httpMock, open, error, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(open).toHaveBeenCalledWith(
+          'Creating service instance "my-instance" carries on in the background. The Services list shows its '
+            + 'progress, and a message will say how it ended.',
+          'Dismiss', { duration: 10000 },
+        );
+
+        answerPoll(httpMock, failedJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(error).toHaveBeenCalledWith('Failed to create service instance: the broker said no');
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('does not hand off a write that ends inside the wait', async () => {
+      const { httpMock, open, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(29_000);
+        answerPoll(httpMock, { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(open).toHaveBeenCalledTimes(1);
+        expect(open).toHaveBeenCalledWith('Service instance "my-instance" created.', 'Dismiss', { duration: 4000 });
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('reports a failure that ends after the user left the wizard', async () => {
+      const { fixture, httpMock, error } = await startSlowCreate();
+      try {
+        fixture.destroy();
+        answerPoll(httpMock, failedJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(error).toHaveBeenCalledWith('Failed to create service instance: the broker said no');
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+  });
+
   it('surfaces CF detail message on 4xx create failure', async () => {
     const { component, httpMock } = setup();
     const result$ = component.onNext();
