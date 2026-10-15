@@ -470,6 +470,23 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
     });
 
+    it('hands off as soon as the user leaves the wizard, and only once', async () => {
+      const { fixture, httpMock, open } = await startSlowCreate();
+      try {
+        fixture.destroy();
+        expect(open).toHaveBeenCalledWith(
+          'Creating service instance "my-instance" carries on in the background. The Services list shows its '
+            + 'progress, and a message will say how it ended.',
+          'Dismiss', { duration: 10000 },
+        );
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(open).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
     it('reports a failure that ends after the user left the wizard', async () => {
       const { fixture, httpMock, error } = await startSlowCreate();
       try {
