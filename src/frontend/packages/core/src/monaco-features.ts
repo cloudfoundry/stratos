@@ -16,7 +16,7 @@
  * one. Left out relative to monaco's features/register.all.js: inline
  * completions, semantic tokens, rename, color picker, sticky scroll,
  * parameter hints, inlay hints, linked editing, drag-and-drop & rich
- * paste, the ~80 other bundled languages, the css/html/typescript
+ * paste (drop-into-editor is kept; see below), the ~80 other bundled languages, the css/html/typescript
  * services, and assorted micro-features with no provider or surface in
  * Stratos. (The diff editor widget is not imported here either, but
  * editor.js pulls it in via createDiffEditor — dropping it needs an
@@ -60,6 +60,21 @@ import 'monaco-editor/features/suggest/register.js';
 // contribs directly until upstream fixes the registry.
 import 'monaco-editor/editor/contrib/suggest/browser/suggestController.js';
 import 'monaco-editor/editor/contrib/gotoSymbol/browser/goToCommands.js';
+// Drop-into-editor cannot be left out: the json language support loads on
+// first use, and the module that starts its worker (internal/common/
+// workers.js) imports most editor features as a side effect, this one
+// included. Arriving that late, the feature registers its controller but
+// its treeViewsDndService misses the editor services, which are fixed when
+// the first editor starts, so every editor created afterwards logs
+// "depends on UNKNOWN service". Registering it here, before any editor,
+// keeps the service in. The same late import brings the other left-out
+// features to editors created after json loads; only this one failed.
+// The e2e Monaco smoke test creates an editor after json loads and fails
+// on any such error, so a monaco upgrade that adds another shows there.
+// Upstream: microsoft/monaco-editor#5507 (fix proposed in #5508); once a
+// release carries it, json no longer brings features and this import is
+// a choice again.
+import 'monaco-editor/features/dropOrPasteInto/register.js';
 import 'monaco-editor/features/toggleTabFocusMode/register.js';
 import 'monaco-editor/features/unicodeHighlighter/register.js';
 import 'monaco-editor/features/unusualLineTerminators/register.js';

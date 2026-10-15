@@ -58,4 +58,42 @@ test.describe('Monaco ESM smoke', () => {
     });
     expect(markerCount).toBeGreaterThan(0);
   });
+
+  // The json language support loads on first use, and the module that
+  // starts its worker imports most editor features as a side effect. A
+  // feature arriving that way whose service is not yet registered breaks
+  // every editor created afterwards, so: one editor starts the services,
+  // a json editor loads the language, and a third must still be clean.
+  test('editors created after json support loads raise no errors', async ({ unauthenticatedPage: page }) => {
+    const errors: string[] = [];
+    page.on('pageerror', (err) => errors.push(err.message));
+    await page.goto('/');
+    // main.ts prefetches the editor once the app is idle, login page included.
+    await page.waitForFunction(() => !!(window as { monaco?: unknown }).monaco, null, { timeout: 30000 });
+
+    const jsonMarkers = await page.evaluate(async () => {
+      const monaco = (window as { monaco?: any }).monaco;
+      const create = (language: string, value: string) => {
+        const host = document.createElement('div');
+        host.style.cssText = 'width:300px;height:100px';
+        document.body.appendChild(host);
+        return monaco.editor.create(host, { language, value });
+      };
+      const editors = [create('plaintext', 'x'), create('json', '{"a": }')];
+      // Diagnostics on the invalid json prove its language support loaded.
+      const uri = editors[1].getModel().uri;
+      const deadline = Date.now() + 10000;
+      while (Date.now() < deadline && monaco.editor.getModelMarkers({ resource: uri }).length === 0) {
+        await new Promise((r) => setTimeout(r, 250));
+      }
+      editors.push(create('plaintext', 'y'));
+      await new Promise((r) => setTimeout(r, 500));
+      const markers = monaco.editor.getModelMarkers({ resource: uri }).length;
+      editors.forEach((editor) => editor.dispose());
+      return markers;
+    });
+
+    expect(jsonMarkers).toBeGreaterThan(0);
+    expect(errors).toEqual([]);
+  });
 });
