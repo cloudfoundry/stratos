@@ -385,6 +385,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const handOff = () => {
       if (handedOff) return;
       handedOff = true;
+      this.snackBar.open(
+        `${this.writeDescription()} carries on in the background. ${this.whereToWatch()} shows its progress, `
+          + 'and a message will say how it ended.',
+        'Dismiss', { duration: 10000 },
+      );
       // A success reports itself (routeToServices); a failure or unknown
       // result would go to a step nobody is looking at.
       outcome.then(r => { if (!r.success) this.snackBar.error(r.message ?? 'The operation failed.'); });
@@ -395,17 +400,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
     const first = await Promise.race([outcome, slow]);
     clearTimeout(timeout);
+    if (!handedOff) stopWatchingDestroy();
     if (first) {
-      if (!handedOff) stopWatchingDestroy();
       return first;
     }
-    stopWatchingDestroy();
     handOff();
-    this.snackBar.open(
-      `${this.writeDescription()} carries on in the background. ${this.whereToWatch()} shows its progress, `
-        + 'and a message will say how it ended.',
-      'Dismiss', { duration: 10000 },
-    );
     return { success: true, redirect: true };
   }
 
