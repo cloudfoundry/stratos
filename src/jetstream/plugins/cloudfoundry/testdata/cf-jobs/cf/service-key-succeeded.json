@@ -1,0 +1,39 @@
+{
+  "guid": "f6d74c98-f3f7-4dd8-b80f-72c3fe5400c2",
+  "created_at": "2026-10-14T04:27:45Z",
+  "updated_at": "2026-10-14T04:28:49Z",
+  "name": "my-key",
+  "type": "key",
+  "last_operation": {
+    "type": "create",
+    "state": "succeeded",
+    "description": null,
+    "created_at": "2026-10-14T04:27:45Z",
+    "updated_at": "2026-10-14T04:28:49Z"
+  },
+  "metadata": {
+    "labels": {},
+    "annotations": {}
+  },
+  "relationships": {
+    "service_instance": {
+      "data": {
+        "guid": "6e1a2814-b77a-4174-8993-0493279c88ff"
+      }
+    }
+  },
+  "links": {
+    "self": {
+      "href": "https://api.example.com/v3/service_credential_bindings/f6d74c98-f3f7-4dd8-b80f-72c3fe5400c2"
+    },
+    "details": {
+      "href": "https://api.example.com/v3/service_credential_bindings/f6d74c98-f3f7-4dd8-b80f-72c3fe5400c2/details"
+    },
+    "parameters": {
+      "href": "https://api.example.com/v3/service_credential_bindings/f6d74c98-f3f7-4dd8-b80f-72c3fe5400c2/parameters"
+    },
+    "service_instance": {
+      "href": "https://api.example.com/v3/service_instances/6e1a2814-b77a-4174-8993-0493279c88ff"
+    }
+  }
+}
