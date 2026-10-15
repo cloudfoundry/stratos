@@ -8,7 +8,6 @@ import { generateASEntities } from '@stratosui/cf-autoscaler';
 import { BaseCfOrgSpaceRouteMock } from '../test-framework/cloud-foundry-endpoint-service.helper';
 import { generateCFEntities } from './cf-entity-generator';
 import { ActiveRouteCfOrgSpace } from './features/cf/cf-page.types';
-import { LongRunningCfOperationsService } from './shared/data-services/long-running-cf-op.service';
 import { CloudFoundryReducersModule } from './store/cloud-foundry.reducers.module';
 import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-permissions-checkers';
 
@@ -33,7 +32,6 @@ import { cfCurrentUserPermissionsService } from './user-permissions/cf-user-perm
       multi: true
     },
     { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-    LongRunningCfOperationsService,
     {
       provide: ActiveRouteCfOrgSpace,
       useFactory: () => new BaseCfOrgSpaceRouteMock(testSCFEndpointGuid)
