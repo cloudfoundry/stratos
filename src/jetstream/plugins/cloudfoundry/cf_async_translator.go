@@ -3,7 +3,9 @@ package cloudfoundry
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"regexp"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
@@ -79,6 +81,11 @@ func (t *CFJobTranslator) Fetch(ctx context.Context, ref interface{}) (
 	}
 
 	job, err := cfClient.Jobs().Get(ctx, cfRef.JobGUID)
+	if errors.Is(err, capi.ErrNotFound) {
+		// CF has no such job: a forged or mistyped id, or a job CF has
+		// already cleaned up. Either way its outcome is unknowable.
+		return "", nil, nil, fmt.Errorf("cf translator: job %s: %w", cfRef.JobGUID, stratosjobs.ErrJobNotFound)
+	}
 	if err != nil {
 		// Transport-level error — leave state as PROCESSING for the caller
 		// to retry on the next poll.
@@ -92,6 +99,72 @@ func (t *CFJobTranslator) Fetch(ctx context.Context, ref interface{}) (
 	}
 
 	return translateCFJobState(job), collectCFJobErrors(job), translateCFJobResult(job), nil
+}
+
+// cfJobKindPattern matches the kinds CF job ids are minted for:
+// "cf.<resource>.<operation>", e.g. "cf.service_instance.create". A fixed
+// shape, so an id with a segment missing does not parse as another kind.
+var cfJobKindPattern = regexp.MustCompile(`^cf\.[a-z0-9_]+\.[a-z0-9_]+$`)
+
+// cfJobIDGUIDPattern matches an endpoint or job guid inside a job id. No
+// dots, so the id splits unambiguously from the right; only unreserved URL
+// characters, so the id is one path segment as is.
+var cfJobIDGUIDPattern = regexp.MustCompile(`^[A-Za-z0-9-]{1,64}$`)
+
+// EncodeID implements stratosjobs.JobIDCodec. The id is
+// "<kind>.<cnsiGUID>.<jobGUID>", e.g.
+// "cf.service_instance.create.<endpoint guid>.<CF job guid>": everything
+// but the user needed to poll the job, readable in logs and URL-safe
+// without escaping. Guids hold no dots, so DecodeID splits the last two
+// segments off and the rest is the kind. Declines refs it could not
+// decode back, so the tracker falls back to a random id.
+func (t *CFJobTranslator) EncodeID(kind string, ref interface{}) (string, bool) {
+	cfRef, ok := ref.(CFJobRef)
+	if !ok || !cfJobKindPattern.MatchString(kind) ||
+		!cfJobIDGUIDPattern.MatchString(cfRef.CnsiGUID) || !cfJobIDGUIDPattern.MatchString(cfRef.JobGUID) {
+		return "", false
+	}
+	return kind + "." + cfRef.CnsiGUID + "." + cfRef.JobGUID, true
+}
+
+// DecodeID implements stratosjobs.JobIDCodec. The ref is built for
+// userGUID, the polling session's user, never for anyone the id names. It
+// requires the endpoint to exist and the user to hold a token for it, the
+// two things newCapiClient needs to poll CF, so an id the user cannot poll
+// reads as unknown (404) rather than failing on every poll.
+func (t *CFJobTranslator) DecodeID(id string, userGUID string) (string, interface{}, bool) {
+	if userGUID == "" {
+		return "", nil, false
+	}
+	rest, jobGUID, ok := cutLast(id, ".")
+	if !ok {
+		return "", nil, false
+	}
+	kind, cnsiGUID, ok := cutLast(rest, ".")
+	if !ok || !cfJobKindPattern.MatchString(kind) ||
+		!cfJobIDGUIDPattern.MatchString(cnsiGUID) || !cfJobIDGUIDPattern.MatchString(jobGUID) {
+		return "", nil, false
+	}
+	proxy := t.proxyProvider()
+	if proxy == nil {
+		return "", nil, false
+	}
+	if _, err := proxy.GetCNSIRecord(cnsiGUID); err != nil {
+		return "", nil, false
+	}
+	if _, ok := proxy.GetCNSITokenRecord(cnsiGUID, userGUID); !ok {
+		return "", nil, false
+	}
+	return kind, CFJobRef{CnsiGUID: cnsiGUID, UserGUID: userGUID, JobGUID: jobGUID}, true
+}
+
+// cutLast splits s around the last sep.
+func cutLast(s, sep string) (before, after string, found bool) {
+	i := strings.LastIndex(s, sep)
+	if i < 0 {
+		return s, "", false
+	}
+	return s[:i], s[i+len(sep):], true
 }
 
 // jobResourceLastOperation is the part of a resource's last_operation the
