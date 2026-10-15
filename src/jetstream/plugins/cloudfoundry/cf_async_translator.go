@@ -4,6 +4,7 @@ package cloudfoundry
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
@@ -45,12 +46,17 @@ func (t *CFJobTranslator) Kind() string { return "cf" }
 //
 // CF v3 Job states (from CAPI docs):
 //   - PROCESSING, POLLING — non-terminal
-//   - COMPLETE            — terminal success
+//   - COMPLETE            — terminal success, unless the resource the job
+//     links to records the operation as failed (checkJobResourceOutcome)
 //   - FAILED              — terminal failure, with errors[]
 //
 // Transport / auth failures bubble up through the error return so the
 // tracker (and RunFastPath) can tolerate them without flipping the job
 // to terminal.
+//
+// RunFastPath and the tracker's Refresh both resolve jobs through Fetch,
+// so the outcome check here covers a write resolved inside the fast-path
+// window and one handed off and polled alike.
 func (t *CFJobTranslator) Fetch(ctx context.Context, ref interface{}) (
 	stratosjobs.JobState,
 	[]stratosjobs.StratosError,
@@ -79,7 +85,129 @@ func (t *CFJobTranslator) Fetch(ctx context.Context, ref interface{}) (
 		return stratosjobs.JobStateProcessing, nil, nil, err
 	}
 
+	if job.State == "COMPLETE" {
+		if lastOpErr := checkJobResourceOutcome(ctx, cfClient, job); lastOpErr != nil {
+			return stratosjobs.JobStateFailed, []stratosjobs.StratosError{*lastOpErr}, nil, nil
+		}
+	}
+
 	return translateCFJobState(job), collectCFJobErrors(job), translateCFJobResult(job), nil
+}
+
+// jobResourceLastOperation is the part of a resource's last_operation the
+// outcome check reads, common to the three service resource types.
+type jobResourceLastOperation struct {
+	opType      string
+	state       string
+	description string
+}
+
+// jobResource describes one kind of resource a CF job can link to: the
+// StratosError it reports a failed last_operation with, and how to GET it.
+// get returns nil when the resource has no last_operation.
+type jobResource struct {
+	code  string
+	label string
+	get   func(ctx context.Context, cfClient capi.Client, guid string) (*jobResourceLastOperation, error)
+}
+
+var (
+	serviceInstanceJobResource = jobResource{
+		code:  "cf.service_instance.last_operation.failed",
+		label: "Service instance",
+		get: func(ctx context.Context, cfClient capi.Client, guid string) (*jobResourceLastOperation, error) {
+			si, err := cfClient.ServiceInstances().Get(ctx, guid)
+			if err != nil || si == nil || si.LastOperation == nil {
+				return nil, err
+			}
+			lo := si.LastOperation
+			return &jobResourceLastOperation{opType: lo.Type, state: lo.State, description: lo.Description}, nil
+		},
+	}
+	serviceCredentialBindingJobResource = jobResource{
+		code:  "cf.service_credential_binding.last_operation.failed",
+		label: "Service credential binding",
+		get: func(ctx context.Context, cfClient capi.Client, guid string) (*jobResourceLastOperation, error) {
+			b, err := cfClient.ServiceCredentialBindings().Get(ctx, guid)
+			if err != nil || b == nil || b.LastOperation == nil {
+				return nil, err
+			}
+			lo := b.LastOperation
+			return &jobResourceLastOperation{opType: lo.Type, state: lo.State, description: derefStr(lo.Description)}, nil
+		},
+	}
+	serviceRouteBindingJobResource = jobResource{
+		code:  "cf.service_route_binding.last_operation.failed",
+		label: "Service route binding",
+		get: func(ctx context.Context, cfClient capi.Client, guid string) (*jobResourceLastOperation, error) {
+			b, err := cfClient.ServiceRouteBindings().Get(ctx, guid)
+			if err != nil || b == nil || b.LastOperation == nil {
+				return nil, err
+			}
+			lo := b.LastOperation
+			return &jobResourceLastOperation{opType: lo.Type, state: lo.State, description: derefStr(lo.Description)}, nil
+		},
+	}
+)
+
+// jobResourceLinks lists the job link keys the outcome check follows. CF
+// names the link after the job's resource_type, which differs per job class
+// and not only per resource: instance create/update say service_instances,
+// instance delete says service_instance (verified on CF API 3.226); app
+// bindings and keys share service_credential_binding (captured); route
+// bindings say service_route_binding (Cloud Controller's resource_type for
+// route binding jobs; not captured). A slice, not a map, so a job carrying
+// more than one is checked in a fixed order.
+var jobResourceLinks = []struct {
+	key      string
+	resource jobResource
+}{
+	{"service_instances", serviceInstanceJobResource},
+	{"service_instance", serviceInstanceJobResource},
+	{"service_credential_binding", serviceCredentialBindingJobResource},
+	{"service_route_binding", serviceRouteBindingJobResource},
+}
+
+// checkJobResourceOutcome re-reads the resource a COMPLETE job ran against
+// and returns a StratosError when its last_operation records that same
+// operation as failed. A broker can report failure on the resource while
+// the job itself completes; without this check that failure reads as
+// success (the wizard confirms a create the broker rejected).
+//
+// The operation is the suffix of the job's operation ("service_keys.create"
+// → "create") and must match last_operation.type, so an update job does
+// not report a stale create failure. Returns nil — the job stays COMPLETE —
+// when the job links no service resource (CF drops the link once a delete
+// has removed the resource), when the GET fails (a 404 after a delete means
+// the resource is gone; any other error we would rather surface as a
+// success the user can reconcile than block a healthy write), and when the
+// last_operation is succeeded or still in progress.
+func checkJobResourceOutcome(ctx context.Context, cfClient capi.Client, job *capi.Job) *stratosjobs.StratosError {
+	operation := job.Operation[strings.LastIndex(job.Operation, ".")+1:]
+	for _, l := range jobResourceLinks {
+		link, ok := job.Links[l.key]
+		if !ok {
+			continue
+		}
+		guid := link.Href[strings.LastIndex(link.Href, "/")+1:]
+		if guid == "" {
+			return nil
+		}
+		lo, err := l.resource.get(ctx, cfClient, guid)
+		if err != nil || lo == nil || lo.state != "failed" || lo.opType != operation {
+			return nil
+		}
+		desc := lo.description
+		if desc == "" {
+			desc = "service broker rejected the " + operation
+		}
+		return &stratosjobs.StratosError{
+			Code:    l.resource.code,
+			Message: l.resource.label + " " + operation + " failed",
+			Detail:  desc,
+		}
+	}
+	return nil
 }
 
 // translateCFJobState maps the CF job state string onto JobState. Unknown

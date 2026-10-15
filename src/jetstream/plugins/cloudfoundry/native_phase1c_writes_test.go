@@ -541,10 +541,10 @@ func TestUpdateManagedServiceInstance_Empty202_ParsesJobFromLocation(t *testing.
 	assert.Equal(t, http.StatusAccepted, rec.Code)
 }
 
-// The update job reaches COMPLETE regardless of broker outcome (same CF
-// quirk as create) — checkManagedSIUpdateOutcome must re-read the SI's
-// last_operation and surface a broker rejection as 422 instead of a false
-// "updated" confirmation. This preserves the GH#5431 UX coverage on the
+// The update job can reach COMPLETE regardless of broker outcome (same CF
+// quirk as create) — the job translator's outcome check must re-read the
+// SI's last_operation and surface a broker rejection as 422 instead of a
+// false "updated" confirmation. This preserves the GH#5431 UX coverage on the
 // native path now that the empty-202 recovery shim is gone.
 func TestUpdateManagedServiceInstance_Empty202_BrokerFailed(t *testing.T) {
 	ts := newCaptureServer(map[string]capiHandler{
@@ -553,10 +553,15 @@ func TestUpdateManagedServiceInstance_Empty202_BrokerFailed(t *testing.T) {
 			w.WriteHeader(http.StatusAccepted)
 		},
 		"GET /v3/jobs/job-1": func(w http.ResponseWriter, _ *http.Request) {
+			// CF names the instance under links.service_instances on an
+			// update job, running or complete (testdata/cf-jobs captures).
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"guid":      "job-1",
 				"operation": "service_instance.update",
 				"state":     "COMPLETE",
+				"links": map[string]interface{}{
+					"service_instances": map[string]string{"href": "https://api.example.com/v3/service_instances/si-1"},
+				},
 			})
 		},
 		"GET /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {
@@ -600,10 +605,15 @@ func TestUpdateManagedServiceInstance_Empty202_Succeeded(t *testing.T) {
 			w.WriteHeader(http.StatusAccepted)
 		},
 		"GET /v3/jobs/job-1": func(w http.ResponseWriter, _ *http.Request) {
+			// CF names the instance under links.service_instances on an
+			// update job, running or complete (testdata/cf-jobs captures).
 			_ = json.NewEncoder(w).Encode(map[string]interface{}{
 				"guid":      "job-1",
 				"operation": "service_instance.update",
 				"state":     "COMPLETE",
+				"links": map[string]interface{}{
+					"service_instances": map[string]string{"href": "https://api.example.com/v3/service_instances/si-1"},
+				},
 			})
 		},
 		"GET /v3/service_instances/si-1": func(w http.ResponseWriter, _ *http.Request) {

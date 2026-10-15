@@ -1,0 +1,47 @@
+{
+  "guid": "b515e345-2143-4436-b978-11fd28874063",
+  "created_at": "2026-10-14T04:27:45Z",
+  "updated_at": "2026-10-14T04:28:49Z",
+  "name": null,
+  "type": "app",
+  "last_operation": {
+    "type": "create",
+    "state": "failed",
+    "description": "Operation failed",
+    "created_at": "2026-10-14T04:27:45Z",
+    "updated_at": "2026-10-14T04:28:49Z"
+  },
+  "metadata": {
+    "labels": {},
+    "annotations": {}
+  },
+  "relationships": {
+    "app": {
+      "data": {
+        "guid": "5a1d2c3e-8f4b-4e6a-9c7d-2b1e0f3a4d5c"
+      }
+    },
+    "service_instance": {
+      "data": {
+        "guid": "6e1a2814-b77a-4174-8993-0493279c88ff"
+      }
+    }
+  },
+  "links": {
+    "self": {
+      "href": "https://api.example.com/v3/service_credential_bindings/b515e345-2143-4436-b978-11fd28874063"
+    },
+    "details": {
+      "href": "https://api.example.com/v3/service_credential_bindings/b515e345-2143-4436-b978-11fd28874063/details"
+    },
+    "parameters": {
+      "href": "https://api.example.com/v3/service_credential_bindings/b515e345-2143-4436-b978-11fd28874063/parameters"
+    },
+    "app": {
+      "href": "https://api.example.com/v3/apps/5a1d2c3e-8f4b-4e6a-9c7d-2b1e0f3a4d5c"
+    },
+    "service_instance": {
+      "href": "https://api.example.com/v3/service_instances/6e1a2814-b77a-4174-8993-0493279c88ff"
+    }
+  }
+}

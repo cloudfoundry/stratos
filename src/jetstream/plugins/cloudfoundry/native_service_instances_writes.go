@@ -2,11 +2,9 @@
 package cloudfoundry
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
@@ -161,18 +159,11 @@ func (cf *CloudFoundrySpecification) createManagedServiceInstance(c *echo.Contex
 
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
+		// A broker rejection recorded only on the new instance's
+		// last_operation arrives here as FAILED too: the job translator
+		// re-reads the instance when the job completes.
 		if res.State == stratosjobs.JobStateFailed {
 			return stratosjobs.WriteFailed(c, res.Errors)
-		}
-		// CF's create job completes (state=COMPLETE) regardless of broker
-		// outcome — the actual provision result lands on the new
-		// service_instance's last_operation. Without this re-check a
-		// broker error silently looks like success: the wizard shows a
-		// green confirmation while the SI sits with last_operation.state
-		// = "failed". Re-fetch the SI from the job links and surface a
-		// proper failure envelope when the broker rejected the create.
-		if siErr := checkManagedSICreateOutcome(reqCtx, cfClient, res.Result); siErr != nil {
-			return stratosjobs.WriteFailed(c, []stratosjobs.StratosError{*siErr})
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
@@ -180,77 +171,6 @@ func (cf *CloudFoundrySpecification) createManagedServiceInstance(c *echo.Contex
 		})
 	}
 	return c.JSON(http.StatusAccepted, res.HandoffJob)
-}
-
-// checkManagedSICreateOutcome walks the job-result links produced by the
-// async translator, GETs the new service_instance, and returns a
-// StratosError when last_operation.state == "failed". Returns nil when the
-// SI provisioned successfully, when the link can't be parsed (we'd rather
-// the user see a success they can reconcile than block a healthy create),
-// or when the GET itself errors.
-func checkManagedSICreateOutcome(ctx context.Context, cfClient capi.Client, result interface{}) *stratosjobs.StratosError {
-	resultMap, ok := result.(map[string]interface{})
-	if !ok {
-		return nil
-	}
-	links, ok := resultMap["links"].(map[string]string)
-	if !ok {
-		return nil
-	}
-	href := links["service_instances"]
-	if href == "" {
-		return nil
-	}
-	idx := strings.LastIndex(href, "/")
-	if idx < 0 || idx == len(href)-1 {
-		return nil
-	}
-	siGUID := href[idx+1:]
-	si, err := cfClient.ServiceInstances().Get(ctx, siGUID)
-	if err != nil || si == nil || si.LastOperation == nil {
-		return nil
-	}
-	if si.LastOperation.State != "failed" {
-		return nil
-	}
-	desc := si.LastOperation.Description
-	if desc == "" {
-		desc = "service broker rejected the create"
-	}
-	return &stratosjobs.StratosError{
-		Code:    "cf.service_instance.last_operation.failed",
-		Message: "Service instance create failed",
-		Detail:  desc,
-	}
-}
-
-// checkManagedSIUpdateOutcome is the update-path sibling of
-// checkManagedSICreateOutcome: CF's service_instance.update job can reach
-// COMPLETE regardless of broker outcome — the real result lands on the SI's
-// last_operation. Without this re-check a broker rejection looks like a
-// successful update (the GH#5431 failure mode, previously surfaced by the
-// fw-capi empty-202 recovery shim this replaces). Unlike create, the SI guid
-// is already known from the request path, so no job-link parsing is needed.
-// Returns nil on success, on a non-update last_operation, or when the GET
-// itself errors (prefer a reconcilable success over blocking a healthy
-// update).
-func checkManagedSIUpdateOutcome(ctx context.Context, cfClient capi.Client, siGUID string) *stratosjobs.StratosError {
-	si, err := cfClient.ServiceInstances().Get(ctx, siGUID)
-	if err != nil || si == nil || si.LastOperation == nil {
-		return nil
-	}
-	if si.LastOperation.Type != "update" || si.LastOperation.State != "failed" {
-		return nil
-	}
-	desc := si.LastOperation.Description
-	if desc == "" {
-		desc = "service broker rejected the update"
-	}
-	return &stratosjobs.StratosError{
-		Code:    "cf.service_instance.last_operation.failed",
-		Message: "Service instance update failed",
-		Detail:  desc,
-	}
 }
 
 // updateManagedServiceInstance handles PATCH /pp/v1/cf/service_instances/{cnsiGuid}/{siGuid}
@@ -307,14 +227,10 @@ func (cf *CloudFoundrySpecification) updateManagedServiceInstance(c *echo.Contex
 
 	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	if res.Resolved {
+		// As for create, a broker rejection recorded on the instance's
+		// last_operation arrives as FAILED from the job translator.
 		if res.State == stratosjobs.JobStateFailed {
 			return stratosjobs.WriteFailed(c, res.Errors)
-		}
-		// Same job-completes-anyway quirk as create — re-check the SI's
-		// last_operation so a broker rejection surfaces as a failure
-		// instead of a false "updated" confirmation.
-		if siErr := checkManagedSIUpdateOutcome(reqCtx, cfClient, siGUID); siErr != nil {
-			return stratosjobs.WriteFailed(c, []stratosjobs.StratosError{*siErr})
 		}
 		return c.JSON(http.StatusOK, map[string]interface{}{
 			"state":  res.State,
