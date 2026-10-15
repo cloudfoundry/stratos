@@ -8,6 +8,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
   combineLatest as observableCombineLatest,
+  firstValueFrom,
   from,
   Observable,
   Subscription,
@@ -389,9 +390,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     // selected instance already exists. Just trigger the bind flow.
     if (this.bindExistingInstance) {
       const existingGuid = this.selectExistingInstanceForm.controls.serviceInstance.value;
-      return this.bindAppIfRequested(existingGuid, state);
+      const instances = await firstValueFrom(this.bindableServiceInstances$);
+      const existingName = instances.find(si => si.guid === existingGuid)?.name ?? existingGuid;
+      return this.bindAppIfRequested(existingGuid, state, existingName, false);
     }
 
+    // Name messages after what the form sent: wizard state carries no name
+    // on create, and the instance's old name when it is renamed on edit.
+    const name = this.createNewInstanceForm.controls.name.value;
     const isEditMode = this.modeService.isEditServiceInstanceMode();
     const verb = isEditMode ? 'update' : 'create';
     const body = this.buildWriteBody(state, isEditMode);
@@ -416,13 +422,13 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     if (result.status === 'UNKNOWN') {
       // Ended, result unknown: never claim it was created or updated, and
       // say a requested bind was not attempted.
-      const leadIn = `${isEditMode ? 'Update' : 'Create'} service instance "${state.name}"`;
+      const leadIn = `${isEditMode ? 'Update' : 'Create'} service instance "${name}"`;
       const notBound = !isEditMode && state.bindAppGuid ? ' It was not bound to the application.' : '';
       return { success: false, message: unknownOutcomeMessage(leadIn, 'The Services list') + notBound };
     }
 
     if (isEditMode) {
-      return this.routeToServices(`Service instance "${state.name}" updated.`);
+      return this.routeToServices(`Service instance "${name}" updated.`);
     }
 
     // Create path: try to extract the new SI's guid for the bind-after-create
@@ -433,11 +439,15 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     if (newGuid) {
       this.csiState.setServiceInstanceGuid(newGuid);
     }
-    return this.bindAppIfRequested(newGuid, state);
+    return this.bindAppIfRequested(newGuid, state, name, true);
   }
 
-  private async bindAppIfRequested(siGuid: string | undefined, state: CsiState): Promise<StepOnNextResult> {
-    const siName = state.name || 'Service instance';
+  private async bindAppIfRequested(
+    siGuid: string | undefined,
+    state: CsiState,
+    siName: string,
+    created: boolean,
+  ): Promise<StepOnNextResult> {
     if (!state.bindAppGuid || !siGuid) {
       return this.routeToServices(`Service instance "${siName}" created.`);
     }
@@ -453,7 +463,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       return {
         success: false,
         message: unknownOutcomeMessage(
-          `Service instance "${siName}" was created. Binding it to the application`,
+          created
+            ? `Service instance "${siName}" was created. Binding it to the application`
+            : `Binding service instance "${siName}" to the application`,
           'The application\'s Services tab',
         ),
       };
@@ -469,7 +481,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     // priming state nothing on this navigation reads. The app's env-vars
     // tab fetches fresh on next mount via AppDetailDataService —
     // dropping the prefetch is functionally a no-op.
-    return this.routeToServices(`Service instance "${siName}" created and bound.`);
+    return this.routeToServices(created
+      ? `Service instance "${siName}" created and bound.`
+      : `Service instance "${siName}" bound to the application.`);
   }
 
   private buildWriteBody(state: CsiState, isEditMode: boolean): Record<string, unknown> {

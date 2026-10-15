@@ -185,7 +185,10 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       serviceInstanceGuid: opts.isEditMode ? 'si-existing' : undefined,
       bindAppGuid: opts.bindAppGuid,
       bindAppParams: opts.csiBindParams,
-      name: 'my-instance',
+      // As in the real wizard: create never writes the name into wizard
+      // state, and edit seeds it with the instance's name before the user
+      // renames it in the form. Messages must name what the form sent.
+      name: opts.isEditMode ? 'my-old-instance' : '',
       spaceScoped: false,
     };
 
@@ -242,6 +245,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
   it('POSTs the v3 managed body and returns success+redirect on create without bind', async () => {
     const { component, httpMock } = setup();
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
 
@@ -269,13 +273,32 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     );
 
     await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith('Service instance "my-instance" created.', 'Dismiss', { duration: 4000 });
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  it('binds an existing instance and names it, without claiming it was created', async () => {
+    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    component.bindExistingInstance = true;
+    component.bindableServiceInstances$ = of([
+      { guid: 'si-1', name: 'instance-one' },
+      { guid: 'si-2', name: 'instance-two' },
+    ] as StServiceInstance[]);
+    component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
+
+    await expect(firstValueFrom(component.onNext())).resolves.toEqual({ success: true, redirect: true });
+    expect(modeServiceStub.createApplicationServiceBinding).toHaveBeenCalledWith('si-2', 'cnsi-1', 'app-1', undefined);
+    expect(snackBarOpen).toHaveBeenCalledWith('Service instance "instance-two" bound to the application.', 'Dismiss', { duration: 4000 });
+    httpMock.expectNone('/pp/v1/cf/service_instances/cnsi-1');
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
   it('chains into bind when bindAppGuid is set and a SI guid is extractable', async () => {
     const { component, modeServiceStub, csiStateStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
 
@@ -293,6 +316,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     );
 
     await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith('Service instance "my-instance" created and bound.', 'Dismiss', { duration: 4000 });
     expect(csiStateStub.setServiceInstanceGuid).toHaveBeenCalledWith('si-new');
     expect(modeServiceStub.createApplicationServiceBinding).toHaveBeenCalledWith(
       'si-new', 'cnsi-1', 'app-1', undefined,
@@ -366,6 +390,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
   it('PATCHes the v3 endpoint and returns success+redirect on update', async () => {
     const { component, httpMock } = setup({ isEditMode: true });
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
 
@@ -381,6 +406,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     );
 
     await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith('Service instance "my-instance" updated.', 'Dismiss', { duration: 4000 });
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
