@@ -350,26 +350,77 @@ func TestRefresh_StageEmittingTranslator_HasFalse_NoStage(t *testing.T) {
 	}
 }
 
-func TestSweep_LeavesNonTerminalAlone(t *testing.T) {
+// A non-terminal job nobody has polled for MaxIdle is dropped: its
+// client is gone (tab closed, a rebuilt job whose only poll failed), and
+// keeping it would grow the tracker without bound.
+func TestSweep_EvictsNonTerminalNotPolledForMaxIdle(t *testing.T) {
 	now := time.Date(2026, 4, 22, 20, 0, 0, 0, time.UTC)
 	clock := now
 	tr := NewInMemoryTracker(InMemoryTrackerConfig{
 		TTL:           5 * time.Minute,
+		MaxIdle:       time.Hour,
 		SweepInterval: time.Hour,
 		Clock:         func() time.Time { return clock },
 	})
 	t.Cleanup(tr.Stop)
 
 	tl := &stubTranslator{fn: func(int) (JobState, []StratosError, interface{}, error) {
+		return "", nil, nil, errors.New("network down")
+	}}
+	id := tr.Create("k", tl, "r")
+	tr.Refresh(context.Background(), id)
+
+	clock = now.Add(59 * time.Minute)
+	tr.sweep()
+	if _, ok := tr.Get(id); !ok {
+		t.Fatal("expected job still present before MaxIdle elapses")
+	}
+
+	clock = now.Add(61 * time.Minute)
+	tr.sweep()
+	if _, ok := tr.Get(id); ok {
+		t.Error("expected non-terminal job evicted once unpolled for MaxIdle")
+	}
+}
+
+// A long backend operation stays tracked while its client keeps polling,
+// however long it runs, and a poll that hits a transport error still
+// counts: the client is still waiting.
+func TestSweep_KeepsNonTerminalStillBeingPolled(t *testing.T) {
+	now := time.Date(2026, 4, 22, 20, 0, 0, 0, time.UTC)
+	clock := now
+	tr := NewInMemoryTracker(InMemoryTrackerConfig{
+		TTL:           5 * time.Minute,
+		MaxIdle:       time.Hour,
+		SweepInterval: time.Hour,
+		Clock:         func() time.Time { return clock },
+	})
+	t.Cleanup(tr.Stop)
+
+	tl := &stubTranslator{fn: func(call int) (JobState, []StratosError, interface{}, error) {
+		if call%2 == 0 {
+			return "", nil, nil, errors.New("network down")
+		}
 		return JobStateProcessing, nil, nil, nil
 	}}
 	id := tr.Create("k", tl, "r")
 
-	// Advance clock well past what would be TTL if the job were terminal.
-	clock = now.Add(24 * time.Hour)
-	tr.sweep()
+	for elapsed := time.Duration(0); elapsed <= 24*time.Hour; elapsed += 30 * time.Minute {
+		clock = now.Add(elapsed)
+		if _, ok := tr.Refresh(context.Background(), id); !ok {
+			t.Fatalf("job dropped while still polled, %v in", elapsed)
+		}
+		tr.sweep()
+	}
 	if _, ok := tr.Get(id); !ok {
-		t.Error("non-terminal job should never be evicted by TTL sweep")
+		t.Error("expected a polled non-terminal job to stay tracked")
+	}
+}
+
+func TestNewInMemoryTracker_DefaultMaxIdle(t *testing.T) {
+	tr := newTestTracker(t, time.Now)
+	if tr.maxIdle != DefaultMaxIdle {
+		t.Errorf("expected default MaxIdle %v, got %v", DefaultMaxIdle, tr.maxIdle)
 	}
 }
 
@@ -440,7 +491,7 @@ func TestMetrics_WiringFiresOnLifecycle(t *testing.T) {
 		t.Fatal("refresh failed")
 	}
 
-	clock = now.Add(time.Hour)
+	clock = now.Add(30 * time.Minute) // past TTL, inside MaxIdle
 	tr.sweep()
 	// Only the first job became terminal; the refresh-path job is still
 	// PROCESSING and remains in the tracker.
