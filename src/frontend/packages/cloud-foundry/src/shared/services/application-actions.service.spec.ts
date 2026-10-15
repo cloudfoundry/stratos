@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BehaviorSubject } from 'rxjs';
@@ -11,7 +11,7 @@ import { AppLifecycleStateService } from '../../features/applications/app-lifecy
 import { ApplicationService } from '../../features/applications/application.service';
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
-import { ConfirmationDialogService } from '@stratosui/core';
+import { ConfirmationDialogService, TailwindSnackBarService } from '@stratosui/core';
 import type { StratosJob, JobStage } from '../../services/async-jobs/async-job.types';
 
 import {
@@ -484,6 +484,29 @@ describe('AppApplicationActionsService', () => {
     const log = svc.log();
     expect(log.find(e => e.event === 'fail')).toBeDefined();
     expect(appsStub._removeRow).not.toHaveBeenCalled();
+  });
+
+  it('delete with an unknown result: keeps the row, stays on the page and says so', async () => {
+    appsStub.deleteApp.mockImplementationOnce(async () => 'unknown');
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigateByUrl');
+    const snackBar = TestBed.inject(TailwindSnackBarService);
+    const open = vi.spyOn(snackBar, 'open');
+    const data = TestBed.inject(AppDetailDataService) as unknown as { refresh: ReturnType<typeof vi.fn> };
+
+    void svc.deleteWithCleanup([], [], { appName: 'my-app', endpointName: 'cf', orgName: 'o', spaceName: 's' });
+    await tick(8);
+
+    expect(appsStub._removeRow).not.toHaveBeenCalled();
+    expect(navigate).not.toHaveBeenCalled();
+    expect(open).not.toHaveBeenCalled();
+    expect(data.refresh).toHaveBeenCalledWith('all');
+    expect(svc.outcome()).toBe('unknown');
+    expect(svc.displayLabel()).toBe('Delete result unknown');
+    expect(svc.outcomeError()).toBe(
+      'Delete "my-app": the operation ended, but its result could not be determined. '
+      + 'This page shows the current state.',
+    );
   });
 
   it('non-delete success paths: do NOT call orchestrator.removeRow', async () => {

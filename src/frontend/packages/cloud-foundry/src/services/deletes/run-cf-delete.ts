@@ -1,14 +1,17 @@
 import type { HttpClient } from '@angular/common/http';
+import type { DeleteOutcome } from './delete-event.types';
 import type { EntityDeleteController } from './entity-delete.controller';
 
 /**
  * Shared helper that routes a CF entity delete through the
  * EntityDeleteController chokepoint. Builds the DeleteRequest (a CF v3
  * DELETE with `observe: 'response'` so writeWithJob can read the 202 + job
- * URL), awaits the terminal lifecycle event, and throws on a non-success
- * terminal (failure or blocked) so the calling component's catch can surface
- * a snackbar — for blocked, the stored CF error (e.g. association_not_empty)
- * carries through.
+ * URL), awaits the terminal lifecycle event, and throws on a failure or
+ * blocked terminal so the calling component's catch can surface a snackbar —
+ * for blocked, the stored CF error (e.g. association_not_empty) carries
+ * through. Otherwise resolves how the delete ended: 'deleted', or 'unknown'
+ * when it ended with a result nobody can determine — callers must then not
+ * act as if the entity were gone (no row removal, no navigating away).
  *
  * Every per-entity signal-config `deleteX` is a thin call to this so the
  * delete-and-invalidate path has exactly one implementation.
@@ -26,7 +29,7 @@ export async function runCfDelete(
     /** The CF v3 DELETE path, e.g. `/pp/v1/cf/spaces/{cnsi}/{guid}`. */
     path: string;
   },
-): Promise<void> {
+): Promise<DeleteOutcome> {
   const deleteName = req.deleteName ?? req.deleteGuid;
   const result = await controller.delete({
     cnsiGuid: req.cnsiGuid,
@@ -39,4 +42,5 @@ export async function runCfDelete(
   if (result.state === 'failure' || result.state === 'blocked') {
     throw result.error ?? new Error(`Failed to delete ${req.entityKind} "${deleteName}"`);
   }
+  return result.state === 'unknown' ? 'unknown' : 'deleted';
 }

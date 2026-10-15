@@ -72,13 +72,22 @@ describe('runCfDelete', () => {
     ).rejects.toBe(boom);
   });
 
-  it('resolves void on success', async () => {
+  it('resolves deleted on success', async () => {
     const controller = makeController({});
     await expect(
       runCfDelete(controller, makeHttp(), {
         cnsiGuid: 'c1', entityKind: 'space', deleteGuid: 's1', path: '/pp/v1/cf/spaces/c1/s1',
       }),
-    ).resolves.toBeUndefined();
+    ).resolves.toBe('deleted');
+  });
+
+  it('resolves unknown when the delete ended with an unknown result', async () => {
+    const controller = makeController({ state: 'unknown' });
+    await expect(
+      runCfDelete(controller, makeHttp(), {
+        cnsiGuid: 'c1', entityKind: 'space', deleteGuid: 's1', path: '/pp/v1/cf/spaces/c1/s1',
+      }),
+    ).resolves.toBe('unknown');
   });
 });
 
@@ -101,7 +110,7 @@ describe('runCfDelete — service instance, recorded backend answers', () => {
         });
         await answerServiceWrite(httpMock, '/pp/v1/cf/service_instances/cnsi-1/si-1', serviceWriteContract(`${broker}-service-instance-delete`), path);
 
-        await expect(done).resolves.toBeUndefined();
+        await expect(done).resolves.toBe('deleted');
       });
     }
   }

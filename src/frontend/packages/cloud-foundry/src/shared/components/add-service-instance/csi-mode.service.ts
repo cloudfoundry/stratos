@@ -6,6 +6,8 @@ import { Observable, defer, firstValueFrom, from } from 'rxjs';
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
+import type { AsyncJobStatus } from '../../../services/async-jobs/async-job.types';
+import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { extractHttpErrorMessage } from '@stratosui/store';
@@ -56,6 +58,17 @@ const defaultViewDetail = {
   showBindApp: true,
   showSpecifyDetails: true
 };
+
+/**
+ * How an app bind requested by the wizard ended. `unknown`: the bind ended
+ * but its result could not be determined, so it must not be reported as
+ * bound (nor as failed).
+ */
+export interface BindResult {
+  success: boolean;
+  unknown?: boolean;
+  message?: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -171,7 +184,7 @@ export class CsiModeService {
     cfGuid: string,
     appGuid: string,
     params: object | undefined,
-  ): Observable<{ success: boolean; message?: string }> {
+  ): Observable<BindResult> {
     return defer(() => from(this.bindWithProvisioningWait(serviceInstanceGuid, cfGuid, appGuid, params)));
   }
 
@@ -187,7 +200,7 @@ export class CsiModeService {
     params: object | undefined,
     inlineWaitMs = 15_000,
     backgroundWaitMs = 600_000,
-  ): Promise<{ success: boolean; message?: string }> {
+  ): Promise<BindResult> {
     const body: Record<string, unknown> = {
       type: 'app',
       relationships: {
@@ -198,8 +211,8 @@ export class CsiModeService {
     if (params && Object.keys(params).length > 0) {
       body['parameters'] = params;
     }
-    const fireBind = async () => {
-      await writeWithJob<unknown>(
+    const fireBind = async (): Promise<AsyncJobStatus> => {
+      const result = await writeWithJob<unknown>(
         this.http,
         this.http.post(`/pp/v1/cf/service_bindings/${cfGuid}`, body, { observe: 'response' }),
       );
@@ -210,11 +223,14 @@ export class CsiModeService {
       // serviceInstanceReducer cross-entity update as cache invalidation;
       // covers both the inline and the background-retry bind paths.
       this.endpointDataRegistry.peek(cfGuid)?.applyCascade('serviceBinding.create');
+      return result.status;
     };
+    // UNKNOWN: the bind ended but nobody can say whether it happened.
+    const outcome = (status: AsyncJobStatus): BindResult =>
+      status === 'UNKNOWN' ? { success: false, unknown: true } : { success: true };
 
     try {
-      await fireBind();
-      return { success: true };
+      return outcome(await fireBind());
     } catch (err: unknown) {
       if (!isOperationInProgressError(err)) {
         return { success: false, message: extractHttpErrorMessage(err) };
@@ -230,8 +246,7 @@ export class CsiModeService {
     }
     if (settled.state === 'succeeded') {
       try {
-        await fireBind();
-        return { success: true };
+        return outcome(await fireBind());
       } catch (err: unknown) {
         return { success: false, message: extractHttpErrorMessage(err) };
       }
@@ -247,7 +262,7 @@ export class CsiModeService {
     siGuid: string,
     cfGuid: string,
     appGuid: string,
-    fireBind: () => Promise<unknown>,
+    fireBind: () => Promise<AsyncJobStatus>,
     waitMs: number,
   ): Promise<void> {
     this.snackBar.open(
@@ -258,8 +273,12 @@ export class CsiModeService {
     const settled = await this.waitForServiceInstanceReady(cfGuid, siGuid, waitMs);
     if (settled.state === 'succeeded') {
       try {
-        await fireBind();
-        this.snackBar.open(`Service instance bound to app.`, undefined, { duration: 10_000 });
+        if (await fireBind() === 'UNKNOWN') {
+          this.snackBar.error(unknownOutcomeMessage(
+            'Service instance ready. Binding it to the app', 'The application\'s Services tab'));
+        } else {
+          this.snackBar.open(`Service instance bound to app.`, undefined, { duration: 10_000 });
+        }
       } catch (err: unknown) {
         this.snackBar.error(`Service instance ready, but bind failed: ${extractHttpErrorMessage(err)}`);
       }

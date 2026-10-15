@@ -1,10 +1,11 @@
 import { provideZonelessChangeDetection, signal, Signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
+import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { of } from 'rxjs';
 
 import { ServiceInstanceSummaryComponent } from './service-instance-summary.component';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -144,5 +145,86 @@ describe('ServiceInstanceSummaryComponent — Parameters / Credentials sections'
   it('does not offer share for a user-provided instance', () => {
     const c = build(ups);
     expect(c.canShare()).toBe(false);
+  });
+});
+
+// A delete or unbind that ends with an unknown result must not act as if it
+// worked: the page stays, says so, and re-reads what it shows.
+describe('ServiceInstanceSummaryComponent — unknown results', () => {
+  let catalog: {
+    serviceInstance: ReturnType<typeof vi.fn>;
+    serviceBindingsForInstance: ReturnType<typeof vi.fn>;
+  };
+  let router: Router;
+  let snackBar: { error: ReturnType<typeof vi.fn> };
+  let confirmed: (() => Promise<void>) | undefined;
+
+  function build(opts: { deleteOutcome?: string; unbindState?: string }) {
+    catalog = {
+      serviceInstance: vi.fn(() => source<StServiceInstance | null>(managed)),
+      serviceBindingsForInstance: vi.fn(() => source([])),
+    };
+    snackBar = { error: vi.fn() };
+    confirmed = undefined;
+    TestBed.configureTestingModule({
+      imports: [ServiceInstanceSummaryComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: ServiceCatalogDataService, useValue: catalog },
+        { provide: EndpointDataRegistry, useValue: { acquire: vi.fn(), release: vi.fn() } },
+        {
+          provide: EntityDeleteController,
+          useValue: { delete: vi.fn(() => ({ events$: of(), done: Promise.resolve({ state: opts.unbindState ?? 'success' }) })) },
+        },
+        {
+          provide: CfServiceInstancesSignalConfigService,
+          useValue: { deleteServiceInstance: vi.fn().mockResolvedValue(opts.deleteOutcome ?? 'deleted') },
+        },
+        { provide: ConfirmationDialogService, useValue: { open: vi.fn((_c: unknown, cb: () => Promise<void>) => { confirmed = cb; }) } },
+        { provide: TailwindSnackBarService, useValue: snackBar },
+        { provide: TailwindDialogService, useValue: { open: vi.fn() } },
+      ],
+    });
+    router = TestBed.inject(Router);
+    vi.spyOn(router, 'navigate').mockResolvedValue(true);
+    return TestBed.createComponent(ServiceInstanceSummaryComponent).componentInstance;
+  }
+
+  const runDelete = async (c: ServiceInstanceSummaryComponent): Promise<void> => {
+    c.runAction(c.actions().find(a => a.label === 'Delete')!);
+    await confirmed!();
+  };
+
+  beforeEach(() => TestBed.resetTestingModule());
+
+  it('navigates back to the services list after a delete', async () => {
+    const c = build({ deleteOutcome: 'deleted' });
+    await runDelete(c);
+    expect(router.navigate).toHaveBeenCalledWith(['/services']);
+    expect(snackBar.error).not.toHaveBeenCalled();
+  });
+
+  it('stays on the page, says the result is unknown and re-reads the instance', async () => {
+    const c = build({ deleteOutcome: 'unknown' });
+    await runDelete(c);
+    expect(router.navigate).not.toHaveBeenCalled();
+    expect(snackBar.error).toHaveBeenCalledWith(
+      'Delete "db": the operation ended, but its result could not be determined. This page shows the current state.',
+    );
+    expect(catalog.serviceInstance).toHaveBeenCalledTimes(2);
+  });
+
+  it('says an unbind result is unknown and re-reads the bindings', async () => {
+    const c = build({ unbindState: 'unknown' });
+    c.unbind({ guid: 'b-1', appName: 'my-app' });
+    await confirmed!();
+    expect(snackBar.error).toHaveBeenCalledWith(
+      'Unbind "my-app": the operation ended, but its result could not be determined. This page shows the current state.',
+    );
+    expect(catalog.serviceBindingsForInstance).toHaveBeenCalledTimes(2);
   });
 });

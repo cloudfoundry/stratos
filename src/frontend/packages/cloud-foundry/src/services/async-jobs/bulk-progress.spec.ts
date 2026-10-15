@@ -22,7 +22,7 @@ describe('pollBulkResult', () => {
       { guid: 'a', state: 'COMPLETE' },
       { guid: 'b', state: 'FAILED' },
     ]));
-    expect(t).toEqual({ settled: 2, deleted: 1, failed: 1, unconfirmed: 0, total: 2 });
+    expect(t).toEqual({ settled: 2, deleted: 1, failed: 1, unknown: 0, total: 2 });
     expect((http as any).get).not.toHaveBeenCalled();
   });
 
@@ -43,12 +43,12 @@ describe('pollBulkResult', () => {
       { guid: 'b', state: 'PENDING', job: job('j-1', 'PROCESSING') },
       { guid: 'c', state: 'PENDING', job: job('j-2', 'PROCESSING') },
     ]), { backoffMs: [0], onProgress: t => progress.push(t.settled) });
-    expect(t).toEqual({ settled: 3, deleted: 2, failed: 1, unconfirmed: 0, total: 3 });
+    expect(t).toEqual({ settled: 3, deleted: 2, failed: 1, unknown: 0, total: 3 });
     expect(progress[0]).toBe(1);            // fast-path tally reported first
     expect(progress.at(-1)).toBe(3);
   });
 
-  it('counts PENDING-without-job and poll-UNKNOWN as unconfirmed', async () => {
+  it('counts PENDING-without-job and poll-UNKNOWN as ended with an unknown result', async () => {
     const http = {
       // pollJob ends a job the backend does not know (404) as UNKNOWN
       get: vi.fn(() => throwError(() => new HttpErrorResponse({ status: 404, statusText: 'Not Found' }))),
@@ -57,7 +57,7 @@ describe('pollBulkResult', () => {
       { guid: 'a', state: 'PENDING' },                                  // no job handoff
       { guid: 'b', state: 'PENDING', job: job('j-x', 'PROCESSING') },   // poll → UNKNOWN
     ]), { backoffMs: [0] });
-    expect(t.unconfirmed).toBe(2);
+    expect(t.unknown).toBe(2);
     expect(t.settled).toBe(2);
   });
 
@@ -162,6 +162,25 @@ describe('runBulkWithProgress', () => {
     });
     await flush();
     expect(sb.error).toHaveBeenCalledWith('1 application deleted, 1 failed');
+    expect(refresh).toHaveBeenCalled();
+  });
+
+  it('unknown results → persistent summary that says so + refresh', async () => {
+    const sb = makeSnackBar();
+    const refresh = vi.fn(async () => {});
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => bulk([
+        { guid: 'a', state: 'COMPLETE' },
+        { guid: 'b', state: 'FAILED' },
+        { guid: 'c', state: 'PENDING' },
+        { guid: 'd', state: 'PENDING' },
+      ]),
+      refresh,
+    });
+    await flush();
+    expect(sb.error).toHaveBeenCalledWith('1 application deleted, 1 failed, 2 results could not be determined');
     expect(refresh).toHaveBeenCalled();
   });
 

@@ -1,7 +1,12 @@
 import { Observable } from 'rxjs';
 import { HttpResponse } from '@angular/common/http';
 
-export type DeleteState = 'start' | 'in-process' | 'success' | 'failure' | 'blocked';
+// `unknown`: the delete ended but its result could not be determined (the
+// write resolved UNKNOWN). Nothing may act as if the entity were gone.
+export type DeleteState = 'start' | 'in-process' | 'success' | 'failure' | 'blocked' | 'unknown';
+
+/** How a delete that did not fail ended, as runCfDelete reports it. */
+export type DeleteOutcome = 'deleted' | 'unknown';
 
 export type BlockReason = 'has-dependents' | 'operation-in-progress' | 'forbidden';
 

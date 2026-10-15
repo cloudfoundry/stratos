@@ -3,6 +3,7 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 
 import { ApplicationService } from '../../features/applications/application.service';
 import { EntityDeleteController } from '../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../services/deletes/run-cf-delete';
 import { serviceCredentialBindingEntityType } from '../../entity-relations/signal/cf-relation-registrations';
 
@@ -45,12 +46,13 @@ export class AppServiceBindingActionsService {
   /**
    * Unbind a service from the current app. CF V3 returns 202 + job; the
    * Promise resolves only when the job settles (COMPLETE) or rejects on
-   * FAILED. transitioningBindingGuid stays set across the full settling
-   * window so the per-row spinner holds until the binding is truly gone.
+   * FAILED; it resolves 'unknown' when the unbind ended with a result
+   * nobody can determine. transitioningBindingGuid stays set across the
+   * full settling window so the per-row spinner holds until it ends.
    *
    * Reentrancy: rejects if another verb is already in flight.
    */
-  async unbindService(bindingGuid: string): Promise<void> {
+  async unbindService(bindingGuid: string): Promise<DeleteOutcome> {
     if (this.inFlight()) {
       throw new Error('Another binding action is already in flight');
     }
@@ -60,7 +62,7 @@ export class AppServiceBindingActionsService {
       // Route through the chokepoint so the binding delete also invalidates
       // the EDS cache + reverse-edge slices (bound app/SI rollups) and fires
       // cleanup hooks — the tab still evicts its own row via removeServiceBinding.
-      await runCfDelete(this.deleteController, this.http, {
+      return await runCfDelete(this.deleteController, this.http, {
         cnsiGuid: cfGuid,
         entityKind: serviceCredentialBindingEntityType,
         deleteGuid: bindingGuid,

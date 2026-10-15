@@ -293,6 +293,32 @@ describe('ServiceKeysComponent — createKey patches the list from the response'
     expect(listFetches).toBe(2);
   });
 
+  // A write that ended with an unknown result (here: a 202 without a job id)
+  // is reported as such, never as created or deleted, and the list re-read.
+  it('says a create ended with an unknown result and re-reads the list', async () => {
+    component.newKeyName.set('maybe');
+    const done = component.createKey();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_keys/cf-1').flush(null, { status: 202, statusText: 'Accepted' });
+    await done;
+
+    expect(component.errorMessage()).toBe(
+      'Create key "maybe": the operation ended, but its result could not be determined. The Service Keys list shows the current state.',
+    );
+    expect(listFetches).toBe(2);
+  });
+
+  it('says a delete ended with an unknown result, re-reads the list and frees the row', async () => {
+    const done = component.deleteKey('k-1');
+    http.expectOne(r => r.method === 'DELETE' && r.url === '/pp/v1/cf/service_keys/cf-1/k-1').flush(null, { status: 202, statusText: 'Accepted' });
+    await done;
+
+    expect(component.errorMessage()).toBe(
+      'Delete key "first": the operation ended, but its result could not be determined. The Service Keys list shows the current state.',
+    );
+    expect(listFetches).toBe(2);
+    expect(component.rowStatus('k-1')).toBe('idle');
+  });
+
   // Recorded backend answers: a sync or async broker, on either resolve
   // path, creates and deletes keys the same way. CF answers a managed key
   // create with a job, so the list is re-read rather than patched.

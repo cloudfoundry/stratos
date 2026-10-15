@@ -29,6 +29,7 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
 import { runBulkWithProgress } from '../../../../../../../services/async-jobs/bulk-progress';
 import type { StApp, StRoute } from '../../../../../../../services/endpoint-data/stratos-types';
 import { routeHref } from '../../../../../../applications/app-detail-data.service';
+import { unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundrySpaceRoutesComponent.
 // Scoped to one space under one org under one CF endpoint (all three guids
@@ -360,9 +361,14 @@ export class CloudFoundrySpaceRoutesSignalComponent {
   // destroys the route entirely. Restores the V2-era listActionUnmap
   // dropped during the signal-native migration.
   private buildRouteActions = (route: StRoute): readonly SignalListRowAction<StRoute>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
+        if (outcome === 'unknown') {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Routes list'));
+        }
       } catch (err: unknown) {
         this.snackBar.error(`${label} failed: ${extractHttpErrorMessage(err)}`);
       }
@@ -398,7 +404,7 @@ export class CloudFoundrySpaceRoutesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () => this.routesConfig.deleteRoute(route.cnsiGuid, route.guid));
+            await runAction('Delete', () => this.routesConfig.deleteRoute(route.cnsiGuid, route.guid), route.url || route.guid);
           });
         },
       },

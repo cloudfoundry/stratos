@@ -127,13 +127,21 @@ export class EntityDeleteController {
       let terminal: DeleteEvent;
       try {
         safeNext({ ...base, state: 'start' });
-        await this.writeFn(this.http, req.call());
-        // A prior block for this key is now moot — the entity is gone.
-        this.blocked.delete(key);
-        // Invalidate caches + run cleanup BEFORE emitting success so a
-        // success observer sees a consistent post-delete world.
-        this.invalidateAndCleanup(req);
-        terminal = { ...base, state: 'success' };
+        const result = await this.writeFn(this.http, req.call());
+        if (result.status === 'UNKNOWN') {
+          // The delete ended but nobody can say whether the entity is gone.
+          // Refetch instead of removing the row, and leave favorites and
+          // recents alone, so the lists show what CF actually holds.
+          this.invalidate(req);
+          terminal = { ...base, state: 'unknown' };
+        } else {
+          // A prior block for this key is now moot — the entity is gone.
+          this.blocked.delete(key);
+          // Invalidate caches + run cleanup BEFORE emitting success so a
+          // success observer sees a consistent post-delete world.
+          this.invalidateAndCleanup(req);
+          terminal = { ...base, state: 'success' };
+        }
       } catch (error: unknown) {
         const reason = classifyBlock(error);
         if (reason) {
@@ -163,27 +171,41 @@ export class EntityDeleteController {
     const eds = this.endpoints.peek(req.cnsiGuid);
     if (eds) {
       const remover = ROW_REMOVERS[req.entityKind];
-      const slices = new Set<string>();
-      try {
-        const registry = this.relations.snapshotRegistry();
-        affectedSlices(req.entityKind, registry).forEach(s => slices.add(s));
-        referencingSlices(req.entityKind, registry).forEach(s => slices.add(s));
-      } catch { /* invalidation is best-effort */ }
       // Count-only slices (e.g. routes) have no row list to patch, so there is
       // no remover — mark the entity's own slice stale to refetch its count.
-      if (!remover) {
-        const ownSlice = ENTITY_TYPE_TO_SLICE[req.entityKind];
-        if (ownSlice) slices.add(ownSlice);
-      }
-      for (const slice of slices) {
-        try { eds.markStale(slice as EntityKind); } catch { /* per-slice best-effort */ }
-      }
+      this.markSlicesStale(eds, req, !remover);
       if (remover) {
         try { remover(eds, req.deleteGuid); } catch { /* row removal is best-effort */ }
       }
     }
     for (const cleanup of this.cleanups) {
       try { cleanup(req); } catch { /* one bad hook can't block the rest */ }
+    }
+  }
+
+  // On an unknown result: mark the same slices stale plus the entity's own,
+  // so its row is refetched rather than removed. No cleanup hooks — they
+  // assume the entity is gone.
+  private invalidate(req: DeleteRequest): void {
+    const eds = this.endpoints.peek(req.cnsiGuid);
+    if (eds) {
+      this.markSlicesStale(eds, req, true);
+    }
+  }
+
+  private markSlicesStale(eds: EndpointDataService, req: DeleteRequest, includeOwn: boolean): void {
+    const slices = new Set<string>();
+    try {
+      const registry = this.relations.snapshotRegistry();
+      affectedSlices(req.entityKind, registry).forEach(s => slices.add(s));
+      referencingSlices(req.entityKind, registry).forEach(s => slices.add(s));
+    } catch { /* invalidation is best-effort */ }
+    if (includeOwn) {
+      const ownSlice = ENTITY_TYPE_TO_SLICE[req.entityKind];
+      if (ownSlice) slices.add(ownSlice);
+    }
+    for (const slice of slices) {
+      try { eds.markStale(slice as EntityKind); } catch { /* per-slice best-effort */ }
     }
   }
 }

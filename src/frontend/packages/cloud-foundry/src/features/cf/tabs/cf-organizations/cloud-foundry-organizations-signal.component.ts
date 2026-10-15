@@ -25,6 +25,7 @@ import { CfOrgsSignalConfigService } from '../../../../shared/signal-list-config
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrg } from '../../../../services/endpoint-data/stratos-types';
+import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundryOrganizationsComponent. Reuses
 // SignalListComponent + the app-wall column-kind vocabulary (link, dot,
@@ -213,9 +214,14 @@ export class CloudFoundryOrganizationsSignalComponent {
   }
 
   private buildOrgActions = (org: StOrg): readonly SignalListRowAction<StOrg>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
+        if (outcome === 'unknown') {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Organizations list'));
+        }
       } catch (err: any) {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
       }
@@ -231,7 +237,7 @@ export class CloudFoundryOrganizationsSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () => this.orgsConfig.deleteOrg(org.cnsiGuid, org.guid, org.name));
+            await runAction('Delete', () => this.orgsConfig.deleteOrg(org.cnsiGuid, org.guid, org.name), org.name);
           });
         },
       },

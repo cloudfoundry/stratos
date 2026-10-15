@@ -33,6 +33,7 @@ import { of } from 'rxjs';
 import { JsonViewerComponent } from '../../../../../core/src/shared/components/json-viewer/json-viewer.component';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -129,7 +130,12 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
 
   private readonly cfGuid: string;
   private readonly siGuid: string;
-  private readonly source: SignalSource<StServiceInstance | null>;
+  // One-shot instance fetch; re-issued when a delete ends with an unknown
+  // result so the page shows whether the instance is still there.
+  private readonly sourceRef: WritableSignal<SignalSource<StServiceInstance | null>>;
+  private get source(): SignalSource<StServiceInstance | null> {
+    return this.sourceRef();
+  }
 
   // One-shot bindings fetch; re-issued after an unbind so the list refreshes
   // (the thin data service doesn't auto-update like the EDS rollups).
@@ -150,7 +156,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
   constructor() {
     this.cfGuid = this.route.snapshot.params.endpointId;
     this.siGuid = this.route.snapshot.params.serviceInstanceId;
-    this.source = this.serviceCatalog.serviceInstance(this.cfGuid, this.siGuid);
+    this.sourceRef = signal(this.serviceCatalog.serviceInstance(this.cfGuid, this.siGuid));
     this.bindingsSource = signal(this.serviceCatalog.serviceBindingsForInstance(this.cfGuid, this.siGuid));
 
     // Hold a refcount on the endpoint's data service so the delete chokepoint
@@ -158,7 +164,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     // app pages) after an unbind.
     this.registry.acquire(this.cfGuid);
 
-    this.loading = this.source.isLoading;
+    this.loading = computed(() => this.source.isLoading());
     this.error = computed(() => this.source.error() != null);
     this.view = computed(() => {
       const si = this.source.value();
@@ -176,7 +182,8 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     // Header action bar. Reuse the shared builder (Edit / Service Keys /
     // Delete) so the route conventions and keys gating match the lists.
     // Detach is dropped — the inline per-app Unbind above covers it. Delete
-    // here also navigates back to the wall, since the page's instance is gone.
+    // here also navigates back to the wall, since the page's instance is gone;
+    // after an unknown result the page stays and re-reads the instance.
     this.actions = computed(() => {
       const si = this.source.value();
       if (!si) { return []; }
@@ -185,9 +192,15 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
         confirmDialog: this.confirmDialog,
         snackBar: this.snackBar,
         deleteServiceInstance: async (cnsiGuid, guid) => {
-          await this.instancesConfig.deleteServiceInstance(cnsiGuid, guid, si.name);
-          void this.router.navigate(['/services']);
+          const outcome = await this.instancesConfig.deleteServiceInstance(cnsiGuid, guid, si.name);
+          if (outcome === 'deleted') {
+            void this.router.navigate(['/services']);
+          } else {
+            this.sourceRef.set(this.serviceCatalog.serviceInstance(this.cfGuid, this.siGuid));
+          }
+          return outcome;
         },
+        unknownOutcomeWhere: 'This page',
         // Offering-bindability cache isn't warmed on this page; fail open so
         // Service Keys shows for managed instances (the builder's convention).
         isOfferingBindable: () => undefined,
@@ -291,14 +304,18 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     );
     this.confirmDialog.open(confirm, async () => {
       try {
-        await runCfDelete(this.deleteController, this.http, {
+        const outcome = await runCfDelete(this.deleteController, this.http, {
           cnsiGuid: this.cfGuid,
           entityKind: serviceCredentialBindingEntityType,
           deleteGuid: row.guid,
           path: `/pp/v1/cf/service_bindings/${this.cfGuid}/${row.guid}`,
         });
-        // Re-issue the one-shot fetch so the unbound app drops out.
+        // Re-issue the one-shot fetch so the unbound app drops out, or so
+        // the list shows whether it did after an unknown result.
         this.bindingsSource.set(this.serviceCatalog.serviceBindingsForInstance(this.cfGuid, this.siGuid));
+        if (outcome === 'unknown') {
+          this.snackBar.error(unknownOutcomeMessage(`Unbind "${row.appName}"`, 'This page'));
+        }
       } catch (err: unknown) {
         this.snackBar.error(`Unbind failed: ${extractHttpErrorMessage(err)}`);
       }

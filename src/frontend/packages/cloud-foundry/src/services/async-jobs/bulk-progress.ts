@@ -9,14 +9,16 @@ export interface BulkTally {
   settled: number;
   deleted: number;
   failed: number;
-  unconfirmed: number;
+  /** Ended with a result that could not be determined. */
+  unknown: number;
   total: number;
 }
 
 // Settles every item of a BulkResult: fast-path items count immediately;
 // PENDING items with a stratosjobs handoff are polled (bounded concurrency)
-// until terminal. Never rejects — job FAILED counts into `failed`, poll
-// UNKNOWN (404/HA) and PENDING-without-job count into `unconfirmed`.
+// until terminal. Never rejects — job FAILED counts into `failed`; a job
+// the backend no longer knows (poll UNKNOWN) and PENDING-without-job ended
+// with a result nobody can determine and count into `unknown`.
 export async function pollBulkResult(
   http: HttpClient,
   result: BulkResult,
@@ -26,14 +28,14 @@ export async function pollBulkResult(
     concurrency?: number;
   } = {},
 ): Promise<BulkTally> {
-  const tally: BulkTally = { settled: 0, deleted: 0, failed: 0, unconfirmed: 0, total: result.results.length };
+  const tally: BulkTally = { settled: 0, deleted: 0, failed: 0, unknown: 0, total: result.results.length };
   const pendingJobs: string[] = [];
 
   for (const item of result.results) {
     if (item.state === 'COMPLETE') { tally.deleted++; tally.settled++; }
     else if (item.state === 'FAILED') { tally.failed++; tally.settled++; }
     else if (item.job?.id) { pendingJobs.push(item.job.id); }
-    else { tally.unconfirmed++; tally.settled++; }
+    else { tally.unknown++; tally.settled++; }
   }
   opts.onProgress?.({ ...tally });
   if (pendingJobs.length === 0) { return tally; }
@@ -46,7 +48,7 @@ export async function pollBulkResult(
       const jobId = pendingJobs[next++];
       try {
         const res = await pollJob<unknown>(http, jobId, { backoffMs: opts.backoffMs });
-        if (res.status === 'COMPLETE') { tally.deleted++; } else { tally.unconfirmed++; }
+        if (res.status === 'COMPLETE') { tally.deleted++; } else { tally.unknown++; }
       } catch {
         tally.failed++; // StratosJobError: the CF job terminally failed
       }
@@ -133,10 +135,12 @@ async function trackSettlement(
 
   const parts = [`${plural(tally.deleted, o.noun)} ${o.doneVerb}`];
   if (tally.failed > 0) { parts.push(`${tally.failed} failed`); }
-  if (tally.unconfirmed > 0) { parts.push(`${tally.unconfirmed} unconfirmed`); }
+  if (tally.unknown > 0) {
+    parts.push(`${plural(tally.unknown, 'result')} could not be determined`);
+  }
   const message = parts.join(', ');
 
-  const clean = tally.failed === 0 && tally.unconfirmed === 0;
+  const clean = tally.failed === 0 && tally.unknown === 0;
   if (clean) {
     o.snackBar.show(message);  // default 5s auto-dismiss = readable linger
   } else {

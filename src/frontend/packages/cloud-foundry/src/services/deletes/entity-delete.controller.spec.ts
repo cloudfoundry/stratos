@@ -263,6 +263,56 @@ describe('EntityDeleteController', () => {
       expect(hook).toHaveBeenCalledWith(ORG_REQUEST);
     });
 
+    // UNKNOWN: the delete ended but nobody can say whether the entity is
+    // gone. The lists refetch to show the truth; nothing acts as if it were
+    // deleted.
+    describe('when the write ends with an unknown result', () => {
+      const configureUnknown = (eds: ReturnType<typeof makeEds>) => {
+        const diag = { emitCounter: vi.fn() };
+        TestBed.configureTestingModule({
+          providers: [
+            provideZonelessChangeDetection(),
+            EntityDeleteController,
+            { provide: WRITE_WITH_JOB, useValue: async () => ({ status: 'UNKNOWN', state: undefined } as AsyncJobResult<void>) },
+            { provide: EndpointDataRegistry, useValue: { peek: vi.fn(() => eds) } },
+            { provide: SignalRelationFetcherService, useValue: { snapshotRegistry: () => indexDescriptors(CF_RELATION_DESCRIPTORS) } },
+            { provide: StratosDiagnostics, useValue: diag },
+          ],
+        });
+        return { ctrl: TestBed.inject(EntityDeleteController), diag };
+      };
+
+      it('terminates as unknown', async () => {
+        const { ctrl } = configureUnknown(makeEds());
+        expect(await collectStates(ctrl, ORG_REQUEST)).toEqual(['start', 'unknown']);
+      });
+
+      it('marks the entity\'s own slice and its relation-graph slices stale', async () => {
+        const eds = makeEds();
+        const { ctrl } = configureUnknown(eds);
+        await ctrl.delete(ORG_REQUEST).done;
+        expect(eds.markStale.mock.calls.map(c => c[0])).toEqual(
+          expect.arrayContaining(['orgs', 'spaces', 'apps', 'routes', 'serviceInstances', 'serviceCredentialBindings']),
+        );
+      });
+
+      it('keeps the row and runs no cleanup hooks', async () => {
+        const eds = makeEds();
+        const { ctrl } = configureUnknown(eds);
+        const hook = vi.fn();
+        ctrl.registerCleanup(hook);
+        await ctrl.delete(ORG_REQUEST).done;
+        expect(eds.removeOrg).not.toHaveBeenCalled();
+        expect(hook).not.toHaveBeenCalled();
+      });
+
+      it('emits a delete-event unknown diagnostics counter', async () => {
+        const { ctrl, diag } = configureUnknown(makeEds());
+        await ctrl.delete(ORG_REQUEST).done;
+        expect(diag.emitCounter).toHaveBeenCalledWith('delete-event', { state: 'unknown', entityKind: 'organization' });
+      });
+    });
+
     it('does not invalidate or run cleanup on the failure path', async () => {
       const eds = makeEds();
       const diag = { emitCounter: vi.fn() };

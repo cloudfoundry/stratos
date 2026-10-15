@@ -25,6 +25,7 @@ import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-use
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import type { StSpace } from '../../../../../services/endpoint-data/stratos-types';
+import { unknownOutcomeMessage } from '../../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundryOrganizationSpacesComponent.
 // Scoped to one org under one CF endpoint (both guids supplied by the
@@ -185,9 +186,14 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
   }
 
   private buildSpaceActions = (space: StSpace): readonly SignalListRowAction<StSpace>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
+        if (outcome === 'unknown') {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Spaces list'));
+        }
       } catch (err: any) {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
       }
@@ -203,7 +209,7 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
             true,
           );
           this.confirmDialog.open(confirm, async () => {
-            await runAction('Delete', () => this.spacesConfig.deleteSpace(space.cnsiGuid, space.guid));
+            await runAction('Delete', () => this.spacesConfig.deleteSpace(space.cnsiGuid, space.guid, space.name), space.name);
           });
         },
       },

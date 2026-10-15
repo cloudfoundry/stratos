@@ -270,7 +270,7 @@ export class CfAppRoutesSignalConfigService {
       {
         label: 'Delete', icon: 'delete', danger: true,
         disabled,
-        invoke: () => this.actionsService.deleteRoute(row.guid),
+        invoke: async () => { await this.actionsService.deleteRoute(row.guid); },
       },
     ];
   };

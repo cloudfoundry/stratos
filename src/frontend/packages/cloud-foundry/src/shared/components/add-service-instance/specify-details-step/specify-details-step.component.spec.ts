@@ -302,12 +302,12 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
-  it('skips auto-bind on slow-async create when no SI link is available (UNKNOWN/missing-link path)', async () => {
+  it('reports a create that ended with an unknown result, and that the bind was not attempted', async () => {
     const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
 
-    // 202 handoff with a job that 404s on poll → writeWithJob resolves UNKNOWN.
+    // 202 handoff with a job the backend no longer knows → UNKNOWN.
     const post = httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1');
     post.flush(
       { id: 'job-2', state: 'PROCESSING', startedAt: '2026-05-09T00:00:00Z' },
@@ -318,12 +318,49 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     const poll = httpMock.expectOne('/pp/v1/stratos/jobs/job-2');
     poll.flush({ errors: [{ message: 'unknown job' }] }, { status: 404, statusText: 'Not Found' });
 
-    // SI eventually settles in CF; bind is left to the user via the services
-    // wall — same UX as SERVICES_WALL_MODE. No bind call here.
-    await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    await expect(finalResult).resolves.toEqual({
+      success: false,
+      message: 'Create service instance "my-instance": the operation ended, but its result could not be determined. '
+        + 'The Services list shows the current state. It was not bound to the application.',
+    });
     expect(modeServiceStub.createApplicationServiceBinding).not.toHaveBeenCalled();
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('reports an update that ended with an unknown result, never as updated', async () => {
+    const { component, httpMock } = setup({ isEditMode: true });
+    const finalResult = firstValueFrom(component.onNext());
+
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing').flush(null, { status: 202, statusText: 'Accepted' });
+
+    await expect(finalResult).resolves.toEqual({
+      success: false,
+      message: 'Update service instance "my-instance": the operation ended, but its result could not be determined. '
+        + 'The Services list shows the current state.',
+    });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('reports a bind that ended with an unknown result after a create', async () => {
+    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, unknown: true }));
+    const finalResult = firstValueFrom(component.onNext());
+
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+      {
+        state: 'COMPLETE',
+        result: { jobGuid: 'job-1', operation: 'service_instance.create', links: { service_instances: 'https://cf/v3/service_instances/si-new' } },
+      },
+      { status: 200, statusText: 'OK' },
+    );
+
+    await expect(finalResult).resolves.toEqual({
+      success: false,
+      message: 'Service instance "my-instance" was created. Binding it to the application: the operation ended, '
+        + 'but its result could not be determined. The application\'s Services tab shows the current state.',
+    });
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 

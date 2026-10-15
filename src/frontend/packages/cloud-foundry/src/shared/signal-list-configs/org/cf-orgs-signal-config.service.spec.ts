@@ -64,7 +64,7 @@ describe('CfOrgsSignalConfigService.deleteOrg', () => {
     // The org summary page deep-links here without the org-list tab ever
     // mounting (so initialize() never ran). The delete must still go through.
     const { svc, controller } = makeSvc();
-    await expect(svc.deleteOrg('cnsi-1', 'org-1')).resolves.toBeUndefined();
+    await expect(svc.deleteOrg('cnsi-1', 'org-1')).resolves.toBe('deleted');
     expect(controller.delete).toHaveBeenCalledTimes(1);
   });
 
@@ -79,5 +79,19 @@ describe('CfOrgsSignalConfigService.deleteOrg', () => {
       } as never,
     });
     await expect(svc.deleteOrg('cnsi-1', 'org-1')).rejects.toBe(boom);
+  });
+
+  it('resolves unknown and re-reads the orgs when the delete ended with an unknown result', async () => {
+    const { svc } = makeSvc({
+      controller: {
+        delete: vi.fn((req: DeleteRequest) => ({
+          events$: of(),
+          done: Promise.resolve({ ...req, state: 'unknown' } as DeleteEvent),
+        })),
+      } as never,
+    });
+    const refresh = vi.spyOn(svc, 'refresh').mockResolvedValue();
+    await expect(svc.deleteOrg('cnsi-1', 'org-1')).resolves.toBe('unknown');
+    expect(refresh).toHaveBeenCalled();
   });
 });
