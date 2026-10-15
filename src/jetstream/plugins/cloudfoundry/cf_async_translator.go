@@ -57,7 +57,9 @@ func (t *CFJobTranslator) RefOwner(ref interface{}) string {
 //   - PROCESSING, POLLING — non-terminal
 //   - COMPLETE            — terminal success, unless the resource the job
 //     links to records the operation as failed (checkJobResourceOutcome)
-//   - FAILED              — terminal failure, with errors[]
+//   - FAILED              — terminal failure, with errors[]; a failed
+//     binding job reports the binding's last_operation instead
+//     (checkJobResourceOutcome)
 //
 // Transport / auth failures bubble up through the error return so the
 // tracker (and RunFastPath) can tolerate them without flipping the job
@@ -99,7 +101,7 @@ func (t *CFJobTranslator) Fetch(ctx context.Context, ref interface{}) (
 		return stratosjobs.JobStateProcessing, nil, nil, err
 	}
 
-	if job.State == "COMPLETE" {
+	if job.State == "COMPLETE" || job.State == "FAILED" {
 		if lastOpErr := checkJobResourceOutcome(ctx, cfClient, job); lastOpErr != nil {
 			return stratosjobs.JobStateFailed, []stratosjobs.StratosError{*lastOpErr}, nil, nil
 		}
@@ -238,21 +240,30 @@ var (
 // bindings say service_route_binding (Cloud Controller's resource_type for
 // route binding jobs; not captured). A slice, not a map, so a job carrying
 // more than one is checked in a fixed order.
+//
+// onFailedJob marks the resources a FAILED job is re-read for too. CF fails
+// a binding job with its own exception name ("create could not be
+// completed: VCAP::CloudController::V3::LastOperationFailedState", CF API
+// 3.226) and keeps the broker's description on the binding. A failed
+// instance job already carries the broker's description, so it is not
+// re-read.
 var jobResourceLinks = []struct {
-	key      string
-	resource jobResource
+	key         string
+	resource    jobResource
+	onFailedJob bool
 }{
-	{"service_instances", serviceInstanceJobResource},
-	{"service_instance", serviceInstanceJobResource},
-	{"service_credential_binding", serviceCredentialBindingJobResource},
-	{"service_route_binding", serviceRouteBindingJobResource},
+	{"service_instances", serviceInstanceJobResource, false},
+	{"service_instance", serviceInstanceJobResource, false},
+	{"service_credential_binding", serviceCredentialBindingJobResource, true},
+	{"service_route_binding", serviceRouteBindingJobResource, true},
 }
 
 // checkJobResourceOutcome re-reads the resource a COMPLETE job ran against
-// and returns a StratosError when its last_operation records that same
-// operation as failed. A broker can report failure on the resource while
-// the job itself completes; without this check that failure reads as
-// success (the wizard confirms a create the broker rejected).
+// (or a FAILED one, for the resources marked onFailedJob) and returns a
+// StratosError when its last_operation records that same operation as
+// failed. A broker can report failure on the resource while the job itself
+// completes; without this check that failure reads as success (the wizard
+// confirms a create the broker rejected).
 //
 // The operation is the suffix of the job's operation ("service_keys.create"
 // → "create") and must match last_operation.type, so an update job does
@@ -268,6 +279,9 @@ func checkJobResourceOutcome(ctx context.Context, cfClient capi.Client, job *cap
 		link, ok := job.Links[l.key]
 		if !ok {
 			continue
+		}
+		if job.State == "FAILED" && !l.onFailedJob {
+			return nil
 		}
 		guid := link.Href[strings.LastIndex(link.Href, "/")+1:]
 		if guid == "" {
