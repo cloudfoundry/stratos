@@ -335,3 +335,38 @@ func TestResolve_JobWithoutOwnerIsNotFound(t *testing.T) {
 		t.Fatalf("expected not found, got %+v", job)
 	}
 }
+
+// A rebuilt job its client stops polling is dropped after MaxIdle, and a
+// later poll rebuilds it from its id and reads the backend's real state.
+func TestResolve_IdleRebuiltJobIsDroppedThenRebuilt(t *testing.T) {
+	now := time.Date(2026, 4, 22, 20, 0, 0, 0, time.UTC)
+	clock := now
+	tl := newCodecTranslator()
+	tl.set("job-1", JobStateProcessing)
+	creator := newTestTracker(t, time.Now)
+	id := creator.Create("fake.thing.create", tl, backendRef{JobID: "job-1", User: "user-a"})
+
+	replica := NewInMemoryTracker(InMemoryTrackerConfig{
+		MaxIdle:       time.Hour,
+		SweepInterval: time.Hour,
+		Clock:         func() time.Time { return clock },
+	})
+	t.Cleanup(replica.Stop)
+	replica.Register(tl)
+
+	if _, ok := replica.Resolve(context.Background(), id, "user-a"); !ok {
+		t.Fatal("expected the replica to rebuild the job")
+	}
+
+	clock = now.Add(2 * time.Hour)
+	replica.sweep()
+	if _, ok := replica.Get(id); ok {
+		t.Fatal("expected the idle rebuilt job dropped")
+	}
+
+	tl.set("job-1", JobStateComplete)
+	job, ok := replica.Resolve(context.Background(), id, "user-a")
+	if !ok || job.State != JobStateComplete {
+		t.Fatalf("expected a later poll to rebuild and reach COMPLETE, got %+v, %v", job, ok)
+	}
+}

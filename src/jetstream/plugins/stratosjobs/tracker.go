@@ -57,14 +57,25 @@ type Tracker interface {
 }
 
 // trackedJob is the internal tracker row — adds bookkeeping the wire shape
-// doesn't need (translator, ref, terminal timestamp for TTL eviction).
+// doesn't need (translator, ref, the timestamps the sweeper evicts by).
 type trackedJob struct {
 	job        StratosJob
 	translator JobTranslator
 	ref        interface{}
 	owner      string // Stratos user the ref polls as; "" when unknown
 	terminalAt *time.Time
+	polledAt   time.Time // last Refresh, or creation; drives MaxIdle eviction
 }
+
+// DefaultMaxIdle bounds how long a non-terminal job is kept with nobody
+// polling it. Age is measured from the last poll, not from the start, so a
+// long backend operation (a broker can take 25+ minutes; CF keeps polling
+// a job for up to 7 days) stays tracked for as long as a client polls it.
+// The frontend polls at least every 3 seconds and a session expires after
+// 20 idle minutes by default, so an hour without a poll means the client
+// is gone. A later poll of a dropped job answers 404 as for any unknown
+// id; an id a translator encoded (JobIDCodec) is rebuilt from the backend.
+const DefaultMaxIdle = time.Hour
 
 // InMemoryTracker holds all jobs in a map guarded by a RWMutex. A job with
 // a random id resolves only on the replica that created it; one with an
@@ -75,6 +86,7 @@ type InMemoryTracker struct {
 	jobs      map[string]*trackedJob
 	codecs    map[string]JobTranslator // Kind() -> translator implementing JobIDCodec
 	ttl       time.Duration
+	maxIdle   time.Duration
 	clock     func() time.Time
 	sweepTick time.Duration
 	metrics   *Metrics // optional; nil-safe everywhere
@@ -88,6 +100,9 @@ type InMemoryTrackerConfig struct {
 	// TTL is how long a terminal job stays retrievable after completion.
 	// Default: 10 minutes.
 	TTL time.Duration
+	// MaxIdle is how long a non-terminal job stays without a poll.
+	// Default: DefaultMaxIdle.
+	MaxIdle time.Duration
 	// SweepInterval is how often the eviction sweeper runs.
 	// Default: 1 minute.
 	SweepInterval time.Duration
@@ -104,6 +119,9 @@ func NewInMemoryTracker(cfg InMemoryTrackerConfig) *InMemoryTracker {
 	if cfg.TTL == 0 {
 		cfg.TTL = 10 * time.Minute
 	}
+	if cfg.MaxIdle == 0 {
+		cfg.MaxIdle = DefaultMaxIdle
+	}
 	if cfg.SweepInterval == 0 {
 		cfg.SweepInterval = time.Minute
 	}
@@ -114,6 +132,7 @@ func NewInMemoryTracker(cfg InMemoryTrackerConfig) *InMemoryTracker {
 		jobs:      make(map[string]*trackedJob),
 		codecs:    make(map[string]JobTranslator),
 		ttl:       cfg.TTL,
+		maxIdle:   cfg.MaxIdle,
 		clock:     cfg.Clock,
 		sweepTick: cfg.SweepInterval,
 		metrics:   cfg.Metrics,
@@ -172,6 +191,7 @@ func (t *InMemoryTracker) insert(id, kind string, translator JobTranslator, ref 
 		translator: translator,
 		ref:        ref,
 		owner:      refOwner(translator, ref),
+		polledAt:   now,
 	}
 	t.mu.Unlock()
 	if t.metrics != nil {
@@ -256,14 +276,16 @@ func (t *InMemoryTracker) Get(id string) (*StratosJob, bool) {
 // TTL eviction.
 func (t *InMemoryTracker) Refresh(ctx context.Context, id string) (*StratosJob, bool) {
 	// Snapshot under the lock: concurrent polls for one job may be
-	// writing it below.
-	t.mu.RLock()
+	// writing it below. Every poll, whatever its outcome, keeps the job
+	// from MaxIdle eviction.
+	t.mu.Lock()
 	tj, ok := t.jobs[id]
 	var current StratosJob
 	if ok {
 		current = tj.job
+		tj.polledAt = t.clock()
 	}
-	t.mu.RUnlock()
+	t.mu.Unlock()
 	if !ok {
 		return nil, false
 	}
@@ -357,7 +379,8 @@ func (t *InMemoryTracker) AppendStage(id string, stage JobStage) {
 	t.appendStageLocked(tj, stage)
 }
 
-// sweepLoop periodically evicts jobs whose terminalAt + ttl has elapsed.
+// sweepLoop periodically evicts terminal jobs whose terminalAt + ttl has
+// elapsed and non-terminal jobs not polled for maxIdle.
 func (t *InMemoryTracker) sweepLoop() {
 	ticker := time.NewTicker(t.sweepTick)
 	defer ticker.Stop()
@@ -372,11 +395,15 @@ func (t *InMemoryTracker) sweepLoop() {
 }
 
 func (t *InMemoryTracker) sweep() {
-	cutoff := t.clock().Add(-t.ttl)
+	now := t.clock()
+	cutoff := now.Add(-t.ttl)
+	idleCutoff := now.Add(-t.maxIdle)
 	var evicted int
 	t.mu.Lock()
 	for id, tj := range t.jobs {
-		if tj.terminalAt != nil && tj.terminalAt.Before(cutoff) {
+		expired := tj.terminalAt != nil && tj.terminalAt.Before(cutoff)
+		idle := tj.terminalAt == nil && tj.polledAt.Before(idleCutoff)
+		if expired || idle {
 			delete(t.jobs, id)
 			evicted++
 		}

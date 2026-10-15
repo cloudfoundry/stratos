@@ -61,7 +61,7 @@ func (t *RestageJobTranslator) RefOwner(ref interface{}) string {
 // the orchestrator's outcome onto the Stratos job tuple.
 //
 // Concurrency: the tracker calls Fetch without holding the per-job lock
-// (Refresh RUnlocks before invoking the translator). With the in-memory
+// (Refresh unlocks before invoking the translator). With the in-memory
 // tracker that's tolerable — frontend polls a single job sequentially —
 // but slice 9's handler must guarantee one in-flight Refresh per job to
 // avoid concurrent advanceRestage calls mutating the same *RestageRef.
