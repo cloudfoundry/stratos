@@ -231,7 +231,7 @@ describe('CsiModeService', () => {
       httpMock.verify();
     });
 
-    it('UNKNOWN (404 on poll, HA-degradation) resolves optimistically as success', async () => {
+    it('UNKNOWN (backend no longer knows the job) resolves as an unknown result, not success', async () => {
       const svc = TestBed.inject(CsiModeService);
       const httpMock = TestBed.inject(HttpTestingController);
 
@@ -248,10 +248,9 @@ describe('CsiModeService', () => {
       const poll = httpMock.expectOne('/pp/v1/stratos/jobs/job-3');
       poll.flush({ errors: [{ message: 'unknown job' }] }, { status: 404, statusText: 'Not Found' });
 
-      // writeWithJob returns {status:'UNKNOWN'} which our mapper treats as
-      // success. Caller refetch reveals the truth — better than blocking the
-      // stepper on a write that probably succeeded.
-      await expect(finalResult).resolves.toEqual({ success: true });
+      // The bind ended but nobody can say whether it happened: the caller
+      // must not report it as bound.
+      await expect(finalResult).resolves.toEqual({ success: false, unknown: true });
       httpMock.verify();
     });
 

@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { ApplicationService } from '../../features/applications/application.service';
 import type { StRoute } from '../../services/endpoint-data/stratos-types';
 import { EntityDeleteController } from '../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../services/deletes/run-cf-delete';
 import { routeEntityType } from '../../cf-entity-types';
 import { extractHttpErrorMessage } from '@stratosui/store';
@@ -94,11 +95,12 @@ export class AppRouteActionsService {
   /**
    * Delete a route entirely. CF V3 returns 202 + job; we route through
    * writeWithJob so the Promise resolves only when the job settles
-   * (COMPLETE) or rejects on FAILED. The transitioningRouteGuid signal
-   * stays set across the full settling window so the per-row spinner
-   * holds until the route is truly gone.
+   * (COMPLETE) or rejects on FAILED, and resolves 'unknown' when the
+   * delete ended with a result nobody can determine. The
+   * transitioningRouteGuid signal stays set across the full settling
+   * window so the per-row spinner holds until it ends.
    */
-  async deleteRoute(routeGuid: string): Promise<void> {
+  async deleteRoute(routeGuid: string): Promise<DeleteOutcome> {
     if (this.inFlight()) {
       throw new Error('Another route action is already in flight');
     }
@@ -108,7 +110,7 @@ export class AppRouteActionsService {
       // Route through the chokepoint so the route delete invalidates the
       // routes count + reverse-edge slices (space/app lists) and fires cleanup
       // — the tab still evicts its own row via removeRoute.
-      await runCfDelete(this.deleteController, this.http, {
+      return await runCfDelete(this.deleteController, this.http, {
         cnsiGuid: cfGuid,
         entityKind: routeEntityType,
         deleteGuid: routeGuid,

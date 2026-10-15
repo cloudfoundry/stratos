@@ -10,7 +10,6 @@ import { TabNavService } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
-import { LongRunningCfOperationsService } from '../../../data-services/long-running-cf-op.service';
 import { AddServiceInstanceComponent } from './add-service-instance.component';
 
 describe('AddServiceInstanceComponent', () => {
@@ -32,7 +31,6 @@ describe('AddServiceInstanceComponent', () => {
         CfOrgSpaceDataService,
         CloudFoundryService,
         TabNavService,
-        LongRunningCfOperationsService,
       ],
     }).compileComponents();
   });

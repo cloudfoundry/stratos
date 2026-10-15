@@ -7,6 +7,7 @@ import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-d
 import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { routeEntityType } from '../../../cf-entity-types';
 import type { StRoute, StRoutesResponse } from '../../../services/endpoint-data/stratos-types';
@@ -339,8 +340,8 @@ export class CfRoutesSignalConfigService {
     });
   }
 
-  async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<DeleteOutcome> {
+    const outcome = await runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: routeEntityType,
       deleteGuid: routeGuid,
@@ -349,8 +350,10 @@ export class CfRoutesSignalConfigService {
     // The local _routes list lives on this config service (via fetchRoutes),
     // not on the EDS cache — re-fetch so the just-deleted row leaves the view.
     // The controller has already marked the routes/space/app slices stale for
-    // the cross-tab UX.
+    // the cross-tab UX. After an unknown result the re-fetch shows whether
+    // the route is still there.
     await this.fetchRoutes(true);
+    return outcome;
   }
 
   // Per-row Unmap on a route entry. Hits the single unmap_all endpoint,

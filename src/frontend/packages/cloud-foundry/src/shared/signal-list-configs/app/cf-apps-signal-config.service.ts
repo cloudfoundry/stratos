@@ -11,6 +11,7 @@ import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestr
 import { wireEndpointErrorReporting } from '../endpoint-error-reporting';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { applicationEntityType, routeEntityType } from '../../../cf-entity-types';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
@@ -1160,8 +1161,8 @@ export class CfAppsSignalConfigService {
   // chokepoint. The controller removes the binding from
   // EndpointDataService._serviceCredentialBindings and (via reverse edges)
   // marks the bound app + service-instance lists stale.
-  async deleteServiceBinding(cnsiGuid: string, bindingGuid: string): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  async deleteServiceBinding(cnsiGuid: string, bindingGuid: string): Promise<DeleteOutcome> {
+    return runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: serviceCredentialBindingEntityType,
       deleteGuid: bindingGuid,
@@ -1177,8 +1178,8 @@ export class CfAppsSignalConfigService {
   // attached routes alongside the app. Throws on FAILED terminal state —
   // callers should either surface the error or swallow it (the route may fail
   // to delete because the app delete already cascaded through CF's checks).
-  async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<DeleteOutcome> {
+    return runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: routeEntityType,
       deleteGuid: routeGuid,
@@ -1243,16 +1244,19 @@ export class CfAppsSignalConfigService {
   // the row from the orchestrator's aggregated view (no-op when there is no
   // orchestrator — the prior cold-fallback branch). The controller removes the
   // app from the EDS cache and marks descendant routes/bindings + the space's
-  // app-count stale.
-  async deleteApp(cnsiGuid: string, appGuid: string, appName: string = appGuid): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  // app-count stale. An unknown result keeps the row; callers re-read.
+  async deleteApp(cnsiGuid: string, appGuid: string, appName: string = appGuid): Promise<DeleteOutcome> {
+    const outcome = await runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: applicationEntityType,
       deleteGuid: appGuid,
       deleteName: appName,
       path: `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`,
     });
-    this.orchestrator?.removeRow(cnsiGuid, appGuid);
+    if (outcome === 'deleted') {
+      this.orchestrator?.removeRow(cnsiGuid, appGuid);
+    }
+    return outcome;
   }
 
   // Bulk delete: destroys each app entity. CF v3 does not cascade-delete a

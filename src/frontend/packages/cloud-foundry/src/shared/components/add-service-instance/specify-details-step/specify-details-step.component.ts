@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, DestroyRef, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import {
   combineLatest as observableCombineLatest,
+  firstValueFrom,
   from,
   Observable,
   Subscription,
@@ -32,12 +33,13 @@ import { TailwindSnackBarService } from '../../../../../../core/src/shared/servi
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult } from '../../../../services/async-jobs/async-job.types';
+import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
-import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
+import { BindResult, CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiState, CsiStateService } from '../csi-state.service';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
@@ -45,6 +47,11 @@ import { extractHttpErrorMessage } from '@stratosui/store';
 // broker schema may not have arrived (or may not exist for the plan).
 // SchemaFormComponent.config tolerates an absent schema.
 type SchemaFormConfigState = Omit<SchemaFormConfig, 'schema'> & { schema?: object };
+
+// How long the wizard holds the user on a write. The broker decides how long
+// CF takes: a 15 s broker operation already takes about a minute in CF, and
+// real brokers take minutes. After this the wizard hands the write off.
+const HAND_OFF_AFTER_MS = 30_000;
 
 @Component({
   selector: 'app-specify-details-step',
@@ -73,6 +80,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   modeService = inject(CsiModeService);
   private http = inject(HttpClient);
   private snackBar = inject(TailwindSnackBarService);
+  private destroyRef = inject(DestroyRef);
   // toObservable() must run inside an injection context — lift to a class
   // field. Reused by selectCreateInstance$ and onNext below.
   private csiState$ = toObservable(this.csiState.state);
@@ -364,9 +372,53 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     return this.csiState$.pipe(
       filter(p => !!p),
       take(1),
-      switchMap(state => from(this.executeWrite(state))),
+      switchMap(state => from(this.handOffIfSlow(this.executeWrite(state)))),
     );
   };
+
+  // A write still running after HAND_OFF_AFTER_MS is handed off: the wizard
+  // closes and names where to watch it, tracking carries on, and the outcome
+  // is reported wherever the user is. Leaving the wizard (Cancel, another
+  // page) hands it off the same way, so a late failure is never lost.
+  private async handOffIfSlow(outcome: Promise<StepOnNextResult>): Promise<StepOnNextResult> {
+    let handedOff = false;
+    const handOff = () => {
+      if (handedOff) return;
+      handedOff = true;
+      this.snackBar.open(
+        `${this.writeDescription()} carries on in the background. ${this.whereToWatch()} shows its progress, `
+          + 'and a message will say how it ended.',
+        'Dismiss', { duration: 10000 },
+      );
+      // A success reports itself (routeToServices); a failure or unknown
+      // result would go to a step nobody is looking at.
+      outcome.then(r => { if (!r.success) this.snackBar.error(r.message ?? 'The operation failed.'); });
+    };
+    const stopWatchingDestroy = this.destroyRef.onDestroy(handOff);
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const slow = new Promise<null>(resolve => { timeout = setTimeout(() => resolve(null), HAND_OFF_AFTER_MS); });
+
+    const first = await Promise.race([outcome, slow]);
+    clearTimeout(timeout);
+    if (!handedOff) stopWatchingDestroy();
+    if (first) {
+      return first;
+    }
+    handOff();
+    return { success: true, redirect: true };
+  }
+
+  private writeDescription(): string {
+    if (this.bindExistingInstance) {
+      return 'Binding the service instance to the application';
+    }
+    const verb = this.modeService.isEditServiceInstanceMode() ? 'Updating' : 'Creating';
+    return `${verb} service instance "${this.createNewInstanceForm.controls.name.value}"`;
+  }
+
+  private whereToWatch(): string {
+    return this.modeService.isAppServicesMode() ? 'The application\'s Services tab' : 'The Services list';
+  }
 
   routeToServices = (successMessage?: string): StepOnNextResult => {
     if (successMessage) {
@@ -388,9 +440,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     // selected instance already exists. Just trigger the bind flow.
     if (this.bindExistingInstance) {
       const existingGuid = this.selectExistingInstanceForm.controls.serviceInstance.value;
-      return this.bindAppIfRequested(existingGuid, state);
+      const instances = await firstValueFrom(this.bindableServiceInstances$);
+      const existingName = instances.find(si => si.guid === existingGuid)?.name ?? existingGuid;
+      return this.bindAppIfRequested(existingGuid, state, existingName, false);
     }
 
+    // Name messages after what the form sent: wizard state carries no name
+    // on create, and the instance's old name when it is renamed on edit.
+    const name = this.createNewInstanceForm.controls.name.value;
     const isEditMode = this.modeService.isEditServiceInstanceMode();
     const verb = isEditMode ? 'update' : 'create';
     const body = this.buildWriteBody(state, isEditMode);
@@ -408,27 +465,39 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     } catch (err: unknown) {
       return {
         success: false,
-        message: `Failed to ${verb} service instance: ${extractHttpErrorMessage(err)}`,
+        message: `Failed to ${verb} service instance "${name}": ${extractHttpErrorMessage(err)}`,
       };
     }
 
+    if (result.status === 'UNKNOWN') {
+      // Ended, result unknown: never claim it was created or updated, and
+      // say a requested bind was not attempted.
+      const leadIn = `${isEditMode ? 'Update' : 'Create'} service instance "${name}"`;
+      const notBound = !isEditMode && state.bindAppGuid ? ' It was not bound to the application.' : '';
+      return { success: false, message: unknownOutcomeMessage(leadIn, 'The Services list') + notBound };
+    }
+
     if (isEditMode) {
-      return this.routeToServices(`Service instance "${state.name}" updated.`);
+      return this.routeToServices(`Service instance "${name}" updated.`);
     }
 
     // Create path: try to extract the new SI's guid for the bind-after-create
-    // follow-up. UNKNOWN (HA-degradation) and slow-async paths without a
-    // resource link both leave the guid undefined — in that case the SI will
-    // appear in the services wall once CF settles and the user binds manually.
+    // follow-up. A slow-async path without a resource link leaves the guid
+    // undefined — in that case the SI will appear in the services wall once
+    // CF settles and the user binds manually.
     const newGuid = extractCreatedSiGuid(result);
     if (newGuid) {
       this.csiState.setServiceInstanceGuid(newGuid);
     }
-    return this.bindAppIfRequested(newGuid, state);
+    return this.bindAppIfRequested(newGuid, state, name, true);
   }
 
-  private async bindAppIfRequested(siGuid: string | undefined, state: CsiState): Promise<StepOnNextResult> {
-    const siName = state.name || 'Service instance';
+  private async bindAppIfRequested(
+    siGuid: string | undefined,
+    state: CsiState,
+    siName: string,
+    created: boolean,
+  ): Promise<StepOnNextResult> {
     if (!state.bindAppGuid || !siGuid) {
       return this.routeToServices(`Service instance "${siName}" created.`);
     }
@@ -439,11 +508,25 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       state.cfGuid!,
       state.bindAppGuid,
       state.bindAppParams,
-    ).pipe(take(1)).toPromise() as { success: boolean; message?: string };
-    if (!bindResult?.success) {
+    ).pipe(take(1)).toPromise() as BindResult;
+    if (bindResult?.unknown) {
       return {
         success: false,
-        message: `Failed to create service instance binding: ${bindResult?.message ?? 'unknown error'}`,
+        message: unknownOutcomeMessage(
+          created
+            ? `Service instance "${siName}" was created. Binding it to the application`
+            : `Binding service instance "${siName}" to the application`,
+          'The application\'s Services tab',
+        ),
+      };
+    }
+    if (!bindResult?.success) {
+      const reason = bindResult?.message ?? 'unknown error';
+      return {
+        success: false,
+        message: created
+          ? `Service instance "${siName}" was created, but binding it to the application failed: ${reason}`
+          : `Failed to bind service instance "${siName}" to the application: ${reason}`,
       };
     }
     // CF mutated VCAP_SERVICES on the bound app. We routeToServices below
@@ -451,7 +534,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     // priming state nothing on this navigation reads. The app's env-vars
     // tab fetches fresh on next mount via AppDetailDataService —
     // dropping the prefetch is functionally a no-op.
-    return this.routeToServices(`Service instance "${siName}" created and bound.`);
+    return this.routeToServices(created
+      ? `Service instance "${siName}" created and bound.`
+      : `Service instance "${siName}" bound to the application.`);
   }
 
   private buildWriteBody(state: CsiState, isEditMode: boolean): Record<string, unknown> {

@@ -16,7 +16,7 @@ import { HttpTestingController } from '@angular/common/http/testing';
  * behaviour has to hold on both.
  */
 
-interface RecordedResponse<T = unknown> {
+interface RecordedResponse<T = object | null> {
   status: number;
   body: T;
 }

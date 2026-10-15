@@ -6,6 +6,7 @@ import { ListStateStore } from '@stratosui/core';
 
 import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { spaceEntityType } from '../../../cf-entity-types';
 import type { StSpace } from '../../../services/endpoint-data/stratos-types';
@@ -141,18 +142,24 @@ export class CfSpacesSignalConfigService {
   // controller derives the full invalidation set from the relation graph
   // (descendant apps/routes/serviceInstances/bindings + the org's space-count
   // via reverse edge), removes the space row, and fires cleanup hooks.
-  async deleteSpace(cnsiGuid: string, spaceGuid: string, spaceName: string = spaceGuid): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  async deleteSpace(cnsiGuid: string, spaceGuid: string, spaceName: string = spaceGuid): Promise<DeleteOutcome> {
+    const outcome = await runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: spaceEntityType,
       deleteGuid: spaceGuid,
       deleteName: spaceName,
       path: `/pp/v1/cf/spaces/${cnsiGuid}/${spaceGuid}`,
     });
-    // The controller's row removal targets the per-CNSI EDS spaces slice,
-    // which this org-scoped list doesn't read — evict the row here so an
-    // in-tab delete disappears without a refetch.
-    this._orgSpaces.update(spaces => spaces.filter(s => s.guid !== spaceGuid));
+    if (outcome === 'deleted') {
+      // The controller's row removal targets the per-CNSI EDS spaces slice,
+      // which this org-scoped list doesn't read — evict the row here so an
+      // in-tab delete disappears without a refetch.
+      this._orgSpaces.update(spaces => spaces.filter(s => s.guid !== spaceGuid));
+    } else {
+      // Unknown result: re-read the org's spaces to show whether it is gone.
+      await this.refresh();
+    }
+    return outcome;
   }
 
   /**

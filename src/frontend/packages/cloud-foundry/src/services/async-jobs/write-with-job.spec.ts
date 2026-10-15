@@ -240,6 +240,104 @@ describe('writeWithJob', () => {
     expect(result.jobId).toBe('job-x');
   });
 
+  // A poll that could not be answered is not an outcome: the job is still
+  // running somewhere, so the loop keeps asking until it hears a terminal
+  // state or the backend says it does not know the job.
+  describe('poll problems', () => {
+    let warn: MockInstance<typeof console.warn>;
+    beforeEach(() => { warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined); });
+    afterEach(() => warn.mockRestore());
+
+    const processing = (id: string): StratosJob => ({ id, kind: 'cf.app.delete', state: 'PROCESSING', startedAt: '', updatedAt: '' });
+    const complete = (id: string): StratosJob => ({ id, kind: 'cf.app.delete', state: 'COMPLETE', startedAt: '', updatedAt: '' });
+
+    const handOff = async (id: string, opts: Parameters<typeof writeWithJob>[2] = noDelay) => {
+      const promise = writeWithJob(http, http.delete('/pp/v1/cf/apps/cnsi/app1', { observe: 'response' }), opts);
+      ctrl.expectOne('/pp/v1/cf/apps/cnsi/app1').flush(processing(id), { status: 202, statusText: 'Accepted' });
+      await tick();
+      return { promise };
+    };
+
+    it('keeps polling through a 503 and a network error, then completes', async () => {
+      const { promise } = await handOff('job-t');
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-t').flush(null, { status: 503, statusText: 'Service Unavailable' });
+      await tick();
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-t').error(new ProgressEvent('error'));
+      await tick();
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-t').flush(complete('job-t'));
+
+      const result = await promise;
+      expect(result.status).toBe('COMPLETE');
+      expect(result.jobId).toBe('job-t');
+    });
+
+    it('keeps polling through a 429 and a 200 without a body', async () => {
+      const { promise } = await handOff('job-r');
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-r').flush(null, { status: 429, statusText: 'Too Many Requests' });
+      await tick();
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-r').flush(null);
+      await tick();
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-r').flush(complete('job-r'));
+
+      expect((await promise).status).toBe('COMPLETE');
+    });
+
+    it('logs once when polling starts failing and once when it recovers', async () => {
+      const { promise } = await handOff('job-l');
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-l').flush(null, { status: 502, statusText: 'Bad Gateway' });
+      await tick();
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-l').flush(null, { status: 502, statusText: 'Bad Gateway' });
+      await tick();
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-l').flush(processing('job-l'));
+      await tick();
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-l').flush(complete('job-l'));
+      await promise;
+
+      expect(warn).toHaveBeenCalledTimes(2);
+      expect(String(warn.mock.calls[0][0])).toContain('job-l');
+      expect(String(warn.mock.calls[1][0])).toContain('job-l');
+    });
+
+    it('ends as UNKNOWN on a 4xx other than 429', async () => {
+      const { promise } = await handOff('job-f');
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-f').flush(null, { status: 403, statusText: 'Forbidden' });
+
+      const result = await promise;
+      expect(result.status).toBe('UNKNOWN');
+      expect(result.jobId).toBe('job-f');
+    });
+
+    it('rejects with an AbortError when the caller stops waiting during a poll', async () => {
+      const abort = new AbortController();
+      const { promise } = await handOff('job-a', { ...noDelay, signal: abort.signal });
+      const poll = ctrl.expectOne('/pp/v1/stratos/jobs/job-a');
+      abort.abort();
+
+      await expect(promise).rejects.toMatchObject({ name: 'AbortError' });
+      expect(poll.cancelled).toBe(true);
+    });
+
+    it('rejects with an AbortError when the caller stops waiting between polls', async () => {
+      const abort = new AbortController();
+      const { promise } = await handOff('job-w', { backoffMs: [60_000], signal: abort.signal });
+      ctrl.expectOne('/pp/v1/stratos/jobs/job-w').flush(processing('job-w'));
+      await tick();
+      abort.abort();
+
+      await expect(promise).rejects.toMatchObject({ name: 'AbortError' });
+      ctrl.expectNone('/pp/v1/stratos/jobs/job-w');
+    });
+
+    it('rejects with an AbortError without writing when already aborted', async () => {
+      const abort = new AbortController();
+      abort.abort();
+      const promise = writeWithJob(http, http.delete('/pp/v1/cf/apps/cnsi/app1', { observe: 'response' }), { signal: abort.signal });
+
+      await expect(promise).rejects.toBeInstanceOf(DOMException);
+      ctrl.expectNone('/pp/v1/cf/apps/cnsi/app1');
+    });
+  });
+
   it('calls onProgress for every poll response', async () => {
     const seen: string[] = [];
     const promise = writeWithJob(

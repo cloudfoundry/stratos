@@ -35,6 +35,7 @@ import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-p
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
 import type { StApp } from '../../../../services/endpoint-data/stratos-types';
+import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 // Per-CF Applications tab. Scoped to one CNSI via the parent route's
 // CloudFoundryEndpointService. Mirrors the per-space tab's wiring exactly,
@@ -450,10 +451,15 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
   }
 
   private buildAppActions = (app: StApp): readonly SignalListRowAction<StApp>[] => {
-    const runAction = async (label: string, op: () => Promise<void>) => {
+    // A delete resolves 'unknown' when it ended with a result nobody can
+    // determine: the row stays and the message says where to look.
+    const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
-        await op();
+        const outcome = await op();
         await this.appsConfig.refresh();
+        if (outcome === 'unknown') {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Applications list'));
+        }
       } catch (err: any) {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
       }
@@ -473,7 +479,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
             await runAction('Delete', () =>
               result?.checkboxChecked
                 ? this.appsConfig.bulkDeleteAppsWithCleanup(app.cnsiGuid, [app.guid]).then(() => {})
-                : this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
+                : this.appsConfig.deleteApp(app.cnsiGuid, app.guid, app.name), app.name);
           });
         },
       },

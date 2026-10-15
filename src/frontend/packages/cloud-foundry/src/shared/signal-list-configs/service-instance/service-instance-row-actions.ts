@@ -7,6 +7,8 @@ import {
   TailwindSnackBarService,
 } from '@stratosui/core';
 
+import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
+import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
@@ -19,7 +21,10 @@ export interface ServiceInstanceRowActionDeps {
   snackBar: TailwindSnackBarService;
   // The host's delete chokepoint (CfServiceInstancesSignalConfigService
   // .deleteServiceInstance), so cache invalidation stays owned by the config.
-  deleteServiceInstance: (cnsiGuid: string, guid: string) => Promise<void>;
+  deleteServiceInstance: (cnsiGuid: string, guid: string) => Promise<DeleteOutcome>;
+  // Where the user sees the instance's current state when a delete ends with
+  // an unknown result. Defaults to the list the row action was invoked from.
+  unknownOutcomeWhere?: string;
   // Resolves the instance's offering bindability from the warmed
   // services-details store (CfServiceInstancesSignalConfigService
   // .isOfferingBindable). undefined → offering not cached yet (fail open).
@@ -98,7 +103,10 @@ export function buildServiceInstanceRowActions(
       );
       deps.confirmDialog.open(confirm, async () => {
         try {
-          await deps.deleteServiceInstance(si.cnsiGuid, si.guid);
+          const outcome = await deps.deleteServiceInstance(si.cnsiGuid, si.guid);
+          if (outcome === 'unknown') {
+            deps.snackBar.error(unknownOutcomeMessage(`Delete "${si.name}"`, deps.unknownOutcomeWhere ?? 'The list'));
+          }
         } catch (err: unknown) {
           deps.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
         }

@@ -114,20 +114,27 @@ describe('RollbackDialogComponent', () => {
     expect(dialogRefMock.close).toHaveBeenCalledWith({ ok: true, stateChanged: true });
   });
 
-  it('sets errorMessage and keeps dialog open on FAILED result', async () => {
-    const failedResult: AsyncJobResult<RollbackResult> = {
-      status: 'UNKNOWN',  // FAILED throws StratosJobError; use UNKNOWN to test the status branch
-      state: undefined,
-    };
-    // Simulate a service return that yields a non-COMPLETE, non-throwing result.
-    // Per contract: any status other than COMPLETE (and non-throwing) falls through.
-    // We test the throw path separately (StratosJobError branch).
-    revisionsServiceMock.rollback.mockResolvedValue(failedResult);
+  it('keeps the dialog open and says the result is unknown on UNKNOWN', async () => {
+    // UNKNOWN: the rollback ended but its result could not be determined.
+    // It must not close as if it had worked.
+    revisionsServiceMock.rollback.mockResolvedValue({ status: 'UNKNOWN', state: undefined } as AsyncJobResult<RollbackResult>);
 
     await component.confirm();
 
-    // UNKNOWN closes with ok:true per spec; test FAILED path via thrown StratosJobError
-    expect(dialogRefMock.close).toHaveBeenCalledWith({ ok: true, stateChanged: true });
+    expect(dialogRefMock.close).not.toHaveBeenCalled();
+    expect(component.errorMessage()).toBe(
+      'Roll back to revision #5: the operation ended, but its result could not be determined. '
+      + 'The Revisions tab shows the current state.',
+    );
+  });
+
+  it('closing after an unknown result asks the Revisions tab to re-read', async () => {
+    revisionsServiceMock.rollback.mockResolvedValue({ status: 'UNKNOWN', state: undefined } as AsyncJobResult<RollbackResult>);
+    await component.confirm();
+
+    component.cancel();
+
+    expect(dialogRefMock.close).toHaveBeenCalledWith({ ok: false, stateChanged: true });
   });
 
   it('sets errorMessage and does NOT close dialog when StratosJobError is thrown', async () => {

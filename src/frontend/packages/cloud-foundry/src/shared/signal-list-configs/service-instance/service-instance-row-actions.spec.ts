@@ -64,3 +64,35 @@ describe('buildServiceInstanceRowActions — Delete failure', () => {
     expect(d.snackBar.error).toHaveBeenCalledWith('Delete failed: deprovision could not be completed: instance is busy');
   });
 });
+
+describe('buildServiceInstanceRowActions — Delete with an unknown result', () => {
+  const confirmDelete = async (d: ServiceInstanceRowActionDeps): Promise<void> => {
+    let confirmed: (() => Promise<void>) | undefined;
+    d.confirmDialog.open = vi.fn((_c: unknown, cb: () => Promise<void>) => { confirmed = cb; }) as never;
+    buildServiceInstanceRowActions(managed(), d).find(a => a.label === 'Delete')!.invoke();
+    await confirmed!();
+  };
+
+  it('says the result could not be determined and points at the list', async () => {
+    const d = deps({ deleteServiceInstance: vi.fn().mockResolvedValue('unknown') });
+    await confirmDelete(d);
+
+    expect(d.snackBar.error).toHaveBeenCalledWith(
+      'Delete "my-db": the operation ended, but its result could not be determined. The list shows the current state.',
+    );
+  });
+
+  it('points at the place the host names', async () => {
+    const d = deps({ deleteServiceInstance: vi.fn().mockResolvedValue('unknown'), unknownOutcomeWhere: 'This page' });
+    await confirmDelete(d);
+
+    expect(d.snackBar.error).toHaveBeenCalledWith(expect.stringContaining('This page shows the current state.'));
+  });
+
+  it('says nothing when the instance was deleted', async () => {
+    const d = deps({ deleteServiceInstance: vi.fn().mockResolvedValue('deleted') });
+    await confirmDelete(d);
+
+    expect(d.snackBar.error).not.toHaveBeenCalled();
+  });
+});

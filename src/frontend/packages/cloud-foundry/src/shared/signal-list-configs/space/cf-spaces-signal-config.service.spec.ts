@@ -62,4 +62,17 @@ describe('CfSpacesSignalConfigService', () => {
     await expect(svc.deleteSpace('cf-1', 'sp-1')).rejects.toBeTruthy();
     expect(svc.spaces().map(s => s.guid)).toEqual(['sp-1', 'sp-2']);
   });
+
+  it('keeps the row and re-reads the spaces when the delete ended with an unknown result', async () => {
+    await initWithSpaces();
+    deleteState = 'unknown';
+    const done = svc.deleteSpace('cf-1', 'sp-1');
+    await new Promise<void>(resolve => setTimeout(resolve, 0));
+    httpMock.expectOne(SPACES_P1).flush({
+      resources: [sp('sp-1'), sp('sp-2')],
+      pagination: { totalResults: 2, totalPages: 1 },
+    });
+    await expect(done).resolves.toBe('unknown');
+    expect(svc.spaces().map(s => s.guid)).toEqual(['sp-1', 'sp-2']);
+  });
 });

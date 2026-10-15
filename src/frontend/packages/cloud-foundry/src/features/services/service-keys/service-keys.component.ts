@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { DialogErrorComponent, IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
+import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import {
   RawServiceKey, ServiceCatalogDataService, ServiceKeyView, SignalSource, toServiceKeyView,
@@ -252,6 +253,12 @@ export class ServiceKeysComponent {
       );
       this.newKeyName.set('');
       this.isAdding.set(false);
+      if (r.status === 'UNKNOWN') {
+        // Ended, result unknown: the re-read list shows whether it exists.
+        this.errorMessage.set(unknownOutcomeMessage(`Create key "${name}"`, 'The Service Keys list'));
+        this.reload();
+        return;
+      }
       // A sync broker answers with the key itself; an async one resolves to
       // the CF job, which has no key fields, so the list is re-read instead.
       if (r.state?.type === 'key' && r.state.guid) {
@@ -276,11 +283,18 @@ export class ServiceKeysComponent {
       return;
     }
     this.setStatus(guid, 'busy');
+    const name = this.keys().find(k => k.guid === guid)?.name ?? guid;
     try {
-      await writeWithJob(
+      const r = await writeWithJob(
         this.http,
         this.http.delete(`/pp/v1/cf/service_keys/${this.cfGuid}/${guid}`, { observe: 'response' as const }),
       );
+      if (r.status === 'UNKNOWN') {
+        // Ended, result unknown: free the row; the re-read list shows
+        // whether the key is still there.
+        this.setStatus(guid, 'idle');
+        this.errorMessage.set(unknownOutcomeMessage(`Delete key "${name}"`, 'The Service Keys list'));
+      }
       this.reload();
     } catch (err: unknown) {
       this.setStatus(guid, 'error');

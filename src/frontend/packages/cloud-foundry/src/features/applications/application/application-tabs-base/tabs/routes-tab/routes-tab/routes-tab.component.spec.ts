@@ -35,6 +35,7 @@ describe('RoutesTabComponent', () => {
   let unmapRoute: ReturnType<typeof vi.fn>;
   let deleteRoute: ReturnType<typeof vi.fn>;
   let confirmOpen: ReturnType<typeof vi.fn>;
+  let snackError: ReturnType<typeof vi.fn>;
 
   /** Minimal AppDetailDataService stub. */
   const makeDataStub = () => {
@@ -50,7 +51,7 @@ describe('RoutesTabComponent', () => {
 
   const makeRouteActionsStub = () => {
     unmapRoute = vi.fn(async () => undefined);
-    deleteRoute = vi.fn(async () => undefined);
+    deleteRoute = vi.fn(async () => 'deleted');
     return {
       transitioningRouteGuid: signal<string | null>(null).asReadonly(),
       inFlight: signal(false).asReadonly(),
@@ -106,9 +107,10 @@ describe('RoutesTabComponent', () => {
     return { open: confirmOpen };
   };
 
-  const makeSnackStub = () => ({
-    open: vi.fn(),
-  });
+  const makeSnackStub = () => {
+    snackError = vi.fn();
+    return { open: vi.fn(), error: snackError };
+  };
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -222,5 +224,23 @@ describe('RoutesTabComponent', () => {
     await onConfirm();
     expect(deleteRoute).toHaveBeenCalledWith('r2');
     expect(removeRoute).toHaveBeenCalledWith('r2');
+  });
+
+  it('keeps the row, re-reads routes and says so when a delete ends with an unknown result', async () => {
+    deleteRoute.mockResolvedValueOnce('unknown');
+    fixture.detectChanges();
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    const del = actionsCol!.actions!({ guid: 'r3', url: 'baz.example.com' } as any).find(a => a.label === 'Delete');
+    del!.invoke({ guid: 'r3', url: 'baz.example.com' } as any);
+    const [, onConfirm] = confirmOpen.mock.calls[0];
+    refreshScope.mockClear();
+    await onConfirm();
+
+    expect(removeRoute).not.toHaveBeenCalled();
+    expect(refreshScope).toHaveBeenCalledWith('routes');
+    expect(snackError).toHaveBeenCalledWith(
+      'Delete "baz.example.com": the operation ended, but its result could not be determined. '
+      + 'The Routes tab shows the current state.',
+    );
   });
 });

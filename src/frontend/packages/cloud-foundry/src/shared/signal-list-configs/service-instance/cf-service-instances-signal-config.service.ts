@@ -12,6 +12,7 @@ import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipe
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import type { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { serviceInstancesEntityType } from '../../../cf-entity-types';
 import type { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
@@ -542,16 +543,22 @@ export class CfServiceInstancesSignalConfigService {
   // orchestrator's aggregated view so it disappears without a refresh.
   // Routing through the root-singleton controller removes the prior
   // orchestrator-undefined cold-fallback branch (removeRow no-ops when there
-  // is no orchestrator).
-  async deleteServiceInstance(cnsiGuid: string, siGuid: string, siName: string = siGuid): Promise<void> {
-    await runCfDelete(this.deleteController, this.http, {
+  // is no orchestrator). When the delete ends with an unknown result the
+  // row stays and the list is re-read instead, so it shows what CF holds.
+  async deleteServiceInstance(cnsiGuid: string, siGuid: string, siName: string = siGuid): Promise<DeleteOutcome> {
+    const outcome = await runCfDelete(this.deleteController, this.http, {
       cnsiGuid,
       entityKind: serviceInstancesEntityType,
       deleteGuid: siGuid,
       deleteName: siName,
       path: `/pp/v1/cf/service_instances/${cnsiGuid}/${siGuid}`,
     });
-    this.orchestrator?.removeRow(cnsiGuid, siGuid);
+    if (outcome === 'deleted') {
+      this.orchestrator?.removeRow(cnsiGuid, siGuid);
+    } else {
+      try { await this.refresh(); } catch { /* the next refresh shows it */ }
+    }
+    return outcome;
   }
 
   // Read a previously-fetched key count. undefined = not yet loaded or the

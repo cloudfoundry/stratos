@@ -4,28 +4,49 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
+	"strings"
 	"sync"
 	"time"
 )
 
 // Tracker owns the lifecycle of tracked jobs. The interface keeps the
-// implementation pluggable: in-memory for CF-deployed Stratos (which already
-// requires session affinity), and — later — DB-backed for pure-k8s deploys
-// where a frontend poll may land on a different replica than the creator.
+// implementation pluggable.
+//
+// A frontend poll may land on a replica that did not create the job
+// (multi-replica k8s without session affinity, a restart, a redeploy).
+// Jobs whose translator implements JobIDCodec survive that: their id
+// carries what the translator needs to rebuild the job, and Resolve
+// rebuilds it from the backend. Jobs with random ids resolve only on the
+// replica that created them.
 //
 // Methods are safe for concurrent use.
 type Tracker interface {
 	// Create registers a new tracked job with a Translator-owned reference.
-	// Returns the generated Stratos job id. Initial state is PROCESSING.
+	// Returns the Stratos job id: encoded by the translator when it
+	// implements JobIDCodec, random otherwise. Initial state is PROCESSING.
 	Create(kind string, translator JobTranslator, ref interface{}) string
+
+	// Register makes a translator's ids resolvable on this replica even
+	// when the job was created elsewhere. A no-op for translators that do
+	// not implement JobIDCodec.
+	Register(translator JobTranslator)
+
+	// Resolve is the poll entry point: it refreshes the job like Refresh,
+	// first rebuilding it from its id for userGUID when this replica does
+	// not hold it. Returns (nil, false) when the id is unknown and cannot
+	// be rebuilt, the job belongs to another user (see
+	// OwnedRefTranslator), or the backend reports the job does not exist.
+	Resolve(ctx context.Context, id string, userGUID string) (*StratosJob, bool)
 
 	// Get returns the job by id. Returns (nil, false) if unknown / evicted.
 	Get(id string) (*StratosJob, bool)
 
 	// Refresh asks the translator for the current underlying state and
-	// updates the tracked job. Called by the poll handler on each GET, so
-	// frontends see progress without the translator being driven by a timer.
-	// Returns the refreshed job, or (nil, false) if unknown.
+	// updates the tracked job, so frontends see progress without the
+	// translator being driven by a timer. Returns the refreshed job, or
+	// (nil, false) if unknown or the backend reports the job does not
+	// exist (the job is then dropped).
 	Refresh(ctx context.Context, id string) (*StratosJob, bool)
 
 	// AppendStage adds a stage to the job's progress timeline. The tracker
@@ -36,21 +57,36 @@ type Tracker interface {
 }
 
 // trackedJob is the internal tracker row — adds bookkeeping the wire shape
-// doesn't need (translator, ref, terminal timestamp for TTL eviction).
+// doesn't need (translator, ref, the timestamps the sweeper evicts by).
 type trackedJob struct {
 	job        StratosJob
 	translator JobTranslator
 	ref        interface{}
+	owner      string // Stratos user the ref polls as; "" when unknown
 	terminalAt *time.Time
+	polledAt   time.Time // last Refresh, or creation; drives MaxIdle eviction
 }
 
-// InMemoryTracker holds all jobs in a map guarded by a RWMutex. Suitable
-// when the frontend's poll is guaranteed to land on the replica that created
-// the job (CF deploy session affinity, or a single-replica k8s deploy).
+// DefaultMaxIdle bounds how long a non-terminal job is kept with nobody
+// polling it. Age is measured from the last poll, not from the start, so a
+// long backend operation (a broker can take 25+ minutes; CF keeps polling
+// a job for up to 7 days) stays tracked for as long as a client polls it.
+// The frontend polls at least every 3 seconds and a session expires after
+// 20 idle minutes by default, so an hour without a poll means the client
+// is gone. A later poll of a dropped job answers 404 as for any unknown
+// id; an id a translator encoded (JobIDCodec) is rebuilt from the backend.
+const DefaultMaxIdle = time.Hour
+
+// InMemoryTracker holds all jobs in a map guarded by a RWMutex. A job with
+// a random id resolves only on the replica that created it; one with an
+// encoded id (JobIDCodec) resolves on any replica that registered its
+// translator.
 type InMemoryTracker struct {
 	mu        sync.RWMutex
 	jobs      map[string]*trackedJob
+	codecs    map[string]JobTranslator // Kind() -> translator implementing JobIDCodec
 	ttl       time.Duration
+	maxIdle   time.Duration
 	clock     func() time.Time
 	sweepTick time.Duration
 	metrics   *Metrics // optional; nil-safe everywhere
@@ -64,6 +100,9 @@ type InMemoryTrackerConfig struct {
 	// TTL is how long a terminal job stays retrievable after completion.
 	// Default: 10 minutes.
 	TTL time.Duration
+	// MaxIdle is how long a non-terminal job stays without a poll.
+	// Default: DefaultMaxIdle.
+	MaxIdle time.Duration
 	// SweepInterval is how often the eviction sweeper runs.
 	// Default: 1 minute.
 	SweepInterval time.Duration
@@ -80,6 +119,9 @@ func NewInMemoryTracker(cfg InMemoryTrackerConfig) *InMemoryTracker {
 	if cfg.TTL == 0 {
 		cfg.TTL = 10 * time.Minute
 	}
+	if cfg.MaxIdle == 0 {
+		cfg.MaxIdle = DefaultMaxIdle
+	}
 	if cfg.SweepInterval == 0 {
 		cfg.SweepInterval = time.Minute
 	}
@@ -88,7 +130,9 @@ func NewInMemoryTracker(cfg InMemoryTrackerConfig) *InMemoryTracker {
 	}
 	t := &InMemoryTracker{
 		jobs:      make(map[string]*trackedJob),
+		codecs:    make(map[string]JobTranslator),
 		ttl:       cfg.TTL,
+		maxIdle:   cfg.MaxIdle,
 		clock:     cfg.Clock,
 		sweepTick: cfg.SweepInterval,
 		metrics:   cfg.Metrics,
@@ -103,11 +147,39 @@ func (t *InMemoryTracker) Stop() {
 	t.stopOnce.Do(func() { close(t.stopCh) })
 }
 
-// Create generates an opaque job id and registers a PROCESSING job.
-func (t *InMemoryTracker) Create(kind string, translator JobTranslator, ref interface{}) string {
-	now := t.clock()
-	id := newJobID()
+// Register records a JobIDCodec translator under its Kind() so Resolve
+// can rebuild its jobs.
+func (t *InMemoryTracker) Register(translator JobTranslator) {
+	if _, ok := translator.(JobIDCodec); !ok {
+		return
+	}
 	t.mu.Lock()
+	t.codecs[translator.Kind()] = translator
+	t.mu.Unlock()
+}
+
+// Create registers a PROCESSING job under the translator's encoded id, or
+// a random one when the translator has no codec or declines the ref.
+func (t *InMemoryTracker) Create(kind string, translator JobTranslator, ref interface{}) string {
+	id := newJobID()
+	if codec, ok := translator.(JobIDCodec); ok {
+		if encoded, ok := codec.EncodeID(kind, ref); ok && strings.HasPrefix(encoded, translator.Kind()+".") {
+			id = encoded
+		}
+	}
+	t.insert(id, kind, translator, ref)
+	return id
+}
+
+// insert adds a PROCESSING job under id unless one is already there (an
+// encoded id names one backend job, so a second insert is the same job).
+func (t *InMemoryTracker) insert(id, kind string, translator JobTranslator, ref interface{}) {
+	now := t.clock()
+	t.mu.Lock()
+	if _, exists := t.jobs[id]; exists {
+		t.mu.Unlock()
+		return
+	}
 	t.jobs[id] = &trackedJob{
 		job: StratosJob{
 			ID:        id,
@@ -118,12 +190,73 @@ func (t *InMemoryTracker) Create(kind string, translator JobTranslator, ref inte
 		},
 		translator: translator,
 		ref:        ref,
+		owner:      refOwner(translator, ref),
+		polledAt:   now,
 	}
 	t.mu.Unlock()
 	if t.metrics != nil {
 		t.metrics.ActiveJobs.Inc()
 	}
-	return id
+}
+
+// refOwner names the user ref polls as, or "" when the translator cannot.
+func refOwner(translator JobTranslator, ref interface{}) string {
+	if o, ok := translator.(OwnedRefTranslator); ok {
+		return o.RefOwner(ref)
+	}
+	return ""
+}
+
+// Resolve refreshes the job for its owner, rebuilding it from its id
+// first when this replica does not hold it. Another user's job reads as
+// unknown, the same answer as an id that never existed.
+func (t *InMemoryTracker) Resolve(ctx context.Context, id string, userGUID string) (*StratosJob, bool) {
+	owner, ok := t.ownerOf(id)
+	if !ok {
+		if !t.rebuild(id, userGUID) {
+			return nil, false
+		}
+		// Re-read: a concurrent poll may have inserted the job first.
+		owner, ok = t.ownerOf(id)
+	}
+	if !ok || owner == "" || owner != userGUID {
+		return nil, false
+	}
+	return t.Refresh(ctx, id)
+}
+
+// ownerOf returns the owner of the job held under id.
+func (t *InMemoryTracker) ownerOf(id string) (string, bool) {
+	t.mu.RLock()
+	defer t.mu.RUnlock()
+	tj, ok := t.jobs[id]
+	if !ok {
+		return "", false
+	}
+	return tj.owner, true
+}
+
+// rebuild decodes id with the codec registered for its prefix and inserts
+// the job as PROCESSING for userGUID; the caller's Refresh then asks the
+// backend for its real state. Decoding happens outside the lock; insert
+// re-checks under it, so concurrent polls for one id track one job.
+func (t *InMemoryTracker) rebuild(id, userGUID string) bool {
+	prefix, _, found := strings.Cut(id, ".")
+	if !found || userGUID == "" {
+		return false
+	}
+	t.mu.RLock()
+	translator := t.codecs[prefix]
+	t.mu.RUnlock()
+	if translator == nil {
+		return false
+	}
+	kind, ref, ok := translator.(JobIDCodec).DecodeID(id, userGUID)
+	if !ok {
+		return false
+	}
+	t.insert(id, kind, translator, ref)
+	return true
 }
 
 // Get returns a snapshot of the job by id.
@@ -142,26 +275,44 @@ func (t *InMemoryTracker) Get(id string) (*StratosJob, bool) {
 // is already terminal, Refresh is a no-op — terminal states are sticky until
 // TTL eviction.
 func (t *InMemoryTracker) Refresh(ctx context.Context, id string) (*StratosJob, bool) {
-	t.mu.RLock()
+	// Snapshot under the lock: concurrent polls for one job may be
+	// writing it below. Every poll, whatever its outcome, keeps the job
+	// from MaxIdle eviction.
+	t.mu.Lock()
 	tj, ok := t.jobs[id]
-	t.mu.RUnlock()
+	var current StratosJob
+	if ok {
+		current = tj.job
+		tj.polledAt = t.clock()
+	}
+	t.mu.Unlock()
 	if !ok {
 		return nil, false
 	}
-	if tj.job.State.IsTerminal() {
-		snap := tj.job
-		return &snap, true
+	if current.State.IsTerminal() {
+		return &current, true
 	}
 
 	state, errs, result, err := tj.translator.Fetch(ctx, tj.ref)
+	if errors.Is(err, ErrJobNotFound) {
+		// The backend has no such job: the outcome is unknowable, which
+		// the poll reports as 404.
+		t.remove(id, tj)
+		return nil, false
+	}
 	if err != nil {
 		// Transport failure — leave current state; caller retries next poll.
-		snap := tj.job
-		return &snap, true
+		return &current, true
 	}
 
 	now := t.clock()
 	t.mu.Lock()
+	if tj.job.State.IsTerminal() {
+		// A concurrent poll reached terminal first; terminal is sticky.
+		snap := tj.job
+		t.mu.Unlock()
+		return &snap, true
+	}
 	tj.job.State = state
 	tj.job.UpdatedAt = now
 	if state == JobStateFailed {
@@ -185,6 +336,19 @@ func (t *InMemoryTracker) Refresh(ctx context.Context, id string) (*StratosJob, 
 	snap := tj.job
 	t.mu.Unlock()
 	return &snap, true
+}
+
+// remove drops tj from the tracker if it is still the job held under id.
+func (t *InMemoryTracker) remove(id string, tj *trackedJob) {
+	t.mu.Lock()
+	removed := t.jobs[id] == tj
+	if removed {
+		delete(t.jobs, id)
+	}
+	t.mu.Unlock()
+	if removed && t.metrics != nil {
+		t.metrics.ActiveJobs.Dec()
+	}
 }
 
 // appendStageLocked appends a stage to tj's timeline when its Code
@@ -215,7 +379,8 @@ func (t *InMemoryTracker) AppendStage(id string, stage JobStage) {
 	t.appendStageLocked(tj, stage)
 }
 
-// sweepLoop periodically evicts jobs whose terminalAt + ttl has elapsed.
+// sweepLoop periodically evicts terminal jobs whose terminalAt + ttl has
+// elapsed and non-terminal jobs not polled for maxIdle.
 func (t *InMemoryTracker) sweepLoop() {
 	ticker := time.NewTicker(t.sweepTick)
 	defer ticker.Stop()
@@ -230,11 +395,15 @@ func (t *InMemoryTracker) sweepLoop() {
 }
 
 func (t *InMemoryTracker) sweep() {
-	cutoff := t.clock().Add(-t.ttl)
+	now := t.clock()
+	cutoff := now.Add(-t.ttl)
+	idleCutoff := now.Add(-t.maxIdle)
 	var evicted int
 	t.mu.Lock()
 	for id, tj := range t.jobs {
-		if tj.terminalAt != nil && tj.terminalAt.Before(cutoff) {
+		expired := tj.terminalAt != nil && tj.terminalAt.Before(cutoff)
+		idle := tj.terminalAt == nil && tj.polledAt.Before(idleCutoff)
+		if expired || idle {
 			delete(t.jobs, id)
 			evicted++
 		}
@@ -245,8 +414,10 @@ func (t *InMemoryTracker) sweep() {
 	}
 }
 
-// newJobID produces an opaque 128-bit hex id. No backend information is
-// encoded — the tracker resolves (translator, ref) internally.
+// newJobID produces an opaque 128-bit hex id for translators without a
+// JobIDCodec. No backend information is encoded — the tracker resolves
+// (translator, ref) internally. It contains no ".", so it never routes to
+// a codec.
 func newJobID() string {
 	var b [16]byte
 	if _, err := rand.Read(b[:]); err != nil {

@@ -8,8 +8,10 @@ import {
   PageHeaderComponent,
   SignalStepHandle,
   StepComponent,
+  StepOnNextResult,
   SteppersComponent,
 } from '@stratosui/core';
+import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import {
   RawRouteServiceBinding,
@@ -83,6 +85,21 @@ export class RouteServiceComponent {
     submit: () => this.bind(),
   };
 
+  private instanceName(siGuid: string): string {
+    return this.siSource.value().find(si => si.guid === siGuid)?.name ?? siGuid;
+  }
+
+  // A write that ended with an unknown result: say so, leave the stepper,
+  // and re-read the binding so the page shows what CF holds.
+  private endedUnknown(leadIn: string): StepOnNextResult {
+    const message = unknownOutcomeMessage(leadIn, 'This page');
+    this.errorMessage.set(message);
+    this.rebinding.set(false);
+    this.selectedSiGuid.set(null);
+    this.reload();
+    return { success: false, message };
+  }
+
   constructor() {
     const route = inject(ActivatedRoute);
     this.cfGuid = route.snapshot.params.endpointId;
@@ -105,7 +122,7 @@ export class RouteServiceComponent {
     this.rebinding.set(true);
   }
 
-  private async bind(): Promise<void> {
+  private async bind(): Promise<void | StepOnNextResult> {
     const siGuid = this.selectedSiGuid();
     if (!siGuid || this.busy()) return;
     this.busy.set(true);
@@ -115,10 +132,15 @@ export class RouteServiceComponent {
     const existing = this.binding();
     try {
       if (existing) {
-        await writeWithJob(
+        const unbound = await writeWithJob(
           this.http,
           this.http.delete(`/pp/v1/cf/service_route_bindings/${this.cfGuid}/${existing.guid}`, { observe: 'response' as const }),
         );
+        if (unbound.status === 'UNKNOWN') {
+          // CF allows one route service per route: binding again while the
+          // old one may still be there cannot be right.
+          return this.endedUnknown(`Unbind "${this.instanceName(existing.serviceInstanceGuid)}"`);
+        }
       }
       const body = {
         relationships: {
@@ -130,6 +152,9 @@ export class RouteServiceComponent {
         this.http,
         this.http.post(`/pp/v1/cf/service_route_bindings/${this.cfGuid}`, body, { observe: 'response' as const }),
       );
+      if (r.status === 'UNKNOWN') {
+        return this.endedUnknown(`Bind "${this.instanceName(siGuid)}"`);
+      }
       this.rebinding.set(false);
       this.selectedSiGuid.set(null);
       // A user-provided instance binds synchronously and answers with the
@@ -154,10 +179,14 @@ export class RouteServiceComponent {
     this.busy.set(true);
     this.errorMessage.set(null);
     try {
-      await writeWithJob(
+      const r = await writeWithJob(
         this.http,
         this.http.delete(`/pp/v1/cf/service_route_bindings/${this.cfGuid}/${existing.guid}`, { observe: 'response' as const }),
       );
+      if (r.status === 'UNKNOWN') {
+        this.endedUnknown(`Unbind "${this.instanceName(existing.serviceInstanceGuid)}"`);
+        return;
+      }
       this.reload();
     } catch (err: unknown) {
       this.errorMessage.set(`Failed to unbind service: ${extractHttpErrorMessage(err)}`);

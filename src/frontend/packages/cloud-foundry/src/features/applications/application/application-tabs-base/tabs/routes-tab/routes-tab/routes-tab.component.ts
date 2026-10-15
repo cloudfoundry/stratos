@@ -28,6 +28,7 @@ import {
 } from '../../../../../../../shared/signal-list-configs/app-route/cf-app-routes-signal-config.service';
 import { AppRouteActionsService } from '../../../../../../../shared/services/app-route-actions.service';
 import type { StRoute } from '../../../../../../../services/endpoint-data/stratos-types';
+import { unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
 import { AppDetailDataService } from '../../../../../app-detail-data.service';
 
 /**
@@ -181,8 +182,15 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
           );
           this.confirmDialog.open(confirm, async () => {
             try {
-              await this.actionsService.deleteRoute(row.guid);
-              this.dataService.removeRoute(row.guid);
+              const outcome = await this.actionsService.deleteRoute(row.guid);
+              if (outcome === 'deleted') {
+                this.dataService.removeRoute(row.guid);
+              } else {
+                // Ended with an unknown result: keep the row and re-read
+                // the routes so the tab shows whether it is still there.
+                void this.dataService.refresh('routes');
+                this.snackBar.error(unknownOutcomeMessage(`Delete "${label}"`, 'The Routes tab'));
+              }
             } catch (err: any) {
               this.snackBar.error(`Delete failed: ${err?.message ?? err}`);
             }

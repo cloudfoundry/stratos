@@ -11,6 +11,8 @@ import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-fo
 import { AppStatsDataRegistry } from '../../services/endpoint-data/app-stats-data.registry';
 import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
 import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
+import { unknownOutcomeMessage } from '../../services/async-jobs/unknown-outcome-message';
+import type { DeleteOutcome } from '../../services/deletes/delete-event.types';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
 /**
@@ -41,7 +43,8 @@ interface OperationLogEntry {
   at: Date;
   verb: LifecycleVerb;
   target: { app: string; cf: string; org: string; space: string };
-  event: 'begin' | 'stage' | 'success' | 'fail';
+  // unknown: the op ended but its result could not be determined.
+  event: 'begin' | 'stage' | 'success' | 'fail' | 'unknown';
   stage?: JobStage;
   error?: { code: string; message: string };
 }
@@ -90,20 +93,23 @@ export class AppApplicationActionsService {
   readonly currentTarget = this._currentTarget.asReadonly();
   // outcome() exposes the terminal event of the most recent op for the
   // snackbar's linger-window display. Null while in flight.
-  readonly outcome = computed<'success' | 'fail' | null>(() => {
+  readonly outcome = computed<'success' | 'fail' | 'unknown' | null>(() => {
     if (this.inFlight()) return null;
     const log = this._log();
     for (let i = log.length - 1; i >= 0; i--) {
-      if (log[i].event === 'success') return 'success';
-      if (log[i].event === 'fail') return 'fail';
+      const event = log[i].event;
+      if (event === 'success' || event === 'fail' || event === 'unknown') return event;
     }
     return null;
   });
+  // The message shown under the label: the failure reason, or why the
+  // result of an op that ended is unknown.
   readonly outcomeError = computed<string | null>(() => {
-    if (this.outcome() !== 'fail') return null;
+    const outcome = this.outcome();
+    if (outcome !== 'fail' && outcome !== 'unknown') return null;
     const log = this._log();
     for (let i = log.length - 1; i >= 0; i--) {
-      if (log[i].event === 'fail') return log[i].error?.message ?? 'Operation failed';
+      if (log[i].event === outcome) return log[i].error?.message ?? 'Operation failed';
     }
     return null;
   });
@@ -128,6 +134,7 @@ export class AppApplicationActionsService {
     if (inFlight) return gerund[v];
     if (this.outcome() === 'success') return past[v];
     if (this.outcome() === 'fail') return `${action[v]} failed`;
+    if (this.outcome() === 'unknown') return `${action[v]} result unknown`;
     return gerund[v];
   });
 
@@ -161,7 +168,9 @@ export class AppApplicationActionsService {
   private runLifecycleAction(
     verb: 'start' | 'stop' | 'restart' | 'restage' | 'delete',
     target: string,
-    action: (opts: { onProgress: (job: StratosJob) => void }) => Promise<void>,
+    // Resolves 'unknown' when the op ended with a result nobody can
+    // determine (only delete reports that today).
+    action: (opts: { onProgress: (job: StratosJob) => void }) => Promise<void | DeleteOutcome>,
     onAfter?: () => void,
   ): void {
     const { cfGuid, appGuid } = this.applicationService;
@@ -204,7 +213,19 @@ export class AppApplicationActionsService {
     };
 
     void action({ onProgress })
-      .then(() => {
+      .then((result) => {
+        if (result === 'unknown') {
+          // Ended, result unknown: nothing may act as if it worked (no row
+          // eviction, no navigating away). Say so and re-read the app.
+          const leadIn = `${verb[0].toUpperCase()}${verb.slice(1)} "${parsedTarget.app}"`;
+          this.appendLog({
+            at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'unknown',
+            error: { code: '', message: unknownOutcomeMessage(leadIn, 'This page') },
+          });
+          this.refreshAppStats();
+          void this.dataService.refresh('all');
+          return;
+        }
         this.appendLog({ at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'success' });
         // Eagerly drop the deleted app's row from the app-wall orchestrator
         // so the post-delete window doesn't leave the gone-app's
@@ -525,7 +546,7 @@ export class AppApplicationActionsService {
             await Promise.all(bindings.map(b => this.apps.deleteServiceBinding(cfGuid, b.guid)));
           }
           emit('DELETE_APP', 'Deleting application');
-          await this.apps.deleteApp(cfGuid, appGuid);
+          return this.apps.deleteApp(cfGuid, appGuid);
         },
         () => {
           // App is gone. The in-page lifecycle-progress overlay is
