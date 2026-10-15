@@ -127,17 +127,7 @@ func (p *portalProxy) GetGuardedHttpClient(skipSSLValidation bool) http.Client {
 // GetHttpClientForRequest returns an Http Client for the giving request
 func (p *portalProxy) GetHttpClientForRequest(req *http.Request, skipSSLValidation bool, caCert string) http.Client {
 	isMutating := req.Method != "GET" && req.Method != "HEAD"
-	client := p.getHttpClient(skipSSLValidation, caCert, isMutating)
-
-	// Is this is a long-running request, then use a different timeout
-	if req.Header.Get(longRunningTimeoutHeader) == "true" {
-		longRunningClient := http.Client{}
-		longRunningClient.Transport = client.Transport
-		longRunningClient.Timeout = time.Duration(p.GetConfig().HTTPClientTimeoutLongRunningInSecs) * time.Second
-		return longRunningClient
-	}
-
-	return client
+	return p.getHttpClient(skipSSLValidation, caCert, isMutating)
 }
 
 func (p *portalProxy) getHttpClient(skipSSLValidation bool, caCert string, mutating bool) http.Client {

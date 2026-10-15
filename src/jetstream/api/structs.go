@@ -421,7 +421,6 @@ type CNSIRequest struct {
 	StatusCode   int          `json:"statusCode"`
 	Status       string       `json:"status"`
 	PassThrough  bool         `json:"-"`
-	LongRunning  bool         `json:"-"`
 	Response     []byte       `json:"-"`
 	Error        error        `json:"-"`
 	ResponseGUID string       `json:"-"`
@@ -429,59 +428,58 @@ type CNSIRequest struct {
 }
 
 type PortalConfig struct {
-	HTTPClientTimeoutInSecs            int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
-	HTTPClientTimeoutMutatingInSecs    int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
-	HTTPClientTimeoutLongRunningInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS"`
-	HTTPConnectionTimeoutInSecs        int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
-	TLSAddress                         string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
-	TLSCert                            string   `configName:"CONSOLE_PROXY_CERT"`
-	TLSCertKey                         string   `configName:"CONSOLE_PROXY_CERT_KEY"`
-	TLSCertPath                        string   `configName:"CONSOLE_PROXY_CERT_PATH"`
-	TLSCertKeyPath                     string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
-	CFClient                           string   `configName:"CF_CLIENT"`
-	CFClientSecret                     string   `configName:"CF_CLIENT_SECRET"`
-	AllowedOrigins                     []string `configName:"ALLOWED_ORIGINS"`
-	CSPPolicy                          string   `configName:"CONSOLE_CSP"`
-	CSPGitHosts                        []string `configName:"CONSOLE_CSP_GIT_HOSTS"`
-	CSPReportOnlyPolicy                string   `configName:"CONSOLE_CSP_REPORT_ONLY"`
-	CSPReportCollector                 string   `configName:"CONSOLE_CSP_REPORT_COLLECTOR"`
-	HSTSPolicy                         string   `configName:"CONSOLE_HSTS"`
-	SessionStoreSecret                 string   `configName:"SESSION_STORE_SECRET"`
-	EncryptionKeyVolume                string   `configName:"ENCRYPTION_KEY_VOLUME"`
-	EncryptionKeyFilename              string   `configName:"ENCRYPTION_KEY_FILENAME"`
-	EncryptionKey                      string   `configName:"ENCRYPTION_KEY"`
-	AutoRegisterCFUrl                  string   `configName:"AUTO_REG_CF_URL"`
-	AutoRegisterCFName                 string   `configName:"AUTO_REG_CF_NAME"`
-	AutoRegisterCFCACert               string   `configName:"AUTO_REG_CF_CA_CERT"`
-	AutoRegisterCFCACertPath           string   `configName:"AUTO_REG_CF_CA_CERT_PATH"`
-	SSOLogin                           bool     `configName:"SSO_LOGIN"`
-	SSOOptions                         string   `configName:"SSO_OPTIONS"`
-	SSOAllowList                       string   `configName:"SSO_ALLOWLIST,SSO_WHITELIST"`
-	AuthEndpointType                   string   `configName:"AUTH_ENDPOINT_TYPE"`
-	CookieDomain                       string   `configName:"COOKIE_DOMAIN"`
-	LogLevel                           string   `configName:"LOG_LEVEL"`
-	UIListMaxSize                      int64    `configName:"UI_LIST_MAX_SIZE"`
-	UIListAllowLoadMaxed               bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
-	AutoRefreshCNSITokens              bool     `configName:"AUTOREFRESH_CNSI_TOKENS"`
-	CFAdminIdentifier                  string
-	CloudFoundryInfo                   *CFInfo
-	HTTPS                              bool
-	EncryptionKeyInBytes               []byte
-	ConsoleVersion                     string
-	IsCloudFoundry                     bool
-	LoginHooks                         []LoginHook
-	SessionStore                       SessionStorer
-	ConsoleConfig                      *ConsoleConfig
-	PluginConfig                       map[string]string
-	DatabaseProviderName               string
-	EnableTechPreview                  bool `configName:"ENABLE_TECH_PREVIEW"`
-	CanMigrateDatabaseSchema           bool
-	APIKeysEnabled                     api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
-	HomeViewShowFavoritesOnly          bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
-	HideNavLogout                      bool                         `configName:"HIDE_NAV_LOGOUT"`
-	EndpointCardConcurrency            int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
-	EndpointRequestConcurrency         int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
-	UserEndpointsEnabled               api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
+	HTTPClientTimeoutInSecs         int64    `configName:"HTTP_CLIENT_TIMEOUT_IN_SECS"`
+	HTTPClientTimeoutMutatingInSecs int64    `configName:"HTTP_CLIENT_TIMEOUT_MUTATING_IN_SECS"`
+	HTTPConnectionTimeoutInSecs     int64    `configName:"HTTP_CONNECTION_TIMEOUT_IN_SECS"`
+	TLSAddress                      string   `configName:"CONSOLE_PROXY_TLS_ADDRESS"`
+	TLSCert                         string   `configName:"CONSOLE_PROXY_CERT"`
+	TLSCertKey                      string   `configName:"CONSOLE_PROXY_CERT_KEY"`
+	TLSCertPath                     string   `configName:"CONSOLE_PROXY_CERT_PATH"`
+	TLSCertKeyPath                  string   `configName:"CONSOLE_PROXY_CERT_KEY_PATH"`
+	CFClient                        string   `configName:"CF_CLIENT"`
+	CFClientSecret                  string   `configName:"CF_CLIENT_SECRET"`
+	AllowedOrigins                  []string `configName:"ALLOWED_ORIGINS"`
+	CSPPolicy                       string   `configName:"CONSOLE_CSP"`
+	CSPGitHosts                     []string `configName:"CONSOLE_CSP_GIT_HOSTS"`
+	CSPReportOnlyPolicy             string   `configName:"CONSOLE_CSP_REPORT_ONLY"`
+	CSPReportCollector              string   `configName:"CONSOLE_CSP_REPORT_COLLECTOR"`
+	HSTSPolicy                      string   `configName:"CONSOLE_HSTS"`
+	SessionStoreSecret              string   `configName:"SESSION_STORE_SECRET"`
+	EncryptionKeyVolume             string   `configName:"ENCRYPTION_KEY_VOLUME"`
+	EncryptionKeyFilename           string   `configName:"ENCRYPTION_KEY_FILENAME"`
+	EncryptionKey                   string   `configName:"ENCRYPTION_KEY"`
+	AutoRegisterCFUrl               string   `configName:"AUTO_REG_CF_URL"`
+	AutoRegisterCFName              string   `configName:"AUTO_REG_CF_NAME"`
+	AutoRegisterCFCACert            string   `configName:"AUTO_REG_CF_CA_CERT"`
+	AutoRegisterCFCACertPath        string   `configName:"AUTO_REG_CF_CA_CERT_PATH"`
+	SSOLogin                        bool     `configName:"SSO_LOGIN"`
+	SSOOptions                      string   `configName:"SSO_OPTIONS"`
+	SSOAllowList                    string   `configName:"SSO_ALLOWLIST,SSO_WHITELIST"`
+	AuthEndpointType                string   `configName:"AUTH_ENDPOINT_TYPE"`
+	CookieDomain                    string   `configName:"COOKIE_DOMAIN"`
+	LogLevel                        string   `configName:"LOG_LEVEL"`
+	UIListMaxSize                   int64    `configName:"UI_LIST_MAX_SIZE"`
+	UIListAllowLoadMaxed            bool     `configName:"UI_LIST_ALLOW_LOAD_MAXED"`
+	AutoRefreshCNSITokens           bool     `configName:"AUTOREFRESH_CNSI_TOKENS"`
+	CFAdminIdentifier               string
+	CloudFoundryInfo                *CFInfo
+	HTTPS                           bool
+	EncryptionKeyInBytes            []byte
+	ConsoleVersion                  string
+	IsCloudFoundry                  bool
+	LoginHooks                      []LoginHook
+	SessionStore                    SessionStorer
+	ConsoleConfig                   *ConsoleConfig
+	PluginConfig                    map[string]string
+	DatabaseProviderName            string
+	EnableTechPreview               bool `configName:"ENABLE_TECH_PREVIEW"`
+	CanMigrateDatabaseSchema        bool
+	APIKeysEnabled                  api.APIKeysConfigValue       `configName:"API_KEYS_ENABLED"`
+	HomeViewShowFavoritesOnly       bool                         `configName:"HOME_VIEW_SHOW_FAVORITES_ONLY"`
+	HideNavLogout                   bool                         `configName:"HIDE_NAV_LOGOUT"`
+	EndpointCardConcurrency         int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
+	EndpointRequestConcurrency      int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
+	UserEndpointsEnabled            api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
 	// DiagnosticsEnabled gates the admin-only /pp/v1/admin/diagnostics endpoint.
 	// Off by default in production; opt-in per deployment (dev, staging) via the
 	// DIAGNOSTICS_ENABLED env var. FWT-934.
