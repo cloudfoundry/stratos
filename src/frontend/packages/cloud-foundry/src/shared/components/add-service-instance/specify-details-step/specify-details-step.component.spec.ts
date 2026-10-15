@@ -388,6 +388,40 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  it('names the instance and says it was created when the bind after a create fails', async () => {
+    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: 'bind said no' }));
+    const finalResult = firstValueFrom(component.onNext());
+
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+      {
+        state: 'COMPLETE',
+        result: { jobGuid: 'job-1', operation: 'service_instance.create', links: { service_instances: 'https://cf/v3/service_instances/si-new' } },
+      },
+      { status: 200, statusText: 'OK' },
+    );
+
+    await expect(finalResult).resolves.toEqual({
+      success: false,
+      message: 'Service instance "my-instance" was created, but binding it to the application failed: bind said no',
+    });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('names the instance when binding an existing one fails', async () => {
+    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: 'bind said no' }));
+    component.bindExistingInstance = true;
+    component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
+    component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
+
+    await expect(firstValueFrom(component.onNext())).resolves.toEqual({
+      success: false,
+      message: 'Failed to bind service instance "instance-two" to the application: bind said no',
+    });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
   it('PATCHes the v3 endpoint and returns success+redirect on update', async () => {
     const { component, httpMock } = setup({ isEditMode: true });
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
@@ -449,7 +483,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
         answerPoll(httpMock, failedJob);
         await vi.advanceTimersByTimeAsync(0);
-        expect(error).toHaveBeenCalledWith('Failed to create service instance: the broker said no');
+        expect(error).toHaveBeenCalledWith('Failed to create service instance "my-instance": the broker said no');
       } finally {
         vi.useRealTimers();
       }
@@ -493,7 +527,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         fixture.destroy();
         answerPoll(httpMock, failedJob);
         await vi.advanceTimersByTimeAsync(0);
-        expect(error).toHaveBeenCalledWith('Failed to create service instance: the broker said no');
+        expect(error).toHaveBeenCalledWith('Failed to create service instance "my-instance": the broker said no');
       } finally {
         vi.useRealTimers();
       }

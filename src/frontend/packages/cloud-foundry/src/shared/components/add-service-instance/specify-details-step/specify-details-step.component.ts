@@ -465,7 +465,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     } catch (err: unknown) {
       return {
         success: false,
-        message: `Failed to ${verb} service instance: ${extractHttpErrorMessage(err)}`,
+        message: `Failed to ${verb} service instance "${name}": ${extractHttpErrorMessage(err)}`,
       };
     }
 
@@ -521,9 +521,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       };
     }
     if (!bindResult?.success) {
+      const reason = bindResult?.message ?? 'unknown error';
       return {
         success: false,
-        message: `Failed to create service instance binding: ${bindResult?.message ?? 'unknown error'}`,
+        message: created
+          ? `Service instance "${siName}" was created, but binding it to the application failed: ${reason}`
+          : `Failed to bind service instance "${siName}" to the application: ${reason}`,
       };
     }
     // CF mutated VCAP_SERVICES on the bound app. We routeToServices below
