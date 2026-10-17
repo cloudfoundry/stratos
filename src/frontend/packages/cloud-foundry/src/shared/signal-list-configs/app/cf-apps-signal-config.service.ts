@@ -19,6 +19,7 @@ import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipe
 import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServiceCredentialBinding, StServiceCredentialBindingsResponse, StSpace, StSpacesResponse, StStack } from '../../../services/endpoint-data/stratos-types';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
+import { UnknownOutcome, unknownOutcomeOf } from '../../../services/async-jobs/unknown-outcome-message';
 import type { StratosJob } from '../../../services/async-jobs/async-job.types';
 import type { SignalListDropdownOption, SignalListRangeValue } from '@stratosui/core';
 import { ListStateStore, naturalCompare, rangeMatches } from '@stratosui/core';
@@ -1195,17 +1196,17 @@ export class CfAppsSignalConfigService {
   // write callsite a uniform client shape regardless of whether CF itself
   // was sync or async. Thrown StratosJobError surfaces CF errors; callers
   // should catch and surface via snackbar.
-  async startApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'start', opts);
+  async startApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<UnknownOutcome | undefined> {
+    return this.appAction(cnsiGuid, appGuid, 'start', opts);
   }
-  async stopApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'stop', opts);
+  async stopApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<UnknownOutcome | undefined> {
+    return this.appAction(cnsiGuid, appGuid, 'stop', opts);
   }
-  async restartApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'restart', opts);
+  async restartApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<UnknownOutcome | undefined> {
+    return this.appAction(cnsiGuid, appGuid, 'restart', opts);
   }
-  async restageApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
-    await this.appAction(cnsiGuid, appGuid, 'restage', opts);
+  async restageApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<UnknownOutcome | undefined> {
+    return this.appAction(cnsiGuid, appGuid, 'restage', opts);
   }
 
   private async appAction(
@@ -1213,13 +1214,15 @@ export class CfAppsSignalConfigService {
     appGuid: string,
     action: 'start' | 'stop' | 'restart' | 'restage',
     opts?: { onProgress?: (job: StratosJob) => void },
-  ): Promise<void> {
+  ): Promise<UnknownOutcome | undefined> {
     const call = this.http.post(
       `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/actions/${action}`,
       null,
       { observe: 'response' },
     );
-    await writeWithJob(this.http, call, { onProgress: opts?.onProgress });
+    // Resolves an UnknownOutcome when nothing can say how the action ended,
+    // so no caller reports it as done.
+    return unknownOutcomeOf(await writeWithJob(this.http, call, { onProgress: opts?.onProgress }));
   }
 
   // Scales the web process of an app through the async-job contract.
@@ -1231,13 +1234,13 @@ export class CfAppsSignalConfigService {
     cnsiGuid: string,
     appGuid: string,
     payload: { instances?: number; memory?: number; disk_quota?: number },
-  ): Promise<void> {
+  ): Promise<UnknownOutcome | undefined> {
     const call = this.http.post(
       `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/scale`,
       payload,
       { observe: 'response' },
     );
-    await writeWithJob(this.http, call);
+    return unknownOutcomeOf(await writeWithJob(this.http, call));
   }
 
   // Deletes an app through the EntityDeleteController chokepoint, then drops

@@ -24,6 +24,7 @@ import {
   AppNameUniqueDirective,
 } from '../../../shared/directives/app-name-unique.directive/app-name-unique.directive';
 import { ApplicationService } from '../application.service';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 
 interface EditApplicationForm {
   name: FormControl<string>;
@@ -203,7 +204,12 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     const { cfGuid, appGuid } = this.applicationService;
     const scale$: Observable<{ success: boolean; message?: string }> = hasScale
       ? defer(() => from(this.apps.scaleApp(cfGuid, appGuid, scaleUpdate))).pipe(
-          map(() => ({ success: true })),
+          map(outcome => {
+            const how = unknownHowOf(outcome);
+            return how
+              ? { success: false, message: unknownOutcomeMessage('Scale the application', 'The application\'s page', how) }
+              : { success: true };
+          }),
           // Surface failure message so the stepper can display it in the
           // snackbar. writeWithJob throws StratosJobError on FAILED terminal;
           // Promise.catch would lose the type, so cast via unknown.

@@ -205,6 +205,17 @@ describe('CardAppInstancesComponent', () => {
       expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 3 });
     });
 
+    it('says so when the scale has no known result, rather than nothing', async () => {
+      const { fixture, appsStub, snackStub } = setup({ showActions: true, desired: 2 });
+      appsStub.scaleApp.mockResolvedValueOnce('unknown');
+      fixture.componentInstance.scaleUp();
+      await fixture.whenStable();
+      await Promise.resolve();
+      expect(snackStub.error).toHaveBeenCalledWith(
+        'Update instance count: the operation ended, but its result could not be determined. '
+          + 'This page shows the current state.');
+    });
+
     it('scaleDown invokes apps.scaleApp with desired-1', () => {
       const { fixture, appsStub } = setup({ showActions: true, desired: 3 });
       fixture.componentInstance.scaleDown();
