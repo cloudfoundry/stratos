@@ -27,27 +27,27 @@
           </app-error>
         }
       </app-form-field>
-      <app-form-field class="stepper-form__tags">
-        <app-label>Tags</app-label>
+      <div class="stepper-form__tags mb-4">
+        <label for="service-instance-tags" class="block mb-1 text-sm text-content-muted">Tags</label>
         <div class="flex flex-wrap gap-2 p-2 border border-content-border rounded-md min-h-[42px] bg-content-bg">
           @for (tag of tags; track tag) {
             <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-content-text bg-content-secondary rounded-full hover:bg-content-border">
               {{tag}}
               @if (tagsRemovable) {
-                <button type="button" (click)="removeTag(tag)" class="ml-2 text-content-muted hover:text-content-text focus:outline-none">
+                <button type="button" (click)="removeTag(tag)" [attr.aria-label]="'Remove tag ' + tag" class="ml-2 text-content-muted hover:text-content-text focus:outline-none">
                   <span class="material-icons text-sm">cancel</span>
                 </button>
               }
             </span>
           }
-          <input type="text"
+          <input id="service-instance-tags" type="text"
             (keydown.enter)="addTagFromInput($event)"
             (keydown.comma)="addTagFromInput($event)"
             (keydown.space)="addTagFromInput($event)"
             class="flex-1 min-w-[120px] outline-none bg-transparent text-sm"
             placeholder="Add tag..." />
         </div>
-      </app-form-field>
+      </div>
       <div class="stepper-form__params">
         <div>Service Parameters</div>
         <app-schema-form [config]="schemaFormConfig()" (dataChange)="setServiceParams($event)"

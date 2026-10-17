@@ -23,6 +23,7 @@ import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
 import { TrackedJobsService } from '../../../../services/async-jobs/tracked-jobs.service';
 import { setJobTrackingLimit } from '../../../../services/async-jobs/write-with-job';
+import type { StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 
 describe('SpecifyDetailsStepComponent', () => {
@@ -185,6 +186,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   async function setup(opts: {
     isEditMode?: boolean;
     bindAppGuid?: string;
+    tags?: string[];
     csiBindParams?: object;
   } = {}) {
     const csiState = {
@@ -200,6 +202,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       // state, and edit seeds it with the instance's name before the user
       // renames it in the form. Messages must name what the form sent.
       name: opts.isEditMode ? 'my-old-instance' : '',
+      tags: opts.tags,
       spaceScoped: false,
     };
 
@@ -787,6 +790,19 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       }
       httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
     });
+  });
+
+  it('renders the instance\'s existing tags when editing, and drops a removed one', async () => {
+    const { fixture, component, httpMock } = await setup({ isEditMode: true, tags: ['db', 'prod'] });
+    component.onEnter({ guid: 'plan-1', cnsiGuid: 'cnsi-1' } as StServicePlan);
+    await fixture.whenStable();
+    const chips = () => [...(fixture.nativeElement as HTMLElement).querySelectorAll('.stepper-form__tags span.rounded-full')]
+      .map(e => e.textContent?.replace('cancel', '').trim());
+    expect(chips()).toEqual(['db', 'prod']);
+    component.removeTag('db');
+    await fixture.whenStable();
+    expect(chips()).toEqual(['prod']);
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
   it('surfaces CF detail message on 4xx create failure', async () => {
