@@ -11,8 +11,14 @@
 - A service instance create or update handed off by the wizard is still
   reported after a page reload or a new sign-in: Stratos says it is
   still running and for how long, then how it ended. Signing out while
-  one runs says its status will show after you sign in. Stratos stops
-  checking an hour after the operation started, and says so.
+  one runs says its status will show after you sign in.
+- Stratos stops following a background operation (a slow broker, a
+  delete Cloud Foundry runs as a job) after a set time, 60 minutes by
+  default, and says it is still running in Cloud Foundry rather than
+  that it failed or that its result is unknown. Set
+  ASYNC_JOB_TRACKING_LIMIT_IN_MINS (Helm: console.ui.jobTrackingLimitMins)
+  to change it; under 1 uses 1, over 360 logs a warning, 1440 or more
+  uses 360.
 
 [BugFixes]
 - An operation whose result Stratos could not determine is no longer
@@ -40,6 +46,8 @@
   determined. It said only how many failed.
 - Background operations are checked less often the longer they run:
   every few seconds at first, then up to every two minutes.
+- Starting, stopping, restarting, restaging or scaling an application
+  whose result could not be determined is no longer reported as done.
 - The backend no longer keeps an unfinished operation in memory forever
   once nobody is checking on it: after an hour without a status check it
   is dropped. An operation someone keeps checking is kept however long it
