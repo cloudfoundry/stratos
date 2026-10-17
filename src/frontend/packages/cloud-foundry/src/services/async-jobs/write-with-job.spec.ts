@@ -258,6 +258,31 @@ describe('writeWithJob', () => {
       return { promise };
     };
 
+    it('checks quickly at first, then backs off exponentially to two minutes', async () => {
+      vi.useFakeTimers();
+      try {
+        const { promise } = await handOff('job-b', {});
+        const at: number[] = [];
+        // Answer every poll "still running" and note when each arrived.
+        for (let step = 0; at.length < 30 && step < 100; step++) {
+          for (const req of ctrl.match('/pp/v1/stratos/jobs/job-b')) {
+            at.push(Date.now());
+            req.flush(processing('job-b'));
+          }
+          await vi.advanceTimersToNextTimerAsync();
+        }
+        const gaps = at.slice(1).map((t, i) => t - at[i]);
+        expect(gaps.slice(0, 4)).toEqual([500, 1000, 2000, 3000]);
+        expect(gaps.slice(4, 21).every(g => g === 3000)).toBe(true);    // every 3 s for the first minute
+        expect(gaps.slice(22, 29)).toEqual([6000, 12000, 24000, 48000, 96000, 120000, 120000]);
+        ctrl.match('/pp/v1/stratos/jobs/job-b').forEach(r => r.flush(complete('job-b')));
+        await vi.advanceTimersByTimeAsync(0);
+        expect((await promise).status).toBe('COMPLETE');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('keeps polling through a 503 and a network error, then completes', async () => {
       const { promise } = await handOff('job-t');
       ctrl.expectOne('/pp/v1/stratos/jobs/job-t').flush(null, { status: 503, statusText: 'Service Unavailable' });
