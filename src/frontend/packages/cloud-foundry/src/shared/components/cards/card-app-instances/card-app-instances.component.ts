@@ -28,6 +28,7 @@ import { ApplicationService } from '../../../../features/applications/applicatio
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CfAppsSignalConfigService } from '../../../signal-list-configs/app/cf-apps-signal-config.service';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 const appInstanceScaleToZeroConfirmation = new ConfirmationDialogConfig(
   'Set Instance count to 0',
@@ -162,7 +163,10 @@ export class CardAppInstancesComponent implements OnDestroy {
   private setInstanceCount(value: number) {
     const doUpdate = async () => {
       try {
-        await this.apps.scaleApp(this.appService.cfGuid, this.appService.appGuid, { instances: value });
+        const how = unknownHowOf(await this.apps.scaleApp(this.appService.cfGuid, this.appService.appGuid, { instances: value }));
+        if (how) {
+          this.snackBarRef = this.snackBar.error(unknownOutcomeMessage('Update instance count', 'This page', how));
+        }
         // Refresh both signals in parallel so the Status and Instances
         // cards converge as soon as the scale job resolves: the app
         // entity carries the new desired count (denominator), stats
