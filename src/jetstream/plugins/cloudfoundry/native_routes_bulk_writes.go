@@ -70,11 +70,7 @@ func (cf *CloudFoundrySpecification) bulkDeleteNativeRoutes(c *echo.Context) err
 			return BulkItemResult{GUID: guid, State: bulkStatePending, Job: res.HandoffJob}
 		}
 		if res.State == stratosjobs.JobStateFailed {
-			itemErrors := make([]BulkItemError, 0, len(res.Errors))
-			for _, e := range res.Errors {
-				itemErrors = append(itemErrors, BulkItemError{Code: e.Code, Message: e.Message})
-			}
-			return BulkItemResult{GUID: guid, State: bulkStateFailed, Errors: itemErrors}
+			return BulkItemResult{GUID: guid, State: bulkStateFailed, Errors: bulkItemErrorsFromJob(res.Errors)}
 		}
 		return BulkItemResult{GUID: guid, State: bulkStateComplete}
 	})
