@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"errors"
+	"log/slog"
 	"strings"
 	"sync"
 	"time"
@@ -65,6 +66,19 @@ type trackedJob struct {
 	owner      string // Stratos user the ref polls as; "" when unknown
 	terminalAt *time.Time
 	polledAt   time.Time // last Refresh, or creation; drives MaxIdle eviction
+	rebuilt    bool      // inserted from its id on a poll; StartedAt is then the rebuild
+}
+
+// logEnded writes one line per job as it leaves tracking, so operators can
+// see how long each kind takes and set ASYNC_JOB_TRACKING_LIMIT_IN_MINS from
+// the numbers. outcome is complete, failed, not_found (the backend has no
+// such job) or abandoned (nobody polled it for MaxIdle: the client stopped
+// at its tracking limit or went away; seconds then counts up to the last
+// poll, so the job ran at least that long). A rebuilt job's seconds start at
+// the rebuild, so they are a lower bound too.
+func logEnded(job StratosJob, outcome string, at time.Time, rebuilt bool) {
+	slog.Info("job ended", "kind", job.Kind, "outcome", outcome,
+		"seconds", int(at.Sub(job.StartedAt).Round(time.Second).Seconds()), "rebuilt", rebuilt)
 }
 
 // DefaultMaxIdle bounds how long a non-terminal job is kept with nobody
@@ -167,13 +181,13 @@ func (t *InMemoryTracker) Create(kind string, translator JobTranslator, ref inte
 			id = encoded
 		}
 	}
-	t.insert(id, kind, translator, ref)
+	t.insert(id, kind, translator, ref, false)
 	return id
 }
 
 // insert adds a PROCESSING job under id unless one is already there (an
 // encoded id names one backend job, so a second insert is the same job).
-func (t *InMemoryTracker) insert(id, kind string, translator JobTranslator, ref interface{}) {
+func (t *InMemoryTracker) insert(id, kind string, translator JobTranslator, ref interface{}, rebuilt bool) {
 	now := t.clock()
 	t.mu.Lock()
 	if _, exists := t.jobs[id]; exists {
@@ -192,6 +206,7 @@ func (t *InMemoryTracker) insert(id, kind string, translator JobTranslator, ref 
 		ref:        ref,
 		owner:      refOwner(translator, ref),
 		polledAt:   now,
+		rebuilt:    rebuilt,
 	}
 	t.mu.Unlock()
 	if t.metrics != nil {
@@ -255,7 +270,7 @@ func (t *InMemoryTracker) rebuild(id, userGUID string) bool {
 	if !ok {
 		return false
 	}
-	t.insert(id, kind, translator, ref)
+	t.insert(id, kind, translator, ref, true)
 	return true
 }
 
@@ -298,6 +313,7 @@ func (t *InMemoryTracker) Refresh(ctx context.Context, id string) (*StratosJob, 
 		// The backend has no such job: the outcome is unknowable, which
 		// the poll reports as 404.
 		t.remove(id, tj)
+		logEnded(current, "not_found", t.clock(), tj.rebuilt)
 		return nil, false
 	}
 	if err != nil {
@@ -335,6 +351,9 @@ func (t *InMemoryTracker) Refresh(ctx context.Context, id string) (*StratosJob, 
 	}
 	snap := tj.job
 	t.mu.Unlock()
+	if state.IsTerminal() {
+		logEnded(snap, strings.ToLower(string(state)), now, tj.rebuilt)
+	}
 	return &snap, true
 }
 
@@ -399,6 +418,7 @@ func (t *InMemoryTracker) sweep() {
 	cutoff := now.Add(-t.ttl)
 	idleCutoff := now.Add(-t.maxIdle)
 	var evicted int
+	var abandoned []trackedJob // copied under the lock: a concurrent poll may still write tj
 	t.mu.Lock()
 	for id, tj := range t.jobs {
 		expired := tj.terminalAt != nil && tj.terminalAt.Before(cutoff)
@@ -407,8 +427,14 @@ func (t *InMemoryTracker) sweep() {
 			delete(t.jobs, id)
 			evicted++
 		}
+		if idle {
+			abandoned = append(abandoned, *tj)
+		}
 	}
 	t.mu.Unlock()
+	for _, tj := range abandoned {
+		logEnded(tj.job, "abandoned", tj.polledAt, tj.rebuilt)
+	}
 	if t.metrics != nil && evicted > 0 {
 		t.metrics.ActiveJobs.Sub(float64(evicted))
 	}
