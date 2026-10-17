@@ -52,6 +52,19 @@ export interface WriteWithJobOptions {
   backoffMs?: readonly number[];
   /** Stop waiting: rejects with a DOMException named 'AbortError'. */
   signal?: AbortSignal;
+  /**
+   * A poll answered 401 rejects with SignedOutError instead of resolving
+   * UNKNOWN: the session ended, not the job, which can be followed again
+   * after the next sign-in.
+   */
+  pauseOnSignOut?: boolean;
+}
+
+export class SignedOutError extends Error {
+  constructor(readonly jobId: string) {
+    super(`signed out while following job ${jobId}`);
+    this.name = 'SignedOutError';
+  }
 }
 
 export async function writeWithJob<T>(
@@ -190,6 +203,9 @@ export async function pollJob<T>(
     } catch (err: unknown) {
       if (opts.signal?.aborted) {
         throw err;
+      }
+      if (opts.pauseOnSignOut && err instanceof HttpErrorResponse && err.status === 401) {
+        throw new SignedOutError(jobId);
       }
       if (endsPolling(err)) {
         return { status: 'UNKNOWN', state: undefined, jobId };

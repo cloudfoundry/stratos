@@ -34,7 +34,8 @@ import { ServiceCatalogDataService, SignalSource } from '../../../../services/en
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult } from '../../../../services/async-jobs/async-job.types';
 import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
-import { writeWithJob } from '../../../../services/async-jobs/write-with-job';
+import { SignedOutError, writeWithJob } from '../../../../services/async-jobs/write-with-job';
+import { TrackedJob, TrackedJobsService, coarseElapsed } from '../../../../services/async-jobs/tracked-jobs.service';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
@@ -57,12 +58,6 @@ const HAND_OFF_AFTER_MS = 30_000;
 const MIN_WAIT_S = 30;
 const MAX_WAIT_S = 600;
 const PROMPT_ANSWER_S = 30;
-
-// Coarse elapsed time: seconds under a minute, whole minutes after.
-const coarseElapsed = (ms: number): string => {
-  const s = Math.round(ms / 1000);
-  return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min`;
-};
 
 type WaitAnswer = number | 'background';
 
@@ -94,6 +89,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private http = inject(HttpClient);
   private snackBar = inject(TailwindSnackBarService);
   private destroyRef = inject(DestroyRef);
+  private trackedJobs = inject(TrackedJobsService);
 
   // The question shown while a write outlasts the wait; null when not asking.
   readonly slowWrite = signal<{ text: string; answerIn: number } | null>(null);
@@ -544,14 +540,56 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       ? this.http.patch(url, body, { observe: 'response' as const })
       : this.http.post(url, body, { observe: 'response' as const });
 
+    // Kept while the write runs, so a reload or a new sign-in can still
+    // report how it ended (TrackedJobsService); it says the bind did not run,
+    // as only this wizard binds.
+    const track: Omit<TrackedJob, 'jobId'> = {
+      startedAt: Date.now(),
+      running: this.writeDescription(),
+      done: `Service instance "${name}" ${isEditMode ? 'updated' : 'created'}.`
+        + (!isEditMode && state.bindAppGuid
+          ? ' It was not bound to the application: the wizard that would bind it closed before the instance was ready.'
+          : ''),
+      failed: `Failed to ${verb} service instance "${name}"`,
+      unknown: `${isEditMode ? 'Update' : 'Create'} service instance "${name}"`,
+      where: 'The Services list',
+    };
+    const deadline = this.trackedJobs.deadline(track.startedAt);
+    let jobId: string | undefined;
+    let signedOut = false;
     let result: AsyncJobResult<unknown>;
     try {
-      result = await writeWithJob<unknown>(this.http, call);
+      result = await writeWithJob<unknown>(this.http, call, {
+        signal: deadline.signal,
+        pauseOnSignOut: true,
+        onProgress: job => {
+          if (!jobId) {
+            jobId = job.id;
+            this.trackedJobs.following.add(jobId);
+            this.trackedJobs.remember({ jobId, ...track });
+          }
+        },
+      });
     } catch (err: unknown) {
+      if (err instanceof SignedOutError) {
+        signedOut = true;
+        return { success: false, message: this.trackedJobs.signedOut(track) };
+      }
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        return { success: false, message: this.trackedJobs.stillRunningAfterLimit(track) };
+      }
       return {
         success: false,
-        message: `Failed to ${verb} service instance "${name}": ${extractHttpErrorMessage(err)}`,
+        message: `${track.failed}: ${extractHttpErrorMessage(err)}`,
       };
+    } finally {
+      deadline.clear();
+      if (jobId) {
+        this.trackedJobs.following.delete(jobId);
+        if (!signedOut) {
+          this.trackedJobs.forget(jobId);
+        }
+      }
     }
 
     if (result.status === 'UNKNOWN') {

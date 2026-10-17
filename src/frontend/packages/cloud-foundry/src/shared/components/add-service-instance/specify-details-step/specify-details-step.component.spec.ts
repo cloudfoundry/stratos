@@ -21,6 +21,7 @@ import { CreateServiceInstanceHelperServiceFactory } from '../create-service-ins
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
+import { TrackedJobsService } from '../../../../services/async-jobs/tracked-jobs.service';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 
 describe('SpecifyDetailsStepComponent', () => {
@@ -452,9 +453,15 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       errors: [{ code: 'CF-UnableToPerform', message: 'CF-UnableToPerform', detail: 'the broker said no' }],
     };
 
-    async function startSlowCreate() {
+    async function startSlowCreate(opts: Parameters<typeof setup>[0] = {}, deadline?: AbortController) {
       vi.useFakeTimers();
-      const ctx = setup();
+      const ctx = setup(opts);
+      const tracked = TestBed.inject(TrackedJobsService);
+      vi.spyOn(tracked, 'remember');
+      vi.spyOn(tracked, 'forget');
+      if (deadline) {
+        vi.spyOn(tracked, 'deadline').mockReturnValue({ signal: deadline.signal, clear: () => undefined });
+      }
       const open = vi.spyOn((ctx.component as any).snackBar, 'open');
       const error = vi.spyOn((ctx.component as any).snackBar, 'error');
       const result = firstValueFrom(ctx.component.onNext());
@@ -467,7 +474,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       // 60 s timeouts do not fire while these tests wait minutes.
       ctx.httpMock.match(r => !r.url.startsWith('/pp/v1/stratos/jobs/'))
         .forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
-      return { ...ctx, open, error, result };
+      return { ...ctx, open, error, result, tracked };
     }
 
     function answerPoll(httpMock: HttpTestingController, body: object) {
@@ -595,6 +602,88 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         vi.useRealTimers();
       }
       httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    const processingJob = { ...failedJob, state: 'PROCESSING', errors: undefined };
+
+    it('remembers a running write so a reload or a new sign-in can report it, and forgets it once it ends', async () => {
+      const { httpMock, result, tracked } = await startSlowCreate();
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(tracked.remember).toHaveBeenCalledWith({
+          jobId: 'job-slow',
+          startedAt: Date.now(),
+          running: 'Creating service instance "my-instance"',
+          done: 'Service instance "my-instance" created.',
+          failed: 'Failed to create service instance "my-instance"',
+          unknown: 'Create service instance "my-instance"',
+          where: 'The Services list',
+        });
+        expect(tracked.following.has('job-slow')).toBe(true);
+        await vi.advanceTimersByTimeAsync(500);
+        answerPoll(httpMock, { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(tracked.forget).toHaveBeenCalledWith('job-slow');
+        expect(tracked.following.has('job-slow')).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('says a resumed create was not bound when the wizard was to bind it', async () => {
+      const { httpMock, tracked } = await startSlowCreate({ bindAppGuid: 'app-1' });
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(tracked.remember).toHaveBeenCalledWith(expect.objectContaining({
+          done: 'Service instance "my-instance" created. It was not bound to the application: the wizard that '
+            + 'would bind it closed before the instance was ready.',
+        }));
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('keeps the record and says so when the session ends while following', async () => {
+      const { httpMock, result, tracked } = await startSlowCreate();
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(500);
+        httpMock.expectOne('/pp/v1/stratos/jobs/job-slow').flush({}, { status: 401, statusText: 'Unauthorized' });
+        await expect(result).resolves.toEqual({
+          success: false,
+          message: 'Signed out while Creating service instance "my-instance" was running (1 s so far). '
+            + 'Its status will show after you sign in.',
+        });
+        expect(tracked.forget).not.toHaveBeenCalled();
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('stops following when the hour is up, says so, and forgets the write', async () => {
+      const deadline = new AbortController();
+      const { httpMock, result, tracked } = await startSlowCreate({}, deadline);
+      try {
+        expect(tracked.deadline).toHaveBeenCalledWith(Date.now());
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(500);
+        deadline.abort();
+        await vi.advanceTimersByTimeAsync(0);
+        await expect(result).resolves.toEqual({
+          success: false,
+          message: 'Creating service instance "my-instance" was still running after 1 hour, so Stratos stopped '
+            + 'checking on it. The Services list shows its current state.',
+        });
+        expect(tracked.forget).toHaveBeenCalledWith('job-slow');
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).filter(r => !r.cancelled).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
     });
 
     it('does not hand off a write that ends inside the wait', async () => {

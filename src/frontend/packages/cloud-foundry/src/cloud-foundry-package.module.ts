@@ -11,6 +11,7 @@ import { EntityDeleteController } from './services/deletes/entity-delete.control
 import { CfRolesDeleteCleanup } from './services/deletes/cf-roles-cleanup.service';
 import { DetailCachesDeleteCleanup } from './services/deletes/detail-caches-cleanup.service';
 import { FavoritesRecentsDeleteCleanup } from './services/deletes/favorites-recents-cleanup.service';
+import { TrackedJobsService } from './services/async-jobs/tracked-jobs.service';
 import { setCfInfoHelperInjector } from './services/endpoint-data/cf-info-helper';
 import { CloudFoundryService } from './shared/data-services/cloud-foundry.service';
 import { CloudFoundryUserProvidedServicesService } from './shared/services/cloud-foundry-user-provided-services.service';
@@ -58,5 +59,9 @@ export class CloudFoundryPackageModule {
     // summary "Spaces" tile, deleted-entity detail eviction) — restores the
     // legacy updateOrganizationSpaceReducer parent sync.
     inject(EntityDeleteController).registerCleanup(inject(DetailCachesDeleteCleanup).hook);
+
+    // Report how handed-off writes ended after a reload or a new sign-in:
+    // the service resumes following them once a session is valid.
+    inject(TrackedJobsService);
   }
 }
