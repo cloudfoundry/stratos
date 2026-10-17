@@ -1,7 +1,6 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
   OnInit,
   Signal,
   WritableSignal,
@@ -59,7 +58,7 @@ import { AppDetailDataService } from '../../../../../app-detail-data.service';
     CfAppRoutesSignalConfigService,
   ],
 })
-export class RoutesTabComponent implements OnInit, OnDestroy {
+export class RoutesTabComponent implements OnInit {
   private dataService = inject(AppDetailDataService);
   private actionsService = inject(AppRouteActionsService);
   private routesConfig = inject(CfAppRoutesSignalConfigService);
@@ -133,11 +132,6 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     // Routes are not auto-polled — fetch on tab mount.
     void this.dataService.refresh('routes');
-  }
-
-  ngOnDestroy(): void {
-    // No focus-priority hold to release; ngOnDestroy kept for symmetry
-    // with peer tabs and as the place to unwind future subscriptions.
   }
 
   /**
