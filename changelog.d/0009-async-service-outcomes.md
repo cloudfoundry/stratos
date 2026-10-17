@@ -52,6 +52,10 @@
   every few seconds at first, then up to every two minutes.
 - Starting, stopping, restarting, restaging or scaling an application
   whose result could not be determined is no longer reported as done.
+- An application action that fails in Cloud Foundry after it was
+  accepted (a delete, start, stop, restart or restage from the
+  application page) gives the reason Cloud Foundry gave, not its
+  internal error name such as CF-UnableToPerform.
 - The backend no longer keeps an unfinished operation in memory forever
   once nobody is checking on it: after an hour without a status check it
   is dropped. An operation someone keeps checking is kept however long it

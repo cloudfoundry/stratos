@@ -278,15 +278,11 @@ export class AppApplicationActionsService {
         onAfter?.();
       })
       .catch((err: any) => {
-        const firstError = err?.job?.errors?.[0];
-        // A synchronous CF 4xx (e.g. 422 "Assign a droplet before starting
-        // this app.") throws a raw HttpErrorResponse with no `.job`, so the
-        // job-shaped extraction misses and the snackbar shows a generic
-        // "Operation failed". Fall back to the CF error-envelope extractor
-        // so the operator sees the real reason. (#5520)
-        const error = firstError
-          ? { code: String(firstError.code), message: String(firstError.message) }
-          : { code: '', message: extractHttpErrorMessage(err) };
+        // The reason CF or the broker gave, from a failed job or a synchronous
+        // CF 4xx (e.g. 422 "Assign a droplet before starting this app.",
+        // #5520) alike; a job's errors[0].message is only CF's error name.
+        const code = err?.job?.errors?.[0]?.code;
+        const error = { code: code === undefined ? '' : String(code), message: extractHttpErrorMessage(err) };
         this.appendLog({
           at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'fail',
           error,

@@ -12,7 +12,7 @@ import { ApplicationService } from '../../features/applications/application.serv
 import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-foundry-endpoint.service';
 import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
 import { ConfirmationDialogService, TailwindSnackBarService } from '@stratosui/core';
-import type { StratosJob, JobStage } from '../../services/async-jobs/async-job.types';
+import { StratosJobError, type StratosJob, type JobStage } from '../../services/async-jobs/async-job.types';
 
 import {
   generateCfStoreModules,
@@ -21,6 +21,10 @@ import {
 // ---------------------------------------------------------------------------
 // Minimal stubs
 // ---------------------------------------------------------------------------
+
+// What writeWithJob throws when a polled job ends FAILED.
+const failedJob = (error: { code: string; message: string; detail?: string }) =>
+  new StratosJobError({ id: 'j', kind: 'k', state: 'FAILED', startedAt: '', updatedAt: '', errors: [error] });
 
 function makeAppServiceStub(cfGuid = 'cf-1', appGuid = 'app-1') {
   return {
@@ -332,7 +336,7 @@ describe('AppApplicationActionsService', () => {
 
   it('log() captures fail entry on error', async () => {
     appsStub.restageApp.mockImplementationOnce(async () => {
-      throw { job: { errors: [{ code: 'CF-AppStaged', message: 'staging failed' }] } };
+      throw failedJob({ code: 'CF-AppStaged', message: 'staging failed' });
     });
 
     void svc.restage();
@@ -475,7 +479,7 @@ describe('AppApplicationActionsService', () => {
 
   it('delete failure path: does NOT call orchestrator.removeRow', async () => {
     appsStub.deleteApp.mockImplementationOnce(async () => {
-      throw { job: { errors: [{ code: 'CF-AppDeleteFailed', message: 'boom' }] } };
+      throw failedJob({ code: 'CF-AppDeleteFailed', message: 'boom' });
     });
 
     void svc.deleteWithCleanup([], []);
@@ -484,6 +488,19 @@ describe('AppApplicationActionsService', () => {
     const log = svc.log();
     expect(log.find(e => e.event === 'fail')).toBeDefined();
     expect(appsStub._removeRow).not.toHaveBeenCalled();
+  });
+
+  it('delete that fails in CF says why, not CF\'s error name', async () => {
+    appsStub.deleteApp.mockImplementationOnce(async () => {
+      throw failedJob({ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: '<p>The app has active service bindings.</p>' });
+    });
+
+    void svc.deleteWithCleanup([], []);
+    await tick(8);
+
+    const failEntry = svc.log().find(e => e.event === 'fail');
+    expect(failEntry?.error).toEqual({ code: 'cf.v3.10009', message: 'The app has active service bindings.' });
+    expect(svc.outcomeError()).toBe('The app has active service bindings.');
   });
 
   it('delete with an unknown result: keeps the row, stays on the page and says so', async () => {
