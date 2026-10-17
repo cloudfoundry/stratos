@@ -48,6 +48,9 @@
 - A bulk delete or unmap that partly fails names each item that failed
   and gives the reason, and names any whose result could not be
   determined. It said only how many failed.
+- Deleting an application from its row menu with "Also delete this
+  application's routes and service bindings" reports how it ended, as a
+  multi-select delete does. A failure used to go unreported.
 - Background operations are checked less often the longer they run:
   every few seconds at first, then up to every two minutes.
 - Starting, stopping, restarting, restaging or scaling an application
