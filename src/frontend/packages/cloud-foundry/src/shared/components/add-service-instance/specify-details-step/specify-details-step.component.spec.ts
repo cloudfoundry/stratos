@@ -552,7 +552,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       void result.then(() => { settled = true; });
       try {
         await vi.advanceTimersByTimeAsync(40_000);
-        component.waitSeconds.setValue(45);
+        component.waitSeconds.set(45);
         component.keepWaiting();
         expect(component.slowWrite()).toBeNull();
         await vi.advanceTimersByTimeAsync(44_000);
@@ -575,12 +575,42 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       try {
         await vi.advanceTimersByTimeAsync(30_000);
         for (const [value, valid] of [[29, false], [30, true], [600, true], [601, false], [45.5, false], [null, false]] as const) {
-          component.waitSeconds.setValue(value as number);
-          expect(component.waitSeconds.valid).toBe(valid);
+          component.waitSeconds.set(value as number);
+          expect(component.waitSecondsValid()).toBe(valid);
         }
-        component.waitSeconds.setValue(601);
+        component.waitSeconds.set(601);
         component.keepWaiting();
         expect(component.slowWrite()).not.toBeNull();
+        component.continueInBackground();
+        await result;
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('renders what the user types into the seconds field: the error and a disabled Keep waiting', async () => {
+      const { fixture, httpMock, result, component } = await startSlowCreate();
+      try {
+        // Zoneless change detection is scheduled on the (fake) clock.
+        const stable = async () => { const done = fixture.whenStable(); await vi.advanceTimersByTimeAsync(50); await done; };
+        await vi.advanceTimersByTimeAsync(30_000);
+        await stable();
+        const root: HTMLElement = fixture.nativeElement;
+        const input = root.querySelector<HTMLInputElement>('#slow-write-seconds')!;
+        const keep = () => [...root.querySelectorAll('button')].find(b => b.textContent?.trim() === 'Keep waiting')!;
+        expect(input.value).toBe('60');
+        expect(keep().disabled).toBe(false);
+        input.value = '601';
+        input.dispatchEvent(new Event('input'));
+        await stable();
+        expect(keep().disabled).toBe(true);
+        expect(root.querySelector('#slow-write-range')?.textContent).toContain('Enter 30 to 600 whole seconds.');
+        input.value = '90';
+        input.dispatchEvent(new Event('input'));
+        await stable();
+        expect(keep().disabled).toBe(false);
+        expect(root.querySelector('#slow-write-range')).toBeNull();
         component.continueInBackground();
         await result;
       } finally {
