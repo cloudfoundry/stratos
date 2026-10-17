@@ -106,6 +106,27 @@ describe('pollBulkResult', () => {
     ]);
     expect(t.unknowns).toEqual(['e', 'd']);
   });
+
+  it('stops each item at its own start plus the limit, however many wait for a poller', async () => {
+    vi.useFakeTimers();
+    try {
+      const startedAt = new Date().toISOString();
+      const hung = (id: string): StratosJob => ({ ...job(id, 'PROCESSING'), startedAt });
+      const http = {
+        get: vi.fn((url: string) =>
+          of(new HttpResponse({ status: 200, body: hung(decodeURIComponent(url.split('/').pop()!)) }))),
+      } as unknown as HttpClient;
+      // One more hung item than pollers: the last waits a full limit for one.
+      const items = Array.from({ length: 7 }, (_, i) =>
+        ({ guid: `g${i}`, state: 'PENDING' as const, job: hung(`j${i}`) }));
+      let tally: Awaited<ReturnType<typeof pollBulkResult>> | undefined;
+      void pollBulkResult(http, bulk(items), { concurrency: 6 }).then(t => { tally = t; });
+      await vi.advanceTimersByTimeAsync(61 * 60_000);
+      expect(tally?.running).toHaveLength(7);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });
 
 function makeSnackBar() {
