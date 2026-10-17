@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, DestroyRef, Input, OnDestroy, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, DestroyRef, ElementRef, Injector, Input, OnDestroy, afterNextRender, effect, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -90,6 +90,8 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private snackBar = inject(TailwindSnackBarService);
   private destroyRef = inject(DestroyRef);
   private trackedJobs = inject(TrackedJobsService);
+  private host = inject<ElementRef<HTMLElement>>(ElementRef);
+  private injector = inject(Injector);
 
   // The question shown while a write outlasts the wait; null when not asking.
   readonly slowWrite = signal<{ text: string; answerIn: number } | null>(null);
@@ -459,6 +461,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         text: `${this.writeDescription()} is still running after ${coarseElapsed(elapsedMs)}.`,
         answerIn,
       });
+      // The question sits below the form, which can be taller than the
+      // screen; unseen, its countdown would hand the write off unasked.
+      afterNextRender(() => {
+        this.host.nativeElement.querySelector('[role=alertdialog]')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      }, { injector: this.injector });
       this.answerCountdown = setInterval(() => {
         answerIn--;
         if (answerIn <= 0) {

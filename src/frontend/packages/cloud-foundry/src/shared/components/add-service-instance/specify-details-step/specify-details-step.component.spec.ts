@@ -510,6 +510,26 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
     });
 
+    it('brings the question into view when it appears', async () => {
+      const scrollIntoView = vi.fn();
+      const original = Element.prototype.scrollIntoView;
+      Element.prototype.scrollIntoView = scrollIntoView;
+      const { fixture, httpMock, result, component } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        fixture.detectChanges();
+        await vi.advanceTimersByTimeAsync(0);
+        expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', behavior: 'smooth' });
+        expect(scrollIntoView.mock.contexts[0]).toBe(fixture.nativeElement.querySelector('[role=alertdialog]'));
+        component.continueInBackground();
+        await result;
+      } finally {
+        Element.prototype.scrollIntoView = original;
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
     it('hands off at once when the user chooses to continue in the background', async () => {
       const { component, httpMock, open, result } = await startSlowCreate();
       try {
