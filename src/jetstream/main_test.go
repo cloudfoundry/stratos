@@ -371,6 +371,36 @@ func TestLoadPortalConfigCSPGitHostsNamesEachSourceOnce(t *testing.T) {
 	}
 }
 
+// ASYNC_JOB_TRACKING_LIMIT_IN_MINS is applied once, at load: unset is the
+// default, and an explicit 0 is under a minute like any other, so 1.
+func TestLoadPortalConfigJobTrackingLimit(t *testing.T) {
+	var pc api.PortalConfig
+	for _, c := range []struct {
+		value string
+		set   bool
+		want  int
+	}{
+		{"", false, 60},
+		{"0", true, 1},
+		{"-5", true, 1},
+		{"90", true, 90},
+		{"5000", true, 360},
+	} {
+		vars := map[string]string{}
+		if c.set {
+			vars["ASYNC_JOB_TRACKING_LIMIT_IN_MINS"] = c.value
+		}
+		result, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(vars)))
+		if err != nil {
+			t.Fatalf("loadPortalConfig(%q): %v", c.value, err)
+		}
+		if result.AsyncJobTrackingLimitMins != c.want {
+			t.Errorf("ASYNC_JOB_TRACKING_LIMIT_IN_MINS=%q (set %v): got %d, want %d",
+				c.value, c.set, result.AsyncJobTrackingLimitMins, c.want)
+		}
+	}
+}
+
 // A value that does not parse stops startup, as for any setting, and the
 // error names the setting so the operator knows which one to fix.
 func TestLoadPortalConfigNamesABadSetting(t *testing.T) {

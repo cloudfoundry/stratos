@@ -736,9 +736,12 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 	pc.HTTPS = true
 	pc.PluginConfig = make(map[string]string)
 
-	if _, warning := jobTrackingLimitMins(pc.AsyncJobTrackingLimitMins); warning != "" {
+	// Applied once, here: only the lookup can tell an explicit 0 from unset.
+	limit, warning := jobTrackingLimitMins(pc.AsyncJobTrackingLimitMins, env.IsSet("ASYNC_JOB_TRACKING_LIMIT_IN_MINS"))
+	if warning != "" {
 		slog.Warn(warning)
 	}
+	pc.AsyncJobTrackingLimitMins = limit
 
 	// Default to standard timeout if the mutating one is not configured
 	if pc.HTTPClientTimeoutMutatingInSecs == 0 {
