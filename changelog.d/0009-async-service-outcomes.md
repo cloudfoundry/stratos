@@ -11,7 +11,8 @@
 - A service instance create or update handed off by the wizard is still
   reported after a page reload or a new sign-in: Stratos says it is
   still running and for how long, then how it ended. Signing out while
-  one runs says its status will show after you sign in.
+  one runs says its status will show after you sign in. With several
+  tabs open, one tab reports it; another takes over if that tab closes.
 - Stratos stops following a background operation (a slow broker, a
   delete Cloud Foundry runs as a job) after a set time, 60 minutes by
   default, and says it is still running in Cloud Foundry rather than
