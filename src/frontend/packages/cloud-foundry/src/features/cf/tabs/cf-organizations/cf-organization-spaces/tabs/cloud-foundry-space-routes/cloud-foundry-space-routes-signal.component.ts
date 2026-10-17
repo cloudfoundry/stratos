@@ -29,7 +29,7 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
 import { runBulkWithProgress } from '../../../../../../../services/async-jobs/bulk-progress';
 import type { StApp, StRoute } from '../../../../../../../services/endpoint-data/stratos-types';
 import { routeHref } from '../../../../../../applications/app-detail-data.service';
-import { unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundrySpaceRoutesComponent.
 // Scoped to one space under one org under one CF endpoint (all three guids
@@ -367,8 +367,9 @@ export class CloudFoundrySpaceRoutesSignalComponent {
     const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
         const outcome = await op();
-        if (outcome === 'unknown') {
-          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Routes list'));
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Routes list', how));
         }
       } catch (err: unknown) {
         this.snackBar.error(`${label} failed: ${extractHttpErrorMessage(err)}`);

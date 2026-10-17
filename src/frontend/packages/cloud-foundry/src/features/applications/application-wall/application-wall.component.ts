@@ -37,7 +37,7 @@ import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-perm
 import { goToAppWall } from '../../cf/cf.helpers';
 import type { StApp } from '../../../services/endpoint-data/stratos-types';
 import { AppAreaLoaderComponent } from '@stratosui/core';
-import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 
 @Component({
   selector: 'app-application-wall',
@@ -115,8 +115,9 @@ export class ApplicationWallComponent implements OnInit {
       try {
         const outcome = await op();
         await this.appsConfig.refresh();
-        if (outcome === 'unknown') {
-          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Applications list'));
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Applications list', how));
         }
       } catch (err: any) {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);

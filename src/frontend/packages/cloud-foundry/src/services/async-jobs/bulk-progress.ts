@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { WritableSignal } from '@angular/core';
 import { TailwindSnackBarRef, TailwindSnackBarService } from '@stratosui/core';
-import { pollJob } from './write-with-job';
+import { jobTrackingLimitMs, pollJob } from './write-with-job';
+import { formatLimit } from './unknown-outcome-message';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import { extractHttpErrorMessage, stripMarkup } from '@stratosui/store';
 
@@ -16,6 +17,8 @@ export interface BulkTally {
   failures: { guid: string; reason?: string }[];
   /** Each item whose result could not be determined. */
   unknowns: string[];
+  /** Each item CF was still running when Stratos stopped following it (counted in `unknown` too). */
+  running: string[];
 }
 
 // Settles every item of a BulkResult: fast-path items count immediately;
@@ -33,7 +36,7 @@ export async function pollBulkResult(
   } = {},
 ): Promise<BulkTally> {
   const tally: BulkTally = {
-    settled: 0, deleted: 0, failed: 0, unknown: 0, total: result.results.length, failures: [], unknowns: [],
+    settled: 0, deleted: 0, failed: 0, unknown: 0, total: result.results.length, failures: [], unknowns: [], running: [],
   };
   const pendingJobs: { guid: string; jobId: string }[] = [];
   const fail = (guid: string, reason?: string) => { tally.failed++; tally.failures.push({ guid, reason }); };
@@ -56,7 +59,9 @@ export async function pollBulkResult(
       const { guid, jobId } = pendingJobs[next++];
       try {
         const res = await pollJob<unknown>(http, jobId, { backoffMs: opts.backoffMs });
-        if (res.status === 'COMPLETE') { tally.deleted++; } else { unknown(guid); }
+        if (res.status === 'COMPLETE') { tally.deleted++; }
+        else if (res.stillRunning) { tally.unknown++; tally.running.push(guid); }
+        else { unknown(guid); }
       } catch (err: unknown) {
         fail(guid, extractHttpErrorMessage(err)); // StratosJobError: the CF job terminally failed
       }
@@ -160,8 +165,12 @@ async function trackSettlement(
       f.reason ? `${nameOf(f.guid)} (${f.reason.replace(/\.$/, '')})` : nameOf(f.guid));
     parts.push(`${tally.failed} failed: ${listSome(named)}`);
   }
-  if (tally.unknown > 0) {
-    parts.push(`${plural(tally.unknown, 'result')} could not be determined: ${listSome(tally.unknowns.map(nameOf))}`);
+  if (tally.unknowns.length > 0) {
+    parts.push(`${plural(tally.unknowns.length, 'result')} could not be determined: ${listSome(tally.unknowns.map(nameOf))}`);
+  }
+  if (tally.running.length > 0) {
+    parts.push(`${tally.running.length} still running in Cloud Foundry after ${formatLimit(jobTrackingLimitMs())}, `
+      + `so Stratos stopped checking: ${listSome(tally.running.map(nameOf))}`);
   }
   const message = parts.join('; ');
 

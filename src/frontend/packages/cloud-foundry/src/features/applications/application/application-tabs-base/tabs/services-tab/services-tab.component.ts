@@ -35,7 +35,7 @@ import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-
 import { CSI_CANCEL_URL } from '../../../../../../shared/components/add-service-instance/csi-mode.service';
 import { SERVICE_INSTANCE_TYPES } from '../../../../../../shared/components/add-service-instance/add-service-instance-base-step/add-service-instance.types';
 import type { StServiceCredentialBinding } from '../../../../../../services/endpoint-data/stratos-types';
-import { unknownOutcomeMessage } from '../../../../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../services/async-jobs/unknown-outcome-message';
 
 /**
  * ServicesTabComponent — signal-native rewrite of the app-detail Service
@@ -209,10 +209,10 @@ export class ServicesTabComponent implements OnInit {
               if (outcome === 'deleted') {
                 this.dataService.removeServiceBinding(row.guid);
               } else {
-                // Ended with an unknown result: keep the row and re-read
+                // Unknown result (ended, or still running in CF): keep the row and re-read
                 // the bindings so the tab shows whether it is still bound.
                 void this.dataService.refresh('serviceBindings');
-                this.snackBar.error(unknownOutcomeMessage(`Unbind "${siName}"`, 'The Services tab'));
+                this.snackBar.error(unknownOutcomeMessage(`Unbind "${siName}"`, 'The Services tab', unknownHowOf(outcome) ?? 'ended'));
               }
             } catch (err: unknown) {
               const msg = (err as { message?: string })?.message ?? String(err);

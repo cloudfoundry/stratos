@@ -89,6 +89,15 @@ describe('runCfDelete', () => {
       }),
     ).resolves.toBe('unknown');
   });
+
+  it('resolves still-running when Stratos stopped following a delete CF was still running', async () => {
+    const controller = makeController({ state: 'unknown', stillRunning: true });
+    await expect(
+      runCfDelete(controller, makeHttp(), {
+        cnsiGuid: 'c1', entityKind: 'space', deleteGuid: 's1', path: '/pp/v1/cf/spaces/c1/s1',
+      }),
+    ).resolves.toBe('still-running');
+  });
 });
 
 // Recorded backend answers: deleting a service instance behind a sync or

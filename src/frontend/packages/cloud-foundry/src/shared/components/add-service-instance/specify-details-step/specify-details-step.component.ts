@@ -33,8 +33,8 @@ import { TailwindSnackBarService } from '../../../../../../core/src/shared/servi
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult } from '../../../../services/async-jobs/async-job.types';
-import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
-import { SignedOutError, writeWithJob } from '../../../../services/async-jobs/write-with-job';
+import { unknownHow, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
+import { SignedOutError, jobTrackingLimitMs, writeWithJob } from '../../../../services/async-jobs/write-with-job';
 import { TrackedJob, TrackedJobsService, coarseElapsed } from '../../../../services/async-jobs/tracked-jobs.service';
 import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-form.component';
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
@@ -561,13 +561,12 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       unknown: `${isEditMode ? 'Update' : 'Create'} service instance "${name}"`,
       where: 'The Services list',
     };
-    const deadline = this.trackedJobs.deadline(track.startedAt);
     let jobId: string | undefined;
     let signedOut = false;
     let result: AsyncJobResult<unknown>;
     try {
       result = await writeWithJob<unknown>(this.http, call, {
-        signal: deadline.signal,
+        deadlineAt: track.startedAt + jobTrackingLimitMs(),
         pauseOnSignOut: true,
         onProgress: job => {
           if (!jobId) {
@@ -582,15 +581,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         signedOut = true;
         return { success: false, message: this.trackedJobs.signedOut(track) };
       }
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        return { success: false, message: this.trackedJobs.stillRunningAfterLimit(track) };
-      }
       return {
         success: false,
         message: `${track.failed}: ${extractHttpErrorMessage(err)}`,
       };
     } finally {
-      deadline.clear();
       if (jobId) {
         this.trackedJobs.following.delete(jobId);
         if (!signedOut) {
@@ -600,11 +595,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     }
 
     if (result.status === 'UNKNOWN') {
-      // Ended, result unknown: never claim it was created or updated, and
-      // say a requested bind was not attempted.
-      const leadIn = `${isEditMode ? 'Update' : 'Create'} service instance "${name}"`;
+      // Result unknown (ended, or still running in CF when the limit was
+      // reached): never claim it was created or updated, and say a
+      // requested bind was not attempted.
       const notBound = !isEditMode && state.bindAppGuid ? ' It was not bound to the application.' : '';
-      return { success: false, message: unknownOutcomeMessage(leadIn, 'The Services list') + notBound };
+      return { success: false, message: unknownOutcomeMessage(track.unknown, track.where, unknownHow(result)) + notBound };
     }
 
     if (isEditMode) {
@@ -647,6 +642,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
             ? `Service instance "${siName}" was created. Binding it to the application`
             : `Binding service instance "${siName}" to the application`,
           'The application\'s Services tab',
+          bindResult.unknown,
         ),
       };
     }

@@ -7,7 +7,7 @@ import {
   TailwindSnackBarService,
 } from '@stratosui/core';
 
-import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '@stratosui/store';
@@ -104,8 +104,9 @@ export function buildServiceInstanceRowActions(
       deps.confirmDialog.open(confirm, async () => {
         try {
           const outcome = await deps.deleteServiceInstance(si.cnsiGuid, si.guid);
-          if (outcome === 'unknown') {
-            deps.snackBar.error(unknownOutcomeMessage(`Delete "${si.name}"`, deps.unknownOutcomeWhere ?? 'The list'));
+          const how = unknownHowOf(outcome);
+          if (how) {
+            deps.snackBar.error(unknownOutcomeMessage(`Delete "${si.name}"`, deps.unknownOutcomeWhere ?? 'The list', how));
           }
         } catch (err: unknown) {
           deps.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);

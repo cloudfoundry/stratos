@@ -133,7 +133,7 @@ export class EntityDeleteController {
           // Refetch instead of removing the row, and leave favorites and
           // recents alone, so the lists show what CF actually holds.
           this.invalidate(req);
-          terminal = { ...base, state: 'unknown' };
+          terminal = { ...base, state: 'unknown', ...(result.stillRunning ? { stillRunning: true } : {}) };
         } else {
           // A prior block for this key is now moot — the entity is gone.
           this.blocked.delete(key);

@@ -58,7 +58,26 @@ export interface WriteWithJobOptions {
    * after the next sign-in.
    */
   pauseOnSignOut?: boolean;
+  /**
+   * Stop following the job at this time (ms since the epoch). Default: the
+   * tracking limit from when polling starts. Ends as UNKNOWN with
+   * stillRunning: the job carries on in Cloud Foundry.
+   */
+  deadlineAt?: number;
 }
+
+// How long a job is followed, from the console's configuration
+// (ASYNC_JOB_TRACKING_LIMIT_IN_MINS, applied when a session starts).
+let trackingLimitMs = 60 * 60_000;
+
+/** Set how long a job is followed, in minutes; ignores a missing or non-positive value. */
+export function setJobTrackingLimit(minutes: number | undefined): void {
+  if (minutes && minutes > 0) {
+    trackingLimitMs = minutes * 60_000;
+  }
+}
+
+export const jobTrackingLimitMs = (): number => trackingLimitMs;
 
 export class SignedOutError extends Error {
   constructor(readonly jobId: string) {
@@ -188,6 +207,7 @@ export async function pollJob<T>(
 ): Promise<AsyncJobResult<T>> {
   const backoff = opts.backoffMs;
   const startedAt = Date.now();
+  const deadlineAt = opts.deadlineAt ?? startedAt + trackingLimitMs;
   let wait = 0;
   const url = `/pp/v1/stratos/jobs/${encodeURIComponent(jobId)}`;
   // Logged once when polls start failing and once when they recover, so a
@@ -232,7 +252,14 @@ export async function pollJob<T>(
       }
     }
 
+    // Past the limit, stop following: the job is still running in CF. The
+    // last wait is cut short so the final check lands on the deadline.
+    const left = deadlineAt - Date.now();
+    if (left <= 0) {
+      return { status: 'UNKNOWN', state: undefined, jobId, stillRunning: true };
+    }
     wait = backoff ? backoff[Math.min(i, backoff.length - 1)] : pollWait(wait, i, Date.now() - startedAt);
+    wait = Math.min(wait, left);
     // Tests pass backoffMs: [0] to bypass wall-clock waits. timer(0) still
     // schedules a macrotask which vitest may not drain inside the test
     // function — just yield a microtask instead so the HttpTestingController

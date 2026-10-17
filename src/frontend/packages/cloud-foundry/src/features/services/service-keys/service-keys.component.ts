@@ -5,7 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 
 import { DialogErrorComponent, IHeaderBreadcrumb, ListSubNavAddAction, ListSubNavComponent, PageHeaderComponent } from '@stratosui/core';
-import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
+import { unknownHow, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import {
   RawServiceKey, ServiceCatalogDataService, ServiceKeyView, SignalSource, toServiceKeyView,
@@ -255,7 +255,7 @@ export class ServiceKeysComponent {
       this.isAdding.set(false);
       if (r.status === 'UNKNOWN') {
         // Ended, result unknown: the re-read list shows whether it exists.
-        this.errorMessage.set(unknownOutcomeMessage(`Create key "${name}"`, 'The Service Keys list'));
+        this.errorMessage.set(unknownOutcomeMessage(`Create key "${name}"`, 'The Service Keys list', unknownHow(r)));
         this.reload();
         return;
       }
@@ -293,7 +293,7 @@ export class ServiceKeysComponent {
         // Ended, result unknown: free the row; the re-read list shows
         // whether the key is still there.
         this.setStatus(guid, 'idle');
-        this.errorMessage.set(unknownOutcomeMessage(`Delete key "${name}"`, 'The Service Keys list'));
+        this.errorMessage.set(unknownOutcomeMessage(`Delete key "${name}"`, 'The Service Keys list', unknownHow(r)));
       }
       this.reload();
     } catch (err: unknown) {

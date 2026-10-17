@@ -6,7 +6,8 @@ import { TailwindSnackBarService } from '@stratosui/core';
 import { AuthDataService } from '@stratosui/store';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import type { StratosJob } from './async-job.types';
-import { TRACK_FOR_MS, TrackedJob, TrackedJobsService } from './tracked-jobs.service';
+import { TrackedJob, TrackedJobsService } from './tracked-jobs.service';
+import { jobTrackingLimitMs, setJobTrackingLimit } from './write-with-job';
 
 const HOUR = 60 * 60_000;
 const jobUrl = (id: string) => `/pp/v1/stratos/jobs/${id}`;
@@ -116,7 +117,7 @@ describe('TrackedJobsService', () => {
   });
 
   it('stops checking an hour after the write started, and says so', async () => {
-    localStorage.setItem('stratos.trackedJobs.u1', JSON.stringify([record('j1', Date.now() - TRACK_FOR_MS + 60_000)]));
+    localStorage.setItem('stratos.trackedJobs.u1', JSON.stringify([record('j1', Date.now() - jobTrackingLimitMs() + 60_000)]));
     TestBed.inject(TrackedJobsService);
     signIn('u1');
     for (let i = 0; i < 40; i++) {
@@ -124,8 +125,8 @@ describe('TrackedJobsService', () => {
       await vi.advanceTimersByTimeAsync(3000);
     }
     expect(snackBar.error).toHaveBeenCalledWith(
-      'Creating service instance "db" was still running after 1 hour, so Stratos stopped checking on it. '
-        + 'The Services list shows its current state.');
+      'Create service instance "db": still running in Cloud Foundry after 1 h, so Stratos stopped checking on '
+        + 'it. The Services list shows its current state.');
     expect(stored('u1')).toEqual([]);
   });
 
@@ -148,6 +149,33 @@ describe('TrackedJobsService', () => {
       'Signed out while Creating service instance "db" was running (5 min so far). Its status will show after '
         + 'you sign in.');
     expect(stored('u1').map(r => r.jobId)).toEqual(['j1']);
+  });
+
+  it('follows for as long as the console is configured to', async () => {
+    localStorage.setItem('stratos.trackedJobs.u1', JSON.stringify([record('j1', Date.now())]));
+    TestBed.inject(TrackedJobsService);
+    sessionData.set({ user: { guid: 'u1' }, config: { jobTrackingLimitMins: 2 } } as never);
+    sessionValid.set(true);
+    TestBed.tick();
+    expect(jobTrackingLimitMs()).toBe(2 * 60_000);
+    for (let i = 0; i < 60; i++) {
+      httpMock.match(jobUrl('j1')).forEach(r => r.flush(job('j1', 'PROCESSING')));
+      await vi.advanceTimersByTimeAsync(3000);
+    }
+    expect(snackBar.error).toHaveBeenCalledWith(expect.stringContaining('still running in Cloud Foundry after 2 min'));
+    setJobTrackingLimit(60);
+  });
+
+  it('resumes again when the same user signs back in without a reload', async () => {
+    localStorage.setItem('stratos.trackedJobs.u1', JSON.stringify([record('j1', Date.now())]));
+    TestBed.inject(TrackedJobsService);
+    signIn('u1');
+    httpMock.expectOne(jobUrl('j1')).flush({}, { status: 401, statusText: 'Unauthorized' });
+    await vi.advanceTimersByTimeAsync(0);
+    sessionValid.set(false);
+    TestBed.tick();
+    signIn('u1');
+    expect(httpMock.match(jobUrl('j1')).length).toBe(1);
   });
 
   it('resumes only the signed-in user\'s writes, once per sign-in, and not ones followed on this page', async () => {

@@ -54,6 +54,8 @@ export interface AsyncJobResult<T> {
   status: AsyncJobStatus;
   state: T | undefined;
   jobId?: string;
+  /** UNKNOWN only: Stratos stopped following a job that was still running in Cloud Foundry. */
+  stillRunning?: boolean;
 }
 
 // StratosJobError is thrown when a polled job terminates in FAILED. It

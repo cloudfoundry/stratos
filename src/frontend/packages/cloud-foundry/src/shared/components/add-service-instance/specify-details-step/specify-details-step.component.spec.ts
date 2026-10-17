@@ -22,6 +22,7 @@ import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
 import { TrackedJobsService } from '../../../../services/async-jobs/tracked-jobs.service';
+import { setJobTrackingLimit } from '../../../../services/async-jobs/write-with-job';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 
 describe('SpecifyDetailsStepComponent', () => {
@@ -453,15 +454,12 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       errors: [{ code: 'CF-UnableToPerform', message: 'CF-UnableToPerform', detail: 'the broker said no' }],
     };
 
-    async function startSlowCreate(opts: Parameters<typeof setup>[0] = {}, deadline?: AbortController) {
+    async function startSlowCreate(opts: Parameters<typeof setup>[0] = {}) {
       vi.useFakeTimers();
       const ctx = setup(opts);
       const tracked = TestBed.inject(TrackedJobsService);
       vi.spyOn(tracked, 'remember');
       vi.spyOn(tracked, 'forget');
-      if (deadline) {
-        vi.spyOn(tracked, 'deadline').mockReturnValue({ signal: deadline.signal, clear: () => undefined });
-      }
       const open = vi.spyOn((ctx.component as any).snackBar, 'open');
       const error = vi.spyOn((ctx.component as any).snackBar, 'error');
       const result = firstValueFrom(ctx.component.onNext());
@@ -685,22 +683,24 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
     });
 
-    it('stops following when the hour is up, says so, and forgets the write', async () => {
-      const deadline = new AbortController();
-      const { httpMock, result, tracked } = await startSlowCreate({}, deadline);
+    it('stops following at the configured limit, says it is still running in CF, and forgets the write', async () => {
+      setJobTrackingLimit(1);
+      const { component, httpMock, result, error, tracked } = await startSlowCreate();
       try {
-        expect(tracked.deadline).toHaveBeenCalledWith(Date.now());
         answerPoll(httpMock, processingJob);
-        await vi.advanceTimersByTimeAsync(500);
-        deadline.abort();
-        await vi.advanceTimersByTimeAsync(0);
-        await expect(result).resolves.toEqual({
-          success: false,
-          message: 'Creating service instance "my-instance" was still running after 1 hour, so Stratos stopped '
-            + 'checking on it. The Services list shows its current state.',
-        });
+        await vi.advanceTimersByTimeAsync(30_000);
+        component.continueInBackground();
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        for (let i = 0; i < 20 && !error.mock.calls.length; i++) {
+          httpMock.match('/pp/v1/stratos/jobs/job-slow').forEach(r => r.flush(processingJob));
+          await vi.advanceTimersByTimeAsync(3_000);
+        }
+        expect(error).toHaveBeenCalledWith(
+          'Create service instance "my-instance": still running in Cloud Foundry after 1 min, so Stratos stopped '
+            + 'checking on it. The Services list shows its current state.');
         expect(tracked.forget).toHaveBeenCalledWith('job-slow');
       } finally {
+        setJobTrackingLimit(60);
         vi.useRealTimers();
       }
       httpMock.match(() => true).filter(r => !r.cancelled).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
