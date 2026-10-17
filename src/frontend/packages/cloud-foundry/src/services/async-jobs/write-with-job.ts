@@ -203,6 +203,12 @@ function pollWait(previousMs: number, i: number, elapsedMs: number): number {
   return Math.min(Math.max(previousMs, quick) * 2, MAX_WAIT_MS);
 }
 
+// Jetstream advances these jobs only when they are polled (it drives the
+// restage and rollback steps itself), so they keep the quick cadence and
+// are never dropped at the tracking limit: either would leave an app
+// stopped part-way, and nothing else would carry the job on.
+const POLL_DRIVEN_KINDS = new Set(['cf.app.restage', 'cf.app.rollback']);
+
 export async function pollJob<T>(
   http: HttpClient,
   jobId: string,
@@ -212,6 +218,7 @@ export async function pollJob<T>(
   const startedAt = Date.now();
   const deadlineAt = opts.deadlineAt ?? startedAt + trackingLimitMs;
   let wait = 0;
+  let pollDriven = false;
   const url = `/pp/v1/stratos/jobs/${encodeURIComponent(jobId)}`;
   // Logged once when polls start failing and once when they recover, so a
   // long outage does not flood the console.
@@ -244,6 +251,7 @@ export async function pollJob<T>(
         failing = false;
         console.warn(`job ${jobId}: polling recovered`);
       }
+      pollDriven ||= POLL_DRIVEN_KINDS.has(job.kind);
       opts.onProgress?.(job);
 
       if (job.state === 'COMPLETE') {
@@ -258,11 +266,15 @@ export async function pollJob<T>(
     // Past the limit, stop following: the job is still running in CF. The
     // last wait is cut short so the final check lands on the deadline.
     const left = deadlineAt - Date.now();
-    if (left <= 0) {
+    if (left <= 0 && !pollDriven) {
       return { status: 'UNKNOWN', state: undefined, jobId, stillRunning: true };
     }
-    wait = backoff ? backoff[Math.min(i, backoff.length - 1)] : pollWait(wait, i, Date.now() - startedAt);
-    wait = Math.min(wait, left);
+    wait = backoff ? backoff[Math.min(i, backoff.length - 1)]
+      : pollDriven ? EARLY_WAITS_MS[Math.min(i, EARLY_WAITS_MS.length - 1)]
+      : pollWait(wait, i, Date.now() - startedAt);
+    if (!pollDriven) {
+      wait = Math.min(wait, left);
+    }
     // Tests pass backoffMs: [0] to bypass wall-clock waits. timer(0) still
     // schedules a macrotask which vitest may not drain inside the test
     // function — just yield a microtask instead so the HttpTestingController
