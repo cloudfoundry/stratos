@@ -48,10 +48,23 @@ import { extractHttpErrorMessage } from '@stratosui/store';
 // SchemaFormComponent.config tolerates an absent schema.
 type SchemaFormConfigState = Omit<SchemaFormConfig, 'schema'> & { schema?: object };
 
-// How long the wizard holds the user on a write. The broker decides how long
-// CF takes: a 15 s broker operation already takes about a minute in CF, and
-// real brokers take minutes. After this the wizard hands the write off.
+// How long the wizard holds the user on a write before asking whether to keep
+// waiting. The broker decides how long CF takes: a 15 s broker operation
+// already takes about a minute in CF, and real brokers take minutes.
 const HAND_OFF_AFTER_MS = 30_000;
+// Every wait is bounded: the user picks the next one from this range, and a
+// question nobody answers within PROMPT_ANSWER_S hands the write off.
+const MIN_WAIT_S = 30;
+const MAX_WAIT_S = 600;
+const PROMPT_ANSWER_S = 30;
+
+// Coarse elapsed time: seconds under a minute, whole minutes after.
+const coarseElapsed = (ms: number): string => {
+  const s = Math.round(ms / 1000);
+  return s < 60 ? `${s} s` : `${Math.floor(s / 60)} min`;
+};
+
+type WaitAnswer = number | 'background';
 
 @Component({
   selector: 'app-specify-details-step',
@@ -81,6 +94,17 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private http = inject(HttpClient);
   private snackBar = inject(TailwindSnackBarService);
   private destroyRef = inject(DestroyRef);
+
+  // The question shown while a write outlasts the wait; null when not asking.
+  readonly slowWrite = signal<{ text: string; answerIn: number } | null>(null);
+  readonly waitSeconds = new FormControl<number>(60, {
+    nonNullable: true,
+    validators: [Validators.required, Validators.min(MIN_WAIT_S), Validators.max(MAX_WAIT_S), Validators.pattern(/^\d+$/)],
+  });
+  readonly minWaitS = MIN_WAIT_S;
+  readonly maxWaitS = MAX_WAIT_S;
+  private answerSlowWrite?: (answer: WaitAnswer) => void;
+  private answerCountdown?: ReturnType<typeof setInterval>;
   // toObservable() must run inside an injection context — lift to a class
   // field. Reused by selectCreateInstance$ and onNext below.
   private csiState$ = toObservable(this.csiState.state);
@@ -376,15 +400,19 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     );
   };
 
-  // A write still running after HAND_OFF_AFTER_MS is handed off: the wizard
-  // closes and names where to watch it, tracking carries on, and the outcome
-  // is reported wherever the user is. Leaving the wizard (Cancel, another
-  // page) hands it off the same way, so a late failure is never lost.
+  // A write still running after HAND_OFF_AFTER_MS asks the user whether to
+  // keep waiting, and for how long. Continue in background, or no answer,
+  // hands it off: the wizard closes and names where to watch it, tracking
+  // carries on, and the outcome is reported wherever the user is. Leaving
+  // the wizard (Cancel, another page) hands it off the same way, so a late
+  // failure is never lost.
   private async handOffIfSlow(outcome: Promise<StepOnNextResult>): Promise<StepOnNextResult> {
+    const startedAt = Date.now();
     let handedOff = false;
     const handOff = () => {
       if (handedOff) return;
       handedOff = true;
+      this.closeSlowWrite('background');
       this.snackBar.open(
         `${this.writeDescription()} carries on in the background. ${this.whereToWatch()} shows its progress, `
           + 'and a message will say how it ended.',
@@ -395,17 +423,74 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       outcome.then(r => { if (!r.success) this.snackBar.error(r.message ?? 'The operation failed.'); });
     };
     const stopWatchingDestroy = this.destroyRef.onDestroy(handOff);
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    const slow = new Promise<null>(resolve => { timeout = setTimeout(() => resolve(null), HAND_OFF_AFTER_MS); });
-
-    const first = await Promise.race([outcome, slow]);
-    clearTimeout(timeout);
-    if (!handedOff) stopWatchingDestroy();
-    if (first) {
-      return first;
+    const handedOffResult: StepOnNextResult = { success: true, redirect: true };
+    try {
+      let waitMs = HAND_OFF_AFTER_MS;
+      for (;;) {
+        const first = await this.outcomeWithin(outcome, waitMs);
+        if (first) return first;
+        if (handedOff) return handedOffResult;
+        const answer = await Promise.race([outcome, this.askSlowWrite(Date.now() - startedAt)]);
+        if (typeof answer === 'object') return answer;
+        if (answer === 'background' || handedOff) {
+          handOff();
+          return handedOffResult;
+        }
+        waitMs = answer * 1000;
+      }
+    } finally {
+      this.closeSlowWrite('background');
+      if (!handedOff) stopWatchingDestroy();
     }
-    handOff();
-    return { success: true, redirect: true };
+  }
+
+  // The outcome, or null once ms pass without one.
+  private async outcomeWithin(outcome: Promise<StepOnNextResult>, ms: number): Promise<StepOnNextResult | null> {
+    let timeout: ReturnType<typeof setTimeout> | undefined;
+    const slow = new Promise<null>(resolve => { timeout = setTimeout(() => resolve(null), ms); });
+    try {
+      return await Promise.race([outcome, slow]);
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  private askSlowWrite(elapsedMs: number): Promise<WaitAnswer> {
+    return new Promise<WaitAnswer>(resolve => {
+      this.answerSlowWrite = resolve;
+      let answerIn = PROMPT_ANSWER_S;
+      this.slowWrite.set({
+        text: `${this.writeDescription()} is still running after ${coarseElapsed(elapsedMs)}.`,
+        answerIn,
+      });
+      this.answerCountdown = setInterval(() => {
+        answerIn--;
+        if (answerIn <= 0) {
+          this.closeSlowWrite('background');
+        } else {
+          this.slowWrite.update(q => q && { ...q, answerIn });
+        }
+      }, 1000);
+    });
+  }
+
+  private closeSlowWrite(answer: WaitAnswer): void {
+    clearInterval(this.answerCountdown);
+    this.answerCountdown = undefined;
+    this.slowWrite.set(null);
+    const resolve = this.answerSlowWrite;
+    this.answerSlowWrite = undefined;
+    resolve?.(answer);
+  }
+
+  keepWaiting(): void {
+    if (this.slowWrite() && this.waitSeconds.valid) {
+      this.closeSlowWrite(this.waitSeconds.value);
+    }
+  }
+
+  continueInBackground(): void {
+    this.closeSlowWrite('background');
   }
 
   private writeDescription(): string {
