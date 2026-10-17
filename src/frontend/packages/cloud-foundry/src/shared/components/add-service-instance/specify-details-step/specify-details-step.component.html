@@ -1,5 +1,5 @@
 <div class="specify-details">
-  @if (!modeService.isEditServiceInstanceMode() && (hasInstances$ | async) && showModeSelection) {
+  @if (!modeService.isEditServiceInstanceMode() && (hasInstances$ | async) && showModeSelection()) {
     <div>
       <div class="flex flex-col gap-3 mb-4">
         @for (mode of formModes; track mode) {
@@ -11,7 +11,7 @@
       </div>
     </div>
   }
-  @if ((showModeSelection && formMode() === 'create-service-instance') || !showModeSelection) {
+  @if ((showModeSelection() && formMode() === 'create-service-instance') || !showModeSelection()) {
     <form class="stepper-form"
       [formGroup]="createNewInstanceForm">
       <app-form-field>
@@ -30,7 +30,7 @@
       <div class="stepper-form__tags mb-4">
         <label for="service-instance-tags" class="block mb-1 text-sm text-content-muted">Tags</label>
         <div class="flex flex-wrap gap-2 p-2 border border-content-border rounded-md min-h-[42px] bg-content-bg">
-          @for (tag of tags; track tag) {
+          @for (tag of tags(); track tag) {
             <span class="inline-flex items-center px-3 py-1 text-sm font-medium text-content-text bg-content-secondary rounded-full hover:bg-content-border">
               {{tag}}
               @if (tagsRemovable) {
@@ -55,7 +55,7 @@
       </div>
     </form>
   }
-  @if (showModeSelection && formMode() === 'bind-service-instance') {
+  @if (showModeSelection() && formMode() === 'bind-service-instance') {
     <form class="stepper-form"
       [formGroup]="selectExistingInstanceForm">
       <app-form-field>
