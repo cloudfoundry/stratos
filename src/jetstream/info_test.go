@@ -131,8 +131,8 @@ func TestGetInfoConcurrencyExplicitValues(t *testing.T) {
 }
 
 // TestJobTrackingLimitMins verifies how long the console follows a job: the
-// default when unset, at least a minute, the configured value up to a day
-// (with a warning past 6 hours), and 6 hours for anything longer.
+// default when unset, at least a minute (0 included), the configured value
+// up to a day (with a warning past 6 hours), and 6 hours for anything longer.
 func TestJobTrackingLimitMins(t *testing.T) {
 	t.Parallel()
 	cases := []struct {
@@ -140,7 +140,7 @@ func TestJobTrackingLimitMins(t *testing.T) {
 		want       int
 		warn       bool
 	}{
-		{0, 60, false},
+		{0, 1, true},
 		{-5, 1, true},
 		{1, 1, false},
 		{90, 90, false},
@@ -151,10 +151,13 @@ func TestJobTrackingLimitMins(t *testing.T) {
 		{5000, 360, true},
 	}
 	for _, c := range cases {
-		got, warning := jobTrackingLimitMins(c.configured)
+		got, warning := jobTrackingLimitMins(c.configured, true)
 		if got != c.want || (warning != "") != c.warn {
 			t.Errorf("jobTrackingLimitMins(%d) = %d, %q; want %d, warn %v", c.configured, got, warning, c.want, c.warn)
 		}
+	}
+	if got, warning := jobTrackingLimitMins(0, false); got != 60 || warning != "" {
+		t.Errorf("jobTrackingLimitMins unset = %d, %q; want 60, no warning", got, warning)
 	}
 }
 

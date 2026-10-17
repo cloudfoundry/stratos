@@ -68,8 +68,12 @@ func (p *portalProxy) getInfo(c *echo.Context) (*api.Info, error) {
 	s.Configuration.EndpointCardConcurrency = p.Config.EndpointCardConcurrency
 	s.Configuration.EndpointRequestConcurrency = p.Config.EndpointRequestConcurrency
 
-	s.Configuration.JobTrackingLimitMins, _ = jobTrackingLimitMins(p.Config.AsyncJobTrackingLimitMins)
+	s.Configuration.JobTrackingLimitMins = p.Config.AsyncJobTrackingLimitMins
 
+	// loadPortalConfig applies the limit; 0 means it never ran.
+	if s.Configuration.JobTrackingLimitMins == 0 {
+		s.Configuration.JobTrackingLimitMins = defaultJobTrackingLimitMins
+	}
 	if s.Configuration.EndpointCardConcurrency == 0 {
 		s.Configuration.EndpointCardConcurrency = 2
 	}
@@ -183,12 +187,12 @@ const (
 )
 
 // jobTrackingLimitMins applies ASYNC_JOB_TRACKING_LIMIT_IN_MINS: unset means
-// the default; under a minute means one; past 6 hours is allowed but each
-// browser tab then polls for that long; a day or more falls back to 6 hours.
-// The warning is empty when the value is used as configured.
-func jobTrackingLimitMins(configured int) (int, string) {
+// the default; under a minute (0 included) means one; past 6 hours is allowed
+// but each browser tab then polls for that long; a day or more falls back to
+// 6 hours. The warning is empty when the value is used as configured.
+func jobTrackingLimitMins(configured int, set bool) (int, string) {
 	switch {
-	case configured == 0:
+	case !set:
 		return defaultJobTrackingLimitMins, ""
 	case configured < 1:
 		return 1, fmt.Sprintf("ASYNC_JOB_TRACKING_LIMIT_IN_MINS=%d is below 1; using 1 minute", configured)
