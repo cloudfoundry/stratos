@@ -3,6 +3,7 @@ import { WritableSignal } from '@angular/core';
 import { TailwindSnackBarRef, TailwindSnackBarService } from '@stratosui/core';
 import { jobTrackingLimitMs, pollJob } from './write-with-job';
 import { formatLimit } from './unknown-outcome-message';
+import type { StratosJob } from './async-job.types';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
 import { extractHttpErrorMessage, stripMarkup } from '@stratosui/store';
 
@@ -38,14 +39,20 @@ export async function pollBulkResult(
   const tally: BulkTally = {
     settled: 0, deleted: 0, failed: 0, unknown: 0, total: result.results.length, failures: [], unknowns: [], running: [],
   };
-  const pendingJobs: { guid: string; jobId: string }[] = [];
+  const pendingJobs: { guid: string; jobId: string; deadlineAt: number }[] = [];
+  // Each item is followed for the limit from when its job started, not from
+  // when a poller reaches it: items queued behind hung ones would otherwise
+  // wait a limit for a poller and then get a full limit of their own.
+  const receivedAt = Date.now();
+  const deadlineOf = (job: StratosJob): number =>
+    (Date.parse(job.startedAt) || receivedAt) + jobTrackingLimitMs();
   const fail = (guid: string, reason?: string) => { tally.failed++; tally.failures.push({ guid, reason }); };
   const unknown = (guid: string) => { tally.unknown++; tally.unknowns.push(guid); };
 
   for (const item of result.results) {
     if (item.state === 'COMPLETE') { tally.deleted++; tally.settled++; }
     else if (item.state === 'FAILED') { fail(item.guid, item.errors?.[0]?.message && stripMarkup(item.errors[0].message)); tally.settled++; }
-    else if (item.job?.id) { pendingJobs.push({ guid: item.guid, jobId: item.job.id }); }
+    else if (item.job?.id) { pendingJobs.push({ guid: item.guid, jobId: item.job.id, deadlineAt: deadlineOf(item.job) }); }
     else { unknown(item.guid); tally.settled++; }
   }
   opts.onProgress?.({ ...tally });
@@ -56,9 +63,9 @@ export async function pollBulkResult(
   let next = 0;
   const worker = async (): Promise<void> => {
     while (next < pendingJobs.length) {
-      const { guid, jobId } = pendingJobs[next++];
+      const { guid, jobId, deadlineAt } = pendingJobs[next++];
       try {
-        const res = await pollJob<unknown>(http, jobId, { backoffMs: opts.backoffMs });
+        const res = await pollJob<unknown>(http, jobId, { backoffMs: opts.backoffMs, deadlineAt });
         if (res.status === 'COMPLETE') { tally.deleted++; }
         else if (res.stillRunning) { tally.unknown++; tally.running.push(guid); }
         else { unknown(guid); }
