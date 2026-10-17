@@ -59,6 +59,9 @@
   accepted (a delete, start, stop, restart or restage from the
   application page) gives the reason Cloud Foundry gave, not its
   internal error name such as CF-UnableToPerform.
+- A setting given a value that does not parse (text for a number, say)
+  still stops the backend at startup, and the error now names the
+  setting.
 - The backend no longer keeps an unfinished operation in memory forever
   once nobody is checking on it: after an hour without a status check it
   is dropped. An operation someone keeps checking is kept however long it

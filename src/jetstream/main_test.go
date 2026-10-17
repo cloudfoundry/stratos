@@ -370,3 +370,15 @@ func TestLoadPortalConfigCSPGitHostsNamesEachSourceOnce(t *testing.T) {
 		}
 	}
 }
+
+// A value that does not parse stops startup, as for any setting, and the
+// error names the setting so the operator knows which one to fix.
+func TestLoadPortalConfigNamesABadSetting(t *testing.T) {
+	var pc api.PortalConfig
+	_, err := loadPortalConfig(pc, env.NewVarSet(env.WithMapLookup(map[string]string{
+		"ASYNC_JOB_TRACKING_LIMIT_IN_MINS": "ten",
+	})))
+	if err == nil || !strings.Contains(err.Error(), "ASYNC_JOB_TRACKING_LIMIT_IN_MINS") {
+		t.Fatalf("expected an error naming ASYNC_JOB_TRACKING_LIMIT_IN_MINS, got %v", err)
+	}
+}
