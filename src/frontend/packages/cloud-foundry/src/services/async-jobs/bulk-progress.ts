@@ -3,7 +3,7 @@ import { WritableSignal } from '@angular/core';
 import { TailwindSnackBarRef, TailwindSnackBarService } from '@stratosui/core';
 import { pollJob } from './write-with-job';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { extractHttpErrorMessage, stripMarkup } from '@stratosui/store';
 
 export interface BulkTally {
   settled: number;
@@ -12,6 +12,10 @@ export interface BulkTally {
   /** Ended with a result that could not be determined. */
   unknown: number;
   total: number;
+  /** Each failed item, with the reason CF or the broker gave when there is one. */
+  failures: { guid: string; reason?: string }[];
+  /** Each item whose result could not be determined. */
+  unknowns: string[];
 }
 
 // Settles every item of a BulkResult: fast-path items count immediately;
@@ -28,14 +32,18 @@ export async function pollBulkResult(
     concurrency?: number;
   } = {},
 ): Promise<BulkTally> {
-  const tally: BulkTally = { settled: 0, deleted: 0, failed: 0, unknown: 0, total: result.results.length };
-  const pendingJobs: string[] = [];
+  const tally: BulkTally = {
+    settled: 0, deleted: 0, failed: 0, unknown: 0, total: result.results.length, failures: [], unknowns: [],
+  };
+  const pendingJobs: { guid: string; jobId: string }[] = [];
+  const fail = (guid: string, reason?: string) => { tally.failed++; tally.failures.push({ guid, reason }); };
+  const unknown = (guid: string) => { tally.unknown++; tally.unknowns.push(guid); };
 
   for (const item of result.results) {
     if (item.state === 'COMPLETE') { tally.deleted++; tally.settled++; }
-    else if (item.state === 'FAILED') { tally.failed++; tally.settled++; }
-    else if (item.job?.id) { pendingJobs.push(item.job.id); }
-    else { tally.unknown++; tally.settled++; }
+    else if (item.state === 'FAILED') { fail(item.guid, item.errors?.[0]?.message && stripMarkup(item.errors[0].message)); tally.settled++; }
+    else if (item.job?.id) { pendingJobs.push({ guid: item.guid, jobId: item.job.id }); }
+    else { unknown(item.guid); tally.settled++; }
   }
   opts.onProgress?.({ ...tally });
   if (pendingJobs.length === 0) { return tally; }
@@ -45,12 +53,12 @@ export async function pollBulkResult(
   let next = 0;
   const worker = async (): Promise<void> => {
     while (next < pendingJobs.length) {
-      const jobId = pendingJobs[next++];
+      const { guid, jobId } = pendingJobs[next++];
       try {
         const res = await pollJob<unknown>(http, jobId, { backoffMs: opts.backoffMs });
-        if (res.status === 'COMPLETE') { tally.deleted++; } else { tally.unknown++; }
-      } catch {
-        tally.failed++; // StratosJobError: the CF job terminally failed
+        if (res.status === 'COMPLETE') { tally.deleted++; } else { unknown(guid); }
+      } catch (err: unknown) {
+        fail(guid, extractHttpErrorMessage(err)); // StratosJobError: the CF job terminally failed
       }
       tally.settled++;
       opts.onProgress?.({ ...tally });
@@ -72,6 +80,8 @@ export interface BulkProgressOptions {
   op: () => Promise<BulkResult>;
   refresh?: () => Promise<void>;
   refreshAfterPending?: boolean;
+  /** Display names by guid, to name failed items; a missing one shows the guid. */
+  names?: ReadonlyMap<string, string>;
   backoffMs?: readonly number[];   // test hook, forwarded to pollBulkResult
   /** Number of items requested (known from the caller's selection). When
    *  provided and > 0, the progress snackbar opens BEFORE the POST rather
@@ -80,6 +90,13 @@ export interface BulkProgressOptions {
 }
 
 const plural = (n: number, noun: string): string => `${n} ${noun}${n === 1 ? '' : 's'}`;
+
+// The first few entries, then how many more: a summary that names every one
+// of a large bulk would not fit on screen. The console has them all.
+const SUMMARY_NAMES = 3;
+const listSome = (items: string[]): string =>
+  items.slice(0, SUMMARY_NAMES).join(', ')
+  + (items.length > SUMMARY_NAMES ? ` and ${items.length - SUMMARY_NAMES} more` : '');
 
 // Owns the whole bulk lifecycle. Resolves when the POST phase ends (bulk
 // bar closes, rows already handled by op); settlement (job polling +
@@ -133,12 +150,20 @@ async function trackSettlement(
   });
   progressRef?.dismiss();
 
-  const parts = [`${plural(tally.deleted, o.noun)} ${o.doneVerb}`];
-  if (tally.failed > 0) { parts.push(`${tally.failed} failed`); }
-  if (tally.unknown > 0) {
-    parts.push(`${plural(tally.unknown, 'result')} could not be determined`);
+  const nameOf = (guid: string) => `"${o.names?.get(guid) ?? guid}"`;
+  for (const f of tally.failures) {
+    console.warn(`Bulk ${o.verb}: ${nameOf(f.guid)} (${f.guid}) failed: ${f.reason ?? 'no reason given'}`);
   }
-  const message = parts.join(', ');
+  const parts = [`${plural(tally.deleted, o.noun)} ${o.doneVerb}`];
+  if (tally.failed > 0) {
+    const named = tally.failures.map(f =>
+      f.reason ? `${nameOf(f.guid)} (${f.reason.replace(/\.$/, '')})` : nameOf(f.guid));
+    parts.push(`${tally.failed} failed: ${listSome(named)}`);
+  }
+  if (tally.unknown > 0) {
+    parts.push(`${plural(tally.unknown, 'result')} could not be determined: ${listSome(tally.unknowns.map(nameOf))}`);
+  }
+  const message = parts.join('; ');
 
   const clean = tally.failed === 0 && tally.unknown === 0;
   if (clean) {
