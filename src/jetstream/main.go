@@ -736,6 +736,10 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 	pc.HTTPS = true
 	pc.PluginConfig = make(map[string]string)
 
+	if _, warning := jobTrackingLimitMins(pc.AsyncJobTrackingLimitMins); warning != "" {
+		slog.Warn(warning)
+	}
+
 	// Default to standard timeout if the mutating one is not configured
 	if pc.HTTPClientTimeoutMutatingInSecs == 0 {
 		pc.HTTPClientTimeoutMutatingInSecs = pc.HTTPClientTimeoutInSecs

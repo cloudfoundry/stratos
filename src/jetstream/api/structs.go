@@ -303,6 +303,7 @@ type Info struct {
 		UserEndpointsEnabled       string `json:"userEndpointsEnabled"`
 		EndpointCardConcurrency    int    `json:"endpointCardConcurrency"`
 		EndpointRequestConcurrency int    `json:"endpointRequestConcurrency"`
+		JobTrackingLimitMins       int    `json:"jobTrackingLimitMins"`
 	} `json:"config"`
 }
 
@@ -479,6 +480,7 @@ type PortalConfig struct {
 	HideNavLogout                   bool                         `configName:"HIDE_NAV_LOGOUT"`
 	EndpointCardConcurrency         int                          `configName:"ENDPOINT_CARD_CONCURRENCY"`
 	EndpointRequestConcurrency      int                          `configName:"ENDPOINT_REQUEST_CONCURRENCY"`
+	AsyncJobTrackingLimitMins       int                          `configName:"ASYNC_JOB_TRACKING_LIMIT_IN_MINS"`
 	UserEndpointsEnabled            api.UserEndpointsConfigValue `configName:"USER_ENDPOINTS_ENABLED"`
 	// DiagnosticsEnabled gates the admin-only /pp/v1/admin/diagnostics endpoint.
 	// Off by default in production; opt-in per deployment (dev, staging) via the
