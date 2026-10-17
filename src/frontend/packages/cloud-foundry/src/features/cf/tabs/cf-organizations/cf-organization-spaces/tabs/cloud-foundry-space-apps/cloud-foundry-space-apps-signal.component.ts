@@ -363,7 +363,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   // POST phase ends (rows are already optimistically handled by the op).
   private async runBulk(
     verb: string,
-    count: number,
+    targets: readonly { guid: string; name: string }[],
     op: () => Promise<BulkResult>,
   ): Promise<void> {
     try {
@@ -376,7 +376,8 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
         doneVerb: 'deleted',
         op,
         refresh: () => this.appsConfig.refresh(),
-        count,
+        count: targets.length,
+        names: new Map(targets.map(t => [t.guid, t.name])),
       });
     } finally {
       this.selectedAppKeys.set(new Set());
@@ -403,7 +404,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
           );
           this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
             const guids = targets.map(a => a.guid);
-            await this.runBulk('delete', targets.length, () =>
+            await this.runBulk('delete', targets, () =>
               result?.checkboxChecked
                 ? this.appsConfig.bulkDeleteAppsWithCleanup(cnsi, guids)
                 : this.appsConfig.bulkDeleteApps(cnsi, guids));

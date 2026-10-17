@@ -183,13 +183,13 @@ describe('CloudFoundryRoutesSignalComponent', () => {
   it('bulk unmap: one failure reports settled outcome via error()', async () => {
     const targets: StRoute[] = [
       route({ cnsiGuid: 'cnsi-1', guid: 'route-1', appGuids: ['app-1'] }),
-      route({ cnsiGuid: 'cnsi-1', guid: 'route-2', appGuids: ['app-2'] }),
+      route({ cnsiGuid: 'cnsi-1', guid: 'route-2', url: 'r2.example.com', appGuids: ['app-2'] }),
     ];
     stubRoutesConfig.view.filteredItems = signal(targets).asReadonly();
     stubRoutesConfig.bulkUnmapRoutes.mockResolvedValue({
       results: [
         { guid: 'route-1', state: 'COMPLETE' },
-        { guid: 'route-2', state: 'FAILED' },
+        { guid: 'route-2', state: 'FAILED', errors: [{ code: 'CF-X', message: 'Route is busy.' }] },
       ],
       succeeded: 1,
       failed: 1,
@@ -204,7 +204,7 @@ describe('CloudFoundryRoutesSignalComponent', () => {
     await flush();
 
     expect(stubRoutesConfig.bulkUnmapRoutes).toHaveBeenCalledWith('cnsi-1', ['route-1', 'route-2']);
-    expect(snackBar.error).toHaveBeenCalledWith('1 route unmapped, 1 failed');
+    expect(snackBar.error).toHaveBeenCalledWith('1 route unmapped; 1 failed: "r2.example.com" (Route is busy)');
     const allCalls = [...snackBar.open.mock.calls, ...snackBar.show.mock.calls, ...snackBar.error.mock.calls]
       .map(c => c[0]);
     expect(allCalls.join(' ')).not.toContain('requested');

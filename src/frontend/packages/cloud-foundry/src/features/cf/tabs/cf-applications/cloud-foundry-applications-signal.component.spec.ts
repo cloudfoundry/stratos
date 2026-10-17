@@ -313,4 +313,29 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
       .map(c => c[0]);
     expect(allCalls.join(' ')).not.toContain('requested');
   });
+
+  it('bulk delete names a failed application and gives the reason', async () => {
+    vi.spyOn(console, 'warn').mockImplementation(() => {});
+    const targets: StApp[] = [
+      app({ cnsiGuid: 'cnsi-1', guid: 'app-1', name: 'l9-after' }),
+      app({ cnsiGuid: 'cnsi-1', guid: 'app-2', name: 'l7-after' }),
+    ];
+    stubAppsConfig.view.filteredItems = signal(targets).asReadonly();
+    stubAppsConfig.bulkDeleteApps.mockResolvedValue({
+      results: [
+        { guid: 'app-1', state: 'COMPLETE' },
+        { guid: 'app-2', state: 'FAILED', errors: [{ code: 'CF-X', message: 'A binding is in progress.' }] },
+      ],
+      succeeded: 1,
+      failed: 1,
+      pending: 0,
+    });
+
+    await component.ngOnInit();
+    const deleteAction = component.listConfig()!.bulkActions!.find(a => a.label === 'Delete');
+    deleteAction!.run(new Set(['cnsi-1:app-1', 'cnsi-1:app-2']));
+    await flush();
+
+    expect(snackBar.error).toHaveBeenCalledWith('1 application deleted; 1 failed: "l7-after" (A binding is in progress)');
+  });
 });
