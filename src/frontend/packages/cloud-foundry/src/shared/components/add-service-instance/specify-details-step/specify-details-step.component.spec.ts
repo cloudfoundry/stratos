@@ -53,10 +53,10 @@ describe('SpecifyDetailsStepComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(SpecifyDetailsStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -134,7 +134,6 @@ describe('SpecifyDetailsStepComponent', () => {
     // setInput (not a plain field write) so the OnPush view is marked dirty,
     // same as the parent-template binding in the real wizard.
     fixture.componentRef.setInput('showModeSelection', true);
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const texts = Array.from(
@@ -173,7 +172,17 @@ describe('SpecifyDetailsStepComponent', () => {
 // fast-path and polled-handoff to the same bare-result shape, so the
 // helper only has to inspect one level.
 describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
-  function setup(opts: {
+  // whenStable, advancing the clock when a test has faked it: zoneless
+  // change detection is scheduled on timers.
+  async function stable(fixture: ComponentFixture<unknown>): Promise<void> {
+    const done = fixture.whenStable();
+    if (vi.isFakeTimers()) {
+      await vi.advanceTimersByTimeAsync(20);
+    }
+    await done;
+  }
+
+  async function setup(opts: {
     isEditMode?: boolean;
     bindAppGuid?: string;
     csiBindParams?: object;
@@ -235,7 +244,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     const fixture = TestBed.createComponent(SpecifyDetailsStepComponent);
     const component = fixture.componentInstance;
     component.createNewInstanceForm.controls.name.setValue('my-instance');
-    fixture.detectChanges();
+    await stable(fixture);
     return {
       fixture,
       component,
@@ -246,7 +255,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   }
 
   it('POSTs the v3 managed body and returns success+redirect on create without bind', async () => {
-    const { component, httpMock } = setup();
+    const { component, httpMock } = await setup();
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
@@ -282,7 +291,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('binds an existing instance and names it, without claiming it was created', async () => {
-    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     component.bindExistingInstance = true;
     component.bindableServiceInstances$ = of([
@@ -299,7 +308,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('chains into bind when bindAppGuid is set and a SI guid is extractable', async () => {
-    const { component, modeServiceStub, csiStateStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, csiStateStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
@@ -329,7 +338,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('reports a create that ended with an unknown result, and that the bind was not attempted', async () => {
-    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
 
@@ -356,7 +365,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('reports an update that ended with an unknown result, never as updated', async () => {
-    const { component, httpMock } = setup({ isEditMode: true });
+    const { component, httpMock } = await setup({ isEditMode: true });
     const finalResult = firstValueFrom(component.onNext());
 
     httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing').flush(null, { status: 202, statusText: 'Accepted' });
@@ -370,7 +379,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('reports a bind that ended with an unknown result after a create', async () => {
-    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, unknown: true }));
     const finalResult = firstValueFrom(component.onNext());
 
@@ -391,7 +400,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('names the instance and says it was created when the bind after a create fails', async () => {
-    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: 'bind said no' }));
     const finalResult = firstValueFrom(component.onNext());
 
@@ -411,7 +420,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('names the instance when binding an existing one fails', async () => {
-    const { component, modeServiceStub, httpMock } = setup({ bindAppGuid: 'app-1' });
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: 'bind said no' }));
     component.bindExistingInstance = true;
     component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
@@ -425,7 +434,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('PATCHes the v3 endpoint and returns success+redirect on update', async () => {
-    const { component, httpMock } = setup({ isEditMode: true });
+    const { component, httpMock } = await setup({ isEditMode: true });
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
@@ -456,7 +465,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
     async function startSlowCreate(opts: Parameters<typeof setup>[0] = {}) {
       vi.useFakeTimers();
-      const ctx = setup(opts);
+      const ctx = await setup(opts);
       const tracked = TestBed.inject(TrackedJobsService);
       vi.spyOn(tracked, 'remember');
       vi.spyOn(tracked, 'forget');
@@ -515,8 +524,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       const { fixture, httpMock, result, component } = await startSlowCreate();
       try {
         await vi.advanceTimersByTimeAsync(30_000);
-        fixture.detectChanges();
-        await vi.advanceTimersByTimeAsync(0);
+        await stable(fixture);
         expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', behavior: 'smooth' });
         expect(scrollIntoView.mock.contexts[0]).toBe(fixture.nativeElement.querySelector('[role=alertdialog]'));
         component.continueInBackground();
@@ -782,7 +790,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
   });
 
   it('surfaces CF detail message on 4xx create failure', async () => {
-    const { component, httpMock } = setup();
+    const { component, httpMock } = await setup();
     const result$ = component.onNext();
     const finalResult = firstValueFrom(result$);
 
@@ -808,7 +816,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     const UPDATE_URL = '/pp/v1/cf/service_instances/cnsi-1/si-existing';
 
     async function runOnNext(opts: Parameters<typeof setup>[0], url: string, contract: ServiceWriteContract, path: ResolvePath) {
-      const ctx = setup(opts);
+      const ctx = await setup(opts);
       const finalResult = firstValueFrom(ctx.component.onNext());
       await answerServiceWrite(ctx.httpMock, url, contract, path);
       const out = await finalResult;
