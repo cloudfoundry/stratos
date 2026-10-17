@@ -19,6 +19,9 @@
   ASYNC_JOB_TRACKING_LIMIT_IN_MINS (Helm: console.ui.jobTrackingLimitMins)
   to change it; under 1 uses 1, over 360 logs a warning, 1440 or more
   uses 360.
+- The backend logs a "job ended" line for each background operation,
+  with its kind, outcome and how long it took, so an operator can set
+  the tracking limit from their own foundation's numbers.
 
 [BugFixes]
 - An operation whose result Stratos could not determine is no longer
