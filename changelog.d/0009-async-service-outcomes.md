@@ -8,6 +8,11 @@
   application's Services tab). The outcome is still reported wherever
   you are; a failure stays on screen until dismissed. Leaving the wizard
   early hands the operation off the same way.
+- A service instance create or update handed off by the wizard is still
+  reported after a page reload or a new sign-in: Stratos says it is
+  still running and for how long, then how it ended. Signing out while
+  one runs says its status will show after you sign in. Stratos stops
+  checking an hour after the operation started, and says so.
 
 [BugFixes]
 - An operation whose result Stratos could not determine is no longer
@@ -30,6 +35,11 @@
   created.`, named a renamed instance by its old name, and said "created
   and bound" when binding an existing instance. A bind that fails after
   the instance was created now says the instance was created.
+- A bulk delete or unmap that partly fails names each item that failed
+  and gives the reason, and names any whose result could not be
+  determined. It said only how many failed.
+- Background operations are checked less often the longer they run:
+  every few seconds at first, then up to every two minutes.
 - The backend no longer keeps an unfinished operation in memory forever
   once nobody is checking on it: after an hour without a status check it
   is dropped. An operation someone keeps checking is kept however long it
@@ -43,3 +53,5 @@
   `HTTP_CLIENT_TIMEOUT_LONGRUNNING_IN_SECS` setting is gone from the
   shipped configs and Helm chart; a deployment that still sets it is
   unaffected, as the value is ignored.
+- The library type checks pass again (TypeScript 6.0 had broken them
+  all) and now run in the gate.
