@@ -69,4 +69,30 @@
     </form>
   }
 
+  @if (slowWrite(); as question) {
+    <div role="alertdialog" aria-labelledby="slow-write-text" aria-describedby="slow-write-countdown"
+      class="mt-4 p-4 border border-content-border rounded-md bg-content-bg">
+      <p id="slow-write-text" class="text-sm font-medium text-content-text">{{ question.text }}</p>
+      <p id="slow-write-countdown" class="text-sm text-content-muted">
+        Continuing in the background in {{ question.answerIn }} s unless you choose to keep waiting.
+      </p>
+      <div class="flex flex-wrap items-center gap-3 mt-3">
+        <label for="slow-write-seconds" class="text-sm text-content-text">Wait another</label>
+        <input id="slow-write-seconds" type="number" [min]="minWaitS" [max]="maxWaitS" step="1"
+          [formControl]="waitSeconds" aria-describedby="slow-write-range"
+          class="w-24 px-2 py-1 text-sm border border-content-border rounded-md bg-content-bg text-content-text">
+        <span class="text-sm text-content-text">seconds</span>
+        <button type="button" class="btn btn-primary" (click)="keepWaiting()" [disabled]="waitSeconds.invalid">
+          Keep waiting
+        </button>
+        <button type="button" class="btn btn-secondary" (click)="continueInBackground()">
+          Continue in background
+        </button>
+      </div>
+      @if (waitSeconds.invalid) {
+        <app-error id="slow-write-range">Enter {{ minWaitS }} to {{ maxWaitS }} whole seconds.</app-error>
+      }
+    </div>
+  }
+
 </div>

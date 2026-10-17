@@ -1,7 +1,10 @@
 [Features]
 - The service instance wizard no longer waits on a slow broker for as
-  long as it takes. After 30 seconds it closes, says the operation
-  carries on and names where to watch it (the Services list, or the
+  long as it takes. After 30 seconds it says how long the operation has
+  been running and asks whether to keep waiting, for 30 seconds up to 10
+  minutes, or to continue in the background. Without an answer within 30
+  seconds, or when you choose to, it closes, says the operation carries
+  on and names where to watch it (the Services list, or the
   application's Services tab). The outcome is still reported wherever
   you are; a failure stays on screen until dismissed. Leaving the wizard
   early hands the operation off the same way.

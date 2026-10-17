@@ -463,6 +463,10 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         { status: 202, statusText: 'Accepted' },
       );
       await vi.advanceTimersByTimeAsync(0);
+      // Answer the background loaders the cf test module starts, so their
+      // 60 s timeouts do not fire while these tests wait minutes.
+      ctx.httpMock.match(r => !r.url.startsWith('/pp/v1/stratos/jobs/'))
+        .forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
       return { ...ctx, open, error, result };
     }
 
@@ -470,11 +474,20 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       httpMock.expectOne('/pp/v1/stratos/jobs/job-slow').flush(body, { status: 200, statusText: 'OK' });
     }
 
-    it('hands off to the Services list, keeps tracking, and reports a later failure', async () => {
-      const { httpMock, open, error, result } = await startSlowCreate();
+    it('asks at 30 s, and with no answer hands off to the Services list, keeps tracking, and reports a later failure', async () => {
+      const { component, httpMock, open, error, result } = await startSlowCreate();
       try {
         await vi.advanceTimersByTimeAsync(30_000);
+        expect(component.slowWrite()).toEqual({
+          text: 'Creating service instance "my-instance" is still running after 30 s.', answerIn: 30,
+        });
+        expect(open).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(29_000);
+        expect(component.slowWrite()?.answerIn).toBe(1);
+        expect(open).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(1_000);
         await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(component.slowWrite()).toBeNull();
         expect(open).toHaveBeenCalledWith(
           'Creating service instance "my-instance" carries on in the background. The Services list shows its '
             + 'progress, and a message will say how it ended.',
@@ -484,6 +497,100 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         answerPoll(httpMock, failedJob);
         await vi.advanceTimersByTimeAsync(0);
         expect(error).toHaveBeenCalledWith('Failed to create service instance "my-instance": the broker said no');
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('hands off at once when the user chooses to continue in the background', async () => {
+      const { component, httpMock, open, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        component.continueInBackground();
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(open).toHaveBeenCalledWith(
+          'Creating service instance "my-instance" carries on in the background. The Services list shows its '
+            + 'progress, and a message will say how it ended.',
+          'Dismiss', { duration: 10000 },
+        );
+        expect(component.slowWrite()).toBeNull();
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('keeps waiting for the chosen seconds, then asks again with the time so far', async () => {
+      const { component, httpMock, open, result } = await startSlowCreate();
+      let settled = false;
+      void result.then(() => { settled = true; });
+      try {
+        await vi.advanceTimersByTimeAsync(40_000);
+        component.waitSeconds.setValue(45);
+        component.keepWaiting();
+        expect(component.slowWrite()).toBeNull();
+        await vi.advanceTimersByTimeAsync(44_000);
+        expect(component.slowWrite()).toBeNull();
+        expect(settled).toBe(false);
+        await vi.advanceTimersByTimeAsync(1_000);
+        expect(component.slowWrite()).toEqual({
+          text: 'Creating service instance "my-instance" is still running after 1 min.', answerIn: 30,
+        });
+        expect(open).not.toHaveBeenCalled();
+        expect(settled).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('takes 30 to 600 whole seconds and ignores Keep waiting otherwise', async () => {
+      const { component, httpMock, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        for (const [value, valid] of [[29, false], [30, true], [600, true], [601, false], [45.5, false], [null, false]] as const) {
+          component.waitSeconds.setValue(value as number);
+          expect(component.waitSeconds.valid).toBe(valid);
+        }
+        component.waitSeconds.setValue(601);
+        component.keepWaiting();
+        expect(component.slowWrite()).not.toBeNull();
+        component.continueInBackground();
+        await result;
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('closes the prompt and reports the outcome when the write ends while asking', async () => {
+      const { component, httpMock, open, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        expect(component.slowWrite()).not.toBeNull();
+        answerPoll(httpMock, { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(component.slowWrite()).toBeNull();
+        expect(open).toHaveBeenCalledTimes(1);
+        expect(open).toHaveBeenCalledWith('Service instance "my-instance" created.', 'Dismiss', { duration: 4000 });
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(open).toHaveBeenCalledTimes(1);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('hands off once when the user leaves while being asked', async () => {
+      const { component, fixture, httpMock, open, result } = await startSlowCreate();
+      try {
+        await vi.advanceTimersByTimeAsync(30_000);
+        fixture.destroy();
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(component.slowWrite()).toBeNull();
+        await vi.advanceTimersByTimeAsync(60_000);
+        expect(open).toHaveBeenCalledTimes(1);
       } finally {
         vi.useRealTimers();
       }
@@ -513,7 +620,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
             + 'progress, and a message will say how it ended.',
           'Dismiss', { duration: 10000 },
         );
-        await vi.advanceTimersByTimeAsync(30_000);
+        await vi.advanceTimersByTimeAsync(90_000);
         expect(open).toHaveBeenCalledTimes(1);
       } finally {
         vi.useRealTimers();
