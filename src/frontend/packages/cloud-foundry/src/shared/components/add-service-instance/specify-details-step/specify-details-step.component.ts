@@ -557,6 +557,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       where: 'The Services list',
     };
     let jobId: string | undefined;
+    let release: (() => void) | undefined;
     let signedOut = false;
     let result: AsyncJobResult<unknown>;
     try {
@@ -566,6 +567,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
         onProgress: job => {
           if (!jobId) {
             jobId = job.id;
+            release = this.trackedJobs.hold(jobId);
             this.trackedJobs.following.add(jobId);
             this.trackedJobs.remember({ jobId, ...track });
           }
@@ -586,6 +588,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
         if (!signedOut) {
           this.trackedJobs.forget(jobId);
         }
+        release?.();   // after forget: a tab waiting on it must find the record gone
       }
     }
 

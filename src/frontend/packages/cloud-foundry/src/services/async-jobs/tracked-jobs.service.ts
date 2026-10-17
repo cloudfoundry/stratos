@@ -33,12 +33,18 @@ export interface TrackedJob {
 // record of each one in browser storage, per user, so that a reload or a
 // sign-out does not lose it: once a session is valid, it resumes following
 // the records the page did not, and reports each outcome.
+//
+// Records are shared by every tab of the site; following a job means
+// holding its Web Lock, so one tab follows it at a time. A tab resuming a
+// job waits for the lock and then re-reads the record: gone means the tab
+// that held it saw the job end, still there means that tab closed first.
 @Injectable({ providedIn: 'root' })
 export class TrackedJobsService {
   private readonly http = inject(HttpClient);
   private readonly snackBar = inject(TailwindSnackBarService);
   private readonly auth = inject(AuthDataService);
   private resumedFor?: string;
+  private waiting?: AbortController;
 
   /** Jobs this page is already following, which a resume leaves alone. */
   readonly following = new Set<string>();
@@ -51,6 +57,7 @@ export class TrackedJobsService {
         // Signed out or expired: resume again after the next sign-in, even
         // as the same user and without a reload.
         this.resumedFor = undefined;
+        this.waiting?.abort();
         return;
       }
       setJobTrackingLimit(session?.config?.jobTrackingLimitMins);
@@ -76,12 +83,42 @@ export class TrackedJobsService {
       + 'Its status will show after you sign in.';
   }
 
+  /**
+   * Keeps other tabs from resuming the job until the returned function is
+   * called. Call it before remember(), so the lock is queued before any tab
+   * can read the record.
+   */
+  hold(jobId: string): () => void {
+    let release!: () => void;
+    const held = new Promise<void>(r => { release = r; });
+    void this.withLock(jobId, () => held);
+    return release;
+  }
+
   private resume(): void {
+    this.waiting?.abort();
+    const waiting = this.waiting = new AbortController();
     for (const job of this.read()) {
       if (!this.following.has(job.jobId)) {
-        void this.follow(job);
+        void this.withLock(job.jobId, async () => {
+          const current = this.read().find(r => r.jobId === job.jobId);
+          if (current && !this.following.has(job.jobId)) {
+            await this.follow(current);
+          }
+        }, waiting.signal);
       }
     }
+  }
+
+  // Runs fn while holding the job's lock. Without Web Locks it runs at once,
+  // and each tab follows on its own.
+  private withLock(jobId: string, fn: () => Promise<void>, signal?: AbortSignal): Promise<unknown> {
+    const locks = navigator.locks as LockManager | null | undefined;
+    if (!locks) {
+      return fn();
+    }
+    return locks.request(`stratos.trackedJob.${jobId}`, { signal }, fn)
+      .catch(() => undefined);   // aborted by a sign-out; follow() handles its own errors
   }
 
   private async follow(job: TrackedJob): Promise<void> {

@@ -192,4 +192,92 @@ describe('TrackedJobsService', () => {
     httpMock.expectNone(jobUrl('live'));
     httpMock.expectNone(jobUrl('other'));
   });
+
+  describe('with other tabs open', () => {
+    // Web Locks, shared by every tab of the site: one queue per name, each
+    // request granted when the one before it is released.
+    let tails: Map<string, Promise<unknown>>;
+    const request = (name: string, opts: { signal?: AbortSignal }, cb: () => Promise<unknown>): Promise<unknown> => {
+      const granted = (tails.get(name) ?? Promise.resolve()).then(() => {
+        if (opts.signal?.aborted) {
+          throw new DOMException('aborted', 'AbortError');
+        }
+        return cb();
+      });
+      tails.set(name, granted.catch(() => undefined));
+      return granted;
+    };
+    // Another tab following a job until the returned function is called.
+    const otherTabFollows = (jobId: string): (() => void) => {
+      let release!: () => void;
+      void request(`stratos.trackedJob.${jobId}`, {}, () => new Promise<void>(r => { release = r; }));
+      return () => release();
+    };
+
+    beforeEach(() => {
+      tails = new Map();
+      Object.defineProperty(navigator, 'locks', { value: { request }, configurable: true });
+    });
+
+    afterEach(() => {
+      delete (navigator as { locks?: unknown }).locks;
+    });
+
+    it('leaves a write another tab is following to it, and takes over if that tab closes first', async () => {
+      localStorage.setItem('stratos.trackedJobs.u1', JSON.stringify([record('j1', Date.now())]));
+      const closeOtherTab = otherTabFollows('j1');
+      TestBed.inject(TrackedJobsService);
+      signIn('u1');
+      await vi.advanceTimersByTimeAsync(0);
+      httpMock.expectNone(jobUrl('j1'));
+      expect(snackBar.open).not.toHaveBeenCalled();
+
+      closeOtherTab();   // the record is still there: nobody saw the write end
+      await vi.advanceTimersByTimeAsync(0);
+      expect(snackBar.open).toHaveBeenCalledWith(expect.stringContaining('is still running'), 'Dismiss', { duration: 10000 });
+      httpMock.expectOne(jobUrl('j1')).flush(job('j1', 'COMPLETE'));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(snackBar.open).toHaveBeenLastCalledWith('Service instance "db" created.', 'Dismiss', { duration: 4000 });
+    });
+
+    it('says nothing about a write the other tab followed to its end', async () => {
+      localStorage.setItem('stratos.trackedJobs.u1', JSON.stringify([record('j1', Date.now())]));
+      const otherTabDone = otherTabFollows('j1');
+      TestBed.inject(TrackedJobsService);
+      signIn('u1');
+      await vi.advanceTimersByTimeAsync(0);
+      localStorage.setItem('stratos.trackedJobs.u1', '[]');   // the other tab reported it and forgot it
+      otherTabDone();
+      await vi.advanceTimersByTimeAsync(0);
+      httpMock.expectNone(jobUrl('j1'));
+      expect(snackBar.open).not.toHaveBeenCalled();
+    });
+
+    it('stops waiting for another tab when the session ends', async () => {
+      localStorage.setItem('stratos.trackedJobs.u1', JSON.stringify([record('j1', Date.now())]));
+      const closeOtherTab = otherTabFollows('j1');
+      TestBed.inject(TrackedJobsService);
+      signIn('u1');
+      await vi.advanceTimersByTimeAsync(0);
+      sessionValid.set(false);
+      TestBed.tick();
+      closeOtherTab();
+      await vi.advanceTimersByTimeAsync(0);
+      httpMock.expectNone(jobUrl('j1'));
+      expect(snackBar.open).not.toHaveBeenCalled();
+    });
+
+    it('keeps other tabs off a write this page holds until it lets go', async () => {
+      const svc = TestBed.inject(TrackedJobsService);
+      signIn('u1');
+      const release = svc.hold('j1');
+      const otherTab = vi.fn(async () => undefined);
+      void request('stratos.trackedJob.j1', {}, otherTab);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(otherTab).not.toHaveBeenCalled();
+      release();
+      await vi.advanceTimersByTimeAsync(0);
+      expect(otherTab).toHaveBeenCalled();
+    });
+  });
 });

@@ -472,6 +472,14 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       const tracked = TestBed.inject(TrackedJobsService);
       vi.spyOn(tracked, 'remember');
       vi.spyOn(tracked, 'forget');
+      // Each release hold() hands out, so a test can see when the wizard lets go.
+      const releases: ReturnType<typeof vi.fn>[] = [];
+      const realHold = tracked.hold.bind(tracked);
+      vi.spyOn(tracked, 'hold').mockImplementation(id => {
+        const release = vi.fn(realHold(id));
+        releases.push(release);
+        return release;
+      });
       const open = vi.spyOn((ctx.component as any).snackBar, 'open');
       const error = vi.spyOn((ctx.component as any).snackBar, 'error');
       const result = firstValueFrom(ctx.component.onNext());
@@ -484,7 +492,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       // 60 s timeouts do not fire while these tests wait minutes.
       ctx.httpMock.match(r => !r.url.startsWith('/pp/v1/stratos/jobs/'))
         .forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
-      return { ...ctx, open, error, result, tracked };
+      return { ...ctx, open, error, result, tracked, releases };
     }
 
     function answerPoll(httpMock: HttpTestingController, body: object) {
@@ -685,6 +693,28 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         await expect(result).resolves.toEqual({ success: true, redirect: true });
         expect(tracked.forget).toHaveBeenCalledWith('job-slow');
         expect(tracked.following.has('job-slow')).toBe(false);
+      } finally {
+        vi.useRealTimers();
+      }
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+    });
+
+    it('holds the write against other tabs from before it is remembered until after it is forgotten', async () => {
+      const { httpMock, result, tracked, releases } = await startSlowCreate();
+      try {
+        answerPoll(httpMock, processingJob);
+        await vi.advanceTimersByTimeAsync(0);
+        expect(tracked.hold).toHaveBeenCalledOnce();
+        expect(tracked.hold).toHaveBeenCalledWith('job-slow');
+        expect(vi.mocked(tracked.hold).mock.invocationCallOrder[0])
+          .toBeLessThan(vi.mocked(tracked.remember).mock.invocationCallOrder[0]);
+        expect(releases[0]).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(500);
+        answerPoll(httpMock, { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+        await expect(result).resolves.toEqual({ success: true, redirect: true });
+        expect(releases[0]).toHaveBeenCalledOnce();
+        expect(vi.mocked(tracked.forget).mock.invocationCallOrder[0])
+          .toBeLessThan(releases[0].mock.invocationCallOrder[0]);
       } finally {
         vi.useRealTimers();
       }
