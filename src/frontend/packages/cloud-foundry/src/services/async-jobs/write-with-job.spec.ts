@@ -286,6 +286,24 @@ describe('writeWithJob', () => {
       }
     });
 
+    it('backs off from a few seconds, not zero, when the first answer comes after the first minute', async () => {
+      vi.useFakeTimers();
+      try {
+        const { promise } = await handOff('job-slow1', {});
+        const first = ctrl.expectOne('/pp/v1/stratos/jobs/job-slow1');
+        await vi.advanceTimersByTimeAsync(61_000);
+        first.flush(processing('job-slow1'));
+        await vi.advanceTimersByTimeAsync(0);
+        expect(ctrl.match('/pp/v1/stratos/jobs/job-slow1')).toHaveLength(0);   // no back-to-back re-poll
+        await vi.advanceTimersByTimeAsync(6_000);
+        ctrl.expectOne('/pp/v1/stratos/jobs/job-slow1').flush(complete('job-slow1'));
+        await vi.advanceTimersByTimeAsync(0);
+        expect((await promise).status).toBe('COMPLETE');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('stops following at the tracking limit and says the job is still running', async () => {
       vi.useFakeTimers();
       setJobTrackingLimit(2);

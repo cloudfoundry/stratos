@@ -194,10 +194,13 @@ const QUICK_FOR_MS = 60_000;
 const MAX_WAIT_MS = 120_000;
 
 function pollWait(previousMs: number, i: number, elapsedMs: number): number {
+  const quick = EARLY_WAITS_MS[Math.min(i, EARLY_WAITS_MS.length - 1)];
   if (elapsedMs < QUICK_FOR_MS) {
-    return EARLY_WAITS_MS[Math.min(i, EARLY_WAITS_MS.length - 1)];
+    return quick;
   }
-  return Math.min(previousMs * 2, MAX_WAIT_MS);
+  // From the quick wait at least: a first answer that took over a minute
+  // must not leave the doubling at zero.
+  return Math.min(Math.max(previousMs, quick) * 2, MAX_WAIT_MS);
 }
 
 export async function pollJob<T>(
