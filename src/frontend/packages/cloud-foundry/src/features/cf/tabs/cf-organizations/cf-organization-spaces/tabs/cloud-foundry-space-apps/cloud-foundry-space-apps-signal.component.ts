@@ -359,29 +359,25 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
       .filter(a => keys.has(`${a.cnsiGuid}:${a.guid}`));
   }
 
-  // Run a bulk op with live settlement feedback; clears selection when the
-  // POST phase ends (rows are already optimistically handled by the op).
-  private async runBulk(
+  // Run a bulk op with live settlement feedback: each item's outcome,
+  // failures named with their reason.
+  private runBulk(
     verb: string,
     targets: readonly { guid: string; name: string }[],
     op: () => Promise<BulkResult>,
   ): Promise<void> {
-    try {
-      await runBulkWithProgress({
-        snackBar: this.snackBar,
-        http: this.http,
-        noun: 'application',
-        verb,
-        progressVerb: 'Deleting',
-        doneVerb: 'deleted',
-        op,
-        refresh: () => this.appsConfig.refresh(),
-        count: targets.length,
-        names: new Map(targets.map(t => [t.guid, t.name])),
-      });
-    } finally {
-      this.selectedAppKeys.set(new Set());
-    }
+    return runBulkWithProgress({
+      snackBar: this.snackBar,
+      http: this.http,
+      noun: 'application',
+      verb,
+      progressVerb: 'Deleting',
+      doneVerb: 'deleted',
+      op,
+      refresh: () => this.appsConfig.refresh(),
+      count: targets.length,
+      names: new Map(targets.map(t => [t.guid, t.name])),
+    });
   }
 
   // Bulk Delete, rendered in the selection bar above the list when 1+ rows
@@ -404,10 +400,16 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
           );
           this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
             const guids = targets.map(a => a.guid);
-            await this.runBulk('delete', targets, () =>
-              result?.checkboxChecked
-                ? this.appsConfig.bulkDeleteAppsWithCleanup(cnsi, guids)
-                : this.appsConfig.bulkDeleteApps(cnsi, guids));
+            // Clear the selection once the POST phase ends: the op has
+            // already handled the rows.
+            try {
+              await this.runBulk('delete', targets, () =>
+                result?.checkboxChecked
+                  ? this.appsConfig.bulkDeleteAppsWithCleanup(cnsi, guids)
+                  : this.appsConfig.bulkDeleteApps(cnsi, guids));
+            } finally {
+              this.selectedAppKeys.set(new Set());
+            }
           });
         },
       },
@@ -445,10 +447,11 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
             { label: 'Also delete this application\'s routes and service bindings' },
           );
           this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
-            await runAction('Delete', () =>
-              result?.checkboxChecked
-                ? this.appsConfig.bulkDeleteAppsWithCleanup(app.cnsiGuid, [app.guid]).then(() => {})
-                : this.appsConfig.deleteApp(app.cnsiGuid, app.guid, app.name), app.name);
+            // The cleanup delete goes through the bulk endpoint, so its
+            // result is reported like a multi-select delete's.
+            await (result?.checkboxChecked
+              ? this.runBulk('delete', [app], () => this.appsConfig.bulkDeleteAppsWithCleanup(app.cnsiGuid, [app.guid]))
+              : runAction('Delete', () => this.appsConfig.deleteApp(app.cnsiGuid, app.guid, app.name), app.name));
           });
         },
       },
