@@ -53,7 +53,7 @@ describe('RollbackDialogComponent', () => {
 
     fixture = TestBed.createComponent(RollbackDialogComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -185,7 +185,7 @@ describe('RollbackDialogComponent', () => {
     );
 
     const confirmPromise = component.confirm();
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // While in flight, the cancel button should be disabled
     const cancelBtn: HTMLButtonElement | null = fixture.nativeElement.querySelector('[data-testid="cancel-btn"]');

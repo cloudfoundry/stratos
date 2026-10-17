@@ -35,10 +35,10 @@ describe('AddServiceInstanceComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(AddServiceInstanceComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

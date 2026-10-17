@@ -165,17 +165,17 @@ describe('ServicesTabComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders without throwing', () => {
-    expect(() => fixture.detectChanges()).not.toThrow();
+  it('renders without throwing', async () => {
+    await expect(fixture.whenStable()).resolves.toBeDefined();
   });
 
-  it('triggers an initial serviceBindings fetch on init', () => {
-    fixture.detectChanges();
+  it('triggers an initial serviceBindings fetch on init', async () => {
+    await fixture.whenStable();
     expect(refreshScope).toHaveBeenCalledWith('serviceBindings');
   });
 
-  it('builds a signal-list config from the bindings config service', () => {
-    fixture.detectChanges();
+  it('builds a signal-list config from the bindings config service', async () => {
+    await fixture.whenStable();
     expect(component.listConfig).toBeTruthy();
     expect(component.listConfig.pagedItems).toBeTruthy();
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
@@ -184,7 +184,7 @@ describe('ServicesTabComponent', () => {
   });
 
   it('Unbind row action opens confirm and on confirm calls unbindService + evicts row', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     const row = { guid: 'bind-1', serviceInstance: { name: 'redis-cache', guid: 'si-1' } };
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions') as any;
     const actions = actionsCol.actions(row);
@@ -203,7 +203,7 @@ describe('ServicesTabComponent', () => {
 
   it('keeps the row, re-reads bindings and says so when an unbind ends with an unknown result', async () => {
     unbindService.mockResolvedValueOnce('unknown');
-    fixture.detectChanges();
+    await fixture.whenStable();
     const row = { guid: 'bind-2', serviceInstance: { name: 'redis-cache', guid: 'si-1' } };
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions') as any;
     actionsCol.actions(row).find((a: any) => a.label === 'Unbind').invoke();
@@ -219,8 +219,8 @@ describe('ServicesTabComponent', () => {
     );
   });
 
-  it('Edit row action navigates to /services/:type/:cnsi/:siGuid/edit with appId + cancel-url', () => {
-    fixture.detectChanges();
+  it('Edit row action navigates to /services/:type/:cnsi/:siGuid/edit with appId + cancel-url', async () => {
+    await fixture.whenStable();
     const row = {
       guid: 'bind-1',
       serviceInstance: { name: 'redis-cache', guid: 'si-1', type: 'managed' },

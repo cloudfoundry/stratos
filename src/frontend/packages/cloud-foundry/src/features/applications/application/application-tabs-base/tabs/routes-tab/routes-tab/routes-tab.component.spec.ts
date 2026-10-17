@@ -164,17 +164,17 @@ describe('RoutesTabComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders without throwing', () => {
-    expect(() => fixture.detectChanges()).not.toThrow();
+  it('renders without throwing', async () => {
+    await expect(fixture.whenStable()).resolves.toBeDefined();
   });
 
-  it('triggers an initial routes fetch on init', () => {
-    fixture.detectChanges();
+  it('triggers an initial routes fetch on init', async () => {
+    await fixture.whenStable();
     expect(refreshScope).toHaveBeenCalledWith('routes');
   });
 
-  it('builds a signal-list config from the wave-2 service', () => {
-    fixture.detectChanges();
+  it('builds a signal-list config from the wave-2 service', async () => {
+    await fixture.whenStable();
     expect(component.listConfig).toBeTruthy();
     expect(component.listConfig.pagedItems).toBeTruthy();
     // Actions column carries the tab's confirm-wrapped factory, not the
@@ -185,7 +185,7 @@ describe('RoutesTabComponent', () => {
   });
 
   it('opens a confirm dialog before unmapping, evicts row on confirm', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
     const rowActions = actionsCol!.actions!({ guid: 'r1', url: 'foo.example.com' } as any);
     const unmap = rowActions.find(a => a.label === 'Unmap');
@@ -206,7 +206,7 @@ describe('RoutesTabComponent', () => {
   });
 
   it('opens a confirm dialog before deleting, evicts row on confirm', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
     const rowActions = actionsCol!.actions!({ guid: 'r2', url: 'bar.example.com' } as any);
     const del = rowActions.find(a => a.label === 'Delete');
@@ -228,7 +228,7 @@ describe('RoutesTabComponent', () => {
 
   it('keeps the row, re-reads routes and says so when a delete ends with an unknown result', async () => {
     deleteRoute.mockResolvedValueOnce('unknown');
-    fixture.detectChanges();
+    await fixture.whenStable();
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
     const del = actionsCol!.actions!({ guid: 'r3', url: 'baz.example.com' } as any).find(a => a.label === 'Delete');
     del!.invoke({ guid: 'r3', url: 'baz.example.com' } as any);

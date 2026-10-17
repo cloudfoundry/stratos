@@ -60,57 +60,57 @@ describe('ServiceKeysComponent — busy-state spinners', () => {
 
     fixture = TestBed.createComponent(ServiceKeysComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('no spinner when idle', () => {
     expect(spinner(fixture.nativeElement)).toBeNull();
   });
 
-  it('shows a spinner while the key list is loading (GET)', () => {
+  it('shows a spinner while the key list is loading (GET)', async () => {
     keysLoading.set(true);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).not.toBeNull();
 
     keysLoading.set(false);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).toBeNull();
   });
 
-  it('shows a spinner in the create form while creating', () => {
+  it('shows a spinner in the create form while creating', async () => {
     component.isAdding.set(true);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).toBeNull();
 
     component.creating.set(true);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).not.toBeNull();
 
     component.creating.set(false);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).toBeNull();
   });
 
-  it('shows a spinner while a key\'s credentials are loading (GET)', () => {
+  it('shows a spinner while a key\'s credentials are loading (GET)', async () => {
     keysVal.set([{ guid: 'k1', name: 'key-one', createdAt: '' }]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).toBeNull();
 
     // Expanding triggers the lazy credential GET; the request stays pending
     // under HttpTestingController, so credsLoading('k1') stays true.
     component.toggleOpen('k1');
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).not.toBeNull();
   });
 
-  it('does not fetch credentials for a key whose creation failed, and says so', () => {
+  it('does not fetch credentials for a key whose creation failed, and says so', async () => {
     const http = TestBed.inject(HttpTestingController);
     keysVal.set([{ guid: 'k-f', name: 'broken', createdAt: '2026-09-05T09:12:29Z', lastOperationState: 'failed' }]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.textContent).not.toContain('Copy all (JSON)');
 
     component.toggleOpen('k-f');
-    fixture.detectChanges();
+    await fixture.whenStable();
     http.expectNone(r => r.url.includes('/details'));
     expect(fixture.nativeElement.textContent).toContain('This key was not created, so it has no credentials.');
     expect(fixture.nativeElement.textContent).not.toContain('Failed to load credentials');
@@ -119,25 +119,25 @@ describe('ServiceKeysComponent — busy-state spinners', () => {
   it('names the HTTP failure when credentials cannot be loaded', async () => {
     const http = TestBed.inject(HttpTestingController);
     keysVal.set([{ guid: 'k-1', name: 'ok', createdAt: '2026-09-05T09:12:29Z', lastOperationState: 'succeeded' }]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     component.toggleOpen('k-1');
     http.expectOne(r => r.url.endsWith('/k-1/details')).flush(
       { error: 'Service key not found' }, { status: 404, statusText: 'Not Found' },
     );
     await new Promise(resolve => setTimeout(resolve, 0));
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.credsError('k-1')).toBe('Service key not found (404)');
     expect(fixture.nativeElement.textContent).not.toContain('unknown error');
   });
 
-  it('shows a spinner on the delete action while deleting', () => {
+  it('shows a spinner on the delete action while deleting', async () => {
     keysVal.set([{ guid: 'k1', name: 'key-one', createdAt: '' }]);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).toBeNull();
 
     // Fire-and-forget: the DELETE stays pending, rowStatus('k1') === 'busy'.
     void component.deleteKey('k1');
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spinner(fixture.nativeElement)).not.toBeNull();
   });
 });
@@ -237,7 +237,7 @@ describe('ServiceKeysComponent — createKey patches the list from the response'
     fixture = TestBed.createComponent(ServiceKeysComponent);
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('appends the created key from a 201 body without refetching the list', async () => {
@@ -268,7 +268,7 @@ describe('ServiceKeysComponent — createKey patches the list from the response'
       errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'The service broker returned an invalid response. Status Code: 504 Gateway Timeout' }],
     });
     await done;
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(component.errorMessage()).toBe(
       'Failed to create key: The service broker returned an invalid response. Status Code: 504 Gateway Timeout',

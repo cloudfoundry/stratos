@@ -29,7 +29,7 @@ describe('TableCellServiceCfBreadcrumbsComponent', () => {
     // The cell only ever renders with an offering bound; its row setter builds
     // the org/space label service the links child reads from.
     component.row = { cnsiGuid: 'cf-guid' } as StServiceOffering;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
