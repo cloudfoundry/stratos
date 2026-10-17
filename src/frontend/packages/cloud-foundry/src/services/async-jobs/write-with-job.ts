@@ -28,7 +28,8 @@ import { StratosJobError } from './async-job.types';
  * — a plain `Observable<T>` throws 202 information away.
  *
  * Polling uses:
- *   - 500ms, 1s, 2s, cap 3s backoff
+ *   - 500ms, 1s, 2s, then every 3s for the first minute; after that each
+ *     wait doubles, up to one check every 2 minutes
  *   - onProgress callback for UI wiring (button spinners, stepper progress)
  *   - a poll that could not be answered (network error, 5xx, 429, a 200
  *     without a body) is not an outcome: the job is still running, so
@@ -47,7 +48,7 @@ import { StratosJobError } from './async-job.types';
  */
 export interface WriteWithJobOptions {
   onProgress?: (job: StratosJob) => void;
-  /** Backoff sequence in ms (capped at last value). Default: [500, 1000, 2000, 3000]. */
+  /** Backoff sequence in ms (capped at last value), for tests. Default: see pollWait. */
   backoffMs?: readonly number[];
   /** Stop waiting: rejects with a DOMException named 'AbortError'. */
   signal?: AbortSignal;
@@ -153,12 +154,28 @@ function settle<T>(source: Observable<T>, signal: AbortSignal | undefined): Prom
   return firstValueFrom(race(source, aborted$));
 }
 
+// Quick checks while a write is likely to end soon. Brokers decide how long
+// an operation takes, often minutes, so after the first minute each wait
+// doubles, up to one check every two minutes.
+const EARLY_WAITS_MS = [500, 1000, 2000, 3000];
+const QUICK_FOR_MS = 60_000;
+const MAX_WAIT_MS = 120_000;
+
+function pollWait(previousMs: number, i: number, elapsedMs: number): number {
+  if (elapsedMs < QUICK_FOR_MS) {
+    return EARLY_WAITS_MS[Math.min(i, EARLY_WAITS_MS.length - 1)];
+  }
+  return Math.min(previousMs * 2, MAX_WAIT_MS);
+}
+
 export async function pollJob<T>(
   http: HttpClient,
   jobId: string,
   opts: WriteWithJobOptions,
 ): Promise<AsyncJobResult<T>> {
-  const backoff = opts.backoffMs ?? [500, 1000, 2000, 3000];
+  const backoff = opts.backoffMs;
+  const startedAt = Date.now();
+  let wait = 0;
   const url = `/pp/v1/stratos/jobs/${encodeURIComponent(jobId)}`;
   // Logged once when polls start failing and once when they recover, so a
   // long outage does not flood the console.
@@ -199,7 +216,7 @@ export async function pollJob<T>(
       }
     }
 
-    const wait = backoff[Math.min(i, backoff.length - 1)];
+    wait = backoff ? backoff[Math.min(i, backoff.length - 1)] : pollWait(wait, i, Date.now() - startedAt);
     // Tests pass backoffMs: [0] to bypass wall-clock waits. timer(0) still
     // schedules a macrotask which vitest may not drain inside the test
     // function — just yield a microtask instead so the HttpTestingController
