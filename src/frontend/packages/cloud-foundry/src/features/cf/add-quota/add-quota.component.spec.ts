@@ -16,7 +16,7 @@ describe('AddQuotaComponent', () => {
   let component: AddQuotaComponent;
   let fixture: ComponentFixture<AddQuotaComponent>;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [
         AddQuotaComponent,
@@ -54,7 +54,7 @@ describe('AddQuotaComponent', () => {
 
     fixture = TestBed.createComponent(AddQuotaComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {

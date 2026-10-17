@@ -108,7 +108,7 @@ describe('CloudFoundrySpaceRoutesSignalComponent', () => {
 
     fixture = TestBed.createComponent(CloudFoundrySpaceRoutesSignalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {

@@ -67,7 +67,7 @@ function makeCupsStub(canResult = true) {
   };
 }
 
-function setup(opts: DataStubOpts & { showActions?: boolean; canEdit?: boolean } = {}) {
+async function setup(opts: DataStubOpts & { showActions?: boolean; canEdit?: boolean } = {}) {
   const dataStub = makeDataStub(opts);
   const appStub = makeAppServiceStub();
   const appsStub = makeAppsStub();
@@ -91,26 +91,26 @@ function setup(opts: DataStubOpts & { showActions?: boolean; canEdit?: boolean }
 
   const fixture: ComponentFixture<CardAppInstancesComponent> = TestBed.createComponent(CardAppInstancesComponent);
   fixture.componentRef.setInput('showActions', opts.showActions ?? false);
-  fixture.detectChanges();
+  await fixture.whenStable();
   return { fixture, dataStub, appStub, appsStub, cupsStub, confirmStub, snackStub };
 }
 
 describe('CardAppInstancesComponent', () => {
-  it('creates', () => {
-    const { fixture } = setup();
+  it('creates', async () => {
+    const { fixture } = await setup();
     expect(fixture.componentInstance).toBeTruthy();
   });
 
   describe('counts', () => {
-    it('reads runningCount and desiredCount from signals', () => {
-      const { fixture } = setup({ desired: 3, running: 2, total: 3 });
+    it('reads runningCount and desiredCount from signals', async () => {
+      const { fixture } = await setup({ desired: 3, running: 2, total: 3 });
       const c = fixture.componentInstance;
       expect(c.runningCount()).toBe(2);
       expect(c.desiredCount()).toBe(3);
     });
 
-    it('renders explicit Running and Desired labels with counts when not editing', () => {
-      const { fixture } = setup({ desired: 3, running: 1, total: 3 });
+    it('renders explicit Running and Desired labels with counts when not editing', async () => {
+      const { fixture } = await setup({ desired: 3, running: 1, total: 3 });
       const text: string = fixture.nativeElement.textContent;
       expect(text).toContain('Running');
       expect(text).toContain('Desired');
@@ -118,69 +118,69 @@ describe('CardAppInstancesComponent', () => {
       expect(text).toContain('3');
     });
 
-    it('reactively updates when stats change', () => {
-      const { fixture, dataStub } = setup({ desired: 2, running: 0, total: 2 });
+    it('reactively updates when stats change', async () => {
+      const { fixture, dataStub } = await setup({ desired: 2, running: 0, total: 2 });
       expect(fixture.componentInstance.runningCount()).toBe(0);
       dataStub._statsSig.set([{ state: 'RUNNING' }, { state: 'RUNNING' }]);
       expect(fixture.componentInstance.runningCount()).toBe(2);
     });
 
-    it('reactively updates desiredCount when app entity changes', () => {
-      const { fixture, dataStub } = setup({ desired: 2 });
+    it('reactively updates desiredCount when app entity changes', async () => {
+      const { fixture, dataStub } = await setup({ desired: 2 });
       expect(fixture.componentInstance.desiredCount()).toBe(2);
       dataStub._appSig.set({ entity: { state: 'STARTED', instances: 5 } });
       expect(fixture.componentInstance.desiredCount()).toBe(5);
     });
 
-    it('returns 0 desired when app entity is null', () => {
-      const { fixture, dataStub } = setup();
+    it('returns 0 desired when app entity is null', async () => {
+      const { fixture, dataStub } = await setup();
       dataStub._appSig.set(null);
       expect(fixture.componentInstance.desiredCount()).toBe(0);
     });
 
-    it('returns 0 running when stats are empty', () => {
-      const { fixture, dataStub } = setup();
+    it('returns 0 running when stats are empty', async () => {
+      const { fixture, dataStub } = await setup();
       dataStub._statsSig.set([]);
       expect(fixture.componentInstance.runningCount()).toBe(0);
     });
   });
 
   describe('actions row visibility', () => {
-    it('hides actions when showActions=false', () => {
-      const { fixture } = setup({ showActions: false });
+    it('hides actions when showActions=false', async () => {
+      const { fixture } = await setup({ showActions: false });
       const buttons = fixture.nativeElement.querySelectorAll('button');
       expect(buttons.length).toBe(0);
     });
 
-    it('renders edit/scaleDown/scaleUp when showActions=true and app is running', () => {
-      const { fixture } = setup({ showActions: true, appState: 'STARTED' });
+    it('renders edit/scaleDown/scaleUp when showActions=true and app is running', async () => {
+      const { fixture } = await setup({ showActions: true, appState: 'STARTED' });
       const html: string = fixture.nativeElement.innerHTML;
       expect(html).toContain('edit');
       expect(html).toContain('remove_circle_outline');
       expect(html).toContain('add_circle_outline');
     });
 
-    it('renders scale buttons when app is stopped (scaling is valid in any state)', () => {
+    it('renders scale buttons when app is stopped (scaling is valid in any state)', async () => {
       // CF accepts scaling a stopped app — it sets the expected instance count,
       // applied on next start. v4.9.2 wrongly gated these on the app running;
       // show them whenever the user can edit, running or stopped.
-      const { fixture } = setup({ showActions: true, appState: 'STOPPED' });
+      const { fixture } = await setup({ showActions: true, appState: 'STOPPED' });
       const html: string = fixture.nativeElement.innerHTML;
       expect(html).toContain('edit');
       expect(html).toContain('remove_circle_outline');
       expect(html).toContain('add_circle_outline');
     });
 
-    it('hides actions when canEdit is false', () => {
-      const { fixture } = setup({ showActions: true, canEdit: false });
+    it('hides actions when canEdit is false', async () => {
+      const { fixture } = await setup({ showActions: true, canEdit: false });
       const buttons = fixture.nativeElement.querySelectorAll('button');
       expect(buttons.length).toBe(0);
     });
   });
 
   describe('button disabled state', () => {
-    it('disables scale buttons while loading.app is true', () => {
-      const { fixture } = setup({ showActions: true, loadingApp: true });
+    it('disables scale buttons while loading.app is true', async () => {
+      const { fixture } = await setup({ showActions: true, loadingApp: true });
       const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
       expect(buttons.length).toBeGreaterThan(0);
       for (const b of buttons) {
@@ -188,8 +188,8 @@ describe('CardAppInstancesComponent', () => {
       }
     });
 
-    it('enables scale buttons when not loading', () => {
-      const { fixture } = setup({ showActions: true, loadingApp: false });
+    it('enables scale buttons when not loading', async () => {
+      const { fixture } = await setup({ showActions: true, loadingApp: false });
       const buttons: HTMLButtonElement[] = Array.from(fixture.nativeElement.querySelectorAll('button'));
       expect(buttons.length).toBeGreaterThan(0);
       for (const b of buttons) {
@@ -199,14 +199,14 @@ describe('CardAppInstancesComponent', () => {
   });
 
   describe('scale actions', () => {
-    it('scaleUp invokes apps.scaleApp with desired+1', () => {
-      const { fixture, appsStub } = setup({ showActions: true, desired: 2 });
+    it('scaleUp invokes apps.scaleApp with desired+1', async () => {
+      const { fixture, appsStub } = await setup({ showActions: true, desired: 2 });
       fixture.componentInstance.scaleUp();
       expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 3 });
     });
 
     it('says so when the scale has no known result, rather than nothing', async () => {
-      const { fixture, appsStub, snackStub } = setup({ showActions: true, desired: 2 });
+      const { fixture, appsStub, snackStub } = await setup({ showActions: true, desired: 2 });
       appsStub.scaleApp.mockResolvedValueOnce('unknown');
       fixture.componentInstance.scaleUp();
       await fixture.whenStable();
@@ -216,22 +216,22 @@ describe('CardAppInstancesComponent', () => {
           + 'This page shows the current state.');
     });
 
-    it('scaleDown invokes apps.scaleApp with desired-1', () => {
-      const { fixture, appsStub } = setup({ showActions: true, desired: 3 });
+    it('scaleDown invokes apps.scaleApp with desired-1', async () => {
+      const { fixture, appsStub } = await setup({ showActions: true, desired: 3 });
       fixture.componentInstance.scaleDown();
       expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 2 });
     });
 
-    it('opens the confirm dialog when scaling to zero', () => {
-      const { fixture, confirmStub, appsStub } = setup({ showActions: true, desired: 1 });
+    it('opens the confirm dialog when scaling to zero', async () => {
+      const { fixture, confirmStub, appsStub } = await setup({ showActions: true, desired: 1 });
       fixture.componentInstance.scaleDown();
       expect(confirmStub.open).toHaveBeenCalled();
       // confirm stub auto-confirms, so scaleApp also fires
       expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 0 });
     });
 
-    it('scaleDown floors at 0 — never requests a negative instance count', () => {
-      const { fixture, appsStub, confirmStub } = setup({ showActions: true, desired: 0 });
+    it('scaleDown floors at 0 — never requests a negative instance count', async () => {
+      const { fixture, appsStub, confirmStub } = await setup({ showActions: true, desired: 0 });
       fixture.componentInstance.scaleDown();
       // 0 routes through the scale-to-zero confirmation (auto-confirmed by the stub).
       expect(confirmStub.open).toHaveBeenCalled();
@@ -242,23 +242,23 @@ describe('CardAppInstancesComponent', () => {
       }
     });
 
-    it('scaleUp from 0 requests 1', () => {
-      const { fixture, appsStub } = setup({ showActions: true, desired: 0 });
+    it('scaleUp from 0 requests 1', async () => {
+      const { fixture, appsStub } = await setup({ showActions: true, desired: 0 });
       fixture.componentInstance.scaleUp();
       expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 1 });
     });
   });
 
   describe('edit flow', () => {
-    it('edit() sets editValue from desiredCount and switches to editing', () => {
-      const { fixture } = setup({ showActions: true, desired: 4 });
+    it('edit() sets editValue from desiredCount and switches to editing', async () => {
+      const { fixture } = await setup({ showActions: true, desired: 4 });
       fixture.componentInstance.edit();
       expect(fixture.componentInstance.isEditing).toBe(true);
       expect(fixture.componentInstance.editValue).toBe(4);
     });
 
-    it('finishEdit(true) commits the edited value', () => {
-      const { fixture, appsStub } = setup({ showActions: true, desired: 2 });
+    it('finishEdit(true) commits the edited value', async () => {
+      const { fixture, appsStub } = await setup({ showActions: true, desired: 2 });
       const c = fixture.componentInstance;
       c.edit();
       c.editValue = '7';
@@ -267,8 +267,8 @@ describe('CardAppInstancesComponent', () => {
       expect(appsStub.scaleApp).toHaveBeenCalledWith('cf-1', 'app-1', { instances: 7 });
     });
 
-    it('finishEdit(false) discards the edit', () => {
-      const { fixture, appsStub } = setup({ showActions: true });
+    it('finishEdit(false) discards the edit', async () => {
+      const { fixture, appsStub } = await setup({ showActions: true });
       const c = fixture.componentInstance;
       c.edit();
       c.editValue = '99';

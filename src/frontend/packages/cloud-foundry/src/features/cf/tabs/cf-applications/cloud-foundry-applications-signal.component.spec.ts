@@ -198,7 +198,7 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
 
     fixture = TestBed.createComponent(CloudFoundryApplicationsSignalComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('builds Org/Space filter dropdowns with no locked Cloud Foundry dropdown', async () => {

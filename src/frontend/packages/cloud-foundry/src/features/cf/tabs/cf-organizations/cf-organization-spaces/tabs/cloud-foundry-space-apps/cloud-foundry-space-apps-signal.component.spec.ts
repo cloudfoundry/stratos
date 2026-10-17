@@ -110,10 +110,9 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
 
     fixture = TestBed.createComponent(CloudFoundrySpaceAppsSignalComponent);
     component = fixture.componentInstance;
-    // Angular runs ngOnInit during detectChanges; the component's
-    // initializeForSpace call doesn't await anything, so we can flush
-    // synchronously for assertions.
-    fixture.detectChanges();
+    // Angular runs ngOnInit during the first change detection pass;
+    // whenStable waits for that pass before the assertions run.
+    await fixture.whenStable();
   });
 
   it('should be created', () => {

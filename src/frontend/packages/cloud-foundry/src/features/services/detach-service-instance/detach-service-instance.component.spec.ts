@@ -97,10 +97,10 @@ describe('DetachServiceInstanceComponent.confirmStepHandle.submit (v3 + writeWit
 
     const fixture = TestBed.createComponent(DetachServiceInstanceComponent);
     const component = fixture.componentInstance;
-    // detectChanges first so the <app-detach-apps> child mounts and runs its
+    // Render first so the <app-detach-apps> child mounts and runs its
     // initial "empty selection" emit; setSelectedBindings then overrides with
     // the test's chosen bindings (mirroring the user's Step 1 selection).
-    fixture.detectChanges();
+    await fixture.whenStable();
     component.setSelectedBindings(bindings);
     return { fixture, component, httpMock: TestBed.inject(HttpTestingController) };
   }

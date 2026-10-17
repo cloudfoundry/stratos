@@ -49,7 +49,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
     fixture = TestBed.createComponent(RouteServiceComponent);
     component = fixture.componentInstance;
     http = TestBed.inject(HttpTestingController);
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('shows the created binding from a 201 body without refetching', async () => {
