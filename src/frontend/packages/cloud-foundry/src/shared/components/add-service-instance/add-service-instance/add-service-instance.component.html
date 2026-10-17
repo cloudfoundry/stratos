@@ -29,7 +29,7 @@
           </app-step>
         }
         <app-step title="Service Instance" [signalHandle]="specifyDetailsHandle">
-          <app-specify-details-step [appId]="appId" #specifyDetails [showModeSelection]="!!appId">
+          <app-specify-details-step #specifyDetails [showModeSelection]="!!appId">
           </app-specify-details-step>
         </app-step>
       }

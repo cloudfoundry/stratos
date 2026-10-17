@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, DestroyRef, ElementRef, Injector, Input, OnDestroy, afterNextRender, computed, effect, signal, viewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, DestroyRef, ElementRef, Injector, afterNextRender, computed, effect, input, signal, viewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 
 import {
   combineLatest as observableCombineLatest,
@@ -14,13 +14,12 @@ import {
   Subscription,
 } from 'rxjs';
 import {
-  combineLatest,
+  combineLatestWith,
   distinctUntilChanged,
   filter,
   map,
-  publishReplay,
-  refCount,
   share,
+  shareReplay,
   startWith,
   switchMap,
   take,
@@ -40,7 +39,7 @@ import { SchemaFormComponent, SchemaFormConfig } from '../../schema-form/schema-
 import { CreateServiceInstanceHelperServiceFactory } from '../create-service-instance-helper-service-factory.service';
 import { CreateServiceInstanceHelper } from '../create-service-instance-helper.service';
 import { CsiGuidsService } from '../csi-guids.service';
-import { BindResult, CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
+import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiState, CsiStateService } from '../csi-state.service';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
@@ -80,7 +79,7 @@ type WaitAnswer = number | 'background';
     SchemaFormComponent
   ]
 })
-export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit {
+export class SpecifyDetailsStepComponent implements AfterContentInit {
   private cSIHelperServiceFactory = inject(CreateServiceInstanceHelperServiceFactory);
   private csiGuidsService = inject(CsiGuidsService);
   private csiState = inject(CsiStateService);
@@ -127,10 +126,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
       key: CreateServiceFormMode.BindServiceInstance
     }
   ];
-  @Input()
-  showModeSelection = false;
-
-  @Input() appId!: string;
+  readonly showModeSelection = input(false);
 
   // Signal (not a plain field): the stepper delivers onEnter after this
   // component's activating render, outside change detection. The first
@@ -160,10 +156,11 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   tagsSelectable = true;
   tagsRemovable = true;
   tagsAddOnBlur = true;
-  tags: string[] = [];
-  spaceScopeSub!: Subscription;
+  // Signal: seeded from wizard state in an async callback, which a plain
+  // field would not re-render under zoneless+OnPush.
+  readonly tags = signal<string[]>([]);
   bindExistingInstance = false;
-  subscriptions: Subscription[] = [];
+  private formValidatorData?: Subscription;
   private _serviceParamsValid = signal<boolean>(false);
   serviceParamsValid = toObservable(this._serviceParamsValid);
   serviceParams: object = {};
@@ -202,8 +199,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         this.cSIHelperService = this.cSIHelperServiceFactory.create(guids.cfGuid, guids.serviceGuid);
         return this.cSIHelperService.serviceInstances$(guids.servicePlanGuid, guids.spaceGuid);
       }),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.serviceInstancesInit$ = this.serviceInstances$.pipe(
@@ -291,7 +287,9 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const helper = this.ensureHelper();
     if (helper) {
       this.allServiceInstances$ = helper.serviceInstances$();
-      this.subscriptions.push(this.setupFormValidatorData());
+      // Re-entering the step replaces the previous subscription.
+      this.formValidatorData?.unsubscribe();
+      this.formValidatorData = this.setupFormValidatorData();
     }
     if (this.modeService.isEditServiceInstanceMode()) {
       this.csiState$.pipe(
@@ -308,7 +306,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
           this.serviceInstanceName = state.name;
           this.createNewInstanceForm.updateValueAndValidity();
           if (state.tags) {
-            this.tags = [...state.tags];
+            this.tags.set([...state.tags]);
           }
         })
       ).subscribe();
@@ -339,7 +337,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     this.createNewInstanceForm.reset();
     this.selectExistingInstanceForm.reset();
     if (mode === CreateServiceFormMode.CreateServiceInstance) {
-      this.tags = [];
+      this.tags.set([]);
       this.bindExistingInstance = false;
     } else if (mode === CreateServiceFormMode.BindServiceInstance) {
       this.bindExistingInstance = true;
@@ -348,7 +346,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   private setupFormValidatorData(): Subscription {
     return this.allServiceInstances$.pipe(
-      combineLatest(this.csiState$),
+      combineLatestWith(this.csiState$),
       filter(([, state]) => !!state.spaceGuid),
       map(([instances, state]) => instances.filter(s => {
         let filterSelf = false;
@@ -357,10 +355,10 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
         }
         return s.space?.guid === state.spaceGuid && !filterSelf;
       })),
-      tap(o => {
-        this.allServiceInstanceNames = o.map(s => s.name);
-      }),
-    ).subscribe();
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(o => {
+      this.allServiceInstanceNames = o.map(s => s.name);
+    });
   }
 
   private setupForms() {
@@ -377,10 +375,6 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   }
 
   setOrg = (guid: string) => this.csiState.setOrg(guid);
-
-  ngOnDestroy() {
-    this.subscriptions.forEach(s => s.unsubscribe());
-  }
 
   ngAfterContentInit() {
     this.setupValidate();
@@ -627,14 +621,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     if (!state.bindAppGuid || !siGuid) {
       return this.routeToServices(`Service instance "${siName}" created.`);
     }
-    const bindResult = await this.modeService.createApplicationServiceBinding(
+    const bindResult = await firstValueFrom(this.modeService.createApplicationServiceBinding(
       siGuid,
       // strict: a service instance can only be created/bound within a CF
       // context, so cfGuid is always set by the time a bind is requested.
       state.cfGuid!,
       state.bindAppGuid,
       state.bindAppParams,
-    ).pipe(take(1)).toPromise() as BindResult;
+    ).pipe(take(1)));
     if (bindResult?.unknown) {
       return {
         success: false,
@@ -669,7 +663,7 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
   private buildWriteBody(state: CsiState, isEditMode: boolean): Record<string, unknown> {
     const name = this.createNewInstanceForm.controls.name.value;
     const params = this.serviceParams;
-    const tags = this.tags.length > 0 ? [...this.tags] : [];
+    const tags = [...this.tags()];
 
     if (isEditMode) {
       // PATCH: only include fields the user can edit. Plan/space relations
@@ -696,18 +690,14 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
 
   private setupValidate() {
     // For a new service instance the step is valid if the form and service params are both valid
-    this.subscriptions.push(
-      observableCombineLatest([
-        this.serviceParamsValid,
-        this.createNewInstanceForm.statusChanges
-      ]).pipe(
-        map(([serviceParamsValid, _b]) => this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid))
-      ).subscribe()
-    );
+    observableCombineLatest([
+      this.serviceParamsValid,
+      this.createNewInstanceForm.statusChanges,
+    ]).pipe(takeUntilDestroyed(this.destroyRef)).subscribe(([serviceParamsValid]) =>
+      this._validate.set(serviceParamsValid && this.createNewInstanceForm.valid));
     // For existing service instance the step is valid if the form is (there's no service params)
-    this.subscriptions.push(this.selectExistingInstanceForm.statusChanges.pipe(
-      map(() => this._validate.set(this.selectExistingInstanceForm.valid))
-    ).subscribe());
+    this.selectExistingInstanceForm.statusChanges.pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this._validate.set(this.selectExistingInstanceForm.valid));
   }
 
   // (keydown.*) template events are typed as plain Event by the compiler
@@ -717,23 +707,21 @@ export class SpecifyDetailsStepComponent implements OnDestroy, AfterContentInit 
     const value = input.value;
 
     if ((value || '').trim()) {
-      this.tags.push(value.trim());
+      this.tags.update(tags => [...tags, value.trim()]);
       this.updateTagsFormControl();
       input.value = '';
     }
   }
 
   removeTag(tag: string): void {
-    const index = this.tags.indexOf(tag);
-
-    if (index >= 0) {
-      this.tags.splice(index, 1);
+    if (this.tags().includes(tag)) {
+      this.tags.update(tags => tags.filter(t => t !== tag));
       this.updateTagsFormControl();
     }
   }
 
   private updateTagsFormControl(): void {
-    this.createNewInstanceForm.controls.tags.setValue(this.tags);
+    this.createNewInstanceForm.controls.tags.setValue(this.tags());
     this.createNewInstanceForm.controls.tags.markAsTouched();
   }
 
