@@ -286,6 +286,32 @@ describe('writeWithJob', () => {
       }
     });
 
+    it('keeps polling a restage every 3 s past the first minute and the limit: Jetstream advances it only when polled', async () => {
+      vi.useFakeTimers();
+      setJobTrackingLimit(1);
+      try {
+        const restaging = (id: string): StratosJob => ({ ...processing(id), kind: 'cf.app.restage' });
+        const { promise } = await handOff('job-rs', {});
+        const at: number[] = [];
+        for (let step = 0; at.length < 40 && step < 100; step++) {
+          for (const req of ctrl.match('/pp/v1/stratos/jobs/job-rs')) {
+            at.push(Date.now());
+            req.flush(restaging('job-rs'));
+          }
+          await vi.advanceTimersToNextTimerAsync();
+        }
+        const gaps = at.slice(1).map((t, i) => t - at[i]);
+        expect(Math.max(...gaps.slice(4))).toBe(3000);
+        expect(at.at(-1)! - at[0]).toBeGreaterThan(90_000);   // well past the 1 min limit, still polling
+        ctrl.match('/pp/v1/stratos/jobs/job-rs').forEach(r => r.flush(complete('job-rs')));
+        await vi.advanceTimersByTimeAsync(0);
+        expect((await promise).status).toBe('COMPLETE');
+      } finally {
+        setJobTrackingLimit(60);
+        vi.useRealTimers();
+      }
+    });
+
     it('backs off from a few seconds, not zero, when the first answer comes after the first minute', async () => {
       vi.useFakeTimers();
       try {
