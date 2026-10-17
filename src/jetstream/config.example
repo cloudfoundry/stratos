@@ -34,6 +34,11 @@ ENABLE_TECH_PREVIEW=false
 #UI_LIST_MAX_SIZE=600
 # If the max list size is hit allow the user to load all results anyway. Defaults to false
 #UI_LIST_ALLOW_LOAD_MAXED=false
+# How long, in minutes, the browser follows a background operation (a slow
+# broker, a delete) before it stops checking; the operation carries on in
+# Cloud Foundry. Defaults to 60; at least 1; over 360 (6 hours) logs a
+# warning; 1440 (a day) or more uses 360.
+#ASYNC_JOB_TRACKING_LIMIT_IN_MINS=60
 
 # By default, only show favorites endpoints on the home view
 # HOME_VIEW_SHOW_FAVORITES_ONLY=false

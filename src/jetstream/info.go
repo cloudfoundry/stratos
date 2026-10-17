@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log/slog"
 	"net/http"
 	"strings"
@@ -66,6 +67,8 @@ func (p *portalProxy) getInfo(c *echo.Context) (*api.Info, error) {
 	s.Configuration.UserEndpointsEnabled = string(p.Config.UserEndpointsEnabled)
 	s.Configuration.EndpointCardConcurrency = p.Config.EndpointCardConcurrency
 	s.Configuration.EndpointRequestConcurrency = p.Config.EndpointRequestConcurrency
+
+	s.Configuration.JobTrackingLimitMins, _ = jobTrackingLimitMins(p.Config.AsyncJobTrackingLimitMins)
 
 	if s.Configuration.EndpointCardConcurrency == 0 {
 		s.Configuration.EndpointCardConcurrency = 2
@@ -168,5 +171,34 @@ func marshalEndpointMetadata(metadata string) interface{} {
 		return anyJSON
 	} else {
 		return metadata
+	}
+}
+
+// How long the browser follows a background job before it stops checking
+// (the job itself carries on in Cloud Foundry), in minutes.
+const (
+	defaultJobTrackingLimitMins = 60
+	warnJobTrackingLimitMins    = 6 * 60
+	maxJobTrackingLimitMins     = 24 * 60
+)
+
+// jobTrackingLimitMins applies ASYNC_JOB_TRACKING_LIMIT_IN_MINS: unset means
+// the default; under a minute means one; past 6 hours is allowed but each
+// browser tab then polls for that long; a day or more falls back to 6 hours.
+// The warning is empty when the value is used as configured.
+func jobTrackingLimitMins(configured int) (int, string) {
+	switch {
+	case configured == 0:
+		return defaultJobTrackingLimitMins, ""
+	case configured < 1:
+		return 1, fmt.Sprintf("ASYNC_JOB_TRACKING_LIMIT_IN_MINS=%d is below 1; using 1 minute", configured)
+	case configured >= maxJobTrackingLimitMins:
+		return warnJobTrackingLimitMins, fmt.Sprintf(
+			"ASYNC_JOB_TRACKING_LIMIT_IN_MINS=%d is a day or more; using %d minutes (6 hours)", configured, warnJobTrackingLimitMins)
+	case configured > warnJobTrackingLimitMins:
+		return configured, fmt.Sprintf(
+			"ASYNC_JOB_TRACKING_LIMIT_IN_MINS=%d is more than 6 hours: each browser tab follows a job that long", configured)
+	default:
+		return configured, ""
 	}
 }

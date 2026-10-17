@@ -129,3 +129,50 @@ func TestGetInfoConcurrencyExplicitValues(t *testing.T) {
 		t.Errorf("EndpointRequestConcurrency explicit: expected 10, got %d", info.Configuration.EndpointRequestConcurrency)
 	}
 }
+
+// TestJobTrackingLimitMins verifies how long the console follows a job: the
+// default when unset, at least a minute, the configured value up to a day
+// (with a warning past 6 hours), and 6 hours for anything longer.
+func TestJobTrackingLimitMins(t *testing.T) {
+	t.Parallel()
+	cases := []struct {
+		configured int
+		want       int
+		warn       bool
+	}{
+		{0, 60, false},
+		{-5, 1, true},
+		{1, 1, false},
+		{90, 90, false},
+		{360, 360, false},
+		{361, 361, true},
+		{1439, 1439, true},
+		{1440, 360, true},
+		{5000, 360, true},
+	}
+	for _, c := range cases {
+		got, warning := jobTrackingLimitMins(c.configured)
+		if got != c.want || (warning != "") != c.warn {
+			t.Errorf("jobTrackingLimitMins(%d) = %d, %q; want %d, warn %v", c.configured, got, warning, c.want, c.warn)
+		}
+	}
+}
+
+// TestGetInfoJobTrackingLimit verifies /info hands the browser the limit,
+// and the default when the config never set one.
+func TestGetInfoJobTrackingLimit(t *testing.T) {
+	t.Parallel()
+	for _, c := range []struct{ configured, want int }{{0, 60}, {90, 90}} {
+		pp, ctx, db, _, ctrl := setupGetInfoTest(t, 0, 0)
+		pp.Config.AsyncJobTrackingLimitMins = c.configured
+		info, err := pp.getInfo(ctx)
+		if err != nil {
+			t.Fatalf("getInfo() returned unexpected error: %v", err)
+		}
+		if info.Configuration.JobTrackingLimitMins != c.want {
+			t.Errorf("JobTrackingLimitMins for %d: expected %d, got %d", c.configured, c.want, info.Configuration.JobTrackingLimitMins)
+		}
+		db.Close()
+		ctrl.Finish()
+	}
+}

@@ -48,3 +48,18 @@ This deployment is recommended only for trying out the Console and for developme
 > Some features are marked as 'Tech Preview' and are only available if tech preview features are enabled when deploying. See the [Tech Preview](tech-preview.md) section for more information.
 
 Frontend Packages and Backend Plugins can be removed at build time, see [here](../extensions/disable-packages.md) for more information.
+## Background Operations
+
+A slow operation (a broker that takes minutes, a delete Cloud Foundry runs as
+a job) is followed by the browser after the page that started it hands it
+off. After `ASYNC_JOB_TRACKING_LIMIT_IN_MINS` minutes (default 60) the browser
+stops checking and says so; the operation itself carries on in Cloud Foundry.
+Values under 1 use 1 minute. Values over 360 (6 hours) are used but log a
+warning, since every browser tab follows an operation that long. Values of
+1440 (a day) or more use 360.
+
+| Deployment | How to set it |
+|------------|---------------|
+| Cloud Foundry | `cf set-env console ASYNC_JOB_TRACKING_LIMIT_IN_MINS 120`, then restage |
+| Kubernetes (Helm) | `--set console.ui.jobTrackingLimitMins=120` |
+| Docker, single container | `docker run -e ASYNC_JOB_TRACKING_LIMIT_IN_MINS=120 ...` |

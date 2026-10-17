@@ -299,6 +299,10 @@ spec:
           value: {{ default "false" .Values.console.ui.listAllowLoadMaxed | quote }}
         - name: HIDE_NAV_LOGOUT
           value: {{ default "false" .Values.console.ui.hideNavLogout | quote }}
+        {{- if .Values.console.ui.jobTrackingLimitMins }}
+        - name: ASYNC_JOB_TRACKING_LIMIT_IN_MINS
+          value: {{ .Values.console.ui.jobTrackingLimitMins | quote }}
+        {{- end }}
         {{- end }}
         - name: ANALYSIS_SERVICES_API
           value: "http://{{ .Release.Name }}-analyzers:8090"
