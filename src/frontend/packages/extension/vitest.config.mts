@@ -28,10 +28,6 @@ export default defineConfig({
     ],
     include: ['src/**/*.spec.ts'],
     exclude: ['node_modules', 'dist', 'out-tsc', '**/test-e2e/**', '**/e2e/**'],
-    // Fix for Angular 20 zoneless + Vitest circular dependency errors
-    teardown: {
-      destroyAfterEach: true,
-    },
     reporters: ['default'], // '../../../../build/vitest-stratos-reporter.ts' - disabled for Vitest 4 compatibility
     testTimeout: 15000, // Increased for Angular TestBed initialization with zoneless detection
     hookTimeout: 15000, // Increased for beforeAll/afterAll hooks
