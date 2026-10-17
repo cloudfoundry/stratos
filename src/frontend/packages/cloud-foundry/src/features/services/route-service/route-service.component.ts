@@ -11,7 +11,7 @@ import {
   StepOnNextResult,
   SteppersComponent,
 } from '@stratosui/core';
-import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
+import { UnknownHow, unknownHow, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import {
   RawRouteServiceBinding,
@@ -89,10 +89,10 @@ export class RouteServiceComponent {
     return this.siSource.value().find(si => si.guid === siGuid)?.name ?? siGuid;
   }
 
-  // A write that ended with an unknown result: say so, leave the stepper,
+  // A write with an unknown result: say so, leave the stepper,
   // and re-read the binding so the page shows what CF holds.
-  private endedUnknown(leadIn: string): StepOnNextResult {
-    const message = unknownOutcomeMessage(leadIn, 'This page');
+  private endedUnknown(leadIn: string, how: UnknownHow): StepOnNextResult {
+    const message = unknownOutcomeMessage(leadIn, 'This page', how);
     this.errorMessage.set(message);
     this.rebinding.set(false);
     this.selectedSiGuid.set(null);
@@ -139,7 +139,7 @@ export class RouteServiceComponent {
         if (unbound.status === 'UNKNOWN') {
           // CF allows one route service per route: binding again while the
           // old one may still be there cannot be right.
-          return this.endedUnknown(`Unbind "${this.instanceName(existing.serviceInstanceGuid)}"`);
+          return this.endedUnknown(`Unbind "${this.instanceName(existing.serviceInstanceGuid)}"`, unknownHow(unbound));
         }
       }
       const body = {
@@ -153,7 +153,7 @@ export class RouteServiceComponent {
         this.http.post(`/pp/v1/cf/service_route_bindings/${this.cfGuid}`, body, { observe: 'response' as const }),
       );
       if (r.status === 'UNKNOWN') {
-        return this.endedUnknown(`Bind "${this.instanceName(siGuid)}"`);
+        return this.endedUnknown(`Bind "${this.instanceName(siGuid)}"`, unknownHow(r));
       }
       this.rebinding.set(false);
       this.selectedSiGuid.set(null);
@@ -184,7 +184,7 @@ export class RouteServiceComponent {
         this.http.delete(`/pp/v1/cf/service_route_bindings/${this.cfGuid}/${existing.guid}`, { observe: 'response' as const }),
       );
       if (r.status === 'UNKNOWN') {
-        this.endedUnknown(`Unbind "${this.instanceName(existing.serviceInstanceGuid)}"`);
+        this.endedUnknown(`Unbind "${this.instanceName(existing.serviceInstanceGuid)}"`, unknownHow(r));
         return;
       }
       this.reload();

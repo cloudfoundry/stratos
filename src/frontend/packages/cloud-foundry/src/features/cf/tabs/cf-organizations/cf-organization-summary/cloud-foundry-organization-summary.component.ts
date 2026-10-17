@@ -23,7 +23,7 @@ import { CardNumberMetricComponent } from '../../../../../../../core/src/shared/
 import { CardCfRecentAppsComponent } from '../../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
 import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
 import { PollingIndicatorComponent } from '../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
-import { unknownOutcomeMessage } from '../../../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../services/async-jobs/unknown-outcome-message';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
@@ -95,10 +95,11 @@ export class CloudFoundryOrganizationSummaryComponent {
       const orgGuid = this.cfOrgService.orgGuid;
       try {
         const outcome = await this.orgsConfig.deleteOrg(cfGuid, orgGuid, name);
-        if (outcome === 'unknown') {
+        const how = unknownHowOf(outcome);
+        if (how) {
           // Ended, result unknown: stay rather than leave as if deleted.
           this.snackBar.error(
-            unknownOutcomeMessage(`Delete organization "${name}"`, 'The Organizations list'), 'Close');
+            unknownOutcomeMessage(`Delete organization "${name}"`, 'The Organizations list', how), 'Close');
           return;
         }
         this.router.navigate(['/cloud-foundry', cfGuid, 'organizations']);

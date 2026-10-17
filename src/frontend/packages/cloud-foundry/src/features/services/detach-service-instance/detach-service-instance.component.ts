@@ -10,7 +10,7 @@ import {
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
-import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
@@ -148,9 +148,10 @@ export class DetachServiceInstanceComponent implements OnDestroy {
         deleteGuid: bindingGuid,
         path: `/pp/v1/cf/service_bindings/${this.cfGuid}/${bindingGuid}`,
       });
-      if (outcome === 'unknown') {
+      const how = unknownHowOf(outcome);
+      if (how) {
         const message = unknownOutcomeMessage(
-          `Unbind "${binding.app?.name ?? bindingGuid}"`, 'The service instance\'s page');
+          `Unbind "${binding.app?.name ?? bindingGuid}"`, 'The service instance\'s page', how);
         this.statusByGuid.update(prev => ({ ...prev, [bindingGuid]: 'unknown' }));
         this.errorByGuid.update(prev => ({ ...prev, [bindingGuid]: message }));
         return;

@@ -25,7 +25,7 @@ import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-use
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
 import type { StSpace } from '../../../../../services/endpoint-data/stratos-types';
-import { unknownOutcomeMessage } from '../../../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundryOrganizationSpacesComponent.
 // Scoped to one org under one CF endpoint (both guids supplied by the
@@ -191,8 +191,9 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
     const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
         const outcome = await op();
-        if (outcome === 'unknown') {
-          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Spaces list'));
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Spaces list', how));
         }
       } catch (err: any) {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);

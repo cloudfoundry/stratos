@@ -250,7 +250,7 @@ describe('CsiModeService', () => {
 
       // The bind ended but nobody can say whether it happened: the caller
       // must not report it as bound.
-      await expect(finalResult).resolves.toEqual({ success: false, unknown: true });
+      await expect(finalResult).resolves.toEqual({ success: false, unknown: 'ended' });
       httpMock.verify();
     });
 

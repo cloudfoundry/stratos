@@ -9,9 +9,11 @@ import type { EntityDeleteController } from './entity-delete.controller';
  * URL), awaits the terminal lifecycle event, and throws on a failure or
  * blocked terminal so the calling component's catch can surface a snackbar —
  * for blocked, the stored CF error (e.g. association_not_empty) carries
- * through. Otherwise resolves how the delete ended: 'deleted', or 'unknown'
- * when it ended with a result nobody can determine — callers must then not
- * act as if the entity were gone (no row removal, no navigating away).
+ * through. Otherwise resolves how the delete ended: 'deleted'; 'unknown'
+ * when it ended with a result nobody can determine; or 'still-running' when
+ * Stratos stopped following it while CF was still running it. For either of
+ * the last two, callers must not act as if the entity were gone (no row
+ * removal, no navigating away).
  *
  * Every per-entity signal-config `deleteX` is a thin call to this so the
  * delete-and-invalidate path has exactly one implementation.
@@ -42,5 +44,8 @@ export async function runCfDelete(
   if (result.state === 'failure' || result.state === 'blocked') {
     throw result.error ?? new Error(`Failed to delete ${req.entityKind} "${deleteName}"`);
   }
-  return result.state === 'unknown' ? 'unknown' : 'deleted';
+  if (result.state === 'unknown') {
+    return result.stillRunning ? 'still-running' : 'unknown';
+  }
+  return 'deleted';
 }

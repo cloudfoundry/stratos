@@ -12,7 +12,7 @@ import {
   RevisionRow,
 } from '../../../services/revisions.service';
 import { extractHttpErrorMessage } from '@stratosui/store';
-import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
+import { unknownHow, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 export interface RollbackDialogData {
   revision: RevisionRow;
@@ -59,10 +59,10 @@ export class RollbackDialogComponent {
       if (r.status === 'COMPLETE') {
         this.ref.close({ ok: true, stateChanged: true });
       } else {
-        // Ended, result unknown: say so rather than close as if it worked.
+        // Result unknown: say so rather than close as if it worked.
         this.ended = true;
         this.errorMessage.set(unknownOutcomeMessage(
-          `Roll back to revision #${this.data.revision.version}`, 'The Revisions tab'));
+          `Roll back to revision #${this.data.revision.version}`, 'The Revisions tab', unknownHow(r)));
       }
     } catch (err: unknown) {
       this.errorMessage.set(extractHttpErrorMessage(err));

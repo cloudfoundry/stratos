@@ -247,6 +247,30 @@ describe('runBulkWithProgress', () => {
     warn.mockRestore();
   });
 
+  it('counts and names items still running in CF when Stratos stopped following them', async () => {
+    const sb = makeSnackBar();
+    vi.useFakeTimers();
+    try {
+      const http = {
+        get: vi.fn(() => of(new HttpResponse({ status: 200, body: job('j-1', 'PROCESSING') }))),
+      } as unknown as HttpClient;
+      await runBulkWithProgress({
+        snackBar: sb as any, http,
+        noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+        op: async () => bulk([
+          { guid: 'a', state: 'COMPLETE' },
+          { guid: 'b', state: 'PENDING', job: job('j-1', 'PROCESSING') },
+        ]),
+        names: new Map([['b', 'slow-app']]),
+      });
+      await vi.advanceTimersByTimeAsync(2 * 60 * 60_000);
+      expect(sb.error).toHaveBeenCalledWith(
+        '1 application deleted; 1 still running in Cloud Foundry after 1 h, so Stratos stopped checking: "slow-app"');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('pending items → progress snackbar updates in place, then final summary', async () => {
     const sb = makeSnackBar();
     const http = {

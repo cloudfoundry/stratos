@@ -509,6 +509,26 @@ describe('AppApplicationActionsService', () => {
     );
   });
 
+  it('delete still running in CF at the tracking limit: keeps the row and says it is still running', async () => {
+    appsStub.deleteApp.mockImplementationOnce(async () => 'still-running');
+    void svc.deleteWithCleanup([], [], { appName: 'my-app', endpointName: 'cf', orgName: 'o', spaceName: 's' });
+    await tick(8);
+    expect(appsStub._removeRow).not.toHaveBeenCalled();
+    expect(svc.outcome()).toBe('unknown');
+    expect(svc.outcomeError()).toBe(
+      'Delete "my-app": still running in Cloud Foundry after 1 h, so Stratos stopped checking on it. '
+      + 'This page shows its current state.',
+    );
+  });
+
+  it('a lifecycle action with an unknown result is not reported as done', async () => {
+    appsStub.restartApp.mockImplementationOnce(async () => 'unknown');
+    void svc.restart();
+    await tick(8);
+    expect(svc.outcome()).toBe('unknown');
+    expect(svc.displayLabel()).toBe('Restart result unknown');
+  });
+
   it('non-delete success paths: do NOT call orchestrator.removeRow', async () => {
     void svc.restage();
     await tick();

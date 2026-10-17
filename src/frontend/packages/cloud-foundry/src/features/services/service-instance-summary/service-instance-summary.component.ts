@@ -33,7 +33,7 @@ import { of } from 'rxjs';
 import { JsonViewerComponent } from '../../../../../core/src/shared/components/json-viewer/json-viewer.component';
 import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
-import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { ServiceCatalogDataService, SignalSource } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -313,8 +313,9 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
         // Re-issue the one-shot fetch so the unbound app drops out, or so
         // the list shows whether it did after an unknown result.
         this.bindingsSource.set(this.serviceCatalog.serviceBindingsForInstance(this.cfGuid, this.siGuid));
-        if (outcome === 'unknown') {
-          this.snackBar.error(unknownOutcomeMessage(`Unbind "${row.appName}"`, 'This page'));
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(`Unbind "${row.appName}"`, 'This page', how));
         }
       } catch (err: unknown) {
         this.snackBar.error(`Unbind failed: ${extractHttpErrorMessage(err)}`);

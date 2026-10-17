@@ -4,7 +4,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it, vi, type MockInstance } from 'vitest';
 import type { StratosJob } from './async-job.types';
 import { StratosJobError } from './async-job.types';
-import { writeWithJob } from './write-with-job';
+import { setJobTrackingLimit, writeWithJob } from './write-with-job';
 
 describe('writeWithJob', () => {
   let http: HttpClient;
@@ -251,7 +251,10 @@ describe('writeWithJob', () => {
     const processing = (id: string): StratosJob => ({ id, kind: 'cf.app.delete', state: 'PROCESSING', startedAt: '', updatedAt: '' });
     const complete = (id: string): StratosJob => ({ id, kind: 'cf.app.delete', state: 'COMPLETE', startedAt: '', updatedAt: '' });
 
+    let handedOffAt = 0;
+    const startedAt = () => handedOffAt;
     const handOff = async (id: string, opts: Parameters<typeof writeWithJob>[2] = noDelay) => {
+      handedOffAt = Date.now();
       const promise = writeWithJob(http, http.delete('/pp/v1/cf/apps/cnsi/app1', { observe: 'response' }), opts);
       ctrl.expectOne('/pp/v1/cf/apps/cnsi/app1').flush(processing(id), { status: 202, statusText: 'Accepted' });
       await tick();
@@ -278,6 +281,45 @@ describe('writeWithJob', () => {
         ctrl.match('/pp/v1/stratos/jobs/job-b').forEach(r => r.flush(complete('job-b')));
         await vi.advanceTimersByTimeAsync(0);
         expect((await promise).status).toBe('COMPLETE');
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
+    it('stops following at the tracking limit and says the job is still running', async () => {
+      vi.useFakeTimers();
+      setJobTrackingLimit(2);
+      try {
+        const { promise } = await handOff('job-lim', {});
+        let polls = 0;
+        let settled = false;
+        void promise.then(() => { settled = true; });
+        for (let step = 0; !settled && step < 200; step++) {
+          for (const req of ctrl.match('/pp/v1/stratos/jobs/job-lim')) {
+            polls++;
+            req.flush(processing('job-lim'));
+          }
+          await vi.advanceTimersToNextTimerAsync();
+        }
+        expect(await promise).toEqual({ status: 'UNKNOWN', state: undefined, jobId: 'job-lim', stillRunning: true });
+        expect(Date.now() - startedAt()).toBe(2 * 60_000);   // the last check lands on the limit
+        expect(polls).toBeGreaterThan(20);
+      } finally {
+        setJobTrackingLimit(60);
+        vi.useRealTimers();
+      }
+    });
+
+    it('stops at the caller\'s deadline when one is given', async () => {
+      vi.useFakeTimers();
+      try {
+        const { promise } = await handOff('job-d', { deadlineAt: Date.now() + 5_000 });
+        for (let step = 0; step < 50; step++) {
+          ctrl.match('/pp/v1/stratos/jobs/job-d').forEach(r => r.flush(processing('job-d')));
+          await vi.advanceTimersToNextTimerAsync();
+        }
+        expect((await promise).stillRunning).toBe(true);
+        expect(Date.now() - startedAt()).toBe(5_000);
       } finally {
         vi.useRealTimers();
       }

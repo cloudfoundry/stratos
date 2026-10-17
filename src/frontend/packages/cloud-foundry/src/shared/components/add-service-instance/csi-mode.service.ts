@@ -6,8 +6,8 @@ import { Observable, defer, firstValueFrom, from } from 'rxjs';
 import { SpaceScopedService } from '../../../../../cloud-foundry/src/features/service-catalog/services-helper';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
-import type { AsyncJobStatus } from '../../../services/async-jobs/async-job.types';
-import { unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
+import type { AsyncJobResult } from '../../../services/async-jobs/async-job.types';
+import { UnknownHow, unknownHow, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { extractHttpErrorMessage } from '@stratosui/store';
@@ -60,13 +60,14 @@ const defaultViewDetail = {
 };
 
 /**
- * How an app bind requested by the wizard ended. `unknown`: the bind ended
- * but its result could not be determined, so it must not be reported as
+ * How an app bind requested by the wizard ended. `unknown`: nobody can say
+ * whether it happened (it ended with no known result, or was still running
+ * in CF when Stratos stopped following it), so it must not be reported as
  * bound (nor as failed).
  */
 export interface BindResult {
   success: boolean;
-  unknown?: boolean;
+  unknown?: UnknownHow;
   message?: string;
 }
 
@@ -211,7 +212,7 @@ export class CsiModeService {
     if (params && Object.keys(params).length > 0) {
       body['parameters'] = params;
     }
-    const fireBind = async (): Promise<AsyncJobStatus> => {
+    const fireBind = async (): Promise<AsyncJobResult<unknown>> => {
       const result = await writeWithJob<unknown>(
         this.http,
         this.http.post(`/pp/v1/cf/service_bindings/${cfGuid}`, body, { observe: 'response' }),
@@ -223,11 +224,11 @@ export class CsiModeService {
       // serviceInstanceReducer cross-entity update as cache invalidation;
       // covers both the inline and the background-retry bind paths.
       this.endpointDataRegistry.peek(cfGuid)?.applyCascade('serviceBinding.create');
-      return result.status;
+      return result;
     };
-    // UNKNOWN: the bind ended but nobody can say whether it happened.
-    const outcome = (status: AsyncJobStatus): BindResult =>
-      status === 'UNKNOWN' ? { success: false, unknown: true } : { success: true };
+    // UNKNOWN: nobody can say whether the bind happened.
+    const outcome = (result: AsyncJobResult<unknown>): BindResult =>
+      result.status === 'UNKNOWN' ? { success: false, unknown: unknownHow(result) } : { success: true };
 
     try {
       return outcome(await fireBind());
@@ -262,7 +263,7 @@ export class CsiModeService {
     siGuid: string,
     cfGuid: string,
     appGuid: string,
-    fireBind: () => Promise<AsyncJobStatus>,
+    fireBind: () => Promise<AsyncJobResult<unknown>>,
     waitMs: number,
   ): Promise<void> {
     this.snackBar.open(
@@ -273,9 +274,10 @@ export class CsiModeService {
     const settled = await this.waitForServiceInstanceReady(cfGuid, siGuid, waitMs);
     if (settled.state === 'succeeded') {
       try {
-        if (await fireBind() === 'UNKNOWN') {
+        const bound = await fireBind();
+        if (bound.status === 'UNKNOWN') {
           this.snackBar.error(unknownOutcomeMessage(
-            'Service instance ready. Binding it to the app', 'The application\'s Services tab'));
+            'Service instance ready. Binding it to the app', 'The application\'s Services tab', unknownHow(bound)));
         } else {
           this.snackBar.open(`Service instance bound to app.`, undefined, { duration: 10_000 });
         }

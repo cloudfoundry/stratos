@@ -28,7 +28,7 @@ import {
 } from '../../../../../../../shared/signal-list-configs/app-route/cf-app-routes-signal-config.service';
 import { AppRouteActionsService } from '../../../../../../../shared/services/app-route-actions.service';
 import type { StRoute } from '../../../../../../../services/endpoint-data/stratos-types';
-import { unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../../../../services/async-jobs/unknown-outcome-message';
 import { AppDetailDataService } from '../../../../../app-detail-data.service';
 
 /**
@@ -186,10 +186,10 @@ export class RoutesTabComponent implements OnInit, OnDestroy {
               if (outcome === 'deleted') {
                 this.dataService.removeRoute(row.guid);
               } else {
-                // Ended with an unknown result: keep the row and re-read
+                // Unknown result (ended, or still running in CF): keep the row and re-read
                 // the routes so the tab shows whether it is still there.
                 void this.dataService.refresh('routes');
-                this.snackBar.error(unknownOutcomeMessage(`Delete "${label}"`, 'The Routes tab'));
+                this.snackBar.error(unknownOutcomeMessage(`Delete "${label}"`, 'The Routes tab', unknownHowOf(outcome) ?? 'ended'));
               }
             } catch (err: any) {
               this.snackBar.error(`Delete failed: ${err?.message ?? err}`);

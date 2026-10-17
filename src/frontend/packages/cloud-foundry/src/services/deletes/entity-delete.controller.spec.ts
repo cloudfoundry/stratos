@@ -287,6 +287,21 @@ describe('EntityDeleteController', () => {
         expect(await collectStates(ctrl, ORG_REQUEST)).toEqual(['start', 'unknown']);
       });
 
+      it('says when the delete was still running in CF as Stratos stopped following it', async () => {
+        TestBed.configureTestingModule({
+          providers: [
+            provideZonelessChangeDetection(),
+            EntityDeleteController,
+            { provide: WRITE_WITH_JOB, useValue: async () => ({ status: 'UNKNOWN', state: undefined, stillRunning: true } as AsyncJobResult<void>) },
+            { provide: EndpointDataRegistry, useValue: { peek: vi.fn(() => makeEds()) } },
+            { provide: SignalRelationFetcherService, useValue: { snapshotRegistry: () => indexDescriptors(CF_RELATION_DESCRIPTORS) } },
+            { provide: StratosDiagnostics, useValue: { emitCounter: vi.fn() } },
+          ],
+        });
+        const terminal = await TestBed.inject(EntityDeleteController).delete(ORG_REQUEST).done;
+        expect(terminal).toMatchObject({ state: 'unknown', stillRunning: true });
+      });
+
       it('marks the entity\'s own slice and its relation-graph slices stale', async () => {
         const eds = makeEds();
         const { ctrl } = configureUnknown(eds);

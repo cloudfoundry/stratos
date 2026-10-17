@@ -11,7 +11,7 @@ import { CloudFoundryEndpointService } from '../../features/cf/services/cloud-fo
 import { AppStatsDataRegistry } from '../../services/endpoint-data/app-stats-data.registry';
 import { CfAppsSignalConfigService } from '../signal-list-configs/app/cf-apps-signal-config.service';
 import type { JobStage, StratosJob } from '../../services/async-jobs/async-job.types';
-import { unknownOutcomeMessage } from '../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../services/async-jobs/unknown-outcome-message';
 import type { DeleteOutcome } from '../../services/deletes/delete-event.types';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
@@ -168,9 +168,9 @@ export class AppApplicationActionsService {
   private runLifecycleAction(
     verb: 'start' | 'stop' | 'restart' | 'restage' | 'delete',
     target: string,
-    // Resolves 'unknown' when the op ended with a result nobody can
-    // determine (only delete reports that today).
-    action: (opts: { onProgress: (job: StratosJob) => void }) => Promise<void | DeleteOutcome>,
+    // Resolves 'unknown' or 'still-running' when nobody can say how the op
+    // ended (see unknownHowOf).
+    action: (opts: { onProgress: (job: StratosJob) => void }) => Promise<void | undefined | DeleteOutcome>,
     onAfter?: () => void,
   ): void {
     const { cfGuid, appGuid } = this.applicationService;
@@ -214,13 +214,15 @@ export class AppApplicationActionsService {
 
     void action({ onProgress })
       .then((result) => {
-        if (result === 'unknown') {
-          // Ended, result unknown: nothing may act as if it worked (no row
+        const how = unknownHowOf(result);
+        if (how) {
+          // Result unknown (ended, or still running in CF when Stratos
+          // stopped following it): nothing may act as if it worked (no row
           // eviction, no navigating away). Say so and re-read the app.
           const leadIn = `${verb[0].toUpperCase()}${verb.slice(1)} "${parsedTarget.app}"`;
           this.appendLog({
             at: new Date(), verb: lifecycleVerb, target: parsedTarget, event: 'unknown',
-            error: { code: '', message: unknownOutcomeMessage(leadIn, 'This page') },
+            error: { code: '', message: unknownOutcomeMessage(leadIn, 'This page', how) },
           });
           this.refreshAppStats();
           void this.dataService.refresh('all');

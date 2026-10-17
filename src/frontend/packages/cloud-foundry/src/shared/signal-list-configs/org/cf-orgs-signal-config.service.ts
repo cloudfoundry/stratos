@@ -197,7 +197,7 @@ export class CfOrgsSignalConfigService {
       deleteName: orgName,
       path: `/pp/v1/cf/orgs/${cnsiGuid}/${orgGuid}`,
     });
-    if (outcome === 'unknown') {
+    if (outcome !== 'deleted') {
       await this.refresh();
     }
     return outcome;

@@ -25,7 +25,7 @@ import { CfOrgsSignalConfigService } from '../../../../shared/signal-list-config
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrg } from '../../../../services/endpoint-data/stratos-types';
-import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
+import { unknownHowOf, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 
 // Signal-native replacement for CloudFoundryOrganizationsComponent. Reuses
 // SignalListComponent + the app-wall column-kind vocabulary (link, dot,
@@ -219,8 +219,9 @@ export class CloudFoundryOrganizationsSignalComponent {
     const runAction = async (label: string, op: () => Promise<unknown>, name?: string) => {
       try {
         const outcome = await op();
-        if (outcome === 'unknown') {
-          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Organizations list'));
+        const how = unknownHowOf(outcome);
+        if (how) {
+          this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Organizations list', how));
         }
       } catch (err: any) {
         this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
