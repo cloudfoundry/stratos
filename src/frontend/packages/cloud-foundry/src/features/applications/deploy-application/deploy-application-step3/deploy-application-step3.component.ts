@@ -78,12 +78,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private initDeployer() {
     const status$ = this.deployer.status$.asObservable();
 
-    // The template reads plain fields (deployer.streamTitle, deployer.deploying)
-    // which are mutated directly by the deployer's websocket handlers, not
-    // through observables. Under OnPush + zoneless CD, those mutations don't
-    // trigger a re-render on their own. Subscribe to status$ (which IS emitted
-    // via the signal wrapper every time updateStatus() is called) and force a
-    // view check so the title bar and spinner reflect the current state.
+    // The template reads a plain field (deployer.deploying) which is mutated
+    // directly by the deployer's websocket handlers, not through observables.
+    // Under OnPush + zoneless CD, that mutation doesn't trigger a re-render on
+    // its own. Subscribe to status$ (which IS emitted via the signal wrapper
+    // every time updateStatus() is called) and force a view check so the
+    // spinner reflects the current state. The title is a signal.
     this.subscriptions.push(
       status$.subscribe(() => this.cdr.markForCheck())
     );
@@ -132,7 +132,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
     this.subscriptions.push(
       status$.pipe(
-        map(status => !status.deploying || status.deploying && !this.deployer.streamTitle)
+        map(status => !status.deploying || status.deploying && !this.deployer.streamTitle())
       ).subscribe(v => this.showOverlaySubject.next(v))
     );
 
@@ -243,7 +243,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.busy = true;
     // Under OnPush + zoneless CD, assigning this.deployer to a plain field
     // does not trigger a view update. Force one so the template (which
-    // reads deployer.streamTitle and renders the log-viewer under an @if
+    // reads deployer.streamTitle() and renders the log-viewer under an @if
     // deployer check) actually picks up the new reference.
     this.cdr.markForCheck();
   };

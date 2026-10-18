@@ -18,7 +18,7 @@ describe('DeployApplicationDeployer', () => {
     deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_NO_MANIFEST, message: reason });
     deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_FAILURE, message: reason });
 
-    expect(deployer.streamTitle).toBe('Deploy Failed - No manifest present!');
+    expect(deployer.streamTitle()).toBe('Deploy Failed - No manifest present!');
     expect(deployer.status$().errorMsg).toContain('enter an application name');
   });
 

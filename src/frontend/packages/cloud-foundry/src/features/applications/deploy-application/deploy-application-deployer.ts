@@ -1,4 +1,4 @@
-import { EnvironmentInjector } from '@angular/core';
+import { EnvironmentInjector, signal } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { take, catchError, filter, map, share, switchMap, tap } from 'rxjs/operators';
@@ -76,7 +76,7 @@ export class DeployApplicationDeployer {
   connectSub!: Subscription;
   updateSub!: Subscription;
   msgSub!: Subscription;
-  streamTitle = 'Preparing...';
+  streamTitle = signal('Preparing...');
   // strict: populated from the MANIFEST websocket event before any read
   appData!: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
@@ -353,7 +353,7 @@ export class DeployApplicationDeployer {
   processWebSocketMessage = (log: any) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
-        this.streamTitle = 'Starting deployment...';
+        this.streamTitle.set('Starting deployment...');
         // This info is will be used to retrieve the app Id
         this.appData = JSON.parse(log.message).Applications[0];
         break;
@@ -362,13 +362,13 @@ export class DeployApplicationDeployer {
         this.applicationGuid$.next(log.message);
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
-        this.streamTitle = 'Deploying...';
+        this.streamTitle.set('Deploying...');
         this.deploying = true;
         this.updateStatus();
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         // Done
-        this.streamTitle = 'Deployed';
+        this.streamTitle.set('Deployed');
         this.deploying = false;
         this.updateStatus();
         break;
@@ -468,7 +468,7 @@ export class DeployApplicationDeployer {
     }
     this.closeReported = true;
     if (title) {
-      this.streamTitle = title;
+      this.streamTitle.set(title);
     }
     this.deploying = false;
     this.updateStatus(

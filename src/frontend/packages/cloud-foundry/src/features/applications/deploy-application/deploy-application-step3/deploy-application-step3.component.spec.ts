@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ApplicationRef, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { NEVER } from 'rxjs';
 
@@ -40,6 +40,21 @@ describe('DeployApplicationStep3Component', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows the manifest title before the push starts', async () => {
+    component.onEnter(undefined as any);
+    await fixture.whenStable();
+    const deployer = component.deployer;
+    deployer.processWebSocketMessage({
+      type: SocketEventTypes.MANIFEST,
+      message: JSON.stringify({ Applications: [{ Name: 'a' }] }),
+    });
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('.font-semibold').textContent.trim()).toBe('Starting deployment...');
+    // The app GUID lookup waits for the push to finish
+    TestBed.inject(HttpTestingController).expectNone(() => true);
   });
 
   it('reports a deploy that finishes after the user leaves the page', async () => {
