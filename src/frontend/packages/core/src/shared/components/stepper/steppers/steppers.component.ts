@@ -75,6 +75,20 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   // Mirrors `steps` so firstStepEntry re-runs whenever the steps re-filter.
   private readonly visibleSteps = signal<StepComponent[]>([]);
+  // The projected steps, set once in ngAfterContentInit.
+  private readonly contentSteps = signal<StepComponent[]>([]);
+
+  // A legacy [hidden] change re-filters through hiddenChange, but a
+  // signalHandle.hidden change emits nothing. Reading `hidden` here tracks
+  // each handle's signal, so the step list re-filters when one flips.
+  private readonly signalHiddenSync = effect(() => {
+    const visible = this.contentSteps().filter(step => !step.hidden);
+    untracked(() => {
+      if (visible.length !== this.steps.length || visible.some((step, i) => step !== this.steps[i])) {
+        this.filterSteps();
+      }
+    });
+  });
 
   // Delivers the first visible step's onEnter once that step exists and is
   // unblocked. setActive(0) cannot do it: no step is visible until
@@ -148,6 +162,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   ngAfterContentInit() {
     this.allSteps = this.stepComponents.toArray();
+    this.contentSteps.set(this.allSteps);
 
     this.allSteps.forEach((step => {
       this.hiddenSubs.push(step.hiddenChange.subscribe((_hidden) => {

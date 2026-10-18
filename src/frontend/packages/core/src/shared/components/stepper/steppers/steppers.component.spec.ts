@@ -345,3 +345,84 @@ describe('SteppersComponent — first step entry', () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 });
+
+// A step can be hidden through its signal handle instead of the legacy
+// [hidden] input. Only the input emits hiddenChange, so the stepper must
+// also follow the handle's hidden signal or its step list goes stale.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [signalHandle]="firstHandle"></app-step>
+      <app-step title="Two" [signalHandle]="secondHandle"></app-step>
+    </app-steppers>
+  `,
+})
+class SignalHiddenHostComponent {
+  entered: string[] = [];
+  firstHidden = signal(false);
+  secondHidden = signal(false);
+  firstHandle: SignalStepHandle = {
+    valid: signal(true),
+    hidden: this.firstHidden,
+    onEnter: () => { this.entered.push('one'); },
+  };
+  secondHandle: SignalStepHandle = {
+    valid: signal(true),
+    hidden: this.secondHidden,
+    onEnter: () => { this.entered.push('two'); },
+  };
+}
+
+describe('SteppersComponent — signal-handle hidden', () => {
+  let hostFixture: ComponentFixture<SignalHiddenHostComponent>;
+  let host: SignalHiddenHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const titles = () => steppers().steps.map(step => step.title);
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [SignalHiddenHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(SignalHiddenHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  it('re-filters the step list when a handle hidden signal flips', async () => {
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['Two']);
+
+    host.firstHidden.set(false);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One', 'Two']);
+    expect(hostFixture.nativeElement.textContent).toContain('One');
+
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One']);
+  });
+
+  it('enters the first step once it is shown through its handle', async () => {
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual([]);
+    expect(host.entered).toEqual([]);
+
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One', 'Two']);
+    expect(host.entered).toEqual(['one']);
+  });
+});
