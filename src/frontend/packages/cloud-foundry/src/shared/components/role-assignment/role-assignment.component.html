@@ -105,6 +105,18 @@
           <app-busy class="text-primary" size="1.25rem" context="role-assignment"></app-busy>
           Loading spaces…
         </div>
+      } @else if (spacesFailedFor(org.metadata.guid)) {
+        <div role="alert" class="flex items-center gap-3 py-2 text-sm text-content-text">
+          <span class="text-danger">Could not load spaces.</span>
+          <button
+            type="button"
+            data-testid="space-retry"
+            (click)="loadSpacesFor(org.metadata.guid)"
+            class="px-2 py-1 text-xs rounded border border-content-border bg-content-bg text-content-text hover:bg-primary-50"
+          >
+            Retry
+          </button>
+        </div>
       } @else {
         <input
           type="text"

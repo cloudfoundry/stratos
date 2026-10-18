@@ -63,16 +63,23 @@ describe('RoleAssignmentComponent', () => {
     }).compileComponents();
   }
 
-  /** Default harness, but with fetchOrgs driven by the test. */
-  async function setupFetchOrgs(fetchOrgs: () => Observable<unknown>): Promise<void> {
+  /** Default harness, but with fetchOrgs (and optionally fetchSpacesForOrg) driven by the test. */
+  async function setupFetchOrgs(
+    fetchOrgs: () => Observable<unknown>,
+    fetchSpacesForOrg: () => Observable<unknown> = () => of([]),
+  ): Promise<void> {
     await TestBed.configureTestingModule({
       imports: [RoleAssignmentComponent],
       providers: [
         provideZonelessChangeDetection(),
         ...provideRoleAssignmentTestDeps(defaultCfg),
-        { provide: CfRolesService, useValue: { fetchOrgs, fetchSpacesForOrg: () => of([]) } },
+        { provide: CfRolesService, useValue: { fetchOrgs, fetchSpacesForOrg } },
       ],
     }).compileComponents();
+  }
+
+  function orgSection(fixture: ComponentFixture<RoleAssignmentComponent>, orgGuid: string): HTMLElement {
+    return fixture.nativeElement.querySelector(`[data-org="${orgGuid}"]`);
   }
 
   function picker(fixture: ComponentFixture<RoleAssignmentComponent>): HTMLElement {
@@ -765,13 +772,6 @@ describe('RoleAssignmentComponent', () => {
     expect(names).toEqual(['Org One']);
   });
 
-  it('E: orgsLoading is false after ngOnInit resolves', async () => {
-    await setup();
-    const fixture = await createFixture();
-
-    const component = fixture.componentInstance;
-    // After the synchronous of() from the harness resolves orgsLoading must be false
-    expect(component.orgsLoading()).toBe(false);
   it('says there are no orgs to manage when the list is empty and nothing is searched', async () => {
     await setupFetchOrgs(() => of([]));
     const fixture = await createFixture();
@@ -790,5 +790,46 @@ describe('RoleAssignmentComponent', () => {
     expect(picker(fixture).textContent).toContain('No organizations match.');
     expect(picker(fixture).textContent).not.toContain('You have no organizations');
   });
+
+  it('shows an error and clears the space spinner when the space fetch fails', async () => {
+    await setupFetchOrgs(() => of([o1]), serverError);
+    const fixture = await createFixture();
+
+    fixture.componentInstance.pickOrg(o1);
+    await fixture.whenStable();
+
+    expect(fixture.componentInstance.spacesLoadingFor('o1')).toBe(false);
+    const section = orgSection(fixture, 'o1');
+    expect(section.textContent).not.toContain('Loading spaces');
+    expect(section.textContent).not.toContain('No spaces in this organization.');
+    expect(section.querySelector('[role="alert"]')?.textContent).toContain('Could not load spaces.');
+  });
+
+  it('space retry fetches the spaces again after a failure', async () => {
+    const results = [serverError(), of([space1])];
+    let calls = 0;
+    await setupFetchOrgs(() => of([o1]), () => results[calls++]);
+    const fixture = await createFixture();
+    fixture.componentInstance.pickOrg(o1);
+    await fixture.whenStable();
+
+    const retry = orgSection(fixture, 'o1').querySelector<HTMLButtonElement>('[data-testid="space-retry"]');
+    expect(retry).toBeTruthy();
+    retry!.click();
+    await fixture.whenStable();
+
+    expect(calls).toBe(2);
+    expect(orgSection(fixture, 'o1').querySelector('[role="alert"]')).toBeNull();
+    expect(fixture.componentInstance.spacesFor('o1')).toEqual([space1]);
+    expect(orgSection(fixture, 'o1').querySelector('[data-space="s1"]')).toBeTruthy();
+  });
+
+  it('E: orgsLoading is false after ngOnInit resolves', async () => {
+    await setup();
+    const fixture = await createFixture();
+
+    const component = fixture.componentInstance;
+    // After the synchronous of() from the harness resolves orgsLoading must be false
+    expect(component.orgsLoading()).toBe(false);
   });
 });

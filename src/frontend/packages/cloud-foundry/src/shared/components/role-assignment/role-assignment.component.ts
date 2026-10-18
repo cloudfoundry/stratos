@@ -122,6 +122,12 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     return this.spacesLoading().has(orgGuid);
   }
 
+  /** Orgs whose last space fetch failed (the section shows an error with a retry). */
+  private readonly spacesFailed = signal<Set<string>>(new Set());
+  spacesFailedFor(orgGuid: string): boolean {
+    return this.spacesFailed().has(orgGuid);
+  }
+
   /** Permission map: orgGuid → can edit */
   private readonly canEditByOrg = signal<Record<string, boolean>>({});
 
@@ -395,15 +401,26 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
 
   // --- Space loading ---
 
-  private loadSpacesFor(orgGuid: string): void {
+  /** Also the section's Retry: a failed fetch leaves spacesByOrg unset, so this fetches again. */
+  protected loadSpacesFor(orgGuid: string): void {
     if (this.spacesByOrg()[orgGuid]) {
       return; // already loaded
     }
     this.spacesLoading.update(s => { const next = new Set(s); next.add(orgGuid); return next; });
-    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe(spaces => {
-      this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
-      this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
-      this.resolveSpacePermissions(orgGuid, spaces);
+    this.spacesFailed.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
+    // The spinner clears on every outcome: a value, an error, or completion without a value.
+    const done = () => this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
+    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe({
+      next: spaces => {
+        this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
+        done();
+        this.resolveSpacePermissions(orgGuid, spaces);
+      },
+      error: () => {
+        this.spacesFailed.update(s => { const next = new Set(s); next.add(orgGuid); return next; });
+        done();
+      },
+      complete: done,
     });
     this.subs.add(spaceSub);
   }
