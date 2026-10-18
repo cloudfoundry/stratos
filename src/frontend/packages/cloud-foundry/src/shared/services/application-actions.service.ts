@@ -315,6 +315,18 @@ export class AppApplicationActionsService {
     });
   }
 
+  // Polls every 100 ms: the names are a CF round trip or two away.
+  private async orgAndSpaceLoaded(timeoutMs: number): Promise<void> {
+    const settled = () => {
+      const errors = this.dataService.errors();
+      // A failed space fetch also leaves the org unfetched.
+      return !!errors.space || (!!this.dataService.space() && (!!this.dataService.org() || !!errors.org));
+    };
+    for (let waited = 0; !settled() && waited < timeoutMs; waited += 100) {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
+  }
+
   // Parse the target string produced by buildDialog:
   // "<appName> on <cfName> / <orgName> / <spaceName>"
   private parseTarget(target: string): { app: string; cf: string; org: string; space: string } {
@@ -510,6 +522,14 @@ export class AppApplicationActionsService {
     bindings: { guid: string }[],
     preResolvedTarget?: { appName: string; endpointName: string; orgName: string; spaceName: string },
   ): Promise<void> {
+    // On a direct load into the delete wizard the org and space names come
+    // from the data service, which fetches the space and then the org after
+    // the app; a quick Confirm gets here first. The dialog and the progress
+    // overlay are built once, so wait for both names - but not past a
+    // failed fetch or 10 s.
+    if (!preResolvedTarget?.orgName || !preResolvedTarget?.spaceName) {
+      await this.orgAndSpaceLoaded(10_000);
+    }
     const { cfg, target } = this.buildDialog('Delete', 'Are you sure you want to delete', 'Delete', preResolvedTarget);
     const appName = preResolvedTarget?.appName ?? this.parseTarget(target).app;
     this.confirmDialog.open(cfg, () => {

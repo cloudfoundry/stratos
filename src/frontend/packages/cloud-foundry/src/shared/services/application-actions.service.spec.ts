@@ -57,6 +57,7 @@ function makeDataServiceStub(opts: { instances?: number, runningStats?: number }
     app: signal({ entity: { name: 'test-app', instances } }),
     org: signal({ guid: 'test-org-guid', name: 'test-org' }),
     space: signal({ guid: 'test-space-guid', name: 'test-space' }),
+    errors: signal<Record<string, unknown>>({}),
     stats: signal(stats),
     summary: signal({ memory: 256, disk_quota: 512 }),
     lastPolledAt: signal(new Date()),
@@ -579,6 +580,54 @@ describe('AppApplicationActionsService', () => {
     expect(cfg.message).toContain('org "test-org"');
     expect(cfg.message).toContain('space "test-space"');
     expect(cfg.message).not.toContain('"?"');
+  });
+
+  describe('on a direct load into the delete wizard, before the space and org have loaded', () => {
+    const later = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    let data: ReturnType<typeof makeDataServiceStub>;
+    const coldDelete = () => svc.deleteWithCleanup([], [], { appName: 'cold-app', endpointName: 'cold-cf', orgName: '', spaceName: '' });
+
+    beforeEach(() => {
+      data = TestBed.inject(AppDetailDataService) as unknown as ReturnType<typeof makeDataServiceStub>;
+      data.space.set(undefined as never);
+      data.org.set(undefined as never);
+    });
+
+    it('waits for them, then names both in the dialog and the progress overlay', async () => {
+      void coldDelete();
+      await later(150);
+      expect(confirmDialogStub.open).not.toHaveBeenCalled();
+
+      data.space.set({ guid: 's', name: 'late-space' });
+      data.org.set({ guid: 'o', name: 'late-org' });
+      await later(150);
+      const [cfg, confirm] = confirmDialogStub.open.mock.calls[0] as [{ message: string }, () => void];
+      expect(cfg.message).toContain('org "late-org" / space "late-space"');
+      confirm();
+      await tick();
+      expect(svc.currentTarget()).toMatchObject({ org: 'late-org', space: 'late-space' });
+    });
+
+    it('asks without them once the space fetch has failed', async () => {
+      void coldDelete();
+      data.errors.set({ space: { code: 'FETCH_ERROR', message: 'no space' } });
+      await later(150);
+      const cfg = confirmDialogStub.open.mock.calls[0][0] as { message: string };
+      expect(cfg.message).toContain('org "?" / space "?"');
+    });
+
+    it('asks without them after 10 s', async () => {
+      vi.useFakeTimers();
+      try {
+        void coldDelete();
+        await vi.advanceTimersByTimeAsync(9_900);
+        expect(confirmDialogStub.open).not.toHaveBeenCalled();
+        await vi.advanceTimersByTimeAsync(200);
+        expect(confirmDialogStub.open).toHaveBeenCalledOnce();
+      } finally {
+        vi.useRealTimers();
+      }
+    });
   });
 
   it('keeps caller-supplied names when the target is fully resolved', async () => {
