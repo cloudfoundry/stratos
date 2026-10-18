@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { HttpClient } from '@angular/common/http';
 import { AfterContentInit, Component, DestroyRef, ElementRef, Injector, afterNextRender, computed, effect, input, signal, viewChild, ChangeDetectionStrategy, inject } from '@angular/core';
 import { AbstractControl, ValidationErrors, ValidatorFn, Validators, ReactiveFormsModule, FormsModule, FormControl, FormGroup } from '@angular/forms';
@@ -73,7 +73,6 @@ type WaitAnswer = number | 'background';
     AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
-    MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     SchemaFormComponent
