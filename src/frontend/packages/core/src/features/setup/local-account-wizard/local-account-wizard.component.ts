@@ -2,16 +2,13 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, inject, Injector, runInInjectionContext, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
-import {
-  AuthState,
-} from '@stratosui/store';
-import { combineLatest, Observable, firstValueFrom } from 'rxjs';
-import { delay, filter, map, take } from 'rxjs/operators';
+import { AuthDataService } from '@stratosui/store';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
 import { APP_TITLE } from '../../../core/core.types';
-import { AuthSignalService } from '../../../core/signals/auth-signal.service';
-import { UaaSetupSignalService } from '../../../core/signals/uaa-setup-signal.service';
-import { LocalAdminSetupData, UaaSetupDataService, UaaSetupState } from '../../../core/uaa-setup-data.service';
+import { LocalAdminSetupData, UaaSetupDataService } from '../../../core/uaa-setup-data.service';
+import { SETUP_NOT_CONFIRMED_MESSAGE, waitForSetupConfirmed } from '../setup-confirmation';
 import { SignalStepHandle } from '../../../shared/components/stepper/step/step.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
@@ -47,14 +44,9 @@ selector: 'app-local-account-wizard',
 export class LocalAccountWizardComponent implements OnInit {
 
   private injector = inject(Injector);
-  private authSignals = inject(AuthSignalService);
-  private uaaSetupSignals = inject(UaaSetupSignalService);
+  private authData = inject(AuthDataService);
   private uaaSetupData = inject(UaaSetupDataService);
   public title = inject(APP_TITLE);
-
-  // Bridge signals → observables in injection context for use in `next` handler.
-  private uaaSetup$ = toObservable(this.uaaSetupSignals.uaaSetup);
-  private auth$ = toObservable(this.authSignals.auth);
 
   passwordForm!: FormGroup;
   validateLocalAuthForm!: Observable<boolean>;
@@ -82,14 +74,7 @@ export class LocalAccountWizardComponent implements OnInit {
     );
     this.signalHandle = {
       valid: validSignal,
-      submit: async () => {
-        const result = await firstValueFrom(this.next() as Observable<{ success: boolean; message?: string }>);
-        if (!result.success) {
-          throw new Error(result.message || 'Failed to apply local account setup');
-        }
-        // Success path triggers a hard window reload inside `next()`; no
-        // router navigation needed here.
-      },
+      submit: () => this.next(),
     };
   }
 
@@ -110,40 +95,32 @@ export class LocalAccountWizardComponent implements OnInit {
     };
   }
 
-  next = () => {
+  next = async (): Promise<void> => {
     const data: LocalAdminSetupData = {
       local_admin_password: this.passwordForm.controls.adminPassword.value,
     };
 
     this.applyingSetup.set(true);
-    void this.uaaSetupData.saveConfig(data);
-    return combineLatest([this.uaaSetup$, this.auth$]).pipe(
-      filter(([uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
-        return !!auth && !(uaa.settingUp || auth.verifying);
-      }),
-      delay(2000),
-      take(10),
-      filter(([_uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
-        const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
-        if (!validUAASessionData) {
-          this.authSignals.verifySession(true, true);
-        }
-        return validUAASessionData;
-      }),
-      map(([uaa]: [UaaSetupState, AuthState | undefined]) => {
-        if (!uaa.error) {
-          // Do a hard reload of the app
-          const loc = window.location;
-          const reload = loc.protocol + '//' + loc.host;
-          window.location.assign(reload);
-        } else {
-          this.applyingSetup.set(false);
-        }
-        return {
-          success: !uaa.error,
-          message: uaa.message
-        };
-      }));
+    try {
+      // Await this save and read the state it left behind rather than a
+      // replayed stream, which still holds the previous state.
+      await this.uaaSetupData.saveConfig(data);
+      const saved = this.uaaSetupData.state();
+      if (saved.error) {
+        throw new Error(saved.message || 'Failed to apply local account setup');
+      }
+      if (!await waitForSetupConfirmed(this.authData)) {
+        throw new Error(SETUP_NOT_CONFIRMED_MESSAGE);
+      }
+    } catch (err) {
+      // Clear the overlay so the stepper's error snackbar is visible.
+      this.applyingSetup.set(false);
+      throw err;
+    }
+    // Do a hard reload of the app
+    const loc = window.location;
+    const reload = loc.protocol + '//' + loc.host;
+    window.location.assign(reload);
   };
 
 }
