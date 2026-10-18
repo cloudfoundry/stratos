@@ -9,16 +9,22 @@
   you are; a failure stays on screen until dismissed. Leaving the wizard
   early hands the operation off the same way.
 - A service instance create or update handed off by the wizard is still
-  reported after a page reload or a new sign-in: Stratos says it is
-  still running and for how long, then how it ended. Signing out while
-  one runs says its status will show after you sign in. With several
-  tabs open, one tab reports it; another takes over if that tab closes.
+  reported after a page reload or a new sign-in, signing out included:
+  Stratos says it is still running and for how long, then how it ended.
+  Only the wizard's create and update are kept this way; a bind, key,
+  delete or bulk operation that is still running when the page reloads
+  is not reported afterwards. If the session ends while one runs and the
+  page stays open (the session expired, or you signed out in another
+  tab), Stratos says its status will show after you sign in. With
+  several tabs open, one tab reports it; another takes over if that tab
+  closes.
   The "still running" or "carries on in the background" message is taken
   down when the message saying how it ended appears.
 - Stratos stops following a background operation (a slow broker, a
   delete Cloud Foundry runs as a job) after a set time, 60 minutes by
   default, and says it is still running in Cloud Foundry rather than
-  that it failed or that its result is unknown. Set
+  that it failed or that its result is unknown. A restage or rollback is
+  followed to the end, since Stratos itself moves it along. Set
   ASYNC_JOB_TRACKING_LIMIT_IN_MINS (Helm: console.ui.jobTrackingLimitMins)
   to change it; under 1 uses 1, over 360 logs a warning, 1440 or more
   uses 360.
