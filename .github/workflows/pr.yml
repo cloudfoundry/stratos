@@ -217,7 +217,7 @@ jobs:
       - name: Get Bun cache directory
         id: bun-cache-dir
         shell: bash
-        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+        run: echo "dir=$(bun pm cache)" >> "${GITHUB_OUTPUT}"
 
       - name: Cache Bun dependencies
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -277,7 +277,7 @@ jobs:
         if: needs.changes.outputs.non_stb == 'true'
         id: bun-cache-dir
         shell: bash
-        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+        run: echo "dir=$(bun pm cache)" >> "${GITHUB_OUTPUT}"
 
       - name: Cache Bun dependencies
         if: needs.changes.outputs.non_stb == 'true'
@@ -379,7 +379,7 @@ jobs:
       - name: Get Bun cache directory
         id: bun-cache-dir
         shell: bash
-        run: echo "dir=$(bun pm cache)" >> ${GITHUB_OUTPUT}
+        run: echo "dir=$(bun pm cache)" >> "${GITHUB_OUTPUT}"
 
       - name: Cache Bun dependencies
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
