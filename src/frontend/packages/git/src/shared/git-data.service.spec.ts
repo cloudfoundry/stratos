@@ -191,6 +191,36 @@ describe('GitDataService', () => {
       httpMock.expectOne('https://api.github.com/ep-1/repos/org/repo/commits/abc').flush({ sha: 'abc' });
     });
 
+    // A branch's head moves on every push. A plain read shares the cached
+    // entry; a refresh read (the gitscm tab opening) fetches the head again.
+    it('refetches a branch on a refresh read and exposes the new head', async () => {
+      const scm = makeHttpScm('ep-1');
+      const url = 'https://api.github.com/ep-1/repos/org/repo/branches/main';
+      const first = service.getBranch(scm, 'org/repo', 'main');
+      httpMock.expectOne(url).flush({ name: 'main', commit: { sha: 'abc' } });
+      expect((await firstValueFrom(first.waitForValue$)).commit!.sha).toBe('abc');
+
+      service.getBranch(scm, 'org/repo', 'main');
+      httpMock.expectNone(url);
+
+      const refreshed = service.getBranch(scm, 'org/repo', 'main', { refresh: true });
+      httpMock.expectOne(url).flush({ name: 'main', commit: { sha: 'def' } });
+
+      expect((await firstValueFrom(refreshed.waitForValue$)).commit!.sha).toBe('def');
+      // Later plain reads see the refreshed entry.
+      expect(service.getBranch(scm, 'org/repo', 'main').value()!.commit!.sha).toBe('def');
+    });
+
+    it('shares a branch request still in flight with a refresh read', () => {
+      const scm = makeHttpScm('ep-1');
+      const url = 'https://api.github.com/ep-1/repos/org/repo/branches/main';
+      const first = service.getBranch(scm, 'org/repo', 'main');
+      const refreshed = service.getBranch(scm, 'org/repo', 'main', { refresh: true });
+
+      expect(refreshed).toBe(first);
+      httpMock.expectOne(url).flush({ name: 'main', commit: { sha: 'abc' } });
+    });
+
     // github.com and a GitHub Enterprise host (or two GitLab hosts) can both
     // hold `org/repo`; their entries must not be shared.
     it('keeps the same owner/repo on two endpoints apart', async () => {

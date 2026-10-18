@@ -97,6 +97,8 @@ describe('GitSCMTabComponent', () => {
   // A deployed project's git lookups, held by the HTTP testing backend.
   describe('git lookups', () => {
     const repoUrl = 'https://api.github.com/repos/org/repo';
+    const commitUrl = 'https://api.github.com/repos/org/repo/commits/abc';
+    const branchUrl = 'https://api.github.com/repos/org/repo/branches/main';
     const notFound = { status: 404, statusText: 'Not Found' };
     let httpMock: HttpTestingController;
     let error: ReturnType<typeof vi.spyOn>;
@@ -124,6 +126,25 @@ describe('GitSCMTabComponent', () => {
       httpMock.expectNone(repoUrl);
       expect(error).toHaveBeenCalledTimes(1);
       expect(error).toHaveBeenCalledWith('Unable to fetch GitHub project: Git request failed(404)');
+    });
+
+    // The branch head moves with every push, so opening the tab reads it
+    // afresh instead of reusing what an earlier visit cached.
+    it('reads the branch head afresh each time the tab opens', async () => {
+      httpMock.expectOne(repoUrl).flush({ full_name: 'org/repo', html_url: 'h', owner: {} });
+      await fixture.whenStable();
+      httpMock.expectOne(commitUrl).flush({ sha: 'abc', commit: { author: { date: '2026-01-01' } } });
+      httpMock.expectOne(branchUrl).flush({ name: 'main', commit: { sha: 'abc' } });
+      await fixture.whenStable();
+      fixture.destroy();
+
+      fixture = TestBed.createComponent(GitSCMTabComponent);
+      await fixture.whenStable();
+      httpMock.expectNone(repoUrl);
+      httpMock.expectOne(branchUrl).flush({ name: 'main', commit: { sha: 'def' } });
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.textContent).toContain('branch has been updated since this app was deployed');
     });
   });
 });

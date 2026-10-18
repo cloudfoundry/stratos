@@ -247,10 +247,12 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         // strict: getCommit resolves the full commit detail before emitting.
         this.deployedTime = getUnixTime(new Date(deployedCommit.commit!.author.date));
       });
+      // The branch head moves with every push, so it is read afresh each
+      // time the tab opens rather than taken from an earlier visit's cache.
       this.isHead$ = blockedOnRepo$.pipe(
         // strict: git-deploy deploySource always carries branch.
         switchMap(([project, meta]) =>
-          this.gitData.getBranch(meta.scm, meta.projectName, project.deploySource.branch!).waitForValue$
+          this.gitData.getBranch(meta.scm, meta.projectName, project.deploySource.branch!, { refresh: true }).waitForValue$
         ),
         withLatestFrom(blockedOnRepo$),
         // strict: a resolved branch carries its head commit; deploySource.commit

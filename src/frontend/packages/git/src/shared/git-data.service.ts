@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { observeSignal } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -32,6 +32,14 @@ export interface GitResource<T> {
   readonly waitForValue$: Observable<T>;
 }
 
+export interface GitReadOptions {
+  /**
+   * Fetch again even when a value is cached. A request still in flight is
+   * shared instead, since it is already fresh.
+   */
+  refresh?: boolean;
+}
+
 /**
  * Signal-native replacement for the git ngrx entity pipeline (GitEffects +
  * git actions + the `gitEntityCatalog.*.store` action-orchestrator surface).
@@ -60,16 +68,20 @@ export class GitDataService {
 
   getRepository(scm: GitSCM, projectName: string): GitResource<GitRepo> {
     const guid = getRepositoryGuid(scm.getType(), projectName);
-    return this.resource(this.repos, guid, scm, () =>
+    return this.resource(this.repos, guid, scm, {}, () =>
       scm.getRepository(this.http, projectName).pipe(
         map(repo => this.stampRepo(repo, scm, projectName, guid))
       )
     );
   }
 
-  getBranch(scm: GitSCM, projectName: string, branchName: string): GitResource<GitBranch> {
+  /**
+   * A branch's head commit moves with every push, so a view that compares
+   * against it passes `{ refresh: true }` when it opens.
+   */
+  getBranch(scm: GitSCM, projectName: string, branchName: string, options: GitReadOptions = {}): GitResource<GitBranch> {
     const guid = getCommitGuid(scm.getType(), projectName, branchName);
-    return this.resource(this.branches, guid, scm, () =>
+    return this.resource(this.branches, guid, scm, options, () =>
       scm.getBranch(this.http, projectName, branchName).pipe(
         map(branch => this.stampBranch(branch, scm, projectName))
       )
@@ -78,7 +90,7 @@ export class GitDataService {
 
   getCommit(scm: GitSCM, projectName: string, commitSha: string): GitResource<GitCommit> {
     const guid = getCommitGuid(scm.getType(), projectName, commitSha);
-    return this.resource(this.commits, guid, scm, () =>
+    return this.resource(this.commits, guid, scm, {}, () =>
       scm.getCommit(this.http, projectName, commitSha).pipe(
         map(commit => this.stampCommit(commit, scm, projectName))
       )
@@ -100,11 +112,12 @@ export class GitDataService {
     cache: Map<string, GitResource<T>>,
     guid: string,
     scm: GitSCM,
+    options: GitReadOptions,
     fetch: () => Observable<T>
   ): GitResource<T> {
     const key = `${GitDataService.hostKey(scm)}::${guid}`;
     const existing = cache.get(key);
-    if (existing) {
+    if (existing && (!options.refresh || existing.fetching())) {
       return existing;
     }
 
@@ -114,7 +127,7 @@ export class GitDataService {
       error: false,
       errorMessage: '',
     });
-    const state$ = toObservable(state, { injector: this.injector });
+    const state$ = observeSignal(state, this.injector);
 
     const resource: GitResource<T> = {
       value: computed(() => state().value),
