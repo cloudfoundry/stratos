@@ -57,8 +57,8 @@ async function deleteInstance(cfApi: CFApiHelper, spaceGuid: string, name: strin
 for (const mode of RESPONSE_MODES) {
   test.describe(`create service instance, ${mode} broker`, () => {
     // An async broker plus CF's own polling: a create with bind and its
-    // cleanup took 3.5 min on the lab.
-    test.setTimeout(360000);
+    // cleanup took 4.7 min on the lab (2026-10-17).
+    test.setTimeout(480000);
 
     let broker: TestBroker | undefined;
     let brokerApi: APIRequestContext;
@@ -98,8 +98,17 @@ for (const mode of RESPONSE_MODES) {
       await next(page);
       await page.getByRole('textbox', { name: /Name/ }).pressSequentially(name);
       await next(page, 'Finish');
-      // The wizard leaves the create page once it reports success.
-      await page.waitForURL(url => !url.pathname.endsWith('/create'), { timeout: 200000 });
+      // A write slower than 30 s gets the wait question, and one left
+      // unanswered is handed off: the wizard then closes before the outcome
+      // is known (and before any bind). Keep waiting, as a user who wants the
+      // result here would, so leaving the create page still means success.
+      const question = page.getByRole('alertdialog');
+      const left = page.waitForURL(url => !url.pathname.endsWith('/create'), { timeout: 300000 }).then(() => true);
+      while (!(await Promise.race([left, question.waitFor({ timeout: 300000 }).then(() => false)]))) {
+        await page.getByLabel('Wait another').fill('600');
+        await page.getByRole('button', { name: 'Keep waiting' }).click();
+        await expect(question).toBeHidden();
+      }
     }
 
     test('reports success only once CF has the instance', async ({ connectedEndpointsAdminPage, cfApi, secrets }) => {
