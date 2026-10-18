@@ -71,7 +71,7 @@ export class UaaSetupDataService {
   readonly state: Signal<UaaSetupState> = this._state.asReadonly();
 
   async checkScopes(setupData: UaaSetupData | LocalAdminSetupData): Promise<void> {
-    await this.post(GET_SCOPES_URL, setupData, 'Failed to save configuration.', CHECK_SCOPES_TIMEOUT_MS);
+    await this.post(GET_SCOPES_URL, setupData, 'Failed to check the UAA credentials.', CHECK_SCOPES_TIMEOUT_MS);
   }
 
   async saveConfig(setupData: UaaSetupData | LocalAdminSetupData): Promise<void> {

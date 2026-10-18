@@ -147,6 +147,16 @@ describe('ConsoleUaaWizardComponent', () => {
       expect(errorSnack()).toContain('no scopes');
     });
 
+    it('words a failed scope check as a credentials check, not a save', async () => {
+      fillForm();
+      await fixture.whenStable();
+
+      nextButton().click();
+      flushCheckError('Failed to authenticate with UAA - check Client ID, Secret and credentials');
+      await settle();
+
+      expect(errorSnack()).toBe('Failed to check the UAA credentials. Failed to authenticate with UAA - check Client ID, Secret and credentials');
+    });
   });
 
   describe('Admin scope step', () => {
