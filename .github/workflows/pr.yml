@@ -236,6 +236,11 @@ jobs:
         # here instead left the Go linters out of CI entirely.
         run: make check lint
 
+      # build-info.ts is generated, never committed, and store and theme
+      # import it: the type check fails without it (TS2307).
+      - name: Generate build info
+        run: make stamp frontend
+
       - name: Type-check the libraries
         # The local gate (gate-check) runs this after lint; without it here a
         # type error only declaration emit sees passes CI. In this job, not a
