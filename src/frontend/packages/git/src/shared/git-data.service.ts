@@ -46,7 +46,8 @@ export interface GitResource<T> {
  *
  * The cache is keyed by the host as well as the guid: the guid only names the
  * SCM type and project, and two hosts (github.com and a GitHub Enterprise
- * server, or two GitLab servers) can each hold the same `owner/repo`.
+ * server, or two GitLab servers) can each hold the same `owner/repo`. A failed
+ * lookup is dropped from the cache so the next read retries it.
  */
 @Injectable({ providedIn: 'root' })
 export class GitDataService {
@@ -130,12 +131,18 @@ export class GitDataService {
 
     fetch().subscribe({
       next: value => state.set({ value, fetching: false, error: false, errorMessage: '' }),
-      error: err => state.set({
-        value: null,
-        fetching: false,
-        error: true,
-        errorMessage: scm.parseErrorAsString(err),
-      }),
+      error: err => {
+        // Readers holding this resource keep the error; the next read retries.
+        if (cache.get(key) === resource) {
+          cache.delete(key);
+        }
+        state.set({
+          value: null,
+          fetching: false,
+          error: true,
+          errorMessage: scm.parseErrorAsString(err),
+        });
+      },
     });
 
     return resource;

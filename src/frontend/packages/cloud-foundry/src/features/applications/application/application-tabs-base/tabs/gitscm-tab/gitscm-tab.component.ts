@@ -186,7 +186,11 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       this.deployedCommitSha = stProject.deploySource.commit!.trim();
       this.icon$ = of(baseGitMeta.scm.getIcon());
 
-      this.hasRepo$ = this.gitData.getRepository(baseGitMeta.scm, baseGitMeta.projectName).state$.pipe(
+      // Read once and held: a failed lookup leaves the cache, so a second
+      // read here would start a new request instead of seeing this one.
+      const repo = this.gitData.getRepository(baseGitMeta.scm, baseGitMeta.projectName);
+
+      this.hasRepo$ = repo.state$.pipe(
         map(state => state.value ? true : state.error ? false : undefined),
         startWith(undefined),
         publishReplay(1),
@@ -205,7 +209,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
       );
 
       this.gitSCMRepo$ = blockedOnRepo$.pipe(
-        switchMap(([, meta]) => this.gitData.getRepository(meta.scm, meta.projectName).waitForValue$)
+        switchMap(() => repo.waitForValue$)
       );
 
       // Once the repo resolves, capture its URL (for Compare links) and kick
@@ -219,8 +223,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
       this.gitSCMRepoErrorSub = this.hasRepo$.pipe(
         filter(hasRepo => hasRepo === false),
-        switchMap(() => coreInfo$),
-        switchMap(([, meta]) => this.gitData.getRepository(meta.scm, meta.projectName).state$),
+        switchMap(() => repo.state$),
         map(state => state.errorMessage),
         distinctUntilChanged(),
         withLatestFrom(coreInfo$)

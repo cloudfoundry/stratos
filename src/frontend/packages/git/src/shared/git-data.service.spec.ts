@@ -165,6 +165,32 @@ describe('GitDataService', () => {
       httpMock.verify();
     });
 
+    // A failed lookup must not stay cached: the next read retries instead of
+    // showing the failure until the page reloads.
+    it('retries a repository lookup that failed when it is read again', async () => {
+      const scm = makeHttpScm('ep-1');
+      const first = service.getRepository(scm, 'org/repo');
+      httpMock.expectOne('https://api.github.com/ep-1/repos/org/repo').flush('nope', notFound);
+      await firstValueFrom(first.state$.pipe(filter(s => s.error)));
+
+      const second = service.getRepository(scm, 'org/repo');
+      httpMock.expectOne('https://api.github.com/ep-1/repos/org/repo')
+        .flush({ full_name: 'org/repo', clone_url: 'url', default_branch: 'main' });
+
+      expect((await firstValueFrom(second.waitForValue$)).full_name).toBe('org/repo');
+      expect(second.error()).toBe(false);
+    });
+
+    it('retries a commit lookup that failed when it is read again', async () => {
+      const scm = makeHttpScm('ep-1');
+      const first = service.getCommit(scm, 'org/repo', 'abc');
+      httpMock.expectOne('https://api.github.com/ep-1/repos/org/repo/commits/abc').flush('nope', notFound);
+      await firstValueFrom(first.state$.pipe(filter(s => s.error)));
+
+      service.getCommit(scm, 'org/repo', 'abc');
+      httpMock.expectOne('https://api.github.com/ep-1/repos/org/repo/commits/abc').flush({ sha: 'abc' });
+    });
+
     // github.com and a GitHub Enterprise host (or two GitLab hosts) can both
     // hold `org/repo`; their entries must not be shared.
     it('keeps the same owner/repo on two endpoints apart', async () => {
