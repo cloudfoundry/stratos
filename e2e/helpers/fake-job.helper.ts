@@ -86,7 +86,13 @@ export async function isolatedAdmin(browser: Browser): Promise<{ context: Browse
   const secrets = SecretsHelper.load();
   const baseURL = process.env.E2E_BASE_URL || 'https://localhost:5540';
   const authType = await detectAuthType(baseURL);
-  const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL });
+  // An empty storageState: otherwise the context inherits the project's saved
+  // admin login, and its cookie, shared with the worker's session.
+  const context = await browser.newContext({
+    ignoreHTTPSErrors: true,
+    baseURL,
+    storageState: { cookies: [], origins: [] },
+  });
   const logIn = async () => {
     await apiLogin(context.request, baseURL, secrets.console.admin.username, secrets.console.admin.password, authType);
   };
