@@ -10,7 +10,7 @@ import type { StFeatureFlag } from '../services/endpoint-data/stratos-types';
 // effects with no Injector, and CfUserPermissionsChecker — an Injectable)
 // share this so the FF list is fetched once per CF endpoint per session.
 // CnsiFeatureFlagsSource is signal-bearing; consumers either await load()
-// for completion-gating or read items() / toObservable(items) for data.
+// for completion-gating or read items() / observeSignal(items) for data.
 const cache = new Map<string, CnsiFeatureFlagsSource>();
 
 export function getFeatureFlagsSource(
@@ -35,7 +35,10 @@ export function getFeatureFlagsSource(
 // pre-built observable. This matters for toObservable(signal): if created
 // while items is still empty it buffers that empty value in its replay and
 // emits it first regardless of subscription timing. Building it post-load
-// means its first emission reflects the populated signal.
+// means its first emission reflects the populated signal. The checker's
+// factory now returns observeSignal(items), which reads on subscribe and so
+// does not buffer early, but the factory keeps the contract safe for any
+// stream a caller passes.
 export function featureFlagsAfterLoad$(
   load: () => Promise<void>,
   itemsFactory: () => Observable<StFeatureFlag[]>,
