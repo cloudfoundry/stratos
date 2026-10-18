@@ -24,7 +24,7 @@ test.describe('application page: an action CF runs as a job', () => {
     await page.locator('app-dialog-confirm [data-test="confirm-dialog-confirm"]').click();
   }
 
-  test('a delete that fails in CF gives CF\'s reason', async ({ browser, applicationHelper }) => {
+  test('a delete that fails in CF gives CF\'s reason', async ({ browser, applicationHelper, secrets }) => {
     const testApp = await applicationHelper.createTestApp(createCustomName('e2e-job-del'));
     const { context, page } = await isolatedAdmin(browser);
     try {
@@ -41,6 +41,9 @@ test.describe('application page: an action CF runs as a job', () => {
       await expect(progress(page)).toContainText(`Delete failed ${testApp.app.name}`, { timeout: 20000 });
       await expect(progress(page)).toContainText('The app has an e2e operation in progress.');
       await expect(progress(page)).not.toContainText('CF-UnableToPerform');
+      // A direct load into the delete wizard still names the org and space.
+      const cf = secrets.cloudFoundry[0];
+      await expect(progress(page)).toContainText(`/ ${cf.testOrg} / ${cf.testSpace}`);
       expect(page.url()).not.toMatch(/\/applications\/?$/);
     } finally {
       await context.close();
