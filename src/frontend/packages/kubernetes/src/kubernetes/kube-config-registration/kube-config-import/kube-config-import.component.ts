@@ -274,6 +274,7 @@ export class KubeConfigImportComponent implements OnDestroy {
   private doConnect(connect: KubeConfigImportAction, next: KubeConfigImportAction[]) {
     if (!connect.user) {
       connect.state.next({ message: 'Can not connect - no user specified', error: true });
+      this.processAction(next);
       return;
     }
     const helper = new KubeConfigAuthHelper();
@@ -281,8 +282,18 @@ export class KubeConfigImportComponent implements OnDestroy {
     if (data) {
       const obs$ = this.connectEndpoint(connect, data);
 
-      // Echo obs$ to the behaviour subject
-      this.subs.push(obs$.subscribe(connect.actionState));
+      // Echo obs$ to the row's action state. The wrapper is not an observer
+      // (calling it reads the signal), so forward each value explicitly; a
+      // failed connect completes the row as an error so the import goes on.
+      this.subs.push(obs$.subscribe({
+        next: status => connect.actionState.next(status),
+        error: err => connect.actionState.next({
+          busy: false,
+          error: true,
+          completed: true,
+          message: err?.message ?? 'Failed to connect endpoint',
+        }),
+      }));
 
       this.subs.push(connect.actionState.asObservable().pipe(
         filter((status: IActionMonitorComponentState) => status.completed),
@@ -295,6 +306,7 @@ export class KubeConfigImportComponent implements OnDestroy {
       }));
     } else {
       connect.state.next({ message: 'Can not connect - could not get user auth data', error: true });
+      this.processAction(next);
     }
   }
 
