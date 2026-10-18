@@ -426,3 +426,75 @@ describe('SteppersComponent — signal-handle hidden', () => {
     expect(host.entered).toEqual(['one']);
   });
 });
+
+// Showing or hiding a step before the current one shifts the visible
+// list. The current index must move with it, so the stepper stays on the
+// step the user is on and that step is the one marked active.
+describe('SteppersComponent — current step across re-filters', () => {
+  let hostFixture: ComponentFixture<FirstStepHostComponent>;
+  let host: FirstStepHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const current = () => steppers().steps[steppers().currentIndex()];
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [FirstStepHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(FirstStepHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  it('stays on the entered step when a hidden step before it is shown', async () => {
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(host.entered).toEqual(['two']);
+    expect(current().title).toBe('Two');
+
+    host.firstHidden.set(false);
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title)).toEqual(['One', 'Two']);
+    expect(current().title).toBe('Two');
+    expect(current().active).toBe(true);
+    expect(steppers().steps[0].active).toBe(false);
+    // Showing a step is not a transition: no extra onEnter.
+    expect(host.entered).toEqual(['two']);
+  });
+
+  it('stays on the current step when a step before it is hidden', async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    steppers().setActive(1);
+    await hostFixture.whenStable();
+    expect(current().title).toBe('Two');
+
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title)).toEqual(['Two']);
+    expect(current().title).toBe('Two');
+    expect(current().active).toBe(true);
+  });
+
+  it('enters the step shown in place of a current step that is hidden', async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    steppers().setActive(1);
+    await hostFixture.whenStable();
+    expect(host.entered).toEqual(['one', 'two']);
+
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title)).toEqual(['One']);
+    expect(current().title).toBe('One');
+    expect(current().active).toBe(true);
+    expect(host.entered).toEqual(['one', 'two', 'one']);
+  });
+});

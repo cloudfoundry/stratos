@@ -195,7 +195,22 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   private filterSteps() {
+    const current = this.steps[this.currentIndex()];
     this.steps = this.allSteps.filter((step => !step.hidden));
+    // Showing or hiding a step before the current one moves it in the
+    // list. Follow it, so the index keeps pointing at the step the user is
+    // on (the one marked active) instead of at its neighbour or past the end.
+    if (current?.active) {
+      const index = this.steps.indexOf(current);
+      if (index >= 0) {
+        this.currentIndex.set(index);
+      } else if (this.steps.length) {
+        // The current step itself was hidden: enter the step now shown in
+        // its place (clamped to the end of the list).
+        current.active = false;
+        this.enterStep(Math.min(this.currentIndex(), this.steps.length - 1));
+      }
+    }
     this.visibleSteps.set(this.steps);
     // Under zoneless CD, reassigning this.steps doesn't mark the view
     // dirty. Without markForCheck the template keeps rendering the step
@@ -344,6 +359,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
 
     // 3) Set stepper state WRT required step
+    this.enterStep(index);
+  }
+
+  private enterStep(index: number): void {
     this.steps.forEach((s, i) => {
       s.complete = i < index;
       s.active = i === index;
