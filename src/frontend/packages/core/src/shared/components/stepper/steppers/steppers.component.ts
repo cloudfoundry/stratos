@@ -77,6 +77,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private readonly visibleSteps = signal<StepComponent[]>([]);
   // The projected steps, set once in ngAfterContentInit.
   private readonly contentSteps = signal<StepComponent[]>([]);
+  // The active step while every step is hidden, so filterSteps can return
+  // to it (or move on from it) once steps are shown again.
+  private parkedStep?: StepComponent;
 
   // A legacy [hidden] change re-filters through hiddenChange, but a
   // signalHandle.hidden change emits nothing. Reading `hidden` here tracks
@@ -195,7 +198,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   private filterSteps() {
-    const current = this.steps[this.currentIndex()];
+    const parked = this.parkedStep;
+    const current = parked ?? this.steps[this.currentIndex()];
+    this.parkedStep = undefined;
     this.steps = this.allSteps.filter((step => !step.hidden));
     // Showing or hiding a step before the current one moves it in the
     // list. Follow it, so the index keeps pointing at the step the user is
@@ -204,11 +209,15 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       const index = this.steps.indexOf(current);
       if (index >= 0) {
         this.currentIndex.set(index);
-      } else if (this.steps.length) {
+      } else if (!this.steps.length) {
+        // Every step is hidden: nothing to show or follow until one returns.
+        this.parkedStep = current;
+      } else {
         // The current step itself was hidden: enter the step now shown in
-        // its place (clamped to the end of the list).
+        // its place (clamped to the end of the list). After every step was
+        // hidden the old position means nothing, so start from the first.
         current.active = false;
-        this.enterStep(Math.min(this.currentIndex(), this.steps.length - 1));
+        this.enterStep(parked ? 0 : Math.min(this.currentIndex(), this.steps.length - 1));
       }
     }
     this.visibleSteps.set(this.steps);

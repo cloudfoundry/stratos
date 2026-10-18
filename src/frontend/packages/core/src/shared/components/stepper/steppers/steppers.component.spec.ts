@@ -498,3 +498,71 @@ describe('SteppersComponent — current step across re-filters', () => {
     expect(host.entered).toEqual(['one', 'two', 'one']);
   });
 });
+
+// When every step is hidden at once (here, two handle signals flipping in
+// one tick), the stepper shows nothing and there is no step for the index
+// to follow. It must remember the step the user was on, so that when steps
+// come back the index and the active marker agree again.
+describe('SteppersComponent — all steps hidden, then shown', () => {
+  let hostFixture: ComponentFixture<SignalHiddenHostComponent>;
+  let host: SignalHiddenHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const current = () => steppers().steps[steppers().currentIndex()];
+  const settle = async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+  };
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [SignalHiddenHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(SignalHiddenHostComponent);
+    host = hostFixture.componentInstance;
+    await settle();
+    // Move to the second step, then hide every step in one re-filter.
+    steppers().setActive(1);
+    await settle();
+    expect(host.entered).toEqual(['one', 'two']);
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await settle();
+    expect(steppers().steps).toEqual([]);
+  });
+
+  it('returns to the step the user was on when it reappears, without a second onEnter', async () => {
+    host.secondHidden.set(false);
+    await settle();
+    expect(steppers().steps.map(step => step.title)).toEqual(['Two']);
+    expect(current().title).toBe('Two');
+    expect(current().active).toBe(true);
+    expect(host.entered).toEqual(['one', 'two']);
+  });
+
+  it('returns to the step the user was on when all steps reappear', async () => {
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await settle();
+    expect(current().title).toBe('Two');
+    expect(current().active).toBe(true);
+    expect(steppers().steps[0].active).toBe(false);
+    expect(host.entered).toEqual(['one', 'two']);
+  });
+
+  it('enters the first visible step once when the step the user was on stays hidden', async () => {
+    host.firstHidden.set(false);
+    await settle();
+    expect(steppers().steps.map(step => step.title)).toEqual(['One']);
+    expect(current().title).toBe('One');
+    expect(current().active).toBe(true);
+    expect(steppers().allSteps[1].active).toBe(false);
+    expect(host.entered).toEqual(['one', 'two', 'one']);
+  });
+});
