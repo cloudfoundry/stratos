@@ -215,10 +215,7 @@ func (p *portalProxy) loginToUAA(c *echo.Context) (*api.LoginRes, error) {
 		sessionValues["user_id"] = u.UserGUID
 		sessionValues["exp"] = u.TokenExpiry
 
-		// Ensure that login disregards cookies from the request
-		req := c.Request()
-		req.Header.Set("Cookie", "")
-		if err = p.setSessionValues(c, sessionValues); err != nil {
+		if err = p.setLoginSession(c, sessionValues); err != nil {
 			return nil, err
 		}
 

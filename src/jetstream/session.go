@@ -173,6 +173,13 @@ func (p *portalProxy) setSessionValues(c *echo.Context, values map[string]interf
 	return p.SaveSession(c, session)
 }
 
+// setLoginSession stores a successful login's values in the session.
+func (p *portalProxy) setLoginSession(c *echo.Context, values map[string]interface{}) error {
+	// Ensure that login disregards cookies from the request
+	c.Request().Header.Set("Cookie", "")
+	return p.setSessionValues(c, values)
+}
+
 func (p *portalProxy) unsetSessionValue(c *echo.Context, sessionKey string) error {
 	slog.Debug("unsetSessionValues", "key", sessionKey)
 	session, err := p.GetSession(c)

@@ -32,11 +32,9 @@ func TestCFHostedLoginWithDeadCookie(t *testing.T) {
 
 	e := echo.New()
 	e.Use(plugin.(*cloudfoundryhosting.CFHosting).SessionEchoMiddleware)
-	// The login handlers' session steps: disregard the request's cookies, set
-	// the user, save.
+	// The login handlers' session step.
 	e.POST("/login", func(c *echo.Context) error {
-		c.Request().Header.Set("Cookie", "")
-		if err := pp.setSessionValues(c, map[string]interface{}{"user_id": "user-1"}); err != nil {
+		if err := pp.setLoginSession(c, map[string]interface{}{"user_id": "user-1"}); err != nil {
 			return err
 		}
 		return c.NoContent(http.StatusOK)
