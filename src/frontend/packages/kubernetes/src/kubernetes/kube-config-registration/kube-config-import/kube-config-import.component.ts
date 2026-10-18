@@ -234,8 +234,16 @@ export class KubeConfigImportComponent implements OnDestroy {
       this.processAction(next);
       return;
     }
-    const helper = new KubeConfigAuthHelper();
-    const data = helper.getAuthDataForConnect(this.environmentInjector, this.injector, this.fb, connect.user);
+    // This runs inside the previous row's status callback, so a throw here
+    // would stop the import: fail this row and move on instead.
+    let data: ConnectEndpointData | null;
+    try {
+      data = new KubeConfigAuthHelper().getAuthDataForConnect(this.environmentInjector, this.injector, this.fb, connect.user);
+    } catch (err) {
+      connect.state.next({ message: (err as Error)?.message || 'Can not connect - could not get user auth data', error: true });
+      this.processAction(next);
+      return;
+    }
     if (data) {
       const obs$ = this.connectEndpoint(connect, data);
 

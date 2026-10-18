@@ -150,7 +150,8 @@ export class KubeConfigAuthHelper {
     return { message: 'Authentication mechanism is not supported', warning: true };
   }
 
-  // Use the auto component to get the data in the correct format for connecting to the endpoint
+  // Use the auto component to get the data in the correct format for connecting to the endpoint.
+  // Throws when the user's auth type is not one the Kubernetes endpoint offers.
   public getAuthDataForConnect(environmentInjector: EnvironmentInjector, injector: Injector, fb: FormBuilder, user: KubeConfigFileUser)
     : ConnectEndpointData | null {
 
@@ -159,6 +160,9 @@ export class KubeConfigAuthHelper {
     // Get the component to us
     if (user && user._authData) {
       const authType = this.authTypes[user._authData.authType];
+      if (!authType) {
+        throw new Error(`Unsupported authentication type: ${user._authData.authType}`);
+      }
 
       const ref = createComponent<IAuthForm>(authType.component, { environmentInjector, elementInjector: injector });
 

@@ -47,6 +47,9 @@ const read = (wrapper: unknown) => (wrapper as () => unknown)();
 
 const AUTH_DATA = { authType: 'token', authVal: { token: 't' }, systemShared: false, bodyContent: '' };
 
+// Taken before any test spies on it, so a spy can still defer to it.
+const realGetAuthData = KubeConfigAuthHelper.prototype.getAuthDataForConnect;
+
 describe('KubeConfigImportComponent', () => {
   let component: KubeConfigImportComponent;
   let fixture: ComponentFixture<KubeConfigImportComponent>;
@@ -140,6 +143,22 @@ describe('KubeConfigImportComponent', () => {
       expect(connect).toHaveBeenCalledTimes(1);
     });
 
+    it('marks an unsupported auth type and still imports the next cluster', async () => {
+      // The first cluster goes through the real helper with an auth type
+      // the kubernetes endpoint does not offer; the second gets usable data.
+      vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect').mockImplementation(function (this: KubeConfigAuthHelper, ...args) {
+        return args[3]._authData.authType === 'no-such-auth' ? realGetAuthData.apply(this, args) : AUTH_DATA as any;
+      });
+      const first = makeCluster('a');
+      first._users[0]._authData = { authType: 'no-such-auth', subType: '', values: {} };
+
+      const actions = await runImport([first, makeCluster('b')]);
+
+      expect(read(actions[1].state)).toEqual({ message: 'Unsupported authentication type: no-such-auth', error: true });
+      expect(stubSignalConfig.register).toHaveBeenCalledTimes(2);
+      expect(connect).toHaveBeenCalledTimes(1);
+      expect(read(actions[3].actionState)).toMatchObject({ error: false, completed: true });
+    });
 
     it('skips the connect of a cluster whose register fails without a message', async () => {
       vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect').mockReturnValue(AUTH_DATA as any);
