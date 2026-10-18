@@ -3,8 +3,8 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ApplicationRef, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
-import { provideRouter } from '@angular/router';
-import { NEVER } from 'rxjs';
+import { provideRouter, Router } from '@angular/router';
+import { NEVER, Subject } from 'rxjs';
 
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -94,6 +94,55 @@ describe('DeployApplicationStep3Component', () => {
 
     expect(show).toHaveBeenCalledWith('Application deployment complete', 'View', 10000, true);
     expect(close).toHaveBeenCalled();
+  });
+
+  it('looks up the app GUID once when the deploy finishes on the page', async () => {
+    await enterConnected();
+    const deployer = component.deployer;
+    deployer.processWebSocketMessage({
+      type: SocketEventTypes.MANIFEST,
+      message: JSON.stringify({ Applications: [{ Name: 'my-app' }] }),
+    });
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_COMPLETED, message: '' });
+    deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_SUCCESS, message: '' });
+    await fixture.whenStable();
+
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.expectOne('/pp/v1/cf/apps/cf?space_guids=space')
+      .flush({ resources: [{ name: 'my-app', guid: 'g1' }] });
+    httpMock.verify();
+    expect(component.appGuid).toBe('g1');
+  });
+
+  it('opens a first-time deploy that finishes after the user leaves the page', async () => {
+    const snackBar = TestBed.inject(TailwindSnackBarService);
+    const action = new Subject<void>();
+    vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => action } as any);
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const httpMock = TestBed.inject(HttpTestingController);
+
+    await enterConnected();
+    const deployer = component.deployer;
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
+    deployer.processWebSocketMessage({
+      type: SocketEventTypes.MANIFEST,
+      message: JSON.stringify({ Applications: [{ Name: 'my-app' }] }),
+    });
+    await fixture.whenStable();
+
+    fixture.destroy();
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_COMPLETED, message: '' });
+    deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_SUCCESS, message: '' });
+    await TestBed.inject(ApplicationRef).whenStable();
+    // The lookup waits for the click
+    httpMock.expectNone('/pp/v1/cf/apps/cf?space_guids=space');
+
+    action.next();
+    httpMock.expectOne('/pp/v1/cf/apps/cf?space_guids=space')
+      .flush({ resources: [{ name: 'other', guid: 'g0' }, { name: 'my-app', guid: 'g1' }] });
+
+    expect(navigate).toHaveBeenCalledWith(['applications', 'cf', 'g1'], undefined);
   });
 
   it('reports a deploy that fails after the user leaves the page', async () => {

@@ -154,25 +154,27 @@ export class DeployApplicationStep3Component implements OnDestroy {
         filter(status => !status.deploying && !status.error),
         filter(() => !!this.deployer.appData?.Name && !this.appGuid),
         take(1),
-        switchMap(() => {
-          const appName = this.deployer.appData.Name;
-          const cfGuid = this.deployer.cfGuid;
-          const spaceGuid = this.deployer.spaceGuid;
-          // Native handler returns apps for the space; client-side filter
-          // for the just-deployed name. Single HTTP call replaces the
-          // legacy ngrx pagination that walked the space-apps list.
-          return this.http.get<StAppsResponse>(
-            `/pp/v1/cf/apps/${cfGuid}?space_guids=${encodeURIComponent(spaceGuid)}`,
-          ).pipe(
-            map(resp => (resp?.resources ?? []).find((a: StApp) => a.name === appName)),
-            filter((app): app is StApp => !!app),
-            map(app => app.guid),
-            take(1),
-          );
-        }),
+        switchMap(() => this.lookUpAppGuid()),
       ).subscribe(guid => {
         this.deployer.applicationGuid$.next(guid);
       })
+    );
+  }
+
+  private lookUpAppGuid(): Observable<string> {
+    const appName = this.deployer.appData?.Name;
+    const cfGuid = this.deployer.cfGuid;
+    const spaceGuid = this.deployer.spaceGuid;
+    // Native handler returns apps for the space; client-side filter
+    // for the just-deployed name. Single HTTP call replaces the
+    // legacy ngrx pagination that walked the space-apps list.
+    return this.http.get<StAppsResponse>(
+      `/pp/v1/cf/apps/${cfGuid}?space_guids=${encodeURIComponent(spaceGuid)}`,
+    ).pipe(
+      map(resp => (resp?.resources ?? []).find((a: StApp) => a.name === appName)),
+      filter((app): app is StApp => !!app),
+      map(app => app.guid),
+      take(1),
     );
   }
 
@@ -206,7 +208,13 @@ export class DeployApplicationStep3Component implements OnDestroy {
         this.snackBarService.show(status.errorMsg ?? 'Application deployment failed', 'Dismiss');
       } else {
         const ref = this.snackBarService.show('Application deployment complete', 'View', 10000, true);
-        ref.onAction().subscribe(() => { this.goToAppSummary(); });
+        // A first-time deploy left mid-way never looked up its app GUID
+        ref.onAction().pipe(
+          switchMap(() => this.appGuid ? observableOf(this.appGuid) : this.lookUpAppGuid()),
+        ).subscribe(guid => {
+          this.appGuid = guid;
+          this.goToAppSummary();
+        });
       }
       this.deployer.close();
     });
