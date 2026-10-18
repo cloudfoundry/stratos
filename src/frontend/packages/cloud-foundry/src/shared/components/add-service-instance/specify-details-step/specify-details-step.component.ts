@@ -464,9 +464,13 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
         answerIn,
       });
       // The question sits below the form, which can be taller than the
-      // screen; unseen, its countdown would hand the write off unasked.
+      // screen; unseen, its countdown would hand the write off unasked. As
+      // an alert dialog it takes focus, so it is read out and answerable from
+      // the keyboard.
       afterNextRender(() => {
-        this.slowWriteQuestion()?.nativeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        const question = this.slowWriteQuestion()?.nativeElement;
+        question?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        question?.querySelector<HTMLElement>('#slow-write-seconds')?.focus({ preventScroll: true });
       }, { injector: this.injector });
       this.answerCountdown = setInterval(() => {
         answerIn--;
