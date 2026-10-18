@@ -553,7 +553,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       });
     }
 
-    it('brings the question into view when it appears', async () => {
+    it('brings the question into view and focus when it appears', async () => {
       const scrollIntoView = vi.fn();
       const original = Element.prototype.scrollIntoView;
       Element.prototype.scrollIntoView = scrollIntoView;
@@ -563,6 +563,9 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         await stable(fixture);
         expect(scrollIntoView).toHaveBeenCalledWith({ block: 'nearest', behavior: 'smooth' });
         expect(scrollIntoView.mock.contexts[0]).toBe(fixture.nativeElement.querySelector('[role=alertdialog]'));
+        // An alert dialog takes focus, so it is read out and answerable from
+        // the keyboard: its first control.
+        expect(document.activeElement).toBe(fixture.nativeElement.querySelector('#slow-write-seconds'));
         component.continueInBackground();
         await result;
       } finally {
