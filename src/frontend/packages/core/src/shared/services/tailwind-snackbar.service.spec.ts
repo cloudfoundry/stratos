@@ -1,3 +1,4 @@
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
@@ -23,6 +24,19 @@ describe('TailwindSnackBarService', () => {
 
   afterEach(() => {
     document.querySelectorAll('.snackbar-close').forEach(btn => btn.parentElement?.remove());
+  });
+
+  // A toast inserted with its text already in it is not reliably read out;
+  // the announcer's live region, which is already on the page, is.
+  it('announces each message to screen readers, errors assertively, and names the close button', () => {
+    const announce = vi.spyOn(TestBed.inject(LiveAnnouncer), 'announce').mockResolvedValue();
+    service.show('Saved');
+    service.error('It broke');
+    expect(announce).toHaveBeenNthCalledWith(1, 'Saved', 'polite');
+    expect(announce).toHaveBeenNthCalledWith(2, 'It broke', 'assertive');
+    const closes = document.querySelectorAll('.snackbar-close');
+    expect(closes).toHaveLength(2);
+    closes.forEach(b => expect(b.getAttribute('aria-label')).toBe('Close'));
   });
 
   it('showWithLink navigates to a route array when the action is clicked', () => {

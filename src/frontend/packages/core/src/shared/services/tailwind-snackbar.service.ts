@@ -1,3 +1,4 @@
+import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Injectable, ApplicationRef, Injector, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, Observable } from 'rxjs';
@@ -73,6 +74,7 @@ export class TailwindSnackBarService {
   private snackbars: HTMLElement[] = [];
 
   private appRef = inject(ApplicationRef);
+  private announcer = inject(LiveAnnouncer);
   private injector = inject(Injector);
   private router = inject(Router);
 
@@ -146,6 +148,9 @@ export class TailwindSnackBarService {
     // Add to DOM
     document.body.appendChild(snackbarElement);
     this.snackbars.push(snackbarElement);
+    // Screen readers miss a toast that arrives with its text; the announcer's
+    // live region is already on the page. Errors interrupt.
+    void this.announcer.announce(message, snackbarElement.classList.contains('snackbar-error') ? 'assertive' : 'polite');
 
     // Auto dismiss. Use ?? instead of || so that an explicit `duration: 0`
     // from the caller means "do not auto-dismiss" (the standard convention)
@@ -253,6 +258,7 @@ export class TailwindSnackBarService {
     // Create close button
     const closeButton = document.createElement('button');
     closeButton.textContent = '×';
+    closeButton.setAttribute('aria-label', 'Close');
     closeButton.className = `snackbar-close ${onRed ? 'text-white' : 'text-gray-400 hover:text-white'} text-xl font-bold ml-2`;
     snackbar.appendChild(closeButton);
 
