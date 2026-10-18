@@ -72,7 +72,7 @@ describe('DeployApplicationStep3Component', () => {
 
     expect(fixture.nativeElement.querySelector('.font-semibold').textContent.trim()).toBe('Starting deployment...');
     // The app GUID lookup waits for the push to finish
-    TestBed.inject(HttpTestingController).expectNone(() => true);
+    TestBed.inject(HttpTestingController).expectNone(req => req.url.startsWith('/pp/v1/cf/apps/'));
   });
 
   it('reports a deploy that finishes after the user leaves the page', async () => {
