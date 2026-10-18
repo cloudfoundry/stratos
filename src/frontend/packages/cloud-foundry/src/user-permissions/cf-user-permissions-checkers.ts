@@ -205,7 +205,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string): Observable<boolean> {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
-      switchMap(guids => combineLatestOrEmpty(guids.map(_guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
+      switchMap(guids => combineLatestOrEmpty(guids.map(guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, guid)))),
       map(checks => checks.some(check => check)),
       distinctUntilChanged()
     );

@@ -224,4 +224,11 @@ describe('CfUserPermissionsChecker across all connected CF endpoints', () => {
     await expect(answer(check$)).resolves.toBe(false);
   });
 
+  it('checks an endpoint scope on each connected endpoint', async () => {
+    const checker = setup(['cf-1', 'cf-2'], guid => guid === 'cf-2');
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
+    );
+    await expect(answer(check$!)).resolves.toBe(true);
+  });
 });
