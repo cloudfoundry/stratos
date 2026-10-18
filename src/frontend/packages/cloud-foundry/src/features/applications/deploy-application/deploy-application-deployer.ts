@@ -77,8 +77,8 @@ export class DeployApplicationDeployer {
   updateSub!: Subscription;
   msgSub!: Subscription;
   streamTitle = signal('Preparing...');
-  // strict: populated from the MANIFEST websocket event before any read
-  appData!: AppData;
+  // From the MANIFEST websocket event; unset until the deploy sends it
+  appData?: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
   cfGuid!: string;
   orgGuid!: string;
@@ -193,6 +193,13 @@ export class DeployApplicationDeployer {
     this.isOpen = true;
     this.closeReported = false;
     this.started = !this.fsFileInfo;
+    // A reopened deployer runs a new deploy: drop what the last one reported
+    this.deploying = false;
+    this.updateStatus();
+    this.streamTitle.set('Preparing...');
+    this.appData = undefined;
+    this.applicationGuid$.next(null);
+    this.fileTransferStatus$.next(undefined);
     this.connectSub = this.deployState$.pipe(
       filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
         !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),

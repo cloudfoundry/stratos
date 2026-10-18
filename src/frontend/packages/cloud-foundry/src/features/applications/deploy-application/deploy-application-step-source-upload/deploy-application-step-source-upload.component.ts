@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
 import { Component, EnvironmentInjector, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 
 import { BytesToHumanSize, StepOnNextFunction, UploadProgressIndicatorComponent } from '@stratosui/core';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
+import { DeployApplicationDeployer } from '../deploy-application-deployer';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 
 
@@ -37,9 +37,9 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
     const injector = this.injector;
 
     this.deployer = new DeployApplicationDeployer(cfOrgSpaceService, injector);
+    // No transfer status (a new upload not yet under way) is not valid
     this.valid$ = this.deployer.fileTransferStatus$.asObservable().pipe(
-      filter(status => !!status),
-      map((status: FileTransferStatus) => status.filesSent === status.totalFiles),
+      map(status => !!status && status.filesSent === status.totalFiles),
     );
   }
 
@@ -51,9 +51,15 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   }
 
   onEnter = (data: FileScannerInfo) => {
-    // Previous step is expected to pass us the file info for the files to be uploaded
-    this.deployer.fsFileInfo = data;
+    // Previous step is expected to pass us the file info for the files to be uploaded.
+    // Coming back from a later step passes none; the files are the same.
+    if (data) {
+      this.deployer.fsFileInfo = data;
+    }
 
+    // Each entry uploads afresh. End what the deployer had first: a deploy
+    // that ended leaves it open on a socket the server has closed.
+    this.deployer.close();
     // Begin the file upload
     this.deployer.open();
   }

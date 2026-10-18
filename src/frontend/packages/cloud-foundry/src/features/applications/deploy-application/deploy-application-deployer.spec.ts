@@ -58,6 +58,23 @@ describe('DeployApplicationDeployer', () => {
 
       expect(deployer.status$().error).toBe(false);
     });
+
+    it('starts a reopened deploy afresh', () => {
+      const send = (type: SocketEventTypes, message = '') => socket.server.next(JSON.stringify({ type, message }));
+      send(SocketEventTypes.MANIFEST, JSON.stringify({ Applications: [{ Name: 'a' }] }));
+      send(SocketEventTypes.APP_GUID_NOTIFY, 'g1');
+      send(SocketEventTypes.CLOSE_FAILURE, 'boom');
+
+      deployer.close();
+      deployer.open();
+
+      expect(deployer.finished).toBe(false);
+      expect(deployer.status$()).toEqual({ error: false, errorMsg: undefined, deploying: false });
+      expect(deployer.streamTitle()).toBe('Preparing...');
+      expect(deployer.applicationGuid$()).toBeNull();
+      expect(deployer.appData).toBeUndefined();
+      deployer.close();
+    });
   });
 
   it('keeps the specific failure when a generic close follows it', () => {
