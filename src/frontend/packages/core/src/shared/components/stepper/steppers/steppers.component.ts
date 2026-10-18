@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Injector, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Injector, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { RoutingHistoryService } from '@stratosui/store';
@@ -72,11 +72,40 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   private enterData: any;
   private snackBarRef!: TailwindSnackBarRef<any>;
-  // First-step unblock poller (see setActive). Held as a field so destroy can
-  // clear it — a local timer kept ticking after teardown and then called
-  // afterNextRender against a destroyed injector (NG0205).
-  private firstStepTimer?: ReturnType<typeof setInterval>;
-  private isDestroyed = false;
+
+  // Mirrors `steps` so firstStepEntry re-runs whenever the steps re-filter.
+  private readonly visibleSteps = signal<StepComponent[]>([]);
+
+  // Delivers the first visible step's onEnter once that step exists and is
+  // unblocked. setActive(0) cannot do it: no step is visible until
+  // filterSteps runs, and a blocked step (e.g. the CF picker while no CF is
+  // connected) can unblock at any later time. `blocked` reads the step's
+  // signals, so this re-runs only when it can change, and it destroys itself
+  // after the one delivery. It replaces a 5 ms setInterval that kept polling
+  // for as long as the first step stayed blocked.
+  private readonly firstStepEntry = effect(() => {
+    const step = this.visibleSteps()[0];
+    if (!step || step.blocked) {
+      return;
+    }
+    untracked(() => {
+      this.firstStepEntry.destroy();
+      // A transition through setActive has already delivered its own onEnter.
+      if (this.currentIndex() !== 0) {
+        return;
+      }
+      step.active = true;
+      // Route through pOnEnter so signal-handle consumers receive the enter
+      // callback, after the render that shows the step (see setActive).
+      // markForCheck guarantees the render that afterNextRender waits on.
+      this.cdr.markForCheck();
+      afterNextRender(() => {
+        if (step.active) {
+          step.pOnEnter(this.enterData);
+        }
+      }, { injector: this.injector });
+    });
+  });
 
   // Signal (read directly in the template as currentIndex()) so the action
   // buttons' [disabled]/text bindings re-render under zoneless CD when the
@@ -110,8 +139,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnInit() { }
 
   ngOnDestroy() {
-    this.isDestroyed = true;
-    clearInterval(this.firstStepTimer);
     this.hiddenSubs.forEach(sub => sub.unsubscribe());
     this.unsubscribeNext();
     if (this.snackBarRef) {
@@ -121,7 +148,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   ngAfterContentInit() {
     this.allSteps = this.stepComponents.toArray();
-    this.setActive(0);
 
     this.allSteps.forEach((step => {
       this.hiddenSubs.push(step.hiddenChange.subscribe((_hidden) => {
@@ -155,6 +181,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
 
   private filterSteps() {
     this.steps = this.allSteps.filter((step => !step.hidden));
+    this.visibleSteps.set(this.steps);
     // Under zoneless CD, reassigning this.steps doesn't mark the view
     // dirty. Without markForCheck the template keeps rendering the step
     // list as it was at ngAfterContentInit, so steps whose [hidden]
@@ -286,35 +313,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (this.basePreviousRedirect && index < 0) {
       this.navigate(this.basePreviousRedirect);
     }
+    // The first step's initial onEnter is delivered by firstStepEntry.
     if (!this.canGoto(index)) {
-      if (index === 0) {
-        if (this.allSteps && this.allSteps.length > 0) {
-          // Execute `onEnter` for the first step as soon as step is unblocked.
-          // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
-          // wizards) receive the enter callback — the legacy onEnter @Input
-          // defaults to a no-op so a raw step.onEnter call swallows
-          // signalHandle.onEnter.
-          clearInterval(this.firstStepTimer);
-          this.firstStepTimer = setInterval(() => {
-            if (this.isDestroyed) {
-              clearInterval(this.firstStepTimer);
-              return;
-            }
-            if (this.allSteps[index].blocked === false) {
-              const step = this.allSteps[index];
-              step.active = true;
-              // Same deferred delivery as setActive's main path below: the
-              // first step's content may not have rendered yet when this
-              // interval fires, so a synchronous pOnEnter races the child
-              // instantiation. markForCheck guarantees the render that
-              // afterNextRender waits on.
-              this.cdr.markForCheck();
-              afterNextRender(() => step.pOnEnter(this.enterData), { injector: this.injector });
-              clearInterval(this.firstStepTimer);
-            }
-          }, 5);
-        }
-      }
       return;
     }
 
@@ -335,7 +335,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     });
     this.currentIndex.set(index);
     // Route through pOnEnter so signal-handle consumers (FWT-959 Shape 3
-    // wizards) receive the enter callback — see comment above for rationale.
+    // wizards) receive the enter callback — the legacy onEnter @Input
+    // defaults to a no-op, so a raw step.onEnter call swallows
+    // signalHandle.onEnter.
     //
     // Delivery is deferred to after the NEXT render. Note: projected step
     // content is NOT lazily instantiated — Ivy constructs <ng-content> inside

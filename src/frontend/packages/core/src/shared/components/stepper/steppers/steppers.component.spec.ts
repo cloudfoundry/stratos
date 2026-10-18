@@ -42,10 +42,10 @@ describe('SteppersComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(SteppersComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
@@ -177,7 +177,6 @@ describe('SteppersComponent — projected step content', () => {
     });
     await TestBed.compileComponents();
     hostFixture = TestBed.createComponent(ProjectionHostComponent);
-    hostFixture.detectChanges();
     await hostFixture.whenStable();
   });
 
@@ -208,5 +207,141 @@ describe('SteppersComponent — projected step content', () => {
 
     await hostFixture.whenStable();
     expect(hostFixture.componentInstance.entered).toEqual(['two']);
+  });
+});
+
+// The first step's onEnter used to be delivered by a 5 ms setInterval that
+// waited for step 0 to unblock. With no Cloud Foundry connected, the CF step
+// of create-app / deploy / add-service-instance stays blocked, so the
+// interval ran for the life of the page. The poll also targeted allSteps[0]
+// even when that step was hidden, so the step actually shown never got its
+// onEnter.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [hidden]="firstHidden()" [blocked]="firstLegacyBlocked()" [signalHandle]="firstHandle"></app-step>
+      <app-step title="Two" [hidden]="secondHidden()" [signalHandle]="secondHandle"></app-step>
+    </app-steppers>
+  `,
+})
+class FirstStepHostComponent {
+  entered: string[] = [];
+  firstHidden = signal(false);
+  secondHidden = signal(false);
+  firstBlocked = signal(false);
+  firstLegacyBlocked = signal(false);
+  firstHandle: SignalStepHandle = {
+    valid: signal(true),
+    blocked: this.firstBlocked,
+    onEnter: () => { this.entered.push('one'); },
+  };
+  secondHandle: SignalStepHandle = {
+    valid: signal(true),
+    onEnter: () => { this.entered.push('two'); },
+  };
+}
+
+@Component({
+  standalone: true,
+  imports: [SteppersComponent],
+  template: `<app-steppers></app-steppers>`,
+})
+class EmptyStepperHostComponent { }
+
+describe('SteppersComponent — first step entry', () => {
+  let hostFixture: ComponentFixture<FirstStepHostComponent>;
+  let host: FirstStepHostComponent;
+
+  // Long enough for any first-step poll to have ticked several times.
+  const settle = async () => {
+    await vi.advanceTimersByTimeAsync(50);
+    await hostFixture.whenStable();
+  };
+
+  beforeEach(async () => {
+    // Only intervals are faked: setTimeout and requestAnimationFrame stay
+    // real so the zoneless scheduler and whenStable still settle.
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    TestBed.configureTestingModule({
+      imports: [FirstStepHostComponent, EmptyStepperHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(FirstStepHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it('fires the first step onEnter exactly once on create', async () => {
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('leaves no interval running while the first step stays blocked', async () => {
+    host.firstBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('fires onEnter once when a blocked first step unblocks', async () => {
+    host.firstBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+
+    host.firstBlocked.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('fires onEnter once when a legacy [blocked] first step unblocks', async () => {
+    host.firstHandle = { valid: signal(true), onEnter: () => { host.entered.push('one'); } };
+    host.firstLegacyBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+
+    host.firstLegacyBlocked.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('enters the first visible step when the first step is hidden', async () => {
+    host.firstHidden.set(true);
+    await settle();
+    expect(host.entered).toEqual(['two']);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('fires onEnter once when the first visible step appears later', async () => {
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+
+    // e.g. the step list resolves after an async load
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('leaves no interval running for a stepper with no steps', async () => {
+    const emptyFixture = TestBed.createComponent(EmptyStepperHostComponent);
+    await vi.advanceTimersByTimeAsync(50);
+    await emptyFixture.whenStable();
+    expect(vi.getTimerCount()).toBe(0);
   });
 });

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal, TemplateRef, ViewChild, signal } from '@angular/core';
 import { from, Observable, of as observableOf } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
@@ -217,11 +217,13 @@ export class StepComponent {
   }
   @Output() disablePreviousChange = new EventEmitter<boolean>();
 
-  private _blocked = false;
+  // A signal, like signalHandle.blocked, so the stepper's first-step entry
+  // effect re-runs when a legacy [blocked] binding clears.
+  private _blocked = signal(false);
   @Input()
-  set blocked(v: boolean) { this._blocked = v; }
+  set blocked(v: boolean) { this._blocked.set(v); }
   get blocked(): boolean {
-    return this.signalHandle?.blocked ? this.signalHandle.blocked() : this._blocked;
+    return this.signalHandle?.blocked ? this.signalHandle.blocked() : this._blocked();
   }
 
   private _destructiveStep = false;
