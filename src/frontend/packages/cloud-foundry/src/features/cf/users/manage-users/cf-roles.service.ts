@@ -342,12 +342,14 @@ export class CfRolesService {
   private fetchOrgNames(cfGuid: string): Observable<StOrg[]> {
     if (!this.cfOrgNames[cfGuid]) {
       this.cfOrgNames[cfGuid] = this.drainCfList<StOrg>(`/pp/v1/cf/orgs/${cfGuid}`).pipe(
-        catchError(() => of([] as StOrg[])),
-        publishReplay(1),
-        refCount(),
+        shareReplay({ bufferSize: 1, refCount: false }),
       );
     }
-    return this.cfOrgNames[cfGuid];
+    // Recover outside the cache: this call still resolves (without names),
+    // and the next call fetches again instead of replaying the failure.
+    return this.cfOrgNames[cfGuid].pipe(
+      catchError(() => of([] as StOrg[])),
+    );
   }
 
   // Drains EVERY page of a native /pp/v1/cf list endpoint into one array. The

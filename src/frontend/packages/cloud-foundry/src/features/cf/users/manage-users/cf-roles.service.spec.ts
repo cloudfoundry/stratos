@@ -146,6 +146,21 @@ describe('CfRolesService', () => {
     expect(await cached).toEqual([]);
   });
 
+  it('populateRoles fetches org names again after a failure instead of caching it', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const user = stUser({ guid: 'user-1', orgRoles: [{ orgGuid: 'org-1', roles: ['manager'] }] });
+
+    // The failure still lets the roles resolve (without the org name).
+    const first = firstValueFrom(service.populateRoles('cf-names', [user]).pipe(take(1)));
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-names?per_page=500&page=1')
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    expect((await first)['user-1']['org-1'].permissions.managers).toBe(true);
+
+    const second = firstValueFrom(service.populateRoles('cf-names', [user]).pipe(take(1)));
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-names?per_page=500&page=1')
+      .flush({ resources: [{ guid: 'org-1', name: 'My Org', cnsiGuid: 'cf-names' }], totalResults: 1 });
+    expect((await second)['user-1']['org-1'].name).toBe('My Org');
+  });
 
   it('fetchOrg degrades to error envelope on HTTP failure', async () => {
     const service = TestBed.inject(CfRolesService);
