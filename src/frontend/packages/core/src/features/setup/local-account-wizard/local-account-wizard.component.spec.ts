@@ -105,6 +105,23 @@ describe('LocalAccountWizardComponent', () => {
     expect(errorSnack()).toContain('did not confirm');
   });
 
+  it('clears the overlay and shows an error when the save never answers', async () => {
+    component.passwordForm.setValue({ adminPassword: 'secret', adminPasswordConfirm: 'secret' });
+    await fixture.whenStable();
+
+    vi.useFakeTimers();
+    finishButton().click();
+    httpMock.expectOne(SAVE_URL);
+    await vi.advanceTimersByTimeAsync(61000);
+    vi.useRealTimers();
+    await settle();
+
+    expect(component.applyingSetup()).toBe(false);
+    expect(overlayShown()).toBe(false);
+    expect(errorSnack()).toContain('did not answer');
+    httpMock.expectNone(VERIFY_URL);
+  });
+
   it('reloads the app once the backend leaves setup mode', async () => {
     const assign = vi.spyOn(window.location, 'assign').mockImplementation(() => undefined);
     await submitPassword();

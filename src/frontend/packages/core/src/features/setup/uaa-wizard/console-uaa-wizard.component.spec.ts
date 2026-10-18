@@ -84,6 +84,22 @@ describe('ConsoleUaaWizardComponent', () => {
   });
 
   describe('UAA endpoint step', () => {
+    it('stops waiting and shows an error when the scope check never answers', async () => {
+      fillForm();
+      await fixture.whenStable();
+
+      vi.useFakeTimers();
+      nextButton().click();
+      httpMock.expectOne(CHECK_URL);
+      await vi.advanceTimersByTimeAsync(131000);
+      vi.useRealTimers();
+      await settle();
+
+      expect(scopeSelect()).toBeNull();
+      expect(nextButton().disabled).toBe(false);
+      expect(errorSnack()).toContain('did not answer');
+    });
+
     // Regression (#6020): the step read the replayed state of the previous
     // request, so the first click succeeded with no scopes before the check
     // had even answered.
@@ -130,6 +146,7 @@ describe('ConsoleUaaWizardComponent', () => {
       expect(scopeSelect()).toBeNull();
       expect(errorSnack()).toContain('no scopes');
     });
+
   });
 
   describe('Admin scope step', () => {
@@ -203,6 +220,22 @@ describe('ConsoleUaaWizardComponent', () => {
       expect(component.applyingSetup()).toBe(false);
       expect(overlayShown()).toBe(false);
       expect(errorSnack()).toContain('did not confirm');
+    });
+
+    it('clears the overlay and shows an error when the save never answers', async () => {
+      await reachScopeStep(['openid', 'stratos.admin']);
+
+      vi.useFakeTimers();
+      nextButton().click();
+      httpMock.expectOne(SAVE_URL);
+      await vi.advanceTimersByTimeAsync(61000);
+      vi.useRealTimers();
+      await settle();
+
+      expect(component.applyingSetup()).toBe(false);
+      expect(overlayShown()).toBe(false);
+      expect(errorSnack()).toContain('did not answer');
+      httpMock.expectNone(VERIFY_URL);
     });
   });
 });
