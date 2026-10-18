@@ -1,6 +1,5 @@
 import { EnvironmentInjector, Injectable, inject, runInInjectionContext } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { EndpointsDataService } from '@stratosui/store';
+import { EndpointsDataService, observeSignal } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
@@ -89,8 +88,10 @@ export class CurrentUserPermissionsService {
       return this.getSimplePermission(actionConfig, endpointGuid, ...args);
     } else if (endpointGuid) {
       // W36-B Wave 3: read endpoint via EndpointsDataService signal
-      // bridge instead of the legacy EntityMonitor.entity$.
-      return toObservable(this.endpointsData.endpointById(endpointGuid), { injector: this.injector }).pipe(
+      // bridge instead of the legacy EntityMonitor.entity$. observeSignal
+      // ties the watch to the subscription; this service's injector is the
+      // root one, so toObservable would keep one running per call.
+      return observeSignal(this.endpointsData.endpointById(endpointGuid), this.injector).pipe(
         // strict: a registered endpoint always carries a cnsi_type; preserve the
         // original guard (call through when an endpoint resolves, else emit false).
         switchMap(endpoint => endpoint ?
