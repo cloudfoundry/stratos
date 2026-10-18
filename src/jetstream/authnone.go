@@ -78,10 +78,7 @@ func (a *noAuth) BeforeVerifySession(c *echo.Context) {
 	sessionValues["user_id"] = noAuthUserID
 	sessionValues["exp"] = expiry
 
-	// Ensure that login disregards cookies from the request
-	req := c.Request()
-	req.Header.Set("Cookie", "")
-	if err := a.p.setSessionValues(c, sessionValues); err == nil {
+	if err := a.p.setLoginSession(c, sessionValues); err == nil {
 		//Makes sure the client gets the right session expiry time
 		if err := a.p.handleSessionExpiryHeader(c); err != nil {
 			slog.Warn("unable to set the session expiry header", "error", err)
