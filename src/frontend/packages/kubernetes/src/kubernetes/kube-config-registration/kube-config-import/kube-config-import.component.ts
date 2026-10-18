@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, Injector, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 
 import { UntypedFormBuilder } from '@angular/forms';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, startWith, take } from 'rxjs/operators';
 
-import { EndpointsDataService } from '@stratosui/store';
+import { createSignalWrapper, EndpointsDataService } from '@stratosui/store';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -37,43 +37,6 @@ import { KubeConfigFileCluster, KubeConfigImportAction } from '../kube-config.ty
 
 const REGISTER_ACTION = 'Register endpoint';
 const CONNECT_ACTION = 'Connect endpoint';
-
-/**
- * Signal wrapper utility for BehaviorSubject compatibility
- * Provides dual API: Signal methods + BehaviorSubject compatibility (.next(), .asObservable())
- * Enables zero-breaking-change migration from BehaviorSubject to Signal
- */
-function createSignalWrapper<T>(initialValue: T) {
-  const _signal = signal<T>(initialValue);
-  // asObservable() must be callable outside injection contexts (wrappers are
-  // created and read during import execution, from step event handlers), so
-  // it is backed by a BehaviorSubject kept in sync on every write instead of
-  // a lazy toObservable(), which throws NG0203 there.
-  const _subject = new BehaviorSubject<T>(initialValue);
-  const write = (value: T) => {
-    _signal.set(value);
-    _subject.next(value);
-  };
-  const wrapper = Object.assign(
-    // Make it callable like a signal
-    () => _signal(),
-    {
-      // WritableSignal methods
-      set: write,
-      update: (fn: (value: T) => T) => write(fn(_signal())),
-      asReadonly: () => _signal.asReadonly(),
-      // BehaviorSubject compatibility methods
-      next: write,
-      getValue: () => _signal(),
-      asObservable: () => _subject.asObservable(),
-    }
-  );
-  return wrapper as WritableSignal<T> & {
-    next: (value: T) => void;
-    getValue: () => T;
-    asObservable: () => Observable<T>;
-  };
-}
 
 @Component({
 selector: 'app-kube-config-import',
@@ -159,17 +122,11 @@ export class KubeConfigImportComponent implements OnDestroy {
     ];
   }
 
-  // Stable per-row Observable for the action-monitor icon. `actionState`'s
-  // asObservable() mints a fresh observable each call; cache by action so the
-  // template binding doesn't re-subscribe every change-detection pass.
-  private readonly actionStateObs = new WeakMap<KubeConfigImportAction, Observable<IActionMonitorComponentState>>();
+  // Per-row Observable for the action-monitor icon. asObservable() returns
+  // the same instance on every call, so the template binding does not
+  // re-subscribe each change-detection pass.
   actionStateFor(row: KubeConfigImportAction): Observable<IActionMonitorComponentState> {
-    let obs = this.actionStateObs.get(row);
-    if (!obs) {
-      obs = row.actionState.asObservable();
-      this.actionStateObs.set(row, obs);
-    }
-    return obs;
+    return row.actionState.asObservable();
   }
 
   subs: Subscription[] = [];
