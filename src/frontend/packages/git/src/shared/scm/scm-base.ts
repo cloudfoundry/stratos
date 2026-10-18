@@ -1,11 +1,10 @@
 import { Observable, of } from 'rxjs';
 import { take, map } from 'rxjs/operators';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { Injector } from '@angular/core';
 
 import { HttpOptions } from '../../../../core/src/core/core.types';
 import { environment } from '../../../../core/src/environments/environment';
-import { EndpointModel } from '../../../../store/src/public-api';
+import { EndpointModel, observeSignal } from '../../../../store/src/public-api';
 import { EndpointsDataService } from '../../../../store/src/services/endpoints-data.service';
 
 
@@ -76,11 +75,12 @@ export abstract class BaseSCM {
     // tolerate misses (e.g. an app deployed from a since-deleted
     // private github endpoint). The signal-native projection updates
     // synchronously, so the take(1) consumer pattern downstream is
-    // unchanged.
+    // unchanged. observeSignal ends the watch when take(1) unsubscribes;
+    // toObservable would keep one running on the root injector per call.
     if (!this.endpointsData || !this.injector) {
       throw new Error('BaseSCM requires EndpointsDataService + Injector — supply them via the subclass constructor.');
     }
-    return toObservable(this.endpointsData.endpointsList, { injector: this.injector }).pipe(
+    return observeSignal(this.endpointsData.endpointsList, this.injector).pipe(
       map(endpoints => endpoints?.find(e => e.guid === endpointGuid))
     );
   }
