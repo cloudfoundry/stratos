@@ -1,8 +1,8 @@
-import { Injector, computed, runInInjectionContext } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injector, computed } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, distinctUntilChanged, map, startWith } from 'rxjs/operators';
 
+import { observeSignal } from '@stratosui/store';
 import { APIResource, EntityInfo } from '../../../../store/src/types/api.types';
 import { AutoscalerInfoDataService } from '../../services/domain-data/autoscaler-info-data.service';
 import { AutoscalerInfo } from '../../store/app-autoscaler.types';
@@ -18,6 +18,11 @@ import { AutoscalerInfo } from '../../store/app-autoscaler.types';
 // args) and the cloud-foundry summary card. The `esf` arg is retained
 // for backwards compat but is unused — the data service is fetched via
 // the module-level injector captured by CfAutoscalerPackageModule.
+//
+// That injector is the root one, which is never destroyed, so the signals
+// are watched with observeSignal: the watcher starts on subscribe and stops
+// on unsubscribe. toObservable would start one at call time that runs for
+// the rest of the session.
 
 let helperInjector: Injector | null = null;
 
@@ -67,7 +72,7 @@ function asEntityInfoObservable(
         : null,
     } as EntityInfo<APIResource<AutoscalerInfo>>;
   });
-  return runInInjectionContext(requireInjector(), () => toObservable(envelope));
+  return observeSignal(envelope, requireInjector());
 }
 
 export const fetchAutoscalerInfo = (
@@ -90,9 +95,7 @@ export const isAutoscalerEnabled = (
 ): Observable<boolean> => {
   const svc = getDataService();
   void svc.load(endpointGuid);
-  return runInInjectionContext(requireInjector(), () =>
-    toObservable(svc.isAvailable(endpointGuid)),
-  ).pipe(
+  return observeSignal(svc.isAvailable(endpointGuid), requireInjector()).pipe(
     distinctUntilChanged(),
     map(value => !!value),
     catchError(() => of(false)),
