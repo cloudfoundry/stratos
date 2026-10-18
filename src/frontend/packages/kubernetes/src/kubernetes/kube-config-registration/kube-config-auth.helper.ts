@@ -166,34 +166,37 @@ export class KubeConfigAuthHelper {
 
       const ref = createComponent<IAuthForm>(authType.component, { environmentInjector, elementInjector: injector });
 
-      const form = fb.group({
-        authType: authType.value,
-        systemShared: false,
-        authValues: fb.group(user._authData.values)
-      });
-
-      ref.instance.formGroup = form;
-
-      // Allow the auth form to supply body content if it needs to
-      const endpointFormInstance = ref.instance as any;
-      if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
-        data = {
+      // Destroy the form even when it fails to build the connect data
+      try {
+        const form = fb.group({
           authType: authType.value,
-          authVal: endpointFormInstance.getValues(user._authData.values),
           systemShared: false,
-          bodyContent: endpointFormInstance.getBody()
-        };
-      } else {
-        // Use values as is
-        data = {
-          authType: authType.value,
-          authVal: user._authData.values,
-          systemShared: false,
-          bodyContent: null
-        };
+          authValues: fb.group(user._authData.values)
+        });
+
+        ref.instance.formGroup = form;
+
+        // Allow the auth form to supply body content if it needs to
+        const endpointFormInstance = ref.instance as any;
+        if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
+          data = {
+            authType: authType.value,
+            authVal: endpointFormInstance.getValues(user._authData.values),
+            systemShared: false,
+            bodyContent: endpointFormInstance.getBody()
+          };
+        } else {
+          // Use values as is
+          data = {
+            authType: authType.value,
+            authVal: user._authData.values,
+            systemShared: false,
+            bodyContent: null
+          };
+        }
+      } finally {
+        ref.destroy();
       }
-
-      ref.destroy();
     }
     return data;
   }
