@@ -1,6 +1,6 @@
 import { EnvironmentInjector, Injectable, inject, runInInjectionContext } from '@angular/core';
-import { EndpointsDataService, observeSignal } from '@stratosui/store';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatestOrEmpty, EndpointsDataService, observeSignal } from '@stratosui/store';
+import { Observable, of } from 'rxjs';
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
 
 import {
@@ -160,8 +160,9 @@ export class CurrentUserPermissionsService {
     const reducedChecks = checkCombiners.map(combiner =>
       BaseCurrentUserPermissionsChecker.reduceChecks(combiner.checks, combiner.combineType)
     );
-    return combineLatest(reducedChecks).pipe(
-      map(checks => checks.every(check => check))
+    return combineLatestOrEmpty(reducedChecks).pipe(
+      // No check groups (empty config): deny rather than grant by default.
+      map(checks => checks.length > 0 && checks.every(check => check))
     );
   }
 

@@ -10,7 +10,7 @@ import {
   StratosCurrentUserPermissions,
 } from '@stratosui/core';
 import { EndpointsDataService, SessionData } from '@stratosui/store';
-import { firstValueFrom, of } from 'rxjs';
+import { firstValueFrom, Observable, of, timeout } from 'rxjs';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { CFFeatureFlagTypes } from '../cf-api.types';
@@ -18,7 +18,7 @@ import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
 
 import { CfCurrentUserRolesSignalService } from './cf-current-user-roles-signal.service';
 import { CfUserPermissionsChecker } from './cf-user-permissions-checkers';
-import { CfPermissionTypes } from './cf-user-permissions.types';
+import { CfPermissionStrings, CfPermissionTypes, CfScopeStrings } from './cf-user-permissions.types';
 import { getFeatureFlagsSource } from './feature-flags-cache';
 
 /**
@@ -165,4 +165,63 @@ describe('CfUserPermissionsChecker feature flag check', () => {
     expect(reads).toBe(readsWhileSubscribed);
     expect(values).toEqual([true]);
   });
+});
+
+describe('CfUserPermissionsChecker across all connected CF endpoints', () => {
+  function setup(connectedGuids: string[], hasScope: (guid: string) => boolean = () => false) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        {
+          provide: CfCurrentUserRolesSignalService,
+          useValue: {
+            connectedCfEndpointGuids$: () => of(connectedGuids),
+            cfEndpointHasScope$: (guid: string) => of(hasScope(guid)),
+          },
+        },
+        { provide: HttpClient, useValue: {} },
+        CfUserPermissionsChecker,
+      ],
+    });
+    return TestBed.inject(CfUserPermissionsChecker);
+  }
+
+  // combineLatest([]) completes without a value, so a check over zero
+  // endpoints must still answer.
+  const answer = (check$: Observable<boolean>) => firstValueFrom(check$.pipe(timeout(1000)));
+
+  it('denies an endpoint scope when no CF endpoint is connected', async () => {
+    const checker = setup([]);
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
+    );
+    await expect(answer(check$!)).resolves.toBe(false);
+  });
+
+  it('denies a feature flag when no CF endpoint is connected', async () => {
+    const checker = setup([]);
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.route_creation),
+    );
+    await expect(answer(check$!)).resolves.toBe(false);
+  });
+
+  it('denies an org role with no org guid when no CF endpoint is connected', async () => {
+    const checker = setup([]);
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER),
+    );
+    await expect(answer(check$!)).resolves.toBe(false);
+  });
+
+  it('answers the org role check itself when no CF endpoint is connected', async () => {
+    const checker = setup([]);
+    // With zero endpoints the read-only check (every([]) is true) denies
+    // before getSimpleCheck reads the role check, so read it directly.
+    const check$ = checker['getCfCheck'](
+      new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER),
+    );
+    await expect(answer(check$)).resolves.toBe(false);
+  });
+
 });

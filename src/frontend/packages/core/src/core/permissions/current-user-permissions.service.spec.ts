@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { computed, provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import { AppState, BaseEntityValues, CurrentUserRolesDataService, EndpointsDataService, EntityCatalogEntityConfig, EntityCatalogTestModule, EndpointModel, PaginationEntityState, TEST_CATALOGUE_ENTITIES, endpointEntityType, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
 import {
   createBasicStoreModule,
@@ -13,6 +13,7 @@ import { AppTestModule } from '@test-framework';
 import { CurrentUserRolesSignalService } from '../signals/current-user-roles-signal.service';
 import { PermissionConfig, PermissionConfigLink } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
+import { BaseCurrentUserPermissionsChecker } from './current-user-permissions.types';
 import { StratosPermissionStrings, StratosPermissionTypes, StratosScopeStrings } from './stratos-user-permissions.checker';
 
 
@@ -612,5 +613,35 @@ describe('CurrentUserPermissionsService fallback permission', () => {
     TestBed.tick();
 
     expect(reads).toBe(readsWhileSubscribed);
+  });
+});
+
+describe('CurrentUserPermissionsService empty complex config', () => {
+  // An empty config array leaves no check groups. combineLatest([]) completes
+  // without a value, so the service must still answer.
+  it('denies an empty permission config', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        CurrentUserPermissionsService,
+        { provide: CurrentUserRolesSignalService, useValue: {} },
+        { provide: EndpointsDataService, useValue: {} },
+      ],
+    });
+    const service = TestBed.inject(CurrentUserPermissionsService);
+
+    await expect(firstValueFrom(service.can([]).pipe(timeout(1000)))).resolves.toBe(false);
+  });
+});
+
+describe('BaseCurrentUserPermissionsChecker.reduceChecks', () => {
+  // An empty list answers with the identity of its combinator, as
+  // some([]) / every([]) do.
+  it('answers false for an empty list combined with ||', async () => {
+    await expect(firstValueFrom(BaseCurrentUserPermissionsChecker.reduceChecks([], '||'))).resolves.toBe(false);
+  });
+
+  it('answers true for an empty list combined with &&', async () => {
+    await expect(firstValueFrom(BaseCurrentUserPermissionsChecker.reduceChecks([], '&&'))).resolves.toBe(true);
   });
 });

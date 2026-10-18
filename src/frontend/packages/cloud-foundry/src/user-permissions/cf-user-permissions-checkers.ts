@@ -15,7 +15,7 @@ import {
   PermissionConfigLink,
   PermissionTypes,
 } from '@stratosui/core';
-import { observeSignal, PermissionValues } from '@stratosui/store';
+import { combineLatestOrEmpty, observeSignal, PermissionValues } from '@stratosui/store';
 import { CFFeatureFlagTypes } from '../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
@@ -205,7 +205,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string): Observable<boolean> {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
-      switchMap(guids => combineLatest(guids.map(_guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
+      switchMap(guids => combineLatestOrEmpty(guids.map(_guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
       map(checks => checks.some(check => check)),
       distinctUntilChanged()
     );
@@ -240,7 +240,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     } else if (!actualGuid) {
       const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
       return endpointGuids$.pipe(
-        switchMap(guids => combineLatest(guids.map(guid => this.checkAllOfType(guid, type as CfPermissionTypes, cfPermissions)))),
+        switchMap(guids => combineLatestOrEmpty(guids.map(guid => this.checkAllOfType(guid, type as CfPermissionTypes, cfPermissions)))),
         map(checks => checks.some(check => check)),
         distinctUntilChanged()
       );
@@ -279,7 +279,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
             () => observeSignal(src.items, this.injector),
           );
         };
-        return combineLatest(guids.map(createFFObs));
+        return combineLatestOrEmpty(guids.map(createFFObs));
       }),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
       distinctUntilChanged(),
