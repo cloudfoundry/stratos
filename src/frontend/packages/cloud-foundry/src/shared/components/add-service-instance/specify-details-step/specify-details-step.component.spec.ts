@@ -528,6 +528,31 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
     });
 
+    // Snackbars stack: the 10 s hand-off notice must not outlive the
+    // message that says how the write ended.
+    for (const end of ['failure', 'success'] as const) {
+      it(`takes the hand-off notice down before reporting a ${end}`, async () => {
+        const { component, httpMock, open, error, result } = await startSlowCreate();
+        try {
+          await vi.advanceTimersByTimeAsync(30_000);
+          component.continueInBackground();
+          await expect(result).resolves.toEqual({ success: true, redirect: true });
+          const notice = vi.spyOn(open.mock.results[0].value, 'dismiss');
+          answerPoll(httpMock, end === 'failure'
+            ? failedJob
+            : { ...failedJob, state: 'COMPLETE', errors: undefined, result: {} });
+          await vi.advanceTimersByTimeAsync(0);
+          const reported = end === 'failure' ? error.mock.invocationCallOrder : open.mock.invocationCallOrder.slice(1);
+          expect(reported).toHaveLength(1);
+          expect(notice).toHaveBeenCalled();
+          expect(notice.mock.invocationCallOrder[0]).toBeLessThan(reported[0]);
+        } finally {
+          vi.useRealTimers();
+        }
+        httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+      });
+    }
+
     it('brings the question into view when it appears', async () => {
       const scrollIntoView = vi.fn();
       const original = Element.prototype.scrollIntoView;

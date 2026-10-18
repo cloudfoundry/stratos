@@ -123,7 +123,8 @@ export class TrackedJobsService {
 
   private async follow(job: TrackedJob): Promise<void> {
     this.following.add(job.jobId);
-    this.snackBar.open(
+    // Snackbars stack: take this down before saying how the write ended.
+    const running = this.snackBar.open(
       `${job.running} is still running (${coarseElapsed(Date.now() - job.startedAt)} so far). ${job.where} shows `
         + 'its progress, and a message will say how it ended.',
       'Dismiss', { duration: 10000 },
@@ -134,6 +135,7 @@ export class TrackedJobsService {
         deadlineAt: job.startedAt + jobTrackingLimitMs(),
         pauseOnSignOut: true,
       });
+      running.dismiss();
       if (result.status === 'COMPLETE') {
         this.snackBar.open(job.done, 'Dismiss', { duration: 4000 });
       } else {
@@ -141,6 +143,7 @@ export class TrackedJobsService {
       }
       this.forget(job.jobId);
     } catch (err: unknown) {
+      running.dismiss();
       if (err instanceof SignedOutError) {
         this.snackBar.error(this.signedOut(job));
         return;
