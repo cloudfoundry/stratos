@@ -173,10 +173,20 @@ func (p *portalProxy) setSessionValues(c *echo.Context, values map[string]interf
 	return p.SaveSession(c, session)
 }
 
-// setLoginSession stores a successful login's values in the session.
+// setLoginSession stores a successful login's values in a new session. The
+// session the request arrived with is never signed in, so a cookie held
+// before the login does not share it. Clearing the Cookie header alone is
+// not enough: middleware may already have loaded that session onto the
+// context (the Cloud Foundry hosting plugin does, on every request). The
+// session left behind expires through the store's cleanup.
 func (p *portalProxy) setLoginSession(c *echo.Context, values map[string]interface{}) error {
-	// Ensure that login disregards cookies from the request
-	c.Request().Header.Set("Cookie", "")
+	req := c.Request()
+	req.Header.Set("Cookie", "")
+	session, err := p.SessionStore.New(req, p.SessionCookieName)
+	if err != nil {
+		return err
+	}
+	c.Set(jetStreamSessionContextKey, session)
 	return p.setSessionValues(c, values)
 }
 
