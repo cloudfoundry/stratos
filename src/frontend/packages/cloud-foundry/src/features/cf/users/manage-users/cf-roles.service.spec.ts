@@ -17,7 +17,9 @@ import {
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateTestCfEndpointServiceProvider } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
+import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { StUser } from '../../../../services/endpoint-data/stratos-types';
+import { CfUserRolesSelected } from '../../../../store/types/users-roles.types';
 import { generateCFEntities } from '../../../../cf-entity-generator';
 import { CfRolesService } from './cf-roles.service';
 
@@ -160,6 +162,39 @@ describe('CfRolesService', () => {
     httpMock.expectOne('/pp/v1/cf/orgs/cf-names?per_page=500&page=1')
       .flush({ resources: [{ guid: 'org-1', name: 'My Org', cnsiGuid: 'cf-names' }], totalResults: 1 });
     expect((await second)['user-1']['org-1'].name).toBe('My Org');
+  });
+
+  it('existingRoles$ does not replay the previous dialog\'s roles to the next one', () => {
+    const service = TestBed.inject(CfRolesService);
+    const rolesData = TestBed.inject(CfUsersRolesDataService);
+    const alice = stUser({ guid: 'alice', orgRoles: [{ orgGuid: 'org-1', roles: ['manager'] }] });
+    const bob = stUser({ guid: 'bob', username: 'bob' });
+
+    // First dialog: alice's roles resolve.
+    rolesData.setUsers('cf-1', [alice]);
+    const first: CfUserRolesSelected[] = [];
+    const sub1 = service.existingRoles$.subscribe(r => first.push(r));
+    TestBed.tick();
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-1?per_page=500&page=1')
+      .flush({ resources: [{ guid: 'org-1', name: 'My Org', cnsiGuid: 'cf-1' }], totalResults: 1 });
+    expect(first.at(-1)).toHaveProperty('alice');
+    sub1.unsubscribe();
+
+    // Next dialog, for bob: nothing about alice may reach it, and loading
+    // must not clear before bob's roles are known.
+    rolesData.setUsers('cf-1', [bob]);
+    const second: CfUserRolesSelected[] = [];
+    const loading: boolean[] = [];
+    const sub2 = service.existingRoles$.subscribe(r => second.push(r));
+    const sub3 = service.loading$.subscribe(l => loading.push(l));
+    expect(loading).toEqual([true]);
+    TestBed.tick();
+
+    expect(second.length).toBeGreaterThan(0);
+    expect(second.some(r => 'alice' in r)).toBe(false);
+    expect(second.at(-1)).toHaveProperty('bob');
+    sub2.unsubscribe();
+    sub3.unsubscribe();
   });
 
   it('fetchOrg degrades to error envelope on HTTP failure', async () => {

@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injectable, Injector, inject } from '@angular/core';
 import { combineLatest, EMPTY, from, Observable, of as observableOf, of } from 'rxjs';
 import { take,
   catchError,
@@ -10,16 +9,14 @@ import { take,
   filter,
   map,
   mergeMap,
-  publishReplay,
   reduce,
-  refCount,
   shareReplay,
   startWith,
   switchMap,
 } from 'rxjs/operators';
 
 import { naturalCompare } from '@stratosui/core';
-import { combineLatestOrEmpty } from '@stratosui/store';
+import { combineLatestOrEmpty, observeSignal } from '@stratosui/store';
 
 import { CurrentUserPermissionsService } from '../../../../../../core/src/core/permissions/current-user-permissions.service';
 import { APIResource, EntityInfo } from '../../../../../../store/src/types/api.types';
@@ -56,6 +53,7 @@ export class CfRolesService {
   private userPerms = inject(CurrentUserPermissionsService);
   private rolesData = inject(CfUsersRolesDataService);
   private http = inject(HttpClient);
+  private injector = inject(Injector);
 
 
   existingRoles$: Observable<CfUserRolesSelected>;
@@ -117,19 +115,22 @@ export class CfRolesService {
   }
 
   constructor() {
-    this.users$ = toObservable(this.rolesData.users);
+    // This service is a root singleton shared by every dialog. observeSignal
+    // reads the signal fresh on each subscribe, and shareReplay with refCount
+    // drops the cached value once the last subscriber leaves, so a new dialog
+    // never sees the previous dialog's users or roles. (toObservable() would
+    // replay the last value it pushed, which can be the previous users.)
+    this.users$ = observeSignal(this.rolesData.users, this.injector);
     this.existingRoles$ = this.users$.pipe(
-      combineLatestOperators(toObservable(this.rolesData.cfGuid)),
+      combineLatestOperators(observeSignal(this.rolesData.cfGuid, this.injector)),
       filter(([_users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
-    this.newRoles$ = toObservable(this.rolesData.newRoles).pipe(
+    this.newRoles$ = observeSignal(this.rolesData.newRoles, this.injector).pipe(
       distinctUntilChanged(),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.loading$ = this.existingRoles$.pipe(
