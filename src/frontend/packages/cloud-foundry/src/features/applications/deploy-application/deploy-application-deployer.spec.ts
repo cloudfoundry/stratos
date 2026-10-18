@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
-import { ApplicationRef, Injector } from '@angular/core';
+import { ApplicationRef, EnvironmentInjector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 
 import { SocketEventTypes } from '../../../store/types/deploy-application.types';
@@ -10,7 +10,7 @@ describe('DeployApplicationDeployer', () => {
   let deployer: DeployApplicationDeployer;
 
   beforeEach(() => {
-    deployer = new DeployApplicationDeployer({} as CfOrgSpaceDataService, TestBed.inject(Injector));
+    deployer = new DeployApplicationDeployer({} as CfOrgSpaceDataService, TestBed.inject(EnvironmentInjector));
   });
 
   it('keeps the specific failure when a generic close follows it', () => {

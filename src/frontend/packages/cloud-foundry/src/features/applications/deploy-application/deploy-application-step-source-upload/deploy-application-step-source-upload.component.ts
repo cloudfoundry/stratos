@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Injector, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, EnvironmentInjector, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -23,7 +23,9 @@ import { FileScannerInfo } from '../deploy-application-step2/deploy-application-
 })
 export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
-  private injector = inject(Injector);
+  // The deployer outlives this step; a view injector would tie its state
+  // effects to the view and end them when the view is destroyed
+  private injector = inject(EnvironmentInjector);
 
 
   public deployer: DeployApplicationDeployer;

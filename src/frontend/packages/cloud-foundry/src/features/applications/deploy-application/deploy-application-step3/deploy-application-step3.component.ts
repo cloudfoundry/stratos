@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, EnvironmentInjector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   BehaviorSubject,
@@ -38,7 +38,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private deployData = inject(CfDeployAppDataService);
   private snackBarService = inject(TailwindSnackBarService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
-  private injector = inject(Injector);
+  // The deployer outlives this step; a view injector would tie its state
+  // effects to the view and end them when the view is destroyed
+  private injector = inject(EnvironmentInjector);
   private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
 

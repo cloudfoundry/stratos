@@ -1,4 +1,4 @@
-import { Injector } from '@angular/core';
+import { EnvironmentInjector } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { take, catchError, filter, map, share, switchMap, tap } from 'rxjs/operators';
@@ -119,7 +119,7 @@ export class DeployApplicationDeployer {
 
   constructor(
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    private injector: Injector,
+    private injector: EnvironmentInjector,
   ) {
     this.status$ = createSignalWrapper<DeployApplicationDeployerStatus>({
       error: false,
