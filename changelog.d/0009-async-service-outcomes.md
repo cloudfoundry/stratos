@@ -86,4 +86,4 @@
   shipped configs and Helm chart; a deployment that still sets it is
   unaffected, as the value is ignored.
 - The library type checks pass again (TypeScript 6.0 had broken them
-  all) and now run in the gate.
+  all) and now run in the gate and on every pull request.
