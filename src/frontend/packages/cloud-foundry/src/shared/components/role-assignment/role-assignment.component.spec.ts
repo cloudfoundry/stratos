@@ -735,7 +735,7 @@ describe('RoleAssignmentComponent', () => {
 
     expect(fixture.componentInstance.orgsLoading()).toBe(false);
     expect(picker(fixture).textContent).not.toContain('Loading organizations');
-    expect(picker(fixture).textContent).toContain('No organizations');
+    expect(picker(fixture).textContent).toContain('You have no organizations where you can manage roles.');
   });
 
   it('shows an error and clears the spinner when the org fetch fails', async () => {
@@ -772,5 +772,23 @@ describe('RoleAssignmentComponent', () => {
     const component = fixture.componentInstance;
     // After the synchronous of() from the harness resolves orgsLoading must be false
     expect(component.orgsLoading()).toBe(false);
+  it('says there are no orgs to manage when the list is empty and nothing is searched', async () => {
+    await setupFetchOrgs(() => of([]));
+    const fixture = await createFixture();
+
+    expect(picker(fixture).textContent).toContain('You have no organizations where you can manage roles.');
+    expect(picker(fixture).textContent).not.toContain('No organizations match.');
+  });
+
+  it('says no orgs match when a search has no hits', async () => {
+    await setup();
+    const fixture = await createFixture();
+
+    fixture.componentInstance.orgSearchText.set('zzz');
+    await fixture.whenStable();
+
+    expect(picker(fixture).textContent).toContain('No organizations match.');
+    expect(picker(fixture).textContent).not.toContain('You have no organizations');
+  });
   });
 });
