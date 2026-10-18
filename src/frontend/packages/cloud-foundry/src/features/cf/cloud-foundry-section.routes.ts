@@ -96,7 +96,6 @@ import { CloudFoundrySummaryTabComponent } from './tabs/cf-summary-tab/cloud-fou
 import { CloudFoundryUsersComponent } from './tabs/cf-users/cloud-foundry-users.component';
 import { InviteUsersComponent } from './users/invite-users/invite-users.component';
 import { UsersRolesComponent } from './users/manage-users/manage-users.component';
-import { RemoveUserComponent } from './users/remove-user/remove-user.component';
 
 const usersRoles: Routes = [
   {
@@ -105,18 +104,8 @@ const usersRoles: Routes = [
     pathMatch: 'full'
   },
   {
-    path: 'users/remove',
-    component: RemoveUserComponent,
-    pathMatch: 'full'
-  },
-  {
     path: 'organizations/:orgId/users/manage',
     component: UsersRolesComponent,
-    pathMatch: 'full'
-  },
-  {
-    path: 'organizations/:orgId/users/remove',
-    component: RemoveUserComponent,
     pathMatch: 'full'
   },
   {
@@ -127,11 +116,6 @@ const usersRoles: Routes = [
   {
     path: 'organizations/:orgId/spaces/:spaceId/users/manage',
     component: UsersRolesComponent,
-    pathMatch: 'full'
-  },
-  {
-    path: 'organizations/:orgId/spaces/:spaceId/users/remove',
-    component: RemoveUserComponent,
     pathMatch: 'full'
   },
   {

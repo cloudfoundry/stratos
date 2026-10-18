@@ -127,7 +127,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     finishButtonText: computed(() => this.applyStartedSignal() ? 'Close' : 'Apply'),
     onEnter: () => this.confirm?.onEnter(),
     submit: async () => {
-      // Two-click apply semantic — see remove-user for the long form.
+      // Two-click apply semantic.
       // First click dispatches the changes and returns ignoreSuccess so
       // the per-row monitor stays visible; second click navigates back.
       if (this.applyStartedSignal()) {

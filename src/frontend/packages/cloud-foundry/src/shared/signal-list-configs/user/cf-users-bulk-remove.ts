@@ -107,7 +107,7 @@ export async function bulkRemoveUsers(deps: BulkRemoveDeps, req: BulkRemoveReque
     return;
   }
 
-  // Permission-filter per change (mirrors RemoveUserComponent).
+  // Permission-filter per change.
   const checks = candidates.map(c => {
     const can$ = c.spaceGuid
       ? deps.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, deps.cfGuid, c.orgGuid, c.spaceGuid)

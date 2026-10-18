@@ -365,23 +365,6 @@ export function createCfOrgSpaceSteppersUrl(
   return route;
 }
 
-export function createCfOrgSpaceUserRemovalUrl(
-  cfGuid: string,
-  orgGuid?: string,
-  spaceGuid?: string,
-): string {
-  let route = `/cloud-foundry/${cfGuid}`;
-  if (orgGuid) {
-    route += `/organizations/${orgGuid}`;
-    if (spaceGuid) {
-      route += `/spaces/${spaceGuid}`;
-    }
-  }
-  route += '/users/remove';
-
-  return route;
-}
-
 export function isServiceInstance(obj: any): IServiceInstance | null {
   return !!obj && !!obj.service_plan_url ? obj as IServiceInstance : null;
 }

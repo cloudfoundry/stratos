@@ -42,7 +42,7 @@ export interface SignalStepHandle {
    * the existing stepper plumbing. Resolving with `{ ignoreSuccess: true }`
    * preserves the legacy `StepOnNextResult.ignoreSuccess` semantic — the
    * step reports success without auto-advancing or emitting the success
-   * snackbar (used by `manage-users` / `remove-user` two-click apply).
+   * snackbar (used by the `manage-users` two-click apply).
    * When omitted the step auto-succeeds — useful for confirmation screens.
    */
   readonly submit?: () => Promise<void | Partial<StepOnNextResult>>;
