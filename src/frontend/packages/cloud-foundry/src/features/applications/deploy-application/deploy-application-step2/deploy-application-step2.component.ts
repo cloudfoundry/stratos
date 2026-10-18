@@ -25,7 +25,6 @@ import {
 } from 'rxjs';
 import {
   catchError,
-  defaultIfEmpty,
   distinctUntilChanged,
   filter,
   map,
@@ -41,7 +40,10 @@ import {
 
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import {
+  StepOnNextFunction,
+  StepOnNextResult,
+} from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { DeployApplicationState, ProjectExists, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
@@ -209,20 +211,37 @@ export class DeployApplicationStep2Component
     if (this.sourceType.group === 'gitscm') {
       const branch = this.repositoryBranch;
       const endpointGuid = this.activeEndpointGuid;
-      this.gitData.getRepository(this.scm, this.repository)
-        .waitForValue$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
-        // A gitscm save needs a resolved repo and branch. The endpoint is
-        // optional: without one the backend clones the repo URL directly.
-        if (!repo || !branch) { return; }
-        this.deployData.saveAppDetails({
-          projectName: this.repository,
-          branch,
-          url: repo.clone_url,
-          accessToken: this.accessToken,
-          commit: this.isRedeploy ? this.commitInfo?.sha : undefined,
-          endpointGuid,
-        }, null);
-      });
+      const data = this.sourceSelectionForm.form.value.fsLocalSource;
+      // A gitscm save needs a resolved repo and branch. The endpoint is
+      // optional: without one the backend clones the repo URL directly.
+      // A redeploy's form is disabled and counts as valid, so a deployed
+      // branch that is gone from the repository is only caught here.
+      if (!branch) {
+        const branchName = this.deployData.deployBranchName();
+        return observableOf({
+          success: false,
+          message: this.isRedeploy && branchName ?
+            `Branch ${branchName} was not found in ${this.repository}.` :
+            `Select a branch to deploy from ${this.repository}.`,
+        });
+      }
+      return this.gitData.getRepository(this.scm, this.repository).waitForValue$.pipe(
+        map((repo): StepOnNextResult => {
+          this.deployData.saveAppDetails({
+            projectName: this.repository,
+            branch,
+            url: repo.clone_url,
+            accessToken: this.accessToken,
+            commit: this.isRedeploy ? this.commitInfo?.sha : undefined,
+            endpointGuid,
+          }, null);
+          return { success: true, data };
+        }),
+        catchError((err: Error) => observableOf({
+          success: false,
+          message: `Unable to fetch ${this.scm.getLabel()} repository ${this.repository}: ${err.message}`,
+        }))
+      );
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
       this.deployData.saveAppDetails({
         projectName: this.gitUrl,
@@ -371,11 +390,12 @@ export class DeployApplicationStep2Component
               this.commitSubscription.unsubscribe();
             }
             if (!commitSha) { return; }
+            // A failed lookup leaves commitInfo unset, so onNext saves no commit.
             this.commitSubscription = this.gitData.getCommit(this.scm, projectInfo.full_name, commitSha)
-              .waitForValue$.pipe(
-                take(1),
-                tap(p => this.commitInfo = p),
-              ).subscribe();
+              .waitForValue$.subscribe({
+                next: p => this.commitInfo = p,
+                error: () => this.commitInfo = undefined,
+              });
           }
         }
       })

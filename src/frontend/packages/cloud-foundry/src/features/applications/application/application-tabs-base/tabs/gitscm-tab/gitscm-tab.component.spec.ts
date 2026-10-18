@@ -8,9 +8,10 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { CommonModule } from '@angular/common';
-import { getGitHubAPIURL, GITHUB_API_URL, GitSCMService } from '@stratosui/git';
+import { getGitHubAPIURL, GITHUB_API_URL, GitDataService, GitResource, GitSCMService } from '@stratosui/git';
 import { TailwindSnackBarService } from '@stratosui/core';
-import { EMPTY, Observable, of } from 'rxjs';
+import { defer, EMPTY, Observable, of } from 'rxjs';
+import { finalize } from 'rxjs/operators';
 
 import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pipe';
 import { AppDetailDataService } from '../../../../../../features/applications/app-detail-data.service';
@@ -103,8 +104,30 @@ describe('GitSCMTabComponent', () => {
     let httpMock: HttpTestingController;
     let error: ReturnType<typeof vi.spyOn>;
 
+    // Every git lookup subscription the tab opens must end: on the lookup's
+    // value, on its error, or when the tab is destroyed. Each resource the
+    // tab reads is wrapped to count the subscriptions still open on it.
+    let open: Record<'repo' | 'commit' | 'branch', number>;
+    const counted = <T>(kind: keyof typeof open, source: Observable<T>) => defer(() => {
+      open[kind]++;
+      return source.pipe(finalize(() => open[kind]--));
+    });
+    const track = <T>(kind: keyof typeof open, resource: GitResource<T>): GitResource<T> => ({
+      ...resource,
+      state$: counted(kind, resource.state$),
+      waitForValue$: counted(kind, resource.waitForValue$),
+    });
+
     beforeEach(async () => {
       await configure(of(project), project);
+      open = { repo: 0, commit: 0, branch: 0 };
+      const gitData = TestBed.inject(GitDataService);
+      const getRepository = gitData.getRepository.bind(gitData);
+      const getCommit = gitData.getCommit.bind(gitData);
+      const getBranch = gitData.getBranch.bind(gitData);
+      vi.spyOn(gitData, 'getRepository').mockImplementation((...a) => track('repo', getRepository(...a)));
+      vi.spyOn(gitData, 'getCommit').mockImplementation((...a) => track('commit', getCommit(...a)));
+      vi.spyOn(gitData, 'getBranch').mockImplementation((...a) => track('branch', getBranch(...a)));
       error = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error');
       httpMock = TestBed.inject(HttpTestingController);
 
@@ -118,7 +141,20 @@ describe('GitSCMTabComponent', () => {
       httpMock.match(() => true);
     });
 
-    it('reports a failed repository lookup once', async () => {
+    it('ends the commit subscriptions when the commit lookup fails', async () => {
+      httpMock.expectOne(repoUrl).flush({ full_name: 'org/repo', html_url: 'h', owner: {} });
+      await fixture.whenStable();
+      httpMock.expectOne(commitUrl).flush('nope', notFound);
+      httpMock.expectOne(branchUrl).flush({ name: 'main', commit: { sha: 'abc' } });
+      await fixture.whenStable();
+
+      expect(open.commit).toBe(0);
+
+      fixture.destroy();
+      expect(open).toEqual({ repo: 0, commit: 0, branch: 0 });
+    });
+
+    it('reports a failed repository lookup once and ends its subscriptions', async () => {
       httpMock.expectOne(repoUrl).flush('nope', notFound);
       await fixture.whenStable();
 
@@ -126,6 +162,9 @@ describe('GitSCMTabComponent', () => {
       httpMock.expectNone(repoUrl);
       expect(error).toHaveBeenCalledTimes(1);
       expect(error).toHaveBeenCalledWith('Unable to fetch GitHub project: Git request failed(404)');
+
+      fixture.destroy();
+      expect(open).toEqual({ repo: 0, commit: 0, branch: 0 });
     });
 
     // The branch head moves with every push, so opening the tab reads it

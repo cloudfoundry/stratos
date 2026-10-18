@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { GitCommit, GitDataService, GitResourceState, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { combineLatest, distinct, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, EMPTY, Observable, of } from 'rxjs';
+import { catchError, combineLatest, distinct, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -154,7 +154,9 @@ export class BuildTabComponent implements OnInit {
         // type because docker/other deploy kinds omit it).
         return this.gitData.getRepository(scm, project.deploySource.project!);
       }),
-      switchMap(repoResource => repoResource.waitForValue$)
+      // A failed lookup leaves the repository links out instead of throwing
+      // into the template's async pipes.
+      switchMap(repoResource => repoResource.waitForValue$.pipe(catchError(() => EMPTY)))
     );
 
     const deploySource$ = observableCombineLatest(

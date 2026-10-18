@@ -221,6 +221,43 @@ describe('GitDataService', () => {
       httpMock.expectOne(url).flush({ name: 'main', commit: { sha: 'abc' } });
     });
 
+    // waitForValue$ is what the deploy wizard and the gitscm tab wait on. It
+    // must end: error when the lookup fails, complete after the value.
+    it('waitForValue$ errors with the message when the lookup fails', async () => {
+      const scm = makeHttpScm('ep-1');
+      const res = service.getCommit(scm, 'org/repo', 'abc');
+      const outcome = firstValueFrom(res.waitForValue$).then(
+        () => 'value',
+        (err: Error) => `error: ${err.message}`,
+      );
+      httpMock.expectOne('https://api.github.com/ep-1/repos/org/repo/commits/abc').flush('nope', notFound);
+
+      const result = await Promise.race([
+        outcome,
+        new Promise(resolve => setTimeout(() => resolve('still waiting'), 50)),
+      ]);
+      expect(result).toMatch(/^error: /);
+    });
+
+    it('waitForValue$ completes after the value', async () => {
+      const scm = makeHttpScm('ep-1');
+      const res = service.getRepository(scm, 'org/repo');
+      const events: string[] = [];
+      const done = new Promise<void>(resolve => {
+        res.waitForValue$.subscribe({
+          next: () => events.push('next'),
+          complete: () => {
+            events.push('complete');
+            resolve();
+          },
+        });
+      });
+      httpMock.expectOne('https://api.github.com/ep-1/repos/org/repo').flush({ full_name: 'org/repo' });
+
+      await Promise.race([done, new Promise(resolve => setTimeout(resolve, 50))]);
+      expect(events).toEqual(['next', 'complete']);
+    });
+
     // github.com and a GitHub Enterprise host (or two GitLab hosts) can both
     // hold `org/repo`; their entries must not be shared.
     it('keeps the same owner/repo on two endpoints apart', async () => {

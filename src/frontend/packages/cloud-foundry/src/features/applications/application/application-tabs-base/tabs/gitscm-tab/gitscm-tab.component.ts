@@ -15,8 +15,9 @@ import {
   GithubCommitAuthorComponent,
 } from '@stratosui/git';
 import { getUnixTime } from 'date-fns';
-import { Observable, Subscription, combineLatest, of } from 'rxjs';
+import { EMPTY, Observable, Subscription, combineLatest, of } from 'rxjs';
 import {
+  catchError,
   distinctUntilChanged,
   filter,
   map,
@@ -203,7 +204,11 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         startWith(true)
       );
 
+      // Completes once the repo lookup settles, without emitting when it
+      // failed, so the one-shot subscriptions below end either way.
       const blockedOnRepo$: Observable<[EnvVarStratosProject, GitMeta]> = this.hasRepo$.pipe(
+        filter(hasRepo => hasRepo !== undefined),
+        take(1),
         filter(hasRepo => !!hasRepo),
         switchMap(() => coreInfo$)
       );
@@ -234,11 +239,14 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         this.snackBarRef = this.snackBar.error(`Unable to fetch ${meta.scm.getLabel()} project: ${errorMessage}`);
       });
 
+      // A failed commit or branch lookup ends these streams without a value:
+      // the template leaves the details out, as it did while they hung.
       this.commit$ = blockedOnRepo$.pipe(
         // strict: git-deploy deploySource always carries commit/branch.
         switchMap(([project, meta]) =>
           this.gitData.getCommit(meta.scm, meta.projectName, project.deploySource.commit!.trim()).waitForValue$
-        )
+        ),
+        catchError(() => EMPTY)
       );
       // Capture the deployed commit's timestamp — the Compare action is only
       // offered for commits newer than the deployed one (see the legacy
@@ -258,6 +266,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
         // strict: a resolved branch carries its head commit; deploySource.commit
         // is present for git-deployed apps.
         map(([branch, [project]]) => branch.commit!.sha === project.deploySource.commit!.trim()),
+        catchError(() => EMPTY)
       );
     });
   }

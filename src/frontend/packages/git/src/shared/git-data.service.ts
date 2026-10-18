@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
 import { observeSignal } from '@stratosui/store';
-import { Observable } from 'rxjs';
-import { filter, map } from 'rxjs/operators';
+import { Observable, of, throwError } from 'rxjs';
+import { filter, map, mergeMap, take } from 'rxjs/operators';
 
 import { getCommitGuid, getRepositoryGuid } from '../store/git-entity-factory';
 import { GitBranch, GitCommit, GitRepo } from '../store/git.public-types';
@@ -28,7 +28,10 @@ export interface GitResource<T> {
   readonly errorMessage: Signal<string>;
   /** Continuous state stream — equivalent to the old `entityObs$`. */
   readonly state$: Observable<GitResourceState<T>>;
-  /** Emits once the value is available — equivalent to the old `waitForEntity$`. */
+  /**
+   * Emits the value once it is available, then completes. Errors with the
+   * lookup's message when the lookup fails, so callers never wait forever.
+   */
   readonly waitForValue$: Observable<T>;
 }
 
@@ -136,8 +139,9 @@ export class GitDataService {
       errorMessage: computed(() => state().errorMessage),
       state$,
       waitForValue$: state$.pipe(
-        filter(s => s.value !== null),
-        map(s => s.value as T)
+        filter(s => s.value !== null || s.error),
+        take(1),
+        mergeMap(s => s.error ? throwError(() => new Error(s.errorMessage)) : of(s.value as T))
       ),
     };
     cache.set(key, resource);

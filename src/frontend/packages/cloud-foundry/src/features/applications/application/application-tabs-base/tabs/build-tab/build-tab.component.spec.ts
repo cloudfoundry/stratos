@@ -135,6 +135,38 @@ describe('BuildTabComponent', () => {
     });
   });
 
+  // The repository links bind gitRepo$ with the async pipe, so a failed
+  // lookup must end the stream rather than throw into the template.
+  describe('with a git deployed project', () => {
+    const project = {
+      deploySource: { type: 'gitscm', scm: 'github', project: 'org/missing', branch: 'main', commit: 'abc', endpointGuid: '' },
+    };
+
+    beforeEach(async () => {
+      await configure({ stratosProject: signal(project) });
+      fixture = TestBed.createComponent(BuildTabComponent);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    });
+
+    it('ends gitRepo$ without an error when the repository lookup fails', async () => {
+      const events: string[] = [];
+      component.gitRepo$.subscribe({
+        next: () => events.push('next'),
+        error: () => events.push('error'),
+        complete: () => events.push('complete'),
+      });
+      await fixture.whenStable();
+      TestBed.inject(HttpTestingController)
+        .expectOne('https://api.github.com/repos/org/missing')
+        .flush('nope', { status: 404, statusText: 'Not Found' });
+      await fixture.whenStable();
+
+      expect(events).not.toContain('error');
+      expect(events).not.toContain('next');
+    });
+  });
+
   // App and env var refreshes hand the tab an equal deploy source again. The
   // git lookups depend only on that source, so a failed lookup is not
   // retried on every refresh.
