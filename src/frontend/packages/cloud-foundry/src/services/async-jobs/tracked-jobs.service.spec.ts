@@ -44,7 +44,7 @@ describe('TrackedJobsService', () => {
     localStorage.clear();
     sessionValid.set(false);
     sessionData.set(null);
-    snackBar = { open: vi.fn(), error: vi.fn() };
+    snackBar = { open: vi.fn(() => ({ dismiss: vi.fn() })), error: vi.fn() };
     TestBed.configureTestingModule({
       providers: [
         provideZonelessChangeDetection(),
@@ -92,6 +92,32 @@ describe('TrackedJobsService', () => {
     await vi.advanceTimersByTimeAsync(0);
     expect(snackBar.open).toHaveBeenLastCalledWith('Service instance "db" created.', 'Dismiss', { duration: 4000 });
     expect(stored('u1')).toEqual([]);
+  });
+
+  // Snackbars stack: the 10 s "still running" message must not outlive the
+  // message that says how the write ended.
+  it('takes the still-running message down when it reports the outcome', async () => {
+    for (const end of [
+      (r: { flush: (b: object, o?: object) => void }) => r.flush(job('j1', 'COMPLETE')),
+      (r: { flush: (b: object, o?: object) => void }) => r.flush(job('j1', 'FAILED', 'the broker said no')),
+      (r: { flush: (b: object, o?: object) => void }) => r.flush({}, { status: 401, statusText: 'Unauthorized' }),
+    ]) {
+      snackBar.open.mockClear();
+      snackBar.error.mockClear();
+      localStorage.setItem('stratos.trackedJobs.u1', JSON.stringify([record('j1', Date.now())]));
+      sessionValid.set(false);
+      TestBed.tick();
+      TestBed.inject(TrackedJobsService);
+      signIn('u1');
+      const running = snackBar.open.mock.results[0].value.dismiss as ReturnType<typeof vi.fn>;
+      expect(running).not.toHaveBeenCalled();
+      end(httpMock.expectOne(jobUrl('j1')));
+      await vi.advanceTimersByTimeAsync(0);
+      expect(running).toHaveBeenCalledOnce();
+      const outcome = [...snackBar.open.mock.invocationCallOrder.slice(1), ...snackBar.error.mock.invocationCallOrder];
+      expect(outcome).toHaveLength(1);
+      expect(running.mock.invocationCallOrder[0]).toBeLessThan(outcome[0]);
+    }
   });
 
   it('reports a failure with the broker\'s reason', async () => {

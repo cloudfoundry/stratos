@@ -13,6 +13,8 @@
   still running and for how long, then how it ended. Signing out while
   one runs says its status will show after you sign in. With several
   tabs open, one tab reports it; another takes over if that tab closes.
+  The "still running" or "carries on in the background" message is taken
+  down when the message saying how it ended appears.
 - Stratos stops following a background operation (a slow broker, a
   delete Cloud Foundry runs as a job) after a set time, 60 minutes by
   default, and says it is still running in Cloud Foundry rather than

@@ -28,7 +28,7 @@ import {
 
 import { safeStringToObj } from '../../../../../../core/src/core/utils.service';
 import { StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { TailwindSnackBarRef, TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult } from '../../../../services/async-jobs/async-job.types';
@@ -103,6 +103,8 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
   readonly maxWaitS = MAX_WAIT_S;
   private answerSlowWrite?: (answer: WaitAnswer) => void;
   private answerCountdown?: ReturnType<typeof setInterval>;
+  // Snackbars stack: the hand-off notice comes down before the outcome shows.
+  private handOffNotice?: TailwindSnackBarRef<unknown>;
   // toObservable() must run inside an injection context — lift to a class
   // field. Reused by selectCreateInstance$ and onNext below.
   private csiState$ = toObservable(this.csiState.state);
@@ -406,14 +408,19 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       if (handedOff) return;
       handedOff = true;
       this.closeSlowWrite('background');
-      this.snackBar.open(
+      this.handOffNotice = this.snackBar.open(
         `${this.writeDescription()} carries on in the background. ${this.whereToWatch()} shows its progress, `
           + 'and a message will say how it ended.',
         'Dismiss', { duration: 10000 },
       );
       // A success reports itself (routeToServices); a failure or unknown
       // result would go to a step nobody is looking at.
-      outcome.then(r => { if (!r.success) this.snackBar.error(r.message ?? 'The operation failed.'); });
+      outcome.then(r => {
+        if (!r.success) {
+          this.handOffNotice?.dismiss();
+          this.snackBar.error(r.message ?? 'The operation failed.');
+        }
+      });
     };
     const stopWatchingDestroy = this.destroyRef.onDestroy(handOff);
     const handedOffResult: StepOnNextResult = { success: true, redirect: true };
@@ -509,6 +516,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       // without this snackbar the user sees the wizard "blink" back to
       // the marketplace with no feedback that the instance / binding
       // actually succeeded.
+      this.handOffNotice?.dismiss();
       this.snackBar.open(successMessage, 'Dismiss', { duration: 4000 });
     }
     return {
