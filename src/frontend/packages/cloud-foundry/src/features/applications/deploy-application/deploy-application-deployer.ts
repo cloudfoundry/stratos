@@ -1,5 +1,4 @@
-import { Injector, signal, WritableSignal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Injector } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { take, catchError, filter, map, share, switchMap, tap } from 'rxjs/operators';
@@ -11,45 +10,18 @@ import {
   OverrideAppDetails,
   SocketEventTypes } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { environment } from '../../../../../core/src/environments/environment.prod';
+import { createSignalWrapper, observeSignal } from '@stratosui/store';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 
-// Helper function to create a signal wrapper compatible with BehaviorSubject API
-// The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
-// while being backed by a Signal for fine-grained reactivity.
-//
-// `equal: () => false` makes every set() emit, restoring BehaviorSubject's
-// "always notify" semantics. The deployer code mutates state objects in place
-// (e.g. fileTransferStatus.filesSent++) and re-emits the same reference;
-// without this, the default Object.is dedupe silently drops every update
-// after the first and the upload progress UI freezes.
-function createSignalWrapper<T>(initialValue: T, injector: Injector) {
-  const _signal = signal<T>(initialValue, { equal: () => false });
-  // Create the observable once during initialization, outside of any reactive context
-  // This prevents NG0602 errors when asObservable() is called from reactive contexts
-  const _observable = toObservable(_signal, { injector });
-
-  const wrapper = Object.assign(
-    // Make it callable like a signal
-    () => _signal(),
-    {
-      // WritableSignal methods
-      set: (value: T) => _signal.set(value),
-      update: (fn: (value: T) => T) => _signal.update(fn),
-      asReadonly: () => _signal.asReadonly(),
-      // BehaviorSubject compatibility methods
-      next: (value: T) => _signal.set(value),
-      getValue: () => _signal(),
-      asObservable: () => _observable }
-  );
-  return wrapper as WritableSignal<T> & {
-    next: (value: T) => void;
-    getValue: () => T;
-    asObservable: () => Observable<T>;
-  };
-}
+// `equal: () => false` on every wrapper below makes each write notify the
+// signal too. The deployer mutates state objects in place (e.g.
+// fileTransferStatus.filesSent++) and re-emits the same reference; the
+// default Object.is dedupe would drop every update after the first and the
+// upload progress UI would freeze.
+const alwaysNotify = { equal: () => false };
 
 export interface DeployApplicationDeployerStatus {
   error: boolean;
@@ -131,6 +103,8 @@ export class DeployApplicationDeployer {
 
   private inputStream: any;
 
+  private deployState$: Observable<DeployApplicationState>;
+
   private isOpen = false;
 
   // The backend can follow a specific close message with a generic one;
@@ -150,13 +124,17 @@ export class DeployApplicationDeployer {
     this.status$ = createSignalWrapper<DeployApplicationDeployerStatus>({
       error: false,
       deploying: false
-    }, this.injector);
+    }, alwaysNotify);
 
-    this.applicationGuid$ = createSignalWrapper<string | null>(null, this.injector);
+    this.applicationGuid$ = createSignalWrapper<string | null>(null, alwaysNotify);
 
-    this.fileTransferStatus$ = createSignalWrapper<FileTransferStatus | undefined>(undefined, this.injector);
+    this.fileTransferStatus$ = createSignalWrapper<FileTransferStatus | undefined>(undefined, alwaysNotify);
 
-    this.messages = createSignalWrapper<string>('', this.injector);
+    this.messages = createSignalWrapper<string>('', alwaysNotify);
+
+    // Built once; each subscription runs its own effect and ends it on
+    // unsubscribe, so repeated open()/close() leaves nothing behind.
+    this.deployState$ = observeSignal(this.injector.get(CfDeployAppDataService).state, this.injector);
   }
 
   updateStatus(error = false, errorMsg?: string) {
@@ -199,9 +177,7 @@ export class DeployApplicationDeployer {
       };
     this.isOpen = true;
     this.closeReported = false;
-    const deployData = this.injector.get(CfDeployAppDataService);
-    const deployState$ = toObservable(deployData.state, { injector: this.injector });
-    this.connectSub = deployState$.pipe(
+    this.connectSub = this.deployState$.pipe(
       filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
         !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       take(1),
@@ -262,7 +238,7 @@ export class DeployApplicationDeployer {
     ).subscribe();
 
     // Watch for updates to the app overrides - use case is app overrides being set after source file/folder upload
-    this.updateSub = deployState$.pipe(
+    this.updateSub = this.deployState$.pipe(
       filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       tap((appDetail) => {
         if (appDetail.applicationOverrides) {

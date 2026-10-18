@@ -1,13 +1,16 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
+import { NEVER } from 'rxjs';
 
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { TailwindSnackBarService } from '@stratosui/core';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
+import { SocketEventTypes } from '../../../../store/types/deploy-application.types';
 import { DeployApplicationStep3Component } from "./deploy-application-step3.component";
 
 describe('DeployApplicationStep3Component', () => {
@@ -32,10 +35,49 @@ describe('DeployApplicationStep3Component', () => {
 
     fixture = TestBed.createComponent(DeployApplicationStep3Component);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('reports a deploy that finishes after the user leaves the page', async () => {
+    const snackBar = TestBed.inject(TailwindSnackBarService);
+    const show = vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => NEVER } as any);
+
+    component.onEnter(undefined as any);
+    await fixture.whenStable();
+    const deployer = component.deployer;
+    const close = vi.spyOn(deployer, 'close');
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
+    await fixture.whenStable();
+
+    // Leave the page mid-deploy, then let the deploy finish.
+    fixture.destroy();
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_COMPLETED, message: '' });
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    expect(show).toHaveBeenCalledWith('Application deployment complete', 'View', 10000, true);
+    expect(close).toHaveBeenCalled();
+  });
+
+  it('reports a deploy that fails after the user leaves the page', async () => {
+    const snackBar = TestBed.inject(TailwindSnackBarService);
+    const show = vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => NEVER } as any);
+
+    component.onEnter(undefined as any);
+    await fixture.whenStable();
+    const deployer = component.deployer;
+    const close = vi.spyOn(deployer, 'close');
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
+    await fixture.whenStable();
+
+    fixture.destroy();
+    deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_PUSH_ERROR, message: 'boom' });
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    expect(show).toHaveBeenCalledWith(expect.stringContaining('Reason: boom'), 'Dismiss');
+    expect(close).toHaveBeenCalled();
   });
 });
