@@ -31,7 +31,12 @@ function makeCluster(name: string): KubeConfigFileCluster {
       server: `https://${name}.example.com`,
     },
     _user: 'admin',
-    _users: [{ name: 'admin', user: { token: 't' }, _authData: { authType: 'token', subType: '', values: {} } as any }],
+    // A cert user, with the auth data parseAuth() gives it
+    _users: [{
+      name: 'admin',
+      user: { 'client-certificate-data': 'cert', 'client-key-data': 'key' },
+      _authData: { authType: 'kube-cert-auth', subType: '', values: { cert: 'cert', certKey: 'key' } },
+    }],
     _selected: true,
     _invalid: false,
     _state: undefined as any,
@@ -45,7 +50,7 @@ function makeCluster(name: string): KubeConfigFileCluster {
 // Row wrappers are typed as Subject-or-signal; these are signal wrappers.
 const read = (wrapper: unknown) => (wrapper as () => unknown)();
 
-const AUTH_DATA = { authType: 'token', authVal: { token: 't' }, systemShared: false, bodyContent: '' };
+const AUTH_DATA = { authType: 'kube-cert-auth', authVal: { cert: 'cert', certKey: 'key' }, systemShared: false, bodyContent: '' };
 
 // Taken before any test spies on it, so a spy can still defer to it.
 const realGetAuthData = KubeConfigAuthHelper.prototype.getAuthDataForConnect;
