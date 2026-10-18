@@ -113,6 +113,9 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** True until the org list fetch resolves (drives the picker spinner). */
   readonly orgsLoading = signal(true);
 
+  /** Set when the org list fetch fails; the picker shows it with a retry. */
+  readonly orgsError = signal<string | null>(null);
+
   /** Orgs whose per-org space fetch is in flight (drives per-section spinner). */
   private readonly spacesLoading = signal<Set<string>>(new Set());
   spacesLoadingFor(orgGuid: string): boolean {
@@ -228,13 +231,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   // --- Lifecycle ---
 
   ngOnInit(): void {
-    // Fetch all orgs, then resolve permissions per org
-    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid).subscribe(orgs => {
-      this.allOrgs.set(orgs);
-      this.resolvePermissions(orgs);
-      this.orgsLoading.set(false);
-    });
-    this.subs.add(orgsSub);
+    this.loadOrgs();
 
     // lockedOrg: seed pickedOrgs from it once orgs load (or immediately if lockedOrg is set)
     if (this.lockedOrg) {
@@ -246,6 +243,28 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+  }
+
+  /**
+   * Fetch all orgs, then resolve permissions per org. The spinner clears on
+   * every outcome: a value, an error, or completion without a value.
+   */
+  loadOrgs(): void {
+    this.orgsLoading.set(true);
+    this.orgsError.set(null);
+    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid).subscribe({
+      next: orgs => {
+        this.allOrgs.set(orgs);
+        this.resolvePermissions(orgs);
+        this.orgsLoading.set(false);
+      },
+      error: () => {
+        this.orgsError.set('Could not load organizations.');
+        this.orgsLoading.set(false);
+      },
+      complete: () => this.orgsLoading.set(false),
+    });
+    this.subs.add(orgsSub);
   }
 
   // --- Permission resolution ---

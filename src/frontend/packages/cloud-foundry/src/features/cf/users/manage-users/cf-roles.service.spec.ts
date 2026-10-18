@@ -107,6 +107,46 @@ describe('CfRolesService', () => {
     req.flush({ resources: [], totalResults: 0 });
   });
 
+  it('fetchOrgs emits an empty list when the endpoint has no orgs', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const result = firstValueFrom(service.fetchOrgs('cf-empty'));
+
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-empty?per_page=500')
+      .flush({ resources: [], totalResults: 0 });
+
+    // combineLatest([]) completes without a value; firstValueFrom would reject.
+    expect(await result).toEqual([]);
+  });
+
+  it('fetchOrgs reports a server error to the caller', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const result = firstValueFrom(service.fetchOrgs('cf-5xx'));
+
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-5xx?per_page=500')
+      .flush('boom', { status: 502, statusText: 'Bad Gateway' });
+
+    await expect(result).rejects.toMatchObject({ status: 502 });
+  });
+
+  it('fetchOrgs fetches again after a failure instead of replaying it', async () => {
+    const service = TestBed.inject(CfRolesService);
+    const failed = firstValueFrom(service.fetchOrgs('cf-retry')).catch(() => 'failed');
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-retry?per_page=500')
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    await failed;
+
+    const retried = firstValueFrom(service.fetchOrgs('cf-retry'));
+    httpMock.expectOne('/pp/v1/cf/orgs/cf-retry?per_page=500')
+      .flush({ resources: [], totalResults: 0 });
+    expect(await retried).toEqual([]);
+
+    // A success stays cached: the next caller gets it without a request.
+    const cached = firstValueFrom(service.fetchOrgs('cf-retry'));
+    httpMock.expectNone('/pp/v1/cf/orgs/cf-retry?per_page=500');
+    expect(await cached).toEqual([]);
+  });
+
+
   it('fetchOrg degrades to error envelope on HTTP failure', async () => {
     const service = TestBed.inject(CfRolesService);
     const emissions = firstValueFrom(
