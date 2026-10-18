@@ -167,6 +167,16 @@ describe('GitSCMTabComponent', () => {
       expect(open).toEqual({ repo: 0, commit: 0, branch: 0 });
     });
 
+    it('requests the commit list once per tab open', async () => {
+      httpMock.expectOne(repoUrl).flush({ full_name: 'org/repo', html_url: 'h', owner: {} });
+      await fixture.whenStable();
+      httpMock.expectOne(commitUrl).flush({ sha: 'abc', commit: { author: { date: '2026-01-01' } } });
+      httpMock.expectOne(branchUrl).flush({ name: 'main', commit: { sha: 'abc' } });
+      await fixture.whenStable();
+
+      expect(httpMock.match(r => r.url.endsWith('/repos/org/repo/commits?sha=main')).length).toBe(1);
+    });
+
     // The branch head moves with every push, so opening the tab reads it
     // afresh instead of reusing what an earlier visit cached.
     it('reads the branch head afresh each time the tab opens', async () => {
