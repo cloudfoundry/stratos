@@ -151,6 +151,14 @@ describe('signal-interop', () => {
       expect(values).toEqual(['a']);
     });
 
+    it('returns the same observable on every asObservable() call', () => {
+      // Templates bind asObservable() directly; a new instance per change
+      // detection pass would resubscribe and replay the last value.
+      const wrapper = createSignalWrapper(0);
+
+      expect(wrapper.asObservable()).toBe(wrapper.asObservable());
+    });
+
     it('delivers every synchronous write to a subscriber', () => {
       const wrapper = createSignalWrapper(0);
       const values: number[] = [];

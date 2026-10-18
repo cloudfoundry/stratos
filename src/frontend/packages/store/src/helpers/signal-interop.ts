@@ -38,6 +38,7 @@ export function combineLatestOrEmpty<T>(sources: Observable<T>[]): Observable<T[
  * asObservable() is backed by a BehaviorSubject updated on every write, so it
  * is synchronous, emits every write (no coalescing per change detection
  * pass), needs no injection context and outlives the view that created it.
+ * It returns the same observable on every call, so a template can bind it.
  *
  * Pass `equal: () => false` when callers mutate a value in place and write
  * the same reference again; the default equality would drop those updates
@@ -46,6 +47,7 @@ export function combineLatestOrEmpty<T>(sources: Observable<T>[]): Observable<T[
 export function createSignalWrapper<T>(initialValue: T, options?: { equal?: ValueEqualityFn<T> }) {
   const _signal = signal<T>(initialValue, options?.equal ? { equal: options.equal } : undefined);
   const _subject = new BehaviorSubject<T>(initialValue);
+  const _observable = _subject.asObservable();
   const write = (value: T) => {
     _signal.set(value);
     _subject.next(value);
@@ -58,7 +60,7 @@ export function createSignalWrapper<T>(initialValue: T, options?: { equal?: Valu
       asReadonly: () => _signal.asReadonly(),
       next: write,
       getValue: () => _signal(),
-      asObservable: () => _subject.asObservable(),
+      asObservable: () => _observable,
     }
   );
   return wrapper as WritableSignal<T> & {
