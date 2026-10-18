@@ -185,17 +185,21 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.deployData.resetState();
     this.destroyDeployer();
     if (this.deployer) {
-      if (!this.deployer.deploying) {
-        this.deployer.close();
-      } else {
+      // A deploy in flight (before or during the push) keeps running and
+      // reports its end
+      if (this.deployer.inFlight) {
         this.setupCompletionNotification();
+      } else {
+        this.deployer.close();
       }
     }
   }
 
   private setupCompletionNotification() {
+    // status$ replays its current value; wait for the reported close, which
+    // every end of a deploy (including a lost connection) produces
     this.deployer.status$.asObservable().pipe(
-      filter(status => !status.deploying),
+      filter(() => this.deployer.finished),
       take(1)
     ).subscribe(status => {
       if (status.error) {

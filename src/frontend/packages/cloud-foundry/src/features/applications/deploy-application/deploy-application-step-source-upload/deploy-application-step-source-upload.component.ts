@@ -63,9 +63,10 @@ export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
     return observableOf({ success: true, data: this.deployer });
   }
 
-  // A running push belongs to the deploy step, which reports its end
+  // A deploy the deploy step started belongs to it, which reports its end;
+  // an upload the deploy step never started is cancelled
   ngOnDestroy() {
-    if (this.deployer && !this.deployer.deploying) {
+    if (this.deployer && !this.deployer.inFlight) {
       this.deployer.close();
     }
   }

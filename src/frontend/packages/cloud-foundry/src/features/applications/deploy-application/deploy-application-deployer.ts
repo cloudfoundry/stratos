@@ -111,6 +111,21 @@ export class DeployApplicationDeployer {
   // only the first close of a deploy is reported
   private closeReported = false;
 
+  // A remote source deploys as soon as the socket opens; a local source
+  // only once deploy() acknowledges the upload
+  private started = false;
+
+  // Started, connected and not yet ended by a reported close. A deploy in
+  // flight reports its end even after the deploy step is gone; one still
+  // waiting to connect never will, as leaving clears its deploy details.
+  get inFlight() {
+    return this.isOpen && this.started && !!this.msgSub && !this.msgSub.closed && !this.closeReported;
+  }
+
+  get finished() {
+    return this.closeReported;
+  }
+
   public fsFileInfo!: FileScannerInfo;
 
   private fileTransfers: any;
@@ -177,6 +192,7 @@ export class DeployApplicationDeployer {
       };
     this.isOpen = true;
     this.closeReported = false;
+    this.started = !this.fsFileInfo;
     this.connectSub = this.deployState$.pipe(
       filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
         !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
@@ -227,12 +243,18 @@ export class DeployApplicationDeployer {
 
         // Buffer messages until each newline character
         let b = '';
-        this.msgSub = buffer.subscribe(m => {
-          b = b + m;
-          if (b.endsWith('\n')) {
-            this.messages.next(b);
-            b = '';
-          }
+        this.msgSub = buffer.subscribe({
+          next: m => {
+            b = b + m;
+            if (b.endsWith('\n')) {
+              this.messages.next(b);
+              b = '';
+            }
+          },
+          // The socket ended (errors end it too) without a close message.
+          // close() unsubscribes, which does not get here.
+          complete: () => this.onClose({}, 'Deploy Failed - Connection lost',
+            'The connection to the server was lost before the deploy finished.'),
         });
       })
     ).subscribe();
@@ -249,6 +271,7 @@ export class DeployApplicationDeployer {
   }
 
   deploy() {
+    this.started = true;
     // After the source has been sent, acknowledge the wait
     const msg = {
       message: '',
@@ -473,7 +496,7 @@ export class DeployApplicationDeployer {
     this.deploying = false;
     this.updateStatus(
       error,
-      error ? `${error}\nReason: ${log.message}` : undefined
+      error && log.message ? `${error}\nReason: ${log.message}` : error || undefined
     );
   }
 

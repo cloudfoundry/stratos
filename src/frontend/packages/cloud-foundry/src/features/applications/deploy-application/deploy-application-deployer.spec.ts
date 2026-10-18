@@ -1,16 +1,63 @@
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApplicationRef, EnvironmentInjector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { Subject, of } from 'rxjs';
 
 import { SocketEventTypes } from '../../../store/types/deploy-application.types';
+import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
+import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DeployApplicationDeployer } from './deploy-application-deployer';
+
+// Each connection gets a server stream the test drives
+const socket = vi.hoisted(() => ({ server: undefined as any }));
+vi.mock('rxjs-websockets', () => ({
+  default: () => {
+    socket.server = new Subject<string>();
+    return of(() => socket.server);
+  },
+}));
 
 describe('DeployApplicationDeployer', () => {
   let deployer: DeployApplicationDeployer;
 
   beforeEach(() => {
-    deployer = new DeployApplicationDeployer({} as CfOrgSpaceDataService, TestBed.inject(EnvironmentInjector));
+    const orgSpace = { orgList: () => [], spaceList: () => [] } as unknown as CfOrgSpaceDataService;
+    deployer = new DeployApplicationDeployer(orgSpace, TestBed.inject(EnvironmentInjector));
+  });
+
+  describe('when the connection ends', () => {
+    beforeEach(async () => {
+      socket.server = undefined;
+      TestBed.inject(CfDeployAppDataService).setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
+      deployer.fsFileInfo = {} as FileScannerInfo;
+      deployer.open();
+      await TestBed.inject(ApplicationRef).whenStable();
+      expect(socket.server).toBeDefined();
+    });
+
+    it('reports a failure when no close message came first', () => {
+      socket.server.complete();
+
+      expect(deployer.streamTitle()).toBe('Deploy Failed - Connection lost');
+      expect(deployer.status$().error).toBeTruthy();
+      expect(deployer.status$().errorMsg).toBe('The connection to the server was lost before the deploy finished.');
+    });
+
+    it('keeps the reported close when the server then closes the connection', () => {
+      socket.server.next(JSON.stringify({ type: SocketEventTypes.CLOSE_SUCCESS, message: '' }));
+      socket.server.complete();
+
+      expect(deployer.status$().error).toBeFalsy();
+      expect(deployer.streamTitle()).not.toBe('Deploy Failed - Connection lost');
+    });
+
+    it('reports nothing when the deployer itself closes the connection', () => {
+      deployer.close();
+      socket.server.complete();
+
+      expect(deployer.status$().error).toBe(false);
+    });
   });
 
   it('keeps the specific failure when a generic close follows it', () => {

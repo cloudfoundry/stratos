@@ -12,7 +12,7 @@ import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCFEntities } from '../../../../cf-entity-generator';
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
-import { OverrideAppDetails } from '../../../../store/types/deploy-application.types';
+import { OverrideAppDetails, SocketEventTypes } from '../../../../store/types/deploy-application.types';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DeployApplicationStepSourceUploadComponent } from "./deploy-application-step-source-upload.component";
 
@@ -62,33 +62,41 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
   });
 
   describe('deployer ownership on destroy', () => {
-    const fileInfo = {} as FileScannerInfo;
     let closeSpy: ReturnType<typeof vi.spyOn>;
 
-    beforeEach(() => {
-      vi.spyOn(component.deployer, 'open').mockImplementation(() => {});
+    beforeEach(async () => {
+      // Enter with the deploy target set, so the deployer connects
+      TestBed.inject(CfDeployAppDataService).setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
+      component.onEnter({} as FileScannerInfo);
+      await TestBed.inject(ApplicationRef).whenStable();
       closeSpy = vi.spyOn(component.deployer, 'close');
     });
 
-    it('closes the deployer when no push is running', () => {
-      component.onEnter(fileInfo);
+    it('closes the deployer while only the upload has run', () => {
       fixture.destroy();
       expect(closeSpy).toHaveBeenCalled();
     });
 
     it('closes a handed-on deployer the deploy step never started', () => {
-      component.onEnter(fileInfo);
       component.onNext(0, null as any).subscribe();
       fixture.destroy();
       expect(closeSpy).toHaveBeenCalled();
     });
 
-    it('leaves the deployer open while its push is running', () => {
-      component.onEnter(fileInfo);
+    it('leaves the deployer open once the deploy step started it, before the push', () => {
       component.onNext(0, null as any).subscribe();
-      component.deployer.deploying = true;
+      component.deployer.deploy();
       fixture.destroy();
       expect(closeSpy).not.toHaveBeenCalled();
+      component.deployer.close();
+    });
+
+    it('closes a started deploy that has finished', () => {
+      component.onNext(0, null as any).subscribe();
+      component.deployer.deploy();
+      component.deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_FAILURE, message: 'boom' });
+      fixture.destroy();
+      expect(closeSpy).toHaveBeenCalled();
     });
   });
 
@@ -105,7 +113,7 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
     expect(component.deployer.applicationOverrides.name).toBe('first');
 
     const deployer = component.deployer;
-    deployer.deploying = true;
+    deployer.deploy();
     fixture.destroy();
     deployData.saveAppOverrides(overrides('second'));
     await appRef.whenStable();
