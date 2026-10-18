@@ -10,6 +10,11 @@ import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
  * it safe with a long-lived injector such as the root one, where
  * toObservable() would leave an effect running forever per call.
  *
+ * A component's injector makes the effect a view effect: it ends with that
+ * view, manualCleanup or not, and the observable then goes silent without
+ * completing. Pass an EnvironmentInjector when the subscriber can outlive
+ * the view.
+ *
  * Timing matches toObservable(): the first value comes from the effect's
  * first run, not synchronously on subscribe.
  */
