@@ -415,6 +415,63 @@ describe('DeployApplicationStep2Component', () => {
     });
   });
 
+  // A redeploy looks up the commit recorded for the deployed app. The lookup
+  // only feeds the commit card; the recorded SHA is what gets deployed, so a
+  // slow or failed lookup must not fall back to the branch HEAD.
+  describe('redeploy commit', () => {
+    const githubType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
+    const branch = { name: 'main', projectName: 'o/r', commit: { sha: 'head000' } } as any;
+    let commit$: Subject<any>;
+
+    beforeEach(async () => {
+      TestBed.inject(ApplicationDeploySourceTypes).types$ = of([githubType]);
+      const gitData = TestBed.inject(GitDataService);
+      vi.spyOn(gitData, 'getBranches').mockReturnValue(of([branch]));
+      vi.spyOn(gitData, 'getRepository')
+        .mockReturnValue({ waitForValue$: of({ clone_url: 'https://github.com/o/r.git' }) } as any);
+      commit$ = new Subject();
+      vi.spyOn(gitData, 'getCommit').mockReturnValue({ waitForValue$: commit$ } as any);
+
+      const deployData = TestBed.inject(CfDeployAppDataService);
+      deployData.setCfDetails({ cloudFoundry: 'cf-1', org: 'org-1', space: 'space-1' });
+      deployData.setSourceType(githubType);
+      deployData.setDeployBranch('main');
+      deployData.setDeployCommit('rec1234abcd');
+
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      fixture.componentRef.setInput('isRedeploy', true);
+      await fixture.whenStable();
+      // The repository lookup resolves after the step is set up, as it does
+      // in the app; that starts the branch and then the commit lookup.
+      const repo = { full_name: 'o/r', html_url: 'https://github.com/o/r', owner: { avatar_url: '' } };
+      deployData.checkProjectExists({ getRepository: () => of(repo) } as any, 'o/r');
+      await fixture.whenStable();
+      expect(gitData.getCommit).toHaveBeenCalledWith(expect.anything(), 'o/r', 'rec1234abcd');
+    });
+
+    it('shows the commit card once the lookup resolves', async () => {
+      commit$.next({ sha: 'rec1234abcd', commit: { message: 'Recorded change' } });
+      await fixture.whenStable();
+
+      const card = fixture.nativeElement.querySelector('.deploy-step2-form__commit');
+      expect(card?.textContent).toContain('Recorded change');
+    });
+
+    it('saves the recorded commit when Next is pressed before the lookup resolves', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      await firstValueFrom(component.onNext(0, null as any));
+      expect(save).toHaveBeenCalledWith(expect.objectContaining({ commit: 'rec1234abcd' }), null);
+    });
+
+    it('saves the recorded commit when the lookup fails', async () => {
+      commit$.error(new Error('gone'));
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      await firstValueFrom(component.onNext(0, null as any));
+      expect(save).toHaveBeenCalledWith(expect.objectContaining({ commit: 'rec1234abcd' }), null);
+    });
+  });
+
   describe('applyGithubEnterpriseAndToken — form wiring', () => {
     let scmSpy: {
       setPublicApi: ReturnType<typeof vi.fn>;

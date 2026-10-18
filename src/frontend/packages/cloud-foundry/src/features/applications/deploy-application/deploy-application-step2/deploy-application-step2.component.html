@@ -139,7 +139,7 @@
                         }
                       </select>
                     </div>
-                    @if (isRedeploy && commitInfo) {
+                    @if (isRedeploy && commitInfo(); as commitInfo) {
                       <div
                         class="deploy-step2-form__project-info-group deploy-step2-form__commit">
                         <div>

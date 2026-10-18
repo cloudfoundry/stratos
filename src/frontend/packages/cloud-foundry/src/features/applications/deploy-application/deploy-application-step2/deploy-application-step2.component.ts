@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -91,7 +91,12 @@ export class DeployApplicationStep2Component
 
   @Input() isRedeploy = false;
 
-  commitInfo?: GitCommit;
+  // Display details of the redeploy commit. A signal, so the OnPush view
+  // repaints when the lookup resolves.
+  commitInfo = signal<GitCommit | undefined>(undefined);
+  // The SHA a redeploy saves. Known before the lookup, which only adds the
+  // display details, so Next does not wait on or depend on the lookup.
+  private redeployCommitSha?: string;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$!: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
@@ -232,7 +237,7 @@ export class DeployApplicationStep2Component
             branch,
             url: repo.clone_url,
             accessToken: this.accessToken,
-            commit: this.isRedeploy ? this.commitInfo?.sha : undefined,
+            commit: this.isRedeploy ? this.redeployCommitSha : undefined,
             endpointGuid,
           }, null);
           return { success: true, data };
@@ -385,16 +390,18 @@ export class DeployApplicationStep2Component
 
           if (this.isRedeploy) {
             const commitSha = commit || branch.commit?.sha;
+            this.redeployCommitSha = commitSha;
 
             if (this.commitSubscription) {
               this.commitSubscription.unsubscribe();
             }
             if (!commitSha) { return; }
-            // A failed lookup leaves commitInfo unset, so onNext saves no commit.
+            // A failed lookup only hides the commit card; onNext still saves
+            // commitSha, and the backend reports a commit that is gone.
             this.commitSubscription = this.gitData.getCommit(this.scm, projectInfo.full_name, commitSha)
               .waitForValue$.subscribe({
-                next: p => this.commitInfo = p,
-                error: () => this.commitInfo = undefined,
+                next: p => this.commitInfo.set(p),
+                error: () => this.commitInfo.set(undefined),
               });
           }
         }
@@ -417,7 +424,8 @@ export class DeployApplicationStep2Component
           if (this.scm && newScm.getType() !== this.scm.getType()) {
             // User changed the SCM type, so reset the project and branch
             this.repository = '';
-            this.commitInfo = undefined;
+            this.commitInfo.set(undefined);
+            this.redeployCommitSha = undefined;
             this.repositoryBranch = undefined;
             this.deployData.setBranch(null);
             this.deployData.projectDoesntExist('');
