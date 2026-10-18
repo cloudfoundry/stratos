@@ -64,6 +64,8 @@
 - A setting given a value that does not parse (text for a number, say)
   still stops the backend at startup, and the error now names the
   setting.
+- Screen readers read out pop-up messages, errors first, and name their
+  close button. They were silent before.
 - ASYNC_JOB_TRACKING_LIMIT_IN_MINS=0 follows jobs for 1 minute, as for
   any value under 1, rather than the 60-minute default it got by being
   mistaken for unset.
