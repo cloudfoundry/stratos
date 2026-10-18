@@ -43,6 +43,10 @@ export interface GitResource<T> {
  * `scmType` / `projectName` / `guid` / `endpointGuid` onto each entity), and
  * holds the result in per-resource signals cached by guid so repeated reads of
  * the same resource share a single fetch (mirroring the entity-store dedupe).
+ *
+ * The cache is keyed by the host as well as the guid: the guid only names the
+ * SCM type and project, and two hosts (github.com and a GitHub Enterprise
+ * server, or two GitLab servers) can each hold the same `owner/repo`.
  */
 @Injectable({ providedIn: 'root' })
 export class GitDataService {
@@ -97,7 +101,8 @@ export class GitDataService {
     scm: GitSCM,
     fetch: () => Observable<T>
   ): GitResource<T> {
-    const existing = cache.get(guid);
+    const key = `${GitDataService.hostKey(scm)}::${guid}`;
+    const existing = cache.get(key);
     if (existing) {
       return existing;
     }
@@ -121,7 +126,7 @@ export class GitDataService {
         map(s => s.value as T)
       ),
     };
-    cache.set(guid, resource);
+    cache.set(key, resource);
 
     fetch().subscribe({
       next: value => state.set({ value, fetching: false, error: false, errorMessage: '' }),
@@ -134,6 +139,16 @@ export class GitDataService {
     });
 
     return resource;
+  }
+
+  /**
+   * The host an SCM's requests go to. A registered endpoint is proxied by the
+   * backend, so its guid names the host; without one the SCM calls its public
+   * API URL directly (the default host, or a base URL typed into the deploy
+   * wizard).
+   */
+  private static hostKey(scm: GitSCM): string {
+    return scm.endpointGuid || scm.getPublicApi();
   }
 
   private stampRepo(repo: GitRepo, scm: GitSCM, projectName: string, guid: string): GitRepo {

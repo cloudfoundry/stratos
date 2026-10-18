@@ -1,8 +1,8 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { HttpClient, provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom, Observable, of, throwError } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 
@@ -36,6 +36,26 @@ function makeScm(overrides: Partial<GitSCM> = {}): GitSCM {
     ...overrides,
   } as GitSCM;
 }
+
+/**
+ * A GitSCM whose lookups go through the HttpClient the service passes in, so
+ * HttpTestingController holds each request until the test flushes it.
+ * `host` stands in for the API base the real SCMs derive from the endpoint
+ * or the public API URL.
+ */
+function makeHttpScm(endpointGuid: string, host = 'https://api.github.com'): GitSCM {
+  return makeScm({
+    endpointGuid,
+    getPublicApi: () => host,
+    getRepository: (http: HttpClient, p: string) => http.get<GitRepo>(`${host}/${endpointGuid}/repos/${p}`),
+    getBranch: (http: HttpClient, p: string, b: string) =>
+      http.get<GitBranch>(`${host}/${endpointGuid}/repos/${p}/branches/${b}`),
+    getCommit: (http: HttpClient, p: string, sha: string) =>
+      http.get<GitCommit>(`${host}/${endpointGuid}/repos/${p}/commits/${sha}`),
+  });
+}
+
+const notFound = { status: 404, statusText: 'Not Found' };
 
 describe('GitDataService', () => {
   let service: GitDataService;
@@ -131,6 +151,44 @@ describe('GitDataService', () => {
       expect(commit.projectName).toBe('org/repo');
       expect(commit.endpointGuid).toBe('ep-1');
       expect(commit.guid).toBe('github--org/repo--abc');
+    });
+  });
+
+  describe('with requests held by the HTTP testing backend', () => {
+    let httpMock: HttpTestingController;
+
+    beforeEach(() => {
+      httpMock = TestBed.inject(HttpTestingController);
+    });
+
+    afterEach(() => {
+      httpMock.verify();
+    });
+
+    // github.com and a GitHub Enterprise host (or two GitLab hosts) can both
+    // hold `org/repo`; their entries must not be shared.
+    it('keeps the same owner/repo on two endpoints apart', async () => {
+      const a = service.getRepository(makeHttpScm('ep-a'), 'org/repo');
+      const b = service.getRepository(makeHttpScm('ep-b'), 'org/repo');
+
+      expect(b).not.toBe(a);
+      httpMock.expectOne('https://api.github.com/ep-a/repos/org/repo').flush({ full_name: 'org/repo', html_url: 'a' });
+      httpMock.expectOne('https://api.github.com/ep-b/repos/org/repo').flush({ full_name: 'org/repo', html_url: 'b' });
+      expect((await firstValueFrom(a.waitForValue$)).html_url).toBe('a');
+      expect((await firstValueFrom(b.waitForValue$)).html_url).toBe('b');
+    });
+
+    it('keeps the same owner/repo on two hosts with no endpoint apart', () => {
+      const ghe = 'https://github.example.com/api/v3';
+      service.getBranch(makeHttpScm('', 'https://api.github.com'), 'org/repo', 'main');
+      service.getBranch(makeHttpScm('', ghe), 'org/repo', 'main');
+      service.getCommit(makeHttpScm('', 'https://api.github.com'), 'org/repo', 'abc');
+      service.getCommit(makeHttpScm('', ghe), 'org/repo', 'abc');
+
+      httpMock.expectOne('https://api.github.com//repos/org/repo/branches/main').flush({ name: 'main' });
+      httpMock.expectOne(`${ghe}//repos/org/repo/branches/main`).flush({ name: 'main' });
+      httpMock.expectOne('https://api.github.com//repos/org/repo/commits/abc').flush({ sha: 'abc' });
+      httpMock.expectOne(`${ghe}//repos/org/repo/commits/abc`).flush({ sha: 'abc' });
     });
   });
 });
