@@ -177,7 +177,7 @@ export class KubeConfigImportComponent implements OnDestroy {
     const sub = reg.actionState.asObservable().subscribe((progress: IActionMonitorComponentState) => {
       // Not sure what the status is used for?
       reg.status = progress;
-      if (progress.error && progress.message) {
+      if (progress.error) {
         // Mark all dependency jobs as skip
         next.forEach(action => {
           if (action.depends === reg) {
@@ -186,7 +186,7 @@ export class KubeConfigImportComponent implements OnDestroy {
             action.state.next({ message: 'Skipping action as endpoint could not be registered', warning: true });
           }
         });
-        reg.state.next({ message: progress.message, error: true });
+        reg.state.next({ message: progress.message || 'Failed to register endpoint', error: true });
       }
       if (progress.completed) {
         if (!progress.error) {

@@ -139,5 +139,20 @@ describe('KubeConfigImportComponent', () => {
       expect(stubSignalConfig.register).toHaveBeenCalledTimes(2);
       expect(connect).toHaveBeenCalledTimes(1);
     });
+
+
+    it('skips the connect of a cluster whose register fails without a message', async () => {
+      vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect').mockReturnValue(AUTH_DATA as any);
+      stubSignalConfig.register.mockResolvedValueOnce({ busy: false, error: true, message: '' });
+
+      const actions = await runImport([makeCluster('a'), makeCluster('b')]);
+
+      expect(read(actions[0].state)).toEqual({ message: 'Failed to register endpoint', error: true });
+      expect(actions[1].action).toBeNull();
+      expect(read(actions[1].state)).toEqual({ message: 'Skipping action as endpoint could not be registered', warning: true });
+      expect(stubSignalConfig.register).toHaveBeenCalledTimes(2);
+      expect(connect).toHaveBeenCalledTimes(1);
+      expect(read(actions[3].actionState)).toMatchObject({ error: false, completed: true });
+    });
   });
 });
