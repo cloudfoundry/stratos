@@ -182,6 +182,45 @@ func TestTamperedCookieYieldsNewSession(t *testing.T) {
 	}
 }
 
+// TestDeadCookieSavesNewSession: a cookie whose row is gone (logged out
+// elsewhere, cleaned up, a table recreated by migration) must give a fresh
+// session that saves, not an update of the missing row that saves nothing.
+// On a CF-hosted console the hosting middleware loads the session before the
+// login handler, so the login itself goes through this path.
+func TestDeadCookieSavesNewSession(t *testing.T) {
+	store, db := openStore(t)
+	cookie := saveNew(t, store, map[interface{}]interface{}{"user_id": "abc-123"})
+	if _, err := db.Exec("DELETE FROM sessions"); err != nil {
+		t.Fatal(err)
+	}
+
+	req := requestWith(cookie)
+	session, err := store.New(req, cookieName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	session.Values["user_id"] = "def-456"
+	rec := httptest.NewRecorder()
+	if err := store.Save(req, rec, session); err != nil {
+		t.Fatal(err)
+	}
+	if n := rowCount(t, db); n != 1 {
+		t.Fatalf("saving over a dead cookie left %d session rows, want 1", n)
+	}
+
+	cookies := rec.Result().Cookies()
+	if len(cookies) != 1 {
+		t.Fatalf("expected 1 cookie, got %d", len(cookies))
+	}
+	loaded, err := store.New(requestWith(cookies[0]), cookieName)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got := loaded.Values["user_id"]; got != "def-456" {
+		t.Errorf("user_id = %v, want def-456", got)
+	}
+}
+
 // TestPostgresStatements pins the PG-specific split: $N placeholders survive
 // only there, and the insert path appends RETURNING id because lib/pq has no
 // LastInsertId.
