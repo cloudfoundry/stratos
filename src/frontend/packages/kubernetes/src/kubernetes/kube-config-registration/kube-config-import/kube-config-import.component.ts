@@ -256,7 +256,7 @@ export class KubeConfigImportComponent implements OnDestroy {
           busy: false,
           error: true,
           completed: true,
-          message: err?.message ?? 'Failed to connect endpoint',
+          message: err?.message || 'Failed to connect endpoint',
         }),
       }));
 
@@ -265,7 +265,7 @@ export class KubeConfigImportComponent implements OnDestroy {
         take(1)
       ).subscribe((status: IActionMonitorComponentState) => {
         if (status.error) {
-          connect.state.next({ message: status.message, error: true });
+          connect.state.next({ message: status.message || 'Failed to connect endpoint', error: true });
         }
         this.processAction(next);
       }));

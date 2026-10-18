@@ -136,6 +136,27 @@ describe('KubeConfigImportComponent', () => {
       expect(connect).toHaveBeenCalledTimes(2);
     });
 
+    it('shows a fallback when a connect fails without a message', async () => {
+      vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect').mockReturnValue(AUTH_DATA as any);
+      connect.mockResolvedValueOnce({ busy: false, error: true, message: '' });
+
+      const actions = await runImport([makeCluster('a'), makeCluster('b')]);
+
+      expect(read(actions[1].state)).toEqual({ message: 'Failed to connect endpoint', error: true });
+      expect(connect).toHaveBeenCalledTimes(2);
+    });
+
+    it('shows a fallback when a connect rejects without a message', async () => {
+      vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect').mockReturnValue(AUTH_DATA as any);
+      connect.mockRejectedValueOnce(new Error(''));
+
+      const actions = await runImport([makeCluster('a'), makeCluster('b')]);
+
+      expect(read(actions[1].actionState)).toMatchObject({ error: true, completed: true, message: 'Failed to connect endpoint' });
+      expect(read(actions[1].state)).toEqual({ message: 'Failed to connect endpoint', error: true });
+      expect(connect).toHaveBeenCalledTimes(2);
+    });
+
     it('moves on when a cluster has no usable auth data', async () => {
       vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect')
         .mockReturnValueOnce(null)
