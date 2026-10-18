@@ -1,6 +1,7 @@
 import { APIRequestContext, Page, request as playwrightRequest } from '@playwright/test';
 import { test, expect } from '../../fixtures/test-base';
 import { CFApiHelper } from '../../helpers/cf-api.helper';
+import { TestBroker, next, pick } from '../../helpers/service-wizard.helper';
 
 /**
  * Service instance writes through the create wizard must end the same way
@@ -15,12 +16,6 @@ import { CFApiHelper } from '../../helpers/cf-api.helper';
  * back to its default mode afterwards.
  */
 
-interface TestBroker {
-  url: string;
-  offering: string;
-  plan: string;
-}
-
 const RESPONSE_MODES = ['sync', 'async'] as const;
 
 test.describe.configure({ mode: 'serial' });
@@ -31,19 +26,6 @@ test.skip(({ browserName }) => browserName !== 'chromium', 'runs in one browser:
 async function setBrokerMode(api: APIRequestContext, broker: TestBroker, mode: string): Promise<void> {
   const res = await api.post(`${broker.url}/admin/setResponseMode`, { data: { mode } });
   expect(res.ok(), `set broker response mode ${mode}`).toBe(true);
-}
-
-/** Opens a select in the current wizard step and picks the option named `name`. */
-async function pick(page: Page, index: number, name: string): Promise<void> {
-  await page.locator('.steppers [role=combobox]').nth(index).click();
-  const exact = new RegExp(`^\\s*${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\s*$`);
-  await page.locator('[role=listbox] app-option:visible').filter({ hasText: exact }).first().click();
-}
-
-async function next(page: Page, label: 'Next' | 'Finish' = 'Next'): Promise<void> {
-  const button = page.getByRole('button', { name: label });
-  await expect(button).toBeEnabled({ timeout: 15000 });
-  await button.click();
 }
 
 async function waitForInstance(cfApi: CFApiHelper, spaceGuid: string, name: string) {
