@@ -1,6 +1,7 @@
 import { ApplicationRef, provideZonelessChangeDetection, signal, computed } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, take } from 'rxjs';
+import { timeout } from 'rxjs/operators';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 /**
@@ -171,6 +172,17 @@ describe('ApplicationService (facade shim)', () => {
     const v = await firstValueFrom(svc.app$.pipe(take(1)));
     expect(v.entity).not.toBeUndefined();
     expect(v.entity?.entity?.name).toBe('my-app');
+  });
+
+  // application$ attaches the endpoint model. It must still emit the app
+  // when the app signal settles before the endpoints signal does.
+  it('application$ emits an app that is already loaded', async () => {
+    dataStub._app.set({
+      metadata: { guid: APP, created_at: '', updated_at: '', url: '' },
+      entity: { name: 'my-app', state: 'STARTED', space_guid: 'sp-1' },
+    });
+    const v = await firstValueFrom(svc.application$.pipe(timeout(1000)));
+    expect(v.app.entity.name).toBe('my-app');
   });
 
   it('app$ reflects loading state', async () => {
