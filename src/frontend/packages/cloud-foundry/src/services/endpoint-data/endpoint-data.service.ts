@@ -20,6 +20,9 @@ import {
 } from './stratos-types';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
+// Matches the per_page of the backend's ?return=recent apps call.
+const RECENT_APPS_COUNT = 10;
+
 export class EndpointDataService {
   // Counts + recent apps populated by load() (home card fast path).
   private readonly _orgCount = signal<number>(0);
@@ -451,8 +454,11 @@ export class EndpointDataService {
       (s as { guid?: string }).guid === guid ? { ...s, ...patch } : s));
   }
 
+  // The app mutators keep recentApps in step with apps, so the home card's
+  // recent list shows a create/update/delete without another load().
   removeApp(guid: string): void {
     this._apps.update(curr => curr.filter(a => (a as { guid?: string }).guid !== guid));
+    this._recentApps.update(curr => curr.filter(a => a.guid !== guid));
     this._appCount.update(n => Math.max(0, n - 1));
   }
   addApp(app: StApp): void {
@@ -461,11 +467,27 @@ export class EndpointDataService {
       if (idx >= 0) { const next = [...curr]; next[idx] = app; return next; }
       return [...curr, app];
     });
+    this.upsertRecentApp(app);
     this._appCount.update(n => n + 1);
   }
   updateApp(guid: string, patch: Partial<StApp>): void {
     this._apps.update(curr => curr.map(a =>
       (a as { guid?: string }).guid === guid ? { ...a, ...patch } : a));
+    // An update bumps updatedAt, so an app outside the recent list can join
+    // it — but only when the full list holds the whole record to add.
+    const recent = this._recentApps().find(a => a.guid === guid);
+    const app = recent ? { ...recent, ...patch } : this._apps().find(a => a.guid === guid);
+    if (app) {
+      this.upsertRecentApp(app);
+    }
+  }
+
+  // Mirrors the backend's ?return=recent: newest updatedAt first, capped.
+  private upsertRecentApp(app: StApp): void {
+    const updated = (a: StApp) => Date.parse(a.updatedAt) || 0;
+    this._recentApps.update(curr => [app, ...curr.filter(a => a.guid !== app.guid)]
+      .sort((a, b) => updated(b) - updated(a))
+      .slice(0, RECENT_APPS_COUNT));
   }
 
   removeServiceInstance(guid: string): void {
