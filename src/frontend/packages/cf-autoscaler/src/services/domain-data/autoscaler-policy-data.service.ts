@@ -129,17 +129,15 @@ export class AutoscalerPolicyDataService {
     const headers = this.headers(endpointGuid);
     try {
       await firstValueFrom(this.http.delete(this.url(appGuid), { headers }));
-      this.patch(endpointGuid, appGuid, {
-        policy: null,
-        deleting: false,
-        deletionError: null,
-        noPolicy: true,
-      });
     } catch (err) {
       const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { deleting: false, deletionError: message });
       throw err;
     }
+    this.patch(endpointGuid, appGuid, { deleting: false, deletionError: null });
+    // The autoscaler applies the service instance's default policy, if it
+    // has one, in place of the detached one; load what is now in force.
+    await this.load(endpointGuid, appGuid);
   }
 
   private url(appGuid: string): string {
