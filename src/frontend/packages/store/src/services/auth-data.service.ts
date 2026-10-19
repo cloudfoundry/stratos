@@ -288,10 +288,14 @@ export class AuthDataService {
     });
   }
 
-  /** RESET_AUTH — back to the default state. */
+  /**
+   * RESET_AUTH — back to the default state, but settled. The default starts
+   * verifying for app init; nothing verifies again after a reset, so keeping
+   * that flag would hold the auth guard and hang every later navigation.
+   */
   private resetAuth(): void {
     this.prevLoggedIn = false;
-    this._auth.set(defaultAuthState);
+    this._auth.set({ ...defaultAuthState, verifying: false });
   }
 
   private isDomainMismatch(headers: { has: (h: string) => boolean; get: (h: string) => string | null } | undefined): boolean {
