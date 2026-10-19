@@ -42,7 +42,8 @@ export class TableCellServiceBrokerComponent extends
   private injector = inject(Injector);
 
   private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
-  private _spaceData: SpaceDataService | null = null;
+  // A signal so `spaceLink` re-evaluates when the effect swaps it in.
+  private readonly _spaceData = signal<SpaceDataService | null>(null);
   private _spaceKey: { cnsi: string, guid: string } | null = null;
 
   readonly broker: Signal<StServiceBroker | null> = computed(
@@ -50,7 +51,7 @@ export class TableCellServiceBrokerComponent extends
   );
 
   readonly spaceLink: Signal<SpaceLink | null> = computed(() => {
-    const space = this._spaceData?.space();
+    const space = this._spaceData()?.space();
     const broker = this.broker();
     if (!space || !broker) return null;
     return {
@@ -93,12 +94,13 @@ export class TableCellServiceBrokerComponent extends
         if (curr?.cnsi === targetKey?.cnsi && curr?.guid === targetKey?.guid) return;
         if (curr) {
           this.spaceRegistry.release(curr.cnsi, curr.guid);
-          this._spaceData = null;
+          this._spaceData.set(null);
           this._spaceKey = null;
         }
         if (targetKey) {
-          this._spaceData = this.spaceRegistry.acquire(targetKey.cnsi, targetKey.guid);
-          this._spaceData.load().subscribe();
+          const spaceData = this.spaceRegistry.acquire(targetKey.cnsi, targetKey.guid);
+          spaceData.load().subscribe();
+          this._spaceData.set(spaceData);
           this._spaceKey = targetKey;
         }
       });
@@ -108,7 +110,7 @@ export class TableCellServiceBrokerComponent extends
   ngOnDestroy(): void {
     if (this._spaceKey) {
       this.spaceRegistry.release(this._spaceKey.cnsi, this._spaceKey.guid);
-      this._spaceData = null;
+      this._spaceData.set(null);
       this._spaceKey = null;
     }
   }
