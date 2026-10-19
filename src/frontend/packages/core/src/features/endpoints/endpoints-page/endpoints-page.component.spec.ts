@@ -4,7 +4,7 @@ import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from "@test-framework/core-test.modules";
@@ -24,6 +24,7 @@ import { EndpointsPageComponent } from './endpoints-page.component';
 describe('EndpointsPageComponent', () => {
   let component: EndpointsPageComponent;
   let fixture: ComponentFixture<EndpointsPageComponent>;
+  let perm$: Subject<boolean>;
 
   // Mock services
   const mockSessionService = {
@@ -97,6 +98,8 @@ describe('EndpointsPageComponent', () => {
   });
 
   beforeEach(async () => {
+    perm$ = new Subject<boolean>();
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(perm$);
     fixture = TestBed.createComponent(EndpointsPageComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
@@ -107,9 +110,25 @@ describe('EndpointsPageComponent', () => {
   });
 
   it('offers Register Endpoint when no endpoints are registered', async () => {
+    perm$.next(true);
     await vi.waitFor(() => {
       const add = fixture.nativeElement.querySelector('[data-test="list-sub-nav-add"]');
       expect(add?.textContent).toContain('Register Endpoint');
     });
+  });
+
+  it('shows Register when a permission check passes', async () => {
+    expect(component.canRegisterEndpoint()).toBe(false);
+    perm$.next(true);
+    await fixture.whenStable();
+    expect(component.canRegisterEndpoint()).toBe(true);
+  });
+
+  // The permission streams are long-lived: a subscription that outlives
+  // the page holds the destroyed component.
+  it('stops watching permissions when destroyed', () => {
+    expect(perm$.observed).toBe(true);
+    fixture.destroy();
+    expect(perm$.observed).toBe(false);
   });
 });
