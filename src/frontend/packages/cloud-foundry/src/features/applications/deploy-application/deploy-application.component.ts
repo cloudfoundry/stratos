@@ -370,7 +370,7 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     disablePrevious: this.step3DisablePrevious.asReadonly(),
     // step3.disablePrevious$ is true from entry until the deploy ends,
     // which is also when the step header should show it busy, so
-    // showBusy reuses that signal rather than polling step3.busy.
+    // showBusy reuses that signal.
     showBusy: this.step3DisablePrevious.asReadonly(),
     cancelButtonText: signal('Close').asReadonly(),
     finishButtonText: signal('Go to App Summary').asReadonly(),

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, EnvironmentInjector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, EnvironmentInjector, Input, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   BehaviorSubject,
@@ -53,7 +53,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
   appGuid?: string;
 
   // Stable BehaviorSubjects back the public Observable fields. The field
-  // references (valid$/closeable$/showOverlay$) are created once and never
+  // references (valid$/closeable$/disablePrevious$) are created once and never
   // reassigned — only the values pushed through the subjects change.
   // Reassigning these fields after the parent template's async pipe has
   // already subscribed would leave the pipe stranded on a completed
@@ -61,10 +61,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
   // is never re-evaluated.
   private validSubject = new BehaviorSubject<boolean>(false);
   private closeableSubject = new BehaviorSubject<boolean>(false);
-  private showOverlaySubject = new BehaviorSubject<boolean>(false);
-  // Locks Previous while a deploy is actively in flight. Flips back to
-  // false on terminal states (success or error) so the user can go back
-  // and fix inputs when the deploy fails.
+  // Locks Previous from entry until the deploy has ended (success or error,
+  // a lost connection or missing details included), so the user can then
+  // go back and fix inputs.
   private disablePreviousSubject = new BehaviorSubject<boolean>(true);
   // A deployed app the lookup did not find, or a lookup that failed: there
   // is no app to go to, but the deploy is over, so the step can be closed
@@ -72,16 +71,11 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
   readonly valid$: Observable<boolean> = this.validSubject.asObservable();
   readonly closeable$: Observable<boolean> = this.closeableSubject.asObservable();
-  readonly showOverlay$: Observable<boolean> = this.showOverlaySubject.asObservable();
   readonly disablePrevious$: Observable<boolean> = this.disablePreviousSubject.asObservable();
-
-  error = signal<boolean>(false);
 
   public deployer!: DeployApplicationDeployer;
 
   private subscriptions: Subscription[] = [];
-
-  public busy = false;
 
   private initDeployer() {
     const status$ = this.deployer.status$.asObservable();
@@ -94,10 +88,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // spinner reflects the current state. The title is a signal.
     this.subscriptions.push(
       status$.subscribe(() => this.cdr.markForCheck())
-    );
-
-    this.subscriptions.push(
-      status$.pipe(filter(status => status.deploying)).subscribe()
     );
 
     this.subscriptions.push(
@@ -129,20 +119,13 @@ export class DeployApplicationStep3Component implements OnDestroy {
     );
 
     this.subscriptions.push(
-      status$.subscribe(status => {
-        this.busy = status.deploying;
+      status$.subscribe(() => {
         // Going back would abandon the deploy, so Previous stays locked
         // until it ends (error or success), not only while it pushes.
         // Every end, a lost connection or missing details included, is
         // reported, so the user isn't trapped on the step.
         this.disablePreviousSubject.next(!this.deployer.finished);
       })
-    );
-
-    this.subscriptions.push(
-      status$.pipe(
-        map(status => !status.deploying || status.deploying && !this.deployer.streamTitle())
-      ).subscribe(v => this.showOverlaySubject.next(v))
     );
 
     // Resolve the app GUID without depending on APP_GUID_NOTIFY. That
@@ -270,10 +253,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // App Summary" staying active from a previous successful push).
     this.validSubject.next(false);
     this.closeableSubject.next(false);
-    this.showOverlaySubject.next(false);
     this.disablePreviousSubject.next(true);
     this.appNotFoundSubject.next(false);
-    this.error.set(false);
     // A retry of a first deploy may deploy another app; look it up again
     this.appGuid = this.redeployAppGuid;
 
@@ -306,7 +287,6 @@ export class DeployApplicationStep3Component implements OnDestroy {
       // Ask the existing deployer to continue deploying
       this.deployer.deploy();
     }
-    this.busy = true;
     // Under OnPush + zoneless CD, assigning this.deployer to a plain field
     // does not trigger a view update. Force one so the template (which
     // reads deployer.streamTitle() and renders the log-viewer under an @if

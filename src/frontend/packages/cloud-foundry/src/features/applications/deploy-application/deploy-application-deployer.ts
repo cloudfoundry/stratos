@@ -397,7 +397,7 @@ export class DeployApplicationDeployer {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
         this.streamTitle.set('Starting deployment...');
-        // This info is will be used to retrieve the app Id
+        // This info will be used to retrieve the app Id
         this.appData = JSON.parse(log.message).Applications[0];
         break;
       case SocketEventTypes.APP_GUID_NOTIFY:
