@@ -335,7 +335,7 @@ describe('DeployApplicationStep3Component', () => {
 
     it('keeps the app given for a redeploy', async () => {
       const httpMock = TestBed.inject(HttpTestingController);
-      fixture.componentRef.setInput('appGuid', 'r1');
+      fixture.componentRef.setInput('redeployAppGuid', 'r1');
       await enterConnected();
       await succeed('my-app');
 

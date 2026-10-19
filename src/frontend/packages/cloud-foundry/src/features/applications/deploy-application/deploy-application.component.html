@@ -27,6 +27,6 @@
     <app-deploy-application-options-step #step4></app-deploy-application-options-step>
   </app-step>
   <app-step [title]="deployButtonText" [signalHandle]="step3Handle">
-    <app-deploy-application-step3 [appGuid]="appGuid" #step3></app-deploy-application-step3>
+    <app-deploy-application-step3 [redeployAppGuid]="appGuid" #step3></app-deploy-application-step3>
   </app-step>
 </app-steppers>

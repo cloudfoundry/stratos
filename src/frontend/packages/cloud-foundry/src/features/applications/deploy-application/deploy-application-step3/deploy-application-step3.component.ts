@@ -46,7 +46,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
 
   // The app being redeployed; none on a first deploy
-  @Input('appGuid') redeployAppGuid?: string;
+  @Input() redeployAppGuid?: string;
 
   // The deployed app: the redeployed one, or the one a first deploy
   // looked up. Each deploy starts again from the input.
