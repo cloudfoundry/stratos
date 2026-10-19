@@ -29,6 +29,7 @@ function makeStubEndpointsService(disablePersistenceFeatures: boolean, endpoints
   return {
     disablePersistenceFeatures$: of(disablePersistenceFeatures),
     haveRegistered$: of(Object.keys(endpoints).length > 0),
+    haveConnected$: of(Object.values(endpoints).some(ep => ep.connectionStatus === 'connected')),
     connectedEndpoints$: of(Object.values(endpoints).filter(ep => ep.connectionStatus === 'connected')),
     endpoints$: of(endpoints),
   } as Partial<EndpointsService>;
@@ -195,7 +196,7 @@ describe('HomePageComponent', () => {
       await configureTestBed(makeStubEndpointsService(false));
       fixture = TestBed.createComponent(HomePageComponent);
       component = fixture.componentInstance;
-      fixture.detectChanges();
+      await fixture.whenStable();
 
       const headerDe = fixture.debugElement.query(By.directive(PageHeaderComponent));
       const header = headerDe.componentInstance as PageHeaderComponent;
@@ -230,7 +231,7 @@ describe('HomePageComponent', () => {
       // The trigger is projected content, so its bindings are checked with the
       // home component's view rather than the header's embedded one.
       trigger.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       view.detectChanges();
       expect(trigger.getAttribute('aria-expanded')).toBe('true');
     });

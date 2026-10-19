@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith } from 'rxjs/operators';
 
@@ -27,7 +27,7 @@ export interface EndpointMissingMessageParts {
     NoContentMessageComponent
   ]
 })
-export class EndpointsMissingComponent implements AfterViewInit, OnInit {
+export class EndpointsMissingComponent implements OnInit {
 
   @Input() showToolbarHint = true;
   @Input() showDirectToEndpointMessage = true;
@@ -64,8 +64,8 @@ export class EndpointsMissingComponent implements AfterViewInit, OnInit {
         text: 'Register an endpoint'
       };
     }
-  }
-  ngAfterViewInit() {
+    // Assigned before the first render: the template's async pipe reads it
+    // once, and nothing re-renders this OnPush view to pick up a later value.
     this.noContent$ = observableCombineLatest([
       this.haveRegistered$,
       this.haveConnected$,
