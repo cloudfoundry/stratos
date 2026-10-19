@@ -143,11 +143,29 @@ export const PolicyAlert = {
   alertInvalidPolicyTriggerScheduleEmpty: 'At least one Scaling Rule or Schedule should be defined.',
 };
 
-// The autoscaler API gives its reason as {"error": "..."}; the request's own
-// message only names the URL and the status
+// The autoscaler gives its reason in the body; the request's own message
+// only names the URL and the status. Bodies (14.x and 15.x): {code, message}
+// for most errors, [{context, description}] for a rejected policy,
+// {error} for an app that is not bound, {error_message} for a bad request.
 export function autoscalerErrorMessage(err: unknown): string {
-  const reason = (err as HttpErrorResponse)?.error?.error;
-  return typeof reason === 'string' ? reason : (err as HttpErrorResponse)?.message ?? String(err);
+  const body = (err as HttpErrorResponse)?.error;
+  if (Array.isArray(body)) {
+    const reasons = body
+      .filter(e => typeof e?.description === 'string')
+      .map(e => {
+        const field = typeof e.context === 'string' ? e.context.replace(/^\(root\)\.?/, '') : '';
+        return field ? `${field}: ${e.description}` : e.description;
+      });
+    if (reasons.length) {
+      return reasons.join('; ');
+    }
+  }
+  for (const key of ['message', 'error', 'error_message']) {
+    if (typeof body?.[key] === 'string') {
+      return body[key];
+    }
+  }
+  return (err as HttpErrorResponse)?.message ?? String(err);
 }
 
 export function isEqual(a: any, b: any): boolean {
