@@ -1,4 +1,4 @@
-import { effect, Injector, signal, Signal, untracked, ValueEqualityFn, WritableSignal } from '@angular/core';
+import { effect, EnvironmentInjector, Injector, signal, Signal, untracked, ValueEqualityFn, WritableSignal } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
 
 /**
@@ -10,10 +10,11 @@ import { BehaviorSubject, combineLatest, Observable, of } from 'rxjs';
  * it safe with a long-lived injector such as the root one, where
  * toObservable() would leave an effect running forever per call.
  *
- * A component's injector makes the effect a view effect: it ends with that
- * view, manualCleanup or not, and the observable then goes silent without
- * completing. Pass an EnvironmentInjector when the subscriber can outlive
- * the view.
+ * The effect is created on the injector's EnvironmentInjector. With a
+ * component's injector it would be a view effect, end with that view, and
+ * leave the observable silent without completing. So the effect lives as
+ * long as the subscription; a subscriber that must stop with a view
+ * unsubscribes itself (takeUntilDestroyed).
  *
  * Timing matches toObservable(): the first value comes from the effect's
  * first run, not synchronously on subscribe.
@@ -23,7 +24,7 @@ export function observeSignal<T>(source: Signal<T>, injector: Injector): Observa
     const ref = effect(() => {
       const value = source();
       untracked(() => subscriber.next(value));
-    }, { injector, manualCleanup: true });
+    }, { injector: injector.get(EnvironmentInjector), manualCleanup: true });
     return () => ref.destroy();
   });
 }
