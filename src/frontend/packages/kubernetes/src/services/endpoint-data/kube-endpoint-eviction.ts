@@ -39,6 +39,13 @@ export class KubeEndpointEviction {
     const at = untracked(() => this.epoch(kubeGuid));
     return () => untracked(() => this.epoch(kubeGuid)) === at;
   }
+
+  // current() for a load that learns its guids only from the response:
+  // the check holds for each guid not evicted since this call.
+  currentAny(): (kubeGuid: string) => boolean {
+    const at = untracked(this.epochs);
+    return kubeGuid => (untracked(this.epochs).get(kubeGuid) ?? 0) === (at.get(kubeGuid) ?? 0);
+  }
 }
 
 // Drop the keys `owned` matches from a signal-held cache map. Leaves the

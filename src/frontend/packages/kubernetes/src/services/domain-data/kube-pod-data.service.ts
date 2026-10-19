@@ -4,7 +4,6 @@ import { Observable, firstValueFrom, of } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
-import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
 import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KubePod, KubePodContainerStatus, StratosError } from '../endpoint-data/kube-types';
 
@@ -44,7 +43,6 @@ interface CacheEntry {
 @Injectable({ providedIn: 'root' })
 export class KubePodDataService {
   private readonly http = inject(HttpClient);
-  private readonly registry = inject(KubeEndpointDataRegistry);
   private readonly eviction = inject(KubeEndpointEviction);
 
   // Per-scope-key cache of pod lists. Key formats:
@@ -142,16 +140,17 @@ export class KubePodDataService {
     if (POD_FETCH_DEDUPE.has(key)) {
       return;
     }
-    // Touch the registry — guarantees the per-endpoint service exists so
-    // cluster-wide diagnostics know about this kubeGuid even if the pods
-    // load races ahead of the namespace/version load.
-    this.registry.getService(kubeGuid);
+    // No registry touch here: KubeEndpointRegistryHook creates the
+    // per-endpoint service on connect, and a read for a departed guid
+    // (a page still open after the disconnect) must not re-create it.
     const inflight = factory().pipe(shareReplay(1));
     POD_FETCH_DEDUPE.set(key, inflight);
-    inflight.subscribe({
-      complete: () => POD_FETCH_DEDUPE.delete(key),
-      error: () => POD_FETCH_DEDUPE.delete(key),
-    });
+    // An eviction or refresh may have replaced this entry with a newer
+    // request; only remove our own.
+    const settle = () => {
+      if (POD_FETCH_DEDUPE.get(key) === inflight) POD_FETCH_DEDUPE.delete(key);
+    };
+    inflight.subscribe({ complete: settle, error: settle });
   }
 
   // Every key format has the kubeGuid as its second segment.

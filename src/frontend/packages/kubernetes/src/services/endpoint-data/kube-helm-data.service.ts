@@ -41,6 +41,7 @@ import {
 export class KubeHelmDataService {
   private readonly http = inject(HttpClient);
   private readonly snackBar = inject(TailwindSnackBarService);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   // --- Release state ---
   private readonly _releases = signal<HelmRelease[]>([]);
@@ -63,7 +64,7 @@ export class KubeHelmDataService {
   ]);
 
   constructor() {
-    inject(KubeEndpointEviction).register(kubeGuid =>
+    this.eviction.register(kubeGuid =>
       this._releases.update(curr => curr.some(r => r.endpointId === kubeGuid)
         ? curr.filter(r => r.endpointId !== kubeGuid)
         : curr));
@@ -108,11 +109,14 @@ export class KubeHelmDataService {
   // Fetch releases across ALL connected helm-bearing endpoints. The
   // legacy effect calls /pp/v1/helm/releases without a CNSI header —
   // Jetstream fans the request out to every connected k8s endpoint and
-  // returns a dict keyed by endpoint guid.
+  // returns a dict keyed by endpoint guid. An endpoint evicted while the
+  // request was on the wire is dropped from the response: its releases
+  // were read with the old credentials.
   async loadReleases(): Promise<void> {
     if (this._releasesLoading()) return;
     this._releasesLoading.set(true);
     this._releaseErrors.set([]);
+    const live = this.eviction.currentAny();
     try {
       const resp = await firstValueFrom(
         this.http.get<Record<string, HelmRelease[] | null>>('/pp/v1/helm/releases'),
@@ -120,7 +124,7 @@ export class KubeHelmDataService {
       const all: HelmRelease[] = [];
       Object.keys(resp ?? {}).forEach(endpointId => {
         const list = resp[endpointId];
-        if (!Array.isArray(list)) return;
+        if (!Array.isArray(list) || !live(endpointId)) return;
         list.forEach(raw => {
           all.push(this.normalizeRelease(raw, endpointId));
         });

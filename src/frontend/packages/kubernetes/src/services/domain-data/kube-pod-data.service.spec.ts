@@ -266,5 +266,36 @@ describe('KubePodDataService', () => {
 
       expect(svc.errors()()).toEqual([]);
     });
+
+    it('a late completion leaves the newer load\'s dedupe entry in place', () => {
+      svc.podsInCluster(KUBE_GUID);
+      const old = pending(KUBE_GUID);
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      svc.podsInCluster(KUBE_GUID);
+      const fresh = pending(KUBE_GUID);
+
+      old.flush(listOf(KUBE_GUID));
+      // Still in flight: this read must join the fresh request.
+      svc.podsInCluster(KUBE_GUID);
+      const extra = httpMock.match(r => r.url === CLUSTER_PODS_URL);
+      extra.forEach(r => r.flush(listOf(KUBE_GUID)));
+      fresh.flush(listOf(KUBE_GUID));
+
+      expect(extra).toHaveLength(0);
+    });
+
+    // A page still open after the disconnect re-reads when the eviction
+    // empties its scope; that read must not bring the registry entry back.
+    it('a read for a departed endpoint does not re-create its registry entry', () => {
+      const registry = TestBed.inject(KubeEndpointDataRegistry);
+      registry.getService(KUBE_GUID);
+      registry.unregister(KUBE_GUID);
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+
+      svc.podsInCluster(KUBE_GUID);
+      pending(KUBE_GUID).flush(listOf(KUBE_GUID));
+
+      expect(registry.getSnapshot().instances.map(i => i.kubeGuid)).toEqual([]);
+    });
   });
 });

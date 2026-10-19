@@ -188,4 +188,40 @@ describe('KubeAnalysisDataService', () => {
       httpMock.expectOne(`${REPORTS_URL}/r1`).flush(report('r1'));
     });
   });
+
+  // refresh() replaces the in-flight request; the older one, still on the
+  // wire, must not displace it or overwrite its result.
+  describe('refresh while a list load is in flight', () => {
+    const report = (id: string) => ({ id, name: id, type: 'popeye', status: 'completed' });
+
+    it('a read after the older load lands joins the refresh', async () => {
+      const old = firstValueFrom(svc.loadReports(KUBE_GUID));
+      const reqOld = httpMock.expectOne(REPORTS_URL);
+      const refreshing = svc.refresh({ kubeGuid: KUBE_GUID });
+      const reqNew = httpMock.expectOne(REPORTS_URL);
+
+      reqOld.flush([report('r1')]);
+      await old;
+      const again = firstValueFrom(svc.loadReports(KUBE_GUID));
+      httpMock.expectNone(REPORTS_URL);
+      reqNew.flush([report('r2')]);
+      await refreshing;
+
+      expect((await again).map(r => r.id)).toEqual(['r2']);
+    });
+
+    it('an older load landing last does not overwrite the refresh', async () => {
+      const old = firstValueFrom(svc.loadReports(KUBE_GUID));
+      const reqOld = httpMock.expectOne(REPORTS_URL);
+      const refreshing = svc.refresh({ kubeGuid: KUBE_GUID });
+      const reqNew = httpMock.expectOne(REPORTS_URL);
+
+      reqNew.flush([report('r2')]);
+      await refreshing;
+      reqOld.flush([report('r1')]);
+      await old;
+
+      expect(svc.reportsForEndpoint(KUBE_GUID)().map(r => r.id)).toEqual(['r2']);
+    });
+  });
 });

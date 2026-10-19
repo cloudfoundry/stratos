@@ -139,13 +139,15 @@ export class KubeAnalysisDataService {
 
   private fetchReports(kubeGuid: string): Observable<AnalysisReport[]> {
     const url = `/pp/v1/analysis/reports/${kubeGuid}`;
-    // A response that lands after the endpoint was evicted carries the
-    // old credentials' data, so it is dropped, success or failure.
-    const live = this.eviction.current(kubeGuid);
-    const req = defer(() => this.http.get<AnalysisReport[]>(url)).pipe(
+    // A response writes only while the entry still holds this request.
+    // An eviction drops the entry (the response carries the old
+    // credentials' data) and refresh() swaps in a newer request; either
+    // way this response is stale and is dropped, success or failure.
+    const owns = () => this._byEndpoint().get(kubeGuid)?.inFlight === req;
+    const req: Observable<AnalysisReport[]> = defer(() => this.http.get<AnalysisReport[]>(url)).pipe(
       map(items => Array.isArray(items) ? items : []),
       tap(items => {
-        if (!live()) return;
+        if (!owns()) return;
         this._byEndpoint.update(curr => {
           const next = new Map(curr);
           next.set(kubeGuid, { reports: items, fetchedAt: Date.now() });
@@ -154,7 +156,7 @@ export class KubeAnalysisDataService {
         this.clearUnavailable(kubeGuid);
       }),
       catchError((err: HttpErrorResponse | unknown) => {
-        if (!live()) return of([] as AnalysisReport[]);
+        if (!owns()) return of([] as AnalysisReport[]);
         this.markUnavailable(kubeGuid, err, 'analysis-reports');
         // Cache the empty result so consumers don't loop on errors;
         // the next refresh() call clears the cache.
@@ -168,12 +170,11 @@ export class KubeAnalysisDataService {
       finalize(() => {
         // Drop the in-flight handle once settled so a future stale-cache
         // request triggers a fresh fetch rather than re-subscribing the
-        // completed observable. After an eviction the entry, if any, is
-        // a newer load's.
-        if (!live()) return;
+        // completed observable. A newer request's handle stays.
+        if (!owns()) return;
         this._byEndpoint.update(curr => {
           const entry = curr.get(kubeGuid);
-          if (!entry?.inFlight) return curr;
+          if (!entry) return curr;
           const next = new Map(curr);
           next.set(kubeGuid, { reports: entry.reports, fetchedAt: entry.fetchedAt });
           return next;
