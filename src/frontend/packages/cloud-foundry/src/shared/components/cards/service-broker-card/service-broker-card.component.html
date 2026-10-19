@@ -6,10 +6,10 @@
     <div class="service-broker__title__link">Service Broker</div>
   </app-meta-card-title>
   <app-meta-card-item>
-    <app-meta-card-item>
-      <app-meta-card-key>Name</app-meta-card-key>
-      <app-meta-card-value>{{ b?.name }}</app-meta-card-value>
-    </app-meta-card-item>
+    <app-meta-card-key>Name</app-meta-card-key>
+    <app-meta-card-value>{{ b?.name }}</app-meta-card-value>
+  </app-meta-card-item>
+  <app-meta-card-item>
     <app-meta-card-key>Broker Link</app-meta-card-key>
     <app-meta-card-value>
       <a [href]="$safeNavigationMigration(b?.url)" target="_blank" appClickStopPropagation>

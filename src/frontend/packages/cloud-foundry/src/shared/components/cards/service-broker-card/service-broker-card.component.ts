@@ -61,8 +61,9 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
 
   // Acquired SpaceDataService (or null when no broker.space.guid yet).
   // The registry refCounts per (cnsi, spaceGuid); we release on swap +
-  // destroy so warm caches stay shared with other consumers.
-  private _spaceData: SpaceDataService | null = null;
+  // destroy so warm caches stay shared with other consumers. A signal so
+  // `spaceLink` re-evaluates when the effect swaps it in.
+  private readonly _spaceData = signal<SpaceDataService | null>(null);
   private _spaceKey: { cnsi: string, guid: string } | null = null;
 
   readonly broker: Signal<StServiceBroker | null> = computed(
@@ -71,7 +72,7 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
 
   readonly spaceLink: Signal<BrokerSpaceLink | null> = computed(() => {
     const cfGuid = this._cfGuid();
-    const space = this._spaceData?.space();
+    const space = this._spaceData()?.space();
     if (!space || !cfGuid) return null;
     return {
       name: space.name,
@@ -116,12 +117,13 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
         if (curr?.cnsi === targetKey?.cnsi && curr?.guid === targetKey?.guid) return;
         if (curr) {
           this.spaceRegistry.release(curr.cnsi, curr.guid);
-          this._spaceData = null;
+          this._spaceData.set(null);
           this._spaceKey = null;
         }
         if (targetKey) {
-          this._spaceData = this.spaceRegistry.acquire(targetKey.cnsi, targetKey.guid);
-          this._spaceData.load().subscribe();
+          const spaceData = this.spaceRegistry.acquire(targetKey.cnsi, targetKey.guid);
+          spaceData.load().subscribe();
+          this._spaceData.set(spaceData);
           this._spaceKey = targetKey;
         }
       });
@@ -131,7 +133,7 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     if (this._spaceKey) {
       this.spaceRegistry.release(this._spaceKey.cnsi, this._spaceKey.guid);
-      this._spaceData = null;
+      this._spaceData.set(null);
       this._spaceKey = null;
     }
   }
