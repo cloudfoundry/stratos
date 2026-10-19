@@ -88,6 +88,23 @@ describe('AutoscalerTabExtensionComponent', () => {
 
   // The policy loads after the tab first renders, so the gauges must follow
   // it rather than read the policy once.
+  // Latest metrics hold data points ({name, value}). The gauge passed the
+  // points themselves to Chart.js, which crashed on the colour and drew
+  // NaN once real metrics arrived.
+  it('builds the gauge from the latest metric values', () => {
+    const data = component.getGaugeData([{
+      entity: {
+        chartMaxValue: 100,
+        latest: {
+          target: [{ name: 'memoryused', value: 30 }],
+          colorTarget: [{ name: 'memoryused', value: 'rgba(90,167,0,0.6)' }],
+        },
+      },
+    }]);
+    expect(data.datasets[0].data).toEqual([30, 70]);
+    expect(data.datasets[0].backgroundColor[0]).toBe('rgba(90,167,0,0.6)');
+  });
+
   it('loads the metric gauges once the policy arrives', async () => {
     const httpMock = TestBed.inject(HttpTestingController);
     httpMock.match(r => r.url.endsWith('/policy')).forEach(req => req.flush({
