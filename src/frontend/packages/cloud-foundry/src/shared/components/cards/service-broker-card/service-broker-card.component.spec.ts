@@ -88,9 +88,7 @@ describe('ServiceBrokerCardComponent', () => {
     component = fixture.componentInstance;
     component.cfGuid = 'test-cf-guid';
     component.brokerGuid = catalogStub.brokerResponse!.guid;
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
   };
 
   beforeEach(async () => setup());
@@ -112,6 +110,17 @@ describe('ServiceBrokerCardComponent', () => {
     expect(launch?.getAttribute('href')).toBe('https://app-autoscaler-broker.cf-dev.io');
   });
 
+  it('gives the Broker Link a name that says where it goes and that it opens a new tab', () => {
+    const link = (fixture.nativeElement as HTMLElement).querySelector('a[target="_blank"]')!;
+    // Accessible name: aria-label wins; otherwise the text minus aria-hidden parts.
+    const visible = link.cloneNode(true) as HTMLElement;
+    visible.querySelectorAll('[aria-hidden="true"]').forEach(el => el.remove());
+    const name = (link.getAttribute('aria-label') ?? visible.textContent ?? '').replace(/\s+/g, ' ').trim();
+    expect(name).toContain('https://app-autoscaler-broker.cf-dev.io');
+    expect(name).toContain('(opens in a new tab)');
+    expect(name).not.toContain('launch');
+  });
+
   it('renders "Not Available" for authUsername when listed in _meta.unavailable', () => {
     const host: HTMLElement = fixture.nativeElement;
     const unavailable = host.querySelector('app-tristate-value .tristate-value--unavailable');
@@ -128,9 +137,7 @@ describe('ServiceBrokerCardComponent', () => {
     component = fixture.componentInstance;
     component.cfGuid = 'test-cf-guid';
     component.brokerGuid = catalogStub.brokerResponse.guid;
-    fixture.detectChanges();
     await fixture.whenStable();
-    fixture.detectChanges();
 
     const host: HTMLElement = fixture.nativeElement;
     const known = host.querySelector('app-tristate-value .tristate-value--known');
