@@ -13,6 +13,7 @@ import { HelmReleaseDataService } from '../../kubernetes/workloads/release/helm-
 import { HelmReleaseGraph } from '../../kubernetes/workloads/workload.types';
 import { KubeAnalysisDataService } from '../domain-data/kube-analysis-data.service';
 import { KubeSecretDataService } from '../domain-data/kube-generic-resource-data.services';
+import { KubeNamespaceDataService } from '../domain-data/kube-namespace-data.service';
 import { KubeNodeDataService } from '../domain-data/kube-node-data.service';
 import { KubePodDataService } from '../domain-data/kube-pod-data.service';
 import { KubeServiceDataService } from '../domain-data/kube-service-data.service';
@@ -295,6 +296,45 @@ describe('KubeEndpointRegistryHook domain cache eviction', () => {
     disconnectA();
 
     expect(helm.allReleases()().map(r => r.endpointId)).toEqual([B]);
+  });
+
+  it('drops errors recorded against the departed endpoint only', async () => {
+    const pods = TestBed.inject(KubePodDataService);
+    const nodes = TestBed.inject(KubeNodeDataService);
+    const services = TestBed.inject(KubeServiceDataService);
+    const secrets = TestBed.inject(KubeSecretDataService);
+    const analysis = TestBed.inject(KubeAnalysisDataService);
+    const namespaces = TestBed.inject(KubeNamespaceDataService);
+    const fail = (path: string, guid: string) => {
+      const reqs = httpMock.match(r => r.url.startsWith(path) && r.headers.get('x-cap-cnsi-list') === guid);
+      expect(reqs).toHaveLength(1);
+      reqs[0].flush('boom', { status: 500, statusText: 'Server Error' });
+    };
+    for (const guid of [A, B]) {
+      pods.podsInCluster(guid);
+      fail('/pp/v1/proxy/api/v1/pods', guid);
+      const node = nodes.refresh(guid);
+      fail('/pp/v1/proxy/api/v1/nodes', guid);
+      await node;
+      const service = services.refresh({ kubeGuid: guid, namespace: 'ns' });
+      fail('/pp/v1/proxy/api/v1/namespaces/ns/services', guid);
+      await service;
+      const secret = secrets.refresh({ kubeGuid: guid });
+      fail('/pp/v1/proxy/api/v1/secrets', guid);
+      await secret;
+      const report = analysis.refresh({ kubeGuid: guid });
+      httpMock.expectOne(`/pp/v1/analysis/reports/${guid}`).flush('boom', { status: 500, statusText: 'Server Error' });
+      await report;
+      const direct = namespaces.fetchDirect(guid);
+      fail('/pp/v1/proxy/api/v1/namespaces?', guid);
+      await direct;
+    }
+
+    disconnectA();
+
+    for (const cache of [pods, nodes, services, secrets, analysis, namespaces]) {
+      expect(cache.errors()().map(e => e.affected?.[0])).toEqual([B]);
+    }
   });
 
   it('blanks helm release detail surfaces of the departed endpoint', () => {

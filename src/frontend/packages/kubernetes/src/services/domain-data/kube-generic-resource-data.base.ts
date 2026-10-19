@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http
 import { Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { KubeEndpointEviction, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
+import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { StratosError } from '../endpoint-data/kube-types';
 
@@ -46,6 +46,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
       evictKeys(this._clusterItems, owned);
       evictKeys(this._namespaceItems, owned);
       evictKeys(this._workloadItems, owned);
+      evictErrors(this._errors, kubeGuid);
     });
   }
 
@@ -180,7 +181,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],
       };
-      this._errors.update(curr => [...curr, next].slice(0, 50));
+      this._errors.update(curr => [...curr, next].slice(-50));
       return [];
     }
   }

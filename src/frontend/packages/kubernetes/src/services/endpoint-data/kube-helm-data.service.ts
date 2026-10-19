@@ -295,7 +295,7 @@ export class KubeHelmDataService {
       title,
       detail: this.unwrapErrorMessage(err),
     };
-    target.update(curr => [...curr, next].slice(0, 50));
+    target.update(curr => [...curr, next].slice(-50));
   }
 
   private errorMessage(err: unknown, fallback: string): string {

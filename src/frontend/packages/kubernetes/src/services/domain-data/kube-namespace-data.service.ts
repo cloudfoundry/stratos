@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { KubeNamespace, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction, evictErrors } from '../endpoint-data/kube-endpoint-eviction';
 
 // Per-resource domain service for k8s namespaces. Composes over
 // KubeEndpointDataRegistry to share the cluster-scoped namespace cache
@@ -22,6 +23,12 @@ export class KubeNamespaceDataService {
   private readonly registry = inject(KubeEndpointDataRegistry);
 
   private readonly _errors = signal<StratosError[]>([]);
+
+  // The namespace list itself lives on the per-endpoint service, which the
+  // registry drops; only fetchDirect's errors are held here.
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid => evictErrors(this._errors, kubeGuid));
+  }
 
   // Returns a signal projecting the namespaces cached on the per-endpoint
   // service. Composing with `computed` keeps the projection reactive —
@@ -96,7 +103,7 @@ export class KubeNamespaceDataService {
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],
       };
-      this._errors.update(curr => [...curr, next].slice(0, 50));
+      this._errors.update(curr => [...curr, next].slice(-50));
       return [];
     }
   }

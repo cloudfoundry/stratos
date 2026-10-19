@@ -5,7 +5,7 @@ import { catchError, map, shareReplay } from 'rxjs/operators';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
-import { KubeEndpointEviction, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
+import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KubePod, KubePodContainerStatus, StratosError } from '../endpoint-data/kube-types';
 
 // Per-resource domain service for k8s pods. Mirrors KubeNamespaceDataService
@@ -31,6 +31,7 @@ import { KubePod, KubePodContainerStatus, StratosError } from '../endpoint-data/
 //   - 401 / 403 mark the affected scope unavailable and surface a
 //     StratosError on errors().
 //   - Other errors push a FETCH_ERROR onto errors().
+//   - A later successful load of that scope clears both.
 
 const POD_TTL_MS = 60_000;
 const POD_FETCH_DEDUPE = new Map<string, Observable<KubePod[]>>();
@@ -158,6 +159,7 @@ export class KubePodDataService {
     evictKeys(this._byScope, owned);
     [...POD_FETCH_DEDUPE.keys()].filter(owned).forEach(key => POD_FETCH_DEDUPE.delete(key));
     this._unavailable.update(curr => [...curr].some(owned) ? new Set([...curr].filter(key => !owned(key))) : curr);
+    evictErrors(this._errors, kubeGuid, a => a === kubeGuid || owned(a));
   }
 
   private invalidate(key: string): void {
@@ -270,9 +272,10 @@ export class KubePodDataService {
       code,
       title,
       detail: (err as Error)?.message ?? String(err),
-      affected: [kubeGuid],
+      // The scope key lets a later successful load of this scope clear it.
+      affected: [kubeGuid, key],
     };
-    this._errors.update(curr => [...curr, next].slice(0, 50));
+    this._errors.update(curr => [...curr, next].slice(-50));
   }
 
   private clearUnavailable(key: string): void {
@@ -282,6 +285,9 @@ export class KubePodDataService {
       next.delete(key);
       return next;
     });
+    this._errors.update(curr => curr.some(e => e.affected?.includes(key))
+      ? curr.filter(e => !e.affected?.includes(key))
+      : curr);
   }
 }
 

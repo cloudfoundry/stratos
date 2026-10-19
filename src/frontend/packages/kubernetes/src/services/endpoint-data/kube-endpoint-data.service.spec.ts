@@ -157,4 +157,16 @@ describe('KubeEndpointDataService', () => {
 
     expect(service.kubeVersion()).toBe('1.29');
   });
+
+  it('keeps the newest 50 errors and drops the oldest', async () => {
+    for (let i = 0; i <= 50; i++) {
+      const refreshing = service.refresh('version');
+      httpMock.expectOne(VERSION_URL).flush('boom', { status: 500, statusText: `err-${i}` });
+      await refreshing;
+    }
+    const errs = service.errors();
+    expect(errs).toHaveLength(50);
+    expect(errs[0].detail).toMatch(/ err-1$/);
+    expect(errs[49].detail).toMatch(/ err-50$/);
+  });
 });

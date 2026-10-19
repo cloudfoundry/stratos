@@ -132,4 +132,16 @@ describe('KubeNamespaceDataService', () => {
     expect(result).toHaveLength(1);
     expect(result[0].kubeGuid).toBe(KUBE_GUID);
   });
+
+  it('keeps the newest 50 errors and drops the oldest', async () => {
+    for (let i = 0; i <= 50; i++) {
+      const direct = svc.fetchDirect(`kube-${i}`);
+      httpMock.expectOne(NS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+      await direct;
+    }
+    const errs = svc.errors()();
+    expect(errs).toHaveLength(50);
+    expect(errs[0].affected?.[0]).toBe('kube-1');
+    expect(errs[49].affected?.[0]).toBe('kube-50');
+  });
 });

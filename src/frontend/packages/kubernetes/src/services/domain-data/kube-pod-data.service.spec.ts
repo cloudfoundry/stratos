@@ -150,6 +150,37 @@ describe('KubePodDataService', () => {
     expect(errs[0].code).toBe('UNAUTHORIZED');
   });
 
+  it('keeps the newest 50 errors and drops the oldest', async () => {
+    for (let i = 0; i <= 50; i++) {
+      const refreshing = svc.refresh({ kubeGuid: `kube-${i}` });
+      httpMock.expectOne(CLUSTER_PODS_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+      await refreshing;
+    }
+    const errs = svc.errors()();
+    expect(errs).toHaveLength(50);
+    expect(errs[0].affected?.[0]).toBe('kube-1');
+    expect(errs[49].affected?.[0]).toBe('kube-50');
+  });
+
+  // A failed scope's error goes once that scope loads; another scope's
+  // error on the same endpoint (e.g. a cluster-wide 403 under namespace-only
+  // RBAC) stays.
+  it('clears a scope error when that scope reloads successfully', async () => {
+    const cluster = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(CLUSTER_PODS_URL).flush('forbidden', { status: 403, statusText: 'Forbidden' });
+    await cluster;
+    const failing = svc.refresh({ kubeGuid: KUBE_GUID, namespace: 'default' });
+    httpMock.expectOne(NS_PODS_URL('default')).flush('boom', { status: 500, statusText: 'Server Error' });
+    await failing;
+    expect(svc.errors()().map(e => e.title)).toEqual(['kube-pods-cluster', 'kube-pods-namespace']);
+
+    const ok = svc.refresh({ kubeGuid: KUBE_GUID, namespace: 'default' });
+    httpMock.expectOne(NS_PODS_URL('default')).flush({ [KUBE_GUID]: { items: [] } });
+    await ok;
+
+    expect(svc.errors()().map(e => e.title)).toEqual(['kube-pods-cluster']);
+  });
+
   it('dedupes concurrent reads on the same scope', async () => {
     // Two reads on the same cluster scope back-to-back should produce
     // exactly one HTTP request (the second is satisfied by shareReplay

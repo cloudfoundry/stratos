@@ -5,7 +5,7 @@ import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 
 import { KubeScoreReportHelper } from '../../kubernetes/services/kubescore-report.helper';
 import { PopeyeReportHelper } from '../../kubernetes/services/popeye-report.helper';
-import { KubeEndpointEviction, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
+import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { AnalysisReport, StratosError } from '../endpoint-data/kube-types';
 
 // Per-endpoint cache TTL — 60s mirrors the design doc's K8s-rate-limit
@@ -68,6 +68,7 @@ export class KubeAnalysisDataService {
       evictKeys(this._byEndpoint, key => key === kubeGuid);
       evictKeys(this._byId, key => key.startsWith(`${kubeGuid}:`));
       this._unavailable.update(curr => curr.includes(kubeGuid) ? curr.filter(g => g !== kubeGuid) : curr);
+      evictErrors(this._errors, kubeGuid);
     });
   }
 
@@ -264,7 +265,7 @@ export class KubeAnalysisDataService {
   }
 
   private addError(err: StratosError): void {
-    this._errors.update(curr => [...curr, err].slice(0, 50));
+    this._errors.update(curr => [...curr, err].slice(-50));
   }
 
   private markUnavailable(kubeGuid: string, err: unknown, title: string): void {

@@ -1,5 +1,7 @@
 import { Injectable, WritableSignal } from '@angular/core';
 
+import { StratosError } from './kube-types';
+
 // Root fan-out for "this kubernetes endpoint is gone". The root domain
 // caches (pods, nodes, services, generic resources, analysis, helm) keep
 // data fetched with the endpoint's credentials for the whole session, so
@@ -29,5 +31,19 @@ export function evictKeys<V>(cache: WritableSignal<Map<string, V>>, owned: (key:
     const next = new Map(curr);
     keys.forEach(key => next.delete(key));
     return next;
+  });
+}
+
+// Drop the errors whose `affected` entries all belong to the departed
+// endpoint (an error naming another endpoint too stays). `owned` defaults
+// to the guid itself; caches that also tag a scope key pass their own.
+export function evictErrors(
+  errors: WritableSignal<StratosError[]>,
+  kubeGuid: string,
+  owned: (affected: string) => boolean = a => a === kubeGuid,
+): void {
+  errors.update(curr => {
+    const next = curr.filter(e => !(e.affected?.length && e.affected.every(owned)));
+    return next.length === curr.length ? curr : next;
   });
 }

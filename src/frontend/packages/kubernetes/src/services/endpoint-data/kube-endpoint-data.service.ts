@@ -243,7 +243,7 @@ export class KubeEndpointDataService {
   }
 
   private addError(err: StratosError): void {
-    this._errors.update(curr => [...curr, err].slice(0, 50));
+    this._errors.update(curr => [...curr, err].slice(-50));
   }
 
   private markUnavailable(field: string, err: unknown, title: string): void {

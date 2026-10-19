@@ -88,4 +88,16 @@ describe('KubeNodeDataService', () => {
     expect(svc.nodesInCluster('kube-1')()).toHaveLength(1);
     expect(svc.nodesInCluster('kube-2')()).toHaveLength(2);
   });
+
+  it('keeps the newest 50 errors and drops the oldest', async () => {
+    for (let i = 0; i <= 50; i++) {
+      const refreshing = svc.refresh(`kube-${i}`);
+      httpMock.expectOne(NODES_URL).flush('boom', { status: 500, statusText: 'Server Error' });
+      await refreshing;
+    }
+    const errs = svc.errors()();
+    expect(errs).toHaveLength(50);
+    expect(errs[0].affected?.[0]).toBe('kube-1');
+    expect(errs[49].affected?.[0]).toBe('kube-50');
+  });
 });

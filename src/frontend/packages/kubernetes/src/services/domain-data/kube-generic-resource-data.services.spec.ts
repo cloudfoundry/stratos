@@ -90,6 +90,19 @@ describe('KubeConfigMapDataService', () => {
     const errs = svc.errors()();
     expect(errs.some(e => e.code === 'FETCH_ERROR')).toBe(true);
   });
+
+  it('keeps the newest 50 errors and drops the oldest', async () => {
+    for (let i = 0; i <= 50; i++) {
+      const refreshing = svc.refresh({ kubeGuid: `kube-${i}` });
+      httpMock.expectOne('/pp/v1/proxy/api/v1/configmaps?limit=500')
+        .flush('boom', { status: 500, statusText: 'Server Error' });
+      await refreshing;
+    }
+    const errs = svc.errors()();
+    expect(errs).toHaveLength(50);
+    expect(errs[0].affected?.[0]).toBe('kube-1');
+    expect(errs[49].affected?.[0]).toBe('kube-50');
+  });
 });
 
 describe('KubeSecretDataService', () => {
