@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, DestroyRef, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
@@ -48,6 +48,7 @@ export interface MetricsConfig<T = any> {
 })
 export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentInit {
   private metricsDataService = inject(MetricsDataService);
+  private destroyRef = inject(DestroyRef);
 
   @Input()
   public metricsConfig!: MetricsConfig;
@@ -165,7 +166,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   ngAfterContentInit() {
     if (this.timeRangeSelector) {
       this.timeRangeSelector.baseRequest = this.metricsConfig.request;
-      this.timeRangeSelector.request.pipe(takeUntilDestroyed()).subscribe((req: MetricsRequest) => {
+      this.timeRangeSelector.request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((req: MetricsRequest) => {
         this.requestSignal.set(req);
       });
     }

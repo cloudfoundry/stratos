@@ -36,4 +36,16 @@ describe('ApplicationInstanceChartComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // The chart projects a time range selector into app-metrics-chart, which
+  // subscribes to it after content init, outside the injection context.
+  it('renders with its time range selector', () => {
+    fixture.componentRef.setInput('appGuid', 'app-guid');
+    fixture.componentRef.setInput('endpointGuid', 'cf-guid');
+    fixture.componentRef.setInput('yAxisLabel', 'CPU');
+    fixture.componentRef.setInput('queryString', 'cpu');
+    fixture.componentRef.setInput('title', 'CPU usage');
+
+    expect(() => fixture.detectChanges()).not.toThrow();
+  });
 });
