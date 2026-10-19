@@ -1,9 +1,9 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApplicationRef, EnvironmentInjector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of } from 'rxjs';
 
-import { SocketEventTypes } from '../../../store/types/deploy-application.types';
+import { SocketEventTypes, SourceType } from '../../../store/types/deploy-application.types';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
@@ -74,6 +74,40 @@ describe('DeployApplicationDeployer', () => {
       expect(deployer.applicationGuid$()).toBeNull();
       expect(deployer.appData).toBeUndefined();
       deployer.close();
+    });
+  });
+
+  describe('uploading files', () => {
+    let read: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(async () => {
+      // Each file reads at once
+      read = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (this: FileReader) {
+        this.onload?.({} as ProgressEvent<FileReader>);
+      });
+      const deployData = TestBed.inject(CfDeployAppDataService);
+      deployData.setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
+      deployData.setSourceType({ id: 'file', name: 'File' } as SourceType);
+      deployer.fsFileInfo = { root: { files: [new File(['x'], 'a.txt')] }, total: 1 } as unknown as FileScannerInfo;
+      deployer.open();
+      await TestBed.inject(ApplicationRef).whenStable();
+    });
+
+    afterEach(() => {
+      read.mockRestore();
+      deployer.close();
+    });
+
+    it('counts the last file once when an extra acknowledgement follows', () => {
+      const send = (type: SocketEventTypes) => socket.server.next(JSON.stringify({ type, message: '' }));
+      send(SocketEventTypes.SOURCE_REQUIRED);
+      send(SocketEventTypes.SOURCE_FILE_ACK);
+      send(SocketEventTypes.SOURCE_FILE_ACK);
+      expect(deployer.fileTransferStatus$()?.filesSent).toBe(1);
+
+      send(SocketEventTypes.SOURCE_FILE_ACK);
+
+      expect(deployer.fileTransferStatus$()).toMatchObject({ filesSent: 1, totalFiles: 1, bytesSent: 1 });
     });
   });
 

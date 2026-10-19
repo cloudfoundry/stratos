@@ -463,6 +463,8 @@ export class DeployApplicationDeployer {
       this.fileTransferStatus.bytesSent += this.currentFileTransfer.size;
       this.fileTransferStatus.filesSent++;
       this.fileTransferStatus$.next(this.fileTransferStatus);
+      // Counted: a further acknowledgement must not count it again
+      this.currentFileTransfer = undefined;
     }
 
     if (this.fileTransfers.length > 0) {
