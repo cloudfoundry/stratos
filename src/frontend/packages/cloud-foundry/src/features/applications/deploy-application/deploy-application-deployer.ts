@@ -203,9 +203,18 @@ export class DeployApplicationDeployer {
     this.applicationGuid$.next(null);
     this.fileTransferStatus$.next(undefined);
     this.connectSub = this.deployState$.pipe(
+      // The steps before save every detail the deploy needs, and nothing
+      // saves them later, so missing ones never arrive: report the end
+      // rather than wait for ever with the deploy step locked
+      take(1),
+      tap(appDetail => {
+        if (!appDetail?.cloudFoundryDetails || !readyFilter(appDetail)) {
+          this.onClose({}, 'Deploy Failed - Source missing!',
+            'Failed to deploy app! Go back through the source steps and deploy again.');
+        }
+      }),
       filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
         !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
-      take(1),
       tap((appDetail) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
         this.orgGuid = appDetail.cloudFoundryDetails.org;

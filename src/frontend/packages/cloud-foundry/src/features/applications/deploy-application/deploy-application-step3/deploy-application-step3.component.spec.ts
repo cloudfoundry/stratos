@@ -1,10 +1,10 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationRef, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, EnvironmentInjector, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
-import { NEVER, Subject } from 'rxjs';
+import { NEVER, Subject, of } from 'rxjs';
 
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -16,9 +16,18 @@ import {
   OverrideAppDetails,
   SocketEventTypes,
   SourceType } from '../../../../store/types/deploy-application.types';
+import { DeployApplicationDeployer } from '../deploy-application-deployer';
+import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DeployApplicationStep3Component } from "./deploy-application-step3.component";
 
-vi.mock('rxjs-websockets', () => ({ default: () => NEVER }));
+// Each connection gets a server stream the test drives
+const socket = vi.hoisted(() => ({ server: undefined as any }));
+vi.mock('rxjs-websockets', () => ({
+  default: () => {
+    socket.server = new Subject<string>();
+    return of(() => socket.server);
+  },
+}));
 
 describe('DeployApplicationStep3Component', () => {
   let component: DeployApplicationStep3Component;
@@ -61,8 +70,7 @@ describe('DeployApplicationStep3Component', () => {
   });
 
   it('shows the manifest title before the push starts', async () => {
-    component.onEnter(undefined as any);
-    await fixture.whenStable();
+    await enterConnected();
     const deployer = component.deployer;
     deployer.processWebSocketMessage({
       type: SocketEventTypes.MANIFEST,
@@ -113,6 +121,76 @@ describe('DeployApplicationStep3Component', () => {
       .flush({ resources: [{ name: 'my-app', guid: 'g1' }] });
     httpMock.verify();
     expect(component.appGuid).toBe('g1');
+  });
+
+  describe('the Previous button', () => {
+    let disabled: boolean[];
+    const locked = () => disabled.at(-1);
+    const fromServer = (type: SocketEventTypes, message = '') => component.deployer.processWebSocketMessage({ type, message });
+
+    beforeEach(() => {
+      disabled = [];
+      component.disablePrevious$.subscribe(d => disabled.push(d));
+    });
+
+    it('stays locked from entry until the deploy ends', async () => {
+      await enterConnected();
+      expect(locked()).toBe(true);
+
+      fromServer(SocketEventTypes.MANIFEST, JSON.stringify({ Applications: [{ Name: 'a' }] }));
+      expect(locked()).toBe(true);
+      fromServer(SocketEventTypes.EVENT_PUSH_STARTED);
+      fromServer(SocketEventTypes.EVENT_PUSH_COMPLETED);
+      expect(locked()).toBe(true);
+      fromServer(SocketEventTypes.CLOSE_SUCCESS);
+
+      expect(locked()).toBe(false);
+    });
+
+    it('unlocks when the deploy fails before the push', async () => {
+      await enterConnected();
+      fromServer(SocketEventTypes.CLOSE_FAILED_CLONE, 'no repo');
+
+      expect(locked()).toBe(false);
+    });
+
+    it('unlocks when the connection is lost', async () => {
+      await enterConnected();
+      socket.server.complete();
+
+      expect(component.deployer.finished).toBe(true);
+      expect(locked()).toBe(false);
+    });
+
+    it('locks a file deploy from entry', async () => {
+      // The upload step's deployer, uploaded and handed on
+      TestBed.inject(CfDeployAppDataService).setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
+      const deployer = new DeployApplicationDeployer(TestBed.inject(CfOrgSpaceDataService), TestBed.inject(EnvironmentInjector));
+      deployer.fsFileInfo = {} as FileScannerInfo;
+      deployer.open();
+      await TestBed.inject(ApplicationRef).whenStable();
+      component.onEnter(deployer);
+      await fixture.whenStable();
+      expect(locked()).toBe(true);
+
+      fromServer(SocketEventTypes.CLOSE_PUSH_ERROR, 'boom');
+      expect(locked()).toBe(false);
+    });
+
+    it('unlocks a deploy whose details are missing', async () => {
+      // A file deploy entered again: the wizard hands on the upload
+      // step's deployer only once, so there is no source to send
+      const deployData = TestBed.inject(CfDeployAppDataService);
+      deployData.setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
+      deployData.setSourceType({ id: 'file', name: 'File' } as SourceType);
+      deployData.saveAppOverrides({} as OverrideAppDetails);
+      component.onEnter(undefined as any);
+      await fixture.whenStable();
+
+      expect(component.deployer.finished).toBe(true);
+      expect(component.deployer.status$().error).toBeTruthy();
+      expect(locked()).toBe(false);
+    });
   });
 
   describe('deploying again after Previous', () => {
@@ -236,10 +314,9 @@ describe('DeployApplicationStep3Component', () => {
     const snackBar = TestBed.inject(TailwindSnackBarService);
     const show = vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => NEVER } as any);
 
-    // No deploy details yet, so the deployer is still waiting to connect;
-    // leaving clears them, so it never would.
+    // Leave before the deployer has read the deploy details, so it is
+    // still waiting to connect; leaving clears them, so it never would.
     component.onEnter(undefined as any);
-    await fixture.whenStable();
     const close = vi.spyOn(component.deployer, 'close');
 
     fixture.destroy();

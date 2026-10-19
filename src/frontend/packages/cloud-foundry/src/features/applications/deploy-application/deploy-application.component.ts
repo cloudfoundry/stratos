@@ -367,10 +367,9 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     },
     canClose: this.step3Closeable.asReadonly(),
     disablePrevious: this.step3DisablePrevious.asReadonly(),
-    // step3.busy and step3.disablePrevious$ are both fed by the same
-    // `status.deploying` signal inside step 3 (see lines ~123-128 of
-    // deploy-application-step3.component.ts), so we derive showBusy
-    // from the same local signal rather than polling step3.busy.
+    // step3.disablePrevious$ is true from entry until the deploy ends,
+    // which is also when the step header should show it busy, so
+    // showBusy reuses that signal rather than polling step3.busy.
     showBusy: this.step3DisablePrevious.asReadonly(),
     cancelButtonText: signal('Close').asReadonly(),
     finishButtonText: signal('Go to App Summary').asReadonly(),

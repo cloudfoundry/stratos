@@ -128,10 +128,11 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.subscriptions.push(
       status$.subscribe(status => {
         this.busy = status.deploying;
-        // Mirror busy state to disablePrevious so that when a deploy ends
-        // (error or success) the Previous button unlocks and the user
-        // isn't trapped on the step.
-        this.disablePreviousSubject.next(status.deploying);
+        // Going back would abandon the deploy, so Previous stays locked
+        // until it ends (error or success), not only while it pushes.
+        // Every end, a lost connection or missing details included, is
+        // reported, so the user isn't trapped on the step.
+        this.disablePreviousSubject.next(!this.deployer.finished);
       })
     );
 
