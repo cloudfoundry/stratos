@@ -1,4 +1,4 @@
-import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import type { SignalListDropdownOption } from '@stratosui/core';
@@ -50,7 +50,6 @@ export interface BulkResult {
 export class CfRoutesSignalConfigService {
   private readonly http = inject(HttpClient);
   private readonly registry = inject(EndpointDataRegistry);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly deleteController = inject(EntityDeleteController);
 
@@ -160,9 +159,6 @@ export class CfRoutesSignalConfigService {
           this.selectedSpace.set(null);
         }
       });
-    });
-    this.destroyRef.onDestroy(() => {
-      this.registry.release(cnsiGuid);
     });
   }
 

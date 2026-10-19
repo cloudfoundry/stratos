@@ -46,7 +46,6 @@ function makeRegistryStub() {
   const endpointDataSvc = makeEndpointDataServiceStub();
   return {
     acquire: vi.fn().mockReturnValue(endpointDataSvc),
-    release: vi.fn(),
     configure: vi.fn(),
   };
 }

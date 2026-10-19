@@ -23,7 +23,7 @@ function makeSvc(opts: {
     registerCleanup: vi.fn(),
     ...opts.controller,
   };
-  const registry = { acquire: vi.fn(), peek: vi.fn(), release: vi.fn() } as unknown as EndpointDataRegistry;
+  const registry = { acquire: vi.fn(), peek: vi.fn() } as unknown as EndpointDataRegistry;
 
   TestBed.configureTestingModule({
     providers: [
