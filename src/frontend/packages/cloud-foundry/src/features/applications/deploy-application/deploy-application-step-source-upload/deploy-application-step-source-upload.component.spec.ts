@@ -193,13 +193,12 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
       };
 
       beforeEach(async () => {
-        read = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (this: FileReader) {
-          reader = this;
-        });
+        read = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(() => undefined);
         component.onEnter(oneFile());
         await appRef.whenStable();
         fromServer(SocketEventTypes.SOURCE_REQUIRED);
         fromServer(SocketEventTypes.SOURCE_FILE_ACK);
+        reader = read.mock.contexts.at(-1) as FileReader | undefined;
         expect(reader).toBeDefined();
       });
 
