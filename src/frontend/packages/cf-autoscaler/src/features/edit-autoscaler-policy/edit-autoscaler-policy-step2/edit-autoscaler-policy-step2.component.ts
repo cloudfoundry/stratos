@@ -132,7 +132,8 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
       metric_type: this.editMetricType,
       operator: this.currentPolicy.scaling_rules_form[index].operator,
       threshold: this.currentPolicy.scaling_rules_form[index].threshold,
-      adjustment: Math.abs(Number(this.currentPolicy.scaling_rules_form[index].adjustment)),
+      // A percentage step is stored as e.g. '-20%'; the field holds 20.
+      adjustment: Math.abs(parseInt(this.currentPolicy.scaling_rules_form[index].adjustment, 10)),
       breach_duration_secs: this.currentPolicy.scaling_rules_form[index].breach_duration_secs ?? 0,
       cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs ?? 0,
       adjustment_type: this.editAdjustmentType
