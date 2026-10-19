@@ -10,6 +10,7 @@ import { autoscalerTransformArrayToMap } from '../../../core/autoscaler-helpers/
 import { PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import { numberWithFractionOrExceedRange } from '../../../core/autoscaler-helpers/autoscaler-validation';
 import { EditAutoscalerPolicyDirective } from '../edit-autoscaler-policy-base-step';
+import { AUTOSCALER_TIMEZONES } from '../../../core/autoscaler-helpers/autoscaler-timezones';
 
 interface EditLimitForm {
   instance_min_count: FormControl<number>;
@@ -37,7 +38,7 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
 
 
   policyAlert = PolicyAlert;
-  timezoneOptions = Intl.supportedValuesOf('timeZone');
+  timezoneOptions = AUTOSCALER_TIMEZONES;
   editLimitForm: FormGroup<EditLimitForm>;
   // FWT-959 Part 2: observable surface for the parent's signal-step
   // handle. Mirrors editLimitForm.valid; statusChanges fires after every

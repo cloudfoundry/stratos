@@ -5,6 +5,7 @@ import {
   AppScalingTrigger,
 } from '../../store/app-autoscaler.types';
 import { AutoscalerConstants, getScaleType, isEqual } from './autoscaler-util';
+import { autoscalerDefaultTimezone } from './autoscaler-timezones';
 
 export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
   const newPolicy: AppAutoscalerPolicyLocal = {
@@ -29,7 +30,7 @@ export function autoscalerTransformArrayToMap(policy: AppAutoscalerPolicy) {
     }
     buildFormUponMap(newPolicy, metricName);
   });
-  newPolicy.schedules = newPolicy.schedules || { timezone: Intl.DateTimeFormat().resolvedOptions().timeZone };
+  newPolicy.schedules = newPolicy.schedules || { timezone: autoscalerDefaultTimezone() };
   newPolicy.schedules.recurring_schedule = newPolicy.schedules.recurring_schedule || [];
   newPolicy.schedules.specific_date = newPolicy.schedules.specific_date || [];
   return newPolicy;
