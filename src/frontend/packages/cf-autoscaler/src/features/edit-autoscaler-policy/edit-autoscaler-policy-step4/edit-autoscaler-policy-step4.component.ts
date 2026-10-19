@@ -9,7 +9,7 @@ import { CommonModule } from '@angular/common';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { StepOnNextFunction } from '@stratosui/core';
-import { AutoscalerConstants, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
+import { AutoscalerConstants, autoscalerErrorMessage, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
@@ -112,7 +112,9 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
         message: undefined as string | undefined,
       })),
       catchError(err => {
-        const detail = (err && (err.message || (err.error && (err.error.message || err.error)))) || '';
+        // The autoscaler's reason; an HttpErrorResponse's own message only
+        // names the URL and the status.
+        const detail = err ? autoscalerErrorMessage(err) : '';
         return observableOf({
           success: false,
           redirect: false,
