@@ -8,7 +8,6 @@ export const appAutoscalerHealthEntityType = 'autoscalerHealth';
 export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
 export const appAutoscalerScalingHistoryEntityType = 'autoscalerScalingHistory';
-export const appAutoscalerCredentialEntityType = 'autoscalerCredential';
 
 export const AUTOSCALER_ENDPOINT_TYPE = 'autoscaler';
 
@@ -36,12 +35,6 @@ export class AutoscalerEntitySchema extends EntitySchema {
 
 entityCache[appAutoscalerInfoEntityType] = new AutoscalerEntitySchema(
   appAutoscalerInfoEntityType,
-  {},
-  { idAttribute: getCFCompositeEntityId }
-);
-
-entityCache[appAutoscalerCredentialEntityType] = new AutoscalerEntitySchema(
-  appAutoscalerCredentialEntityType,
   {},
   { idAttribute: getCFCompositeEntityId }
 );

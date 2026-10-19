@@ -182,9 +182,3 @@ export interface AppAutoscaleMetricChart {
   unit?: string;
 }
 
-export interface AppAutoscalerCredential {
-  username: string;
-  password: string;
-  app_id?: string;
-  url?: string;
-}
