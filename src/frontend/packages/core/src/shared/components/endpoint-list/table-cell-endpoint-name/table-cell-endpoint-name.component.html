@@ -1,4 +1,4 @@
-@if (endpoint$ | async; as endpoint) {
+@if (endpoint(); as endpoint) {
   <div class="flex items-center">
     @if (endpoint.canShowLink) {
       <a routerLink="{{ endpoint.link }}">{{ endpoint.name }}</a>
