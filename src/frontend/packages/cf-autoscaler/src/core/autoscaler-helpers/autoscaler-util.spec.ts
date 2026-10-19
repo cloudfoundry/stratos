@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { describe, it, expect } from 'vitest';
 import {
-  autoscalerErrorMessage, isEqual, buildLegendData, shiftArray,
+  AutoscalerConstants, autoscalerErrorMessage, isEqual, buildLegendData, shiftArray,
 } from './autoscaler-util';
 
 describe('Autoscaler Util Helper', () => {
@@ -71,6 +71,17 @@ describe('Autoscaler Util Helper', () => {
   it('shiftArray', () => {
     expect(shiftArray([0, 2, 3], 1)).toEqual([1, 3, 4]);
     expect(shiftArray([1, 6, 9], -1)).toEqual([0, 5, 8]);
+  });
+  // The built-in metrics of autoscaler 14.x and 15.x, with the threshold
+  // limits it enforces by default.
+  it('knows every built-in metric and its threshold limit', () => {
+    expect(AutoscalerConstants.MetricTypes).toEqual(
+      expect.arrayContaining(['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu', 'cpuutil', 'disk', 'diskutil']));
+    expect(AutoscalerConstants.getMetricThresholdMax('cpuutil')).toBe(100);
+    expect(AutoscalerConstants.getMetricThresholdMax('diskutil')).toBe(100);
+    expect(AutoscalerConstants.getMetricThresholdMax('disk')).toBe(2048);
+    expect(AutoscalerConstants.getMetricThresholdMax('memoryused')).toBeUndefined();
+    expect(AutoscalerConstants.getMetricUnit('disk')).toBe('MB');
   });
   it('autoscalerErrorMessage', () => {
     const refusal = new HttpErrorResponse({ status: 403, error: { error: 'The application is not bound to Auto-Scaling service' } });

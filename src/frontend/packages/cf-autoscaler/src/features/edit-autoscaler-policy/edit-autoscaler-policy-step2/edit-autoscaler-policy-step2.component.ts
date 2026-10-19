@@ -200,10 +200,9 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
         return null;
       }
       const errors: AppAutoscalerInvalidPolicyError = {};
-      if (AutoscalerConstants.MetricPercentageTypes.indexOf(this.editMetricType) >= 0) {
-        if (numberWithFractionOrExceedRange(control.value, 1, 100, true)) {
-          errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
-        }
+      const limit = AutoscalerConstants.getMetricThresholdMax(this.editMetricType);
+      if (limit !== undefined && numberWithFractionOrExceedRange(control.value, 1, limit, true)) {
+        errors.alertInvalidPolicyTriggerThreshold100 = { value: control.value };
       }
       const thresholdMin = getThresholdMin(this.currentPolicy.scaling_rules_form, this.editMetricType, this.editScaleType, this.editIndex);
       const thresholdMax = getThresholdMax(this.currentPolicy.scaling_rules_form, this.editMetricType, this.editScaleType, this.editIndex);
