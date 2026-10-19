@@ -1,7 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, map, publishReplay, refCount, withLatestFrom } from 'rxjs/operators';
+import { filter, publishReplay, refCount } from 'rxjs/operators';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
@@ -170,15 +170,14 @@ export class ApplicationService {
         fetching: this.detail.loading().app,
         app: app as APIResource<IApp>,
         stack: app?.entity?.stack as APIResource<any>,
-        cf: null as any,   // patched below via withLatestFrom(endpoints$)
+        // The endpoint model, so cf?.guid / cf?.name work without an
+        // endpoint fetch. Read here, not joined with withLatestFrom: that
+        // dropped the app when it settled before the endpoints did.
+        cf: this.cfEndpoints.all()?.[this.cfGuid] ?? null,
       } as ApplicationData;
     })
   ).pipe(
     filter(data => !!data.app),
-    // Attach the endpoint model from the ngrx store so cf?.guid / cf?.name work.
-    // This keeps the legacy consumer API intact without adding endpoint HTTP fetches.
-    withLatestFrom(toObservable(this.cfEndpoints.all)),
-    map(([data, endpoints]) => ({ ...data, cf: endpoints?.[this.cfGuid] ?? null })),
     publishReplay(1),
     refCount(),
   );
