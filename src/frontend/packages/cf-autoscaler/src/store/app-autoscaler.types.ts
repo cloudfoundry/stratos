@@ -28,6 +28,13 @@ export interface AppAutoscalerPolicy {
     recurring_schedule?: AppRecurringSchedule[],
     specific_date?: AppSpecificDate[]
   };
+  // Custom metric options (autoscaler 14.x and later). Kept as loaded, so
+  // a save does not reset them.
+  configuration?: {
+    custom_metrics?: {
+      metric_submission_strategy?: { allow_from: string }
+    }
+  };
 }
 
 export interface AppSpecificDate {

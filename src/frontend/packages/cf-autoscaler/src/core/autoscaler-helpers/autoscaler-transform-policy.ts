@@ -97,6 +97,9 @@ export function autoscalerTransformMapToArray(oldPolicy: AppAutoscalerPolicyLoca
   if (scalingRules.length > 0) {
     newPolicy.scaling_rules = scalingRules;
   }
+  if (oldPolicy.configuration) {
+    newPolicy.configuration = oldPolicy.configuration;
+  }
   if (oldPolicy.schedules &&
     (hasNamedSchedule(oldPolicy.schedules.recurring_schedule) || hasNamedSchedule(oldPolicy.schedules.specific_date))) {
     newPolicy.schedules = {
