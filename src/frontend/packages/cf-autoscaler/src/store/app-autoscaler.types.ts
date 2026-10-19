@@ -82,12 +82,6 @@ export interface AppAutoscalerPolicyLocal extends AppAutoscalerPolicy {
   };
 }
 
-export interface AppAutoscalerHealth {
-  entity: {
-    uptime: number;
-  };
-}
-
 export interface AppAutoscalerEvent {
   app_id: string;
   error: string;

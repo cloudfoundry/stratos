@@ -4,7 +4,6 @@ import { getCFCompositeEntityId } from '../../../cloud-foundry/src/store/selecto
 import { EntitySchema } from '@stratosui/store';
 
 export const appAutoscalerInfoEntityType = 'autoscalerInfo';
-export const appAutoscalerHealthEntityType = 'autoscalerHealth';
 export const appAutoscalerPolicyEntityType = 'autoscalerPolicy';
 export const appAutoscalerPolicyTriggerEntityType = 'autoscalerPolicyTrigger';
 export const appAutoscalerScalingHistoryEntityType = 'autoscalerScalingHistory';
@@ -47,11 +46,6 @@ entityCache[appAutoscalerPolicyEntityType] = new AutoscalerEntitySchema(
 
 entityCache[appAutoscalerPolicyTriggerEntityType] = new AutoscalerEntitySchema(
   appAutoscalerPolicyTriggerEntityType,
-  {},
-  { idAttribute: getCFCompositeEntityId }
-);
-entityCache[appAutoscalerHealthEntityType] = new AutoscalerEntitySchema(
-  appAutoscalerHealthEntityType,
   {},
   { idAttribute: getCFCompositeEntityId }
 );
