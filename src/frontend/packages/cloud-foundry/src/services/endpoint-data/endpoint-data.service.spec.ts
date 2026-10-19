@@ -760,6 +760,40 @@ describe('EndpointDataService', () => {
         service.updateApp('app-unknown', { state: 'STOPPED' });
         expect(service.recentApps().map(a => a.guid)).toEqual(['app-new']);
       });
+
+      // The full drain is the newer truth: app-old was deleted, app-new was
+      // renamed and stopped, app-newest was created elsewhere.
+      const newest = { guid: 'app-newest', name: 'newest', state: 'STARTED', updatedAt: '2026-04-01T00:00:00Z' } as any;
+      const changed = [{ ...newer, name: 'renamed', state: 'STOPPED' }, newest];
+      const recentOf = () => service.recentApps().map(a => `${a.guid}:${a.name}:${a.state}`);
+
+      it('refreshApps rebuilds recentApps from the new app list', async () => {
+        await warmRecent([newer, older]);
+        service.refreshApps().subscribe();
+        httpMock.expectOne(APPS_FULL_URL).flush({ resources: changed, pagination: { totalResults: 2, totalPages: 1 } });
+        await Promise.resolve();
+        expect(recentOf()).toEqual(['app-newest:newest:STARTED', 'app-new:renamed:STOPPED']);
+      });
+
+      it('loadApps rebuilds recentApps from the new app list', async () => {
+        await warmRecent([newer, older]);
+        service.loadApps().subscribe();
+        httpMock.expectOne(APPS_FULL_URL).flush({ resources: changed, pagination: { totalResults: 2, totalPages: 1 } });
+        await Promise.resolve();
+        expect(recentOf()).toEqual(['app-newest:newest:STARTED', 'app-new:renamed:STOPPED']);
+      });
+
+      it('removeApp refills recentApps from the full list', async () => {
+        const eleven = Array.from({ length: 11 }, (_, i) =>
+          ({ guid: `app-${i}`, name: `${i}`, state: 'STARTED', updatedAt: `2026-01-${String(20 - i).padStart(2, '0')}T00:00:00Z` }));
+        await warmRecent(eleven.slice(0, 10));
+        service.refreshApps().subscribe();
+        httpMock.expectOne(APPS_FULL_URL).flush({ resources: eleven, pagination: { totalResults: 11, totalPages: 1 } });
+        await Promise.resolve();
+        service.removeApp('app-0');
+        expect(service.recentApps().map(a => a.guid))
+          .toEqual(eleven.slice(1).map(a => a.guid));
+      });
     });
 
     it('removeServiceInstance / addServiceInstance / updateServiceInstance work + count tracked', () => {
