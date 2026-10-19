@@ -275,6 +275,24 @@ describe('DeployApplicationStep3Component', () => {
       expect(component.appGuid).toBe('g2');
     });
 
+    it('can be closed when the deployed app is not found', async () => {
+      const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show').mockReturnValue({ onAction: () => NEVER } as any);
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+      let closeable: boolean | undefined;
+      let valid: boolean | undefined;
+      component.closeable$.subscribe(c => closeable = c);
+      component.valid$.subscribe(v => valid = v);
+      await enterConnected();
+      await succeed('my-app');
+
+      TestBed.inject(HttpTestingController).expectOne(appsUrl).flush({ resources: [{ name: 'other', guid: 'g0' }] });
+
+      expect(closeable).toBe(true);
+      expect(valid).toBe(false);
+      expect(show).toHaveBeenCalledWith('Application my-app was deployed but could not be found in the space', 'Dismiss');
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
     it('keeps the app given for a redeploy', async () => {
       const httpMock = TestBed.inject(HttpTestingController);
       fixture.componentRef.setInput('appGuid', 'r1');

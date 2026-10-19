@@ -66,6 +66,9 @@ export class DeployApplicationStep3Component implements OnDestroy {
   // false on terminal states (success or error) so the user can go back
   // and fix inputs when the deploy fails.
   private disablePreviousSubject = new BehaviorSubject<boolean>(true);
+  // A deployed app the lookup did not find: there is no app to go to, but
+  // the deploy is over, so the step can be closed
+  private appNotFoundSubject = new BehaviorSubject<boolean>(false);
 
   readonly valid$: Observable<boolean> = this.validSubject.asObservable();
   readonly closeable$: Observable<boolean> = this.closeableSubject.asObservable();
@@ -120,8 +123,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
     );
 
     this.subscriptions.push(
-      observableCombineLatest(this.validSubject, status$).pipe(
-        map(([validated, status]) => validated || status.error)
+      observableCombineLatest(this.validSubject, status$, this.appNotFoundSubject).pipe(
+        map(([validated, status, appNotFound]) => validated || status.error || appNotFound)
       ).subscribe(v => this.closeableSubject.next(v))
     );
 
@@ -162,12 +165,19 @@ export class DeployApplicationStep3Component implements OnDestroy {
         take(1),
         switchMap(() => this.lookUpAppGuid()),
       ).subscribe(guid => {
-        this.deployer.applicationGuid$.next(guid);
+        if (guid) {
+          this.deployer.applicationGuid$.next(guid);
+        } else {
+          this.appNotFoundSubject.next(true);
+          this.snackBarService.show(
+            `Application ${this.deployer.appData?.Name} was deployed but could not be found in the space`, 'Dismiss');
+        }
       })
     );
   }
 
-  private lookUpAppGuid(): Observable<string> {
+  // Emits undefined when the space has no app of that name
+  private lookUpAppGuid(): Observable<string | undefined> {
     const appName = this.deployer.appData?.Name;
     const cfGuid = this.deployer.cfGuid;
     const spaceGuid = this.deployer.spaceGuid;
@@ -177,9 +187,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     return this.http.get<StAppsResponse>(
       `/pp/v1/cf/apps/${cfGuid}?space_guids=${encodeURIComponent(spaceGuid)}`,
     ).pipe(
-      map(resp => (resp?.resources ?? []).find((a: StApp) => a.name === appName)),
-      filter((app): app is StApp => !!app),
-      map(app => app.guid),
+      map(resp => (resp?.resources ?? []).find((a: StApp) => a.name === appName)?.guid),
       take(1),
     );
   }
@@ -242,6 +250,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.closeableSubject.next(false);
     this.showOverlaySubject.next(false);
     this.disablePreviousSubject.next(true);
+    this.appNotFoundSubject.next(false);
     this.error.set(false);
     // A retry of a first deploy may deploy another app; look it up again
     this.appGuid = this.redeployAppGuid;
