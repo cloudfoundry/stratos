@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { AbstractControl, FormBuilder, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { Observable, of as observableOf } from 'rxjs';
+import { defer, Observable, of as observableOf } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { ApplicationService } from '@stratosui/cloud-foundry';
@@ -53,10 +53,11 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
       instance_max_count: this.fb.nonNullable.control(0, [Validators.required, this.validateGlobalLimitMax()]),
       timezone: this.fb.nonNullable.control('', [Validators.required])
     });
-    this.valid$ = this.editLimitForm.statusChanges.pipe(
+    // defer: start from the status when subscribed, not when built.
+    this.valid$ = defer(() => this.editLimitForm.statusChanges.pipe(
       startWith(this.editLimitForm.status),
       map(status => status === 'VALID'),
-    );
+    ));
   }
 
   ngOnInit() {
@@ -70,8 +71,10 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
         this.editLimitForm.controls.timezone.setValue(this.currentPolicy.schedules?.timezone ?? '');
         this.editLimitForm.controls.instance_min_count.setValue(this.currentPolicy.instance_min_count);
         this.editLimitForm.controls.instance_max_count.setValue(this.currentPolicy.instance_max_count);
-        this.editLimitForm.controls.instance_min_count.setValidators([Validators.required, this.validateGlobalLimitMin()]);
-        this.editLimitForm.controls.instance_max_count.setValidators([Validators.required, this.validateGlobalLimitMax()]);
+        // Each count is checked against the other. The minimum was checked
+        // while the maximum was still unset, so check both again now.
+        this.editLimitForm.controls.instance_min_count.updateValueAndValidity();
+        this.editLimitForm.controls.instance_max_count.updateValueAndValidity();
         this.cdr.markForCheck();
         return this.currentPolicy;
       })
