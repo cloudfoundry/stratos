@@ -52,7 +52,6 @@ export const E2E_LEGACY_FILES = [
   "e2e/pages/marketplace/marketplace.page.ts",
   "e2e/pages/marketplace/service-plan-details.page.ts",
   "e2e/pages/marketplace/services-wall.page.ts",
-  "e2e/tests/application/application-autoscaler.spec.ts",
   "e2e/tests/application/application-deploy-local.spec.ts",
   "e2e/tests/application/application-deploy.spec.ts",
   "e2e/tests/application/application-routes.spec.ts",
