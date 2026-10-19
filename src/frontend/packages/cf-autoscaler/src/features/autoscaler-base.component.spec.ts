@@ -57,4 +57,11 @@ describe('AutoscalerBaseComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  // The policy editor and the other autoscaler pages get ApplicationService
+  // from this component. It needs the app-detail services the app page
+  // provides; without them every autoscaler page failed with NG0201.
+  it('provides an ApplicationService its pages can use', () => {
+    expect(() => fixture.debugElement.injector.get(ApplicationService)).not.toThrow();
+  });
 });

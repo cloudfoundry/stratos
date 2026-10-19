@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
-  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
+  Component, ChangeDetectionStrategy, DestroyRef, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
@@ -64,6 +64,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
   private router = inject(Router);
   private permissionsService = inject(CurrentUserPermissionsService);
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Total app count for the L5 sub-nav. */
   public totalApplications!: Signal<number>;
@@ -365,7 +366,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
     this.appsConfig.pageSize.set(6);
 
     void this.appsConfig.loadAll();
-    this.appsConfig.startStatsPolling();
+    this.appsConfig.startStatsPolling(this.destroyRef);
   }
 
   private toggleAppFavorite(app: StApp): void {

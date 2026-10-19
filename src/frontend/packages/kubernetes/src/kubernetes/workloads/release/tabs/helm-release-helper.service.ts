@@ -1,5 +1,6 @@
-import { Injectable, Injector, inject, runInInjectionContext } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { observeSignal } from '@stratosui/store';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -145,23 +146,28 @@ export class HelmReleaseHelperService {
     return this.guid.replace(':', '/').replace(':', '/');
   }
 
+  // The fetch*/getCharts streams are built per call (per tab visit, per graph
+  // node click) on the release shell, which is reused across tab switches,
+  // so they use observeSignal: the watch ends with the subscription instead
+  // of piling up until the user leaves the release. The constructor streams
+  // above are built once per shell and keep toObservable.
   public fetchReleaseGraph(): Observable<HelmReleaseGraph> {
     // Socket-fed graph signal (written by HelmReleaseSocketService).
-    return toObservable(this.releaseData.graph(this.guid), { injector: this.injector }).pipe(
+    return observeSignal(this.releaseData.graph(this.guid), this.injector).pipe(
       filter((graph): graph is HelmReleaseGraph => !!graph)
     );
   }
 
   public fetchReleaseResources(): Observable<HelmReleaseResources> {
     // Socket-fed resources signal (written by HelmReleaseSocketService).
-    return toObservable(this.releaseData.resources(this.guid), { injector: this.injector }).pipe(
+    return observeSignal(this.releaseData.resources(this.guid), this.injector).pipe(
       filter((resources): resources is HelmReleaseResources => !!resources)
     );
   }
 
   public fetchReleaseChartStats(): Observable<HelmReleaseChartData> {
     const podsSig = this.podData.podsInWorkload(this.endpointGuid, this.namespace, this.releaseTitle);
-    return runInInjectionContext(this.injector, () => toObservable(podsSig)).pipe(
+    return observeSignal(podsSig, this.injector).pipe(
       map((pods: KubePod[]) => this.mapPods(pods as any)),
     );
   }
@@ -169,7 +175,7 @@ export class HelmReleaseHelperService {
   // Check to see if a workload has updates available
   public getCharts() {
     void this.helmData.loadCharts();
-    return toObservable(this.helmData.monocularCharts(), { injector: this.injector }).pipe(
+    return observeSignal(this.helmData.monocularCharts(), this.injector).pipe(
       filter((charts: any) => !!charts)
     );
   }
@@ -178,7 +184,7 @@ export class HelmReleaseHelperService {
     // Get the history for a Helm release (signal-native; replaces the ngrx
     // `history` entity-catalog getEntityService).
     void this.releaseData.loadHistory(this.endpointGuid, this.namespace, this.releaseTitle);
-    return toObservable(this.releaseData.history(this.guid), { injector: this.injector }).pipe(
+    return observeSignal(this.releaseData.history(this.guid), this.injector).pipe(
       filter((revisions): revisions is HelmReleaseRevision[] => !!revisions)
     );
   }

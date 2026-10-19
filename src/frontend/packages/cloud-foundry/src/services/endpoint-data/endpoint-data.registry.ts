@@ -12,6 +12,8 @@ interface RegistryEntry {
   refCount: number;
 }
 
+// Entries are kept for the session (sticky) on purpose. refCount is
+// diagnostics only (getSnapshot); nothing evicts on zero.
 @Injectable({ providedIn: 'root' })
 export class EndpointDataRegistry implements OnDestroy {
   private readonly http = inject(HttpClient);
@@ -143,7 +145,7 @@ export class EndpointDataRegistry implements OnDestroy {
     const entry = this.instances.get(guid);
     if (!entry) { return; }
     entry.refCount = Math.max(0, entry.refCount - 1);
-    // Instance stays in map with its data (sticky) — only removed on explicit evict
+    // Instance stays in the map with its data (sticky; see class comment).
   }
 
   ngOnDestroy(): void {

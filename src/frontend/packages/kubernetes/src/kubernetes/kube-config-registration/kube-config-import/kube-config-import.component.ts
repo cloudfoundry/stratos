@@ -1,10 +1,10 @@
 import { ChangeDetectionStrategy, Component, EnvironmentInjector, Injector, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 
 import { UntypedFormBuilder } from '@angular/forms';
-import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
+import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { filter, map, startWith, take } from 'rxjs/operators';
 
-import { EndpointsDataService } from '@stratosui/store';
+import { createSignalWrapper, EndpointsDataService } from '@stratosui/store';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -37,43 +37,6 @@ import { KubeConfigFileCluster, KubeConfigImportAction } from '../kube-config.ty
 
 const REGISTER_ACTION = 'Register endpoint';
 const CONNECT_ACTION = 'Connect endpoint';
-
-/**
- * Signal wrapper utility for BehaviorSubject compatibility
- * Provides dual API: Signal methods + BehaviorSubject compatibility (.next(), .asObservable())
- * Enables zero-breaking-change migration from BehaviorSubject to Signal
- */
-function createSignalWrapper<T>(initialValue: T) {
-  const _signal = signal<T>(initialValue);
-  // asObservable() must be callable outside injection contexts (wrappers are
-  // created and read during import execution, from step event handlers), so
-  // it is backed by a BehaviorSubject kept in sync on every write instead of
-  // a lazy toObservable(), which throws NG0203 there.
-  const _subject = new BehaviorSubject<T>(initialValue);
-  const write = (value: T) => {
-    _signal.set(value);
-    _subject.next(value);
-  };
-  const wrapper = Object.assign(
-    // Make it callable like a signal
-    () => _signal(),
-    {
-      // WritableSignal methods
-      set: write,
-      update: (fn: (value: T) => T) => write(fn(_signal())),
-      asReadonly: () => _signal.asReadonly(),
-      // BehaviorSubject compatibility methods
-      next: write,
-      getValue: () => _signal(),
-      asObservable: () => _subject.asObservable(),
-    }
-  );
-  return wrapper as WritableSignal<T> & {
-    next: (value: T) => void;
-    getValue: () => T;
-    asObservable: () => Observable<T>;
-  };
-}
 
 @Component({
 selector: 'app-kube-config-import',
@@ -159,17 +122,11 @@ export class KubeConfigImportComponent implements OnDestroy {
     ];
   }
 
-  // Stable per-row Observable for the action-monitor icon. `actionState`'s
-  // asObservable() mints a fresh observable each call; cache by action so the
-  // template binding doesn't re-subscribe every change-detection pass.
-  private readonly actionStateObs = new WeakMap<KubeConfigImportAction, Observable<IActionMonitorComponentState>>();
+  // Per-row Observable for the action-monitor icon. asObservable() returns
+  // the same instance on every call, so the template binding does not
+  // re-subscribe each change-detection pass.
   actionStateFor(row: KubeConfigImportAction): Observable<IActionMonitorComponentState> {
-    let obs = this.actionStateObs.get(row);
-    if (!obs) {
-      obs = row.actionState.asObservable();
-      this.actionStateObs.set(row, obs);
-    }
-    return obs;
+    return row.actionState.asObservable();
   }
 
   subs: Subscription[] = [];
@@ -220,7 +177,7 @@ export class KubeConfigImportComponent implements OnDestroy {
     const sub = reg.actionState.asObservable().subscribe((progress: IActionMonitorComponentState) => {
       // Not sure what the status is used for?
       reg.status = progress;
-      if (progress.error && progress.message) {
+      if (progress.error) {
         // Mark all dependency jobs as skip
         next.forEach(action => {
           if (action.depends === reg) {
@@ -229,7 +186,7 @@ export class KubeConfigImportComponent implements OnDestroy {
             action.state.next({ message: 'Skipping action as endpoint could not be registered', warning: true });
           }
         });
-        reg.state.next({ message: progress.message, error: true });
+        reg.state.next({ message: progress.message || 'Failed to register endpoint', error: true });
       }
       if (progress.completed) {
         if (!progress.error) {
@@ -274,27 +231,47 @@ export class KubeConfigImportComponent implements OnDestroy {
   private doConnect(connect: KubeConfigImportAction, next: KubeConfigImportAction[]) {
     if (!connect.user) {
       connect.state.next({ message: 'Can not connect - no user specified', error: true });
+      this.processAction(next);
       return;
     }
-    const helper = new KubeConfigAuthHelper();
-    const data = helper.getAuthDataForConnect(this.environmentInjector, this.injector, this.fb, connect.user);
+    // This runs inside the previous row's status callback, so a throw here
+    // would stop the import: fail this row and move on instead.
+    let data: ConnectEndpointData | null;
+    try {
+      data = new KubeConfigAuthHelper().getAuthDataForConnect(this.environmentInjector, this.injector, this.fb, connect.user);
+    } catch (err) {
+      connect.state.next({ message: (err as Error)?.message || 'Can not connect - could not get user auth data', error: true });
+      this.processAction(next);
+      return;
+    }
     if (data) {
       const obs$ = this.connectEndpoint(connect, data);
 
-      // Echo obs$ to the behaviour subject
-      this.subs.push(obs$.subscribe(connect.actionState));
+      // Echo obs$ to the row's action state. The wrapper is not an observer
+      // (calling it reads the signal), so forward each value explicitly; a
+      // failed connect completes the row as an error so the import goes on.
+      this.subs.push(obs$.subscribe({
+        next: status => connect.actionState.next(status),
+        error: err => connect.actionState.next({
+          busy: false,
+          error: true,
+          completed: true,
+          message: err?.message || 'Failed to connect endpoint',
+        }),
+      }));
 
       this.subs.push(connect.actionState.asObservable().pipe(
         filter((status: IActionMonitorComponentState) => status.completed),
         take(1)
       ).subscribe((status: IActionMonitorComponentState) => {
         if (status.error) {
-          connect.state.next({ message: status.message, error: true });
+          connect.state.next({ message: status.message || 'Failed to connect endpoint', error: true });
         }
         this.processAction(next);
       }));
     } else {
       connect.state.next({ message: 'Can not connect - could not get user auth data', error: true });
+      this.processAction(next);
     }
   }
 

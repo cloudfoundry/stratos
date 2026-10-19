@@ -60,9 +60,14 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   private logStreamSubject = new BehaviorSubject<Observable<any>>(NEVER);
 
+  // A different stream is a new log: what the last one showed goes
   @Input()
   set logStream(stream: Observable<any>) {
-    this.logStreamSubject.next(stream || NEVER);
+    const next = stream || NEVER;
+    if (next !== this.logStreamSubject.value) {
+      this.clear();
+    }
+    this.logStreamSubject.next(next);
   }
 
   @ViewChild('container', { static: true }) container!: ElementRef;
@@ -101,8 +106,10 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       this.stopped$,
       this.logStreamSubject.asObservable()
     ]).pipe(
+      // Each line keeps its stream, so lines of a replaced stream still
+      // waiting in the buffer are dropped
       switchMap(
-        ([stopped, stream]) => (stopped ? NEVER : stream)
+        ([stopped, stream]) => (stopped ? NEVER : stream.pipe(map(log => ({ stream, log }))))
       ),
       share()
     );
@@ -226,6 +233,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     const addedLogs$ = stoppableLogStream$.pipe(
       buffer(buffer$))
       .pipe(
+        map(lines => lines.filter(line => line.stream === this.logStreamSubject.value).map(line => line.log)),
         filter(log => !!log.length),
         // Apply filter to messages if applicable
         map(logs => logs.map(log => {
@@ -358,6 +366,14 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     if (this.stopped$) {
       this.stopped$.next(pause);
     }
+  }
+
+  private clear() {
+    // Not there yet when the first stream is set
+    if (this.content) {
+      this.content.nativeElement.textContent = '';
+    }
+    this.logLinesCount = 0;
   }
 
   private binElement() {

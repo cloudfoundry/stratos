@@ -30,21 +30,15 @@
       <!-- The list (and its sub-nav) renders only with endpoints, so the
            first endpoint needs this sub-nav for its Register button. -->
       <app-list-sub-nav title="Total Endpoints" [count]="noEndpoints" [addAction]="registerEndpointAction"></app-list-sub-nav>
-      @if (!customizations.noEndpointsComponent) {
+      @if (customizations.noEndpointsComponent) {
+        <ng-container *ngComponentOutlet="customizations.noEndpointsComponent"></ng-container>
+      } @else {
         <app-endpoints-missing [showToolbarHint]="false"
         [showDirectToEndpointMessage]="false"></app-endpoints-missing>
       }
     }
-    <ng-template #noEndpointsContainer>
-      @if (!customizations.noEndpointsComponent) {
-        <app-endpoints-missing
-        [showDirectToEndpointMessage]="false"></app-endpoints-missing>
-      } @else {
-      }
-    </ng-template>
   }
 </div>
-<ng-template #customNoEndpoints></ng-template>
 
 <!-- Register Endpoint Modal -->
 @if (showRegisterModal) {

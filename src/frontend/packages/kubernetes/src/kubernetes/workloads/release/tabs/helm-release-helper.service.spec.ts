@@ -1,14 +1,15 @@
-import { provideZonelessChangeDetection } from '@angular/core';
+import { computed, provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { firstValueFrom } from 'rxjs';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { CATALOGUE_ENTITIES } from '@stratosui/store';
 import { KubernetesBaseTestModules } from '../../../kubernetes.testing.module';
 import { generateHelmEntities } from '../../../../helm/helm-entity-generator';
 import { KubePodDataService } from '../../../../services/domain-data/kube-pod-data.service';
+import { KubeHelmDataService } from '../../../../services/endpoint-data/kube-helm-data.service';
 import { HelmReleaseDataService } from '../helm-release-data.service';
 import { HelmReleaseGraph, HelmReleaseGuid, HelmReleaseResources } from '../../workload.types';
 import { HelmReleaseHelperService, Version } from './helm-release-helper.service';
@@ -72,6 +73,69 @@ describe('HelmReleaseHelperService', () => {
       releaseData.setResources(RELEASE_GUID, { endpointId: 'cnsi-1', releaseTitle: 'rel-x', kind: 'Resources', data: [] } as HelmReleaseResources);
       const res: any = await firstValueFrom(res$);
       expect(res.kind).toBe('Resources');
+    });
+  });
+
+  // The helper is provided on the release shell, which is reused across tab
+  // switches, and these methods run per tab visit or per graph node click.
+  // Each returned stream must stop watching its signal on unsubscribe rather
+  // than when the shell is destroyed.
+  describe('per-call streams', () => {
+    let source: ReturnType<typeof signal<number>>;
+    let reads: number;
+    // A computed over `source` that counts its evaluations; `value` maps the
+    // counter into whatever the stream's filter lets through.
+    const counted = <T>(value: (n: number) => T) => computed(() => {
+      reads++;
+      return value(source());
+    });
+
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [...KubernetesBaseTestModules],
+        providers: [
+          provideZonelessChangeDetection(),
+          provideHttpClient(),
+          provideHttpClientTesting(),
+          HelmReleaseHelperService,
+          { provide: HelmReleaseGuid, useValue: { guid: RELEASE_GUID } },
+        ],
+      }).compileComponents();
+      source = signal(0);
+      reads = 0;
+      const releaseData = TestBed.inject(HelmReleaseDataService);
+      const helmData = TestBed.inject(KubeHelmDataService);
+      vi.spyOn(releaseData, 'graph').mockReturnValue(counted(n => ({ n }) as unknown as HelmReleaseGraph));
+      vi.spyOn(releaseData, 'resources').mockReturnValue(counted(n => ({ n }) as unknown as HelmReleaseResources));
+      vi.spyOn(releaseData, 'history').mockReturnValue(counted(() => []) as any);
+      vi.spyOn(releaseData, 'loadHistory').mockResolvedValue(undefined as any);
+      vi.spyOn(TestBed.inject(KubePodDataService), 'podsInWorkload').mockReturnValue(counted(() => []) as any);
+      vi.spyOn(helmData, 'monocularCharts').mockReturnValue(counted(() => []) as any);
+      vi.spyOn(helmData, 'loadCharts').mockResolvedValue(undefined as any);
+    });
+
+    it.each([
+      ['fetchReleaseGraph'],
+      ['fetchReleaseResources'],
+      ['fetchReleaseChartStats'],
+      ['getCharts'],
+      ['fetchReleaseHistory'],
+    ] as const)('%s stops reading its signal after unsubscribe', method => {
+      const helper = TestBed.inject(HelmReleaseHelperService);
+      let emitted = 0;
+      const sub = (helper[method]() as ReturnType<HelmReleaseHelperService['fetchReleaseGraph']>)
+        .subscribe(() => emitted++);
+      TestBed.tick();
+      expect(emitted).toBe(1);
+      const readsWhileSubscribed = reads;
+
+      sub.unsubscribe();
+      source.set(1);
+      TestBed.tick();
+
+      expect(reads).toBe(readsWhileSubscribed);
+      expect(emitted).toBe(1);
     });
   });
 

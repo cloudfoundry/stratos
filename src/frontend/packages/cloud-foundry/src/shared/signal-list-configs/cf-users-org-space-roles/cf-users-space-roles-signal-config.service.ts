@@ -174,18 +174,10 @@ export class CfUsersSpaceRolesSignalConfigService {
 
     this.destroyRef.onDestroy(() => {
       this.permCheckSub?.unsubscribe();
-      const og = this._orgGuid();
-      if (og && this._orgDataService()) {
-        this.registry.release(this.activeRoute.cfGuid, og);
-      }
     });
   }
 
   private bindOrg(orgGuid: string): void {
-    const prevOrg = this._orgGuid();
-    if (this._orgDataService() && prevOrg) {
-      this.registry.release(this.activeRoute.cfGuid, prevOrg);
-    }
     this._orgGuid.set(orgGuid);
     const svc = this.registry.acquire(this.activeRoute.cfGuid, orgGuid);
     this._orgDataService.set(svc);

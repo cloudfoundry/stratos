@@ -1,6 +1,5 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, switchMap } from 'rxjs/operators';
 import {
@@ -16,7 +15,7 @@ import {
   PermissionConfigLink,
   PermissionTypes,
 } from '@stratosui/core';
-import { PermissionValues } from '@stratosui/store';
+import { combineLatestOrEmpty, observeSignal, PermissionValues } from '@stratosui/store';
 import { CFFeatureFlagTypes } from '../cf-api.types';
 import { CF_ENDPOINT_TYPE } from '../cf-types';
 import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
@@ -206,7 +205,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   private getEndpointScopesCheck(permission: CfScopeStrings, endpointGuid?: string): Observable<boolean> {
     const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
     return endpointGuids$.pipe(
-      switchMap(guids => combineLatest(guids.map(_guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, endpointGuid)))),
+      switchMap(guids => combineLatestOrEmpty(guids.map(guid => this.check(CfPermissionTypes.ENDPOINT_SCOPE, permission, guid)))),
       map(checks => checks.some(check => check)),
       distinctUntilChanged()
     );
@@ -241,7 +240,7 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
     } else if (!actualGuid) {
       const endpointGuids$ = this.getEndpointGuidObservable(endpointGuid);
       return endpointGuids$.pipe(
-        switchMap(guids => combineLatest(guids.map(guid => this.checkAllOfType(guid, type as CfPermissionTypes, cfPermissions)))),
+        switchMap(guids => combineLatestOrEmpty(guids.map(guid => this.checkAllOfType(guid, type as CfPermissionTypes, cfPermissions)))),
         map(checks => checks.some(check => check)),
         distinctUntilChanged()
       );
@@ -270,13 +269,17 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
           // take(1) consumer would otherwise capture the pre-load empty list
           // and resolve to a false negative (set/unset-roles-by-username
           // wrongly appearing disabled despite the flag being enabled).
+          //
+          // observeSignal, not toObservable: this checker lives on the root
+          // injector, so a toObservable effect would outlive every
+          // subscription and run for the rest of the session.
           const src = getFeatureFlagsSource(guid, this.http);
           return featureFlagsAfterLoad$(
             () => src.load(),
-            () => toObservable(src.items, { injector: this.injector }),
+            () => observeSignal(src.items, this.injector),
           );
         };
-        return combineLatest(guids.map(createFFObs));
+        return combineLatestOrEmpty(guids.map(createFFObs));
       }),
       map(endpointFeatureFlags => endpointFeatureFlags.some(featureFlags => this.checkFeatureFlag(featureFlags, permission))),
       distinctUntilChanged(),

@@ -42,10 +42,10 @@ describe('SteppersComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(SteppersComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
@@ -177,7 +177,6 @@ describe('SteppersComponent — projected step content', () => {
     });
     await TestBed.compileComponents();
     hostFixture = TestBed.createComponent(ProjectionHostComponent);
-    hostFixture.detectChanges();
     await hostFixture.whenStable();
   });
 
@@ -208,5 +207,362 @@ describe('SteppersComponent — projected step content', () => {
 
     await hostFixture.whenStable();
     expect(hostFixture.componentInstance.entered).toEqual(['two']);
+  });
+});
+
+// The first step's onEnter used to be delivered by a 5 ms setInterval that
+// waited for step 0 to unblock. With no Cloud Foundry connected, the CF step
+// of create-app / deploy / add-service-instance stays blocked, so the
+// interval ran for the life of the page. The poll also targeted allSteps[0]
+// even when that step was hidden, so the step actually shown never got its
+// onEnter.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [hidden]="firstHidden()" [blocked]="firstLegacyBlocked()" [signalHandle]="firstHandle"></app-step>
+      <app-step title="Two" [hidden]="secondHidden()" [signalHandle]="secondHandle"></app-step>
+    </app-steppers>
+  `,
+})
+class FirstStepHostComponent {
+  entered: string[] = [];
+  firstHidden = signal(false);
+  secondHidden = signal(false);
+  firstBlocked = signal(false);
+  firstLegacyBlocked = signal(false);
+  firstHandle: SignalStepHandle = {
+    valid: signal(true),
+    blocked: this.firstBlocked,
+    onEnter: () => { this.entered.push('one'); },
+  };
+  secondHandle: SignalStepHandle = {
+    valid: signal(true),
+    onEnter: () => { this.entered.push('two'); },
+  };
+}
+
+@Component({
+  standalone: true,
+  imports: [SteppersComponent],
+  template: `<app-steppers></app-steppers>`,
+})
+class EmptyStepperHostComponent { }
+
+describe('SteppersComponent — first step entry', () => {
+  let hostFixture: ComponentFixture<FirstStepHostComponent>;
+  let host: FirstStepHostComponent;
+
+  // Long enough for any first-step poll to have ticked several times.
+  const settle = async () => {
+    await vi.advanceTimersByTimeAsync(50);
+    await hostFixture.whenStable();
+  };
+
+  beforeEach(async () => {
+    // Only intervals are faked: setTimeout and requestAnimationFrame stay
+    // real so the zoneless scheduler and whenStable still settle.
+    vi.useFakeTimers({ toFake: ['setInterval', 'clearInterval'] });
+    TestBed.configureTestingModule({
+      imports: [FirstStepHostComponent, EmptyStepperHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(FirstStepHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  afterEach(() => vi.useRealTimers());
+
+  it('fires the first step onEnter exactly once on create', async () => {
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('leaves no interval running while the first step stays blocked', async () => {
+    host.firstBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('fires onEnter once when a blocked first step unblocks', async () => {
+    host.firstBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+
+    host.firstBlocked.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('fires onEnter once when a legacy [blocked] first step unblocks', async () => {
+    host.firstHandle = { valid: signal(true), onEnter: () => { host.entered.push('one'); } };
+    host.firstLegacyBlocked.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+
+    host.firstLegacyBlocked.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('enters the first visible step when the first step is hidden', async () => {
+    host.firstHidden.set(true);
+    await settle();
+    expect(host.entered).toEqual(['two']);
+    expect(vi.getTimerCount()).toBe(0);
+  });
+
+  it('fires onEnter once when the first visible step appears later', async () => {
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await settle();
+    expect(host.entered).toEqual([]);
+    expect(vi.getTimerCount()).toBe(0);
+
+    // e.g. the step list resolves after an async load
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await settle();
+    await settle();
+    expect(host.entered).toEqual(['one']);
+  });
+
+  it('leaves no interval running for a stepper with no steps', async () => {
+    const emptyFixture = TestBed.createComponent(EmptyStepperHostComponent);
+    await vi.advanceTimersByTimeAsync(50);
+    await emptyFixture.whenStable();
+    expect(vi.getTimerCount()).toBe(0);
+  });
+});
+
+// A step can be hidden through its signal handle instead of the legacy
+// [hidden] input. Only the input emits hiddenChange, so the stepper must
+// also follow the handle's hidden signal or its step list goes stale.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [signalHandle]="firstHandle"></app-step>
+      <app-step title="Two" [signalHandle]="secondHandle"></app-step>
+    </app-steppers>
+  `,
+})
+class SignalHiddenHostComponent {
+  entered: string[] = [];
+  firstHidden = signal(false);
+  secondHidden = signal(false);
+  firstHandle: SignalStepHandle = {
+    valid: signal(true),
+    hidden: this.firstHidden,
+    onEnter: () => { this.entered.push('one'); },
+  };
+  secondHandle: SignalStepHandle = {
+    valid: signal(true),
+    hidden: this.secondHidden,
+    onEnter: () => { this.entered.push('two'); },
+  };
+}
+
+describe('SteppersComponent — signal-handle hidden', () => {
+  let hostFixture: ComponentFixture<SignalHiddenHostComponent>;
+  let host: SignalHiddenHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const titles = () => steppers().steps.map(step => step.title);
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [SignalHiddenHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(SignalHiddenHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  it('re-filters the step list when a handle hidden signal flips', async () => {
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['Two']);
+
+    host.firstHidden.set(false);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One', 'Two']);
+    expect(hostFixture.nativeElement.textContent).toContain('One');
+
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One']);
+  });
+
+  it('enters the first step once it is shown through its handle', async () => {
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    expect(titles()).toEqual([]);
+    expect(host.entered).toEqual([]);
+
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(titles()).toEqual(['One', 'Two']);
+    expect(host.entered).toEqual(['one']);
+  });
+});
+
+// Showing or hiding a step before the current one shifts the visible
+// list. The current index must move with it, so the stepper stays on the
+// step the user is on and that step is the one marked active.
+describe('SteppersComponent — current step across re-filters', () => {
+  let hostFixture: ComponentFixture<FirstStepHostComponent>;
+  let host: FirstStepHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const current = () => steppers().steps[steppers().currentIndex()];
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [FirstStepHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(FirstStepHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  it('stays on the entered step when a hidden step before it is shown', async () => {
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(host.entered).toEqual(['two']);
+    expect(current().title).toBe('Two');
+
+    host.firstHidden.set(false);
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title)).toEqual(['One', 'Two']);
+    expect(current().title).toBe('Two');
+    expect(current().active).toBe(true);
+    expect(steppers().steps[0].active).toBe(false);
+    // Showing a step is not a transition: no extra onEnter.
+    expect(host.entered).toEqual(['two']);
+  });
+
+  it('stays on the current step when a step before it is hidden', async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    steppers().setActive(1);
+    await hostFixture.whenStable();
+    expect(current().title).toBe('Two');
+
+    host.firstHidden.set(true);
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title)).toEqual(['Two']);
+    expect(current().title).toBe('Two');
+    expect(current().active).toBe(true);
+  });
+
+  it('enters the step shown in place of a current step that is hidden', async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    steppers().setActive(1);
+    await hostFixture.whenStable();
+    expect(host.entered).toEqual(['one', 'two']);
+
+    host.secondHidden.set(true);
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+    expect(steppers().steps.map(step => step.title)).toEqual(['One']);
+    expect(current().title).toBe('One');
+    expect(current().active).toBe(true);
+    expect(host.entered).toEqual(['one', 'two', 'one']);
+  });
+});
+
+// When every step is hidden at once (here, two handle signals flipping in
+// one tick), the stepper shows nothing and there is no step for the index
+// to follow. It must remember the step the user was on, so that when steps
+// come back the index and the active marker agree again.
+describe('SteppersComponent — all steps hidden, then shown', () => {
+  let hostFixture: ComponentFixture<SignalHiddenHostComponent>;
+  let host: SignalHiddenHostComponent;
+  const steppers = () => hostFixture.debugElement
+    .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+  const current = () => steppers().steps[steppers().currentIndex()];
+  const settle = async () => {
+    await hostFixture.whenStable();
+    await hostFixture.whenStable();
+  };
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [SignalHiddenHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(SignalHiddenHostComponent);
+    host = hostFixture.componentInstance;
+    await settle();
+    // Move to the second step, then hide every step in one re-filter.
+    steppers().setActive(1);
+    await settle();
+    expect(host.entered).toEqual(['one', 'two']);
+    host.firstHidden.set(true);
+    host.secondHidden.set(true);
+    await settle();
+    expect(steppers().steps).toEqual([]);
+  });
+
+  it('returns to the step the user was on when it reappears, without a second onEnter', async () => {
+    host.secondHidden.set(false);
+    await settle();
+    expect(steppers().steps.map(step => step.title)).toEqual(['Two']);
+    expect(current().title).toBe('Two');
+    expect(current().active).toBe(true);
+    expect(host.entered).toEqual(['one', 'two']);
+  });
+
+  it('returns to the step the user was on when all steps reappear', async () => {
+    host.firstHidden.set(false);
+    host.secondHidden.set(false);
+    await settle();
+    expect(current().title).toBe('Two');
+    expect(current().active).toBe(true);
+    expect(steppers().steps[0].active).toBe(false);
+    expect(host.entered).toEqual(['one', 'two']);
+  });
+
+  it('enters the first visible step once when the step the user was on stays hidden', async () => {
+    host.firstHidden.set(false);
+    await settle();
+    expect(steppers().steps.map(step => step.title)).toEqual(['One']);
+    expect(current().title).toBe('One');
+    expect(current().active).toBe(true);
+    expect(steppers().allSteps[1].active).toBe(false);
+    expect(host.entered).toEqual(['one', 'two', 'one']);
   });
 });

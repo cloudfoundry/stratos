@@ -46,7 +46,9 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   @ViewChild('inputs', { read: ViewContainerRef, static: true })
   inputs!: ViewContainerRef;
 
-  disabled = false;
+  // True while any row is PROCESSING; a signal so the stateIn$ push
+  // re-renders the OnPush "Add another" button.
+  readonly disabled = signal(false);
   private count = 0;
 
   private components: {
@@ -89,7 +91,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     stackedAction.stateIn$ = toObservable(stateInSignal, { injector: this.injector });
 
     // Track them all together in one pot
-    this.components[stackedAction.key] = {
+    this.components[stackedAction.key()] = {
       stateInSignal: stateInSignal.asReadonly(),
       stateInUpdate: (state: StackedInputActionsState | null) => stateInSignal.set(state),
       componentRef,
@@ -107,8 +109,8 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     const components = Object.values(this.components);
     // Emit a list of values for all components that should be processed. This does not include succeeded components
     const valuesToSubmit = components ? components.reduce((values: Record<string, string>, component) => {
-      if ((!component.stackedAction.state || component.stackedAction.state.result !== StackedInputActionResult.SUCCEEDED) && component.update) {
-        values[component.stackedAction.key] = component.update.value;
+      if (component.stackedAction.state()?.result !== StackedInputActionResult.SUCCEEDED && component.update) {
+        values[component.stackedAction.key()] = component.update.value;
       }
       return values;
     }, {} as Record<string, string>) : {};
@@ -121,10 +123,10 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
 
   removeComponent(stackedAction: StackedInputActionComponent): void {
     // Remove the visual component
-    const componentRef = this.components[stackedAction.key].componentRef;
+    const componentRef = this.components[stackedAction.key()].componentRef;
     this.inputs.remove(this.inputs.indexOf(componentRef.hostView));
     // Remove the tracked component
-    delete this.components[stackedAction.key];
+    delete this.components[stackedAction.key()];
     // Update all components with their new position
     this.updatePositions();
     this.cd.detectChanges();
@@ -147,7 +149,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
         key,
         result: StackedInputActionResult.OTHER_VALUES_UPDATED,
         otherValues: Object.values(this.components)
-          .filter(fComponent => component.stackedAction.key !== fComponent.stackedAction.key)
+          .filter(fComponent => component.stackedAction.key() !== fComponent.stackedAction.key())
           .map(mComponent => mComponent.update?.value)
           .filter(value => !!value && value.length)
       });
@@ -160,7 +162,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     // Push state change into their respective components
     this.subs.push(this.stateIn$.subscribe(states => {
       // Disable the 'add new' button
-      this.disabled = !!states.find(state => state.result === StackedInputActionResult.PROCESSING);
+      this.disabled.set(states.some(state => state.result === StackedInputActionResult.PROCESSING));
       // Push state using signal update function
       states.forEach((state, _index) => this.components[state.key].stateInUpdate(state));
     }));

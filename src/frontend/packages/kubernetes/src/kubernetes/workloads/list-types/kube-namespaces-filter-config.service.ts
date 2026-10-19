@@ -1,7 +1,7 @@
-import { Injectable, OnDestroy, signal, WritableSignal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
+import { Injectable, OnDestroy, signal, computed, Injector, inject, runInInjectionContext } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { EndpointsSignalService, naturalCompare, safeUnsubscribe } from '@stratosui/core';
-import { EndpointModel } from '@stratosui/store';
+import { createSignalWrapper, EndpointModel } from '@stratosui/store';
 import { Observable, Subscription } from 'rxjs';
 import {
   distinctUntilChanged,
@@ -14,36 +14,6 @@ import {
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 import { KubeNamespace } from '../../../services/endpoint-data/kube-types';
-
-// Helper function to create a signal wrapper compatible with IListMultiFilterConfig
-// The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
-// while being backed by a Signal
-// MUST be called within an injection context (constructor, field initializer, or runInInjectionContext)
-function createSignalWrapper<T>(initialValue: T) {
-  const _signal = signal<T>(initialValue);
-  // Convert signal to observable within injection context once
-  const _observable = toObservable(_signal);
-
-  const wrapper = Object.assign(
-    // Make it callable like a signal
-    () => _signal(),
-    {
-      // WritableSignal methods
-      set: (value: T) => _signal.set(value),
-      update: (fn: (value: T) => T) => _signal.update(fn),
-      asReadonly: () => _signal.asReadonly(),
-      // BehaviorSubject compatibility methods
-      next: (value: T) => _signal.set(value),
-      getValue: () => _signal(),
-      asObservable: () => _observable,
-    }
-  );
-  return wrapper as WritableSignal<T> & {
-    next: (value: T) => void;
-    getValue: () => T;
-    asObservable: () => Observable<T>;
-  };
-}
 
 export interface KubernetesNamespacesFilterItem<T = any> {
   list$: Observable<T[]>;

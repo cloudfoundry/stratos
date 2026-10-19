@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal, TemplateRef, ViewChild } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal, TemplateRef, ViewChild, signal } from '@angular/core';
 import { from, Observable, of as observableOf } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
@@ -42,7 +42,7 @@ export interface SignalStepHandle {
    * the existing stepper plumbing. Resolving with `{ ignoreSuccess: true }`
    * preserves the legacy `StepOnNextResult.ignoreSuccess` semantic — the
    * step reports success without auto-advancing or emitting the success
-   * snackbar (used by `manage-users` / `remove-user` two-click apply).
+   * snackbar (used by the `manage-users` two-click apply).
    * When omitted the step auto-succeeds — useful for confirmation screens.
    */
   readonly submit?: () => Promise<void | Partial<StepOnNextResult>>;
@@ -217,11 +217,13 @@ export class StepComponent {
   }
   @Output() disablePreviousChange = new EventEmitter<boolean>();
 
-  private _blocked = false;
+  // A signal, like signalHandle.blocked, so the stepper's first-step entry
+  // effect re-runs when a legacy [blocked] binding clears.
+  private _blocked = signal(false);
   @Input()
-  set blocked(v: boolean) { this._blocked = v; }
+  set blocked(v: boolean) { this._blocked.set(v); }
   get blocked(): boolean {
-    return this.signalHandle?.blocked ? this.signalHandle.blocked() : this._blocked;
+    return this.signalHandle?.blocked ? this.signalHandle.blocked() : this._blocked();
   }
 
   private _destructiveStep = false;

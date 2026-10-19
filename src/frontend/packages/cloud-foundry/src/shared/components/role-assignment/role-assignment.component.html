@@ -13,6 +13,18 @@
         <app-busy class="text-primary" size="1.25rem" context="role-assignment"></app-busy>
         Loading organizations…
       </div>
+    } @else if (orgsError()) {
+      <div role="alert" class="flex items-center gap-3 px-3 py-4 text-sm text-content-text">
+        <span class="text-danger">{{ orgsError() }}</span>
+        <button
+          type="button"
+          data-testid="org-retry"
+          (click)="loadOrgs()"
+          class="px-2 py-1 text-xs rounded border border-content-border bg-content-bg text-content-text hover:bg-primary-50"
+        >
+          Retry
+        </button>
+      </div>
     } @else {
       <ul class="role-assignment__org-list list-none m-0 p-1 max-h-40 overflow-y-auto custom-scrollbar">
         @for (org of filteredAllowedOrgs(); track org.metadata.guid) {
@@ -28,7 +40,11 @@
           </li>
         }
         @if (filteredAllowedOrgs().length === 0) {
-          <li class="px-3 py-2 text-sm text-content-muted">No organizations match.</li>
+          @if (orgSearchText()) {
+            <li class="px-3 py-2 text-sm text-content-muted">No organizations match.</li>
+          } @else {
+            <li class="px-3 py-2 text-sm text-content-muted">You have no organizations where you can manage roles.</li>
+          }
         }
       </ul>
     }
@@ -88,6 +104,18 @@
         <div class="flex items-center gap-2 py-2 text-sm text-content-muted">
           <app-busy class="text-primary" size="1.25rem" context="role-assignment"></app-busy>
           Loading spaces…
+        </div>
+      } @else if (spacesFailedFor(org.metadata.guid)) {
+        <div role="alert" class="flex items-center gap-3 py-2 text-sm text-content-text">
+          <span class="text-danger">Could not load spaces.</span>
+          <button
+            type="button"
+            data-testid="space-retry"
+            (click)="loadSpacesFor(org.metadata.guid)"
+            class="px-2 py-1 text-xs rounded border border-content-border bg-content-bg text-content-text hover:bg-primary-50"
+          >
+            Retry
+          </button>
         </div>
       } @else {
         <input

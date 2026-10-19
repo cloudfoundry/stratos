@@ -94,8 +94,9 @@
         <form class="space-y-4 min-w-[400px] w-full">
           <div class="form-field">
             <label class="form-label" for="uaaScope">UAA Scope</label>
-            <select id="uaaScope" class="input" [(ngModel)]="selectedScope" name="UAAScope">
-              @for (scope of uaaScopes; track scope) {
+            <select id="uaaScope" class="input" [ngModel]="selectedScope()" (ngModelChange)="selectedScope.set($event)" name="UAAScope">
+              <option value="" disabled>Select a scope</option>
+              @for (scope of uaaScopes(); track scope) {
                 <option [value]="scope">
                   {{ scope }}
                 </option>

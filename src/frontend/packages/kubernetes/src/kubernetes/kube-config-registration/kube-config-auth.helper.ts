@@ -150,7 +150,8 @@ export class KubeConfigAuthHelper {
     return { message: 'Authentication mechanism is not supported', warning: true };
   }
 
-  // Use the auto component to get the data in the correct format for connecting to the endpoint
+  // Use the auto component to get the data in the correct format for connecting to the endpoint.
+  // Throws when the user's auth type is not one the Kubernetes endpoint offers.
   public getAuthDataForConnect(environmentInjector: EnvironmentInjector, injector: Injector, fb: FormBuilder, user: KubeConfigFileUser)
     : ConnectEndpointData | null {
 
@@ -159,37 +160,43 @@ export class KubeConfigAuthHelper {
     // Get the component to us
     if (user && user._authData) {
       const authType = this.authTypes[user._authData.authType];
+      if (!authType) {
+        throw new Error(`Unsupported authentication type: ${user._authData.authType}`);
+      }
 
       const ref = createComponent<IAuthForm>(authType.component, { environmentInjector, elementInjector: injector });
 
-      const form = fb.group({
-        authType: authType.value,
-        systemShared: false,
-        authValues: fb.group(user._authData.values)
-      });
-
-      ref.instance.formGroup = form;
-
-      // Allow the auth form to supply body content if it needs to
-      const endpointFormInstance = ref.instance as any;
-      if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
-        data = {
+      // Destroy the form even when it fails to build the connect data
+      try {
+        const form = fb.group({
           authType: authType.value,
-          authVal: endpointFormInstance.getValues(user._authData.values),
           systemShared: false,
-          bodyContent: endpointFormInstance.getBody()
-        };
-      } else {
-        // Use values as is
-        data = {
-          authType: authType.value,
-          authVal: user._authData.values,
-          systemShared: false,
-          bodyContent: null
-        };
+          authValues: fb.group(user._authData.values)
+        });
+
+        ref.instance.formGroup = form;
+
+        // Allow the auth form to supply body content if it needs to
+        const endpointFormInstance = ref.instance as any;
+        if (endpointFormInstance.getBody && endpointFormInstance.getValues) {
+          data = {
+            authType: authType.value,
+            authVal: endpointFormInstance.getValues(user._authData.values),
+            systemShared: false,
+            bodyContent: endpointFormInstance.getBody()
+          };
+        } else {
+          // Use values as is
+          data = {
+            authType: authType.value,
+            authVal: user._authData.values,
+            systemShared: false,
+            bodyContent: null
+          };
+        }
+      } finally {
+        ref.destroy();
       }
-
-      ref.destroy();
     }
     return data;
   }

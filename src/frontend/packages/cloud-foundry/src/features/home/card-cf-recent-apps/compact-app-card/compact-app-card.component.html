@@ -1,11 +1,11 @@
-@if (app) {
+@if (app(); as app) {
   <div class="compact-app-card">
     <app-application-state-icon [status]="appStatus()"></app-application-state-icon>
     <div class="compact-app-card__name">
-      <a [routerLink]="['/applications', endpoint, app.metadata.guid]" [queryParams]="bcType">{{ app.entity.name }}</a>
+      <a [routerLink]="['/applications', endpointGuid(), app.metadata.guid]" [queryParams]="bcType">{{ app.entity.name }}</a>
     </div>
-    @if (showDate) {
-      <div [ngClass]="{'compact-app-card__subtle': dateMode === 'subtle'}" class="compact-app-card__updated">{{ app.metadata.updated_at | date:'medium' }}</div>
+    @if (showDate()) {
+      <div [ngClass]="{'compact-app-card__subtle': dateMode() === 'subtle'}" class="compact-app-card__updated">{{ app.metadata.updated_at | date:'medium' }}</div>
     }
   </div>
 } @else {
@@ -14,9 +14,8 @@
     <div class="compact-app-card__name">
       <div class="ph-item ph-large"></div>
     </div>
-    @if (showDate) {
-      <div [ngClass]="{'compact-app-card__subtle': dateMode === 'subtle'}" class="ph-item ph-small compact-app-card__updated"></div>
+    @if (showDate()) {
+      <div [ngClass]="{'compact-app-card__subtle': dateMode() === 'subtle'}" class="ph-item ph-small compact-app-card__updated"></div>
     }
   </div>
 }
-

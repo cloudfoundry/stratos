@@ -11,11 +11,19 @@ import {
   ViewChild,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { toObservable } from '@angular/core/rxjs-interop';
-import { combineLatest as observableCombineLatest, firstValueFrom, Observable, of, Subscription } from 'rxjs';
-import { take, combineLatest, filter, map } from 'rxjs/operators';
+import { firstValueFrom, forkJoin, of, Subscription } from 'rxjs';
+import { catchError, map, take } from 'rxjs/operators';
 
-import { IHeaderBreadcrumb, PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
+import {
+  DialogErrorComponent,
+  IHeaderBreadcrumb,
+  NoContentMessageComponent,
+  PageHeaderComponent,
+  SignalStepHandle,
+  StepComponent,
+  SteppersComponent,
+} from '@stratosui/core';
+import { extractHttpErrorMessage } from '@stratosui/store';
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
 import { StUser } from '../../../../services/endpoint-data/stratos-types';
@@ -34,6 +42,8 @@ import { ManageUsersSetUsernamesComponent } from './manage-users-set-usernames/m
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    DialogErrorComponent,
+    NoContentMessageComponent,
     PageHeaderComponent,
     SteppersComponent,
     StepComponent,
@@ -54,8 +64,26 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
   private rolesData = inject(CfUsersRolesDataService);
 
-  initialUsers$!: Observable<StUser[]>;
-  singleUser$!: Observable<StUser | null>;
+  /** Users the wizard was opened for; null while the deep-link lookup runs. */
+  readonly initialUsers = signal<StUser[] | null>(null);
+  /** Deep-link guids that did not resolve, with the reason. */
+  readonly failedLookups = signal<{ guid: string; reason: string }[]>([]);
+  /** Nothing to manage: the deep link named no users, or none resolved. */
+  readonly noUsers = computed(() => this.initialUsers()?.length === 0);
+  readonly lookupErrorMessage = computed(() => {
+    const failed = this.failedLookups();
+    const total = failed.length + (this.initialUsers()?.length ?? 0);
+    return `Could not load ${failed.length} of ${total} selected users: ` +
+      failed.map(f => `${f.guid} (${f.reason})`).join(', ');
+  });
+  readonly noUsersLines = computed(() => [
+    ...this.failedLookups().map(f => ({ text: `${f.guid}: ${f.reason}` })),
+    { link: this.defaultCancelUrl, linkText: 'Back to Users', text: '' },
+  ]);
+  readonly title = computed(() => {
+    const users = this.initialUsers();
+    return users?.length === 1 ? `Manage Roles: ${users[0].username}` : `Manage User Roles`;
+  });
   defaultCancelUrl!: string;
   // FWT-959 Part 2: applyStarted promoted to a signal so the confirm step's
   // canClose / disablePrevious / destructiveStep / finishButtonText handle
@@ -66,9 +94,8 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   get applyStarted(): boolean { return this.applyStartedSignal(); }
   set applyStarted(v: boolean) { this.applyStartedSignal.set(v); }
   setUsernames = false;
-  title$!: Observable<string>;
   /** Trail back to the Users list (the page the wizard was launched from). */
-  breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
+  readonly breadcrumbs = signal<IHeaderBreadcrumb[]>([]);
 
   // FWT-959 Part 2: SignalStepHandle wiring for the 3-step manage-users
   // flow. The first step (`Usernames`) is rendered conditionally via the
@@ -91,6 +118,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   private modifyValid = signal<boolean>(false);
   private modifyBlocked = signal<boolean>(true);
   private bridgeSubs: Subscription[] = [];
+  private lookupSub?: Subscription;
 
   setUsernamesStepHandle: SignalStepHandle = {
     valid: this.setUsersValid.asReadonly(),
@@ -127,7 +155,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
     finishButtonText: computed(() => this.applyStartedSignal() ? 'Close' : 'Apply'),
     onEnter: () => this.confirm?.onEnter(),
     submit: async () => {
-      // Two-click apply semantic — see remove-user for the long form.
+      // Two-click apply semantic.
       // First click dispatches the changes and returns ignoreSuccess so
       // the per-row monitor stays visible; second click navigates back.
       if (this.applyStartedSignal()) {
@@ -141,63 +169,49 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   };
 
   constructor() {
-    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
-    const route = this.route;
+    const cfGuid = this.activeRouteCfOrgSpace.cfGuid;
+    const queryParams = this.route.snapshot.queryParams;
 
-
-    this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
-    this.breadcrumbs$ = of([{ breadcrumbs: [{ value: 'Users', routerLink: this.defaultCancelUrl }] }]);
+    this.defaultCancelUrl = this.createReturnUrl(this.activeRouteCfOrgSpace);
+    this.breadcrumbs.set([{ breadcrumbs: [{ value: 'Users', routerLink: this.defaultCancelUrl }] }]);
 
     // Setup the stepper with the users that will have their roles managed
-    this.setUsernames = route.snapshot.queryParams.setByUsername;
+    this.setUsernames = queryParams.setByUsername;
     if (this.setUsernames) {
       // User has yet to supply users to manage. This will be handled by the first step
-      this.singleUser$ = of(null);
-    } else {
-      // `?users=g1,g2,g3` selects multiple users (the bulk Manage Roles
-      // path); `?user=g1` is the single-user shorthand. Falls back to the
-      // already-picked users in the wizard state.
-      const usersQParam = this.route.snapshot.queryParams.users;
-      const userQParam = this.route.snapshot.queryParams.user;
-      if (usersQParam) {
-        const guids = (usersQParam as string).split(',').map(g => g.trim()).filter(Boolean);
-        this.initialUsers$ = observableCombineLatest(
-          guids.map(guid => this.usersData.getUser(activeRouteCfOrgSpace.cfGuid, guid))
-        ).pipe(
-          // getUser emits StUser | undefined; drop any guid that didn't resolve
-          // so the wizard is never seeded with a hole in the picked-users array.
-          map(users => users.filter((user): user is StUser => !!user)),
-          take(1)
-        );
-      } else if (userQParam) {
-        this.initialUsers$ = this.usersData.getUser(activeRouteCfOrgSpace.cfGuid, userQParam).pipe(
-          map(user => user ? [user] : []),
-          take(1)
-        );
-      } else {
-        this.initialUsers$ = toObservable(this.rolesData.users).pipe(take(1));
-      }
-
-      this.singleUser$ = this.initialUsers$.pipe(
-        take(1),
-        filter(users => users && users.length > 0),
-        map(users => users.length === 1 ? users[0] : null),
-      );
-
-      // Ensure that when we arrive here directly the store is set up with all it needs
-      toObservable(this.rolesData.state).pipe(
-        combineLatest(this.initialUsers$),
-        take(1)
-      ).subscribe(([usersRoles, users]) => {
-        if (!usersRoles?.cfGuid || !users) {
-          this.rolesData.setUsers(activeRouteCfOrgSpace.cfGuid, users);
-        }
-      });
+      return;
     }
+    // `?users=g1,g2,g3` selects multiple users (the bulk Manage Roles
+    // path); `?user=g1` is the single-user shorthand. Falls back to the
+    // already-picked users in the wizard state.
+    const guidsParam: string | undefined = queryParams.users ?? queryParams.user;
+    if (guidsParam === undefined) {
+      this.seedUsers(cfGuid, this.rolesData.users());
+      return;
+    }
+    const guids = String(guidsParam).split(',').map(g => g.trim()).filter(Boolean);
+    if (guids.length === 0) {
+      this.seedUsers(cfGuid, []);
+      return;
+    }
+    // One subscription, so one request per guid. A failed lookup is kept
+    // with its reason instead of failing the whole page.
+    this.lookupSub = forkJoin(guids.map(guid => this.usersData.getUser(cfGuid, guid).pipe(
+      take(1),
+      map(user => ({ guid, user, reason: 'user not found' })),
+      catchError(err => of({ guid, user: undefined, reason: extractHttpErrorMessage(err) })),
+    ))).subscribe(results => {
+      this.failedLookups.set(results.filter(r => !r.user).map(({ guid, reason }) => ({ guid, reason })));
+      this.seedUsers(cfGuid, results.flatMap(r => r.user ? [r.user] : []));
+    });
+  }
 
-    this.title$ = this.singleUser$.pipe(
-      map(singleUser => singleUser ? `Manage Roles: ${singleUser.username}` : `Manage User Roles`)
-    );
+  private seedUsers(cfGuid: string, users: StUser[]): void {
+    this.initialUsers.set(users);
+    // Ensure that when we arrive here directly the store is set up with all it needs
+    if (users.length > 0 && !this.rolesData.cfGuid()) {
+      this.rolesData.setUsers(cfGuid, users);
+    }
   }
 
   ngAfterViewInit(): void {
@@ -234,6 +248,7 @@ export class UsersRolesComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.lookupSub?.unsubscribe();
     this.bridgeSubs.forEach(s => s.unsubscribe());
     this.rolesData.clear();
   }

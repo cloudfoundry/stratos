@@ -28,12 +28,6 @@ describe('CfInfoDataRegistry', () => {
     expect(registry.acquire('cnsi-1')).not.toBe(registry.acquire('cnsi-2'));
   });
 
-  it('retains instance after release (sticky)', () => {
-    const svc = registry.acquire('cnsi-1');
-    registry.release('cnsi-1');
-    expect(registry.acquire('cnsi-1')).toBe(svc);
-  });
-
   it('evict() removes the instance', () => {
     const svc = registry.acquire('cnsi-1');
     registry.evict('cnsi-1');

@@ -1,16 +1,12 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import {
-  AuthState,
-} from '@stratosui/store';
-import { combineLatest, firstValueFrom, Subscription } from 'rxjs';
-import { delay, filter, skipWhile, take } from 'rxjs/operators';
+import { AuthDataService } from '@stratosui/store';
+import { Subscription } from 'rxjs';
 
-import { AuthSignalService } from '../../../core/signals/auth-signal.service';
-import { UaaSetupSignalService } from '../../../core/signals/uaa-setup-signal.service';
-import { UaaSetupDataService, UaaSetupState } from '../../../core/uaa-setup-data.service';
+import { UaaSetupData, UaaSetupDataService } from '../../../core/uaa-setup-data.service';
+import { SETUP_NOT_CONFIRMED_MESSAGE, waitForSetupConfirmed } from '../setup-confirmation';
 
 interface UAAWizardForm {
   apiUrl: FormControl<string>;
@@ -33,6 +29,9 @@ import { ProductNameComponent } from '../../../shared/components/product-name.cc
 import { ShowHideButtonComponent } from '../../../core/show-hide-button/show-hide-button.component';
 import { LoadingPageComponent } from '../../../shared/components/loading-page/loading-page.component';
 
+// Pre-selected, in order, when the admin user's token carries them.
+const PREFERRED_ADMIN_SCOPES = ['stratos.admin', 'cloud_controller.admin'];
+
 @Component({
   selector: 'app-console-uaa-wizard',
   templateUrl: './console-uaa-wizard.component.html',
@@ -52,15 +51,9 @@ import { LoadingPageComponent } from '../../../shared/components/loading-page/lo
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
-  private cdr = inject(ChangeDetectorRef);
-  private authSignals = inject(AuthSignalService);
-  private uaaSetupSignals = inject(UaaSetupSignalService);
+  private authData = inject(AuthDataService);
   private uaaSetupData = inject(UaaSetupDataService);
   title = inject(APP_TITLE);
-
-  // Bridge signals → observables in injection context (used by step handlers below).
-  private uaaSetup$ = toObservable(this.uaaSetupSignals.uaaSetup);
-  private auth$ = toObservable(this.authSignals.auth);
 
   protected clientRedirectURI: string;
 
@@ -70,8 +63,8 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
   }
 
   uaaForm!: FormGroup<UAAWizardForm>;
-  uaaScopes: string[] = [];
-  selectedScope = '';
+  uaaScopes = signal<string[]>([]);
+  selectedScope = signal('');
   applyingSetup = signal<boolean>(false);
   // app-loading-page takes an Observable<boolean> — bridge the signal.
   applyingSetup$ = toObservable(this.applyingSetup);
@@ -88,83 +81,59 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
 
   // FWT-959 Part 2 (Partition A) — SignalStepHandle wiring.
   //
-  // Two-step UAA setup. Step 1 collects credentials and dispatches
-  // SetupConsoleGetScopes; step 2 picks an admin scope and dispatches
-  // SetupSaveConfig then hard-reloads on success. Cross-step state
-  // (`uaaScopes`, `selectedScope`) lives on this parent and is read
-  // directly by step 2's template, so we don't need to plumb it through
-  // signals — the previous and migrated paths share the same fields.
+  // Two-step UAA setup. Step 1 collects credentials and fetches the admin
+  // user's scopes; step 2 picks an admin scope, saves the config, waits for
+  // the backend to leave setup mode, then hard-reloads. Cross-step state
+  // (`uaaScopes`, `selectedScope`) lives on this parent as signals so step
+  // 2's OnPush template re-renders when step 1 sets them after an await.
 
   uaaFormStepHandle: SignalStepHandle = {
     valid: this.uaaFormValid.asReadonly(),
     submit: async () => {
-      void this.uaaSetupData.checkScopes({
-        uaa_endpoint: this.uaaForm.controls.apiUrl.value,
-        console_client: this.uaaForm.controls.clientId.value,
-        password: this.uaaForm.controls.adminPassword.value,
-        skip_ssl_validation: this.uaaForm.controls.skipSSL.value,
-        username: this.uaaForm.controls.adminUsername.value,
-        console_client_secret: this.uaaForm.controls.clientSecret.value,
-        use_sso: this.uaaForm.controls.useSSO.value,
-        console_admin_scope: ''
-      });
-      const state = await firstValueFrom(
-        this.uaaSetup$.pipe(
-          skipWhile((s: UaaSetupState) => s.settingUp),
-          take(1),
-        )
-      );
+      this.uaaScopes.set([]);
+      this.selectedScope.set('');
+      // Await this request and read the state it left behind. A replayed
+      // stream still holds the previous request's state at this point.
+      await this.uaaSetupData.checkScopes(this.setupData(''));
+      const state = this.uaaSetupData.state();
       if (state.error) {
         throw new Error(state.message || 'Failed to fetch UAA scopes');
       }
-      this.uaaScopes = state.payload?.scope ?? [];
-      if (this.uaaScopes.find(scope => scope === 'stratos.admin')) {
-        this.selectedScope = 'stratos.admin';
-      } else if (this.uaaScopes.find(scope => scope === 'cloud_controller.admin')) {
-        this.selectedScope = 'cloud_controller.admin';
+      const scopes = state.payload?.scope ?? [];
+      if (!scopes.length) {
+        throw new Error('The UAA returned no scopes for the admin user, so there is no admin scope to choose. Check the admin username and password.');
       }
-      // OnPush: uaaScopes / selectedScope are plain fields read by step 2's
-      // template. The setter assignments above don't trigger CD on their
-      // own, so step 2 may render with an empty scope dropdown until
-      // something else marks the view dirty. Force a tick.
-      this.cdr.markForCheck();
+      this.uaaScopes.set(scopes);
+      const preferred = PREFERRED_ADMIN_SCOPES.find(scope => scopes.includes(scope));
+      if (preferred) {
+        this.selectedScope.set(preferred);
+      }
     },
   };
 
-  uaaScopeStepHandle: SignalStepHandle = {
-    valid: signal(true).asReadonly(),
-    submit: async () => {
-      void this.uaaSetupData.saveConfig({
-        uaa_endpoint: this.uaaForm.controls.apiUrl.value,
-        console_client: this.uaaForm.controls.clientId.value,
-        password: this.uaaForm.controls.adminPassword.value,
-        skip_ssl_validation: this.uaaForm.controls.skipSSL.value,
-        username: this.uaaForm.controls.adminUsername.value,
-        console_client_secret: this.uaaForm.controls.clientSecret.value,
-        use_sso: this.uaaForm.controls.useSSO.value,
-        console_admin_scope: this.selectedScope
-      });
+  // The backend stays in setup mode until an admin scope is saved, so
+  // Finish is only enabled once one of the returned scopes is chosen.
+  private adminScopeChosen = computed(() => {
+    const scope = this.selectedScope();
+    return !!scope && this.uaaScopes().includes(scope);
+  });
 
+  uaaScopeStepHandle: SignalStepHandle = {
+    valid: this.adminScopeChosen,
+    submit: async () => {
       this.applyingSetup.set(true);
-      const state = await firstValueFrom(
-        combineLatest([this.uaaSetup$, this.auth$] as [typeof this.uaaSetup$, typeof this.auth$]).pipe(
-          filter(([uaa, auth]: [UaaSetupState, AuthState | undefined]) => !!auth && !(uaa.settingUp || auth.verifying)),
-          delay(2000),
-          take(10),
-          filter(([_uaa, auth]: [UaaSetupState, AuthState | undefined]) => {
-            const validUAASessionData = !!auth?.sessionData && !auth.sessionData.uaaError;
-            if (!validUAASessionData) {
-              this.authSignals.verifySession(true, true);
-            }
-            return validUAASessionData;
-          }),
-          take(1),
-        )
-      );
-      const [uaa] = state;
-      if (uaa.error) {
+      try {
+        await this.uaaSetupData.saveConfig(this.setupData(this.selectedScope()));
+        const saved = this.uaaSetupData.state();
+        if (saved.error) {
+          throw new Error(saved.message || 'Failed to save UAA configuration');
+        }
+        if (!await waitForSetupConfirmed(this.authData)) {
+          throw new Error(SETUP_NOT_CONFIRMED_MESSAGE);
+        }
+      } catch (err) {
         this.applyingSetup.set(false);
-        throw new Error(uaa.message || 'Failed to save UAA configuration');
+        throw err;
       }
       // Hard reload of the app on success — preserves the legacy behaviour.
       const loc = window.location;
@@ -172,6 +141,20 @@ export class ConsoleUaaWizardComponent implements OnInit, OnDestroy {
       window.location.assign(reload);
     },
   };
+
+  private setupData(adminScope: string): UaaSetupData {
+    const form = this.uaaForm.controls;
+    return {
+      uaa_endpoint: form.apiUrl.value,
+      console_client: form.clientId.value,
+      password: form.adminPassword.value,
+      skip_ssl_validation: form.skipSSL.value,
+      username: form.adminUsername.value,
+      console_client_secret: form.clientSecret.value,
+      use_sso: form.useSSO.value,
+      console_admin_scope: adminScope,
+    };
+  }
 
   ngOnInit() {
     this.uaaForm = new FormGroup<UAAWizardForm>({

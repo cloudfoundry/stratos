@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { GitCommit, GitDataService, GitResourceState, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
-import { combineLatest, distinct, map, startWith, switchMap } from 'rxjs/operators';
+import { combineLatest as observableCombineLatest, EMPTY, Observable, of } from 'rxjs';
+import { catchError, combineLatest, distinct, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -29,6 +29,12 @@ import { InstancesAccordionComponent } from './instances-accordion/instances-acc
 import { EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
+
+// What a git lookup is made from: the host (SCM type and endpoint), the
+// project and the commit. App and env var refreshes hand over equal sources
+// again; comparing on this keeps a failed lookup from being retried on each.
+const gitSourceKey = (source: EnvVarStratosProjectSource): string =>
+  [source.scm || source.type, source.endpointGuid, source.project, source.commit].join('|');
 
 interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   label?: string;
@@ -139,6 +145,7 @@ export class BuildTabComponent implements OnInit {
     );
 
     this.gitRepo$ = this.applicationService.applicationStratProject$.pipe(
+      distinctUntilChanged((a, b) => gitSourceKey(a.deploySource) === gitSourceKey(b.deploySource)),
       map(project => {
         const scmType = project.deploySource.scm || project.deploySource.type;
         const scm = this.scmService.getSCM(scmType as GitSCMType, project.deploySource.endpointGuid);
@@ -147,7 +154,9 @@ export class BuildTabComponent implements OnInit {
         // type because docker/other deploy kinds omit it).
         return this.gitData.getRepository(scm, project.deploySource.project!);
       }),
-      switchMap(repoResource => repoResource.waitForValue$)
+      // A failed lookup leaves the repository links out instead of throwing
+      // into the template's async pipes.
+      switchMap(repoResource => repoResource.waitForValue$.pipe(catchError(() => EMPTY)))
     );
 
     const deploySource$ = observableCombineLatest(
@@ -183,7 +192,12 @@ export class BuildTabComponent implements OnInit {
           return null;
         }
       }),
-      switchMap((deploySource: DeploySourceView | null) => {
+      // Each app refresh rebuilds an equal source; only a changed one is shown
+      // and looked up again. The steps below fill in a copy, so the source
+      // kept for this comparison stays as built.
+      distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+      switchMap((source: DeploySourceView | null) => {
+        const deploySource = source && { ...source };
         let commit$: Observable<GitResourceState<GitCommit> | null> = of(null);
         if (deploySource && deploySource.type === 'gitscm') {
           // Add gitscm info... add async info in next section

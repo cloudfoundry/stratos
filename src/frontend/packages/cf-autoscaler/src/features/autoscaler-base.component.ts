@@ -1,26 +1,15 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
-import { ActivatedRoute, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 
-import { ApplicationService, getGuids } from '@stratosui/cloud-foundry';
-import { APP_GUID, CF_GUID } from '@stratosui/core';
+import { APP_DETAIL_PROVIDERS } from '@stratosui/cloud-foundry';
 
 @Component({
   selector: 'app-autoscaler-base',
   templateUrl: './autoscaler-base.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [
-    ApplicationService,
-    {
-      provide: CF_GUID,
-      useFactory: getGuids('cf'),
-      deps: [ActivatedRoute]
-    },
-    {
-      provide: APP_GUID,
-      useFactory: getGuids(),
-      deps: [ActivatedRoute]
-    },
-  ],
+  // The same app-detail providers as the app page: ApplicationService
+  // needs AppDetailDataService and the services it depends on.
+  providers: APP_DETAIL_PROVIDERS,
   standalone: true,
   imports: [RouterOutlet]
 })

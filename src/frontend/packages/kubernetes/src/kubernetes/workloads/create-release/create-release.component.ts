@@ -226,7 +226,7 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
       map(() => this.details.valid)
     );
 
-    // Auto-select first endpoint
+    // Auto select endpoint if there is only one
     this.kubeEndpoints$.pipe(take(1)).subscribe(endpoints => {
       if (endpoints.length === 1) {
         this.details.controls.endpoint.setValue(endpoints[0].guid);
@@ -271,7 +271,8 @@ export class CreateReleaseComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Auto select endpoint if there is only one
+    // Preselect the first endpoint if there are several (a single endpoint
+    // is auto selected in setupDetailsStep)
     this.kubeEndpoints$.pipe(take(1)).subscribe(ep => {
       if (ep.length > 1) {
         this.details.controls.endpoint.setValue(ep[0].guid, { onlySelf: true });

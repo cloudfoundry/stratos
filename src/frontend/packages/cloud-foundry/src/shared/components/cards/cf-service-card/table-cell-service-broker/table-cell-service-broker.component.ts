@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal, untracked } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { TableCellCustom } from '@stratosui/core';
@@ -35,22 +35,30 @@ interface SpaceLink {
 })
 export class TableCellServiceBrokerComponent extends
   TableCellCustom<StServiceOffering,
-  TableCellServiceBrokerComponentConfig> implements OnInit, OnDestroy {
+  TableCellServiceBrokerComponentConfig> implements OnInit {
 
   private serviceCatalog = inject(ServiceCatalogDataService);
   private spaceRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
 
   private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
-  private _spaceData: SpaceDataService | null = null;
-  private _spaceKey: { cnsi: string, guid: string } | null = null;
+  // A signal so `spaceLink` re-evaluates when the effect swaps it in.
+  private readonly _spaceData = signal<SpaceDataService | null>(null);
 
   readonly broker: Signal<StServiceBroker | null> = computed(
     () => this._brokerSource()?.value() ?? null,
   );
 
+  // Compared by value so a broker re-fetch with the same space does not
+  // re-run the acquire effect.
+  private readonly _spaceKey = computed(() => {
+    const broker = this.broker();
+    const guid = broker?.space?.guid;
+    return guid && broker ? { cnsi: broker.cnsiGuid, guid } : null;
+  }, { equal: (a, b) => a?.cnsi === b?.cnsi && a?.guid === b?.guid });
+
   readonly spaceLink: Signal<SpaceLink | null> = computed(() => {
-    const space = this._spaceData?.space();
+    const space = this._spaceData()?.space();
     const broker = this.broker();
     if (!space || !broker) return null;
     return {
@@ -82,34 +90,24 @@ export class TableCellServiceBrokerComponent extends
   }
 
   ngOnInit(): void {
+    // The cleanup ends the space load when the space swaps and when the
+    // cell is destroyed.
     runInInjectionContext(this.injector, () => {
-      effect(() => {
-        const broker = this.broker();
-        const targetGuid = broker?.space?.guid ?? null;
-        const targetKey = targetGuid && broker
-          ? { cnsi: broker.cnsiGuid, guid: targetGuid }
-          : null;
-        const curr = this._spaceKey;
-        if (curr?.cnsi === targetKey?.cnsi && curr?.guid === targetKey?.guid) return;
-        if (curr) {
-          this.spaceRegistry.release(curr.cnsi, curr.guid);
-          this._spaceData = null;
-          this._spaceKey = null;
+      effect(onCleanup => {
+        const key = this._spaceKey();
+        if (!key) {
+          this._spaceData.set(null);
+          return;
         }
-        if (targetKey) {
-          this._spaceData = this.spaceRegistry.acquire(targetKey.cnsi, targetKey.guid);
-          this._spaceData.load().subscribe();
-          this._spaceKey = targetKey;
-        }
+        // load() reads the service's own signals; untracked so the space
+        // landing does not re-run this effect and end the load.
+        untracked(() => {
+          const spaceData = this.spaceRegistry.acquire(key.cnsi, key.guid);
+          const load = spaceData.load().subscribe();
+          onCleanup(() => load.unsubscribe());
+          this._spaceData.set(spaceData);
+        });
       });
     });
-  }
-
-  ngOnDestroy(): void {
-    if (this._spaceKey) {
-      this.spaceRegistry.release(this._spaceKey.cnsi, this._spaceKey.guid);
-      this._spaceData = null;
-      this._spaceKey = null;
-    }
   }
 }

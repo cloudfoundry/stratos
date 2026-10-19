@@ -53,15 +53,16 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
   // name) lives in CfOrgSpaceDataService + the signal-native
   // CreateAppStateService — children read/write it via that service.
   //
-  // The steppers component renders only the active step's content
-  // template at any given time (see steppers.component.html line 71:
-  // `<span *ngTemplateOutlet="steps[currentIndex].content">`), so
-  // children for non-active steps are not instantiated. We use
-  // ViewChild *setters* so the bridge subscription is wired the moment
-  // the child instance becomes available — and torn down when the
-  // child reference flips back to undefined as the user navigates
-  // away. This sidesteps relying on signal-handle onEnter being routed
-  // through the steppers component for bridge wiring.
+  // The steppers component shows only the active step's content
+  // (`*ngTemplateOutlet="steps[currentIndex()].content"`), but Ivy
+  // builds every step's projected content with this view on first
+  // render, whichever step is active (pinned by the projected step
+  // content spec in steppers.component.spec.ts). So all three children
+  // exist up front, and navigating between steps does not create or
+  // destroy them. We use ViewChild *setters* so each bridge
+  // subscription is wired as soon as its child exists, without relying
+  // on signal-handle onEnter being routed through the steppers
+  // component.
   private _step1?: CreateApplicationStep1Component;
   private _step2?: CreateApplicationStep2Component;
   private _step3?: CreateApplicationStep3Component;

@@ -1,5 +1,6 @@
-import { Injectable, Signal, computed, inject } from '@angular/core';
-import { EndpointsDataService } from '@stratosui/store';
+import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
+import { EndpointsDataService, observeSignal } from '@stratosui/store';
+import { Observable } from 'rxjs';
 
 export interface EndpointStatusState {
   loading: boolean;
@@ -21,6 +22,12 @@ export class EndpointStatusSignalService {
     error: !!this.endpointsService.error(),
     message: this.endpointsService.error() ?? '',
   }));
+
+  /**
+   * `status` as an observable, built once for the endpoints guard. Each
+   * subscriber gets its own watcher, which ends when it unsubscribes.
+   */
+  readonly status$: Observable<EndpointStatusState> = observeSignal(this.status, inject(Injector));
 
   readonly loading: Signal<boolean> = computed(() => !!this.status().loading);
   readonly error: Signal<boolean> = computed(() => !!this.status().error);

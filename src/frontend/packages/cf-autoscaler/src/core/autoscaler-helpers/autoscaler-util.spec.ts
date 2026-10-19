@@ -1,6 +1,7 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { describe, it, expect } from 'vitest';
 import {
-  isEqual, buildLegendData, shiftArray,
+  autoscalerErrorMessage, isEqual, buildLegendData, shiftArray,
 } from './autoscaler-util';
 
 describe('Autoscaler Util Helper', () => {
@@ -70,5 +71,11 @@ describe('Autoscaler Util Helper', () => {
   it('shiftArray', () => {
     expect(shiftArray([0, 2, 3], 1)).toEqual([1, 3, 4]);
     expect(shiftArray([1, 6, 9], -1)).toEqual([0, 5, 8]);
+  });
+  it('autoscalerErrorMessage', () => {
+    const refusal = new HttpErrorResponse({ status: 403, error: { error: 'The application is not bound to Auto-Scaling service' } });
+    expect(autoscalerErrorMessage(refusal)).toBe('The application is not bound to Auto-Scaling service');
+    const other = new HttpErrorResponse({ status: 500, error: 'boom', url: '/x' });
+    expect(autoscalerErrorMessage(other)).toBe(other.message);
   });
 });

@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
+import { KubeEndpointEviction } from './kube-endpoint-eviction';
 import { KubeHelmDataService } from './kube-helm-data.service';
 import { HelmInstallPayload, HelmUpgradePayload } from './kube-types';
 
@@ -179,5 +180,21 @@ describe('KubeHelmDataService', () => {
     await promise;
     expect(svc.releasesLastFetched()()).not.toBeNull();
     expect(svc.chartsLastFetched()()).not.toBeNull();
+  });
+
+  // The releases request spans every endpoint, so an eviction while it is
+  // on the wire must still drop the departed endpoint's share of it.
+  it('drops a departed endpoint\'s releases from a late response', async () => {
+    const promise = svc.loadReleases();
+    const req = httpMock.expectOne(RELEASES_URL);
+
+    TestBed.inject(KubeEndpointEviction).evict('kube-1');
+    req.flush({
+      'kube-1': [{ name: 'rel-a', namespace: 'ns1', info: { status: 'deployed' }, chart: { metadata: {} } }],
+      'kube-2': [{ name: 'rel-b', namespace: 'ns2', info: { status: 'deployed' }, chart: { metadata: {} } }],
+    });
+    await promise;
+
+    expect(svc.allReleases()().map(r => r.guid)).toEqual(['kube-2:ns2:rel-b']);
   });
 });

@@ -1,8 +1,8 @@
 <div class="input-action">
   <form class="input-action__form stepper-form">
     <app-form-field>
-      <input appInput class="w-full placeholder:!text-transparent focus:outline-none" [placeholder]="config.text.placeholder"
-        [formControl]="textFormControl" #inputElement [name]="position" data-test="stacked-input">
+      <input appInput class="w-full placeholder:!text-transparent focus:outline-none" [placeholder]="resolvedConfig().text.placeholder"
+        [formControl]="textFormControl" #inputElement [name]="position()" data-test="stacked-input">
       @if (textFormControl.hasError('email') && !textFormControl.hasError('required')) {
         <app-error>
           Please enter a valid email address
@@ -10,27 +10,28 @@
       }
       @if (textFormControl.hasError('required')) {
         <app-error>
-          {{config.text.requiredError}}
+          {{resolvedConfig().text.requiredError}}
         </app-error>
       }
       @if (textFormControl.hasError('notUnique') && !textFormControl.hasError('email')) {
         <app-error>
-          {{config.text.uniqueError}}
+          {{resolvedConfig().text.uniqueError}}
         </app-error>
       }
     </app-form-field>
   </form>
   <div class="input-action__detail">
-    @if (showRemove) {
+    @if (showRemove()) {
       <app-custom-icon class="input-action__detail__remove" [ngClass]="{'disabled': textFormControl.disabled}"
       (click)="!textFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</app-custom-icon>
     }
-    @if (state && result && (state.result === result.SUCCEEDED || state.result === result.FAILED)) {
+    @let st = state();
+    @if (st && (st.result === result.SUCCEEDED || st.result === result.FAILED)) {
       <ng-container
         class="input-action__detail__result">
-        <app-boolean-indicator [isTrue]="state.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false"
+        <app-boolean-indicator [isTrue]="st.result === result.SUCCEEDED" type="succeeded-failed" [subtle]="false"
         [showText]="false"></app-boolean-indicator>
-        <span>{{ state.message }}</span>
+        <span>{{ st.message }}</span>
       </ng-container>
     }
   </div>

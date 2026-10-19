@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { computed, provideZonelessChangeDetection, Signal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import {
   CUSTOM_USER_PERMISSION_CHECKERS,
@@ -10,11 +10,16 @@ import {
   StratosCurrentUserPermissions,
 } from '@stratosui/core';
 import { EndpointsDataService, SessionData } from '@stratosui/store';
-import { firstValueFrom, of } from 'rxjs';
-import { describe, expect, it, beforeEach } from 'vitest';
+import { firstValueFrom, Observable, of, timeout } from 'rxjs';
+import { describe, expect, it, beforeEach, vi } from 'vitest';
+
+import { CFFeatureFlagTypes } from '../cf-api.types';
+import { StFeatureFlag } from '../services/endpoint-data/stratos-types';
 
 import { CfCurrentUserRolesSignalService } from './cf-current-user-roles-signal.service';
 import { CfUserPermissionsChecker } from './cf-user-permissions-checkers';
+import { CfPermissionStrings, CfPermissionTypes, CfScopeStrings } from './cf-user-permissions.types';
+import { getFeatureFlagsSource } from './feature-flags-cache';
 
 /**
  * Checker contract (#5570 / #5571): a checker signals "this config is not
@@ -112,5 +117,118 @@ describe('CurrentUserPermissionsService with both checkers registered', () => {
     await expect(
       firstValueFrom(service.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT)),
     ).resolves.toBe(false);
+  });
+});
+
+describe('CfUserPermissionsChecker feature flag check', () => {
+  // The checker is a root service, so whatever watches the flags signal must
+  // end with the subscription, not with the (permanent) root injector.
+  it('stops reading the feature flags after unsubscribe', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: CfCurrentUserRolesSignalService, useValue: {} },
+        { provide: HttpClient, useValue: {} },
+        CfUserPermissionsChecker,
+      ],
+    });
+    const checker = TestBed.inject(CfUserPermissionsChecker);
+
+    // Pre-seed the shared cache entry so load() resolves without a request,
+    // and read the flags through a computed that counts its evaluations.
+    const guid = 'ff-unsubscribe-cf';
+    const src = getFeatureFlagsSource(guid, TestBed.inject(HttpClient));
+    vi.spyOn(src, 'load').mockResolvedValue();
+    const flags = signal<StFeatureFlag[]>([{ name: CFFeatureFlagTypes.set_roles_by_username, enabled: true } as StFeatureFlag]);
+    let reads = 0;
+    (src as { items: Signal<StFeatureFlag[]> }).items = computed(() => {
+      reads++;
+      return flags();
+    });
+
+    const values: boolean[] = [];
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.set_roles_by_username),
+      guid,
+    );
+    const sub = check$!.subscribe(v => values.push(v));
+    await src.load();
+    await Promise.resolve();
+    TestBed.tick();
+    expect(values).toEqual([true]);
+    const readsWhileSubscribed = reads;
+
+    sub.unsubscribe();
+    flags.set([{ name: CFFeatureFlagTypes.set_roles_by_username, enabled: false } as StFeatureFlag]);
+    TestBed.tick();
+
+    expect(reads).toBe(readsWhileSubscribed);
+    expect(values).toEqual([true]);
+  });
+});
+
+describe('CfUserPermissionsChecker across all connected CF endpoints', () => {
+  function setup(connectedGuids: string[], hasScope: (guid: string) => boolean = () => false) {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        {
+          provide: CfCurrentUserRolesSignalService,
+          useValue: {
+            connectedCfEndpointGuids$: () => of(connectedGuids),
+            cfEndpointHasScope$: (guid: string) => of(hasScope(guid)),
+          },
+        },
+        { provide: HttpClient, useValue: {} },
+        CfUserPermissionsChecker,
+      ],
+    });
+    return TestBed.inject(CfUserPermissionsChecker);
+  }
+
+  // combineLatest([]) completes without a value, so a check over zero
+  // endpoints must still answer.
+  const answer = (check$: Observable<boolean>) => firstValueFrom(check$.pipe(timeout(1000)));
+
+  it('denies an endpoint scope when no CF endpoint is connected', async () => {
+    const checker = setup([]);
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
+    );
+    await expect(answer(check$!)).resolves.toBe(false);
+  });
+
+  it('denies a feature flag when no CF endpoint is connected', async () => {
+    const checker = setup([]);
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.route_creation),
+    );
+    await expect(answer(check$!)).resolves.toBe(false);
+  });
+
+  it('denies an org role with no org guid when no CF endpoint is connected', async () => {
+    const checker = setup([]);
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER),
+    );
+    await expect(answer(check$!)).resolves.toBe(false);
+  });
+
+  it('answers the org role check itself when no CF endpoint is connected', async () => {
+    const checker = setup([]);
+    // With zero endpoints the read-only check (every([]) is true) denies
+    // before getSimpleCheck reads the role check, so read it directly.
+    const check$ = checker['getCfCheck'](
+      new PermissionConfig(CfPermissionTypes.ORGANIZATION, CfPermissionStrings.ORG_MANAGER),
+    );
+    await expect(answer(check$)).resolves.toBe(false);
+  });
+
+  it('checks an endpoint scope on each connected endpoint', async () => {
+    const checker = setup(['cf-1', 'cf-2'], guid => guid === 'cf-2');
+    const check$ = checker.getSimpleCheck(
+      new PermissionConfig(CfPermissionTypes.ENDPOINT_SCOPE, CfScopeStrings.CF_ADMIN_GROUP),
+    );
+    await expect(answer(check$!)).resolves.toBe(true);
   });
 });

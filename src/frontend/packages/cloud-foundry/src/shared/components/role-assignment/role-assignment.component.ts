@@ -113,10 +113,19 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   /** True until the org list fetch resolves (drives the picker spinner). */
   readonly orgsLoading = signal(true);
 
+  /** Set when the org list fetch fails; the picker shows it with a retry. */
+  readonly orgsError = signal<string | null>(null);
+
   /** Orgs whose per-org space fetch is in flight (drives per-section spinner). */
   private readonly spacesLoading = signal<Set<string>>(new Set());
   spacesLoadingFor(orgGuid: string): boolean {
     return this.spacesLoading().has(orgGuid);
+  }
+
+  /** Orgs whose last space fetch failed (the section shows an error with a retry). */
+  private readonly spacesFailed = signal<Set<string>>(new Set());
+  spacesFailedFor(orgGuid: string): boolean {
+    return this.spacesFailed().has(orgGuid);
   }
 
   /** Permission map: orgGuid → can edit */
@@ -228,13 +237,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   // --- Lifecycle ---
 
   ngOnInit(): void {
-    // Fetch all orgs, then resolve permissions per org
-    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid).subscribe(orgs => {
-      this.allOrgs.set(orgs);
-      this.resolvePermissions(orgs);
-      this.orgsLoading.set(false);
-    });
-    this.subs.add(orgsSub);
+    this.loadOrgs();
 
     // lockedOrg: seed pickedOrgs from it once orgs load (or immediately if lockedOrg is set)
     if (this.lockedOrg) {
@@ -246,6 +249,28 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subs.unsubscribe();
+  }
+
+  /**
+   * Fetch all orgs, then resolve permissions per org. The spinner clears on
+   * every outcome: a value, an error, or completion without a value.
+   */
+  loadOrgs(): void {
+    this.orgsLoading.set(true);
+    this.orgsError.set(null);
+    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid).subscribe({
+      next: orgs => {
+        this.allOrgs.set(orgs);
+        this.resolvePermissions(orgs);
+        this.orgsLoading.set(false);
+      },
+      error: () => {
+        this.orgsError.set('Could not load organizations.');
+        this.orgsLoading.set(false);
+      },
+      complete: () => this.orgsLoading.set(false),
+    });
+    this.subs.add(orgsSub);
   }
 
   // --- Permission resolution ---
@@ -376,15 +401,26 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
 
   // --- Space loading ---
 
-  private loadSpacesFor(orgGuid: string): void {
+  /** Also the section's Retry: a failed fetch leaves spacesByOrg unset, so this fetches again. */
+  protected loadSpacesFor(orgGuid: string): void {
     if (this.spacesByOrg()[orgGuid]) {
       return; // already loaded
     }
     this.spacesLoading.update(s => { const next = new Set(s); next.add(orgGuid); return next; });
-    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe(spaces => {
-      this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
-      this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
-      this.resolveSpacePermissions(orgGuid, spaces);
+    this.spacesFailed.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
+    // The spinner clears on every outcome: a value, an error, or completion without a value.
+    const done = () => this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
+    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe({
+      next: spaces => {
+        this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
+        done();
+        this.resolveSpacePermissions(orgGuid, spaces);
+      },
+      error: () => {
+        this.spacesFailed.update(s => { const next = new Set(s); next.add(orgGuid); return next; });
+        done();
+      },
+      complete: done,
     });
     this.subs.add(spaceSub);
   }

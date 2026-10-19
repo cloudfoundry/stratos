@@ -75,7 +75,7 @@ export class LoggedInService {
         if (!this.sessionChecker || this.sessionChecker.closed) {
           this.openSessionCheckerPoll();
         }
-        if (!this.userInteractionChecker) {
+        if (!this.userInteractionChecker || this.userInteractionChecker.closed) {
           this.userInteractionChecker = merge(...eventStreams).subscribe(() => {
             this.lastUserInteraction = Date.now();
           });

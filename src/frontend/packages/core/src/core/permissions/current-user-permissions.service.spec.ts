@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { computed, provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { firstValueFrom } from 'rxjs';
-import { AppState, BaseEntityValues, CurrentUserRolesDataService, EntityCatalogEntityConfig, EntityCatalogTestModule, EndpointModel, PaginationEntityState, TEST_CATALOGUE_ENTITIES, endpointEntityType, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
+import { firstValueFrom, timeout } from 'rxjs';
+import { AppState, BaseEntityValues, CurrentUserRolesDataService, EndpointsDataService, EntityCatalogEntityConfig, EntityCatalogTestModule, EndpointModel, PaginationEntityState, TEST_CATALOGUE_ENTITIES, endpointEntityType, generateStratosEntities, stratosEntityFactory } from '@stratosui/store';
 import {
   createBasicStoreModule,
   createEntityStoreState,
@@ -10,8 +10,10 @@ import {
   STORE_TEST_PROVIDERS,
 } from '@stratosui/store/testing';
 import { AppTestModule } from '@test-framework';
-import { PermissionConfig } from './current-user-permissions.config';
+import { CurrentUserRolesSignalService } from '../signals/current-user-roles-signal.service';
+import { PermissionConfig, PermissionConfigLink } from './current-user-permissions.config';
 import { CurrentUserPermissionsService } from './current-user-permissions.service';
+import { BaseCurrentUserPermissionsChecker } from './current-user-permissions.types';
 import { StratosPermissionStrings, StratosPermissionTypes, StratosScopeStrings } from './stratos-user-permissions.checker';
 
 
@@ -569,4 +571,77 @@ describe('CurrentUserPermissionsService', () => {
   });
 
 
+});
+
+describe('CurrentUserPermissionsService fallback permission', () => {
+  // The service is a root singleton, so the endpoint watch behind a fallback
+  // check must end with the subscription, not with the root injector.
+  it('stops reading the endpoint after unsubscribe', () => {
+    const version = signal(0);
+    let reads = 0;
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        CurrentUserPermissionsService,
+        { provide: CurrentUserRolesSignalService, useValue: {} },
+        {
+          provide: EndpointsDataService,
+          // Unknown endpoint: the fallback branch answers false without
+          // asking a checker.
+          useValue: {
+            endpointById: () => computed(() => {
+              reads++;
+              version();
+              return null;
+            }),
+          },
+        },
+      ],
+    });
+    const service = TestBed.inject(CurrentUserPermissionsService);
+
+    // A link to no known config leaves only the fallback branch.
+    const values: boolean[] = [];
+    const sub = service.can(new PermissionConfigLink('no-such-permission'), 'ep-1')
+      .subscribe(v => values.push(v));
+    TestBed.tick();
+    expect(values).toEqual([false]);
+    const readsWhileSubscribed = reads;
+
+    sub.unsubscribe();
+    version.set(1);
+    TestBed.tick();
+
+    expect(reads).toBe(readsWhileSubscribed);
+  });
+});
+
+describe('CurrentUserPermissionsService empty complex config', () => {
+  // An empty config array leaves no check groups. combineLatest([]) completes
+  // without a value, so the service must still answer.
+  it('denies an empty permission config', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        CurrentUserPermissionsService,
+        { provide: CurrentUserRolesSignalService, useValue: {} },
+        { provide: EndpointsDataService, useValue: {} },
+      ],
+    });
+    const service = TestBed.inject(CurrentUserPermissionsService);
+
+    await expect(firstValueFrom(service.can([]).pipe(timeout(1000)))).resolves.toBe(false);
+  });
+});
+
+describe('BaseCurrentUserPermissionsChecker.reduceChecks', () => {
+  // An empty list answers with the identity of its combinator, as
+  // some([]) / every([]) do.
+  it('answers false for an empty list combined with ||', async () => {
+    await expect(firstValueFrom(BaseCurrentUserPermissionsChecker.reduceChecks([], '||'))).resolves.toBe(false);
+  });
+
+  it('answers true for an empty list combined with &&', async () => {
+    await expect(firstValueFrom(BaseCurrentUserPermissionsChecker.reduceChecks([], '&&'))).resolves.toBe(true);
+  });
 });

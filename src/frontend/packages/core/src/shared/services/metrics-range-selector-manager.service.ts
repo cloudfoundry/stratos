@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable, NgZone, inject } from '@angular/core';
+import { ApplicationRef, Injectable, NgZone, OnDestroy, inject } from '@angular/core';
 import { MetricsRequest, MetricQueryType } from '@stratosui/store';
 import { Subject } from 'rxjs';
 import { isValid, isEqual } from 'date-fns';
@@ -9,7 +9,7 @@ import { ITimeRange } from './metrics-range-selector.types';
 @Injectable({
   providedIn: 'root'
 })
-export class MetricsRangeSelectorManagerService {
+export class MetricsRangeSelectorManagerService implements OnDestroy {
   metricRangeService = inject(MetricsRangeSelectorService);
   private ngZone = inject(NgZone);
   private appRef = inject(ApplicationRef);
@@ -82,6 +82,13 @@ export class MetricsRangeSelectorManagerService {
   }
 
   public destroy() {
+    this.endWindowPoll();
+  }
+
+  // Each host provides its own manager, so it is destroyed with the host.
+  // Without this the window poll ticks the whole app every pollInterval
+  // for every visit that did not call destroy().
+  ngOnDestroy() {
     this.endWindowPoll();
   }
 

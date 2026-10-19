@@ -1,16 +1,28 @@
-<app-page-header [breadcrumbs]="breadcrumbs$ | async">
-  {{ title$ | async}}
+<app-page-header [breadcrumbs]="breadcrumbs()">
+  {{ title() }}
 </app-page-header>
-<app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
-  @if (setUsernames) {
-    <app-step title="Usernames" [signalHandle]="setUsernamesStepHandle">
-      <app-manage-users-set-usernames #setUsers></app-manage-users-set-usernames>
-    </app-step>
+@if (noUsers()) {
+  <app-no-content-message
+    data-testid="manage-users-no-users"
+    icon="people"
+    [firstLine]="failedLookups().length ? 'None of the selected users could be loaded' : 'No users selected'"
+    [otherLines]="noUsersLines()">
+  </app-no-content-message>
+} @else {
+  @if (failedLookups().length) {
+    <app-dialog-error data-testid="manage-users-lookup-error" role="alert" [show]="true" [message]="lookupErrorMessage()" />
   }
-  <app-step title="Select Roles" [signalHandle]="modifyStepHandle">
-    <app-manage-users-modify #modify [setUsernames]="setUsernames"></app-manage-users-modify>
-  </app-step>
-  <app-step title="Confirm" [signalHandle]="confirmStepHandle">
-    <app-manage-users-confirm #confirm [setUsernames]="setUsernames"></app-manage-users-confirm>
-  </app-step>
-</app-steppers>
+  <app-steppers cancel="{{defaultCancelUrl}}" [nextButtonProgress]="false">
+    @if (setUsernames) {
+      <app-step title="Usernames" [signalHandle]="setUsernamesStepHandle">
+        <app-manage-users-set-usernames #setUsers></app-manage-users-set-usernames>
+      </app-step>
+    }
+    <app-step title="Select Roles" [signalHandle]="modifyStepHandle">
+      <app-manage-users-modify #modify [setUsernames]="setUsernames"></app-manage-users-modify>
+    </app-step>
+    <app-step title="Confirm" [signalHandle]="confirmStepHandle">
+      <app-manage-users-confirm #confirm [setUsernames]="setUsernames"></app-manage-users-confirm>
+    </app-step>
+  </app-steppers>
+}

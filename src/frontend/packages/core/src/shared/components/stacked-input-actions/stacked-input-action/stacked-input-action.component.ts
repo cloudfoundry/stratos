@@ -8,6 +8,9 @@ import { ChangeDetectionStrategy, AfterContentInit,
   OnInit,
   Output,
   ViewChild,
+  computed,
+  input,
+  signal,
  } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent, AppErrorComponent, AppInputDirective } from '../../../components/custom-form-field/custom-form-field.component';
@@ -72,17 +75,11 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     }
   };
   @Input() stateIn$!: Observable<StackedInputActionsState | null>;
-  @Input() position!: number;
-  @Input() showRemove!: boolean;
-  @Input() key!: number;
-  private pConfig!: StackedInputActionConfig;
-  @Input()
-  set config(config: StackedInputActionConfig) {
-    this.pConfig = config;
-  }
-  get config(): StackedInputActionConfig {
-    return this.pConfig || StackedInputActionComponent.defaultConfig;
-  }
+  readonly position = input<number>(0);
+  readonly showRemove = input(false);
+  readonly key = input<number>(0);
+  readonly config = input<StackedInputActionConfig | undefined>(undefined);
+  readonly resolvedConfig = computed(() => this.config() || StackedInputActionComponent.defaultConfig);
 
   @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
   @Output() remove = new EventEmitter<any>();
@@ -91,13 +88,15 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
 
   public result = StackedInputActionResult;
   public textFormControl = new FormControl<string | null>('', [Validators.required, this.uniqueValidator.bind(this)]);
-  public state: StackedInputActionsState | null = null;
+  // Signal so a SUCCEEDED result after PROCESSING re-renders: the form
+  // control stays disabled across both, so nothing else marks the view.
+  readonly state = signal<StackedInputActionsState | null>(null);
   private subs: Subscription[] = [];
   private otherValues!: string[];
 
   ngOnInit() {
     const validators = [Validators.required, this.uniqueValidator.bind(this)];
-    if (this.config.isEmailInput) {
+    if (this.resolvedConfig().isEmailInput) {
       validators.push(Validators.email);
     }
     this.textFormControl = new FormControl<string | null>('', validators);
@@ -105,10 +104,10 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
     // Emit any changes of form state outwards.
     this.subs.push(this.textFormControl.valueChanges.subscribe((value) => {
       this.stateOut.emit({
-        key: this.key,
+        key: this.key(),
         value: value ?? '',
         // Component is valid if form is ok OR it's already succeeded
-        valid: this.state && this.state.result === StackedInputActionResult.SUCCEEDED || this.textFormControl.valid
+        valid: this.state()?.result === StackedInputActionResult.SUCCEEDED || this.textFormControl.valid
       });
     }));
 
@@ -148,18 +147,18 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
 
   private handleStateIn(incState: StackedInputActionsState | null) {
     if (!incState) {
-      this.state = incState;
+      this.state.set(incState);
       this.textFormControl.enable();
       return;
     }
     switch (incState.result) {
       case StackedInputActionResult.PROCESSING:
       case StackedInputActionResult.SUCCEEDED:
-        this.state = incState;
+        this.state.set(incState);
         this.textFormControl.disable();
         break;
       case StackedInputActionResult.FAILED:
-        this.state = incState;
+        this.state.set(incState);
         this.textFormControl.enable();
         break;
       case StackedInputActionResult.OTHER_VALUES_UPDATED: {

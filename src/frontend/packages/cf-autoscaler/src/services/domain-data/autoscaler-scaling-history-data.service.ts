@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
@@ -6,6 +6,7 @@ import { environment } from '@stratosui/core';
 
 import { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
 import { AppAutoscalerEvent } from '../../store/app-autoscaler.types';
+import { autoscalerErrorMessage } from '../../core/autoscaler-helpers/autoscaler-util';
 
 // Per-(endpoint, app) state. Keyed by `${endpointGuid}::${appGuid}` so a
 // single service instance can manage scaling-history reads for multiple apps
@@ -105,7 +106,7 @@ export class AutoscalerScalingHistoryDataService {
         error: null,
       });
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }

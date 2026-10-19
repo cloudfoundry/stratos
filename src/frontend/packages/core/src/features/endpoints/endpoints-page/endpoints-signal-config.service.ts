@@ -1,4 +1,4 @@
-import { DestroyRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import {
   ActionState,
   EndpointModel,
@@ -124,8 +124,6 @@ export class ViewPipeline<T> {
 // visual / interaction language stays consistent across signal-list pages.
 @Injectable({ providedIn: 'root' })
 export class EndpointsSignalConfigService {
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly injector = inject(Injector);
   private readonly endpointsSignals = inject(EndpointsSignalService);
   private readonly endpointsData = inject(EndpointsDataService);
 
@@ -142,11 +140,17 @@ export class EndpointsSignalConfigService {
     sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
   });
 
-  readonly filter: WritableSignal<(ep: EndpointModel) => boolean> = signal(() => true);
   readonly sort = this.state.sort as WritableSignal<SortSpec<EndpointModel>>;
   readonly pageSize = this.state.pageSize;
   readonly pageIndex = this.state.pageIndex;
   readonly nameFilter: WritableSignal<string> = signal('');
+  // Derived, not effect-driven: the service is root-provided and
+  // initialize() runs on every visit, so an effect there would add a
+  // root-lifetime watcher per visit.
+  readonly filter: Signal<(ep: EndpointModel) => boolean> = computed(() => {
+    const q = this.nameFilter().trim().toLowerCase();
+    return (ep: EndpointModel) => !q || (ep.name ?? '').toLowerCase().includes(q);
+  });
   readonly viewMode = this.state.viewMode;
   readonly loading: Signal<boolean> = this.endpointsData.loading;
 
@@ -171,20 +175,6 @@ export class EndpointsSignalConfigService {
       this.pageIndex,
       this._sortExtractors.asReadonly(),
     );
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        const q = this.nameFilter().trim().toLowerCase();
-        this.filter.set((ep: EndpointModel) => {
-          if (!q) return true;
-          return (ep.name ?? '').toLowerCase().includes(q);
-        });
-      });
-    });
-    // No registry release pattern here — endpointEntitiesSelector is a pure
-    // store projection. The DestroyRef hook stays as a placeholder so future
-    // listeners (e.g. health-check pulse subscription) have a tidy attach
-    // point without restructuring the service.
-    this.destroyRef.onDestroy(() => undefined);
   }
 
   clearFilters(): void {

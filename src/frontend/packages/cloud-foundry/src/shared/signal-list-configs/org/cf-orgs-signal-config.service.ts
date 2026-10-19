@@ -1,4 +1,4 @@
-import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 import { ListStateStore } from '@stratosui/core';
@@ -21,7 +21,6 @@ import type { StOrg } from '../../../services/endpoint-data/stratos-types';
 export class CfOrgsSignalConfigService {
   private readonly http = inject(HttpClient);
   private readonly registry = inject(EndpointDataRegistry);
-  private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
   private readonly deleteController = inject(EntityDeleteController);
 
@@ -142,9 +141,6 @@ export class CfOrgsSignalConfigService {
           this._hasLoadedOnce.set(true);
         }
       });
-    });
-    this.destroyRef.onDestroy(() => {
-      this.registry.release(cnsiGuid);
     });
   }
 

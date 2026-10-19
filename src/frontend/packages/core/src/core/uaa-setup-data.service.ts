@@ -1,6 +1,6 @@
 import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
 import { Injectable, Signal, inject, signal } from '@angular/core';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout, TimeoutError } from 'rxjs';
 
 export interface UaaSetupData {
   console_client: string;
@@ -43,6 +43,14 @@ const EMPTY_STATE: UaaSetupState = {
 const GET_SCOPES_URL = '/pp/v1/setup/check';
 const SAVE_CONFIG_URL = '/pp/v1/setup/save';
 
+// Without a limit a request that never answers keeps the wizard busy
+// forever. The check calls the UAA token endpoint with the backend's
+// mutating HTTP client (120 s by default), so wait a little longer than
+// that and let the backend's own error arrive first. The save only writes
+// the config (and logs a local admin in), so it gets a shorter limit.
+export const CHECK_SCOPES_TIMEOUT_MS = 130000;
+export const SAVE_CONFIG_TIMEOUT_MS = 60000;
+
 /**
  * Signal-native UAA setup state. Replaces the @stratosui/store
  * `uaaSetup` slice (effects + reducer + actions) with HttpClient calls
@@ -63,14 +71,19 @@ export class UaaSetupDataService {
   readonly state: Signal<UaaSetupState> = this._state.asReadonly();
 
   async checkScopes(setupData: UaaSetupData | LocalAdminSetupData): Promise<void> {
-    await this.post(GET_SCOPES_URL, setupData, 'Failed to save configuration.');
+    await this.post(GET_SCOPES_URL, setupData, 'Failed to check the UAA credentials.', CHECK_SCOPES_TIMEOUT_MS);
   }
 
   async saveConfig(setupData: UaaSetupData | LocalAdminSetupData): Promise<void> {
-    await this.post(SAVE_CONFIG_URL, setupData, 'Failed to setup Administrator scope.');
+    await this.post(SAVE_CONFIG_URL, setupData, 'Failed to setup Administrator scope.', SAVE_CONFIG_TIMEOUT_MS);
   }
 
-  private async post(url: string, setupData: UaaSetupData | LocalAdminSetupData, failurePrefix: string): Promise<void> {
+  private async post(
+    url: string,
+    setupData: UaaSetupData | LocalAdminSetupData,
+    failurePrefix: string,
+    timeoutMs: number,
+  ): Promise<void> {
     this._state.set({
       ...this._state(),
       settingUp: true,
@@ -84,7 +97,7 @@ export class UaaSetupDataService {
       const data = await firstValueFrom(
         this.http.post<Partial<UaaSetupPayload> | UaaSetupPayload | unknown>(url, params, {
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        })
+        }).pipe(timeout(timeoutMs))
       );
       const merged: UaaSetupPayload = {
         ...(this._state().payload ?? ({} as UaaSetupPayload)),
@@ -103,7 +116,9 @@ export class UaaSetupDataService {
         settingUp: false,
         setup: false,
         error: true,
-        message: `${failurePrefix} ${this.fetchError(err)}`,
+        message: err instanceof TimeoutError
+          ? `${failurePrefix} The server did not answer within ${timeoutMs / 1000} seconds.`
+          : `${failurePrefix} ${this.fetchError(err)}`,
       });
     }
   }

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, Injector, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, EnvironmentInjector, Input, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   BehaviorSubject,
@@ -38,15 +38,22 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private deployData = inject(CfDeployAppDataService);
   private snackBarService = inject(TailwindSnackBarService);
   cfOrgSpaceService = inject(CfOrgSpaceDataService);
-  private injector = inject(Injector);
+  // The deployer outlives this step; a view injector would tie its state
+  // effects to the view and end them when the view is destroyed
+  private injector = inject(EnvironmentInjector);
   private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
 
 
-  @Input() appGuid!: string;
+  // The app being redeployed; none on a first deploy
+  @Input() redeployAppGuid?: string;
+
+  // The deployed app: the redeployed one, or the one a first deploy
+  // looked up. Each deploy starts again from the input.
+  appGuid?: string;
 
   // Stable BehaviorSubjects back the public Observable fields. The field
-  // references (valid$/closeable$/showOverlay$) are created once and never
+  // references (valid$/closeable$/disablePrevious$) are created once and never
   // reassigned — only the values pushed through the subjects change.
   // Reassigning these fields after the parent template's async pipe has
   // already subscribed would leave the pipe stranded on a completed
@@ -54,40 +61,33 @@ export class DeployApplicationStep3Component implements OnDestroy {
   // is never re-evaluated.
   private validSubject = new BehaviorSubject<boolean>(false);
   private closeableSubject = new BehaviorSubject<boolean>(false);
-  private showOverlaySubject = new BehaviorSubject<boolean>(false);
-  // Locks Previous while a deploy is actively in flight. Flips back to
-  // false on terminal states (success or error) so the user can go back
-  // and fix inputs when the deploy fails.
+  // Locks Previous from entry until the deploy has ended (success or error,
+  // a lost connection or missing details included), so the user can then
+  // go back and fix inputs.
   private disablePreviousSubject = new BehaviorSubject<boolean>(true);
+  // A deployed app the lookup did not find, or a lookup that failed: there
+  // is no app to go to, but the deploy is over, so the step can be closed
+  private appNotFoundSubject = new BehaviorSubject<boolean>(false);
 
   readonly valid$: Observable<boolean> = this.validSubject.asObservable();
   readonly closeable$: Observable<boolean> = this.closeableSubject.asObservable();
-  readonly showOverlay$: Observable<boolean> = this.showOverlaySubject.asObservable();
   readonly disablePrevious$: Observable<boolean> = this.disablePreviousSubject.asObservable();
-
-  error = signal<boolean>(false);
 
   public deployer!: DeployApplicationDeployer;
 
   private subscriptions: Subscription[] = [];
 
-  public busy = false;
-
   private initDeployer() {
     const status$ = this.deployer.status$.asObservable();
 
-    // The template reads plain fields (deployer.streamTitle, deployer.deploying)
-    // which are mutated directly by the deployer's websocket handlers, not
-    // through observables. Under OnPush + zoneless CD, those mutations don't
-    // trigger a re-render on their own. Subscribe to status$ (which IS emitted
-    // via the signal wrapper every time updateStatus() is called) and force a
-    // view check so the title bar and spinner reflect the current state.
+    // The template reads a plain field (deployer.deploying) which is mutated
+    // directly by the deployer's websocket handlers, not through observables.
+    // Under OnPush + zoneless CD, that mutation doesn't trigger a re-render on
+    // its own. Subscribe to status$ (which IS emitted via the signal wrapper
+    // every time updateStatus() is called) and force a view check so the
+    // spinner reflects the current state. The title is a signal.
     this.subscriptions.push(
       status$.subscribe(() => this.cdr.markForCheck())
-    );
-
-    this.subscriptions.push(
-      status$.pipe(filter(status => status.deploying)).subscribe()
     );
 
     this.subscriptions.push(
@@ -113,35 +113,26 @@ export class DeployApplicationStep3Component implements OnDestroy {
     );
 
     this.subscriptions.push(
-      observableCombineLatest(this.validSubject, status$).pipe(
-        map(([validated, status]) => validated || status.error)
+      observableCombineLatest(this.validSubject, status$, this.appNotFoundSubject).pipe(
+        map(([validated, status, appNotFound]) => validated || status.error || appNotFound)
       ).subscribe(v => this.closeableSubject.next(v))
     );
 
     this.subscriptions.push(
-      status$.subscribe(status => {
-        this.busy = status.deploying;
-        // Mirror busy state to disablePrevious so that when a deploy ends
-        // (error or success) the Previous button unlocks and the user
-        // isn't trapped on the step.
-        this.disablePreviousSubject.next(status.deploying);
+      status$.subscribe(() => {
+        // Going back would abandon the deploy, so Previous stays locked
+        // until it ends (error or success), not only while it pushes.
+        // Every end, a lost connection or missing details included, is
+        // reported, so the user isn't trapped on the step.
+        this.disablePreviousSubject.next(!this.deployer.finished);
       })
     );
 
-    this.subscriptions.push(
-      status$.pipe(
-        map(status => !status.deploying || status.deploying && !this.deployer.streamTitle)
-      ).subscribe(v => this.showOverlaySubject.next(v))
-    );
-
-    // Resolve the app GUID without depending on APP_GUID_NOTIFY. That
-    // backend event (cfapppush/deploy.go:205-208) is useless either way:
-    // absent on first-time deploy (the cfV2Actor wrapper in push_actor.go
-    // that used to send it was dropped when CF CLI internals were migrated
-    // from v2action to v7action and no v7 equivalent was written) and
-    // redundant on redeploy (it just echoes the value the client passed in
-    // the URL). Even the Stratos "Redeploy" button path currently ends up
-    // as a first-time deploy from the server's perspective because
+    // Fallback for a missing APP_GUID_NOTIFY. After a first-time push the
+    // backend resolves the new app's GUID by name and sends it, but that
+    // lookup is best-effort (cfapppush/deploy.go), so the event can be
+    // absent. The Stratos "Redeploy" button path also ends up as a
+    // first-time deploy from the server's perspective because
     // DeployApplicationDeployer.isRedeploy is never assigned from the
     // parent component — the &app=X URL parameter is never set.
     //
@@ -152,25 +143,47 @@ export class DeployApplicationStep3Component implements OnDestroy {
         filter(status => !status.deploying && !status.error),
         filter(() => !!this.deployer.appData?.Name && !this.appGuid),
         take(1),
-        switchMap(() => {
-          const appName = this.deployer.appData.Name;
-          const cfGuid = this.deployer.cfGuid;
-          const spaceGuid = this.deployer.spaceGuid;
-          // Native handler returns apps for the space; client-side filter
-          // for the just-deployed name. Single HTTP call replaces the
-          // legacy ngrx pagination that walked the space-apps list.
-          return this.http.get<StAppsResponse>(
-            `/pp/v1/cf/apps/${cfGuid}?space_guids=${encodeURIComponent(spaceGuid)}`,
-          ).pipe(
-            map(resp => (resp?.resources ?? []).find((a: StApp) => a.name === appName)),
-            filter((app): app is StApp => !!app),
-            map(app => app.guid),
-            take(1),
-          );
-        }),
-      ).subscribe(guid => {
-        this.deployer.applicationGuid$.next(guid);
+        switchMap(() => this.lookUpAppGuid()),
+      ).subscribe({
+        next: guid => {
+          if (guid) {
+            this.deployer.applicationGuid$.next(guid);
+          } else {
+            this.appNotFoundSubject.next(true);
+            this.showAppNotFound();
+          }
+        },
+        error: () => {
+          this.appNotFoundSubject.next(true);
+          this.showAppLookupFailed();
+        },
       })
+    );
+  }
+
+  private showAppNotFound() {
+    this.snackBarService.show(
+      `Application ${this.deployer.appData?.Name} was deployed but could not be found in the space`, 'Dismiss');
+  }
+
+  private showAppLookupFailed() {
+    this.snackBarService.show(
+      `Application ${this.deployer.appData?.Name} was deployed but looking it up in the space failed`, 'Dismiss');
+  }
+
+  // Emits undefined when the space has no app of that name
+  private lookUpAppGuid(): Observable<string | undefined> {
+    const appName = this.deployer.appData?.Name;
+    const cfGuid = this.deployer.cfGuid;
+    const spaceGuid = this.deployer.spaceGuid;
+    // Native handler returns apps for the space; client-side filter
+    // for the just-deployed name. Single HTTP call replaces the
+    // legacy ngrx pagination that walked the space-apps list.
+    return this.http.get<StAppsResponse>(
+      `/pp/v1/cf/apps/${cfGuid}?space_guids=${encodeURIComponent(spaceGuid)}`,
+    ).pipe(
+      map(resp => (resp?.resources ?? []).find((a: StApp) => a.name === appName)?.guid),
+      take(1),
     );
   }
 
@@ -183,24 +196,41 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.deployData.resetState();
     this.destroyDeployer();
     if (this.deployer) {
-      if (!this.deployer.deploying) {
-        this.deployer.close();
-      } else {
+      // A deploy in flight (before or during the push) keeps running and
+      // reports its end
+      if (this.deployer.inFlight) {
         this.setupCompletionNotification();
+      } else {
+        this.deployer.close();
       }
     }
   }
 
   private setupCompletionNotification() {
+    // status$ replays its current value; wait for the reported close, which
+    // every end of a deploy (including a lost connection) produces
     this.deployer.status$.asObservable().pipe(
-      filter(status => !status.deploying),
+      filter(() => this.deployer.finished),
       take(1)
     ).subscribe(status => {
       if (status.error) {
         this.snackBarService.show(status.errorMsg ?? 'Application deployment failed', 'Dismiss');
       } else {
         const ref = this.snackBarService.show('Application deployment complete', 'View', 10000, true);
-        ref.onAction().subscribe(() => { this.goToAppSummary(); });
+        // A first-time deploy left mid-way never looked up its app GUID
+        ref.onAction().pipe(
+          switchMap(() => this.appGuid ? observableOf(this.appGuid) : this.lookUpAppGuid()),
+        ).subscribe({
+          next: guid => {
+            if (guid) {
+              this.appGuid = guid;
+              this.goToAppSummary();
+            } else {
+              this.showAppNotFound();
+            }
+          },
+          error: () => this.showAppLookupFailed(),
+        });
       }
       this.deployer.close();
     });
@@ -220,9 +250,10 @@ export class DeployApplicationStep3Component implements OnDestroy {
     // App Summary" staying active from a previous successful push).
     this.validSubject.next(false);
     this.closeableSubject.next(false);
-    this.showOverlaySubject.next(false);
     this.disablePreviousSubject.next(true);
-    this.error.set(false);
+    this.appNotFoundSubject.next(false);
+    // A retry of a first deploy may deploy another app; look it up again
+    this.appGuid = this.redeployAppGuid;
 
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {
@@ -231,17 +262,31 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.deployer = new DeployApplicationDeployer(this.cfOrgSpaceService, this.injector);
     }
 
+    // A file deploy entered again after it ended: its connection is over,
+    // so upload the same files again on a new one
+    const reupload = !!fsDeployer && fsDeployer.finished;
+    if (reupload) {
+      fsDeployer.close();
+    }
+
     this.initDeployer();
     // Start deploying
     this.deployer.open();
-    if (fsDeployer) {
+    if (reupload) {
+      // The server reads the go-ahead only after its ack of the last file
+      this.subscriptions.push(
+        this.deployer.fileTransferStatus$.asObservable().pipe(
+          filter(status => !!status && status.filesSent === status.totalFiles),
+          take(1),
+        ).subscribe(() => this.deployer.deploy())
+      );
+    } else if (fsDeployer) {
       // Ask the existing deployer to continue deploying
       this.deployer.deploy();
     }
-    this.busy = true;
     // Under OnPush + zoneless CD, assigning this.deployer to a plain field
     // does not trigger a view update. Force one so the template (which
-    // reads deployer.streamTitle and renders the log-viewer under an @if
+    // reads deployer.streamTitle() and renders the log-viewer under an @if
     // deployer check) actually picks up the new reference.
     this.cdr.markForCheck();
   };

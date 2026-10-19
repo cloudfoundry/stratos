@@ -2,8 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, Signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
+import { observeSignal } from '@stratosui/store';
 import { combineLatest, EMPTY, Observable } from 'rxjs';
-import { catchError, filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { catchError, distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
@@ -232,9 +233,14 @@ export class CloudFoundryOrganizationService {
     this.quotaDefinition$ = orgSnapshot$.pipe(
       map(o => o.quotaGuid),
       filter(quotaGuid => !!quotaGuid),
+      // A rename patches the org but keeps its quota
+      distinctUntilChanged(),
+      // observeSignal, not toObservable: toObservable's effect would outlive
+      // switchMap's unsubscribe, so each org re-emission (load, patch after
+      // an edit) would add one more effect for the life of the page.
       switchMap(quotaGuid => {
         const source = this.quotaData.orgQuota(this.cfGuid, quotaGuid);
-        return toObservable(source.value, { injector: this.injector }).pipe(
+        return observeSignal(source.value, this.injector).pipe(
           filter((q): q is StOrgQuota => !!q),
         );
       }),

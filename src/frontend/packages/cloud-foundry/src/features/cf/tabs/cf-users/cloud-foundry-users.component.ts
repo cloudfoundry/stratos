@@ -37,12 +37,10 @@ import { AddUserDialogComponent } from '../../users/add-user/add-user-dialog.com
 // /cloud-foundry/:cnsi/users. CNSI-wide — shows every user the CF returns,
 // joined with their org and space role grants by the backend handler.
 //
-// Manage Roles + Remove User wizards are still legacy ngrx (separate
-// route entries under /cloud-foundry/:cnsi/users/manage|remove). Manage
-// Roles is selection-driven via the bulk action (forwards the selected
-// users as ?users=g1,g2,…); the per-row kebab now carries only the two
-// Remove entries, which navigate with ?user={guid} to pre-fill the
-// wizard for that row. The Org Roles + Space Roles columns resolve
+// The Manage Roles wizard is a separate route
+// (/cloud-foundry/:cnsi/users/manage), selection-driven via the bulk
+// action (forwards the selected users as ?users=g1,g2,…). Removal is the
+// inline bulk remove. The Org Roles + Space Roles columns resolve
 // org/space names via EndpointDataService signals so cells never render
 // raw GUIDs (no_raw_guids feedback rule).
 @Component({

@@ -85,15 +85,14 @@ export class CfAppsSignalConfigService {
     signal(new Map());
   readonly appStats: Signal<Map<string, { running: number; total: number }>> =
     computed(() => this._appStats());
-  private statsTimer?: ReturnType<typeof setInterval>;
-  // Reactive stats refresh effect, captured so a re-entry (root singleton +
-  // per-mount startStatsPolling) destroys the prior one instead of stacking.
-  private statsEffect?: EffectRef;
+  // Stops the current stats poll (timer + reactive effect). Captured so a
+  // re-entry (root singleton + per-mount startStatsPolling) stops the prior
+  // one instead of stacking.
+  private stopStats?: () => void;
   // Tracks `${cnsiGuid}:${appGuid}` keys with an in-flight stats request so
   // burst signal updates during initial render don't issue 4× duplicate
   // calls per app — the original symptom on multi-CNSI walls with slow CFs.
   private readonly statsInFlight = new Set<string>();
-  private readonly destroyRef = inject(DestroyRef);
   private readonly injector = inject(Injector);
 
   // Lazy org/space catalog loading. loadNames() runs an org+per-org-spaces
@@ -268,6 +267,10 @@ export class CfAppsSignalConfigService {
   private readonly http = inject(HttpClient);
 
   constructor() {
+    // Hosts stop their own polls; this covers an injector torn down while
+    // a poll is still live (each spec's TestBed reset).
+    inject(DestroyRef).onDestroy(() => this.stopStats?.());
+
     const cfService = inject(CloudFoundryService, { optional: true });
     this.connectedEndpoints = cfService
       ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as EndpointModel[] })
@@ -1079,44 +1082,43 @@ export class CfAppsSignalConfigService {
   }
 
   // Kick off an initial stats fetch for the currently visible page, plus
-  // an interval-based refresh. Safe to call more than once — the timer
-  // is reset each time. Call from the app-wall once the view pipeline is
-  // initialized; registerDestroy stops the timer on teardown.
+  // an interval-based refresh. Call from the list component once the view
+  // pipeline is initialized, passing the component's DestroyRef: this
+  // service is a root singleton, so only the host knows when its page is
+  // gone, and the poll stops with it. Safe to call more than once — each
+  // call stops the previous poll first, so a re-entry never stacks.
   //
   // Page / sort / filter changes happen more often than the poll tick,
   // so we ALSO re-fetch reactively whenever pagedItems changes — the
   // user navigating to page 2 sees stats fill in within a few hundred
   // ms rather than waiting up to intervalMs.
-  startStatsPolling(intervalMs: number = 30000): void {
-    if (this.statsTimer) {
-      clearInterval(this.statsTimer);
+  startStatsPolling(host: DestroyRef, intervalMs: number = 30000): void {
+    this.stopStats?.();
+    // The callers start polling after an await in ngOnInit; a host that
+    // left in the meantime must not start a poll nobody will stop.
+    if (host.destroyed) {
+      return;
     }
     const runOnce = () => {
       const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
       this.refreshStatsForKeys(keys);
     };
     runOnce();
-    this.statsTimer = setInterval(runOnce, intervalMs);
-    // effect() requires an injection context; startStatsPolling is called
-    // from the component's ngOnInit which isn't one. Wrap it explicitly.
-    //
-    // Tear down any previous mount's effect first. This service is a root
-    // singleton, so a re-entry (app-wall remounted on navigation) would
-    // otherwise stack one live effect per visit, multiplying stats fetches
-    // across a session — same reasoning as the statsTimer reset above.
-    this.statsEffect?.destroy();
-    runInInjectionContext(this.injector, () => {
-      this.statsEffect = effect(() => {
-        const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
-        this.refreshStatsForKeys(keys);
-      });
-    });
-    this.destroyRef.onDestroy(() => {
-      if (this.statsTimer) {
-        clearInterval(this.statsTimer);
-        this.statsTimer = undefined;
+    const timer = setInterval(runOnce, intervalMs);
+    // effect() requires an injection context; the callers' ngOnInit isn't
+    // one, hence the explicit injector.
+    const statsEffect = effect(runOnce, { injector: this.injector });
+    // stop() only touches its own timer and effect, so a stale host
+    // destroyed after a newer start leaves the newer poll running.
+    const stop = () => {
+      clearInterval(timer);
+      statsEffect.destroy();
+      if (this.stopStats === stop) {
+        this.stopStats = undefined;
       }
-    });
+    };
+    this.stopStats = stop;
+    host.onDestroy(stop);
   }
 
   // Fetches every route currently mapped to an app, via the Stratos-native

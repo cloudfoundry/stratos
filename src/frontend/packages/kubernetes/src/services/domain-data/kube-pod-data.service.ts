@@ -4,7 +4,7 @@ import { Observable, firstValueFrom, of } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
-import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KubePod, KubePodContainerStatus, StratosError } from '../endpoint-data/kube-types';
 
 // Per-resource domain service for k8s pods. Mirrors KubeNamespaceDataService
@@ -30,6 +30,7 @@ import { KubePod, KubePodContainerStatus, StratosError } from '../endpoint-data/
 //   - 401 / 403 mark the affected scope unavailable and surface a
 //     StratosError on errors().
 //   - Other errors push a FETCH_ERROR onto errors().
+//   - A later successful load of that scope clears both.
 
 const POD_TTL_MS = 60_000;
 const POD_FETCH_DEDUPE = new Map<string, Observable<KubePod[]>>();
@@ -42,7 +43,7 @@ interface CacheEntry {
 @Injectable({ providedIn: 'root' })
 export class KubePodDataService {
   private readonly http = inject(HttpClient);
-  private readonly registry = inject(KubeEndpointDataRegistry);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   // Per-scope-key cache of pod lists. Key formats:
   //   cluster:{kubeGuid}
@@ -51,6 +52,10 @@ export class KubePodDataService {
   private readonly _byScope = signal<Map<string, CacheEntry>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
   private readonly _unavailable = signal<Set<string>>(new Set());
+
+  constructor() {
+    this.eviction.register(kubeGuid => this.evictEndpoint(kubeGuid));
+  }
 
   errors(): Signal<StratosError[]> {
     return this._errors.asReadonly();
@@ -135,16 +140,26 @@ export class KubePodDataService {
     if (POD_FETCH_DEDUPE.has(key)) {
       return;
     }
-    // Touch the registry — guarantees the per-endpoint service exists so
-    // cluster-wide diagnostics know about this kubeGuid even if the pods
-    // load races ahead of the namespace/version load.
-    this.registry.getService(kubeGuid);
+    // No registry touch here: KubeEndpointRegistryHook creates the
+    // per-endpoint service on connect, and a read for a departed guid
+    // (a page still open after the disconnect) must not re-create it.
     const inflight = factory().pipe(shareReplay(1));
     POD_FETCH_DEDUPE.set(key, inflight);
-    inflight.subscribe({
-      complete: () => POD_FETCH_DEDUPE.delete(key),
-      error: () => POD_FETCH_DEDUPE.delete(key),
-    });
+    // An eviction or refresh may have replaced this entry with a newer
+    // request; only remove our own.
+    const settle = () => {
+      if (POD_FETCH_DEDUPE.get(key) === inflight) POD_FETCH_DEDUPE.delete(key);
+    };
+    inflight.subscribe({ complete: settle, error: settle });
+  }
+
+  // Every key format has the kubeGuid as its second segment.
+  private evictEndpoint(kubeGuid: string): void {
+    const owned = (key: string) => key.split(':')[1] === kubeGuid;
+    evictKeys(this._byScope, owned);
+    [...POD_FETCH_DEDUPE.keys()].filter(owned).forEach(key => POD_FETCH_DEDUPE.delete(key));
+    this._unavailable.update(curr => [...curr].some(owned) ? new Set([...curr].filter(key => !owned(key))) : curr);
+    evictErrors(this._errors, kubeGuid, a => a === kubeGuid || owned(a));
   }
 
   private invalidate(key: string): void {
@@ -157,46 +172,33 @@ export class KubePodDataService {
   }
 
   private fetchClusterPods(kubeGuid: string): Observable<KubePod[]> {
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
-    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(
-      `/pp/v1/proxy/api/v1/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
-      { headers },
-    ).pipe(
-      map(resp => this.absorbResponse(clusterKey(kubeGuid), kubeGuid, resp?.[kubeGuid])),
-      catchError((err: HttpErrorResponse | unknown) => {
-        this.markUnavailable(clusterKey(kubeGuid), err, 'kube-pods-cluster', kubeGuid);
-        this.storeItems(clusterKey(kubeGuid), []);
-        return of([] as KubePod[]);
-      }),
-    );
+    return this.fetchPods(kubeGuid, clusterKey(kubeGuid), 'kube-pods-cluster',
+      `/pp/v1/proxy/api/v1/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}`);
   }
 
   private fetchNamespacePods(kubeGuid: string, namespace: string): Observable<KubePod[]> {
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
-    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(
-      `/pp/v1/proxy/api/v1/namespaces/${encodeURIComponent(namespace)}/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
-      { headers },
-    ).pipe(
-      map(resp => this.absorbResponse(nsKey(kubeGuid, namespace), kubeGuid, resp?.[kubeGuid])),
-      catchError((err: HttpErrorResponse | unknown) => {
-        this.markUnavailable(nsKey(kubeGuid, namespace), err, 'kube-pods-namespace', kubeGuid);
-        this.storeItems(nsKey(kubeGuid, namespace), []);
-        return of([] as KubePod[]);
-      }),
-    );
+    return this.fetchPods(kubeGuid, nsKey(kubeGuid, namespace), 'kube-pods-namespace',
+      `/pp/v1/proxy/api/v1/namespaces/${encodeURIComponent(namespace)}/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}`);
   }
 
   private fetchNodePods(kubeGuid: string, nodeName: string): Observable<KubePod[]> {
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const fieldSelector = encodeURIComponent(`spec.nodeName=${nodeName}`);
-    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(
-      `/pp/v1/proxy/api/v1/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}&fieldSelector=${fieldSelector}`,
-      { headers },
-    ).pipe(
-      map(resp => this.absorbResponse(nodeKey(kubeGuid, nodeName), kubeGuid, resp?.[kubeGuid])),
+    return this.fetchPods(kubeGuid, nodeKey(kubeGuid, nodeName), 'kube-pods-node',
+      `/pp/v1/proxy/api/v1/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}&fieldSelector=${fieldSelector}`);
+  }
+
+  // A response that lands after the endpoint was evicted carries the old
+  // credentials' data, so it is dropped, success or failure.
+  private fetchPods(kubeGuid: string, key: string, title: string, url: string): Observable<KubePod[]> {
+    const live = this.eviction.current(kubeGuid);
+    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(url, { headers }).pipe(
+      map(resp => live() ? this.absorbResponse(key, kubeGuid, resp?.[kubeGuid]) : []),
       catchError((err: HttpErrorResponse | unknown) => {
-        this.markUnavailable(nodeKey(kubeGuid, nodeName), err, 'kube-pods-node', kubeGuid);
-        this.storeItems(nodeKey(kubeGuid, nodeName), []);
+        if (live()) {
+          this.markUnavailable(key, err, title, kubeGuid);
+          this.storeItems(key, []);
+        }
         return of([] as KubePod[]);
       }),
     );
@@ -257,9 +259,10 @@ export class KubePodDataService {
       code,
       title,
       detail: (err as Error)?.message ?? String(err),
-      affected: [kubeGuid],
+      // The scope key lets a later successful load of this scope clear it.
+      affected: [kubeGuid, key],
     };
-    this._errors.update(curr => [...curr, next].slice(0, 50));
+    this._errors.update(curr => [...curr, next].slice(-50));
   }
 
   private clearUnavailable(key: string): void {
@@ -269,6 +272,9 @@ export class KubePodDataService {
       next.delete(key);
       return next;
     });
+    this._errors.update(curr => curr.some(e => e.affected?.includes(key))
+      ? curr.filter(e => !e.affected?.includes(key))
+      : curr);
   }
 }
 

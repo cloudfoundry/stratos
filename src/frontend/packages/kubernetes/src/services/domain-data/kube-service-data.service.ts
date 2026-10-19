@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { KubeEndpoint, KubeService, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 
 // Per-resource domain service for k8s Services AND Endpoints. Folds the
 // `kubernetes-endpoints` page's k8s Endpoints fetch in here because the
@@ -28,12 +29,24 @@ export class KubeServiceDataService {
   // mirrors KubeNamespaceDataService and gives wave-3 a hook to attach
   // service-count to the cluster summary card without re-injecting.
   private readonly registry = inject(KubeEndpointDataRegistry);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   private readonly _clusterServices = signal<Map<string, KubeService[]>>(new Map());
   private readonly _namespaceServices = signal<Map<string, KubeService[]>>(new Map());
   private readonly _workloadServices = signal<Map<string, KubeService[]>>(new Map());
   private readonly _clusterEndpoints = signal<Map<string, KubeEndpoint[]>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+
+  constructor() {
+    this.eviction.register(kubeGuid => {
+      const owned = (key: string) => key === kubeGuid || key.startsWith(`${kubeGuid}/`);
+      evictKeys(this._clusterServices, owned);
+      evictKeys(this._namespaceServices, owned);
+      evictKeys(this._workloadServices, owned);
+      evictKeys(this._clusterEndpoints, owned);
+      evictErrors(this._errors, kubeGuid);
+    });
+  }
 
   // ---- Read API ----------------------------------------------------------
 
@@ -101,11 +114,15 @@ export class KubeServiceDataService {
   // Refresh dispatches based on scope. Without a namespace it refreshes
   // both the cluster-wide services AND the cluster-wide endpoints in
   // parallel — both consumers (services list, endpoints list) typically
-  // sit on the same route family.
+  // sit on the same route family. A response that lands after the
+  // endpoint was evicted carries the old credentials' data, so it is
+  // dropped (fetchList drops a late failure).
   async refresh(scope: { kubeGuid: string; namespace?: string }): Promise<void> {
+    const live = this.eviction.current(scope.kubeGuid);
     if (scope.namespace) {
       const namespace = scope.namespace;
       const items = await this.fetchNamespacedServices(scope.kubeGuid, namespace);
+      if (!live()) return;
       this._namespaceServices.update(curr => {
         const next = new Map(curr);
         next.set(nsKey(scope.kubeGuid, namespace), items);
@@ -117,6 +134,7 @@ export class KubeServiceDataService {
       this.fetchClusterServices(scope.kubeGuid),
       this.fetchClusterEndpoints(scope.kubeGuid),
     ]);
+    if (!live()) return;
     this._clusterServices.update(curr => {
       const next = new Map(curr);
       next.set(scope.kubeGuid, services);
@@ -154,6 +172,7 @@ export class KubeServiceDataService {
     title: string,
   ): Promise<Array<T & { kubeGuid: string }>> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    const live = this.eviction.current(kubeGuid);
     try {
       const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeListResponse<T> }>(
         url,
@@ -175,7 +194,7 @@ export class KubeServiceDataService {
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],
       };
-      this._errors.update(curr => [...curr, next].slice(0, 50));
+      if (live()) this._errors.update(curr => [...curr, next].slice(-50));
       return [];
     }
   }

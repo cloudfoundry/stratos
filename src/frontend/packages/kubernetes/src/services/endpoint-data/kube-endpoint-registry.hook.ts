@@ -6,6 +6,7 @@ import { EndpointModel } from '@stratosui/store';
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes/kubernetes-entity-factory';
 import { KubeEndpointDataRegistry } from './kube-endpoint-data.registry';
+import { KubeEndpointEviction } from './kube-endpoint-eviction';
 
 // Signal/router-native lifecycle hook for the kubernetes endpoint
 // registry. Replaces the wave-2 `KubeEndpointLifecycleService` which
@@ -23,9 +24,11 @@ import { KubeEndpointDataRegistry } from './kube-endpoint-data.registry';
 //   * Warm `registry.getService(guid)` for new connects (guids in
 //     current set, not previous) so the first navigation already has
 //     a cached service.
-//   * Evict `registry.unregister(guid)` for departures (guids in
-//     previous set, not current). A departure covers BOTH a status
-//     flip to disconnected AND the endpoint being removed entirely.
+//   * Evict `registry.unregister(guid)` and `eviction.evict(guid)` for
+//     departures (guids in previous set, not current). A departure
+//     covers BOTH a status flip to disconnected AND the endpoint being
+//     removed entirely. The second call clears the root domain caches,
+//     which still hold data fetched with the departed credentials.
 //
 // Diff key: `endpoint.cnsi_type === KUBERNETES_ENDPOINT_TYPE &&
 // endpoint.connectionStatus === 'connected'`. Subscriber sees
@@ -40,6 +43,7 @@ import { KubeEndpointDataRegistry } from './kube-endpoint-data.registry';
 export class KubeEndpointRegistryHook implements OnDestroy {
   private readonly endpointsService = inject(EndpointsService);
   private readonly registry = inject(KubeEndpointDataRegistry);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   private readonly subs = new Subscription();
   private lastConnected: Set<string> = new Set();
@@ -72,6 +76,7 @@ export class KubeEndpointRegistryHook implements OnDestroy {
           if (!current.has(guid)) {
             this._disconnects++;
             this.registry.unregister(guid);
+            this.eviction.evict(guid);
           }
         });
 

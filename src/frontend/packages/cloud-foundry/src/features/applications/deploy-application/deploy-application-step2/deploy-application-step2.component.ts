@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -25,7 +25,6 @@ import {
 } from 'rxjs';
 import {
   catchError,
-  defaultIfEmpty,
   distinctUntilChanged,
   filter,
   map,
@@ -41,7 +40,10 @@ import {
 
 import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
 import { TruncatePipe } from '../../../../../../core/src/core/truncate.pipe';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import {
+  StepOnNextFunction,
+  StepOnNextResult,
+} from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { DeployApplicationState, ProjectExists, SourceType } from '../../../../store/types/deploy-application.types';
 import { ApplicationDeploySourceTypes, DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { GitSuggestedRepo } from './../../../../../../git/src/store/git.public-types';
@@ -89,7 +91,12 @@ export class DeployApplicationStep2Component
 
   @Input() isRedeploy = false;
 
-  commitInfo?: GitCommit;
+  // Display details of the redeploy commit. A signal, so the OnPush view
+  // repaints when the lookup resolves.
+  commitInfo = signal<GitCommit | undefined>(undefined);
+  // The SHA a redeploy saves. Known before the lookup, which only adds the
+  // display details, so Next does not wait on or depend on the lookup.
+  private redeployCommitSha?: string;
   public DEPLOY_TYPES_IDS = DEPLOY_TYPES_IDS;
   sourceType$!: Observable<SourceType>;
   INITIAL_SOURCE_TYPE = 0; // Fall back to GitHub, for cases where there's no type in store (refresh) or url (removed & nav)
@@ -209,20 +216,37 @@ export class DeployApplicationStep2Component
     if (this.sourceType.group === 'gitscm') {
       const branch = this.repositoryBranch;
       const endpointGuid = this.activeEndpointGuid;
-      this.gitData.getRepository(this.scm, this.repository)
-        .waitForValue$.pipe(take(1), defaultIfEmpty(null)).subscribe(repo => {
-        // A gitscm save needs a resolved repo and branch. The endpoint is
-        // optional: without one the backend clones the repo URL directly.
-        if (!repo || !branch) { return; }
-        this.deployData.saveAppDetails({
-          projectName: this.repository,
-          branch,
-          url: repo.clone_url,
-          accessToken: this.accessToken,
-          commit: this.isRedeploy ? this.commitInfo?.sha : undefined,
-          endpointGuid,
-        }, null);
-      });
+      const data = this.sourceSelectionForm.form.value.fsLocalSource;
+      // A gitscm save needs a resolved repo and branch. The endpoint is
+      // optional: without one the backend clones the repo URL directly.
+      // A redeploy's form is disabled and counts as valid, so a deployed
+      // branch that is gone from the repository is only caught here.
+      if (!branch) {
+        const branchName = this.deployData.deployBranchName();
+        return observableOf({
+          success: false,
+          message: this.isRedeploy && branchName ?
+            `Branch ${branchName} was not found in ${this.repository}.` :
+            `Select a branch to deploy from ${this.repository}.`,
+        });
+      }
+      return this.gitData.getRepository(this.scm, this.repository).waitForValue$.pipe(
+        map((repo): StepOnNextResult => {
+          this.deployData.saveAppDetails({
+            projectName: this.repository,
+            branch,
+            url: repo.clone_url,
+            accessToken: this.accessToken,
+            commit: this.isRedeploy ? this.redeployCommitSha : undefined,
+            endpointGuid,
+          }, null);
+          return { success: true, data };
+        }),
+        catchError((err: Error) => observableOf({
+          success: false,
+          message: `Unable to fetch ${this.scm.getLabel()} repository ${this.repository}: ${err.message}`,
+        }))
+      );
     } else if (this.sourceType.id === DEPLOY_TYPES_IDS.GIT_URL) {
       this.deployData.saveAppDetails({
         projectName: this.gitUrl,
@@ -366,16 +390,22 @@ export class DeployApplicationStep2Component
 
           if (this.isRedeploy) {
             const commitSha = commit || branch.commit?.sha;
+            this.redeployCommitSha = commitSha;
 
             if (this.commitSubscription) {
               this.commitSubscription.unsubscribe();
             }
+            if (this.commitInfo()?.sha !== commitSha) {
+              this.commitInfo.set(undefined);
+            }
             if (!commitSha) { return; }
+            // A failed lookup only hides the commit card; onNext still saves
+            // commitSha, and the backend reports a commit that is gone.
             this.commitSubscription = this.gitData.getCommit(this.scm, projectInfo.full_name, commitSha)
-              .waitForValue$.pipe(
-                take(1),
-                tap(p => this.commitInfo = p),
-              ).subscribe();
+              .waitForValue$.subscribe({
+                next: p => this.commitInfo.set(p),
+                error: () => this.commitInfo.set(undefined),
+              });
           }
         }
       })
@@ -397,7 +427,8 @@ export class DeployApplicationStep2Component
           if (this.scm && newScm.getType() !== this.scm.getType()) {
             // User changed the SCM type, so reset the project and branch
             this.repository = '';
-            this.commitInfo = undefined;
+            this.commitInfo.set(undefined);
+            this.redeployCommitSha = undefined;
             this.repositoryBranch = undefined;
             this.deployData.setBranch(null);
             this.deployData.projectDoesntExist('');

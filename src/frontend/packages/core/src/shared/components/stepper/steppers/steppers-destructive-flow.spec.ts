@@ -11,7 +11,7 @@ import { TabNavService } from '../../../../tab-nav.service';
 import { SignalStepHandle, StepComponent } from '../step/step.component';
 import { SteppersComponent } from './steppers.component';
 
-// Reproduces the manage-users / remove-user Shape-3 wizard: two
+// Reproduces the manage-users Shape-3 wizard: two
 // signal-handle steps where the second is a destructive two-click
 // confirm. Pins the full Next → confirm-entry → Apply-enabled lifecycle —
 // the destructive-step busy delay must release the Apply button.

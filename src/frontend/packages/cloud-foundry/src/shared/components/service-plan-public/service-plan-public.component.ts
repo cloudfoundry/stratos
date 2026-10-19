@@ -25,8 +25,13 @@ export class ServicePlanPublicComponent {
   // admin/error case.
   private readonly _visibilitySource = signal<SignalSource<StServicePlanVisibility | null> | null>(null);
 
+  // Signal behind the setter input so the computeds below re-run when a
+  // parent passes the plan after the first render.
+  private readonly _servicePlan = signal<StServicePlan | null>(null);
+  readonly plan: Signal<StServicePlan | null> = this._servicePlan.asReadonly();
+
   readonly planAccessibility: Signal<StratosStatus> = computed(() => {
-    const plan = this.pServicePlan;
+    const plan = this._servicePlan();
     if (!plan) return StratosStatus.ERROR;
     const visibility = this._visibilitySource()?.value() ?? null;
     return getPlanAccessibilityV3(plan.visibilityType === 'public', visibility);
@@ -39,15 +44,13 @@ export class ServicePlanPublicComponent {
     return '';
   });
 
-  private pServicePlan: StServicePlan | null = null;
-
   @Input()
   get servicePlan(): StServicePlan | null {
-    return this.pServicePlan;
+    return this._servicePlan();
   }
 
   set servicePlan(servicePlan: StServicePlan | null) {
-    this.pServicePlan = servicePlan;
+    this._servicePlan.set(servicePlan);
     if (!servicePlan) {
       this._visibilitySource.set(null);
       return;

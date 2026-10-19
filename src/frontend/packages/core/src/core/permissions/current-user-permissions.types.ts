@@ -53,7 +53,8 @@ export abstract class BaseCurrentUserPermissionsChecker {
   public static reduceChecks(checks: Observable<boolean>[], type: IPermissionCheckCombineTypes = '||') {
     const func = type === '||' ? 'some' : 'every';
     if (!checks || !checks.length) {
-      return of(true);
+      // Identity of the combinator, as some([]) / every([]) give.
+      return of(type === '&&');
     }
     return combineLatest(checks).pipe(
       map(flags => flags[func](flag => flag)),

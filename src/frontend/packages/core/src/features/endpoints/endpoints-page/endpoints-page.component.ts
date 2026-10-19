@@ -1,13 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, AfterViewInit, Component, NgZone, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
 import {
   EndpointsDataService,
 } from '@stratosui/store';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { take, delay, filter, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, take, delay, filter, map, switchMap, tap } from 'rxjs/operators';
 
 import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { EndpointsService } from '../../../core/endpoints.service';
@@ -60,6 +60,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   private endpointModalService = inject(EndpointModalService);
   private dashboardSignals = inject(DashboardSignalService);
   private endpointStatusSignals = inject(EndpointStatusSignalService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   // Bridge dashboard signal → observable in injection context (field init).
   private dashboardState$ = toObservable(this.dashboardSignals.dashboard);
 
@@ -68,7 +69,27 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   // button would disappear after a modal open/close cycle. A signal reads cleanly
   // in the template with @if and always reflects the latest permission result,
   // regardless of surrounding component state churn.
-  public canRegisterEndpoint = signal<boolean>(false);
+  //
+  // Allowed when ANY of the permissions that allow endpoint registration
+  // passes — matching the previous directive-based behavior. toSignal
+  // ends the long-lived permission streams with the page.
+  public canRegisterEndpoint = toSignal(
+    this.sessionService.userEndpointsEnabled().pipe(
+      filter(enabled => enabled !== undefined && enabled !== null),
+      switchMap(enabled => {
+        const perms = enabled
+          ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT]
+          : [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
+        return combineLatest(perms.map(p => this.currentUserPermissionsService.can(p)));
+      }),
+      map(results => results.some(Boolean)),
+      catchError(err => {
+        console.error('Error resolving register-endpoint permission:', err);
+        return of(false);
+      })
+    ),
+    { initialValue: false }
+  );
   private healthCheckTimeout!: number;
 
   /**
@@ -93,9 +114,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public showRegisterModal = false;
   public isInitialised$: Observable<boolean>;
 
-  @ViewChild('customNoEndpointsContainer', { read: ViewContainerRef, static: true }) customNoEndpointsContainer!: ViewContainerRef;
-  customContentComponentRef!: ComponentRef<any>;
-
   private snackBarText = {
     message: `There are no connected endpoints, connect with your personal credentials to get started.`,
     action: 'Got it'
@@ -106,7 +124,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   constructor() {
     const endpointsService = this.endpointsService;
     const cs = inject(CustomizationService);
-    const currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
     this.customizations = cs.get();
 
@@ -120,27 +137,11 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
           this.router.navigate(['applications'], { replaceUrl: true });
         }
       }),
-      take(1)
+      take(1),
+      // The flag may never arrive; do not hold the page after it closes.
+      takeUntilDestroyed()
     ).subscribe({
       error: (err) => console.error('Error checking persistence features:', err)
-    });
-
-    // Resolve the set of permissions that would allow endpoint registration,
-    // run each through the permission service, and fold into a single boolean.
-    // Allowed when ANY of the permission checks passes — matching the previous
-    // directive-based behavior.
-    this.sessionService.userEndpointsEnabled().pipe(
-      filter(enabled => enabled !== undefined && enabled !== null),
-      switchMap(enabled => {
-        const perms = enabled
-          ? [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT, StratosCurrentUserPermissions.EDIT_ENDPOINT]
-          : [StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT];
-        return combineLatest(perms.map(p => currentUserPermissionsService.can(p)));
-      }),
-      map(results => results.some(Boolean))
-    ).subscribe({
-      next: can => this.canRegisterEndpoint.set(can),
-      error: (err) => console.error('Error resolving register-endpoint permission:', err)
     });
 
     // Is the backup/restore plugin available on the backend?
@@ -149,7 +150,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       filter(sessionData => !!sessionData),
       take(1),
       map(sessionData => sessionData?.plugins?.backup || false),
-      switchMap(enabled => enabled ? currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
+      switchMap(enabled => enabled ? this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_ADMIN_ENDPOINT) : of(false))
     );
 
     // Create an observable to track when endpoints are loaded and ready
@@ -198,29 +199,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     void this.endpointsData.getAll(false).catch(err => {
       console.error('Failed to load endpoints via EndpointsDataService:', err);
     });
-
-    // Subscribe to haveRegistered$ to handle custom no-endpoints component
-    // Defensive: Add error handling to prevent subscription failures from breaking the page
-    this.subs.push(
-      this.endpointsService.haveRegistered$.pipe(
-        filter(haveRegistered => haveRegistered !== undefined && haveRegistered !== null)
-      ).subscribe({
-        next: (haveRegistered) => {
-          // Use custom component if specified and no endpoints are registered
-          if (this.customNoEndpointsContainer) {
-            this.customNoEndpointsContainer.clear();
-          }
-          if (!haveRegistered && this.customizations.noEndpointsComponent) {
-            try {
-              this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(this.customizations.noEndpointsComponent);
-            } catch (error) {
-              console.error('Error creating custom no-endpoints component:', error);
-            }
-          }
-        },
-        error: (err) => console.error('Error subscribing to haveRegistered$:', err)
-      })
-    );
 
     // Trigger endpoint health checks
     // Defensive: Wrap in try-catch to prevent errors from breaking initialization
@@ -278,14 +256,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       safeUnsubscribe(...this.subs);
     } catch (error) {
       console.error('Error unsubscribing:', error);
-    }
-
-    try {
-      if (this.customContentComponentRef) {
-        this.customContentComponentRef.destroy();
-      }
-    } catch (error) {
-      console.error('Error destroying custom component:', error);
     }
 
     try {

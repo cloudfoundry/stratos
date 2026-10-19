@@ -112,11 +112,11 @@
                         <div>
                           <img #ownerAvatar src="{{projectInfo.owner.avatar_url}}" alt="" (error)="ownerAvatar.hidden = true">
                         </div>
-                        <div src="description">
+                        <div>
                           <div>
                             <a href="{{projectInfo.html_url}}" target="_blank">{{projectInfo.full_name}}</a>
                           </div>
-                          <div class="centered">
+                          <div>
                             {{projectInfo.description}}
                           </div>
                         </div>
@@ -139,13 +139,13 @@
                         }
                       </select>
                     </div>
-                    @if (isRedeploy && commitInfo) {
+                    @if (isRedeploy && commitInfo(); as commitInfo) {
                       <div
                         class="deploy-step2-form__project-info-group deploy-step2-form__commit">
                         <div>
                           <img #authorAvatar src="{{commitInfo.author?.avatar_url}}" alt="" (error)="authorAvatar.hidden = true">
                         </div>
-                        <div src="description">
+                        <div>
                           <div>
                             <a href="{{commitInfo.html_url}}" target="_blank">{{commitInfo.sha | limitTo:8}}</a>
                           </div>

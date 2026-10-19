@@ -1,6 +1,7 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of, Subject, throwError } from 'rxjs';
+import { DestroyRef, EnvironmentInjector, createEnvironmentInjector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CfAppsSignalConfigService } from './cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
@@ -601,8 +602,9 @@ describe('CfAppsSignalConfigService', () => {
     TestBed.tick();
 
     // Simulate two mounts of the app-wall (route re-entry).
-    svc.startStatsPolling();
-    svc.startStatsPolling();
+    const host = TestBed.inject(DestroyRef);
+    svc.startStatsPolling(host);
+    svc.startStatsPolling(host);
     TestBed.tick();
 
     // Count only refreshes driven by the reactive effect on a pagedItems
@@ -617,6 +619,98 @@ describe('CfAppsSignalConfigService', () => {
     // Exactly one live effect → one reactive refresh. Without the fix the
     // two stacked effects would each fire, yielding 2.
     expect(refresh).toHaveBeenCalledTimes(1);
+  });
+
+  describe('stats polling lifetime', () => {
+    // The service is a root singleton, so only the host that started the
+    // poll knows when its page is gone. Without a host-scoped stop, the
+    // first apps-list visit left one app-stats request per CF every 30s
+    // running until reload.
+    afterEach(() => vi.useRealTimers());
+
+    const appA = {
+      guid: 'a', name: 'a-app', state: 'STARTED', cnsiGuid: 'cnsi-1',
+      spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '',
+    } as StApp;
+    const appB = { ...appA, guid: 'b', name: 'b-app' } as StApp;
+
+    function statsCalls(http: HttpClient): number {
+      return (http.get as ReturnType<typeof vi.fn>).mock.calls
+        .filter(([url]) => String(url).startsWith('/pp/v1/cf/app-stats/')).length;
+    }
+
+    async function setup() {
+      vi.useFakeTimers();
+      const http = makeHttp();
+      const svc = makeSvc(http, makeStubCfService([{ guid: 'cnsi-1', name: 'Primary CF' }]));
+      svc.initialize(['cnsi-1']);
+      // Let the (empty) initial drains settle first, or they replace the
+      // seeded rows mid-test and the poll goes quiet for the wrong reason.
+      await drainUntil(() => false);
+      seedApps(svc, [appA]);
+      TestBed.tick();
+      const newHost = () => createEnvironmentInjector([], TestBed.inject(EnvironmentInjector));
+      return { http, svc, newHost };
+    }
+
+    it('stops the timer and the reactive effect when the host is destroyed', async () => {
+      const { http, svc, newHost } = await setup();
+      const host = newHost();
+      svc.startStatsPolling(host.get(DestroyRef));
+      TestBed.tick();
+      vi.advanceTimersByTime(30_000);
+      expect(statsCalls(http)).toBeGreaterThan(0);
+
+      host.destroy();
+      const before = statsCalls(http);
+      vi.advanceTimersByTime(95_000);
+      seedApps(svc, [appB]);
+      TestBed.tick();
+
+      expect(statsCalls(http)).toBe(before);
+    });
+
+    it('polls again when a later host starts after the first was destroyed', async () => {
+      const { http, svc, newHost } = await setup();
+      const first = newHost();
+      svc.startStatsPolling(first.get(DestroyRef));
+      first.destroy();
+
+      const second = newHost();
+      svc.startStatsPolling(second.get(DestroyRef));
+      TestBed.tick();
+      const before = statsCalls(http);
+      vi.advanceTimersByTime(30_000);
+
+      expect(statsCalls(http)).toBe(before + 1);
+    });
+
+    it('a stale host destroyed after a re-entry does not stop the new poll', async () => {
+      const { http, svc, newHost } = await setup();
+      const first = newHost();
+      svc.startStatsPolling(first.get(DestroyRef));
+      const second = newHost();
+      svc.startStatsPolling(second.get(DestroyRef));
+      TestBed.tick();
+      first.destroy();
+
+      const before = statsCalls(http);
+      vi.advanceTimersByTime(30_000);
+      expect(statsCalls(http)).toBe(before + 1);
+    });
+
+    it('does not start for a host destroyed before the call', async () => {
+      const { http, svc, newHost } = await setup();
+      const host = newHost();
+      const hostRef = host.get(DestroyRef);
+      host.destroy();
+      const before = statsCalls(http);
+
+      svc.startStatsPolling(hostRef);
+      vi.advanceTimersByTime(60_000);
+
+      expect(statsCalls(http)).toBe(before);
+    });
   });
 
   it('cnsiOptions picks up connected CF endpoints from CloudFoundryService', () => {

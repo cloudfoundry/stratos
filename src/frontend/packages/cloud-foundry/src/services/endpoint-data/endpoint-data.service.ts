@@ -20,6 +20,15 @@ import {
 } from './stratos-types';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
+// Matches the per_page of the backend's ?return=recent apps call.
+const RECENT_APPS_COUNT = 10;
+
+// Mirrors the backend's ?return=recent: newest updatedAt first, capped.
+function newestApps(apps: StApp[]): StApp[] {
+  const updated = (a: StApp) => Date.parse(a.updatedAt) || 0;
+  return [...apps].sort((a, b) => updated(b) - updated(a)).slice(0, RECENT_APPS_COUNT);
+}
+
 export class EndpointDataService {
   // Counts + recent apps populated by load() (home card fast path).
   private readonly _orgCount = signal<number>(0);
@@ -172,8 +181,8 @@ export class EndpointDataService {
   ) {}
 
   // load() populates counts + the 10 most-recent apps via fast per_page=1/10
-  // backend calls. Fires loadDetails() in the background on completion so
-  // the full orgs/apps/spaces arrays are populated for detail views.
+  // backend calls. It does not load the full orgs/apps/spaces arrays;
+  // detail views call loadDetails() (or a loadX()) for those.
   load(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'load' });
     // Warm-cache short-circuit: signals already populated, no network needed.
@@ -348,6 +357,8 @@ export class EndpointDataService {
       // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._apps.set(resp.resources);
+        // The full list is newer than the recent list load() fetched.
+        this._recentApps.set(newestApps(resp.resources));
         this._appCount.set(resp.totalResults);
         this._appsLastFetched.set(new Date());
         this._appsStale.set(false);
@@ -451,8 +462,15 @@ export class EndpointDataService {
       (s as { guid?: string }).guid === guid ? { ...s, ...patch } : s));
   }
 
+  // The app mutators keep recentApps in step with apps, so the home card's
+  // recent list shows a create/update/delete without another load().
   removeApp(guid: string): void {
     this._apps.update(curr => curr.filter(a => (a as { guid?: string }).guid !== guid));
+    // Refill from the full list (when loaded) so the next most recent app
+    // takes the freed slot; entries already shown keep their own record.
+    const recent = this._recentApps().filter(a => a.guid !== guid);
+    const shown = new Set(recent.map(a => a.guid));
+    this._recentApps.set(newestApps([...recent, ...this._apps().filter(a => !shown.has(a.guid))]));
     this._appCount.update(n => Math.max(0, n - 1));
   }
   addApp(app: StApp): void {
@@ -461,11 +479,23 @@ export class EndpointDataService {
       if (idx >= 0) { const next = [...curr]; next[idx] = app; return next; }
       return [...curr, app];
     });
+    this.upsertRecentApp(app);
     this._appCount.update(n => n + 1);
   }
   updateApp(guid: string, patch: Partial<StApp>): void {
     this._apps.update(curr => curr.map(a =>
       (a as { guid?: string }).guid === guid ? { ...a, ...patch } : a));
+    // An update bumps updatedAt, so an app outside the recent list can join
+    // it — but only when the full list holds the whole record to add.
+    const recent = this._recentApps().find(a => a.guid === guid);
+    const app = recent ? { ...recent, ...patch } : this._apps().find(a => a.guid === guid);
+    if (app) {
+      this.upsertRecentApp(app);
+    }
+  }
+
+  private upsertRecentApp(app: StApp): void {
+    this._recentApps.update(curr => newestApps([app, ...curr.filter(a => a.guid !== app.guid)]));
   }
 
   removeServiceInstance(guid: string): void {
@@ -541,6 +571,8 @@ export class EndpointDataService {
       // Stamp on success only — see loadOrgs.
       tap(resp => {
         this._apps.set(resp.resources);
+        // The full list is newer than the recent list load() fetched.
+        this._recentApps.set(newestApps(resp.resources));
         this._appCount.set(resp.totalResults);
         this._appsLastFetched.set(new Date());
         this._appsStale.set(false);

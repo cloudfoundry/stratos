@@ -1,10 +1,11 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { Injectable, Signal, computed, inject, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { KubeNamespace, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction, evictErrors } from '../endpoint-data/kube-endpoint-eviction';
 
 // Per-resource domain service for k8s namespaces. Composes over
 // KubeEndpointDataRegistry to share the cluster-scoped namespace cache
@@ -20,20 +21,28 @@ import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.re
 export class KubeNamespaceDataService {
   private readonly http = inject(HttpClient);
   private readonly registry = inject(KubeEndpointDataRegistry);
+  private readonly eviction = inject(KubeEndpointEviction);
 
-  // Per-endpoint independent fetch cache. Used for refresh() — the
-  // primary read path goes through registry.getService(kubeGuid)
-  // .namespaces() so multiple consumers on the same endpoint share data.
-  private readonly _directNamespaces = signal<Map<string, KubeNamespace[]>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+
+  // The namespace list itself lives on the per-endpoint service, which the
+  // registry drops; only fetchDirect's errors are held here.
+  constructor() {
+    this.eviction.register(kubeGuid => evictErrors(this._errors, kubeGuid));
+  }
 
   // Returns a signal projecting the namespaces cached on the per-endpoint
   // service. Composing with `computed` keeps the projection reactive —
   // when load()/refresh() updates the underlying signal the consumer
-  // recomputes.
+  // recomputes. The registry drops that service when the endpoint leaves
+  // (the hook evicts in the same step), so the projection re-resolves it
+  // on each eviction rather than holding the orphaned instance. Untracked:
+  // the lookup may construct the service, which writes its signals.
   namespacesForEndpoint(kubeGuid: string): Signal<KubeNamespace[]> {
-    const svc = this.registry.getService(kubeGuid);
-    return computed(() => svc.namespaces());
+    return computed(() => {
+      this.eviction.epoch(kubeGuid);
+      return untracked(() => this.registry.getService(kubeGuid)).namespaces();
+    });
   }
 
   // Single-namespace projection by name — derived from the per-endpoint
@@ -74,8 +83,9 @@ export class KubeNamespaceDataService {
   // Direct fetch escape-hatch — bypasses the per-endpoint cache. Used
   // by ad-hoc consumers (e.g. dropdown population on a wizard) that
   // want a snapshot but don't need to share the result with the page-
-  // level signal. Returns the raw items; errors are accumulated on the
-  // service-level errors signal.
+  // level signal. Returns the raw items without caching them, so a
+  // disconnected endpoint leaves nothing behind; errors are accumulated
+  // on the service-level errors signal.
   async fetchDirect(kubeGuid: string): Promise<KubeNamespace[]> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     try {
@@ -84,17 +94,11 @@ export class KubeNamespaceDataService {
         { headers },
       ));
       const list = resp?.[kubeGuid];
-      const items = (list?.items ?? []).map(ns => ({
+      return (list?.items ?? []).map(ns => ({
         ...ns,
         kubeGuid,
         metadata: { ...(ns.metadata ?? { name: '' }), kubeId: kubeGuid },
       }));
-      this._directNamespaces.update(curr => {
-        const next = new Map(curr);
-        next.set(kubeGuid, items);
-        return next;
-      });
-      return items;
     } catch (err) {
       const status = (err as HttpErrorResponse)?.status;
       const code: StratosError['code'] = status === 401 || status === 403 ? 'UNAUTHORIZED' : 'FETCH_ERROR';
@@ -105,7 +109,7 @@ export class KubeNamespaceDataService {
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],
       };
-      this._errors.update(curr => [...curr, next].slice(0, 50));
+      this._errors.update(curr => [...curr, next].slice(-50));
       return [];
     }
   }

@@ -1,5 +1,4 @@
-import { Injector, signal, WritableSignal } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { EnvironmentInjector, signal } from '@angular/core';
 import { Observable, Subject, Subscription } from 'rxjs';
 import websocketConnect from 'rxjs-websockets';
 import { take, catchError, filter, map, share, switchMap, tap } from 'rxjs/operators';
@@ -11,45 +10,18 @@ import {
   OverrideAppDetails,
   SocketEventTypes } from '../../../../../cloud-foundry/src/store/types/deploy-application.types';
 import { environment } from '../../../../../core/src/environments/environment.prod';
+import { createSignalWrapper, observeSignal } from '@stratosui/store';
 import { CfDeployAppDataService } from '../../../services/domain-data/cf-deploy-app-data.service';
 import { CfOrgSpaceDataService } from '../../../shared/data-services/cf-org-space-service.service';
 import { FileScannerInfo } from './deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DEPLOY_TYPES_IDS } from './deploy-application-steps.types';
 
-// Helper function to create a signal wrapper compatible with BehaviorSubject API
-// The wrapper provides BehaviorSubject-like API (.next, .getValue, .asObservable)
-// while being backed by a Signal for fine-grained reactivity.
-//
-// `equal: () => false` makes every set() emit, restoring BehaviorSubject's
-// "always notify" semantics. The deployer code mutates state objects in place
-// (e.g. fileTransferStatus.filesSent++) and re-emits the same reference;
-// without this, the default Object.is dedupe silently drops every update
-// after the first and the upload progress UI freezes.
-function createSignalWrapper<T>(initialValue: T, injector: Injector) {
-  const _signal = signal<T>(initialValue, { equal: () => false });
-  // Create the observable once during initialization, outside of any reactive context
-  // This prevents NG0602 errors when asObservable() is called from reactive contexts
-  const _observable = toObservable(_signal, { injector });
-
-  const wrapper = Object.assign(
-    // Make it callable like a signal
-    () => _signal(),
-    {
-      // WritableSignal methods
-      set: (value: T) => _signal.set(value),
-      update: (fn: (value: T) => T) => _signal.update(fn),
-      asReadonly: () => _signal.asReadonly(),
-      // BehaviorSubject compatibility methods
-      next: (value: T) => _signal.set(value),
-      getValue: () => _signal(),
-      asObservable: () => _observable }
-  );
-  return wrapper as WritableSignal<T> & {
-    next: (value: T) => void;
-    getValue: () => T;
-    asObservable: () => Observable<T>;
-  };
-}
+// `equal: () => false` on every wrapper below makes each write notify the
+// signal too. The deployer mutates state objects in place (e.g.
+// fileTransferStatus.filesSent++) and re-emits the same reference; the
+// default Object.is dedupe would drop every update after the first and the
+// upload progress UI would freeze.
+const alwaysNotify = { equal: () => false };
 
 export interface DeployApplicationDeployerStatus {
   error: boolean;
@@ -104,9 +76,9 @@ export class DeployApplicationDeployer {
   connectSub!: Subscription;
   updateSub!: Subscription;
   msgSub!: Subscription;
-  streamTitle = 'Preparing...';
-  // strict: populated from the MANIFEST websocket event before any read
-  appData!: AppData;
+  streamTitle = signal('Preparing...');
+  // From the MANIFEST websocket event; unset until the deploy sends it
+  appData?: AppData;
   proxyAPIVersion = environment.proxyAPIVersion;
   cfGuid!: string;
   orgGuid!: string;
@@ -131,11 +103,28 @@ export class DeployApplicationDeployer {
 
   private inputStream: any;
 
+  private deployState$: Observable<DeployApplicationState>;
+
   private isOpen = false;
 
   // The backend can follow a specific close message with a generic one;
   // only the first close of a deploy is reported
   private closeReported = false;
+
+  // A remote source deploys as soon as the socket opens; a local source
+  // only once deploy() acknowledges the upload
+  private started = false;
+
+  // Started, connected and not yet ended by a reported close. A deploy in
+  // flight reports its end even after the deploy step is gone; one still
+  // waiting to connect never will, as leaving clears its deploy details.
+  get inFlight() {
+    return this.isOpen && this.started && !!this.msgSub && !this.msgSub.closed && !this.closeReported;
+  }
+
+  get finished() {
+    return this.closeReported;
+  }
 
   public fsFileInfo!: FileScannerInfo;
 
@@ -145,18 +134,22 @@ export class DeployApplicationDeployer {
 
   constructor(
     public cfOrgSpaceService: CfOrgSpaceDataService,
-    private injector: Injector,
+    private injector: EnvironmentInjector,
   ) {
     this.status$ = createSignalWrapper<DeployApplicationDeployerStatus>({
       error: false,
       deploying: false
-    }, this.injector);
+    }, alwaysNotify);
 
-    this.applicationGuid$ = createSignalWrapper<string | null>(null, this.injector);
+    this.applicationGuid$ = createSignalWrapper<string | null>(null, alwaysNotify);
 
-    this.fileTransferStatus$ = createSignalWrapper<FileTransferStatus | undefined>(undefined, this.injector);
+    this.fileTransferStatus$ = createSignalWrapper<FileTransferStatus | undefined>(undefined, alwaysNotify);
 
-    this.messages = createSignalWrapper<string>('', this.injector);
+    this.messages = createSignalWrapper<string>('', alwaysNotify);
+
+    // Built once; each subscription runs its own effect and ends it on
+    // unsubscribe, so repeated open()/close() leaves nothing behind.
+    this.deployState$ = observeSignal(this.injector.get(CfDeployAppDataService).state, this.injector);
   }
 
   updateStatus(error = false, errorMsg?: string) {
@@ -180,6 +173,8 @@ export class DeployApplicationDeployer {
     }
     this.isOpen = false;
     this.currentFileTransfer = undefined;
+    // A file read still running belongs to this connection; see sendNextFile
+    this.inputStream = undefined;
   }
 
   open() {
@@ -199,12 +194,29 @@ export class DeployApplicationDeployer {
       };
     this.isOpen = true;
     this.closeReported = false;
-    const deployData = this.injector.get(CfDeployAppDataService);
-    const deployState$ = toObservable(deployData.state, { injector: this.injector });
-    this.connectSub = deployState$.pipe(
+    this.started = !this.fsFileInfo;
+    // A reopened deployer runs a new deploy: drop what the last one reported
+    this.deploying = false;
+    this.updateStatus();
+    this.streamTitle.set('Preparing...');
+    this.appData = undefined;
+    this.applicationGuid$.next(null);
+    this.fileTransferStatus$.next(undefined);
+    // A new stream per deploy: the log viewer starts a new log for it
+    this.messages = createSignalWrapper<string>('', alwaysNotify);
+    this.connectSub = this.deployState$.pipe(
+      // The steps before save every detail the deploy needs, and nothing
+      // saves them later, so missing ones never arrive: report the end
+      // rather than wait for ever with the deploy step locked
+      take(1),
+      tap(appDetail => {
+        if (!appDetail?.cloudFoundryDetails || !readyFilter(appDetail)) {
+          this.onClose({}, 'Deploy Failed - Source missing!',
+            'Failed to deploy app! Go back through the source steps and deploy again.');
+        }
+      }),
       filter((appDetail): appDetail is DeployApplicationState & { cloudFoundryDetails: NonNullable<DeployApplicationState['cloudFoundryDetails']>; } =>
         !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
-      take(1),
       tap((appDetail) => {
         this.cfGuid = appDetail.cloudFoundryDetails.cloudFoundry;
         this.orgGuid = appDetail.cloudFoundryDetails.org;
@@ -251,18 +263,24 @@ export class DeployApplicationDeployer {
 
         // Buffer messages until each newline character
         let b = '';
-        this.msgSub = buffer.subscribe(m => {
-          b = b + m;
-          if (b.endsWith('\n')) {
-            this.messages.next(b);
-            b = '';
-          }
+        this.msgSub = buffer.subscribe({
+          next: m => {
+            b = b + m;
+            if (b.endsWith('\n')) {
+              this.messages.next(b);
+              b = '';
+            }
+          },
+          // The socket ended (errors end it too) without a close message.
+          // close() unsubscribes, which does not get here.
+          complete: () => this.onClose({}, 'Deploy Failed - Connection lost',
+            'The connection to the server was lost before the deploy finished.'),
         });
       })
     ).subscribe();
 
     // Watch for updates to the app overrides - use case is app overrides being set after source file/folder upload
-    this.updateSub = deployState$.pipe(
+    this.updateSub = this.deployState$.pipe(
       filter((appDetail): appDetail is DeployApplicationState => !!appDetail && !!appDetail.cloudFoundryDetails && readyFilter(appDetail)),
       tap((appDetail) => {
         if (appDetail.applicationOverrides) {
@@ -273,13 +291,14 @@ export class DeployApplicationDeployer {
   }
 
   deploy() {
+    this.started = true;
     // After the source has been sent, acknowledge the wait
     const msg = {
       message: '',
       timestamp: Math.round((new Date()).getTime() / 1000),
       type: SocketEventTypes.SOURCE_WAIT_ACK
     };
-    this.inputStream.next(JSON.stringify(msg));
+    this.inputStream?.next(JSON.stringify(msg));
   }
 
   sendAppOverride = (appOverrides: OverrideAppDetails) => {
@@ -377,8 +396,8 @@ export class DeployApplicationDeployer {
   processWebSocketMessage = (log: any) => {
     switch (log.type) {
       case SocketEventTypes.MANIFEST:
-        this.streamTitle = 'Starting deployment...';
-        // This info is will be used to retrieve the app Id
+        this.streamTitle.set('Starting deployment...');
+        // This info will be used to retrieve the app Id
         this.appData = JSON.parse(log.message).Applications[0];
         break;
       case SocketEventTypes.APP_GUID_NOTIFY:
@@ -386,19 +405,19 @@ export class DeployApplicationDeployer {
         this.applicationGuid$.next(log.message);
         break;
       case SocketEventTypes.EVENT_PUSH_STARTED:
-        this.streamTitle = 'Deploying...';
+        this.streamTitle.set('Deploying...');
         this.deploying = true;
         this.updateStatus();
         break;
       case SocketEventTypes.EVENT_PUSH_COMPLETED:
         // Done
-        this.streamTitle = 'Deployed';
+        this.streamTitle.set('Deployed');
         this.deploying = false;
         this.updateStatus();
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
         // Acknowledge
-        this.inputStream.next(this.sendCloseAcknowledgement());
+        this.inputStream?.next(this.sendCloseAcknowledgement());
         this.onClose(log, null, null);
         break;
       case SocketEventTypes.CLOSE_INVALID_MANIFEST:
@@ -431,13 +450,13 @@ export class DeployApplicationDeployer {
           this.onClose(log, 'Deploy Failed - Unknown source type',
             'Failed to deploy the app - unknown source type');
         } else {
-          this.inputStream.next(sourceInfo);
+          this.inputStream?.next(sourceInfo);
         }
         break;
       }
       case SocketEventTypes.OVERRIDES_REQUIRED: {
         const overrides = this.sendAppOverride(this.applicationOverrides);
-        this.inputStream.next(overrides);
+        this.inputStream?.next(overrides);
         break;
       }
       case SocketEventTypes.EVENT_CLONED:
@@ -457,6 +476,8 @@ export class DeployApplicationDeployer {
       this.fileTransferStatus.bytesSent += this.currentFileTransfer.size;
       this.fileTransferStatus.filesSent++;
       this.fileTransferStatus$.next(this.fileTransferStatus);
+      // Counted: a further acknowledgement must not count it again
+      this.currentFileTransfer = undefined;
     }
 
     if (this.fileTransfers.length > 0) {
@@ -473,31 +494,36 @@ export class DeployApplicationDeployer {
       this.fileTransferStatus$.next(this.fileTransferStatus);
 
       // Send the file name metadata
-      this.inputStream.next(JSON.stringify(msg));
+      this.inputStream?.next(JSON.stringify(msg));
 
       // Now send the file data as a binary message
+      const stream = this.inputStream;
       const reader = new FileReader();
       reader.onload = () => {
+        // The connection the read started for has since closed
+        if (stream !== this.inputStream) {
+          return;
+        }
         this.currentFileTransfer = file;
         const output = reader.result;
-        this.inputStream.next(output);
+        this.inputStream?.next(output);
       };
       reader.readAsArrayBuffer(file);
     }
   }
 
-  private onClose(log: any, title: string | null, error: any) {
+  private onClose(log: any, title: string | null, error: string | null) {
     if (this.closeReported) {
       return;
     }
     this.closeReported = true;
     if (title) {
-      this.streamTitle = title;
+      this.streamTitle.set(title);
     }
     this.deploying = false;
     this.updateStatus(
-      error,
-      error ? `${error}\nReason: ${log.message}` : undefined
+      !!error,
+      error && log.message ? `${error}\nReason: ${log.message}` : error || undefined
     );
   }
 

@@ -306,7 +306,7 @@ export class KubernetesEndpointService {
     // mirrored back into Observables for template consumers.
     const pluginConfig = () => this.session.sessionData()?.['plugin-config'];
 
-    this.kubeDashboardEnabled$ = of(pluginConfig()?.kubeTerminalEnabled === 'true');
+    this.kubeDashboardEnabled$ = of(pluginConfig()?.kubeDashboardEnabled === 'true');
     this.kubeTerminalEnabled$ = of(pluginConfig()?.kubeTerminalEnabled === 'true');
 
     // Wave-3.5: dashboard status now fetched directly from the kubedash

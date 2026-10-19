@@ -1,4 +1,4 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
@@ -6,6 +6,7 @@ import { environment } from '@stratosui/core';
 
 import { PaginationResponse } from '../../../../cloud-foundry/src/store/types/cf-api.types';
 import { AppAutoscalerMetricData } from '../../store/app-autoscaler.types';
+import { autoscalerErrorMessage } from '../../core/autoscaler-helpers/autoscaler-util';
 
 // Time-window query for the autoscaler aggregated_metric_histories
 // endpoint. Mirrors the legacy `AutoscalerPaginationParams` shape so
@@ -90,7 +91,7 @@ export class AutoscalerMetricDataService {
       const metrics = response?.resources ?? [];
       this.patch(endpointGuid, appGuid, metricType, { metrics, loading: false, error: null });
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, metricType, { metrics: [], loading: false, error: message });
     }
   }

@@ -1,10 +1,10 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { Subject, of } from 'rxjs';
+import { Subject, firstValueFrom, of } from 'rxjs';
 
 import { getGitHubAPIURL, GITHUB_API_URL, GitDataService, GitSCMService, GitHubSCM } from '@stratosui/git';
 import {
@@ -326,23 +326,159 @@ describe('DeployApplicationStep2Component', () => {
       component.repositoryBranch = { name: 'main' } as any;
     });
 
-    it('saves the deploy details in Public mode with no endpoint registered', () => {
+    it('saves the deploy details in Public mode with no endpoint registered', async () => {
       const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
       component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
       component.gitMode = 'public';
-      component.onNext();
+      const result = await firstValueFrom(component.onNext(0, null as any));
+      expect(result.success).toBe(true);
       expect(save).toHaveBeenCalledWith(
         expect.objectContaining({ projectName: 'o/r', url: 'https://github.com/o/r.git', endpointGuid: '' }),
         null,
       );
     });
 
-    it('saves the registered endpoint in Public mode when one is selected', () => {
+    it('saves the registered endpoint in Public mode when one is selected', async () => {
       const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
       component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub', endpointGuid: 'ep-1' } as any;
       component.gitMode = 'public';
-      component.onNext();
+      await firstValueFrom(component.onNext(0, null as any));
       expect(save).toHaveBeenCalledWith(expect.objectContaining({ endpointGuid: 'ep-1' }), null);
+    });
+  });
+
+  // On a redeploy the form is disabled and counts as valid, so Next is open
+  // even when the deployed branch is no longer in the repository. onNext is
+  // then the only check left.
+  describe('onNext without a branch', () => {
+    beforeEach(() => {
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      component.scm = TestBed.inject(GitSCMService).getSCM('github', '');
+      component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
+      component.repository = 'o/r';
+      component.repositoryBranch = undefined;
+    });
+
+    it('reports failure and saves nothing', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      const deployData = TestBed.inject(CfDeployAppDataService);
+      deployData.setSourceType(component.sourceType);
+      deployData.setDeployBranch('gone');
+      component.isRedeploy = true;
+      const results: { success: boolean; message?: string }[] = [];
+      component.onNext(0, null as any).subscribe(r => results.push(r));
+
+      TestBed.inject(HttpTestingController).match(() => true).forEach(r => r.flush({ clone_url: 'u' }));
+      await fixture.whenStable();
+
+      expect(results).toEqual([{ success: false, message: 'Branch gone was not found in o/r.' }]);
+      expect(save).not.toHaveBeenCalled();
+    });
+
+    it('asks for a branch outside a redeploy', async () => {
+      const results: { success: boolean; message?: string }[] = [];
+      component.onNext(0, null as any).subscribe(r => results.push(r));
+
+      TestBed.inject(HttpTestingController).match(() => true).forEach(r => r.flush({ clone_url: 'u' }));
+      await fixture.whenStable();
+
+      expect(results).toEqual([{ success: false, message: 'Select a branch to deploy from o/r.' }]);
+    });
+  });
+
+  // The repository lookup runs through the real data service; the testing
+  // backend holds the request until it is flushed with an error.
+  describe('onNext when the repository lookup fails', () => {
+    beforeEach(() => {
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      component.scm = TestBed.inject(GitSCMService).getSCM('github', '');
+      component.sourceType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
+      component.gitMode = 'public';
+      component.repository = 'o/missing';
+      component.repositoryBranch = { name: 'main' } as any;
+    });
+
+    it('reports failure with the message and saves nothing', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      const results: { success: boolean; message?: string }[] = [];
+      component.onNext(0, null as any).subscribe(r => results.push(r));
+
+      TestBed.inject(HttpTestingController)
+        .expectOne('https://api.github.com/repos/o/missing')
+        .flush('nope', { status: 404, statusText: 'Not Found' });
+      await fixture.whenStable();
+
+      expect(results).toEqual([{ success: false, message: expect.stringContaining('Git request failed(404)') }]);
+      expect(save).not.toHaveBeenCalled();
+    });
+  });
+
+  // A redeploy looks up the commit recorded for the deployed app. The lookup
+  // only feeds the commit card; the recorded SHA is what gets deployed, so a
+  // slow or failed lookup must not fall back to the branch HEAD.
+  describe('redeploy commit', () => {
+    const githubType = { id: 'github', group: 'gitscm', name: 'GitHub' } as any;
+    const branch = { name: 'main', projectName: 'o/r', commit: { sha: 'head000' } } as any;
+    let commit$: Subject<any>;
+
+    beforeEach(async () => {
+      TestBed.inject(ApplicationDeploySourceTypes).types$ = of([githubType]);
+      const gitData = TestBed.inject(GitDataService);
+      vi.spyOn(gitData, 'getBranches').mockReturnValue(of([branch]));
+      vi.spyOn(gitData, 'getRepository')
+        .mockReturnValue({ waitForValue$: of({ clone_url: 'https://github.com/o/r.git' }) } as any);
+      commit$ = new Subject();
+      vi.spyOn(gitData, 'getCommit').mockReturnValue({ waitForValue$: commit$ } as any);
+
+      const deployData = TestBed.inject(CfDeployAppDataService);
+      deployData.setCfDetails({ cloudFoundry: 'cf-1', org: 'org-1', space: 'space-1' });
+      deployData.setSourceType(githubType);
+      deployData.setDeployBranch('main');
+      deployData.setDeployCommit('rec1234abcd');
+
+      fixture = TestBed.createComponent(DeployApplicationStep2Component);
+      component = fixture.componentInstance;
+      fixture.componentRef.setInput('isRedeploy', true);
+      await fixture.whenStable();
+      // The repository lookup resolves after the step is set up, as it does
+      // in the app; that starts the branch and then the commit lookup.
+      const repo = { full_name: 'o/r', html_url: 'https://github.com/o/r', owner: { avatar_url: '' } };
+      deployData.checkProjectExists({ getRepository: () => of(repo) } as any, 'o/r');
+      await fixture.whenStable();
+      expect(gitData.getCommit).toHaveBeenCalledWith(expect.anything(), 'o/r', 'rec1234abcd');
+    });
+
+    it('shows the commit card once the lookup resolves', async () => {
+      commit$.next({ sha: 'rec1234abcd', commit: { message: 'Recorded change' } });
+      await fixture.whenStable();
+
+      const card = fixture.nativeElement.querySelector('.deploy-step2-form__commit');
+      expect(card?.textContent).toContain('Recorded change');
+    });
+
+    it('hides the previous commit while a new commit is looked up', async () => {
+      commit$.next({ sha: 'rec1234abcd', commit: { message: 'Recorded change' } });
+      await fixture.whenStable();
+
+      TestBed.inject(CfDeployAppDataService).setDeployCommit('new5678efgh');
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('.deploy-step2-form__commit')).toBeNull();
+    });
+
+    it('saves the recorded commit when Next is pressed before the lookup resolves', async () => {
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      await firstValueFrom(component.onNext(0, null as any));
+      expect(save).toHaveBeenCalledWith(expect.objectContaining({ commit: 'rec1234abcd' }), null);
+    });
+
+    it('saves the recorded commit when the lookup fails', async () => {
+      commit$.error(new Error('gone'));
+      const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
+      await firstValueFrom(component.onNext(0, null as any));
+      expect(save).toHaveBeenCalledWith(expect.objectContaining({ commit: 'rec1234abcd' }), null);
     });
   });
 

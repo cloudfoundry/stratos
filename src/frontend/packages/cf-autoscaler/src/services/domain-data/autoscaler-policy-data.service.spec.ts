@@ -99,6 +99,17 @@ describe('AutoscalerPolicyDataService', () => {
     expect(svc.noPolicy(ENDPOINT_GUID, APP_GUID)()).toBe(false);
   });
 
+  it('load() keeps the autoscaler reason for a refusal', async () => {
+    const promise = svc.load(ENDPOINT_GUID, APP_GUID);
+    httpMock.expectOne(POLICY_URL).flush(
+      { error: 'The application is not bound to Auto-Scaling service' },
+      { status: 403, statusText: 'Forbidden' },
+    );
+    await promise;
+
+    expect(svc.error(ENDPOINT_GUID, APP_GUID)()).toBe('The application is not bound to Auto-Scaling service');
+  });
+
   it('update() PUTs the transformed policy and refreshes signals', async () => {
     const promise = svc.update(ENDPOINT_GUID, APP_GUID, samplePolicy());
 

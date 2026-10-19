@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '@stratosui/core';
 
 import { AppAutoscalerHealth } from '../../store/app-autoscaler.types';
+import { autoscalerErrorMessage } from '../../core/autoscaler-helpers/autoscaler-util';
 
 interface HealthState {
   health: AppAutoscalerHealth | null;
@@ -60,7 +61,7 @@ export class AutoscalerHealthDataService {
         this.patch(endpointGuid, { health: null, loading: false, error: null });
         return;
       }
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, { health: null, loading: false, error: message });
     }
   }

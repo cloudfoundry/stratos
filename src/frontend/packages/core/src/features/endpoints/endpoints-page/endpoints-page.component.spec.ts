@@ -1,10 +1,10 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from "@test-framework/core-test.modules";
@@ -16,14 +16,20 @@ import { SidePanelService } from './../../../shared/services/side-panel.service'
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { EndpointStatusSignalService } from '../../../core/signals/endpoint-status-signal.service';
-import { CustomizationService } from '../../../core/customizations.types';
+import { CustomizationService, CustomizationsMetadata } from '../../../core/customizations.types';
 import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointsPageComponent } from './endpoints-page.component';
 
+@Component({ selector: 'app-test-welcome', template: '<p class="test-welcome">Welcome</p>' })
+class TestWelcomeComponent {}
+
 describe('EndpointsPageComponent', () => {
   let component: EndpointsPageComponent;
   let fixture: ComponentFixture<EndpointsPageComponent>;
+  let perm$: Subject<boolean>;
+  let persistence$: Subject<boolean>;
+  let customizations: CustomizationsMetadata;
 
   // Mock services
   const mockSessionService = {
@@ -33,16 +39,14 @@ describe('EndpointsPageComponent', () => {
   };
 
   const mockEndpointsService = {
-    disablePersistenceFeatures$: of(false),
+    disablePersistenceFeatures$: new Subject<boolean>(),
     haveRegistered$: of(false),
     haveConnected$: of(false),
     checkAllEndpoints: vi.fn()
   };
 
   const mockCustomizationService = {
-    get: () => ({
-      noEndpointsComponent: null
-    })
+    get: () => customizations
   };
 
   const mockSnackBarService = {
@@ -82,6 +86,8 @@ describe('EndpointsPageComponent', () => {
         { provide: EndpointStatusSignalService, useValue: mockEndpointStatusSignals },
         { provide: SessionService, useValue: mockSessionService },
         { provide: EndpointsService, useValue: mockEndpointsService },
+        // The real service waits on an endpoints request the test never answers.
+        { provide: EndpointStatusSignalService, useValue: { initialised: signal(true) } },
         { provide: CustomizationService, useValue: mockCustomizationService },
         { provide: TailwindSnackBarService, useValue: mockSnackBarService },
         { provide: EndpointModalService, useValue: mockEndpointModalService },
@@ -97,6 +103,11 @@ describe('EndpointsPageComponent', () => {
   });
 
   beforeEach(async () => {
+    perm$ = new Subject<boolean>();
+    persistence$ = new Subject<boolean>();
+    mockEndpointsService.disablePersistenceFeatures$ = persistence$;
+    customizations = { noEndpointsComponent: null };
+    vi.spyOn(TestBed.inject(CurrentUserPermissionsService), 'can').mockReturnValue(perm$);
     fixture = TestBed.createComponent(EndpointsPageComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
@@ -107,9 +118,52 @@ describe('EndpointsPageComponent', () => {
   });
 
   it('offers Register Endpoint when no endpoints are registered', async () => {
+    perm$.next(true);
     await vi.waitFor(() => {
       const add = fixture.nativeElement.querySelector('[data-test="list-sub-nav-add"]');
       expect(add?.textContent).toContain('Register Endpoint');
     });
+  });
+
+  it('shows Register when a permission check passes', async () => {
+    expect(component.canRegisterEndpoint()).toBe(false);
+    perm$.next(true);
+    await fixture.whenStable();
+    expect(component.canRegisterEndpoint()).toBe(true);
+  });
+
+  // The permission streams are long-lived: a subscription that outlives
+  // the page holds the destroyed component.
+  it('stops watching permissions when destroyed', () => {
+    expect(perm$.observed).toBe(true);
+    fixture.destroy();
+    expect(perm$.observed).toBe(false);
+  });
+
+  it('stops waiting for the persistence flag when destroyed', () => {
+    expect(persistence$.observed).toBe(true);
+    fixture.destroy();
+    expect(persistence$.observed).toBe(false);
+  });
+
+  // The content waits for isInitialised$, which is delayed by 500ms.
+  const renderEmptyPage = async () => {
+    const page = TestBed.createComponent(EndpointsPageComponent);
+    await page.whenStable();
+    await new Promise(resolve => setTimeout(resolve, 600));
+    await page.whenStable();
+    return page.nativeElement as HTMLElement;
+  };
+
+  it('shows the default message with no endpoints', async () => {
+    const el = await renderEmptyPage();
+    expect(el.querySelector('app-endpoints-missing')).not.toBeNull();
+  });
+
+  it('shows a custom no-endpoints component in place of the message', async () => {
+    customizations = { noEndpointsComponent: TestWelcomeComponent };
+    const el = await renderEmptyPage();
+    expect(el.querySelector('.test-welcome')?.textContent).toBe('Welcome');
+    expect(el.querySelector('app-endpoints-missing')).toBeNull();
   });
 });
