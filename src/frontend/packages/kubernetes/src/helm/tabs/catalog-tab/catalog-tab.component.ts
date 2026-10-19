@@ -1,9 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, Injector, OnDestroy, Signal, WritableSignal, computed, inject, linkedSignal, signal,
+} from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Observable, Subscription, firstValueFrom } from 'rxjs';
+import { Observable, Subscription } from 'rxjs';
 import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
 
 import { EndpointsSignalService } from '../../../../../core/src/core/signals/endpoints-signal.service';
@@ -38,16 +40,6 @@ import { ChartItemComponent } from '../../monocular/chart-item/chart-item.compon
 })
 export class CatalogTabComponent implements OnDestroy {
 
-  // Sidebar visibility / collapse state — preserved from the legacy
-  // component. `hide` flips off when there is exactly one helm endpoint
-  // (no need for repo filtering); `collapsed` is the user-toggle.
-  public collapsed = true;
-  public hide = true;
-
-  // Two-way ngModel target for the sidebar's repo-name search input.
-  public searchReposValue = '';
-  private readonly searchRepos: WritableSignal<string> = signal('');
-
   private sub: Subscription | undefined;
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly endpointsData = inject(EndpointsDataService);
@@ -55,10 +47,24 @@ export class CatalogTabComponent implements OnDestroy {
   private readonly injector = inject(Injector);
   readonly signalConfig = inject(MonocularChartsSignalConfigService);
 
-  // W36-B Wave 3: Pre-built signal-bridge over EndpointsDataService.
-  // Reused by both the artifactHubAndHelmRepoTypes$ stream and the
-  // computeSidebarVisibility() one-shot read so we don't recreate
-  // toObservable() on every change-detection cycle.
+  // Sidebar visibility / collapse state — preserved from the legacy
+  // component. `hide` is on when there is exactly one helm endpoint and it
+  // is not Artifact Hub (no need for repo filtering). `collapsed` is the
+  // user-toggle; it starts expanded when Artifact Hub is attached.
+  private readonly helmEndpoints = computed(() =>
+    this.endpointsData.endpointsList().filter(ep => ep?.cnsi_type === HELM_ENDPOINT_TYPE),
+  );
+  private readonly hasArtifactHub = computed(() =>
+    this.helmEndpoints().some(ep => ep.sub_type === HELM_HUB_ENDPOINT_TYPE),
+  );
+  readonly hide = computed(() => !this.hasArtifactHub() && this.helmEndpoints().length === 1);
+  readonly collapsed = linkedSignal(() => !this.hasArtifactHub());
+
+  // Two-way ngModel target for the sidebar's repo-name search input.
+  readonly searchReposValue: WritableSignal<string> = signal('');
+
+  // W36-B Wave 3: Pre-built signal-bridge over EndpointsDataService for the
+  // artifactHubAndHelmRepoTypes$ stream.
   private readonly endpoints$ = toObservable(this.endpointsData.endpointsList, { injector: this.injector });
 
   // Connected helm endpoints for the duplicate-URL banner — scoped to helm
@@ -95,11 +101,11 @@ export class CatalogTabComponent implements OnDestroy {
 
   // Repo-name lists filtered by the sidebar search.
   readonly stratosRepos: Signal<string[]> = computed(() => {
-    const q = this.searchRepos().toLowerCase();
+    const q = this.searchReposValue().toLowerCase();
     return this.signalConfig.stratosRepos().filter(n => !q || n.toLowerCase().startsWith(q));
   });
   readonly artifactHubRepos: Signal<string[]> = computed(() => {
-    const q = this.searchRepos().toLowerCase();
+    const q = this.searchReposValue().toLowerCase();
     return this.signalConfig.artifactHubRepos().filter(n => !q || n.toLowerCase().startsWith(q));
   });
 
@@ -107,11 +113,6 @@ export class CatalogTabComponent implements OnDestroy {
   get filteredRepo(): string { return this.signalConfig.repositoryFilter(); }
 
   constructor() {
-    // Determine sidebar visibility — match the legacy logic. Hide the
-    // sidebar entirely if there is exactly one helm endpoint (and it's
-    // not Artifact Hub).
-    void this.computeSidebarVisibility();
-
     this.signalConfig.initialize();
     void this.signalConfig.loadAll();
 
@@ -165,37 +166,8 @@ export class CatalogTabComponent implements OnDestroy {
     });
   }
 
-  private async computeSidebarVisibility(): Promise<void> {
-    try {
-      const endpoints = await firstValueFrom(
-        this.endpoints$.pipe(
-          filter(e => !!e),
-          take(1),
-        ),
-      ) as EndpointModel[];
-      let stratosHelmEndpoints = 0;
-      for (const ep of endpoints) {
-        if (ep.cnsi_type !== HELM_ENDPOINT_TYPE) continue;
-        stratosHelmEndpoints++;
-        if (ep.sub_type === HELM_HUB_ENDPOINT_TYPE) {
-          // Artifact Hub attached — always show the filter sidebar.
-          this.collapsed = false;
-          this.hide = false;
-          return;
-        }
-      }
-      this.hide = stratosHelmEndpoints === 1;
-    } catch {
-      this.hide = true;
-    }
-  }
-
   filterCharts(repoName?: string): void {
     this.signalConfig.repositoryFilter.set(repoName ?? '');
-  }
-
-  searchReposChange(repoName: string): void {
-    this.searchRepos.set(repoName ?? '');
   }
 
   ngOnDestroy(): void {
