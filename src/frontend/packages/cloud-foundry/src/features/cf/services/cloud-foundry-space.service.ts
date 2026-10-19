@@ -2,7 +2,7 @@ import { Injectable, Injector, Signal, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { observeSignal } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
-import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
@@ -149,6 +149,8 @@ export class CloudFoundrySpaceService {
     // an edit) would add one more effect for the life of the page.
     this.spaceQuotaDefinition$ = space$.pipe(
       map(s => s.quotaGuid || null),
+      // A rename patches the space but keeps its quota
+      distinctUntilChanged(),
       switchMap(quotaGuid => quotaGuid
         ? observeSignal(this.quotaData.spaceQuota(this.cfGuid, quotaGuid).value, this.injector)
         : of(null as StSpaceQuota | null)),

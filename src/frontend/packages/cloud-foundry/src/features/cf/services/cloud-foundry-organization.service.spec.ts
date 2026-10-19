@@ -23,11 +23,14 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
   // Each live signal-to-observable bridge reads the quota value once per
   // write, so the read count after one write is the number of live bridges.
   let quotaReads: number;
+  // quota lookups made, one per quota the stream switched to
+  let lookups: number;
 
   beforeEach(() => {
     org = signal<StOrgDetail | null>(null);
     quota = signal<StOrgQuota | null>(null);
     quotaReads = 0;
+    lookups = 0;
     const countedQuota = (() => {
       quotaReads++;
       return quota();
@@ -42,7 +45,7 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
           provide: OrgDataRegistry,
           useValue: { acquire: () => ({ load: () => of(undefined), org, spaces: signal([]) }) },
         },
-        { provide: QuotaDataService, useValue: { orgQuota: () => ({ value: countedQuota }) } },
+        { provide: QuotaDataService, useValue: { orgQuota: () => { lookups++; return { value: countedQuota }; } } },
         { provide: CnsiUsersSnapshotService, useValue: { users: () => signal(null) } },
         { provide: ServiceCatalogDataService, useValue: { serviceInstanceCount: () => ({ value: signal(0) }) } },
         {
@@ -72,10 +75,10 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
     const seen: StOrgQuota[] = [];
     const sub = svc.quotaDefinition$.subscribe(q => seen.push(q));
 
-    // Each org write (load, then patch() after an edit) re-runs the
-    // switchMap, which builds a new bridge to the quota signal.
-    for (const name of ['a', 'b', 'c']) {
-      org.set({ guid: 'org-1', name, quotaGuid: 'quota-1' } as StOrgDetail);
+    // Each change of quota re-runs the switchMap, which builds a new
+    // bridge to the quota signal.
+    for (const quotaGuid of ['quota-a', 'quota-b', 'quota-1']) {
+      org.set({ guid: 'org-1', name: 'a', quotaGuid } as StOrgDetail);
       TestBed.tick();
     }
 
@@ -86,6 +89,20 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
 
     expect(quotaReads).toBe(1);
     expect(seen).toEqual([q]);
+    sub.unsubscribe();
+  });
+
+  it('looks the quota up again only when the quota changes', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    const sub = svc.quotaDefinition$.subscribe();
+
+    // A rename patches the org but keeps its quota
+    for (const name of ['a', 'b', 'c']) {
+      org.set({ guid: 'org-1', name, quotaGuid: 'quota-1' } as StOrgDetail);
+      TestBed.tick();
+    }
+
+    expect(lookups).toBe(1);
     sub.unsubscribe();
   });
 });

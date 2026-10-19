@@ -22,11 +22,14 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
   // Each live signal-to-observable bridge reads the quota value once per
   // write, so the read count after one write is the number of live bridges.
   let quotaReads: number;
+  // quota lookups made, one per quota the stream switched to
+  let lookups: number;
 
   beforeEach(() => {
     space = signal<StSpace | null>(null);
     quota = signal<StSpaceQuota | null>(null);
     quotaReads = 0;
+    lookups = 0;
     const countedQuota = (() => {
       quotaReads++;
       return quota();
@@ -39,7 +42,7 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
           provide: SpaceDataRegistry,
           useValue: { acquire: () => ({ load: () => of(undefined), space }) },
         },
-        { provide: QuotaDataService, useValue: { spaceQuota: () => ({ value: countedQuota }) } },
+        { provide: QuotaDataService, useValue: { spaceQuota: () => { lookups++; return { value: countedQuota }; } } },
         { provide: CloudFoundryOrganizationService, useValue: { quotaDefinition$: of(null) } },
         { provide: CnsiUsersSnapshotService, useValue: { users: () => signal(null) } },
         { provide: ServiceCatalogDataService, useValue: { serviceInstanceCount: () => ({ value: signal(0) }) } },
@@ -69,10 +72,10 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
     const seen: (StSpaceQuota | null)[] = [];
     const sub = svc.spaceQuotaDefinition$.subscribe(q => seen.push(q));
 
-    // Each space write (load, then patch() after an edit) re-runs the
-    // switchMap, which builds a new bridge to the quota signal.
-    for (const name of ['a', 'b', 'c']) {
-      space.set({ guid: 'space-1', name, quotaGuid: 'quota-1' } as StSpace);
+    // Each change of quota re-runs the switchMap, which builds a new
+    // bridge to the quota signal.
+    for (const quotaGuid of ['quota-a', 'quota-b', 'quota-1']) {
+      space.set({ guid: 'space-1', name: 'a', quotaGuid } as StSpace);
       TestBed.tick();
     }
 
@@ -83,6 +86,20 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
 
     expect(quotaReads).toBe(1);
     expect(seen.at(-1)).toEqual(q);
+    sub.unsubscribe();
+  });
+
+  it('looks the quota up again only when the quota changes', () => {
+    const svc = TestBed.inject(CloudFoundrySpaceService);
+    const sub = svc.spaceQuotaDefinition$.subscribe();
+
+    // A rename patches the space but keeps its quota
+    for (const name of ['a', 'b', 'c']) {
+      space.set({ guid: 'space-1', name, quotaGuid: 'quota-1' } as StSpace);
+      TestBed.tick();
+    }
+
+    expect(lookups).toBe(1);
     sub.unsubscribe();
   });
 });
