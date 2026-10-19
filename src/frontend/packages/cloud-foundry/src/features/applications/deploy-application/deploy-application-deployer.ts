@@ -202,6 +202,8 @@ export class DeployApplicationDeployer {
     this.appData = undefined;
     this.applicationGuid$.next(null);
     this.fileTransferStatus$.next(undefined);
+    // A new stream per deploy: the log viewer starts a new log for it
+    this.messages = createSignalWrapper<string>('', alwaysNotify);
     this.connectSub = this.deployState$.pipe(
       // The steps before save every detail the deploy needs, and nothing
       // saves them later, so missing ones never arrive: report the end

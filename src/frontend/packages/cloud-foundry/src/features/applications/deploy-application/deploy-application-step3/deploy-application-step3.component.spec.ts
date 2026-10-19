@@ -241,6 +241,49 @@ describe('DeployApplicationStep3Component', () => {
     });
   });
 
+  describe('the log of a retry', () => {
+    const logText = (): string => fixture.nativeElement.querySelector('.log-scroller__content').textContent;
+    const log = async (line: string) => {
+      component.deployer.messages.next(`${line}\n`);
+      await vi.waitFor(() => expect(logText()).toContain(line));
+    };
+
+    it('starts empty for a git deploy', async () => {
+      await enterConnected();
+      await log('first run');
+
+      component.onEnter(undefined as any);
+      await fixture.whenStable();
+      await log('second run');
+
+      expect(logText()).not.toContain('first run');
+    });
+
+    it('starts empty for a file deploy', async () => {
+      // The upload step's deployer, uploaded and handed on
+      const appRef = TestBed.inject(ApplicationRef);
+      TestBed.inject(CfDeployAppDataService).setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
+      const deployer = new DeployApplicationDeployer(TestBed.inject(CfOrgSpaceDataService), TestBed.inject(EnvironmentInjector));
+      deployer.fsFileInfo = {} as FileScannerInfo;
+      deployer.open();
+      await appRef.whenStable();
+      component.onEnter(deployer);
+      await fixture.whenStable();
+      await log('first run');
+
+      // Back to the upload step, which uploads again on the same deployer
+      deployer.close();
+      deployer.open();
+      await appRef.whenStable();
+      component.onEnter(deployer);
+      await fixture.whenStable();
+      await log('second run');
+
+      expect(logText()).not.toContain('first run');
+      deployer.close();
+    });
+  });
+
   it('opens a first-time deploy that finishes after the user leaves the page', async () => {
     const snackBar = TestBed.inject(TailwindSnackBarService);
     const action = new Subject<void>();
