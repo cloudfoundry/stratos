@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Injector, OnInit, Output, Signal, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy, computed, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -6,8 +6,6 @@ import { filter, map, startWith } from 'rxjs/operators';
 
 import { APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
-import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
-import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
 import { appDataSort } from '../../cf/services/cloud-foundry-endpoint.service';
 import {
   PollingIndicatorComponent,
@@ -65,12 +63,8 @@ export class CardCfRecentAppsComponent implements OnInit {
 
   hasEntities$!: Observable<boolean>;
   show$!: Observable<boolean>;
-  // The loading$ input, or the endpoint data's loading signal when the
-  // card sources its own apps.
+  // The loading$ input; not loading when none is given.
   appsLoading$!: Observable<boolean>;
-
-  private readonly registry = inject(EndpointDataRegistry);
-  private readonly injector = inject(Injector);
 
   private readonly maxRows$ = toObservable(this.maxRows);
 
@@ -81,28 +75,10 @@ export class CardCfRecentAppsComponent implements OnInit {
       return;
     }
     this.canRefresh = this.refresh.observers.length > 0;
-    let allApps$ = this.allApps$();
+    // Every live caller passes allApps$ (home, CF, org and space summaries)
+    const allApps$ = this.allApps$() ?? of([]);
     this.appsLoading$ = this.loading$() ?? of(false);
-    if (!allApps$) {
-      // Signal-native source — EndpointDataService.apps is populated by the
-      // registry-managed loadDetails() call. The home card path warms via
-      // load() (recent apps fast path) and then loadDetails() chains; the
-      // CF/org/space summary acquire path goes straight to loadDetails().
-      // Either way we read the same signal — no separate ngrx fetch.
-      // strict: a card without allApps$ is always given its endpoint.
-      const endpointData = this.registry.acquire(this.endpoint()!);
-      const appResources: Signal<APIResource<IApp>[]> = computed(
-        () => endpointData.apps().map(stAppToAPIResource),
-      );
-      allApps$ = toObservable(appResources, { injector: this.injector });
-      this.appsLoading$ = toObservable(endpointData.isLoadingDetails, { injector: this.injector });
-      this.hasEntities$ = toObservable(
-        computed(() => endpointData.apps().length > 0),
-        { injector: this.injector },
-      );
-    } else {
-      this.hasEntities$ = of(true);
-    }
+    this.hasEntities$ = of(true);
 
     // Stats are loaded by each row (CompactAppCardComponent), once per
     // started app; the registry shares the request between rows.
