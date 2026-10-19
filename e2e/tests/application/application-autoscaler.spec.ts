@@ -1,886 +1,128 @@
+import { Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test-base';
-import { ApplicationBasePage } from '../../pages/application/application.page';
-import { ApplicationPageAutoscalerTab } from '../../pages/application/tabs/autoscaler.page';
+import { CFApiHelper } from '../../helpers/cf-api.helper';
 
 /**
- * Application Autoscaler E2E Tests
- * Migrated from src/test-e2e/application/application-autoscaler-e2e.spec.ts
+ * The App Autoscaler pages against a real autoscaler (14.x or 15.x): the
+ * Autoscale tab, the policy editor, the scaling history and metric pages.
  *
- * Tests CF autoscaler integration
- *
- * CF Helpers Integration:
- * - ✅ Uses applicationHelper for app creation via CF API
- * - ⏳ UI wizard tests require autoscaler extension and page objects (TODO)
- * - ⏳ Policy management tests require autoscaler API integration (TODO)
- *
- * NOTE: Full autoscaler functionality requires:
- * - CF autoscaler extension enabled in CF
- * - Autoscaler extension enabled in Stratos
- * - Autoscaler policy management API
+ * Needs the autoscaler service offering in the test space (its broker
+ * registered and service access enabled); skipped without it. Each test
+ * makes its own app and cleans it up.
  */
 
+const OFFERING = 'autoscaler';
+
+// Writes go through CF jobs and the autoscaler; the lifecycle test does a
+// create, an edit and a detach.
+test.setTimeout(300000);
+
+async function openTab(page: Page, cfGuid: string, appGuid: string): Promise<void> {
+  await page.goto(`/applications/${cfGuid}/${appGuid}/autoscale`);
+}
+
+async function editorSteps(page: Page): Promise<void> {
+  // From recurring schedules (step 3) past specific dates: none, then save.
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('button', { name: 'Finish', exact: true }).click();
+}
+
+async function removeInstance(cfApi: CFApiHelper, spaceGuid: string, name: string): Promise<void> {
+  const si = await cfApi.findServiceInstanceByName(spaceGuid, name).catch(() => null);
+  if (!si) {
+    return;
+  }
+  for (const binding of await cfApi.getAppBindings(si.guid)) {
+    await cfApi.unbindService(binding.guid);
+  }
+  // Unbinding a managed instance is a CF job; CF refuses the delete until it ends.
+  await expect.poll(async () => (await cfApi.getAppBindings(si.guid)).length, { timeout: 120000 }).toBe(0);
+  await cfApi.deleteServiceInstance(si.guid);
+  await expect.poll(() => cfApi.serviceInstanceExists(si.guid), { timeout: 120000 }).toBe(false);
+}
+
 test.describe('Application Autoscaler', () => {
-
-  test.describe('Basic Autoscaler Setup', () => {
-    test('should create app for autoscaler testing', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      // Verify app exists and is ready for autoscaler
-      expect(testApp.app.guid).toBeTruthy();
-      expect(testApp.app.state).toBe('STOPPED');
-
-      // Navigate to app summary
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-      await page.waitForLoadState('networkidle');
-
-      const summaryPage = page.locator('app-page-side-nav');
-      await expect(summaryPage).toBeVisible();
-    });
-
-    test('should verify autoscaler extension availability', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      // Navigate to app page to check if autoscaler tab exists
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-      await page.waitForLoadState('networkidle');
-
-      // Check if autoscaler tab/feature is available
-      // Note: This test documents the autoscaler integration point
-      // Actual autoscaler tab presence depends on extension being enabled
-      const appPageElement = page.locator('app-page-side-nav');
-      await expect(appPageElement).toBeVisible();
-
-      // The autoscaler tab would appear here if extension is enabled
-      // For now, we just verify the app page loads successfully
-    });
+  test('explains why an app that is not bound cannot autoscale', async ({ connectedEndpointsAdminPage, cfApi, applicationHelper }) => {
+    const { page, cfGuid, spaceGuid } = connectedEndpointsAdminPage;
+    test.skip(!(await cfApi.findServicePlanGuid(OFFERING, spaceGuid)), 'no autoscaler offering in the test space');
+    const testApp = await applicationHelper.createTestApp('e2e-autoscaler-unbound');
+    try {
+      await openTab(page, cfGuid, testApp.app.guid);
+      // The autoscaler's own reason, not a generic HTTP error or "no policy".
+      await expect(page.getByText(/not bound/i)).toBeVisible({ timeout: 60000 });
+      await expect(page.getByRole('button', { name: /Create Policy/ })).toHaveCount(0);
+    } finally {
+      await applicationHelper.cleanupTestApp(testApp);
+    }
   });
 
-  test.describe('Autoscaler Tab (UI)', () => {
-    test('should show autoscaler tab when extension enabled', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      // Navigate to app summary
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-      await page.waitForLoadState('networkidle');
-
-      // Check if autoscaler tab is present
-      const autoscalerTab = page.locator('app-page-side-nav .page-side-nav__item').filter({ hasText: /autoscale/i });
-      const tabVisible = await autoscalerTab.isVisible().catch(() => false);
-
-      if (!tabVisible) {
-        test.skip(tabVisible, 'Autoscaler extension is not enabled in this CF deployment');
-      }
-
-      // Verify autoscaler tab is visible
-      await expect(autoscalerTab).toBeVisible();
-    });
-
-    test('should navigate to autoscaler tab', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      // Navigate to app page
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-      await page.waitForLoadState('networkidle');
-
-      // Check if autoscaler tab exists
-      const autoscalerTab = page.locator('app-page-side-nav .page-side-nav__item').filter({ hasText: /autoscale/i });
-      const tabVisible = await autoscalerTab.isVisible().catch(() => false);
-
-      if (!tabVisible) {
-        test.skip(tabVisible, 'Autoscaler extension is not enabled');
-      }
-
-      // Click autoscaler tab
-      await autoscalerTab.click();
-
-      // Verify navigation to autoscale URL
-      await page.waitForURL(new RegExp(`/applications/${testApp.cfGuid}/${testApp.app.guid}/autoscale`), { timeout: 10000 });
-
-      // Verify autoscaler page loaded
-      const autoscalerPage = page.locator('app-autoscaler-tab, app-application-autoscaler');
-      await expect(autoscalerPage.first()).toBeVisible({ timeout: 10000 });
-    });
-
-    test('should show policy status', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      // Navigate to app page
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-      await page.waitForLoadState('networkidle');
-
-      // Check for autoscaler tab
-      const autoscalerTab = page.locator('app-page-side-nav .page-side-nav__item').filter({ hasText: /autoscale/i });
-      const tabVisible = await autoscalerTab.isVisible().catch(() => false);
-
-      if (!tabVisible) {
-        test.skip(tabVisible, 'Autoscaler extension is not enabled');
-      }
-
-      // Navigate to autoscaler tab
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Check for policy status message (either "no policy" or existing policy details)
-      const noPolicyMessage = page.locator('app-no-content-message, .no-content-message').filter({ hasText: /no.*policy|policy.*not.*found/i });
-      const policyCard = page.locator('app-card-autoscaler-default, app-autoscaler-policy');
-
-      // Either "no policy" message or policy card should be visible
-      const noPolicyVisible = await noPolicyMessage.isVisible().catch(() => false);
-      const policyVisible = await policyCard.isVisible().catch(() => false);
-
-      expect(noPolicyVisible || policyVisible).toBe(true);
-    });
-  });
-
-  test.describe('Create Policy (UI)', () => {
-    test('should open create policy dialog', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      // Navigate to app and check for autoscaler
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      const tabVisible = await autoscalerTab.isVisible().catch(() => false);
-
-      if (!tabVisible) {
-        test.skip(tabVisible, 'Autoscaler extension not available');
-      }
-
-      // Navigate to autoscaler tab
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Look for create/add policy button
-      const createButton = page.locator('button').filter({ hasText: /create|add.*policy/i });
-      const buttonVisible = await createButton.isVisible().catch(() => false);
-
-      if (buttonVisible) {
-        await createButton.click();
-
-        // Verify policy creation dialog/form opened
-        const policyDialog = page.locator('app-dialog, [role="dialog"], app-autoscaler-policy-form');
-        await expect(policyDialog.first()).toBeVisible({ timeout: 10000 });
-      }
-    });
-
-    test('should set instance limits (min/max)', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const createButton = page.locator('button').filter({ hasText: /create|add.*policy/i });
-      if (await createButton.isVisible().catch(() => false)) {
-        await createButton.click();
-
-        // Look for instance limit fields
-        const minInstancesField = page.locator('input[formcontrolname="minInstances"], input[name="minInstances"], input').filter({ has: page.locator('label').filter({ hasText: /min.*instance/i }) });
-        const maxInstancesField = page.locator('input[formcontrolname="maxInstances"], input[name="maxInstances"], input').filter({ has: page.locator('label').filter({ hasText: /max.*instance/i }) });
-
-        const minVisible = await minInstancesField.isVisible().catch(() => false);
-        const maxVisible = await maxInstancesField.isVisible().catch(() => false);
-
-        if (minVisible && maxVisible) {
-          // Set values
-          await minInstancesField.first().fill('1');
-          await maxInstancesField.first().fill('5');
-
-          // Verify values set
-          await expect(minInstancesField.first()).toHaveValue('1');
-          await expect(maxInstancesField.first()).toHaveValue('5');
-        }
-      }
-    });
-
-    test('should configure scaling rules', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const createButton = page.locator('button').filter({ hasText: /create|add.*policy/i });
-      if (await createButton.isVisible().catch(() => false)) {
-        await createButton.click();
-
-        // Look for scaling rules section
-        const scalingRulesSection = page.locator('app-autoscaler-scaling-rules, .scaling-rules').or(
-          page.locator('mat-expansion-panel').filter({ hasText: /scaling.*rule/i })
-        );
-
-        const rulesVisible = await scalingRulesSection.isVisible().catch(() => false);
-        if (rulesVisible) {
-          await expect(scalingRulesSection.first()).toBeVisible();
-        }
-      }
-    });
-
-    test('should set CPU threshold', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const createButton = page.locator('button').filter({ hasText: /create|add.*policy/i });
-      if (await createButton.isVisible().catch(() => false)) {
-        await createButton.click();
-
-        // Look for CPU threshold field
-        const cpuField = page.locator('input[formcontrolname="cpuThreshold"], input[name="cpu"]').or(
-          page.locator('input').filter({ has: page.locator('label').filter({ hasText: /cpu/i }) })
-        );
-
-        const cpuVisible = await cpuField.isVisible().catch(() => false);
-        if (cpuVisible) {
-          await cpuField.first().fill('80');
-          await expect(cpuField.first()).toHaveValue('80');
-        }
-      }
-    });
-
-    test('should set memory threshold', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const createButton = page.locator('button').filter({ hasText: /create|add.*policy/i });
-      if (await createButton.isVisible().catch(() => false)) {
-        await createButton.click();
-
-        // Look for memory threshold field
-        const memoryField = page.locator('input[formcontrolname="memoryThreshold"], input[name="memory"]').or(
-          page.locator('input').filter({ has: page.locator('label').filter({ hasText: /memory/i }) })
-        );
-
-        const memoryVisible = await memoryField.isVisible().catch(() => false);
-        if (memoryVisible) {
-          await memoryField.first().fill('90');
-          await expect(memoryField.first()).toHaveValue('90');
-        }
-      }
-    });
-
-    test('should set custom metrics', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const createButton = page.locator('button').filter({ hasText: /create|add.*policy/i });
-      if (await createButton.isVisible().catch(() => false)) {
-        await createButton.click();
-
-        // Look for custom metrics section
-        const customMetricsSection = page.locator('app-autoscaler-custom-metrics, .custom-metrics').or(
-          page.locator('mat-expansion-panel').filter({ hasText: /custom.*metric/i })
-        );
-
-        const metricsVisible = await customMetricsSection.isVisible().catch(() => false);
-        if (metricsVisible) {
-          await expect(customMetricsSection.first()).toBeVisible();
-        }
-      }
-    });
-
-    test('should save policy', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const createButton = page.locator('button').filter({ hasText: /create|add.*policy/i });
-      if (await createButton.isVisible().catch(() => false)) {
-        await createButton.click();
-
-        // Fill in minimum required fields
-        const minInstancesField = page.locator('input[formcontrolname="minInstances"], input[name="minInstances"]');
-        const maxInstancesField = page.locator('input[formcontrolname="maxInstances"], input[name="maxInstances"]');
-
-        if (await minInstancesField.isVisible().catch(() => false)) {
-          await minInstancesField.first().fill('1');
-        }
-        if (await maxInstancesField.isVisible().catch(() => false)) {
-          await maxInstancesField.first().fill('5');
-        }
-
-        // Look for save/submit button
-        const saveButton = page.locator('button').filter({ hasText: /save|create|submit/i });
-        const saveVisible = await saveButton.isVisible().catch(() => false);
-
-        if (saveVisible) {
-          await saveButton.first().click();
-
-          // Wait for dialog to close or success message
-          await page.waitForTimeout(2000);
-
-          // Verify we're back on autoscaler tab or success shown
-          const currentUrl = page.url();
-          expect(currentUrl).toContain('autoscale');
-        }
-      }
-    });
-  });
-
-  test.describe('Edit Policy (UI)', () => {
-    test('should load existing policy', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Look for edit policy button (only visible if policy exists)
-      const editButton = page.locator('button').filter({ hasText: /edit.*policy/i });
-      const editVisible = await editButton.isVisible().catch(() => false);
-
-      if (editVisible) {
-        await editButton.click();
-
-        // Verify policy edit dialog/form opened
-        const policyDialog = page.locator('app-dialog, [role="dialog"], app-autoscaler-policy-form');
-        await expect(policyDialog.first()).toBeVisible({ timeout: 10000 });
-
-        // Verify fields are populated with existing values
-        const minInstancesField = page.locator('input[formcontrolname="minInstances"], input[name="minInstances"]');
-        const minFieldVisible = await minInstancesField.isVisible().catch(() => false);
-
-        if (minFieldVisible) {
-          const minValue = await minInstancesField.first().inputValue();
-          expect(minValue).toBeTruthy(); // Should have existing value
-        }
-      }
-    });
-
-    test('should modify instance limits', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const editButton = page.locator('button').filter({ hasText: /edit.*policy/i });
-      if (await editButton.isVisible().catch(() => false)) {
-        await editButton.click();
-
-        const minInstancesField = page.locator('input[formcontrolname="minInstances"], input[name="minInstances"]');
-        const maxInstancesField = page.locator('input[formcontrolname="maxInstances"], input[name="maxInstances"]');
-
-        if (await minInstancesField.isVisible().catch(() => false)) {
-          await minInstancesField.first().fill('2');
-          await expect(minInstancesField.first()).toHaveValue('2');
-        }
-
-        if (await maxInstancesField.isVisible().catch(() => false)) {
-          await maxInstancesField.first().fill('10');
-          await expect(maxInstancesField.first()).toHaveValue('10');
-        }
-      }
-    });
-
-    test('should update scaling rules', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const editButton = page.locator('button').filter({ hasText: /edit.*policy/i });
-      if (await editButton.isVisible().catch(() => false)) {
-        await editButton.click();
-
-        // Look for scaling rules section
-        const scalingRulesSection = page.locator('app-autoscaler-scaling-rules, .scaling-rules').or(
-          page.locator('mat-expansion-panel').filter({ hasText: /scaling.*rule/i })
-        );
-
-        const rulesVisible = await scalingRulesSection.isVisible().catch(() => false);
-        if (rulesVisible) {
-          await expect(scalingRulesSection.first()).toBeVisible();
-          // Rules can be modified here
-        }
-      }
-    });
-
-    test('should save changes', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const editButton = page.locator('button').filter({ hasText: /edit.*policy/i });
-      if (await editButton.isVisible().catch(() => false)) {
-        await editButton.click();
-
-        // Make a change
-        const minInstancesField = page.locator('input[formcontrolname="minInstances"], input[name="minInstances"]');
-        if (await minInstancesField.isVisible().catch(() => false)) {
-          await minInstancesField.first().fill('2');
-        }
-
-        // Save changes
-        const saveButton = page.locator('button').filter({ hasText: /save|update|submit/i });
-        if (await saveButton.isVisible().catch(() => false)) {
-          await saveButton.first().click();
-
-          // Wait for save operation
-          await page.waitForTimeout(2000);
-
-          // Verify we're back on autoscaler tab
-          const currentUrl = page.url();
-          expect(currentUrl).toContain('autoscale');
-        }
-      }
-    });
-  });
-
-  test.describe('Delete Policy (UI)', () => {
-    test('should confirm policy deletion', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Look for delete policy button
-      const deleteButton = page.locator('button').filter({ hasText: /delete.*policy|remove.*policy/i });
-      const deleteVisible = await deleteButton.isVisible().catch(() => false);
-
-      if (deleteVisible) {
-        await deleteButton.click();
-
-        // Verify confirmation dialog appears
-        const confirmDialog = page.locator('app-dialog-confirm, app-dialog-confirm');
-        await expect(confirmDialog.first()).toBeVisible({ timeout: 10000 });
-      }
-    });
-
-    test('should delete policy', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const deleteButton = page.locator('button').filter({ hasText: /delete.*policy|remove.*policy/i });
-      if (await deleteButton.isVisible().catch(() => false)) {
-        await deleteButton.click();
-
-        // Confirm deletion
-        const confirmButton = page.locator('app-dialog-confirm button').filter({ hasText: /delete|confirm/i });
-        if (await confirmButton.isVisible().catch(() => false)) {
-          await confirmButton.first().click();
-
-          // Wait for deletion
-          await page.waitForTimeout(2000);
-
-          // Verify "no policy" message appears
-          const noPolicyMessage = page.locator('app-no-content-message, .no-content-message').filter({ hasText: /no.*policy/i });
-          const noPolicy = await noPolicyMessage.isVisible().catch(() => false);
-
-          if (noPolicy) {
-            await expect(noPolicyMessage).toBeVisible();
-          }
-        }
-      }
-    });
-
-    test('should disable autoscaling', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Deleting policy effectively disables autoscaling
-      const deleteButton = page.locator('button').filter({ hasText: /delete.*policy|remove.*policy/i });
-      if (await deleteButton.isVisible().catch(() => false)) {
-        // Policy exists, can be deleted to disable autoscaling
-        await expect(deleteButton).toBeVisible();
-      } else {
-        // No policy = autoscaling already disabled
-        const noPolicyMessage = page.locator('app-no-content-message').filter({ hasText: /no.*policy/i });
-        const noPolicy = await noPolicyMessage.isVisible().catch(() => false);
-
-        if (noPolicy) {
-          await expect(noPolicyMessage).toBeVisible();
-        }
-      }
-    });
-  });
-
-  test.describe('Scaling Events (UI)', () => {
-    test('should show scaling history', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Look for scaling events/history section
-      const eventsSection = page.locator('app-autoscaler-events, app-table-autoscaler-events, .autoscaler-events').or(
-        page.locator('mat-expansion-panel').filter({ hasText: /event|history/i })
-      );
-
-      const eventsVisible = await eventsSection.isVisible().catch(() => false);
-      if (eventsVisible) {
-        await expect(eventsSection.first()).toBeVisible();
-      } else {
-        // Events might be in a tab or collapsed section
-        const eventsTab = page.locator('button, a').filter({ hasText: /event|history/i });
-        const tabVisible = await eventsTab.isVisible().catch(() => false);
-
-        if (tabVisible) {
-          await eventsTab.click();
-          await expect(page.locator('app-table, table').first()).toBeVisible();
-        }
-      }
-    });
-
-    test('should display scale up events', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Look for events table
-      const eventsTable = page.locator('app-table-autoscaler-events, app-table, table');
-      const tableVisible = await eventsTable.isVisible().catch(() => false);
-
-      if (tableVisible) {
-        // Events table exists - look for scale up events
-        const scaleUpEvent = eventsTable.locator('tr, .row').filter({ hasText: /scale.*up|scaled.*up/i });
-        const hasScaleUp = await scaleUpEvent.isVisible().catch(() => false);
-
-        // Events might not exist yet, but table should be present
-        if (!hasScaleUp) {
-          // No events yet, which is fine
-          await expect(eventsTable.first()).toBeVisible();
-        }
-      }
-    });
-
-    test('should display scale down events', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const eventsTable = page.locator('app-table-autoscaler-events, app-table, table');
-      const tableVisible = await eventsTable.isVisible().catch(() => false);
-
-      if (tableVisible) {
-        const scaleDownEvent = eventsTable.locator('tr, .row').filter({ hasText: /scale.*down|scaled.*down/i });
-        const hasScaleDown = await scaleDownEvent.isVisible().catch(() => false);
-
-        // Events might not exist yet
-        if (!hasScaleDown) {
-          await expect(eventsTable.first()).toBeVisible();
-        }
-      }
-    });
-
-    test('should show event timestamps', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const eventsTable = page.locator('app-table-autoscaler-events, app-table, table');
-      if (await eventsTable.isVisible().catch(() => false)) {
-        // Look for timestamp column header
-        const timestampHeader = eventsTable.locator('th, .header-cell').filter({ hasText: /time|date/i });
-        const headerVisible = await timestampHeader.isVisible().catch(() => false);
-
-        if (headerVisible) {
-          await expect(timestampHeader.first()).toBeVisible();
-        }
-      }
-    });
-
-    test('should show scaling reasons', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const eventsTable = page.locator('app-table-autoscaler-events, app-table, table');
-      if (await eventsTable.isVisible().catch(() => false)) {
-        // Look for reason column
-        const reasonHeader = eventsTable.locator('th, .header-cell').filter({ hasText: /reason|cause/i });
-        const headerVisible = await reasonHeader.isVisible().catch(() => false);
-
-        if (headerVisible) {
-          await expect(reasonHeader.first()).toBeVisible();
-        } else {
-          // Reason might be embedded in event description
-          await expect(eventsTable.first()).toBeVisible();
-        }
-      }
-    });
-  });
-
-  test.describe('Metrics (UI)', () => {
-    test('should display current metrics', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Look for metrics card or section
-      const metricsCard = page.locator('app-card-autoscaler-metric, .autoscaler-metrics, app-metrics');
-      const metricsVisible = await metricsCard.isVisible().catch(() => false);
-
-      if (metricsVisible) {
-        await expect(metricsCard.first()).toBeVisible();
-      }
-    });
-
-    test('should show CPU usage', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const cpuMetric = page.locator('app-card-autoscaler-metric, .metric').filter({ hasText: /cpu/i });
-      const cpuVisible = await cpuMetric.isVisible().catch(() => false);
-
-      if (cpuVisible) {
-        await expect(cpuMetric.first()).toBeVisible();
-      }
-    });
-
-    test('should show memory usage', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      const memoryMetric = page.locator('app-card-autoscaler-metric, .metric').filter({ hasText: /memory/i });
-      const memoryVisible = await memoryMetric.isVisible().catch(() => false);
-
-      if (memoryVisible) {
-        await expect(memoryMetric.first()).toBeVisible();
-      }
-    });
-
-    test('should show custom metric values', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Custom metrics might not be configured
-      const customMetric = page.locator('app-card-autoscaler-metric, .metric').filter({ hasText: /custom/i });
-      const customVisible = await customMetric.isVisible().catch(() => false);
-
-      if (customVisible) {
-        await expect(customMetric.first()).toBeVisible();
-      } else {
-        // No custom metrics configured, which is fine
-        const metricsSection = page.locator('app-autoscaler-tab, app-application-autoscaler');
-        await expect(metricsSection.first()).toBeVisible();
-      }
-    });
-
-    test('should refresh metrics automatically', async ({ withTestApp }) => {
-      const { page, testApp } = withTestApp;
-
-      const appPage = new ApplicationBasePage(page, testApp.cfGuid, testApp.app.guid);
-      await appPage.navigateTo();
-
-      const autoscalerTab = page.locator('button, a').filter({ hasText: /autoscale/i });
-      if (!await autoscalerTab.isVisible().catch(() => false)) {
-        test.skip(true, 'Autoscaler extension not available');
-      }
-
-      await autoscalerTab.click();
-      await page.waitForURL(new RegExp(`/autoscale`));
-
-      // Verify metrics section is present
-      const metricsSection = page.locator('app-card-autoscaler-metric, .autoscaler-metrics, app-autoscaler-tab');
-      await expect(metricsSection.first()).toBeVisible();
-
-      // Auto-refresh is a background behavior
-      // We can verify the page doesn't show errors after waiting
-      await page.waitForTimeout(3000);
-
-      // Metrics section should still be visible (no crash/error)
-      await expect(metricsSection.first()).toBeVisible();
-    });
+  test('creates, edits and detaches a policy', async ({ connectedEndpointsAdminPage, cfApi, applicationHelper }) => {
+    const { page, cfGuid, spaceGuid } = connectedEndpointsAdminPage;
+    const planGuid = await cfApi.findServicePlanGuid(OFFERING, spaceGuid);
+    test.skip(!planGuid, 'no autoscaler offering in the test space');
+
+    const testApp = await applicationHelper.createTestApp('e2e-autoscaler-policy');
+    const appGuid = testApp.app.guid;
+    const appName = testApp.app.name;
+    const instanceName = `e2e-autoscaler-${Date.now()}`;
+    try {
+      await cfApi.createManagedServiceInstance(spaceGuid, instanceName, planGuid!);
+      await expect.poll(async () => (await cfApi.findServiceInstanceByName(spaceGuid, instanceName))?.last_operation?.state,
+        { timeout: 120000 }).toBe('succeeded');
+      const si = await cfApi.findServiceInstanceByName(spaceGuid, instanceName);
+      await cfApi.bindService(appGuid, si!.guid);
+      // A managed bind is a CF job: the autoscaler knows the app only once it succeeds.
+      await expect.poll(async () => (await cfApi.getAppBindings(si!.guid)).find(b => b.appGuid === appGuid)?.state,
+        { timeout: 120000 }).toBe('succeeded');
+
+      // Bound, no policy yet.
+      await openTab(page, cfGuid, appGuid);
+      await expect(page.getByText('This application has no Autoscaler Policy')).toBeVisible({ timeout: 60000 });
+
+      // Create through the editor with the default limits and rule.
+      await page.getByRole('button', { name: /Create Policy/ }).click();
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(`Create AutoScaler Policy: ${appName}`, { timeout: 60000 });
+      const next = page.getByRole('button', { name: 'Next', exact: true });
+      await expect(next).toBeEnabled();
+      await next.click();
+      await page.getByRole('button', { name: 'Add', exact: true }).click();
+      await page.getByRole('button', { name: 'done', exact: true }).click();
+      await expect(page.getByText(/If average memoryused/)).toBeVisible();
+      await next.click();
+      await editorSteps(page);
+      await page.waitForURL(url => url.pathname.endsWith('/autoscale'));
+      await expect.poll(async () => (await cfApi.getAutoscalerPolicy(appGuid))?.scaling_rules?.[0]?.metric_type,
+        { timeout: 60000 }).toBe('memoryused');
+      await expect(page.getByRole('button', { name: /Edit Policy/ })).toBeVisible({ timeout: 60000 });
+
+      // Edit the maximum instance count.
+      await page.getByRole('button', { name: /Edit Policy/ }).click();
+      const max = page.getByRole('spinbutton', { name: 'Maximum Instance Count' });
+      await expect(max).toHaveValue('10', { timeout: 60000 });
+      await max.fill('5');
+      await next.click();
+      await next.click();
+      await editorSteps(page);
+      await page.waitForURL(url => url.pathname.endsWith('/autoscale'));
+      await expect.poll(async () => (await cfApi.getAutoscalerPolicy(appGuid))?.instance_max_count, { timeout: 60000 }).toBe(5);
+
+      // The scaling history and metric pages name the app and load.
+      await page.goto(`/autoscaler/${cfGuid}/${appGuid}/app-autoscaler-scale-history-page`);
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(`AutoScaler Scaling Events: ${appName}`, { timeout: 60000 });
+      await expect(page.getByText('There are no scaling events')).toBeVisible({ timeout: 60000 });
+      await page.goto(`/autoscaler/${cfGuid}/${appGuid}/app-autoscaler-metric-page`);
+      await expect(page.getByRole('heading', { level: 1 })).toContainText(`AutoScaler Metric Charts: ${appName}`, { timeout: 60000 });
+      await expect(page.getByRole('heading', { level: 3, name: /memoryused/ })).toBeVisible({ timeout: 60000 });
+
+      // Detach: with no default policy on the instance, none is left.
+      await openTab(page, cfGuid, appGuid);
+      await page.getByRole('button', { name: /Delete Policy/ }).click();
+      await page.locator('[data-test="confirm-dialog-confirm"]').click();
+      await expect(page.getByText('This application has no Autoscaler Policy')).toBeVisible({ timeout: 60000 });
+      expect(await cfApi.getAutoscalerPolicy(appGuid)).toBeNull();
+    } finally {
+      await removeInstance(cfApi, spaceGuid, instanceName);
+      await applicationHelper.cleanupTestApp(testApp);
+    }
   });
 });
