@@ -49,6 +49,23 @@ describe('SignalListComponent', () => {
     expect(rows[1].textContent).toContain('two');
   });
 
+  // Cards are 16rem minimum by default; a list of wide cards (the autoscaler
+  // metric charts) sets its own minimum so one card is not squeezed.
+  it('lays out cards with the configured minimum width', () => {
+    const columns = (cardMinWidth?: string) => {
+      const fixture = TestBed.createComponent(Host);
+      fixture.componentInstance.config = {
+        ...fixture.componentInstance.config,
+        viewMode: signal<'table' | 'card'>('card'),
+        cardMinWidth,
+      };
+      fixture.detectChanges();
+      return (fixture.nativeElement.querySelector('[data-test="card-grid"]') as HTMLElement).style.gridTemplateColumns;
+    };
+    expect(columns()).toBe('repeat(auto-fill, minmax(16rem, 1fr))');
+    expect(columns('40rem')).toBe('repeat(auto-fill, minmax(40rem, 1fr))');
+  });
+
   it('row-action menu items expose data-test hooks (label default, dataTest override)', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {

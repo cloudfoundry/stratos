@@ -420,7 +420,7 @@
       }
     } @else if (config.viewMode && config.viewMode!() === 'card' && cardTemplate) {
       <div data-test="card-grid"
-           class="grid gap-3 p-3 grid-cols-[repeat(auto-fill,minmax(16rem,1fr))]">
+           class="grid gap-3 p-3" [style.grid-template-columns]="cardGridColumns()">
         @for (row of config.pagedItems(); track trackByRow($index, row)) {
           <div data-test="card-projected">
             <ng-container *ngTemplateOutlet="cardTemplate; context: { $implicit: row }"></ng-container>
@@ -429,7 +429,7 @@
       </div>
     } @else if (config.viewMode && config.viewMode!() === 'card') {
       <div data-test="card-grid"
-           class="grid gap-3 p-3 grid-cols-[repeat(auto-fill,minmax(16rem,1fr))]">
+           class="grid gap-3 p-3" [style.grid-template-columns]="cardGridColumns()">
         @for (row of config.pagedItems(); track trackByRow($index, row)) {
           <div data-test="card"
                [routerLink]="rowLink(row)"
