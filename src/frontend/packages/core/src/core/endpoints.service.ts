@@ -262,10 +262,11 @@ export const endpointsGuard: CanActivateFn = (
   const endpointStatusSignals = inject(EndpointStatusSignalService);
 
   // Reroute user to endpoint/no endpoint screens if there are no connected or registered endpoints.
-  // Auth + endpoint loading state both sourced from signal services.
+  // Auth + endpoint loading state both sourced from signal services, via
+  // observables built once there (toObservable() here leaked per run).
   const guardLogic$ = observableCombineLatest(
-    toObservable(authSignals.auth),
-    toObservable(endpointStatusSignals.status)
+    authSignals.auth$,
+    endpointStatusSignals.status$
   ).pipe(
     filter(([state, endpointState]) => {
       // Only proceed when logged in and endpoints are done loading
