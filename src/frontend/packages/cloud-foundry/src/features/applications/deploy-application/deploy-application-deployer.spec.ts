@@ -59,6 +59,16 @@ describe('DeployApplicationDeployer', () => {
       expect(deployer.status$().error).toBe(false);
     });
 
+    it('sends nothing once closed', () => {
+      deployer.close();
+
+      expect(() => {
+        deployer.deploy();
+        deployer.processWebSocketMessage({ type: SocketEventTypes.OVERRIDES_REQUIRED, message: '' });
+        deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_SUCCESS, message: '' });
+      }).not.toThrow();
+    });
+
     it('starts a reopened deploy afresh', () => {
       const send = (type: SocketEventTypes, message = '') => socket.server.next(JSON.stringify({ type, message }));
       send(SocketEventTypes.MANIFEST, JSON.stringify({ Applications: [{ Name: 'a' }] }));

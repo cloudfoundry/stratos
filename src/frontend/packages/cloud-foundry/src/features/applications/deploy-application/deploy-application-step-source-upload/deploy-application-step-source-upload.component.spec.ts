@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
@@ -17,14 +17,21 @@ import { FileScannerInfo } from '../deploy-application-step2/deploy-application-
 import { DeployApplicationStepSourceUploadComponent } from "./deploy-application-step-source-upload.component";
 
 // Each connection gets a server stream the test drives; what the client
-// sends is recorded
-const socket = vi.hoisted(() => ({ server: undefined as any, connections: 0, sent: [] as unknown[] }));
+// sends is recorded, in all and by connection
+const socket = vi.hoisted(() => ({
+  server: undefined as any, connections: 0, sent: [] as unknown[], sentOn: [] as unknown[][],
+}));
 vi.mock('rxjs-websockets', () => ({
   default: () => {
     socket.connections++;
     socket.server = new Subject<string>();
     return of((input: Observable<unknown>) => {
-      input.subscribe(m => socket.sent.push(m));
+      const sentHere: unknown[] = [];
+      socket.sentOn.push(sentHere);
+      input.subscribe(m => {
+        socket.sent.push(m);
+        sentHere.push(m);
+      });
       return socket.server;
     });
   },
@@ -121,6 +128,7 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
       appRef = TestBed.inject(ApplicationRef);
       socket.connections = 0;
       socket.sent = [];
+      socket.sentOn = [];
       const deployData = TestBed.inject(CfDeployAppDataService);
       deployData.setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
       deployData.setSourceType({ id: 'file', name: 'File' } as SourceType);
@@ -173,6 +181,64 @@ describe('DeployApplicationStepSourceUploadComponent', () => {
       component.valid$.subscribe(v => later.push(v)).unsubscribe();
       expect(later).not.toContain(true);
       component.deployer.close();
+    });
+
+    describe('with a file read still running', () => {
+      let reader: FileReader | undefined;
+      let read: ReturnType<typeof vi.spyOn>;
+      // The read the first upload started finishes now
+      const finishRead = () => {
+        Object.defineProperty(reader, 'result', { value: new ArrayBuffer(1) });
+        reader!.onload!({} as ProgressEvent<FileReader>);
+      };
+
+      beforeEach(async () => {
+        read = vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (this: FileReader) {
+          reader = this;
+        });
+        component.onEnter(oneFile());
+        await appRef.whenStable();
+        fromServer(SocketEventTypes.SOURCE_REQUIRED);
+        fromServer(SocketEventTypes.SOURCE_FILE_ACK);
+        expect(reader).toBeDefined();
+      });
+
+      afterEach(() => {
+        read.mockRestore();
+        component.deployer.close();
+      });
+
+      // Previous, then back: the upload starts again on a new connection
+      const reenter = () => {
+        component.onLeave(false);
+        component.onEnter(oneFile());
+      };
+
+      // The new upload asks for the source and acknowledges the file name;
+      // the first file is not sent yet
+      const startNewUpload = () => {
+        expect(socket.connections).toBe(2);
+        fromServer(SocketEventTypes.SOURCE_REQUIRED);
+        fromServer(SocketEventTypes.SOURCE_FILE_ACK);
+        expect(socket.sentOn[1].some(m => m instanceof ArrayBuffer)).toBe(false);
+        expect(component.deployer.fileTransferStatus$()?.filesSent).toBe(0);
+      };
+
+      it('drops a read that finishes after the new connection opened', async () => {
+        reenter();
+        await appRef.whenStable();
+        finishRead();
+
+        startNewUpload();
+      });
+
+      it('drops a read that finishes while the new connection opens', async () => {
+        reenter();
+        finishRead();
+        await appRef.whenStable();
+
+        startNewUpload();
+      });
     });
   });
 

@@ -173,6 +173,8 @@ export class DeployApplicationDeployer {
     }
     this.isOpen = false;
     this.currentFileTransfer = undefined;
+    // A file read still running belongs to this connection; see sendNextFile
+    this.inputStream = undefined;
   }
 
   open() {
@@ -285,7 +287,7 @@ export class DeployApplicationDeployer {
       timestamp: Math.round((new Date()).getTime() / 1000),
       type: SocketEventTypes.SOURCE_WAIT_ACK
     };
-    this.inputStream.next(JSON.stringify(msg));
+    this.inputStream?.next(JSON.stringify(msg));
   }
 
   sendAppOverride = (appOverrides: OverrideAppDetails) => {
@@ -404,7 +406,7 @@ export class DeployApplicationDeployer {
         break;
       case SocketEventTypes.CLOSE_SUCCESS:
         // Acknowledge
-        this.inputStream.next(this.sendCloseAcknowledgement());
+        this.inputStream?.next(this.sendCloseAcknowledgement());
         this.onClose(log, null, null);
         break;
       case SocketEventTypes.CLOSE_INVALID_MANIFEST:
@@ -437,13 +439,13 @@ export class DeployApplicationDeployer {
           this.onClose(log, 'Deploy Failed - Unknown source type',
             'Failed to deploy the app - unknown source type');
         } else {
-          this.inputStream.next(sourceInfo);
+          this.inputStream?.next(sourceInfo);
         }
         break;
       }
       case SocketEventTypes.OVERRIDES_REQUIRED: {
         const overrides = this.sendAppOverride(this.applicationOverrides);
-        this.inputStream.next(overrides);
+        this.inputStream?.next(overrides);
         break;
       }
       case SocketEventTypes.EVENT_CLONED:
@@ -481,14 +483,19 @@ export class DeployApplicationDeployer {
       this.fileTransferStatus$.next(this.fileTransferStatus);
 
       // Send the file name metadata
-      this.inputStream.next(JSON.stringify(msg));
+      this.inputStream?.next(JSON.stringify(msg));
 
       // Now send the file data as a binary message
+      const stream = this.inputStream;
       const reader = new FileReader();
       reader.onload = () => {
+        // The connection the read started for has since closed
+        if (stream !== this.inputStream) {
+          return;
+        }
         this.currentFileTransfer = file;
         const output = reader.result;
-        this.inputStream.next(output);
+        this.inputStream?.next(output);
       };
       reader.readAsArrayBuffer(file);
     }
