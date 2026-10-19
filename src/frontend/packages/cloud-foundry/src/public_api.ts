@@ -17,7 +17,7 @@ export { CloudFoundryService } from './shared/data-services/cloud-foundry.servic
 export { CfOrgSpaceLabelService } from './shared/services/cf-org-space-label.service';
 
 // Utility Functions
-export { getGuids } from './features/applications/application/application-base.component';
+export { APP_DETAIL_PROVIDERS, getGuids } from './features/applications/application/application-base.component';
 
 // Service Instance Constants
 export { CSI_CANCEL_URL } from './shared/components/add-service-instance/csi-mode.service';
