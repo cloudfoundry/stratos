@@ -458,6 +458,16 @@ describe('DeployApplicationStep2Component', () => {
       expect(card?.textContent).toContain('Recorded change');
     });
 
+    it('hides the previous commit while a new commit is looked up', async () => {
+      commit$.next({ sha: 'rec1234abcd', commit: { message: 'Recorded change' } });
+      await fixture.whenStable();
+
+      TestBed.inject(CfDeployAppDataService).setDeployCommit('new5678efgh');
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('.deploy-step2-form__commit')).toBeNull();
+    });
+
     it('saves the recorded commit when Next is pressed before the lookup resolves', async () => {
       const save = vi.spyOn(TestBed.inject(CfDeployAppDataService), 'saveAppDetails');
       await firstValueFrom(component.onNext(0, null as any));

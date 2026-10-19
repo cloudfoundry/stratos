@@ -395,6 +395,9 @@ export class DeployApplicationStep2Component
             if (this.commitSubscription) {
               this.commitSubscription.unsubscribe();
             }
+            if (this.commitInfo()?.sha !== commitSha) {
+              this.commitInfo.set(undefined);
+            }
             if (!commitSha) { return; }
             // A failed lookup only hides the commit card; onNext still saves
             // commitSha, and the backend reports a commit that is gone.
