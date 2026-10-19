@@ -75,8 +75,52 @@ describe('AutoscalerTabExtensionComponent', () => {
     httpMock.verify();
   });
 
+  // The data services patch their state after an awaited request, a
+  // microtask after the flush.
+  const settle = async () => {
+    await new Promise(resolve => setTimeout(resolve));
+    await fixture.whenStable();
+  };
+
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The policy loads after the tab first renders, so the gauges must follow
+  // it rather than read the policy once.
+  it('loads the metric gauges once the policy arrives', async () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(r => r.url.endsWith('/policy')).forEach(req => req.flush({
+      instance_min_count: 1,
+      instance_max_count: 2,
+      scaling_rules: [{
+        metric_type: 'memoryused',
+        breach_duration_secs: 120,
+        threshold: 80,
+        operator: '>=',
+        cool_down_secs: 60,
+        adjustment: '+1',
+      }],
+    }));
+    await settle();
+
+    expect(Object.keys(component.appAutoscalerAppMetrics())).toEqual(['memoryused']);
+    expect(httpMock.match(r => r.url.endsWith('/metric/memoryused')).length).toBe(1);
+  });
+
+  it('says the app has no policy above its scaling events', async () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(r => r.url.endsWith('/policy'))
+      .forEach(req => req.flush('Not Found', { status: 404, statusText: 'Not Found' }));
+    httpMock.match(r => r.url.endsWith('/event')).forEach(req => req.flush({
+      resources: [{ old_instances: 1, new_instances: 2, reason: 'r', message: 'm', timestamp: 0, error: '' }],
+      total_results: 1,
+      total_pages: 1,
+    }));
+    await settle();
+
+    expect(fixture.nativeElement.textContent)
+      .toContain('This application has no Autoscaler Policy. To create a policy click the + icon above');
   });
 
   afterAll(() => { });

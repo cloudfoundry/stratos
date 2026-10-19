@@ -1,5 +1,5 @@
 <app-page-sub-nav>
-  @if (appAutoscalerPolicy$ | async; as policy) {
+  @if (appAutoscalerPolicy(); as policy) {
     <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="edit" (click)="updatePolicyPage()">
       <span class="flex items-center">
         <app-custom-icon class="mr-1.5">edit</app-custom-icon> Edit Policy
@@ -27,7 +27,7 @@
 </app-page-sub-nav>
 <div class="flex relative w-full">
   <app-tile-grid class="w-full">
-    @if (appAutoscalerPolicy$ | async; as policy) {
+    @if (appAutoscalerPolicy(); as policy) {
       <app-tile-group>
         @if (policy.enabled) {
           <app-tile>
@@ -46,10 +46,10 @@
                 </app-card-header>
                 <app-card-content>
                   <div class="flex flex-row">
-                    @for (metric of appAutoscalerAppMetricNames$ | async; track metric) {
+                    @for (metric of appAutoscalerAppMetricNames(); track metric) {
                       <div class="pr-10">
                         <app-metadata-item class="my-0" label={{metric.name}}>
-                          @if (appAutoscalerAppMetrics()[metric.name] | async; as metricData) {
+                          @if (appAutoscalerAppMetrics()[metric.name]?.(); as metricData) {
                             <canvas baseChart [type]="'doughnut'"
                               [data]="getGaugeData(metricData)"
                               [options]="gaugeOptions"
@@ -74,7 +74,7 @@
         }
       </app-tile-group>
     }
-    @if (appAutoscalerPolicy$ | async; as policy) {
+    @if (appAutoscalerPolicy(); as policy) {
       <div class="autoscaler-tab-policy">
         @if (policy.enabled) {
           <app-tile-group>
@@ -265,14 +265,14 @@
         }
       </div>
     }
-    @if (showAutoscalerHistory$ | async) {
+    @if (showAutoscalerHistory()) {
       <app-tile-group class="flex-col">
-        @if ((appAutoscalerPolicy$ | async) === false) {
+        @if (noPolicy()) {
           <span class="flex items-center mb-3 p-3.5">
             {{noPolicyMessageFirstLine}}. {{noPolicyMessageSecondLine.text}}
           </span>
         }
-        @if (appAutoscalerScalingHistory$ | async; as scalingHistory) {
+        @if (appAutoscalerScalingHistory(); as scalingHistory) {
           <app-tile>
             <app-card>
               <app-card-header class="flex flex-1 h-10 justify-between pt-0">
@@ -328,8 +328,8 @@
               </app-card-content>
               <app-card-actions class="absolute bottom-2.5 right-6 pt-0 text-right">
                 <app-polling-indicator (poll)="fetchScalingHistory()"
-                  [manualPoll]="(scalingHistoryLoading$ | async) === false"
-                  [isPolling]="(scalingHistoryLoading$ | async)">
+                  [manualPoll]="!scalingHistoryLoading()"
+                  [isPolling]="scalingHistoryLoading()">
                 </app-polling-indicator>
                 <button (click)="scaleHistoryPage()" class="btn btn-icon" aria-label="Open scale history">
                   <app-custom-icon>launch</app-custom-icon>
@@ -340,7 +340,7 @@
         }
       </app-tile-group>
     }
-    @if (showNoPolicyMessage$ | async) {
+    @if (showNoPolicyMessage()) {
       <app-no-content-message [icon]="'meter'" [iconFont]="'stratos-icons'"
         [firstLine]="noPolicyMessageFirstLine" [secondLine]="noPolicyMessageSecondLine">
       </app-no-content-message>
