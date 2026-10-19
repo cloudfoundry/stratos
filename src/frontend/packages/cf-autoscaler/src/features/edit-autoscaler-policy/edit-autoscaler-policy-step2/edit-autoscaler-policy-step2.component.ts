@@ -26,7 +26,6 @@ interface EditTriggerForm {
   metric_type: FormControl<string>;
   operator: FormControl<string>;
   threshold: FormControl<number>;
-  unit: FormControl<string>;
   adjustment: FormControl<number>;
   breach_duration_secs: FormControl<number>;
   cool_down_secs: FormControl<number>;
@@ -84,7 +83,6 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
       metric_type: this.fb.control('', { validators: [Validators.required, this.validateTriggerMetricType()], nonNullable: true }),
       operator: this.fb.control('', { validators: [this.validateTriggerOperator()], nonNullable: true }),
       threshold: this.fb.control(0, { validators: [Validators.required, Validators.min(1), this.validateTriggerThreshold()], nonNullable: true }),
-      unit: this.fb.control('', { nonNullable: true }),
       adjustment: this.fb.control(0, { validators: [Validators.required, Validators.min(1), this.validateTriggerAdjustment()], nonNullable: true }),
       breach_duration_secs: this.fb.control(0, { validators: [
         Validators.min(AutoscalerConstants.PolicyDefaultSetting.breach_duration_secs_min),
@@ -134,7 +132,6 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
       metric_type: this.editMetricType,
       operator: this.currentPolicy.scaling_rules_form[index].operator,
       threshold: this.currentPolicy.scaling_rules_form[index].threshold,
-      unit: this.currentPolicy.scaling_rules_form[index].unit || '',
       adjustment: Math.abs(Number(this.currentPolicy.scaling_rules_form[index].adjustment)),
       breach_duration_secs: this.currentPolicy.scaling_rules_form[index].breach_duration_secs ?? 0,
       cool_down_secs: this.currentPolicy.scaling_rules_form[index].cool_down_secs ?? 0,
@@ -150,7 +147,6 @@ export class EditAutoscalerPolicyStep2Component extends EditAutoscalerPolicyDire
     this.currentPolicy.scaling_rules_form[this.editIndex].metric_type = this.editTriggerForm.get('metric_type')?.value ?? '';
     this.currentPolicy.scaling_rules_form[this.editIndex].operator = this.editTriggerForm.get('operator')?.value ?? '';
     this.currentPolicy.scaling_rules_form[this.editIndex].threshold = this.editTriggerForm.get('threshold')?.value ?? 0;
-    this.currentPolicy.scaling_rules_form[this.editIndex].unit = this.editTriggerForm.get('unit')?.value ?? '';
     this.currentPolicy.scaling_rules_form[this.editIndex].adjustment = adjustmentM;
     const breachDuration = this.editTriggerForm.get('breach_duration_secs')?.value ?? 0;
     if (breachDuration) {
