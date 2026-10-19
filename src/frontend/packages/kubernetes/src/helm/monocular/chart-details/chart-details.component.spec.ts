@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Subject, of } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 
 import { EntitySummaryTitleComponent } from '@stratosui/core';
@@ -66,5 +67,47 @@ describe('ChartDetailsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+});
+
+describe('ChartDetailsComponent loading', () => {
+  let fixture: ComponentFixture<ChartDetailsComponent>;
+  let chart: Subject<any>;
+  // chart-details-info reads the schema once the chart renders
+  const charts = Object.assign(new MockChartService(), { getChartSchema: () => of(null) });
+
+  beforeEach(async () => {
+    chart = new Subject<any>();
+    vi.spyOn(charts, 'getChart').mockReturnValue(chart);
+    await TestBed.configureTestingModule({
+      imports: [...BaseTestModulesNoShared, HelmTestingModule, ChartDetailsComponent],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        { provide: ChartsService, useValue: charts },
+        { provide: ConfigService, useValue: { appName: 'appName' } },
+        { provide: ActivatedRoute, useValue: {
+          params: { forEach: (fn: any) => fn({ repo: 'incubator', chartName: 'test' }) },
+          snapshot: { params: { endpoint: 'stratos' }, queryParams: {} }
+        }},
+        provideZonelessChangeDetection()
+      ]
+    }).compileComponents();
+    fixture = TestBed.createComponent(ChartDetailsComponent);
+    fixture.detectChanges();
+  });
+
+  it('shows the spinner while the chart loads, then the chart', async () => {
+    await new Promise(resolve => setTimeout(resolve, 150));
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('app-busy')).not.toBeNull();
+
+    const mockChart = await new Promise<any>(resolve => new MockChartService().getChart().subscribe(resolve));
+    chart.next(mockChart);
+    chart.complete();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('app-busy')).toBeNull();
+    expect(fixture.nativeElement.querySelector('app-chart-details-readme')).not.toBeNull();
   });
 });
