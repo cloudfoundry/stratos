@@ -2,6 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { KubeEndpointEviction } from '../../../services/endpoint-data/kube-endpoint-eviction';
 import { HelmRelease, HelmReleaseGraph, HelmReleaseResources, HelmReleaseRevision } from '../workload.types';
 
 // Signal-native data surface for the single helm-release detail page.
@@ -25,6 +26,20 @@ export class HelmReleaseDataService {
   private readonly _history = new Map<string, WritableSignal<HelmReleaseRevision[] | undefined>>();
   private readonly _graph = new Map<string, WritableSignal<HelmReleaseGraph | undefined>>();
   private readonly _resources = new Map<string, WritableSignal<HelmReleaseResources | undefined>>();
+
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid => this.evictEndpoint(kubeGuid));
+  }
+
+  // Blank rather than delete, so a page holding these signals keeps a
+  // live identity and sees the reconnect's writes.
+  private evictEndpoint(kubeGuid: string): void {
+    for (const map of [this._detail, this._history, this._graph, this._resources]) {
+      map.forEach((s: WritableSignal<unknown>, key) => {
+        if (key.startsWith(`${kubeGuid}:`)) s.set(undefined);
+      });
+    }
+  }
 
   private guid(endpoint: string, namespace: string, name: string): string {
     return `${endpoint}:${namespace}:${name}`;

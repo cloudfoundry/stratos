@@ -5,6 +5,7 @@ import { catchError, map, shareReplay } from 'rxjs/operators';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KubePod, KubePodContainerStatus, StratosError } from '../endpoint-data/kube-types';
 
 // Per-resource domain service for k8s pods. Mirrors KubeNamespaceDataService
@@ -51,6 +52,10 @@ export class KubePodDataService {
   private readonly _byScope = signal<Map<string, CacheEntry>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
   private readonly _unavailable = signal<Set<string>>(new Set());
+
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid => this.evictEndpoint(kubeGuid));
+  }
 
   errors(): Signal<StratosError[]> {
     return this._errors.asReadonly();
@@ -145,6 +150,14 @@ export class KubePodDataService {
       complete: () => POD_FETCH_DEDUPE.delete(key),
       error: () => POD_FETCH_DEDUPE.delete(key),
     });
+  }
+
+  // Every key format has the kubeGuid as its second segment.
+  private evictEndpoint(kubeGuid: string): void {
+    const owned = (key: string) => key.split(':')[1] === kubeGuid;
+    evictKeys(this._byScope, owned);
+    [...POD_FETCH_DEDUPE.keys()].filter(owned).forEach(key => POD_FETCH_DEDUPE.delete(key));
+    this._unavailable.update(curr => [...curr].some(owned) ? new Set([...curr].filter(key => !owned(key))) : curr);
   }
 
   private invalidate(key: string): void {

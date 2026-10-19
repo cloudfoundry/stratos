@@ -1,4 +1,5 @@
 import { HttpClient } from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { describe, expect, it } from 'vitest';
 import { KubeGenericResourceConfig, KubeGenericResourceDataServiceBase } from './kube-generic-resource-data.base';
@@ -23,9 +24,12 @@ class DeletableTestService extends KubeGenericResourceDataServiceBase<{ metadata
   };
 }
 
+// The base registers with the root eviction bus, so build in DI context.
+const build = <S>(ctor: new () => S): S => TestBed.runInInjectionContext(() => new ctor());
+
 describe('KubeGenericResourceDataServiceBase workload scope', () => {
   it('setWorkloadItems stores items readable via itemsInWorkload, keyed by release', () => {
-    const svc = new TestResourceService();
+    const svc = build(TestResourceService);
     expect(svc.itemsInWorkload('cnsi-1', 'ns-a', 'rel-x')()).toEqual([]);
     svc.setWorkloadItems('cnsi-1', 'ns-a', 'rel-x', [{ metadata: { name: 'r1' } } as any]);
     const out = svc.itemsInWorkload('cnsi-1', 'ns-a', 'rel-x')();
@@ -38,7 +42,7 @@ describe('KubeGenericResourceDataServiceBase workload scope', () => {
 
 describe('KubeGenericResourceDataServiceBase delete', () => {
   it('DELETEs the namespaced resource URL with the cnsi header and drops the row from workload scope', async () => {
-    const svc = new DeletableTestService();
+    const svc = build(DeletableTestService);
     svc.setWorkloadItems('cnsi-1', 'ns-a', 'rel-x', [
       { metadata: { name: 'r1', namespace: 'ns-a' } } as any,
       { metadata: { name: 'r2', namespace: 'ns-a' } } as any,
@@ -52,7 +56,7 @@ describe('KubeGenericResourceDataServiceBase delete', () => {
   });
 
   it('drops the deleted row from cluster and namespace scopes too', async () => {
-    const svc = new DeletableTestService();
+    const svc = build(DeletableTestService);
     (svc as any)['_clusterItems'].set(new Map([['cnsi-1', [{ metadata: { name: 'r1' }, kubeGuid: 'cnsi-1' }]]]));
     svc.setWorkloadItems('cnsi-1', 'ns-a', 'rel-x', [{ metadata: { name: 'r1', namespace: 'ns-a' } } as any]);
     await svc.delete('cnsi-1', 'r1', 'ns-a');
@@ -61,7 +65,7 @@ describe('KubeGenericResourceDataServiceBase delete', () => {
   });
 
   it('uses the cluster URL form when no namespace is given', async () => {
-    const svc = new DeletableTestService();
+    const svc = build(DeletableTestService);
     (svc as any).config = { apiPath: '/api/v1', resourceName: 'persistentvolumes', namespaced: false, title: 'pv' };
     await svc.delete('cnsi-1', 'pv1');
     expect(svc.lastDelete?.url).toBe('/pp/v1/proxy/api/v1/persistentvolumes/pv1');

@@ -21,10 +21,6 @@ export class KubeNamespaceDataService {
   private readonly http = inject(HttpClient);
   private readonly registry = inject(KubeEndpointDataRegistry);
 
-  // Per-endpoint independent fetch cache. Used for refresh() — the
-  // primary read path goes through registry.getService(kubeGuid)
-  // .namespaces() so multiple consumers on the same endpoint share data.
-  private readonly _directNamespaces = signal<Map<string, KubeNamespace[]>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
 
   // Returns a signal projecting the namespaces cached on the per-endpoint
@@ -74,8 +70,9 @@ export class KubeNamespaceDataService {
   // Direct fetch escape-hatch — bypasses the per-endpoint cache. Used
   // by ad-hoc consumers (e.g. dropdown population on a wizard) that
   // want a snapshot but don't need to share the result with the page-
-  // level signal. Returns the raw items; errors are accumulated on the
-  // service-level errors signal.
+  // level signal. Returns the raw items without caching them, so a
+  // disconnected endpoint leaves nothing behind; errors are accumulated
+  // on the service-level errors signal.
   async fetchDirect(kubeGuid: string): Promise<KubeNamespace[]> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     try {
@@ -84,17 +81,11 @@ export class KubeNamespaceDataService {
         { headers },
       ));
       const list = resp?.[kubeGuid];
-      const items = (list?.items ?? []).map(ns => ({
+      return (list?.items ?? []).map(ns => ({
         ...ns,
         kubeGuid,
         metadata: { ...(ns.metadata ?? { name: '' }), kubeId: kubeGuid },
       }));
-      this._directNamespaces.update(curr => {
-        const next = new Map(curr);
-        next.set(kubeGuid, items);
-        return next;
-      });
-      return items;
     } catch (err) {
       const status = (err as HttpErrorResponse)?.status;
       const code: StratosError['code'] = status === 401 || status === 403 ? 'UNAUTHORIZED' : 'FETCH_ERROR';

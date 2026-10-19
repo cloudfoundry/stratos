@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { KubeEndpoint, KubeService, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 
 // Per-resource domain service for k8s Services AND Endpoints. Folds the
 // `kubernetes-endpoints` page's k8s Endpoints fetch in here because the
@@ -34,6 +35,16 @@ export class KubeServiceDataService {
   private readonly _workloadServices = signal<Map<string, KubeService[]>>(new Map());
   private readonly _clusterEndpoints = signal<Map<string, KubeEndpoint[]>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid => {
+      const owned = (key: string) => key === kubeGuid || key.startsWith(`${kubeGuid}/`);
+      evictKeys(this._clusterServices, owned);
+      evictKeys(this._namespaceServices, owned);
+      evictKeys(this._workloadServices, owned);
+      evictKeys(this._clusterEndpoints, owned);
+    });
+  }
 
   // ---- Read API ----------------------------------------------------------
 

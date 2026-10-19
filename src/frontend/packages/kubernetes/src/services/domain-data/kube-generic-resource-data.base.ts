@@ -1,7 +1,8 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Signal, computed, signal } from '@angular/core';
+import { Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { KubeEndpointEviction, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { StratosError } from '../endpoint-data/kube-types';
 
@@ -38,6 +39,15 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   private readonly _namespaceItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _workloadItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid => {
+      const owned = (key: string) => key === kubeGuid || key.startsWith(`${kubeGuid}/`);
+      evictKeys(this._clusterItems, owned);
+      evictKeys(this._namespaceItems, owned);
+      evictKeys(this._workloadItems, owned);
+    });
+  }
 
   // ---- Read API ----------------------------------------------------------
 

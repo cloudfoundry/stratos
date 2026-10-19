@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { KubeEndpointEviction } from './kube-endpoint-eviction';
 import {
   HelmInstallPayload,
   HelmRelease,
@@ -60,6 +61,13 @@ export class KubeHelmDataService {
     ...this._releaseErrors(),
     ...this._chartErrors(),
   ]);
+
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid =>
+      this._releases.update(curr => curr.some(r => r.endpointId === kubeGuid)
+        ? curr.filter(r => r.endpointId !== kubeGuid)
+        : curr));
+  }
 
   // --- Public read API ---
 

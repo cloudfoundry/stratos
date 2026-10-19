@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
 import { KubeNode, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 
 // Per-resource domain service for k8s nodes. Same shape as
 // KubeNamespaceDataService — caches per-endpoint node lists, exposes
@@ -23,6 +24,10 @@ export class KubeNodeDataService {
   // this cache so multiple pages on the same endpoint share one fetch.
   private readonly _nodes = signal<Map<string, KubeNode[]>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid => evictKeys(this._nodes, key => key === kubeGuid));
+  }
 
   // Signal projecting the cached nodes for a given endpoint. Composed
   // via computed() so consumers re-render when the underlying map

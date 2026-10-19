@@ -5,6 +5,7 @@ import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
 
 import { KubeScoreReportHelper } from '../../kubernetes/services/kubescore-report.helper';
 import { PopeyeReportHelper } from '../../kubernetes/services/popeye-report.helper';
+import { KubeEndpointEviction, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { AnalysisReport, StratosError } from '../endpoint-data/kube-types';
 
 // Per-endpoint cache TTL — 60s mirrors the design doc's K8s-rate-limit
@@ -61,6 +62,14 @@ export class KubeAnalysisDataService {
   // capped at 50 entries; older entries are dropped.
   readonly errorsSignal: Signal<StratosError[]> = this._errors.asReadonly();
   readonly unavailable: Signal<string[]> = this._unavailable.asReadonly();
+
+  constructor() {
+    inject(KubeEndpointEviction).register(kubeGuid => {
+      evictKeys(this._byEndpoint, key => key === kubeGuid);
+      evictKeys(this._byId, key => key.startsWith(`${kubeGuid}:`));
+      this._unavailable.update(curr => curr.includes(kubeGuid) ? curr.filter(g => g !== kubeGuid) : curr);
+    });
+  }
 
   // Signal projection of the report list for a single endpoint. Returns
   // an empty array until a fetch completes — call `refresh({ kubeGuid })`
