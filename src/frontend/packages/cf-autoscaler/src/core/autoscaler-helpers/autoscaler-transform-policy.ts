@@ -90,9 +90,6 @@ export function autoscalerTransformMapToArray(oldPolicy: AppAutoscalerPolicyLoca
       operator: trigger.operator,
       threshold: trigger.threshold
     };
-    if (AutoscalerConstants.getMetricUnit(trigger.metric_type) === '' && trigger.unit && trigger.unit !== '') {
-      newTrigger.unit = trigger.unit;
-    }
     return newTrigger;
   });
   if (scalingRules.length > 0) {

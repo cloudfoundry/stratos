@@ -340,6 +340,21 @@ describe('Autoscaler Transform Policy Helper', () => {
     expect(saved.configuration).toEqual(policy.configuration);
   });
 
+  // The autoscaler's rule model has no unit, so a custom metric unit sent
+  // with the policy was dropped; the editor no longer collects one.
+  it('sends no unit with a custom metric rule', () => {
+    const local = autoscalerTransformArrayToMap({
+      instance_min_count: 1,
+      instance_max_count: 4,
+      scaling_rules: [{
+        metric_type: 'queue_length', operator: '>', threshold: 5, adjustment: '+1',
+        breach_duration_secs: 120, cool_down_secs: 300, unit: 'jobs',
+      }],
+    } as AppAutoscalerPolicy);
+    const saved = autoscalerTransformMapToArray(local);
+    expect(saved.scaling_rules?.[0]).not.toHaveProperty('unit');
+  });
+
   it('preserves cool_down_secs distinct from breach_duration_secs (regression)', () => {
     const local = {
       instance_min_count: 1,

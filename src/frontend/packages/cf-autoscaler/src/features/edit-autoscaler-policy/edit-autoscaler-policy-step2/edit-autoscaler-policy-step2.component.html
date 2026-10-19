@@ -55,11 +55,6 @@
                         <input type="number" name="threshold" formControlName="threshold" required
                           placeholder="Threshold" class="input-sm">
                       </div>
-                      @if (getMetricUnit(editMetricType) === '') {
-                        <div class="form-group min-w-0 shrink-0">
-                          <input type="text" name="unit" formControlName="unit" placeholder="Unit" class="input-sm">
-                        </div>
-                      }
                       <span>{{getMetricUnit(editMetricType)}} for</span>
                       <div class="form-group min-w-0 shrink-0">
                         <input type="number" name="breach_duration_secs" formControlName="breach_duration_secs"
