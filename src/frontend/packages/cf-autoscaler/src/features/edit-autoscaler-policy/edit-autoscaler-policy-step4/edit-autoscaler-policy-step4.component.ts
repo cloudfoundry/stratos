@@ -180,7 +180,7 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
   validateSpecificDateInitialMin(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editSpecificDateForm && numberWithFractionOrExceedRange(control.value,
-        this.editSpecificDateForm.controls.instance_min_count.value, this.editSpecificDateForm.controls.instance_max_count.value + 1, false);
+        this.editSpecificDateForm.controls.instance_min_count.value, this.editSpecificDateForm.controls.instance_max_count.value, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
     };
   }

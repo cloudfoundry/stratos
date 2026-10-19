@@ -218,7 +218,7 @@ export class EditAutoscalerPolicyStep3Component extends EditAutoscalerPolicyDire
       const minValue = this.editRecurringScheduleForm?.get('instance_min_count')?.value ?? 0;
       const maxValue = this.editRecurringScheduleForm?.get('instance_max_count')?.value ?? Number.MAX_VALUE;
       const invalid = this.editRecurringScheduleForm &&
-        numberWithFractionOrExceedRange(control.value, minValue, maxValue + 1, false);
+        numberWithFractionOrExceedRange(control.value, minValue, maxValue, false);
       return invalid ? { alertInvalidPolicyInitialMaximumRange: { value: control.value } } : null;
     };
   }
