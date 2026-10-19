@@ -5,6 +5,7 @@ import { firstValueFrom } from 'rxjs';
 import { environment } from '@stratosui/core';
 
 import { AutoscalerInfo } from '../../store/app-autoscaler.types';
+import { autoscalerErrorMessage } from '../../core/autoscaler-helpers/autoscaler-util';
 
 // Per-endpoint state held in one signal-of-map. Keyed by endpointGuid
 // so multiple CF endpoints can be queried independently from the same
@@ -97,7 +98,7 @@ export class AutoscalerInfoDataService {
         this.patch(endpointGuid, { info: null, loading: false, error: null });
         return;
       }
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, { info: null, loading: false, error: message });
     }
   }

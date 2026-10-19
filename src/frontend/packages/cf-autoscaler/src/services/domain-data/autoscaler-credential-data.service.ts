@@ -1,10 +1,11 @@
-import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { environment } from '@stratosui/core';
 
 import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
+import { autoscalerErrorMessage } from '../../core/autoscaler-helpers/autoscaler-util';
 
 // Per-(endpoint, app) state. Keyed by `${endpointGuid}::${appGuid}` so a
 // single service instance can manage credentials for multiple apps across
@@ -70,7 +71,7 @@ export class AutoscalerCredentialDataService {
       this.patch(endpointGuid, appGuid, { credential: result, loading: false, error: null });
       return result;
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }
@@ -83,7 +84,7 @@ export class AutoscalerCredentialDataService {
       await firstValueFrom(this.http.delete(this.url(appGuid), { headers }));
       this.patch(endpointGuid, appGuid, { credential: null, loading: false, error: null });
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }

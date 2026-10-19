@@ -9,6 +9,7 @@ import {
   autoscalerTransformMapToArray,
 } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { AppAutoscalerPolicy, AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
+import { autoscalerErrorMessage } from '../../core/autoscaler-helpers/autoscaler-util';
 
 interface PolicyState {
   policy: AppAutoscalerPolicyLocal | null;
@@ -101,7 +102,7 @@ export class AutoscalerPolicyDataService {
         this.patch(endpointGuid, appGuid, { policy: null, loading: false, error: null, noPolicy: true });
         return;
       }
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { policy: null, loading: false, error: message, noPolicy: false });
     }
   }
@@ -117,7 +118,7 @@ export class AutoscalerPolicyDataService {
       const next = autoscalerTransformArrayToMap(wire);
       this.patch(endpointGuid, appGuid, { policy: next, loading: false, error: null, noPolicy: false });
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { loading: false, error: message });
       throw err;
     }
@@ -135,7 +136,7 @@ export class AutoscalerPolicyDataService {
         noPolicy: true,
       });
     } catch (err) {
-      const message = (err as HttpErrorResponse)?.message ?? String(err);
+      const message = autoscalerErrorMessage(err);
       this.patch(endpointGuid, appGuid, { deleting: false, deletionError: message });
       throw err;
     }

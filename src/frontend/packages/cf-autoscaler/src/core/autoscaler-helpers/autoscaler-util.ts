@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
 
 import {
@@ -141,6 +142,13 @@ export const PolicyAlert = {
   alertInvalidPolicyScheduleSpecificConflict: 'Specific date configuration conflict occurs.',
   alertInvalidPolicyTriggerScheduleEmpty: 'At least one Scaling Rule or Schedule should be defined.',
 };
+
+// The autoscaler API gives its reason as {"error": "..."}; the request's own
+// message only names the URL and the status
+export function autoscalerErrorMessage(err: unknown): string {
+  const reason = (err as HttpErrorResponse)?.error?.error;
+  return typeof reason === 'string' ? reason : (err as HttpErrorResponse)?.message ?? String(err);
+}
 
 export function isEqual(a: any, b: any): boolean {
   if (typeof a !== typeof b) {
