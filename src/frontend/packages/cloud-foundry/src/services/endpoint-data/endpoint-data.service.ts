@@ -181,8 +181,8 @@ export class EndpointDataService {
   ) {}
 
   // load() populates counts + the 10 most-recent apps via fast per_page=1/10
-  // backend calls. Fires loadDetails() in the background on completion so
-  // the full orgs/apps/spaces arrays are populated for detail views.
+  // backend calls. It does not load the full orgs/apps/spaces arrays;
+  // detail views call loadDetails() (or a loadX()) for those.
   load(): Observable<void> {
     this.diagnostics?.emitCounter('service-call-count', { service: 'EndpointDataService', method: 'load' });
     // Warm-cache short-circuit: signals already populated, no network needed.
