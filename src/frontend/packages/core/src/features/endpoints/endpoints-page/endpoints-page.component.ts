@@ -23,6 +23,7 @@ import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos
 import { safeUnsubscribe } from '../../../core/utils.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
+import { ListSubNavComponent } from '../../../shared/components/list-sub-nav/list-sub-nav.component';
 import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
@@ -44,7 +45,8 @@ import { AppAreaLoaderComponent } from '../../../shared/components/area-loader/a
     PageHeaderComponent,
     EndpointsSignalListComponent,
     EndpointsMissingComponent,
-    EndpointRegisterModalComponent
+    EndpointRegisterModalComponent,
+    ListSubNavComponent
   ]
 })
 export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit {
@@ -83,6 +85,9 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     visible: this.canRegisterEndpoint,
     invoke: () => this.openRegisterModal(),
   };
+
+  /** Count for the sub-nav shown when no endpoints are registered. */
+  public readonly noEndpoints = signal(0);
 
   public canBackupRestore$: Observable<boolean>;
   public showRegisterModal = false;
