@@ -43,7 +43,6 @@ export const E2E_LEGACY_FILES = [
   "e2e/pages/cloud-foundry/cf-level/config-invite-client-dialog.page.ts",
   "e2e/pages/cloud-foundry/manage-users.page.ts",
   "e2e/pages/cloud-foundry/org-level/cf-org-level.page.ts",
-  "e2e/pages/cloud-foundry/remove-users.page.ts",
   "e2e/pages/endpoints/endpoints.page.ts",
   "e2e/pages/endpoints/register-dialog.page.ts",
   "e2e/pages/marketplace/base-create-service-instance-stepper.page.ts",
