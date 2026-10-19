@@ -12,8 +12,14 @@ import {
 
 export class AutoscalerConstants {
   public static S2NS = 1000000000;
-  public static MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu'];
-  public static MetricPercentageTypes = ['memoryutil'];
+  public static MetricTypes = ['memoryused', 'memoryutil', 'responsetime', 'throughput', 'cpu', 'cpuutil', 'disk', 'diskutil'];
+  // Utilization metrics: their charts are drawn on a 0-100 scale.
+  public static MetricPercentageTypes = ['memoryutil', 'cpuutil', 'diskutil'];
+  // The autoscaler's default threshold limits (an operator can change
+  // them; its validation message covers that case). Lower bound is 1.
+  public static MetricThresholdMax: { [metricName: string]: number } = {
+    memoryutil: 100, cpu: 100, cpuutil: 100, diskutil: 100, disk: 2048,
+  };
   public static ScaleTypes = ['upper', 'lower'];
   public static UpperOperators = ['>', '>='];
   public static LowerOperators = ['<', '<='];
@@ -86,6 +92,18 @@ export class AutoscalerConstants {
     cpu: {
       unit_internal: ' % ',
       interval: 40,
+    },
+    cpuutil: {
+      unit_internal: ' % ',
+      interval: 40,
+    },
+    disk: {
+      unit_internal: 'MB',
+      interval: 40,
+    },
+    diskutil: {
+      unit_internal: ' % ',
+      interval: 40,
     }
   };
 
@@ -95,6 +113,10 @@ export class AutoscalerConstants {
     } else {
       return unit || '';
     }
+  }
+
+  public static getMetricThresholdMax(metricType: string): number | undefined {
+    return AutoscalerConstants.MetricThresholdMax[metricType];
   }
 
   public static getMetricInterval(metricType: string) {
@@ -122,7 +144,7 @@ export const PolicyAlert = {
   alertInvalidPolicyTriggerMetricName: 'Invalid metric type name, only combination of letters, numbers and underlines "_" are allowed.',
   alertInvalidPolicyTriggerUpperThresholdRange: 'The Upper Threshold value must be an integer greater than the Lower Threshold value.',
   alertInvalidPolicyTriggerLowerThresholdRange: 'The Lower Threshold value must be an integer between 1 and (Upper Threshold-1).',
-  alertInvalidPolicyTriggerThreshold100: 'The Lower/Upper Threshold value of memoryutil must be an integer below or equal to 100.',
+  alertInvalidPolicyTriggerThreshold100: 'The threshold must be an integer from 1 to 100 for cpu, cpuutil, diskutil and memoryutil, and from 1 to 2048 (MB) for disk.',
   alertInvalidPolicyTriggerStepPercentageRange: 'The Instance Step Up/Down percentage must be an integer greater than 1.',
   alertInvalidPolicyTriggerStepRange: 'The Instance Step Up/Down value must be an integer between 1 and (Maximum Instance-1).',
   alertInvalidPolicyTriggerBreachDurationRange:
