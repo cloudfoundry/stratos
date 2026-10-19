@@ -155,12 +155,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private injector = inject(Injector);
 
 
-  // Signal-native replacement for the legacy `canManageCredentials$`
-  // Observable. Bound directly in the template via `canManageCredentials()`.
-  // Source data comes from the per-endpoint cache populated by load()
-  // in ngOnInit.
-  canManageCredentials!: Signal<boolean>;
-
   scalingRuleColumns: string[] = ['metric', 'condition', 'action'];
   specificDateColumns: string[] = ['from', 'to', 'init', 'min', 'max'];
   recurringScheduleColumns: string[] = ['effect', 'repeat', 'from', 'to', 'init', 'min', 'max'];
@@ -249,13 +243,10 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
 
     // Trigger autoscaler info fetch via the signal-native data service
     // (replaces the legacy fetchAutoscalerInfo helper + Store/Effects
-    // path). canManageCredentials() reads the cached per-endpoint
-    // signal — its value reflects whether the autoscaler build is
-    // >= 3.x and credential management is exposed.
+    // path).
     const cfGuid = this.applicationService.cfGuid;
     const appGuid = this.applicationService.appGuid;
     this.autoscalerInfoData.load(cfGuid);
-    this.canManageCredentials = this.autoscalerInfoData.canManageCredentials(cfGuid);
 
     // Policy state from the signal-native data service, fetched below. The
     // policy signal holds null while loading (or with no policy) and the
@@ -444,15 +435,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   getMetricUnit(metricType: string, unit?: string) {
     return AutoscalerConstants.getMetricUnit(metricType, unit);
   }
-
-  manageCredentialPage = () => {
-    void this.router.navigate([
-      'autoscaler',
-      this.applicationService.cfGuid,
-      this.applicationService.appGuid,
-      'edit-autoscaler-credential',
-    ]);
-  };
 
   public gaugeOptions = {
     responsive: true,

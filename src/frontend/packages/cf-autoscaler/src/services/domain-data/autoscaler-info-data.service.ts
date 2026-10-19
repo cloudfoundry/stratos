@@ -30,7 +30,6 @@ const EMPTY: InfoState = { info: null, loading: false, error: null };
 //   error(guid)              — Signal<string|null> (null on 404 — that
 //                              just means autoscaler isn't configured)
 //   isAvailable(guid)        — Signal<boolean>  (info present, no error)
-//   canManageCredentials(g)  — Signal<boolean>  (build major >= 3)
 //   load(guid)               — Promise<void>; populates the cache
 @Injectable({ providedIn: 'root' })
 export class AutoscalerInfoDataService {
@@ -55,28 +54,6 @@ export class AutoscalerInfoDataService {
     return computed(() => {
       const s = this.stateFor(endpointGuid);
       return !!s.info && !s.error;
-    });
-  }
-
-  // Mirrors the legacy `canManageCredentials$` derivation in the
-  // autoscaler-tab-extension component — autoscaler builds >= 3.x
-  // expose the credential management endpoints.
-  canManageCredentials(endpointGuid: string): Signal<boolean> {
-    return computed(() => {
-      const s = this.stateFor(endpointGuid);
-      if (!s.info || s.error) {
-        return false;
-      }
-      const build = s.info.build;
-      if (!build || typeof build !== 'string') {
-        return false;
-      }
-      const parts = build.split('.');
-      if (parts.length === 0) {
-        return false;
-      }
-      const major = Number.parseInt(parts[0], 10);
-      return Number.isFinite(major) && major >= 3;
     });
   }
 

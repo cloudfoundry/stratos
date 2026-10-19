@@ -8,7 +8,6 @@ import {
 } from '@stratosui/store';
 import { AppAutoscalerEvent, AppAutoscalerHealth, AppAutoscalerPolicy, AppScalingTrigger } from './app-autoscaler.types';
 import {
-  appAutoscalerCredentialEntityType,
   appAutoscalerHealthEntityType,
   appAutoscalerInfoEntityType,
   appAutoscalerPolicyEntityType,
@@ -45,7 +44,6 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     generatePolicyTriggerEntity(endpointDefinition),
     generateHealthEntity(endpointDefinition),
     generateScalingEntity(endpointDefinition),
-    generateCredentialEntity(endpointDefinition),
   ];
 }
 
@@ -58,15 +56,6 @@ function generatePolicyEntity(endpointDefinition: StratosEndpointExtensionDefini
   const definition = {
     type: appAutoscalerPolicyEntityType,
     schema: autoscalerEntityFactory(appAutoscalerPolicyEntityType),
-    endpoint: endpointDefinition
-  };
-  return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);
-}
-
-function generateCredentialEntity(endpointDefinition: StratosEndpointExtensionDefinition) {
-  const definition = {
-    type: appAutoscalerCredentialEntityType,
-    schema: autoscalerEntityFactory(appAutoscalerCredentialEntityType),
     endpoint: endpointDefinition
   };
   return new StratosCatalogEntity<IFavoriteMetadata, APIResource<AppAutoscalerPolicy>>(definition);

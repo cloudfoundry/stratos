@@ -75,25 +75,6 @@ describe('AutoscalerInfoDataService', () => {
     expect(svc.isAvailable(ENDPOINT_GUID)()).toBe(false);
   });
 
-  it('canManageCredentials returns true only when build major >= 3', async () => {
-    const p1 = svc.load(ENDPOINT_GUID);
-    httpMock.expectOne(INFO_URL).flush({ name: 'as', build: '2.5.1', support: '', description: '' });
-    await p1;
-    expect(svc.canManageCredentials(ENDPOINT_GUID)()).toBe(false);
-
-    const p2 = svc.load(ENDPOINT_GUID);
-    httpMock.expectOne(INFO_URL).flush({ name: 'as', build: '3.0.0', support: '', description: '' });
-    await p2;
-    expect(svc.canManageCredentials(ENDPOINT_GUID)()).toBe(true);
-  });
-
-  it('canManageCredentials handles missing or malformed build strings', async () => {
-    const p1 = svc.load(ENDPOINT_GUID);
-    httpMock.expectOne(INFO_URL).flush({ name: 'as', build: undefined as unknown as string, support: '', description: '' });
-    await p1;
-    expect(svc.canManageCredentials(ENDPOINT_GUID)()).toBe(false);
-  });
-
   it('per-endpoint state is isolated', async () => {
     const p1 = svc.load('cf-a');
     httpMock.expectOne(INFO_URL).flush({ name: 'as', build: '3.0.0', support: '', description: '' });

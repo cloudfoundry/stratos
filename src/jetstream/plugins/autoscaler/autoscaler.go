@@ -81,26 +81,6 @@ func (a *Autoscaler) getAutoscalerEvent(echoContext *echo.Context) error {
 	return a.portalProxy.SendProxiedResponse(echoContext, responses)
 }
 
-func (a *Autoscaler) createAutoscalerCredential(echoContext *echo.Context) error {
-	appID := echoContext.Param("appId")
-	credentialURL, _ := url.Parse("/v1/apps/" + appID + "/credential")
-	responses, err := a.portalProxy.ProxyRequest(echoContext, credentialURL)
-	if err != nil {
-		return err
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
-}
-
-func (a *Autoscaler) deleteAutoscalerCredential(echoContext *echo.Context) error {
-	appID := echoContext.Param("appId")
-	credentialURL, _ := url.Parse("/v1/apps/" + appID + "/credential")
-	responses, err := a.portalProxy.ProxyRequest(echoContext, credentialURL)
-	if err != nil {
-		return err
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
-}
-
 // historyQuery builds the query for the autoscaler's history endpoints from
 // the request's. Only parameters the caller sent are forwarded: the
 // autoscaler rejects an empty value.

@@ -11,13 +11,6 @@
         <app-custom-icon class="mr-1.5">delete</app-custom-icon> Delete Policy
       </span>
     </button>
-    @if (canManageCredentials()) {
-      <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="credential" (click)="manageCredentialPage()">
-        <span class="flex items-center">
-          <app-custom-icon class="mr-1.5">vpn_key</app-custom-icon> Manage Credentials
-        </span>
-      </button>
-    }
   } @else if (noPolicy()) {
     <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="add" (click)="updatePolicyPage(true)">
       <span class="flex items-center">
