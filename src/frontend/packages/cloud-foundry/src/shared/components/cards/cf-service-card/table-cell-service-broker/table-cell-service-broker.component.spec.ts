@@ -2,7 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { TableCellServiceBrokerComponent, TableCellServiceBrokerComponentMode } from './table-cell-service-broker.component';
@@ -15,11 +15,23 @@ import { StServiceBroker, StServiceOffering, StSpace } from '../../../../../serv
 class SpaceDataRegistryStub {
   readonly space = signal<StSpace | null>(null);
   readonly loaded = new Subject<void>();
+  // One entry per load() subscription; `closed` flips when it ends.
+  loads: { key: string, closed: boolean }[] = [];
 
-  acquire(_cnsi: string, _spaceGuid: string) {
+  acquire(cnsi: string, spaceGuid: string) {
+    const key = `${cnsi}/${spaceGuid}`;
     return {
       space: this.space.asReadonly(),
-      load: (): Observable<void> => this.loaded,
+      // Reads `space` the way the real load() checks its cache.
+      load: (): Observable<void> => this.space() ? of(undefined) : new Observable<void>(subscriber => {
+        const load = { key, closed: false };
+        this.loads.push(load);
+        const inner = this.loaded.subscribe(subscriber);
+        return () => {
+          load.closed = true;
+          inner.unsubscribe();
+        };
+      }),
     };
   }
 }
@@ -71,12 +83,12 @@ describe('TableCellServiceBrokerComponent', () => {
     component = fixture.componentInstance;
   });
 
-  it('should create', () => {
-    fixture.detectChanges();
+  it('should create', async () => {
+    await fixture.whenStable();
     expect(component).toBeTruthy();
   });
 
-  it('resolves broker via ServiceCatalogDataService when row is assigned', () => {
+  it('resolves broker via ServiceCatalogDataService when row is assigned', async () => {
     component.config = { mode: TableCellServiceBrokerComponentMode.NAME };
     const offering: StServiceOffering = {
       guid: 'svc-1',
@@ -86,7 +98,7 @@ describe('TableCellServiceBrokerComponent', () => {
       createdAt: '2026-01-01T00:00:00Z',
     };
     component.row = offering;
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(lastBrokerLookup).toEqual({ cnsiGuid: 'cnsi-1', brokerGuid: 'broker-7' });
     expect(component.broker()?.name).toBe('global-broker');
@@ -127,8 +139,46 @@ describe('TableCellServiceBrokerComponent', () => {
     spaceStub.loaded.next();
     await fixture.whenStable();
 
+    // The space landing must not start a second load.
+    expect(spaceStub.loads).toEqual([{ key: 'cnsi-1/space-1', closed: false }]);
     const link = host.querySelector('a');
     expect(link?.textContent).toBe('broker-space');
     expect(link?.getAttribute('href')).toBe('/cloud-foundry/cnsi-1/organizations/org-1/spaces/space-1/summary');
+  });
+
+  it('ends the previous space load when the space swaps, and the current one on destroy', async () => {
+    const inSpace = (guid: string): StServiceBroker => ({
+      guid: 'broker-7',
+      name: 'space-broker',
+      url: 'https://b.example',
+      space: { guid },
+      labels: {},
+      annotations: {},
+      cnsiGuid: 'cnsi-1',
+      createdAt: '',
+      updatedAt: '',
+    });
+    lateBroker = signal<StServiceBroker | null>(inSpace('space-a'));
+    component.config = { mode: TableCellServiceBrokerComponentMode.SCOPE };
+    component.row = {
+      guid: 'svc-1',
+      cnsiGuid: 'cnsi-1',
+      name: 'svc',
+      broker: { guid: 'broker-7' },
+      createdAt: '2026-01-01T00:00:00Z',
+    };
+    await fixture.whenStable();
+    expect(spaceStub.loads).toEqual([{ key: 'cnsi-1/space-a', closed: false }]);
+
+    // Swap while the first load is still pending.
+    lateBroker.set(inSpace('space-b'));
+    await fixture.whenStable();
+    expect(spaceStub.loads).toEqual([
+      { key: 'cnsi-1/space-a', closed: true },
+      { key: 'cnsi-1/space-b', closed: false },
+    ]);
+
+    fixture.destroy();
+    expect(spaceStub.loads.every(load => load.closed)).toBe(true);
   });
 });

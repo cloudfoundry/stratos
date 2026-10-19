@@ -3,7 +3,7 @@ import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@an
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -46,12 +46,24 @@ class SpaceDataRegistryStub {
   readonly space = signal<StSpace | null>(null);
   readonly loaded = new Subject<void>();
   acquired: string[] = [];
+  // One entry per load() subscription; `closed` flips when it ends.
+  loads: { key: string, closed: boolean }[] = [];
 
   acquire(cnsi: string, spaceGuid: string) {
-    this.acquired.push(`${cnsi}/${spaceGuid}`);
+    const key = `${cnsi}/${spaceGuid}`;
+    this.acquired.push(key);
     return {
       space: this.space.asReadonly(),
-      load: (): Observable<void> => this.loaded,
+      // Reads `space` the way the real load() checks its cache.
+      load: (): Observable<void> => this.space() ? of(undefined) : new Observable<void>(subscriber => {
+        const load = { key, closed: false };
+        this.loads.push(load);
+        const inner = this.loaded.subscribe(subscriber);
+        return () => {
+          load.closed = true;
+          inner.unsubscribe();
+        };
+      }),
     };
   }
 
@@ -174,10 +186,34 @@ describe('ServiceBrokerCardComponent', () => {
     } as StSpace);
     await fixture.whenStable();
 
+    // The space landing must not start a second load.
+    expect(spaceStub.loads).toEqual([{ key: 'test-cf-guid/space-guid', closed: false }]);
     const link = (fixture.nativeElement as HTMLElement).querySelector('a[href*="/spaces/"]');
     expect(link?.textContent).toBe('broker-space');
     expect(link?.getAttribute('href')).toBe(
       '/cloud-foundry/test-cf-guid/organizations/org-guid/spaces/space-guid/summary',
     );
+  });
+
+  it('ends the previous space load when the space swaps, and the current one on destroy', async () => {
+    const inSpace = (guid: string): StServiceBroker => ({ ...catalogStub.brokerResponse!, space: { guid } });
+    catalogStub.lateBroker = signal<StServiceBroker | null>(inSpace('space-a'));
+    fixture = TestBed.createComponent(ServiceBrokerCardComponent);
+    component = fixture.componentInstance;
+    component.cfGuid = 'test-cf-guid';
+    component.brokerGuid = catalogStub.brokerResponse!.guid;
+    await fixture.whenStable();
+    expect(spaceStub.loads).toEqual([{ key: 'test-cf-guid/space-a', closed: false }]);
+
+    // Swap while the first load is still pending.
+    catalogStub.lateBroker.set(inSpace('space-b'));
+    await fixture.whenStable();
+    expect(spaceStub.loads).toEqual([
+      { key: 'test-cf-guid/space-a', closed: true },
+      { key: 'test-cf-guid/space-b', closed: false },
+    ]);
+
+    fixture.destroy();
+    expect(spaceStub.loads.every(load => load.closed)).toBe(true);
   });
 });
