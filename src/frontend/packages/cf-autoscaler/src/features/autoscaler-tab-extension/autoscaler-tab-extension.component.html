@@ -36,10 +36,10 @@
         }
         @if (policy.enabled) {
           <app-tile class="flex-[2] min-h-[200px]">
-            @if (policy.scaling_rules.length === 0) {
+            @if (!policy.scaling_rules?.length) {
               <app-card-app-usage></app-card-app-usage>
             }
-            @if (policy.scaling_rules.length > 0) {
+            @if (policy.scaling_rules?.length) {
               <app-card>
                 <app-card-header>
                   <app-card-title>Latest Metrics</app-card-title>
@@ -61,13 +61,13 @@
                     }
                   </div>
                 </app-card-content>
-                <app-card-actions class="absolute bottom-2.5 right-6 pt-0 text-right">
+                <div class="absolute bottom-2.5 right-6 pt-0 text-right">
                   <app-polling-indicator [manualPoll]="true" (poll)="loadLatestMetricsUponPolicy()">
                   </app-polling-indicator>
                   <button (click)="metricChartPage()" class="btn btn-icon" aria-label="Open metric chart">
                     <app-custom-icon>launch</app-custom-icon>
                   </button>
-                </app-card-actions>
+                </div>
               </app-card>
             }
           </app-tile>
@@ -252,7 +252,7 @@
                         </tbody>
                       </table>
                     </div>
-                    @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.recurring_schedule.length === 0) {
+                    @if (policy && policy.schedules && policy.schedules.specific_date && !policy.schedules.recurring_schedule?.length) {
                       <div class="mt-2 text-center py-8 text-content-muted"
                         >
                       No recurring schedule.</div>
@@ -326,7 +326,7 @@
                   }
                 </div>
               </app-card-content>
-              <app-card-actions class="absolute bottom-2.5 right-6 pt-0 text-right">
+              <div class="absolute bottom-2.5 right-6 pt-0 text-right">
                 <app-polling-indicator (poll)="fetchScalingHistory()"
                   [manualPoll]="!scalingHistoryLoading()"
                   [isPolling]="scalingHistoryLoading()">
@@ -334,7 +334,7 @@
                 <button (click)="scaleHistoryPage()" class="btn btn-icon" aria-label="Open scale history">
                   <app-custom-icon>launch</app-custom-icon>
                 </button>
-              </app-card-actions>
+              </div>
             </app-card>
           </app-tile>
         }

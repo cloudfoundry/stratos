@@ -15,8 +15,9 @@ import { AppStatsDataRegistry } from '../../../services/endpoint-data/app-stats-
 export class RunningInstancesComponent implements OnInit {
   private readonly registry = inject(AppStatsDataRegistry);
 
+  // Desired instance count; blank until the host has the app
+  @Input() instances?: number | null;
   // strict: required @Inputs, always bound by the host template
-  @Input() instances!: number;
   @Input() cfGuid!: string;
   @Input() appGuid!: string;
 
