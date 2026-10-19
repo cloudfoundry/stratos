@@ -17,6 +17,7 @@ import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/k
 export class KubeNodeDataService {
   private readonly http = inject(HttpClient);
   private readonly registry = inject(KubeEndpointDataRegistry);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   // Per-endpoint node cache. Independent of the endpoint-service's
   // node *count* signal (which only tracks the count for the cluster
@@ -26,7 +27,7 @@ export class KubeNodeDataService {
   private readonly _errors = signal<StratosError[]>([]);
 
   constructor() {
-    inject(KubeEndpointEviction).register(kubeGuid => {
+    this.eviction.register(kubeGuid => {
       evictKeys(this._nodes, key => key === kubeGuid);
       evictErrors(this._errors, kubeGuid);
     });
@@ -49,9 +50,13 @@ export class KubeNodeDataService {
   // Force a fresh fetch. Pushes the result into the per-endpoint cache
   // so signal projections light up. Updates the endpoint-service's node
   // *count* signal as a side-effect so the cluster summary card stays
-  // coherent.
+  // coherent. A response that lands after the endpoint was evicted
+  // carries the old credentials' data, so it is dropped; skipping the
+  // count sync also keeps the registry from rebuilding the departed entry.
   async refresh(kubeGuid: string): Promise<void> {
+    const live = this.eviction.current(kubeGuid);
     const items = await this.fetchNodes(kubeGuid);
+    if (!live()) return;
     this._nodes.update(curr => {
       const next = new Map(curr);
       next.set(kubeGuid, items);
@@ -78,6 +83,7 @@ export class KubeNodeDataService {
 
   private async fetchNodes(kubeGuid: string): Promise<KubeNode[]> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    const live = this.eviction.current(kubeGuid);
     try {
       const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeListResponse<KubeNode> }>(
         `/pp/v1/proxy/api/v1/nodes?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
@@ -99,7 +105,7 @@ export class KubeNodeDataService {
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],
       };
-      this._errors.update(curr => [...curr, next].slice(-50));
+      if (live()) this._errors.update(curr => [...curr, next].slice(-50));
       return [];
     }
   }

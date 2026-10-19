@@ -1,5 +1,5 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Injectable, Signal, computed, inject, signal } from '@angular/core';
+import { Injectable, Signal, computed, inject, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
@@ -21,22 +21,28 @@ import { KubeEndpointEviction, evictErrors } from '../endpoint-data/kube-endpoin
 export class KubeNamespaceDataService {
   private readonly http = inject(HttpClient);
   private readonly registry = inject(KubeEndpointDataRegistry);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   private readonly _errors = signal<StratosError[]>([]);
 
   // The namespace list itself lives on the per-endpoint service, which the
   // registry drops; only fetchDirect's errors are held here.
   constructor() {
-    inject(KubeEndpointEviction).register(kubeGuid => evictErrors(this._errors, kubeGuid));
+    this.eviction.register(kubeGuid => evictErrors(this._errors, kubeGuid));
   }
 
   // Returns a signal projecting the namespaces cached on the per-endpoint
   // service. Composing with `computed` keeps the projection reactive —
   // when load()/refresh() updates the underlying signal the consumer
-  // recomputes.
+  // recomputes. The registry drops that service when the endpoint leaves
+  // (the hook evicts in the same step), so the projection re-resolves it
+  // on each eviction rather than holding the orphaned instance. Untracked:
+  // the lookup may construct the service, which writes its signals.
   namespacesForEndpoint(kubeGuid: string): Signal<KubeNamespace[]> {
-    const svc = this.registry.getService(kubeGuid);
-    return computed(() => svc.namespaces());
+    return computed(() => {
+      this.eviction.epoch(kubeGuid);
+      return untracked(() => this.registry.getService(kubeGuid)).namespaces();
+    });
   }
 
   // Single-namespace projection by name — derived from the per-endpoint

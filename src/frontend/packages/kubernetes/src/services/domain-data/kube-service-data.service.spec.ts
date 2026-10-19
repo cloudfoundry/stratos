@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction } from '../endpoint-data/kube-endpoint-eviction';
 import { KubeServiceDataService } from './kube-service-data.service';
 
 const KUBE_GUID = 'kube-1';
@@ -133,6 +134,44 @@ describe('KubeServiceDataService', () => {
       req.flush(null);
       await done;
       expect(svc.servicesInWorkload('cnsi-1', 'ns-a', 'rel-x')().map(s => s.metadata.name)).toEqual(['s2']);
+    });
+  });
+  // A response already on the wire when its endpoint departs carries the
+  // old credentials' data; it must not land after the eviction.
+  describe('eviction while a load is in flight', () => {
+    const OTHER = 'kube-2';
+    const pending = (url: string, guid: string) =>
+      httpMock.expectOne(r => r.url === url && r.headers.get('x-cap-cnsi-list') === guid);
+    const listOf = (guid: string) => ({ [guid]: { items: [{ metadata: { name: 'x' } }] } });
+
+    it('drops the departed endpoint\'s late cluster lists and keeps the other\'s', async () => {
+      const a = svc.refresh({ kubeGuid: KUBE_GUID });
+      const b = svc.refresh({ kubeGuid: OTHER });
+      const reqs = [KUBE_GUID, OTHER].flatMap(g => [pending(SERVICES_URL, g), pending(ENDPOINTS_URL, g)]);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqs.forEach(r => r.flush(listOf(r.request.headers.get('x-cap-cnsi-list') as string)));
+      await Promise.all([a, b]);
+
+      expect(svc.servicesInCluster(KUBE_GUID)()).toEqual([]);
+      expect(svc.endpointsInCluster(KUBE_GUID)()).toEqual([]);
+      expect(svc.servicesInCluster(OTHER)()).toHaveLength(1);
+      expect(svc.endpointsInCluster(OTHER)()).toHaveLength(1);
+    });
+
+    it('drops the departed endpoint\'s late namespaced list and failure', async () => {
+      const ok = svc.refresh({ kubeGuid: KUBE_GUID, namespace: 'default' });
+      const okReq = pending(NS_SERVICES_URL, KUBE_GUID);
+      const failing = svc.refresh({ kubeGuid: KUBE_GUID, namespace: 'other' });
+      const failReq = pending('/pp/v1/proxy/api/v1/namespaces/other/services?limit=500', KUBE_GUID);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      okReq.flush(listOf(KUBE_GUID));
+      failReq.flush('boom', { status: 500, statusText: 'Server Error' });
+      await Promise.all([ok, failing]);
+
+      expect(svc.servicesInNamespace(KUBE_GUID, 'default')()).toEqual([]);
+      expect(svc.errors()()).toEqual([]);
     });
   });
 });

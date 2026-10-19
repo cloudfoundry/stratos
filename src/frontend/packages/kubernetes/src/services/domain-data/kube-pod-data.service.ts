@@ -45,6 +45,7 @@ interface CacheEntry {
 export class KubePodDataService {
   private readonly http = inject(HttpClient);
   private readonly registry = inject(KubeEndpointDataRegistry);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   // Per-scope-key cache of pod lists. Key formats:
   //   cluster:{kubeGuid}
@@ -55,7 +56,7 @@ export class KubePodDataService {
   private readonly _unavailable = signal<Set<string>>(new Set());
 
   constructor() {
-    inject(KubeEndpointEviction).register(kubeGuid => this.evictEndpoint(kubeGuid));
+    this.eviction.register(kubeGuid => this.evictEndpoint(kubeGuid));
   }
 
   errors(): Signal<StratosError[]> {
@@ -172,46 +173,33 @@ export class KubePodDataService {
   }
 
   private fetchClusterPods(kubeGuid: string): Observable<KubePod[]> {
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
-    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(
-      `/pp/v1/proxy/api/v1/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
-      { headers },
-    ).pipe(
-      map(resp => this.absorbResponse(clusterKey(kubeGuid), kubeGuid, resp?.[kubeGuid])),
-      catchError((err: HttpErrorResponse | unknown) => {
-        this.markUnavailable(clusterKey(kubeGuid), err, 'kube-pods-cluster', kubeGuid);
-        this.storeItems(clusterKey(kubeGuid), []);
-        return of([] as KubePod[]);
-      }),
-    );
+    return this.fetchPods(kubeGuid, clusterKey(kubeGuid), 'kube-pods-cluster',
+      `/pp/v1/proxy/api/v1/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}`);
   }
 
   private fetchNamespacePods(kubeGuid: string, namespace: string): Observable<KubePod[]> {
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
-    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(
-      `/pp/v1/proxy/api/v1/namespaces/${encodeURIComponent(namespace)}/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
-      { headers },
-    ).pipe(
-      map(resp => this.absorbResponse(nsKey(kubeGuid, namespace), kubeGuid, resp?.[kubeGuid])),
-      catchError((err: HttpErrorResponse | unknown) => {
-        this.markUnavailable(nsKey(kubeGuid, namespace), err, 'kube-pods-namespace', kubeGuid);
-        this.storeItems(nsKey(kubeGuid, namespace), []);
-        return of([] as KubePod[]);
-      }),
-    );
+    return this.fetchPods(kubeGuid, nsKey(kubeGuid, namespace), 'kube-pods-namespace',
+      `/pp/v1/proxy/api/v1/namespaces/${encodeURIComponent(namespace)}/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}`);
   }
 
   private fetchNodePods(kubeGuid: string, nodeName: string): Observable<KubePod[]> {
-    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const fieldSelector = encodeURIComponent(`spec.nodeName=${nodeName}`);
-    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(
-      `/pp/v1/proxy/api/v1/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}&fieldSelector=${fieldSelector}`,
-      { headers },
-    ).pipe(
-      map(resp => this.absorbResponse(nodeKey(kubeGuid, nodeName), kubeGuid, resp?.[kubeGuid])),
+    return this.fetchPods(kubeGuid, nodeKey(kubeGuid, nodeName), 'kube-pods-node',
+      `/pp/v1/proxy/api/v1/pods?limit=${KUBE_LIST_DEFAULT_LIMIT}&fieldSelector=${fieldSelector}`);
+  }
+
+  // A response that lands after the endpoint was evicted carries the old
+  // credentials' data, so it is dropped, success or failure.
+  private fetchPods(kubeGuid: string, key: string, title: string, url: string): Observable<KubePod[]> {
+    const live = this.eviction.current(kubeGuid);
+    const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(url, { headers }).pipe(
+      map(resp => live() ? this.absorbResponse(key, kubeGuid, resp?.[kubeGuid]) : []),
       catchError((err: HttpErrorResponse | unknown) => {
-        this.markUnavailable(nodeKey(kubeGuid, nodeName), err, 'kube-pods-node', kubeGuid);
-        this.storeItems(nodeKey(kubeGuid, nodeName), []);
+        if (live()) {
+          this.markUnavailable(key, err, title, kubeGuid);
+          this.storeItems(key, []);
+        }
         return of([] as KubePod[]);
       }),
     );

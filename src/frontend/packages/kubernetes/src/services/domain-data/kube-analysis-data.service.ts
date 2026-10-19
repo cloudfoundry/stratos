@@ -49,6 +49,7 @@ interface ReportByIdCache {
 @Injectable({ providedIn: 'root' })
 export class KubeAnalysisDataService {
   private readonly http = inject(HttpClient);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   // Per-endpoint list cache, keyed by kubeGuid. Stored as a Map inside a
   // signal so consumers projecting `reportsForEndpoint(...)` recompute on
@@ -64,7 +65,7 @@ export class KubeAnalysisDataService {
   readonly unavailable: Signal<string[]> = this._unavailable.asReadonly();
 
   constructor() {
-    inject(KubeEndpointEviction).register(kubeGuid => {
+    this.eviction.register(kubeGuid => {
       evictKeys(this._byEndpoint, key => key === kubeGuid);
       evictKeys(this._byId, key => key.startsWith(`${kubeGuid}:`));
       this._unavailable.update(curr => curr.includes(kubeGuid) ? curr.filter(g => g !== kubeGuid) : curr);
@@ -138,9 +139,13 @@ export class KubeAnalysisDataService {
 
   private fetchReports(kubeGuid: string): Observable<AnalysisReport[]> {
     const url = `/pp/v1/analysis/reports/${kubeGuid}`;
+    // A response that lands after the endpoint was evicted carries the
+    // old credentials' data, so it is dropped, success or failure.
+    const live = this.eviction.current(kubeGuid);
     const req = defer(() => this.http.get<AnalysisReport[]>(url)).pipe(
       map(items => Array.isArray(items) ? items : []),
       tap(items => {
+        if (!live()) return;
         this._byEndpoint.update(curr => {
           const next = new Map(curr);
           next.set(kubeGuid, { reports: items, fetchedAt: Date.now() });
@@ -149,6 +154,7 @@ export class KubeAnalysisDataService {
         this.clearUnavailable(kubeGuid);
       }),
       catchError((err: HttpErrorResponse | unknown) => {
+        if (!live()) return of([] as AnalysisReport[]);
         this.markUnavailable(kubeGuid, err, 'analysis-reports');
         // Cache the empty result so consumers don't loop on errors;
         // the next refresh() call clears the cache.
@@ -162,7 +168,9 @@ export class KubeAnalysisDataService {
       finalize(() => {
         // Drop the in-flight handle once settled so a future stale-cache
         // request triggers a fresh fetch rather than re-subscribing the
-        // completed observable.
+        // completed observable. After an eviction the entry, if any, is
+        // a newer load's.
+        if (!live()) return;
         this._byEndpoint.update(curr => {
           const entry = curr.get(kubeGuid);
           if (!entry?.inFlight) return curr;
@@ -187,12 +195,15 @@ export class KubeAnalysisDataService {
   private fetchReportById(kubeGuid: string, id: string): Observable<AnalysisReport> {
     const key = `${kubeGuid}:${id}`;
     const url = `/pp/v1/analysis/reports/${kubeGuid}/${id}`;
+    // Same eviction guard as fetchReports.
+    const live = this.eviction.current(kubeGuid);
     const req = defer(() => this.http.get<AnalysisReport>(url)).pipe(
       map(report => {
         this.processReport(report);
         return report;
       }),
       tap(report => {
+        if (!live()) return;
         this._byId.update(curr => {
           const next = new Map(curr);
           next.set(key, { report, fetchedAt: Date.now() });
@@ -202,20 +213,23 @@ export class KubeAnalysisDataService {
       catchError((err: HttpErrorResponse | unknown) => {
         const status = (err as HttpErrorResponse)?.status;
         const code: StratosError['code'] = status === 401 || status === 403 ? 'UNAUTHORIZED' : 'FETCH_ERROR';
-        this.addError({
-          scope: 'envelope',
-          code,
-          title: 'analysis-report-detail',
-          detail: (err as Error)?.message ?? String(err),
-          guid: id,
-          affected: [kubeGuid],
-        });
+        if (live()) {
+          this.addError({
+            scope: 'envelope',
+            code,
+            title: 'analysis-report-detail',
+            detail: (err as Error)?.message ?? String(err),
+            guid: id,
+            affected: [kubeGuid],
+          });
+        }
         // Re-throw so the consumer's catchError path runs (parity with
         // the legacy `getByID` which surfaced fetch errors to the
         // detail component).
         throw err;
       }),
       finalize(() => {
+        if (!live()) return;
         this._byId.update(curr => {
           const entry = curr.get(key);
           if (!entry?.inFlight) return curr;

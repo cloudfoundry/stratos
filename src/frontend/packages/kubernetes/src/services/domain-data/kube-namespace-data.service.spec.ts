@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction } from '../endpoint-data/kube-endpoint-eviction';
 import { KubeNamespaceDataService } from './kube-namespace-data.service';
 
 const KUBE_GUID = 'kube-1';
@@ -143,5 +144,21 @@ describe('KubeNamespaceDataService', () => {
     expect(errs).toHaveLength(50);
     expect(errs[0].affected?.[0]).toBe('kube-1');
     expect(errs[49].affected?.[0]).toBe('kube-50');
+  });
+  // A page keeps the projection it got at first render. After the endpoint
+  // leaves and comes back, the registry vends a new per-endpoint service;
+  // the held projection must follow it, not the orphaned one.
+  it('a held projection follows the endpoint service across unregister and reconnect', async () => {
+    const held = svc.namespacesForEndpoint(KUBE_GUID);
+    expect(held()).toEqual([]);
+
+    // The departure as KubeEndpointRegistryHook performs it, then the reconnect.
+    registry.unregister(KUBE_GUID);
+    TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+    const loading = registry.getService(KUBE_GUID).refresh('namespaces');
+    httpMock.expectOne(NS_URL).flush({ [KUBE_GUID]: { items: [{ metadata: { name: 'after' } }] } });
+    await loading;
+
+    expect(held().map(ns => ns.metadata.name)).toEqual(['after']);
   });
 });

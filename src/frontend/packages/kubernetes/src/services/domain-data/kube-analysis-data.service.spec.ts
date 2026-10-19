@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
+import { KubeEndpointEviction } from '../endpoint-data/kube-endpoint-eviction';
 import { KubeAnalysisDataService } from './kube-analysis-data.service';
 
 const KUBE_GUID = 'kube-1';
@@ -139,5 +140,52 @@ describe('KubeAnalysisDataService', () => {
     expect(errs).toHaveLength(50);
     expect(errs[0].affected?.[0]).toBe('kube-1');
     expect(errs[49].affected?.[0]).toBe('kube-50');
+  });
+
+  // A response already on the wire when its endpoint departs carries the
+  // old credentials' data; it must not land after the eviction.
+  describe('eviction while a load is in flight', () => {
+    const OTHER = 'kube-2';
+    const report = (id: string) => ({ id, name: id, type: 'popeye', status: 'completed' });
+
+    it('drops the departed endpoint\'s late list and keeps the other\'s', async () => {
+      const a = firstValueFrom(svc.loadReports(KUBE_GUID));
+      const b = firstValueFrom(svc.loadReports(OTHER));
+      const reqA = httpMock.expectOne(REPORTS_URL);
+      const reqB = httpMock.expectOne(`/pp/v1/analysis/reports/${OTHER}`);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush([report('r1')]);
+      reqB.flush([report('r2')]);
+      await Promise.all([a, b]);
+
+      expect(svc.reportsForEndpoint(KUBE_GUID)()).toEqual([]);
+      expect(svc.reportsForEndpoint(OTHER)()).toHaveLength(1);
+    });
+
+    it('drops the departed endpoint\'s late list failure', async () => {
+      const a = firstValueFrom(svc.loadReports(KUBE_GUID));
+      const reqA = httpMock.expectOne(REPORTS_URL);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush('boom', { status: 500, statusText: 'Server Error' });
+      await a;
+
+      expect(svc.unavailable()).toEqual([]);
+      expect(svc.errors()()).toEqual([]);
+    });
+
+    it('drops the departed endpoint\'s late report detail', async () => {
+      const a = firstValueFrom(svc.reportById(KUBE_GUID, 'r1'));
+      const reqA = httpMock.expectOne(`${REPORTS_URL}/r1`);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush(report('r1'));
+      await a;
+
+      // A cache hit would answer without a request; a cold cache asks again.
+      svc.reportById(KUBE_GUID, 'r1').subscribe();
+      httpMock.expectOne(`${REPORTS_URL}/r1`).flush(report('r1'));
+    });
   });
 });

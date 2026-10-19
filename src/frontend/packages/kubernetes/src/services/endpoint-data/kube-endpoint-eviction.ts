@@ -1,4 +1,4 @@
-import { Injectable, WritableSignal } from '@angular/core';
+import { Injectable, WritableSignal, signal, untracked } from '@angular/core';
 
 import { StratosError } from './kube-types';
 
@@ -8,17 +8,36 @@ import { StratosError } from './kube-types';
 // each one registers an evictor here and KubeEndpointRegistryHook calls
 // evict(kubeGuid) on disconnect or unregister. Services register on
 // construction; one never constructed holds nothing to evict.
+//
+// Eviction cannot recall a request already on the wire, so each evict
+// also bumps the guid's epoch. A load takes current(kubeGuid) before it
+// sends and writes its response only while that check still holds.
 
 @Injectable({ providedIn: 'root' })
 export class KubeEndpointEviction {
   private readonly evictors: Array<(kubeGuid: string) => void> = [];
+  private readonly epochs = signal<ReadonlyMap<string, number>>(new Map());
 
   register(evictor: (kubeGuid: string) => void): void {
     this.evictors.push(evictor);
   }
 
   evict(kubeGuid: string): void {
+    this.epochs.update(curr => new Map(curr).set(kubeGuid, (curr.get(kubeGuid) ?? 0) + 1));
     this.evictors.forEach(evictor => evictor(kubeGuid));
+  }
+
+  // Tracked read: a computed that calls this re-runs after each evict of
+  // the guid (used to re-resolve per-endpoint instances).
+  epoch(kubeGuid: string): number {
+    return this.epochs().get(kubeGuid) ?? 0;
+  }
+
+  // Check that stays true until the next evict(kubeGuid). Untracked, so a
+  // load started from inside a computed adds no dependency.
+  current(kubeGuid: string): () => boolean {
+    const at = untracked(() => this.epoch(kubeGuid));
+    return () => untracked(() => this.epoch(kubeGuid)) === at;
   }
 }
 

@@ -39,9 +39,10 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   private readonly _namespaceItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _workloadItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+  private readonly eviction = inject(KubeEndpointEviction);
 
   constructor() {
-    inject(KubeEndpointEviction).register(kubeGuid => {
+    this.eviction.register(kubeGuid => {
       const owned = (key: string) => key === kubeGuid || key.startsWith(`${kubeGuid}/`);
       evictKeys(this._clusterItems, owned);
       evictKeys(this._namespaceItems, owned);
@@ -86,9 +87,13 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   // Refresh dispatches based on scope. Without a namespace it refreshes
   // the cluster-wide list. Cluster-only resources (PV, StorageClass,
   // ClusterRole) ignore the `namespace` field and always fetch cluster.
+  // A response that lands after the endpoint was evicted carries the old
+  // credentials' data, so it is dropped (fetchList drops a late failure).
   async refresh(scope: { kubeGuid: string; namespace?: string }): Promise<void> {
+    const live = this.eviction.current(scope.kubeGuid);
     if (scope.namespace && this.config.namespaced) {
       const items = await this.fetchNamespaced(scope.kubeGuid, scope.namespace);
+      if (!live()) return;
       this._namespaceItems.update(curr => {
         const next = new Map(curr);
         next.set(nsKey(scope.kubeGuid, scope.namespace as string), items);
@@ -97,6 +102,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
       return;
     }
     const items = await this.fetchCluster(scope.kubeGuid);
+    if (!live()) return;
     this._clusterItems.update(curr => {
       const next = new Map(curr);
       next.set(scope.kubeGuid, items);
@@ -160,6 +166,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   // Stamps `kubeGuid` + `metadata.kubeId` on each row.
   private async fetchList(url: string, kubeGuid: string): Promise<Array<T & { kubeGuid: string }>> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    const live = this.eviction.current(kubeGuid);
     try {
       const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeListResponse<T> }>(
         url,
@@ -181,7 +188,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],
       };
-      this._errors.update(curr => [...curr, next].slice(-50));
+      if (live()) this._errors.update(curr => [...curr, next].slice(-50));
       return [];
     }
   }

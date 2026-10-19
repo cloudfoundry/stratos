@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction } from '../endpoint-data/kube-endpoint-eviction';
 import { KubeNodeDataService } from './kube-node-data.service';
 
 const KUBE_GUID = 'kube-1';
@@ -99,5 +100,41 @@ describe('KubeNodeDataService', () => {
     expect(errs).toHaveLength(50);
     expect(errs[0].affected?.[0]).toBe('kube-1');
     expect(errs[49].affected?.[0]).toBe('kube-50');
+  });
+  // A response already on the wire when its endpoint departs carries the
+  // old credentials' data; it must not land after the eviction.
+  describe('eviction while a load is in flight', () => {
+    const OTHER = 'kube-2';
+    const pending = (guid: string) =>
+      httpMock.expectOne(r => r.url === NODES_URL && r.headers.get('x-cap-cnsi-list') === guid);
+
+    it('drops the departed endpoint\'s late response and keeps the other\'s', async () => {
+      const a = svc.refresh(KUBE_GUID);
+      const b = svc.refresh(OTHER);
+      const reqA = pending(KUBE_GUID);
+      const reqB = pending(OTHER);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush({ [KUBE_GUID]: { items: [{ metadata: { name: 'a' } }] } });
+      reqB.flush({ [OTHER]: { items: [{ metadata: { name: 'b' } }] } });
+      await Promise.all([a, b]);
+
+      expect(svc.nodesInCluster(KUBE_GUID)()).toEqual([]);
+      expect(svc.nodesInCluster(OTHER)()).toHaveLength(1);
+      // The node-count sync must not rebuild a registry entry for it either.
+      const guids = TestBed.inject(KubeEndpointDataRegistry).getSnapshot().instances.map(i => i.kubeGuid);
+      expect(guids).not.toContain(KUBE_GUID);
+    });
+
+    it('drops the departed endpoint\'s late failure', async () => {
+      const a = svc.refresh(KUBE_GUID);
+      const reqA = pending(KUBE_GUID);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush('boom', { status: 500, statusText: 'Server Error' });
+      await a;
+
+      expect(svc.errors()()).toEqual([]);
+    });
   });
 });

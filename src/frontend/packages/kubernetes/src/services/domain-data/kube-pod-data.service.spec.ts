@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
+import { KubeEndpointEviction } from '../endpoint-data/kube-endpoint-eviction';
 import { KubePodDataService } from './kube-pod-data.service';
 
 const KUBE_GUID = 'kube-1';
@@ -231,6 +232,39 @@ describe('KubePodDataService', () => {
       req.flush(null);
       await done;
       expect(svc.podsInWorkload('cnsi-1', 'ns-a', 'rel-x')().map(p => p.metadata.name)).toEqual(['p2']);
+    });
+  });
+
+  // A response already on the wire when its endpoint departs carries the
+  // old credentials' data; it must not land after the eviction.
+  describe('eviction while a load is in flight', () => {
+    const OTHER = 'kube-2';
+    const pending = (guid: string) =>
+      httpMock.expectOne(r => r.url === CLUSTER_PODS_URL && r.headers.get('x-cap-cnsi-list') === guid);
+    const listOf = (guid: string) => ({ [guid]: { items: [{ metadata: { name: 'p' }, status: {} }] } });
+
+    it('drops the departed endpoint\'s late response and keeps the other\'s', () => {
+      const a = svc.podsInCluster(KUBE_GUID);
+      const b = svc.podsInCluster(OTHER);
+      const reqA = pending(KUBE_GUID);
+      const reqB = pending(OTHER);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush(listOf(KUBE_GUID));
+      reqB.flush(listOf(OTHER));
+
+      expect(a()).toEqual([]);
+      expect(b()).toHaveLength(1);
+    });
+
+    it('drops the departed endpoint\'s late failure', () => {
+      svc.podsInCluster(KUBE_GUID);
+      const reqA = pending(KUBE_GUID);
+
+      TestBed.inject(KubeEndpointEviction).evict(KUBE_GUID);
+      reqA.flush('nope', { status: 403, statusText: 'Forbidden' });
+
+      expect(svc.errors()()).toEqual([]);
     });
   });
 });
