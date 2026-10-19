@@ -98,7 +98,10 @@ export class HelmReleaseDataService {
       );
       this.sig(this._detail, key, undefined).set(resp);
     } catch {
-      // Leave the detail signal as-is; the page renders the tristate empty.
+      // Blank, not delete (see evictEndpoint): a failed reload, e.g. a 403
+      // after reconnecting with narrower credentials, must not keep showing
+      // the release fetched before. The page renders the tristate empty.
+      this.sig(this._detail, key, undefined).set(undefined);
     } finally {
       loading.set(false);
     }
@@ -114,7 +117,8 @@ export class HelmReleaseDataService {
       );
       this.sig(this._history, key, undefined).set(resp?.revisions ?? []);
     } catch {
-      // Leave history undefined on error.
+      // Blank on error, as for the detail: never keep an earlier history.
+      this.sig(this._history, key, undefined).set(undefined);
     }
   }
 }
