@@ -162,6 +162,11 @@ describe('AutoscalerPolicyDataService', () => {
     const req = httpMock.expectOne(POLICY_URL);
     expect(req.request.method).toBe('DELETE');
     req.flush(null);
+    // The autoscaler may apply a default policy on detach, so it reloads.
+    await new Promise(r => setTimeout(r));
+    const reload = httpMock.expectOne(POLICY_URL);
+    expect(reload.request.method).toBe('GET');
+    reload.flush('Policy Not Found', { status: 404, statusText: 'Not Found' });
     await detachP;
 
     expect(svc.policy(ENDPOINT_GUID, APP_GUID)()).toBeNull();
@@ -169,6 +174,20 @@ describe('AutoscalerPolicyDataService', () => {
     expect(svc.error(ENDPOINT_GUID, APP_GUID)()).toBeNull();
     expect(svc.deleting(ENDPOINT_GUID, APP_GUID)()).toBe(false);
     expect(svc.deletionError(ENDPOINT_GUID, APP_GUID)()).toBeNull();
+  });
+
+  // Detaching re-applies the service instance's default policy when it
+  // has one (14.x and 15.x); showing "no policy" then was wrong.
+  it('detach() shows the default policy the autoscaler applies', async () => {
+    const detachP = svc.detach(ENDPOINT_GUID, APP_GUID);
+    httpMock.expectOne(POLICY_URL).flush(null);
+    await new Promise(r => setTimeout(r));
+    httpMock.expectOne(POLICY_URL).flush({ instance_min_count: 2, instance_max_count: 4 });
+    await detachP;
+
+    expect(svc.noPolicy(ENDPOINT_GUID, APP_GUID)()).toBe(false);
+    expect(svc.policy(ENDPOINT_GUID, APP_GUID)()?.instance_min_count).toBe(2);
+    expect(svc.deleting(ENDPOINT_GUID, APP_GUID)()).toBe(false);
   });
 
   it('detach() surfaces deletionError + clears deleting on failure', async () => {
