@@ -84,6 +84,8 @@ export class AutoscalerMetricPageComponent implements OnInit {
       onRefresh: () => this.chartConfig.refresh(),
       onClear: () => this.chartConfig.clearFilters(),
       viewMode: this.chartConfig.viewMode,
+      // Each card holds a gauge and a time chart; the 16rem default squeezed them.
+      cardMinWidth: '40rem',
       sort: this.chartConfig.sort,
       hidePagerWhenSingle: true,
     });
