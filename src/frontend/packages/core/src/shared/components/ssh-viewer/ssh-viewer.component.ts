@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectorRef, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
@@ -20,11 +20,20 @@ import { AppProgressBarComponent } from '../progress-bar/app-progress-bar.compon
   ]
 })
 export class SshViewerComponent implements OnInit, OnDestroy {
-  private changeDetector = inject(ChangeDetectorRef);
   private resizer = inject(EventWatcherService);
 
+  // The parent's error, e.g. a failed web socket. The parent clears it at the
+  // start of each attempt.
+  private readonly parentError = signal<string | undefined>(undefined);
   @Input()
-  errorMessage?: string;
+  set errorMessage(v: string | undefined) { this.parentError.set(v); }
+  get errorMessage(): string | undefined { return this.parentError(); }
+
+  // An error the backend sends as a '!' window title. It stays after the
+  // stream closes, so the user sees why; reconnect() clears it.
+  private readonly streamError = signal<string | undefined>(undefined);
+
+  public readonly error = computed(() => this.streamError() ?? this.parentError());
 
   @Input()
   sshStream!: Observable<any>;
@@ -35,11 +44,11 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   @Input()
   public connectionStatus!: Observable<number>;
 
-  public isConnected = false;
-  public attemptingConnection = false;
-  private isDestroying = false;
+  public readonly isConnected = signal(false);
+  public readonly attemptingConnection = signal(false);
 
-  public message = '';
+  // A progress window title from the backend, e.g. while a pod starts.
+  public readonly message = signal('');
 
   @ViewChild('terminal', { static: true }) container!: ElementRef;
   private xterm!: Terminal;
@@ -68,14 +77,11 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.connectSubscription = this.connectionStatus
       .pipe(takeUntil(this.destroy$))
       .subscribe((count: number) => {
-        this.isConnected = (count !== 0);
-        if (this.isConnected) {
+        this.isConnected.set(count !== 0);
+        if (this.isConnected()) {
           this.xterm.focus();
-          this.attemptingConnection = false;
+          this.attemptingConnection.set(false);
           this.resize();
-        }
-        if (!this.isDestroying) {
-          this.changeDetector.detectChanges();
         }
       });
 
@@ -107,7 +113,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
-    this.isDestroying = true;
     this.destroy$.next();
     this.destroy$.complete();
 
@@ -133,9 +138,8 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   }
 
   disconnect() {
-    this.attemptingConnection = false;
-    this.isConnected = false;
-    this.errorMessage = undefined;
+    this.attemptingConnection.set(false);
+    this.isConnected.set(false);
     if (this.msgSubscription && !this.msgSubscription.closed) {
       this.msgSubscription.unsubscribe();
     }
@@ -143,9 +147,9 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
   reconnect() {
     this.disconnect();
-    this.attemptingConnection = true;
-    this.changeDetector.detectChanges();
-    this.errorMessage = undefined;
+    this.attemptingConnection.set(true);
+    this.streamError.set(undefined);
+    this.message.set('');
     this.xterm.reset();
     this.msgSubscription = this.sshStream
       .pipe(takeUntil(this.destroy$))
@@ -156,10 +160,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
             for (const c of data.split(' ')) {
               this.xterm.write(String.fromCharCode(parseInt(c, 16)));
             }
-          } else {
-            console.error('Error: ', this.errorMessage);
-            const eMsg = this.errorMessage;
-            this.errorMessage = eMsg;
           }
         },
         (_err) => {
@@ -167,9 +167,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
         },
         () => {
           this.disconnect();
-          if (!this.isDestroying) {
-            this.changeDetector.detectChanges();
-          }
         }
       );
   }
@@ -185,11 +182,11 @@ export class SshViewerComponent implements OnInit, OnDestroy {
         title += String.fromCharCode(parseInt(chars[i], 16));
       }
       if (title.length > 0 && title.charAt(0) === '!') {
-        this.errorMessage = title.substr(1);
-        console.error(this.errorMessage);
+        this.streamError.set(title.substring(1));
+        console.error(this.streamError());
         return true;
       }
-      this.message = title;
+      this.message.set(title);
     }
     return false;
   }

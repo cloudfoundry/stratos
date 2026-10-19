@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
@@ -34,7 +34,8 @@ export class SshApplicationComponent implements OnInit {
 
   public sshInput!: Subject<string>;
 
-  public errorMessage!: string;
+  // Set when the web socket fails, after the first render
+  public readonly errorMessage = signal<string | undefined>(undefined);
 
   public sshRoute!: string;
 
@@ -89,11 +90,13 @@ export class SshApplicationComponent implements OnInit {
       );
 
       this.messages = connection.pipe(
+        // Each connect attempt starts without the previous attempt's error
+        tap({ subscribe: () => this.errorMessage.set(undefined) }),
         tap(() => this.connectionStatus.next(1)),
         switchMap((getResponse: any): any[] => getResponse(this.sshInput)),
         catchError((e: Error): any[] => {
           if (e.message !== normalClosureMessage) {
-            this.errorMessage = 'Error connecting to web socket';
+            this.errorMessage.set('Error connecting to web socket');
           }
           return [];
         }));

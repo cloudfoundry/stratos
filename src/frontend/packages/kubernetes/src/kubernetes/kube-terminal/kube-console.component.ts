@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, ViewChild, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { EMPTY, NEVER, Observable, Subject } from 'rxjs';
@@ -53,7 +53,8 @@ export class KubeConsoleComponent implements OnInit {
 
   public sshInput!: Subject<string>; // strict: assigned in ngOnInit when an endpoint guid is available
 
-  public errorMessage?: string;
+  // Set when the terminal fails to launch, after the first render
+  public readonly errorMessage = signal<string | undefined>(undefined);
 
   public connected = false;
 
@@ -72,7 +73,7 @@ export class KubeConsoleComponent implements OnInit {
     if (!guid) {
       this.messages = NEVER;
       this.connectionStatus.next(0);
-      this.errorMessage = 'No Endpoint ID available';
+      this.errorMessage.set('No Endpoint ID available');
     } else {
       const host = window.location.host;
       const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
@@ -83,11 +84,13 @@ export class KubeConsoleComponent implements OnInit {
       const connection = websocketConnect(streamUrl);
 
       this.messages = connection.pipe(
+        // Each connect attempt starts without the previous attempt's error
+        tap({ subscribe: () => this.errorMessage.set(undefined) }),
         tap(() => this.connectionStatus.next(1)),
         switchMap(getResponse => getResponse(this.sshInput)),
         catchError((e: Error): Observable<never> => {
-          if (e.message !== normalClosureMessage && !this.sshViewer.isConnected) {
-            this.errorMessage = 'Error launching Kubernetes Terminal';
+          if (e.message !== normalClosureMessage && !this.sshViewer.isConnected()) {
+            this.errorMessage.set('Error launching Kubernetes Terminal');
           }
           return EMPTY;
         }));

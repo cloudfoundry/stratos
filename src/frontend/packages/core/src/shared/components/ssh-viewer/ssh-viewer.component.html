@@ -1,29 +1,29 @@
 <div class="ssh-viewer">
-  @if (!message && (errorMessage || !isConnected)) {
+  @if (!message() && (error() || !isConnected())) {
     <div class="ssh-viewer__overlay">
-      @if (errorMessage) {
+      @if (error()) {
         <div class="ssh-viewer__error">
-          {{ errorMessage || 'Error occurred establishing SSH connection' }}
+          {{ error() }}
         </div>
       }
-      @if (!errorMessage && !isConnected && !attemptingConnection) {
+      @if (!error() && !isConnected() && !attemptingConnection()) {
         <div class="ssh-viewer__disconnected">
           Disconnected
         </div>
       }
     </div>
   }
-  @if (message) {
+  @if (message()) {
     <div class="ssh-viewer__overlay">
       <div class="ssh-viewer__disconnected">
-        {{ message }}
+        {{ message() }}
       </div>
     </div>
   }
-  @if (attemptingConnection) {
+  @if (attemptingConnection()) {
     <app-progress-bar mode="indeterminate"></app-progress-bar>
   }
-  <div class="ssh-terminal" #container [ngClass]="{'ssh-terminal-disconnected': !isConnected}">
+  <div class="ssh-terminal" #container [ngClass]="{'ssh-terminal-disconnected': !isConnected()}">
     <div id="terminal" #terminal></div>
   </div>
 </div>
