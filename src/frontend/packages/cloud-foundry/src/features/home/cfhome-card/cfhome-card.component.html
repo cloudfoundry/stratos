@@ -1,38 +1,38 @@
 <app-tile-grid [fit]="true">
   <app-tile-group class="cf-home-card__plain-tiles">
     <app-tile>
-      <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/applications" icon="apps" label="Applications"
-      labelSingular="Application" value="{{ endpointDataService?.appCount() }}"></app-card-number-metric>
+      <app-card-number-metric mode="plain" link="/cloud-foundry/{{ guid() }}/applications" icon="apps" label="Applications"
+      labelSingular="Application" value="{{ endpointDataService()?.appCount() }}"></app-card-number-metric>
     </app-tile>
     <app-tile>
-      <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/organizations" iconFont="stratos-icons"
-      icon="organization" label="Orgs" labelSingular="Org" value="{{ endpointDataService?.orgCount() }}"></app-card-number-metric>
+      <app-card-number-metric mode="plain" link="/cloud-foundry/{{ guid() }}/organizations" iconFont="stratos-icons"
+      icon="organization" label="Orgs" labelSingular="Org" value="{{ endpointDataService()?.orgCount() }}"></app-card-number-metric>
     </app-tile>
-    @if (layout.x <= 2) {
+    @if (cardLayout().x <= 2) {
       <app-tile>
-        <app-card-number-metric mode="plain" link="/cloud-foundry/{{guid}}/routes" iconFont="stratos-icons" icon="route"
-        label="Routes" value="{{ endpointDataService?.routeCount() }}"></app-card-number-metric>
+        <app-card-number-metric mode="plain" link="/cloud-foundry/{{ guid() }}/routes" iconFont="stratos-icons" icon="route"
+        label="Routes" value="{{ endpointDataService()?.routeCount() }}"></app-card-number-metric>
       </app-tile>
     }
   </app-tile-group>
   <app-tile-group class="tile-group-1-cols">
     <app-tile>
-      @if (cardLoaded && recentAppsRows > 0) {
+      @if (cardLoaded() && recentAppsRows() > 0) {
         <app-card-cf-recent-apps [hideWhenEmpty]="true" [noStats]="true"
-          dateMode="subtle" [showDate]="true" [maxRows]="recentAppsRows" mode="plain"
-          [endpoint]="guid" [allApps$]="allApps$">
+          dateMode="subtle" [showDate]="true" [maxRows]="recentAppsRows()" mode="plain"
+          [endpoint]="guid()" [allApps$]="allApps$">
         </app-card-cf-recent-apps>
       }
-      @if (!cardLoaded && recentAppsRows > 0) {
+      @if (!cardLoaded() && recentAppsRows() > 0) {
         <app-card-cf-recent-apps [placeholderMode]="true"
-        [maxRows]="recentAppsRows" mode="plain"></app-card-cf-recent-apps>
+        [maxRows]="recentAppsRows()" mode="plain"></app-card-cf-recent-apps>
       }
 
-      @if ((hasNoApps$ | async)) {
+      @if (hasNoApps()) {
         <div class="cf-home-card__no-apps">
           <span class="material-icons">apps</span>
           <div class="cf-home-card__no-apps-title">You don't have any applications</div>
-          @if (showDeployAppTiles) {
+          @if (showDeployAppTiles()) {
             <div>
               <div class="cf-home-card__no-apps-deploy">Get started by deploying an Application from ...</div>
               <app-tile-selector [options]="(tileSelectorConfig$ | async) ?? []" [compactTiles]="true"

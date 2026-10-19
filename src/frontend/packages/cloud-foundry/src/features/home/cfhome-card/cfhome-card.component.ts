@@ -1,8 +1,9 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, computed, inject, OnDestroy, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { map, take, startWith } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
@@ -51,39 +52,56 @@ import { TileSelectorComponent } from '@stratosui/core';
 })
 export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
   private router = inject(Router);
-  private cdr = inject(ChangeDetectorRef);
   private registry = inject(EndpointDataRegistry);
 
-  endpointDataService: EndpointDataService | null = null;
+  // Set by load(); the template and the derived state below read it.
+  readonly endpointDataService = signal<EndpointDataService | null>(null);
 
-  pLayout!: HomePageCardLayout;
+  readonly cardLayout = signal(new HomePageCardLayout(1, 1));
 
-  get layout(): HomePageCardLayout { return this.pLayout; }
+  get layout(): HomePageCardLayout { return this.cardLayout(); }
 
   @Input() set layout(value: HomePageCardLayout) {
-    if (value) { this.pLayout = value; }
-    this.updateLayout();
+    if (value) { this.cardLayout.set(value); }
   }
 
   @Input() set endpoint(value: EndpointModel) {
     // strict: a registered endpoint always carries a guid; it is only
     // optional on the shared EndpointModel shape.
-    this.guid = value.guid!;
+    this.guid.set(value.guid!);
   }
 
-  // strict: populated by the @Input endpoint setter the home framework
-  // always supplies before load()/template read.
-  guid!: string;
-  recentAppsRows = 10;
-  hasNoApps$!: Observable<boolean>;
-  allApps$!: Observable<APIResource<IApp>[]>;
-  cardLoaded = false;
-  showDeployAppTiles = false;
+  // Populated by the @Input endpoint setter the home framework always
+  // supplies before load()/template read.
+  readonly guid = signal('');
+  readonly cardLoaded = computed(() => this.endpointDataService() !== null);
+  readonly recentAppsRows = computed(() => {
+    const layout = this.cardLayout();
+    if (layout.x > 2) {
+      return 0;
+    } else if (layout.y > 1) {
+      return 5;
+    } else if (layout.x === 2) {
+      return 7;
+    }
+    return 10;
+  });
+  readonly showDeployAppTiles = computed(() => this.cardLayout().x === 1 && this.cardLayout().y === 1);
+
+  // Follows the service's recent-apps signal, so the list picks up the app
+  // mutators (start/stop, create, delete) without another load().
+  private readonly allApps = computed<APIResource<IApp>[]>(() =>
+    this.endpointDataService()?.recentApps().map(app => stAppToAPIResource(app)) ?? []);
+  readonly allApps$ = toObservable(this.allApps);
+  // Only once a load has succeeded: before then appCount is just the default 0.
+  readonly hasNoApps = computed(() => {
+    const eds = this.endpointDataService();
+    return !!eds && eds.lastFetched() !== null && eds.appCount() === 0;
+  });
   public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
 
   constructor() {
     const appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
-    this.pLayout = new HomePageCardLayout(1, 1);
     this.tileSelectorConfig$ = appDeploySourceTypes.types$.pipe(
       map(types => types.map(type =>
         // strict: every SourceType emitted by types$ defines a graphic (the
@@ -105,8 +123,8 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
     if (tile && tile.data) {
       const data = tile.data as IAppTileData;
       const query: Record<string, string> = {
-        [BASE_REDIRECT_QUERY]: `applications/new/${this.guid}`,
-        [AUTO_SELECT_CF_URL_PARAM]: this.guid,
+        [BASE_REDIRECT_QUERY]: `applications/new/${this.guid()}`,
+        [AUTO_SELECT_CF_URL_PARAM]: this.guid(),
       };
       if (data.subType) { query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = data.subType; }
       if (data.endpointGuid) { query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = data.endpointGuid; }
@@ -115,26 +133,14 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
   }
 
   load(): Observable<boolean> {
-    this.cardLoaded = true;
-    this.endpointDataService = this.registry.acquire(this.guid);
-    this.cdr.markForCheck();
+    const endpointDataService = this.registry.acquire(this.guid());
+    this.endpointDataService.set(endpointDataService);
 
-    // afterLoad$ resolves immediately on cache hit, otherwise completes when the
-    // parallel native-route fetch finishes. Both allApps$ and hasNoApps$ share it.
-    const afterLoad$ = this.afterLoad();
-    this.allApps$ = afterLoad$.pipe(
-      map(() => this.endpointDataService!.recentApps().map(app => stAppToAPIResource(app))),
-      startWith([] as APIResource<IApp>[]),
-    );
-    this.hasNoApps$ = afterLoad$.pipe(
-      map(() => this.endpointDataService!.appCount() === 0),
-    );
-
-    if (this.endpointDataService.lastFetched() !== null) {
+    if (endpointDataService.lastFetched() !== null) {
       return of(true);
     }
     return new Observable<boolean>(subscriber => {
-      const sub = this.endpointDataService!.loaded$.pipe(take(1)).subscribe({
+      const sub = endpointDataService.loaded$.pipe(take(1)).subscribe({
         next: () => { subscriber.next(true); subscriber.complete(); },
         error: () => { subscriber.next(true); subscriber.complete(); },
       });
@@ -143,31 +149,9 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (this.endpointDataService) {
-      this.registry.release(this.guid);
+    if (this.endpointDataService()) {
+      this.registry.release(this.guid());
     }
-  }
-
-  public updateLayout() {
-    if (this.layout.x > 2) {
-      this.recentAppsRows = 0;
-    } else if (this.layout.y > 1) {
-      this.recentAppsRows = 5;
-    } else if (this.layout.x === 2) {
-      this.recentAppsRows = 7;
-    } else {
-      this.recentAppsRows = 10;
-    }
-    this.showDeployAppTiles = this.layout.x === 1 && this.layout.y === 1;
-    this.cdr.markForCheck();
-  }
-
-  // Emits once when data is available — immediately on cache hit, after load otherwise.
-  private afterLoad(): Observable<void> {
-    const svc = this.endpointDataService!;
-    return svc.lastFetched() !== null
-      ? of(undefined as void)
-      : svc.loaded$.pipe(take(1));
   }
 
 }
