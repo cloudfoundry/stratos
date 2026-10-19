@@ -3,6 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { firstValueFrom } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createEmptyStoreModule } from '@stratosui/store/testing';
@@ -53,5 +54,15 @@ describe('EditAutoscalerPolicyStep1Component', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The defaults (min 1, max 10, the browser timezone) are a valid policy,
+  // so Next must be enabled on a new policy.
+  it('reports the default limits as valid', async () => {
+    await fixture.whenStable();
+    expect(component.editLimitForm.controls.instance_min_count.value).toBe(1);
+    expect(component.editLimitForm.controls.instance_max_count.value).toBe(10);
+    expect(component.editLimitForm.valid).toBe(true);
+    expect(await firstValueFrom(component.valid$)).toBe(true);
   });
 });
