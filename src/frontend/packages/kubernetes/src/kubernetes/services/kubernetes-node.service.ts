@@ -6,6 +6,7 @@ import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
+import { observeSignal } from '../../../../store/src/helpers/signal-interop';
 import { MetricsDataService, MetricsRequest } from '../../../../store/src/services/metrics-data.service';
 import { EntityInfo } from '../../../../store/src/types/api.types';
 import { MetricQueryType } from '../../../../store/src/types/metric.types';
@@ -75,7 +76,9 @@ export class KubernetesNodeService {
     };
     const requestSignal = signal(request);
     const observation = this.metricsDataService.observe<any>(requestSignal, { pollIntervalMs: 30000 });
-    const entity$ = toObservable(observation.metrics, { injector: this.injector }).pipe(
+    // observeSignal, not toObservable: its watch ends when the caller
+    // unsubscribes, instead of piling up one per Metrics tab visit.
+    const entity$ = observeSignal(observation.metrics, this.injector).pipe(
       filter(metrics => !!metrics),
       map(metrics => {
         const result = metrics?.data?.result;

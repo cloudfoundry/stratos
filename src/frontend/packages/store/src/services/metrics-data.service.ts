@@ -73,17 +73,16 @@ export class MetricsDataService {
   // Signal-bound observation. Tracks `request()`; whenever the request
   // signal changes, a new fetch fires and the metrics/fetching/error
   // signals update. Optional poll interval re-fires on a timer. The
-  // returned `stop()` cancels the polling timer.
+  // returned `stop()` ends the observation: no more fetches or polls.
   //
-  // Caller owns the lifetime — pass a DestroyRef-bound effect cleanup
-  // (or call stop() explicitly) when the consumer component tears down.
+  // Caller owns the lifetime and must call stop() when it tears down: the
+  // effect is anchored to the root injector, so nothing else ends it.
   observe<T = any>(
     request: Signal<MetricsRequest | null>,
     options: { pollIntervalMs?: Signal<number> | number } = {},
   ): MetricsObservation<T> {
     const state = signal<MetricsFetchState<T>>(EMPTY_STATE);
     let inFlightToken = 0;
-    let timerId: ReturnType<typeof setInterval> | null = null;
 
     const runFetch = async (req: MetricsRequest | null) => {
       if (!req) {
@@ -109,22 +108,18 @@ export class MetricsDataService {
     // (e.g. ngOnInit), which is not itself an injection context. We
     // anchor effect() to the service's captured injector so the
     // signal -> fetch wire works regardless of caller context.
-    runInInjectionContext(this.injector, () => {
-      effect(() => {
-        const req = request();
-        if (timerId !== null) {
-          clearInterval(timerId);
-          timerId = null;
-        }
-        untracked(() => { void runFetch(req); });
-        const interval = typeof options.pollIntervalMs === 'number'
-          ? options.pollIntervalMs
-          : options.pollIntervalMs?.();
-        if (interval && interval > 0 && req) {
-          timerId = setInterval(() => { void runFetch(request()); }, interval);
-        }
-      });
-    });
+    const ref = runInInjectionContext(this.injector, () => effect(onCleanup => {
+      const req = request();
+      untracked(() => { void runFetch(req); });
+      const interval = typeof options.pollIntervalMs === 'number'
+        ? options.pollIntervalMs
+        : options.pollIntervalMs?.();
+      if (interval && interval > 0 && req) {
+        const timerId = setInterval(() => { void runFetch(request()); }, interval);
+        // Runs before the next request and on destroy.
+        onCleanup(() => clearInterval(timerId));
+      }
+    }));
 
     return {
       metrics: computed(() => state().metrics),
@@ -132,10 +127,7 @@ export class MetricsDataService {
       error: computed(() => state().error),
       refresh: () => runFetch(request()),
       stop: () => {
-        if (timerId !== null) {
-          clearInterval(timerId);
-          timerId = null;
-        }
+        ref.destroy();
         inFlightToken++;
       },
     };
