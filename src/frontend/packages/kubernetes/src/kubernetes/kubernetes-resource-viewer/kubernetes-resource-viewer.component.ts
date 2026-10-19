@@ -8,7 +8,8 @@ import {
   TemplateRef,
   ViewChild,
   ViewContainerRef,
-  inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+  computed,
+  inject, ChangeDetectionStrategy, ChangeDetectorRef, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
@@ -106,18 +107,33 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     serviceAccount: inject(KubeServiceAccountDataService),
   };
 
+  // Resource kind to catalog type, for a delete opened with no definition
+  // (the helm release resource graph passes only the resource kind).
+  private kindTypes: Record<string, string> = {
+    Pod: 'pod',
+    Service: 'service',
+    Job: 'job',
+    Secret: 'secrets',
+    PersistentVolumeClaim: 'pvc',
+    ReplicaSet: 'replicaSet',
+    Role: 'role',
+    ServiceAccount: 'serviceAccount',
+  };
+
+  public title = signal('');
+
   // strict: the following are assigned by setProps, the previewable-component
   // entry point the framework invokes before the template renders them.
-  public title!: string;
   public resource$!: Observable<KubernetesResourceViewerResource>;
 
   public hasPodMetrics$!: Observable<boolean>;
   public podRouterLink$!: Observable<string[]>;
 
   private analysis: any;
-  public alerts: any;
+  private resourceKind?: string;
+  public alerts = signal<any>(null);
 
-  public favorite?: UserFavorite<IFavoriteMetadata>;
+  public favorite = signal<UserFavorite<IFavoriteMetadata> | undefined>(undefined);
 
   // Custom component
   @ViewChild('customComponent', { read: ViewContainerRef, static: false }) customComponentContainer: ViewContainerRef | undefined;
@@ -127,9 +143,11 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   data!: KubernetesResourceViewerComponentConfig; // strict: assigned in setProps before deleteWarn can fire
 
-  // strict: static:false ViewChild resolved by ngAfterViewInit, where headerContent is built
-  @ViewChild('header', { static: false }) templatePortalContent!: TemplateRef<unknown>;
-  headerContent!: Portal<any>;
+  private headerTemplate = viewChild<TemplateRef<unknown>>('header');
+  headerContent = computed<Portal<any> | undefined>(() => {
+    const template = this.headerTemplate();
+    return template ? new TemplatePortal(template, this.viewContainerRef) : undefined;
+  });
 
   ngOnDestroy(): void {
     this.removeCustomComponent();
@@ -154,12 +172,12 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   ngAfterViewInit(): void {
     this.createCustomComponent();
-    setTimeout(() => this.headerContent = new TemplatePortal(this.templatePortalContent, this.viewContainerRef), 0);
   }
 
   setProps(props: KubernetesResourceViewerConfig): void {
-    this.title = props.title;
+    this.title.set(props.title);
     this.analysis = props.analysis;
+    this.resourceKind = props.resourceKind;
     this.component = props.component;
 
     this.resource$ = props.resource$.pipe(
@@ -218,7 +236,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         };
         this.createCustomComponent();
 
-        setTimeout(() => this.setFavorite(props.definition, item), 0);
+        this.setFavorite(props.definition, item);
 
         // Apply analysis if there is one - if this is a k8s resource (i.e. not a container)
         if (item.metadata) {
@@ -273,18 +291,18 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
     let id = (resource.kind || 'pod').toLowerCase();
     id = `${id}/${resource.raw.metadata.namespace}/${resource.raw.metadata.name}`;
     if (this.analysis && this.analysis.alerts[id]) {
-      this.alerts = this.analysis.alerts[id];
+      this.alerts.set(this.analysis.alerts[id]);
     } else {
-      this.alerts = null;
+      this.alerts.set(null);
     }
   }
 
-  private setFavorite(defn: KubeResourceEntityDefinition, item: BasicKubeAPIResource): void {
+  private setFavorite(defn: KubeResourceEntityDefinition | undefined, item: BasicKubeAPIResource): void {
     if (defn) {
       const entityDefn = entityCatalog.getEntity(KUBERNETES_ENDPOINT_TYPE, defn.type);
       const canFav = this.userFavoriteManager.canFavoriteEntityType(entityDefn);
       if (canFav) {
-        this.favorite = this.userFavoriteManager.getFavorite(item, defn.type, KUBERNETES_ENDPOINT_TYPE) ?? undefined;
+        this.favorite.set(this.userFavoriteManager.getFavorite(item, defn.type, KUBERNETES_ENDPOINT_TYPE) ?? undefined);
       }
     }
   }
@@ -293,10 +311,14 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   public deleteWarn(): void {
     // Namespace vs Pod definition in different places
     const defnRaw = this.data.definition as any;
-    const defn = (defnRaw?.definition || this.data.definition) as KubeResourceEntityDefinition;
+    const defn = (defnRaw?.definition || this.data.definition) as KubeResourceEntityDefinition | undefined;
+    // With no definition, fall back to the resource kind
+    const kind = (this.data.resource as { kind?: string }).kind || this.resourceKind || '';
+    const label = defn?.label || kind || 'Resource';
+    const type = defn?.type || this.kindTypes[kind];
     this.sidePanelService.hide();
     const confirmation = new ConfirmationDialogConfig(
-      `Delete ${defn.label}`,
+      `Delete ${label}`,
       `Are you sure you want to delete "${this.data.resource.metadata.name}" ?`,
       'Delete',
       true,
@@ -305,9 +327,9 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
       () => {
         const name = this.data.resource.metadata.name;
         const namespace = this.data.resource.metadata.namespace;
-        const dataService = this.deleteServices[defn.type];
+        const dataService = type ? this.deleteServices[type] : undefined;
         if (!dataService) {
-          this.snackBarService.show(`Delete not supported for ${defn.label}`);
+          this.snackBarService.show(`Delete not supported for ${label}`);
           return;
         }
         const endpointId = this.data.endpointId;
@@ -320,12 +342,13 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         // path used to clean up, then surface the same snackbar.
         dataService.delete(endpointId, name, namespace)
           .then(() => {
-            if (this.favorite && this.favorite.entityId) {
+            const favorite = this.favorite();
+            if (favorite && favorite.entityId) {
               this.deleteCleanup.removeFavoriteAndRecent(
-                this.favorite.endpointId,
-                this.favorite.endpointType,
-                this.favorite.entityType,
-                this.favorite.entityId,
+                favorite.endpointId,
+                favorite.endpointType,
+                favorite.entityType,
+                favorite.entityId,
               );
             }
             this.snackBarService.show(`Deleted resource '${name}'`);
