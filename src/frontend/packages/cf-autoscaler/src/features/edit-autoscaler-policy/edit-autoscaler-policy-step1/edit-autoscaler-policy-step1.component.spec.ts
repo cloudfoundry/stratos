@@ -1,8 +1,10 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -29,6 +31,8 @@ describe('EditAutoscalerPolicyStep1Component', () => {
       ],
       providers: [
         provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
         DatePipe,
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         TabNavService,
@@ -59,8 +63,11 @@ describe('EditAutoscalerPolicyStep1Component', () => {
   // The defaults (min 1, max 10, the browser timezone) are a valid policy,
   // so Next must be enabled on a new policy.
   it('reports the default limits as valid', async () => {
-    await fixture.whenStable();
-    expect(component.editLimitForm.controls.instance_min_count.value).toBe(1);
+    // A new policy: the autoscaler has none for the app yet.
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/policy'))
+      .flush('Policy Not Found', { status: 404, statusText: 'Not Found' });
+    // The state reaches the form once the load settles and the view renders.
+    await vi.waitFor(() => expect(component.editLimitForm.controls.instance_min_count.value).toBe(1));
     expect(component.editLimitForm.controls.instance_max_count.value).toBe(10);
     expect(component.editLimitForm.valid).toBe(true);
     expect(await firstValueFrom(component.valid$)).toBe(true);
