@@ -125,4 +125,17 @@ describe('ServicePlanPublicComponent', () => {
 
     expect(element.textContent).toContain('Service Plan has no visibility');
   });
+
+  it('updates the visibility message when the plan arrives after the first render', async () => {
+    // Parents pass the plan once their own fetch lands: the first render
+    // sees no plan, which reads as "no visibility".
+    await fixture.whenStable();
+    expect(element.textContent).toContain('Service Plan has no visibility');
+
+    fixture.componentRef.setInput('servicePlan', buildPlan({ visibilityType: 'public' }));
+    await fixture.whenStable();
+
+    expect(element.textContent).toContain('Yes');
+    expect(element.textContent).not.toContain('Service Plan has no visibility');
+  });
 });
