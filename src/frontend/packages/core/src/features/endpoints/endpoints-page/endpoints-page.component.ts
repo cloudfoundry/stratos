@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, AfterViewInit, Component, NgZone, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
 import {
@@ -114,9 +114,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public showRegisterModal = false;
   public isInitialised$: Observable<boolean>;
 
-  @ViewChild('customNoEndpointsContainer', { read: ViewContainerRef, static: true }) customNoEndpointsContainer!: ViewContainerRef;
-  customContentComponentRef!: ComponentRef<any>;
-
   private snackBarText = {
     message: `There are no connected endpoints, connect with your personal credentials to get started.`,
     action: 'Got it'
@@ -140,7 +137,9 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
           this.router.navigate(['applications'], { replaceUrl: true });
         }
       }),
-      take(1)
+      take(1),
+      // The flag may never arrive; do not hold the page after it closes.
+      takeUntilDestroyed()
     ).subscribe({
       error: (err) => console.error('Error checking persistence features:', err)
     });
@@ -201,29 +200,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       console.error('Failed to load endpoints via EndpointsDataService:', err);
     });
 
-    // Subscribe to haveRegistered$ to handle custom no-endpoints component
-    // Defensive: Add error handling to prevent subscription failures from breaking the page
-    this.subs.push(
-      this.endpointsService.haveRegistered$.pipe(
-        filter(haveRegistered => haveRegistered !== undefined && haveRegistered !== null)
-      ).subscribe({
-        next: (haveRegistered) => {
-          // Use custom component if specified and no endpoints are registered
-          if (this.customNoEndpointsContainer) {
-            this.customNoEndpointsContainer.clear();
-          }
-          if (!haveRegistered && this.customizations.noEndpointsComponent) {
-            try {
-              this.customContentComponentRef = this.customNoEndpointsContainer.createComponent(this.customizations.noEndpointsComponent);
-            } catch (error) {
-              console.error('Error creating custom no-endpoints component:', error);
-            }
-          }
-        },
-        error: (err) => console.error('Error subscribing to haveRegistered$:', err)
-      })
-    );
-
     // Trigger endpoint health checks
     // Defensive: Wrap in try-catch to prevent errors from breaking initialization
     try {
@@ -280,14 +256,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       safeUnsubscribe(...this.subs);
     } catch (error) {
       console.error('Error unsubscribing:', error);
-    }
-
-    try {
-      if (this.customContentComponentRef) {
-        this.customContentComponentRef.destroy();
-      }
-    } catch (error) {
-      console.error('Error destroying custom component:', error);
     }
 
     try {
