@@ -66,8 +66,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
   // false on terminal states (success or error) so the user can go back
   // and fix inputs when the deploy fails.
   private disablePreviousSubject = new BehaviorSubject<boolean>(true);
-  // A deployed app the lookup did not find: there is no app to go to, but
-  // the deploy is over, so the step can be closed
+  // A deployed app the lookup did not find, or a lookup that failed: there
+  // is no app to go to, but the deploy is over, so the step can be closed
   private appNotFoundSubject = new BehaviorSubject<boolean>(false);
 
   readonly valid$: Observable<boolean> = this.validSubject.asObservable();
@@ -164,16 +164,31 @@ export class DeployApplicationStep3Component implements OnDestroy {
         filter(() => !!this.deployer.appData?.Name && !this.appGuid),
         take(1),
         switchMap(() => this.lookUpAppGuid()),
-      ).subscribe(guid => {
-        if (guid) {
-          this.deployer.applicationGuid$.next(guid);
-        } else {
+      ).subscribe({
+        next: guid => {
+          if (guid) {
+            this.deployer.applicationGuid$.next(guid);
+          } else {
+            this.appNotFoundSubject.next(true);
+            this.showAppNotFound();
+          }
+        },
+        error: () => {
           this.appNotFoundSubject.next(true);
-          this.snackBarService.show(
-            `Application ${this.deployer.appData?.Name} was deployed but could not be found in the space`, 'Dismiss');
-        }
+          this.showAppLookupFailed();
+        },
       })
     );
+  }
+
+  private showAppNotFound() {
+    this.snackBarService.show(
+      `Application ${this.deployer.appData?.Name} was deployed but could not be found in the space`, 'Dismiss');
+  }
+
+  private showAppLookupFailed() {
+    this.snackBarService.show(
+      `Application ${this.deployer.appData?.Name} was deployed but looking it up in the space failed`, 'Dismiss');
   }
 
   // Emits undefined when the space has no app of that name
@@ -225,9 +240,16 @@ export class DeployApplicationStep3Component implements OnDestroy {
         // A first-time deploy left mid-way never looked up its app GUID
         ref.onAction().pipe(
           switchMap(() => this.appGuid ? observableOf(this.appGuid) : this.lookUpAppGuid()),
-        ).subscribe(guid => {
-          this.appGuid = guid;
-          this.goToAppSummary();
+        ).subscribe({
+          next: guid => {
+            if (guid) {
+              this.appGuid = guid;
+              this.goToAppSummary();
+            } else {
+              this.showAppNotFound();
+            }
+          },
+          error: () => this.showAppLookupFailed(),
         });
       }
       this.deployer.close();

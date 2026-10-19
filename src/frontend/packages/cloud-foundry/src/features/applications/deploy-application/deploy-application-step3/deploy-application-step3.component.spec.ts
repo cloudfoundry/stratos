@@ -72,6 +72,28 @@ describe('DeployApplicationStep3Component', () => {
     await fixture.whenStable();
   };
 
+  // A first deploy of my-app that the user leaves mid-way; it then succeeds
+  // and the user clicks View on the snackbar it shows
+  const viewAfterLeaving = async () => {
+    const action = new Subject<void>();
+    const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show').mockReturnValue({ onAction: () => action } as any);
+    await enterConnected();
+    const deployer = component.deployer;
+    deployer.processWebSocketMessage({
+      type: SocketEventTypes.MANIFEST,
+      message: JSON.stringify({ Applications: [{ Name: 'my-app' }] }),
+    });
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
+    await fixture.whenStable();
+
+    fixture.destroy();
+    deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_COMPLETED, message: '' });
+    deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_SUCCESS, message: '' });
+    await TestBed.inject(ApplicationRef).whenStable();
+    action.next();
+    return show;
+  };
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -293,6 +315,24 @@ describe('DeployApplicationStep3Component', () => {
       expect(navigate).not.toHaveBeenCalled();
     });
 
+    it('can be closed when the lookup of the deployed app fails', async () => {
+      const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show').mockReturnValue({ onAction: () => NEVER } as any);
+      const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+      let closeable: boolean | undefined;
+      let valid: boolean | undefined;
+      component.closeable$.subscribe(c => closeable = c);
+      component.valid$.subscribe(v => valid = v);
+      await enterConnected();
+      await succeed('my-app');
+
+      TestBed.inject(HttpTestingController).expectOne(appsUrl).flush('boom', { status: 500, statusText: 'Server Error' });
+
+      expect(closeable).toBe(true);
+      expect(valid).toBe(false);
+      expect(show).toHaveBeenCalledWith('Application my-app was deployed but looking it up in the space failed', 'Dismiss');
+      expect(navigate).not.toHaveBeenCalled();
+    });
+
     it('keeps the app given for a redeploy', async () => {
       const httpMock = TestBed.inject(HttpTestingController);
       fixture.componentRef.setInput('appGuid', 'r1');
@@ -381,6 +421,17 @@ describe('DeployApplicationStep3Component', () => {
     expect(navigate).toHaveBeenCalledWith(['applications', 'cf', 'g1'], undefined);
   });
 
+  it('reports on View that the app of a deploy left mid-way is not found', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const show = await viewAfterLeaving();
+
+    TestBed.inject(HttpTestingController).expectOne('/pp/v1/cf/apps/cf?space_guids=space')
+      .flush({ resources: [{ name: 'other', guid: 'g0' }] });
+
+    expect(show).toHaveBeenCalledWith('Application my-app was deployed but could not be found in the space', 'Dismiss');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   it('reports a deploy that fails after the user leaves the page', async () => {
     const snackBar = TestBed.inject(TailwindSnackBarService);
     const show = vi.spyOn(snackBar, 'show').mockReturnValue({ onAction: () => NEVER } as any);
@@ -453,5 +504,16 @@ describe('DeployApplicationStep3Component', () => {
 
     expect(close).toHaveBeenCalled();
     expect(show).not.toHaveBeenCalled();
+  });
+
+  it('reports on View that the lookup of the app of a deploy left mid-way failed', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate').mockResolvedValue(true);
+    const show = await viewAfterLeaving();
+
+    TestBed.inject(HttpTestingController).expectOne('/pp/v1/cf/apps/cf?space_guids=space')
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+
+    expect(show).toHaveBeenCalledWith('Application my-app was deployed but looking it up in the space failed', 'Dismiss');
+    expect(navigate).not.toHaveBeenCalled();
   });
 });
