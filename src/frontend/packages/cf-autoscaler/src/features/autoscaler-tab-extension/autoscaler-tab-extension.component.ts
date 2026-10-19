@@ -458,18 +458,21 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       return { labels: [], datasets: [] };
     }
 
-    const current = entity.latest.target[0];
+    // target and colorTarget hold data points ({name, value}); the gauge
+    // needs the value and the colour string.
+    const current = Number(entity.latest.target[0].value);
     const max = entity.chartMaxValue;
     const remaining = max - current;
 
     const cssVar = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+    const color = entity.latest.colorTarget?.[0]?.value;
 
     return {
       labels: ['Current', 'Remaining'],
       datasets: [{
         data: [current, remaining],
         backgroundColor: [
-          entity.latest.colorTarget?.[0] || cssVar('--color-info'), // Fallback color if missing
+          typeof color === 'string' ? color : cssVar('--color-info'),
           cssVar('--content-border')
         ]
       }]
