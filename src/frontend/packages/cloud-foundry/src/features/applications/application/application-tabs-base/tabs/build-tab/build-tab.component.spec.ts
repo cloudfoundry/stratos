@@ -1,3 +1,4 @@
+import { HttpRequest } from '@angular/common/http';
 import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal, WritableSignal } from '@angular/core';
@@ -174,6 +175,8 @@ describe('BuildTabComponent', () => {
     const source = { type: 'gitscm', scm: 'github', project: 'org/missing', branch: 'main', commit: 'abc', endpointGuid: '' };
     const repoUrl = 'https://api.github.com/repos/org/missing';
     const commitUrl = 'https://api.github.com/repos/org/missing/commits/abc';
+    const isRepo = (req: HttpRequest<unknown>) => req.urlWithParams === repoUrl;
+    const isCommit = (req: HttpRequest<unknown>) => req.urlWithParams === commitUrl;
     const notFound = { status: 404, statusText: 'Not Found' };
     let stratosProject: WritableSignal<unknown>;
     let app: WritableSignal<unknown>;
@@ -196,8 +199,8 @@ describe('BuildTabComponent', () => {
         component.deploySource$.subscribe(),
       ];
       await fixture.whenStable();
-      const repoRequests = httpMock.match(repoUrl);
-      const commitRequests = httpMock.match(commitUrl);
+      const repoRequests = httpMock.match(isRepo);
+      const commitRequests = httpMock.match(isCommit);
       expect(repoRequests.length).toBe(1);
       expect(commitRequests.length).toBe(1);
       repoRequests.forEach(r => r.flush('nope', notFound));
@@ -210,8 +213,8 @@ describe('BuildTabComponent', () => {
         await fixture.whenStable();
       }
 
-      expect(httpMock.match(repoUrl).length).toBe(0);
-      expect(httpMock.match(commitUrl).length).toBe(0);
+      expect(httpMock.match(isRepo).length).toBe(0);
+      expect(httpMock.match(isCommit).length).toBe(0);
       subs.forEach(sub => sub.unsubscribe());
     });
   });
