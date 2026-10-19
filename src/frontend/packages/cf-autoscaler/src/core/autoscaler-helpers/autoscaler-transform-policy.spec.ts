@@ -328,6 +328,18 @@ describe('Autoscaler Transform Policy Helper', () => {
     expect(isEqual(arrayPolicy, autoscalerTransformMapToArray(mapPolicy))).toBe(true);
   });
 
+  // A save sends the whole policy. Leaving out configuration made the
+  // autoscaler reset the custom metric submission strategy to same_app.
+  it('keeps the configuration section through edit and save', () => {
+    const policy = {
+      instance_min_count: 1,
+      instance_max_count: 4,
+      configuration: { custom_metrics: { metric_submission_strategy: { allow_from: 'bound_app' } } },
+    } as AppAutoscalerPolicy;
+    const saved = autoscalerTransformMapToArray(autoscalerTransformArrayToMap(policy));
+    expect(saved.configuration).toEqual(policy.configuration);
+  });
+
   it('preserves cool_down_secs distinct from breach_duration_secs (regression)', () => {
     const local = {
       instance_min_count: 1,
