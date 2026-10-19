@@ -128,14 +128,11 @@ export class DeployApplicationStep3Component implements OnDestroy {
       })
     );
 
-    // Resolve the app GUID without depending on APP_GUID_NOTIFY. That
-    // backend event (cfapppush/deploy.go:205-208) is useless either way:
-    // absent on first-time deploy (the cfV2Actor wrapper in push_actor.go
-    // that used to send it was dropped when CF CLI internals were migrated
-    // from v2action to v7action and no v7 equivalent was written) and
-    // redundant on redeploy (it just echoes the value the client passed in
-    // the URL). Even the Stratos "Redeploy" button path currently ends up
-    // as a first-time deploy from the server's perspective because
+    // Fallback for a missing APP_GUID_NOTIFY. After a first-time push the
+    // backend resolves the new app's GUID by name and sends it, but that
+    // lookup is best-effort (cfapppush/deploy.go), so the event can be
+    // absent. The Stratos "Redeploy" button path also ends up as a
+    // first-time deploy from the server's perspective because
     // DeployApplicationDeployer.isRedeploy is never assigned from the
     // parent component — the &app=X URL parameter is never set.
     //
