@@ -1,13 +1,28 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, WritableSignal, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnDestroy,
+  OnInit,
+  WritableSignal,
+  computed,
+  effect,
+  inject,
+  signal,
+  untracked,
+} from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
 import {
+  GitBranch,
   GitCommit,
   GitDataService,
   GithubCommitsSignalConfigService,
   GitMeta,
   GitRepo,
+  GitResource,
   GitSCM,
   GitSCMService,
   GitSCMType,
@@ -15,19 +30,8 @@ import {
   GithubCommitAuthorComponent,
 } from '@stratosui/git';
 import { getUnixTime } from 'date-fns';
-import { EMPTY, Observable, Subscription, combineLatest, of } from 'rxjs';
-import {
-  catchError,
-  distinctUntilChanged,
-  filter,
-  map,
-  publishReplay,
-  refCount,
-  startWith,
-  switchMap,
-  take,
-  withLatestFrom,
-} from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../application.service';
 
@@ -88,33 +92,56 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   private readonly signalConfig = inject(GithubCommitsSignalConfigService);
 
 
+  private readonly destroyRef = inject(DestroyRef);
+
+  // The git lookups this tab reads, set once the project resolves (and, for
+  // the commit and branch, once the repo does). Template state derives from
+  // their signals, so a lookup that settles after the first render, or fails,
+  // still reaches the view.
+  private readonly repo = signal<GitResource<GitRepo> | undefined>(undefined);
+  private readonly commitLookup = signal<GitResource<GitCommit> | undefined>(undefined);
+  private readonly branchLookup = signal<GitResource<GitBranch> | undefined>(undefined);
+
   // undefined while the repo state is still resolving (before value/error).
-  public hasRepo$!: Observable<boolean | undefined>;
-  public isLoading$!: Observable<boolean>;
+  public readonly hasRepo = computed(() => {
+    const repo = this.repo();
+    return repo?.value() ? true : repo?.error() ? false : undefined;
+  });
+  public readonly isLoading$ = toObservable(computed(() => this.hasRepo() === undefined));
 
-  public gitSCMRepo$!: Observable<GitRepo>;
-  public commit$!: Observable<GitCommit>;
-  public isHead$!: Observable<boolean>;
+  public readonly gitSCMRepo = computed(() => this.repo()?.value() ?? null);
+  // A failed commit or branch lookup leaves these null: the template leaves
+  // the details out.
+  public readonly commit = computed(() => this.commitLookup()?.value() ?? null);
+  public readonly isHead = computed(() => {
+    const branch = this.branchLookup()?.value();
+    // strict: a resolved branch carries its head commit.
+    return branch ? branch.commit!.sha === this.deployedCommitSha : null;
+  });
+  public readonly icon = signal<SCMIcon | undefined>(undefined);
 
-  // Signal-native commit list config — undefined until the repo + branch
-  // resolve (the commits load happens in the same block).
+  // Signal-native commit list config — undefined until the repo resolves.
   public readonly listConfig: WritableSignal<SignalListConfig<GitCommit> | undefined> = signal(undefined);
 
-  private gitSCMRepoErrorSub!: Subscription;
   private snackBarRef?: TailwindSnackBarRef<any>;
 
   // Context needed by the per-row Deploy / Compare actions, captured as the
-  // observables resolve so the action callbacks can read them synchronously.
+  // lookups resolve so the action callbacks can read them synchronously.
   private scm!: GitSCM;
   private projectName = '';
   private branchName = '';
   private deployedCommitSha = '';
-  private deployedTime = 0;
-  private repoHtmlUrl = '';
   private cfGuid = '';
   private orgGuid = '';
   private spaceGuid = '';
   private appGuid = '';
+
+  // The Compare action is only offered for commits newer than the deployed
+  // one (see the legacy createEnabled gating).
+  private readonly deployedTime = computed(() => {
+    const deployed = this.commit()?.commit;
+    return deployed ? getUnixTime(new Date(deployed.author.date)) : 0;
+  });
 
   public noContentFirstLine = 'Unable to fetch details';
   public noContentSecondLine: NoContentMessageLine = {
@@ -123,17 +150,32 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   public noContentOtherLines: NoContentMessageLine[] = [{
     text: 'Alternatively this may be due to a communication issue.'
   }];
-  public icon$!: Observable<SCMIcon>;
 
   // Exposed for the SHA cell template's "(deployed)" marker.
   public isDeployedCommit = (c: GitCommit): boolean => this.signalConfig.isHighlighted(c);
 
+  constructor() {
+    // Once the repo resolves, look up the deployed commit and the branch head
+    // and kick off the signal-native commit list.
+    effect(() => {
+      const repo = this.gitSCMRepo();
+      if (repo && !untracked(this.listConfig)) {
+        untracked(() => this.loadRepoDetails());
+      }
+    });
+
+    effect(() => {
+      const repo = this.repo();
+      if (repo?.error()) {
+        const errorMessage = repo.errorMessage();
+        untracked(() => this.reportRepoError(errorMessage));
+      }
+    });
+  }
+
   ngOnDestroy(): void {
     if (this.snackBarRef) {
       this.snackBarRef.dismiss();
-    }
-    if (this.gitSCMRepoErrorSub) {
-      this.gitSCMRepoErrorSub.unsubscribe();
     }
   }
 
@@ -149,15 +191,11 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    // Show the loading spinner until applicationStratProject$ resolves.
-    // The fields built inside the subscribe overwrite this once the
-    // project (and its repo) become available.
-    this.isLoading$ = of(true);
-
     // Resolve the CF org/space/app guids the Deploy action needs to seed the
     // redeploy wizard.
     combineLatest([this.appService.waitForAppEntity$, this.appService.appSpace$]).pipe(
       take(1),
+      takeUntilDestroyed(this.destroyRef),
     ).subscribe(([app, space]) => {
       // strict: cfGuid is stamped on every loaded app entity (optional on IApp
       // only because the raw CF payload omits it before Stratos decorates it).
@@ -171,104 +209,42 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
 
     // applicationStratProject$ is filtered to non-null by the facade
     // (application.service.ts:197-199), so it suspends until env vars
-    // load and STRATOS_PROJECT is parsed. take(1) gives us a one-shot
-    // value with the same timing as the legacy observable.
-    this.appService.applicationStratProject$.pipe(take(1)).subscribe(stProject => {
-      const baseGitMeta = this.createBaseGitMeta(stProject);
-      const coreInfo$: Observable<[EnvVarStratosProject, GitMeta]> = of(
-        [stProject, baseGitMeta] as [EnvVarStratosProject, GitMeta]
-      );
-
-      this.scm = baseGitMeta.scm;
+    // load and STRATOS_PROJECT is parsed; on a direct load that is after
+    // the first render.
+    this.appService.applicationStratProject$.pipe(
+      take(1),
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe(stProject => {
+      const { projectName, scm } = this.createBaseGitMeta(stProject);
+      this.scm = scm;
+      this.projectName = projectName;
       // strict: git-deploy STRATOS_PROJECT always carries project/branch/commit
       // (optional on the shared source type for docker/other deploy kinds).
-      this.projectName = stProject.deploySource.project!;
       this.branchName = stProject.deploySource.branch!;
       this.deployedCommitSha = stProject.deploySource.commit!.trim();
-      this.icon$ = of(baseGitMeta.scm.getIcon());
-
+      this.icon.set(scm.getIcon());
       // Read once and held: a failed lookup leaves the cache, so a second
-      // read here would start a new request instead of seeing this one.
-      const repo = this.gitData.getRepository(baseGitMeta.scm, baseGitMeta.projectName);
-
-      this.hasRepo$ = repo.state$.pipe(
-        map(state => state.value ? true : state.error ? false : undefined),
-        startWith(undefined),
-        publishReplay(1),
-        refCount()
-      );
-
-      this.isLoading$ = this.hasRepo$.pipe(
-        filter(hasRepo => hasRepo !== undefined),
-        map(() => false),
-        startWith(true)
-      );
-
-      // Completes once the repo lookup settles, without emitting when it
-      // failed, so the one-shot subscriptions below end either way.
-      const blockedOnRepo$: Observable<[EnvVarStratosProject, GitMeta]> = this.hasRepo$.pipe(
-        filter(hasRepo => hasRepo !== undefined),
-        take(1),
-        filter(hasRepo => !!hasRepo),
-        switchMap(() => coreInfo$)
-      );
-
-      this.gitSCMRepo$ = blockedOnRepo$.pipe(
-        switchMap(() => repo.waitForValue$)
-      );
-
-      // Once the repo resolves, capture its URL (for Compare links) and kick
-      // off the signal-native commit list.
-      this.gitSCMRepo$.pipe(take(1)).subscribe(repo => {
-        this.repoHtmlUrl = repo.html_url;
-        this.signalConfig.initialize(this.scm, this.projectName, this.branchName, this.deployedCommitSha);
-        void this.signalConfig.loadAll();
-        this.listConfig.set(this.buildListConfig());
-      });
-
-      this.gitSCMRepoErrorSub = this.hasRepo$.pipe(
-        filter(hasRepo => hasRepo === false),
-        switchMap(() => repo.state$),
-        map(state => state.errorMessage),
-        distinctUntilChanged(),
-        withLatestFrom(coreInfo$)
-      ).subscribe(([errorMessage, [, meta]]) => {
-        if (this.snackBarRef) {
-          this.snackBarRef.dismiss();
-        }
-        this.snackBarRef = this.snackBar.error(`Unable to fetch ${meta.scm.getLabel()} project: ${errorMessage}`);
-      });
-
-      // A failed commit or branch lookup ends these streams without a value:
-      // the template leaves the details out, as it did while they hung.
-      this.commit$ = blockedOnRepo$.pipe(
-        // strict: git-deploy deploySource always carries commit/branch.
-        switchMap(([project, meta]) =>
-          this.gitData.getCommit(meta.scm, meta.projectName, project.deploySource.commit!.trim()).waitForValue$
-        ),
-        catchError(() => EMPTY)
-      );
-      // Capture the deployed commit's timestamp — the Compare action is only
-      // offered for commits newer than the deployed one (see the legacy
-      // createEnabled gating).
-      this.commit$.pipe(take(1)).subscribe(deployedCommit => {
-        // strict: getCommit resolves the full commit detail before emitting.
-        this.deployedTime = getUnixTime(new Date(deployedCommit.commit!.author.date));
-      });
-      // The branch head moves with every push, so it is read afresh each
-      // time the tab opens rather than taken from an earlier visit's cache.
-      this.isHead$ = blockedOnRepo$.pipe(
-        // strict: git-deploy deploySource always carries branch.
-        switchMap(([project, meta]) =>
-          this.gitData.getBranch(meta.scm, meta.projectName, project.deploySource.branch!, { refresh: true }).waitForValue$
-        ),
-        withLatestFrom(blockedOnRepo$),
-        // strict: a resolved branch carries its head commit; deploySource.commit
-        // is present for git-deployed apps.
-        map(([branch, [project]]) => branch.commit!.sha === project.deploySource.commit!.trim()),
-        catchError(() => EMPTY)
-      );
+      // read would start a new request instead of seeing this one.
+      this.repo.set(this.gitData.getRepository(scm, projectName));
     });
+  }
+
+  private loadRepoDetails(): void {
+    this.commitLookup.set(this.gitData.getCommit(this.scm, this.projectName, this.deployedCommitSha));
+    // The branch head moves with every push, so it is read afresh each
+    // time the tab opens rather than taken from an earlier visit's cache.
+    this.branchLookup.set(this.gitData.getBranch(this.scm, this.projectName, this.branchName, { refresh: true }));
+
+    this.signalConfig.initialize(this.scm, this.projectName, this.branchName, this.deployedCommitSha);
+    void this.signalConfig.loadAll();
+    this.listConfig.set(this.buildListConfig());
+  }
+
+  private reportRepoError(errorMessage: string): void {
+    if (this.snackBarRef) {
+      this.snackBarRef.dismiss();
+    }
+    this.snackBarRef = this.snackBar.error(`Unable to fetch ${this.scm.getLabel()} project: ${errorMessage}`);
   }
 
   private buildListConfig(): SignalListConfig<GitCommit> {
@@ -310,7 +286,7 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
           // (GitHub renders "no change" otherwise) and never for the deployed
           // commit itself.
           const isDeployed = c.sha === this.deployedCommitSha;
-          if (!isDeployed && this.deployedTime < getUnixTime(new Date(c.commit?.author?.date ?? 0))) {
+          if (!isDeployed && this.deployedTime() < getUnixTime(new Date(c.commit?.author?.date ?? 0))) {
             items.push({ label: 'Compare', icon: 'compare_arrows', invoke: () => this.compare(c) });
           }
           return items;
@@ -357,6 +333,6 @@ export class GitSCMTabComponent implements OnInit, OnDestroy {
   }
 
   private compare(commit: GitCommit): void {
-    window.open(this.scm.getCompareCommitURL(this.repoHtmlUrl, this.deployedCommitSha, commit.sha), '_blank');
+    window.open(this.scm.getCompareCommitURL(this.gitSCMRepo()?.html_url ?? '', this.deployedCommitSha, commit.sha), '_blank');
   }
 }

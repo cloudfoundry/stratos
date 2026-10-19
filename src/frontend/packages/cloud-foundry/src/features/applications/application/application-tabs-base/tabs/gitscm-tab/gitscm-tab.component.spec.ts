@@ -10,10 +10,14 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { CommonModule } from '@angular/common';
 import { getGitHubAPIURL, GITHUB_API_URL, GitDataService, GitResource, GitSCMService } from '@stratosui/git';
 import { TailwindSnackBarService } from '@stratosui/core';
-import { defer, EMPTY, Observable, of } from 'rxjs';
+import { defer, EMPTY, Observable, of, Subject } from 'rxjs';
 import { finalize } from 'rxjs/operators';
 
 import { TruncatePipe } from '../../../../../../../../core/src/core/truncate.pipe';
+import { LoadingPageComponent } from '../../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import {
+  NoContentMessageComponent,
+} from '../../../../../../../../core/src/shared/components/no-content-message/no-content-message.component';
 import { AppDetailDataService } from '../../../../../../features/applications/app-detail-data.service';
 import { CfDeployAppDataService } from '../../../../../../services/domain-data/cf-deploy-app-data.service';
 import { ApplicationService } from '../../../../application.service';
@@ -70,10 +74,11 @@ function configure(applicationStratProject$: Observable<unknown>, stratosProject
     ],
     schemas: [NO_ERRORS_SCHEMA]
   })
-  // Keep CommonModule (async pipe) and the template's pipe but strip deep
-  // child components that pull in the full ngrx entity store.
+  // Keep CommonModule (async pipe), the template's pipe and the loading and
+  // no-content pages but strip deep child components that pull in the full
+  // ngrx entity store.
   .overrideComponent(GitSCMTabComponent, {
-    set: { imports: [CommonModule, TruncatePipe] },
+    set: { imports: [CommonModule, TruncatePipe, LoadingPageComponent, NoContentMessageComponent] },
   })
   .compileComponents();
 }
@@ -194,6 +199,60 @@ describe('GitSCMTabComponent', () => {
       await fixture.whenStable();
 
       expect(fixture.nativeElement.textContent).toContain('branch has been updated since this app was deployed');
+    });
+
+    it('ends its lookups when the tab closes before they settle', async () => {
+      fixture.destroy();
+
+      expect(open).toEqual({ repo: 0, commit: 0, branch: 0 });
+    });
+
+    it('ends the commit lookup when the tab closes before it settles', async () => {
+      httpMock.expectOne(repoUrl).flush({ full_name: 'org/repo', html_url: 'h', owner: {} });
+      await fixture.whenStable();
+      fixture.destroy();
+
+      expect(open).toEqual({ repo: 0, commit: 0, branch: 0 });
+    });
+  });
+
+  // A direct load or reload: the app's env vars, and so the project, arrive
+  // after the tab has first rendered.
+  describe('when the project arrives after the first render', () => {
+    const repoUrl = 'https://api.github.com/repos/org/repo';
+    let project$: Subject<unknown>;
+    let httpMock: HttpTestingController;
+
+    beforeEach(async () => {
+      project$ = new Subject();
+      await configure(project$, project);
+      httpMock = TestBed.inject(HttpTestingController);
+      fixture = TestBed.createComponent(GitSCMTabComponent);
+      await fixture.whenStable();
+      project$.next(project);
+      await fixture.whenStable();
+    });
+
+    afterEach(() => {
+      httpMock.match(() => true);
+    });
+
+    it('leaves the loading page when the repository lookup fails', async () => {
+      httpMock.expectOne(repoUrl).flush('nope', { status: 404, statusText: 'Not Found' });
+      await fixture.whenStable();
+
+      const text = fixture.nativeElement.textContent;
+      expect(text).not.toContain('Retrieving Git Details');
+      expect(text).toContain('Unable to fetch details');
+    });
+
+    it('shows the repository once its lookup resolves', async () => {
+      httpMock.expectOne(repoUrl).flush({ full_name: 'org/repo', html_url: 'h', owner: {} });
+      await fixture.whenStable();
+
+      const text = fixture.nativeElement.textContent;
+      expect(text).not.toContain('Retrieving Git Details');
+      expect(text).toContain('Repository Details');
     });
   });
 });
