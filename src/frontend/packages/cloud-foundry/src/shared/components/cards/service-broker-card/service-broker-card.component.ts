@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, Input, OnDestroy, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
@@ -50,7 +50,7 @@ interface BrokerSpaceLink {
     TristateValueComponent,
   ],
 })
-export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
+export class ServiceBrokerCardComponent implements OnInit {
   private serviceCatalog = inject(ServiceCatalogDataService);
   private spaceRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
@@ -59,9 +59,8 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
   private readonly _brokerGuid = signal('');
   private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
 
-  // Acquired SpaceDataService (or null when no broker.space.guid yet).
-  // The registry refCounts per (cnsi, spaceGuid); we release on swap +
-  // destroy so warm caches stay shared with other consumers. A signal so
+  // Acquired SpaceDataService (or null when no broker.space.guid yet),
+  // shared per (cnsi, spaceGuid) through the registry. A signal so
   // `spaceLink` re-evaluates when the effect swaps it in.
   private readonly _spaceData = signal<SpaceDataService | null>(null);
   private _spaceKey: { cnsi: string, guid: string } | null = null;
@@ -103,7 +102,7 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // Acquire/release SpaceDataService when broker.space.guid changes.
+    // Acquire SpaceDataService when broker.space.guid changes.
     // Effect re-runs on broker swap (new SignalSource) and on broker
     // value flip (HTTP landed) — same shape regardless of which triggered
     // the change.
@@ -116,7 +115,6 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
         const curr = this._spaceKey;
         if (curr?.cnsi === targetKey?.cnsi && curr?.guid === targetKey?.guid) return;
         if (curr) {
-          this.spaceRegistry.release(curr.cnsi, curr.guid);
           this._spaceData.set(null);
           this._spaceKey = null;
         }
@@ -128,13 +126,5 @@ export class ServiceBrokerCardComponent implements OnInit, OnDestroy {
         }
       });
     });
-  }
-
-  ngOnDestroy(): void {
-    if (this._spaceKey) {
-      this.spaceRegistry.release(this._spaceKey.cnsi, this._spaceKey.guid);
-      this._spaceData.set(null);
-      this._spaceKey = null;
-    }
   }
 }

@@ -272,7 +272,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   }
 
   ngOnDestroy() {
-    this.destroy();
     this.spaceSubscription.unsubscribe();
     this.formStatusSub?.unsubscribe();
   }

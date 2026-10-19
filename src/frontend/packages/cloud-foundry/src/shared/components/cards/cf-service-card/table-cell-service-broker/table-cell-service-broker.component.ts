@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { TableCellCustom } from '@stratosui/core';
@@ -35,7 +35,7 @@ interface SpaceLink {
 })
 export class TableCellServiceBrokerComponent extends
   TableCellCustom<StServiceOffering,
-  TableCellServiceBrokerComponentConfig> implements OnInit, OnDestroy {
+  TableCellServiceBrokerComponentConfig> implements OnInit {
 
   private serviceCatalog = inject(ServiceCatalogDataService);
   private spaceRegistry = inject(SpaceDataRegistry);
@@ -93,7 +93,6 @@ export class TableCellServiceBrokerComponent extends
         const curr = this._spaceKey;
         if (curr?.cnsi === targetKey?.cnsi && curr?.guid === targetKey?.guid) return;
         if (curr) {
-          this.spaceRegistry.release(curr.cnsi, curr.guid);
           this._spaceData.set(null);
           this._spaceKey = null;
         }
@@ -105,13 +104,5 @@ export class TableCellServiceBrokerComponent extends
         }
       });
     });
-  }
-
-  ngOnDestroy(): void {
-    if (this._spaceKey) {
-      this.spaceRegistry.release(this._spaceKey.cnsi, this._spaceKey.guid);
-      this._spaceData.set(null);
-      this._spaceKey = null;
-    }
   }
 }

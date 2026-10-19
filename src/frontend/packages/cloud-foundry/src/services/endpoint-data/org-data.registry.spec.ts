@@ -24,8 +24,6 @@ describe('OrgDataRegistry', () => {
     const svc1 = registry.acquire('cnsi-1', 'org-a');
     const svc2 = registry.acquire('cnsi-1', 'org-a');
     expect(svc1).toBe(svc2);
-    registry.release('cnsi-1', 'org-a');
-    registry.release('cnsi-1', 'org-a');
   });
 
   it('returns different instances for different orgs in same cnsi', () => {
@@ -38,13 +36,6 @@ describe('OrgDataRegistry', () => {
     const a = registry.acquire('cnsi-1', 'org-a');
     const b = registry.acquire('cnsi-2', 'org-a');
     expect(a).not.toBe(b);
-  });
-
-  it('retains instance after full release (sticky data)', () => {
-    const svc = registry.acquire('cnsi-1', 'org-a');
-    registry.release('cnsi-1', 'org-a');
-    const svcAgain = registry.acquire('cnsi-1', 'org-a');
-    expect(svc).toBe(svcAgain);
   });
 
   it('evict() removes the instance', () => {

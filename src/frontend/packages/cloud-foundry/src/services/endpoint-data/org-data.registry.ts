@@ -3,47 +3,35 @@ import { Injectable, inject } from '@angular/core';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
 import { OrgDataService } from './org-data.service';
 
-interface RegistryEntry {
-  service: OrgDataService;
-  refCount: number;
-}
-
 // Caches OrgDataService instances per (cnsiGuid, orgGuid). Mirrors
 // EndpointDataRegistry — keeps state warm across navigation away and back to
 // the same org-detail page, and gives every consumer in the org-detail tree a
 // shared instance (so in-flight dedup + cached signals actually take effect).
+// Entries are kept for the session (sticky) on purpose; only evict() removes one.
 @Injectable({ providedIn: 'root' })
 export class OrgDataRegistry {
   private readonly http = inject(HttpClient);
   private readonly diagnostics = inject(StratosDiagnostics);
-  private readonly instances = new Map<string, RegistryEntry>();
+  private readonly instances = new Map<string, OrgDataService>();
 
   acquire(cnsiGuid: string, orgGuid: string): OrgDataService {
     const key = this.key(cnsiGuid, orgGuid);
     const existing = this.instances.get(key);
     if (existing) {
-      existing.refCount++;
-      return existing.service;
+      return existing;
     }
     const service = new OrgDataService(this.http, cnsiGuid, orgGuid, this.diagnostics);
-    this.instances.set(key, { service, refCount: 1 });
+    this.instances.set(key, service);
     return service;
-  }
-
-  release(cnsiGuid: string, orgGuid: string): void {
-    const entry = this.instances.get(this.key(cnsiGuid, orgGuid));
-    if (!entry) { return; }
-    entry.refCount = Math.max(0, entry.refCount - 1);
-    // Instance stays in map sticky — only removed on explicit evict.
   }
 
   evict(cnsiGuid: string, orgGuid: string): void {
     this.instances.delete(this.key(cnsiGuid, orgGuid));
   }
 
-  /** Cached instance lookup without creating one or bumping refCount. */
+  /** Cached instance lookup without creating one. */
   peek(cnsiGuid: string, orgGuid: string): OrgDataService | undefined {
-    return this.instances.get(this.key(cnsiGuid, orgGuid))?.service;
+    return this.instances.get(this.key(cnsiGuid, orgGuid));
   }
 
   // Every cached instance for an endpoint — mutation cleanups that only
@@ -53,7 +41,7 @@ export class OrgDataRegistry {
     const prefix = `${cnsiGuid}:`;
     return [...this.instances.entries()]
       .filter(([key]) => key.startsWith(prefix))
-      .map(([, entry]) => entry.service);
+      .map(([, service]) => service);
   }
 
   private key(cnsiGuid: string, orgGuid: string): string {

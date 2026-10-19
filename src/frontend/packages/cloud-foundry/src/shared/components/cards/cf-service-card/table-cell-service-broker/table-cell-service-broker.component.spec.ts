@@ -22,8 +22,6 @@ class SpaceDataRegistryStub {
       load: (): Observable<void> => this.loaded,
     };
   }
-
-  release(_cnsi: string, _spaceGuid: string): void { /* no-op */ }
 }
 
 describe('TableCellServiceBrokerComponent', () => {

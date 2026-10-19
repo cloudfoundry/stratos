@@ -38,10 +38,6 @@ export class AddEditSpaceStepBase {
     this.hasSpaceQuotas = computed(() => this.quotaDefinitions().length > 0);
   }
 
-  destroy(): void {
-    this.orgRegistry.release(this.cfGuid, this.orgGuid);
-  }
-
   spaceNameTakenValidator = (): ValidatorFn => {
     return (formField: AbstractControl): ValidationErrors | null => {
       const nameValid = this.isNameUnique(formField.value);

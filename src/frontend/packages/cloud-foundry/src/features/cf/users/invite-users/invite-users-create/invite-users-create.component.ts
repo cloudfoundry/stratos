@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, Input, OnDestroy, OnInit, Signal, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, computed, Input, OnInit, Signal, signal, ChangeDetectionStrategy, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -36,7 +36,7 @@ import { UserInviteSendSpaceRoles, UserInviteService } from '../../../user-invit
     StackedInputActionsComponent
   ]
 })
-export class InviteUsersCreateComponent implements OnInit, OnDestroy {
+export class InviteUsersCreateComponent implements OnInit {
   private usersData = inject(CfUsersPagedDataService);
   private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
   private userInviteService = inject(UserInviteService);
@@ -122,21 +122,6 @@ export class InviteUsersCreateComponent implements OnInit, OnDestroy {
       this.spaceName = computed(() => this.spaceData?.space()?.name ?? '');
     } else {
       this.spaceName = computed(() => '');
-    }
-  }
-
-  ngOnDestroy() {
-    if (this.orgData) {
-      this.orgRegistry.release(
-        this.activeRouteCfOrgSpace.cfGuid,
-        this.activeRouteCfOrgSpace.orgGuid,
-      );
-    }
-    if (this.spaceData) {
-      this.spaceRegistry.release(
-        this.activeRouteCfOrgSpace.cfGuid,
-        this.activeRouteCfOrgSpace.spaceGuid,
-      );
     }
   }
 

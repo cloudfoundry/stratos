@@ -525,22 +525,16 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
     });
   }
 
-  // Promise wrapper for SpaceDataRegistry.acquire+load. Releases the
-  // registry refcount in `finally` so warm caches stay shared but the
-  // dispatcher's transient interest is correctly dropped.
+  // Promise wrapper for SpaceDataRegistry.acquire+load.
   private async awaitSpaceLoad(cfId: string, spaceGuid: string): Promise<StSpace> {
     const sd = this.spaceRegistry.acquire(cfId, spaceGuid);
-    try {
-      await firstValueFrom(sd.load());
-      const space = sd.space();
-      if (!space) {
-        const errs = sd.errors();
-        throw new Error(errs[0]?.message ?? 'Failed to load space');
-      }
-      return space;
-    } finally {
-      this.spaceRegistry.release(cfId, spaceGuid);
+    await firstValueFrom(sd.load());
+    const space = sd.space();
+    if (!space) {
+      const errs = sd.errors();
+      throw new Error(errs[0]?.message ?? 'Failed to load space');
     }
+    return space;
   }
 
   private failSetup(logMessage: string, userMessage: string): Promise<boolean> {

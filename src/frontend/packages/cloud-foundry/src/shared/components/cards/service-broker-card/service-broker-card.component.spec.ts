@@ -55,8 +55,6 @@ class SpaceDataRegistryStub {
     };
   }
 
-  release(_cnsi: string, _spaceGuid: string): void { /* no-op */ }
-
   land(space: StSpace): void {
     this.space.set(space);
     this.loaded.next();
