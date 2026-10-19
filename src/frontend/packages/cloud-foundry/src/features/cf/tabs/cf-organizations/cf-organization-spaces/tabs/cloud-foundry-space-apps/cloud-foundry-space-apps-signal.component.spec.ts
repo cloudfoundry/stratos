@@ -310,6 +310,16 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
     expect([...selected()]).toEqual(['cnsi-1:app-1']);
   });
 
+  it('scopes stats polling to this tab: passes its own DestroyRef', async () => {
+    stubAppsConfig.startStatsPolling.mockClear();
+    await component.ngOnInit();
+    const host = stubAppsConfig.startStatsPolling.mock.calls[0]?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
+  });
+
   it('formatMb returns human-friendly units and ∞ for unlimited', () => {
     expect(CloudFoundrySpaceAppsSignalComponent.formatMb(512)).toBe('512 MB');
     expect(CloudFoundrySpaceAppsSignalComponent.formatMb(2048)).toBe('2.0 GB');

@@ -202,6 +202,16 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
     await fixture.whenStable();
   });
 
+  it('scopes stats polling to this tab: passes its own DestroyRef', async () => {
+    stubAppsConfig.startStatsPolling.mockClear();
+    await component.ngOnInit();
+    const host = stubAppsConfig.startStatsPolling.mock.calls[0]?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
+  });
+
   it('builds Org/Space filter dropdowns with no locked Cloud Foundry dropdown', async () => {
     await component.ngOnInit();
     const cfg = component.listConfig();

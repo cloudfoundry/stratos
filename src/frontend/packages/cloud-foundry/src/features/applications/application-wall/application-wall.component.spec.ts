@@ -4,10 +4,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { Observable, Subject, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 
-import { TabNavService } from '@stratosui/core';
+import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
@@ -15,6 +15,7 @@ import { ApplicationWallComponent } from './application-wall.component';
 import { countDuplicateUrlEndpoints } from '@stratosui/store';
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
+import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 
 function makeStubSignalConfigService() {
   const pageIndex = signal(0);
@@ -79,6 +80,9 @@ describe('ApplicationWallComponent', () => {
   let component: ApplicationWallComponent;
   let fixture: ComponentFixture<ApplicationWallComponent>;
   let stubSignalConfig: ReturnType<typeof makeStubSignalConfigService>;
+  // Source for the wall's own create-application permission check, so a
+  // spec can emit on it after the wall is gone.
+  let canCreate$: Subject<boolean>;
 
   beforeEach(async () => {
     stubSignalConfig = makeStubSignalConfigService();
@@ -127,9 +131,17 @@ describe('ApplicationWallComponent', () => {
       ]
     }).compileComponents();
 
+    canCreate$ = new Subject<boolean>();
+    const perms = TestBed.inject(CurrentUserPermissionsService);
+    const realCan = perms.can.bind(perms);
+    vi.spyOn(perms, 'can').mockImplementation(((action: unknown, ...rest: unknown[]) =>
+      action === CfCurrentUserPermissions.APPLICATION_CREATE
+        ? canCreate$
+        : (realCan as (...a: unknown[]) => Observable<boolean>)(action, ...rest)) as typeof perms.can);
+
     fixture = TestBed.createComponent(ApplicationWallComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
@@ -204,6 +216,26 @@ describe('ApplicationWallComponent', () => {
     expect(range).toBeDefined();
     expect(range!.valueType).toBe('date');
     expect(range!.selected).toBe(stubSignalConfig.lastRefreshedRange);
+  });
+
+  it('stops listening for the create permission once destroyed', () => {
+    canCreate$.next(true);
+    expect(component.canCreateApplication()).toBe(true);
+
+    fixture.destroy();
+    expect(canCreate$.observed).toBe(false);
+    canCreate$.next(false);
+    expect(component.canCreateApplication()).toBe(true);
+  });
+
+  it('scopes stats polling to the wall: passes its own DestroyRef', async () => {
+    stubSignalConfig.startStatsPolling.mockClear();
+    await component.ngOnInit();
+    const host = stubSignalConfig.startStatsPolling.mock.calls[0]?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
   });
 });
 

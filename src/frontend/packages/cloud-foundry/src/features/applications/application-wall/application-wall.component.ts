@@ -1,8 +1,8 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import {
-  Component, OnInit, ChangeDetectionStrategy, Signal, computed, inject, signal, WritableSignal, Injector, effect,
+  Component, OnInit, ChangeDetectionStrategy, DestroyRef, Signal, computed, inject, signal, WritableSignal, Injector, effect,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Observable, firstValueFrom } from 'rxjs';
 import { filter, map, take } from 'rxjs/operators';
@@ -66,6 +66,7 @@ export class ApplicationWallComponent implements OnInit {
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
 
   // Row keys ({cnsiGuid}:{appGuid}) for apps the user has favorited.
   // Derived from UserFavoriteManager's combined (groups, entities) stream
@@ -221,7 +222,10 @@ export class ApplicationWallComponent implements OnInit {
     // Resolve APPLICATION_CREATE for the current user; mirror the previous
     // directive call (no endpoint/org/space scope — true if any connected
     // CF allows it). Push the result into a signal the L5 button reads.
-    currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_CREATE).subscribe({
+    // The check stays live, so end it with the wall.
+    currentUserPermissionsService.can(CfCurrentUserPermissions.APPLICATION_CREATE).pipe(
+      takeUntilDestroyed(this.destroyRef),
+    ).subscribe({
       next: can => this.canCreateApplication.set(can),
       error: err => console.error('Error resolving create-application permission:', err),
     });
@@ -515,7 +519,7 @@ export class ApplicationWallComponent implements OnInit {
     // ticks every 30s so STARTING / CRASHED instances drift toward their
     // terminal state without user input; it ALSO re-fetches whenever
     // pagedItems changes so navigating pages fills the column quickly.
-    this.appsConfig.startStatsPolling();
+    this.appsConfig.startStatsPolling(this.destroyRef);
   }
 
   static formatMb(mb: number | null | undefined): string {

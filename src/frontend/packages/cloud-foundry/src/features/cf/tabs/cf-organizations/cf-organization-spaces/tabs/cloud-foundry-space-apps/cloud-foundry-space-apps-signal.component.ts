@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
-  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
+  Component, ChangeDetectionStrategy, DestroyRef, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
@@ -70,6 +70,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
   private router = inject(Router);
   private permissionsService = inject(CurrentUserPermissionsService);
   private readonly injector = inject(Injector);
+  private readonly destroyRef = inject(DestroyRef);
 
   /** Total app count in this space for the L5 sub-nav. */
   public totalApplications!: Signal<number>;
@@ -331,7 +332,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
     // Drive the Instances column's running / desired display the same way
     // the wall does — initial fetch + 30s polling + reactive re-fetch on
     // pagedItems change.
-    this.appsConfig.startStatsPolling();
+    this.appsConfig.startStatsPolling(this.destroyRef);
   }
 
   private toggleAppFavorite(app: StApp): void {
