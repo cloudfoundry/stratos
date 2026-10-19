@@ -64,6 +64,8 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   }
 
   onEnter = (data: ConnectEndpointConfig) => {
+    // Entered again after Previous: end the earlier connect first
+    this.connectService?.destroy();
     this.connectService = new ConnectEndpointService(this.endpointsService, data, this.endpointsData, this.injector);
     // OnPush change detection: setting a non-signal field doesn't notify
     // the template, so the success message renders without the endpoint
