@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { autoscalerTransformArrayToMap } from '../../core/autoscaler-helpers/autoscaler-transform-policy';
 import { AutoscalerPolicyDataService } from '../../services/domain-data/autoscaler-policy-data.service';
 import { AppAutoscalerPolicyLocal } from '../../store/app-autoscaler.types';
+import { autoscalerDefaultTimezone } from '../../core/autoscaler-helpers/autoscaler-timezones';
 
 @Injectable()
 export class EditAutoscalerPolicyService {
@@ -15,7 +16,7 @@ export class EditAutoscalerPolicyService {
     instance_max_count: 10,
     scaling_rules: [],
     schedules: {
-      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      timezone: autoscalerDefaultTimezone(),
       recurring_schedule: [],
       specific_date: []
     }
