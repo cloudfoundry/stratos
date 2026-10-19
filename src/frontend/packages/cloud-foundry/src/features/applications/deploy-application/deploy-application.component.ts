@@ -76,7 +76,8 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
   selectedSourceType$: Observable<SourceType | undefined>;
 
   // Reactive deploy button text — switches to "Redeploy" when the
-  // wizard is invoked with an existing appGuid. Step 4's handle reads
+  // wizard is invoked with an existing appGuid, and to "Deploy again" once
+  // a deploy has started. Step 4's handle reads
   // this signal so changing the field once at construction time
   // cascades into the rendered button label.
   private deployButtonTextSignal = signal<string>('Deploy');
@@ -365,7 +366,12 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     // instantiates a fresh deployer.
     // The deployer is kept: entering again after a file deploy ended (via
     // Previous to the overrides) uploads the same files again and deploys.
-    onEnter: () => this._step3?.onEnter(this.pendingDeployer as any),
+    // Previous from here leads back to the overrides, whose Next then
+    // deploys again.
+    onEnter: () => {
+      this.deployButtonTextSignal.set('Deploy again');
+      this._step3?.onEnter(this.pendingDeployer as any);
+    },
     canClose: this.step3Closeable.asReadonly(),
     disablePrevious: this.step3DisablePrevious.asReadonly(),
     // step3.disablePrevious$ is true from entry until the deploy ends,

@@ -141,6 +141,16 @@ describe('DeployApplicationComponent', () => {
     expect(mockStep3.onEnter).toHaveBeenLastCalledWith(undefined);
   });
 
+  // Previous from the deploy step leads back to the overrides, whose Next
+  // then starts another deploy
+  it('labels the overrides Next "Deploy again" once a deploy has started', () => {
+    (component as any)._step3 = { onEnter: vi.fn() };
+    expect(component.step4Handle.nextButtonText!()).toBe('Deploy');
+
+    component.step3Handle.onEnter!();
+    expect(component.step4Handle.nextButtonText!()).toBe('Deploy again');
+  });
+
   // Regression guard for the "Source Config shows no options / Next disabled"
   // bug. step2_1 (the git commit picker) is rendered via [hidden], so its
   // @ViewChild fires at parent view-init — before step 2 has saved any
