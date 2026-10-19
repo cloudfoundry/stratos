@@ -74,6 +74,42 @@ describe('LogViewerComponent', () => {
     expect(contentEl.children[0].children[0].innerHTML).toEqual(logText);
   }, 3000);
 
+  describe('when the log stream changes', () => {
+    const shown = async (text: string) => vi.waitFor(() => expect(contentEl.textContent).toContain(text));
+
+    it('clears the lines of the previous stream', async () => {
+      stream.next('old');
+      await shown('old');
+
+      const next = new Subject<string>();
+      component.logViewer.logStream = next;
+      expect(contentEl.children.length).toEqual(0);
+      next.next('new');
+      await shown('new');
+
+      expect(contentEl.textContent).not.toContain('old');
+    });
+
+    it('drops lines of the previous stream it had not shown yet', async () => {
+      stream.next('stale');
+      const next = new Subject<string>();
+      component.logViewer.logStream = next;
+      next.next('new');
+      await shown('new');
+
+      expect(contentEl.textContent).not.toContain('stale');
+    });
+
+    it('keeps the lines when given the same stream again', async () => {
+      stream.next('kept');
+      await shown('kept');
+
+      component.logViewer.logStream = stream;
+
+      expect(contentEl.textContent).toContain('kept');
+    });
+  });
+
   it('should only allow max rows', async () => {
     expect(contentEl.children.length).toEqual(0);
 
