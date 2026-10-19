@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of } from 'rxjs';
@@ -15,6 +15,7 @@ import { TabNavService } from '../../../tab-nav.service';
 import { SidePanelService } from './../../../shared/services/side-panel.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointsService } from '../../../core/endpoints.service';
+import { EndpointStatusSignalService } from '../../../core/signals/endpoint-status-signal.service';
 import { CustomizationService } from '../../../core/customizations.types';
 import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
@@ -49,6 +50,14 @@ describe('EndpointsPageComponent', () => {
     hide: vi.fn()
   };
 
+  const mockPermissionsService = {
+    can: () => of(true)
+  };
+
+  const mockEndpointStatusSignals = {
+    initialised: signal(true)
+  };
+
   const mockEndpointModalService = {
     openModal: vi.fn(),
     closeModal: vi.fn()
@@ -69,7 +78,8 @@ describe('EndpointsPageComponent', () => {
       providers: [
         TabNavService,
         SidePanelService,
-        CurrentUserPermissionsService,
+        { provide: CurrentUserPermissionsService, useValue: mockPermissionsService },
+        { provide: EndpointStatusSignalService, useValue: mockEndpointStatusSignals },
         { provide: SessionService, useValue: mockSessionService },
         { provide: EndpointsService, useValue: mockEndpointsService },
         { provide: CustomizationService, useValue: mockCustomizationService },
@@ -86,13 +96,20 @@ describe('EndpointsPageComponent', () => {
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(EndpointsPageComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('offers Register Endpoint when no endpoints are registered', async () => {
+    await vi.waitFor(() => {
+      const add = fixture.nativeElement.querySelector('[data-test="list-sub-nav-add"]');
+      expect(add?.textContent).toContain('Register Endpoint');
+    });
   });
 });

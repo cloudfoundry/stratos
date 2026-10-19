@@ -27,10 +27,12 @@
     @if ((endpointsService.haveRegistered$ | async)) {
       <app-endpoints-signal-list [addAction]="registerEndpointAction" class="flex-1"></app-endpoints-signal-list>
     } @else {
+      <!-- The list (and its sub-nav) renders only with endpoints, so the
+           first endpoint needs this sub-nav for its Register button. -->
+      <app-list-sub-nav title="Total Endpoints" [count]="noEndpoints" [addAction]="registerEndpointAction"></app-list-sub-nav>
       @if (!customizations.noEndpointsComponent) {
-        <app-endpoints-missing
+        <app-endpoints-missing [showToolbarHint]="false"
         [showDirectToEndpointMessage]="false"></app-endpoints-missing>
-      } @else {
       }
     }
     <ng-template #noEndpointsContainer>
