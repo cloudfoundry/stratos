@@ -78,4 +78,19 @@ describe('Autoscaler Util Helper', () => {
     const other = new HttpErrorResponse({ status: 500, error: 'boom', url: '/x' });
     expect(autoscalerErrorMessage(other)).toBe(other.message);
   });
+  // The other shapes the autoscaler (14.x and 15.x) answers with.
+  it('autoscalerErrorMessage reads every autoscaler error shape', () => {
+    const coded = new HttpErrorResponse({ status: 404, error: { code: 'Not Found', message: 'Policy Not Found' } });
+    expect(autoscalerErrorMessage(coded)).toBe('Policy Not Found');
+    const decode = new HttpErrorResponse({ status: 400, error: { error_message: 'decode params: query: "order": invalid value' } });
+    expect(autoscalerErrorMessage(decode)).toBe('decode params: query: "order": invalid value');
+    const invalidPolicy = new HttpErrorResponse({
+      status: 400, error: [
+        { context: '(root).scaling_rules.0.breach_duration_secs', description: 'Must be greater than or equal to 60' },
+        { context: '(root)', description: 'instance_min_count is required' },
+      ]
+    });
+    expect(autoscalerErrorMessage(invalidPolicy)).toBe(
+      'scaling_rules.0.breach_duration_secs: Must be greater than or equal to 60; instance_min_count is required');
+  });
 });
