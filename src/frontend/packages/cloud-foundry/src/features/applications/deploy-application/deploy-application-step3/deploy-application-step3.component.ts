@@ -45,7 +45,12 @@ export class DeployApplicationStep3Component implements OnDestroy {
   private http = inject(HttpClient);
 
 
-  @Input() appGuid!: string;
+  // The app being redeployed; none on a first deploy
+  @Input('appGuid') redeployAppGuid?: string;
+
+  // The deployed app: the redeployed one, or the one a first deploy
+  // looked up. Each deploy starts again from the input.
+  appGuid?: string;
 
   // Stable BehaviorSubjects back the public Observable fields. The field
   // references (valid$/closeable$/showOverlay$) are created once and never
@@ -237,6 +242,8 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.showOverlaySubject.next(false);
     this.disablePreviousSubject.next(true);
     this.error.set(false);
+    // A retry of a first deploy may deploy another app; look it up again
+    this.appGuid = this.redeployAppGuid;
 
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {

@@ -115,6 +115,54 @@ describe('DeployApplicationStep3Component', () => {
     expect(component.appGuid).toBe('g1');
   });
 
+  describe('deploying again after Previous', () => {
+    const appsUrl = '/pp/v1/cf/apps/cf?space_guids=space';
+
+    // The deploy of the named app succeeds on the page
+    const succeed = async (name: string) => {
+      const deployer = component.deployer;
+      deployer.processWebSocketMessage({
+        type: SocketEventTypes.MANIFEST,
+        message: JSON.stringify({ Applications: [{ Name: name }] }),
+      });
+      deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_STARTED, message: '' });
+      deployer.processWebSocketMessage({ type: SocketEventTypes.EVENT_PUSH_COMPLETED, message: '' });
+      deployer.processWebSocketMessage({ type: SocketEventTypes.CLOSE_SUCCESS, message: '' });
+      await fixture.whenStable();
+    };
+
+    it('looks up the app of the new deploy', async () => {
+      const httpMock = TestBed.inject(HttpTestingController);
+      await enterConnected();
+      await succeed('my-app');
+      httpMock.expectOne(appsUrl).flush({ resources: [{ name: 'my-app', guid: 'g1' }] });
+      expect(component.appGuid).toBe('g1');
+
+      // Back to the overrides, where the user renames the app
+      component.onEnter(undefined as any);
+      await fixture.whenStable();
+      expect(component.appGuid).toBeFalsy();
+      await succeed('renamed');
+
+      httpMock.expectOne(appsUrl).flush({ resources: [{ name: 'my-app', guid: 'g1' }, { name: 'renamed', guid: 'g2' }] });
+      expect(component.appGuid).toBe('g2');
+    });
+
+    it('keeps the app given for a redeploy', async () => {
+      const httpMock = TestBed.inject(HttpTestingController);
+      fixture.componentRef.setInput('appGuid', 'r1');
+      await enterConnected();
+      await succeed('my-app');
+
+      component.onEnter(undefined as any);
+      await fixture.whenStable();
+      await succeed('my-app');
+
+      httpMock.expectNone(appsUrl);
+      expect(component.appGuid).toBe('r1');
+    });
+  });
+
   it('opens a first-time deploy that finishes after the user leaves the page', async () => {
     const snackBar = TestBed.inject(TailwindSnackBarService);
     const action = new Subject<void>();
