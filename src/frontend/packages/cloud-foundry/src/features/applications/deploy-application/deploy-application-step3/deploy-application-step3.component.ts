@@ -253,10 +253,25 @@ export class DeployApplicationStep3Component implements OnDestroy {
       this.deployer = new DeployApplicationDeployer(this.cfOrgSpaceService, this.injector);
     }
 
+    // A file deploy entered again after it ended: its connection is over,
+    // so upload the same files again on a new one
+    const reupload = !!fsDeployer && fsDeployer.finished;
+    if (reupload) {
+      fsDeployer.close();
+    }
+
     this.initDeployer();
     // Start deploying
     this.deployer.open();
-    if (fsDeployer) {
+    if (reupload) {
+      // The server reads the go-ahead only after its ack of the last file
+      this.subscriptions.push(
+        this.deployer.fileTransferStatus$.asObservable().pipe(
+          filter(status => !!status && status.filesSent === status.totalFiles),
+          take(1),
+        ).subscribe(() => this.deployer.deploy())
+      );
+    } else if (fsDeployer) {
       // Ask the existing deployer to continue deploying
       this.deployer.deploy();
     }

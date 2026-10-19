@@ -298,6 +298,9 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
       // (file-upload path only — git-url/docker source paths leave data
       // undefined and step2_2 isn't navigated to).
       this.pendingFsFileInfo = result.data;
+      // A source chosen again needs its own upload: a file source passes
+      // through step 2_2, which hands on a deployer; others need none
+      this.pendingDeployer = undefined;
     },
   };
 
@@ -360,11 +363,9 @@ export class DeployApplicationComponent implements OnInit, OnDestroy {
     // `pendingDeployer === undefined`. Source types that bypass step 2_2
     // (git-url, docker-image) leave pendingDeployer undefined and step 3
     // instantiates a fresh deployer.
-    onEnter: () => {
-      const deployer = this.pendingDeployer;
-      this.pendingDeployer = undefined;
-      this._step3?.onEnter(deployer as any);
-    },
+    // The deployer is kept: entering again after a file deploy ended (via
+    // Previous to the overrides) uploads the same files again and deploys.
+    onEnter: () => this._step3?.onEnter(this.pendingDeployer as any),
     canClose: this.step3Closeable.asReadonly(),
     disablePrevious: this.step3DisablePrevious.asReadonly(),
     // step3.disablePrevious$ is true from entry until the deploy ends,

@@ -4,7 +4,7 @@ import { ApplicationRef, EnvironmentInjector, importProvidersFrom, provideZonele
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
-import { NEVER, Subject, of } from 'rxjs';
+import { NEVER, Observable, Subject, of } from 'rxjs';
 
 import { generateCfBaseTestModulesNoShared } from "@test-framework/cf";
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -20,12 +20,19 @@ import { DeployApplicationDeployer } from '../deploy-application-deployer';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
 import { DeployApplicationStep3Component } from "./deploy-application-step3.component";
 
-// Each connection gets a server stream the test drives
-const socket = vi.hoisted(() => ({ server: undefined as any }));
+// Each connection gets a server stream the test drives; what the client
+// sends is recorded by connection
+const socket = vi.hoisted(() => ({ server: undefined as any, connections: 0, sentOn: [] as unknown[][] }));
 vi.mock('rxjs-websockets', () => ({
   default: () => {
+    socket.connections++;
     socket.server = new Subject<string>();
-    return of(() => socket.server);
+    return of((input: Observable<unknown>) => {
+      const sent: unknown[] = [];
+      socket.sentOn.push(sent);
+      input.subscribe(m => sent.push(m));
+      return socket.server;
+    });
   },
 }));
 
@@ -178,8 +185,8 @@ describe('DeployApplicationStep3Component', () => {
     });
 
     it('unlocks a deploy whose details are missing', async () => {
-      // A file deploy entered again: the wizard hands on the upload
-      // step's deployer only once, so there is no source to send
+      // A file source without the upload step's deployer has no source
+      // to send
       const deployData = TestBed.inject(CfDeployAppDataService);
       deployData.setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
       deployData.setSourceType({ id: 'file', name: 'File' } as SourceType);
@@ -191,6 +198,48 @@ describe('DeployApplicationStep3Component', () => {
       expect(component.deployer.status$().error).toBeTruthy();
       expect(locked()).toBe(false);
     });
+  });
+
+  it('uploads again before deploying a file deploy entered again', async () => {
+    const appRef = TestBed.inject(ApplicationRef);
+    const fromServer = (type: SocketEventTypes, message = '') => socket.server.next(JSON.stringify({ type, message }));
+    const sentTypes = (connection: number) => socket.sentOn[connection]
+      .filter((m): m is string => typeof m === 'string').map(m => JSON.parse(m).type);
+    const deployData = TestBed.inject(CfDeployAppDataService);
+    deployData.setCfDetails({ cloudFoundry: 'cf', org: 'org', space: 'space' });
+    deployData.setSourceType({ id: 'file', name: 'File' } as SourceType);
+    deployData.saveAppOverrides({} as OverrideAppDetails);
+    socket.connections = 0;
+    socket.sentOn = [];
+
+    // The upload step uploads the file and hands the deployer on
+    const deployer = new DeployApplicationDeployer(TestBed.inject(CfOrgSpaceDataService), TestBed.inject(EnvironmentInjector));
+    deployer.fsFileInfo = { root: { files: [new File(['x'], 'a.txt')] }, total: 1 } as unknown as FileScannerInfo;
+    deployer.open();
+    await appRef.whenStable();
+    fromServer(SocketEventTypes.SOURCE_REQUIRED);
+    fromServer(SocketEventTypes.SOURCE_FILE_ACK);
+    await vi.waitFor(() => expect(socket.sentOn[0].some(m => m instanceof ArrayBuffer)).toBe(true));
+    fromServer(SocketEventTypes.SOURCE_FILE_ACK);
+    component.onEnter(deployer);
+    await fixture.whenStable();
+    fromServer(SocketEventTypes.CLOSE_FAILURE, 'boom');
+
+    // Previous to the overrides, then Next: the wizard hands it on again
+    component.onEnter(deployer);
+    await fixture.whenStable();
+    expect(socket.connections).toBe(2);
+    fromServer(SocketEventTypes.SOURCE_REQUIRED);
+    fromServer(SocketEventTypes.SOURCE_FILE_ACK);
+    await vi.waitFor(() => expect(socket.sentOn[1].some(m => m instanceof ArrayBuffer)).toBe(true));
+    expect(sentTypes(1)).not.toContain(SocketEventTypes.SOURCE_WAIT_ACK);
+
+    // The server acknowledges the last file; only now may the deploy go on
+    fromServer(SocketEventTypes.SOURCE_FILE_ACK);
+    expect(sentTypes(1).at(-1)).toBe(SocketEventTypes.SOURCE_WAIT_ACK);
+    expect(sentTypes(1).filter(t => t === SocketEventTypes.SOURCE_WAIT_ACK).length).toBe(1);
+    expect(component.deployer.finished).toBe(false);
+    deployer.close();
   });
 
   describe('deploying again after Previous', () => {

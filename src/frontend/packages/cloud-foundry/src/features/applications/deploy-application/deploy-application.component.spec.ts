@@ -119,6 +119,28 @@ describe('DeployApplicationComponent', () => {
     expect((component as any).pendingFsFileInfo).toBeUndefined();
   });
 
+  // A file deploy that ended can be deployed again from the overrides step:
+  // the deploy step gets the upload deployer on every entry, until the
+  // source is chosen again
+  it('hands the upload deployer to every entry of the deploy step', async () => {
+    const deployer = {};
+    const mockStep3 = { onEnter: vi.fn() };
+    (component as any)._step2_2 = { onNext: vi.fn().mockReturnValue(of({ success: true, data: deployer })) };
+    (component as any)._step3 = mockStep3;
+    await component.step2_2Handle.submit!();
+
+    component.step3Handle.onEnter!();
+    // Previous to the overrides, then Next
+    component.step3Handle.onEnter!();
+    expect(mockStep3.onEnter).toHaveBeenNthCalledWith(2, deployer);
+
+    // Back to the source step, which now saves a git source
+    (component as any)._step2 = { onNext: vi.fn().mockReturnValue(of({ success: true, data: undefined })) };
+    await component.step2Handle.submit!();
+    component.step3Handle.onEnter!();
+    expect(mockStep3.onEnter).toHaveBeenLastCalledWith(undefined);
+  });
+
   // Regression guard for the "Source Config shows no options / Next disabled"
   // bug. step2_1 (the git commit picker) is rendered via [hidden], so its
   // @ViewChild fires at parent view-init — before step 2 has saved any
