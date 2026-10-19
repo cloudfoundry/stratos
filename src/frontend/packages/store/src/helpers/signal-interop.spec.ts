@@ -1,4 +1,4 @@
-import { computed, Injector, signal } from '@angular/core';
+import { Component, computed, Injector, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom, of, Subject } from 'rxjs';
 import { take, toArray } from 'rxjs/operators';
@@ -91,6 +91,23 @@ describe('signal-interop', () => {
       expect(first).toEqual(['a']);
       expect(second).toEqual(['a', 'b']);
       sub2.unsubscribe();
+    });
+
+    it('keeps emitting after the view of a component injector is destroyed', () => {
+      @Component({ template: '' })
+      class HostComponent {}
+      const fixture = TestBed.createComponent(HostComponent);
+      const source = signal(1);
+      const values: number[] = [];
+
+      const sub = observeSignal(source, fixture.componentRef.injector).subscribe(v => values.push(v));
+      TestBed.tick();
+      fixture.destroy();
+      source.set(2);
+      TestBed.tick();
+
+      expect(values).toEqual([1, 2]);
+      sub.unsubscribe();
     });
   });
 
