@@ -34,7 +34,6 @@ import {
   CustomIconComponent,
   MetadataItemComponent,
   NoContentMessageComponent,
-  PageSubNavComponent,
   PollingIndicatorComponent,
   TileComponent,
   TileGridComponent,
@@ -127,7 +126,6 @@ interface AutoscalerTabPaginationParams {
   imports: [
     CommonModule,
     BaseChartDirective,
-    PageSubNavComponent,
     TileGridComponent,
     TileGroupComponent,
     TileComponent,
@@ -199,6 +197,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   // True once the policy lookup has found none (or it was detached); false
   // while it loads, so the notice does not flash before the policy lands.
   noPolicy!: Signal<boolean>;
+  // Why the policy could not be read, e.g. the app is not bound to the
+  // autoscaler service; shown in place of the no-policy notice
+  policyError!: Signal<string | null>;
 
   public readonly showAutoscalerHistory = computed(() => {
     const history = this.appAutoscalerScalingHistory();
@@ -206,12 +207,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   });
   public readonly showNoPolicyMessage = computed(() => {
     const history = this.appAutoscalerScalingHistory();
-    return !this.appAutoscalerPolicy() && (!history || history.length === 0);
+    return this.noPolicy() && (!history || history.length === 0);
   });
 
   public noPolicyMessageFirstLine = 'This application has no Autoscaler Policy';
   public noPolicyMessageSecondLine = {
-    text: 'To create a policy click the + icon above'
+    text: 'To create a policy click Create Policy above'
   };
 
   private appAutoscalerPolicySnackBarRef!: TailwindSnackBarRef<any>;
@@ -256,12 +257,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     this.autoscalerInfoData.load(cfGuid);
     this.canManageCredentials = this.autoscalerInfoData.canManageCredentials(cfGuid);
 
-    // Policy fetch via the signal-native data service. The policy signal
-    // holds null while loading (or with no policy) and the policy local
-    // form once loaded.
-    void this.policyData.load(cfGuid, appGuid);
+    // Policy state from the signal-native data service, fetched below. The
+    // policy signal holds null while loading (or with no policy) and the
+    // policy local form once loaded.
     this.appAutoscalerPolicy = this.policyData.policy(cfGuid, appGuid);
     this.noPolicy = this.policyData.noPolicy(cfGuid, appGuid);
+    this.policyError = this.policyData.error(cfGuid, appGuid);
 
     // The gauges follow the policy: it lands after the first render on a
     // first visit, and changes when the policy is edited or detached.
@@ -275,7 +276,12 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     // results per (cnsi, app).
     this.appAutoscalerScalingHistory = this.scalingHistoryData.events(cfGuid, appGuid);
     this.scalingHistoryLoading = this.scalingHistoryData.loading(cfGuid, appGuid);
-    this.fetchScalingHistory();
+    // The autoscaler refuses the events for the same reasons as the policy
+    void this.policyData.load(cfGuid, appGuid).then(() => {
+      if (!this.policyError()) {
+        this.fetchScalingHistory();
+      }
+    });
     this.initErrorSub();
   }
 
@@ -340,30 +346,6 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   initErrorSub() {
     const cfGuid = this.applicationService.cfGuid;
     const appGuid = this.applicationService.appGuid;
-
-    // Signal-native policy error surfacing. Replaces the legacy
-    // EntityService.entityMonitor.entityRequest$ subscription. The data
-    // service distinguishes "no policy" (404 → noPolicy=true, error=null)
-    // from real failures (error message), so we only need to surface
-    // real errors here. The "Autoscaler not available" / "plugin not
-    // available" filter from the legacy code is preserved.
-    let lastPolicyError: string | null = null;
-    effect(() => {
-      const errorMessage = this.policyData.error(cfGuid, appGuid)();
-      if (!errorMessage || errorMessage === lastPolicyError) {
-        return;
-      }
-      const isAutoscalerUnavailable = errorMessage.includes('Autoscaler not available') ||
-                                      errorMessage.includes('Autoscaler plugin not available');
-      lastPolicyError = errorMessage;
-      if (isAutoscalerUnavailable) {
-        return;
-      }
-      if (this.appAutoscalerPolicySnackBarRef) {
-        this.appAutoscalerPolicySnackBarRef.dismiss();
-      }
-      this.appAutoscalerPolicySnackBarRef = this.appAutoscalerPolicySnackBar.open(errorMessage, 'Dismiss');
-    }, { injector: this.injector });
 
     // Signal-native scaling-history error surfacing. Effect re-runs whenever
     // the data-service error signal changes; mirrors the legacy
@@ -456,7 +438,7 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
       this.applicationService.cfGuid,
       this.applicationService.appGuid,
       { ...this.paramsHistory },
-    );
+    ).catch(() => undefined);
   }
 
   getMetricUnit(metricType: string, unit?: string) {

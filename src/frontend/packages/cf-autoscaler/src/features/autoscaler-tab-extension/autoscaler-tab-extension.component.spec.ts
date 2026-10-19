@@ -112,6 +112,7 @@ describe('AutoscalerTabExtensionComponent', () => {
     const httpMock = TestBed.inject(HttpTestingController);
     httpMock.match(r => r.url.endsWith('/policy'))
       .forEach(req => req.flush('Not Found', { status: 404, statusText: 'Not Found' }));
+    await settle();
     httpMock.match(r => r.url.endsWith('/event')).forEach(req => req.flush({
       resources: [{ old_instances: 1, new_instances: 2, reason: 'r', message: 'm', timestamp: 0, error: '' }],
       total_results: 1,
@@ -120,7 +121,34 @@ describe('AutoscalerTabExtensionComponent', () => {
     await settle();
 
     expect(fixture.nativeElement.textContent)
-      .toContain('This application has no Autoscaler Policy. To create a policy click the + icon above');
+      .toContain('This application has no Autoscaler Policy. To create a policy click Create Policy above');
+  });
+
+  // The application action bar owns the page sub-nav, so the tab's own
+  // actions must render in the tab
+  it('offers Create Policy in the tab when the app has no policy', async () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(r => r.url.endsWith('/policy'))
+      .forEach(req => req.flush('Not Found', { status: 404, statusText: 'Not Found' }));
+    await settle();
+
+    expect(fixture.nativeElement.querySelector('button[name="add"]')).not.toBeNull();
+  });
+
+  it('shows why the autoscaler refused the app instead of offering a policy', async () => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(r => r.url.endsWith('/policy')).forEach(req => req.flush(
+      { error: 'The application is not bound to Auto-Scaling service' },
+      { status: 403, statusText: 'Forbidden' },
+    ));
+    await settle();
+
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('The application is not bound to Auto-Scaling service');
+    expect(text).not.toContain('no Autoscaler Policy');
+    expect(fixture.nativeElement.querySelector('button[name="add"]')).toBeNull();
+    // The events would be refused for the same reason
+    expect(httpMock.match(r => r.url.endsWith('/event')).length).toBe(0);
   });
 
   afterAll(() => { });

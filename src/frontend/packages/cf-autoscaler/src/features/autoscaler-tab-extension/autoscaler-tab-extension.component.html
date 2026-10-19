@@ -1,4 +1,5 @@
-<app-page-sub-nav>
+<!-- The application action bar owns the page sub-nav, so the policy actions sit in the tab -->
+<div class="flex items-center px-6 pt-4">
   @if (appAutoscalerPolicy(); as policy) {
     <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="edit" (click)="updatePolicyPage()">
       <span class="flex items-center">
@@ -17,14 +18,14 @@
         </span>
       </button>
     }
-  } @else {
+  } @else if (noPolicy()) {
     <button class="btn my-0 mr-2.5 ml-0 py-0 px-1.5" name="add" (click)="updatePolicyPage(true)">
       <span class="flex items-center">
         <app-custom-icon class="mr-1.5">add</app-custom-icon> Create Policy
       </span>
     </button>
   }
-</app-page-sub-nav>
+</div>
 <div class="flex relative w-full">
   <app-tile-grid class="w-full">
     @if (appAutoscalerPolicy(); as policy) {
@@ -339,6 +340,10 @@
           </app-tile>
         }
       </app-tile-group>
+    }
+    @if (policyError() && !appAutoscalerPolicy()) {
+      <app-no-content-message [icon]="'meter'" [iconFont]="'stratos-icons'" [firstLine]="policyError()!">
+      </app-no-content-message>
     }
     @if (showNoPolicyMessage()) {
       <app-no-content-message [icon]="'meter'" [iconFont]="'stratos-icons'"
