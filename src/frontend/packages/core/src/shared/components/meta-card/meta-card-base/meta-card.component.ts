@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ContentChild, ContentChildren, Input, QueryList, HostListener } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, Input, HostListener, contentChildren, signal } from '@angular/core';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -44,10 +44,11 @@ export function createMetaCardMenuItemSeparator(): MenuItem {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetaCardComponent {
-  public menuOpen = false;
+  readonly menuOpen = signal(false);
 
-  @ContentChildren(MetaCardItemComponent)
-  metaItems!: QueryList<MetaCardItemComponent>;
+  // Signal query so items a card adds after the first render (behind an
+  // @if waiting on async data) re-render this OnPush view.
+  readonly metaItems = contentChildren(MetaCardItemComponent);
 
   @ContentChild(MetaCardTitleComponent, { static: true })
   title!: MetaCardTitleComponent;
@@ -118,21 +119,21 @@ export class MetaCardComponent {
   private pActionMenu!: MenuItem[];
 
   toggleMenu(): void {
-    this.menuOpen = !this.menuOpen;
+    this.menuOpen.update(open => !open);
   }
 
   menuItemClick(menuItem: MenuItem): void {
     menuItem.action();
-    this.menuOpen = false;
+    this.menuOpen.set(false);
   }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     // Close menu when clicking outside
-    if (this.menuOpen) {
+    if (this.menuOpen()) {
       const target = event.target as HTMLElement;
       if (!target.closest('.meta-card__header-container__actions')) {
-        this.menuOpen = false;
+        this.menuOpen.set(false);
       }
     }
   }

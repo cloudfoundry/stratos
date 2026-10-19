@@ -1,4 +1,4 @@
-import { Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_SCHEMA, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -8,6 +8,9 @@ import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
 import { generateGenericMockEntities } from '@test-framework/mock-catalog-entities';
 import { MetaCardComponent } from './meta-card.component';
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
+import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from '../meta-card-key/meta-card-key.component';
+import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.component';
 
 @Component({
   imports: [MetaCardComponent, MetaCardTitleComponent],
@@ -19,6 +22,28 @@ import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.compo
 class WrapperComponent {
   @ViewChild(MetaCardComponent, { static: true })
   metaCard!: MetaCardComponent;
+}
+
+// An item behind an @if that turns on after the first render, the way
+// cards add rows once their async data lands.
+@Component({
+  imports: [MetaCardComponent, MetaCardItemComponent, MetaCardKeyComponent, MetaCardValueComponent],
+  template: `
+    <app-meta-card>
+      <app-meta-card-item>
+        <app-meta-card-key>Always</app-meta-card-key>
+        <app-meta-card-value>here</app-meta-card-value>
+      </app-meta-card-item>
+      @if (showLate()) {
+        <app-meta-card-item>
+          <app-meta-card-key>Late</app-meta-card-key>
+          <app-meta-card-value>arrived</app-meta-card-value>
+        </app-meta-card-item>
+      }
+    </app-meta-card>`
+})
+class LateItemWrapperComponent {
+  readonly showLate = signal(false);
 }
 
 class UserFavoriteManagerMock {
@@ -58,6 +83,7 @@ describe('MetaCardComponent', () => {
         NoopAnimationsModule,
         createBasicStoreModule(),
         WrapperComponent,
+        LateItemWrapperComponent,
       ],
       providers: [
         { provide: UserFavoriteManager, useClass: UserFavoriteManagerMock },
@@ -133,5 +159,19 @@ describe('MetaCardComponent', () => {
     fixture.detectChanges();
 
     expect(element.querySelector('app-application-state-icon')).toBeTruthy();
+  });
+
+  it('renders an item added after the first render', async () => {
+    const lateFixture = TestBed.createComponent(LateItemWrapperComponent);
+    await lateFixture.whenStable();
+    const host: HTMLElement = lateFixture.nativeElement;
+    expect(host.textContent).toContain('here');
+    expect(host.textContent).not.toContain('arrived');
+
+    lateFixture.componentInstance.showLate.set(true);
+    await lateFixture.whenStable();
+
+    expect(host.textContent).toContain('Late');
+    expect(host.textContent).toContain('arrived');
   });
 });
