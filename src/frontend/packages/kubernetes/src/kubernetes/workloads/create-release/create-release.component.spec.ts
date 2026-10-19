@@ -4,9 +4,10 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NO_ERRORS_SCHEMA, Signal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute, provideRouter } from '@angular/router';
-import { firstValueFrom, Observable } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
+import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 
 import { AppTestModule } from '../../../../../core/test-framework/core-test.helper';
@@ -154,6 +155,26 @@ describe('CreateReleaseComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Endpoint preselection: a single cluster is selected outright, and with
+  // several the first one is preselected.
+  const createWithEndpoints = (guids: string[]) => {
+    vi.spyOn(TestBed.inject(EndpointsService), 'connectedEndpointsOfTypes')
+      .mockReturnValue(of(guids.map(guid => ({ guid, name: guid }))) as any);
+    const created = TestBed.createComponent(CreateReleaseComponent);
+    created.detectChanges();
+    // Drop the second component's chart requests; only the form matters here.
+    httpMock.match(() => true);
+    return created.componentInstance;
+  };
+
+  it('selects the only kubernetes endpoint', () => {
+    expect(createWithEndpoints(['k1']).details.controls.endpoint.value).toBe('k1');
+  });
+
+  it('preselects the first of several kubernetes endpoints', () => {
+    expect(createWithEndpoints(['k1', 'k2']).details.controls.endpoint.value).toBe('k1');
   });
 
   it('createNamespace delegates to KubeNamespaceDataService.create on success', async () => {
