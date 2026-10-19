@@ -1,5 +1,4 @@
-import { Injector } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { effect, Injector, Signal, untracked } from '@angular/core';
 import {
   entityCatalog,
   EndpointModel,
@@ -13,7 +12,7 @@ export interface ConnectAuthParams {
   password?: string;
   token?: string;
 }
-import { combineLatest, defer, from, Observable, of, Subject, Subscription, timer } from 'rxjs';
+import { combineLatest, defer, from, Observable, of, ReplaySubject, Subject, Subscription, timer } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../core/endpoints.service';
@@ -70,6 +69,8 @@ export class ConnectEndpointService {
   private update$!: Observable<ActionState>;
 
   private subs: Subscription[] = [];
+  // Ends the signal bridges made by observe(); see there.
+  private bridgeTeardowns: (() => void)[] = [];
 
   private hasAttemptedConnect!: boolean;
   private pData!: ConnectEndpointData;
@@ -127,23 +128,14 @@ export class ConnectEndpointService {
   }
 
   private setupObservables() {
-    // W36-B Wave 3: replace ngrx EntityMonitor reads with toObservable()
+    // W36-B Wave 3: replace ngrx EntityMonitor reads with observe()
     // bridges over EndpointsDataService signals. The service already
     // exposes `connectingState(guid)` / `fetchingState(guid)` /
     // `endpointById(guid)` per the Wave 1 surface lock; we just lift
     // them into the Observable shape this rxjs-heavy class expects.
-    const connectingState$ = toObservable(
-      this.endpointsData.connectingState(this.config.guid),
-      { injector: this.injector },
-    );
-    const fetchingState$ = toObservable(
-      this.endpointsData.fetchingState(this.config.guid),
-      { injector: this.injector },
-    );
-    const endpoint$ = toObservable(
-      this.endpointsData.endpointById(this.config.guid),
-      { injector: this.injector },
-    );
+    const connectingState$ = this.observe(this.endpointsData.connectingState(this.config.guid));
+    const fetchingState$ = this.observe(this.endpointsData.fetchingState(this.config.guid));
+    const endpoint$ = this.observe(this.endpointsData.endpointById(this.config.guid));
 
     // update$ is the per-guid connecting lifecycle (replaces legacy
     // `getUpdatingSection(ConnectEndpoint.UpdatingKey)`). Initial
@@ -188,6 +180,24 @@ export class ConnectEndpointService {
     );
 
     this.setupCombinedObservables();
+  }
+
+  // toObservable() with this connect's lifetime. toObservable() ends its
+  // effect only when the injector is destroyed, and the caller's injector
+  // (the page or stepper) outlives each connect, so every connect left
+  // three effects running. Same values and timing: one effect per signal,
+  // created now, latest value replayed to later subscribers.
+  private observe<T>(source: Signal<T>): Observable<T> {
+    const subject = new ReplaySubject<T>(1);
+    const ref = effect(() => {
+      const value = source();
+      untracked(() => subject.next(value));
+    }, { injector: this.injector, manualCleanup: true });
+    this.bridgeTeardowns.push(() => {
+      ref.destroy();
+      subject.complete();
+    });
+    return subject.asObservable();
   }
 
   private setupCombinedObservables() {
@@ -256,5 +266,7 @@ export class ConnectEndpointService {
 
   public destroy() {
     safeUnsubscribe(...this.subs);
+    this.bridgeTeardowns.forEach(teardown => teardown());
+    this.bridgeTeardowns = [];
   }
 }
