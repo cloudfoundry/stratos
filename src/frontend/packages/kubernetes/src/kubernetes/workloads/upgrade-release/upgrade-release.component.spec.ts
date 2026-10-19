@@ -6,7 +6,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { EMPTY, of } from 'rxjs';
+import { EMPTY, of, Subject } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
 import { TEST_CATALOGUE_ENTITIES, EntityCatalogTestModule, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
@@ -84,6 +84,9 @@ describe('UpgradeReleaseComponent', () => {
       ]
     });
 
+    // The component provides its own HelmReleaseHelperService; swap that one too.
+    TestBed.overrideProvider(HelmReleaseHelperService, { useValue: mockHelmReleaseHelper });
+
     // Initialize EntityCatalogHelper for Angular 20 compatibility
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
@@ -105,5 +108,22 @@ describe('UpgradeReleaseComponent', () => {
   // auto-selected, so the step starts invalid.
   it('version step starts invalid until a version is selected', () => {
     expect(component.versionStepHandle.valid()).toBe(false);
+  });
+
+  // The upgrade target can resolve after the user has left the page. The
+  // late value must not set up a version list on the destroyed component.
+  it('ignores an upgrade target that resolves after destroy', () => {
+    const chart$ = new Subject<any>();
+    (mockHelmReleaseHelper.hasUpgrade as any).mockReturnValue(chart$);
+    const late = TestBed.createComponent(UpgradeReleaseComponent);
+    late.destroy();
+
+    chart$.next({
+      upgrade: { name: 'chart', repo: { name: 'repo' } },
+      release: { chart: { metadata: { version: '1.0.0' } } },
+      monocularEndpointId: 'monocular',
+    });
+
+    expect(late.componentInstance.listConfig()).toBeUndefined();
   });
 });

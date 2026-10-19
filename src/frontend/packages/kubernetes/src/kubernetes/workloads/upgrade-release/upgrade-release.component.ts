@@ -7,6 +7,7 @@ import {
   ViewChild,
   WritableSignal,
 } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { format, formatDistance } from 'date-fns';
 import { combineLatest, firstValueFrom, Observable } from 'rxjs';
@@ -133,7 +134,8 @@ export class UpgradeReleaseComponent {
 
     this.helper.hasUpgrade(true).pipe(
       filter(c => !!c),
-      take(1)
+      take(1),
+      takeUntilDestroyed(),
     ).subscribe(chart => {
       if (!chart) {
         return;
