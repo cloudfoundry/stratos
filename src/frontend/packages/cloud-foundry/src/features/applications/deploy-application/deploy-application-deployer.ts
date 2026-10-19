@@ -512,7 +512,7 @@ export class DeployApplicationDeployer {
     }
   }
 
-  private onClose(log: any, title: string | null, error: any) {
+  private onClose(log: any, title: string | null, error: string | null) {
     if (this.closeReported) {
       return;
     }
@@ -522,7 +522,7 @@ export class DeployApplicationDeployer {
     }
     this.deploying = false;
     this.updateStatus(
-      error,
+      !!error,
       error && log.message ? `${error}\nReason: ${log.message}` : error || undefined
     );
   }

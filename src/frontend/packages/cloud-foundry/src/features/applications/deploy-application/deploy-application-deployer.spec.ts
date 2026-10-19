@@ -40,7 +40,7 @@ describe('DeployApplicationDeployer', () => {
       socket.server.complete();
 
       expect(deployer.streamTitle()).toBe('Deploy Failed - Connection lost');
-      expect(deployer.status$().error).toBeTruthy();
+      expect(deployer.status$().error).toBe(true);
       expect(deployer.status$().errorMsg).toBe('The connection to the server was lost before the deploy finished.');
     });
 
@@ -48,7 +48,7 @@ describe('DeployApplicationDeployer', () => {
       socket.server.next(JSON.stringify({ type: SocketEventTypes.CLOSE_SUCCESS, message: '' }));
       socket.server.complete();
 
-      expect(deployer.status$().error).toBeFalsy();
+      expect(deployer.status$().error).toBe(false);
       expect(deployer.streamTitle()).not.toBe('Deploy Failed - Connection lost');
     });
 

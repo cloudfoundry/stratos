@@ -217,7 +217,7 @@ describe('DeployApplicationStep3Component', () => {
       await fixture.whenStable();
 
       expect(component.deployer.finished).toBe(true);
-      expect(component.deployer.status$().error).toBeTruthy();
+      expect(component.deployer.status$().error).toBe(true);
       expect(locked()).toBe(false);
     });
   });
