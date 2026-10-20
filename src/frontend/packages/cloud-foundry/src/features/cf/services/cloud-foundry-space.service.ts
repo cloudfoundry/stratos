@@ -46,7 +46,7 @@ export class CloudFoundrySpaceService {
   cfGuid: string;
   orgGuid: string;
   spaceGuid: string;
-  userRole$!: Observable<string>;
+  userRole$!: Observable<string | null>;
   /**
    * Sensible quota to use for space. If there's no specific space quota set this will be the org quota. If there's no org quota
    * a mock quota with everything allowed will be used
@@ -107,7 +107,8 @@ export class CloudFoundrySpaceService {
     const users$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector });
     this.userRole$ = combineLatest([this.cfEndpointService.currentUser$, users$]).pipe(
       map(([currentUser, users]) => {
-        if (!users) return 'None';
+        // Still loading: the tile shows its placeholder, not 'None'.
+        if (!users) return null;
         const me = users.find(u => u.guid === currentUser.guid);
         const roles = me?.spaceRoles.find(r => r.spaceGuid === this.spaceGuid)?.roles ?? [];
         return getSpaceRolesString(createUserRoleInSpace(

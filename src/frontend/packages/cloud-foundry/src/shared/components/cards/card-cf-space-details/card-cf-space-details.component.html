@@ -7,7 +7,7 @@
       <div class="flex flex-row">
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="User Space Role/s">
-            {{ cfSpaceService.userRole$ | async }}
+            {{ (cfSpaceService.userRole$ | async) ?? '–' }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
             @if (cfSpaceService.spaceQuotaDefinition$ | async; as spaceQuotaDefinition) {

@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Signal, signal } from '@angular/core';
+import { Signal, WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -9,7 +9,7 @@ import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-u
 import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
-import { StOrgDetail, StOrgQuota } from '../../../services/endpoint-data/stratos-types';
+import { StOrgDetail, StOrgQuota, StUser } from '../../../services/endpoint-data/stratos-types';
 import {
   CloudFoundryUserProvidedServicesService,
 } from '../../../shared/services/cloud-foundry-user-provided-services.service';
@@ -26,7 +26,10 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
   // quota lookups made, one per quota the stream switched to
   let lookups: number;
 
+  let users: WritableSignal<StUser[] | null>;
+
   beforeEach(() => {
+    users = signal<StUser[] | null>(null);
     org = signal<StOrgDetail | null>(null);
     quota = signal<StOrgQuota | null>(null);
     quotaReads = 0;
@@ -46,7 +49,7 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
           useValue: { acquire: () => ({ load: () => of(undefined), org, spaces: signal([]) }) },
         },
         { provide: QuotaDataService, useValue: { orgQuota: () => { lookups++; return { value: countedQuota }; } } },
-        { provide: CnsiUsersSnapshotService, useValue: { users: () => signal(null) } },
+        { provide: CnsiUsersSnapshotService, useValue: { users: () => users } },
         { provide: ServiceCatalogDataService, useValue: { serviceInstanceCount: () => ({ value: signal(0) }) } },
         {
           provide: CloudFoundryUserProvidedServicesService,
@@ -103,6 +106,38 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
     }
 
     expect(lookups).toBe(1);
+    sub.unsubscribe();
+  });
+
+  // The tile shows a placeholder while the users snapshot loads; 'None' is
+  // only for a user with no role here (it used to show 'None' for both).
+  it('gives no role string while the users are loading', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    const seen: (string | null)[] = [];
+    const sub = svc.userOrgRole$.subscribe(r => seen.push(r));
+    TestBed.tick();
+    expect(seen.at(-1)).toBeNull();
+    sub.unsubscribe();
+  });
+
+  it('says None once loaded when the user has no role here', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    const seen: (string | null)[] = [];
+    const sub = svc.userOrgRole$.subscribe(r => seen.push(r));
+    users.set([{ guid: 'me', username: 'me', cnsiGuid: 'cf-1', orgRoles: [], spaceRoles: [] }]);
+    TestBed.tick();
+    expect(seen.at(-1)).toBe('None');
+    sub.unsubscribe();
+  });
+
+  it('names the user\'s role once loaded', () => {
+    const svc = TestBed.inject(CloudFoundryOrganizationService);
+    const seen: (string | null)[] = [];
+    const sub = svc.userOrgRole$.subscribe(r => seen.push(r));
+    users.set([{ guid: 'me', username: 'me', cnsiGuid: 'cf-1', spaceRoles: [],
+      orgRoles: [{ orgGuid: 'org-1', roles: ['auditor'] }] } as unknown as StUser]);
+    TestBed.tick();
+    expect(seen.at(-1)).toBe('Auditor');
     sub.unsubscribe();
   });
 });

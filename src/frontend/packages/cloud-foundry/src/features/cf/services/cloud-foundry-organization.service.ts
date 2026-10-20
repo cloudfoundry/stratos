@@ -85,7 +85,7 @@ export class CloudFoundryOrganizationService {
   orgGuid: string;
   cfGuid: string;
   quotaLink$!: Observable<string[] | undefined>;
-  userOrgRole$!: Observable<string>;
+  userOrgRole$!: Observable<string | null>;
   // V3-shape — quotaDefinition$ now emits StOrgQuota directly. Consumers
   // that previously read V2 fields (memory_limit, etc.) must read the V3
   // camelCase equivalents (totalMemoryInMB, etc.). Backwards-compat shim
@@ -127,7 +127,8 @@ export class CloudFoundryOrganizationService {
     const users$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector });
     this.userOrgRole$ = combineLatest([this.cfEndpointService.currentUser$, users$]).pipe(
       map(([currentUser, users]) => {
-        if (!users) return 'None';
+        // Still loading: the tile shows its placeholder, not 'None'.
+        if (!users) return null;
         const me = users.find(u => u.guid === currentUser.guid);
         const roles = me?.orgRoles.find(r => r.orgGuid === this.orgGuid)?.roles ?? [];
         return getOrgRolesString(createUserRoleInOrg(
