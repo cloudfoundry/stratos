@@ -44,6 +44,12 @@ export interface UpsPickerRow {
 
 const { proxyAPIVersion } = environment;
 
+// CF takes syslog://, syslog-tls:// and https:// log drains. The drain keeps
+// the shared URL check's host, port and path rules (and its http scheme) but
+// also takes the two syslog schemes; the route service URL keeps the shared
+// check unchanged.
+const syslogDrainUrlExpression = urlValidationExpression.replace('^https?:', '^(?:syslog|syslog-tls|https?):');
+
 // Replace every leaf value with the '<redacted>' marker, keeping the key
 // structure (nested objects and array shapes included) browsable. Angle
 // brackets match the masked-credentials URL redaction convention and keep
@@ -99,7 +105,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
     this.createEditServiceInstance = new FormGroup<CreateEditServiceInstanceForm>({
       name: new FormControl('', { validators: [Validators.required, Validators.maxLength(50)], nonNullable: true }),
-      syslog_drain_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
+      syslog_drain_url: new FormControl('', { validators: [Validators.pattern(syslogDrainUrlExpression)], nonNullable: true }),
       credentials: new FormControl('', { validators: isValidJsonValidator(), nonNullable: true }),
       route_service_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
       tags: new FormControl<any[]>([], { nonNullable: true }) });
