@@ -14,9 +14,8 @@ import { ServicesWallPage } from '../../pages/marketplace/services-wall.page';
  *   - fetchUserProvidedServiceInstancesCount (org / space card UPS count)
  *
  * This smoke proves the wire paths are reachable from a connected CF
- * endpoint and that the Add Service Instance flow that consumes the
- * picker still loads. UPS create / edit / delete are tested in
- * user-provided-service-instance.spec.ts.
+ * endpoint. The Add Service Instance flow, and UPS create / edit / delete,
+ * are tested in user-provided-service-instance.spec.ts.
  */
 test.describe('Stage 9e — UPS reads smoke', () => {
   test('services wall reachable on a connected CF endpoint', async ({ connectedEndpointsAdminPage, secrets }) => {
@@ -63,34 +62,5 @@ test.describe('Stage 9e — UPS reads smoke', () => {
     const body = await resp.json();
     expect(body).toHaveProperty('totalResults');
     expect(typeof body.totalResults).toBe('number');
-  });
-
-  test('Add Service Instance flow renders the UPS picker form', async ({ connectedEndpointsAdminPage, secrets }) => {
-    const { page, cfGuid } = connectedEndpointsAdminPage;
-    const cfEndpoint = secrets.getCloudfoundryEndpoint(0);
-    const spaceGuid = cfEndpoint.testSpaceGuid;
-
-    const servicesPage = new ServicesWallPage(page);
-    await servicesPage.navigateTo(cfGuid, spaceGuid);
-    await servicesPage.waitForPage();
-
-    // Try to open the Add Service flow. Some environments may gate the
-    // button behind permissions or marketplace state; soft-skip when it
-    // isn't visible to keep the smoke advisory rather than gate-blocking
-    // on environment shape.
-    const addButton = page.locator('button').filter({ hasText: /add.*service|create.*service/i }).first();
-    const visible = await addButton.isVisible({ timeout: 5000 }).catch(() => false);
-    if (!visible) {
-      test.skip(true, 'Add service button not visible in this environment');
-    }
-
-    await addButton.click();
-    const wizard = page.locator('[role="dialog"], app-stepper').first();
-    await expect(wizard).toBeVisible({ timeout: 10000 });
-
-    // The picker component is reachable via the UPS option — its sole
-    // wire dependency in Stage 9e is the new getUserProvidedServices
-    // call, which we already proved at the HTTP layer above.
-    await page.keyboard.press('Escape');
   });
 });
