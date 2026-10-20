@@ -7,14 +7,21 @@ import { StLastOperation, StServiceInstance } from '../../../services/endpoint-d
 // StServiceInstance type says, so every reader here allows it to be missing.
 type WithLastOperation = { lastOperation?: StLastOperation };
 
+// CF reports a queued operation as "initial" before it starts; to the user
+// it is already in progress.
+const shownState = (si: WithLastOperation): string => {
+  const state = si.lastOperation?.state ?? '';
+  return state.toLowerCase() === 'initial' ? 'in progress' : state;
+};
+
 const lastOperationState = (si: WithLastOperation): string =>
-  (si.lastOperation?.state ?? '').toLowerCase();
+  shownState(si).toLowerCase();
 
 // "Create in progress", "Update failed": the state alone does not say which
 // operation is running or went wrong.
 export function lastOperationLabel(si: WithLastOperation): string {
   const type = si.lastOperation?.type ?? '';
-  const state = si.lastOperation?.state ?? '';
+  const state = shownState(si);
   return [type.charAt(0).toUpperCase() + type.slice(1), state].filter(Boolean).join(' ');
 }
 
