@@ -18,6 +18,9 @@
   valid format") instead of their own error text, such as a taken name
   or a bad API address. They now show their own text, and screen
   readers announce it as the field's error.
+- The first navigation after loading or refreshing a page rebuilt the
+  whole page, side navigation and top bar included, instead of only the
+  part that changed.
 
 [Chores]
 - The CF API client (capi) is taken from a fork commit carrying the
