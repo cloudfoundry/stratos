@@ -53,4 +53,19 @@ describe('CreateQuotaStepComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  // app-form-field shows a field's <app-error> text as its error line.
+  it('says a taken quota name exists', async () => {
+    await fixture.whenStable();
+    component.form.allQuotas = ['taken'];
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('input[formcontrolname="name"]')!;
+    input.value = 'taken';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    const id = input.getAttribute('aria-errormessage');
+    expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe(
+      'A quota with this name already exists. Please enter a different one.'
+    );
+  });
 });

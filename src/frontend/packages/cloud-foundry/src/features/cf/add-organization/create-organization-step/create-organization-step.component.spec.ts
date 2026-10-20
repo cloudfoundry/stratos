@@ -64,4 +64,18 @@ describe('CreateOrganizationStepComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  // app-form-field shows a field's <app-error> text as its error line.
+  it('says a taken organization name exists', async () => {
+    component.allOrgs = ['taken'];
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('input[formcontrolname="orgName"]')!;
+    input.value = 'taken';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    const id = input.getAttribute('aria-errormessage');
+    expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe(
+      'An organization with this name already exists. Please enter a different one.'
+    );
+  });
 });

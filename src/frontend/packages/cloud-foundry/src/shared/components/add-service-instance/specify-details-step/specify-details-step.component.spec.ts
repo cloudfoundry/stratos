@@ -160,6 +160,39 @@ describe('SpecifyDetailsStepComponent', () => {
     httpMock.expectNone(r => r.url.startsWith('/pp/v1/cf/service_plans/'));
     expect(component.schemaFormConfig()?.schema).toEqual(schema);
   });
+
+  // app-form-field shows a field's <app-error> text as its error line.
+  describe('name errors', () => {
+    function nameInput(): HTMLInputElement {
+      return (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>('input[placeholder="Name"]')!;
+    }
+
+    async function typeName(value: string) {
+      const input = nameInput();
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      await fixture.whenStable();
+    }
+
+    /** What app-form-field shows for the name, through aria-errormessage. */
+    function nameError(): string | undefined {
+      const id = nameInput().getAttribute('aria-errormessage');
+      return id ? (fixture.nativeElement as HTMLElement).querySelector(`#${id}`)?.textContent?.trim() : undefined;
+    }
+
+    it('says a taken name already exists', async () => {
+      component.allServiceInstanceNames = ['my-db'];
+      await typeName('my-db');
+
+      expect(nameError()).toBe('A service instance with this name already exists. Please enter a different one.');
+    });
+
+    it('says a long name exceeds 50 characters', async () => {
+      await typeName('x'.repeat(51));
+
+      expect(nameError()).toBe('A service instance name cannot exceed 50 characters.');
+    });
+  });
 });
 
 // Managed service instance create/update goes through HttpClient +

@@ -404,4 +404,28 @@ describe('AddRoutesComponent', () => {
     fixture.detectChanges();
     expect(component.hostCollision()).toBeNull();
   });
+  // app-form-field shows a field's <app-error> text as its error line.
+  describe('field errors', () => {
+    async function type(name: string, value: string): Promise<HTMLInputElement> {
+      const input = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(`input[formcontrolname="${name}"]`)!;
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+      await fixture.whenStable();
+      return input;
+    }
+
+    /** What app-form-field shows for a field, through the input's aria-errormessage. */
+    function errorFor(input: HTMLInputElement): string | undefined {
+      const id = input.getAttribute('aria-errormessage');
+      return id ? (fixture.nativeElement as HTMLElement).querySelector(`#${id}`)?.textContent?.trim() : undefined;
+    }
+
+    it('says a host with a space is invalid', async () => {
+      expect(errorFor(await type('host', 'my host'))).toBe('Invalid Hostname');
+    });
+
+    it('says a path cannot exceed 128 characters', async () => {
+      expect(errorFor(await type('path', '/' + 'p'.repeat(128)))).toBe('Path cannot exceed 128 characters');
+    });
+  });
 });

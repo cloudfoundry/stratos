@@ -33,4 +33,18 @@ describe('CreateApplicationStep3Component', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+  // app-form-field shows a field's <app-error> text as its error line.
+  it('says a host cannot exceed 63 characters', async () => {
+    // The host is enabled once a domain is chosen.
+    component.setDomainHost.controls.host.enable();
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('input[formcontrolname="host"]')!;
+    input.value = 'h'.repeat(64);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    const id = input.getAttribute('aria-errormessage');
+    expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe('Host cannot exceed 63 characters');
+  });
 });
