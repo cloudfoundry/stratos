@@ -9,12 +9,17 @@ import { FormComponent, MenuComponent } from '../../components';
 export class ApiKeyAddDialogPage {
   public readonly form: FormComponent;
   public readonly buttons: MenuComponent;
+  /** Read state through these with expect(...).toBeEnabled()/toBeDisabled(), which retry. */
+  public readonly cancelButton: Locator;
+  public readonly createButton: Locator;
   private readonly dialog: Locator;
 
   constructor(private page: Page) {
     this.dialog = page.locator('app-add-api-key-dialog, [role="dialog"]').first();
     this.form = new FormComponent(page, this.dialog.locator('.key-dialog, form').first());
     this.buttons = new MenuComponent(page, this.dialog.locator('.key-dialog__actions, mat-dialog-actions, .dialog-actions').first());
+    this.cancelButton = this.dialog.getByRole('button', { name: 'Cancel', exact: true });
+    this.createButton = this.dialog.getByRole('button', { name: 'Create', exact: true });
   }
 
   /**
@@ -32,17 +37,6 @@ export class ApiKeyAddDialogPage {
   }
 
   /**
-   * Check if close button is enabled
-   */
-  async canClose(): Promise<boolean> {
-    const items = await this.buttons.getItemMap();
-    if (items.cancel) {
-      return !items.cancel.disabled;
-    }
-    return true;
-  }
-
-  /**
    * Create the API key
    */
   async create(): Promise<void> {
@@ -54,20 +48,6 @@ export class ApiKeyAddDialogPage {
       const createButton = this.dialog.locator('button').filter({ hasText: /create|add/i });
       await createButton.click();
     }
-  }
-
-  /**
-   * Check if create button is enabled
-   */
-  async canCreate(): Promise<boolean> {
-    const items = await this.buttons.getItemMap();
-    if (items.create) {
-      return !items.create.disabled;
-    }
-
-    // Fallback: check button directly
-    const createButton = this.dialog.locator('button').filter({ hasText: /create|add/i });
-    return await createButton.isEnabled();
   }
 
   /**
