@@ -85,12 +85,7 @@ export const E2E_LEGACY_FILES = [
   "e2e/tests/core/branding.spec.ts",
   "e2e/tests/core/screenshots.spec.ts",
   "e2e/tests/dependent/endpoints.spec.ts",
-  "e2e/tests/marketplace/create-service-instance-private.spec.ts",
-  "e2e/tests/marketplace/create-service-instance-space-scoped.spec.ts",
-  "e2e/tests/marketplace/create-service-instance.spec.ts",
   "e2e/tests/marketplace/delete-service-instance.spec.ts",
-  "e2e/tests/marketplace/marketplace-create-service-instances.spec.ts",
-  "e2e/tests/marketplace/marketplace-summary.spec.ts",
   "e2e/tests/marketplace/service-keys.spec.ts",
   "e2e/tests/metrics/metrics-registration.spec.ts",
 ];
