@@ -42,11 +42,13 @@
             <app-meta-card-value>{{ v.typeLabel }}</app-meta-card-value>
           </app-meta-card-item>
 
-          @if (v.status) {
+          <!-- A failure's reason is page text, not hover text, so screen
+               reader and keyboard users get it too. -->
+          @if (v.lastOperation) {
             <app-meta-card-item>
-              <app-meta-card-key>Status</app-meta-card-key>
+              <app-meta-card-key>Last operation</app-meta-card-key>
               <app-meta-card-value>
-                {{ v.status }}@if (v.statusDetail) { — {{ v.statusDetail }} }
+                {{ v.lastOperation }}@if (v.lastOperationReason) { — {{ v.lastOperationReason }} }
               </app-meta-card-value>
             </app-meta-card-item>
           }

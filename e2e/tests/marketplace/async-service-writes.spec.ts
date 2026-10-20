@@ -161,7 +161,7 @@ for (const mode of RESPONSE_MODES) {
         const row = page.locator('[data-test=row], [data-test=card]').filter({ hasText: name });
         await detail.goto(`/services/service/${cfGuid}/${si.guid}`);
         // The meta card renders its items' templates itself; find the row by its key.
-        const status = detail.locator('.meta-card-item__key', { hasText: 'Status' }).locator('xpath=..');
+        const status = detail.locator('.meta-card-item__key', { hasText: 'Last operation' }).locator('xpath=..');
 
         // CF reports the create as "initial" while it is queued, then "in progress".
         await expect(row).toContainText(/initial|in progress/i, { timeout: 60000 });

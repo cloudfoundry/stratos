@@ -48,6 +48,10 @@ import { CfServiceInstancesSignalConfigService, operationRunning } from '../../.
 import {
   buildServiceInstanceRowActions,
 } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import {
+  lastOperationLabel,
+  lastOperationReason,
+} from '../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import {
   ShareServiceInstanceDialogComponent,
@@ -65,8 +69,10 @@ interface InstanceView {
   name: string;
   isManaged: boolean;
   typeLabel: string;
-  status: string;
-  statusDetail: string;
+  // "Update failed"; empty when CF records no operation.
+  lastOperation: string;
+  // The broker's reason, on a failure only.
+  lastOperationReason: string;
   plan: string;
   offering: string;
   broker: string;
@@ -354,8 +360,8 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
       name: si.name,
       isManaged,
       typeLabel: isManaged ? 'Managed' : 'User-provided',
-      status: si.lastOperation?.state ?? '',
-      statusDetail: si.lastOperation?.description ?? '',
+      lastOperation: lastOperationLabel(si),
+      lastOperationReason: lastOperationReason(si),
       plan: si.servicePlan?.name ?? '',
       offering: si.servicePlan?.serviceOffering?.name ?? '',
       broker: si.servicePlan?.serviceOffering?.broker?.name ?? '',

@@ -310,7 +310,7 @@ describe('ServiceInstanceSummaryComponent — operation in progress (#6002)', ()
     TestBed.tick();
     expect(reads[1].source.isLoading()).toBe(true);
     expect(page.loading()).toBe(false);
-    expect(page.view()?.status).toBe('in progress');
+    expect(page.view()?.lastOperation).toBe('Update in progress');
   });
 
   // CF reports a queued operation as "initial" before "in progress".
@@ -331,5 +331,52 @@ describe('ServiceInstanceSummaryComponent — operation in progress (#6002)', ()
     fixture.destroy();
     await vi.advanceTimersByTimeAsync(60000);
     expect(reads.length).toBe(1);
+  });
+});
+
+describe('ServiceInstanceSummaryComponent — last operation (#6002)', () => {
+  function render(si: StServiceInstance): string {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [ServiceInstanceSummaryComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        {
+          provide: ServiceCatalogDataService,
+          useValue: { serviceInstance: vi.fn(() => source<StServiceInstance | null>(si)), serviceBindingsForInstance: vi.fn(() => source([])) },
+        },
+        { provide: EndpointDataRegistry, useValue: { acquire: vi.fn(), release: vi.fn() } },
+        { provide: EntityDeleteController, useValue: {} },
+        { provide: CfServiceInstancesSignalConfigService, useValue: {} },
+        { provide: ConfirmationDialogService, useValue: {} },
+        { provide: TailwindSnackBarService, useValue: {} },
+        { provide: TailwindDialogService, useValue: { open: vi.fn() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(ServiceInstanceSummaryComponent);
+    fixture.detectChanges();
+    return (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+  }
+  const withOp = (type: string, state: string, description: string) =>
+    ({ ...managed, lastOperation: { type, state, description } }) as unknown as StServiceInstance;
+
+  it('names the operation and shows a failure\'s reason as text, markup stripped', () => {
+    const text = render(withOp('update', 'failed', '<p>Plan <b>large</b> is not available</p>'));
+    expect(text).toContain('Last operation: Update failed — Plan large is not available');
+    expect(text).not.toContain('<b>');
+  });
+
+  it('does not show the description of an operation that did not fail', () => {
+    const text = render(withOp('create', 'succeeded', 'Provisioned in 3 s'));
+    expect(text).toContain('Last operation: Create succeeded');
+    expect(text).not.toContain('Provisioned in 3 s');
+  });
+
+  it('hides the line when there is no last operation', () => {
+    expect(render(managed)).not.toContain('Last operation');
   });
 });
