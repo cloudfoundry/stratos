@@ -11,6 +11,13 @@
   each field's own error ("Invalid URL", "A service instance with this
   name already exists...") instead of a generic one, and accepts
   `syslog://` and `syslog-tls://` drain URLs, as CF does.
+- The user-provided service instance form accepted an `http://` route
+  service URL, which CF then rejected; it now requires `https`, as CF
+  does.
+- 15 forms showed a generic line ("Invalid value", "Please enter a
+  valid format") instead of their own error text, such as a taken name
+  or a bad API address. They now show their own text, and screen
+  readers announce it as the field's error.
 
 [Chores]
 - The CF API client (capi) is taken from a fork commit carrying the
