@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
 import { CloudFoundryEndpointService } from './cloud-foundry-endpoint.service';
 import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
-import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { EndpointsDataService } from '@stratosui/store';
@@ -41,7 +41,7 @@ describe('CloudFoundryEndpointService — fetchAppCount / fetchRouteCount', () =
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid: 'cnsi-1' } },
-        { provide: CnsiUsersSnapshotService, useValue: { users: () => () => null } },
+        { provide: CfUsersPagedDataService, useValue: { users: () => () => null } },
         {
           provide: EndpointDataRegistry,
           useValue: { acquire: () => endpointDataStub, release: vi.fn() },
@@ -119,7 +119,7 @@ describe('CloudFoundryEndpointService — no-op when cfGuid is falsy', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         { provide: ActiveRouteCfOrgSpace, useValue: { cfGuid } },
-        { provide: CnsiUsersSnapshotService, useValue: { users: () => () => null } },
+        { provide: CfUsersPagedDataService, useValue: { users: () => () => null } },
         { provide: EndpointDataRegistry, useValue: { acquire: acquireFn, release: vi.fn() } },
         { provide: CfInfoDataRegistry, useValue: { acquire: cfInfoAcquireFn } },
         { provide: EndpointsDataService, useValue: { waitFor: () => new Promise(() => { /* never resolves */ }) } },

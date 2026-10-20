@@ -104,8 +104,9 @@ fetched before a list is complete. There are two drain implementations.
 ### `drainCfPages()`
 
 Used by `EndpointDataService` (orgs, apps, spaces, and their refresh
-variants), `CnsiUsersSnapshotService`, `CfUsersPagedDataService` and the
-foundation-shape measurement service.
+variants) and `CfUsersPagedDataService`, the one per-CF users cache that
+the summary tiles, the Users tabs, the role wizards and the
+foundation-shape measurement all read.
 
 - Requests `per_page=500`.
 - Fetches page 1 first and reads `pagination.totalPages` (falling back to

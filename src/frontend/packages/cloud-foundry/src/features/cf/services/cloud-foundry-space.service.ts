@@ -4,7 +4,7 @@ import { observeSignal } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
-import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { SpaceDataRegistry } from '../../../services/endpoint-data/space-data.registry';
 import { StOrgQuota, StSpace, StSpaceQuota } from '../../../services/endpoint-data/stratos-types';
@@ -32,7 +32,7 @@ export class CloudFoundrySpaceService {
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
   private serviceCatalog = inject(ServiceCatalogDataService);
   private cfOrgService = inject(CloudFoundryOrganizationService);
-  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private cnsiUsers = inject(CfUsersPagedDataService);
   private spaceDataRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
 
@@ -101,7 +101,7 @@ export class CloudFoundrySpaceService {
     this.initialiseSpaceObservables();
     this.initialiseAppObservables();
 
-    // V3-native: read role buckets from the StUser snapshot (lazy fetch of
+    // V3-native: read role buckets from the StUser cache (lazy fetch of
     // /pp/v1/cf/users/:cnsi). V2 helpers inspect user.managed_spaces etc. —
     // fields the V3 wire no longer carries.
     const users$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector });

@@ -27,7 +27,6 @@ import { UserInviteService } from '../../user-invites/user-invite.service';
 import { TailwindSnackBarService } from '@stratosui/core';
 import { EndpointsDataService } from '@stratosui/store';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
-import { CnsiUsersSnapshotService } from '../../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { StUser } from '../../../../services/endpoint-data/stratos-types';
 import { RoleAssignmentComponent } from '../../../../shared/components/role-assignment/role-assignment.component';
@@ -95,7 +94,6 @@ export class AddUserDialogComponent {
   private invite = inject(UserInviteService);
   private snackBar = inject(TailwindSnackBarService);
   private paged = inject(CfUsersPagedDataService);
-  private snapshot = inject(CnsiUsersSnapshotService);
 
   // ── Writable signals (field initializers — no `(this as {...})` casts) ────
 
@@ -212,7 +210,6 @@ export class AddUserDialogComponent {
       invite: this.invite,
       snackBar: this.snackBar,
       paged: this.paged,
-      snapshot: this.snapshot,
       cfGuid: this.data.cfGuid,
     };
   }

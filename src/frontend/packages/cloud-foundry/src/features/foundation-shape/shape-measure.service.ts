@@ -3,7 +3,7 @@ import { inject, Injectable, signal } from '@angular/core';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
-import { drainCfPages } from '../../services/endpoint-data/drain-pages';
+import { CfUsersPagedDataService } from '../../shared/data-services/cf-users-paged-data.service';
 import { StBuildpacksResponse, StStacksResponse, StUser } from '../../services/endpoint-data/stratos-types';
 
 /**
@@ -59,6 +59,7 @@ export interface MeasuredRoles {
 @Injectable({ providedIn: 'root' })
 export class ShapeMeasureService {
   private readonly http = inject(HttpClient);
+  private readonly users = inject(CfUsersPagedDataService);
 
   private readonly _totals = signal<ReadonlyMap<string, MeasuredTotals>>(new Map());
   private readonly _ecosystem = signal<ReadonlyMap<string, MeasuredEcosystem>>(new Map());
@@ -121,26 +122,23 @@ export class ShapeMeasureService {
     });
   }
 
-  // Fetched here rather than through CnsiUsersSnapshotService because that
-  // service reports a failed fetch as an empty user list — which this page
-  // would then export as "measured, nobody has a role". A failure has to stay
-  // distinguishable from an empty foundation, so nothing is recorded on error
-  // and the retry is one click away.
+  // A fresh drain through the shared users cache, so the pages that read it
+  // see the same measurement. A failure has to stay distinguishable from an
+  // empty foundation (else the export says "measured, nobody has a role"),
+  // so nothing is recorded on error and the retry is one click away.
   measureRoles(guid: string): void {
     const key = `${guid}:roles`;
     if (!this.begin(key)) {
       return;
     }
-    drainCfPages<StUser>(this.http, `/pp/v1/cf/users/${guid}`)
-      .pipe(catchError(() => of(null)))
-      .subscribe(drained => {
-        if (drained) {
-          this._roles.update(all =>
-            new Map(all).set(guid, { users: drained.resources, fetchedAt: new Date() })
-          );
-        }
-        this.end(key);
-      });
+    this.users.refresh(guid).subscribe(() => {
+      if (!this.users.errorsByCnsi()(guid)) {
+        this._roles.update(all =>
+          new Map(all).set(guid, { users: this.users.usersSignal(guid)(), fetchedAt: new Date() })
+        );
+      }
+      this.end(key);
+    });
   }
 
   private countProbe(guid: string, path: string) {

@@ -7,7 +7,7 @@ import { of } from 'rxjs';
 
 import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
 import { CfInfoDataService } from '../../../services/endpoint-data/cf-info-data.service';
-import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
 import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
@@ -42,7 +42,7 @@ export function appDataSort(app1: APIResource<IApp>, app2: APIResource<IApp>): n
 })
 export class CloudFoundryEndpointService {
   activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
-  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private cnsiUsers = inject(CfUsersPagedDataService);
   private endpointDataRegistry = inject(EndpointDataRegistry);
   private cfInfoDataRegistry = inject(CfInfoDataRegistry);
   private endpointsData = inject(EndpointsDataService);
@@ -188,7 +188,7 @@ export class CloudFoundryEndpointService {
       filter((info): info is ICfV2Info => !!info),
     );
 
-    // V3-native: lazy snapshot of /pp/v1/cf/users/:cnsi. Counts every user
+    // V3-native: lazy read of the /pp/v1/cf/users/:cnsi cache. Counts every user
     // visible to the connected principal — admin sees the whole CNSI; non-
     // admin sees the role-restricted subset that getNativeUsers returns.
     this.usersCount$ = toObservable(this.cnsiUsers.users(this.cfGuid), { injector: this.injector }).pipe(
