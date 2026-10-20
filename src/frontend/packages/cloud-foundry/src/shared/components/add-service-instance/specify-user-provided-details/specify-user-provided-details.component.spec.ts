@@ -330,7 +330,7 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     type(creds, '["e2e"]');
     await fixture.whenStable();
 
-    expect(errorFor(host, route)).toBe('Invalid URL');
+    expect(errorFor(host, route)).toBe('Invalid URL (route services need https)');
     expect(errorFor(host, drain)).toBe('Invalid URL');
     expect(errorFor(host, creds)).toBe('Not a valid JSON object.');
   });
@@ -402,5 +402,16 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     const route = component.createEditServiceInstance.controls.route_service_url;
     route.setValue('syslog://logs.example.com:514');
     expect(route.valid).toBe(false);
+  });
+
+  // CF: the route service URL "must use the https protocol".
+  it('accepts an https route service URL only', async () => {
+    const { component } = await setup();
+    const route = component.createEditServiceInstance.controls.route_service_url;
+    route.setValue('https://route.example.com/service');
+    expect(route.valid).toBe(true);
+    route.setValue('http://route.example.com/service');
+    expect(route.valid).toBe(false);
+    expect(route.errors?.['invalidUrl']?.message).toBe('Invalid URL (route services need https)');
   });
 });

@@ -46,9 +46,10 @@ const { proxyAPIVersion } = environment;
 
 // CF takes syslog://, syslog-tls:// and https:// log drains. The drain keeps
 // the shared URL check's host, port and path rules (and its http scheme) but
-// also takes the two syslog schemes; the route service URL keeps the shared
-// check unchanged.
+// also takes the two syslog schemes. A route service URL "must use the https
+// protocol", so it keeps the same rules with https alone.
 const syslogDrainUrlExpression = urlValidationExpression.replace('^https?:', '^(?:syslog|syslog-tls|https?):');
+const routeServiceUrlExpression = urlValidationExpression.replace('^https?:', '^https:');
 
 // app-form-field shows one error line per field: the first error's own
 // message, else a stock text ("Invalid value" for a check it does not
@@ -117,7 +118,10 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       syslog_drain_url: new FormControl('', { validators: [invalidUrl(syslogDrainUrlExpression)], nonNullable: true }),
       credentials: new FormControl('', {
         validators: withMessage(isValidJsonValidator(), 'notValidJson', 'Not a valid JSON object.'), nonNullable: true }),
-      route_service_url: new FormControl('', { validators: [invalidUrl(urlValidationExpression)], nonNullable: true }),
+      route_service_url: new FormControl('', {
+        validators: [withMessage(Validators.pattern(routeServiceUrlExpression), 'invalidUrl', 'Invalid URL (route services need https)')],
+        nonNullable: true,
+      }),
       tags: new FormControl<any[]>([], { nonNullable: true }) });
     this.bindExistingInstance = new FormGroup<BindExistingInstanceForm>({
       serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }) });
