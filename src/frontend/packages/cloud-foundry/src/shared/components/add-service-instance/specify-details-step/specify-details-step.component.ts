@@ -383,11 +383,9 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
     this.setupValidate();
   }
 
-  // Single signal-native write path: POST or PATCH /pp/v1/cf/service_instances
-  // wrapped in writeWithJob. Replaces the prior ngrx
-  // cfEntityCatalog.serviceInstance.actions.create/update pipeline plus the
-  // separate LongRunningCfOperationsService handoff — writeWithJob's
-  // fast-path-then-poll contract is the long-running mechanism now.
+  // Single write path: POST or PATCH /pp/v1/cf/service_instances wrapped in
+  // writeWithJob, whose fast-path-then-poll contract follows a long-running
+  // write to its end.
   onNext = (): Observable<StepOnNextResult> => {
     return this.csiState$.pipe(
       filter(p => !!p),
