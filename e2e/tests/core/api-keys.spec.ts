@@ -90,8 +90,8 @@ test.describe('API Keys', () => {
         await dialog.waitUntilShown('Create an API Key');
 
         expect(await dialog.isDisplayed()).toBeTruthy();
-        expect(await dialog.canClose()).toBeTruthy();
-        expect(await dialog.canCreate()).toBeFalsy();
+        await expect(dialog.cancelButton).toBeEnabled();
+        await expect(dialog.createButton).toBeDisabled();
 
         await dialog.close();
         await dialog.waitUntilNotShown();
@@ -108,12 +108,12 @@ test.describe('API Keys', () => {
         const dialog = new ApiKeyAddDialogPage(sharedPage);
         await dialog.waitUntilShown();
 
-        expect(await dialog.canCreate()).toBeFalsy();
+        await expect(dialog.createButton).toBeDisabled();
 
         await dialog.form.fill({ comment: newKeyComment });
 
-        expect(await dialog.canClose()).toBeTruthy();
-        expect(await dialog.canCreate()).toBeTruthy();
+        await expect(dialog.cancelButton).toBeEnabled();
+        await expect(dialog.createButton).toBeEnabled();
 
         await dialog.create();
         await dialog.waitUntilNotShown();
