@@ -18,6 +18,11 @@ describe('lastOperationLabel', () => {
     expect(lastOperationLabel(withOp({ type: 'delete', state: 'succeeded' }))).toBe('Delete succeeded');
   });
 
+  // CF reports a queued operation as "initial" before it starts.
+  it('shows a queued operation as in progress', () => {
+    expect(lastOperationLabel(withOp({ type: 'create', state: 'initial' }))).toBe('Create in progress');
+  });
+
   it('shows the bare state when the type is missing', () => {
     expect(lastOperationLabel(withOp({ state: 'succeeded' }))).toBe('succeeded');
   });
@@ -39,6 +44,10 @@ describe('lastOperationColor', () => {
     expect(lastOperationColor(withOp({ type: 'create', state: 'in progress' }))).toBe('warning');
     expect(lastOperationColor(withOp({ type: 'create', state: 'failed' }))).toBe('danger');
     expect(lastOperationColor(withOp({ type: 'create', state: 'other' }))).toBe('neutral');
+  });
+
+  it('colours a queued operation as in progress', () => {
+    expect(lastOperationColor(withOp({ type: 'create', state: 'initial' }))).toBe('warning');
   });
 
   it('is neutral when there is no last operation', () => {
