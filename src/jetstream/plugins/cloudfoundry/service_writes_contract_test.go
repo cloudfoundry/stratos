@@ -171,7 +171,7 @@ type writeContract struct {
 
 const contractJobID = "stratos-job-1"
 
-func runWrite(t *testing.T, wc serviceWriteCase, cf *fakeCF) (recordedResponse, *CloudFoundrySpecification) {
+func runWrite(t *testing.T, wc serviceWriteCase, cf http.Handler) (recordedResponse, *CloudFoundrySpecification) {
 	t.Helper()
 	srv := httptest.NewServer(cf)
 	t.Cleanup(srv.Close)
@@ -334,6 +334,53 @@ func TestServiceWritesContract(t *testing.T) {
 			}
 
 			checkContractFile(t, f.name, got)
+		})
+	}
+}
+
+// CF deletes a user-provided service instance, and its app and route
+// bindings, synchronously: 204 No Content with no Location header (CF v3 API
+// docs, each resource's delete). The handlers must report the delete as
+// complete, not as failed after CF has already done it.
+func TestUserProvidedDeletesCompleteSynchronously(t *testing.T) {
+	cases := []serviceWriteCase{
+		{
+			op: "service-instance-delete", method: http.MethodDelete,
+			path:    "/pp/v1/cf/service_instances/:cnsiGuid/:siGuid",
+			params:  echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "siGuid", Value: "ups-1"}},
+			handler: (*CloudFoundrySpecification).deleteServiceInstance,
+		},
+		{
+			op: "app-binding-delete", method: http.MethodDelete,
+			path:    "/pp/v1/cf/service_bindings/:cnsiGuid/:bindingGuid",
+			params:  echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "bindingGuid", Value: "binding-1"}},
+			handler: (*CloudFoundrySpecification).deleteServiceBinding,
+		},
+		{
+			op: "route-binding-delete", method: http.MethodDelete,
+			path:    "/pp/v1/cf/service_route_bindings/:cnsiGuid/:bindingGuid",
+			params:  echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "bindingGuid", Value: "route-binding-1"}},
+			handler: (*CloudFoundrySpecification).deleteServiceRouteBinding,
+		},
+	}
+	syncCF := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/v3":
+			w.Header().Set("Content-Type", "application/json")
+			_, _ = w.Write([]byte(`{"links":{}}`))
+		case r.Method == http.MethodDelete:
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			http.NotFound(w, r)
+		}
+	})
+	for _, wc := range cases {
+		t.Run(wc.op, func(t *testing.T) {
+			resp, _ := runWrite(t, wc, syncCF)
+			require.Equal(t, http.StatusOK, resp.Status, "%s", resp.Body)
+			var body map[string]interface{}
+			require.NoError(t, json.Unmarshal(resp.Body, &body))
+			assert.Equal(t, string(stratosjobs.JobStateComplete), body["state"])
 		})
 	}
 }

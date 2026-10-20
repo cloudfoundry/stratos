@@ -243,3 +243,7 @@ require (
 	sigs.k8s.io/structured-merge-diff/v6 v6.4.2 // indirect
 	sigs.k8s.io/yaml v1.6.0 // indirect
 )
+
+// User-provided service instance deletes answer 204 with no Location;
+// fivetwenty-io/capi#16 accepts that. Drop this once a release carries it.
+replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20261020094728-a3625edf6e94
