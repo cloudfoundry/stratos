@@ -1,5 +1,5 @@
 import { CommonModule, DatePipe } from '@angular/common';
-import { Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
+import { DestroyRef, Component, OnInit, ChangeDetectionStrategy, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, firstValueFrom } from 'rxjs';
@@ -67,6 +67,7 @@ import { AppAreaLoaderComponent } from '@stratosui/core';
 export class ServicesWallComponent implements OnInit {
   cloudFoundryService = inject(CloudFoundryService);
   private instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly destroyRef = inject(DestroyRef);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
@@ -330,6 +331,7 @@ export class ServicesWallComponent implements OnInit {
 
     if (cnsiGuids.length > 0) {
       void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+      this.instancesConfig.startProgressPolling(this.destroyRef);
     }
   }
 

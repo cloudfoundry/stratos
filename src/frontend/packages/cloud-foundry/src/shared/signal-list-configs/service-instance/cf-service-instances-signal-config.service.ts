@@ -44,6 +44,11 @@ import { ListStateStore, naturalCompare } from '@stratosui/core';
 // Delete is the only write surface this config OWNS (deleteServiceInstance).
 // Edit / Detach are per-row navigations to the /services edit|detach routes
 // and Add is an L5 sub-nav action — both wired at the consuming components.
+// Whether an instance's last operation has yet to end: CF reports a queued
+// operation as "initial" before "in progress".
+export const operationRunning = (si: StServiceInstance): boolean =>
+  si.lastOperation?.state === 'initial' || si.lastOperation?.state === 'in progress';
+
 @Injectable({ providedIn: 'root' })
 export class CfServiceInstancesSignalConfigService {
   orchestrator!: MergeOrchestrator<StServiceInstance>;
@@ -132,6 +137,10 @@ export class CfServiceInstancesSignalConfigService {
   // stale-selection clearer that keeps the toolbar display in sync with the
   // filter when an endpoint disconnects mid-session.
   private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+  // The current scope's rows, swapped by rebuild() so the progress poll
+  // follows a scope change made after it started.
+  private readonly _scopedItems: WritableSignal<Signal<StServiceInstance[]>> = signal(signal([]));
+  private stopProgress?: () => void;
   /** True once the first load has completed for the current scope. Pages
    *  use `!hasLoadedOnce()` to show a pending count in the sub-nav (#5766). */
   readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
@@ -410,6 +419,7 @@ export class CfServiceInstancesSignalConfigService {
         return true;
       });
     });
+    this._scopedItems.set(scopedItems);
     this.view = new ViewPipeline<StServiceInstance>(
       scopedItems,
       this.filter,
@@ -467,6 +477,46 @@ export class CfServiceInstancesSignalConfigService {
     await this.orchestrator.refresh();
     this._hasLoadedOnce.set(true);
     this.writeBackToRegistry();
+  }
+
+  // While an operation is in progress on any instance in the page's scope,
+  // re-read the list every intervalMs so its state follows the broker (#6002).
+  // Stops when none is in progress or the host page closes. A broker that
+  // never finishes keeps one read per interval going while the page is open.
+  startProgressPolling(host: DestroyRef, intervalMs: number = 10000): void {
+    this.stopProgress?.();
+    // Callers start polling after an await in ngOnInit; a host that left in
+    // the meantime must not start a poll nobody will stop.
+    if (host.destroyed) {
+      return;
+    }
+    let timer: ReturnType<typeof setInterval> | undefined;
+    let reading = false;
+    const tick = () => {
+      if (reading) return;
+      reading = true;
+      void this.refresh().finally(() => { reading = false; });
+    };
+    const watch = effect(() => {
+      const busy = this._scopedItems()().some(operationRunning);
+      if (busy && !timer) {
+        timer = setInterval(tick, intervalMs);
+      } else if (!busy && timer) {
+        clearInterval(timer);
+        timer = undefined;
+      }
+    }, { injector: this.injector });
+    // stop() only touches its own timer and effect, so a stale host
+    // destroyed after a newer start leaves the newer poll running.
+    const stop = () => {
+      clearInterval(timer);
+      watch.destroy();
+      if (this.stopProgress === stop) {
+        this.stopProgress = undefined;
+      }
+    };
+    this.stopProgress = stop;
+    host.onDestroy(stop);
   }
 
   // Build a per-CNSI source, optionally pre-seeded from the registry's

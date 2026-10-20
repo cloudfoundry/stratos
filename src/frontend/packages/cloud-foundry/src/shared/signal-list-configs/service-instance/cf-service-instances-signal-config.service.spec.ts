@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { HttpClient } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
+import { DestroyRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { CfServiceInstancesSignalConfigService } from './cf-service-instances-signal-config.service';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
@@ -296,5 +297,103 @@ describe('CfServiceInstancesSignalConfigService — lazy service-key counts', ()
     const keyCalls = (http.get as any).mock.calls.filter((c: any[]) => String(c[0]).includes('/service_keys/'));
     expect(keyCalls.length).toBe(0);
     expect(svc.serviceKeyCount('ups-1')).toBeUndefined();
+  });
+});
+
+// A host page: its DestroyRef ends the poll when the page closes.
+function makeHost(): { host: DestroyRef; close: () => void } {
+  const hooks: Array<() => void> = [];
+  const host = { destroyed: false, onDestroy: (fn: () => void) => { hooks.push(fn); return () => {}; } };
+  return {
+    host: host as unknown as DestroyRef,
+    close: () => { host.destroyed = true; hooks.forEach(fn => fn()); },
+  };
+}
+
+// Answers each list read with whatever rows() holds at that moment.
+function makeLiveHttp(rows: () => StServiceInstance[]) {
+  return {
+    get: vi.fn(() => of({
+      resources: rows(),
+      pagination: { totalResults: rows().length, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } },
+    })),
+  };
+}
+
+const withState = (state: string, overrides: Partial<StServiceInstance> = {}) =>
+  makeInstance({ lastOperation: { type: 'create', state, description: '' }, ...overrides } as Partial<StServiceInstance>);
+
+describe('CfServiceInstancesSignalConfigService — progress polling (#6002)', () => {
+  afterEach(() => vi.useRealTimers());
+
+  async function start(rows: () => StServiceInstance[], scope: (svc: CfServiceInstancesSignalConfigService) => void) {
+    vi.useFakeTimers();
+    const http = makeLiveHttp(rows);
+    const svc = makeSvc(http as unknown as HttpClient, makeRegistry([{ guid: 'cnsi-1' }]).registry);
+    scope(svc);
+    await svc.loadAll();
+    const page = makeHost();
+    svc.startProgressPolling(page.host);
+    TestBed.tick();
+    const reads = () => http.get.mock.calls.length;
+    return { svc, page, reads };
+  }
+
+  it('re-reads the list while a row is in progress and stops once it ends', async () => {
+    let state = 'in progress';
+    const { reads } = await start(() => [withState(state)], svc => svc.initialize(['cnsi-1']));
+
+    const before = reads();
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(reads()).toBe(before + 1);
+
+    state = 'succeeded';
+    await vi.advanceTimersByTimeAsync(10000);
+    TestBed.tick();
+    const settled = reads();
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(reads()).toBe(settled);
+  });
+
+  // CF reports a queued operation as "initial" before "in progress".
+  it('re-reads the list while an operation is queued', async () => {
+    const { reads } = await start(() => [withState('initial')], svc => svc.initialize(['cnsi-1']));
+    const before = reads();
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(reads()).toBe(before + 1);
+  });
+
+  it('does not poll when nothing is in progress', async () => {
+    const { reads } = await start(() => [withState('succeeded')], svc => svc.initialize(['cnsi-1']));
+    const before = reads();
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(reads()).toBe(before);
+  });
+
+  it('stops when the page closes', async () => {
+    const { page, reads } = await start(() => [withState('in progress')], svc => svc.initialize(['cnsi-1']));
+    page.close();
+    const before = reads();
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(reads()).toBe(before);
+  });
+
+  it('ignores an operation in progress outside the page scope', async () => {
+    const rows = () => [withState('succeeded'), withState('in progress', { guid: 'si-2', space: { guid: 'sp-2', name: 'other' } } as Partial<StServiceInstance>)];
+    const { reads } = await start(rows, svc => svc.initializeForSpace('cnsi-1', 'sp-1'));
+    const before = reads();
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(reads()).toBe(before);
+  });
+
+  it('follows a scope change made after the poll started', async () => {
+    const rows = () => [withState('succeeded'), withState('in progress', { guid: 'si-2', space: { guid: 'sp-2', name: 'other' } } as Partial<StServiceInstance>)];
+    const { svc, reads } = await start(rows, s => s.initializeForSpace('cnsi-1', 'sp-1'));
+    svc.initializeForSpace('cnsi-1', 'sp-2');
+    await svc.loadAll();
+    TestBed.tick();
+    const before = reads();
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(reads()).toBe(before + 1);
   });
 });

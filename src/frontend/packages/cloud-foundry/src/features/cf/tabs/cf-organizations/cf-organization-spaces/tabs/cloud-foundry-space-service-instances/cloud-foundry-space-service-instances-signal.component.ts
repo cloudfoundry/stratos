@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { DestroyRef, ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
@@ -58,6 +58,7 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
   cfOrgService = inject(CloudFoundryOrganizationService);
   cfSpaceService = inject(CloudFoundrySpaceService);
   private instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly destroyRef = inject(DestroyRef);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
@@ -259,6 +260,7 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
     this.instancesConfig.registerFilterExtractor('name', (si: StServiceInstance) => si.name ?? '');
 
     void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+    this.instancesConfig.startProgressPolling(this.destroyRef);
   }
 
   private toggleFavorite(si: StServiceInstance): void {
