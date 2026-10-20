@@ -711,11 +711,12 @@ export class CFApiHelper {
     return this.exists(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
   }
 
-  /** First plan guid of a service offering visible in the space, or null. */
-  async findServicePlanGuid(offeringName: string, spaceGuid: string): Promise<string | null> {
+  /** Guid of a service offering's plan visible in the space (planName, else the first), or null. */
+  async findServicePlanGuid(offeringName: string, spaceGuid: string, planName?: string): Promise<string | null> {
     if (!this.cfApiBase) await this.init();
+    const byName = planName ? `&names=${encodeURIComponent(planName)}` : '';
     const response = await this.pget(
-      `${this.cfApiBase}/service_plans?service_offering_names=${encodeURIComponent(offeringName)}&space_guids=${spaceGuid}`
+      `${this.cfApiBase}/service_plans?service_offering_names=${encodeURIComponent(offeringName)}&space_guids=${spaceGuid}${byName}`
     );
     return response.resources?.[0]?.guid ?? null;
   }
