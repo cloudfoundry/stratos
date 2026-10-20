@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
-import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
+import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
 
@@ -49,6 +49,15 @@ const { proxyAPIVersion } = environment;
 // also takes the two syslog schemes; the route service URL keeps the shared
 // check unchanged.
 const syslogDrainUrlExpression = urlValidationExpression.replace('^https?:', '^(?:syslog|syslog-tls|https?):');
+
+// app-form-field shows one error line per field: the first error's own
+// message, else a stock text ("Invalid value" for a check it does not
+// know). It does not project <app-error> children, so each check here
+// carries the text the field shows.
+function withMessage(validator: ValidatorFn, key: string, message: string): ValidatorFn {
+  return control => validator(control) ? { [key]: { message } } : null;
+}
+const invalidUrl = (expression: string) => withMessage(Validators.pattern(expression), 'invalidUrl', 'Invalid URL');
 
 // Replace every leaf value with the '<redacted>' marker, keeping the key
 // structure (nested objects and array shapes included) browsable. Angle
@@ -105,9 +114,10 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
     this.createEditServiceInstance = new FormGroup<CreateEditServiceInstanceForm>({
       name: new FormControl('', { validators: [Validators.required, Validators.maxLength(50)], nonNullable: true }),
-      syslog_drain_url: new FormControl('', { validators: [Validators.pattern(syslogDrainUrlExpression)], nonNullable: true }),
-      credentials: new FormControl('', { validators: isValidJsonValidator(), nonNullable: true }),
-      route_service_url: new FormControl('', { validators: [Validators.pattern(urlValidationExpression)], nonNullable: true }),
+      syslog_drain_url: new FormControl('', { validators: [invalidUrl(syslogDrainUrlExpression)], nonNullable: true }),
+      credentials: new FormControl('', {
+        validators: withMessage(isValidJsonValidator(), 'notValidJson', 'Not a valid JSON object.'), nonNullable: true }),
+      route_service_url: new FormControl('', { validators: [invalidUrl(urlValidationExpression)], nonNullable: true }),
       tags: new FormControl<any[]>([], { nonNullable: true }) });
     this.bindExistingInstance = new FormGroup<BindExistingInstanceForm>({
       serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }) });
@@ -217,6 +227,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public showModeSelection = false;
 
   public appNameChecking = new AppNameUniqueChecking();
+  public readonly nameTakenMessage = 'A service instance with this name already exists. Please enter a different one.';
 
   public serviceBindingForApplication$ = this.serviceInstancesForApplication();
   formModes = [

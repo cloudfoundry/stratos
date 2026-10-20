@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, provideRouter } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -305,6 +305,53 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     const label = [...host.querySelectorAll('label')].find(l => l.textContent?.trim() === text);
     return label?.htmlFor ? host.querySelector<HTMLInputElement>(`#${label.htmlFor}`) : null;
   }
+
+  /** What app-form-field shows for a field, through the input's aria-errormessage. */
+  function errorFor(host: HTMLElement, input: Element): string | undefined {
+    const id = input.getAttribute('aria-errormessage');
+    return id ? host.querySelector(`#${id}`)?.textContent?.trim() : undefined;
+  }
+
+  function type(input: HTMLInputElement | HTMLTextAreaElement, value: string) {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  // app-form-field shows one error line per field and does not project
+  // <app-error> children, so each check must carry its own text.
+  it('names what is wrong with a URL or the credentials', async () => {
+    const { fixture, host } = await setup();
+    const route = host.querySelector<HTMLInputElement>('input[placeholder="Route Service URL"]')!;
+    const drain = host.querySelector<HTMLInputElement>('input[placeholder="Syslog Drain URL"]')!;
+    const creds = host.querySelector<HTMLTextAreaElement>('textarea[aria-label="Credentials (JSON)"]')!;
+    type(route, 'not a url');
+    type(drain, 'ftp://logs.example.com');
+    type(creds, '["e2e"]');
+    await fixture.whenStable();
+
+    expect(errorFor(host, route)).toBe('Invalid URL');
+    expect(errorFor(host, drain)).toBe('Invalid URL');
+    expect(errorFor(host, creds)).toBe('Not a valid JSON object.');
+  });
+
+  it('shows the name check in progress, then says the name is taken', async () => {
+    const { fixture, host } = await setup();
+    const http = TestBed.inject(HttpTestingController);
+    const name = host.querySelector<HTMLInputElement>('input[placeholder="Name"]')!;
+    const suffix = name.closest('app-form-field')!.querySelector('.form-field-suffix')!;
+    type(name, 'my-ups');
+    await fixture.whenStable();
+    expect(suffix.querySelector('app-stateful-icon app-busy'), 'busy while checking').toBeTruthy();
+
+    // The check asks CF once typing pauses for 500ms.
+    await new Promise(resolve => setTimeout(resolve, 550));
+    http.expectOne(r => r.url === '/pp/v1/cf/service_instances/cf-1' && r.params.get('names') === 'my-ups')
+      .flush({ resources: [], totalResults: 1 });
+    await fixture.whenStable();
+
+    expect(errorFor(host, name)).toBe('A service instance with this name already exists. Please enter a different one.');
+    expect(suffix.querySelector('app-busy'), 'not busy once answered').toBeNull();
+  });
 
   it('renders a labelled Tags field; Enter adds a tag and its remove button names it', async () => {
     const { fixture, host } = await setup();

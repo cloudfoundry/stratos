@@ -33,18 +33,13 @@
         placeholder="Name"
         [appApplicationNameUnique]="appNameChecking"
         [appApplicationNameUniqueRequest]="getUniqueRequest"
+        [appApplicationNameUniqueMessage]="nameTakenMessage"
         required
       />
-      @if (createEditServiceInstance.controls.name.hasError("appNameTaken")) {
-        <app-error> A service instance with this name already exists. Please enter a different one. </app-error>
-      }
-      @if (createEditServiceInstance.controls.name.hasError("maxlength")) {
-        <app-error> A service instance name cannot exceed 50 characters. </app-error>
-      }
-      @if (!createEditServiceInstance.controls.name.hasError("maxlength")) {
-        <div class="inline-icon inline-icon__form">
-          <app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon>
-        </div>
+      <!-- The field draws its own valid / invalid icon; this one only shows
+           the name check in progress. -->
+      @if (appNameChecking.busy) {
+        <span matSuffix><app-stateful-icon [state]="appNameChecking.status"></app-stateful-icon></span>
       }
     </app-form-field>
     <app-form-field>
@@ -55,9 +50,6 @@
         type="url"
         placeholder="Route Service URL"
       />
-      @if (createEditServiceInstance.controls.route_service_url.hasError("pattern")) {
-        <app-error>Invalid URL</app-error>
-      }
     </app-form-field>
     <app-form-field>
       <input
@@ -66,9 +58,6 @@
         formControlName="syslog_drain_url"
         placeholder="Syslog Drain URL"
       />
-      @if (createEditServiceInstance.controls.syslog_drain_url.hasError("pattern")) {
-        <app-error>Invalid URL</app-error>
-      }
     </app-form-field>
     <div class="stepper-form__tags mb-4">
       <label for="ups-service-instance-tags" class="block mb-1 text-sm text-content-muted">Tags</label>
@@ -143,9 +132,6 @@
           class="w-full min-w-full placeholder:!text-transparent focus:outline-none min-h-[240px] resize font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"
           formControlName="credentials"
         ></textarea>
-        @if (createEditServiceInstance.controls.credentials.hasError("notValidJson")) {
-          <app-error> Not valid JSON. </app-error>
-        }
       </app-form-field>
     }
     @if (credsSource()?.isLoading()) {
