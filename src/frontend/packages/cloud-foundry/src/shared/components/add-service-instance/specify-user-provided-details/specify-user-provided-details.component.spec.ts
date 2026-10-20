@@ -275,6 +275,7 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
   async function setup() {
     const upsServiceStub = {
       getUserProvidedServices: vi.fn().mockReturnValue(of([])),
+      createUserProvidedService: vi.fn().mockReturnValue(of({ success: true, guid: 'ups-1' })),
     };
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
@@ -297,7 +298,7 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     component.spaceGuid = 'space-1';
     await fixture.whenStable();
     const host = fixture.nativeElement as HTMLElement;
-    return { fixture, component, host };
+    return { fixture, component, host, upsServiceStub };
   }
 
   /** The input a visible label names, as a screen reader pairs them. */
@@ -366,6 +367,18 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
       .map(e => e.textContent?.replace('cancel', '').trim());
     expect(chips).toEqual(['db']);
     expect(host.querySelector('button[aria-label="Remove tag db"]')).toBeTruthy();
+  });
+
+  // With no app to bind, a created instance ends the wizard.
+  it('asks the stepper to leave once CF has created the instance', async () => {
+    const { component, upsServiceStub } = await setup();
+    component.createEditServiceInstance.controls.name.setValue('my-ups');
+
+    const result = await firstValueFrom(component.onNext());
+
+    expect(upsServiceStub.createUserProvidedService).toHaveBeenCalledWith(
+      'cf-1', expect.any(String), expect.objectContaining({ name: 'my-ups', spaceGuid: 'space-1' }));
+    expect(result).toEqual({ success: true, redirect: true });
   });
 
   // CF takes syslog, syslog-tls and https drains; the route service URL
