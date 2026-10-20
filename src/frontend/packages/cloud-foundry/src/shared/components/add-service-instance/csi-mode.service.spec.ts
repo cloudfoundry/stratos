@@ -8,6 +8,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { answerServiceWrite, RESOLVE_PATHS, serviceWriteContract } from '@test-framework/cf';
 
+import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { CsiModeService } from './csi-mode.service';
 
 function configure(routeParams: Record<string, string>) {
@@ -251,6 +252,25 @@ describe('CsiModeService', () => {
       // The bind ended but nobody can say whether it happened: the caller
       // must not report it as bound.
       await expect(finalResult).resolves.toEqual({ success: false, unknown: 'ended' });
+      httpMock.verify();
+    });
+
+    // A bind that lands while the instance is still being created waits for
+    // it; if the create fails, the broker's reason is the bind's message.
+    it('gives a failed create\'s reason without markup', async () => {
+      TestBed.overrideProvider(TailwindSnackBarService, { useValue: { open: vi.fn(), error: vi.fn() } });
+      const svc = TestBed.inject(CsiModeService);
+      const httpMock = TestBed.inject(HttpTestingController);
+
+      const finalResult = firstValueFrom(svc.createApplicationServiceBinding('si-1', 'cnsi-1', 'app-1', {}));
+      httpMock.expectOne('/pp/v1/cf/service_bindings/cnsi-1').flush(
+        { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'There is an operation in progress for the service instance' }] },
+        { status: 422, statusText: 'Unprocessable Entity' },
+      );
+      const read = await vi.waitFor(() => httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-1'));
+      read.flush({ lastOperation: { type: 'create', state: 'failed', description: '<html><body><h1>Quota</h1> exceeded</body></html>' } });
+
+      await expect(finalResult).resolves.toEqual({ success: false, message: 'Quota exceeded' });
       httpMock.verify();
     });
 
