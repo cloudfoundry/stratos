@@ -1,91 +1,51 @@
+import { Locator, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test-base';
+import { TestBroker } from '../../helpers/service-wizard.helper';
 
-test.describe('Marketplace', () => {
-  test('should navigate to marketplace', { tag: '@smoke' }, async ({ connectedEndpointsAdminPage }) => {
-    const { page, cfGuid } = connectedEndpointsAdminPage;
-    await page.goto(`/marketplace/${cfGuid}`);
-    await page.waitForLoadState('networkidle');
-    const url = page.url();
-    expect(url).toContain('/marketplace/');
+/**
+ * The Services Marketplace list and an offering's page (#6002), driven by
+ * the test broker's offering, which the test space can see. Needs it in the
+ * secrets profile (cloudFoundry[0].services.testBroker); skipped without it.
+ */
+
+/** Opens the marketplace filtered to name. */
+async function filterTo(page: Page, name: string): Promise<Locator> {
+  await page.goto('/marketplace');
+  await page.locator('[data-test=name-filter]').fill(name);
+  return page.locator('[data-test=row], [data-test=card]');
+}
+
+test.describe('marketplace', () => {
+  let broker: TestBroker | undefined;
+  test.beforeEach(({ secrets }) => {
+    broker = secrets.cloudFoundry[0]?.services?.testBroker;
+    test.skip(!broker, 'no services.testBroker in the secrets profile');
   });
 
-  test.describe('Marketplace UI', () => {
+  test('filters the offerings by name', { tag: '@smoke' }, async ({ connectedEndpointsAdminPage }) => {
+    const { page } = connectedEndpointsAdminPage;
+    const rows = await filterTo(page, broker!.offering);
+    await expect(rows.filter({ hasText: broker!.offering }).first()).toBeVisible({ timeout: 60000 });
 
-    test('should display service offerings', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
+    await page.locator('[data-test=name-filter]').fill(`e2e-no-such-offering-${Date.now()}`);
+    await expect(page.locator('[data-test=empty-filtered]')).toContainText('No services match the current filters');
+    await expect(rows).toHaveCount(0);
+  });
 
-      await page.goto(`/marketplace/${cfGuid}`);
-      await page.waitForLoadState('networkidle');
+  test('opens an offering\'s page, and its Add Service Instance opens the create wizard', async ({ connectedEndpointsAdminPage, cfApi }) => {
+    const { page, cfGuid, spaceGuid } = connectedEndpointsAdminPage;
+    const offeringGuid = await cfApi.findServiceOfferingGuid(broker!.offering, spaceGuid);
+    expect(offeringGuid, `offering ${broker!.offering} visible in the test space`).toBeTruthy();
 
-      // Check for service offerings list
-      const listComponent = page.locator('app-list, app-cards, .services-list');
-      const listExists = await listComponent.first().isVisible({ timeout: 10000 }).catch(() => false);
+    const rows = await filterTo(page, broker!.offering);
+    // The link of this CF's offering; another CF may offer one of the same name.
+    await rows.locator(`a[href="/marketplace/${cfGuid}/${offeringGuid}"]`).click({ timeout: 60000 });
+    await page.waitForURL(url => url.pathname === `/marketplace/${cfGuid}/${offeringGuid}/summary`);
+    await expect(page.locator('app-page-header')).toContainText(broker!.offering);
+    await expect(page.locator('app-service-summary-card')).toBeVisible({ timeout: 30000 });
 
-      if (!listExists) {
-        // May require service brokers to be registered
-        test.skip('No service offerings displayed - may require service brokers');
-      }
-
-      await expect(listComponent.first()).toBeVisible();
-    });
-
-    test('should filter services', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-
-      await page.goto(`/marketplace/${cfGuid}`);
-      await page.waitForLoadState('networkidle');
-
-      // Look for filter/search input
-      const searchInput = page.locator('input[placeholder*="Search"], input[placeholder*="Filter"], input[type="text"]').first();
-      const searchExists = await searchInput.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!searchExists) {
-        test.skip('Filter input not found in marketplace');
-      }
-
-      // Try filtering
-      await searchInput.fill('test');
-      await page.waitForTimeout(1000);
-
-      // Verify input accepted
-      const inputValue = await searchInput.inputValue();
-      expect(inputValue).toBe('test');
-    });
-
-    test('should navigate to service details', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-
-      // Get available services from API
-      const servicesResponse = await connectedEndpointsAdminPage.request.get(
-        `/pp/v1/proxy/v3/cf/${cfGuid}/service_offerings`
-      );
-      const services = servicesResponse.resources;
-
-      if (!services || services.length === 0) {
-        test.skip('No service offerings available - skipping navigation test');
-      }
-
-      const firstService = services[0];
-
-      await page.goto(`/marketplace/${cfGuid}`);
-      await page.waitForLoadState('networkidle');
-
-      // Try to click on first service card/link
-      const serviceCard = page.locator('app-card, mat-card, .service-card').first();
-      const cardExists = await serviceCard.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (cardExists) {
-        await serviceCard.click();
-
-        // Wait for navigation to service summary
-        await page.waitForURL(/.*marketplace.*summary.*/, { timeout: 10000 });
-
-        const url = page.url();
-        expect(url).toContain('/marketplace/');
-        expect(url).toContain('/summary');
-      } else {
-        test.skip('Service cards not found in marketplace');
-      }
-    });
+    await page.getByRole('button', { name: 'Add Service Instance' }).click();
+    await page.waitForURL(url => url.pathname === `/marketplace/${cfGuid}/${offeringGuid}/create`);
+    await expect(page.getByRole('button', { name: 'Next' })).toBeVisible({ timeout: 30000 });
   });
 });
