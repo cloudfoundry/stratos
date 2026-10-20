@@ -4,9 +4,9 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { of } from 'rxjs';
+import { firstValueFrom, of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
-import { TabNavService } from '@stratosui/core';
+import { StepComponent, TabNavService } from '@stratosui/core';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
 import { CloudFoundryService } from '../../../data-services/cloud-foundry.service';
@@ -173,6 +173,27 @@ describe('AddServiceInstanceComponent', () => {
       component.selectPlanHandle.onEnter?.();
 
       expect(called).toBe(true);
+    });
+  });
+
+  // The user-provided step is the wizard's last. A success without
+  // redirect makes the stepper try the step after it, which does not
+  // exist, so the wizard stays put with no error.
+  describe('supdHandle.submit', () => {
+    async function stepResult(childResult: object) {
+      (component as any).supdRef = { validate: signal(true), onNext: () => of(childResult) } as any;
+      const step = TestBed.createComponent(StepComponent).componentInstance;
+      step.signalHandle = component.supdHandle;
+      return firstValueFrom(step.invokeNext(0));
+    }
+
+    it('passes the create or update redirect on to the stepper', async () => {
+      expect(await stepResult({ success: true, redirect: true })).toMatchObject({ success: true, redirect: true });
+    });
+
+    it('fails the step with the reason given', async () => {
+      expect(await stepResult({ success: false, message: 'Name taken' }))
+        .toMatchObject({ success: false, message: expect.stringContaining('Name taken') });
     });
   });
 });

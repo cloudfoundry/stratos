@@ -398,6 +398,9 @@ export class AddServiceInstanceComponent implements OnInit, OnDestroy {
       if (!result.success) {
         throw new Error(result.message || 'Failed to create user-provided service instance');
       }
+      // Pass redirect on: this is the last step, so a bare success
+      // leaves the stepper nowhere to go.
+      return result;
     },
   };
 
