@@ -134,8 +134,9 @@ test.describe('user-provided service instance: create', () => {
     }
   });
 
-  // CF takes syslog://, syslog-tls:// and https:// drains.
-  test('refuses a drain URL in a scheme CF does not take', async ({ connectedEndpointsAdminPage, cfApi, secrets }) => {
+  // CF takes syslog://, syslog-tls:// and https:// drains, and https route
+  // services only.
+  test('refuses a drain or route service URL in a scheme CF does not take', async ({ connectedEndpointsAdminPage, cfApi, secrets }) => {
     const { page, spaceGuid } = connectedEndpointsAdminPage;
     const name = `e2e-ups-drain-${Date.now()}`;
     try {
@@ -148,6 +149,13 @@ test.describe('user-provided service instance: create', () => {
       await expect(finish).toBeDisabled();
       await drain.fill('syslog-tls://e2e-ups-drain.example.com:6514');
       await expect(drain).not.toHaveAttribute('aria-invalid', 'true');
+      await expect(finish).toBeEnabled({ timeout: 15000 });
+
+      const route = page.getByRole('textbox', { name: /Route Service URL/ });
+      await route.fill('http://e2e-ups-route.example.com');
+      await expect(route).toHaveAccessibleErrorMessage('Invalid URL (route services need https)');
+      await expect(finish).toBeDisabled();
+      await route.fill('https://e2e-ups-route.example.com');
       await expect(finish).toBeEnabled({ timeout: 15000 });
     } finally {
       await removeUps(cfApi, spaceGuid, name);
