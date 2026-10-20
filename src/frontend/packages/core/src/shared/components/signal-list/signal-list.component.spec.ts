@@ -1246,6 +1246,48 @@ describe('SignalListComponent', () => {
     });
   });
 
+  // A pill holds a short state; its column's tooltip can say more on hover
+  // (the service-instance lists put a failed operation's reason there).
+  describe('pill column hover text (tooltip)', () => {
+    @Component({
+      standalone: true,
+      imports: [SignalListComponent],
+      template: `<app-signal-list [config]="config" />`,
+    })
+    class PillHost {
+      items = signal([{ name: 'db', state: 'Update failed', reason: 'quota exceeded' }]);
+      config: SignalListConfig<{ name: string; state: string; reason: string }> = {
+        pagedItems: this.items.asReadonly(),
+        totalFilteredResults: signal(1).asReadonly(),
+        totalPages: signal(1).asReadonly(),
+        pageIndex: signal(0),
+        pageSize: signal(10),
+        isAnyLoading: signal(false).asReadonly(),
+        errorsByCnsi: signal(new Map<string, unknown>()).asReadonly(),
+        columns: [
+          { header: 'Name', key: 'name', render: r => r.name },
+          { header: 'State', key: 'state', kind: 'pill', render: r => r.state, tooltip: r => `${r.state} — ${r.reason}` },
+          { header: 'Plain', key: 'plain', kind: 'pill', render: r => r.state },
+        ],
+        getRowKey: r => r.name,
+      };
+    }
+
+    // The title sits on the pill's cell (table) or value span (card).
+    const pillTitles = (fixture: { nativeElement: HTMLElement }) =>
+      Array.from(fixture.nativeElement.querySelectorAll('span.rounded'))
+        .map(pill => pill.parentElement!.getAttribute('title'));
+
+    for (const viewMode of ['table', 'card'] as const) {
+      it(`titles a pill with its tooltip, else its text (${viewMode})`, () => {
+        const fixture = TestBed.createComponent(PillHost);
+        fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal(viewMode) };
+        fixture.detectChanges();
+        expect(pillTitles(fixture)).toEqual(['Update failed — quota exceeded', 'Update failed']);
+      });
+    }
+  });
+
   describe('bulk-action bar (bulkActions slot)', () => {
     @Component({
       standalone: true,

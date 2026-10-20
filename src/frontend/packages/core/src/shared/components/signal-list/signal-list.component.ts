@@ -189,7 +189,9 @@ export interface SignalListColumn<T> {
   // Optional, kind-agnostic. Overrides the hover `title` (tooltip) for this
   // column's cell/card-title; defaults to the rendered text. Used by the
   // routes card to show a route's full guid on hover while the visible title
-  // shows a short-guid fallback for unnamed routes.
+  // shows a short-guid fallback for unnamed routes. Of the other cells, only
+  // a pill reads it: the service-instance lists put a failed operation's
+  // reason on the Last Operation pill.
   tooltip?: (row: T) => string;
   // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
   pillColor?: (row: T) => SignalListPillColor;
