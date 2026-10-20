@@ -320,4 +320,27 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     expect(chips).toEqual(['db']);
     expect(host.querySelector('button[aria-label="Remove tag db"]')).toBeTruthy();
   });
+
+  // CF takes syslog, syslog-tls and https drains; the route service URL
+  // keeps the shared http(s) check.
+  it('accepts syslog, syslog-tls, http and https drains only', async () => {
+    const { component } = await setup();
+    const drain = component.createEditServiceInstance.controls.syslog_drain_url;
+    for (const url of [
+      'syslog://logs.example.com:514',
+      'syslog-tls://logs.example.com:6514',
+      'https://logs.example.com/drain',
+      'http://logs.example.com/drain',
+    ]) {
+      drain.setValue(url);
+      expect(drain.valid, url).toBe(true);
+    }
+    for (const url of ['ftp://logs.example.com', 'syslog:/logs.example.com', 'logs.example.com:514']) {
+      drain.setValue(url);
+      expect(drain.valid, url).toBe(false);
+    }
+    const route = component.createEditServiceInstance.controls.route_service_url;
+    route.setValue('syslog://logs.example.com:514');
+    expect(route.valid).toBe(false);
+  });
 });
