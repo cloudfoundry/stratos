@@ -1,7 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRouteSnapshot, DetachedRouteHandle, Params, RouteReuseStrategy } from '@angular/router';
 
-import { AppComponent } from './app.component';
 import { DashboardBaseComponent } from './features/dashboard/dashboard-base/dashboard-base.component';
 
 // Shallow equality of a route node's own params (e.g. { endpointId, id }).
@@ -20,7 +19,12 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
 
   shouldReuseRoute(future: ActivatedRouteSnapshot, curr: ActivatedRouteSnapshot): boolean {
     const isDashboard = curr.component === DashboardBaseComponent && future.component === DashboardBaseComponent;
-    const isAppComp = curr.component === AppComponent && future.component === AppComponent;
+    // The root is the only node without a route config. Always reuse it, as
+    // Angular's default strategy does: the router's first state after a page
+    // load has a root with no component while the next one carries
+    // AppComponent, and not reusing it rebuilt the whole tree, dashboard
+    // shell included, on the first in-app navigation after every load.
+    const isRoot = curr.routeConfig === null && future.routeConfig === null;
 
     let reuse: boolean;
     if (curr.data.reuseRoute === true) {
@@ -45,6 +49,6 @@ export class CustomReuseStrategy extends RouteReuseStrategy {
         (future.component ?? null) === (future.data.reuseRoute ?? null) &&
         paramsEqual(curr.params, future.params);
     }
-    return isDashboard || isAppComp || reuse;
+    return isDashboard || isRoot || reuse;
   }
 }
