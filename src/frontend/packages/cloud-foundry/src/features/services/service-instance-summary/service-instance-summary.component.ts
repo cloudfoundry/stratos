@@ -7,7 +7,9 @@ import {
   Signal,
   WritableSignal,
   computed,
+  effect,
   inject,
+  linkedSignal,
   signal,
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -42,9 +44,7 @@ import {
   MaskedCredentialsComponent,
   toCredentialFields,
 } from '../../../shared/components/masked-credentials/masked-credentials.component';
-import {
-  CfServiceInstancesSignalConfigService,
-} from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
+import { CfServiceInstancesSignalConfigService, operationRunning } from '../../../shared/signal-list-configs/service-instance/cf-service-instances-signal-config.service';
 import {
   buildServiceInstanceRowActions,
 } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
@@ -97,6 +97,8 @@ interface InstanceView {
  * asks, and so a broker that doesn't support parameter retrieval errors only
  * the section, not the page.
  */
+const PROGRESS_POLL_MS = 10000;
+
 @Component({
   selector: 'app-service-instance-summary',
   templateUrl: './service-instance-summary.component.html',
@@ -145,6 +147,10 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     { breadcrumbs: [{ value: 'Services', routerLink: '/services' }] },
   ];
 
+  // The last instance read. A re-read keeps it on screen until the new
+  // answer lands (or fails), so polling never flashes the page empty.
+  private readonly instance: Signal<StServiceInstance | null>;
+
   readonly loading: Signal<boolean>;
   readonly error: Signal<boolean>;
   readonly view: Signal<InstanceView | null>;
@@ -164,13 +170,28 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     // app pages) after an unbind.
     this.registry.acquire(this.cfGuid);
 
-    this.loading = computed(() => this.source.isLoading());
-    this.error = computed(() => this.source.error() != null);
+    this.instance = linkedSignal<{ si: StServiceInstance | null; settled: boolean }, StServiceInstance | null>({
+      source: () => ({ si: this.source.value(), settled: !this.source.isLoading() && this.source.error() == null }),
+      computation: (read, previous) => read.settled || !previous?.value ? read.si : previous.value,
+    });
+    this.loading = computed(() => this.source.isLoading() && !this.instance());
+    this.error = computed(() => this.source.error() != null && !this.instance());
     this.view = computed(() => {
-      const si = this.source.value();
+      const si = this.instance();
       return si ? this.toView(si) : null;
     });
     this.title = computed(() => this.view()?.name ?? '');
+
+    // While an operation is in progress, re-read the instance so its status
+    // follows the broker (#6002). Ends with the operation or the page.
+    effect((onCleanup) => {
+      const si = this.instance();
+      if (!si || !operationRunning(si)) return;
+      const timer = setInterval(() => {
+        if (!this.source.isLoading()) this.reread();
+      }, PROGRESS_POLL_MS);
+      onCleanup(() => clearInterval(timer));
+    });
 
     this.bindingsLoading = computed(() => this.bindingsSource().isLoading());
     this.bindings = computed(() =>
@@ -185,7 +206,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     // here also navigates back to the wall, since the page's instance is gone;
     // after an unknown result the page stays and re-reads the instance.
     this.actions = computed(() => {
-      const si = this.source.value();
+      const si = this.instance();
       if (!si) { return []; }
       return buildServiceInstanceRowActions(si, {
         router: this.router,
@@ -196,7 +217,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
           if (outcome === 'deleted') {
             void this.router.navigate(['/services']);
           } else {
-            this.sourceRef.set(this.serviceCatalog.serviceInstance(this.cfGuid, this.siGuid));
+            this.reread();
           }
           return outcome;
         },
@@ -260,15 +281,19 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
     this.registry.release(this.cfGuid);
   }
 
+  private reread(): void {
+    this.sourceRef.set(this.serviceCatalog.serviceInstance(this.cfGuid, this.siGuid));
+  }
+
   // Share is a managed-instance-only affordance — CF rejects sharing a
   // user-provided instance. Gated in the template so the button only shows
   // for managed instances that have loaded.
-  readonly canShare = computed(() => this.source.value()?.type != null
-    && this.source.value()?.type !== 'user-provided');
+  readonly canShare = computed(() => this.instance()?.type != null
+    && this.instance()?.type !== 'user-provided');
 
   /** Invoke a header action (the builder's invokes close over the instance). */
   runAction(action: SignalListRowAction<StServiceInstance>): void {
-    const si = this.source.value();
+    const si = this.instance();
     if (si) { void action.invoke(si); }
   }
 
@@ -277,7 +302,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
   // shared_spaces, body { guids }). The instance's own space is passed so the
   // picker can exclude it. Managed-only — see canShare.
   openShareToSpaces(): void {
-    const si = this.source.value();
+    const si = this.instance();
     if (!si) { return; }
     this.dialog.open<ShareServiceInstanceDialogComponent, ShareServiceInstanceDialogData, boolean>(
       ShareServiceInstanceDialogComponent,
