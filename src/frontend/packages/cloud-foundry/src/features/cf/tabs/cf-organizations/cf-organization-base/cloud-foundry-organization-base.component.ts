@@ -63,8 +63,10 @@ export class CloudFoundryOrganizationBaseComponent implements OnInit {
   orgDataService = inject(OrgDataService);
 
   // Drives the loading-page overlay from the signal-native data service,
-  // replacing the old ngrx EntityMonitor (entityId/entitySchema) path.
-  isLoading$ = toObservable(this.orgDataService.isLoading);
+  // replacing the old ngrx EntityMonitor (entityId/entitySchema) path. It
+  // waits for the org only, and is up from the first render (no flash of
+  // empty tiles before load() starts); the spaces list fills in behind it.
+  isLoading$ = toObservable(computed(() => !this.orgDataService.orgSettled()));
 
 
   tabLinks: IPageSideNavTab[] = [

@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Injector, Signal, inject } from '@angular/core';
+import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
 import { observeSignal } from '@stratosui/store';
@@ -209,8 +209,13 @@ export class CloudFoundryOrganizationService {
   private initialiseOrgObservables() {
     // V3-native: spaces come straight off the shared OrgDataService signal.
     this.orgDataService.load().subscribe({ error: () => {} });
-    this.spaces$ = toObservable(this.orgDataService.spaces, { injector: this.injector }).pipe(
-      filter(spaces => !!spaces),
+    // Held back until the spaces have arrived: the Spaces tile shows its
+    // placeholder, not "0", and the org's apps (filtered by space) wait too.
+    this.spaces$ = toObservable(
+      computed(() => (this.orgDataService.spacesSettled() ? this.orgDataService.spaces() : null)),
+      { injector: this.injector },
+    ).pipe(
+      filter((spaces): spaces is StSpace[] => !!spaces),
     );
 
     // V3-native private domains: hit /pp/v1/cf/org/:cnsi/:orgGuid/private_domains

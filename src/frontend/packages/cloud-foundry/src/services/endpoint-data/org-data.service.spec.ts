@@ -2,6 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { HttpClient, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { OrgDataService } from './org-data.service';
 
@@ -121,6 +122,43 @@ describe('OrgDataService', () => {
     httpMock.expectOne(SPACES_P2).flush({ resources: [aSpace('sp-2')], pagination: { totalResults: 2, totalPages: 2 } });
     await Promise.resolve();
     expect(service.spaces().map(s => s.guid)).toEqual(['sp-1', 'sp-2']);
+  });
+
+  // The org page waits for the org only; the spaces list (counts enriched
+  // per space, the slow half on a large org) fills in behind it.
+  it('settles the org before the spaces arrive', async () => {
+    expect(service.orgSettled()).toBe(false);
+    expect(service.spacesSettled()).toBe(false);
+    service.load().subscribe();
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(anOrg());
+    expect(service.orgSettled()).toBe(true);
+    expect(service.spacesSettled()).toBe(false);
+    httpMock.expectOne(SPACES_P1).flush({ resources: [], pagination: { totalResults: 0, totalPages: 1 } });
+    await Promise.resolve();
+    expect(service.spacesSettled()).toBe(true);
+  });
+
+  it('settles both halves when their fetches fail', async () => {
+    service.load().subscribe({ error: () => {} });
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush('x', { status: 500, statusText: 'Server Error' });
+    httpMock.expectOne(SPACES_P1).flush('x', { status: 403, statusText: 'Forbidden' });
+    await Promise.resolve();
+    expect(service.orgSettled()).toBe(true);
+    expect(service.spacesSettled()).toBe(true);
+  });
+
+  it('refreshSpaces re-drains the spaces and keeps the rows meanwhile', async () => {
+    service.load().subscribe();
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(anOrg());
+    httpMock.expectOne(SPACES_P1).flush({ resources: [aSpace('sp-1')], pagination: { totalResults: 1, totalPages: 1 } });
+    await Promise.resolve();
+
+    const done = firstValueFrom(service.refreshSpaces());
+    expect(service.spaces().map(s => s.guid)).toEqual(['sp-1']);
+    httpMock.expectOne(SPACES_P1).flush({ resources: [aSpace('sp-1'), aSpace('sp-2')], pagination: { totalResults: 2, totalPages: 1 } });
+    await done;
+    expect(service.spaces().map(s => s.guid)).toEqual(['sp-1', 'sp-2']);
+    httpMock.expectNone('/pp/v1/cf/org/cnsi-1/org-1');
   });
 
   it('patch() merges partial updates into the cached org detail', async () => {

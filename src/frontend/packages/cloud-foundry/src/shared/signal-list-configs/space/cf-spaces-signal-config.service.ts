@@ -1,4 +1,4 @@
-import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 
@@ -9,24 +9,15 @@ import { EntityDeleteController } from '../../../services/deletes/entity-delete.
 import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../../services/deletes/run-cf-delete';
 import { spaceEntityType } from '../../../cf-entity-types';
+import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
+import type { OrgDataService } from '../../../services/endpoint-data/org-data.service';
 import type { StSpace } from '../../../services/endpoint-data/stratos-types';
 
-/**
- * Wire shape of /pp/v1/cf/org/{cnsi}/{org}/spaces. Mirrors
- * StratosPagedResponse<StSpace> from native_handlers.go.
- */
-interface PagedSpaces {
-  resources: StSpace[];
-  pagination: {
-    totalResults: number;
-    totalPages: number;
-  };
-}
-
-// Spaces list config service — single-CNSI, single-org. Fetches directly
-// from the org-scoped Jetstream endpoint
-// `/pp/v1/cf/org/{cnsi}/{org}/spaces` instead of reading the per-CNSI
-// `endpointDataService.spaces()` cache.
+// Spaces list config service — single-CNSI, single-org. Reads the org's
+// OrgDataService (the org page's own load of the org-scoped Jetstream
+// endpoint `/pp/v1/cf/org/{cnsi}/{org}/spaces`, every page) instead of
+// draining the same enriched list a second time, and instead of the
+// per-CNSI `endpointDataService.spaces()` cache.
 //
 // The per-CNSI cache is populated by `loadDetails()` with a single
 // `?per_page=500&page=1` request — fine for small foundations, but on
@@ -43,11 +34,9 @@ export class CfSpacesSignalConfigService {
   private readonly injector = inject(Injector);
   private readonly deleteController = inject(EntityDeleteController);
 
-  private cnsiGuid = '';
-  private orgGuid = '';
-  /** Concurrent fetch token; ignore late page-2+ responses if a newer
-   *  fetch (e.g. after navigating between orgs) has started. */
-  private fetchEpoch = 0;
+  private readonly orgRegistry = inject(OrgDataRegistry);
+  /** The org in scope; swapped by initialize() on navigation between orgs. */
+  private readonly orgData = signal<OrgDataService | null>(null);
 
   private readonly state = inject(ListStateStore).bind('cf-spaces', {
     viewMode: 'card',
@@ -63,10 +52,8 @@ export class CfSpacesSignalConfigService {
   readonly nameFilter: WritableSignal<string> = signal('');
   readonly viewMode = this.state.viewMode;
 
-  /** All spaces for the active org. Populated by fetchOrgSpaces(); the
-   *  ViewPipeline reads this signal as its source. */
-  private readonly _orgSpaces: WritableSignal<StSpace[]> = signal([]);
-  readonly spaces: Signal<StSpace[]> = this._orgSpaces.asReadonly();
+  /** All spaces for the active org; the ViewPipeline reads this signal as its source. */
+  readonly spaces: Signal<StSpace[]> = computed(() => this.orgData()?.spaces() ?? []);
 
   view!: ViewPipeline<StSpace>;
 
@@ -76,29 +63,26 @@ export class CfSpacesSignalConfigService {
 
   private readonly _sortExtractors: WritableSignal<Map<string, (row: StSpace) => unknown>> = signal(new Map());
 
-  private readonly _hasLoadedOnce = signal(false);
-  readonly hasLoadedOnce: Signal<boolean> = this._hasLoadedOnce.asReadonly();
+  readonly hasLoadedOnce: Signal<boolean> = computed(() => this.orgData()?.spacesSettled() ?? false);
 
-  // Last drain failure keyed by cnsi, for the signal-list error surfaces
+  // Last spaces failure keyed by cnsi, for the signal-list error surfaces
   // (top strip + failed-load empty state with Retry). Cleared on the next
   // successful drain.
-  private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
-  readonly errorsByCnsi: Signal<Map<string, unknown>> = this._errorsByCnsi.asReadonly();
+  readonly errorsByCnsi: Signal<Map<string, unknown>> = computed(() => {
+    const org = this.orgData();
+    const failed = org?.errors().find(e => e.resource === 'spaces');
+    return org && failed ? new Map([[org.cnsiGuid, failed.detail ?? failed]]) : new Map();
+  });
 
   initialize(cnsiGuid: string, orgGuid: string): void {
     // New scope → new data set: drop any page position the previous
     // scope left behind (#5670). Same scope re-entry keeps position.
     this.state.resetPageOnScopeChange(`${cnsiGuid}:${orgGuid}`);
-    // If the active scope is changing (revisiting the page for a different
-    // org under the same singleton), drop the previous payload so the
-    // table doesn't flash stale rows for the wrong org while the fetch
-    // is in flight.
-    if (cnsiGuid !== this.cnsiGuid || orgGuid !== this.orgGuid) {
-      this._orgSpaces.set([]);
-      this._hasLoadedOnce.set(false);
-    }
-    this.cnsiGuid = cnsiGuid;
-    this.orgGuid = orgGuid;
+    // One OrgDataService per org (sticky registry), so switching orgs never
+    // shows the previous org's rows; load() is a no-op once warm.
+    const orgData = this.orgRegistry.acquire(cnsiGuid, orgGuid);
+    this.orgData.set(orgData);
+    orgData.load().subscribe({ error: () => {} });
     this.view = new ViewPipeline<StSpace>(
       this.spaces,
       this.filter,
@@ -107,7 +91,6 @@ export class CfSpacesSignalConfigService {
       this.pageIndex,
       this._sortExtractors.asReadonly(),
     );
-    void this.fetchOrgSpaces();
     this.filterEffect?.destroy();
     runInInjectionContext(this.injector, () => {
       this.filterEffect = effect(() => {
@@ -127,7 +110,10 @@ export class CfSpacesSignalConfigService {
   }
 
   async refresh(): Promise<void> {
-    await this.fetchOrgSpaces();
+    const orgData = this.orgData();
+    if (orgData) {
+      await firstValueFrom(orgData.refreshSpaces(), { defaultValue: undefined });
+    }
   }
 
   registerSortExtractor(fieldKey: string, extractor: (row: StSpace) => unknown): void {
@@ -151,60 +137,14 @@ export class CfSpacesSignalConfigService {
       path: `/pp/v1/cf/spaces/${cnsiGuid}/${spaceGuid}`,
     });
     if (outcome === 'deleted') {
-      // The controller's row removal targets the per-CNSI EDS spaces slice,
-      // which this org-scoped list doesn't read — evict the row here so an
-      // in-tab delete disappears without a refetch.
-      this._orgSpaces.update(spaces => spaces.filter(s => s.guid !== spaceGuid));
+      // Evict the row from the org's list so an in-tab delete disappears
+      // without a refetch (the delete cleanup hook does the same; both are
+      // idempotent).
+      this.orgData()?.applySpaceDeleted(spaceGuid);
     } else {
       // Unknown result: re-read the org's spaces to show whether it is gone.
       await this.refresh();
     }
     return outcome;
-  }
-
-  /**
-   * Drain `/pp/v1/cf/org/{cnsi}/{org}/spaces` into `_orgSpaces`. Page 1
-   * runs first to learn `totalPages`; pages 2..N fan out in parallel.
-   *
-   * Per-page cap is 500 (the limit applyPagingParams accepts on the
-   * Jetstream side). For typical orgs, the totalPages is 1 — the
-   * page-2 fan-out only runs in unusual cases.
-   */
-  private async fetchOrgSpaces(): Promise<void> {
-    if (!this.cnsiGuid || !this.orgGuid) return;
-    const epoch = ++this.fetchEpoch;
-    const perPage = 500;
-    const url = (page: number) =>
-      `/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}/spaces?per_page=${perPage}&page=${page}`;
-    try {
-      const first = await firstValueFrom(this.http.get<PagedSpaces>(url(1)));
-      if (epoch !== this.fetchEpoch) return; // superseded; drop result
-      const out = [...(first.resources ?? [])];
-      const totalPages = first.pagination?.totalPages ?? 1;
-      if (totalPages > 1) {
-        const reqs: Promise<PagedSpaces>[] = [];
-        for (let p = 2; p <= totalPages; p++) {
-          reqs.push(firstValueFrom(this.http.get<PagedSpaces>(url(p))));
-        }
-        const rest = await Promise.all(reqs);
-        if (epoch !== this.fetchEpoch) return;
-        for (const r of rest) {
-          if (r?.resources) out.push(...r.resources);
-        }
-      }
-      // cnsiGuid is needed by SignalListColumn.favorite (key uses
-      // `${cnsiGuid}:${guid}`). Backend now echoes it on every StSpace
-      // row, so the wire payload is self-describing — no stamping needed.
-      this._orgSpaces.set(out);
-      this._hasLoadedOnce.set(true);
-      this._errorsByCnsi.set(new Map());
-    } catch (err) {
-      // Surface the failure so the list renders the failed-load state with
-      // a Retry affordance instead of a misleading "no spaces" (#5577).
-      if (epoch === this.fetchEpoch) {
-        this._hasLoadedOnce.set(true);
-        this._errorsByCnsi.set(new Map([[this.cnsiGuid, err]]));
-      }
-    }
   }
 }
