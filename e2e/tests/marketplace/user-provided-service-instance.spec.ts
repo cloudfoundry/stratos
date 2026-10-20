@@ -58,18 +58,22 @@ async function rowAction(page: Page, row: Locator, label: 'Edit' | 'Delete'): Pr
 }
 
 test.describe('user-provided service instance: create', () => {
-  // The wizard's Tags field is never rendered (app-form-field drops it), so
-  // tags are not part of this test.
-  test('stores the credentials, syslog drain and route service given in the wizard', async ({ connectedEndpointsAdminPage, cfApi, secrets }) => {
+  test('stores the credentials, tags, syslog drain and route service given in the wizard', async ({ connectedEndpointsAdminPage, cfApi, secrets }) => {
     const { page, spaceGuid } = connectedEndpointsAdminPage;
     const name = `e2e-ups-create-${Date.now()}`;
     const routeServiceUrl = 'https://e2e-ups-route.example.com';
-    const syslogDrainUrl = 'https://e2e-ups-drain.example.com/logs';
+    const syslogDrainUrl = 'syslog://e2e-ups-drain.example.com:514';
     try {
       await openCreateDetails(page, cfApi, secrets);
       await page.getByRole('textbox', { name: /Name/ }).fill(name);
       await page.getByRole('textbox', { name: /Route Service URL/ }).fill(routeServiceUrl);
       await page.getByRole('textbox', { name: /Syslog Drain URL/ }).fill(syslogDrainUrl);
+      const tags = page.getByRole('textbox', { name: 'Tags' });
+      for (const tag of ['e2e-one', 'e2e-two']) {
+        await tags.fill(tag);
+        await tags.press('Enter');
+        await expect(page.getByRole('button', { name: `Remove tag ${tag}` })).toBeVisible();
+      }
       await page.getByRole('textbox', { name: 'Credentials (JSON)' }).fill(JSON.stringify(CREDENTIALS));
       await next(page, 'Finish');
       await page.waitForURL(url => !url.pathname.includes('/new'), { timeout: 30000 });
@@ -79,6 +83,7 @@ test.describe('user-provided service instance: create', () => {
       expect(si!.type).toBe('user-provided');
       expect(si!.route_service_url).toBe(routeServiceUrl);
       expect(si!.syslog_drain_url).toBe(syslogDrainUrl);
+      expect(si!.tags).toEqual(['e2e-one', 'e2e-two']);
       expect(await credentialKeys(cfApi, si!.guid)).toEqual(Object.keys(CREDENTIALS).sort());
       await listRow(page, name);
     } finally {
@@ -86,8 +91,7 @@ test.describe('user-provided service instance: create', () => {
     }
   });
 
-  // app-form-field does not render a field's own <app-error> text, so the
-  // user sees the field's generic message, read out through aria-errormessage.
+  // Each field's error is read out through aria-errormessage.
   test('refuses credentials that are not a JSON object', async ({ connectedEndpointsAdminPage, cfApi, secrets }) => {
     const { page, spaceGuid } = connectedEndpointsAdminPage;
     const name = `e2e-ups-json-${Date.now()}`;
@@ -98,7 +102,7 @@ test.describe('user-provided service instance: create', () => {
       const finish = page.getByRole('button', { name: 'Finish' });
       for (const bad of ['{"user": ', '["e2e"]']) {
         await credentials.fill(bad);
-        await expect(credentials).toHaveAccessibleErrorMessage('Invalid value');
+        await expect(credentials).toHaveAccessibleErrorMessage('Not a valid JSON object.');
         await expect(finish).toBeDisabled();
       }
       await credentials.fill(JSON.stringify(CREDENTIALS));
@@ -119,13 +123,34 @@ test.describe('user-provided service instance: create', () => {
       const finish = page.getByRole('button', { name: 'Finish' });
       await nameBox.fill(name);
       // The check asks CF once typing pauses.
-      await expect(nameBox).toHaveAccessibleErrorMessage('Invalid value', { timeout: 15000 });
+      await expect(nameBox).toHaveAccessibleErrorMessage(
+        'A service instance with this name already exists. Please enter a different one.', { timeout: 15000 });
       await expect(finish).toBeDisabled();
       await nameBox.fill(`${name}-free`);
       await expect(finish).toBeEnabled({ timeout: 15000 });
     } finally {
       await removeUps(cfApi, spaceGuid, name);
       await removeUps(cfApi, spaceGuid, `${name}-free`);
+    }
+  });
+
+  // CF takes syslog://, syslog-tls:// and https:// drains.
+  test('refuses a drain URL in a scheme CF does not take', async ({ connectedEndpointsAdminPage, cfApi, secrets }) => {
+    const { page, spaceGuid } = connectedEndpointsAdminPage;
+    const name = `e2e-ups-drain-${Date.now()}`;
+    try {
+      await openCreateDetails(page, cfApi, secrets);
+      await page.getByRole('textbox', { name: /Name/ }).fill(name);
+      const drain = page.getByRole('textbox', { name: /Syslog Drain URL/ });
+      const finish = page.getByRole('button', { name: 'Finish' });
+      await drain.fill('ftp://e2e-ups-drain.example.com');
+      await expect(drain).toHaveAccessibleErrorMessage('Invalid URL');
+      await expect(finish).toBeDisabled();
+      await drain.fill('syslog-tls://e2e-ups-drain.example.com:6514');
+      await expect(drain).not.toHaveAttribute('aria-invalid', 'true');
+      await expect(finish).toBeEnabled({ timeout: 15000 });
+    } finally {
+      await removeUps(cfApi, spaceGuid, name);
     }
   });
 });
@@ -140,14 +165,17 @@ test.describe('user-provided service instance: edit', () => {
       await rowAction(page, await listRow(page, name), 'Edit');
       const nameBox = page.getByRole('textbox', { name: /Name/ });
       await expect(nameBox).toHaveValue(name, { timeout: 15000 });
+      for (const tag of ['e2e-one', 'e2e-two']) {
+        await expect(page.getByRole('button', { name: `Remove tag ${tag}` })).toBeVisible();
+      }
       await nameBox.fill(renamed);
       await next(page, 'Finish');
       await page.waitForURL(url => !url.pathname.endsWith('/edit'), { timeout: 30000 });
 
       const si = await cfApi.findServiceInstanceByName(spaceGuid, renamed);
       expect(si?.guid, `CF has ${name} renamed to ${renamed}`).toBe(guid);
-      // The form sends the tags it loaded, though it does not show them, and
-      // leaves out credentials nobody opened.
+      // The form sends the tags it loaded and leaves out credentials nobody
+      // opened.
       expect(si!.tags).toEqual(['e2e-one', 'e2e-two']);
       expect(await credentialKeys(cfApi, guid)).toEqual(Object.keys(CREDENTIALS).sort());
     } finally {
