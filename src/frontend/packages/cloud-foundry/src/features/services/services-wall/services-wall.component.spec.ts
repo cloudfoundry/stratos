@@ -129,6 +129,19 @@ describe('ServicesWallComponent', () => {
     } as any)).toBe('cnsi-1:si-1');
   });
 
+  // The pill names the operation, gives a failure's reason on hover and
+  // survives an instance with no last operation (the backend omits it).
+  it('Last Operation names the operation and hovers with a failure reason', async () => {
+    await component.ngOnInit();
+    const col = component.listConfig()!.columns.find(c => c.key === 'lastOp')!;
+    const si: any = { lastOperation: { type: 'update', state: 'failed', description: '<b>quota</b> exceeded' } };
+    expect(col.render(si)).toBe('Update failed');
+    expect(col.tooltip!(si)).toBe('Update failed — quota exceeded');
+    expect(col.render({} as any)).toBe('');
+    const sortBy = stubSignalConfig.registerSortExtractor.mock.calls.find((c: unknown[]) => c[0] === 'lastOp')![1];
+    expect(sortBy(si)).toBe('Update failed');
+  });
+
   it('Service Keys column links to the keys page, renders the lazy count, and triggers the fetch', async () => {
     await component.ngOnInit();
     await Promise.resolve();

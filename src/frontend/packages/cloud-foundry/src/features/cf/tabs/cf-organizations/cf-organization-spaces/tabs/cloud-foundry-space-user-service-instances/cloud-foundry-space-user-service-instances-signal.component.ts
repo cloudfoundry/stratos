@@ -11,7 +11,6 @@ import {
   ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
-  SignalListPillColor,
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
@@ -26,6 +25,7 @@ import { CloudFoundryEndpointService } from '../../../../../services/cloud-found
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
 import { buildServiceInstanceRowActions } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import { lastOperationColumn, lastOperationLabel } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Scoped to one space under one org under one CF endpoint, narrowed to
@@ -138,16 +138,6 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
       return tags.length === 0 ? '—' : tags.join(', ');
     };
 
-    const renderLastOp = (si: StServiceInstance): string => si.lastOperation.state ?? '';
-
-    const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOperation.state ?? '').toLowerCase();
-      if (state === 'succeeded') return 'success';
-      if (state === 'in progress') return 'warning';
-      if (state === 'failed') return 'danger';
-      return 'neutral';
-    };
-
     const renderCreated = (si: StServiceInstance): string =>
       CloudFoundrySpaceUserServiceInstancesSignalComponent.formatDate(si.createdAt);
 
@@ -173,13 +163,7 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
           render: (si: StServiceInstance) => si.name,
           widthHint: '14rem',
         },
-        {
-          header: 'Last Operation', key: 'lastOp', sortField: renderLastOp,
-          kind: 'pill',
-          pillColor: lastOpColor,
-          render: renderLastOp,
-          widthHint: '10rem',
-        },
+        lastOperationColumn(),
         {
           header: 'Tags', key: 'tags', sortField: renderTags,
           render: renderTags,
@@ -223,7 +207,7 @@ export class CloudFoundrySpaceUserServiceInstancesSignalComponent {
       sort: this.instancesConfig.sort,
     });
 
-    this.instancesConfig.registerSortExtractor('lastOp', renderLastOp);
+    this.instancesConfig.registerSortExtractor('lastOp', lastOperationLabel);
     this.instancesConfig.registerSortExtractor('tags', renderTags);
     this.instancesConfig.registerFilterExtractor('name', (si: StServiceInstance) => si.name ?? '');
 
