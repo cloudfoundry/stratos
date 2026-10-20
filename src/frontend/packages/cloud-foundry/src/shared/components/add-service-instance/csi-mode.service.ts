@@ -10,6 +10,7 @@ import type { AsyncJobResult } from '../../../services/async-jobs/async-job.type
 import { UnknownHow, unknownHow, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { lastOperationReason } from '../../signal-list-configs/service-instance/service-instance-columns';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
 export enum CreateServiceInstanceMode {
@@ -307,7 +308,7 @@ export class CsiModeService {
         const op = si?.lastOperation;
         const state = op?.state ?? '';
         if (state === 'succeeded' || state === 'failed') {
-          return { state, detail: op?.description ?? '' };
+          return { state, detail: lastOperationReason(si) };
         }
       } catch {
         // Transient — try again until deadline.
