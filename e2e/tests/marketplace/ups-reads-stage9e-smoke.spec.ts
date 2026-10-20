@@ -15,8 +15,8 @@ import { ServicesWallPage } from '../../pages/marketplace/services-wall.page';
  *
  * This smoke proves the wire paths are reachable from a connected CF
  * endpoint and that the Add Service Instance flow that consumes the
- * picker still loads. Full functional coverage of UPS create / edit /
- * delete continues to live in delete-ups-service-instance.spec.ts.
+ * picker still loads. UPS create / edit / delete are tested in
+ * user-provided-service-instance.spec.ts.
  */
 test.describe('Stage 9e — UPS reads smoke', () => {
   test('services wall reachable on a connected CF endpoint', async ({ connectedEndpointsAdminPage, secrets }) => {
