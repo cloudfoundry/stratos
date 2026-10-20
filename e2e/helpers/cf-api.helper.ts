@@ -83,12 +83,16 @@ export interface CFDomain {
 export interface CFServiceInstance {
   guid: string;
   name: string;
-  type: 'managed' | 'user_provided';
+  type: 'managed' | 'user-provided';
   last_operation?: {
     type: string;
     state: 'initial' | 'in progress' | 'succeeded' | 'failed';
     description?: string;
   };
+  // User-provided instances only.
+  tags?: string[];
+  syslog_drain_url?: string;
+  route_service_url?: string;
   relationships: {
     space: {
       data: {
@@ -676,12 +680,18 @@ export class CFApiHelper {
   /**
    * Create a user-provided service instance (no broker needed) and return its guid
    */
-  async createUserProvidedService(spaceGuid: string, name: string): Promise<string> {
+  async createUserProvidedService(spaceGuid: string, name: string, fields: {
+    credentials?: Record<string, unknown>;
+    tags?: string[];
+    syslog_drain_url?: string;
+    route_service_url?: string;
+  } = {}): Promise<string> {
     if (!this.cfApiBase) await this.init();
 
     const response = await this.ppost(`${this.cfApiBase}/service_instances`, {
       type: 'user-provided',
       name,
+      ...fields,
       relationships: {
         space: {
           data: {
@@ -704,6 +714,12 @@ export class CFApiHelper {
   async deleteServiceInstance(serviceInstanceGuid: string): Promise<void> {
     if (!this.cfApiBase) await this.init();
     await this.pdelete(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}`);
+  }
+
+  /** The credentials CF holds for a user-provided instance. */
+  async getUserProvidedCredentials(serviceInstanceGuid: string): Promise<Record<string, unknown>> {
+    if (!this.cfApiBase) await this.init();
+    return this.pget(`${this.cfApiBase}/service_instances/${serviceInstanceGuid}/credentials`);
   }
 
   async serviceInstanceExists(serviceInstanceGuid: string): Promise<boolean> {
