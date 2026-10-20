@@ -594,7 +594,7 @@
                 } @else {
                   <div class="flex justify-between items-center gap-2 text-sm py-0.5">
                     <span class="text-content-muted">{{ col.header }}</span>
-                    <span class="text-content-text text-right truncate" [attr.title]="col.render(row)">
+                    <span class="text-content-text text-right truncate" [attr.title]="col.kind === 'pill' && col.tooltip ? col.tooltip(row) : col.render(row)">
                       @if (col.copyValue?.(row); as cv) {
                         <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
                       }
@@ -745,7 +745,7 @@
                 <td class="px-3 py-2 align-top text-sm text-content-text"
                     [class.truncate]="col.kind !== 'radio' && col.kind !== 'checkbox' && col.kind !== 'gauge' && col.kind !== 'template'"
                     [class.overflow-visible]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template'"
-                    [attr.title]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : col.render(row)">
+                    [attr.title]="col.kind === 'radio' || col.kind === 'checkbox' || col.kind === 'gauge' || col.kind === 'template' ? null : col.kind === 'pill' && col.tooltip ? col.tooltip(row) : col.render(row)">
                   @if (col.copyValue?.(row); as cv) {
                     <app-copy-to-clipboard data-test="copy-value" class="inline-flex align-middle mr-1" [compact]="true" [text]="cv" [tooltip]="'Copy ' + cv" [showSuccessText]="false" />
                   }
