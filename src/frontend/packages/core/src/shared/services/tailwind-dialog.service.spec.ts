@@ -36,6 +36,19 @@ class TestDraggableDialogComponent {
   public dialogRef = inject(TailwindDialogRef<TestDraggableDialogComponent>);
 }
 
+// A dialog whose template state comes from bindings, like a form's Create
+// button disabled until the form is valid.
+@Component({
+  selector: 'test-bound-dialog',
+  template: '<button class="bound" [disabled]="locked">Create</button><span class="label">{{ label }}</span>',
+  standalone: true,
+})
+class TestBoundDialogComponent {
+  public dialogRef = inject(TailwindDialogRef<TestBoundDialogComponent>);
+  locked = true;
+  label = 'bound';
+}
+
 describe('TailwindDialogService', () => {
   let service: TailwindDialogService;
   let _appRef: ApplicationRef;
@@ -63,6 +76,17 @@ describe('TailwindDialogService', () => {
     if (typeof document !== 'undefined') {
       document.querySelectorAll('[class*="fixed inset-0"]').forEach(el => el.remove());
     }
+  });
+
+  // The dialog is in the DOM as soon as open() returns, so its bindings must
+  // already apply: before, change detection ran only in a later timeout and the
+  // browser could paint the raw template (a Create button enabled for a frame).
+  it('renders the dialog with its bindings applied before it reaches the page', () => {
+    service.open(TestBoundDialogComponent);
+    const button = document.querySelector('test-bound-dialog button.bound') as HTMLButtonElement;
+    expect(button).toBeTruthy();
+    expect(button.disabled).toBe(true);
+    expect(document.querySelector('test-bound-dialog .label')?.textContent).toBe('bound');
   });
 
   describe('Basic Dialog Opening', () => {

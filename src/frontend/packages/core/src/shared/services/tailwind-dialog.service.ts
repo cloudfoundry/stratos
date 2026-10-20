@@ -175,6 +175,11 @@ export class TailwindDialogService {
     dialogContainer.querySelector('.dialog-content')?.appendChild(domElem);
     document.body.appendChild(dialogContainer);
     this.openDialogs.push(dialogContainer);
+    // Render once now, in the same task as the insert: the tick below runs a
+    // task later, and until then the browser could paint the raw template
+    // (bindings such as [disabled] not yet applied). After the insert, so
+    // lifecycle hooks still see the dialog in the document.
+    componentRef.changeDetectorRef.detectChanges();
 
     // Set up event listeners
     this.setupEventListeners(dialogContainer, dialogRef, config);
