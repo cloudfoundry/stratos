@@ -13,6 +13,8 @@ export class OrgDataService {
   private readonly _isLoading = signal<boolean>(false);
   private readonly _errors = signal<StError[]>([]);
   private readonly _lastFetched = signal<Date | null>(null);
+  private readonly _orgSettled = signal(false);
+  private readonly _spacesSettled = signal(false);
 
   readonly org: Signal<StOrgDetail | null> = this._org.asReadonly();
   readonly spaces: Signal<StSpace[]> = this._spaces.asReadonly();
@@ -20,6 +22,11 @@ export class OrgDataService {
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
   readonly errors: Signal<StError[]> = this._errors.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
+  // Each half of load() settles on its own (success or failure): the org
+  // page waits only for the org, while the spaces list, whose per-space
+  // counts are the slow part on a large org, fills in behind it.
+  readonly orgSettled: Signal<boolean> = this._orgSettled.asReadonly();
+  readonly spacesSettled: Signal<boolean> = this._spacesSettled.asReadonly();
 
   // ReplaySubject so late subscribers see the last completion immediately
   // (matches EndpointDataService convention).
@@ -57,6 +64,7 @@ export class OrgDataService {
       this.http.get<StOrgDetail>(`/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}`).pipe(
         tap(org => this._org.set(org)),
         catchError(err => { this.addError('org', err); return EMPTY; }),
+        finalize(() => this._orgSettled.set(true)),
       ),
       this.drainSpaces(),
     ).pipe(
@@ -73,6 +81,12 @@ export class OrgDataService {
     return this._inFlightLoad;
   }
 
+  // Re-read the org's spaces (the Spaces tab's refresh, an unknown delete
+  // result). Rows stay visible until the new list lands.
+  refreshSpaces(): Observable<void> {
+    return this.drainSpaces().pipe(map(() => undefined));
+  }
+
   // Every page: without per_page the endpoint returns CF's default first
   // page of 50, so larger orgs lost spaces from the tile, the count and the
   // apps filtered by space.
@@ -83,6 +97,7 @@ export class OrgDataService {
         this._errors.update(errors => errors.filter(e => e.resource !== 'spaces'));
       }),
       catchError(err => { this.addError('spaces', err); return EMPTY; }),
+      finalize(() => this._spacesSettled.set(true)),
     );
   }
 

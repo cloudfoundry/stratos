@@ -70,7 +70,7 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
   // so the test doesn't need to wire HttpClient against the native handler.
   const mockOrgDataService = {
     org: () => null,
-    isLoading: signal(false),
+    orgSettled: signal(false),
     load: () => of(undefined),
   };
 
@@ -127,5 +127,18 @@ describe('CloudFoundryOrganizationBaseComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The overlay covers the tabs until the org itself is in; the spaces list
+  // (enriched with per-space counts, slow on a large org) fills in behind it.
+  it('shows the loading overlay until the org settles', async () => {
+    const seen: boolean[] = [];
+    component.isLoading$.subscribe(v => seen.push(v));
+    await fixture.whenStable();
+    expect(seen.at(-1)).toBe(true);
+    mockOrgDataService.orgSettled.set(true);
+    await fixture.whenStable();
+    expect(seen.at(-1)).toBe(false);
+    mockOrgDataService.orgSettled.set(false);
   });
 });
