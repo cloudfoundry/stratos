@@ -110,6 +110,17 @@ type TestFixtures = {
 };
 
 /**
+ * The app has routed past its auth and endpoint guards: the dashboard shell,
+ * or the page a non-admin without endpoints lands on. Fixtures wait for this,
+ * not 'networkidle': Home starts the endpoint cache load, which keeps the
+ * network busy for seconds (longer under parallel workers), so the old 15s
+ * idle wait ran out on most fixture setups without ever going idle.
+ */
+async function waitForAppShell(page: Page): Promise<void> {
+  await page.locator('app-dashboard-base, app-no-endpoints-non-admin').first().waitFor({ state: 'visible', timeout: 30000 });
+}
+
+/**
  * Extended test with worker-scoped sessions and test-scoped fixtures.
  * Usage: import { test, expect } from '../fixtures/test-base';
  */
@@ -130,7 +141,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
     // Navigate once to ensure cookies are established
     const page = await context.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
     await page.close();
 
     await use(context);
@@ -158,7 +169,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
 
     const page = await context.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
     await page.close();
 
     await use(context);
@@ -196,7 +207,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   authenticatedPage: async ({ workerAdminContext }, use) => {
     const page = await workerAdminContext.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
     await use(page);
     await page.close();
   },
@@ -229,7 +240,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   userPage: async ({ workerUserContext }, use) => {
     const page = await workerUserContext.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
     await use(page);
     await page.close();
   },
@@ -240,7 +251,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   noEndpointsAdminPage: async ({ workerAdminContext }, use) => {
     const page = await workerAdminContext.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
     await use(page);
     await page.close();
   },
@@ -251,7 +262,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   noEndpointsUserPage: async ({ workerUserContext }, use) => {
     const page = await workerUserContext.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
     await use(page);
     await page.close();
   },
@@ -262,7 +273,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   registeredEndpointsPage: async ({ workerAdminContext }, use) => {
     const page = await workerAdminContext.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
 
     // Dismiss snackbar if present
     try {
@@ -287,7 +298,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   connectedEndpointsAdminPage: async ({ workerAdminContext, secrets }, use) => {
     const page = await workerAdminContext.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
 
     // Get CF endpoint GUID using the worker's own session
     const cfEndpoint = await resolveConnectedCfEndpoint(page, 'connectedEndpointsAdminPage');
@@ -311,7 +322,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
   connectedEndpointsUserPage: async ({ workerUserContext, secrets }, use) => {
     const page = await workerUserContext.newPage();
     await page.goto('/');
-    await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
+    await waitForAppShell(page);
 
     // Get CF endpoint GUID using the worker's own session
     const cfEndpoint = await resolveConnectedCfEndpoint(page, 'connectedEndpointsUserPage');
