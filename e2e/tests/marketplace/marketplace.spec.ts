@@ -41,7 +41,9 @@ test.describe('marketplace', () => {
     // The link of this CF's offering; another CF may offer one of the same name.
     await rows.locator(`a[href="/marketplace/${cfGuid}/${offeringGuid}"]`).click({ timeout: 60000 });
     await page.waitForURL(url => url.pathname === `/marketplace/${cfGuid}/${offeringGuid}/summary`);
-    await expect(page.locator('app-page-header')).toContainText(broker!.offering);
+    // The page title is projected into the top bar's page header. For a
+    // moment the marketplace list's header is still there too.
+    await expect(page.locator('app-show-page-header').filter({ hasText: broker!.offering })).toBeVisible();
     await expect(page.locator('app-service-summary-card')).toBeVisible({ timeout: 30000 });
 
     await page.getByRole('button', { name: 'Add Service Instance' }).click();
