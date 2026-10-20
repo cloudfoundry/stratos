@@ -18,16 +18,17 @@ import { ServicesWallPage } from '../../pages/marketplace/services-wall.page';
  * are tested in user-provided-service-instance.spec.ts.
  */
 test.describe('Stage 9e — UPS reads smoke', () => {
-  test('services wall reachable on a connected CF endpoint', async ({ connectedEndpointsAdminPage, secrets }) => {
-    const { page, cfGuid } = connectedEndpointsAdminPage;
-    const cfEndpoint = secrets.getCloudfoundryEndpoint(0);
-    const spaceGuid = cfEndpoint.testSpaceGuid;
+  test('services wall reachable on a connected CF endpoint', async ({ connectedEndpointsAdminPage }) => {
+    const { page } = connectedEndpointsAdminPage;
 
     const servicesPage = new ServicesWallPage(page);
-    await servicesPage.navigateTo(cfGuid, spaceGuid);
+    await servicesPage.navigateTo();
     await servicesPage.waitForPage();
 
-    expect(page.url()).toContain(`/services/${cfGuid}`);
+    // The Services list spans every connected endpoint; the route has no
+    // endpoint segment.
+    expect(new URL(page.url()).pathname).toBe('/services');
+    await expect(servicesPage.serviceInstancesList).toBeVisible({ timeout: 30000 });
   });
 
   test('UPS count endpoint returns a number for the test space', async ({ connectedEndpointsAdminPage, secrets, request }) => {
