@@ -58,6 +58,32 @@ Valid sections, in the order they appear in the published notes:
 A section appears in the published notes only when at least one fragment
 contributes to it. Unknown section headers fail assembly loudly.
 
+### Subcategories
+
+A header can name a subcategory after a colon. Bullets that share one are
+gathered across fragments under a `###` heading inside the section:
+
+```markdown
+[Features: Performance]
+- A space's summary page now loads in under a second.
+```
+
+Bullets with no subcategory come first in their section, then the listed
+subcategories in list order, then any others in the order they landed.
+
+Subcategories are free-form. Pick one from the list below when it fits;
+a name that is not on it still works, and assembly prints a note naming
+it. If a new name will be used again, add it to the list in the same PR.
+
+<!-- subcategories -->
+- Accessibility
+- Applications
+- Organizations and Spaces
+- Performance
+- Services
+- Users and Roles
+<!-- /subcategories -->
+
 ### Lists read as columns, not sentences
 
 When an entry covers several items, lay them out instead of chaining them
