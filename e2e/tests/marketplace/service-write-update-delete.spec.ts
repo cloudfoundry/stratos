@@ -2,7 +2,7 @@ import { Locator, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test-base';
 import { CFApiHelper } from '../../helpers/cf-api.helper';
 import { FakeJob, handOffWrite, isolatedAdmin, toast } from '../../helpers/fake-job.helper';
-import { TestBroker } from '../../helpers/service-wizard.helper';
+import { TestBroker, next } from '../../helpers/service-wizard.helper';
 
 /**
  * What the console does with an update or a delete of a service instance
@@ -96,6 +96,77 @@ test.describe('services list: a delete that runs long', () => {
       job.set({ state: 'FAILED', detail: 'The broker refused the e2e delete.' });
       await expect(toast(page, 'Delete failed: The broker refused the e2e delete.')).toBeVisible({ timeout: 20000 });
       await expect(row).toBeVisible();
+    } finally {
+      await context.close();
+      await removeInstance(cfApi, spaceGuid, name);
+    }
+  });
+});
+
+test.describe('edit wizard: an update that outlasts the wait', () => {
+  // Making and removing the instance goes through the broker; the question
+  // comes at 30 s and an unanswered one hands off 30 s later.
+  test.setTimeout(300000);
+
+  let broker: TestBroker | undefined;
+  test.beforeEach(({ secrets }) => {
+    broker = secrets.cloudFoundry[0]?.services?.testBroker;
+    test.skip(!broker, 'no services.testBroker in the secrets profile');
+  });
+
+  /** Saves si unchanged from the edit wizard; the PATCH hands off to job. Returns the wait question. */
+  async function submitUpdate(page: Page, job: FakeJob, cfGuid: string, si: Instance): Promise<Locator> {
+    await job.attach(page);
+    await handOffWrite(page, `**/pp/v1/cf/service_instances/${cfGuid}/${si.guid}`, 'PATCH', job);
+    await page.goto(`/services/service/${cfGuid}/${si.guid}/edit`);
+    await next(page);
+    await expect(page.getByRole('textbox', { name: /Name/ })).toHaveValue(si.name, { timeout: 15000 });
+    await next(page, 'Finish');
+    return page.getByRole('alertdialog');
+  }
+
+  test('hands off when nobody answers, names where to watch, then reports the update', async ({ browser, connectedEndpointsAdminPage, cfApi }) => {
+    const { cfGuid, spaceGuid } = connectedEndpointsAdminPage;
+    const name = `e2e-slow-update-${Date.now()}`;
+    const { context, page } = await isolatedAdmin(browser);
+    try {
+      const si = await createInstance(cfApi, spaceGuid, broker!, name);
+      const job = new FakeJob(`e2e-update-${Date.now()}`, 'cf.service_instance.update');
+      const question = await submitUpdate(page, job, cfGuid, si);
+
+      await expect(question).toContainText('Continuing in the background in', { timeout: 40000 });
+      await page.waitForURL(url => !url.pathname.endsWith('/edit'), { timeout: 40000 });
+      const carriesOn = toast(page, `Updating service instance "${name}" carries on in the background. The Services list shows its progress`);
+      await expect(carriesOn).toBeVisible();
+
+      job.set({ state: 'COMPLETE' });
+      await expect(toast(page, `Service instance "${name}" updated.`)).toBeVisible({ timeout: 20000 });
+      // The hand-off notice does not outlive the outcome.
+      await expect(carriesOn).toBeHidden();
+    } finally {
+      await context.close();
+      await removeInstance(cfApi, spaceGuid, name);
+    }
+  });
+
+  test('Continue in background hands off at once; a later failure gives the broker\'s reason', async ({ browser, connectedEndpointsAdminPage, cfApi }) => {
+    const { cfGuid, spaceGuid } = connectedEndpointsAdminPage;
+    const name = `e2e-slow-update-${Date.now()}`;
+    const { context, page } = await isolatedAdmin(browser);
+    try {
+      const si = await createInstance(cfApi, spaceGuid, broker!, name);
+      const job = new FakeJob(`e2e-update-${Date.now()}`, 'cf.service_instance.update');
+      const question = await submitUpdate(page, job, cfGuid, si);
+
+      await expect(question).toContainText(`Updating service instance "${name}" is still running after 30 s.`, { timeout: 40000 });
+      await page.getByRole('button', { name: 'Continue in background' }).click();
+      await page.waitForURL(url => !url.pathname.endsWith('/edit'), { timeout: 10000 });
+      const carriesOn = toast(page, `Updating service instance "${name}" carries on in the background.`);
+      await expect(carriesOn).toBeVisible();
+
+      job.set({ state: 'FAILED', detail: 'The broker refused the e2e update.' });
+      await expect(toast(page, `Failed to update service instance "${name}": The broker refused the e2e update.`)).toBeVisible({ timeout: 20000 });
+      await expect(carriesOn).toBeHidden();
     } finally {
       await context.close();
       await removeInstance(cfApi, spaceGuid, name);
