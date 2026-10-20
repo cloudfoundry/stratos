@@ -162,11 +162,9 @@ describe('SpecifyDetailsStepComponent', () => {
   });
 });
 
-// Stage 5 of the services-domain signal+V3 slice: managed service instance
-// create/update goes through HttpClient + writeWithJob against
-// /pp/v1/cf/service_instances. The previous ngrx pipeline (entity-catalog
-// actions + selectCfRequestInfo polling + LongRunningCfOperationsService)
-// is gone — writeWithJob's fast-path-then-handoff IS the long-running path.
+// Managed service instance create/update goes through HttpClient +
+// writeWithJob against /pp/v1/cf/service_instances; writeWithJob's
+// fast-path-then-handoff is the long-running path.
 //
 // `extractCreatedSiGuid` parses the new SI guid out of writeWithJob's
 // terminal result so the bind-after-create flow can chain into
