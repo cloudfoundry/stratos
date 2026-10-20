@@ -268,3 +268,56 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
     expect(credsSpy).toHaveBeenCalledTimes(1);
   });
 });
+
+// The create form as the user meets it: what app-form-field renders for
+// each field, read from the DOM.
+describe('SpecifyUserProvidedDetailsComponent create form', () => {
+  async function setup() {
+    const upsServiceStub = {
+      getUserProvidedServices: vi.fn().mockReturnValue(of([])),
+    };
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      imports: [SpecifyUserProvidedDetailsComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+        CsiModeService,
+        CsiStateService,
+        { provide: CloudFoundryUserProvidedServicesService, useValue: upsServiceStub },
+      ],
+    });
+    const fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);
+    const component = fixture.componentInstance;
+    component.cfGuid = 'cf-1';
+    component.spaceGuid = 'space-1';
+    await fixture.whenStable();
+    const host = fixture.nativeElement as HTMLElement;
+    return { fixture, component, host };
+  }
+
+  /** The input a visible label names, as a screen reader pairs them. */
+  function labelledInput(host: HTMLElement, text: string): HTMLInputElement | null {
+    const label = [...host.querySelectorAll('label')].find(l => l.textContent?.trim() === text);
+    return label?.htmlFor ? host.querySelector<HTMLInputElement>(`#${label.htmlFor}`) : null;
+  }
+
+  it('renders a labelled Tags field; Enter adds a tag and its remove button names it', async () => {
+    const { fixture, host } = await setup();
+    const input = labelledInput(host, 'Tags');
+    expect(input, 'a Tags label tied to an input').toBeTruthy();
+
+    input!.value = 'db';
+    input!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await fixture.whenStable();
+
+    const chips = [...host.querySelectorAll('.stepper-form__tags span.rounded-full')]
+      .map(e => e.textContent?.replace('cancel', '').trim());
+    expect(chips).toEqual(['db']);
+    expect(host.querySelector('button[aria-label="Remove tag db"]')).toBeTruthy();
+  });
+});
