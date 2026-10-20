@@ -305,59 +305,6 @@ test.describe('Marketplace Create Service Instances', () => {
 
       await expect(tagsInput).toBeVisible();
     });
-
-    test('should handle async service provisioning', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-
-      // This tests the UI behavior for async provisioning
-      // Actual creation would require a full wizard flow
-
-      const servicesResponse = await connectedEndpointsAdminPage.request.get(
-        `/pp/v1/proxy/v3/cf/${cfGuid}/service_offerings`
-      );
-      const responseBody: any = await servicesResponse.json();
-      const services = responseBody.resources;
-
-      if (!services || services.length === 0) {
-        test.skip('No service offerings available');
-      }
-
-      // Look for provisioning status indicators in the UI
-      const statusIndicators = page.locator('mat-spinner, app-loading, [class*="spinner"], [class*="progress"]').first();
-      // Status indicators won't be visible until provisioning starts
-      // Just verify the test framework can detect them
-      expect(true).toBe(true);
-    });
-
-    test('should show provisioning progress', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-
-      // Test that progress indicators exist in the UI
-      const progressIndicator = page.locator('mat-progress-bar, mat-progress-spinner, app-loading-indicator').first();
-      // Progress won't be visible unless service is being created
-      // This test verifies the component structure exists
-      expect(true).toBe(true);
-    });
-
-    test('should handle provisioning timeout', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-
-      // Test error handling UI exists
-      const errorDisplay = page.locator('.error, .mat-error, [role="alert"], app-error').first();
-      // Errors won't display unless there's an actual timeout
-      // This verifies error display components exist
-      expect(true).toBe(true);
-    });
-
-    test('should handle provisioning failure', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-
-      // Test error handling and retry mechanisms
-      const retryButton = page.locator('button').filter({ hasText: /retry|try.*again/i }).first();
-      // Retry button won't be visible unless there's a failure
-      // This verifies the error recovery UI structure
-      expect(true).toBe(true);
-    });
   });
 
   test.describe('Service Plan Selection (UI)', () => {
