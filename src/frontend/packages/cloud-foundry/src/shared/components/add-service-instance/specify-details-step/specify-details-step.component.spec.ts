@@ -25,6 +25,7 @@ import { TrackedJobsService } from '../../../../services/async-jobs/tracked-jobs
 import { setJobTrackingLimit } from '../../../../services/async-jobs/write-with-job';
 import type { StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -244,6 +245,11 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       ],
     });
 
+    // The endpoint's cached data; a write marks its services stale.
+    const endpointData = { applyCascade: vi.fn() };
+    const registryStub = vi.spyOn(TestBed.inject(EndpointDataRegistry), 'peek')
+      .mockReturnValue(endpointData as unknown as ReturnType<EndpointDataRegistry['peek']>);
+
     const fixture = TestBed.createComponent(SpecifyDetailsStepComponent);
     const component = fixture.componentInstance;
     component.createNewInstanceForm.controls.name.setValue('my-instance');
@@ -253,9 +259,71 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       component,
       modeServiceStub,
       csiStateStub,
+      endpointData,
+      registryStub,
       httpMock: TestBed.inject(HttpTestingController),
     };
   }
+
+  // Cached services lists (the recent-instances card, the offering's count,
+  // the next list's first paint) must not keep the old rows once CF has the
+  // instance, finished or not (#6002).
+  describe('marks the cached services stale', () => {
+    const drain = (httpMock: HttpTestingController) =>
+      httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+
+    it('after a create', async () => {
+      const { component, httpMock, endpointData, registryStub } = await setup();
+      const done = firstValueFrom(component.onNext());
+      httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+        { state: 'COMPLETE', result: { links: { service_instances: 'https://cf/v3/service_instances/si-new' } } },
+        { status: 200, statusText: 'OK' },
+      );
+      await done;
+      expect(registryStub).toHaveBeenCalledWith('cnsi-1');
+      expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.create');
+      drain(httpMock);
+    });
+
+    it('after an update', async () => {
+      const { component, httpMock, endpointData } = await setup({ isEditMode: true });
+      const done = firstValueFrom(component.onNext());
+      httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-existing').flush(
+        { state: 'COMPLETE', result: {} }, { status: 200, statusText: 'OK' },
+      );
+      await done;
+      expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.update');
+      drain(httpMock);
+    });
+
+    it('as soon as CF accepts a slow create, before it ends', async () => {
+      const { component, httpMock, endpointData } = await setup();
+      const done = firstValueFrom(component.onNext());
+      httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+        { id: 'job-3', state: 'PROCESSING', startedAt: '2026-10-20T00:00:00Z' },
+        { status: 202, statusText: 'Accepted' },
+      );
+      await Promise.resolve();
+      const poll = httpMock.expectOne('/pp/v1/stratos/jobs/job-3');
+      poll.flush({ id: 'job-3', state: 'PROCESSING', startedAt: '2026-10-20T00:00:00Z' }, { status: 200, statusText: 'OK' });
+      await vi.waitFor(() => expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.create'));
+      component.ngOnDestroy?.();
+      void done;
+      drain(httpMock);
+    });
+
+    it('after a create that failed inside the fast-path window', async () => {
+      const { component, httpMock, endpointData } = await setup();
+      const done = firstValueFrom(component.onNext());
+      httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+        { errors: [{ code: 'CF-UnableToPerform', detail: 'the broker said no' }] },
+        { status: 502, statusText: 'Bad Gateway' },
+      );
+      await done;
+      expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.create');
+      drain(httpMock);
+    });
+  });
 
   it('POSTs the v3 managed body and returns success+redirect on create without bind', async () => {
     const { component, httpMock } = await setup();

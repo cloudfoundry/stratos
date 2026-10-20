@@ -32,6 +32,7 @@ import { TailwindSnackBarRef, TailwindSnackBarService } from '../../../../../../
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { StServiceInstance, StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { AsyncJobResult } from '../../../../services/async-jobs/async-job.types';
+import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { unknownHow, unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 import { SignedOutError, jobTrackingLimitMs, writeWithJob } from '../../../../services/async-jobs/write-with-job';
 import { TrackedJob, TrackedJobsService, coarseElapsed } from '../../../../services/async-jobs/tracked-jobs.service';
@@ -88,6 +89,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
   private snackBar = inject(TailwindSnackBarService);
   private destroyRef = inject(DestroyRef);
   private trackedJobs = inject(TrackedJobsService);
+  private endpointDataRegistry = inject(EndpointDataRegistry);
   private readonly slowWriteQuestion = viewChild<ElementRef<HTMLElement>>('slowWriteQuestion');
   private injector = inject(Injector);
 
@@ -567,6 +569,13 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       unknown: `${isEditMode ? 'Update' : 'Create'} service instance "${name}"`,
       where: 'The Services list',
     };
+    // CF has the instance, or its change, from the moment it accepts the
+    // write, finished or not: mark the endpoint's cached services stale so
+    // their next read fetches them again (#6002). Marked again when the write
+    // ends, however it ends: a failure inside the fast-path window looks like
+    // a refusal, and a stale mark only costs one extra read.
+    const markStale = () => state.cfGuid && this.endpointDataRegistry.peek(state.cfGuid)
+      ?.applyCascade(isEditMode ? 'serviceInstance.update' : 'serviceInstance.create');
     let jobId: string | undefined;
     let release: (() => void) | undefined;
     let signedOut = false;
@@ -577,6 +586,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
         pauseOnSignOut: true,
         onProgress: job => {
           if (!jobId) {
+            markStale();
             jobId = job.id;
             release = this.trackedJobs.hold(jobId);
             this.trackedJobs.following.add(jobId);
@@ -594,6 +604,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
         message: `${track.failed}: ${extractHttpErrorMessage(err)}`,
       };
     } finally {
+      markStale();
       if (jobId) {
         this.trackedJobs.following.delete(jobId);
         if (!signedOut) {
