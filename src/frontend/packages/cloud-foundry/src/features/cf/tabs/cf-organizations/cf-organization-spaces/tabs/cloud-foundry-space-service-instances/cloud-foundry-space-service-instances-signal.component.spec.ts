@@ -38,6 +38,7 @@ function makeStubSignalConfigService() {
     hasLoadedOnce: signal(true).asReadonly(),
     initialize: vi.fn(),
     loadAll: vi.fn().mockResolvedValue(undefined),
+    startProgressPolling: vi.fn(),
     refresh: vi.fn().mockResolvedValue(undefined),
     registerSortExtractor: vi.fn(),
     registerFilterExtractor: vi.fn(),
@@ -183,5 +184,13 @@ describe('CloudFoundrySpaceServiceInstancesSignalComponent', () => {
     expect(cfg!.filterDropdowns).toBeUndefined();
     expect(cfg!.columns.find(c => c.key === 'type')).toBeUndefined();
     expect(cfg!.columns.find(c => c.key === 'cf')).toBeUndefined();
+  });
+  // The progress poll must end with this page, not run on in the root config.
+  it('polls operations in progress only while this page is open', async () => {
+    const host = stubSignalConfig.startProgressPolling.mock.calls.at(-1)?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
   });
 });

@@ -1,5 +1,6 @@
 import { CommonModule, DatePipe } from '@angular/common';
 import {
+  DestroyRef,
   ChangeDetectionStrategy,
   Component,
   OnInit,
@@ -63,6 +64,7 @@ export class ServiceInstancesComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly confirmDialog = inject(ConfirmationDialogService);
   private readonly snackBar = inject(TailwindSnackBarService);
 
@@ -213,6 +215,7 @@ export class ServiceInstancesComponent implements OnInit {
     this.instancesConfig.registerFilterExtractor('name', (si) => si.name ?? '');
 
     void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+    this.instancesConfig.startProgressPolling(this.destroyRef);
   }
 
   // Per-row Edit / Detach / Delete. Restores the V2-era listActionEdit

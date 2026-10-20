@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { DestroyRef, Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { map } from 'rxjs/operators';
@@ -51,6 +51,7 @@ import type { StServiceInstance } from '../../../../services/endpoint-data/strat
 export class CloudFoundryServicesSignalComponent implements OnInit {
   cfEndpointService = inject(CloudFoundryEndpointService);
   private instancesConfig = inject(CfServiceInstancesSignalConfigService);
+  private readonly destroyRef = inject(DestroyRef);
   private userFavoriteManager = inject(UserFavoriteManager);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
@@ -278,6 +279,7 @@ export class CloudFoundryServicesSignalComponent implements OnInit {
     this.instancesConfig.registerFilterExtractor('tags', renderTags);
 
     void this.instancesConfig.loadAll().then(() => this.instancesConfig.ensureServiceKeyCounts());
+    this.instancesConfig.startProgressPolling(this.destroyRef);
   }
 
   private buildInstanceActions = (si: StServiceInstance): readonly SignalListRowAction<StServiceInstance>[] =>

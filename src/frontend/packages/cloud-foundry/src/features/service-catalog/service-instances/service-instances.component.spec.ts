@@ -38,6 +38,7 @@ describe('ServiceInstancesComponent (signal-native)', () => {
       registerSortExtractor: vi.fn(),
       registerFilterExtractor: vi.fn(),
       loadAll: vi.fn(async () => undefined),
+      startProgressPolling: vi.fn(),
       refresh: vi.fn(async () => undefined),
       clearFilters: vi.fn(),
       deleteServiceInstance: vi.fn(async () => undefined),
@@ -130,5 +131,14 @@ describe('ServiceInstancesComponent (signal-native)', () => {
     const onConfirm = confirmDialog.open.mock.calls[0][1];
     await onConfirm();
     expect(configStub.deleteServiceInstance).toHaveBeenCalledWith('cnsi-1', 'si-7');
+  });
+  // The progress poll must end with this page, not run on in the root config.
+  it('polls operations in progress only while this page is open', async () => {
+    fixture.detectChanges();
+    const host = configStub.startProgressPolling.mock.calls.at(-1)?.[0] as { destroyed: boolean } | undefined;
+    expect(host?.destroyed).toBe(false);
+
+    fixture.destroy();
+    expect(host?.destroyed).toBe(true);
   });
 });
