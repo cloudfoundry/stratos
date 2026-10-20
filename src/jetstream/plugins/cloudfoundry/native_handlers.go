@@ -1070,11 +1070,11 @@ func (c *CloudFoundrySpecification) getNativeOrgDetail(ctx *echo.Context) error 
 
 // getNativeSpaceDetail handles GET /pp/v1/cf/spaces/{cnsiGuid}/{spaceGuid}.
 //
-// Single CAPI Get + an opportunistic /v3/spaces/{guid}/features/ssh fetch
-// to surface the V3 space-feature `ssh` flag (which V3 moved off the
-// space resource). The feature fetch is best-effort: on failure we log
-// and return AllowSSH=false rather than failing the whole detail call —
-// the SSH/env-var UI just falls back to its disabled state.
+// The space Get, its app and route counts and the V3 space-feature `ssh`
+// flag (which V3 moved off the space resource) run concurrently. Only the
+// space Get can fail the call: a failed count degrades to 0, and a failed
+// feature fetch is logged and returns AllowSSH=false — the SSH/env-var UI
+// just falls back to its disabled state.
 func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx *echo.Context) error {
 	cnsiGUID := ctx.Param("cnsiGuid")
 	spaceGUID := ctx.Param("spaceGuid")
@@ -1088,27 +1088,36 @@ func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx *echo.Context) erro
 		return err
 	}
 
-	r, err := cfClient.Spaces().Get(ctx.Request().Context(), spaceGUID)
-	if err != nil {
-		return echo.NewHTTPError(statusFromCapiError(err), err.Error())
+	// The space, its counts and the ssh feature are independent CC reads:
+	// run them together so the page waits for the slowest, not the sum.
+	var (
+		r                    *capi.Space
+		spaceErr             error
+		appCount, routeCount int
+		feature              *capi.SpaceFeature
+		ferr                 error
+	)
+	g, gctx := errgroup.WithContext(ctx.Request().Context())
+	g.Go(func() error { r, spaceErr = cfClient.Spaces().Get(gctx, spaceGUID); return nil })
+	g.Go(func() error { appCount, _ = countAppsInSpace(gctx, cfClient, spaceGUID); return nil })
+	g.Go(func() error { routeCount, _ = countRoutesInSpace(gctx, cfClient, spaceGUID); return nil })
+	g.Go(func() error { feature, ferr = cfClient.Spaces().GetFeature(gctx, spaceGUID, "ssh"); return nil })
+	_ = g.Wait()
+	if spaceErr != nil {
+		return echo.NewHTTPError(statusFromCapiError(spaceErr), spaceErr.Error())
 	}
 
 	detail := StSpaceDetail{
 		StSpace: toStSpace(*r, cnsiGUID),
 	}
+	// The space summary's tiles read the counts straight off this payload;
+	// V3 spaces carry none inline, so without them every space rendered
+	// "0 Apps / 0 Routes" (#5670). Lazy-non-fatal like the list handlers.
+	detail.AppCount = appCount
+	detail.RouteCount = routeCount
 
-	// Per-space app + route counts — the space summary's tiles read these
-	// straight off this payload; V3 spaces carry no counts inline, so
-	// without this every space rendered "0 Apps / 0 Routes" (#5670).
-	// Lazy-non-fatal like the list handlers: a failed count degrades to 0.
-	appCounts, _ := fetchAppCountsForSpaces(ctx, cfClient, []string{spaceGUID})
-	routeCounts, _ := fetchRouteCountsForSpaces(ctx, cfClient, []string{spaceGUID})
-	detail.AppCount = appCounts[spaceGUID]
-	detail.RouteCount = routeCounts[spaceGUID]
-
-	// Best-effort SSH-feature lookup. V3 split this off the space resource
-	// to /v3/spaces/{guid}/features/ssh; failure here is non-fatal.
-	if feature, ferr := cfClient.Spaces().GetFeature(ctx.Request().Context(), spaceGUID, "ssh"); ferr != nil {
+	// Best-effort SSH-feature lookup; failure here is non-fatal.
+	if ferr != nil {
 		slog.Warn("getNativeSpaceDetail: ssh feature lookup failed", "space", spaceGUID, "err", ferr)
 	} else if feature != nil {
 		detail.AllowSSH = feature.Enabled
@@ -1116,6 +1125,25 @@ func (c *CloudFoundrySpecification) getNativeSpaceDetail(ctx *echo.Context) erro
 
 	ctx.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
 	return ctx.JSON(http.StatusOK, detail)
+}
+
+// countAppsInSpace and countRoutesInSpace read one space's count from the
+// total_results of a per_page=1 list: one small response, however many
+// apps or routes the space holds.
+func countAppsInSpace(ctx context.Context, cfClient capi.Client, spaceGUID string) (int, error) {
+	raw, err := cfClient.Apps().List(ctx, capi.NewQueryParams().WithPerPage(1).WithFilter("space_guids", spaceGUID))
+	if err != nil {
+		return 0, err
+	}
+	return raw.Pagination.TotalResults, nil
+}
+
+func countRoutesInSpace(ctx context.Context, cfClient capi.Client, spaceGUID string) (int, error) {
+	raw, err := cfClient.Routes().List(ctx, capi.NewQueryParams().WithPerPage(1).WithFilter("space_guids", spaceGUID))
+	if err != nil {
+		return 0, err
+	}
+	return raw.Pagination.TotalResults, nil
 }
 
 // getNativeOrgSpaces handles GET /pp/v1/cf/org/{cnsiGuid}/{orgGuid}/spaces.
