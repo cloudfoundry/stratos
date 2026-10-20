@@ -1,6 +1,6 @@
 import { test, expect } from '../../fixtures/test-base';
 import { CFApiHelper } from '../../helpers/cf-api.helper';
-import { TestBroker, next } from '../../helpers/service-wizard.helper';
+import { TestBroker, createBrokerInstance, next } from '../../helpers/service-wizard.helper';
 
 /**
  * Editing a managed service instance from the console (#6002), checked
@@ -36,12 +36,7 @@ test.describe('managed service instance: edit', () => {
     const name = `e2e-managed-edit-${Date.now()}`;
     const renamed = `${name}-new`;
     try {
-      const planGuid = await cfApi.findServicePlanGuid(broker!.offering, spaceGuid, broker!.plan);
-      expect(planGuid, `plan ${broker!.plan} visible in the test space`).toBeTruthy();
-      await cfApi.createManagedServiceInstance(spaceGuid, name, planGuid!);
-      await expect.poll(async () => (await cfApi.findServiceInstanceByName(spaceGuid, name))?.last_operation?.state,
-        { timeout: 120000 }).toBe('succeeded');
-      const guid = (await cfApi.findServiceInstanceByName(spaceGuid, name))!.guid;
+      const guid = await createBrokerInstance(cfApi, spaceGuid, broker!, name);
 
       await page.goto(`/services/service/${cfGuid}/${guid}/edit`);
       await next(page);

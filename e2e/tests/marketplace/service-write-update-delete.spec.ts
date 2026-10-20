@@ -2,7 +2,7 @@ import { Locator, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test-base';
 import { CFApiHelper } from '../../helpers/cf-api.helper';
 import { FakeJob, handOffWrite, isolatedAdmin, toast } from '../../helpers/fake-job.helper';
-import { TestBroker, next } from '../../helpers/service-wizard.helper';
+import { TestBroker, createBrokerInstance, next } from '../../helpers/service-wizard.helper';
 
 /**
  * What the console does with an update or a delete of a service instance
@@ -17,16 +17,6 @@ import { TestBroker, next } from '../../helpers/service-wizard.helper';
  */
 
 type Instance = { guid: string; name: string };
-
-/** Makes a managed instance of the broker's plan and waits until CF has it. */
-async function createInstance(cfApi: CFApiHelper, spaceGuid: string, broker: TestBroker, name: string): Promise<Instance> {
-  const planGuid = await cfApi.findServicePlanGuid(broker.offering, spaceGuid, broker.plan);
-  expect(planGuid, `plan ${broker.plan} visible in the test space`).toBeTruthy();
-  await cfApi.createManagedServiceInstance(spaceGuid, name, planGuid!);
-  await expect.poll(async () => (await cfApi.findServiceInstanceByName(spaceGuid, name))?.last_operation?.state,
-    { timeout: 120000 }).toBe('succeeded');
-  return { guid: (await cfApi.findServiceInstanceByName(spaceGuid, name))!.guid, name };
-}
 
 async function removeInstance(cfApi: CFApiHelper, spaceGuid: string, name: string): Promise<void> {
   const si = await cfApi.findServiceInstanceByName(spaceGuid, name).catch(() => null);
@@ -66,7 +56,7 @@ test.describe('services list: a delete that runs long', () => {
     const name = `e2e-slow-delete-${Date.now()}`;
     const { context, page } = await isolatedAdmin(browser);
     try {
-      const si = await createInstance(cfApi, spaceGuid, broker!, name);
+      const si = { name, guid: await createBrokerInstance(cfApi, spaceGuid, broker!, name) };
       const job = new FakeJob(`e2e-delete-${Date.now()}`, 'cf.service_instance.delete');
       const row = await deleteFromList(page, job, cfGuid, si);
 
@@ -88,7 +78,7 @@ test.describe('services list: a delete that runs long', () => {
     const name = `e2e-slow-delete-${Date.now()}`;
     const { context, page } = await isolatedAdmin(browser);
     try {
-      const si = await createInstance(cfApi, spaceGuid, broker!, name);
+      const si = { name, guid: await createBrokerInstance(cfApi, spaceGuid, broker!, name) };
       const job = new FakeJob(`e2e-delete-${Date.now()}`, 'cf.service_instance.delete');
       const row = await deleteFromList(page, job, cfGuid, si);
 
@@ -130,7 +120,7 @@ test.describe('edit wizard: an update that outlasts the wait', () => {
     const name = `e2e-slow-update-${Date.now()}`;
     const { context, page } = await isolatedAdmin(browser);
     try {
-      const si = await createInstance(cfApi, spaceGuid, broker!, name);
+      const si = { name, guid: await createBrokerInstance(cfApi, spaceGuid, broker!, name) };
       const job = new FakeJob(`e2e-update-${Date.now()}`, 'cf.service_instance.update');
       const question = await submitUpdate(page, job, cfGuid, si);
 
@@ -154,7 +144,7 @@ test.describe('edit wizard: an update that outlasts the wait', () => {
     const name = `e2e-slow-update-${Date.now()}`;
     const { context, page } = await isolatedAdmin(browser);
     try {
-      const si = await createInstance(cfApi, spaceGuid, broker!, name);
+      const si = { name, guid: await createBrokerInstance(cfApi, spaceGuid, broker!, name) };
       const job = new FakeJob(`e2e-update-${Date.now()}`, 'cf.service_instance.update');
       const question = await submitUpdate(page, job, cfGuid, si);
 

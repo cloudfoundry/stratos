@@ -46,3 +46,13 @@ export async function openCreateDetails(
   await next(page);
   await expect(page.getByRole('textbox', { name: /Name/ })).toBeVisible();
 }
+
+/** Makes a managed instance of the broker's plan and waits until CF has it. Returns its guid. */
+export async function createBrokerInstance(cfApi: CFApiHelper, spaceGuid: string, broker: TestBroker, name: string): Promise<string> {
+  const planGuid = await cfApi.findServicePlanGuid(broker.offering, spaceGuid, broker.plan);
+  expect(planGuid, `plan ${broker.plan} visible in the test space`).toBeTruthy();
+  await cfApi.createManagedServiceInstance(spaceGuid, name, planGuid!);
+  await expect.poll(async () => (await cfApi.findServiceInstanceByName(spaceGuid, name))?.last_operation?.state,
+    { timeout: 120000 }).toBe('succeeded');
+  return (await cfApi.findServiceInstanceByName(spaceGuid, name))!.guid;
+}
