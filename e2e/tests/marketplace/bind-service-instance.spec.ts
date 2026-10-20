@@ -77,8 +77,9 @@ test.describe('app services tab: bind an existing instance', () => {
       await next(page, 'Finish');
 
       await page.waitForURL(url => url.pathname === `/applications/${cfGuid}/${appGuid}/services`, { timeout: 120000 });
-      await expect(toast(page, `Service instance "${name}" bound to the application.`)).toBeVisible();
-      // A managed bind is a CF job.
+      // A managed bind is a CF job. One that outlasts the wizard's wait is
+      // handed off and reports itself when the job ends, after the redirect.
+      await expect(toast(page, `Service instance "${name}" bound to the application.`)).toBeVisible({ timeout: 120000 });
       await expect.poll(async () => (await cfApi.getAppBindings(guid)).find(b => b.appGuid === appGuid)?.state,
         { timeout: 120000 }).toBe('succeeded');
 
