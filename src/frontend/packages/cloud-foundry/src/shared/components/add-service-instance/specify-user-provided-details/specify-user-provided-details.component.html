@@ -70,8 +70,8 @@
         <app-error>Invalid URL</app-error>
       }
     </app-form-field>
-    <app-form-field class="stepper-form__tags">
-      <app-label>Tags</app-label>
+    <div class="stepper-form__tags mb-4">
+      <label for="ups-service-instance-tags" class="block mb-1 text-sm text-content-muted">Tags</label>
       <div class="flex flex-wrap gap-2 p-2 border border-content-border rounded-md min-h-[42px] bg-content-bg">
         @for (tag of tags(); track tag) {
           <span
@@ -81,6 +81,7 @@
             <button
               type="button"
               (click)="removeTag(tag)"
+              [attr.aria-label]="'Remove tag ' + tag.label"
               class="ml-2 text-content-muted hover:text-content-text focus:outline-none"
             >
               <span class="material-icons text-sm">cancel</span>
@@ -88,6 +89,7 @@
           </span>
         }
         <input
+          id="ups-service-instance-tags"
           type="text"
           (keydown.enter)="addTagFromInput($event)"
           (keydown.comma)="addTagFromInput($event)"
@@ -96,7 +98,7 @@
           placeholder="Add tag..."
         />
       </div>
-    </app-form-field>
+    </div>
     <!-- Credentials: one visual control (#5768). In update mode it opens as
          a readonly view — structure with highlighted '<redacted>' markers,
          real values after Show credentials — and Edit swaps in the real

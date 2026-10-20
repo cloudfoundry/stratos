@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { HttpParams, HttpRequest } from '@angular/common/http';
 import { Component, Input, OnDestroy, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup } from '@angular/forms';
@@ -69,7 +69,6 @@ function redactValues(value: unknown): unknown {
     AppErrorComponent,
     AppInputDirective,
     CustomFormFieldComponent,
-    MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     AppNameUniqueDirective,
