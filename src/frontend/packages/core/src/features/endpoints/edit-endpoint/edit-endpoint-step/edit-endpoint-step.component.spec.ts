@@ -2,7 +2,15 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModuleManualStore, TEST_CATALOGUE_ENTITIES, generateStratosEntities } from '@stratosui/store';
+import {
+  EntityCatalogHelper,
+  EntityCatalogHelpers,
+  EntityCatalogTestModuleManualStore,
+  StratosCatalogEndpointEntity,
+  TEST_CATALOGUE_ENTITIES,
+  entityCatalog,
+  generateStratosEntities,
+} from '@stratosui/store';
 import { createBasicStoreModule, seedEndpointsDataService, STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
 import { EditEndpointStepComponent } from './edit-endpoint-step.component';
 
@@ -45,6 +53,15 @@ describe('EditEndpointStepComponent', () => {
     const helper = TestBed.inject(EntityCatalogHelper);
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
 
+    // The form renders once the endpoint's type is in the catalog.
+    entityCatalog.register(new StratosCatalogEndpointEntity({
+      type: 'cf',
+      label: 'Cloud Foundry',
+      labelPlural: 'Cloud Foundry',
+      logoUrl: '/core/assets/endpoint-icons/cloudfoundry.svg',
+      authTypes: [],
+    }, entity => `/cloud-foundry/${entity.guid}/summary`));
+
     // Seed the signal-native EndpointsDataService with the endpoint under
     // edit so the component (which reads `endpointsData.endpointsList`) finds
     // it by route id. Replaces the legacy ngrx `store.dispatch` seeding.
@@ -86,5 +103,17 @@ describe('EditEndpointStepComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+  // app-form-field shows a field's <app-error> text as its error line.
+  it('says the name is required once it is cleared', async () => {
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement;
+    const name = host.querySelector<HTMLInputElement>('#name')!;
+    name.value = '';
+    name.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    const id = name.getAttribute('aria-errormessage');
+    expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe('Name is required');
   });
 });

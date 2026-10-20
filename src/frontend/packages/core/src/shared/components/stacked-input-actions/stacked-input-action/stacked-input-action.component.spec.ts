@@ -41,4 +41,17 @@ describe('StackedInputActionComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  // app-form-field shows a field's <app-error> text as its error line.
+  it('says the value is required once it is cleared', async () => {
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('[data-test="stacked-input"]')!;
+    input.value = 'x';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    const id = input.getAttribute('aria-errormessage');
+    expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe('Email is required');
+  });
 });

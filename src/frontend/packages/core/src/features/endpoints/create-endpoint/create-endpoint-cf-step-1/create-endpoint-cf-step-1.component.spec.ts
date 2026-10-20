@@ -221,4 +221,37 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(component.registerForm.valid).toBe(false);
     });
   });
+  // app-form-field shows a field's <app-error> text as its error line.
+  describe('field errors', () => {
+    function type(input: HTMLInputElement, value: string) {
+      input.value = value;
+      input.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+
+    /** What app-form-field shows for a field, through the input's aria-errormessage. */
+    function errorFor(input: HTMLInputElement): string | undefined {
+      const id = input.getAttribute('aria-errormessage');
+      const host: HTMLElement = fixture.nativeElement;
+      return id ? host.querySelector(`#${id}`)?.textContent?.replace(/\s+/g, ' ').trim() : undefined;
+    }
+
+    it('says the name is required once it is cleared', async () => {
+      const name = fixture.nativeElement.querySelector('#name') as HTMLInputElement;
+      type(name, 'x');
+      type(name, '');
+      await fixture.whenStable();
+
+      expect(errorFor(name)).toBe('Name is required');
+    });
+
+    it('explains a bad API address', async () => {
+      const url = fixture.nativeElement.querySelector('#url') as HTMLInputElement;
+      type(url, 'not a url');
+      await fixture.whenStable();
+
+      expect(errorFor(url)).toBe(
+        'Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or https://api.example.com)'
+      );
+    });
+  });
 });
