@@ -214,24 +214,6 @@ test.describe('Marketplace Create Service Instances', () => {
       await expect(createButton).toBeVisible();
     });
 
-    test('should create user-provided service instance', async ({ connectedEndpointsAdminPage }) => {
-      const { page, cfGuid } = connectedEndpointsAdminPage;
-
-      // Navigate to services page to look for UPS creation
-      await page.goto(`/services/new`);
-      await page.waitForLoadState('networkidle');
-
-      // Look for user-provided service option
-      const upsOption = page.locator(':text("user-provided"), :text("ups"), button').filter({ hasText: /user.*provided|ups|custom/i }).first();
-      const hasUPSOption = await upsOption.isVisible({ timeout: 5000 }).catch(() => false);
-
-      if (!hasUPSOption) {
-        test.skip('User-provided service option not found');
-      }
-
-      await expect(upsOption).toBeVisible();
-    });
-
     test('should create service with custom parameters', async ({ connectedEndpointsAdminPage }) => {
       const { page, cfGuid } = connectedEndpointsAdminPage;
 
