@@ -58,7 +58,6 @@ export const E2E_LEGACY_FILES = [
   "e2e/tests/cloud-foundry/cf-level/cf-users-removal.spec.ts",
   "e2e/tests/cloud-foundry/cf-level/manage-org.spec.ts",
   "e2e/tests/cloud-foundry/cf-level/manage-quota.spec.ts",
-  "e2e/tests/cloud-foundry/cloud-foundry-list.spec.ts",
   "e2e/tests/cloud-foundry/manage-users-by-username-stepper.spec.ts",
   "e2e/tests/cloud-foundry/manage-users-stepper.spec.ts",
   "e2e/tests/cloud-foundry/org-level/cf-org-level.spec.ts",
