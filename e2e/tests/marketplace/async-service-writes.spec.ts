@@ -140,5 +140,39 @@ for (const mode of RESPONSE_MODES) {
         await applicationHelper.cleanupTestApp(testApp);
       }
     });
+
+    // Lists and the instance page read the instance once; while its operation
+    // is in progress they must read it again, so its status reaches the result
+    // without a reload (#6002).
+    test('the services list and the instance page follow a create to its end', async ({ connectedEndpointsAdminPage, cfApi }) => {
+      test.skip(!broker, 'no services.testBroker in the secrets profile');
+      test.skip(mode !== 'async', 'only an async broker leaves the create in progress');
+      const { page, cfGuid, spaceGuid } = connectedEndpointsAdminPage;
+      const name = `e2e-${mode}-follow-${Date.now()}`;
+      const detail = await page.context().newPage();
+      try {
+        const planGuid = await cfApi.findServicePlanGuid(broker!.offering, spaceGuid);
+        expect(planGuid, `offering ${broker!.offering} has a plan in the test space`).toBeTruthy();
+        await cfApi.createManagedServiceInstance(spaceGuid, name, planGuid!);
+        const si = await waitForInstance(cfApi, spaceGuid, name);
+
+        await page.goto('/services');
+        await page.locator('[data-test=name-filter]').fill(name);
+        const row = page.locator('[data-test=row], [data-test=card]').filter({ hasText: name });
+        await detail.goto(`/services/service/${cfGuid}/${si.guid}`);
+        // The meta card renders its items' templates itself; find the row by its key.
+        const status = detail.locator('.meta-card-item__key', { hasText: 'Status' }).locator('xpath=..');
+
+        // CF reports the create as "initial" while it is queued, then "in progress".
+        await expect(row).toContainText(/initial|in progress/i, { timeout: 60000 });
+        await expect(status).toContainText(/initial|in progress/i, { timeout: 60000 });
+        // No reload from here on: each page must notice the end by itself.
+        await expect(row).toContainText(/succeeded/i, { timeout: 300000 });
+        await expect(status).toContainText(/succeeded/i, { timeout: 60000 });
+      } finally {
+        await detail.close();
+        await deleteInstance(cfApi, spaceGuid, name);
+      }
+    });
   });
 }
