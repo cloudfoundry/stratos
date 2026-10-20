@@ -7,7 +7,7 @@
       <div class="flex flex-row">
         <div class="flex-1">
           <app-metadata-item class="mt-0" label="User Org Role">
-            {{ cfOrgService.userOrgRole$ | async }}
+            {{ (cfOrgService.userOrgRole$ | async) ?? '–' }}
           </app-metadata-item>
           <app-metadata-item label="Quota Definition">
             <a [routerLink]="cfOrgService.quotaLink$ | async">
