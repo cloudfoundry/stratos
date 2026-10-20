@@ -45,7 +45,6 @@ export const E2E_LEGACY_FILES = [
   "e2e/pages/cloud-foundry/org-level/cf-org-level.page.ts",
   "e2e/pages/endpoints/endpoints.page.ts",
   "e2e/pages/endpoints/register-dialog.page.ts",
-  "e2e/pages/marketplace/marketplace.page.ts",
   "e2e/tests/application/application-deploy-local.spec.ts",
   "e2e/tests/application/application-deploy.spec.ts",
   "e2e/tests/application/application-routes.spec.ts",
