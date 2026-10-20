@@ -11,7 +11,6 @@ import {
   ListSubNavComponent,
   SignalListComponent,
   SignalListConfig,
-  SignalListPillColor,
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
@@ -29,6 +28,7 @@ import { boundAppSegments, renderBoundApps } from '../../../../../../../shared/s
 import { renderServiceKeyCount, serviceKeysLink, serviceKeysLinkQueryParams } from '../../../../../../../shared/signal-list-configs/service-keys-count-cell';
 import { dashboardLink, renderDashboard } from '../../../../../../../shared/signal-list-configs/dashboard-link-cell';
 import { buildServiceInstanceRowActions } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
+import { lastOperationColumn, lastOperationLabel } from '../../../../../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import type { StServiceInstance } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Scoped to one space under one org under one CF endpoint. Reuses the wall's
@@ -142,16 +142,6 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
       return tags.length === 0 ? '—' : tags.join(', ');
     };
 
-    const renderLastOp = (si: StServiceInstance): string => si.lastOperation.state ?? '';
-
-    const lastOpColor = (si: StServiceInstance): SignalListPillColor => {
-      const state = (si.lastOperation.state ?? '').toLowerCase();
-      if (state === 'succeeded') return 'success';
-      if (state === 'in progress') return 'warning';
-      if (state === 'failed') return 'danger';
-      return 'neutral';
-    };
-
     const renderCreated = (si: StServiceInstance): string =>
       CloudFoundrySpaceServiceInstancesSignalComponent.formatDate(si.createdAt);
 
@@ -182,13 +172,7 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
           render: renderService,
           widthHint: '12rem',
         },
-        {
-          header: 'Last Operation', key: 'lastOp', sortField: renderLastOp,
-          kind: 'pill',
-          pillColor: lastOpColor,
-          render: renderLastOp,
-          widthHint: '10rem',
-        },
+        lastOperationColumn(),
         {
           header: 'Dashboard', key: 'dashboard', kind: 'link',
           render: renderDashboard,
@@ -255,7 +239,7 @@ export class CloudFoundrySpaceServiceInstancesSignalComponent {
     });
 
     this.instancesConfig.registerSortExtractor('service', renderService);
-    this.instancesConfig.registerSortExtractor('lastOp', renderLastOp);
+    this.instancesConfig.registerSortExtractor('lastOp', lastOperationLabel);
     this.instancesConfig.registerSortExtractor('tags', renderTags);
     this.instancesConfig.registerFilterExtractor('name', (si: StServiceInstance) => si.name ?? '');
 

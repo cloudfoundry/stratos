@@ -93,6 +93,19 @@ describe('ServiceInstancesComponent (signal-native)', () => {
     expect(keys).toEqual(['name', 'plan', 'lastOp', 'dashboard', 'boundApps', 'serviceKeys', 'tags', 'createdAt', 'type', 'actions']);
   });
 
+  // The pill names the operation, gives a failure's reason on hover and
+  // survives an instance with no last operation (the backend omits it).
+  it('Last Operation names the operation and hovers with a failure reason', () => {
+    fixture.detectChanges();
+    const col = component.listConfig!.columns.find(c => c.key === 'lastOp')!;
+    const si: any = { lastOperation: { type: 'update', state: 'failed', description: '<b>quota</b> exceeded' } };
+    expect(col.render(si)).toBe('Update failed');
+    expect(col.tooltip!(si)).toBe('Update failed — quota exceeded');
+    expect(col.render({} as any)).toBe('');
+    const sortBy = configStub.registerSortExtractor.mock.calls.find((c: unknown[]) => c[0] === 'lastOp')![1];
+    expect(sortBy(si)).toBe('Update failed');
+  });
+
   it('Service Keys column links to the keys page and renders the lazy count', () => {
     fixture.detectChanges();
     const cols = component.listConfig!.columns;
