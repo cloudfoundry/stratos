@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
 import { Directive, forwardRef, Input, OnInit, inject } from '@angular/core';
-import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS } from '@angular/forms';
+import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { Observable, of as observableOf, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
 
@@ -51,6 +51,9 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
   @Input() appApplicationNameUnique!: AppNameUniqueChecking;
   @Input() appApplicationNameUniqueRequest!: UniqueValidatorRequestBuilder;
   @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.totalResults > 0;
+  // Text app-form-field shows for a taken name. Without it the error is
+  // { appNameTaken: true } and the field shows its stock "Invalid value".
+  @Input() appApplicationNameUniqueMessage?: string;
 
   constructor() {
     if (!this.appApplicationNameUnique) {
@@ -65,7 +68,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
     this.appApplicationNameUnique.set(false);
   }
 
-  public validate(control: AbstractControl): Observable<{ appNameTaken: boolean, } | null> {
+  public validate(control: AbstractControl): Observable<ValidationErrors | null> {
     if (!control.dirty) {
       return observableOf(null);
     }
@@ -74,7 +77,11 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
       switchMap(() => this.getCheck(control.value)),
       map(appNameTaken => {
         this.appApplicationNameUnique.set(false, appNameTaken);
-        return appNameTaken ? { appNameTaken } : null;
+        if (!appNameTaken) {
+          return null;
+        }
+        const message = this.appApplicationNameUniqueMessage;
+        return { appNameTaken: message ? { message } : true };
       }),
       catchError(() => {
         // Fail open: CC enforces name uniqueness at create time, so a

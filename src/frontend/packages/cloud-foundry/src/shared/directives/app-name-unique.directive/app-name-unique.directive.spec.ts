@@ -29,9 +29,10 @@ describe('AppNameUniqueDirective', () => {
     expect(directive).toBeTruthy();
   });
 
-  function setupValidation(name: string) {
+  function setupValidation(name: string, message?: string) {
     TestBed.inject(CreateAppStateService).setCFDetails({ cloudFoundry: 'cf-1', org: 'org-1', space: 'space-1' });
     const directive = TestBed.runInInjectionContext(() => new AppNameUniqueDirective());
+    directive.appApplicationNameUniqueMessage = message;
     directive.ngOnInit();
     const control = new FormControl(name);
     control.markAsDirty();
@@ -54,6 +55,18 @@ describe('AppNameUniqueDirective', () => {
     req.flush({ resources: [], totalResults: 1 });
 
     expect(await result).toEqual({ appNameTaken: true });
+    http.verify();
+  });
+
+  // app-form-field shows an error's own message as the field's error text.
+  it('carries the given message on a taken name', async () => {
+    const http = TestBed.inject(HttpTestingController);
+    const result = setupValidation('my-app', 'That name is taken.');
+
+    await debounce();
+    http.expectOne(r => r.url === '/pp/v1/cf/apps/cf-1').flush({ resources: [], totalResults: 1 });
+
+    expect(await result).toEqual({ appNameTaken: { message: 'That name is taken.' } });
     http.verify();
   });
 
