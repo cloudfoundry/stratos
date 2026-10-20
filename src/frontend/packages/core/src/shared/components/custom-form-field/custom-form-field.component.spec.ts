@@ -1,7 +1,14 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { CustomFormFieldComponent } from './custom-form-field.component';
+import { Component, provideZonelessChangeDetection } from '@angular/core';
+import {
+  AbstractControl,
+  FormControl,
+  ReactiveFormsModule,
+  ValidationErrors,
+  Validators,
+} from '@angular/forms';
+import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from './custom-form-field.component';
 
 describe('CustomFormFieldComponent — Tailwind state-class getters (FWT-956)', () => {
   let component: CustomFormFieldComponent;
@@ -98,5 +105,96 @@ describe('CustomFormFieldComponent — Tailwind state-class getters (FWT-956)', 
       Object.defineProperty(component, 'isValid', { get: () => true, configurable: true });
       expect(component.rippleColorClasses).toContain('bg-success');
     });
+  });
+});
+
+@Component({
+  template: `
+    <app-form-field>
+      <input appInput [formControl]="name" placeholder="Name" required>
+      @if (name.hasError('taken')) {
+        <app-error>That name is taken</app-error>
+      }
+    </app-form-field>
+  `,
+  imports: [ReactiveFormsModule, CustomFormFieldComponent, AppInputDirective, AppErrorComponent],
+})
+class ProjectedErrorHostComponent {
+  name = new FormControl('', [
+    Validators.required,
+    (c: AbstractControl): ValidationErrors | null => (c.value === 'taken' ? { taken: true } : null),
+  ]);
+}
+
+describe('CustomFormFieldComponent — projected <app-error>', () => {
+  async function setup() {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+      imports: [ProjectedErrorHostComponent],
+    });
+    const fixture = TestBed.createComponent(ProjectedErrorHostComponent);
+    await fixture.whenStable();
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('input')!;
+    return { fixture, host, input };
+  }
+
+  function type(input: HTMLInputElement, value: string) {
+    input.value = value;
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+
+  /** The field's error line, read through the input's aria-errormessage. */
+  function errorFor(host: HTMLElement, input: HTMLInputElement): string | undefined {
+    const id = input.getAttribute('aria-errormessage');
+    return id ? host.querySelector(`#${id}`)?.textContent?.trim() : undefined;
+  }
+
+  it('shows the projected text instead of the stock line', async () => {
+    const { fixture, host, input } = await setup();
+    type(input, 'taken');
+    await fixture.whenStable();
+
+    const line = host.querySelector('.form-field-error');
+    expect(line?.textContent?.trim()).toBe('That name is taken');
+    expect(host.textContent).not.toContain('Invalid value');
+  });
+
+  it('shows the stock line when no projected error is rendered', async () => {
+    const { fixture, host, input } = await setup();
+    type(input, 'x');
+    type(input, '');
+    await fixture.whenStable();
+
+    expect(host.querySelector('app-error')).toBeNull();
+    expect(host.querySelector('.form-field-error')?.textContent?.trim()).toBe('This field is required');
+  });
+
+  it('shows no error while the field shows no errors', async () => {
+    const { fixture, host } = await setup();
+    fixture.componentInstance.name.setValue('taken');
+    await fixture.whenStable();
+
+    expect(host.querySelector('.form-field-error')).toBeNull();
+    expect(host.textContent).not.toContain('That name is taken');
+  });
+
+  it('makes the projected text the accessible error message', async () => {
+    const { fixture, host, input } = await setup();
+    type(input, 'taken');
+    await fixture.whenStable();
+
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(errorFor(host, input)).toBe('That name is taken');
+  });
+
+  it('goes back to the stock line when the projected error clears', async () => {
+    const { fixture, host, input } = await setup();
+    type(input, 'taken');
+    await fixture.whenStable();
+    type(input, '');
+    await fixture.whenStable();
+
+    expect(errorFor(host, input)).toBe('This field is required');
   });
 });

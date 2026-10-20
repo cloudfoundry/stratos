@@ -11,6 +11,7 @@ import {
   inject,
   ChangeDetectionStrategy,
   forwardRef,
+  contentChildren,
 } from "@angular/core";
 import { FormControl, NgControl } from "@angular/forms";
 
@@ -97,6 +98,13 @@ export class CustomFormFieldComponent
   @ContentChild(CustomSelectComponent, { static: false })
   selectComponent!: CustomSelectComponent;
   @ContentChild(NgControl, { static: false }) ngControl!: NgControl;
+
+  /**
+   * The `<app-error>` children the form renders right now. Forms wrap each
+   * in `@if (control.hasError(...))`; while any is rendered, the error line
+   * shows them instead of the stock `errorMessage`.
+   */
+  readonly projectedErrors = contentChildren(forwardRef(() => AppErrorComponent));
 
   public focused = false;
   public hasValue = false;
