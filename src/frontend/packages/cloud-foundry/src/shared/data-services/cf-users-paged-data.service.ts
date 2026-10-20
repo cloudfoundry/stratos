@@ -1,4 +1,4 @@
-import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { Injectable, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap } from 'rxjs/operators';
@@ -50,6 +50,25 @@ export class CfUsersPagedDataService {
   lastFetched(cnsi: string): Signal<Date | null> { return this.ensure(cnsi).lastFetched.asReadonly(); }
 
   markStale(cnsi: string): void { this.ensure(cnsi).stale.set(true); }
+
+  // Lazy read for summary tiles (user counts, "your role"): the first read
+  // starts the drain, and the signal stays null until it settles so tiles
+  // show a dash instead of a flickering 0. A failed drain settles to the
+  // empty list (tiles read 0 / None); errorsByCnsi still carries the error.
+  users(cnsi: string): Signal<StUser[] | null> {
+    const s = this.ensure(cnsi);
+    this.loadUsers(cnsi).subscribe();
+    return computed(() => (s.lastFetched() !== null || this._errorsByCnsi().has(cnsi) ? s.allUsers() : null));
+  }
+
+  // Re-fetch only a CF whose users were already loaded. Mutation flows call
+  // this so mounted tiles and lists reconcile with server truth, without
+  // starting the users+roles join where nothing has read it.
+  refreshIfLoaded(cnsi: string): void {
+    if (this.states.get(cnsi)?.lastFetched()) {
+      this.refresh(cnsi).subscribe();
+    }
+  }
 
   // Insert a user the cache has never seen (a set-by-username add: the
   // real guid only arrives in the role-change response). Mounted lists

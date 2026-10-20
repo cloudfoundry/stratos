@@ -6,7 +6,7 @@ import { observeSignal } from '@stratosui/store';
 import { combineLatest, EMPTY, Observable } from 'rxjs';
 import { catchError, distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
-import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { StOrgDetail, StOrgQuota, StSpace } from '../../../services/endpoint-data/stratos-types';
@@ -73,7 +73,7 @@ export class CloudFoundryOrganizationService {
   private cfUserProvidedServicesService = inject(CloudFoundryUserProvidedServicesService);
   private serviceCatalog = inject(ServiceCatalogDataService);
   private quotaData = inject(QuotaDataService);
-  private cnsiUsers = inject(CnsiUsersSnapshotService);
+  private cnsiUsers = inject(CfUsersPagedDataService);
   private orgDataRegistry = inject(OrgDataRegistry);
   private injector = inject(Injector);
 

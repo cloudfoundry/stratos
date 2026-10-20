@@ -5,7 +5,6 @@ import { EndpointsDataService } from '@stratosui/store';
 import { firstValueFrom } from 'rxjs';
 
 import { CfCurrentUserRolesDataService } from '../cf-current-user-roles-data.service';
-import { CnsiUsersSnapshotService } from '../endpoint-data/cnsi-users-snapshot.service';
 import { CfUsersPagedDataService } from '../../shared/data-services/cf-users-paged-data.service';
 
 import {
@@ -38,7 +37,6 @@ export class CfUsersRolesDataService {
   private readonly cfRoles = inject(CfCurrentUserRolesDataService);
   private readonly endpoints = inject(EndpointsDataService);
   private readonly pagedUsers = inject(CfUsersPagedDataService);
-  private readonly usersSnapshot = inject(CnsiUsersSnapshotService);
 
   private readonly _cfGuid = signal<string>('');
   private readonly _users = signal<StUser[]>([]);
@@ -250,7 +248,7 @@ export class CfUsersRolesDataService {
         this.pagedUsers.applyRoleChange(cfGuid, userGuid, c.orgGuid, c.spaceGuid, bucketRoleName(c), c.add);
       }
       this.pagedUsers.markStale(cfGuid);
-      this.usersSnapshot.refreshIfLoaded(cfGuid);
+      this.pagedUsers.refreshIfLoaded(cfGuid);
     }
 
     // Keep the connected user's own role cache in step with the mutation

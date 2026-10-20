@@ -12,7 +12,6 @@ import { CfIdentityProvidersService } from '../../../../shared/data-services/cf-
 import { CfUsersRolesDataService } from '../../../../services/domain-data/cf-users-roles-data.service';
 import { UserInviteService } from '../../user-invites/user-invite.service';
 import { CfUsersPagedDataService } from '../../../../shared/data-services/cf-users-paged-data.service';
-import { CnsiUsersSnapshotService } from '../../../../services/endpoint-data/cnsi-users-snapshot.service';
 import { CfRoleChange } from '../../../../store/types/users-roles.types';
 import { OrgUserRoleNames } from '../../../../store/types/cf-user.types';
 import {
@@ -58,7 +57,6 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}): {
       { provide: UserInviteService, useValue: {} },
       { provide: TailwindSnackBarService, useValue: { open: vi.fn(), error: vi.fn() } },
       { provide: CfUsersPagedDataService, useValue: {} },
-      { provide: CnsiUsersSnapshotService, useValue: {} },
       { provide: EndpointsDataService, useValue: { endpointById: () => signal({ user: { admin: opts.admin ?? true } }) } },
       // Real RoleAssignmentComponent services (no stub, no overrideComponent).
       ...provideRoleAssignmentTestDeps(TEST_HARNESS_CFG),

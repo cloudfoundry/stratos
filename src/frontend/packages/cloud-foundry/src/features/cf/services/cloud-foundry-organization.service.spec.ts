@@ -5,7 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { CnsiUsersSnapshotService } from '../../../services/endpoint-data/cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../../shared/data-services/cf-users-paged-data.service';
 import { OrgDataRegistry } from '../../../services/endpoint-data/org-data.registry';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -49,7 +49,7 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
           useValue: { acquire: () => ({ load: () => of(undefined), org, spaces: signal([]) }) },
         },
         { provide: QuotaDataService, useValue: { orgQuota: () => { lookups++; return { value: countedQuota }; } } },
-        { provide: CnsiUsersSnapshotService, useValue: { users: () => users } },
+        { provide: CfUsersPagedDataService, useValue: { users: () => users } },
         { provide: ServiceCatalogDataService, useValue: { serviceInstanceCount: () => ({ value: signal(0) }) } },
         {
           provide: CloudFoundryUserProvidedServicesService,
@@ -109,7 +109,7 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
     sub.unsubscribe();
   });
 
-  // The tile shows a placeholder while the users snapshot loads; 'None' is
+  // The tile shows a placeholder while the users cache loads; 'None' is
   // only for a user with no role here (it used to show 'None' for both).
   it('gives no role string while the users are loading', () => {
     const svc = TestBed.inject(CloudFoundryOrganizationService);

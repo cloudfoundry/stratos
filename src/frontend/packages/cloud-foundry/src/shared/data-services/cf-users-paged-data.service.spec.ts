@@ -1,3 +1,4 @@
+import { ApplicationRef } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -126,6 +127,61 @@ describe('CfUsersPagedDataService', () => {
       await p;
       expect(svc.usersSignal(CNSI)().map(u => u.guid)).toEqual(['a']);
       expect(svc.lastFetched(CNSI)()).not.toBeNull();
+    });
+  });
+
+  describe('users (lazy read for summary tiles)', () => {
+    it('starts one drain on first read and stays null until it lands', async () => {
+      const sig = svc.users(CNSI);
+      expect(sig()).toBeNull();
+      expect(svc.users(CNSI)()).toBeNull(); // a second read joins the same drain
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await TestBed.inject(ApplicationRef).whenStable();
+      expect(sig()!.map(u => u.guid)).toEqual(['a']);
+    });
+
+    it('reads a loaded cache without another request', async () => {
+      const p = firstValueFrom(svc.loadUsers(CNSI));
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await p;
+      expect(svc.users(CNSI)()!.map(u => u.guid)).toEqual(['a']);
+      http.expectNone(P1);
+    });
+
+    // Tiles render 0 / None after a failure instead of a loading dash forever;
+    // the error stays readable through errorsByCnsi.
+    it('settles to an empty list on a failed drain', async () => {
+      const sig = svc.users(CNSI);
+      http.expectOne(P1).flush('boom', { status: 500, statusText: 'Server Error' });
+      await TestBed.inject(ApplicationRef).whenStable();
+      expect(sig()).toEqual([]);
+      expect(svc.errorsByCnsi()(CNSI)).toBeTruthy();
+    });
+
+    it('reflects an inline role patch without a refetch', async () => {
+      const sig = svc.users(CNSI);
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await TestBed.inject(ApplicationRef).whenStable();
+      svc.applyRoleChange(CNSI, 'a', 'org-1', undefined, 'manager', true);
+      expect(sig()![0].orgRoles).toEqual([{ orgGuid: 'org-1', roles: ['manager'] }]);
+    });
+  });
+
+  describe('refreshIfLoaded', () => {
+    it('does nothing for a CF whose users were never loaded', () => {
+      svc.refreshIfLoaded(CNSI);
+      http.expectNone(P1);
+    });
+
+    it('refetches a loaded cache and keeps the old rows visible meanwhile', async () => {
+      const sig = svc.users(CNSI);
+      http.expectOne(P1).flush({ resources: [mkUser('a')], pagination: { totalResults: 1, totalPages: 1 } });
+      await TestBed.inject(ApplicationRef).whenStable();
+      svc.refreshIfLoaded(CNSI);
+      expect(sig()!.map(u => u.guid)).toEqual(['a']);
+      http.expectOne(P1).flush({ resources: [mkUser('a'), mkUser('b')], pagination: { totalResults: 2, totalPages: 1 } });
+      await TestBed.inject(ApplicationRef).whenStable();
+      expect(sig()!.map(u => u.guid)).toEqual(['a', 'b']);
     });
   });
 

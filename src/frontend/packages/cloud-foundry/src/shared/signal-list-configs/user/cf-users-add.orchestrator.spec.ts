@@ -13,7 +13,6 @@ function makeDeps(over: Partial<{
   invite: any;
   snackBar: any;
   paged: any;
-  snapshot: any;
 }> = {}): AddUsersDeps {
   return {
     rolesData: {
@@ -30,8 +29,7 @@ function makeDeps(over: Partial<{
       ...over.invite,
     },
     snackBar: { error: vi.fn(), open: vi.fn(), ...over.snackBar },
-    paged: { markStale: vi.fn(), ...over.paged },
-    snapshot: { refreshIfLoaded: vi.fn(), ...over.snapshot },
+    paged: { markStale: vi.fn(), refreshIfLoaded: vi.fn(), ...over.paged },
     cfGuid: 'cf1',
   } as any;
 }
@@ -94,7 +92,7 @@ describe('addUsers', () => {
     // Cache refresh is owned by executeChanges on this path; orchestrator must
     // NOT call markStale/refreshIfLoaded a second time (no double-refresh).
     expect(deps.paged.markStale).not.toHaveBeenCalled();
-    expect(deps.snapshot.refreshIfLoaded).not.toHaveBeenCalled();
+    expect(deps.paged.refreshIfLoaded).not.toHaveBeenCalled();
 
     // Exactly ONE snackbar from the orchestrator; none from executeChanges (silent).
     const snackCalls = (deps.snackBar.open as any).mock.calls.length + (deps.snackBar.error as any).mock.calls.length;
@@ -132,7 +130,7 @@ describe('addUsers', () => {
 
     // Should refresh after associate-only
     expect(deps.paged.markStale).toHaveBeenCalledWith('cf1');
-    expect(deps.snapshot.refreshIfLoaded).toHaveBeenCalledWith('cf1');
+    expect(deps.paged.refreshIfLoaded).toHaveBeenCalledWith('cf1');
   });
 
   it('invite: invites role-free, then grants full matrix by returned userid', async () => {
@@ -183,7 +181,7 @@ describe('addUsers', () => {
 
     // No double-refresh: executeChanges owns the cache flush on this path.
     expect(deps.paged.markStale).not.toHaveBeenCalled();
-    expect(deps.snapshot.refreshIfLoaded).not.toHaveBeenCalled();
+    expect(deps.paged.refreshIfLoaded).not.toHaveBeenCalled();
 
     // Exactly one snackbar (orchestrator's reportSnackBar only).
     const snackCalls = (deps.snackBar.open as any).mock.calls.length + (deps.snackBar.error as any).mock.calls.length;
@@ -342,7 +340,7 @@ describe('addUsers', () => {
 
     // No double-refresh (executeChanges owns cache)
     expect(deps.paged.markStale).not.toHaveBeenCalled();
-    expect(deps.snapshot.refreshIfLoaded).not.toHaveBeenCalled();
+    expect(deps.paged.refreshIfLoaded).not.toHaveBeenCalled();
   });
 
   it('partial failure: multiple errored role-changes for one identity count as 1 failed identity', async () => {

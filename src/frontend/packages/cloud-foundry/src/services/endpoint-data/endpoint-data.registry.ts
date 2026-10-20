@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { from, Subject, Subscription } from 'rxjs';
 import { mergeMap, concatMap, tap } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
-import { CnsiUsersSnapshotService } from './cnsi-users-snapshot.service';
+import { CfUsersPagedDataService } from '../../shared/data-services/cf-users-paged-data.service';
 import { EndpointDataService } from './endpoint-data.service';
 import { EndpointDataShim } from './endpoint-data.shim';
 
@@ -19,7 +19,7 @@ export class EndpointDataRegistry implements OnDestroy {
   private readonly http = inject(HttpClient);
   private readonly shim = inject(EndpointDataShim);
   private readonly diagnostics = inject(StratosDiagnostics);
-  private readonly cnsiUsers = inject(CnsiUsersSnapshotService);
+  private readonly cnsiUsers = inject(CfUsersPagedDataService);
 
   private readonly instances = new Map<string, RegistryEntry>();
   private readonly cardQueue$ = new Subject<EndpointDataService>();
@@ -58,14 +58,13 @@ export class EndpointDataRegistry implements OnDestroy {
       )),
     ).subscribe();
     // Secondary pre-warm: services-domain details (instances + offerings +
-    // plans + brokers) followed by a lazy users-snapshot read. Serial across
-    // CFs to avoid stacking 4×N parallel CAPI hits on a multi-endpoint
-    // foundation. Users snapshot kick is fire-and-forget — the service's
-    // first-read sentinel triggers the /pp/v1/cf/users/:cnsi fetch
-    // internally and we don't need to await it.
+    // plans + brokers) followed by the users drain. Serial across CFs to
+    // avoid stacking 4×N parallel CAPI hits on a multi-endpoint foundation.
+    // The users load is fire-and-forget into the one per-CNSI users cache
+    // that the summary tiles and the Users tabs both read.
     this.prewarmSub = this.prewarmQueue$.pipe(
       concatMap(svc => from(svc.loadServicesDetails()).pipe(
-        tap({ complete: () => { this.cnsiUsers.users(svc.guid); } }),
+        tap({ complete: () => { this.cnsiUsers.loadUsers(svc.guid).subscribe(); } }),
       )),
     ).subscribe();
 
