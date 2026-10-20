@@ -2,7 +2,7 @@ import { Locator, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test-base';
 import { CFApiHelper } from '../../helpers/cf-api.helper';
 import { toast } from '../../helpers/fake-job.helper';
-import { TestBroker, next, pick } from '../../helpers/service-wizard.helper';
+import { TestBroker, createBrokerInstance, next, pick } from '../../helpers/service-wizard.helper';
 
 /**
  * Binding an existing managed service instance to an app from the app's
@@ -13,16 +13,6 @@ import { TestBroker, next, pick } from '../../helpers/service-wizard.helper';
  * test broker's offering and plan in the secrets profile
  * (cloudFoundry[0].services.testBroker); skipped without it.
  */
-
-/** Makes a managed instance of the broker's plan and waits until CF has it. Returns its guid. */
-async function createInstance(cfApi: CFApiHelper, spaceGuid: string, broker: TestBroker, name: string): Promise<string> {
-  const planGuid = await cfApi.findServicePlanGuid(broker.offering, spaceGuid, broker.plan);
-  expect(planGuid, `plan ${broker.plan} visible in the test space`).toBeTruthy();
-  await cfApi.createManagedServiceInstance(spaceGuid, name, planGuid!);
-  await expect.poll(async () => (await cfApi.findServiceInstanceByName(spaceGuid, name))?.last_operation?.state,
-    { timeout: 120000 }).toBe('succeeded');
-  return (await cfApi.findServiceInstanceByName(spaceGuid, name))!.guid;
-}
 
 /** Removes the named instance and any app bindings it has, if CF has it. */
 async function removeInstance(cfApi: CFApiHelper, spaceGuid: string, name: string): Promise<void> {
@@ -61,7 +51,7 @@ test.describe('app services tab: bind an existing instance', () => {
     const testApp = await applicationHelper.createTestApp(`e2e-bind-existing-app-${Date.now()}`);
     const appGuid = testApp.app.guid;
     try {
-      const guid = await createInstance(cfApi, spaceGuid, broker!, name);
+      const guid = await createBrokerInstance(cfApi, spaceGuid, broker!, name);
 
       await page.goto(`/applications/${cfGuid}/${appGuid}/services`);
       await page.locator('[data-test=list-sub-nav-add]').click();
