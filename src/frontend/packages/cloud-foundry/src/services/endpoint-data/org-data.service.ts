@@ -3,6 +3,7 @@ import { computed, signal, Signal } from '@angular/core';
 import { EMPTY, merge, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, finalize, map, shareReplay, tap, timeout } from 'rxjs/operators';
 import { StratosDiagnostics } from '../diagnostics/stratos-diagnostics.service';
+import { drainCfPages } from './drain-pages';
 import { StError, StOrgDetail, StSpace } from './stratos-types';
 import { extractHttpErrorMessage } from '@stratosui/store';
 
@@ -57,12 +58,7 @@ export class OrgDataService {
         tap(org => this._org.set(org)),
         catchError(err => { this.addError('org', err); return EMPTY; }),
       ),
-      this.http.get<{ resources: StSpace[]; totalResults: number }>(
-        `/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}/spaces`,
-      ).pipe(
-        tap(resp => this._spaces.set(resp.resources)),
-        catchError(err => { this.addError('spaces', err); return EMPTY; }),
-      ),
+      this.drainSpaces(),
     ).pipe(
       timeout(60_000),
       map(() => undefined),
@@ -75,6 +71,19 @@ export class OrgDataService {
       shareReplay({ bufferSize: 1, refCount: false }),
     );
     return this._inFlightLoad;
+  }
+
+  // Every page: without per_page the endpoint returns CF's default first
+  // page of 50, so larger orgs lost spaces from the tile, the count and the
+  // apps filtered by space.
+  private drainSpaces(): Observable<unknown> {
+    return drainCfPages<StSpace>(this.http, `/pp/v1/cf/org/${this.cnsiGuid}/${this.orgGuid}/spaces`).pipe(
+      tap(resp => {
+        this._spaces.set(resp.resources);
+        this._errors.update(errors => errors.filter(e => e.resource !== 'spaces'));
+      }),
+      catchError(err => { this.addError('spaces', err); return EMPTY; }),
+    );
   }
 
   // Merge a partial update into the cached org detail. Called by stepper

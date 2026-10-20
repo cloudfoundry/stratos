@@ -5,6 +5,9 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { OrgDataService } from './org-data.service';
 
+const SPACES_P1 = '/pp/v1/cf/org/cnsi-1/org-1/spaces?per_page=500&page=1';
+const SPACES_P2 = '/pp/v1/cf/org/cnsi-1/org-1/spaces?per_page=500&page=2';
+
 describe('OrgDataService', () => {
   let httpMock: HttpTestingController;
   let service: OrgDataService;
@@ -37,7 +40,7 @@ describe('OrgDataService', () => {
 
     service.load().subscribe();
     httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
-    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: mockSpaces, totalResults: 1 });
+    httpMock.expectOne(SPACES_P1).flush({ resources: mockSpaces, totalResults: 1 });
     await Promise.resolve();
 
     expect(service.org()?.name).toBe('My Org');
@@ -52,7 +55,8 @@ describe('OrgDataService', () => {
 
     service.load().subscribe({ error: () => {} });
     httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
-    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').error(new ErrorEvent('Network error'));
+    // A non-transient failure: the drain retries network errors and 5xx first.
+    httpMock.expectOne(SPACES_P1).flush('denied', { status: 403, statusText: 'Forbidden' });
     await Promise.resolve();
 
     expect(service.org()?.name).toBe('My Org');
@@ -67,7 +71,7 @@ describe('OrgDataService', () => {
       { errors: [{ code: 10010, title: 'CF-OrganizationNotFound', detail: 'Organization not found' }] },
       { status: 404, statusText: 'Not Found' },
     );
-    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: [] });
+    httpMock.expectOne(SPACES_P1).flush({ resources: [] });
     await Promise.resolve();
 
     expect(service.errors().find(e => e.resource === 'org')?.message).toBe('Organization not found');
@@ -84,7 +88,7 @@ describe('OrgDataService', () => {
     // Concurrent callers must share one HTTP fan-out — expectOne would fail if
     // any caller spawned its own request.
     httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
-    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: mockSpaces, totalResults: 0 });
+    httpMock.expectOne(SPACES_P1).flush({ resources: mockSpaces, totalResults: 0 });
     await Promise.resolve();
 
     expect(service.org()?.name).toBe('My Org');
@@ -95,20 +99,35 @@ describe('OrgDataService', () => {
 
     service.load().subscribe();
     httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
-    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: [], totalResults: 0 });
+    httpMock.expectOne(SPACES_P1).flush({ resources: [], totalResults: 0 });
     await Promise.resolve();
 
     // Second call: cache is hot — expectNone for both URLs.
     service.load().subscribe();
     httpMock.expectNone('/pp/v1/cf/org/cnsi-1/org-1');
-    httpMock.expectNone('/pp/v1/cf/org/cnsi-1/org-1/spaces');
+    httpMock.expectNone(SPACES_P1);
+  });
+
+  const anOrg = () => ({ guid: 'org-1', name: 'My Org', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [] });
+  const aSpace = (guid: string) => ({ guid, name: guid, orgGuid: 'org-1', cnsiGuid: 'cnsi-1', createdAt: '', updatedAt: '' } as any);
+
+  // Without per_page the endpoint returns CF's default first page (50), and
+  // an org with 61 spaces showed "50" on its Spaces tile.
+  it('drains every page of the org spaces', async () => {
+    service.load().subscribe();
+    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(anOrg());
+    httpMock.expectOne(SPACES_P1).flush({ resources: [aSpace('sp-1')], pagination: { totalResults: 2, totalPages: 2 } });
+    await new Promise<void>(resolve => setTimeout(resolve, 0));
+    httpMock.expectOne(SPACES_P2).flush({ resources: [aSpace('sp-2')], pagination: { totalResults: 2, totalPages: 2 } });
+    await Promise.resolve();
+    expect(service.spaces().map(s => s.guid)).toEqual(['sp-1', 'sp-2']);
   });
 
   it('patch() merges partial updates into the cached org detail', async () => {
     const mockOrg = { guid: 'org-1', name: 'Old', status: 'active', labels: {}, annotations: {}, createdAt: '', updatedAt: '', spaces: [], quotaGuid: 'q-1' };
     service.load().subscribe();
     httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
-    httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: [], totalResults: 0 });
+    httpMock.expectOne(SPACES_P1).flush({ resources: [], totalResults: 0 });
     await Promise.resolve();
 
     service.patch({ name: 'New', quotaGuid: 'q-2' });
@@ -131,7 +150,7 @@ describe('OrgDataService', () => {
     const loadWarm = async () => {
       service.load().subscribe();
       httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1').flush(mockOrg);
-      httpMock.expectOne('/pp/v1/cf/org/cnsi-1/org-1/spaces').flush({ resources: [sp('sp-1')], totalResults: 1 });
+      httpMock.expectOne(SPACES_P1).flush({ resources: [sp('sp-1')], totalResults: 1 });
       await Promise.resolve();
     };
 

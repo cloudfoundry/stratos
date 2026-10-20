@@ -17,6 +17,7 @@ import {
   TailwindSnackBarService,
 } from '@stratosui/core';
 
+import { drainCfPages } from '../../../../services/endpoint-data/drain-pages';
 import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
 import { StSpace } from '../../../../services/endpoint-data/stratos-types';
 import { extractHttpErrorMessage } from '@stratosui/store';
@@ -68,12 +69,10 @@ export class ApplyQuotaToSpacesDialogComponent {
   );
 
   constructor() {
-    // Same spaces-in-org endpoint OrgDataService reads. Fetched fresh here so
-    // the dialog is self-contained (no dependency on a warmed org-detail cache).
-    this.http
-      .get<{ resources: StSpace[]; totalResults: number }>(
-        `/pp/v1/cf/org/${this.data.cfGuid}/${this.data.orgGuid}/spaces`,
-      )
+    // Same spaces-in-org endpoint OrgDataService reads, every page. Fetched
+    // fresh here so the dialog is self-contained (no dependency on a warmed
+    // org-detail cache).
+    drainCfPages<StSpace>(this.http, `/pp/v1/cf/org/${this.data.cfGuid}/${this.data.orgGuid}/spaces`)
       .subscribe({
         next: resp => {
           this.spaces.set(resp?.resources ?? []);
