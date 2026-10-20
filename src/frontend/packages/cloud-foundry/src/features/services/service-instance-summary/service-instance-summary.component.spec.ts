@@ -4,7 +4,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter, Router } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
 import { ServiceInstanceSummaryComponent } from './service-instance-summary.component';
@@ -226,5 +226,110 @@ describe('ServiceInstanceSummaryComponent — unknown results', () => {
       'Unbind "my-app": the operation ended, but its result could not be determined. This page shows the current state.',
     );
     expect(catalog.serviceBindingsForInstance).toHaveBeenCalledTimes(2);
+  });
+});
+
+describe('ServiceInstanceSummaryComponent — operation in progress (#6002)', () => {
+  // A read the test settles by hand: loading until resolve() is called.
+  function pendingRead() {
+    const value = signal<StServiceInstance | null>(null);
+    const isLoading = signal(true);
+    return {
+      source: { value: value.asReadonly(), isLoading: isLoading.asReadonly(), error: signal(null).asReadonly() } as SignalSource<StServiceInstance | null>,
+      resolve: (si: StServiceInstance) => { value.set(si); isLoading.set(false); },
+    };
+  }
+  const withState = (state: string) =>
+    ({ ...managed, lastOperation: { type: 'update', state, description: '' } }) as unknown as StServiceInstance;
+
+  let reads: Array<ReturnType<typeof pendingRead>>;
+
+  function build(first: StServiceInstance) {
+    reads = [];
+    const catalog = {
+      serviceInstance: vi.fn(() => {
+        const read = pendingRead();
+        reads.push(read);
+        if (reads.length === 1) read.resolve(first);
+        return read.source;
+      }),
+      serviceBindingsForInstance: vi.fn(() => source([])),
+    };
+    TestBed.configureTestingModule({
+      imports: [ServiceInstanceSummaryComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        provideNoopAnimations(),
+        { provide: ServiceCatalogDataService, useValue: catalog },
+        { provide: EndpointDataRegistry, useValue: { acquire: vi.fn(), release: vi.fn() } },
+        { provide: EntityDeleteController, useValue: {} },
+        { provide: CfServiceInstancesSignalConfigService, useValue: {} },
+        { provide: ConfirmationDialogService, useValue: {} },
+        { provide: TailwindSnackBarService, useValue: {} },
+        { provide: TailwindDialogService, useValue: { open: vi.fn() } },
+      ],
+    });
+    const fixture = TestBed.createComponent(ServiceInstanceSummaryComponent);
+    TestBed.tick();
+    return fixture;
+  }
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    vi.useFakeTimers();
+  });
+  afterEach(() => vi.useRealTimers());
+
+  it('re-reads the instance every 10 s while its operation is in progress', async () => {
+    build(withState('in progress'));
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(reads.length).toBe(2);
+
+    reads[1].resolve(withState('in progress'));
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(reads.length).toBe(3);
+  });
+
+  it('stops re-reading once the operation ends', async () => {
+    build(withState('in progress'));
+    await vi.advanceTimersByTimeAsync(10000);
+    reads[1].resolve(withState('succeeded'));
+    TestBed.tick();
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(reads.length).toBe(2);
+  });
+
+  it('keeps showing the instance while a re-read is loading', async () => {
+    const fixture = build(withState('in progress'));
+    const page = fixture.componentInstance;
+    await vi.advanceTimersByTimeAsync(10000);
+    TestBed.tick();
+    expect(reads[1].source.isLoading()).toBe(true);
+    expect(page.loading()).toBe(false);
+    expect(page.view()?.status).toBe('in progress');
+  });
+
+  // CF reports a queued operation as "initial" before "in progress".
+  it('re-reads the instance while its operation is queued', async () => {
+    build(withState('initial'));
+    await vi.advanceTimersByTimeAsync(10000);
+    expect(reads.length).toBe(2);
+  });
+
+  it('does not re-read an instance with no operation in progress', async () => {
+    build(withState('succeeded'));
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(reads.length).toBe(1);
+  });
+
+  it('stops re-reading when the page closes', async () => {
+    const fixture = build(withState('in progress'));
+    fixture.destroy();
+    await vi.advanceTimersByTimeAsync(60000);
+    expect(reads.length).toBe(1);
   });
 });
