@@ -4,7 +4,7 @@ import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthState, RouterRedirect } from '@stratosui/store';
-import { Observable, combineLatest, BehaviorSubject } from 'rxjs';
+import { Observable, combineLatest, BehaviorSubject, firstValueFrom } from 'rxjs';
 import { map, startWith, distinctUntilChanged, shareReplay, filter, tap, switchMap, take } from 'rxjs/operators';
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
@@ -237,7 +237,7 @@ export class LoginPageComponent implements OnInit {
       this.navigationInProgress$.next(true);
       try {
         // Get current auth state
-        const auth = await this.auth$.pipe(take(1)).toPromise();
+        const auth = await firstValueFrom(this.auth$, { defaultValue: undefined });
         if (!auth) {
           // auth$ only completes without a value if the page is torn down mid-redirect
           return;
