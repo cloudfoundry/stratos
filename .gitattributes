@@ -1,6 +1,9 @@
 # Maintain line endings to be LF on checkout in case system defaults convert them to CRLF
 * text eol=lf
 
+# Upstream error bodies are test fixtures kept byte for byte, CRLFs included
+src/frontend/packages/store/src/testdata/** -text
+
 # Treat images, font and icon files as binary
 *.png binary
 *.woff binary
