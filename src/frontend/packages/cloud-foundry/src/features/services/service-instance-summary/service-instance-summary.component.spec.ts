@@ -335,7 +335,7 @@ describe('ServiceInstanceSummaryComponent — operation in progress (#6002)', ()
 });
 
 describe('ServiceInstanceSummaryComponent — last operation (#6002)', () => {
-  function render(si: StServiceInstance): string {
+  async function renderElement(si: StServiceInstance): Promise<HTMLElement> {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [ServiceInstanceSummaryComponent],
@@ -358,25 +358,37 @@ describe('ServiceInstanceSummaryComponent — last operation (#6002)', () => {
       ],
     });
     const fixture = TestBed.createComponent(ServiceInstanceSummaryComponent);
-    fixture.detectChanges();
-    return (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+    await fixture.whenStable();
+    return fixture.nativeElement as HTMLElement;
   }
+  const render = async (si: StServiceInstance): Promise<string> =>
+    (await renderElement(si)).textContent!.replace(/\s+/g, ' ');
   const withOp = (type: string, state: string, description: string) =>
     ({ ...managed, lastOperation: { type, state, description } }) as unknown as StServiceInstance;
 
-  it('names the operation and shows a failure\'s reason as text, markup stripped', () => {
-    const text = render(withOp('update', 'failed', '<p>Plan <b>large</b> is not available</p>'));
+  it('names the operation and shows a failure\'s reason as text, markup stripped', async () => {
+    const text = await render(withOp('update', 'failed', '<p>Plan <b>large</b> is not available</p>'));
     expect(text).toContain('Last operation: Update failed — Plan large is not available');
     expect(text).not.toContain('<b>');
   });
 
-  it('does not show the description of an operation that did not fail', () => {
-    const text = render(withOp('create', 'succeeded', 'Provisioned in 3 s'));
+  it('does not show the description of an operation that did not fail', async () => {
+    const text = await render(withOp('create', 'succeeded', 'Provisioned in 3 s'));
     expect(text).toContain('Last operation: Create succeeded');
     expect(text).not.toContain('Provisioned in 3 s');
   });
 
-  it('hides the line when there is no last operation', () => {
-    expect(render(managed)).not.toContain('Last operation');
+  it('hides the line when there is no last operation', async () => {
+    expect(await render(managed)).not.toContain('Last operation');
+  });
+
+  it('shows an HTML error page in the reason as its heading and message', async () => {
+    const page = '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center>'
+      + '<hr><center>nginx</center></body></html>';
+    const el = await renderElement(withOp('create', 'failed', page));
+    expect(el.textContent!.replace(/\s+/g, ' ')).toContain('Last operation: Create failed — 502 Bad Gateway nginx');
+    const heading = el.querySelector('app-error-text .font-semibold');
+    expect(heading?.textContent).toBe('502 Bad Gateway');
+    expect(el.querySelector('app-error-text')?.textContent).toBe('502 Bad Gateway\nnginx');
   });
 });
