@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, NgZone, OnChanges, inject } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, inject } from '@angular/core';
 
 @Directive({
 selector: '[appFocus]',
@@ -8,7 +8,6 @@ export class FocusDirective implements OnChanges {
   @Input() appFocus!: boolean;
 
   private element = inject(ElementRef);
-  private ngZone = inject(NgZone);
 
   public ngOnChanges() {
     if (this.appFocus) {
@@ -17,8 +16,6 @@ export class FocusDirective implements OnChanges {
   }
 
   private focus() {
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => this.element.nativeElement.focus(), 250);
-    });
+    setTimeout(() => this.element.nativeElement.focus(), 250);
   }
 }

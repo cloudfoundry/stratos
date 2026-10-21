@@ -1,5 +1,5 @@
 import { DOCUMENT } from '@angular/common';
-import { Injectable, NgZone, inject } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { TailwindDialogService } from './shared/services/tailwind-dialog.service';
 import { AuthState } from '@stratosui/store';
@@ -21,7 +21,6 @@ import { DashboardSignalService } from './core/signals/dashboard-signal.service'
 export class LoggedInService {
   private document = inject<Document>(DOCUMENT);
   private dialog = inject(TailwindDialogService);
-  private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private authSignals = inject(AuthSignalService);
   private dashboardSignals = inject(DashboardSignalService);
@@ -100,29 +99,23 @@ export class LoggedInService {
     }
   }
 
-  // Run outside Angular zone to prevent E2E test timeouts
-  // Polling intervals should not block Angular change detection
   private openSessionCheckerPoll() {
     this.closeSessionCheckerPoll();
     // Ensure interval configuration is valid
     const intervalTime = this.checkSessionInterval || 5000;
-    this.ngZone.runOutsideAngular(() => {
-      this.sessionChecker = interval(intervalTime)
-        .pipe(
-          withLatestFrom(
-            this.dashboardState$,
-            this.auth$
-          ),
-          tap(([, dashboardState, authState]) => {
-            if (!authState) {
-              return;
-            }
-            this.ngZone.run(() => {
-              this._checkSession(dashboardState, authState);
-            });
-          })
-        ).subscribe();
-    });
+    this.sessionChecker = interval(intervalTime)
+      .pipe(
+        withLatestFrom(
+          this.dashboardState$,
+          this.auth$
+        ),
+        tap(([, dashboardState, authState]) => {
+          if (!authState) {
+            return;
+          }
+          this._checkSession(dashboardState, authState);
+        })
+      ).subscribe();
   }
 
   private closeSessionCheckerPoll() {
