@@ -18,7 +18,6 @@ describe('HelmReleaseValuesTabComponent', () => {
         HelmReleaseValuesTabComponent,
       ],
       providers: [
-        // ...HelmBaseTestProviders,
         ...HelmReleaseProviders,
         TabNavService,
 

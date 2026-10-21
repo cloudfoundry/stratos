@@ -1,10 +1,5 @@
-import { HttpClient, HttpHandler } from '@angular/common/http';
 import { NgModule } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
-import { RouterTestingModule } from '@angular/router/testing';
-import { CoreModule, SharedModule } from '@stratosui/core';
-import { CoreTestingModule } from '../../../core/test-framework/core-test.modules';
 
 import {
   CATALOGUE_ENTITIES,
@@ -13,7 +8,6 @@ import {
   TestEntityCatalog,
 } from '../../../store/src/public-api';
 import { generateStratosEntities } from '../../../store/src/stratos-entity-generator';
-import { createBasicStoreModule } from '../../../store/testing/public-api';
 import { HelmReleaseGuid } from '../kubernetes/workloads/workload.types';
 import { generateHelmEntities } from './helm-entity-generator';
 
@@ -58,19 +52,4 @@ export const HelmReleaseGuidMock = {
     guid: '123:4'
   }
 };
-
-export const HelmBaseTestModules = [
-  CoreTestingModule,
-  createBasicStoreModule(),
-  HelmTestingModule,
-  RouterTestingModule,
-  CoreModule,
-  NoopAnimationsModule,
-  SharedModule
-].filter(Boolean);
-
-export const HelmBaseTestProviders = [
-  HttpClient,
-  HttpHandler
-];
 
