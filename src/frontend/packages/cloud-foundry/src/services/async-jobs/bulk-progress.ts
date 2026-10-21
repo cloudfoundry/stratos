@@ -5,7 +5,7 @@ import { jobTrackingLimitMs, pollJob } from './write-with-job';
 import { formatLimit } from './unknown-outcome-message';
 import type { StratosJob } from './async-job.types';
 import type { BulkResult } from '../../shared/signal-list-configs/route/cf-routes-signal-config.service';
-import { extractHttpErrorMessage, stripMarkup } from '@stratosui/store';
+import { extractHttpErrorMessage, leadPieces, stripMarkup } from '@stratosui/store';
 
 export interface BulkTally {
   settled: number;
@@ -129,7 +129,7 @@ export async function runBulkWithProgress(o: BulkProgressOptions): Promise<void>
     result = await o.op();
   } catch (err: unknown) {
     progressRef?.dismiss();
-    o.snackBar.error(`Bulk ${o.verb} failed: ${extractHttpErrorMessage(err)}`);
+    o.snackBar.error(leadPieces(`Bulk ${o.verb} failed`, err));
     return;
   } finally {
     o.bulkRunning?.set(false);

@@ -21,7 +21,7 @@ import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-p
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StSpaceQuota } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces } from '@stratosui/store';
 
 // Signal-native CF Space Quotas tab (rendered inside the org page —
 // /cloud-foundry/:cnsi/organizations/:org/space-quota-definitions).
@@ -239,7 +239,7 @@ export class CloudFoundryOrganizationSpaceQuotasComponent {
             try {
               await this.quotasConfig.deleteQuota(q.cnsiGuid, q.guid);
             } catch (err: unknown) {
-              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
+              this.snackBar.error(leadPieces('Delete failed', err));
             }
           });
         },

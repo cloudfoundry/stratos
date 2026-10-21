@@ -20,7 +20,7 @@ import { CfOrgQuotasSignalConfigService } from '../../../../shared/signal-list-c
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import type { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces } from '@stratosui/store';
 
 // Signal-native CF Org Quotas tab. Read-only list of org-level quota
 // definitions on the foundation. Replaces the legacy ListConfig +
@@ -212,7 +212,7 @@ export class CloudFoundryQuotasComponent {
             try {
               await this.quotasConfig.deleteQuota(q.cnsiGuid, q.guid);
             } catch (err: unknown) {
-              this.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
+              this.snackBar.error(leadPieces('Delete failed', err));
             }
           });
         },

@@ -19,7 +19,7 @@ import {
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { IsolationSegmentDataService } from '../../../services/endpoint-data/isolation-segment-data.service';
 import { StOrg } from '../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces } from '@stratosui/store';
 
 // ─── Dialog data ──────────────────────────────────────────────────────────────
 
@@ -118,7 +118,7 @@ export class EntitleIsoSegmentOrgsDialogComponent {
       // M1: do NOT touch `submitting` after close() — the view is destroyed.
       this.dialogRef.close(true);
     } catch (err: unknown) {
-      this.snackBar.error(`Entitle failed: ${extractHttpErrorMessage(err)}`);
+      this.snackBar.error(leadPieces('Entitle failed', err));
       this.submitting.set(false);
     }
   }

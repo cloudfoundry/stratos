@@ -21,7 +21,7 @@ import {
   CfSecurityGroupsSignalConfigService,
   SecurityGroupSpaceBindLifecycle,
 } from '../../../../shared/signal-list-configs/cf-security-groups/cf-security-groups-signal-config.service';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces } from '@stratosui/store';
 
 // ─── Dialog data ──────────────────────────────────────────────────────────────
 
@@ -126,7 +126,7 @@ export class BindSecurityGroupSpacesDialogComponent {
       // M1: do NOT touch `submitting` after close() — the view is destroyed.
       this.dialogRef.close(true);
     } catch (err: unknown) {
-      this.snackBar.error(`Bind failed: ${extractHttpErrorMessage(err)}`);
+      this.snackBar.error(leadPieces('Bind failed', err));
       this.submitting.set(false);
     }
   }

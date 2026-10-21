@@ -58,7 +58,7 @@ import {
   ShareServiceInstanceDialogData,
 } from './share-service-instance-dialog.component';
 import { AppBusyComponent } from '@stratosui/core';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces } from '@stratosui/store';
 
 interface BindingRow {
   guid: string;
@@ -349,7 +349,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
           this.snackBar.error(unknownOutcomeMessage(`Unbind "${row.appName}"`, 'This page', how));
         }
       } catch (err: unknown) {
-        this.snackBar.error(`Unbind failed: ${extractHttpErrorMessage(err)}`);
+        this.snackBar.error(leadPieces('Unbind failed', err));
       }
     });
   }

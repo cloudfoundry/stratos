@@ -20,7 +20,7 @@ import {
 import { drainCfPages } from '../../../../services/endpoint-data/drain-pages';
 import { QuotaDataService } from '../../../../services/endpoint-data/quota-data.service';
 import { StSpace } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { extractHttpErrorMessage, leadPieces } from '@stratosui/store';
 
 // ─── Dialog data ────────────────────────────────────────────────────────────
 
@@ -119,7 +119,7 @@ export class ApplyQuotaToSpacesDialogComponent {
       // Do NOT touch signals after close() — the view is destroyed.
       this.dialogRef.close(true);
     } catch (err: unknown) {
-      this.snackBar.error(`Failed to apply quota: ${extractHttpErrorMessage(err)}`);
+      this.snackBar.error(leadPieces('Failed to apply quota', err));
       this.submitting.set(false);
     }
   }

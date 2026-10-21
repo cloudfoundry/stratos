@@ -61,7 +61,29 @@ describe('buildServiceInstanceRowActions — Delete failure', () => {
     buildServiceInstanceRowActions(managed(), d).find(a => a.label === 'Delete')!.invoke();
     await confirmed!();
 
-    expect(d.snackBar.error).toHaveBeenCalledWith('Delete failed: deprovision could not be completed: instance is busy');
+    expect(d.snackBar.error).toHaveBeenCalledWith([
+      { text: 'Delete failed: deprovision could not be completed: instance is busy', style: 'text' },
+    ]);
+  });
+
+  it('shows a broker\'s HTML error page as its heading and message', async () => {
+    const httpError = new HttpErrorResponse({
+      error: { errors: [{ code: 10001, title: 'CF-ServiceBrokerBadResponse', detail: '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>' }] },
+      status: 502, statusText: 'Bad Gateway',
+    });
+    let confirmed: (() => Promise<void>) | undefined;
+    const d = deps({
+      confirmDialog: { open: vi.fn((_c: unknown, cb: () => Promise<void>) => { confirmed = cb; }) } as unknown as ServiceInstanceRowActionDeps['confirmDialog'],
+      deleteServiceInstance: vi.fn().mockRejectedValue(httpError),
+    });
+    buildServiceInstanceRowActions(managed(), d).find(a => a.label === 'Delete')!.invoke();
+    await confirmed!();
+
+    expect(d.snackBar.error).toHaveBeenCalledWith([
+      { text: 'Delete failed: ', style: 'text' },
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx', style: 'text' },
+    ]);
   });
 });
 
