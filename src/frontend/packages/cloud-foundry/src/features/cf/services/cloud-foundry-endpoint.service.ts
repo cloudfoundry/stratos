@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, Injector, Signal, computed, inject, signal } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { EMPTY, Observable, Subscription, from } from 'rxjs';
-import { catchError, take, filter, map, publishReplay, refCount } from 'rxjs/operators';
+import { catchError, take, filter, map, shareReplay } from 'rxjs/operators';
 import { of } from 'rxjs';
 
 import { CfInfoDataRegistry } from '../../../services/endpoint-data/cf-info-data.registry';
@@ -242,7 +242,7 @@ export class CloudFoundryEndpointService {
     this.currentUser$ = this.endpoint$.pipe(
       map(e => e.entity.user),
       filter((user): user is EndpointUser => !!user),
-      take(1), publishReplay(1), refCount());
+      take(1), shareReplay({ bufferSize: 1, refCount: true }));
   }
 
   public getAppsInOrgViaAllApps(org: APIResource<IOrganization>): Observable<APIResource<IApp>[]> {

@@ -8,7 +8,7 @@ import {
   getFullEndpointApiUrl,
 } from '@stratosui/store';
 import { Observable } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 
 export interface MetricsEndpointProvider {
   provider: EndpointModel;
@@ -53,8 +53,7 @@ export class MetricsService {
         });
         return result;
       }),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.haveNoMetricsEndpoints$ = this.endpoints$.pipe(
@@ -62,8 +61,7 @@ export class MetricsService {
         const metrics = endpoints.filter(e => e.cnsi_type === 'metrics');
         return metrics.length === 0;
       }),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.haveNoConnectedMetricsEndpoints$ = this.endpoints$.pipe(
@@ -72,8 +70,7 @@ export class MetricsService {
         const connected = metrics.filter(e => !!e.user);
         return connected.length === 0;
       }),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
   }
 }

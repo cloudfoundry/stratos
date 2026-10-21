@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of } from 'rxjs';
-import { take, defaultIfEmpty, map, publishReplay, refCount, startWith, switchMap } from 'rxjs/operators';
+import { take, defaultIfEmpty, map, shareReplay, startWith, switchMap } from 'rxjs/operators';
 
 import {
   AppInputDirective,
@@ -86,14 +86,12 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
     this.canAdd$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => userPerms.can(ffSetPermConfig, activeRouteCfOrgSpace.cfGuid)),
       take(1),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
     this.canRemove$ = waitForCFPermissions(cfRoles, activeRouteCfOrgSpace.cfGuid).pipe(
       switchMap(() => userPerms.can(ffRemovePermConfig, activeRouteCfOrgSpace.cfGuid)),
       take(1),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
 
     const canAddRemove = combineLatest([this.canAdd$, this.canRemove$]);
@@ -106,8 +104,7 @@ export class ManageUsersSetUsernamesComponent implements OnInit {
       map(() => false),
       take(1),
       startWith(true),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
   }

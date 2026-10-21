@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, Input, OnInit, ViewChild, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 
 import { ApplicationService, RunningInstancesComponent } from '@stratosui/cloud-foundry';
 import { MetadataItemComponent } from '@stratosui/core';
@@ -66,14 +66,12 @@ export class CardAutoscalerDefaultComponent implements OnInit {
     });
 
     this.appAutoscalerPolicy$ = toObservable(triState, { injector: this.injector }).pipe(
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.applicationInstances$ = this.applicationService.app$.pipe(
       map(({ entity }) => entity ? entity.entity.instances : null),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
     this.cdr.markForCheck();
   }

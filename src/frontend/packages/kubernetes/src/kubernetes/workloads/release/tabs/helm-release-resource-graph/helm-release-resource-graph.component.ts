@@ -7,7 +7,7 @@ import { CustomTooltipDirective } from '../../../../../../../core/src/shared/com
 import { Edge, GraphComponent, LayoutService, NgxGraphZoomOptions } from '@swimlane/ngx-graph';
 import { SidePanelService } from '@stratosui/core';
 import { combineLatest, Observable, Subject, Subscription } from 'rxjs';
-import { take, distinctUntilChanged, filter, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { take, distinctUntilChanged, filter, map, shareReplay, startWith } from 'rxjs/operators';
 
 import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
 import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewer/analysis-report-runner/analysis-report-runner.component';
@@ -113,8 +113,7 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   private analysisReportUpdated$ = this.analysisReportUpdated.pipe(
     startWith(null),
     distinctUntilChanged(),
-    publishReplay(1),
-    refCount()
+    shareReplay({ bufferSize: 1, refCount: true })
   );
   protected helper = inject(HelmReleaseHelperService);
   public analyzerService = inject(KubernetesAnalysisService);

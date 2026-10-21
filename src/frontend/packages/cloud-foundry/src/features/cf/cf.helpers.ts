@@ -1,6 +1,6 @@
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
-import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -304,8 +304,7 @@ export function waitForCFPermissions(
   return cfRoles.cfEndpointRolesState$(cfGuid).pipe(
     filter(cf => cf && cf.state.initialised),
     take(1),
-    publishReplay(1),
-    refCount(),
+    shareReplay({ bufferSize: 1, refCount: true }),
   );
 }
 

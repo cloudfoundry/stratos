@@ -13,7 +13,7 @@ import {
 import { RouterLink } from '@angular/router';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
-import { take, filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { take, filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
@@ -244,8 +244,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
         }
         return resource;
       }),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
 
     this.hasPodMetrics$ = props.resourceKind === 'pod' ?

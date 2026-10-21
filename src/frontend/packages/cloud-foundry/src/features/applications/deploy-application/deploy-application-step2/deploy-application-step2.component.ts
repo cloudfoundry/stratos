@@ -29,8 +29,7 @@ import {
   filter,
   map,
   pairwise,
-  publishReplay,
-  refCount,
+  shareReplay,
   startWith,
   switchMap,
   take,
@@ -310,8 +309,7 @@ export class DeployApplicationStep2Component
     ]).pipe(
       filter(([cfGuid, sourceType]) => !!cfGuid && !!sourceType),
       switchMap(([cfGuid, sourceType]) => this.appDeploySourceTypes.canDeployType(cfGuid, sourceType.id)),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
 
     this.stepperText$ = this.canDeployType$.pipe(
@@ -373,8 +371,7 @@ export class DeployApplicationStep2Component
           );
         }),
         map(([branches, _branchName]) => branches),
-        publishReplay(1),
-        refCount()
+        shareReplay({ bufferSize: 1, refCount: true })
       );
 
     const updateBranchAndCommit = observableCombineLatest([
