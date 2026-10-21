@@ -4,6 +4,9 @@
   closing it at once, and it starts counting again after a successful
   connection. Before, a stream that connected and later dropped could
   stop reconnecting.
+- The application log stream tab now says when it is retrying the
+  connection (with the attempt number) and when it has given up,
+  instead of showing "Connecting to log stream..." for good.
 
 [Maintainability]
 - Replaced the RxJS APIs deprecated in RxJS 7 (publishReplay/refCount,
