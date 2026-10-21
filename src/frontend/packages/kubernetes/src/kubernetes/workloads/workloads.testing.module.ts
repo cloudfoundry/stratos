@@ -1,9 +1,5 @@
 import { NgModule } from '@angular/core';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
 
-import { CoreModule, SharedModule } from '../../../../core/src/public-api';
-import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
 import {
   CATALOGUE_ENTITIES,
   entityCatalog,
@@ -11,9 +7,8 @@ import {
   TestEntityCatalog,
 } from '../../../../store/src/public-api';
 import { generateStratosEntities } from '../../../../store/src/stratos-entity-generator';
-import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '../../../../store/testing/public-api';
+import { STORE_TEST_PROVIDERS } from '../../../../store/testing/public-api';
 import { generateHelmEntities } from '../../helm/helm-entity-generator';
-import { HelmTestingModule } from '../../helm/helm-testing.module';
 import { kubeEntityCatalog } from '../kubernetes-entity-generator';
 
 @NgModule({
@@ -38,14 +33,3 @@ import { kubeEntityCatalog } from '../kubernetes-entity-generator';
   ]
 })
 export class WorkloadsTestingModule { }
-
-export const WorkloadsBaseTestingModule = [
-  AppTestModule,
-  RouterTestingModule,
-  CoreModule,
-  createBasicStoreModule(),
-  NoopAnimationsModule,
-  SharedModule,
-  HelmTestingModule,
-  WorkloadsTestingModule
-];
