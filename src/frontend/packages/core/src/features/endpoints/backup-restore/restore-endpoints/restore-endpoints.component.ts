@@ -119,10 +119,10 @@ export class RestoreEndpointsComponent {
         reject(new Error(`Failed to restore backup` + (errorMessage ? `: ${errorMessage}` : '')));
       };
 
-      const restoreBackup = () => this.service.restoreBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
-        res => res !== null ? restoreSuccess() : backupFailure('Restore service returned no response'),
-        backupFailure
-      );
+      const restoreBackup = () => this.service.restoreBackup().pipe(take(1), defaultIfEmpty(null)).subscribe({
+        next: res => res !== null ? restoreSuccess() : backupFailure('Restore service returned no response'),
+        error: backupFailure
+      });
 
       this.confirmDialog.openWithCancel(confirmation, restoreBackup, userCancelledDialog);
     });

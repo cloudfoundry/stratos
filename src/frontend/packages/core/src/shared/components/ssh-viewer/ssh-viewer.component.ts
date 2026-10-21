@@ -153,8 +153,8 @@ export class SshViewerComponent implements OnInit, OnDestroy {
     this.xterm.reset();
     this.msgSubscription = this.sshStream
       .pipe(takeUntil(this.destroy$))
-      .subscribe(
-        (data: string) => {
+      .subscribe({
+        next: (data: string) => {
           // Check for a window title message
           if (!this.isWindowTitle(data)) {
             for (const c of data.split(' ')) {
@@ -162,13 +162,13 @@ export class SshViewerComponent implements OnInit, OnDestroy {
             }
           }
         },
-        (_err) => {
+        error: () => {
           this.disconnect();
         },
-        () => {
+        complete: () => {
           this.disconnect();
         }
-      );
+      });
   }
   private isWindowTitle(data: string): boolean {
     const chars = data.split(' ');

@@ -57,8 +57,8 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   }
 
   private loadDocument() {
-    this.httpClient.get(this._documentUrl, { responseType: 'text' }).subscribe(
-      (markText: string) => {
+    this.httpClient.get(this._documentUrl, { responseType: 'text' }).subscribe({
+      next: (markText: string) => {
         if (markText && markText.length > 0) {
           // Basic sanitization - Note: marked no longer supports sanitize option
           const renderer = new marked.Renderer();
@@ -71,7 +71,8 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
           this.markdownHtml.set(typeof result === 'string' ? result : '');
         }
       },
-      (error: any) => console.warn(`Failed to fetch markdown with url ${this._documentUrl}: `, error));
+      error: (error: any) => console.warn(`Failed to fetch markdown with url ${this._documentUrl}: `, error)
+    });
   }
 
   public markdownRendered() {
