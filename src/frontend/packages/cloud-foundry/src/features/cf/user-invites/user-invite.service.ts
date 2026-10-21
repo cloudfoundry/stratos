@@ -145,10 +145,10 @@ export class UserInviteService {
       map(v => !!v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
     );
 
-    this.canConfigure$ = combineLatest(
+    this.canConfigure$ = combineLatest([
       waitForCFPermissions(this.cfRoles, this.activeRouteCfOrgSpace.cfGuid),
       toObservable(this.authData.sessionData)
-    ).pipe(
+    ]).pipe(
       map(([cf, sessionData]) =>
         cf.global.isAdmin &&
         !!sessionData?.['plugin-config'] && sessionData['plugin-config'].userInvitationsEnabled === 'true')
@@ -160,7 +160,7 @@ export class UserInviteService {
   canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
     // Can only invite someone to an org or space and user must be admin or org manager
     return !orgGuid ? observableOf(false) : waitForCFPermissions(this.cfRoles, cfGuid).pipe(
-      switchMap(() => combineLatest(
+      switchMap(() => combineLatest([
         this.configured$,
         this.currentUserPermissionsService.can(
           CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES,
@@ -168,7 +168,7 @@ export class UserInviteService {
           orgGuid,
           spaceGuid
         )
-      )),
+      ])),
       map(([configured, canChangeRoles]) => !!configured && !!canChangeRoles)
     );
   }

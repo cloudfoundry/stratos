@@ -182,10 +182,10 @@ export class CloudFoundrySpaceBaseComponent implements OnInit {
     // stays the same shape. take(1) preserves the original "freeze first
     // populated value" behaviour.
     const orgSignal$ = toObservable(cfOrgService.orgDataService.org, { injector: this.injector });
-    this.breadcrumbs$ = combineLatest(
+    this.breadcrumbs$ = combineLatest([
       cfEndpointService.endpoint$,
       orgSignal$.pipe(filter(org => !!org)),
-    ).pipe(
+    ]).pipe(
       map(([endpoint, org]) => ([
         {
           breadcrumbs: [

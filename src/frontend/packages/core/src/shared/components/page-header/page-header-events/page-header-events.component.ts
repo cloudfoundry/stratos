@@ -54,10 +54,10 @@ export class PageHeaderEventsComponent implements OnInit {
       this.endpointIds$ = observableOf([this.endpointId]);
     }
     if (this.endpointIds$) {
-      this.events$ = combineLatest(
+      this.events$ = combineLatest([
         this.eventService.events$,
         this.endpointIds$,
-      ).pipe(
+      ]).pipe(
         map(([events, endpointIds]) => {
           const filteredEvents = events.filter(event => {
             // Is it an error of type endpoint?

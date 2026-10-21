@@ -164,7 +164,7 @@ export class CloudFoundrySpaceService {
     this.quotaDefinition$ = this.spaceQuotaDefinition$.pipe(
       switchMap(def => def ? of(def) : this.cfOrgService.quotaDefinition$.pipe(map(q => q ?? null))),
     );
-    this.quotaLink$ = combineLatest(this.quotaDefinition$, this.spaceQuotaDefinition$).pipe(
+    this.quotaLink$ = combineLatest([this.quotaDefinition$, this.spaceQuotaDefinition$]).pipe(
       map(([_quota, spaceQuota]) => {
         if (!spaceQuota) {
           return [

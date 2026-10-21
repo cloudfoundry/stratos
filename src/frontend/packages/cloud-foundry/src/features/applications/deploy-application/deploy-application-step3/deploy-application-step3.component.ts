@@ -113,7 +113,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     );
 
     this.subscriptions.push(
-      observableCombineLatest(this.validSubject, status$, this.appNotFoundSubject).pipe(
+      observableCombineLatest([this.validSubject, status$, this.appNotFoundSubject]).pipe(
         map(([validated, status, appNotFound]) => validated || status.error || appNotFound)
       ).subscribe(v => this.closeableSubject.next(v))
     );

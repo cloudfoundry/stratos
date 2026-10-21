@@ -201,10 +201,10 @@ export class ConnectEndpointService {
   }
 
   private setupCombinedObservables() {
-    this.isBusy$ = combineLatest(
+    this.isBusy$ = combineLatest([
       this.connecting$.pipe(startWith(false)),
       this.fetchingInfo$.pipe(startWith(false))
-    ).pipe(
+    ]).pipe(
       map(([connecting, fetchingInfo]) => connecting || fetchingInfo),
     );
   }

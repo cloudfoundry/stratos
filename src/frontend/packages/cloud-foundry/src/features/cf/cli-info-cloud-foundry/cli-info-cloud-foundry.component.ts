@@ -136,11 +136,11 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     const space$ = spaceGuid && this.cfSpaceService
       ? toObservable(this.cfSpaceService.spaceDataService.space, { injector: this.injector })
       : observableOf(null);
-    this.endpointOrgSpace$ = combineLatest(
+    this.endpointOrgSpace$ = combineLatest([
       this.cfEndpointService.endpoint$,
       org$,
       space$
-    );
+    ]);
 
     this.context$ = this.endpointOrgSpace$.pipe(
       map(([cf, org, space]) => {

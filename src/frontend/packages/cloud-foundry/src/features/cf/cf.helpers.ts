@@ -282,10 +282,10 @@ export function canUpdateOrgSpaceRoles(
   cfGuid: string,
   orgGuid?: string,
   spaceGuid?: string): Observable<boolean> {
-  return combineLatest(
+  return combineLatest([
     perms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, cfGuid, orgGuid),
     perms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, cfGuid, orgGuid, spaceGuid)
-  ).pipe(
+  ]).pipe(
     map((checks: boolean[]) => checks.some(check => check))
   );
 }

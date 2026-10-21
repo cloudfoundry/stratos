@@ -104,7 +104,7 @@ export class MetaCardComponent {
 
       const nonSeparators = actionMenu
         .filter(menuItem => !menuItem.separator)
-        .map(menuItem => menuItem.can);
+        .map(menuItem => menuItem.can ?? of(true));
       this.showMenu$ = combineLatest(nonSeparators).pipe(
         map(cans => cans.some(can => can))
       );

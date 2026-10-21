@@ -248,7 +248,7 @@ export class HelmReleaseHelperService {
   }
 
   public hasUpgrade(returnLatest = false): Observable<InternalHelmUpgrade | null> {
-    const updates = combineLatest(this.getCharts(), this.release$);
+    const updates = combineLatest([this.getCharts(), this.release$]);
     return updates.pipe(
       map(([charts, release]: [any, any]) => {
         let score = -1;
