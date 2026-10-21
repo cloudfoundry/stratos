@@ -4,7 +4,7 @@ import { NgModel } from '@angular/forms';
 import { format } from 'date-fns';
 import { EMPTY, NEVER, Observable, Subject, of, timer } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, debounceTime, map, share, startWith, switchMap, tap, retryWhen, delayWhen, take } from 'rxjs/operators';
+import { catchError, debounceTime, map, retry, share, startWith, switchMap, tap, take } from 'rxjs/operators';
 
 import { AnsiColorizer, LogViewerComponent } from '@stratosui/core';
 import { ApplicationService } from '../../../../application.service';
@@ -42,7 +42,6 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   private connectionStatusSubject = new Subject<number>();
   public connectionStatus!: Observable<number>;
   private socketError = false;
-  private connectionAttempts = 0;
   private maxRetries = 3;
   private retryDelayMs = 2000;
   private lastError: ConnectionError | null = null;
@@ -92,55 +91,39 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
 
       const socket$ = makeWebSocketObservable<string>(streamUrl).pipe(
         tap(() => {
-          // Reset connection tracking on successful connection
-          this.connectionAttempts = 0;
+          // Reset error state on successful connection
           this.socketError = false;
           this.lastError = null;
           console.log('WebSocket connected successfully');
           this.cdr.markForCheck();
         }),
-        retryWhen(errors => errors.pipe(
-          tap(error => {
-            this.connectionAttempts++;
+        // maxRetries attempts in all: the first connection and maxRetries - 1
+        // retries. A successful connection starts the count again.
+        retry({
+          count: this.maxRetries - 1,
+          resetOnSuccess: true,
+          delay: (error, retryCount) => {
             const errorMessage = this.parseWebSocketError(error);
-            console.warn(
-              `WebSocket connection attempt ${this.connectionAttempts} failed:`,
-              errorMessage
-            );
-
+            console.warn(`WebSocket connection attempt ${retryCount} failed:`, errorMessage);
             this.lastError = {
               message: errorMessage,
-              retryable: this.connectionAttempts < this.maxRetries,
+              retryable: true,
               timestamp: Date.now()
             };
-
-            if (this.connectionAttempts >= this.maxRetries) {
-              this.socketError = true;
-              this.connectionStatusSubject.next(-1);
-              this.connectionStatusSignal.set(-1);
-              console.error(
-                `WebSocket connection failed after ${this.maxRetries} attempts. Reason: ${errorMessage}`
-              );
-              this.cdr.markForCheck();
-            } else {
-              // Inform user of retry attempt
-              this.connectionStatusSubject.next(-2); // -2 indicates retrying
-              this.connectionStatusSignal.set(-2);
-              this.cdr.markForCheck();
-            }
-          }),
-          delayWhen(() => {
-            // Exponential backoff: 2s, 4s, 8s
-            const delay = this.retryDelayMs * Math.pow(2, this.connectionAttempts - 1);
+            // Inform user of retry attempt
+            this.connectionStatusSubject.next(-2); // -2 indicates retrying
+            this.connectionStatusSignal.set(-2);
+            this.cdr.markForCheck();
+            // Exponential backoff: 2s, then 4s
+            const delay = this.retryDelayMs * Math.pow(2, retryCount - 1);
             console.log(`Retrying WebSocket connection in ${delay}ms...`);
             return timer(delay);
-          }),
-          take(this.maxRetries)
-        )),
+          },
+        }),
         catchError(e => {
           const errorMessage = this.parseWebSocketError(e);
           console.error(
-            'WebSocket connection failed permanently: ' + errorMessage
+            `WebSocket connection failed after ${this.maxRetries} attempts. Reason: ${errorMessage}`
           );
           this.socketError = true;
           this.lastError = {
