@@ -181,7 +181,7 @@ function settle<T>(source: Observable<T>, signal: AbortSignal | undefined): Prom
     return Promise.reject(abortError());
   }
   const aborted$ = fromEvent(signal, 'abort').pipe(
-    switchMap(() => throwError(abortError)),
+    switchMap(() => throwError(() => abortError())),
   );
   return firstValueFrom(race(source, aborted$));
 }
