@@ -48,7 +48,7 @@
             <app-meta-card-item>
               <app-meta-card-key>Last operation</app-meta-card-key>
               <app-meta-card-value>
-                {{ v.lastOperation }}@if (v.lastOperationReason) { — {{ v.lastOperationReason }} }
+                {{ v.lastOperation }}@if (v.lastOperationReason.length) { — <app-error-text [pieces]="v.lastOperationReason" /> }
               </app-meta-card-value>
             </app-meta-card-item>
           }
