@@ -1,8 +1,17 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Injectable, ApplicationRef, Injector, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { ErrorPiece, piecesToText } from '@stratosui/store';
 import { Subject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+
+import { ERROR_PIECE_CLASS } from '../components/error-text/error-text.component';
+
+/**
+ * A snackbar message: plain text, or styled pieces such as
+ * extractHttpErrorPieces() or leadPieces() give for an upstream error.
+ */
+export type TailwindSnackBarMessage = string | readonly ErrorPiece[];
 
 export interface TailwindSnackBarConfig {
   duration?: number;
@@ -86,7 +95,7 @@ export class TailwindSnackBarService {
   // If closeMessage is supplied a button to dismiss the snack bar is shown and the duration is ignored.
   // If closeMessage is not supplied, no action button is shown and the snack bar hides after the duration (default 5s).
   // If forceDuration is supplied the duration is used regardless of closeMessage.
-  show(message: string, closeMessage?: string, duration = 5000, forceDuration = false): TailwindSnackBarRef<any> {
+  show(message: TailwindSnackBarMessage, closeMessage?: string, duration = 5000, forceDuration = false): TailwindSnackBarRef<any> {
     return this.track(this.open(message, closeMessage, {
       duration: forceDuration ? duration : (closeMessage ? 0 : duration)
     }));
@@ -122,7 +131,7 @@ export class TailwindSnackBarService {
   // Errors must stay on screen until the user dismisses them — the default
    // 4s auto-dismiss hid broker / 502 / job failures before the operator
    // could read them. Red panel class signals severity at a glance.
-   error(message: string, action: string = 'Dismiss', config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
+   error(message: TailwindSnackBarMessage, action: string = 'Dismiss', config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
     return this.open(message, action, {
       duration: 0,
       ...(config ?? {}),
@@ -133,7 +142,7 @@ export class TailwindSnackBarService {
     });
   }
 
-  open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
+  open(message: TailwindSnackBarMessage, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
     const snackbarElement = this.createSnackbarElement(message, action, config);
     const snackbarRef = new TailwindSnackBarRefImpl(
       () => this.removeSnackbar(snackbarElement),
@@ -150,7 +159,8 @@ export class TailwindSnackBarService {
     this.snackbars.push(snackbarElement);
     // Screen readers miss a toast that arrives with its text; the announcer's
     // live region is already on the page. Errors interrupt.
-    void this.announcer.announce(message, snackbarElement.classList.contains('snackbar-error') ? 'assertive' : 'polite');
+    const text = typeof message === 'string' ? message : piecesToText(message);
+    void this.announcer.announce(text, snackbarElement.classList.contains('snackbar-error') ? 'assertive' : 'polite');
 
     // Auto dismiss. Use ?? instead of || so that an explicit `duration: 0`
     // from the caller means "do not auto-dismiss" (the standard convention)
@@ -198,7 +208,7 @@ export class TailwindSnackBarService {
     });
   }
 
-  private createSnackbarElement(message: string, action?: string, config?: TailwindSnackBarConfig): HTMLElement {
+  private createSnackbarElement(message: TailwindSnackBarMessage, action?: string, config?: TailwindSnackBarConfig): HTMLElement {
     const snackbar = document.createElement('div');
 
     // Base classes
@@ -240,8 +250,20 @@ export class TailwindSnackBarService {
     // Create message element. whitespace-pre-line honours explicit "\n" in the
     // message (so callers can put a technical detail / error code on its own
     // line) while still wrapping normally — textContent keeps it XSS-safe.
+    // Pieces get a span each, styled, and still only textContent.
     const messageElement = document.createElement('span');
-    messageElement.textContent = message;
+    if (typeof message === 'string') {
+      messageElement.textContent = message;
+    } else {
+      for (const piece of message) {
+        const span = document.createElement('span');
+        if (ERROR_PIECE_CLASS[piece.style]) {
+          span.className = ERROR_PIECE_CLASS[piece.style];
+        }
+        span.textContent = piece.text;
+        messageElement.appendChild(span);
+      }
+    }
     messageElement.className = 'snackbar-message flex-1 whitespace-pre-line';
     snackbar.appendChild(messageElement);
 
