@@ -10,8 +10,7 @@ import {
   distinctUntilChanged,
   filter,
   map,
-  publishReplay,
-  refCount,
+  shareReplay,
   startWith,
   switchMap,
   tap,
@@ -166,8 +165,7 @@ export class SelectPlanStepComponent implements OnDestroy {
         }
       }),
       map(plans => [...plans].sort((a, b) => naturalCompare(this.getDisplayName(a), this.getDisplayName(b)))),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
     this.selectedPlan$ = observableCombineLatest([

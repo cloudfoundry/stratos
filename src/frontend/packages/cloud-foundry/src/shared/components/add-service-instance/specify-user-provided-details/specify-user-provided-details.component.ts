@@ -23,7 +23,7 @@ import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, enviro
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, from } from 'rxjs';
-import { take, filter, map, publishReplay, refCount, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
+import { take, filter, map, shareReplay, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
 import { IUserProvidedServiceInstanceData } from '../../../../cf-api-svc.types';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
@@ -337,8 +337,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
         });
       }),
       startWith(null),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
   }
 

@@ -6,7 +6,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
+import { filter, map, shareReplay, take } from 'rxjs/operators';
 
 import { EndpointsSignalService } from '../../../../../core/src/core/signals/endpoints-signal.service';
 import { AppInputDirective, CustomFormFieldComponent } from '../../../../../core/src/shared/components/custom-form-field/custom-form-field.component';
@@ -95,8 +95,7 @@ export class CatalogTabComponent implements OnDestroy {
         }
         return haveArtifactHub && haveHelmRepo;
       }),
-      publishReplay(1),
-      refCount(),
+      shareReplay({ bufferSize: 1, refCount: true }),
     );
 
   // Repo-name lists filtered by the sidebar search.

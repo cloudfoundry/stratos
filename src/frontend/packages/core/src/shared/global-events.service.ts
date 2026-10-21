@@ -5,7 +5,7 @@ import {
 } from '@stratosui/store';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, ReplaySubject } from 'rxjs';
-import { debounceTime, distinctUntilChanged, map, publishReplay, refCount, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, shareReplay, startWith } from 'rxjs/operators';
 
 export type GlobalEventTypes = 'warning' | 'error' | 'process' | 'complete';
 
@@ -312,8 +312,11 @@ export class GlobalEventService {
           return eventsAndPriority;
         }, [[], null] as [IGlobalEvent[], GlobalEventTypes | null]);
       }),
-      publishReplay(1),
-      refCount(),
+      // refCount: false keeps the latest events across the moments when no
+      // page is subscribed: this is a root service, and every navigation
+      // drops its subscribers to zero. With refCount: true the next page
+      // would wait for the 100 ms debounce before it saw any event.
+      shareReplay({ bufferSize: 1, refCount: false }),
     );
   }
 

@@ -3,7 +3,7 @@ import { Injectable, Injector, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, of } from 'rxjs';
-import { filter, map, publishReplay, refCount, switchMap } from 'rxjs/operators';
+import { filter, map, shareReplay, switchMap } from 'rxjs/operators';
 
 import { PermissionConfig, CurrentUserPermissionsService } from '@stratosui/core';
 import { GitSCM, GitSCMService, GIT_ENDPOINT_SUB_TYPES, GIT_ENDPOINT_TYPE } from '@stratosui/git';
@@ -157,8 +157,7 @@ export class ApplicationDeploySourceTypes {
 
         return newTypes;
       }),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
   }
 
@@ -178,15 +177,13 @@ export class ApplicationDeploySourceTypes {
       // So fetch the feature flags for the cf, which is the blocker, first before checking if we `.can`
       const fetchedFeatureFlags$ = this.http.get<StFeatureFlagsResponse>(`/pp/v1/cf/feature_flags/${cfId}`).pipe(
         map(resp => !!resp),
-        publishReplay(1),
-        refCount(),
+        shareReplay({ bufferSize: 1, refCount: true }),
       );
 
       const canDeployWithDocker$ = this.perms.can(
         new PermissionConfig(CfPermissionTypes.FEATURE_FLAG, CFFeatureFlagTypes.diego_docker), cfId
       ).pipe(
-        publishReplay(1),
-        refCount(),
+        shareReplay({ bufferSize: 1, refCount: true }),
       );
 
       return fetchedFeatureFlags$.pipe(

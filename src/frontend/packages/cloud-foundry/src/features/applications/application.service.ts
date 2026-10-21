@@ -1,7 +1,7 @@
 import { Injectable, computed, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, of as observableOf } from 'rxjs';
-import { filter, publishReplay, refCount } from 'rxjs/operators';
+import { filter, shareReplay } from 'rxjs/operators';
 
 import { APP_GUID, CF_GUID } from '@stratosui/core';
 import {
@@ -68,8 +68,7 @@ export class ApplicationService {
    */
   waitForAppEntity$: Observable<EntityInfo<APIResource<IApp>>> = this.app$.pipe(
     filter(info => !!info.entity),
-    publishReplay(1),
-    refCount(),
+    shareReplay({ bufferSize: 1, refCount: true }),
   );
 
   /**
@@ -178,8 +177,7 @@ export class ApplicationService {
     })
   ).pipe(
     filter(data => !!data.app),
-    publishReplay(1),
-    refCount(),
+    shareReplay({ bufferSize: 1, refCount: true }),
   );
 
   // ---------------------------------------------------------------------------

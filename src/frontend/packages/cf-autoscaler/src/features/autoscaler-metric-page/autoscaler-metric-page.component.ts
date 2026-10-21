@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, WritableSignal, computed, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
 import { CustomIconComponent, SignalListComponent, SignalListConfig } from '@stratosui/core';
@@ -94,8 +94,7 @@ export class AutoscalerMetricPageComponent implements OnInit {
   ngOnInit() {
     this.applicationName$ = this.applicationService.app$.pipe(
       map(({ entity }) => entity ? entity.entity.name : null),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
     void this.chartConfig.loadAll();
     this.cdr.markForCheck();

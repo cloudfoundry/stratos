@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
-import { take, map, publishReplay, refCount, share } from 'rxjs/operators';
+import { take, map, shareReplay, share } from 'rxjs/operators';
 
 import { endpointEventKey, GlobalEventService, IGlobalEvent } from '../../../global-events.service';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -71,8 +71,7 @@ export class PageHeaderEventsComponent implements OnInit {
           });
           return filteredEvents;
         }),
-        publishReplay(1),
-        refCount()
+        shareReplay({ bufferSize: 1, refCount: true })
       );
       this.errorMessage$ = this.events$.pipe(
         // Fixme this emits a lot, we should fix this.

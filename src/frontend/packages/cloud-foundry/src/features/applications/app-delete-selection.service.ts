@@ -6,7 +6,7 @@ import type { StRoute, StServiceCredentialBinding } from '../../services/endpoin
  * Resolved display names the wizard already had on hand when the user
  * pressed Confirm. The parent's "Are you sure?" dialog uses these
  * directly instead of racing the data service's observables — by the
- * time the parent is recreated post-navigation, its publishReplay
+ * time the parent is recreated post-navigation, its shareReplay
  * caches are gone with the old instance, so the race loses and the
  * dialog renders appGuid + "?" for org/space.
  */

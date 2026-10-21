@@ -13,7 +13,7 @@ import {
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@stratosui/core';
 import { Observable, Subscription, firstValueFrom } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import {
@@ -215,8 +215,7 @@ export class EditAutoscalerPolicyComponent implements OnInit, OnDestroy {
   ngOnInit() {
     this.applicationName$ = this.applicationService.app$.pipe(
       map(({ entity }) => entity ? entity.entity.name : null),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
     this.isCreate = this.route.snapshot.queryParams.create;
     this.cdr.markForCheck();

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, Writable
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
-import { map, publishReplay, refCount } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { CustomIconComponent, PageHeaderModule, SignalListComponent, SignalListConfig, SignalListPillColor } from '@stratosui/core';
@@ -102,8 +102,7 @@ export class AutoscalerScaleHistoryPageComponent implements OnInit {
   ngOnInit() {
     this.applicationName$ = this.applicationService.app$.pipe(
       map(({ entity }) => entity ? entity.entity.name : null),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
     void this.eventsConfig.loadAll();
     this.cdr.markForCheck();

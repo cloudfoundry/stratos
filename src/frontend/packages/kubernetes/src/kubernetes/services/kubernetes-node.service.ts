@@ -2,7 +2,7 @@ import { Injectable, Injector, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
-import { filter, map, publishReplay, refCount, take } from 'rxjs/operators';
+import { filter, map, shareReplay, take } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/src/core/utils.service';
 import { MetricQueryConfig } from '../../../../store/src/actions/metrics.actions';
@@ -53,8 +53,7 @@ export class KubernetesNodeService {
       filter((n): n is NonNullable<typeof n> => !!n),
       take(1),
       map(n => n as unknown as KubernetesNode),
-      publishReplay(1),
-      refCount()
+      shareReplay({ bufferSize: 1, refCount: true })
     );
 
     this.node$ = this.nodeEntity$.pipe(
