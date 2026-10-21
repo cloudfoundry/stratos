@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, NgZone, OnChanges, inject } from '@angular/core';
+import { Directive, ElementRef, Input, OnChanges, inject } from '@angular/core';
 
 @Directive({
 selector: '[appBlur]',
@@ -8,7 +8,6 @@ export class BlurDirective implements OnChanges {
   @Input() appBlur!: boolean;
 
   private element = inject(ElementRef);
-  private ngZone = inject(NgZone);
 
   public ngOnChanges() {
     if (this.appBlur) {
@@ -17,8 +16,6 @@ export class BlurDirective implements OnChanges {
   }
 
   private blur() {
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => this.element.nativeElement.blur(), 250);
-    });
+    setTimeout(() => this.element.nativeElement.blur(), 250);
   }
 }

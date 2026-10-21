@@ -4,7 +4,7 @@
     style="display: flex !important; flex-direction: row !important; width: 100% !important; height: 100vh !important;">
     <!-- Side navigation drawer -->
     @if (mainNavState$ | async; as navState) {
-      <div #sidenav
+      <div
         class="dashboard-side-nav bg-nav-bg text-nav-text h-full shrink-0 transition-all duration-300 ease-in-out shadow-lg"
          [ngClass]="{
            'fixed inset-y-0 left-0 z-50': navState.mode === 'over',
@@ -13,7 +13,7 @@
            'translate-x-0': navState.opened,
            '-translate-x-full': !navState.opened && navState.mode === 'over'
          }">
-        <app-side-nav (changedMode)="redrawSideNav()" [iconMode]="navState.iconMode" [tabs]="sideNavTabs">
+        <app-side-nav [iconMode]="navState.iconMode" [tabs]="sideNavTabs">
         </app-side-nav>
       </div>
     }

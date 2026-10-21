@@ -1,4 +1,4 @@
-import { ApplicationRef, Injectable, NgZone, OnDestroy, inject } from '@angular/core';
+import { ApplicationRef, Injectable, OnDestroy, inject } from '@angular/core';
 import { MetricsRequest, MetricQueryType } from '@stratosui/store';
 import { Subject } from 'rxjs';
 import { isValid, isEqual } from 'date-fns';
@@ -11,7 +11,6 @@ import { ITimeRange } from './metrics-range-selector.types';
 })
 export class MetricsRangeSelectorManagerService implements OnDestroy {
   metricRangeService = inject(MetricsRangeSelectorService);
-  private ngZone = inject(NgZone);
   private appRef = inject(ApplicationRef);
 
 
@@ -126,17 +125,15 @@ export class MetricsRangeSelectorManagerService implements OnDestroy {
 
   private startWindowPoll(timeWindow: ITimeRange) {
     this.endWindowPoll();
-    this.ngZone.runOutsideAngular(() => {
-      this.pollIndex = window.setInterval(
-        () => {
-          if (timeWindow.value != null && this.baseRequest) {
-            this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
-            this.ngZone.run(() => this.appRef.tick());
-          }
-        },
-        this.pollInterval
-      );
-    });
+    this.pollIndex = window.setInterval(
+      () => {
+        if (timeWindow.value != null && this.baseRequest) {
+          this.commitRequest(this.metricRangeService.getNewTimeWindowRequest(this.baseRequest, timeWindow.value));
+          this.appRef.tick();
+        }
+      },
+      this.pollInterval
+    );
   }
 
   private endWindowPoll() {

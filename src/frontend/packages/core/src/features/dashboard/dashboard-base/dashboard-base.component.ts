@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -11,7 +11,7 @@ import {
 import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
 import { DashboardDataService, DashboardState } from '../../../core/dashboard-data.service';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, startWith } from 'rxjs/operators';
 
 import { CustomizationService } from '../../../core/customizations.types';
 import { naturalCompare } from '../../../shared/utils/natural-sort';
@@ -50,7 +50,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   private activatedRoute = inject(ActivatedRoute);
   private endpointsService = inject(EndpointsService);
   tabNavService = inject(TabNavService);
-  private ngZone = inject(NgZone);
   sidePanelService = inject(SidePanelService);
   private cs = inject(CustomizationService);
   private cd = inject(ChangeDetectorRef);
@@ -68,11 +67,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public rightNavState$!: Observable<{ opened: boolean, component?: object, props?: object, }>;
   private dashboardState$: Observable<DashboardState> = of({} as DashboardState);
   public noMargin$: Observable<boolean> = of(false);
-  private closeSub!: Subscription;
   private mobileSub: Subscription;
   private resizeObserver?: ResizeObserver;
   private mutationObserver?: MutationObserver;
-  private drawer: any;
   public iconModeOpen = false;
   public sideNavWidth = 54;
 
@@ -120,28 +117,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
     this.mobileSub = this.isMobile$
       .subscribe(isMobile => isMobile ? this.dashboardData.enableMobileNav() : this.dashboardData.disableMobileNav());
-  }
-
-  @ViewChild('sidenav') set sidenav(drawer: any) {
-    this.drawer = drawer;
-    if (!this.closeSub && drawer && drawer.closedStart) {
-      // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
-      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([_change, state]: [any, DashboardState]) => {
-        if (state.isMobile) {
-          this.dashboardData.closeSideNav();
-        }
-      });
-    }
-  }
-
-  public redrawSideNav() {
-    // We need to do this to ensure there isn't a space left behind
-    // when going from mobile to desktop
-    if (this.drawer && this.drawer._modeChanged) {
-      this.ngZone.runOutsideAngular(() => {
-        setTimeout(() => this.drawer._modeChanged.next(), 250);
-      });
-    }
   }
 
   sideHelpClosed() {
@@ -201,9 +176,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   ngOnDestroy() {
     if (this.mobileSub) {
       this.mobileSub.unsubscribe();
-    }
-    if (this.closeSub) {
-      this.closeSub.unsubscribe();
     }
     this.resizeObserver?.disconnect();
     this.mutationObserver?.disconnect();

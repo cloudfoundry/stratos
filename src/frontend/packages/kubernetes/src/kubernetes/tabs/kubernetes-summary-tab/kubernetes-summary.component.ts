@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import {Component, NgZone, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
+import {Component, OnDestroy, OnInit, computed, inject, ChangeDetectionStrategy, Injector, runInInjectionContext } from '@angular/core';
 import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
@@ -87,7 +87,6 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   private podData = inject(KubePodDataService);
   private nodeData = inject(KubeNodeDataService);
   private namespaceData = inject(KubeNamespaceDataService);
-  private ngZone = inject(NgZone);
   private router = inject(Router);
   private injector = inject(Injector);
 
@@ -245,13 +244,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   }
 
   private poll(guid: string) {
-    this.ngZone.runOutsideAngular(() =>
-      this.polls.push(
-        interval(10000).subscribe(() => {
-          this.ngZone.run(() => this.refreshAll(guid));
-        })
-      )
-    );
+    this.polls.push(interval(10000).subscribe(() => this.refreshAll(guid)));
   }
 
   // Refresh the three cluster caches. Each data service dedups in-flight

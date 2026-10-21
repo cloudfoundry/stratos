@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, NgZone, OnDestroy, OnInit, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { Router, RouterModule } from '@angular/router';
@@ -54,7 +54,6 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   router = inject(Router);
   private endpointsData = inject(EndpointsDataService);
   private authSignal = inject(AuthSignalService);
-  private ngZone = inject(NgZone);
   private snackBarService = inject(TailwindSnackBarService);
   sessionService = inject(SessionService);
   private endpointModalService = inject(EndpointModalService);
@@ -165,13 +164,9 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
   private startEndpointHealthCheckPulse() {
-    this.ngZone.runOutsideAngular(() => {
-      this.healthCheckTimeout = window.setInterval(() => {
-        this.ngZone.run(() => {
-          this.endpointsService.checkAllEndpoints();
-        });
-      }, 30000);
-    });
+    this.healthCheckTimeout = window.setInterval(() => {
+      this.endpointsService.checkAllEndpoints();
+    }, 30000);
   }
 
   private stopEndpointHealthCheckPulse() {

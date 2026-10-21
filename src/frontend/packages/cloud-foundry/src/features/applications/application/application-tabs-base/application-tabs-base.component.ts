@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EffectRef, Injector, NgZone, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Component, EffectRef, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router, RouterModule } from '@angular/router';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
@@ -62,7 +62,6 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
   applicationService = inject(ApplicationService);
   private router = inject(Router);
   private endpointsService = inject(EndpointsService);
-  private ngZone = inject(NgZone);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
   private userFavoriteManager = inject(UserFavoriteManager);
   private cfEndpoints = inject(CfEndpointsDataService);
