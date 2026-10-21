@@ -69,6 +69,55 @@ export default tseslint.config(
       // A snackbar service injected but never called is dead weight that
       // misleads readers about what the component can do (#5603).
       "stratos/no-unused-snackbar-service": "error",
+
+      // APIs deprecated in RxJS 7 (removed in RxJS 8) and Angular APIs the
+      // zoneless app has no use for. All call sites were replaced in #6022;
+      // these keep them from coming back.
+      "no-restricted-imports": ["error", { paths: [
+        ...["rxjs", "rxjs/operators"].map(name => ({
+          name,
+          importNames: ["publishReplay", "refCount", "publish", "publishLast", "publishBehavior", "multicast"],
+          message: "Deprecated in RxJS 7: use shareReplay({ bufferSize: 1, refCount: true }), share() or connectable().",
+        })),
+        ...["rxjs", "rxjs/operators"].map(name => ({
+          name,
+          importNames: ["retryWhen"],
+          message: "Deprecated in RxJS 7: use retry({ count, delay }).",
+        })),
+        {
+          name: "rxjs/operators",
+          importNames: ["combineLatest"],
+          message: "Deprecated in RxJS 7: use the combineLatestWith operator.",
+        },
+        {
+          name: "@angular/common/http",
+          importNames: ["HttpClientModule"],
+          message: "Deprecated: the app configures HttpClient with provideHttpClient() in AppModule.",
+        },
+        {
+          name: "@angular/core",
+          importNames: ["NgZone"],
+          message: "The app is zoneless: NgZone.run() and runOutsideAngular() only call their callback.",
+        },
+      ] }],
+      "no-restricted-syntax": ["error",
+        {
+          selector: "CallExpression[callee.property.name='toPromise']",
+          message: "Deprecated in RxJS 7: use firstValueFrom() or lastValueFrom().",
+        },
+        {
+          selector: "CallExpression[callee.property.name='subscribe'][arguments.length>1]",
+          message: "Deprecated in RxJS 7: pass one observer, subscribe({ next, error, complete }).",
+        },
+        {
+          selector: "CallExpression[callee.name=/^(combineLatest|observableCombineLatest)$/][arguments.length>1]",
+          message: "Deprecated in RxJS 7: pass the sources as one array, combineLatest([a, b]).",
+        },
+        {
+          selector: "CallExpression[callee.name='throwError'][arguments.0.type!=/^(ArrowFunctionExpression|FunctionExpression)$/]",
+          message: "Deprecated in RxJS 7: pass an inline error factory, throwError(() => error).",
+        },
+      ],
     },
   },
   {
