@@ -1,4 +1,4 @@
-import { HttpBackend, HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -32,39 +32,5 @@ export class MonocularInterceptor implements HttpInterceptor {
     }) : req;
 
     return next.handle(newReq);
-  }
-}
-
-class HttpInterceptorHandler implements HttpHandler {
-  constructor(
-    private next: HttpHandler,
-    private interceptor: HttpInterceptor
-  ) { }
-
-  handle(req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
-    return this.interceptor.intercept(req, this.next);
-  }
-}
-export class HttpInterceptingHandler implements HttpHandler {
-  private chain: HttpHandler | null = null;
-
-  constructor(
-    private backend: HttpBackend,
-    private interceptors: HttpInterceptor[],
-    private intercept?: (req: HttpRequest<unknown>) => HttpRequest<unknown>
-  ) { }
-
-  handle(req: HttpRequest<unknown>): Observable<HttpEvent<unknown>> {
-    if (this.intercept) {
-      req = this.intercept(req);
-    }
-
-    if (this.chain === null) {
-      this.chain = this.interceptors.reduceRight(
-        (next, interceptor) => new HttpInterceptorHandler(next, interceptor),
-        this.backend
-      );
-    }
-    return this.chain.handle(req);
   }
 }

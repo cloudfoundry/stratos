@@ -1,7 +1,6 @@
-import { HTTP_INTERCEPTORS, HttpBackend, HttpClient, HttpInterceptor } from '@angular/common/http';
-import { Optional } from '@angular/core';
+import { HttpClient, HttpHandler } from '@angular/common/http';
 
-import { HttpInterceptingHandler, MonocularInterceptor } from '../monocular.interceptor';
+import { MonocularInterceptor } from '../monocular.interceptor';
 import { ChartsService } from './shared/services/charts.service';
 import { ConfigService } from './shared/services/config.service';
 import { MenuService } from './shared/services/menu.service';
@@ -10,10 +9,9 @@ import { ReposService } from './shared/services/repos.service';
 /**
  * Helm Method to ensure http client with custom monocular interceptor is used in the monocular services
  *
- * HTTP_INTERCEPTORS is Optional because the app uses functional interceptors
- * (provideHttpClient withInterceptors) rather than the legacy DI-based multi
- * provider. When no class-based interceptors are registered, HTTP_INTERCEPTORS
- * resolves to null and we fall back to an empty array.
+ * The client runs the monocular interceptor (which needs this component's
+ * route) and then hands the request to the app's HttpHandler, so the app's
+ * own interceptors (XSRF and the rest) still run.
  */
 export const createMonocularProviders = () => [
   ChartsService,
@@ -23,12 +21,8 @@ export const createMonocularProviders = () => [
   MonocularInterceptor,
   {
     provide: HttpClient,
-    useFactory: (httpBackend: HttpBackend, interceptors: HttpInterceptor[] | null, monocularInterceptor: MonocularInterceptor) => {
-      return new HttpClient(new HttpInterceptingHandler(httpBackend, [
-        ...(interceptors || []),
-        monocularInterceptor
-      ]));
-    },
-    deps: [HttpBackend, [new Optional(), HTTP_INTERCEPTORS], MonocularInterceptor]
+    useFactory: (appHandler: HttpHandler, monocularInterceptor: MonocularInterceptor) =>
+      new HttpClient({ handle: req => monocularInterceptor.intercept(req, appHandler) }),
+    deps: [HttpHandler, MonocularInterceptor]
   }
 ];
