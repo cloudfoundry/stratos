@@ -51,6 +51,9 @@ const BLOCKS = new Set([
   'li', 'ul', 'ol', 'pre', 'table', 'tr', 'hr', 'blockquote', 'address', 'dl', 'dt', 'dd', 'br',
 ]);
 
+/** Table cells, kept apart by a space as a browser keeps them apart by a gap. */
+const CELLS = new Set(['td', 'th']);
+
 type Emphasis = Exclude<ErrorPieceStyle, 'text'>;
 
 const EMPHASIS = new Map<string, Emphasis>([
@@ -139,7 +142,8 @@ const tagEnd = (s: string, j: number): number => {
  * Collects readable text into pieces. Whitespace collapses to one space,
  * and a block boundary becomes one '\n', written only once readable text
  * follows it: empty blocks add nothing, and there is never a break at
- * either end.
+ * either end. A word boundary is a space written the same way; next to a
+ * line break it gives way to the break.
  */
 class PieceWriter {
   readonly pieces: Array<{ text: string; style: ErrorPieceStyle }> = [];
@@ -151,6 +155,10 @@ class PieceWriter {
   breakLine(bullet = false): void {
     this.lineBreak = true;
     this.bullet ||= bullet;
+  }
+
+  breakWord(): void {
+    this.space = true;
   }
 
   dropBullet(): void {
@@ -229,6 +237,8 @@ const tokenize = (input: string): Parsed | null => {
     }
     if (BLOCKS.has(name)) {
       out.breakLine(name === 'li');
+    } else if (CELLS.has(name)) {
+      out.breakWord();
     }
   };
   const close = (name: string): void => {
@@ -243,6 +253,8 @@ const tokenize = (input: string): Parsed | null => {
     }
     if (BLOCKS.has(name)) {
       out.breakLine();
+    } else if (CELLS.has(name)) {
+      out.breakWord();
     }
     if (name === 'li') {
       out.dropBullet();
@@ -341,10 +353,11 @@ const capPieces = (pieces: ErrorPiece[]): ErrorPiece[] => {
 /**
  * Reads an error body into styled pieces of plain text. An HTML page
  * gives its visible text: headings, emphasis and code keep their style;
- * blocks become line breaks; head, script, style, title, noscript,
- * template and svg content and all attributes (so every link target) are
- * dropped; entities are decoded after the tags are read, so `&lt;b&gt;`
- * is the text "<b>". The text is capped at 1,000 characters.
+ * blocks become line breaks and table cells spaces; head, script, style,
+ * title, noscript, template and svg content and all attributes (so every
+ * link target) are dropped; entities are decoded after the tags are read,
+ * so `&lt;b&gt;` is the text "<b>". The text is capped at 1,000
+ * characters.
  *
  * Text that is not a page gives what stripping its tags always gave. A
  * page that never closes a construct does too, capped. A page with no
