@@ -1,6 +1,6 @@
 module github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular
 
-go 1.27.1
+go 1.27.2
 
 require (
 	github.com/Masterminds/semver/v3 v3.5.0
@@ -25,8 +25,8 @@ require (
 	github.com/ncruces/julianday v1.0.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/samber/lo v1.53.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/text v0.42.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 )
 
 replace github.com/cloudfoundry/stratos/src/jetstream => ../../
