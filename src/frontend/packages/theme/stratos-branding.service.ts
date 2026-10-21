@@ -1,5 +1,6 @@
 import { DestroyRef, Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
 import { StratosTheme, defaultTheme, darkTheme } from './theme.config';
 import { CompanyConfig } from './company-config.interface';
 import { BUILD_INFO } from '../core/src/environments/build-info';
@@ -195,7 +196,7 @@ export class StratosBrandingService {
   private async loadCompanyConfig() {
     try {
       // Try to load from company-config.json first
-      const config = await this.http.get<CompanyConfig>('/assets/company-config.json').toPromise();
+      const config = await firstValueFrom(this.http.get<CompanyConfig>('/assets/company-config.json'));
       if (config) {
         this.setCompanyConfig(config);
         return;
@@ -206,7 +207,7 @@ export class StratosBrandingService {
 
     try {
       // Try to load from environment-specific config
-      const envConfig = await this.http.get<CompanyConfig>('/assets/config/company.json').toPromise();
+      const envConfig = await firstValueFrom(this.http.get<CompanyConfig>('/assets/config/company.json'));
       if (envConfig) {
         this.setCompanyConfig(envConfig);
         return;
