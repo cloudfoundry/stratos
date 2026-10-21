@@ -49,10 +49,10 @@ export class DateTimeComponent implements OnDestroy {
 
   private setupInputSub() {
     this.stopInputSub();
-    this.sub = combineLatest(
+    this.sub = combineLatest([
       this.timeObservable,
       this.dateObservable
-    ).pipe(
+    ]).pipe(
       debounceTime(250),
       filter(([time, date]) => !!(time && date)),
       map(([time, date]: [string, string]): [number, number, Date] => {

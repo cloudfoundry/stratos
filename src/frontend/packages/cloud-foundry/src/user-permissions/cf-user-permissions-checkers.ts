@@ -323,10 +323,10 @@ export class CfUserPermissionsChecker extends BaseCurrentUserPermissionsChecker 
   private applyAdminCheck(check$: Observable<boolean>, endpointGuid?: string): Observable<boolean> {
     const adminCheck$ = this.getAdminChecks(endpointGuid);
     const readOnlyCheck$ = this.getReadOnlyChecks(endpointGuid);
-    return combineLatest(
+    return combineLatest([
       adminCheck$,
       readOnlyCheck$
-    ).pipe(
+    ]).pipe(
       distinctUntilChanged(),
       switchMap(([isAdmin, isReadOnly]) => {
         if (isAdmin) {

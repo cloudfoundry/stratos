@@ -53,10 +53,10 @@ export class MetricsEndpointDetailsComponent extends EndpointListDetailsComponen
     );
 
     // Raw endpoint data for this metrics endpoint
-    this.data$ = combineLatest(
+    this.data$ = combineLatest([
       endpoints$,
       guid$
-    ).pipe(
+    ]).pipe(
       map(([endpoints, guid]) => endpoints.find((item) => item.provider.guid === guid)),
       filter(provider => !!provider),
       filter(data => data.provider.connectionStatus === 'connected'),

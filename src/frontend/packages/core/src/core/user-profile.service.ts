@@ -111,10 +111,10 @@ export class UserProfileService {
     const didChangePassword = !!(profileChanges.newPassword && profileChanges.currentPassword);
     const profileObs$ = didChangeProfile ? this.updateProfileInfo(profile, profileChanges) : observableOf(getDefaultActionState());
     const passwordObs$ = didChangePassword ? this.updatePassword(profile, profileChanges) : observableOf(getDefaultActionState());
-    return combineLatest(
+    return combineLatest([
       profileObs$,
       passwordObs$
-    );
+    ]);
   }
 
   private updateProfileInfo(profile: UserProfileInfo, profileChanges: UserProfileInfoUpdates): Observable<ActionState> {

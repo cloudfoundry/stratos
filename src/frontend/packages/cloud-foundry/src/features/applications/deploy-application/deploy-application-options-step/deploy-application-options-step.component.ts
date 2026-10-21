@@ -224,7 +224,7 @@ export class DeployApplicationOptionsStepComponent implements OnInit, OnDestroy 
     // overrides we want to preseed.
     this.appGuid = this.activatedRoute.snapshot.queryParams.appGuid;
     if (this.appGuid) {
-      combineLatest(this.domains$, cfDetails$).pipe(
+      combineLatest([this.domains$, cfDetails$]).pipe(
         switchMap(([, cfDetails]) => this.http.get<StEnvVars>(
           `/pp/v1/cf/apps/${cfDetails.cloudFoundry}/${this.appGuid}/env`,
         )),

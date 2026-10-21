@@ -317,10 +317,10 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
     // snackbar convey the action's progress/result in place. Gating on "app
     // not yet present" stops those refreshes from blanking the whole page with
     // the spinner (the restage repaint regression).
-    this.isFetching$ = observableCombineLatest(
+    this.isFetching$ = observableCombineLatest([
       this.applicationService.isFetchingApp$,
       toObservable(this.detail.app, { injector: this.injector }),
-    ).pipe(
+    ]).pipe(
       map(([isFetchingApp, app]) => isFetchingApp && !app),
     );
 
@@ -329,19 +329,19 @@ export class ApplicationTabsBaseComponent implements OnInit, OnDestroy {
       startWith({ updating: true }),
     );
 
-    const initialFetch$ = observableCombineLatest(
+    const initialFetch$ = observableCombineLatest([
       this.applicationService.isFetchingApp$,
       this.applicationService.isFetchingEnvVars$,
       this.applicationService.isFetchingStats$
-    ).pipe(
+    ]).pipe(
       map(([isFetchingApp, isFetchingEnvVars, isFetchingStats]) => {
         return isFetchingApp || isFetchingEnvVars || isFetchingStats;
       }));
 
-    this.summaryDataChanging$ = observableCombineLatest(
+    this.summaryDataChanging$ = observableCombineLatest([
       initialFetch$,
       this.applicationService.isUpdatingApp$,
-    ).pipe(map(([isFetchingApp, isUpdating]) => {
+    ]).pipe(map(([isFetchingApp, isUpdating]) => {
       return !!(isFetchingApp || isUpdating);
     }));
   }

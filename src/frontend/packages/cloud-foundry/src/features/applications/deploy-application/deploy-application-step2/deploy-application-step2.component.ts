@@ -270,11 +270,11 @@ export class DeployApplicationStep2Component
   };
 
   ngOnInit() {
-    this.sourceType$ = combineLatest(
+    this.sourceType$ = combineLatest([
       this.appDeploySourceTypes.getAutoSelectedType(this.route),
       this.sourceType$$,
       this.appDeploySourceTypes.types$.pipe(take(1), map(st => st[this.INITIAL_SOURCE_TYPE]))
-    ).pipe(
+    ]).pipe(
       map(([sourceFromParam, sourceFromStore, sourceDefault]) => sourceFromParam || sourceFromStore || sourceDefault),
       filter(sourceType => !!sourceType),
     );
@@ -377,12 +377,12 @@ export class DeployApplicationStep2Component
         refCount()
       );
 
-    const updateBranchAndCommit = observableCombineLatest(
+    const updateBranchAndCommit = observableCombineLatest([
       this.repositoryBranches$,
       deployBranchName$,
       this.projectInfo$,
       deployCommit$,
-    ).pipe(
+    ]).pipe(
       tap(([branches, name, projectInfo, commit]) => {
         const branch = branches.find(b => b.name === name);
         if (branch && !!projectInfo && branch.projectName === projectInfo.full_name) {

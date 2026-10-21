@@ -13,7 +13,7 @@ import {
 import {
   buffer,
   catchError,
-  combineLatest,
+  combineLatestWith,
   distinctUntilChanged,
   filter,
   map,
@@ -204,7 +204,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     // When we resize the window, we need to re-enable auto-scroll - if the height changes
     // we will determine that the user scrolled off the bottom, when in fact this is due to the resize event
     this.resizeSub = observableFromEvent(window, 'resize').pipe(
-      combineLatest(this.isLocked$))
+      combineLatestWith(this.isLocked$))
       .subscribe(([_event, locked]) => {
         if (locked) {
           this.scrollToBottom();
@@ -222,7 +222,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
       startWith(false));
 
     const buffer$ = observableInterval().pipe(
-      combineLatest(this.isHighThroughput$),
+      combineLatestWith(this.isHighThroughput$),
       throttle(([_t, high]) => {
         return observableInterval(
           high ? this.highThroughputBufferIntervalMS : 0
@@ -303,7 +303,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
         })
       );
 
-    this.listeningSub = observableCombineLatest(this.isLocked$, addedLogs$).pipe(
+    this.listeningSub = observableCombineLatest([this.isLocked$, addedLogs$]).pipe(
       tap(([isLocked, _logs]) => {
         try {
           if (isLocked) {

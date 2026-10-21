@@ -3,7 +3,7 @@ import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/cor
 import { RouterModule } from '@angular/router';
 import { GitCommit, GitDataService, GitResourceState, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
 import { combineLatest as observableCombineLatest, EMPTY, Observable, of } from 'rxjs';
-import { catchError, combineLatest, distinct, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
+import { catchError, combineLatestWith, distinct, distinctUntilChanged, map, startWith, switchMap } from 'rxjs/operators';
 
 import {
   CurrentUserPermissionsService,
@@ -118,7 +118,7 @@ export class BuildTabComponent implements OnInit {
     void this.data.refresh('serviceBindings');
 
     this.cardTwoFetching$ = this.applicationService.application$.pipe(
-      combineLatest(
+      combineLatestWith(
         this.applicationService.appSummary$
       ),
       map(([app, appSummary]: [ApplicationData, EntityInfo<IAppSummary>]) => {
@@ -126,7 +126,7 @@ export class BuildTabComponent implements OnInit {
       }), distinct());
 
     this.sshStatus$ = this.applicationService.application$.pipe(
-      combineLatest(this.applicationService.appSpace$),
+      combineLatestWith(this.applicationService.appSpace$),
       map(([app, space]) => {
         if (!space?.allowSsh) {
           return 'Disabled by the space';
@@ -159,10 +159,10 @@ export class BuildTabComponent implements OnInit {
       switchMap(repoResource => repoResource.waitForValue$.pipe(catchError(() => EMPTY)))
     );
 
-    const deploySource$ = observableCombineLatest(
+    const deploySource$ = observableCombineLatest([
       this.applicationService.applicationStratProject$,
       this.applicationService.application$
-    ).pipe(
+    ]).pipe(
       map(([project, app]): DeploySourceView | null => {
         if (project) {
           const deploySource: CustomEnvVarStratosProjectSource = { ...project.deploySource };

@@ -170,9 +170,9 @@ export class SelectPlanStepComponent implements OnDestroy {
       refCount(),
     );
 
-    this.selectedPlan$ = observableCombineLatest(
+    this.selectedPlan$ = observableCombineLatest([
       this.stepperForm.statusChanges.pipe(startWith(true)),
-      this.servicePlans$).pipe(
+      this.servicePlans$]).pipe(
         filter(([, servicePlans]) => !!servicePlans && servicePlans.length > 0),
         map(([, servicePlans]) => {
           return servicePlans.find(s => s.guid === this.stepperForm.controls.servicePlans.value);

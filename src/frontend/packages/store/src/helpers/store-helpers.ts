@@ -29,10 +29,10 @@ export class MultiActionListEntity {
 
 
 export function getFavoriteInfoObservable(userFavorites: UserFavoritesDataService): Observable<IFavoritesInfo> {
-  return combineLatest(
+  return combineLatest([
     userFavorites.fetching$,
     userFavorites.error$
-  ).pipe(
+  ]).pipe(
     map(([fetching, error]) => ({
       fetching,
       error

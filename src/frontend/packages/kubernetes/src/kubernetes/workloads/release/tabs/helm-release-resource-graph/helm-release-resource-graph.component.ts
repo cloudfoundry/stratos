@@ -133,10 +133,10 @@ export class HelmReleaseResourceGraphComponent implements OnInit, OnDestroy {
   ngOnInit() {
 
     // Listen for the graph
-    this.graph = combineLatest(
+    this.graph = combineLatest([
       this.helper.fetchReleaseGraph(),
       this.analysisReportUpdated$
-    ).subscribe(([g, report]: [HelmReleaseGraph, any]) => {
+    ]).subscribe(([g, report]: [HelmReleaseGraph, any]) => {
       const newNodes: CustomHelmReleaseGraphNode[] = [];
       Object.values(g.nodes).forEach((node: HelmReleaseGraphNode) => {
         const colors = this.getColor(node.data.status);

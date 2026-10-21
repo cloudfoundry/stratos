@@ -3,7 +3,7 @@ import { Injectable, Injector, inject } from '@angular/core';
 import { combineLatest, EMPTY, from, Observable, of as observableOf, of } from 'rxjs';
 import { take,
   catchError,
-  combineLatest as combineLatestOperators,
+  combineLatestWith,
   distinctUntilChanged,
   expand,
   filter,
@@ -79,7 +79,7 @@ export class CfRolesService {
       // Create an observable containing the original list of organisations and a corresponding list of whether an org can be edited.
       // An empty list must still emit, or the caller waits forever.
       switchMap(orgsOrSpaces => {
-        return combineLatest(
+        return combineLatest([
           observableOf(orgsOrSpaces),
           combineLatestOrEmpty(orgsOrSpaces.map(orgOrSpace => CfRolesService.canEditOrgOrSpace(
             userPerms,
@@ -89,7 +89,7 @@ export class CfRolesService {
             orgOrSpace.entity.cfGuid ?? cfGuid,
             isOrg ? orgOrSpace.metadata.guid : ((orgOrSpace as APIResource<ISpace>).entity.organization_guid),
             isOrg ? CfUserPermissionsChecker.ALL_SPACES : orgOrSpace.metadata.guid,
-          ))));
+          )))]);
       }),
       // Filter out orgs than the current user cannot edit
       map(([orgs, canEdit]) => orgs.filter(org => {
@@ -122,7 +122,7 @@ export class CfRolesService {
     // replay the last value it pushed, which can be the previous users.)
     this.users$ = observeSignal(this.rolesData.users, this.injector);
     this.existingRoles$ = this.users$.pipe(
-      combineLatestOperators(observeSignal(this.rolesData.cfGuid, this.injector)),
+      combineLatestWith(observeSignal(this.rolesData.cfGuid, this.injector)),
       filter(([_users, cfGuid]) => !!cfGuid),
       switchMap(([users, cfGuid]) => this.populateRoles(cfGuid, users)),
       distinctUntilChanged(),
@@ -134,7 +134,7 @@ export class CfRolesService {
     );
 
     this.loading$ = this.existingRoles$.pipe(
-      combineLatestOperators(this.newRoles$),
+      combineLatestWith(this.newRoles$),
       map(([existingRoles, newRoles]) => !existingRoles || !newRoles),
       startWith(true),
     );
@@ -211,7 +211,7 @@ export class CfRolesService {
    */
   createRolesDiff(orgGuid: string): Observable<CfRoleChange[]> {
     return this.existingRoles$.pipe(
-      combineLatestOperators(
+      combineLatestWith(
         this.newRoles$,
         this.users$,
       ),

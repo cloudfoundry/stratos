@@ -180,7 +180,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
     );
 
     // We need the schame, value sand the monaco editor to be all loaded before we're ready
-    this.loading$ = combineLatest(schema$, values$, this.monacoLoaded$).pipe(
+    this.loading$ = combineLatest([schema$, values$, this.monacoLoaded$]).pipe(
       filter(([schema, values, loaded]: [any, any, boolean]) => schema !== undefined && values !== undefined && loaded),
       tap(([schema, values, _loaded]: [any, any, boolean]) => {
         this.schema = schema;

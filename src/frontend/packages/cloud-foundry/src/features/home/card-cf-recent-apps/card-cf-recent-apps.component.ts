@@ -82,10 +82,10 @@ export class CardCfRecentAppsComponent implements OnInit {
 
     // Stats are loaded by each row (CompactAppCardComponent), once per
     // started app; the registry shares the request between rows.
-    this.recentApps$ = combineLatest(
+    this.recentApps$ = combineLatest([
       allApps$,
       this.maxRows$,
-    ).pipe(
+    ]).pipe(
       filter(([apps]) => !!apps),
       map(([apps, maxRows]) => this.restrictApps(apps, maxRows)),
     );

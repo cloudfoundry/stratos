@@ -61,12 +61,12 @@ export class CliInfoApplicationComponent implements OnInit {
     // Read the wrapped APIResource shapes from the data-service-backed
     // observables instead so we get name fields without relying on
     // inline relations.
-    this.context$ = combineLatest(
+    this.context$ = combineLatest([
       this.applicationService.application$,
       this.applicationService.appSpace$,
       this.applicationService.appOrg$,
       endpoint$,
-    ).pipe(
+    ]).pipe(
       filter(([app, space, org, ep]) => !!app && !!space && !!org && !!ep),
       map(([app, space, org, ep]: [any, any, any, EndpointModel]) => ({
         appName: app.app.entity.name,

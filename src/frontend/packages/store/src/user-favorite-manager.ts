@@ -46,19 +46,19 @@ export class UserFavoriteManager {
     const waitForFavorites$ = this.getWaitForFavoritesObservable();
     const favoriteGroups$ = this.userFavorites.groups$;
     const favoriteEntities$ = this.getFavoriteEntitiesObservable();
-    const combined$ = combineLatest(
+    const combined$ = combineLatest([
       favoriteGroups$,
       favoriteEntities$
-    );
+    ]);
     return waitForFavorites$
       .pipe(switchMap(() => combined$));
   }
 
   private getWaitForFavoritesObservable() {
-    return combineLatest(
+    return combineLatest([
       this.userFavorites.fetching$,
       this.userFavorites.error$
-    ).pipe(
+    ]).pipe(
       tap(([fetching, error]) => {
         // Defensive: Log error details before throwing
         if (error) {
