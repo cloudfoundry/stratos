@@ -111,4 +111,33 @@ describe('TailwindSnackBarService', () => {
     ref.update('Deleting 5 applications… 5 of 5');
     expect(el.textContent).toBe('Deleting 5 applications… 0 of 5');
   });
+  // An upstream error page reads as a heading and lines of text; each piece
+  // is its own text node, so markup inside one stays text.
+  it('error() shows message pieces styled, as text, and announces their text', () => {
+    const announce = vi.spyOn(TestBed.inject(LiveAnnouncer), 'announce').mockResolvedValue();
+    service.error([
+      { text: 'Delete failed: ', style: 'text' },
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\n<img src=x onerror=alert(1)>', style: 'text' },
+    ]);
+    const message = document.querySelector('.snackbar-message') as HTMLElement;
+    expect(Array.from(message.children).map(c => [c.tagName, c.textContent, c.className])).toEqual([
+      ['SPAN', 'Delete failed: ', ''],
+      ['SPAN', '502 Bad Gateway', 'font-semibold'],
+      ['SPAN', '\n<img src=x onerror=alert(1)>', ''],
+    ]);
+    expect(message.querySelector('img')).toBeNull();
+    expect(message.classList).toContain('whitespace-pre-line');
+    expect(announce).toHaveBeenCalledWith('Delete failed: 502 Bad Gateway\n<img src=x onerror=alert(1)>', 'assertive');
+  });
+
+  it('show() and open() take message pieces too', () => {
+    service.show([{ text: 'Saved ', style: 'text' }, { text: 'app-1', style: 'code' }]);
+    service.open([{ text: 'Working', style: 'em' }]);
+    const messages = Array.from(document.querySelectorAll('.snackbar-message'));
+    expect(messages.map(m => m.innerHTML)).toEqual([
+      '<span>Saved </span><span class="font-mono">app-1</span>',
+      '<span class="italic">Working</span>',
+    ]);
+  });
 });
