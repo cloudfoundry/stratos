@@ -51,12 +51,12 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
         // Manually check if a cert is required, if so tick by default
         this.http.get<CertResponse>(`/pp/v1/kube/cert?url=${row.cluster.server}`).pipe(
           timeout(5000),
-        ).subscribe(
+        ).subscribe({
           // Success, no cert required
-          (res: CertResponse) => this.update(res.Required),
+          next: (res: CertResponse) => this.update(res.Required),
           // Failed, check for specific cert required error
-          (_e: HttpErrorResponse) => this.update(false)
-        );
+          error: (_e: HttpErrorResponse) => this.update(false)
+        });
       }
     }
   }

@@ -265,20 +265,23 @@ export class KubedashConfigurationComponent implements OnDestroy {
       return;
     }
 
-    obs.subscribe(() => {
-      console.log(okMsg); // Replace with proper notification system if needed
-      msgUpdater(okMsg);
-      busy.set(false);
-      this.refresh();
-    }, (e) => {
-      let msg = errorMsg;
-      if (e && e.error && e.error.error) {
-        msg = e.error.error;
+    obs.subscribe({
+      next: () => {
+        console.log(okMsg); // Replace with proper notification system if needed
+        msgUpdater(okMsg);
+        busy.set(false);
+        this.refresh();
+      },
+      error: (e) => {
+        let msg = errorMsg;
+        if (e && e.error && e.error.error) {
+          msg = e.error.error;
+        }
+        console.error(msg); // Replace with proper notification system if needed
+        msgUpdater(msg);
+        busy.set(false);
+        this.refresh();
       }
-      console.error(msg); // Replace with proper notification system if needed
-      msgUpdater(msg);
-      busy.set(false);
-      this.refresh();
     });
   }
 

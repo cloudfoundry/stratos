@@ -33,10 +33,10 @@ export class EulaPageComponent {
   constructor() {
     const http = inject(HttpClient);
 
-    http.get('/core/assets/eula.html', {responseType: 'text'}).subscribe(
-      (html: string) => this.eulaHtml.set(html),
-      () => this.eulaHtml.set('An error occurred retrieving the EULA')
-    );
+    http.get('/core/assets/eula.html', {responseType: 'text'}).subscribe({
+      next: (html: string) => this.eulaHtml.set(html),
+      error: () => this.eulaHtml.set('An error occurred retrieving the EULA')
+    });
   }
 
 }

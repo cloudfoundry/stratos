@@ -274,10 +274,10 @@ export class BackupEndpointsComponent implements OnDestroy {
         reject(new Error(`Failed to create backup` + (errorMessage ? `: ${errorMessage}` : '')));
       };
 
-      const createBackup = () => this.service.createBackup().pipe(take(1), defaultIfEmpty(null)).subscribe(
-        res => res !== null ? backupSuccess(res) : backupFailure('Backup service returned no response'),
-        backupFailure
-      );
+      const createBackup = () => this.service.createBackup().pipe(take(1), defaultIfEmpty(null)).subscribe({
+        next: res => res !== null ? backupSuccess(res) : backupFailure('Backup service returned no response'),
+        error: backupFailure
+      });
 
       if (this.service.hasConnectionDetails()) {
         this.confirmDialog.openWithCancel(confirmation, createBackup, userCancelledDialog);
