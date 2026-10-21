@@ -1,10 +1,10 @@
-import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, signal, inject } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 
 import { NgModel } from '@angular/forms';
 import { format } from 'date-fns';
-import { EMPTY, NEVER, Observable, Subject, of, timer } from 'rxjs';
+import { BehaviorSubject, EMPTY, NEVER, Observable, Subject, timer } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
-import { catchError, debounceTime, map, retry, share, startWith, switchMap, tap, take } from 'rxjs/operators';
+import { catchError, debounceTime, map, retry, share, switchMap, tap } from 'rxjs/operators';
 
 import { AnsiColorizer, LogViewerComponent } from '@stratosui/core';
 import { ApplicationService } from '../../../../application.service';
@@ -39,15 +39,17 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   private cdr = inject(ChangeDetectorRef);
 
   public messages!: Observable<string>;
-  private connectionStatusSubject = new Subject<number>();
-  public connectionStatus!: Observable<number>;
+  // 0 connecting, 1 connected, -2 retrying, -1 failed: the codes the log
+  // viewer turns into its status message.
+  private connectionStatusSubject = new BehaviorSubject<number>(0);
+  public connectionStatus: Observable<number> = this.connectionStatusSubject.pipe(
+    // Ensure the connection message doesn't flash onscreen.
+    debounceTime(250)
+  );
   private socketError = false;
-  private maxRetries = 3;
+  protected readonly maxRetries = 3;
   private retryDelayMs = 2000;
   private lastError: ConnectionError | null = null;
-
-  // Signal for connection status tracking
-  connectionStatusSignal = signal<number>(0);
 
   // strict: populated by Angular's @ViewChild query after view init.
   @ViewChild('searchFilter', { static: false }) searchFilter!: NgModel;
@@ -66,17 +68,14 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.connectionStatusSubject.next(0);
-    this.connectionStatusSignal.set(0);
     if (!this.applicationService.cfGuid || !this.applicationService.appGuid) {
       this.messages = NEVER;
-      this.connectionStatus = of(-1); // Indicate invalid configuration
       this.lastError = {
         message: 'Invalid configuration: Missing application or Cloud Foundry endpoint information',
         retryable: false,
         timestamp: Date.now()
       };
-      this.connectionStatusSignal.set(-1);
+      this.connectionStatusSubject.next(-1); // Indicate invalid configuration
       this.cdr.markForCheck();
     } else {
       // Use window.location.protocol to construct proper WebSocket URL
@@ -94,6 +93,7 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
           // Reset error state on successful connection
           this.socketError = false;
           this.lastError = null;
+          this.connectionStatusSubject.next(1);
           console.log('WebSocket connected successfully');
           this.cdr.markForCheck();
         }),
@@ -112,7 +112,6 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             };
             // Inform user of retry attempt
             this.connectionStatusSubject.next(-2); // -2 indicates retrying
-            this.connectionStatusSignal.set(-2);
             this.cdr.markForCheck();
             // Exponential backoff: 2s, then 4s
             const delay = this.retryDelayMs * Math.pow(2, retryCount - 1);
@@ -132,7 +131,6 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             timestamp: Date.now()
           };
           this.connectionStatusSubject.next(-1);
-          this.connectionStatusSignal.set(-1);
           this.cdr.markForCheck();
           // Return EMPTY to complete the stream gracefully
           return EMPTY;
@@ -158,33 +156,12 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
             timestamp: Date.now()
           };
           this.connectionStatusSubject.next(-1);
-          this.connectionStatusSignal.set(-1);
           this.cdr.markForCheck();
           return EMPTY;
         }),
         tap(() => {
           // Mark for check on each message for real-time streaming
           this.cdr.markForCheck();
-        })
-      );
-
-      this.connectionStatus = socket$.pipe(
-        take(1),
-        map(() => {
-          this.connectionStatusSubject.next(1);
-          this.connectionStatusSignal.set(1);
-          console.log('WebSocket connection status: Connected');
-          this.cdr.markForCheck();
-          return 1;
-        }),
-        startWith(0),
-        // Ensure the connection message doesn't flash onscreen.
-        debounceTime(250),
-        catchError(() => {
-          this.connectionStatusSubject.next(-1);
-          this.connectionStatusSignal.set(-1);
-          this.cdr.markForCheck();
-          return of(-1);
         })
       );
     }
