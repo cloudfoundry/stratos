@@ -1,4 +1,4 @@
-import { HttpClient, HttpClientModule, HttpHandler } from '@angular/common/http';
+import { HttpClient, HttpHandler } from '@angular/common/http';
 import { NgModule } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { ActivatedRoute } from '@angular/router';
@@ -66,7 +66,6 @@ export const HelmBaseTestModules = [
   RouterTestingModule,
   CoreModule,
   NoopAnimationsModule,
-  HttpClientModule,
   SharedModule
 ].filter(Boolean);
 
