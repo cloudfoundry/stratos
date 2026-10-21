@@ -1,13 +1,13 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { describe, expect, it } from 'vitest';
 import { StratosJobError } from './async-job.types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { extractHttpErrorMessage, extractHttpErrorPieces } from '@stratosui/store';
 
 const httpError = (error: unknown, status = 502, statusText = 'Bad Gateway'): HttpErrorResponse =>
   new HttpErrorResponse({ error, status, statusText });
 
 const html504 = 'Status Code: 504 Gateway Timeout, Body: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn\'t respond in time.\n</body></html>';
-const stripped504 = 'Status Code: 504 Gateway Timeout, Body: 504 Gateway Time-out The server didn\'t respond in time.';
+const stripped504 = 'Status Code: 504 Gateway Timeout, Body:\n504 Gateway Time-out\nThe server didn\'t respond in time.';
 
 describe('extractHttpErrorMessage', () => {
   it('reads the same message from a failed job on either path', () => {
@@ -16,6 +16,8 @@ describe('extractHttpErrorMessage', () => {
     const fast = httpError({ state: 'FAILED', errors });
     expect(extractHttpErrorMessage(fast)).toBe(stripped504);
     expect(extractHttpErrorMessage(polled)).toBe(stripped504);
+    expect(extractHttpErrorPieces(polled)).toEqual(extractHttpErrorPieces(fast));
+    expect(extractHttpErrorPieces(polled)).toContainEqual({ text: '504 Gateway Time-out', style: 'heading' });
   });
 
   it('strips markup from a CF passthrough detail', () => {

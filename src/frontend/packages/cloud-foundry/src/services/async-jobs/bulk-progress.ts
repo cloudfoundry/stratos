@@ -168,8 +168,10 @@ async function trackSettlement(
   }
   const parts = [`${plural(tally.deleted, o.noun)} ${o.doneVerb}`];
   if (tally.failed > 0) {
+    // A reason read from an HTML page has a line per block; this summary
+    // lists every failure on one line.
     const named = tally.failures.map(f =>
-      f.reason ? `${nameOf(f.guid)} (${f.reason.replace(/\.$/, '')})` : nameOf(f.guid));
+      f.reason ? `${nameOf(f.guid)} (${f.reason.replaceAll('\n', ' ').replace(/\.$/, '')})` : nameOf(f.guid));
     parts.push(`${tally.failed} failed: ${listSome(named)}`);
   }
   if (tally.unknowns.length > 0) {

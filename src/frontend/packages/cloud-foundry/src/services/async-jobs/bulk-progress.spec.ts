@@ -252,6 +252,21 @@ describe('runBulkWithProgress', () => {
     warn.mockRestore();
   });
 
+  it('keeps each failure reason on one line in the summary', async () => {
+    const sb = makeSnackBar();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => bulk([
+        { guid: 'b', state: 'FAILED', errors: [{ code: 'CF-X', message: '<html><body><h1>502 Bad Gateway</h1><p>Try later.</p></body></html>' }] },
+      ]),
+    });
+    await flush();
+    expect(sb.error).toHaveBeenCalledWith('0 applications deleted; 1 failed: "b" (502 Bad Gateway Try later)');
+    warn.mockRestore();
+  });
+
   it('names the first three failures and counts the rest', async () => {
     const sb = makeSnackBar();
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
