@@ -90,11 +90,15 @@ export { getFavoriteInfoObservable } from './helpers/store-helpers';
 export {
   JetStreamErrorResponse,
   extractHttpErrorMessage,
+  extractHttpErrorPieces,
   httpErrorResponseToSafeString,
   isHttpErrorResponse,
+  leadPieces,
   proxyAPIVersion,
   stripMarkup,
 } from './jetstream';
+export type { ErrorPiece, ErrorPieceStyle } from './upstream-error-text';
+export { htmlToPieces, piecesToText } from './upstream-error-text';
 export type { RoutingEvent } from './types/routing.type';
 export type { IFavoriteMetadata, IFavoritesInfo, UserFavoriteEndpoint, IEndpointFavMetadata, FavoriteIconData } from './types/user-favorites.types';
 export { UserFavorite } from './types/user-favorites.types';
