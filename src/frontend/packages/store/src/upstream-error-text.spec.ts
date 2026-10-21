@@ -144,6 +144,31 @@ describe('htmlToPieces', () => {
     it('drops the space next to a break', () => {
       expect(text('Body: <h1>504</h1> The server')).toBe('Body:\n504\nThe server');
     });
+
+  });
+
+  describe('table cells', () => {
+    it('separates the cells of a row with a space', () => {
+      expect(text('<h2>HTTP ERROR 404</h2><table><tr><th>URI:</th><td>/foo</td></tr></table>')).toBe('HTTP ERROR 404\nURI: /foo');
+    });
+
+    it('breaks between rows', () => {
+      expect(text('<html><table><tr><th>A</th><td>1</td></tr><tr><th>B</th><td>2</td></tr></table>')).toBe('A 1\nB 2');
+    });
+
+    it('gives one space for empty cells and the spaces around them', () => {
+      expect(text('<html><table><tr><td>a</td><td></td><td>b</td></tr></table>')).toBe('a b');
+      expect(text('<html><table><tr><td>a</td><td></td><td> </td><td>b</td></tr></table>')).toBe('a b');
+      expect(text('<html><table><tr><th> A </th><td>&nbsp;1 </td><td></td></tr></table>')).toBe('A 1');
+    });
+
+    it('gives only the line break where a cell holds a block', () => {
+      expect(text('<html><table><tr><th>A</th><td><p>1</p></td><td>2</td></tr></table>')).toBe('A\n1\n2');
+    });
+
+    it('keeps the style of cell content', () => {
+      expect(htmlToPieces('<html><table><tr><th><b>Type</b></th><td>x</td></tr></table>')).toEqual([b('Type'), t(' x')]);
+    });
   });
 
   describe('entities', () => {
