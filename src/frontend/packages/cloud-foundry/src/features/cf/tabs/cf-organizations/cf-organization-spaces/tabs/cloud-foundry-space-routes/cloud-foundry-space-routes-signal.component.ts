@@ -19,7 +19,7 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
-  extractHttpErrorMessage,
+  leadPieces,
 } from '@stratosui/store';
 
 import { BulkResult, CfRoutesSignalConfigService } from '../../../../../../../shared/signal-list-configs/route/cf-routes-signal-config.service';
@@ -372,7 +372,7 @@ export class CloudFoundrySpaceRoutesSignalComponent {
           this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Routes list', how));
         }
       } catch (err: unknown) {
-        this.snackBar.error(`${label} failed: ${extractHttpErrorMessage(err)}`);
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     const appGuids = route.appGuids ?? [];

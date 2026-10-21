@@ -19,7 +19,7 @@ import {
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { QuotaDataService } from '../../../services/endpoint-data/quota-data.service';
 import { StOrg } from '../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces } from '@stratosui/store';
 
 // ─── Dialog data ──────────────────────────────────────────────────────────────
 
@@ -124,7 +124,7 @@ export class ApplyQuotaToOrgsDialogComponent {
       // M1: do NOT touch `submitting` after close() — the view is destroyed.
       this.dialogRef.close(true);
     } catch (err: unknown) {
-      this.snackBar.error(`Apply failed: ${extractHttpErrorMessage(err)}`);
+      this.snackBar.error(leadPieces('Apply failed', err));
       this.submitting.set(false);
     }
   }
