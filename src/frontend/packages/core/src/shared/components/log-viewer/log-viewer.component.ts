@@ -58,6 +58,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   @Input() status!: Observable<number>;
 
+  // How many times the parent retries before it reports the stream failed
+  @Input() maxReconnectAttempts = 5;
+
   private logStreamSubject = new BehaviorSubject<Observable<any>>(NEVER);
 
   // A different stream is a new log: what the last one showed goes
@@ -89,7 +92,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   // Connection state tracking
   private connectionAttempts = 0;
-  private maxReconnectAttempts = 5;
   private lastConnectionError: ConnectionErrorInfo | null = null;
 
   public maxLogLines = 1000;

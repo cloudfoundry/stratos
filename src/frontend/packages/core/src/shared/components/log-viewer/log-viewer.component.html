@@ -10,10 +10,12 @@
   </div>
 
   @if (statusMessage$ | async; as message) {
-    <div>
+    <div role="status">
       @if (message.message) {
         <div class="log-viewer__message" [ngClass]="{'log-viewer__message-error': message.isError}">
-          <div class="log-viewer__messageText">{{ message.message }}</div>
+          <div class="log-viewer__messageText"
+            [class.text-danger]="message.isError"
+            [class.text-content-muted]="!message.isError">{{ message.message }}</div>
         </div>
       }
     </div>
