@@ -6,7 +6,7 @@ replace github.com/cloudfoundry/stratos/src/jetstream/api => ../../api
 
 require (
 	code.cloudfoundry.org/cli/v8 v8.19.1
-	code.cloudfoundry.org/clock v1.91.0
+	code.cloudfoundry.org/clock v1.92.0
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
 	github.com/coder/websocket v1.8.15
 	github.com/labstack/echo/v5 v5.4.0
@@ -77,7 +77,7 @@ require (
 	go.yaml.in/yaml/v2 v2.4.4 // indirect
 	go4.org v0.0.0-20230225012048-214862532bf5 // indirect
 	golang.org/x/crypto v0.58.0 // indirect
-	golang.org/x/net v0.60.0 // indirect
+	golang.org/x/net v0.61.0 // indirect
 	golang.org/x/oauth2 v0.36.0 // indirect
 	golang.org/x/sys v0.49.0 // indirect
 	golang.org/x/term v0.47.0 // indirect
