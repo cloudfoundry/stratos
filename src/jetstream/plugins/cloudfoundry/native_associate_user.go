@@ -21,8 +21,9 @@ type associateUserRequest struct {
 // associate the user with the foundation (roleless association).
 //
 // Already-associated (CF returns 422 / capi.ErrUnprocessable) is treated as a
-// benign success — the user is already a member. Only a hard failure (any
-// other error from the capi client) is surfaced as an error.
+// benign success — the user is already a member. Any other CF failure, in
+// the lookup or the create, goes out with CF's status and error envelope via
+// handleCapiError (a non-admin caller gets CF's 403, for example).
 func (cf *CloudFoundrySpecification) associateUser(c *echo.Context) error {
 	cnsiGUID := c.Param("cnsiGuid")
 	if cnsiGUID == "" {
@@ -49,8 +50,11 @@ func (cf *CloudFoundrySpecification) associateUser(c *echo.Context) error {
 	// in UAA (created via `cf create-user` or invited). If it does not resolve,
 	// return 404 so the frontend can surface a clear "user not found" message.
 	guid, err := findUserGUID(reqCtx, cfClient, req.Username, req.Origin)
-	if err != nil {
+	if errors.Is(err, errUserNotFound) {
 		return echo.NewHTTPError(http.StatusNotFound, err.Error())
+	}
+	if err != nil {
+		return handleCapiError(c, err)
 	}
 
 	// Associate the user with the foundation via POST /v3/users {"guid": <guid>}.
@@ -59,7 +63,7 @@ func (cf *CloudFoundrySpecification) associateUser(c *echo.Context) error {
 	associated := true
 	if createErr != nil {
 		if !errors.Is(createErr, capi.ErrUnprocessable) {
-			return echo.NewHTTPError(http.StatusBadGateway, "failed to associate user: "+createErr.Error())
+			return handleCapiError(c, createErr)
 		}
 		// 422 = already associated, which is a benign idempotent success.
 		associated = false
