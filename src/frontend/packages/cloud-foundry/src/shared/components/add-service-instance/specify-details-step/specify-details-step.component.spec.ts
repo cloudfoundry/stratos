@@ -1,6 +1,8 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { firstValueFrom, of } from 'rxjs';
@@ -26,6 +28,10 @@ import { setJobTrackingLimit } from '../../../../services/async-jobs/write-with-
 import type { StServicePlan } from '../../../../services/endpoint-data/stratos-types';
 import { SpecifyDetailsStepComponent } from './specify-details-step.component';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
+
+// nginx's own 502 page.
+const nginx502 = (): string =>
+  readFileSync(join(import.meta.dirname, '../../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
 
 describe('SpecifyDetailsStepComponent', () => {
   let component: SpecifyDetailsStepComponent;
@@ -514,10 +520,8 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       { status: 200, statusText: 'OK' },
     );
 
-    await expect(finalResult).resolves.toEqual({
-      success: false,
-      message: 'Service instance "my-instance" was created, but binding it to the application failed: bind said no',
-    });
+    const message = 'Service instance "my-instance" was created, but binding it to the application failed: bind said no';
+    await expect(finalResult).resolves.toEqual({ success: false, message, messagePieces: [{ text: message, style: 'text' }] });
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
@@ -528,10 +532,27 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
     component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
 
-    await expect(firstValueFrom(component.onNext())).resolves.toEqual({
-      success: false,
-      message: 'Failed to bind service instance "instance-two" to the application: bind said no',
-    });
+    const message = 'Failed to bind service instance "instance-two" to the application: bind said no';
+    await expect(firstValueFrom(component.onNext())).resolves.toEqual({ success: false, message, messagePieces: [{ text: message, style: 'text' }] });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('keeps an error page\'s heading when binding an existing instance fails', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    const error = new HttpErrorResponse({ error: nginx502(), status: 502, statusText: 'Bad Gateway' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, message: '502 Bad Gateway\nnginx/1.28.0', error }));
+    component.bindExistingInstance = true;
+    component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
+    component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
+
+    const out = await firstValueFrom(component.onNext());
+
+    expect(out.message).toBe('Failed to bind service instance "instance-two" to the application: 502 Bad Gateway\nnginx/1.28.0');
+    expect(out.messagePieces).toEqual([
+      { text: 'Failed to bind service instance "instance-two" to the application: ', style: 'text' },
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx/1.28.0', style: 'text' },
+    ]);
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
@@ -620,7 +641,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
         answerPoll(httpMock, failedJob);
         await vi.advanceTimersByTimeAsync(0);
-        expect(error).toHaveBeenCalledWith('Failed to create service instance "my-instance": the broker said no');
+        expect(error).toHaveBeenCalledWith([{ text: 'Failed to create service instance "my-instance": the broker said no', style: 'text' }]);
       } finally {
         vi.useRealTimers();
       }
@@ -941,7 +962,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
         fixture.destroy();
         answerPoll(httpMock, failedJob);
         await vi.advanceTimersByTimeAsync(0);
-        expect(error).toHaveBeenCalledWith('Failed to create service instance "my-instance": the broker said no');
+        expect(error).toHaveBeenCalledWith([{ text: 'Failed to create service instance "my-instance": the broker said no', style: 'text' }]);
       } finally {
         vi.useRealTimers();
       }
@@ -978,6 +999,26 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     expect(out.message).toContain('Service instance name is taken');
     // Drain unrelated background loaders the cf test module fires on bootstrap;
     // they are not under test in this stage.
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  // CF quotes the broker's own page in the error detail.
+  it('keeps an error page\'s heading when the create fails', async () => {
+    const { component, httpMock } = await setup();
+    const finalResult = firstValueFrom(component.onNext());
+
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+      { errors: [{ code: 10001, title: 'CF-ServiceBrokerBadResponse', detail: nginx502() }] },
+      { status: 502, statusText: 'Bad Gateway' },
+    );
+
+    const out = await finalResult;
+    expect(out.message).toBe('Failed to create service instance "my-instance": 502 Bad Gateway\nnginx/1.28.0');
+    expect(out.messagePieces).toEqual([
+      { text: 'Failed to create service instance "my-instance": ', style: 'text' },
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx/1.28.0', style: 'text' },
+    ]);
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 

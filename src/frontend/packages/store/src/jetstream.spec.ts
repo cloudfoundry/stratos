@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { describe, expect, it } from 'vitest';
-import { extractHttpErrorMessage, extractHttpErrorPieces, leadPieces, stripMarkup } from './jetstream';
+import { extractHttpErrorMessage, extractHttpErrorPieces, leadError, leadPieces, stripMarkup } from './jetstream';
 import { ErrorPiece } from './upstream-error-text';
 
 const t = (s: string): ErrorPiece => ({ text: s, style: 'text' });
@@ -64,6 +64,24 @@ describe('leadPieces', () => {
     expect(leadPieces('Delete failed', httpError(nginx502)))
       .toEqual([t('Delete failed: '), h('502 Bad Gateway'), t('\nnginx')]);
     expect(leadPieces('Delete failed', new Error('boom'))).toEqual([t('Delete failed: boom')]);
+  });
+});
+
+describe('leadError', () => {
+  it('reads as the lead-in and message, and keeps their pieces', () => {
+    const cause = httpError(nginx502);
+    const err = leadError('Failed to update organization', cause);
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toBe('Failed to update organization: 502 Bad Gateway\nnginx');
+    expect(err.cause).toBe(cause);
+    expect(extractHttpErrorPieces(err))
+      .toEqual([t('Failed to update organization: '), h('502 Bad Gateway'), t('\nnginx')]);
+  });
+
+  it('gives a plain message as one text piece', () => {
+    const err = leadError('Failed to create quota', new Error('boom'));
+    expect(err.message).toBe('Failed to create quota: boom');
+    expect(extractHttpErrorPieces(err)).toEqual([t('Failed to create quota: boom')]);
   });
 });
 

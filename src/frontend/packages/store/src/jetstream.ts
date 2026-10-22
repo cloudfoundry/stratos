@@ -126,6 +126,15 @@ export function leadPieces(lead: string, err: unknown): ErrorPiece[] {
     : [{ text: `${lead}: `, style: 'text' }, first, ...rest];
 }
 
+/**
+ * leadPieces as an Error, for a step's submit() to throw: its message is
+ * their text, `pieces` keeps them for the stepper, `cause` is `err`.
+ */
+export function leadError(lead: string, err: unknown): Error & { pieces: ErrorPiece[] } {
+  const pieces = leadPieces(lead, err);
+  return Object.assign(new Error(piecesToText(pieces), { cause: err }), { pieces });
+}
+
 // TODO It would be nice if the BE could return a unique para for us to check for. #3827
 // There is always a chance that this will return a false positive (more so with extensions).
 export function hasJetStreamError(pages: Partial<JetStreamErrorResponse>[]): JetStreamErrorResponse | null {

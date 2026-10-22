@@ -9,6 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { answerServiceWrite, RESOLVE_PATHS, serviceWriteContract } from '@test-framework/cf';
 
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { CsiModeService } from './csi-mode.service';
 
 function configure(routeParams: Record<string, string>) {
@@ -209,6 +210,7 @@ describe('CsiModeService', () => {
       await expect(finalResult).resolves.toEqual({
         success: false,
         message: 'broker rejected the bind',
+        error: expect.any(StratosJobError),
       });
       httpMock.verify();
     });

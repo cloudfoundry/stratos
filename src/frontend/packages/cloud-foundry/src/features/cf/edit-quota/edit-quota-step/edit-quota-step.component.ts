@@ -9,7 +9,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 import { formToOrgQuotaWriteBody } from '../../quota-definition-form/quota-form-mapping';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadError } from '@stratosui/store';
 
 @Component({
   selector: 'app-edit-quota-step',
@@ -67,7 +67,7 @@ export class EditQuotaStepComponent implements OnDestroy {
       try {
         await firstValueFrom(this.quotaData.updateOrgQuota(this.cfGuid, this.quotaGuid, body));
       } catch (err: unknown) {
-        throw new Error(`Failed to update quota: ${extractHttpErrorMessage(err)}`, { cause: err });
+        throw leadError('Failed to update quota', err);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
