@@ -5,6 +5,7 @@ import { HomePage } from '../../pages/home.page';
 import { MenuComponent } from '../../components';
 import { SnackBarComponent } from '../../components';
 import { detectAuthType, browserLogin } from '../../helpers/auth.helper';
+import { BASE_URL } from '../../servers';
 
 /**
  * Endpoints E2E Tests
@@ -42,7 +43,7 @@ test.describe('Endpoints', () => {
       // They use unauthenticatedPage + fresh admin login to properly test the login redirect flow.
       test.describe('Some registered endpoints', () => {
         test('should reach endpoint dashboard after log in', async ({ unauthenticatedPage, secrets, baseURL }) => {
-          const authType = await detectAuthType(baseURL || 'https://localhost:5540');
+          const authType = await detectAuthType(baseURL || BASE_URL);
           try {
             await browserLogin(unauthenticatedPage, secrets.console.admin.username, secrets.console.admin.password, authType);
           } catch {
@@ -66,7 +67,7 @@ test.describe('Endpoints', () => {
         test('welcome snackbar message should be displayed', async ({ unauthenticatedPage, secrets, baseURL }) => {
           // Snackbar only appears on first load when there are registered-but-unconnected CF endpoints.
           // Use fresh login so we catch the snackbar before it auto-dismisses.
-          const authType = await detectAuthType(baseURL || 'https://localhost:5540');
+          const authType = await detectAuthType(baseURL || BASE_URL);
           try {
             await browserLogin(unauthenticatedPage, secrets.console.admin.username, secrets.console.admin.password, authType);
           } catch {
@@ -176,7 +177,7 @@ test.describe('Endpoints', () => {
           }
           await endpointManager.registerDefaultCloudFoundry();
 
-          const authType = await detectAuthType(baseURL || 'https://localhost:5540');
+          const authType = await detectAuthType(baseURL || BASE_URL);
           await browserLogin(unauthenticatedPage, secrets.console.user.username, secrets.console.user.password, authType);
 
           const endpointsPage = new EndpointsPage(unauthenticatedPage);
@@ -196,7 +197,7 @@ test.describe('Endpoints', () => {
           }
           await endpointManager.registerDefaultCloudFoundry();
 
-          const authType2 = await detectAuthType(baseURL || 'https://localhost:5540');
+          const authType2 = await detectAuthType(baseURL || BASE_URL);
           await browserLogin(unauthenticatedPage, secrets.console.user.username, secrets.console.user.password, authType2);
 
           const endpointsPage = new EndpointsPage(unauthenticatedPage);
@@ -213,7 +214,7 @@ test.describe('Endpoints', () => {
           }
           await endpointManager.registerDefaultCloudFoundry();
 
-          const authType3 = await detectAuthType(baseURL || 'https://localhost:5540');
+          const authType3 = await detectAuthType(baseURL || BASE_URL);
           await browserLogin(unauthenticatedPage, secrets.console.user.username, secrets.console.user.password, authType3);
 
           const endpointsPage = new EndpointsPage(unauthenticatedPage);
@@ -239,7 +240,7 @@ test.describe('Endpoints', () => {
           }
           await endpointManager.registerDefaultCloudFoundry();
 
-          const authType4 = await detectAuthType(baseURL || 'https://localhost:5540');
+          const authType4 = await detectAuthType(baseURL || BASE_URL);
           await browserLogin(unauthenticatedPage, secrets.console.user.username, secrets.console.user.password, authType4);
 
           const endpointsPage = new EndpointsPage(unauthenticatedPage);

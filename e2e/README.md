@@ -64,6 +64,21 @@ bunx playwright test e2e/tests/application/application-wall.spec.ts
 
 E2E test configuration is in `playwright.config.ts` at project root.
 
+A run starts its own backend and frontend on ports 5543 and 5540, away from
+the dev servers on 5443 and 5440. To run beside another e2e run, give it other
+ports:
+
+```bash
+BACKEND_PORT=5583 FRONTEND_PORT=5580 bun run e2e
+```
+
+`E2E_BASE_URL` tests a deployed console instead, and starts no local servers.
+`e2e/servers.ts` resolves these once, for the config and for the fixtures that
+log in outside a test's `baseURL`; take the console URL from there, never
+from a hard-coded `https://localhost:5540`, or a run on other ports logs into
+whatever serves 5540. `scripts/tests/e2e-servers.test.mjs` fails on a
+hard-coded one.
+
 ## Writing Tests
 
 Follow the Page Object Model pattern:

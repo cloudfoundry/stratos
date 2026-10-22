@@ -193,8 +193,8 @@ See `src/jetstream/config.example` for all available settings with descriptions.
 |---------|---------|-------------------|
 | Frontend dev server | 5440 | `FRONTEND_PORT` |
 | Backend (jetstream) | 5443 | `BACKEND_PORT` |
-| E2E frontend | 5540 | Playwright config |
-| E2E backend | 5543 | Playwright config |
+| E2E frontend | 5540 | `FRONTEND_PORT` (e2e run) |
+| E2E backend | 5543 | `BACKEND_PORT` (e2e run) |
 
 ## IDE Support
 

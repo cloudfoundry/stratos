@@ -1,6 +1,7 @@
 import { Browser, BrowserContext, Locator, Page, Route } from '@playwright/test';
 import { SecretsHelper } from './secrets-helpers';
 import { apiLogin, detectAuthType } from './auth.helper';
+import { BASE_URL } from '../servers';
 
 /**
  * Background-job outcomes on demand, for specs about what the browser does
@@ -84,7 +85,7 @@ export async function handOffWrite(page: Page | BrowserContext, url: string, met
  */
 export async function isolatedAdmin(browser: Browser): Promise<{ context: BrowserContext; page: Page; logIn: () => Promise<void> }> {
   const secrets = SecretsHelper.load();
-  const baseURL = process.env.E2E_BASE_URL || 'https://localhost:5540';
+  const baseURL = BASE_URL;
   const authType = await detectAuthType(baseURL);
   // An empty storageState: otherwise the context inherits the project's saved
   // admin login, and its cookie, shared with the worker's session.
