@@ -251,6 +251,27 @@ describe('cfApiInterceptor', () => {
     expect(calls).toHaveLength(0); // component handles its own 404
   });
 
+  // The native middleware passes a CF 4xx through with CF's status and its
+  // own JSON body (empty reason, upstream status when known). The endpoint
+  // answered, so this is the calling component's error, not a banner.
+  it.each([
+    [400, 'Bad Request', '', 'CF-BadQueryParameter'],
+    [404, 'Not Found', '404', 'CF-ResourceNotFound'],
+    [422, 'Unprocessable Entity', '422', 'CF-UnprocessableEntity'],
+  ])('shaped CF %i with no reason header → no banner', async (status, statusText, upstream, title) => {
+    const cnsi = 'CSnSysOkvwBD6A-UQyQW6gmKPhI';
+    endpointsStub.endpoints.set({ [cnsi]: { name: 'Kevin' } });
+    const calls = await captureSnackbar();
+
+    http.get(`/pp/v1/cf/apps/${cnsi}?return=summary`).subscribe({ error: () => undefined });
+    ctrl.expectOne(`/pp/v1/cf/apps/${cnsi}?return=summary`).flush(
+      JSON.stringify({ reason: '', ...(upstream ? { upstreamStatus: Number(upstream) } : {}), detail: `listing apps: ${title}`, cnsiGuid: cnsi }),
+      { status, statusText, headers: upstream ? { 'X-Stratos-Upstream-Status': upstream } : {} },
+    );
+
+    expect(calls).toHaveLength(0);
+  });
+
   it('operation_failed reason (a job the endpoint ran and failed) → no endpoint banner', async () => {
     // The endpoint answered; the broker behind it rejected the operation.
     // The component that made the call reports that failure.
