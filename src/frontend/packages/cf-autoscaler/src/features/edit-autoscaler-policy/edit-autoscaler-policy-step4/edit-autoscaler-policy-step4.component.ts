@@ -8,8 +8,9 @@ import { catchError, map } from 'rxjs/operators';
 import { CommonModule } from '@angular/common';
 
 import { ApplicationService } from '@stratosui/cloud-foundry';
-import { StepOnNextFunction } from '@stratosui/core';
-import { AutoscalerConstants, autoscalerErrorMessage, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
+import { StepOnNextFunction, StepOnNextResult } from '@stratosui/core';
+import { leadPieces, piecesToText } from '@stratosui/store';
+import { AutoscalerConstants, autoscalerReason, PolicyAlert } from '../../../core/autoscaler-helpers/autoscaler-util';
 import {
   dateTimeIsSameOrAfter,
   numberWithFractionOrExceedRange,
@@ -112,13 +113,18 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
         message: undefined as string | undefined,
       })),
       catchError(err => {
+        const lead = `Could not ${this.createUpdateTest}`;
+        if (!err) {
+          return observableOf<StepOnNextResult>({ success: false, redirect: false, message: lead });
+        }
         // The autoscaler's reason; an HttpErrorResponse's own message only
         // names the URL and the status.
-        const detail = err ? autoscalerErrorMessage(err) : '';
-        return observableOf({
+        const messagePieces = leadPieces(lead, autoscalerReason(err) ?? err);
+        return observableOf<StepOnNextResult>({
           success: false,
           redirect: false,
-          message: `Could not ${this.createUpdateTest}${detail ? `: ${detail}` : ''}`,
+          message: piecesToText(messagePieces),
+          messagePieces,
         });
       }),
     );

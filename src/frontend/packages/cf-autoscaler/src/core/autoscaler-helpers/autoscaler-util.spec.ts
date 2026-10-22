@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { HttpErrorResponse } from '@angular/common/http';
 import { describe, it, expect } from 'vitest';
 import {
@@ -86,8 +88,9 @@ describe('Autoscaler Util Helper', () => {
   it('autoscalerErrorMessage', () => {
     const refusal = new HttpErrorResponse({ status: 403, error: { error: 'The application is not bound to Auto-Scaling service' } });
     expect(autoscalerErrorMessage(refusal)).toBe('The application is not bound to Auto-Scaling service');
+    // A body that is plain text is the reason, not the request's own message.
     const other = new HttpErrorResponse({ status: 500, error: 'boom', url: '/x' });
-    expect(autoscalerErrorMessage(other)).toBe(other.message);
+    expect(autoscalerErrorMessage(other)).toBe('boom');
   });
   // The other shapes the autoscaler (14.x and 15.x) answers with.
   it('autoscalerErrorMessage reads every autoscaler error shape', () => {
@@ -103,5 +106,11 @@ describe('Autoscaler Util Helper', () => {
     });
     expect(autoscalerErrorMessage(invalidPolicy)).toBe(
       'scaling_rules.0.breach_duration_secs: Must be greater than or equal to 60; instance_min_count is required');
+  });
+  // A proxy in front of the autoscaler answers with its own HTML page.
+  it('autoscalerErrorMessage reads an error page as its message', () => {
+    const page = readFileSync(join(import.meta.dirname, '../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    const proxied = new HttpErrorResponse({ status: 502, statusText: 'Bad Gateway', error: page, url: '/x' });
+    expect(autoscalerErrorMessage(proxied)).toBe('502 Bad Gateway\nnginx/1.28.0');
   });
 });
