@@ -10,7 +10,7 @@
   thing; it closes just that message, and the other tabs keep their
   numbers. A "Close all" button beside the tabs closes them all. The
   same message arriving again straight after itself is counted
-  instead of getting a new tab: its tab and the start of its text
-  show how many times it has been shown. The tabs work with the arrow
-  keys and screen readers, and a closed message is also cleared from
-  what screen readers can find.
+  instead of getting a new tab: the start of its text shows how many
+  times it has been shown. The tabs work with the arrow keys and
+  screen readers, and a closed message is also cleared from what
+  screen readers can find.

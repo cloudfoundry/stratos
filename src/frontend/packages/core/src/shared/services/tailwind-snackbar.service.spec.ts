@@ -244,10 +244,9 @@ describe('TailwindSnackBarService', () => {
     expect(closeAll().hidden).toBe(true);
   });
 
-  it('a lone repeated message shows its tab but no "Close all"', () => {
+  it('a lone repeated message shows no "Close all"', () => {
     service.error('broker failed');
     service.error('broker failed');
-    expect(strip().hidden).toBe(false);
     expect(closeAll().hidden).toBe(true);
   });
 
@@ -464,7 +463,7 @@ describe('TailwindSnackBarService', () => {
   // A run of the same message, as when one failing call raises the same
   // error back to back, is one set: a repeat of the newest message joins
   // its tab.
-  it('a repeat of the newest message joins its tab with a count instead of adding one', () => {
+  it('a repeat of the newest message joins its tab, counted, instead of adding one', () => {
     const announce = vi.spyOn(TestBed.inject(LiveAnnouncer), 'announce').mockResolvedValue();
     service.error('other failure');
     const first = service.error('broker failed');
@@ -473,8 +472,8 @@ describe('TailwindSnackBarService', () => {
     expect(again).toBe(first);
     expect(numbers()).toEqual(['1', '2']);
     expect(selected()).toEqual(['2']);
-    expect(tabs()[1].querySelector('.snackbar-count')!.textContent).toBe('×2');
-    expect(tabs()[1].getAttribute('aria-label')).toContain('shown 2 times');
+    expect(setCount().textContent).toBe('(2)');
+    expect(tabs()[1].getAttribute('aria-label')).toBe('Message 2');
     expect(announce).toHaveBeenLastCalledWith('broker failed (Shown 2 times)', 'assertive');
     expect(announce).toHaveBeenCalledTimes(3);
   });
@@ -488,7 +487,7 @@ describe('TailwindSnackBarService', () => {
     expect(again).not.toBe(first);
     expect(numbers()).toEqual(['1', '2', '3']);
     expect(selected()).toEqual(['3']);
-    expect(document.querySelector('.snackbar-count')).toBeNull();
+    expect(document.querySelector('.snackbar-set-count:not([hidden])')).toBeNull();
   });
 
   // The newest is the tab with the last number given out; once it is
@@ -499,7 +498,7 @@ describe('TailwindSnackBarService', () => {
     service.error('three').dismiss();
     service.error('two');
     expect(numbers()).toEqual(['1', '2', '4']);
-    expect(document.querySelector('.snackbar-count')).toBeNull();
+    expect(document.querySelector('.snackbar-set-count:not([hidden])')).toBeNull();
   });
 
   const setCount = () => document.querySelector<HTMLElement>('.snackbar-panel:not([hidden]) .snackbar-set-count')!;
@@ -547,12 +546,31 @@ describe('TailwindSnackBarService', () => {
     expect(setCount().textContent).toBe('(2)');
   });
 
-  it('a repeated lone message shows its count on a single tab', () => {
+  // A lone message, repeated or not, looks as a toast always has: no
+  // strip, and a set's count at the start of its text.
+  it('a repeated lone message has no strip; its text starts with "(2)"', () => {
     service.error('broker failed');
     service.error('broker failed');
-    expect(strip().hidden).toBe(false);
-    expect(numbers()).toEqual(['1']);
-    expect(tabs()[0].querySelector('.snackbar-count')!.textContent).toBe('×2');
+    expect(strip().hidden).toBe(true);
+    const panel = document.querySelector<HTMLElement>('.snackbar-box:not([inert]) .snackbar-panel')!;
+    expect(panel.hasAttribute('role')).toBe(false);
+    const line = panel.querySelector<HTMLElement>('.snackbar-text')!;
+    expect(line.firstElementChild).toBe(setCount());
+    expect(line.textContent!.startsWith('(2)')).toBe(true);
+    expect(shown()).toEqual(['broker failed']);
+  });
+
+  // The count is shown once, in the message; the tab is only its number.
+  it('a set\'s tab shows only its number; the count starts its message', () => {
+    service.error('other failure');
+    service.error('broker failed');
+    service.error('broker failed');
+    expect(tabs()[1].textContent).toBe('2');
+    expect(tabs()[1].querySelector('.snackbar-count')).toBeNull();
+    expect(tabs()[1].getAttribute('aria-label')).toBe('Message 2');
+    const line = document.querySelector<HTMLElement>('.snackbar-panel:not([hidden]) .snackbar-text')!;
+    expect(line.firstElementChild).toBe(setCount());
+    expect(setCount().textContent).toBe('(2)');
   });
 
   it('the same text of a different kind gets its own tab', () => {
@@ -707,7 +725,7 @@ describe('TailwindSnackBarService', () => {
     expect(numbers()).toEqual(['1', '2']);
     service.showWithLink('You were switched', '/cf/spaces/2', 'Return');
     expect(numbers()).toEqual(['1', '2']);
-    expect(tabs()[1].querySelector('.snackbar-count')!.textContent).toBe('×2');
+    expect(setCount().textContent).toBe('(2)');
   });
 
   it('route arrays are compared as destinations too', () => {

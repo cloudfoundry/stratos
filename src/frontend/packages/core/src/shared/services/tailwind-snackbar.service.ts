@@ -430,18 +430,18 @@ export class TailwindSnackBarService {
   }
 
   // Brings the strip, tabs and panels in line with the open messages.
-  // The strip shows once there is more than one tab, or a count to show;
-  // a single message looks as a toast always has.
+  // The strip shows once there is more than one tab; a single message,
+  // repeated or not, looks as a toast always has. A tab shows only its
+  // number; a set's count is in its message.
   private render(): void {
-    const tabsShown = this.entries.length > 1 || this.entries.some(e => e.count > 1);
+    const tabsShown = this.entries.length > 1;
     this.strip!.hidden = !tabsShown;
     this.closeAllButton!.hidden = this.entries.length < 2;
     for (const entry of this.entries) {
       const on = entry === this.selected;
       entry.tab.setAttribute('aria-selected', String(on));
       entry.tab.tabIndex = on ? 0 : -1;
-      entry.tab.setAttribute('aria-label',
-        `Message ${entry.number}${entry.count > 1 ? `, shown ${entry.count} times` : ''}`);
+      entry.tab.setAttribute('aria-label', `Message ${entry.number}`);
       entry.tab.className = this.tabClasses(on, entry.error);
       entry.panel.hidden = !on;
       if (tabsShown) {
@@ -452,15 +452,6 @@ export class TailwindSnackBarService {
         entry.panel.removeAttribute('aria-labelledby');
       }
       this.renderSetCount(entry);
-      if (entry.count > 1) {
-        let badge = entry.tab.querySelector('.snackbar-count');
-        if (!badge) {
-          badge = document.createElement('span');
-          badge.className = 'snackbar-count ml-1 text-xs';
-          entry.tab.appendChild(badge);
-        }
-        badge.textContent = `×${entry.count}`;
-      }
     }
   }
 
