@@ -460,8 +460,8 @@ github.com/ncruces/go-sqlite3-wasm/v6 v6.3.35304 h1:dBSZlcEFdtBMvNRg34y50mConBPO
 github.com/ncruces/go-sqlite3-wasm/v6 v6.3.35304/go.mod h1:YvoJzbJpX6phd3BGdtiXu2NuD5RX6G8zsUdzt47GgOY=
 github.com/ncruces/julianday v1.0.0 h1:fH0OKwa7NWvniGQtxdJRxAgkBMolni2BjDHaWTxqt7M=
 github.com/ncruces/julianday v1.0.0/go.mod h1:Dusn2KvZrrovOMJuOt0TNXL6tB7U2E8kvza5fFc9G7g=
-github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20261020094728-a3625edf6e94 h1:khj6P4JmNsiW1SSkUJMAioYePKWKXQVfJnT772ajmV4=
-github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20261020094728-a3625edf6e94/go.mod h1:jcpCj9Pz+dacd9bVg65lQzQwgAtqAlGz2e6Bt9DKCtE=
+github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20261022071155-a4e9d752d752 h1:Bg5Hdtrj56wP6XqNopXogJXCW3Y/uqL9O7Nz9LrEK0Q=
+github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20261022071155-a4e9d752d752/go.mod h1:jcpCj9Pz+dacd9bVg65lQzQwgAtqAlGz2e6Bt9DKCtE=
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d h1:VhgPp6v9qf9Agr/56bj7Y/xa04UccTW04VP0Qed4vnQ=
 github.com/nu7hatch/gouuid v0.0.0-20131221200532-179d4d0c4d8d/go.mod h1:YUTz3bUH2ZwIWBy3CJBeOBEugqcmXREj14T+iG/4k4U=
 github.com/nwaples/rardecode/v2 v2.2.0 h1:4ufPGHiNe1rYJxYfehALLjup4Ls3ck42CWwjKiOqu0A=
