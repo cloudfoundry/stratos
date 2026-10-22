@@ -71,7 +71,10 @@ export class TailwindSimpleSnackBar {
   providedIn: 'root'
 })
 export class TailwindSnackBarService {
-  private snackbars: HTMLElement[] = [];
+  // The snackbar on screen. Every toast sits at the same fixed spot, so only
+  // one is shown at a time, as Material's MatSnackBar did before this
+  // service replaced it: opening a new one dismisses this one.
+  private current?: TailwindSnackBarRef<any>;
 
   private appRef = inject(ApplicationRef);
   private announcer = inject(LiveAnnouncer);
@@ -134,9 +137,18 @@ export class TailwindSnackBarService {
   }
 
   open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
+    this.current?.dismiss();
     const snackbarElement = this.createSnackbarElement(message, action, config);
-    const snackbarRef = new TailwindSnackBarRefImpl(
-      () => this.removeSnackbar(snackbarElement),
+    const snackbarRef: TailwindSnackBarRef<any> = new TailwindSnackBarRefImpl(
+      () => {
+        // A replaced snackbar's timer or close can still fire; only the one
+        // on screen owns the announcer's live region, so only it clears it.
+        if (this.current === snackbarRef) {
+          this.current = undefined;
+          this.announcer.clear();
+        }
+        this.removeSnackbar(snackbarElement);
+      },
       (message: string) => {
         const el = snackbarElement.querySelector('.snackbar-message');
         if (el) { el.textContent = message; }
@@ -147,7 +159,7 @@ export class TailwindSnackBarService {
 
     // Add to DOM
     document.body.appendChild(snackbarElement);
-    this.snackbars.push(snackbarElement);
+    this.current = snackbarRef;
     // Screen readers miss a toast that arrives with its text; the announcer's
     // live region is already on the page. Errors interrupt.
     void this.announcer.announce(message, snackbarElement.classList.contains('snackbar-error') ? 'assertive' : 'polite');
@@ -192,10 +204,7 @@ export class TailwindSnackBarService {
   }
 
   dismiss(): void {
-    // Dismiss all current snackbars
-    this.snackbars.forEach(snackbar => {
-      this.removeSnackbar(snackbar);
-    });
+    this.current?.dismiss();
   }
 
   private createSnackbarElement(message: string, action?: string, config?: TailwindSnackBarConfig): HTMLElement {
@@ -266,10 +275,9 @@ export class TailwindSnackBarService {
   }
 
   private removeSnackbar(snackbar: HTMLElement): void {
-    const index = this.snackbars.indexOf(snackbar);
-    if (index > -1) {
-      this.snackbars.splice(index, 1);
-    }
+    // While it fades out it must not take clicks meant for its replacement
+    // or be read out again.
+    snackbar.setAttribute('inert', '');
 
     // Add fade out animation
     snackbar.style.transition = 'opacity 0.3s ease-out';

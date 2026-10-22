@@ -39,6 +39,50 @@ describe('TailwindSnackBarService', () => {
     closes.forEach(b => expect(b.getAttribute('aria-label')).toBe('Close'));
   });
 
+  // Every toast sits at the same fixed spot, so a second one covered the
+  // first, which peeked out behind it and could take clicks meant for the
+  // new one. Like the Material snack bar this replaced, a new toast now
+  // dismisses the one on screen.
+  it('shows one snackbar at a time: a new one dismisses the one on screen', () => {
+    const firstDismissed = vi.fn();
+    service.error('first failure').afterDismissed().subscribe(firstDismissed);
+    service.error('second failure');
+    const onScreen = Array.from(document.querySelectorAll('.snackbar-message'))
+      .filter(el => !el.parentElement!.hasAttribute('inert'))
+      .map(el => el.textContent);
+    expect(onScreen).toEqual(['second failure']);
+    expect(firstDismissed).toHaveBeenCalledTimes(1);
+  });
+
+  it('a dismissed snackbar takes no clicks or focus while it fades out', () => {
+    const ref = service.error('broker failed');
+    const bar = document.querySelector('.snackbar-error') as HTMLElement;
+    ref.dismiss();
+    expect(bar.hasAttribute('inert')).toBe(true);
+  });
+
+  // The announcer's live region keeps the last message until something
+  // replaces it, so a closed toast would still be found there.
+  it('clears the announced message when the snackbar on screen is dismissed', () => {
+    const announcer = TestBed.inject(LiveAnnouncer);
+    vi.spyOn(announcer, 'announce').mockResolvedValue();
+    const clear = vi.spyOn(announcer, 'clear');
+    service.error('broker failed').dismiss();
+    expect(clear).toHaveBeenCalledTimes(1);
+  });
+
+  // The replaced toast's own timer or close can still fire later; that must
+  // not wipe the announcement of the toast now on screen.
+  it('a replaced snackbar dismissed again later leaves the live region alone', () => {
+    const announcer = TestBed.inject(LiveAnnouncer);
+    vi.spyOn(announcer, 'announce').mockResolvedValue();
+    const first = service.show('Saved', 'Dismiss');
+    service.error('broker failed');
+    const clear = vi.spyOn(announcer, 'clear');
+    first.dismiss();
+    expect(clear).not.toHaveBeenCalled();
+  });
+
   it('showWithLink navigates to a route array when the action is clicked', () => {
     service.showWithLink('Analysis complete', ['kubernetes', 'ep1', 'analysis'], 'View');
     (document.querySelector('.snackbar-action') as HTMLElement).click();
@@ -52,11 +96,14 @@ describe('TailwindSnackBarService', () => {
   });
 
   it('hide dismisses snackbars opened via show but leaves error snackbars up', () => {
-    const dismissed: string[] = [];
-    service.show('registered').afterDismissed().subscribe(() => dismissed.push('shown'));
-    service.error('broker failed').afterDismissed().subscribe(() => dismissed.push('error'));
+    const errorDismissed = vi.fn();
+    service.error('broker failed').afterDismissed().subscribe(errorDismissed);
     service.hide();
-    expect(dismissed).toEqual(['shown']);
+    expect(errorDismissed).not.toHaveBeenCalled();
+    const shownDismissed = vi.fn();
+    service.show('registered').afterDismissed().subscribe(shownDismissed);
+    service.hide();
+    expect(shownDismissed).toHaveBeenCalledTimes(1);
   });
 
   // White on --color-danger measured 3.76:1 (light) / 2.77:1 (dark) and the
