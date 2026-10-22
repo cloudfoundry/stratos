@@ -2,9 +2,7 @@ import https from 'https';
 import fs from 'fs';
 import path from 'path';
 
-// Port configuration (matches playwright.config.ts defaults)
-const BACKEND_PORT = parseInt(process.env.BACKEND_PORT || '5543');
-const FRONTEND_PORT = parseInt(process.env.FRONTEND_PORT || '5540');
+import { BACKEND_PORT, FRONTEND_PORT } from './servers';
 
 // Matches SQLITE_DB_DIR / SQLiteDatabaseFile in the jetstream webServer
 // command in playwright.config.ts.
@@ -63,8 +61,8 @@ function backendBootStatus(): 'fresh boot' | 'reused (existing process)' | 'unkn
 }
 
 async function globalSetup() {
-  const backendUp = await checkPort(BACKEND_PORT);
-  const frontendUp = await checkPort(FRONTEND_PORT);
+  const backendUp = await checkPort(parseInt(BACKEND_PORT));
+  const frontendUp = await checkPort(parseInt(FRONTEND_PORT));
   const bootStatus = backendBootStatus();
 
   console.log('');

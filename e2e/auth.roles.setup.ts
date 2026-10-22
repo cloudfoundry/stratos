@@ -5,6 +5,7 @@ import { detectAuthType, browserLogin } from './helpers/auth.helper';
 import { EndpointManagementHelper } from './helpers/endpoint-management.helper';
 import { RequestHelper } from './helpers/request.helper';
 import { SecretsHelper } from './helpers/secrets-helpers';
+import { BASE_URL } from './servers';
 
 /**
  * One saved session per CF role, consumed by the `role-*` projects in
@@ -23,7 +24,7 @@ import { SecretsHelper } from './helpers/secrets-helpers';
  */
 for (const role of CF_ROLES) {
   setup(`authenticate as ${role}`, async ({ page, baseURL }) => {
-    const url = baseURL || 'https://localhost:5540';
+    const url = baseURL || BASE_URL;
     const endpoint = SecretsHelper.load().cloudFoundry[0];
     const creds = SecretsHelper.roleCreds(endpoint.name, role);
 

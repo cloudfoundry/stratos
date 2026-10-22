@@ -1,6 +1,6 @@
 import { execFileSync } from 'child_process';
 
-const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
+import { BACKEND_PORT } from './servers';
 
 /**
  * Playwright global teardown — kill test servers by session ID.

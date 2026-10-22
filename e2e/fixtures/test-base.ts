@@ -6,6 +6,7 @@ import { CFApiHelper } from '../helpers/cf-api.helper';
 import { ApplicationTestHelper, TestApp } from '../helpers/application-test.helper';
 import { detectAuthType, browserLogin, apiLogin, AuthType } from '../helpers/auth.helper';
 import { ADMIN_STATE, USER_STATE } from '../auth.constants';
+import { BASE_URL } from '../servers';
 
 /**
  * Test Fixtures
@@ -132,7 +133,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
    */
   workerAdminContext: [async ({ browser }, use) => {
     const secrets = SecretsHelper.load();
-    const baseURL = process.env.E2E_BASE_URL || 'https://localhost:5540';
+    const baseURL = BASE_URL;
     const authType = await detectAuthType(baseURL);
     const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL });
 
@@ -154,7 +155,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
    */
   workerUserContext: [async ({ browser }, use) => {
     const secrets = SecretsHelper.load();
-    const baseURL = process.env.E2E_BASE_URL || 'https://localhost:5540';
+    const baseURL = BASE_URL;
     const authType = await detectAuthType(baseURL);
     const { username, password } = secrets.console.user;
     const context = await browser.newContext({ ignoreHTTPSErrors: true, baseURL });
@@ -187,7 +188,7 @@ export const test = base.extend<TestFixtures, WorkerFixtures>({
    * Auth type fixture - detects local vs SSO auth
    */
   authType: async ({ baseURL }, use) => {
-    const type = await detectAuthType(baseURL || 'https://localhost:5540');
+    const type = await detectAuthType(baseURL || BASE_URL);
     await use(type);
   },
 

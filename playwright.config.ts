@@ -1,6 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
 import { CF_ROLES, roleProjectName, roleSpecDir, roleStatePath } from './e2e/auth.constants';
+import { BACKEND_PORT, BASE_URL, FRONTEND_PORT } from './e2e/servers';
 
 // Default secrets profile — auto-detect from base URL, fall back to 'local'
 if (!process.env.E2E_PROFILE) {
@@ -47,10 +48,6 @@ const roleProjects = () => CF_ROLES.map(role => ({
   },
 }));
 
-// Test environment ports (separate from dev to avoid conflicts)
-const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
-const FRONTEND_PORT = process.env.FRONTEND_PORT || '5540';
-
 /**
  * Playwright configuration for Stratos E2E tests
  * Migrated from Protractor configuration
@@ -85,8 +82,9 @@ export default defineConfig({
 
   // Shared settings for all the projects below
   use: {
-    // Base URL for navigation
-    baseURL: process.env.E2E_BASE_URL || `https://localhost:${FRONTEND_PORT}`,
+    // Base URL for navigation. The e2e ports are separate from dev to avoid
+    // conflicts; e2e/servers.ts resolves them, for the fixtures too.
+    baseURL: BASE_URL,
 
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
