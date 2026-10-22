@@ -245,5 +245,7 @@ require (
 )
 
 // User-provided service instance deletes answer 204 with no Location;
-// fivetwenty-io/capi#16 accepts that. Drop this once a release carries it.
-replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20261020094728-a3625edf6e94
+// fivetwenty-io/capi#16 accepts that. A CF 5xx that outlasts capi's
+// retries keeps its sentinel, and every mapped error carries its HTTP
+// status (capi.StatusError). Drop this once a release carries both.
+replace github.com/fivetwenty-io/capi/v3 => github.com/norman-abramovitz/fw-capi/v3 v3.216.7-0.20261022071155-a4e9d752d752
