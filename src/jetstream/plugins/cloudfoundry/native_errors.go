@@ -17,8 +17,8 @@ import (
 )
 
 // capiStatusRe matches the "(status NNN)" fragment capi.MapHTTPError embeds in
-// its error messages. capi sentinel errors don't expose the numeric HTTP
-// status via a field, so this is the only way to recover it for display.
+// its non-envelope error messages. It recovers the status from an error
+// whose wrap chain no longer reaches the *capi.StatusError.
 var capiStatusRe = regexp.MustCompile(`\(status (\d{3})\)`)
 
 // gorouterRouteMissingRe matches the body gorouter returns when the platform's
@@ -175,11 +175,12 @@ func diagFailKind(parent context.Context, err error) string {
 
 // upstreamStatusOf extracts the upstream HTTP status when the error carries
 // one. The UAA token-refresh path provides it directly via
-// api.ErrHTTPRequest.Status; capi CF-call errors embed it as "(status NNN)" in
-// the message (parsed best-effort). When CF answered with a v3 error
-// envelope there is no "(status NNN)", so the status comes from the capi
-// sentinel when that names exactly one (see exactCapiStatus). Returns 0 when
-// no status is recoverable, in which case it is omitted from the response.
+// api.ErrHTTPRequest.Status, and capi CF-call errors via *capi.StatusError,
+// envelope responses included. An error that lost the wrap chain falls
+// back to the "(status NNN)" capi embeds in non-envelope messages (parsed
+// best-effort), then to the capi sentinel when that names exactly one (see
+// exactCapiStatus). Returns 0 when no status is recoverable, in which case
+// it is omitted from the response.
 func upstreamStatusOf(err error) int {
 	if err == nil {
 		return 0
@@ -187,6 +188,10 @@ func upstreamStatusOf(err error) int {
 	var httpReq api.ErrHTTPRequest
 	if errors.As(err, &httpReq) {
 		return httpReq.Status
+	}
+	var statusErr *capi.StatusError
+	if errors.As(err, &statusErr) {
+		return statusErr.StatusCode
 	}
 	if m := capiStatusRe.FindStringSubmatch(err.Error()); m != nil {
 		if n, convErr := strconv.Atoi(m[1]); convErr == nil {

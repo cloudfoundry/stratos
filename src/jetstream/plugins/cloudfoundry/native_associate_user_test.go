@@ -181,10 +181,11 @@ func TestAssociateUser_CFRejectionKeepsStatus(t *testing.T) {
 	}{
 		{"create forbidden (non-admin caller)", http.StatusOK, associateLookupOK, http.StatusForbidden, notAuthorized,
 			http.StatusForbidden, "", "403", "CF-NotAuthorized"},
-		// A 5xx that outlasts capi's retries keeps its sentinel and
-		// envelope: a 502 that names the endpoint unreachable.
+		// A 5xx that outlasts capi's retries keeps its sentinel, envelope
+		// and status: a 502 that names the endpoint unreachable and
+		// reports CF's 503.
 		{"create server error", http.StatusOK, associateLookupOK, http.StatusServiceUnavailable, serverError,
-			http.StatusBadGateway, "unreachable", "", "CF-ServerError"},
+			http.StatusBadGateway, "unreachable", "503", "CF-ServerError"},
 		{"lookup forbidden", http.StatusForbidden, notAuthorized, http.StatusCreated, `{}`,
 			http.StatusForbidden, "", "403", "CF-NotAuthorized"},
 	}
