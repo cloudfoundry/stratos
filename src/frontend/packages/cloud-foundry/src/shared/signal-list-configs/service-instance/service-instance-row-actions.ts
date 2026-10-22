@@ -10,7 +10,7 @@ import {
 import { unknownHowOf, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import type { DeleteOutcome } from '../../../services/deletes/delete-event.types';
 import { StServiceInstance } from '../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces } from '@stratosui/store';
 
 // Services this builder needs from the host list component. Each list already
 // injects these; passing them in keeps the builder free of Angular DI so it
@@ -109,7 +109,7 @@ export function buildServiceInstanceRowActions(
             deps.snackBar.error(unknownOutcomeMessage(`Delete "${si.name}"`, deps.unknownOutcomeWhere ?? 'The list', how));
           }
         } catch (err: unknown) {
-          deps.snackBar.error(`Delete failed: ${extractHttpErrorMessage(err)}`);
+          deps.snackBar.error(leadPieces('Delete failed', err));
         }
       });
     },

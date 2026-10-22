@@ -196,7 +196,7 @@ describe('runBulkWithProgress', () => {
     await flush();
     expect(sb.open).toHaveBeenCalledWith('Deleting 2 applications…', undefined, { duration: 0 });
     expect(sb.ref.dismiss).toHaveBeenCalled();
-    expect(sb.error).toHaveBeenCalledWith(expect.stringContaining('Bulk delete failed'));
+    expect(sb.error).toHaveBeenCalledWith([{ text: 'Bulk delete failed: boom', style: 'text' }]);
     expect(sb.show).not.toHaveBeenCalled();
   });
 
@@ -249,6 +249,35 @@ describe('runBulkWithProgress', () => {
     await flush();
     expect(sb.error).toHaveBeenCalledWith('1 application deleted; 1 failed: "l7-after" (A binding is in progress)');
     expect(warn).toHaveBeenCalledWith('Bulk delete: "l7-after" (b) failed: A binding is in progress.');
+    warn.mockRestore();
+  });
+
+  it('shows a failed request\'s HTML error page as its heading and message', async () => {
+    const sb = makeSnackBar();
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => { throw new HttpErrorResponse({ error: '<html><body><h1>504 Gateway Time-out</h1>\nThe server didn\'t respond in time.\n</body></html>\n', status: 504, statusText: 'Gateway Timeout' }); },
+    });
+    expect(sb.error).toHaveBeenCalledWith([
+      { text: 'Bulk delete failed: ', style: 'text' },
+      { text: '504 Gateway Time-out', style: 'heading' },
+      { text: '\nThe server didn\'t respond in time.', style: 'text' },
+    ]);
+  });
+
+  it('keeps each failure reason on one line in the summary', async () => {
+    const sb = makeSnackBar();
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+    await runBulkWithProgress({
+      snackBar: sb as any, http: { get: vi.fn() } as any,
+      noun: 'application', verb: 'delete', progressVerb: 'Deleting', doneVerb: 'deleted',
+      op: async () => bulk([
+        { guid: 'b', state: 'FAILED', errors: [{ code: 'CF-X', message: '<html><body><h1>502 Bad Gateway</h1><p>Try later.</p></body></html>' }] },
+      ]),
+    });
+    await flush();
+    expect(sb.error).toHaveBeenCalledWith('0 applications deleted; 1 failed: "b" (502 Bad Gateway Try later)');
     warn.mockRestore();
   });
 
@@ -332,7 +361,7 @@ describe('runBulkWithProgress', () => {
       op: async () => { throw new Error('boom'); },
     });
     await flush();
-    expect(sb.error).toHaveBeenCalledWith(expect.stringContaining('Bulk delete failed'));
+    expect(sb.error).toHaveBeenCalledWith([{ text: 'Bulk delete failed: boom', style: 'text' }]);
     expect(sb.show).not.toHaveBeenCalled();
   });
 });

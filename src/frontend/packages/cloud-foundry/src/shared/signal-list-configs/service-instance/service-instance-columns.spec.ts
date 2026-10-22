@@ -6,6 +6,7 @@ import {
   lastOperationColumn,
   lastOperationLabel,
   lastOperationReason,
+  lastOperationReasonPieces,
 } from './service-instance-columns';
 
 const withOp = (lastOperation?: StLastOperation): StServiceInstance =>
@@ -69,6 +70,21 @@ describe('lastOperationReason', () => {
   it('is empty when a failure has no description', () => {
     expect(lastOperationReason(withOp({ type: 'create', state: 'failed' }))).toBe('');
     expect(lastOperationReason(withOp(undefined))).toBe('');
+  });
+});
+
+describe('lastOperationReasonPieces', () => {
+  it('reads an HTML error page in a failure\'s description as styled pieces', () => {
+    const si = withOp({ type: 'create', state: 'failed', description: '<html><body><h1>503 Service Unavailable</h1>\nNo server is available to handle this request.\n</body></html>\n' });
+    expect(lastOperationReasonPieces(si)).toEqual([
+      { text: '503 Service Unavailable', style: 'heading' },
+      { text: '\nNo server is available to handle this request.', style: 'text' },
+    ]);
+    expect(lastOperationReason(si)).toBe('503 Service Unavailable\nNo server is available to handle this request.');
+  });
+
+  it('is empty unless the operation failed', () => {
+    expect(lastOperationReasonPieces(withOp({ type: 'create', state: 'succeeded', description: '<h1>done</h1>' }))).toEqual([]);
   });
 });
 

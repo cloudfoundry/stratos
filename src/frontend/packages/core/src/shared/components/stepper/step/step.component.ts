@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal
 import { from, Observable, of as observableOf } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { ErrorPiece, extractHttpErrorPieces, piecesToText } from '@stratosui/store';
 
 export interface IStepperStep {
   validate: Observable<boolean>;
@@ -14,6 +14,9 @@ export interface IStepperStep {
 export interface StepOnNextResult {
   success: boolean;
   message?: string;
+  // `message` as styled pieces (an upstream HTML error page keeps its
+  // heading); the stepper's error snackbar shows these when set.
+  messagePieces?: readonly ErrorPiece[];
   // Should we redirect to the store previous state?
   redirect?: boolean;
   redirectPayload?: StepperRedirectPayload;
@@ -306,10 +309,10 @@ export class StepComponent {
             }
             return base;
           },
-          (err: unknown) => ({
-            success: false,
-            message: extractHttpErrorMessage(err),
-          } as StepOnNextResult),
+          (err: unknown) => {
+            const messagePieces = extractHttpErrorPieces(err);
+            return { success: false, message: piecesToText(messagePieces), messagePieces } as StepOnNextResult;
+          },
         ),
       );
     }

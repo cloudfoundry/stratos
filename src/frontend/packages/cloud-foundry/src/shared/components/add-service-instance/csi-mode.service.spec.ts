@@ -9,6 +9,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { answerServiceWrite, RESOLVE_PATHS, serviceWriteContract } from '@test-framework/cf';
 
 import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
+import { StratosJobError } from '../../../services/async-jobs/async-job.types';
 import { CsiModeService } from './csi-mode.service';
 
 function configure(routeParams: Record<string, string>) {
@@ -209,6 +210,7 @@ describe('CsiModeService', () => {
       await expect(finalResult).resolves.toEqual({
         success: false,
         message: 'broker rejected the bind',
+        error: expect.any(StratosJobError),
       });
       httpMock.verify();
     });
@@ -257,6 +259,7 @@ describe('CsiModeService', () => {
 
     // A bind that lands while the instance is still being created waits for
     // it; if the create fails, the broker's reason is the bind's message.
+    // An HTML reason keeps its heading on a line of its own.
     it('gives a failed create\'s reason without markup', async () => {
       TestBed.overrideProvider(TailwindSnackBarService, { useValue: { open: vi.fn(), error: vi.fn() } });
       const svc = TestBed.inject(CsiModeService);
@@ -270,7 +273,7 @@ describe('CsiModeService', () => {
       const read = await vi.waitFor(() => httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1/si-1'));
       read.flush({ lastOperation: { type: 'create', state: 'failed', description: '<html><body><h1>Quota</h1> exceeded</body></html>' } });
 
-      await expect(finalResult).resolves.toEqual({ success: false, message: 'Quota exceeded' });
+      await expect(finalResult).resolves.toEqual({ success: false, message: 'Quota\nexceeded' });
       httpMock.verify();
     });
 

@@ -21,10 +21,10 @@ describe('StepComponent', () => {
     TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(StepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
@@ -136,6 +136,20 @@ describe('StepComponent', () => {
       const result = await firstValueFrom(component.invokeNext(0));
       expect(result.success).toBe(false);
       expect(result.message).toBe('Name must be unique');
+    });
+
+    it('signal-handle submit() rejecting with an HTML error page gives its heading as a piece', async () => {
+      component.signalHandle = {
+        valid: signal(true).asReadonly(),
+        submit: () => Promise.reject(new HttpErrorResponse({ error: '<html><body><h1>503 Service Unavailable</h1>\nNo server is available to handle this request.\n</body></html>\n', status: 503, statusText: 'Service Unavailable' })),
+      };
+      const result = await firstValueFrom(component.invokeNext(0));
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('503 Service Unavailable\nNo server is available to handle this request.');
+      expect(result.messagePieces).toEqual([
+        { text: '503 Service Unavailable', style: 'heading' },
+        { text: '\nNo server is available to handle this request.', style: 'text' },
+      ]);
     });
 
     it('signal-handle submit() resolving with {ignoreSuccess:true} threads it through', async () => {

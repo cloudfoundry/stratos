@@ -335,7 +335,7 @@ describe('ServiceInstanceSummaryComponent — operation in progress (#6002)', ()
 });
 
 describe('ServiceInstanceSummaryComponent — last operation (#6002)', () => {
-  function render(si: StServiceInstance): string {
+  async function renderElement(si: StServiceInstance): Promise<HTMLElement> {
     TestBed.resetTestingModule();
     TestBed.configureTestingModule({
       imports: [ServiceInstanceSummaryComponent],
@@ -358,25 +358,69 @@ describe('ServiceInstanceSummaryComponent — last operation (#6002)', () => {
       ],
     });
     const fixture = TestBed.createComponent(ServiceInstanceSummaryComponent);
-    fixture.detectChanges();
-    return (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+    await fixture.whenStable();
+    return fixture.nativeElement as HTMLElement;
   }
+  const render = async (si: StServiceInstance): Promise<string> =>
+    (await renderElement(si)).textContent!.replace(/\s+/g, ' ');
   const withOp = (type: string, state: string, description: string) =>
     ({ ...managed, lastOperation: { type, state, description } }) as unknown as StServiceInstance;
 
-  it('names the operation and shows a failure\'s reason as text, markup stripped', () => {
-    const text = render(withOp('update', 'failed', '<p>Plan <b>large</b> is not available</p>'));
-    expect(text).toContain('Last operation: Update failed — Plan large is not available');
+  it('names the operation and shows a failure\'s reason as text, markup stripped', async () => {
+    const text = await render(withOp('update', 'failed', '<p>Plan <b>large</b> is not available</p>'));
+    expect(text).toContain('Last operation: Update failed Plan large is not available');
     expect(text).not.toContain('<b>');
   });
 
-  it('does not show the description of an operation that did not fail', () => {
-    const text = render(withOp('create', 'succeeded', 'Provisioned in 3 s'));
+  it('does not show the description of an operation that did not fail', async () => {
+    const text = await render(withOp('create', 'succeeded', 'Provisioned in 3 s'));
     expect(text).toContain('Last operation: Create succeeded');
     expect(text).not.toContain('Provisioned in 3 s');
   });
 
-  it('hides the line when there is no last operation', () => {
-    expect(render(managed)).not.toContain('Last operation');
+  it('hides the line when there is no last operation', async () => {
+    expect(await render(managed)).not.toContain('Last operation');
+  });
+
+  it('shows an HTML error page in the reason as its heading and message', async () => {
+    const page = '<html><head><title>502 Bad Gateway</title></head><body><center><h1>502 Bad Gateway</h1></center>'
+      + '<hr><center>nginx</center></body></html>';
+    const el = await renderElement(withOp('create', 'failed', page));
+    expect(el.textContent!.replace(/\s+/g, ' ')).toContain('Last operation: Create failed 502 Bad Gateway nginx');
+    const heading = el.querySelector('app-error-text .font-semibold');
+    expect(heading?.textContent).toBe('502 Bad Gateway');
+    expect(el.querySelector('app-error-text')?.textContent).toBe('502 Bad Gateway\nnginx');
+  });
+
+  // The value column is right-aligned by meta-card-item's own CSS, which is
+  // unlayered and so beats any utility on the column itself. The reason is
+  // its own block under the state, with the utilities on it: the column's
+  // rule reaches it only by inheritance, which a value set on the element
+  // always beats, layered or not. Specs load no component styles or
+  // Tailwind, and happy-dom has no @layer, so the rule and the two
+  // utilities are added here as plain rules.
+  it('puts a failure\'s reason on its own line, left-aligned', async () => {
+    const page = '<html><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>';
+    const el = await renderElement(withOp('create', 'failed', page));
+    const reason = el.querySelector<HTMLElement>('app-error-text')!;
+    const css = document.createElement('style');
+    css.textContent = '.meta-card-item__value { text-align: end; } .block { display: block; } .text-left { text-align: left; }';
+    document.head.append(css);
+    try {
+      expect(getComputedStyle(reason.closest('.meta-card-item__value')!).textAlign).toBe('end');
+      expect(getComputedStyle(reason).display).toBe('block');
+      expect(getComputedStyle(reason).textAlign).toBe('left');
+    } finally {
+      css.remove();
+    }
+  });
+
+  // A reason makes the value several lines tall; the row-top style lines
+  // the key up with the value's first line instead of its middle.
+  it('lines the key up with the first line of a multi-line reason', async () => {
+    const page = '<html><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>';
+    const el = await renderElement(withOp('create', 'failed', page));
+    const reason = el.querySelector('app-error-text')!;
+    expect(reason.closest('.meta-card-item-row-top')).not.toBeNull();
   });
 });

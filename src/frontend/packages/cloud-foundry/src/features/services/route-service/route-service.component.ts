@@ -167,7 +167,7 @@ export class RouteServiceComponent {
       }
     } catch (err: unknown) {
       this.errorMessage.set(`Failed to bind service: ${extractHttpErrorMessage(err)}`);
-      throw err instanceof Error ? err : new Error(extractHttpErrorMessage(err));
+      throw err;
     } finally {
       this.busy.set(false);
     }

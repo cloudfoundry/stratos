@@ -42,7 +42,7 @@ import { CreateServiceInstanceHelper } from '../create-service-instance-helper.s
 import { CsiGuidsService } from '../csi-guids.service';
 import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiState, CsiStateService } from '../csi-state.service';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces, piecesToText } from '@stratosui/store';
 
 // Local view of the schema-form config while it is being assembled: the
 // broker schema may not have arrived (or may not exist for the plan).
@@ -417,7 +417,7 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       outcome.then(r => {
         if (!r.success) {
           this.handOffNotice?.dismiss();
-          this.snackBar.error(r.message ?? 'The operation failed.');
+          this.snackBar.error(r.messagePieces ?? r.message ?? 'The operation failed.');
         }
       });
     };
@@ -597,10 +597,8 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
         signedOut = true;
         return { success: false, message: this.trackedJobs.signedOut(track) };
       }
-      return {
-        success: false,
-        message: `${track.failed}: ${extractHttpErrorMessage(err)}`,
-      };
+      const messagePieces = leadPieces(track.failed, err);
+      return { success: false, message: piecesToText(messagePieces), messagePieces };
     } finally {
       markStale();
       if (jobId) {
@@ -665,13 +663,13 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       };
     }
     if (!bindResult?.success) {
-      const reason = bindResult?.message ?? 'unknown error';
-      return {
-        success: false,
-        message: created
-          ? `Service instance "${siName}" was created, but binding it to the application failed: ${reason}`
-          : `Failed to bind service instance "${siName}" to the application: ${reason}`,
-      };
+      const messagePieces = leadPieces(
+        created
+          ? `Service instance "${siName}" was created, but binding it to the application failed`
+          : `Failed to bind service instance "${siName}" to the application`,
+        bindResult?.error ?? bindResult?.message ?? 'unknown error',
+      );
+      return { success: false, message: piecesToText(messagePieces), messagePieces };
     }
     // CF mutated VCAP_SERVICES on the bound app. We routeToServices below
     // (away from any app-detail route), so the legacy ngrx prefetch was

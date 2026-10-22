@@ -41,6 +41,7 @@ export { ProfileSettingsTypes } from './shared/components/profile-settings/profi
 // Tailwind Material Replacements
 export * from './shared/services/tailwind-material-replacements';
 export * from './shared/services/tailwind-snackbar.service';
+export { ERROR_PIECE_CLASS, ErrorTextComponent } from './shared/components/error-text/error-text.component';
 export * from './shared/services/endpoint-auth-state.service';
 export * from './shared/services/tailwind-dialog.service';
 export * from './shared/services/tailwind-sort.service';

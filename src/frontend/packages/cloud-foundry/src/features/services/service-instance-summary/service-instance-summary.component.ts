@@ -50,15 +50,15 @@ import {
 } from '../../../shared/signal-list-configs/service-instance/service-instance-row-actions';
 import {
   lastOperationLabel,
-  lastOperationReason,
+  lastOperationReasonPieces,
 } from '../../../shared/signal-list-configs/service-instance/service-instance-columns';
 import { StServiceCredentialBinding, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 import {
   ShareServiceInstanceDialogComponent,
   ShareServiceInstanceDialogData,
 } from './share-service-instance-dialog.component';
-import { AppBusyComponent } from '@stratosui/core';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { AppBusyComponent, ErrorTextComponent } from '@stratosui/core';
+import { ErrorPiece, leadPieces } from '@stratosui/store';
 
 interface BindingRow {
   guid: string;
@@ -72,7 +72,7 @@ interface InstanceView {
   // "Update failed"; empty when CF records no operation.
   lastOperation: string;
   // The broker's reason, on a failure only.
-  lastOperationReason: string;
+  lastOperationReason: readonly ErrorPiece[];
   plan: string;
   offering: string;
   broker: string;
@@ -113,6 +113,7 @@ const PROGRESS_POLL_MS = 10000;
   imports: [
     AppBusyComponent,
     CommonModule,
+    ErrorTextComponent,
     PageHeaderComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
@@ -349,7 +350,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
           this.snackBar.error(unknownOutcomeMessage(`Unbind "${row.appName}"`, 'This page', how));
         }
       } catch (err: unknown) {
-        this.snackBar.error(`Unbind failed: ${extractHttpErrorMessage(err)}`);
+        this.snackBar.error(leadPieces('Unbind failed', err));
       }
     });
   }
@@ -361,7 +362,7 @@ export class ServiceInstanceSummaryComponent implements OnDestroy {
       isManaged,
       typeLabel: isManaged ? 'Managed' : 'User-provided',
       lastOperation: lastOperationLabel(si),
-      lastOperationReason: lastOperationReason(si),
+      lastOperationReason: lastOperationReasonPieces(si),
       plan: si.servicePlan?.name ?? '',
       offering: si.servicePlan?.serviceOffering?.name ?? '',
       broker: si.servicePlan?.serviceOffering?.broker?.name ?? '',

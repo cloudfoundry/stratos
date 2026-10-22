@@ -5,11 +5,12 @@ import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, from, Observable, Subscription, throwError } from 'rxjs';
-import { catchError, map, switchMap, tap } from 'rxjs/operators';
+import { firstValueFrom, from, Observable, Subscription } from 'rxjs';
+import { finalize, map, switchMap, tap } from 'rxjs/operators';
+import { leadError } from '@stratosui/store';
 
 import { FocusDirective } from '../../../../../../core/src/shared/components/focus.directive';
-import { SignalStepHandle, StepOnNextFunction, StepOnNextResult } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { SignalStepHandle } from '../../../../../../core/src/shared/components/stepper/step/step.component';
 import { CnsiSpacesSource } from '../../../../services/data-sources/cnsi-spaces-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
@@ -61,9 +62,10 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this.runCreate());
-      if (!result.success) {
-        throw new Error(result.message ?? 'Failed to create space');
+      try {
+        await firstValueFrom(this.runCreate());
+      } catch (err: unknown) {
+        throw leadError('Failed to create space', err);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
@@ -135,8 +137,6 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
 
   validate = () => this.validSignal();
 
-  submit: StepOnNextFunction = () => this.runCreate();
-
   // Routes the V3-native space create through CnsiSpacesSource so the
   // new space lands in EndpointDataService._spaces and fires the
   // space.create cascade — direct http.post bypassed the cache and the
@@ -144,7 +144,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   // Quota-apply still uses a raw http.post; space_quotas don't have an
   // EDS cache to patch, so the cascade alone is enough to invalidate
   // any consumer reading quota_guid off the space.
-  private runCreate(): Observable<StepOnNextResult> {
+  private runCreate(): Observable<unknown> {
     const quotaValue = this.quotaDefinition.value;
     const quotaGuid = quotaValue ? String(quotaValue) : null;
     const eds = this.endpointDataRegistry.acquire(this.cfGuid);
@@ -166,15 +166,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
           { space_guids: [space.guid] },
         ).pipe(map(() => space));
       }),
-      map(() => ({ success: true })),
-      catchError(err => {
-        const message = err?.error?.error || err?.message || `Failed to create space`;
-        return throwError(() => ({ success: false, message } as StepOnNextResult));
-      }),
-      // Convert throwError to a successful emit of the failure result so
-      // the stepper's pipeline can read it without rxjs error semantics.
-      catchError((result: StepOnNextResult) => [result]),
-      tap(() => this.endpointDataRegistry.release(this.cfGuid)),
+      finalize(() => this.endpointDataRegistry.release(this.cfGuid)),
     );
   }
 

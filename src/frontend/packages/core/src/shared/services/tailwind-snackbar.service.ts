@@ -1,8 +1,17 @@
 import { LiveAnnouncer } from '@angular/cdk/a11y';
 import { Injectable, ApplicationRef, Injector, inject } from '@angular/core';
 import { Router } from '@angular/router';
+import { ErrorPiece, piecesToText } from '@stratosui/store';
 import { Subject, Observable } from 'rxjs';
 import { take } from 'rxjs/operators';
+
+import { ERROR_PIECE_CLASS } from '../components/error-text/error-text.component';
+
+/**
+ * A snackbar message: plain text, or styled pieces such as
+ * extractHttpErrorPieces() or leadPieces() give for an upstream error.
+ */
+export type TailwindSnackBarMessage = string | readonly ErrorPiece[];
 
 export interface TailwindSnackBarConfig {
   duration?: number;
@@ -118,7 +127,7 @@ export class TailwindSnackBarService {
   // If closeMessage is supplied a button to dismiss the snack bar is shown and the duration is ignored.
   // If closeMessage is not supplied, no action button is shown and the snack bar hides after the duration (default 5s).
   // If forceDuration is supplied the duration is used regardless of closeMessage.
-  show(message: string, closeMessage?: string, duration = 5000, forceDuration = false): TailwindSnackBarRef<any> {
+  show(message: TailwindSnackBarMessage, closeMessage?: string, duration = 5000, forceDuration = false): TailwindSnackBarRef<any> {
     return this.track(this.open(message, closeMessage, {
       duration: forceDuration ? duration : (closeMessage ? 0 : duration)
     }));
@@ -154,7 +163,7 @@ export class TailwindSnackBarService {
   // Errors must stay on screen until the user dismisses them — the default
    // 4s auto-dismiss hid broker / 502 / job failures before the operator
    // could read them. Red panel class signals severity at a glance.
-   error(message: string, action: string = 'Dismiss', config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
+   error(message: TailwindSnackBarMessage, action: string = 'Dismiss', config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
     return this.open(message, action, {
       duration: 0,
       ...(config ?? {}),
@@ -165,9 +174,11 @@ export class TailwindSnackBarService {
     });
   }
 
-  open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
+  open(message: TailwindSnackBarMessage, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
     const panelClasses = config?.panelClass ? ([] as string[]).concat(config.panelClass) : [];
     const key = `${panelClasses.join(' ')}\n${action ?? ''}`;
+    // Pieces are compared and announced by their plain text.
+    const text = typeof message === 'string' ? message : piecesToText(message);
 
     // A repeat of the newest message (the tab with the last number given
     // out), while that tab is open, joins it instead of adding one: its
@@ -175,11 +186,11 @@ export class TailwindSnackBarService {
     // any, starts over. The same text after another message, or after the
     // newest tab closed, is a new event and gets its own tab.
     const newest = this.entries.find(e => e.number === this.nextNumber - 1);
-    if (newest && this.isSameMessage(newest, key, message)) {
+    if (newest && this.isSameMessage(newest, key, text)) {
       newest.count++;
       this.startTimer(newest);
       this.select(newest);
-      this.announce(newest, message);
+      this.announce(newest, text);
       return newest.ref;
     }
 
@@ -229,7 +240,7 @@ export class TailwindSnackBarService {
     box.appendChild(panel);
     this.entries.push(entry);
     this.select(entry);
-    this.announce(entry, message);
+    this.announce(entry, text);
     this.startTimer(entry);
 
     // Add event listeners
@@ -267,9 +278,9 @@ export class TailwindSnackBarService {
     [...this.entries].forEach(entry => entry.ref.dismiss());
   }
 
-  // Same text, kind and action.
-  private isSameMessage(entry: SnackbarEntry, key: string, message: string): boolean {
-    return entry.key === key && this.messageOf(entry) === message;
+  // Same plain text (pieces by their text), kind and action.
+  private isSameMessage(entry: SnackbarEntry, key: string, text: string): boolean {
+    return entry.key === key && this.messageOf(entry) === text;
   }
 
   private messageOf(entry: SnackbarEntry): string | null | undefined {
@@ -516,7 +527,7 @@ export class TailwindSnackBarService {
     return box;
   }
 
-  private createSnackbarElement(message: string, action?: string, config?: TailwindSnackBarConfig): HTMLElement {
+  private createSnackbarElement(message: TailwindSnackBarMessage, action?: string, config?: TailwindSnackBarConfig): HTMLElement {
     const snackbar = document.createElement('div');
 
     // Base classes. The box placed on the page is built by createBox(); this
@@ -571,9 +582,21 @@ export class TailwindSnackBarService {
     const setCountText = document.createElement('span');
     setCountText.className = 'snackbar-set-count-text sr-only';
     setCountText.hidden = true;
+    // Pieces get a span each, styled, and still only textContent.
     const messageElement = document.createElement('span');
-    messageElement.textContent = message;
-    messageElement.className = 'snackbar-message';
+    if (typeof message === 'string') {
+      messageElement.textContent = message;
+    } else {
+      for (const piece of message) {
+        const span = document.createElement('span');
+        if (ERROR_PIECE_CLASS[piece.style]) {
+          span.className = ERROR_PIECE_CLASS[piece.style];
+        }
+        span.textContent = piece.text;
+        messageElement.appendChild(span);
+      }
+    }
+    messageElement.className = 'snackbar-message whitespace-pre-line';
     // The space parts "(N)" from the message; pre-line drops it at the
     // start of the line when the count is hidden.
     line.append(setCount, setCountText, ' ', messageElement);

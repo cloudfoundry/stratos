@@ -285,7 +285,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             ignoreSuccess: false
           } as StepOnNextResult);
         }),
-        switchMap(({ success, data, message, redirect, redirectPayload, ignoreSuccess }) => {
+        switchMap(({ success, data, message, messagePieces, redirect, redirectPayload, ignoreSuccess }) => {
           this.showNextButtonProgress = false;
           step.error = !success;
           step.busy = false;
@@ -302,9 +302,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             } else {
               this.setActive(this.currentIndex() + 1);
             }
-          } else if (!success && message) {
+          } else if (!success && (messagePieces?.length || message)) {
             this.snackBarRef = this.snackBar.error(
-              message,
+              messagePieces?.length ? messagePieces : message ?? '',
               'Dismiss',
               { panelClass: 'stepper-snack-bar' },
             );

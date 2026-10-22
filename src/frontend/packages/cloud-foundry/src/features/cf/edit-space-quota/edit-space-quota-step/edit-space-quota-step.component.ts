@@ -9,7 +9,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
 import { formToSpaceQuotaUpdateBody } from '../../quota-definition-form/quota-form-mapping';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadError } from '@stratosui/store';
 
 @Component({
   selector: 'app-edit-space-quota-step',
@@ -67,7 +67,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
       try {
         await firstValueFrom(this.quotaData.updateSpaceQuota(this.cfGuid, this.spaceQuotaGuid, body));
       } catch (err: unknown) {
-        throw new Error(`Failed to update space quota: ${extractHttpErrorMessage(err)}`, { cause: err });
+        throw leadError('Failed to update space quota', err);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

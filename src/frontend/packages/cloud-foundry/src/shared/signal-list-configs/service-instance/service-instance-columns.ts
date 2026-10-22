@@ -1,5 +1,5 @@
 import { SignalListColumn, SignalListPillColor } from '@stratosui/core';
-import { stripMarkup } from '@stratosui/store';
+import { ErrorPiece, htmlToPieces, piecesToText } from '@stratosui/store';
 
 import { StLastOperation, StServiceInstance } from '../../../services/endpoint-data/stratos-types';
 
@@ -33,11 +33,17 @@ export function lastOperationColor(si: WithLastOperation): SignalListPillColor {
   return 'neutral';
 }
 
-// The broker's reason for a failure. Its description can carry HTML, and on
-// other states it is progress chatter rather than something to act on.
+// The broker's reason for a failure, as styled pieces. Its description can
+// carry HTML (a whole error page keeps its heading), and on other states it
+// is progress chatter rather than something to act on.
+export function lastOperationReasonPieces(si: WithLastOperation): ErrorPiece[] {
+  if (lastOperationState(si) !== 'failed') return [];
+  return htmlToPieces(si.lastOperation?.description ?? '');
+}
+
+// The broker's reason for a failure, as text.
 export function lastOperationReason(si: WithLastOperation): string {
-  if (lastOperationState(si) !== 'failed') return '';
-  return stripMarkup(si.lastOperation?.description ?? '');
+  return piecesToText(lastOperationReasonPieces(si));
 }
 
 // The Last Operation pill shared by every service-instance list. A failure's

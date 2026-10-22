@@ -11,7 +11,7 @@ import { UnknownHow, unknownHow, unknownOutcomeMessage } from '../../../services
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { lastOperationReason } from '../../signal-list-configs/service-instance/service-instance-columns';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { extractHttpErrorMessage, leadPieces } from '@stratosui/store';
 
 export enum CreateServiceInstanceMode {
   MARKETPLACE_MODE = 'marketPlaceMode',
@@ -70,6 +70,8 @@ export interface BindResult {
   success: boolean;
   unknown?: UnknownHow;
   message?: string;
+  // What a failed bind threw, so a step can show `message` styled.
+  error?: unknown;
 }
 
 @Injectable({
@@ -235,7 +237,7 @@ export class CsiModeService {
       return outcome(await fireBind());
     } catch (err: unknown) {
       if (!isOperationInProgressError(err)) {
-        return { success: false, message: extractHttpErrorMessage(err) };
+        return { success: false, message: extractHttpErrorMessage(err), error: err };
       }
     }
 
@@ -250,7 +252,7 @@ export class CsiModeService {
       try {
         return outcome(await fireBind());
       } catch (err: unknown) {
-        return { success: false, message: extractHttpErrorMessage(err) };
+        return { success: false, message: extractHttpErrorMessage(err), error: err };
       }
     }
     // Slow broker. Detach the bind so the wizard doesn't keep spinning;
@@ -283,7 +285,7 @@ export class CsiModeService {
           this.snackBar.open(`Service instance bound to app.`, undefined, { duration: 10_000 });
         }
       } catch (err: unknown) {
-        this.snackBar.error(`Service instance ready, but bind failed: ${extractHttpErrorMessage(err)}`);
+        this.snackBar.error(leadPieces('Service instance ready, but bind failed', err));
       }
       return;
     }

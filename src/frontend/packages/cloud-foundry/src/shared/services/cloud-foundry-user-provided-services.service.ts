@@ -1,7 +1,8 @@
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 import { IUserProvidedServiceInstanceData } from '../../cf-api-svc.types';
 import { StServiceInstance } from '../../services/endpoint-data/stratos-types';
@@ -10,11 +11,15 @@ export interface UpsCreateResult {
   success: boolean;
   guid?: string;
   message?: string;
+  // What the request threw, so a step can show `message` styled.
+  error?: unknown;
 }
 
 export interface UpsUpdateResult {
   success: boolean;
   message?: string;
+  // What the request threw, so a step can show `message` styled.
+  error?: unknown;
 }
 
 interface PagedServiceInstances {
@@ -168,9 +173,10 @@ export class CloudFoundryUserProvidedServicesService {
       this.toV3RequestBody(data),
     ).pipe(
       map(res => ({ success: true, guid: res.guid } as UpsCreateResult)),
-      catchError((err: HttpErrorResponse) => of<UpsCreateResult>({
+      catchError((err: unknown) => of<UpsCreateResult>({
         success: false,
-        message: this.extractErrorMessage(err),
+        message: extractHttpErrorMessage(err),
+        error: err,
       })),
     );
   }
@@ -185,9 +191,10 @@ export class CloudFoundryUserProvidedServicesService {
       this.toV3RequestBody(data),
     ).pipe(
       map(() => ({ success: true } as UpsUpdateResult)),
-      catchError((err: HttpErrorResponse) => of<UpsUpdateResult>({
+      catchError((err: unknown) => of<UpsUpdateResult>({
         success: false,
-        message: this.extractErrorMessage(err),
+        message: extractHttpErrorMessage(err),
+        error: err,
       })),
     );
   }
@@ -213,13 +220,5 @@ export class CloudFoundryUserProvidedServicesService {
       body.routeServiceUrl = data.route_service_url;
     }
     return body;
-  }
-
-  private extractErrorMessage(err: HttpErrorResponse): string {
-    const body = err.error;
-    if (body && typeof body === 'object' && typeof body.message === 'string') {
-      return body.message;
-    }
-    return err.message || `HTTP ${err.status}`;
   }
 }

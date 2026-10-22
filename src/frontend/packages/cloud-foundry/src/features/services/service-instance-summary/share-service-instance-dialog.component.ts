@@ -19,7 +19,7 @@ import {
 import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
 import { StSpace } from '../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadPieces } from '@stratosui/store';
 
 // ─── Dialog data ──────────────────────────────────────────────────────────────
 
@@ -124,7 +124,7 @@ export class ShareServiceInstanceDialogComponent {
       // M1: do NOT touch `submitting` after close() — the view is destroyed.
       this.dialogRef.close(true);
     } catch (err: unknown) {
-      this.snackBar.error(`Share failed: ${extractHttpErrorMessage(err)}`);
+      this.snackBar.error(leadPieces('Share failed', err));
       this.submitting.set(false);
     }
   }

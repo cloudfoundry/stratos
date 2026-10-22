@@ -13,8 +13,13 @@ describe('StratosJobError message', () => {
       detail: 'bind could not be completed: Status Code: 504 Gateway Timeout, Body: <html><body><h1>504 Gateway Time-out</h1>\nThe server didn\'t respond in time.\n</body></html>',
     }]));
     expect(err.message).toBe(
-      'bind could not be completed: Status Code: 504 Gateway Timeout, Body: 504 Gateway Time-out The server didn\'t respond in time.',
+      'bind could not be completed: Status Code: 504 Gateway Timeout, Body:\n504 Gateway Time-out\nThe server didn\'t respond in time.',
     );
+    expect(err.pieces).toEqual([
+      { text: 'bind could not be completed: Status Code: 504 Gateway Timeout, Body:\n', style: 'text' },
+      { text: '504 Gateway Time-out', style: 'heading' },
+      { text: '\nThe server didn\'t respond in time.', style: 'text' },
+    ]);
   });
 
   it('is the CF title when there is no detail', () => {
@@ -26,5 +31,6 @@ describe('StratosJobError message', () => {
 
   it('names the job when there are no errors at all', () => {
     expect(new StratosJobError(job(undefined)).message).toBe('job j-1 failed');
+    expect(new StratosJobError(job(undefined)).pieces).toEqual([{ text: 'job j-1 failed', style: 'text' }]);
   });
 });

@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
@@ -5,6 +7,10 @@ import { ActivatedRoute, provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
+import { firstValueFrom } from 'rxjs';
+
+import { StepComponent } from '@stratosui/core';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 import { RouteServiceComponent } from './route-service.component';
 import { ServiceCatalogDataService } from '../../../services/endpoint-data/service-catalog-data.service';
@@ -91,9 +97,30 @@ describe('RouteServiceComponent — bind patches the binding from the response',
       { state: 'FAILED', errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'bind could not be completed: route services disabled' }] },
       { status: 502, statusText: 'Bad Gateway' },
     );
-    await expect(done).rejects.toThrow('bind could not be completed: route services disabled');
+    // The stepper reads the rejection as extractHttpErrorMessage does.
+    await expect(done.catch(extractHttpErrorMessage)).resolves.toBe('bind could not be completed: route services disabled');
 
     expect(component.errorMessage()).toBe('Failed to bind service: bind could not be completed: route services disabled');
+  });
+
+  // nginx's own 502 page, as a proxy in front of Stratos sends it.
+  it('gives the stepper an error page\'s heading when the bind fails', async () => {
+    const page = readFileSync(join(import.meta.dirname, '../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    component.selectedSiGuid.set('si-1');
+    const step = TestBed.createComponent(StepComponent).componentInstance;
+    step.signalHandle = component.bindStepHandle;
+    const done = firstValueFrom(step.invokeNext(0));
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1')
+      .flush(page, { status: 502, statusText: 'Bad Gateway' });
+
+    const result = await done;
+
+    expect(result.message).toBe('502 Bad Gateway\nnginx/1.28.0');
+    expect(result.messagePieces).toEqual([
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx/1.28.0', style: 'text' },
+    ]);
+    expect(component.errorMessage()).toBe('Failed to bind service: 502 Bad Gateway\nnginx/1.28.0');
   });
 
   // A write that ended with an unknown result (here: a 202 without a job id)

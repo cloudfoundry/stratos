@@ -1,5 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
+import { extractHttpErrorMessage } from '@stratosui/store';
 
 import {
   AppAutoscalerMetricDataPoint,
@@ -169,7 +170,14 @@ export const PolicyAlert = {
 // only names the URL and the status. Bodies (14.x and 15.x): {code, message}
 // for most errors, [{context, description}] for a rejected policy,
 // {error} for an app that is not bound, {error_message} for a bad request.
+// Anything else, such as a proxy's HTML error page, is read as any other
+// request's error is.
 export function autoscalerErrorMessage(err: unknown): string {
+  return autoscalerReason(err) ?? extractHttpErrorMessage(err);
+}
+
+// The reason from one of the autoscaler's own bodies, if it sent one.
+export function autoscalerReason(err: unknown): string | undefined {
   const body = (err as HttpErrorResponse)?.error;
   if (Array.isArray(body)) {
     const reasons = body
@@ -187,7 +195,7 @@ export function autoscalerErrorMessage(err: unknown): string {
       return body[key];
     }
   }
-  return (err as HttpErrorResponse)?.message ?? String(err);
+  return undefined;
 }
 
 export function isEqual(a: any, b: any): boolean {
