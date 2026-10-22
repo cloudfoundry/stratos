@@ -83,6 +83,9 @@ interface SnackbarEntry {
   // Panel classes and action label: with the text, two messages with the
   // same key are the same message and share a tab.
   key: string;
+  // Where the action leads, for a showWithLink() message; part of what
+  // makes two messages the same.
+  destination?: string;
   error: boolean;
   count: number;
   duration: number;
@@ -136,7 +139,13 @@ export class TailwindSnackBarService {
   // Show a snack bar whose action button navigates to the given route.
   // Stays on screen until dismissed unless a duration is given.
   showWithLink(message: string, returnUrl: string | string[], returnLabel: string, duration?: number): TailwindSnackBarRef<any> {
-    const ref = this.open(message, returnLabel, { duration: duration || 0 });
+    const destination = typeof returnUrl === 'string' ? `url:${returnUrl}` : `route:${JSON.stringify(returnUrl)}`;
+    const ref = this.openMessage(message, returnLabel, { duration: duration || 0 }, destination);
+    // A repeat joined the open message, which already navigates and is
+    // tracked; a second subscription would navigate twice per click.
+    if (this.tracked.includes(ref)) {
+      return ref;
+    }
     // Navigate when the action button is clicked. onAction() emits once per click and
     // never completes, so this fires only on a real click; take(1) bounds it to one.
     ref.onAction().pipe(take(1)).subscribe(() => {
@@ -175,6 +184,15 @@ export class TailwindSnackBarService {
   }
 
   open(message: TailwindSnackBarMessage, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
+    return this.openMessage(message, action, config);
+  }
+
+  private openMessage(
+    message: TailwindSnackBarMessage,
+    action?: string,
+    config?: TailwindSnackBarConfig,
+    destination?: string,
+  ): TailwindSnackBarRef<any> {
     const panelClasses = config?.panelClass ? ([] as string[]).concat(config.panelClass) : [];
     const key = `${panelClasses.join(' ')}\n${action ?? ''}`;
     // Pieces are compared and announced by their plain text.
@@ -186,7 +204,7 @@ export class TailwindSnackBarService {
     // any, starts over. The same text after another message, or after the
     // newest tab closed, is a new event and gets its own tab.
     const newest = this.entries.find(e => e.number === this.nextNumber - 1);
-    if (newest && this.isSameMessage(newest, key, text)) {
+    if (newest && this.isSameMessage(newest, key, text, destination)) {
       newest.count++;
       this.startTimer(newest);
       this.select(newest);
@@ -210,6 +228,7 @@ export class TailwindSnackBarService {
     const entry: SnackbarEntry = {
       number: this.nextNumber++,
       key,
+      destination,
       error: panelClasses.includes('snackbar-error'),
       count: 1,
       // Use ?? instead of || so that an explicit `duration: 0` from the
@@ -278,9 +297,10 @@ export class TailwindSnackBarService {
     [...this.entries].forEach(entry => entry.ref.dismiss());
   }
 
-  // Same plain text (pieces by their text), kind and action.
-  private isSameMessage(entry: SnackbarEntry, key: string, text: string): boolean {
-    return entry.key === key && this.messageOf(entry) === text;
+  // Same plain text (pieces by their text), kind, action and, for a
+  // link, destination.
+  private isSameMessage(entry: SnackbarEntry, key: string, text: string, destination?: string): boolean {
+    return entry.key === key && entry.destination === destination && this.messageOf(entry) === text;
   }
 
   private messageOf(entry: SnackbarEntry): string | null | undefined {

@@ -452,6 +452,38 @@ describe('TailwindSnackBarService', () => {
     expect(shown()).toEqual(['broker failed']);
   });
 
+  // A link is part of the message: the same words leading somewhere else
+  // are a different message.
+  it('a link message joins a set only when its destination matches too', () => {
+    service.showWithLink('You were switched', '/cf/spaces/1', 'Return');
+    service.showWithLink('You were switched', '/cf/spaces/2', 'Return');
+    expect(numbers()).toEqual(['1', '2']);
+    service.showWithLink('You were switched', '/cf/spaces/2', 'Return');
+    expect(numbers()).toEqual(['1', '2']);
+    expect(tabs()[1].querySelector('.snackbar-count')!.textContent).toBe('×2');
+  });
+
+  it('route arrays are compared as destinations too', () => {
+    service.showWithLink('Analysis complete', ['kubernetes', 'ep1'], 'View');
+    service.showWithLink('Analysis complete', ['kubernetes', 'ep2'], 'View');
+    expect(numbers()).toEqual(['1', '2']);
+    service.showWithLink('Analysis complete', ['kubernetes', 'ep2'], 'View');
+    expect(numbers()).toEqual(['1', '2']);
+  });
+
+  it('a link message is not the same as one with no link', () => {
+    service.show('Saved', 'View');
+    service.showWithLink('Saved', '/apps', 'View');
+    expect(numbers()).toEqual(['1', '2']);
+  });
+
+  it('a link that joined a set navigates once per click', () => {
+    service.showWithLink('You were switched', '/cf/spaces/1', 'Return');
+    service.showWithLink('You were switched', '/cf/spaces/1', 'Return');
+    (document.querySelector('.snackbar-action') as HTMLElement).click();
+    expect(router.navigateByUrl).toHaveBeenCalledTimes(1);
+  });
+
   it('showWithLink navigates to a route array when the action is clicked', () => {
     service.showWithLink('Analysis complete', ['kubernetes', 'ep1', 'analysis'], 'View');
     (document.querySelector('.snackbar-action') as HTMLElement).click();
