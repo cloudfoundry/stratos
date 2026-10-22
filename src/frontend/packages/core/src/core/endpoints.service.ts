@@ -14,7 +14,7 @@ import { EndpointStatusState } from './signals/endpoint-status-signal.service';
 import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
 import { catchError, filter, map, take, withLatestFrom } from 'rxjs/operators';
 
-import { endpointHasMetricsByAvailable } from '../features/endpoints/endpoint-helpers';
+import { endpointHasMetrics } from '../features/endpoints/endpoint-helpers';
 import { SessionService } from '../shared/services/session.service';
 import { EndpointHealthChecks } from './endpoints-health-checks';
 import { AuthSignalService } from './signals/auth-signal.service';
@@ -179,7 +179,7 @@ export class EndpointsService {
 
 
   hasMetrics(endpointId: string): Observable<boolean> {
-    return endpointHasMetricsByAvailable(this.endpointsService, endpointId);
+    return endpointHasMetrics(endpointId, this.endpointsService);
   }
 
   doesNotHaveConnectedEndpointType(type: string): Observable<boolean> {

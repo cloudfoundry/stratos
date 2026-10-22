@@ -22,7 +22,6 @@ function makeSystemInfo(): SystemInfo {
           user: { guid: 'u1', name: 'admin', admin: true },
           system_shared_token: false,
           sso_allowed: false,
-          metricsAvailable: false,
           creator: { name: 'admin', admin: true, system: false },
         } as unknown as SystemInfo['endpoints']['cf']['cf-1'],
         'cf-2': {
@@ -32,7 +31,6 @@ function makeSystemInfo(): SystemInfo {
           // No user => disconnected
           system_shared_token: false,
           sso_allowed: false,
-          metricsAvailable: false,
           creator: { name: 'admin', admin: true, system: false },
         } as unknown as SystemInfo['endpoints']['cf']['cf-2'],
       },
@@ -44,7 +42,6 @@ function makeSystemInfo(): SystemInfo {
           user: { guid: 'u1', name: 'admin', admin: true },
           system_shared_token: false,
           sso_allowed: false,
-          metricsAvailable: false,
           creator: { name: 'admin', admin: true, system: false },
         } as unknown as SystemInfo['endpoints']['k8s']['k8s-1'],
       },

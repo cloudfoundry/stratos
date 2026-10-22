@@ -19,7 +19,7 @@ const systemInfo = {
         guid: 'cf-1', name: 'cf-one', cnsi_type: 'cf',
         api_endpoint: { Scheme: 'https', Host: 'api.example.com' },
         user: { guid: 'u1', name: 'admin', admin: true },
-        system_shared_token: false, sso_allowed: false, metricsAvailable: false,
+        system_shared_token: false, sso_allowed: false,
         creator: { name: 'admin', admin: true, system: false },
       },
     },

@@ -95,7 +95,6 @@ export interface EndpointModel {
   token_renewable?: boolean;
   // These are generated client side when we login
   connectionStatus?: endpointConnectionStatus;
-  metricsAvailable: boolean;
   local?: true;
   creator: CreatorInfo;
 }
