@@ -4,6 +4,7 @@ package cloudfoundry
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 
@@ -206,10 +207,14 @@ func findUserGUID(ctx context.Context, cfClient capi.Client, username, origin st
 		return "", err
 	}
 	if list == nil || len(list.Resources) == 0 {
-		return "", fmt.Errorf("user not found: %s", username)
+		return "", fmt.Errorf("%w: %s", errUserNotFound, username)
 	}
 	return list.Resources[0].GUID, nil
 }
+
+// errUserNotFound is findUserGUID's answer when the lookup succeeded but
+// listed no user, as opposed to a failed CF call.
+var errUserNotFound = errors.New("user not found")
 
 // resolveRoleGUID finds the GUID of an existing role for a (user, scope, type)
 // tuple via a filtered V3 roles list. CF v3 deletes roles by GUID, but the
