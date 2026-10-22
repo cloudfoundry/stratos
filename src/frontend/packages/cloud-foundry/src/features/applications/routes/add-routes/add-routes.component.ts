@@ -29,6 +29,7 @@ import {
   SignalListSort,
   SignalStepHandle,
 } from '@stratosui/core';
+import { leadError } from '@stratosui/store';
 import { StDomain } from '../../../../services/endpoint-data/stratos-types';
 import { ApplicationService } from '../../application.service';
 import { AppDetailDataService } from '../../app-detail-data.service';
@@ -539,29 +540,30 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
       // hostCollision and never reach this branch. Other 422 details
       // (invalid host, quota exceeded, etc.) pass through verbatim;
       // orphan-on-attach-fail messages too.
-      throw new Error(this.classifyCreateError(err), { cause: err });
+      throw this.classifyCreateError(err);
     }
     this.dataService.addRoute(created);
     void this.router.navigate(['/applications', this.cfGuid, this.appGuid, 'routes']);
   }
 
   /**
-   * Map a thrown error from createAndAttachRoute into a user-facing
-   * message. CF v3 returns 422 with `errors[].code` for uniqueness
+   * Map a thrown error from createAndAttachRoute into the error the
+   * stepper shows. CF v3 returns 422 with `errors[].code` for uniqueness
    * conflicts (210003/210004/210005); we translate those without leaking
-   * the colliding route's space/org. Any other shape passes the original
-   * message through.
+   * the colliding route's space/org. The action service's own errors
+   * (orphaned route, action in flight) pass through; a failed request
+   * reads as its CF detail or error page, after a lead-in.
    */
-  private classifyCreateError(err: unknown): string {
-    const e = err as { message?: string; status?: number; error?: unknown };
+  private classifyCreateError(err: unknown): Error {
+    const e = err as { status?: number; error?: unknown };
     const status = e?.status ?? 0;
     if (status === 422) {
       const code = this.extractCfErrorCode(e?.error);
       if (code === 210003 || code === 210004 || code === 210005) {
-        return 'Route name is unavailable. Please choose another.';
+        return new Error('Route name is unavailable. Please choose another.', { cause: err });
       }
     }
-    return e?.message ?? 'Failed to add route';
+    return err instanceof Error ? err : leadError('Failed to add route', err);
   }
 
   /**
@@ -596,8 +598,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
     try {
       await this.actions.attachRoute(selected.guid);
     } catch (err) {
-      const msg = (err as Error)?.message ?? 'Failed to map route';
-      throw new Error(msg, { cause: err });
+      throw err instanceof Error ? err : leadError('Failed to map route', err);
     }
     // Use the picker's locally-held StRoute (backend returns empty 200 from
     // attach). The picker's drain stamps cnsiGuid via toStRoute server-side.

@@ -1,9 +1,12 @@
-import { HttpClient, provideHttpClient } from '@angular/common/http';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { HttpClient, HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Subject, of, throwError } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { extractHttpErrorPieces } from '@stratosui/store';
 
 import { AppRouteActionsService, type CreateRouteRequest } from './app-route-actions.service';
 import { ApplicationService } from '../../features/applications/application.service';
@@ -503,6 +506,23 @@ describe('AppRouteActionsService — createAndAttachRoute', () => {
     // Both legs were called exactly once — no auto-delete cleanup attempt.
     expect(http.post).toHaveBeenCalledTimes(1);
     expect(http.put).toHaveBeenCalledTimes(1);
+  });
+
+  // nginx's own 502 page, as a proxy in front of Stratos sends it.
+  it('orphan path: keeps the heading of an error page from attach', async () => {
+    const created = makeStRoute({ guid: 'route-ORPHAN', url: 'orphan.example.com' });
+    const page = readFileSync(join(import.meta.dirname, '../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    const attachErr = new HttpErrorResponse({ error: page, status: 502, statusText: 'Bad Gateway' });
+    configure(makeRichHttpStub({ post: () => of(created), put: () => throwError(() => attachErr) }));
+
+    const caught = await svc.createAndAttachRoute(makeCreateReq()).then(() => undefined, (e: unknown) => e);
+
+    expect(extractHttpErrorPieces(caught)).toEqual([
+      { text: 'Route created but attach failed. Orphan route in space: guid=route-ORPHAN url=orphan.example.com. Original error: ', style: 'text' },
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx/1.28.0', style: 'text' },
+    ]);
+    expect((caught as { orphanRoute?: StRoute }).orphanRoute).toEqual(created);
     expect(http.delete).not.toHaveBeenCalled();
     expect(svc.transitioningRouteGuid()).toBeNull();
     expect(svc.inFlight()).toBe(false);

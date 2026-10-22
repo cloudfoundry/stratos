@@ -1,10 +1,13 @@
-import { provideHttpClient } from '@angular/common/http';
+import { readFileSync } from 'fs';
+import { join } from 'path';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { firstValueFrom } from 'rxjs';
 
 import {
   TEST_CATALOGUE_ENTITIES,
@@ -17,6 +20,8 @@ import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoin
 import { generateTestCfEndpointServiceProvider } from "@test-framework/cloud-foundry-endpoint-service.helper";
 import { ActiveRouteCfOrgSpace } from "../../cf-page.types";
 import { generateCFEntities } from '@stratosui/cloud-foundry';
+import { StepComponent } from '@stratosui/core';
+import { CnsiSpacesSource } from '../../../../services/data-sources/cnsi-spaces-source';
 import { CreateSpaceStepComponent } from "./create-space-step.component";
 
 describe('CreateSpaceStepComponent', () => {
@@ -70,6 +75,8 @@ describe('CreateSpaceStepComponent', () => {
     fixture.detectChanges();
   });
 
+  afterEach(() => vi.restoreAllMocks());
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
@@ -87,5 +94,24 @@ describe('CreateSpaceStepComponent', () => {
     expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe(
       'A space with this name already exists. Please enter a different one.'
     );
+  });
+
+  // nginx's own 502 page, as a proxy in front of Stratos sends it.
+  it('keeps an error page\'s heading after its lead-in when the create fails', async () => {
+    const page = readFileSync(join(import.meta.dirname, '../../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    vi.spyOn(CnsiSpacesSource.prototype, 'create')
+      .mockRejectedValue(new HttpErrorResponse({ error: page, status: 502, statusText: 'Bad Gateway' }));
+    const step = TestBed.createComponent(StepComponent).componentInstance;
+    step.signalHandle = component.signalHandle;
+
+    const result = await firstValueFrom(step.invokeNext(0));
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('Failed to create space: 502 Bad Gateway\nnginx/1.28.0');
+    expect(result.messagePieces).toEqual([
+      { text: 'Failed to create space: ', style: 'text' },
+      { text: '502 Bad Gateway', style: 'heading' },
+      { text: '\nnginx/1.28.0', style: 'text' },
+    ]);
   });
 });

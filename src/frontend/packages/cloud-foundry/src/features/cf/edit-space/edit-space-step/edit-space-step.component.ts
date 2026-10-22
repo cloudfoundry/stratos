@@ -4,8 +4,8 @@ import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { firstValueFrom, from, Observable, of, Subscription, throwError } from 'rxjs';
-import { catchError, filter, map, switchMap, take, tap } from 'rxjs/operators';
+import { firstValueFrom, from, Observable, of, Subscription } from 'rxjs';
+import { filter, finalize, map, switchMap, take, tap } from 'rxjs/operators';
 
 import {
   AppErrorComponent,
@@ -15,10 +15,9 @@ import {
   CustomOptionComponent,
   CustomSlideToggleComponent,
   FocusDirective,
-  SignalStepHandle,
-  StepOnNextFunction,
-  StepOnNextResult
+  SignalStepHandle
 } from '@stratosui/core';
+import { leadError } from '@stratosui/store';
 import { CnsiSpacesSource } from '../../../../services/data-sources/cnsi-spaces-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { OrgDataRegistry } from '../../../../services/endpoint-data/org-data.registry';
@@ -75,17 +74,17 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
     submit: async () => {
-      const spaceResult = await firstValueFrom(this.updateSpace());
-      if (!spaceResult.success) {
-        throw new Error(spaceResult.message || 'Failed to update space');
+      try {
+        await firstValueFrom(this.updateSpace());
+      } catch (err: unknown) {
+        throw leadError('Failed to update space', err);
       }
-      if (this.quotaUnchanged()) {
-        await this.router.navigateByUrl(this.redirectUrl);
-        return;
-      }
-      const quotaResult = await firstValueFrom(this.updateSpaceQuota());
-      if (!quotaResult.success) {
-        throw new Error(quotaResult.message || 'Failed to update space quota');
+      if (!this.quotaUnchanged()) {
+        try {
+          await firstValueFrom(this.updateSpaceQuota());
+        } catch (err: unknown) {
+          throw leadError('Failed to update space quota', err);
+        }
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },
@@ -169,20 +168,6 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
     );
   }
 
-  submit: StepOnNextFunction = () => {
-    return this.updateSpace().pipe(
-      switchMap(spaceResult => {
-        if (!spaceResult.success) {
-          return of({ success: false, redirect: false, message: spaceResult.message });
-        }
-        if (this.quotaUnchanged()) {
-          return of({ success: true, redirect: true });
-        }
-        return this.updateSpaceQuota();
-      }),
-    );
-  };
-
   private quotaUnchanged(): boolean {
     const next = this.editSpaceForm.value.quotaDefinition;
     return this.originalSpaceQuotaGuid === next ||
@@ -194,7 +179,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   // space.update cascade fires. The SSH feature PUT is a side endpoint
   // (CF v3 lifted SSH out of the space attributes endpoint) and isn't
   // cached on EDS, so it stays as a raw http.put.
-  updateSpace(): Observable<StepOnNextResult> {
+  updateSpace(): Observable<unknown> {
     const name = this.editSpaceForm.value.spaceName as string;
     const allowSsh = !!this.editSpaceForm.value.toggleSsh;
     const sshChanged = allowSsh !== this.originalAllowSsh;
@@ -217,13 +202,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
         // the summary view reads from.
         this.cfSpaceService.spaceDataService.patch({ name, allowSsh });
       }),
-      map(() => ({ success: true })),
-      catchError(err => {
-        const message = err?.error?.error || err?.message || `Failed to update space`;
-        return throwError(() => ({ success: false, message } as StepOnNextResult));
-      }),
-      catchError((result: StepOnNextResult) => [result]),
-      tap(() => this.endpointDataRegistry.release(this.cfGuid)),
+      finalize(() => this.endpointDataRegistry.release(this.cfGuid)),
     );
   }
 
@@ -237,7 +216,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   // spaces list (which renders the quota name) re-fetches the updated
   // quotaGuid — space_quotas isn't cached on EDS, but the space row's
   // quotaGuid field is the source of truth for the displayed quota.
-  updateSpaceQuota(): Observable<StepOnNextResult> {
+  updateSpaceQuota(): Observable<unknown> {
     const next = this.editSpaceForm.value.quotaDefinition;
     const nextGuid = next ? String(next) : null;
     const oldGuid = this.originalSpaceQuotaGuid || null;
@@ -250,12 +229,12 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
     return detach$.pipe(
       switchMap(() => {
         if (!nextGuid) {
-          return of({ success: true, redirect: true } as StepOnNextResult);
+          return of(null);
         }
         return this.http.post(
           `/pp/v1/cf/space_quotas/${this.cfGuid}/${nextGuid}/relationships/spaces`,
           { space_guids: [this.spaceGuid] },
-        ).pipe(map(() => ({ success: true, redirect: true } as StepOnNextResult)));
+        );
       }),
       tap(() => {
         eds.applyCascade('space.update');
@@ -263,11 +242,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
         // "Quota Definition" row reflects the change without a reload.
         this.cfSpaceService.spaceDataService.patch({ quotaGuid: nextGuid ?? undefined });
       }),
-      catchError(err => {
-        const message = err?.error?.error || err?.message || `Failed to update space quota`;
-        return of({ success: false, redirect: false, message: `Failed to update space quota: ${message}` } as StepOnNextResult);
-      }),
-      tap(() => this.endpointDataRegistry.release(this.cfGuid)),
+      finalize(() => this.endpointDataRegistry.release(this.cfGuid)),
     );
   }
 
