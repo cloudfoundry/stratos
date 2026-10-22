@@ -67,14 +67,42 @@ export class TailwindSimpleSnackBar {
   }
 }
 
+// One open message in the snackbar box: its numbered tab, its panel and
+// the ref its caller holds.
+interface SnackbarEntry {
+  number: number;
+  // Panel classes and action label: with the text, two messages with the
+  // same key are the same message and share a tab.
+  key: string;
+  error: boolean;
+  count: number;
+  duration: number;
+  timer?: ReturnType<typeof setTimeout>;
+  closed: boolean;
+  ref: TailwindSnackBarRef<any>;
+  tab: HTMLButtonElement;
+  panel: HTMLElement;
+}
+
+// Ids tie each tab to its panel (aria-controls / aria-labelledby).
+let nextId = 0;
+
 @Injectable({
   providedIn: 'root'
 })
 export class TailwindSnackBarService {
-  // The snackbar on screen. Every toast sits at the same fixed spot, so only
-  // one is shown at a time, as Material's MatSnackBar did before this
-  // service replaced it: opening a new one dismisses this one.
-  private current?: TailwindSnackBarRef<any>;
+  // Open messages share one box at the bottom centre of the page, one
+  // numbered tab each. Toasts used to be placed one on top of another at
+  // that spot, so an older one peeked out and caught clicks meant for the
+  // newer one. A tab's number is never changed while any tab is open;
+  // numbering starts again at 1 once every tab has been closed.
+  private box?: HTMLElement;
+  private strip?: HTMLElement;
+  private entries: SnackbarEntry[] = [];
+  private selected?: SnackbarEntry;
+  private nextNumber = 1;
+  // The message whose text the announcer's live region holds.
+  private announced?: SnackbarEntry;
 
   private appRef = inject(ApplicationRef);
   private announcer = inject(LiveAnnouncer);
@@ -137,99 +165,321 @@ export class TailwindSnackBarService {
   }
 
   open(message: string, action?: string, config?: TailwindSnackBarConfig): TailwindSnackBarRef<any> {
-    this.current?.dismiss();
-    const snackbarElement = this.createSnackbarElement(message, action, config);
-    const snackbarRef: TailwindSnackBarRef<any> = new TailwindSnackBarRefImpl(
-      () => {
-        // A replaced snackbar's timer or close can still fire; only the one
-        // on screen owns the announcer's live region, so only it clears it.
-        if (this.current === snackbarRef) {
-          this.current = undefined;
-          this.announcer.clear();
-        }
-        this.removeSnackbar(snackbarElement);
-      },
+    const panelClasses = config?.panelClass ? ([] as string[]).concat(config.panelClass) : [];
+    const key = `${panelClasses.join(' ')}\n${action ?? ''}`;
+
+    // The same message again (same text, kind and action) while its tab is
+    // open joins that tab instead of adding one: its count goes up, it is
+    // selected and announced again, and its timer, if any, starts over.
+    const same = this.entries.find(e => e.key === key && this.messageOf(e) === message);
+    if (same) {
+      same.count++;
+      this.startTimer(same);
+      this.select(same);
+      this.announce(same, message);
+      return same.ref;
+    }
+
+    const id = nextId++;
+    const panel = this.createSnackbarElement(message, action, config);
+    panel.id = `snackbar-panel-${id}`;
+    const tab = this.createTab(id, this.nextNumber, panel.id);
+    const ref: TailwindSnackBarRef<any> = new TailwindSnackBarRefImpl(
+      () => this.close(entry),
       (message: string) => {
-        const el = snackbarElement.querySelector('.snackbar-message');
+        const el = panel.querySelector('.snackbar-message');
         if (el) { el.textContent = message; }
         // ZONELESS: keep parity with the other DOM mutations in this service
         this.appRef.tick();
       },
     );
+    const entry: SnackbarEntry = {
+      number: this.nextNumber++,
+      key,
+      error: panelClasses.includes('snackbar-error'),
+      count: 1,
+      // Use ?? instead of || so that an explicit `duration: 0` from the
+      // caller means "do not auto-dismiss" (the standard convention) rather
+      // than being treated as falsy and falling back to the 4s default.
+      // Previously, callers that wanted a persistent error snackbar (e.g.
+      // the stepper's "Dismiss" action) had their explicit `duration: 0`
+      // silently overridden, causing the error to pop up and disappear
+      // before the user could read it. This `duration: 0` =
+      // stay-until-dismissed rule mirrors Angular Material's MatSnackBar,
+      // so callers coming from Material get it.
+      duration: config?.duration ?? 4000,
+      closed: false,
+      ref,
+      tab,
+      panel,
+    };
+
+    tab.addEventListener('click', () => {
+      this.select(entry);
+      // ZONELESS: Trigger change detection after user interaction
+      this.appRef.tick();
+    });
 
     // Add to DOM
-    document.body.appendChild(snackbarElement);
-    this.current = snackbarRef;
-    // Screen readers miss a toast that arrives with its text; the announcer's
-    // live region is already on the page. Errors interrupt.
-    void this.announcer.announce(message, snackbarElement.classList.contains('snackbar-error') ? 'assertive' : 'polite');
-
-    // Auto dismiss. Use ?? instead of || so that an explicit `duration: 0`
-    // from the caller means "do not auto-dismiss" (the standard convention)
-    // rather than being treated as falsy and falling back to the 4s default.
-    // Previously, callers that wanted a persistent error snackbar (e.g. the
-    // stepper's "Dismiss" action) had their explicit `duration: 0` silently
-    // overridden, causing the error to pop up and disappear before the user
-    // could read it. This `duration: 0` = stay-until-dismissed rule mirrors
-    // Angular Material's MatSnackBar, so callers coming from Material get it.
-    const duration = config?.duration ?? 4000;
-    if (duration > 0) {
-      setTimeout(() => {
-        snackbarRef.dismiss();
-        // ZONELESS: Trigger change detection after async operation
-        this.appRef.tick();
-      }, duration);
-    }
+    const box = this.box ?? this.createBox();
+    this.strip!.appendChild(tab);
+    box.appendChild(panel);
+    this.entries.push(entry);
+    this.select(entry);
+    this.announce(entry, message);
+    this.startTimer(entry);
 
     // Add event listeners
-    const actionButton = snackbarElement.querySelector('.snackbar-action');
+    const actionButton = panel.querySelector('.snackbar-action');
     if (actionButton) {
       actionButton.addEventListener('click', () => {
-        snackbarRef.dismissWithAction();
+        ref.dismissWithAction();
         // ZONELESS: Trigger change detection after user interaction
         this.appRef.tick();
       });
     }
 
-    const closeButton = snackbarElement.querySelector('.snackbar-close');
+    const closeButton = panel.querySelector('.snackbar-close');
     if (closeButton) {
       closeButton.addEventListener('click', () => {
-        snackbarRef.dismiss();
+        ref.dismiss();
         // ZONELESS: Trigger change detection after user interaction
         this.appRef.tick();
       });
     }
 
-    return snackbarRef;
+    return ref;
   }
 
+  // Close every open message, each through its own ref so that its
+  // afterDismissed() fires. The stepper calls this to clear its error
+  // before the next try; before the tabs this closed every toast on the
+  // page too, so it still means all, not just the selected tab.
   dismiss(): void {
-    this.current?.dismiss();
+    [...this.entries].forEach(entry => entry.ref.dismiss());
+  }
+
+  private messageOf(entry: SnackbarEntry): string | null | undefined {
+    return entry.panel.querySelector('.snackbar-message')?.textContent;
+  }
+
+  // Screen readers miss a toast that arrives with its text; the announcer's
+  // live region is already on the page. Errors interrupt.
+  private announce(entry: SnackbarEntry, message: string): void {
+    this.announced = entry;
+    void this.announcer.announce(message, entry.error ? 'assertive' : 'polite');
+  }
+
+  private startTimer(entry: SnackbarEntry): void {
+    if (entry.duration > 0) {
+      clearTimeout(entry.timer);
+      entry.timer = setTimeout(() => {
+        entry.ref.dismiss();
+        // ZONELESS: Trigger change detection after async operation
+        this.appRef.tick();
+      }, entry.duration);
+    }
+  }
+
+  private select(entry: SnackbarEntry): void {
+    this.selected = entry;
+    this.render();
+    // Bring a tab scrolled out of the strip back into view.
+    if (!this.strip!.hidden) {
+      entry.tab.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    }
+  }
+
+  // Closes one message's tab. Runs for the close button, the action, the
+  // timer and the caller's ref.dismiss(); only the first call counts, so a
+  // closed message's late timer changes nothing.
+  private close(entry: SnackbarEntry): void {
+    if (entry.closed) {
+      return;
+    }
+    entry.closed = true;
+    clearTimeout(entry.timer);
+    // Only the message the live region holds clears it; closing another
+    // tab leaves a newer announcement alone.
+    if (this.announced === entry) {
+      this.announced = undefined;
+      this.announcer.clear();
+    }
+    const index = this.entries.indexOf(entry);
+    this.entries.splice(index, 1);
+    // Read before inert below, which can move focus off the element.
+    const active = document.activeElement;
+    const hadFocus = entry.tab.contains(active) || entry.panel.contains(active);
+    // While it fades out it must not take clicks or be read out again.
+    entry.panel.setAttribute('inert', '');
+
+    if (!this.entries.length) {
+      // The last tab closes the box, and numbering starts again at 1.
+      const box = this.box!;
+      this.box = undefined;
+      this.strip = undefined;
+      this.selected = undefined;
+      this.nextNumber = 1;
+      this.removeSnackbar(box);
+      return;
+    }
+
+    entry.tab.remove();
+    entry.panel.remove();
+    if (this.selected === entry) {
+      // The neighbour on the right, or on the left if it was the last tab.
+      this.select(this.entries[Math.min(index, this.entries.length - 1)]);
+    } else {
+      this.render();
+    }
+    // Focus went with the closed message's button; put it on the message
+    // now shown, so a keyboard user is not dropped back to the page.
+    if (hadFocus) {
+      const next = this.selected!;
+      const target = this.strip!.hidden ? next.panel.querySelector<HTMLElement>('.snackbar-close') : next.tab;
+      target?.focus();
+    }
+  }
+
+  // Brings the strip, tabs and panels in line with the open messages.
+  // The strip shows once there is more than one tab, or a count to show;
+  // a single message looks as a toast always has.
+  private render(): void {
+    const tabsShown = this.entries.length > 1 || this.entries.some(e => e.count > 1);
+    this.strip!.hidden = !tabsShown;
+    for (const entry of this.entries) {
+      const on = entry === this.selected;
+      entry.tab.setAttribute('aria-selected', String(on));
+      entry.tab.tabIndex = on ? 0 : -1;
+      entry.tab.setAttribute('aria-label',
+        `Message ${entry.number}${entry.count > 1 ? `, shown ${entry.count} times` : ''}`);
+      entry.tab.className = this.tabClasses(on, entry.error);
+      entry.panel.hidden = !on;
+      if (tabsShown) {
+        entry.panel.setAttribute('role', 'tabpanel');
+        entry.panel.setAttribute('aria-labelledby', entry.tab.id);
+      } else {
+        entry.panel.removeAttribute('role');
+        entry.panel.removeAttribute('aria-labelledby');
+      }
+      if (entry.count > 1) {
+        let badge = entry.tab.querySelector('.snackbar-count');
+        if (!badge) {
+          badge = document.createElement('span');
+          badge.className = 'snackbar-count ml-1 text-xs';
+          entry.tab.appendChild(badge);
+        }
+        badge.textContent = `×${entry.count}`;
+      }
+    }
+  }
+
+  // The selected tab carries its message's colour and runs into the panel
+  // below it; the others sit on the darker strip and keep their kind as a
+  // coloured underline, so an error among them stays visible.
+  private tabClasses(selected: boolean, error: boolean): string {
+    const base = 'snackbar-tab shrink-0 px-3 py-1 text-sm font-medium border-b-2 ' +
+      'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white';
+    if (selected) {
+      return `${base} text-white ${error ? 'bg-danger-700 border-danger-700' : 'bg-gray-800 border-gray-800'}`;
+    }
+    return `${base} bg-gray-900 text-gray-300 hover:text-white ${error ? 'border-danger-400' : 'border-gray-500'}`;
+  }
+
+  private createTab(id: number, number: number, panelId: string): HTMLButtonElement {
+    const tab = document.createElement('button');
+    tab.type = 'button';
+    tab.id = `snackbar-tab-${id}`;
+    tab.setAttribute('role', 'tab');
+    tab.setAttribute('aria-controls', panelId);
+    const label = document.createElement('span');
+    label.className = 'snackbar-tab-number';
+    label.textContent = String(number);
+    tab.appendChild(label);
+    return tab;
+  }
+
+  private createBox(): HTMLElement {
+    const box = document.createElement('div');
+    // The spot every toast has used, bottom centre. The min/max widths are
+    // the old toast's (min-w-72, max-w-2xl), held 1rem inside each side of
+    // a narrow screen.
+    //
+    // NOTE: bg-gray-900/text-white is a deliberate INVERSE overlay, not a
+    // theme surface — a toast stays dark in both light and dark mode. Kept
+    // raw (no content-* token) so the #5494 sweep doesn't flip it to a
+    // light-on-light surface. The box colour shows only behind the strip;
+    // each panel paints its own.
+    box.className = [
+      'snackbar-box', 'fixed', 'bottom-4', 'left-1/2', 'transform', '-translate-x-1/2', 'z-50',
+      'min-w-[min(18rem,calc(100vw_-_2rem))]', 'max-w-[min(42rem,calc(100vw_-_2rem))]',
+      'bg-gray-900', 'text-white', 'rounded-lg', 'shadow-lg', 'overflow-hidden',
+      'animate-fade-in'
+    ].join(' ');
+
+    const strip = document.createElement('div');
+    strip.setAttribute('role', 'tablist');
+    strip.setAttribute('aria-label', 'Messages');
+    // w-0 + min-w-full: the tabs never widen the box; once they no longer
+    // fit, the strip scrolls sideways, and the page does not.
+    strip.className = 'snackbar-tabs flex w-0 min-w-full overflow-x-auto';
+    strip.hidden = true;
+    // Arrow keys move along the tabs (wrapping), Home and End jump to the
+    // ends; only the selected tab is in the Tab order.
+    strip.addEventListener('keydown', (event: KeyboardEvent) => {
+      const index = this.entries.findIndex(e => e.tab === event.target);
+      if (index < 0) {
+        return;
+      }
+      const last = this.entries.length - 1;
+      const moves: Record<string, number> = {
+        ArrowLeft: index === 0 ? last : index - 1,
+        ArrowRight: index === last ? 0 : index + 1,
+        Home: 0,
+        End: last,
+      };
+      const to = moves[event.key];
+      if (to === undefined) {
+        return;
+      }
+      event.preventDefault();
+      const entry = this.entries[to];
+      this.select(entry);
+      entry.tab.focus();
+      // ZONELESS: Trigger change detection after user interaction
+      this.appRef.tick();
+    });
+
+    box.appendChild(strip);
+    document.body.appendChild(box);
+    this.box = box;
+    this.strip = strip;
+    return box;
   }
 
   private createSnackbarElement(message: string, action?: string, config?: TailwindSnackBarConfig): HTMLElement {
     const snackbar = document.createElement('div');
 
-    // Base classes
+    // Base classes. The box placed on the page is built by createBox(); this
+    // is one message's panel inside it.
     //
-    // max-w-2xl + items-start + whitespace-normal/break-words: previously the
-    // snackbar was max-w-md (~448px) with items-center and no wrap class, so
-    // longer messages (e.g. "Restaging sample-go-app on Cloud Foundry 'dup3'
-    // — org 'opensource' / space 'openproject'") truncated to a single line
-    // and the operator could not read what action was in flight. Switching
-    // to a wider container with proper wrapping lets multi-line messages
-    // render in full while keeping short ones on a single line.
+    // items-start + whitespace-normal/break-words: previously the snackbar
+    // was max-w-md (~448px) with items-center and no wrap class, so longer
+    // messages (e.g. "Restaging sample-go-app on Cloud Foundry 'dup3' — org
+    // 'opensource' / space 'openproject'") truncated to a single line and
+    // the operator could not read what action was in flight. A wider box
+    // with proper wrapping lets multi-line messages render in full while
+    // keeping short ones on a single line.
     //
     // NOTE: bg-gray-800/text-white is a deliberate INVERSE overlay, not a
     // theme surface — a toast stays dark in both light and dark mode. Kept raw
     // (no content-* token) so the #5494 sweep doesn't flip it to a light-on-light
     // surface and break the white action/close text + the !bg-danger error variant.
     let classes = [
-      'fixed', 'bottom-4', 'left-1/2', 'transform', '-translate-x-1/2',
-      'bg-gray-800', 'text-white', 'px-6', 'py-3', 'rounded-lg', 'shadow-lg',
-      'flex', 'items-start', 'space-x-4', 'z-50', 'min-w-72', 'max-w-2xl',
+      'snackbar-panel',
+      'bg-gray-800', 'text-white', 'px-6', 'py-3',
+      'flex', 'items-start', 'space-x-4',
       'whitespace-normal', 'break-words',
-      'animate-fade-in'
     ];
 
     // Add custom classes
@@ -275,8 +525,8 @@ export class TailwindSnackBarService {
   }
 
   private removeSnackbar(snackbar: HTMLElement): void {
-    // While it fades out it must not take clicks meant for its replacement
-    // or be read out again.
+    // While it fades out it must not take clicks meant for a new box or be
+    // read out again.
     snackbar.setAttribute('inert', '');
 
     // Add fade out animation

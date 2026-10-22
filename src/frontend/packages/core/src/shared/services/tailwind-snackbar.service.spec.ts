@@ -23,8 +23,23 @@ describe('TailwindSnackBarService', () => {
   });
 
   afterEach(() => {
-    document.querySelectorAll('.snackbar-close').forEach(btn => btn.parentElement?.remove());
+    vi.useRealTimers();
+    document.querySelectorAll('.snackbar-box').forEach(box => box.remove());
   });
+
+  const tabs = () => Array.from(document.querySelectorAll<HTMLElement>('.snackbar-box:not([inert]) [role="tab"]'));
+  const numbers = () => tabs().map(t => t.querySelector('.snackbar-tab-number')!.textContent);
+  const selected = () => tabs().filter(t => t.getAttribute('aria-selected') === 'true')
+    .map(t => t.querySelector('.snackbar-tab-number')!.textContent);
+  const strip = () => document.querySelector<HTMLElement>('.snackbar-box:not([inert]) [role="tablist"]')!;
+  const shown = () => Array.from(document.querySelectorAll<HTMLElement>('.snackbar-box:not([inert]) .snackbar-message'))
+    .filter(el => !el.parentElement!.hidden)
+    .map(el => el.textContent);
+  const closeShown = () => {
+    const panel = Array.from(document.querySelectorAll<HTMLElement>('.snackbar-box:not([inert]) .snackbar-panel'))
+      .find(p => !p.hidden)!;
+    (panel.querySelector('.snackbar-close') as HTMLElement).click();
+  };
 
   // A toast inserted with its text already in it is not reliably read out;
   // the announcer's live region, which is already on the page, is.
@@ -39,31 +54,247 @@ describe('TailwindSnackBarService', () => {
     closes.forEach(b => expect(b.getAttribute('aria-label')).toBe('Close'));
   });
 
-  // Every toast sits at the same fixed spot, so a second one covered the
+  // Every toast sat at the same fixed spot, so a second one covered the
   // first, which peeked out behind it and could take clicks meant for the
-  // new one. Like the Material snack bar this replaced, a new toast now
-  // dismisses the one on screen.
-  it('shows one snackbar at a time: a new one dismisses the one on screen', () => {
-    const firstDismissed = vi.fn();
-    service.error('first failure').afterDismissed().subscribe(firstDismissed);
+  // new one. Open messages now share one box at that spot, one tab each.
+  it('a single message has no tab strip, as before', () => {
+    service.error('broker failed');
+    expect(document.querySelectorAll('.snackbar-box')).toHaveLength(1);
+    expect(strip().hidden).toBe(true);
+    expect(shown()).toEqual(['broker failed']);
+  });
+
+  it('two messages share one box with tabs 1 and 2, the newest selected', () => {
+    service.error('first failure');
     service.error('second failure');
-    const onScreen = Array.from(document.querySelectorAll('.snackbar-message'))
-      .filter(el => !el.parentElement!.hasAttribute('inert'))
-      .map(el => el.textContent);
-    expect(onScreen).toEqual(['second failure']);
-    expect(firstDismissed).toHaveBeenCalledTimes(1);
+    expect(document.querySelectorAll('.snackbar-box')).toHaveLength(1);
+    expect(strip().hidden).toBe(false);
+    expect(numbers()).toEqual(['1', '2']);
+    expect(selected()).toEqual(['2']);
+    expect(shown()).toEqual(['second failure']);
+  });
+
+  it('closing tab 2 of two leaves tab 1 shown and hides the strip', () => {
+    service.error('first failure');
+    service.error('second failure');
+    closeShown();
+    expect(numbers()).toEqual(['1']);
+    expect(selected()).toEqual(['1']);
+    expect(strip().hidden).toBe(true);
+    expect(shown()).toEqual(['first failure']);
+  });
+
+  it('closing a tab keeps the other numbers; the next message takes the next number', () => {
+    service.error('one');
+    const two = service.error('two');
+    service.error('three');
+    two.dismiss();
+    expect(numbers()).toEqual(['1', '3']);
+    service.error('four');
+    expect(numbers()).toEqual(['1', '3', '4']);
+    expect(selected()).toEqual(['4']);
+  });
+
+  it('closing tab 1 of three leaves tabs 2 and 3 numbered as they were', () => {
+    const one = service.error('one');
+    service.error('two');
+    service.error('three');
+    one.dismiss();
+    expect(numbers()).toEqual(['2', '3']);
+  });
+
+  it('numbering starts again at 1 once every tab is dismissed', () => {
+    service.error('one').dismiss();
+    service.error('two').dismiss();
+    service.error('three');
+    service.error('four');
+    expect(numbers()).toEqual(['1', '2']);
+  });
+
+  it('closing the selected tab selects a neighbour', () => {
+    service.error('one');
+    service.error('two');
+    service.error('three');
+    tabs()[1].click();
+    expect(selected()).toEqual(['2']);
+    closeShown();
+    expect(selected()).toEqual(['3']);
+    expect(shown()).toEqual(['three']);
+    closeShown();
+    expect(selected()).toEqual(['1']);
+  });
+
+  // The focused close button goes with its tab; focus moves to the tab
+  // now selected rather than falling back to the page.
+  it('closing the focused message moves focus to the tab now selected', () => {
+    service.error('one');
+    service.error('two');
+    service.error('three');
+    const panel = Array.from(document.querySelectorAll<HTMLElement>('.snackbar-panel')).find(p => !p.hidden)!;
+    const close = panel.querySelector('.snackbar-close') as HTMLElement;
+    close.focus();
+    close.click();
+    expect(selected()).toEqual(['2']);
+    expect(document.activeElement).toBe(tabs()[1]);
+  });
+
+  it('clicking a tab shows its message', () => {
+    service.error('one');
+    service.show('two', 'Dismiss');
+    tabs()[0].click();
+    expect(selected()).toEqual(['1']);
+    expect(shown()).toEqual(['one']);
+  });
+
+  it('has no cap on the number of tabs', () => {
+    for (let i = 1; i <= 30; i++) {
+      service.error(`failure ${i}`);
+    }
+    expect(tabs()).toHaveLength(30);
+    expect(selected()).toEqual(['30']);
+  });
+
+  // The strip scrolls sideways instead of widening the box past the page.
+  it('the tab strip scrolls sideways when the tabs overflow', () => {
+    service.error('one');
+    service.error('two');
+    expect(strip().classList).toContain('overflow-x-auto');
+  });
+
+  it('an identical message joins its open tab with a count instead of adding one', () => {
+    const announce = vi.spyOn(TestBed.inject(LiveAnnouncer), 'announce').mockResolvedValue();
+    const first = service.error('broker failed');
+    service.error('other failure');
+    const again = service.error('broker failed');
+    expect(again).toBe(first);
+    expect(numbers()).toEqual(['1', '2']);
+    expect(selected()).toEqual(['1']);
+    expect(tabs()[0].querySelector('.snackbar-count')!.textContent).toBe('×2');
+    expect(tabs()[0].getAttribute('aria-label')).toContain('shown 2 times');
+    expect(announce).toHaveBeenLastCalledWith('broker failed', 'assertive');
+    expect(announce).toHaveBeenCalledTimes(3);
+  });
+
+  it('a repeated lone message shows its count on a single tab', () => {
+    service.error('broker failed');
+    service.error('broker failed');
+    expect(strip().hidden).toBe(false);
+    expect(numbers()).toEqual(['1']);
+    expect(tabs()[0].querySelector('.snackbar-count')!.textContent).toBe('×2');
+  });
+
+  it('the same text of a different kind gets its own tab', () => {
+    service.show('Request failed');
+    service.error('Request failed');
+    expect(numbers()).toEqual(['1', '2']);
+  });
+
+  it('an identical message restarts the auto-dismiss timer of its tab', () => {
+    vi.useFakeTimers();
+    const onDismiss = vi.fn();
+    service.show('Saved').afterDismissed().subscribe(onDismiss);
+    vi.advanceTimersByTime(4000);
+    service.show('Saved');
+    vi.advanceTimersByTime(4000);
+    expect(onDismiss).not.toHaveBeenCalled();
+    vi.advanceTimersByTime(1000);
+    expect(onDismiss).toHaveBeenCalledTimes(1);
+  });
+
+  it('a message that closes itself removes only its own tab', () => {
+    vi.useFakeTimers();
+    const errorDismissed = vi.fn();
+    service.error('broker failed').afterDismissed().subscribe(errorDismissed);
+    service.show('Saved');
+    expect(numbers()).toEqual(['1', '2']);
+    vi.advanceTimersByTime(5000);
+    expect(numbers()).toEqual(['1']);
+    expect(shown()).toEqual(['broker failed']);
+    expect(errorDismissed).not.toHaveBeenCalled();
+  });
+
+  it('the strip is a tablist whose tabs control their message panels', () => {
+    service.error('one');
+    service.error('two');
+    service.error('three');
+    const list = strip();
+    expect(list.getAttribute('role')).toBe('tablist');
+    expect(tabs().map(t => t.getAttribute('aria-selected'))).toEqual(['false', 'false', 'true']);
+    expect(tabs().map(t => t.getAttribute('tabindex'))).toEqual(['-1', '-1', '0']);
+    tabs().forEach(t => {
+      const panel = document.getElementById(t.getAttribute('aria-controls')!)!;
+      expect(panel.getAttribute('role')).toBe('tabpanel');
+      expect(panel.getAttribute('aria-labelledby')).toBe(t.id);
+    });
+    expect(tabs().map(t => t.getAttribute('aria-label')))
+      .toEqual(['Message 1', 'Message 2', 'Message 3']);
+  });
+
+  it('arrow, Home and End keys move the selection and focus along the strip', () => {
+    service.error('one');
+    service.error('two');
+    service.error('three');
+    const key = (k: string) => {
+      const focused = tabs().find(t => t.getAttribute('aria-selected') === 'true')!;
+      focused.focus();
+      focused.dispatchEvent(new KeyboardEvent('keydown', { key: k, bubbles: true }));
+    };
+    key('ArrowLeft');
+    expect(selected()).toEqual(['2']);
+    expect(document.activeElement).toBe(tabs()[1]);
+    key('Home');
+    expect(selected()).toEqual(['1']);
+    key('ArrowLeft');
+    expect(selected()).toEqual(['3']);
+    key('ArrowRight');
+    expect(selected()).toEqual(['1']);
+    key('End');
+    expect(selected()).toEqual(['3']);
+    expect(shown()).toEqual(['three']);
+    expect(document.activeElement).toBe(tabs()[2]);
+  });
+
+  it('message text and tab numbers are text, never markup', () => {
+    service.error('<b>bold</b> failure');
+    service.error('second');
+    const box = document.querySelector('.snackbar-box')!;
+    expect(box.querySelector('b')).toBeNull();
+    expect(tabs()[0].getAttribute('aria-controls')).toBeTruthy();
+    tabs()[0].click();
+    expect(shown()).toEqual(['<b>bold</b> failure']);
+  });
+
+  // The stepper closes its error with the service-level dismiss(), and
+  // waits on afterDismissed(); that has to fire for every open message.
+  it('service dismiss() closes every open message through its ref', () => {
+    const dismissed: string[] = [];
+    service.error('one').afterDismissed().subscribe(() => dismissed.push('one'));
+    service.show('two', 'Dismiss').afterDismissed().subscribe(() => dismissed.push('two'));
+    const box = document.querySelector('.snackbar-box') as HTMLElement;
+    service.dismiss();
+    expect(dismissed).toEqual(['one', 'two']);
+    expect(box.hasAttribute('inert')).toBe(true);
   });
 
   it('a dismissed snackbar takes no clicks or focus while it fades out', () => {
     const ref = service.error('broker failed');
     const bar = document.querySelector('.snackbar-error') as HTMLElement;
+    const box = bar.closest('.snackbar-box') as HTMLElement;
     ref.dismiss();
     expect(bar.hasAttribute('inert')).toBe(true);
+    expect(box.hasAttribute('inert')).toBe(true);
+  });
+
+  it('a message after the box began fading out opens a new box', () => {
+    service.error('one').dismiss();
+    service.error('two');
+    expect(shown()).toEqual(['two']);
+    expect(numbers()).toEqual(['1']);
   });
 
   // The announcer's live region keeps the last message until something
   // replaces it, so a closed toast would still be found there.
-  it('clears the announced message when the snackbar on screen is dismissed', () => {
+  it('clears the announced message when its tab is closed', () => {
     const announcer = TestBed.inject(LiveAnnouncer);
     vi.spyOn(announcer, 'announce').mockResolvedValue();
     const clear = vi.spyOn(announcer, 'clear');
@@ -71,9 +302,8 @@ describe('TailwindSnackBarService', () => {
     expect(clear).toHaveBeenCalledTimes(1);
   });
 
-  // The replaced toast's own timer or close can still fire later; that must
-  // not wipe the announcement of the toast now on screen.
-  it('a replaced snackbar dismissed again later leaves the live region alone', () => {
+  // Closing an older tab must not wipe the announcement of the newer one.
+  it('closing a tab that is not the announced one leaves the live region alone', () => {
     const announcer = TestBed.inject(LiveAnnouncer);
     vi.spyOn(announcer, 'announce').mockResolvedValue();
     const first = service.show('Saved', 'Dismiss');
@@ -81,6 +311,20 @@ describe('TailwindSnackBarService', () => {
     const clear = vi.spyOn(announcer, 'clear');
     first.dismiss();
     expect(clear).not.toHaveBeenCalled();
+  });
+
+  // A closed message's own timer or close can still fire later; that must
+  // not wipe the announcement of a message opened since.
+  it('a closed message dismissed again later leaves the live region alone', () => {
+    const announcer = TestBed.inject(LiveAnnouncer);
+    vi.spyOn(announcer, 'announce').mockResolvedValue();
+    const first = service.show('Saved', 'Dismiss');
+    first.dismiss();
+    service.error('broker failed');
+    const clear = vi.spyOn(announcer, 'clear');
+    first.dismiss();
+    expect(clear).not.toHaveBeenCalled();
+    expect(shown()).toEqual(['broker failed']);
   });
 
   it('showWithLink navigates to a route array when the action is clicked', () => {
@@ -95,15 +339,15 @@ describe('TailwindSnackBarService', () => {
     expect(router.navigateByUrl).toHaveBeenCalledWith('/cf/spaces/1');
   });
 
+  // Both stay open together again (as tabs), so one hide() call can be
+  // checked against both, as it was before the one-at-a-time change.
   it('hide dismisses snackbars opened via show but leaves error snackbars up', () => {
-    const errorDismissed = vi.fn();
-    service.error('broker failed').afterDismissed().subscribe(errorDismissed);
+    const dismissed: string[] = [];
+    service.show('registered').afterDismissed().subscribe(() => dismissed.push('shown'));
+    service.error('broker failed').afterDismissed().subscribe(() => dismissed.push('error'));
     service.hide();
-    expect(errorDismissed).not.toHaveBeenCalled();
-    const shownDismissed = vi.fn();
-    service.show('registered').afterDismissed().subscribe(shownDismissed);
-    service.hide();
-    expect(shownDismissed).toHaveBeenCalledTimes(1);
+    expect(dismissed).toEqual(['shown']);
+    expect(shown()).toEqual(['broker failed']);
   });
 
   // White on --color-danger measured 3.76:1 (light) / 2.77:1 (dark) and the
@@ -136,7 +380,6 @@ describe('TailwindSnackBarService', () => {
     ref.afterDismissed().subscribe(onDismiss);
     vi.advanceTimersByTime(10000);
     expect(onDismiss).not.toHaveBeenCalled();
-    vi.useRealTimers();
   });
 
   it('update() replaces the message text of an open snackbar in place', () => {
