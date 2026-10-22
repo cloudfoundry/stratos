@@ -158,8 +158,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnDestroy() {
     this.hiddenSubs.forEach(sub => sub.unsubscribe());
     this.unsubscribeNext();
+    // Only the stepper's own error; other open messages stay.
     if (this.snackBarRef) {
-      this.snackBar.dismiss();
+      this.snackBarRef.dismiss();
     }
   }
 
@@ -230,9 +231,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   goNext(): void {
-    // Close previous error snackbar if there was one
+    // Close the stepper's previous error, if there was one, through its
+    // ref; other messages open beside it as tabs are not the stepper's.
     if (this.snackBarRef) {
-      this.snackBar.dismiss();
+      this.snackBarRef.dismiss();
     }
     this.unsubscribeNext();
     if (this.currentIndex() < this.steps.length) {

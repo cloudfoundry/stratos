@@ -285,9 +285,9 @@ export class TailwindSnackBarService {
   }
 
   // Close every open message, each through its own ref so that its
-  // afterDismissed() fires. The stepper calls this to clear its error
-  // before the next try; before the tabs this closed every toast on the
-  // page too, so it still means all, not just the selected tab.
+  // afterDismissed() fires. It means all, not just the selected tab, as
+  // it did before the tabs. A caller clearing a message of its own closes
+  // it through that message's ref instead, as the stepper does.
   dismiss(): void {
     this.closeAll();
   }

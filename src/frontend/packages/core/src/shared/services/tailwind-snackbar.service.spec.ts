@@ -389,8 +389,8 @@ describe('TailwindSnackBarService', () => {
     expect(shown()).toEqual(['<b>bold</b> failure']);
   });
 
-  // The stepper closes its error with the service-level dismiss(), and
-  // waits on afterDismissed(); that has to fire for every open message.
+  // The service-level dismiss() closes everything, and afterDismissed()
+  // has to fire for every open message.
   it('service dismiss() closes every open message through its ref', () => {
     const dismissed: string[] = [];
     service.error('one').afterDismissed().subscribe(() => dismissed.push('one'));
