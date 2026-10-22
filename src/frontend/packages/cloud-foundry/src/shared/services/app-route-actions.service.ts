@@ -8,7 +8,7 @@ import { EntityDeleteController } from '../../services/deletes/entity-delete.con
 import type { DeleteOutcome } from '../../services/deletes/delete-event.types';
 import { runCfDelete } from '../../services/deletes/run-cf-delete';
 import { routeEntityType } from '../../cf-entity-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadError } from '@stratosui/store';
 
 /**
  * Stratos-shape mirror of CF V3's `capi.RouteCreateRequest`. Sent as the
@@ -202,8 +202,9 @@ export class AppRouteActionsService {
       await this.attachRoute(created.guid);
       return created;
     } catch (err) {
-      const orphanErr = new Error(
-        `Route created but attach failed. Orphan route in space: guid=${created.guid} url=${created.url}. Original error: ${extractHttpErrorMessage(err)}`,
+      const orphanErr = leadError(
+        `Route created but attach failed. Orphan route in space: guid=${created.guid} url=${created.url}. Original error`,
+        err,
       );
       (orphanErr as { orphanRoute?: StRoute }).orphanRoute = created;
       throw orphanErr;

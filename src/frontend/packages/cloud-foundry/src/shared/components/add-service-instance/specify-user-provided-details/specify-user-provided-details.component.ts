@@ -423,11 +423,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       withLatestFrom(this.csiState$),
       switchMap(([result, state]) => {
         if (!result.success) {
-          return observableOf({
-            success: false,
-            redirect: false,
-            message: 'Failed to create User Provided Service Instance. Reason: "' + (result.message ?? '') + '"',
-          });
+          const messagePieces = leadPieces(
+            'Failed to create User Provided Service Instance. Reason', result.error ?? result.message);
+          return observableOf({ success: false, redirect: false, message: piecesToText(messagePieces), messagePieces });
         }
         if (state.bindAppGuid && result.guid) {
           return this.createApplicationServiceBinding(result.guid, state);
@@ -474,10 +472,12 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
     ).pipe(
       switchMap(result => {
         if (!result.success) {
+          const messagePieces = leadPieces('Failed to update service instance', result.error ?? result.message);
           return observableOf<StepOnNextResult>({
             success: false,
             redirect: false,
-            message: `Failed to update service instance: ${result.message ?? ''}`,
+            message: piecesToText(messagePieces),
+            messagePieces,
           });
         }
         // The bound app's denormalized service-instance data (name, tags,

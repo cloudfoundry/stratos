@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
@@ -145,6 +147,7 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
       success: false,
       redirect: false,
       message: 'Failed to update service instance: broker rejected the update',
+      messagePieces: [{ text: 'Failed to update service instance: broker rejected the update', style: 'text' }],
     });
   });
 });
@@ -379,6 +382,53 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     expect(upsServiceStub.createUserProvidedService).toHaveBeenCalledWith(
       'cf-1', expect.any(String), expect.objectContaining({ name: 'my-ups', spaceGuid: 'space-1' }));
     expect(result).toEqual({ success: true, redirect: true });
+  });
+
+  // nginx's own 502 page, as a proxy in front of Stratos sends it, through
+  // the real service.
+  const nginx502 = (lead: string) => [
+    { text: `${lead}: `, style: 'text' },
+    { text: '502 Bad Gateway', style: 'heading' },
+    { text: '\nnginx/1.28.0', style: 'text' },
+  ];
+  function answerWithErrorPage(method: string) {
+    const page = readFileSync(join(import.meta.dirname, '../../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+    TestBed.inject(HttpTestingController).expectOne(r => r.method === method)
+      .flush(page, { status: 502, statusText: 'Bad Gateway' });
+  }
+
+  it('keeps an error page\'s heading when CF does not create the instance', async () => {
+    const { component, upsServiceStub } = await setup();
+    const real = TestBed.runInInjectionContext(() => new CloudFoundryUserProvidedServicesService());
+    upsServiceStub.createUserProvidedService.mockImplementation(
+      (...args: Parameters<typeof real.createUserProvidedService>) => real.createUserProvidedService(...args));
+    component.createEditServiceInstance.controls.name.setValue('my-ups');
+
+    const pending = firstValueFrom(component.onNext());
+    answerWithErrorPage('POST');
+    const result = await pending;
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('Failed to create User Provided Service Instance. Reason: 502 Bad Gateway\nnginx/1.28.0');
+    expect(result.messagePieces).toEqual(nginx502('Failed to create User Provided Service Instance. Reason'));
+  });
+
+  it('keeps an error page\'s heading when CF does not update the instance', async () => {
+    const { component } = await setup();
+    const real = TestBed.runInInjectionContext(() => new CloudFoundryUserProvidedServicesService());
+    Object.assign(TestBed.inject(CloudFoundryUserProvidedServicesService), {
+      updateUserProvidedService: real.updateUserProvidedService.bind(real),
+    });
+    component.isUpdate = true;
+    component.serviceInstanceId = 'ups-1';
+
+    const pending = firstValueFrom(component.onNext());
+    answerWithErrorPage('PATCH');
+    const result = await pending;
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('Failed to update service instance: 502 Bad Gateway\nnginx/1.28.0');
+    expect(result.messagePieces).toEqual(nginx502('Failed to update service instance'));
   });
 
   // CF takes syslog, syslog-tls and https drains; the route service URL
