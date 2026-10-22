@@ -768,19 +768,10 @@ func (cf *CloudFoundrySpecification) createNativeApp(c *echo.Context) error {
 // statusFromCapiError maps a capi sentinel error to an HTTP status code.
 // CAPI's MapHTTPError always unwraps to one of these sentinels.
 func statusFromCapiError(err error) int {
+	if status := exactCapiStatus(err); status != 0 {
+		return status
+	}
 	switch {
-	case errors.Is(err, capi.ErrNotFound):
-		return http.StatusNotFound
-	case errors.Is(err, capi.ErrUnauthorized):
-		return http.StatusUnauthorized
-	case errors.Is(err, capi.ErrForbidden):
-		return http.StatusForbidden
-	case errors.Is(err, capi.ErrConflict):
-		return http.StatusConflict
-	case errors.Is(err, capi.ErrUnprocessable):
-		return http.StatusUnprocessableEntity
-	case errors.Is(err, capi.ErrRateLimited):
-		return http.StatusTooManyRequests
 	case errors.Is(err, capi.ErrServerError):
 		return http.StatusBadGateway
 	case errors.Is(err, capi.ErrBadRequest):
