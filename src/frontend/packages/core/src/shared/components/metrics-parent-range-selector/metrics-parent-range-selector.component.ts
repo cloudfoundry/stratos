@@ -44,7 +44,8 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
       return;
     }
     const baseRequest = this.metricsCharts.first.metricsConfig.request;
-    this.rangeSelectorManager.init(baseRequest);
+    // Subscribe before init(): init() commits the first windowed request at
+    // once, on a plain Subject, and the charts must not miss it.
     this.requestSub = this.rangeSelectorManager.request$.subscribe(next => {
       if (next) {
         this.metricsCharts.forEach(chart => {
@@ -61,6 +62,7 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
         });
       }
     });
+    this.rangeSelectorManager.init(baseRequest);
   }
 
   ngOnDestroy() {

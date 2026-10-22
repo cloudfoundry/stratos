@@ -1,12 +1,13 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { ApplicationRef, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationRef, provideZonelessChangeDetection, QueryList } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { MetricQueryConfig, MetricQueryType } from '@stratosui/store';
+import { MetricQueryConfig, MetricQueryType, MetricsRequest } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@test-framework';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { MetricsRangeSelectorService } from '../../services/metrics-range-selector.service';
+import { MetricsChartComponent } from '../metrics-chart/metrics-chart.component';
 import { MetricsParentRangeSelectorComponent } from './metrics-parent-range-selector.component';
 
 describe('MetricsParentRangeSelectorComponent', () => {
@@ -66,5 +67,36 @@ describe('MetricsParentRangeSelectorComponent', () => {
 
     expect(tick).not.toHaveBeenCalled();
     expect(requests).not.toHaveBeenCalled();
+  });
+
+  it('gives every chart the windowed request as soon as the charts are known', () => {
+    vi.useFakeTimers();
+    const base: MetricsRequest = {
+      endpointGuid: 'e1',
+      url: '/pp/v1/metrics/cf/app/a1',
+      query: new MetricQueryConfig('firehose_container_metric_cpu_percentage'),
+      queryType: MetricQueryType.RANGE_QUERY,
+      windowValue: '1:hour',
+    };
+    const charts = [0, 1].map(() => {
+      const chart = { metricsConfig: { request: base }, currentRequest: base, applyRequest: vi.fn() };
+      chart.applyRequest.mockImplementation((req: MetricsRequest) => chart.currentRequest = req);
+      return chart;
+    });
+    const list = new QueryList<MetricsChartComponent>();
+    list.reset(charts as unknown as MetricsChartComponent[]);
+    (component as unknown as { metricsCharts: QueryList<MetricsChartComponent> }).metricsCharts = list;
+
+    // No timer has run: the first request has to come from choosing the
+    // window, not from the first 10 s poll.
+    component.ngAfterContentInit();
+
+    for (const chart of charts) {
+      expect(chart.applyRequest).toHaveBeenCalledTimes(1);
+      const params = chart.currentRequest.query.params;
+      expect(params?.start).toBeTypeOf('number');
+      expect(params?.end).toBeTypeOf('number');
+      expect(chart.currentRequest.windowValue).toBe('1:hour');
+    }
   });
 });
