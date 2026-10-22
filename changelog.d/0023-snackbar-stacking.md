@@ -1,11 +1,15 @@
 [BugFixes]
-- Pop-up messages at the bottom of the page no longer pile up in the
-  same spot. A second message covered the first, which peeked out
-  behind it and could catch a click meant for the new message's close
-  button. Open messages now share one box: when there is more than
-  one, numbered tabs along its top switch between them, and a new
-  message is shown as it arrives. Closing a message removes only its
-  tab, and the other tabs keep their numbers. A message that repeats
-  one already open adds a count to its tab instead of a new tab. The
-  tabs work with the arrow keys and screen readers, and a closed
-  message is also cleared from what screen readers can find.
+- Several pop-up messages can be open at the bottom of the page at
+  once, as intended, but each one sat exactly on top of the one
+  before: the older message peeked out behind the newer one and could
+  catch a click meant for its close button. Stacked messages are now
+  usable as tabs. They share one box: when there is more than one,
+  numbered tabs along its top switch between them, and a new message
+  is shown as it arrives. A message's own close button closes just
+  that message, and the other tabs keep their numbers; a "Close all"
+  button beside the tabs closes them all. The same message arriving
+  again straight after itself is counted instead of getting a new
+  tab: its tab and the start of its text show how many times it has
+  been shown. The tabs work with the arrow keys and screen readers,
+  and a closed message is also cleared from what screen readers can
+  find.
