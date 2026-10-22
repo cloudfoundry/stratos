@@ -277,10 +277,12 @@ export class TailwindSnackBarService {
   }
 
   // Screen readers miss a toast that arrives with its text; the announcer's
-  // live region is already on the page. Errors interrupt.
+  // live region is already on the page. Errors interrupt. A repeat says
+  // how many times the message has been shown.
   private announce(entry: SnackbarEntry, message: string): void {
     this.announced = entry;
-    void this.announcer.announce(message, entry.error ? 'assertive' : 'polite');
+    const text = entry.count > 1 ? `${message} (Shown ${entry.count} times)` : message;
+    void this.announcer.announce(text, entry.error ? 'assertive' : 'polite');
   }
 
   private startTimer(entry: SnackbarEntry): void {
@@ -377,6 +379,7 @@ export class TailwindSnackBarService {
         entry.panel.removeAttribute('role');
         entry.panel.removeAttribute('aria-labelledby');
       }
+      this.renderSetCount(entry);
       if (entry.count > 1) {
         let badge = entry.tab.querySelector('.snackbar-count');
         if (!badge) {
@@ -386,6 +389,23 @@ export class TailwindSnackBarService {
         }
         badge.textContent = `×${entry.count}`;
       }
+    }
+  }
+
+  // A set (a message shown more than once) shows "(N)" at the start of
+  // its first line, so it takes no extra line. The visible "(N)" is
+  // hidden from screen readers, which read "Shown N times" beside it.
+  private renderSetCount(entry: SnackbarEntry): void {
+    const visible = entry.panel.querySelector<HTMLElement>('.snackbar-set-count')!;
+    const spoken = entry.panel.querySelector<HTMLElement>('.snackbar-set-count-text')!;
+    const isSet = entry.count > 1;
+    visible.hidden = !isSet;
+    spoken.hidden = !isSet;
+    if (isSet) {
+      const meaning = `Shown ${entry.count} times`;
+      visible.textContent = `(${entry.count})`;
+      visible.title = meaning;
+      spoken.textContent = meaning;
     }
   }
 
@@ -538,10 +558,26 @@ export class TailwindSnackBarService {
     // Create message element. whitespace-pre-line honours explicit "\n" in the
     // message (so callers can put a technical detail / error code on its own
     // line) while still wrapping normally — textContent keeps it XSS-safe.
+    //
+    // The line also holds a set's count, ahead of the message; it stays
+    // hidden until the message repeats. The message keeps a span of its
+    // own, so update() and the repeat check see only its text.
+    const line = document.createElement('span');
+    line.className = 'snackbar-text flex-1 whitespace-pre-line';
+    const setCount = document.createElement('span');
+    setCount.className = 'snackbar-set-count';
+    setCount.setAttribute('aria-hidden', 'true');
+    setCount.hidden = true;
+    const setCountText = document.createElement('span');
+    setCountText.className = 'snackbar-set-count-text sr-only';
+    setCountText.hidden = true;
     const messageElement = document.createElement('span');
     messageElement.textContent = message;
-    messageElement.className = 'snackbar-message flex-1 whitespace-pre-line';
-    snackbar.appendChild(messageElement);
+    messageElement.className = 'snackbar-message';
+    // The space parts "(N)" from the message; pre-line drops it at the
+    // start of the line when the count is hidden.
+    line.append(setCount, setCountText, ' ', messageElement);
+    snackbar.appendChild(line);
 
     // Create action button if provided
     if (action) {

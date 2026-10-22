@@ -33,7 +33,7 @@ describe('TailwindSnackBarService', () => {
     .map(t => t.querySelector('.snackbar-tab-number')!.textContent);
   const strip = () => document.querySelector<HTMLElement>('.snackbar-box:not([inert]) [role="tablist"]')!;
   const shown = () => Array.from(document.querySelectorAll<HTMLElement>('.snackbar-box:not([inert]) .snackbar-message'))
-    .filter(el => !el.parentElement!.hidden)
+    .filter(el => !el.closest<HTMLElement>('.snackbar-panel')!.hidden)
     .map(el => el.textContent);
   const closeShown = () => {
     const panel = Array.from(document.querySelectorAll<HTMLElement>('.snackbar-box:not([inert]) .snackbar-panel'))
@@ -228,7 +228,7 @@ describe('TailwindSnackBarService', () => {
     expect(selected()).toEqual(['2']);
     expect(tabs()[1].querySelector('.snackbar-count')!.textContent).toBe('×2');
     expect(tabs()[1].getAttribute('aria-label')).toContain('shown 2 times');
-    expect(announce).toHaveBeenLastCalledWith('broker failed', 'assertive');
+    expect(announce).toHaveBeenLastCalledWith('broker failed (Shown 2 times)', 'assertive');
     expect(announce).toHaveBeenCalledTimes(3);
   });
 
@@ -253,6 +253,51 @@ describe('TailwindSnackBarService', () => {
     service.error('two');
     expect(numbers()).toEqual(['1', '2', '4']);
     expect(document.querySelector('.snackbar-count')).toBeNull();
+  });
+
+  const setCount = () => document.querySelector<HTMLElement>('.snackbar-panel:not([hidden]) .snackbar-set-count')!;
+  const setCountText = () =>
+    document.querySelector<HTMLElement>('.snackbar-panel:not([hidden]) .snackbar-set-count-text')!;
+
+  // The count goes on the message's first line, so a set takes no more
+  // room than one message. The visible "(N)" is hidden from screen
+  // readers, which read "Shown N times" instead; the tooltip is for the
+  // mouse.
+  it('a set shows "(N)" at the start of its message, with a tooltip and screen reader text', () => {
+    service.error('broker failed\ncode 502');
+    service.error('broker failed\ncode 502');
+    service.error('broker failed\ncode 502');
+    expect(setCount().hidden).toBe(false);
+    expect(setCount().textContent).toBe('(3)');
+    expect(setCount().title).toBe('Shown 3 times');
+    expect(setCount().getAttribute('aria-hidden')).toBe('true');
+    expect(setCountText().hidden).toBe(false);
+    expect(setCountText().textContent).toBe('Shown 3 times');
+    expect(setCountText().classList).toContain('sr-only');
+    // Same line as the message, before it; the message text is unchanged.
+    const message = document.querySelector<HTMLElement>('.snackbar-message')!;
+    const line = message.parentElement!;
+    expect(setCount().parentElement).toBe(line);
+    expect(setCountText().parentElement).toBe(line);
+    const order = Array.from(line.children);
+    expect(order.indexOf(setCount())).toBeLessThan(order.indexOf(message));
+    expect(order.indexOf(setCountText())).toBeLessThan(order.indexOf(message));
+    expect(message.textContent).toBe('broker failed\ncode 502');
+    expect(shown()).toEqual(['broker failed\ncode 502']);
+  });
+
+  it('a message shown once has no count in its text', () => {
+    service.error('broker failed');
+    expect(setCount().hidden).toBe(true);
+    expect(setCountText().hidden).toBe(true);
+  });
+
+  it('update() on a set keeps its count', () => {
+    service.error('Deleting… 0 of 5');
+    const ref = service.error('Deleting… 0 of 5');
+    ref.update('Deleting… 3 of 5');
+    expect(shown()).toEqual(['Deleting… 3 of 5']);
+    expect(setCount().textContent).toBe('(2)');
   });
 
   it('a repeated lone message shows its count on a single tab', () => {
