@@ -118,6 +118,39 @@ scripts/secrets.sh decrypt
 scripts/secrets.sh run-e2e
 ```
 
+#### Passphrase from the macOS Keychain
+
+On macOS the openssl backend can read the passphrase from the Keychain
+instead of prompting for it. Store it once as a generic password with
+service `stratos-e2e-secrets` and account `passphrase`; `security`
+prompts for the value, so it stays out of your shell history:
+
+```bash
+security add-generic-password -s stratos-e2e-secrets -a passphrase -w
+```
+
+Then name the service with `--keychain`, or set it once with
+`STRATOS_SECRETS_KEYCHAIN`:
+
+```bash
+scripts/secrets.sh run-e2e --keychain stratos-e2e-secrets
+
+export STRATOS_SECRETS_KEYCHAIN=stratos-e2e-secrets
+scripts/secrets.sh decrypt --env local
+```
+
+The passphrase goes to openssl on a file descriptor, never in a
+command's arguments or the environment. `encrypt`, `decrypt`, `run-e2e`
+and `check` all use it. Every `--env` file uses the same item; to give
+an environment its own passphrase, store it under another service and
+pass that one (`--env staging --keychain stratos-e2e-secrets-staging`).
+
+Files are the same whichever way the passphrase is entered, so a file
+encrypted at the prompt decrypts from the Keychain and the reverse.
+With neither the flag nor the variable set, openssl prompts as before.
+If the item is missing, or there is no `security` command (Linux), the
+script stops with an error rather than falling back to the prompt.
+
 ### 3. SOPS + age (recommended for teams)
 
 Uses public-key encryption. No shared passphrase needed — each team
@@ -199,6 +232,7 @@ E2E_ENV           Environment name for file selection   (none)
 E2E_PROFILE       Profile name within secrets file      (none)
 E2E_BASE_URL      Override Stratos URL                  https://localhost:5440
 STRATOS_SECRETS_BACKEND   Default encryption backend            openssl
+STRATOS_SECRETS_KEYCHAIN  Keychain service for the passphrase   (none: openssl prompts)
 SOPS_AGE_KEY_FILE         Path to age private key               ~/.config/sops/age/keys.txt
 ```
 
@@ -410,6 +444,8 @@ Problem                    Cause                              Fix
 Secrets file not found     No secrets.yaml, no env var        Run secrets.sh decrypt or copy template
 Profile 'X' not found      E2E_PROFILE not in file    Check profiles: section in secrets file
 bad decrypt (openssl)      Wrong passphrase                   Re-enter passphrase
+no Keychain item           No item under that service         security add-generic-password -s SVC -a passphrase -w
+'security' not found       Keychain source used off macOS     Unset STRATOS_SECRETS_KEYCHAIN / drop --keychain
 no identity matched (sops) Age key not in .sops.yaml          Add your public key to .sops.yaml
 age: no identity           Missing age key file               age-keygen -o ~/.config/sops/age/keys.txt
 Tests fail with auth       Wrong credentials                  Verify creds match target environment

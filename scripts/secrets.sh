@@ -6,10 +6,11 @@
 # Supports per-environment files and both OpenSSL and SOPS+age backends.
 #
 # Usage:
-#   secrets.sh encrypt [--env NAME] [--backend sops|openssl]
-#   secrets.sh decrypt [--env NAME] [--backend sops|openssl]
-#   secrets.sh run-e2e [--env NAME] [--backend sops|openssl] [-- ARGS...]
-#   secrets.sh check
+#   secrets.sh encrypt [--env NAME] [--backend sops|openssl] [--keychain SERVICE]
+#   secrets.sh decrypt [--env NAME] [--backend sops|openssl] [--keychain SERVICE]
+#   secrets.sh run-e2e [--env NAME] [--backend sops|openssl] [--keychain SERVICE]
+#                      [-- ARGS...]
+#   secrets.sh check [--backend sops|openssl] [--keychain SERVICE]
 #
 # Environment files:
 #   Default:    secrets.yaml / secrets.yaml.enc
@@ -19,9 +20,22 @@
 #   openssl  — AES-256-CBC with PBKDF2 (default, no extra tools needed)
 #   sops     — SOPS + age (requires sops and age installed)
 #
+# Keychain passphrase (openssl backend, macOS):
+#   By default openssl prompts for the passphrase. With --keychain SERVICE
+#   (or STRATOS_SECRETS_KEYCHAIN=SERVICE) it is read instead from the
+#   generic password item with that service and account "passphrase",
+#   and handed to openssl on a file descriptor, never in argv or the
+#   environment. The convention is service "stratos-e2e-secrets"; every
+#   --env file uses that item unless a per-env service is named.
+#   Add the item once (security prompts for the value):
+#     security add-generic-password -s stratos-e2e-secrets -a passphrase -w
+#   A missing item, or no `security` command (Linux), is an error; it
+#   never falls back to the prompt. Files are the same either way.
+#
 # Environment variables:
 #   E2E_ENV       — Default --env value
 #   STRATOS_SECRETS_BACKEND — Default --backend value (openssl|sops)
+#   STRATOS_SECRETS_KEYCHAIN — Default --keychain value (Keychain service)
 #   SOPS_AGE_KEY_FILE     — Path to age key file (for sops backend)
 #
 # Portability:
@@ -37,6 +51,8 @@ ROOT_DIR="$(git rev-parse --show-toplevel 2>/dev/null || pwd)"
 # ── Defaults ──────────────────────────────────────────────────
 ENV_NAME="${E2E_ENV:-}"
 BACKEND="${STRATOS_SECRETS_BACKEND:-openssl}"
+KEYCHAIN_SERVICE="${STRATOS_SECRETS_KEYCHAIN:-}"
+KEYCHAIN_ACCOUNT="passphrase"
 COMMAND=""
 E2E_ARGS=()
 
@@ -55,6 +71,9 @@ Options:
   --env NAME       Environment name (e.g., local, staging, prod)
                    Uses secrets.<env>.yaml / secrets.<env>.yaml.enc
   --backend TYPE   Encryption backend: openssl (default) or sops
+  --keychain SVC   openssl backend: read the passphrase from the macOS
+                   Keychain item with service SVC, account "passphrase",
+                   instead of prompting (e.g. stratos-e2e-secrets)
   --help           Show this help
 
 Examples:
@@ -62,6 +81,7 @@ Examples:
   secrets.sh decrypt --env local             # Decrypt local env secrets
   secrets.sh run-e2e --env staging -- --headed  # Run tests against staging
   secrets.sh check --backend sops            # Check sops prerequisites
+  secrets.sh run-e2e --keychain stratos-e2e-secrets  # No passphrase prompt
 USAGE
   exit "${1:-0}"
 }
@@ -76,6 +96,8 @@ parse_args() {
         ENV_NAME="${2:?--env requires a value}"; shift 2 ;;
       --backend)
         BACKEND="${2:?--backend requires a value}"; shift 2 ;;
+      --keychain)
+        KEYCHAIN_SERVICE="${2:?--keychain requires a value}"; shift 2 ;;
       --help|-h)
         usage 0 ;;
       --)
@@ -108,20 +130,50 @@ encrypted_path() {
   fi
 }
 
+# ── Keychain passphrase ───────────────────────────────────────
+# Fails unless the Keychain item exists. The lookup leaves out -w, so it
+# only confirms the item; the passphrase is read later, straight into
+# openssl's file descriptor.
+keychain_require() {
+  if ! command -v security &>/dev/null; then
+    echo "Error: a Keychain service is set, but 'security' command not found (macOS only)" >&2
+    exit 1
+  fi
+  if ! security find-generic-password -s "${KEYCHAIN_SERVICE}" -a "${KEYCHAIN_ACCOUNT}" &>/dev/null; then
+    echo "Error: no Keychain item for service '${KEYCHAIN_SERVICE}', account '${KEYCHAIN_ACCOUNT}'" >&2
+    echo "  Add it with: security add-generic-password -s ${KEYCHAIN_SERVICE} -a ${KEYCHAIN_ACCOUNT} -w" >&2
+    exit 1
+  fi
+}
+
 # ── OpenSSL backend ───────────────────────────────────────────
+# Runs openssl enc with the passphrase from the Keychain on fd 3 when a
+# service is set; otherwise openssl prompts for it as before. openssl
+# takes the first line of fd 3 without its newline, the same passphrase
+# the prompt would have read, so files stay interchangeable.
+openssl_enc() {
+  if [[ -z "${KEYCHAIN_SERVICE}" ]]; then
+    openssl enc "$@"
+    return
+  fi
+  keychain_require
+  openssl enc "$@" -pass fd:3 \
+    3< <(security find-generic-password -s "${KEYCHAIN_SERVICE}" -a "${KEYCHAIN_ACCOUNT}" -w)
+}
+
 openssl_encrypt() {
   local plain="$1" encrypted="$2"
-  openssl enc -aes-256-cbc -salt -pbkdf2 -in "${plain}" -out "${encrypted}"
+  openssl_enc -aes-256-cbc -salt -pbkdf2 -in "${plain}" -out "${encrypted}"
 }
 
 openssl_decrypt() {
   local encrypted="$1" plain="$2"
-  openssl enc -aes-256-cbc -d -pbkdf2 -in "${encrypted}" -out "${plain}"
+  openssl_enc -aes-256-cbc -d -pbkdf2 -in "${encrypted}" -out "${plain}"
 }
 
 openssl_decrypt_stdout() {
   local encrypted="$1"
-  openssl enc -aes-256-cbc -d -pbkdf2 -in "${encrypted}"
+  openssl_enc -aes-256-cbc -d -pbkdf2 -in "${encrypted}"
 }
 
 openssl_check() {
@@ -130,6 +182,10 @@ openssl_check() {
     return 1
   fi
   echo "OK: openssl $(openssl version 2>&1 | head -1)"
+  if [[ -n "${KEYCHAIN_SERVICE}" ]]; then
+    keychain_require
+    echo "OK: Keychain item '${KEYCHAIN_SERVICE}' (account '${KEYCHAIN_ACCOUNT}') found"
+  fi
 }
 
 # ── SOPS+age backend ─────────────────────────────────────────
