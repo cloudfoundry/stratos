@@ -555,4 +555,28 @@ describe('TailwindSnackBarService', () => {
       '<span class="italic">Working</span>',
     ]);
   });
+
+  // Each call builds its own array, so a repeat is found by its plain
+  // text, not by the array it came in.
+  it('identical message pieces from separate calls join one set, the count before the first piece', () => {
+    const pieces = () => [
+      { text: 'Delete failed: ', style: 'text' as const },
+      { text: '502 Bad Gateway', style: 'heading' as const },
+    ];
+    const first = service.error(pieces());
+    const again = service.error(pieces());
+    expect(again).toBe(first);
+    expect(numbers()).toEqual(['1']);
+    expect(setCount().textContent).toBe('(2)');
+    const message = document.querySelector<HTMLElement>('.snackbar-message')!;
+    const line = Array.from(message.parentElement!.childNodes);
+    expect(line.indexOf(setCount())).toBeLessThan(line.indexOf(message));
+    expect(message.firstElementChild!.textContent).toBe('Delete failed: ');
+  });
+
+  it('pieces and a string with the same plain text are the same message', () => {
+    const first = service.error([{ text: 'Request ', style: 'text' }, { text: 'failed', style: 'strong' }]);
+    expect(service.error('Request failed')).toBe(first);
+    expect(numbers()).toEqual(['1']);
+  });
 });
