@@ -414,4 +414,13 @@ describe('ServiceInstanceSummaryComponent — last operation (#6002)', () => {
       css.remove();
     }
   });
+
+  // A reason makes the value several lines tall; the row-top style lines
+  // the key up with the value's first line instead of its middle.
+  it('lines the key up with the first line of a multi-line reason', async () => {
+    const page = '<html><body><center><h1>502 Bad Gateway</h1></center><hr><center>nginx</center></body></html>';
+    const el = await renderElement(withOp('create', 'failed', page));
+    const reason = el.querySelector('app-error-text')!;
+    expect(reason.closest('.meta-card-item-row-top')).not.toBeNull();
+  });
 });
