@@ -2,8 +2,8 @@ import { inject, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { defer, Observable, of } from 'rxjs';
-import { AuthDataService, AuthState, EndpointsDataService } from '@stratosui/store';
+import { defer, firstValueFrom, Observable, of } from 'rxjs';
+import { AuthDataService, AuthState, EndpointModel, EndpointsDataService } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
 import { SessionService } from '../shared/services/session.service';
@@ -33,6 +33,20 @@ describe('EndpointsService', () => {
   it('should be created', inject([EndpointsService], (service: EndpointsService) => {
     expect(service).toBeTruthy();
   }));
+
+  it('reports metrics for an endpoint a metrics endpoint covers', async () => {
+    const service = TestBed.inject(EndpointsService);
+    const data = TestBed.inject(EndpointsDataService);
+    vi.spyOn(data, 'whenReady').mockResolvedValue(undefined);
+    vi.spyOn(data, 'endpoints').mockReturnValue(new Map([
+      ['cf-covered', { guid: 'cf-covered', metadata: { metrics: 'metrics-guid' } } as EndpointModel],
+      ['cf-plain', { guid: 'cf-plain', metadata: {} } as EndpointModel],
+    ]));
+
+    expect(await firstValueFrom(service.hasMetrics('cf-covered'))).toBe(true);
+    expect(await firstValueFrom(service.hasMetrics('cf-plain'))).toBe(false);
+    expect(await firstValueFrom(service.hasMetrics('cf-unknown'))).toBe(false);
+  });
 });
 
 describe('endpointsGuard runs', () => {

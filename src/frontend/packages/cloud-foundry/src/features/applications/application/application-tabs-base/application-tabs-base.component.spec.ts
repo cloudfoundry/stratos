@@ -85,7 +85,6 @@ describe('ApplicationTabsBaseComponent', () => {
       sso_allowed: false,
       sub_type: '',
       metadata: {},
-      metricsAvailable: false,
       creator: { name: 'test-user', admin: false, system: false }
     };
 

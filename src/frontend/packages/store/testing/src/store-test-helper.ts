@@ -49,7 +49,6 @@ export const testSCFEndpoint: EndpointModel = {
   cnsi_type: 'cf',
   system_shared_token: false,
   sso_allowed: false,
-  metricsAvailable: false,
   creator: {
     name: 'admin',
     admin: true,
@@ -252,8 +251,7 @@ function getDefaultInitialTestStoreState(): AppState<BaseEntityValues> {
             system: false
           },
           connectionStatus: 'connected',
-          system_shared_token: false,
-          metricsAvailable: false
+          system_shared_token: false
         },
       },
       metrics: {},
