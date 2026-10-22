@@ -214,18 +214,45 @@ describe('TailwindSnackBarService', () => {
     expect(strip().classList).toContain('overflow-x-auto');
   });
 
-  it('an identical message joins its open tab with a count instead of adding one', () => {
+  // A run of the same message, as when one failing call raises the same
+  // error back to back, is one set: a repeat of the newest message joins
+  // its tab.
+  it('a repeat of the newest message joins its tab with a count instead of adding one', () => {
     const announce = vi.spyOn(TestBed.inject(LiveAnnouncer), 'announce').mockResolvedValue();
-    const first = service.error('broker failed');
     service.error('other failure');
+    const first = service.error('broker failed');
+    tabs()[0].click();
     const again = service.error('broker failed');
     expect(again).toBe(first);
     expect(numbers()).toEqual(['1', '2']);
-    expect(selected()).toEqual(['1']);
-    expect(tabs()[0].querySelector('.snackbar-count')!.textContent).toBe('×2');
-    expect(tabs()[0].getAttribute('aria-label')).toContain('shown 2 times');
+    expect(selected()).toEqual(['2']);
+    expect(tabs()[1].querySelector('.snackbar-count')!.textContent).toBe('×2');
+    expect(tabs()[1].getAttribute('aria-label')).toContain('shown 2 times');
     expect(announce).toHaveBeenLastCalledWith('broker failed', 'assertive');
     expect(announce).toHaveBeenCalledTimes(3);
+  });
+
+  // Only a repeat of the newest message is a set; the same text after
+  // something else is a new event and gets its own tab.
+  it('a repeat of an older open message gets a new tab', () => {
+    const first = service.error('broker failed');
+    service.error('other failure');
+    const again = service.error('broker failed');
+    expect(again).not.toBe(first);
+    expect(numbers()).toEqual(['1', '2', '3']);
+    expect(selected()).toEqual(['3']);
+    expect(document.querySelector('.snackbar-count')).toBeNull();
+  });
+
+  // The newest is the tab with the last number given out; once it is
+  // closed, an older open tab with the same text is still not it.
+  it('a repeat after the newest tab closed gets a new tab, even if an older one matches', () => {
+    service.error('one');
+    service.error('two');
+    service.error('three').dismiss();
+    service.error('two');
+    expect(numbers()).toEqual(['1', '2', '4']);
+    expect(document.querySelector('.snackbar-count')).toBeNull();
   });
 
   it('a repeated lone message shows its count on a single tab', () => {

@@ -169,16 +169,18 @@ export class TailwindSnackBarService {
     const panelClasses = config?.panelClass ? ([] as string[]).concat(config.panelClass) : [];
     const key = `${panelClasses.join(' ')}\n${action ?? ''}`;
 
-    // The same message again (same text, kind and action) while its tab is
-    // open joins that tab instead of adding one: its count goes up, it is
-    // selected and announced again, and its timer, if any, starts over.
-    const same = this.entries.find(e => e.key === key && this.messageOf(e) === message);
-    if (same) {
-      same.count++;
-      this.startTimer(same);
-      this.select(same);
-      this.announce(same, message);
-      return same.ref;
+    // A repeat of the newest message (the tab with the last number given
+    // out), while that tab is open, joins it instead of adding one: its
+    // count goes up, it is selected and announced again, and its timer, if
+    // any, starts over. The same text after another message, or after the
+    // newest tab closed, is a new event and gets its own tab.
+    const newest = this.entries.find(e => e.number === this.nextNumber - 1);
+    if (newest && this.isSameMessage(newest, key, message)) {
+      newest.count++;
+      this.startTimer(newest);
+      this.select(newest);
+      this.announce(newest, message);
+      return newest.ref;
     }
 
     const id = nextId++;
@@ -263,6 +265,11 @@ export class TailwindSnackBarService {
   // The strip's "Close all" button and the service-level dismiss().
   private closeAll(): void {
     [...this.entries].forEach(entry => entry.ref.dismiss());
+  }
+
+  // Same text, kind and action.
+  private isSameMessage(entry: SnackbarEntry, key: string, message: string): boolean {
+    return entry.key === key && this.messageOf(entry) === message;
   }
 
   private messageOf(entry: SnackbarEntry): string | null | undefined {
