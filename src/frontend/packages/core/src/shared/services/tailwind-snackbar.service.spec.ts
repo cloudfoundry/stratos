@@ -191,6 +191,87 @@ describe('TailwindSnackBarService', () => {
     expect(shown()).toEqual(['one']);
   });
 
+  // Closing the box takes the focused control with it. Focus goes back to
+  // where it was just before it entered the box, not to the page.
+  describe('focus when the box closes', () => {
+    let outside: HTMLButtonElement;
+    let elsewhere: HTMLButtonElement;
+    beforeEach(() => {
+      outside = document.createElement('button');
+      elsewhere = document.createElement('button');
+      document.body.append(outside, elsewhere);
+    });
+    afterEach(() => {
+      outside.remove();
+      elsewhere.remove();
+    });
+    const closeButton = () => document.querySelector<HTMLElement>(
+      '.snackbar-box:not([inert]) .snackbar-panel:not([hidden]) .snackbar-close')!;
+
+    it('"Close all" returns focus to where it was before it entered the box', () => {
+      outside.focus();
+      service.error('one');
+      service.error('two');
+      tabs()[1].focus();
+      closeAll().focus();
+      closeAll().click();
+      expect(document.activeElement).toBe(outside);
+    });
+
+    it('closing the last message returns focus there too', () => {
+      outside.focus();
+      service.error('one');
+      closeButton().focus();
+      closeButton().click();
+      expect(document.activeElement).toBe(outside);
+    });
+
+    it('records where focus came from each time it enters the box', () => {
+      outside.focus();
+      service.error('one');
+      closeButton().focus();
+      elsewhere.focus();
+      closeButton().focus();
+      closeButton().click();
+      expect(document.activeElement).toBe(elsewhere);
+    });
+
+    it('forgets an older element when focus last entered the box from the page', () => {
+      outside.focus();
+      service.error('one');
+      closeButton().focus();
+      outside.focus();
+      outside.blur();
+      closeButton().focus();
+      const focus = vi.spyOn(outside, 'focus');
+      closeButton().click();
+      expect(focus).not.toHaveBeenCalled();
+    });
+
+    it('leaves focus alone when the element it came from is gone', () => {
+      outside.focus();
+      service.error('one');
+      closeButton().focus();
+      const focus = vi.spyOn(outside, 'focus');
+      outside.remove();
+      closeButton().click();
+      expect(focus).not.toHaveBeenCalled();
+    });
+
+    it('leaves focus alone when it is outside the box as the box closes', () => {
+      vi.useFakeTimers();
+      outside.focus();
+      service.show('Saved');
+      const close = closeButton();
+      close.focus();
+      elsewhere.focus();
+      const focus = vi.spyOn(outside, 'focus');
+      vi.advanceTimersByTime(5000);
+      expect(focus).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(elsewhere);
+    });
+  });
+
   it('clicking a tab shows its message', () => {
     service.error('one');
     service.show('two', 'Dismiss');

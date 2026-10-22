@@ -116,6 +116,9 @@ export class TailwindSnackBarService {
   private nextNumber = 1;
   // The message whose text the announcer's live region holds.
   private announced?: SnackbarEntry;
+  // Where focus was just before it last entered the box; it goes back
+  // there when the box closes with focus inside.
+  private focusBefore?: HTMLElement;
 
   private appRef = inject(ApplicationRef);
   private announcer = inject(LiveAnnouncer);
@@ -362,6 +365,14 @@ export class TailwindSnackBarService {
     if (!this.entries.length) {
       // The last tab closes the box, and numbering starts again at 1.
       const box = this.box!;
+      // The box goes inert and takes the focused control with it. Put
+      // focus back where it came from, unless that element is gone; if
+      // focus is not in the box, it stays where it is.
+      const back = this.focusBefore;
+      this.focusBefore = undefined;
+      if (box.contains(document.activeElement) && back?.isConnected) {
+        back.focus();
+      }
       this.box = undefined;
       this.strip = undefined;
       this.closeAllButton = undefined;
@@ -526,8 +537,8 @@ export class TailwindSnackBarService {
       'bg-gray-900 text-gray-300 hover:text-white border-gray-500 ' +
       'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white';
     closeAll.hidden = true;
-    // Closing the last tab closes the box, which goes inert; as with the
-    // last single close, focus then falls back to the page.
+    // Closing the last tab closes the box; as with the last single close,
+    // focus goes back to where it was before it entered the box.
     closeAll.addEventListener('click', () => {
       this.closeAll();
       // ZONELESS: Trigger change detection after user interaction
@@ -538,6 +549,15 @@ export class TailwindSnackBarService {
     header.className = 'snackbar-header flex';
     header.appendChild(strip);
     header.appendChild(closeAll);
+
+    box.addEventListener('focusin', (event: FocusEvent) => {
+      // From inside the box it is a move along it. From the page itself
+      // (no element) there is nowhere to return to.
+      const from = event.relatedTarget;
+      if (!(from instanceof Node && box.contains(from))) {
+        this.focusBefore = from instanceof HTMLElement ? from : undefined;
+      }
+    });
 
     box.appendChild(header);
     document.body.appendChild(box);
