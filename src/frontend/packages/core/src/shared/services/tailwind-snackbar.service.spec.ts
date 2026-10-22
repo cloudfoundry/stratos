@@ -258,6 +258,81 @@ describe('TailwindSnackBarService', () => {
       expect(focus).not.toHaveBeenCalled();
     });
 
+    // A browser blurs a focused element once it is hidden or made inert,
+    // so by the last close focus can already be on the page; the test DOM
+    // keeps it. These specs make hiding and inert blur, as a browser does.
+    describe('when hiding or inert blurs the focused element, as in a browser', () => {
+      const restore: (() => void)[] = [];
+      const blurIfFocusedIn = (el: Element) => {
+        if (el.contains(document.activeElement)) {
+          (document.activeElement as HTMLElement).blur();
+        }
+      };
+      beforeEach(() => {
+        let proto: object | null = HTMLElement.prototype;
+        let hidden: PropertyDescriptor | undefined;
+        while (proto && !(hidden = Object.getOwnPropertyDescriptor(proto, 'hidden'))) {
+          proto = Object.getPrototypeOf(proto);
+        }
+        Object.defineProperty(HTMLElement.prototype, 'hidden', {
+          configurable: true,
+          get(this: HTMLElement) { return hidden!.get!.call(this); },
+          set(this: HTMLElement, value: boolean) {
+            hidden!.set!.call(this, value);
+            if (value) {
+              blurIfFocusedIn(this);
+            }
+          },
+        });
+        restore.push(() => {
+          if (proto === HTMLElement.prototype) {
+            Object.defineProperty(HTMLElement.prototype, 'hidden', hidden!);
+          } else {
+            delete (HTMLElement.prototype as { hidden?: boolean }).hidden;
+          }
+        });
+        const setAttribute = Element.prototype.setAttribute;
+        Element.prototype.setAttribute = function (this: Element, name: string, value: string) {
+          setAttribute.call(this, name, value);
+          if (name === 'inert' || name === 'hidden') {
+            blurIfFocusedIn(this);
+          }
+        };
+        restore.push(() => { Element.prototype.setAttribute = setAttribute; });
+      });
+      afterEach(() => restore.splice(0).reverse().forEach(undo => undo()));
+
+      it('"Close all" with three tabs returns focus though the button hides on the way', () => {
+        outside.focus();
+        service.error('one');
+        service.error('two');
+        service.error('three');
+        closeAll().focus();
+        closeAll().click();
+        expect(document.activeElement).toBe(outside);
+      });
+
+      it('closing the last message returns focus though its panel goes inert first', () => {
+        outside.focus();
+        service.error('one');
+        closeButton().focus();
+        closeButton().click();
+        expect(document.activeElement).toBe(outside);
+      });
+
+      it('still leaves focus alone when it was outside the box', () => {
+        outside.focus();
+        service.error('one');
+        service.error('two');
+        closeAll().focus();
+        elsewhere.focus();
+        const focus = vi.spyOn(outside, 'focus');
+        service.dismiss();
+        expect(focus).not.toHaveBeenCalled();
+        expect(document.activeElement).toBe(elsewhere);
+      });
+    });
+
     it('leaves focus alone when it is outside the box as the box closes', () => {
       vi.useFakeTimers();
       outside.focus();

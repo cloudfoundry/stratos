@@ -119,6 +119,9 @@ export class TailwindSnackBarService {
   // Where focus was just before it last entered the box; it goes back
   // there when the box closes with focus inside.
   private focusBefore?: HTMLElement;
+  // Set while closeAll() runs: whether focus was in the box before the
+  // first message closed.
+  private focusWasInBox?: boolean;
 
   private appRef = inject(ApplicationRef);
   private announcer = inject(LiveAnnouncer);
@@ -297,7 +300,19 @@ export class TailwindSnackBarService {
 
   // The strip's "Close all" button and the service-level dismiss().
   private closeAll(): void {
-    [...this.entries].forEach(entry => entry.ref.dismiss());
+    // Read once, before any close hides the button or tab that has focus;
+    // a browser blurs a hidden or inert element, so by the last close
+    // focus would already be on the page.
+    this.focusWasInBox = this.hasFocus();
+    try {
+      [...this.entries].forEach(entry => entry.ref.dismiss());
+    } finally {
+      this.focusWasInBox = undefined;
+    }
+  }
+
+  private hasFocus(): boolean {
+    return !!this.box?.contains(document.activeElement);
   }
 
   // Same plain text (pieces by their text), kind, action and, for a
@@ -346,6 +361,8 @@ export class TailwindSnackBarService {
     if (entry.closed) {
       return;
     }
+    // Before anything below hides, removes or inerts the focused control.
+    const focusWasInBox = this.focusWasInBox ?? this.hasFocus();
     entry.closed = true;
     clearTimeout(entry.timer);
     // Only the message the live region holds clears it; closing another
@@ -365,12 +382,12 @@ export class TailwindSnackBarService {
     if (!this.entries.length) {
       // The last tab closes the box, and numbering starts again at 1.
       const box = this.box!;
-      // The box goes inert and takes the focused control with it. Put
-      // focus back where it came from, unless that element is gone; if
-      // focus is not in the box, it stays where it is.
+      // The box goes inert and takes the focused control with it. If focus
+      // was in the box, put it back where it came from, unless that
+      // element is gone; focus outside the box stays where it is.
       const back = this.focusBefore;
       this.focusBefore = undefined;
-      if (box.contains(document.activeElement) && back?.isConnected) {
+      if (focusWasInBox && back?.isConnected) {
         back.focus();
       }
       this.box = undefined;
