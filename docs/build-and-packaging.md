@@ -89,7 +89,7 @@ Run `make check gate` before any push — it mirrors what CI runs on each PR.
 `make check e2e` requires a running Stratos instance (local or deployed);
 point it at a specific deployment via the `E2E_BASE_URL` environment
 variable (defaults to the local e2e server at `https://localhost:5540`, or
-`FRONTEND_PORT` when set).
+`E2E_FRONTEND_PORT` when set).
 
 `make test e2e`/`make check e2e` also need Playwright's browser binaries —
 `bun install` pulls in the `@playwright/test` package but does **not**
