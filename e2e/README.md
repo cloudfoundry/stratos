@@ -69,8 +69,12 @@ the dev servers on 5443 and 5440. To run beside another e2e run, give it other
 ports:
 
 ```bash
-BACKEND_PORT=5583 FRONTEND_PORT=5580 bun run e2e
+E2E_BACKEND_PORT=5583 E2E_FRONTEND_PORT=5580 bun run e2e
 ```
+
+The `E2E_` names keep these apart from the dev servers' `FRONTEND_PORT` and
+`BACKEND_PORT`. A run still reads those old names when the new ones are unset,
+for one release only.
 
 `E2E_BASE_URL` tests a deployed console instead, and starts no local servers.
 `e2e/servers.ts` resolves these once, for the config and for the fixtures that

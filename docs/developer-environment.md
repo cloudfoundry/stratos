@@ -193,8 +193,11 @@ See `src/jetstream/config.example` for all available settings with descriptions.
 |---------|---------|-------------------|
 | Frontend dev server | 5440 | `FRONTEND_PORT` |
 | Backend (jetstream) | 5443 | `BACKEND_PORT` |
-| E2E frontend | 5540 | `FRONTEND_PORT` (e2e run) |
-| E2E backend | 5543 | `BACKEND_PORT` (e2e run) |
+| E2E frontend | 5540 | `E2E_FRONTEND_PORT` |
+| E2E backend | 5543 | `E2E_BACKEND_PORT` |
+
+An e2e run still reads `FRONTEND_PORT` and `BACKEND_PORT` when the `E2E_`
+names are unset, for one release only.
 
 ## IDE Support
 
