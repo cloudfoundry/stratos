@@ -621,3 +621,61 @@ describe('SteppersComponent — failed step', () => {
     );
   });
 });
+
+// The stepper clears its own error before the next try and when it goes
+// away. Other messages open beside it, as tabs, are not its to close.
+describe('SteppersComponent — its own error message', () => {
+  const setUp = async (snackBar?: unknown) => {
+    TestBed.configureTestingModule({
+      imports: [FailingStepHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...(snackBar ? [{ provide: TailwindSnackBarService, useValue: snackBar }] : []),
+      ],
+    });
+    await TestBed.compileComponents();
+    const hostFixture = TestBed.createComponent(FailingStepHostComponent);
+    await hostFixture.whenStable();
+    const steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    return { hostFixture, steppers };
+  };
+
+  afterEach(() => document.querySelectorAll('.snackbar-box').forEach(box => box.remove()));
+
+  it('closes only its own error before the next try', async () => {
+    const ref = { dismiss: vi.fn() };
+    const snackBar = { error: vi.fn(() => ref), dismiss: vi.fn() };
+    const { steppers } = await setUp(snackBar);
+    steppers.goNext();
+    await vi.waitFor(() => expect(snackBar.error).toHaveBeenCalledTimes(1));
+    steppers.goNext();
+    expect(ref.dismiss).toHaveBeenCalledTimes(1);
+    expect(snackBar.dismiss).not.toHaveBeenCalled();
+  });
+
+  it('closes only its own error when it is destroyed', async () => {
+    const ref = { dismiss: vi.fn() };
+    const snackBar = { error: vi.fn(() => ref), dismiss: vi.fn() };
+    const { hostFixture, steppers } = await setUp(snackBar);
+    steppers.goNext();
+    await vi.waitFor(() => expect(snackBar.error).toHaveBeenCalledTimes(1));
+    hostFixture.destroy();
+    expect(ref.dismiss).toHaveBeenCalledTimes(1);
+    expect(snackBar.dismiss).not.toHaveBeenCalled();
+  });
+
+  it('leaves another open message up when it retries', async () => {
+    const { steppers } = await setUp();
+    const service = TestBed.inject(TailwindSnackBarService);
+    const open = () => Array.from(document.querySelectorAll('.snackbar-box:not([inert]) .snackbar-message'))
+      .map(m => m.textContent);
+    steppers.goNext();
+    await vi.waitFor(() => expect(open()).toHaveLength(1));
+    service.show('Other message', 'Dismiss');
+    steppers.goNext();
+    await vi.waitFor(() => expect(open()).toHaveLength(2));
+    expect(open()[0]).toBe('Other message');
+  });
+});

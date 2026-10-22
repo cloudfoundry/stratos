@@ -91,7 +91,7 @@ async function firstAppOrgGuid(page: Page): Promise<string | null> {
 
 /** Dismiss endpoint error banner if present */
 async function dismissErrorBanner(page: Page): Promise<void> {
-  const closeButton = page.locator('button[aria-label="Close"], .alert-dismiss').first();
+  const closeButton = page.locator('button[aria-label="Close"], .snackbar-close, .alert-dismiss').first();
   if (await closeButton.isVisible({ timeout: 1000 }).catch(() => false)) {
     await closeButton.click().catch(() => {});
   }
