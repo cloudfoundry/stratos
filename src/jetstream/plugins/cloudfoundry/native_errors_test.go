@@ -103,6 +103,10 @@ func TestUpstreamStatusOf(t *testing.T) {
 		{"capi envelope 429", cfEnvelopeErr(capi.ErrRateLimited, 10013, "CF-RateLimitExceeded"), 429},
 		{"capi envelope wrapped", fmt.Errorf("listing apps: %w", cfEnvelopeErr(capi.ErrNotFound, 10010, "CF-ResourceNotFound")), 404},
 		{"capi envelope from MapHTTPError", capi.MapHTTPError(422, []byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"x"}]}`)), 422},
+		// MapHTTPError's *capi.StatusError keeps the exact status even
+		// where the sentinel covers a range.
+		{"capi envelope 400 from MapHTTPError", capi.MapHTTPError(400, []byte(`{"errors":[{"code":10005,"title":"CF-BadQueryParameter","detail":"x"}]}`)), 400},
+		{"capi envelope 503 from MapHTTPError", fmt.Errorf("listing apps: %w", capi.MapHTTPError(503, []byte(`{"errors":[{"code":10001,"title":"CF-ServerError","detail":"x"}]}`))), 503},
 		// ErrBadRequest and ErrServerError each cover a range of statuses;
 		// without the exact code there is nothing to report.
 		{"capi envelope other 4xx", cfEnvelopeErr(capi.ErrBadRequest, 10005, "CF-BadQueryParameter"), 0},
