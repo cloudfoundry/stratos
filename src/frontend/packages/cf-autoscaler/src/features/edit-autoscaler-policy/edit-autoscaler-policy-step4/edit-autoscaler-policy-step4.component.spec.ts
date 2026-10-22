@@ -1,3 +1,5 @@
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
@@ -271,7 +273,12 @@ describe('EditAutoscalerPolicyStep4Component', () => {
 
       const result = await firstValueFrom(component.updatePolicy(3, null as never));
 
-      expect(result).toEqual({ success: false, redirect: false, message: 'Could not update policy: network down' });
+      expect(result).toEqual({
+        success: false,
+        redirect: false,
+        message: 'Could not update policy: network down',
+        messagePieces: [{ text: 'Could not update policy: network down', style: 'text' }],
+      });
     });
 
     // A rejected policy comes back as an HTTP error whose own message only
@@ -289,6 +296,23 @@ describe('EditAutoscalerPolicyStep4Component', () => {
 
       expect(result.success).toBe(false);
       expect(result.message).toBe('Could not update policy: instance_min_count: Must be greater than or equal to 1');
+    });
+
+    // nginx's own 502 page, as a proxy in front of the autoscaler sends it.
+    it('keeps an error page\'s heading after its lead-in', async () => {
+      const page = readFileSync(join(import.meta.dirname, '../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
+      spyOnUpdate().mockRejectedValue(new HttpErrorResponse({ error: page, status: 502, statusText: 'Bad Gateway' }));
+      create([specific()]);
+
+      const result = await firstValueFrom(component.updatePolicy(3, null as never));
+
+      expect(result.success).toBe(false);
+      expect(result.message).toBe('Could not update policy: 502 Bad Gateway\nnginx/1.28.0');
+      expect(result.messagePieces).toEqual([
+        { text: 'Could not update policy: ', style: 'text' },
+        { text: '502 Bad Gateway', style: 'heading' },
+        { text: '\nnginx/1.28.0', style: 'text' },
+      ]);
     });
 
     it('says create when the policy is new', async () => {
