@@ -43,7 +43,7 @@ describe('TailwindSnackBarService', () => {
 
   // A toast inserted with its text already in it is not reliably read out;
   // the announcer's live region, which is already on the page, is.
-  it('announces each message to screen readers, errors assertively, and names the close button', () => {
+  it('announces each message to screen readers, errors assertively, and names the Dismiss control', () => {
     const announce = vi.spyOn(TestBed.inject(LiveAnnouncer), 'announce').mockResolvedValue();
     service.show('Saved');
     service.error('It broke');
@@ -51,7 +51,98 @@ describe('TailwindSnackBarService', () => {
     expect(announce).toHaveBeenNthCalledWith(2, 'It broke', 'assertive');
     const closes = document.querySelectorAll('.snackbar-close');
     expect(closes).toHaveLength(2);
-    closes.forEach(b => expect(b.getAttribute('aria-label')).toBe('Close'));
+    closes.forEach(b => expect(b.getAttribute('aria-label') ?? b.textContent).toBe('Dismiss'));
+  });
+
+  // Each message had two controls that both closed it: the caller's
+  // "Dismiss" action and a "×". Now there is one, reading "Dismiss".
+  describe('one Dismiss control per message', () => {
+    const shownPanel = () => Array.from(document.querySelectorAll<HTMLElement>('.snackbar-box:not([inert]) .snackbar-panel'))
+      .find(p => !p.hidden)!;
+    const buttons = () => Array.from(shownPanel().querySelectorAll<HTMLButtonElement>('button'));
+
+    it('a message with no action shows exactly one "Dismiss" control and no "×"', () => {
+      service.open('broker failed', undefined, { duration: 0 });
+      expect(buttons().map(b => b.textContent)).toEqual(['Dismiss']);
+      expect(buttons()[0].classList).toContain('snackbar-close');
+      expect(shownPanel().textContent).not.toContain('×');
+    });
+
+    it('error() with its default action shows exactly one control', () => {
+      service.error('broker failed');
+      expect(buttons().map(b => b.textContent)).toEqual(['Dismiss']);
+      expect(shownPanel().querySelector('.snackbar-action')).toBeNull();
+      expect(shownPanel().textContent).not.toContain('×');
+    });
+
+    // 'Close' closes the message too; it would be a second close control.
+    it('a "Close" action shows exactly one control, reading "Dismiss"', () => {
+      service.show('Auth token copied to clipboard', 'Close');
+      expect(buttons().map(b => b.textContent)).toEqual(['Dismiss']);
+      expect(shownPanel().querySelector('.snackbar-action')).toBeNull();
+    });
+
+    it('a "Close" action fires onAction() from "Dismiss", as "Dismiss" does', () => {
+      const viaAction = vi.fn();
+      const dismissed = vi.fn();
+      const ref = service.show('Failed to delete release', 'Close');
+      ref.onAction().subscribe(viaAction);
+      ref.afterDismissed().subscribe(dismissed);
+      (shownPanel().querySelector('.snackbar-close') as HTMLElement).click();
+      expect(viaAction).toHaveBeenCalledTimes(1);
+      expect(dismissed).toHaveBeenCalledTimes(1);
+    });
+
+    it('matches "Close" exactly; another label keeps its own button', () => {
+      service.show('Saved', 'close');
+      expect(buttons().map(b => b.textContent)).toEqual(['close', 'Dismiss']);
+    });
+
+    it('a real action keeps its own button beside "Dismiss"', () => {
+      service.error('Endpoint needs re-authentication.', 'Reconnect');
+      expect(buttons().map(b => b.textContent)).toEqual(['Reconnect', 'Dismiss']);
+      expect(shownPanel().querySelector('.snackbar-action')!.textContent).toBe('Reconnect');
+    });
+
+    it('a message that times out on its own still has "Dismiss"', () => {
+      service.show('Saved');
+      expect(buttons().map(b => b.textContent)).toEqual(['Dismiss']);
+    });
+
+    it('clicking "Dismiss" closes only that tab', () => {
+      service.error('one');
+      service.error('two');
+      const dismiss = shownPanel().querySelector('.snackbar-close') as HTMLElement;
+      expect(dismiss.textContent).toBe('Dismiss');
+      dismiss.click();
+      expect(numbers()).toEqual(['1']);
+      expect(shown()).toEqual(['one']);
+    });
+
+    it('its accessible name is "Dismiss", the text on screen', () => {
+      service.error('broker failed');
+      const dismiss = shownPanel().querySelector<HTMLButtonElement>('.snackbar-close')!;
+      expect(dismiss.textContent).toBe('Dismiss');
+      expect(dismiss.getAttribute('aria-label') ?? dismiss.textContent).toBe('Dismiss');
+      expect(dismiss.type).toBe('button');
+    });
+
+    // Callers that passed 'Dismiss' as their action saw onAction() fire
+    // when it was clicked; a message with no action did not.
+    it('keeps onAction() for a caller whose action was "Dismiss", and only then', () => {
+      const viaAction = vi.fn();
+      const viaClose = vi.fn();
+      const dismissed = vi.fn();
+      const first = service.error('one');
+      first.onAction().subscribe(viaAction);
+      first.afterDismissed().subscribe(dismissed);
+      (shownPanel().querySelector('.snackbar-close') as HTMLElement).click();
+      expect(viaAction).toHaveBeenCalledTimes(1);
+      expect(dismissed).toHaveBeenCalledTimes(1);
+      service.open('two', undefined, { duration: 0 }).onAction().subscribe(viaClose);
+      (shownPanel().querySelector('.snackbar-close') as HTMLElement).click();
+      expect(viaClose).not.toHaveBeenCalled();
+    });
   });
 
   // Every toast sat at the same fixed spot, so a second one covered the
@@ -665,8 +756,8 @@ describe('TailwindSnackBarService', () => {
 
   // White on --color-danger measured 3.76:1 (light) / 2.77:1 (dark) and the
   // primary-blue action 1.02:1; danger-700 gives white 4.98:1 (WCAG AA).
-  it('error snackbars are readable: dark red, white action and close', () => {
-    service.error('broker failed');
+  it('error snackbars are readable: dark red, white action and Dismiss', () => {
+    service.error('broker failed', 'Reconnect');
     const bar = document.querySelector('.snackbar-error') as HTMLElement;
     expect(bar.classList).toContain('!bg-danger-700');
     expect(bar.classList).not.toContain('!bg-danger');
@@ -678,12 +769,13 @@ describe('TailwindSnackBarService', () => {
     expect(close.classList).not.toContain('text-gray-400');
   });
 
-  it('other snackbars keep the primary action and grey close on the dark toast', () => {
+  it('other snackbars style the action and "Dismiss" as primary text on the dark toast', () => {
     service.open('saved', 'Undo');
     const bar = document.querySelector('.snackbar-action')!.parentElement as HTMLElement;
     expect(bar.classList).not.toContain('snackbar-error');
     expect(bar.querySelector('.snackbar-action')!.classList).toContain('text-primary');
-    expect(bar.querySelector('.snackbar-close')!.classList).toContain('text-gray-400');
+    expect(bar.querySelector('.snackbar-close')!.classList).toContain('text-primary');
+    expect(bar.querySelector('.snackbar-close')!.classList).not.toContain('text-gray-400');
   });
 
   it('show with a close message does not auto-dismiss', () => {

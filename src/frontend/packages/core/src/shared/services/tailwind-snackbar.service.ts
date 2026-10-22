@@ -99,6 +99,12 @@ interface SnackbarEntry {
 // Ids tie each tab to its panel (aria-controls / aria-labelledby).
 let nextId = 0;
 
+// The text of the control that closes a message.
+const DISMISS = 'Dismiss';
+// Callers' action labels that only close the message; such an action is
+// the Dismiss control rather than a second button. Matched exactly.
+const CLOSE_ACTIONS: readonly (string | undefined)[] = [DISMISS, 'Close'];
+
 @Injectable({
   providedIn: 'root'
 })
@@ -281,7 +287,14 @@ export class TailwindSnackBarService {
     const closeButton = panel.querySelector('.snackbar-close');
     if (closeButton) {
       closeButton.addEventListener('click', () => {
-        ref.dismiss();
+        // A caller whose action was "Dismiss" or "Close" gets it as this
+        // control, and its onAction() fires as it did when that was a
+        // button of its own.
+        if (CLOSE_ACTIONS.includes(action)) {
+          ref.dismissWithAction();
+        } else {
+          ref.dismiss();
+        }
         // ZONELESS: Trigger change detection after user interaction
         this.appRef.tick();
       });
@@ -659,21 +672,26 @@ export class TailwindSnackBarService {
     line.append(setCount, setCountText, ' ', messageElement);
     snackbar.appendChild(line);
 
-    // Create action button if provided
-    if (action) {
+    // Every message has one control that closes it, reading "Dismiss",
+    // its accessible name too. It replaced a "×" that sat beside the
+    // callers' own "Dismiss" or "Close" action, two controls doing one
+    // thing. Such an action is this control; any other action keeps its
+    // own button before it. Both are styled as text actions.
+    const textAction = onRed
+      ? 'text-white underline hover:no-underline font-medium'
+      : 'text-primary hover:text-primary/80 font-medium';
+    if (action && !CLOSE_ACTIONS.includes(action)) {
       const actionButton = document.createElement('button');
+      actionButton.type = 'button';
       actionButton.textContent = action;
-      actionButton.className = onRed
-        ? 'snackbar-action text-white underline hover:no-underline font-medium'
-        : 'snackbar-action text-primary hover:text-primary/80 font-medium';
+      actionButton.className = `snackbar-action ${textAction}`;
       snackbar.appendChild(actionButton);
     }
 
-    // Create close button
     const closeButton = document.createElement('button');
-    closeButton.textContent = '×';
-    closeButton.setAttribute('aria-label', 'Close');
-    closeButton.className = `snackbar-close ${onRed ? 'text-white' : 'text-gray-400 hover:text-white'} text-xl font-bold ml-2`;
+    closeButton.type = 'button';
+    closeButton.textContent = DISMISS;
+    closeButton.className = `snackbar-close ${textAction}`;
     snackbar.appendChild(closeButton);
 
     return snackbar;
