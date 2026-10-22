@@ -43,12 +43,17 @@
           </app-meta-card-item>
 
           <!-- A failure's reason is page text, not hover text, so screen
-               reader and keyboard users get it too. -->
+               reader and keyboard users get it too. It goes on its own
+               lines under the state, left-aligned: the value column is
+               right-aligned and narrow. -->
           @if (v.lastOperation) {
             <app-meta-card-item>
               <app-meta-card-key>Last operation</app-meta-card-key>
               <app-meta-card-value>
-                {{ v.lastOperation }}@if (v.lastOperationReason.length) { — <app-error-text [pieces]="v.lastOperationReason" /> }
+                {{ v.lastOperation }}
+                @if (v.lastOperationReason.length) {
+                  <app-error-text class="block text-left" [pieces]="v.lastOperationReason" />
+                }
               </app-meta-card-value>
             </app-meta-card-item>
           }
