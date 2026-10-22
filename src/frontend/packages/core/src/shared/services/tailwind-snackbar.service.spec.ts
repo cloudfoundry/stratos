@@ -138,6 +138,59 @@ describe('TailwindSnackBarService', () => {
     expect(document.activeElement).toBe(tabs()[1]);
   });
 
+  const closeAll = () => document.querySelector<HTMLElement>('.snackbar-box:not([inert]) .snackbar-close-all')!;
+
+  it('a "Close all" button sits beside the strip once two or more tabs are open', () => {
+    service.error('one');
+    expect(closeAll().hidden).toBe(true);
+    service.error('two');
+    expect(closeAll().hidden).toBe(false);
+    expect(closeAll().textContent).toBe('Close all');
+    expect(closeAll().getAttribute('type')).toBe('button');
+    // A tablist holds only tabs; the button is next to it, not in it.
+    expect(strip().contains(closeAll())).toBe(false);
+    closeShown();
+    expect(closeAll().hidden).toBe(true);
+  });
+
+  it('a lone repeated message shows its tab but no "Close all"', () => {
+    service.error('broker failed');
+    service.error('broker failed');
+    expect(strip().hidden).toBe(false);
+    expect(closeAll().hidden).toBe(true);
+  });
+
+  it('"Close all" closes every tab and the box, each through its ref', () => {
+    const dismissed: string[] = [];
+    service.error('one').afterDismissed().subscribe(() => dismissed.push('one'));
+    service.show('two', 'Dismiss').afterDismissed().subscribe(() => dismissed.push('two'));
+    service.error('three').afterDismissed().subscribe(() => dismissed.push('three'));
+    const box = document.querySelector('.snackbar-box') as HTMLElement;
+    closeAll().click();
+    expect(dismissed).toEqual(['one', 'two', 'three']);
+    expect(box.hasAttribute('inert')).toBe(true);
+    expect(tabs()).toHaveLength(0);
+  });
+
+  it('numbering starts again at 1 after "Close all"', () => {
+    service.error('one');
+    service.error('two');
+    closeAll().click();
+    service.error('three');
+    service.error('four');
+    expect(numbers()).toEqual(['1', '2']);
+  });
+
+  // A merged set is one message: its own close button closes the set.
+  it('a message\'s close button closes only that message, a whole set when merged', () => {
+    service.error('one');
+    service.error('two');
+    service.error('two');
+    closeShown();
+    expect(numbers()).toEqual(['1']);
+    expect(shown()).toEqual(['one']);
+  });
+
   it('clicking a tab shows its message', () => {
     service.error('one');
     service.show('two', 'Dismiss');

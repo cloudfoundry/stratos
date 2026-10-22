@@ -98,6 +98,7 @@ export class TailwindSnackBarService {
   // numbering starts again at 1 once every tab has been closed.
   private box?: HTMLElement;
   private strip?: HTMLElement;
+  private closeAllButton?: HTMLButtonElement;
   private entries: SnackbarEntry[] = [];
   private selected?: SnackbarEntry;
   private nextNumber = 1;
@@ -256,6 +257,11 @@ export class TailwindSnackBarService {
   // before the next try; before the tabs this closed every toast on the
   // page too, so it still means all, not just the selected tab.
   dismiss(): void {
+    this.closeAll();
+  }
+
+  // The strip's "Close all" button and the service-level dismiss().
+  private closeAll(): void {
     [...this.entries].forEach(entry => entry.ref.dismiss());
   }
 
@@ -318,6 +324,7 @@ export class TailwindSnackBarService {
       const box = this.box!;
       this.box = undefined;
       this.strip = undefined;
+      this.closeAllButton = undefined;
       this.selected = undefined;
       this.nextNumber = 1;
       this.removeSnackbar(box);
@@ -347,6 +354,7 @@ export class TailwindSnackBarService {
   private render(): void {
     const tabsShown = this.entries.length > 1 || this.entries.some(e => e.count > 1);
     this.strip!.hidden = !tabsShown;
+    this.closeAllButton!.hidden = this.entries.length < 2;
     for (const entry of this.entries) {
       const on = entry === this.selected;
       entry.tab.setAttribute('aria-selected', String(on));
@@ -420,9 +428,10 @@ export class TailwindSnackBarService {
     const strip = document.createElement('div');
     strip.setAttribute('role', 'tablist');
     strip.setAttribute('aria-label', 'Messages');
-    // w-0 + min-w-full: the tabs never widen the box; once they no longer
-    // fit, the strip scrolls sideways, and the page does not.
-    strip.className = 'snackbar-tabs flex w-0 min-w-full overflow-x-auto';
+    // w-0 + flex-1: the tabs never widen the box but fill the row beside
+    // "Close all"; once they no longer fit, the strip scrolls sideways,
+    // and the page does not.
+    strip.className = 'snackbar-tabs flex flex-1 w-0 overflow-x-auto';
     strip.hidden = true;
     // Arrow keys move along the tabs (wrapping), Home and End jump to the
     // ends; only the selected tab is in the Tab order.
@@ -450,10 +459,33 @@ export class TailwindSnackBarService {
       this.appRef.tick();
     });
 
-    box.appendChild(strip);
+    // Next to the tablist, not in it: a tablist holds only tabs. Shown
+    // once two or more tabs are open.
+    const closeAll = document.createElement('button');
+    closeAll.type = 'button';
+    closeAll.textContent = 'Close all';
+    closeAll.className = 'snackbar-close-all shrink-0 px-3 py-1 text-sm font-medium border-b-2 ' +
+      'bg-gray-900 text-gray-300 hover:text-white border-gray-500 ' +
+      'focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-white';
+    closeAll.hidden = true;
+    // Closing the last tab closes the box, which goes inert; as with the
+    // last single close, focus then falls back to the page.
+    closeAll.addEventListener('click', () => {
+      this.closeAll();
+      // ZONELESS: Trigger change detection after user interaction
+      this.appRef.tick();
+    });
+
+    const header = document.createElement('div');
+    header.className = 'snackbar-header flex';
+    header.appendChild(strip);
+    header.appendChild(closeAll);
+
+    box.appendChild(header);
     document.body.appendChild(box);
     this.box = box;
     this.strip = strip;
+    this.closeAllButton = closeAll;
     return box;
   }
 
