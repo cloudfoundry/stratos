@@ -8,7 +8,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { QuotaDefinitionFormComponent } from '../../quota-definition-form/quota-definition-form.component';
 import { formToOrgQuotaWriteBody } from '../../quota-definition-form/quota-form-mapping';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadError } from '@stratosui/store';
 
 @Component({
   selector: 'app-create-quota-step',
@@ -46,7 +46,7 @@ export class CreateQuotaStepComponent implements AfterViewInit, OnDestroy {
       try {
         await firstValueFrom(this.quotaData.createOrgQuota(this.cfGuid, body));
       } catch (err: unknown) {
-        throw new Error(`Failed to create quota: ${extractHttpErrorMessage(err)}`, { cause: err });
+        throw leadError('Failed to create quota', err);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

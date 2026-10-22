@@ -12,7 +12,7 @@ import { CnsiOrgsSource } from '../../../../services/data-sources/cnsi-orgs-sour
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
 import { QuotaDataService, SignalSource } from '../../../../services/endpoint-data/quota-data.service';
 import { StOrgQuota } from '../../../../services/endpoint-data/stratos-types';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadError } from '@stratosui/store';
 
 interface CreateOrganizationForm {
   orgName: FormControl<string>;
@@ -74,7 +74,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
           this.endpointDataRegistry.release(this.cfGuid);
         }
       } catch (err: unknown) {
-        throw new Error(`Failed to create organization: ${extractHttpErrorMessage(err)}`, { cause: err });
+        throw leadError('Failed to create organization', err);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

@@ -8,7 +8,7 @@ import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { SpaceQuotaDefinitionFormComponent } from '../../space-quota-definition-form/space-quota-definition-form.component';
 import { formToSpaceQuotaCreateBody } from '../../quota-definition-form/quota-form-mapping';
-import { extractHttpErrorMessage } from '@stratosui/store';
+import { leadError } from '@stratosui/store';
 
 @Component({
   selector: 'app-create-space-quota-step',
@@ -48,7 +48,7 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
       try {
         await firstValueFrom(this.quotaData.createSpaceQuota(this.cfGuid, body));
       } catch (err: unknown) {
-        throw new Error(`Failed to create space quota: ${extractHttpErrorMessage(err)}`, { cause: err });
+        throw leadError('Failed to create space quota', err);
       }
       await this.router.navigateByUrl(this.redirectUrl);
     },

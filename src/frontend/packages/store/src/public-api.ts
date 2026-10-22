@@ -93,6 +93,7 @@ export {
   extractHttpErrorPieces,
   httpErrorResponseToSafeString,
   isHttpErrorResponse,
+  leadError,
   leadPieces,
   proxyAPIVersion,
   stripMarkup,

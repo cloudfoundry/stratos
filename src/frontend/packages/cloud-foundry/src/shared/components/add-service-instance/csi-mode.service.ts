@@ -70,6 +70,8 @@ export interface BindResult {
   success: boolean;
   unknown?: UnknownHow;
   message?: string;
+  // What a failed bind threw, so a step can show `message` styled.
+  error?: unknown;
 }
 
 @Injectable({
@@ -235,7 +237,7 @@ export class CsiModeService {
       return outcome(await fireBind());
     } catch (err: unknown) {
       if (!isOperationInProgressError(err)) {
-        return { success: false, message: extractHttpErrorMessage(err) };
+        return { success: false, message: extractHttpErrorMessage(err), error: err };
       }
     }
 
@@ -250,7 +252,7 @@ export class CsiModeService {
       try {
         return outcome(await fireBind());
       } catch (err: unknown) {
-        return { success: false, message: extractHttpErrorMessage(err) };
+        return { success: false, message: extractHttpErrorMessage(err), error: err };
       }
     }
     // Slow broker. Detach the bind so the wizard doesn't keep spinning;
