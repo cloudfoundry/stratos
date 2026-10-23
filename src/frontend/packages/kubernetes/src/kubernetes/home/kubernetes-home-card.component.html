@@ -17,3 +17,6 @@
     </app-tile>
   </app-tile-group>
 </app-tile-grid>
+@if (failureReason(); as reason) {
+  <div data-test="kube-card-failure" class="px-2 text-sm text-danger-shade-700 break-words">Failed to load: {{ reason }}</div>
+}

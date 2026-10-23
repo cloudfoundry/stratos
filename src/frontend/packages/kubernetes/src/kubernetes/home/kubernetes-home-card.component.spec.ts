@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Signal, provideZonelessChangeDetection, signal } from '@angular/core';
+import { StratosError } from '../../services/endpoint-data/kube-types';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 
@@ -24,14 +25,31 @@ describe('KubernetesHomeCardComponent', () => {
   const nodeRefresh = vi.fn().mockResolvedValue(undefined);
   const namespaceRefresh = vi.fn().mockResolvedValue(undefined);
 
-  const podStub = { podsInCluster: (_g: string) => pods as Signal<unknown[]>, refresh: podRefresh };
-  const nodeStub = { nodesInCluster: (_g: string) => nodes as Signal<unknown[]>, refresh: nodeRefresh };
-  const namespaceStub = { namespacesForEndpoint: (_g: string) => namespaces as Signal<unknown[]>, refresh: namespaceRefresh };
+  // Load failures, as the services record them.
+  const podErrors = signal<StratosError[]>([]);
+  const nodeErrors = signal<StratosError[]>([]);
+  const namespaceErrors = signal<StratosError[]>([]);
+
+  const podStub = {
+    podsInCluster: (_g: string) => pods as Signal<unknown[]>, refresh: podRefresh,
+    scopeErrors: () => podErrors(),
+  };
+  const nodeStub = {
+    nodesInCluster: (_g: string) => nodes as Signal<unknown[]>, refresh: nodeRefresh,
+    errors: () => nodeErrors.asReadonly(),
+  };
+  const namespaceStub = {
+    namespacesForEndpoint: (_g: string) => namespaces as Signal<unknown[]>, refresh: namespaceRefresh,
+    namespaceListErrors: () => namespaceErrors(),
+  };
 
   beforeEach(async () => {
     pods.set([]);
     nodes.set([]);
     namespaces.set([]);
+    podErrors.set([]);
+    nodeErrors.set([]);
+    namespaceErrors.set([]);
     vi.clearAllMocks();
     await TestBed.configureTestingModule({imports: [...KubernetesBaseTestModules,
         KubernetesHomeCardComponent,
@@ -56,11 +74,11 @@ describe('KubernetesHomeCardComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(KubernetesHomeCardComponent);
     component = fixture.componentInstance;
     component.endpoint = {} as EndpointModel;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -87,5 +105,27 @@ describe('KubernetesHomeCardComponent', () => {
 
     expect(nodeRefresh).toHaveBeenCalledWith('k1');
     expect(namespaceRefresh).toHaveBeenCalledWith({ kubeGuid: 'k1' });
+  });
+
+  it('shows a count whose load failed as "-", with the reason, not 0', async () => {
+    nodes.set([]);
+    nodeErrors.set([{ code: 'FETCH_ERROR', title: 'kube-nodes', detail: 'Error proxing request: i/o timeout', affected: ['k1'] }]);
+    component.endpoint = { guid: 'k1' } as EndpointModel;
+
+    component.load();
+    await fixture.whenStable();
+
+    expect(component.nodeCount()).toBeNull();
+    const el: HTMLElement = fixture.nativeElement;
+    const values = [...el.querySelectorAll('.number-metric-card-value')].map(v => v.textContent!.trim());
+    expect(values[0]).toBe('-');
+    expect(el.querySelector('[data-test="kube-card-failure"]')?.textContent).toContain('Error proxing request: i/o timeout');
+  });
+
+  it('shows no failure while every count loaded', async () => {
+    component.endpoint = { guid: 'k1' } as EndpointModel;
+    component.load();
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('[data-test="kube-card-failure"]')).toBeNull();
   });
 });
