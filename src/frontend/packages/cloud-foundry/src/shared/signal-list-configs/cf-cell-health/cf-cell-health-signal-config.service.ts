@@ -48,18 +48,18 @@ interface PrometheusResponseEnvelope {
   };
 }
 
+// The health history covers the past hour, sampled in 50 steps. This
+// is what the legacy list showed by default: its time-window picker
+// started on "The past hour" and sent a range query with
+// step = window / 50.
+const HISTORY_WINDOW_SECONDS = 60 * 60;
+const HISTORY_STEPS = 50;
+
 // Cell-health history list config. Drives the table embedded in the
-// cell-detail Summary tab. Replaces CfCellHealthListConfigService +
-// CfCellHealthDataSource (ngrx + PaginationMonitor + ListDataSource)
-// with a direct fetch against /pp/v1/metrics/cf/cells/query and a
-// signal-backed row collection, matching CfCellsSignalConfigService.
-//
-// Behavior parity: the legacy data source parsed `result[0].values`
-// (range-query matrix) but the action was dispatched with QUERY
-// (instant), so the legacy table almost always rendered empty. We
-// preserve that — instant query, parse `.values` if a range somehow
-// arrives, otherwise fall through to an empty list. A future change
-// can wire the window-picker UI back in by switching to query_range.
+// cell-detail Summary tab. Sends a range query to
+// /pp/v1/metrics/cf/cells/query_range and lists each change of the
+// health value in the returned samples (`result[0].values`). The
+// legacy list's time-window picker is not offered; the window is fixed.
 @Injectable({ providedIn: 'root' })
 export class CfCellHealthSignalConfigService {
   private readonly http = inject(HttpClient);
@@ -170,7 +170,11 @@ export class CfCellHealthSignalConfigService {
 
   private async fetchHealth(metric: string): Promise<HealthFetch> {
     const query = `${metric}{bosh_job_id="${this.cellId}"}`;
-    const url = `/pp/v1/metrics/cf/cells/query?query=${encodeURIComponent(query)}`;
+    const end = Math.floor(Date.now() / 1000);
+    const start = end - HISTORY_WINDOW_SECONDS;
+    const step = HISTORY_WINDOW_SECONDS / HISTORY_STEPS;
+    const url = `/pp/v1/metrics/cf/cells/query_range?query=${encodeURIComponent(query)}`
+      + `&start=${start}&end=${end}&step=${step}`;
     try {
       const resp = await firstValueFrom(
         this.http.get<PrometheusResponseEnvelope>(url, {
