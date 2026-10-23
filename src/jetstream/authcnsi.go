@@ -153,7 +153,9 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 
-	// admins are note allowed to connect to user created endpoints
+	// With user endpoints on (enabled or admin_only), a personal endpoint
+	// (one with a creator) can be connected to only by its creator; anyone
+	// else, admins included, is refused.
 	if p.GetConfig().UserEndpointsEnabled != config.UserEndpointsConfigEnum.Disabled {
 
 		if len(cnsiRecord.Creator) != 0 && cnsiRecord.Creator != userID {
