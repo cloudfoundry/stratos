@@ -75,3 +75,6 @@
     }
   }
 </div>
+@if (connectable && config.showLabel && lastError; as lastError) {
+  <div class="mt-1 text-xs text-content-muted" data-test="endpoint-last-error">{{ lastError }}</div>
+}

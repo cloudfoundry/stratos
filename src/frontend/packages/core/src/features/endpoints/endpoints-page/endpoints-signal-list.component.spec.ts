@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { vi } from 'vitest';
 import type { EndpointModel } from '@stratosui/store';
-import { UserFavoriteManager } from '@stratosui/store';
+import { EndpointLastErrorService, UserFavoriteManager } from '@stratosui/store';
 
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { EndpointAuthStateService } from '../../../shared/services/endpoint-auth-state.service';
@@ -112,5 +112,20 @@ describe('EndpointsSignalListComponent - expired status + reconnect action', () 
     const status = statusColumn();
     expect(status.render(endpoint)).toBe('Expired');
     expect(status.pillColor?.(endpoint)).toBe('warning');
+  });
+
+  // A failed connect leaves the endpoint Disconnected; the status says why
+  // the last attempt failed, as the last error.
+  it('tells why the last connect failed on a disconnected endpoint', () => {
+    TestBed.inject(EndpointLastErrorService).record('guid-1', 'Could not connect to the endpoint (400)');
+    const status = statusColumn();
+    expect(status.render(ep('disconnected'))).toBe('Disconnected');
+    expect(status.tooltip?.(ep('disconnected')))
+      .toBe('The last error was Could not connect to the endpoint (400). Reconnect to get the latest status.');
+  });
+
+  it('shows no last error on a connected endpoint', () => {
+    TestBed.inject(EndpointLastErrorService).record('guid-1', 'Could not connect to the endpoint (400)');
+    expect(statusColumn().tooltip?.(ep('connected')) ?? 'Connected').toBe('Connected');
   });
 });
