@@ -121,15 +121,23 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 			return nil, err
 		}
 
-		rootCAs, _ := x509.SystemCertPool()
-		if rootCAs == nil {
-			rootCAs = x509.NewCertPool()
+		tlsConfig := &tls.Config{
+			InsecureSkipVerify: cnsi.SkipSSLValidation,
+			Certificates:       []tls.Certificate{cert},
 		}
-
+		// As for the other endpoint requests (getHttpClient): with a CA
+		// certificate the cluster is verified against it and the system
+		// pool, and Skip SSL applies only without one.
 		if len(cnsi.CACert) > 0 {
+			rootCAs, _ := x509.SystemCertPool()
+			if rootCAs == nil {
+				rootCAs = x509.NewCertPool()
+			}
 			if ok := rootCAs.AppendCertsFromPEM([]byte(cnsi.CACert)); !ok {
 				slog.Warn("could not append the endpoint CA, using system certs only", "endpoint", cnsi.GUID)
 			}
+			tlsConfig.RootCAs = rootCAs
+			tlsConfig.InsecureSkipVerify = false
 		}
 
 		dial := (&net.Dialer{
@@ -141,10 +149,7 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 			Proxy:               http.ProxyFromEnvironment,
 			DialContext:         dial,
 			TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: cnsi.SkipSSLValidation,
-				Certificates:       []tls.Certificate{cert},
-			},
+			TLSClientConfig:     tlsConfig,
 			MaxIdleConnsPerHost: 6, // (default is 2)
 		}
 
