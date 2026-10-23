@@ -298,4 +298,23 @@ describe('KubePodDataService', () => {
       expect(registry.getSnapshot().instances.map(i => i.kubeGuid)).toEqual([]);
     });
   });
+
+  // The proxy answers 200 with a per-endpoint error entry for a failed call.
+  it('records a per-endpoint proxy error with its reason instead of an empty list', async () => {
+    const refreshing = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(CLUSTER_PODS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    await refreshing;
+
+    expect(svc.podsInCluster(KUBE_GUID)()).toEqual([]);
+    expect(svc.errors()()).toEqual([expect.objectContaining({
+      code: 'FETCH_ERROR',
+      detail: 'Error proxing request: dial tcp: i/o timeout',
+    })]);
+  });
+
+  it('rejects a pod delete the endpoint refused', async () => {
+    const deleting = svc.delete(KUBE_GUID, 'p1', 'ns');
+    httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces/ns/pods/p1').flush({ [KUBE_GUID]: { error: { statusCode: 403, status: '403 Forbidden' }, errorResponse: { kind: 'Status', message: 'denied' } } });
+    await expect(deleting).rejects.toThrow('403 Forbidden: denied');
+  });
 });

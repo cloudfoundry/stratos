@@ -4,6 +4,7 @@ import { firstValueFrom, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, finalize, map, tap } from 'rxjs/operators';
 
 import { KubeListResponse, KUBE_LIST_DEFAULT_LIMIT } from './kube-paged-response';
+import { KubeProxyResponse, kubeProxyResult } from './kube-proxy-response';
 import {
   KubeEndpointData,
   KubeNamespace,
@@ -23,6 +24,9 @@ import {
 //     segment. (Original design doc had `/proxy/${kubeGuid}/...` — the
 //     existing kubernetes effects show the actual contract is header-
 //     based; honoring that contract here.)
+//   - The proxy reports a failed sub-fetch as the endpoint's error
+//     entry in a 200 response (kubeProxyResult throws it), so it is
+//     handled like an HTTP error.
 //   - 403 / 404 / network errors on individual sub-fetches push a
 //     StratosError onto the `_errors` signal AND tag the affected
 //     field name in `_unavailable` so consumers can render "Not
@@ -88,12 +92,12 @@ export class KubeEndpointDataService {
 
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.kubeGuid });
 
-    const versionReq = this.http.get<{ [cnsi: string]: KubeVersionInfo }>(
+    const versionReq = this.http.get<KubeProxyResponse<KubeVersionInfo>>(
       '/pp/v1/proxy/version',
       { headers },
     ).pipe(
-      tap(resp => {
-        const info = resp?.[this.kubeGuid];
+      kubeProxyResult<KubeVersionInfo>(this.kubeGuid),
+      tap(info => {
         const v = info?.gitVersion ?? this.composeVersion(info);
         this._kubeVersion.set(v || null);
       }),
@@ -104,12 +108,12 @@ export class KubeEndpointDataService {
       map(() => undefined as void),
     );
 
-    const namespacesReq = this.http.get<{ [cnsi: string]: KubeListResponse<KubeNamespace> }>(
+    const namespacesReq = this.http.get<KubeProxyResponse<KubeListResponse<KubeNamespace>>>(
       `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
       { headers },
     ).pipe(
-      tap(resp => {
-        const list = resp?.[this.kubeGuid];
+      kubeProxyResult<KubeListResponse<KubeNamespace>>(this.kubeGuid),
+      tap(list => {
         const items = (list?.items ?? []).map(ns => ({
           ...ns,
           kubeGuid: this.kubeGuid,
@@ -125,12 +129,12 @@ export class KubeEndpointDataService {
       map(() => undefined as void),
     );
 
-    const nodesReq = this.http.get<{ [cnsi: string]: KubeListResponse<unknown> }>(
+    const nodesReq = this.http.get<KubeProxyResponse<KubeListResponse<unknown>>>(
       `/pp/v1/proxy/api/v1/nodes?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
       { headers },
     ).pipe(
-      tap(resp => {
-        const list = resp?.[this.kubeGuid];
+      kubeProxyResult<KubeListResponse<unknown>>(this.kubeGuid),
+      tap(list => {
         this._nodeCount.set(list?.items?.length ?? 0);
       }),
       catchError((err: HttpErrorResponse | unknown) => {
@@ -183,11 +187,10 @@ export class KubeEndpointDataService {
     if (scope === 'version') {
       const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.kubeGuid });
       try {
-        const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeVersionInfo }>(
+        const info = await firstValueFrom(this.http.get<KubeProxyResponse<KubeVersionInfo>>(
           '/pp/v1/proxy/version',
           { headers },
-        ));
-        const info = resp?.[this.kubeGuid];
+        ).pipe(kubeProxyResult<KubeVersionInfo>(this.kubeGuid)));
         this._kubeVersion.set(info?.gitVersion ?? this.composeVersion(info) ?? null);
         this.clearUnavailable('kubeVersion');
       } catch (err) {
@@ -198,11 +201,10 @@ export class KubeEndpointDataService {
     if (scope === 'namespaces') {
       const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.kubeGuid });
       try {
-        const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeListResponse<KubeNamespace> }>(
+        const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<KubeNamespace>>>(
           `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
           { headers },
-        ));
-        const list = resp?.[this.kubeGuid];
+        ).pipe(kubeProxyResult<KubeListResponse<KubeNamespace>>(this.kubeGuid)));
         const items = (list?.items ?? []).map(ns => ({
           ...ns,
           kubeGuid: this.kubeGuid,

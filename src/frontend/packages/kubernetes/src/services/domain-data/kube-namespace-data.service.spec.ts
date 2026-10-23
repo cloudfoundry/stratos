@@ -161,4 +161,20 @@ describe('KubeNamespaceDataService', () => {
 
     expect(held().map(ns => ns.metadata.name)).toEqual(['after']);
   });
+
+  // The proxy answers 200 with a per-endpoint error entry for a failed call.
+  it('fetchDirect records a per-endpoint proxy error with its reason', async () => {
+    const fetching = svc.fetchDirect(KUBE_GUID);
+    httpMock.expectOne(NS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    await expect(fetching).resolves.toEqual([]);
+    expect(svc.errors()()).toEqual([expect.objectContaining({
+      detail: 'Error proxing request: dial tcp: i/o timeout',
+    })]);
+  });
+
+  it('create rejects a namespace the endpoint refused', async () => {
+    const creating = svc.create(KUBE_GUID, 'new-ns');
+    httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces').flush({ [KUBE_GUID]: { error: { statusCode: 403, status: '403 Forbidden' }, errorResponse: { kind: 'Status', message: 'denied' } } });
+    await expect(creating).rejects.toThrow('403 Forbidden: denied');
+  });
 });

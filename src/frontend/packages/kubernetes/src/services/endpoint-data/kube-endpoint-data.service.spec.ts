@@ -169,4 +169,30 @@ describe('KubeEndpointDataService', () => {
     expect(errs[0].detail).toMatch(/ err-1$/);
     expect(errs[49].detail).toMatch(/ err-50$/);
   });
+
+  // The proxy answers 200 with a per-endpoint error entry for a failed call.
+  it('load marks each leg whose proxy entry is an error unavailable, with its reason', async () => {
+    const loading = firstValueFrom(service.load());
+    httpMock.expectOne(VERSION_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    httpMock.expectOne(NAMESPACES_URL).flush({ [KUBE_GUID]: { error: { statusCode: 403, status: '403 Forbidden' }, errorResponse: { kind: 'Status', message: 'denied' } } });
+    httpMock.expectOne(NODES_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    await loading;
+
+    expect(service.unavailable()).toEqual(expect.arrayContaining(['kubeVersion', 'namespaces', 'nodeCount']));
+    expect(service.errors()).toEqual(expect.arrayContaining([
+      expect.objectContaining({ affected: ['namespaces'], code: 'UNAUTHORIZED', detail: '403 Forbidden: denied' }),
+      expect.objectContaining({ affected: ['kubeVersion'], detail: 'Error proxing request: dial tcp: i/o timeout' }),
+    ]));
+  });
+
+  it('refresh of a slice marks it unavailable on a proxy error entry', async () => {
+    const versioning = service.refresh('version');
+    httpMock.expectOne(VERSION_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    await versioning;
+    const namespacing = service.refresh('namespaces');
+    httpMock.expectOne(NAMESPACES_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    await namespacing;
+
+    expect(service.unavailable()).toEqual(['kubeVersion', 'namespaces']);
+  });
 });

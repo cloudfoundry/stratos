@@ -174,4 +174,28 @@ describe('KubeServiceDataService', () => {
       expect(svc.errors()()).toEqual([]);
     });
   });
+
+  // The proxy answers 200 with a per-endpoint error entry for a failed call.
+  it('records a per-endpoint proxy error with its reason, cleared by a later good load', async () => {
+    const failing = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(SERVICES_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    httpMock.expectOne(ENDPOINTS_URL).flush({ [KUBE_GUID]: { items: [] } });
+    await failing;
+    expect(svc.errors()()).toEqual([expect.objectContaining({
+      title: 'kube-services',
+      detail: 'Error proxing request: dial tcp: i/o timeout',
+    })]);
+
+    const retrying = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(SERVICES_URL).flush({ [KUBE_GUID]: { items: [] } });
+    httpMock.expectOne(ENDPOINTS_URL).flush({ [KUBE_GUID]: { items: [] } });
+    await retrying;
+    expect(svc.errors()()).toEqual([]);
+  });
+
+  it('rejects a service delete the endpoint refused', async () => {
+    const deleting = svc.delete(KUBE_GUID, 's1', 'ns');
+    httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces/ns/services/s1').flush({ [KUBE_GUID]: { error: { statusCode: 403, status: '403 Forbidden' }, errorResponse: { kind: 'Status', message: 'denied' } } });
+    await expect(deleting).rejects.toThrow('403 Forbidden: denied');
+  });
 });

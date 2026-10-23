@@ -4,6 +4,7 @@ import { Observable, firstValueFrom, of } from 'rxjs';
 import { catchError, map, shareReplay } from 'rxjs/operators';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
+import { KubeProxyResponse, kubeProxyResult } from '../endpoint-data/kube-proxy-response';
 import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KubePod, KubePodContainerStatus, StratosError } from '../endpoint-data/kube-types';
 
@@ -192,8 +193,9 @@ export class KubePodDataService {
   private fetchPods(kubeGuid: string, key: string, title: string, url: string): Observable<KubePod[]> {
     const live = this.eviction.current(kubeGuid);
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
-    return this.http.get<{ [cnsi: string]: KubeListResponse<KubePod> }>(url, { headers }).pipe(
-      map(resp => live() ? this.absorbResponse(key, kubeGuid, resp?.[kubeGuid]) : []),
+    return this.http.get<KubeProxyResponse<KubeListResponse<KubePod>>>(url, { headers }).pipe(
+      kubeProxyResult<KubeListResponse<KubePod>>(kubeGuid),
+      map(list => live() ? this.absorbResponse(key, kubeGuid, list) : []),
       catchError((err: HttpErrorResponse | unknown) => {
         if (live()) {
           this.markUnavailable(key, err, title, kubeGuid);
@@ -225,14 +227,15 @@ export class KubePodDataService {
 
   // Signal-native pod delete (replaces the ngrx deleteResource pipeline).
   // DELETEs through the Jetstream proxy, then drops the pod from every cached
-  // scope so the lists/graph update immediately. Errors propagate to the
-  // caller (resource viewer renders the failure snackbar).
+  // scope so the lists/graph update immediately. Errors, including the
+  // endpoint refusing the delete, propagate to the caller (resource viewer
+  // renders the failure snackbar).
   async delete(kubeGuid: string, name: string, namespace?: string): Promise<void> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const url = namespace
       ? `/pp/v1/proxy/api/v1/namespaces/${encodeURIComponent(namespace)}/pods/${encodeURIComponent(name)}`
       : `/pp/v1/proxy/api/v1/pods/${encodeURIComponent(name)}`;
-    await firstValueFrom(this.http.delete(url, { headers }));
+    await firstValueFrom(this.http.delete<KubeProxyResponse<unknown>>(url, { headers }).pipe(kubeProxyResult(kubeGuid)));
     this._byScope.update(curr => {
       const next = new Map(curr);
       for (const [key, entry] of next) {
