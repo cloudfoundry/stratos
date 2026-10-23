@@ -334,7 +334,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     });
 
     it('as soon as CF accepts a slow create, before it ends', async () => {
-      const { component, httpMock, endpointData } = await setup();
+      const { fixture, component, httpMock, endpointData } = await setup();
       const done = firstValueFrom(component.onNext());
       httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
         { id: 'job-3', state: 'PROCESSING', startedAt: '2026-10-20T00:00:00Z' },
@@ -344,7 +344,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
       const poll = httpMock.expectOne('/pp/v1/stratos/jobs/job-3');
       poll.flush({ id: 'job-3', state: 'PROCESSING', startedAt: '2026-10-20T00:00:00Z' }, { status: 200, statusText: 'OK' });
       await vi.waitFor(() => expect(endpointData.applyCascade).toHaveBeenCalledWith('serviceInstance.create'));
-      component.ngOnDestroy?.();
+      fixture.destroy();
       void done;
       drain(httpMock);
     });

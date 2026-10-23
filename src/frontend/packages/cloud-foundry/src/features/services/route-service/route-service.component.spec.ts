@@ -29,6 +29,15 @@ describe('RouteServiceComponent — bind patches the binding from the response',
   let http: HttpTestingController;
   let bindingFetches: number;
 
+  // Runs the bind step's submit action; throws when the step has none.
+  const submitBindStep = () => {
+    const submit = component.bindStepHandle.submit;
+    if (!submit) {
+      throw new Error('the bind step has no submit action');
+    }
+    return submit();
+  };
+
   beforeEach(async () => {
     bindingFetches = 0;
     await TestBed.configureTestingModule({
@@ -60,7 +69,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
 
   it('shows the created binding from a 201 body without refetching', async () => {
     component.selectedSiGuid.set('si-1');
-    const done = component.bindStepHandle.submit();
+    const done = submitBindStep();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
       {
         guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
@@ -79,7 +88,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
 
   it('falls back to a refetch when the response is a completed job rather than the binding', async () => {
     component.selectedSiGuid.set('si-1');
-    const done = component.bindStepHandle.submit();
+    const done = submitBindStep();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
       { state: 'COMPLETE', result: { guid: 'job-9', operation: 'service_route_binding.create', state: 'COMPLETE' } },
       { status: 200, statusText: 'OK' },
@@ -92,7 +101,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
 
   it('shows the broker detail when the bind fails on the fast path', async () => {
     component.selectedSiGuid.set('si-1');
-    const done = component.bindStepHandle.submit();
+    const done = submitBindStep();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
       { state: 'FAILED', errors: [{ code: 'cf.v3.10009', message: 'CF-UnableToPerform', detail: 'bind could not be completed: route services disabled' }] },
       { status: 502, statusText: 'Bad Gateway' },
@@ -127,7 +136,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
   // is reported as such and the binding re-read, never shown as bound.
   it('says a bind ended with an unknown result and re-reads the binding', async () => {
     component.selectedSiGuid.set('si-1');
-    const done = component.bindStepHandle.submit();
+    const done = submitBindStep();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(null, { status: 202, statusText: 'Accepted' });
     const message = 'Bind "logger": the operation ended, but its result could not be determined. This page shows the current state.';
     await expect(done).resolves.toEqual({ success: false, message });
@@ -139,7 +148,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
 
   it('says an unbind ended with an unknown result and re-reads the binding', async () => {
     component.selectedSiGuid.set('si-1');
-    const bound = component.bindStepHandle.submit();
+    const bound = submitBindStep();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
       {
         guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
@@ -161,7 +170,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
 
   it('does not bind after the unbind leg of a rebind ends with an unknown result', async () => {
     component.selectedSiGuid.set('si-1');
-    const bound = component.bindStepHandle.submit();
+    const bound = submitBindStep();
     http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
       {
         guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
@@ -173,7 +182,7 @@ describe('RouteServiceComponent — bind patches the binding from the response',
 
     component.startRebind();
     component.selectedSiGuid.set('si-1');
-    const done = component.bindStepHandle.submit();
+    const done = submitBindStep();
     http.expectOne(r => r.method === 'DELETE' && r.url === '/pp/v1/cf/service_route_bindings/cf-1/b-1').flush(null, { status: 202, statusText: 'Accepted' });
     const out = await done;
 

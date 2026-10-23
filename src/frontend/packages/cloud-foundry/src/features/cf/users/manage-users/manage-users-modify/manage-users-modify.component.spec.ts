@@ -28,20 +28,16 @@ import { CfRoleChange } from '../../../../../store/types/users-roles.types';
 const mockUser1: StUser = {
   guid: 'user-1',
   username: 'alice',
-  admin: false,
-  active: true,
   cnsiGuid: 'cfGuid',
-  orgRoles: {},
-  spaceRoles: {},
+  orgRoles: [],
+  spaceRoles: [],
 };
 const mockUser2: StUser = {
   guid: 'user-2',
   username: 'bob',
-  admin: false,
-  active: true,
   cnsiGuid: 'cfGuid',
-  orgRoles: {},
-  spaceRoles: {},
+  orgRoles: [],
+  spaceRoles: [],
 };
 
 const mockExistingRoles = { 'user-1': { 'org-1': { orgGuid: 'org-1', name: 'Org 1', permissions: {}, spaces: {} } } };

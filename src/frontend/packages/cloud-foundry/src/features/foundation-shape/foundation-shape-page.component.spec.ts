@@ -10,7 +10,8 @@ import { MeasuredEcosystem, MeasuredRoles, MeasuredTotals, ShapeMeasureService }
 import { app, binding, org, serviceInstance, space, user } from './testing/entity-builders';
 
 // jsdom cannot exercise the real workbook writer; the mock records the sheets it was handed.
-const writeXlsxMock = vi.hoisted(() => vi.fn(() => ({ toFile: vi.fn(() => Promise.resolve()) })));
+const writeXlsxMock = vi.hoisted(() =>
+  vi.fn((_sheets: { sheet: string; data: unknown[][] }[]) => ({ toFile: vi.fn(() => Promise.resolve()) })));
 vi.mock('write-excel-file/browser', () => ({ default: writeXlsxMock }));
 
 const cfEndpoint = { guid: 'cf-1', name: 'My Cloud Foundry', cnsi_type: 'cf' } as EndpointModel;
@@ -21,6 +22,15 @@ const adminCfEndpoint = {
   user: { guid: 'u1', name: 'admin', admin: true },
 } as EndpointModel;
 const nonCfEndpoint = { guid: 'k8s-1', name: 'My Kube', cnsi_type: 'k8s' } as EndpointModel;
+
+// Returns the button the selector matches; throws when the page did not render it.
+function findButton(root: HTMLElement, selector: string): HTMLButtonElement {
+  const found = root.querySelector<HTMLButtonElement>(selector);
+  if (!found) {
+    throw new Error(`no button matches ${selector}`);
+  }
+  return found;
+}
 
 /** Writable-signal stand-in for the EndpointDataService surface the page reads. */
 const fakeDataService = () => ({
@@ -67,6 +77,15 @@ describe('FoundationShapePageComponent', () => {
     measureTotals: ReturnType<typeof vi.fn>;
     measureEcosystem: ReturnType<typeof vi.fn>;
     measureRoles: ReturnType<typeof vi.fn>;
+  };
+  // Returns the fake data service the page acquired for this endpoint; throws
+  // when the page never acquired one.
+  const dataService = (guid: string): ReturnType<typeof fakeDataService> => {
+    const svc = services.get(guid);
+    if (!svc) {
+      throw new Error(`no data service was acquired for ${guid}`);
+    }
+    return svc;
   };
   /** Records the confirm config and lets a test decide whether the user confirms. */
   let confirmed: { config: { title: string; message: string } | null; accept: boolean };
@@ -158,7 +177,7 @@ describe('FoundationShapePageComponent', () => {
     expect(withData).toHaveLength(3);
     expect(withData.every(tile => tile.headline !== null)).toBe(true);
 
-    const svc = services.get('cf-1');
+    const svc = dataService('cf-1');
     svc.apps.set([]);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -176,7 +195,7 @@ describe('FoundationShapePageComponent', () => {
   });
 
   it('flags never-loaded drains as null spaces total, distinct from empty', async () => {
-    const svc = services.get('cf-1');
+    const svc = dataService('cf-1');
     svc.spaces.set([]);
     svc.spacesLastFetched.set(null);
     fixture.detectChanges();
@@ -185,7 +204,7 @@ describe('FoundationShapePageComponent', () => {
   });
 
   it('shows dashes, not zeros, when the fast counts never loaded', async () => {
-    const svc = services.get('cf-1');
+    const svc = dataService('cf-1');
     svc.lastFetched.set(null);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -195,7 +214,7 @@ describe('FoundationShapePageComponent', () => {
   });
 
   it('shows dashes for service counts until their own counts fetch lands', async () => {
-    const svc = services.get('cf-1');
+    const svc = dataService('cf-1');
     svc.servicesCountsLastFetched.set(null);
     fixture.detectChanges();
     await fixture.whenStable();
@@ -212,8 +231,7 @@ describe('FoundationShapePageComponent', () => {
     });
 
     it('starts a totals measurement for the section endpoint on click', async () => {
-      const button = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[data-test="measure-totals"]');
-      button.click();
+      findButton(fixture.nativeElement as HTMLElement, '[data-test="measure-totals"]').click();
       await fixture.whenStable();
       expect(measure.measureTotals).toHaveBeenCalledWith('cf-1');
     });
@@ -259,10 +277,10 @@ describe('FoundationShapePageComponent', () => {
     it('starts expanded with a single endpoint and collapses on bar toggle', async () => {
       const root = fixture.nativeElement as HTMLElement;
       expect(root.querySelector('[data-test="shape-totals"]')).not.toBeNull();
-      root.querySelector<HTMLButtonElement>('[data-test="section-toggle"]').click();
+      findButton(root, '[data-test="section-toggle"]').click();
       await fixture.whenStable();
       expect(root.querySelector('[data-test="shape-totals"]')).toBeNull();
-      root.querySelector<HTMLButtonElement>('[data-test="section-toggle"]').click();
+      findButton(root, '[data-test="section-toggle"]').click();
       await fixture.whenStable();
       expect(root.querySelector('[data-test="shape-totals"]')).not.toBeNull();
     });
@@ -289,7 +307,7 @@ describe('FoundationShapePageComponent', () => {
 
     it('starts a roles measurement, stating its single-request cost', async () => {
       expect((fixture.nativeElement as HTMLElement).textContent).toContain('1 request');
-      (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('[data-test="measure-roles"]').click();
+      findButton(fixture.nativeElement as HTMLElement, '[data-test="measure-roles"]').click();
       await fixture.whenStable();
       expect(measure.measureRoles).toHaveBeenCalledWith('cf-1');
     });
@@ -317,9 +335,7 @@ describe('FoundationShapePageComponent', () => {
       endpoints.set([adminCfEndpoint]);
       fixture.detectChanges();
       await fixture.whenStable();
-      (fixture.nativeElement as HTMLElement)
-        .querySelector<HTMLButtonElement>(`[data-test="${button}"]`)
-        .click();
+      findButton(fixture.nativeElement as HTMLElement, `[data-test="${button}"]`).click();
       await fixture.whenStable();
     };
 
@@ -353,14 +369,13 @@ describe('FoundationShapePageComponent', () => {
       endpoints.set([adminCfEndpoint]);
       fixture.detectChanges();
       await fixture.whenStable();
-      services.get('cf-1').orgsLastFetched.set(null);
+      dataService('cf-1').orgsLastFetched.set(null);
       fixture.detectChanges();
       await fixture.whenStable();
 
       expect(component.canExportDetail(component.sections()[0])).toBe(false);
       expect(component.detailPayload(component.sections()[0])).toBeNull();
-      const button = (fixture.nativeElement as HTMLElement)
-        .querySelector<HTMLButtonElement>('[data-test="export-detail-json"]');
+      const button = findButton(fixture.nativeElement as HTMLElement, '[data-test="export-detail-json"]');
       expect(button.disabled).toBe(true);
     });
 
@@ -381,7 +396,7 @@ describe('FoundationShapePageComponent', () => {
     it('the spreadsheet form passes the same confirmation gate, then writes the flattened workbook', async () => {
       await clickDetailExport('export-detail-xlsx');
       expect(confirmed.config?.title).toBe('Export named foundation data');
-      const sheets = writeXlsxMock.mock.calls[0][0] as { sheet: string; data: unknown[][] }[];
+      const sheets = writeXlsxMock.mock.calls[0][0];
       expect(sheets.map(s => s.sheet)).toEqual(['Overview', 'Organizations', 'Spaces', 'Apps']);
     });
 
@@ -413,7 +428,7 @@ describe('FoundationShapePageComponent', () => {
       expect(component.detailPayload(component.sections()[0])?.organizations[0].spaces?.[0])
         .not.toHaveProperty('service_instances');
 
-      services.get('cf-1').servicesDetailsLastFetched.set(new Date('2026-08-01T10:00:00Z'));
+      dataService('cf-1').servicesDetailsLastFetched.set(new Date('2026-08-01T10:00:00Z'));
       fixture.detectChanges();
       await fixture.whenStable();
       const payload = component.detailPayload(component.sections()[0]);

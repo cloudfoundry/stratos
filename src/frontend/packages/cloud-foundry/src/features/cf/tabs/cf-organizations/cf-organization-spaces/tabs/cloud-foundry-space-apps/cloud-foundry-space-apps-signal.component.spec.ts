@@ -14,6 +14,7 @@ import { CloudFoundrySpaceAppsSignalComponent } from './cloud-foundry-space-apps
 import { CfAppsSignalConfigService } from '../../../../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
+import type { StApp } from '../../../../../../../services/endpoint-data/stratos-types';
 
 // Mirrors the mock in bulk-progress.spec.ts / cloud-foundry-applications-signal.component.spec.ts:
 // show/open/error recorded separately (runBulkWithProgress calls each for a
@@ -21,9 +22,30 @@ import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-
 // progress snackbar.
 function makeSnackBar() {
   const ref = { update: vi.fn(), dismiss: vi.fn(), afterDismissed: vi.fn(), onAction: vi.fn(), dismissWithAction: vi.fn() };
-  return { ref, open: vi.fn(() => ref), show: vi.fn(() => ref), error: vi.fn(() => ref) };
+  return {
+    ref,
+    open: vi.fn<TailwindSnackBarService['open']>(() => ref),
+    show: vi.fn<TailwindSnackBarService['show']>(() => ref),
+    error: vi.fn<TailwindSnackBarService['error']>(() => ref),
+  };
 }
 const flush = async (n = 16) => { for (let i = 0; i < n; i++) { await Promise.resolve(); } };
+
+// A started one-instance app in space-1 on cnsi-1; overrides set the rest.
+function app(overrides: Partial<StApp> = {}): StApp {
+  return {
+    cnsiGuid: 'cnsi-1',
+    guid: 'app-1',
+    name: 'app-1',
+    state: 'STARTED',
+    spaceGuid: 'space-1',
+    instances: 1,
+    routes: [],
+    createdAt: '',
+    updatedAt: '',
+    ...overrides,
+  };
+}
 
 function makeStubAppsConfig() {
   const pageIndex = signal(0);
@@ -32,7 +54,7 @@ function makeStubAppsConfig() {
   const sortSig = signal({ field: 'name' as const, direction: 'asc' as const });
   const view = {
     pagedItems: signal([]).asReadonly(),
-    filteredItems: signal([]).asReadonly(),
+    filteredItems: signal<StApp[]>([]).asReadonly(),
     totalFilteredResults: signal(0).asReadonly(),
     totalPages: signal(1).asReadonly(),
     totalItems: signal(0).asReadonly(),
@@ -224,9 +246,9 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
   // wording — a CF delete accepted async settles for real once its job
   // completes, and the summary should say so.
   it('bulk delete reports settled outcome wording, not "requested"', async () => {
-    const targets: any[] = [
-      { cnsiGuid: 'cnsi-1', guid: 'app-1', name: 'app-1', state: 'STARTED', spaceGuid: 'space-1', instances: 1, createdAt: '', updatedAt: '' },
-      { cnsiGuid: 'cnsi-1', guid: 'app-2', name: 'app-2', state: 'STARTED', spaceGuid: 'space-1', instances: 1, createdAt: '', updatedAt: '' },
+    const targets: StApp[] = [
+      app({ guid: 'app-1', name: 'app-1' }),
+      app({ guid: 'app-2', name: 'app-2' }),
     ];
     stubAppsConfig.view.filteredItems = signal(targets).asReadonly();
     stubAppsConfig.bulkDeleteApps.mockResolvedValue({
@@ -257,8 +279,8 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
   it('bulk delete names a failed application and gives the reason', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     const targets: StApp[] = [
-      { cnsiGuid: 'cnsi-1', guid: 'app-1', name: 'l9-after', state: 'STARTED', spaceGuid: 'space-1', instances: 1, createdAt: '', updatedAt: '' } as any,
-      { cnsiGuid: 'cnsi-1', guid: 'app-2', name: 'l7-after', state: 'STARTED', spaceGuid: 'space-1', instances: 1, createdAt: '', updatedAt: '' } as any,
+      app({ guid: 'app-1', name: 'l9-after' }),
+      app({ guid: 'app-2', name: 'l7-after' }),
     ];
     stubAppsConfig.view.filteredItems = signal(targets).asReadonly();
     stubAppsConfig.bulkDeleteApps.mockResolvedValue({
@@ -287,7 +309,7 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
   // a multi-select delete's, and it must leave other rows' selection alone.
   it('row delete with cleanup names the failure and keeps the selection', async () => {
     vi.spyOn(console, 'warn').mockImplementation(() => {});
-    const target = { cnsiGuid: 'cnsi-1', guid: 'app-2', name: 'l7-after', state: 'STARTED', spaceGuid: 'space-1', instances: 1, createdAt: '', updatedAt: '' } as any;
+    const target = app({ guid: 'app-2', name: 'l7-after' });
     stubAppsConfig.bulkDeleteAppsWithCleanup.mockResolvedValue({
       results: [{ guid: 'app-2', state: 'FAILED', errors: [{ code: 'CF-X', message: 'A binding is in progress.' }] }],
       succeeded: 0,

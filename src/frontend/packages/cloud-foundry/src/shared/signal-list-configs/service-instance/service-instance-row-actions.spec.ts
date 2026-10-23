@@ -29,7 +29,8 @@ const keysAction = (si: StServiceInstance, d: ServiceInstanceRowActionDeps) =>
 describe('buildServiceInstanceRowActions — Service Keys breadcrumb context', () => {
   it('tags the keys nav with ?breadcrumbs=<key> when a breadcrumbKey is given', () => {
     const d = deps({ breadcrumbKey: 'space-services' });
-    keysAction(managed(), d)!.invoke();
+    const si = managed();
+    keysAction(si, d)!.invoke(si);
 
     expect(d.router.navigate).toHaveBeenCalledWith(
       ['/services', 'service', 'cf-1', 'si-1', 'keys'],
@@ -39,7 +40,8 @@ describe('buildServiceInstanceRowActions — Service Keys breadcrumb context', (
 
   it('navigates without a breadcrumbs query param when no key is given (global wall)', () => {
     const d = deps();
-    keysAction(managed(), d)!.invoke();
+    const si = managed();
+    keysAction(si, d)!.invoke(si);
 
     expect(d.router.navigate).toHaveBeenCalledWith(
       ['/services', 'service', 'cf-1', 'si-1', 'keys'],
@@ -58,7 +60,8 @@ describe('buildServiceInstanceRowActions — Delete failure', () => {
       confirmDialog: { open: vi.fn((_c: unknown, cb: () => Promise<void>) => { confirmed = cb; }) } as unknown as ServiceInstanceRowActionDeps['confirmDialog'],
       deleteServiceInstance: vi.fn().mockRejectedValue(httpError),
     });
-    buildServiceInstanceRowActions(managed(), d).find(a => a.label === 'Delete')!.invoke();
+    const si = managed();
+    buildServiceInstanceRowActions(si, d).find(a => a.label === 'Delete')!.invoke(si);
     await confirmed!();
 
     expect(d.snackBar.error).toHaveBeenCalledWith([
@@ -76,7 +79,8 @@ describe('buildServiceInstanceRowActions — Delete failure', () => {
       confirmDialog: { open: vi.fn((_c: unknown, cb: () => Promise<void>) => { confirmed = cb; }) } as unknown as ServiceInstanceRowActionDeps['confirmDialog'],
       deleteServiceInstance: vi.fn().mockRejectedValue(httpError),
     });
-    buildServiceInstanceRowActions(managed(), d).find(a => a.label === 'Delete')!.invoke();
+    const si = managed();
+    buildServiceInstanceRowActions(si, d).find(a => a.label === 'Delete')!.invoke(si);
     await confirmed!();
 
     expect(d.snackBar.error).toHaveBeenCalledWith([
@@ -91,7 +95,8 @@ describe('buildServiceInstanceRowActions — Delete with an unknown result', () 
   const confirmDelete = async (d: ServiceInstanceRowActionDeps): Promise<void> => {
     let confirmed: (() => Promise<void>) | undefined;
     d.confirmDialog.open = vi.fn((_c: unknown, cb: () => Promise<void>) => { confirmed = cb; }) as never;
-    buildServiceInstanceRowActions(managed(), d).find(a => a.label === 'Delete')!.invoke();
+    const si = managed();
+    buildServiceInstanceRowActions(si, d).find(a => a.label === 'Delete')!.invoke(si);
     await confirmed!();
   };
 

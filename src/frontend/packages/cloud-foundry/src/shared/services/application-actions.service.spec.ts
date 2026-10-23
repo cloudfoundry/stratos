@@ -71,9 +71,10 @@ let capturedOnProgress: ((job: StratosJob) => void) | undefined;
 function makeAppsStub() {
   const resolvers: Array<() => void> = [];
   function makeAction(_name: string) {
-    return vi.fn(async (_cnsi: string, _app: string, opts?: { onProgress?: (job: StratosJob) => void }) => {
+    return vi.fn<CfAppsSignalConfigService['restartApp']>(async (_cnsi, _app, opts) => {
       capturedOnProgress = opts?.onProgress;
       await new Promise<void>((r) => resolvers.push(r));
+      return undefined;
     });
   }
   // Stub the wave-1 orchestrator surface used by the post-delete row-evict
@@ -86,14 +87,17 @@ function makeAppsStub() {
     restageApp: makeAction('restageApp'),
     // deleteWithCleanup orchestrates routes/bindings/app deletes serially.
     // Each is a thenable; tests resolve them via _resolveAll.
-    deleteApp: vi.fn(async (_cnsi: string, _app: string) => {
+    deleteApp: vi.fn<CfAppsSignalConfigService['deleteApp']>(async () => {
       await new Promise<void>((r) => resolvers.push(r));
+      return 'deleted';
     }),
-    deleteRoute: vi.fn(async (_cnsi: string, _routeGuid: string) => {
+    deleteRoute: vi.fn<CfAppsSignalConfigService['deleteRoute']>(async () => {
       await new Promise<void>((r) => resolvers.push(r));
+      return 'deleted';
     }),
-    deleteServiceBinding: vi.fn(async (_cnsi: string, _bindingGuid: string) => {
+    deleteServiceBinding: vi.fn<CfAppsSignalConfigService['deleteServiceBinding']>(async () => {
       await new Promise<void>((r) => resolvers.push(r));
+      return 'deleted';
     }),
     orchestrator: { removeRow },
     _removeRow: removeRow,

@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { Signal, WritableSignal, provideZonelessChangeDetection, signal } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
@@ -19,6 +19,7 @@ import {
   RoleAssignmentDriver,
 } from '../../../../shared/components/role-assignment/role-assignment.test-deps';
 import * as addModule from '../../../../shared/signal-list-configs/user/cf-users-add';
+import { StUser } from '../../../../services/endpoint-data/stratos-types';
 import { AddUserDialogComponent, AddUserDialogData } from './add-user-dialog.component';
 
 const CF_GUID = 'test-cf-guid';
@@ -29,6 +30,26 @@ const TEST_HARNESS_CFG = {
   spacesByOrg: { 'org-1': [] },
 };
 
+// The protected members these tests drive and read. They are protected
+// because only the template uses them; the tests reach them through this
+// view of the component instance.
+interface AddUserDialogTestView {
+  data: AddUserDialogData;
+  pendingUsers: StUser[];
+  origin: Signal<string>;
+  originOptions: Signal<string[]>;
+  identities: WritableSignal<string[]>;
+  identitiesValid: WritableSignal<boolean>;
+  roleChanges: Signal<CfRoleChange[]>;
+  submitting: Signal<boolean>;
+  inviteTabVisible: Signal<boolean>;
+  orgLocked: Signal<boolean>;
+  rolesRequired: Signal<boolean>;
+  canSubmit: Signal<boolean>;
+  onRoleChangeSet(changes: CfRoleChange[]): void;
+  submit(): Promise<void>;
+}
+
 interface MakeOpts {
   idpsOrigins?: string[];
   /** Whether the console user is a CF admin on the endpoint (default true). */
@@ -36,7 +57,7 @@ interface MakeOpts {
 }
 
 function make(data: AddUserDialogData, opts: MakeOpts = {}): {
-  cmp: AddUserDialogComponent;
+  cmp: AddUserDialogTestView;
   fixture: ComponentFixture<AddUserDialogComponent>;
   close: ReturnType<typeof vi.fn>;
   listOrigins: ReturnType<typeof vi.fn>;
@@ -65,7 +86,7 @@ function make(data: AddUserDialogData, opts: MakeOpts = {}): {
 
   const fixture = TestBed.createComponent(AddUserDialogComponent);
   fixture.detectChanges();
-  return { cmp: fixture.componentInstance, fixture, close, listOrigins };
+  return { cmp: fixture.componentInstance as unknown as AddUserDialogTestView, fixture, close, listOrigins };
 }
 
 describe('AddUserDialogComponent', () => {
@@ -102,7 +123,7 @@ describe('AddUserDialogComponent', () => {
       { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
       { admin: false },
     );
-    const c = cmp as any;
+    const c = cmp;
     c.identities.set(['alice']);
     c.identitiesValid.set(true);
     expect(c.rolesRequired()).toBe(true);
@@ -114,7 +135,7 @@ describe('AddUserDialogComponent', () => {
 
   it('lets a CF admin submit without a role', () => {
     const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false }, { admin: true });
-    const c = cmp as any;
+    const c = cmp;
     c.identities.set(['alice']);
     c.identitiesValid.set(true);
     expect(c.rolesRequired()).toBe(false);
@@ -148,7 +169,7 @@ describe('AddUserDialogComponent', () => {
     // No orgGuid → orgLocked is false
     expect(cmp.orgLocked()).toBe(false);
     // roleChanges starts empty
-    expect((cmp as any).roleChanges()).toEqual([]);
+    expect(cmp.roleChanges()).toEqual([]);
   });
 
   // ── sentinel-user regression guard ────────────────────────────────────────
@@ -157,7 +178,7 @@ describe('AddUserDialogComponent', () => {
 
   it('pendingUsers is a stable array with exactly one sentinel entry', () => {
     const { cmp } = make({ cfGuid: CF_GUID, userInviteAllowed: false });
-    const pending = (cmp as any).pendingUsers as any[];
+    const pending = cmp.pendingUsers;
     expect(pending).toHaveLength(1);
     expect(pending[0].guid).toBeTruthy();
     expect(pending[0].guid).toBe('pending-add-user');
@@ -187,8 +208,8 @@ describe('AddUserDialogComponent', () => {
       add: true,
       role: OrgUserRoleNames.MANAGER,
     };
-    (cmp as any).onRoleChangeSet([change]);
-    expect((cmp as any).roleChanges()).toEqual([change]);
+    cmp.onRoleChangeSet([change]);
+    expect(cmp.roleChanges()).toEqual([change]);
   });
 
   it('submit forwards the widget grants to addUsers via req.changes', async () => {
@@ -196,7 +217,7 @@ describe('AddUserDialogComponent', () => {
     const { cmp, close } = make(
       { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
     );
-    const c = cmp as any;
+    const c = cmp;
 
     // Simulate widget emitting a role change
     const change: CfRoleChange = {
@@ -234,7 +255,7 @@ describe('AddUserDialogComponent', () => {
     const { cmp, close } = make(
       { cfGuid: CF_GUID, orgGuid: 'org-1', orgName: 'Org One', userInviteAllowed: false },
     );
-    const c = cmp as any;
+    const c = cmp;
 
     c.identities.set(['alice', 'bob']);
     c.identitiesValid.set(true);
@@ -270,7 +291,7 @@ describe('AddUserDialogComponent', () => {
       orgName: 'Org One',
       userInviteAllowed: false,
     });
-    const c = cmp as any;
+    const c = cmp;
 
     // Wait for async init (fetchOrgs subscription + permission resolution).
     await fixture.whenStable();
@@ -295,8 +316,9 @@ describe('AddUserDialogComponent', () => {
     expect(spy).toHaveBeenCalledOnce();
     const [, req] = spy.mock.calls[0];
     // req.changes must NOT be empty — this is the regression guard.
-    expect(req.changes.length).toBeGreaterThan(0);
-    expect(req.changes.some((r: CfRoleChange) => r.role === OrgUserRoleNames.MANAGER && r.add === true)).toBe(true);
+    const changes = req.changes ?? [];
+    expect(changes.length).toBeGreaterThan(0);
+    expect(changes.some((r: CfRoleChange) => r.role === OrgUserRoleNames.MANAGER && r.add === true)).toBe(true);
 
     spy.mockRestore();
   });
