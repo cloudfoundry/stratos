@@ -6,6 +6,7 @@ import { MetricQueryConfig, getFullMetricQueryQuery } from '../actions/metrics.a
 import { httpErrorResponseToSafeString } from '../jetstream';
 import { IMetrics, IMetricsData, IMetricsResponse } from '../types/base-metric.types';
 import { MetricQueryType } from '../types/metric.types';
+import { isProxyErrorEntry, proxyErrorReason } from './proxy-error-entry';
 
 // Shape that captures the V2 MetricsAction's HTTP-relevant payload without
 // any ngrx/entity-catalog coupling. Consumers build a MetricsRequest, hand it
@@ -47,7 +48,9 @@ export class MetricsDataService {
   // One-shot fetch. Mirrors metrics.effects.ts:metrics$ — same URL build,
   // same x-cap-cnsi-list header, same response unwrap. Returns the IMetrics
   // payload for the requested endpoint (null when Jetstream returns no
-  // entry for that endpoint).
+  // entry for that endpoint). The endpoint's error entry (the plugin
+  // answers 200 per endpoint) rejects with an HttpErrorResponse carrying
+  // the endpoint's status and reason, as an HTTP failure would.
   async fetch<T = any>(req: MetricsRequest): Promise<IMetrics<T> | null> {
     const fullUrl = `${req.url}/${req.queryType}?query=${getFullMetricQueryQuery(req.query)}`;
     const response = await firstValueFrom(
@@ -56,6 +59,14 @@ export class MetricsDataService {
       })
     );
     const entry = response?.[req.endpointGuid];
+    if (isProxyErrorEntry(entry)) {
+      throw new HttpErrorResponse({
+        status: entry.error.statusCode,
+        statusText: entry.error.status,
+        url: fullUrl,
+        error: proxyErrorReason(entry),
+      });
+    }
     if (!entry) {
       return null;
     }

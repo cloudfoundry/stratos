@@ -103,6 +103,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   });
 
   public isFetching = computed(() => this.observation ? this.observation.fetching() && !this.observation.metrics() : true);
+  // Why the last fetch failed (the chart shows it in place of the data).
+  public error = computed(() => this.observation?.error() ?? null);
   public isRefreshing = computed(() => this.observation ? this.observation.fetching() && !!this.observation.metrics() : false);
 
   public chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };

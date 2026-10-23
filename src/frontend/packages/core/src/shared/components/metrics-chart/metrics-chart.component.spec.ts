@@ -1,65 +1,36 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createBasicStoreModule } from "@test-framework/core-test.helper";
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { MetricsDataService } from '@stratosui/store';
+import { describe, it, expect } from 'vitest';
 
-import { CoreTestingModule } from "@test-framework/core-test.modules";
-import { CoreModule } from '../../../core/core.module';
-import { MDAppModule } from '../../../core/md.module';
-import { SharedModule } from '../../shared.module';
 import { MetricsChartComponent } from './metrics-chart.component';
-import { MetricsLineChartConfig } from './metrics-chart.types';
 
-// REASON FOR SKIP: Architectural issue tracked in STRAT-152
-//
-// PROBLEM:
-// MetricsChartComponent (in @stratosui/core) requires a concrete MetricsAction for testing,
-// but all implementations are in feature packages (@stratosui/cloud-foundry, @stratosui/kubernetes).
-// This violates the dependency hierarchy: core packages should not depend on feature packages.
-//
-// BLOCKING ISSUE (STRAT-152):
-// The metrics architecture needs reorganization to provide test-friendly mock actions:
-// - Option A: Create MockMetricsAction in @stratosui/store/testing
-// - Option B: Move all metrics actions to store package (major refactoring)
-// - Option C: Accept integration-only testing (current state)
-//
-// CURRENT COVERAGE:
-// - Integration tests exist in feature packages (ApplicationInstanceChartComponent, PodMetricsComponent)
-// - Component works correctly in production
-// - Complex business logic (mapMetricsToChartData, postFetchMiddleware) lacks unit test coverage
-//
-// DECISION: Keep skipped until STRAT-152 is resolved with architectural decision.
-//
-// TODO: Fix after metrics architecture has been sorted - STRAT-152
-describe.skip('MetricsChartComponent', () => {
-  let component: MetricsChartComponent;
-  let fixture: ComponentFixture<MetricsChartComponent>;
-
-  beforeEach(() => {
+// The chart reads its data through MetricsDataService.observe(), so a
+// stubbed observation drives it (the V2 metrics actions an earlier,
+// skipped suite waited for were deleted in 2847befc2b).
+describe('MetricsChartComponent load failure', () => {
+  it('shows why the metrics failed to load instead of an empty chart', async () => {
+    const error = signal<string | null>('Error proxing request: dial tcp: i/o timeout (500)');
+    const observation = {
+      metrics: signal(null).asReadonly(), fetching: signal(false).asReadonly(), error: error.asReadonly(),
+      refresh: async () => undefined, stop: () => undefined,
+    };
     TestBed.configureTestingModule({
-      providers: [provideZonelessChangeDetection()],
-      imports: [
-        MDAppModule,
-        CoreModule,
-        SharedModule,
-        CoreTestingModule,
-        createBasicStoreModule(),
-        NoopAnimationsModule,
-      ]
+      imports: [MetricsChartComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: MetricsDataService, useValue: { observe: () => observation } },
+      ],
     });
-      TestBed.compileComponents();
-  });
+    const fixture = TestBed.createComponent(MetricsChartComponent);
+    fixture.componentInstance.metricsConfig = { request: {} as any, getSeriesName: () => '' };
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[data-test="metrics-chart-error"]')?.textContent)
+      .toContain('Failed to load metrics: Error proxing request: dial tcp: i/o timeout (500)');
 
-  beforeEach(() => {
-    fixture = TestBed.createComponent(MetricsChartComponent);
-    component = fixture.componentInstance;
-    component.chartConfig = new MetricsLineChartConfig();
-    component.chartConfig.xAxisLabel = 'Time';
-    fixture.detectChanges();
-  });
-
-  it('should create', () => {
-    expect(component).toBeTruthy();
+    error.set(null);
+    await fixture.whenStable();
+    expect(el.querySelector('[data-test="metrics-chart-error"]')).toBeNull();
   });
 });

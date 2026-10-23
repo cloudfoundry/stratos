@@ -2,6 +2,9 @@
   <div class="card-header">
     <h3 class="card-title">Summary of {{title}} Usage for Last {{period}}</h3>
   </div>
+  @if (errorText(); as error) {
+    <div data-test="node-metric-error" class="card-content p-4 text-sm text-danger-shade-700 break-words">Failed to load: {{ error }}</div>
+  } @else {
   @if (metric==='container_memory_usage_bytes') {
     <div class="card-content p-4">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -17,5 +20,6 @@
         <app-kubernetes-node-simple-metric key="Maximum" value="{{ (max$ | async ) | number:'1.0-2' }}" unit="secs"></app-kubernetes-node-simple-metric>
       </div>
     </div>
+  }
   }
 </div>

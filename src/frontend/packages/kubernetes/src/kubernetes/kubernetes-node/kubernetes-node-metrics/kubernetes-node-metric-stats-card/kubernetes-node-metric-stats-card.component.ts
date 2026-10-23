@@ -6,6 +6,9 @@ import {
   OnInit,
   inject,
   ChangeDetectionStrategy,
+  Signal,
+  computed,
+  signal,
 } from "@angular/core";
 import { Observable, Subscription } from "rxjs";
 
@@ -46,6 +49,9 @@ export class KubernetesNodeMetricStatsCardComponent
 
   max$!: Observable<number>;
   mean$!: Observable<number>;
+  // Why either statistic failed to load, shown in place of the values.
+  private readonly statErrors = signal<Signal<string | null>[]>([]);
+  readonly errorText = computed(() => this.statErrors().map(e => e()).find(e => !!e) ?? null);
   subscriptions: Subscription[] = [];
   public kubeNodeService = inject(KubernetesNodeService);
 
@@ -63,6 +69,7 @@ export class KubernetesNodeMetricStatsCardComponent
     );
     this.subscriptions.push(meanMetric.pollerSub);
     this.mean$ = meanMetric.entity$;
+    this.statErrors.set([maxMetric.error, meanMetric.error]);
   }
 
   ngOnDestroy() {
