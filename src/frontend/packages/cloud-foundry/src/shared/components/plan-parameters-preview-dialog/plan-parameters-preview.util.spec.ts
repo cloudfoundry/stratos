@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { extractCreateParameters, previewSchema } from './plan-parameters-preview.util';
 import type { StServicePlan } from '../../../services/endpoint-data/stratos-types';
 
