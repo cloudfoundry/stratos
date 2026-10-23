@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { Unsubscribable } from 'rxjs';
 
 import { isUnlimited } from './cf-quota.types';
 
@@ -273,7 +273,7 @@ export function safeStringToObj<T = object>(value: string): T | null {
   return null;
 }
 
-export const safeUnsubscribe = (...subs: Subscription[]) => {
+export const safeUnsubscribe = (...subs: Unsubscribable[]) => {
   subs.forEach(sub => {
     if (sub) {
       sub.unsubscribe();

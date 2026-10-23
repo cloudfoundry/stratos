@@ -35,7 +35,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   protected override injector = inject(Injector);
 
   readonly closeModalEvent = output<void>();
-  readonly endpointRegistered = output<any>();
+  readonly endpointRegistered = output<void>();
 
   @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false })
   // strict: ViewChild populated by Angular before loadEndpointRegistrationComponent runs.
@@ -298,7 +298,6 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
 
   private onEndpointRegistered() {
     console.log('Modal: onEndpointRegistered called - emitting event');
-    // TODO: The 'emit' function requires a mandatory any argument
     this.endpointRegistered.emit();
     // Small delay to show success before closing
     setTimeout(() => {

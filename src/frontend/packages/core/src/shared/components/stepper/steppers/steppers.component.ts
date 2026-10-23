@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { RoutingHistoryService } from '@stratosui/store';
-import { combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
+import { combineLatest, Observable, of as observableOf, Subscription, Unsubscribable } from 'rxjs';
 import { take, catchError, defaultIfEmpty, finalize, map, switchMap } from 'rxjs/operators';
 
 import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
@@ -69,7 +69,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   allSteps: StepComponent[] = [];
   showNextButtonProgress = false;
 
-  hiddenSubs: Subscription[] = [];
+  hiddenSubs: Unsubscribable[] = [];
 
   stepValidateSub: Subscription | null = null;
 

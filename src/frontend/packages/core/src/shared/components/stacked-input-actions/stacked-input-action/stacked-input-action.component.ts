@@ -84,7 +84,7 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   readonly resolvedConfig = computed(() => this.config() || StackedInputActionComponent.defaultConfig);
 
   readonly stateOut = output<StackedInputActionUpdate>();
-  readonly remove = output<any>();
+  readonly remove = output<void>();
 
   @ViewChild('inputElement', { static: true }) inputElement!: ElementRef;
 
