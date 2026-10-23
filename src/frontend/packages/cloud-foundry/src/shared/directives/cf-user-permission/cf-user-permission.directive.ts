@@ -15,7 +15,8 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   private viewContainer = inject(ViewContainerRef);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
-  public readonly appCfUserPermission = input<CfCurrentUserPermissions>();
+  // The structural directive's own expression; every use names the permission.
+  public readonly appCfUserPermission = input.required<CfCurrentUserPermissions>();
 
   public readonly appCfUserPermissionEndpointGuid = input<string>();
 
@@ -44,7 +45,7 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
     );
   }
 
-  private waitForEndpointPermissions(endpointGuid: string): Observable<any> {
+  private waitForEndpointPermissions(endpointGuid?: string): Observable<any> {
     return endpointGuid && endpointGuid.length > 0 ? waitForCFPermissions(this.cfRoles, endpointGuid) : observableOf(true);
   }
 

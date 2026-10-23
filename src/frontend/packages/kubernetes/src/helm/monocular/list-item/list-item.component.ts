@@ -34,7 +34,7 @@ export class ListItemComponent implements OnInit {
     this.showArtifactHub$ = artifactHubAndHelmRepoTypes$ ? artifactHubAndHelmRepoTypes$.pipe(
       map(artifactHubAndHelmRepoTypes =>
         // Only show if we have artifact hub registered, there's other helm repo's also registered and this chart is from artifact hub
-        artifactHubAndHelmRepoTypes && !!this.chart().monocularEndpointId
+        artifactHubAndHelmRepoTypes && !!this.chart()?.monocularEndpointId
       ),
     ) : of(false);
   }

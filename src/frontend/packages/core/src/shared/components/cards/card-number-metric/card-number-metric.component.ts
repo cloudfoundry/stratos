@@ -78,10 +78,11 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   }
 
   format() {
-    if (this.value() === '') {
+    const value = this.value();
+    if (value === undefined || value === '') {
       this.handleNoValue();
     } else {
-      this.handleValue();
+      this.handleValue(value);
     }
   }
 
@@ -90,14 +91,14 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     this.formattedLimit = undefined;
   }
 
-  handleValue() {
-    const value = parseInt(this.value(), 10);
+  handleValue(rawValue: string) {
+    const value = parseInt(rawValue, 10);
     this.isUnlimited = false;
     if (isUnlimited(value)) {
       this.formattedValue = 'Unlimited';
       this.isUnlimited = true;
     } else {
-      this.formattedValue = this.formatForUnits(this.value());
+      this.formattedValue = this.formatForUnits(rawValue);
     }
 
     const limitValue = this.limit();
@@ -105,7 +106,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
       return;
     }
 
-    const status = determineCardStatus(parseInt(this.value(), 10), parseInt(limitValue, 10));
+    const status = determineCardStatus(value, parseInt(limitValue, 10));
     this._status.set(status);
 
     const limit = parseInt(limitValue, 10);
@@ -131,10 +132,11 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   }
 
   goToLink() {
-    if (typeof (this.link()) === 'string') {
-      this.router.navigate([this.link()]);
+    const link = this.link();
+    if (typeof link === 'string') {
+      this.router.navigate([link]);
     } else {
-      this.link()?.();
+      link?.();
     }
   }
 

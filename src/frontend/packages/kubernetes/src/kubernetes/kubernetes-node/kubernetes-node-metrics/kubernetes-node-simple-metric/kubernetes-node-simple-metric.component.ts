@@ -9,12 +9,11 @@ import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
 })
 export class KubernetesNodeSimpleMetricComponent {
 
-  // strict: required @Input, set by Angular before the template reads it
-  readonly key = input<string>();
+  // Every caller binds key and value.
+  readonly key = input.required<string>();
 
-  // strict: required @Input, set by Angular before the template reads it.
   // Callers bind interpolated (already formatted) values, so this is a string.
-  readonly value = input<string>();
+  readonly value = input.required<string>();
 
   // Optional - callers may omit the unit; formatValue() falls back to ''
   readonly unit = input<string>();

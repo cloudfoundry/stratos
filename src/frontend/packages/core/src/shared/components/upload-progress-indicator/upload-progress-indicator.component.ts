@@ -18,6 +18,6 @@ export class UploadProgressIndicatorComponent {
 
   constructor() { }
 
-  readonly value = input<number>();
+  readonly value = input(0);
 
 }
