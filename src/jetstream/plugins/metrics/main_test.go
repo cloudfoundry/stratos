@@ -83,3 +83,35 @@ func TestUrlComparision(t *testing.T) {
 	})
 
 }
+
+func TestInfoFailsOnAnErrorStatus(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		status  int
+		wantErr bool
+	}{
+		{http.StatusOK, false},
+		{http.StatusUnauthorized, false},
+		{http.StatusBadRequest, true},
+		{http.StatusNotFound, true},
+		{http.StatusInternalServerError, true},
+		{http.StatusBadGateway, true},
+	} {
+		server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+			w.WriteHeader(tc.status)
+		}))
+		m := &MetricsSpecification{portalProxy: &httpClientProxy{}}
+
+		_, _, err := m.Info(server.URL, false, "")
+		server.Close()
+
+		if tc.wantErr {
+			if assert.Error(t, err, "status %d", tc.status) {
+				assert.Contains(t, err.Error(), http.StatusText(tc.status))
+			}
+		} else {
+			assert.NoError(t, err, "status %d", tc.status)
+		}
+	}
+}
