@@ -32,7 +32,7 @@
               </app-card-number-metric>
             </app-tile>
             <app-tile>
-              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/pods"
+              <app-card-number-metric [textOnly]="true" link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/resource/pod"
                 icon="apps" label="Pods" labelSingular="Pod" value="{{ podCount$ | async }}">
               </app-card-number-metric>
             </app-tile>
