@@ -196,7 +196,7 @@
     "@vitest/ui": "5.0.3",
     "acorn": "8.18.0",
     "adm-zip": "0.6.1",
-    "angular-eslint": "22.5.0",
+    "angular-eslint": "22.6.0",
     "baseline-browser-mapping": "^2.11.27",
     "copy-webpack-plugin": "14.0.0",
     "eslint": "^10.12.0",
