@@ -3,7 +3,7 @@
 // Purpose: Initialize TestBed platform once for entire workspace
 
 console.log('[WORKSPACE SETUP] ===== FILE LOADING =====');
-import { expect, describe, it } from 'vitest';
+import { chai, expect, describe, it } from 'vitest';
 console.log('[WORKSPACE SETUP] Vitest imports loaded');
 import '@angular/compiler';
 console.log('[WORKSPACE SETUP] Angular compiler loaded');
@@ -31,6 +31,24 @@ if (typeof window !== 'undefined') {
 } else {
   console.log('[WORKSPACE SETUP] WARNING: window is undefined!');
 }
+
+// toContain on null/undefined must fail. Vitest passes such a value
+// straight to chai's include, which reads a keyless object or function
+// argument as a property subset ("has all of these no properties") and
+// passes, so `expect(missing?.list).toContain(fn)` checked nothing. Jest
+// rejects a null or undefined received value; so do we.
+chai.use((chaiApi, utils) => {
+  utils.overwriteMethod(chaiApi.Assertion.prototype, 'toContain', (original: (...args: unknown[]) => unknown) =>
+    function (this: object, ...args: unknown[]) {
+      const actual = utils.flag(this, 'object');
+      if (actual === null || actual === undefined) {
+        throw new chaiApi.AssertionError(
+          `toContain: expected a string, array or other iterable to search, but got ${actual}`,
+        );
+      }
+      return original.apply(this, args);
+    });
+});
 
 // Polyfill: window.matchMedia for all tests
 if (typeof window.matchMedia === 'undefined') {
