@@ -157,7 +157,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
     ).subscribe(endpoint => {
       this.setAdvancedFields(endpoint);
       this.lastSkipSSLValue = endpoint.skip_ssl_validation ?? false;
-      this.showCACertField.set(!!endpoint.caCert);
+      this.showCACertField.set(!!endpoint.ca_cert);
       this.updateSSLFieldCheckbox();
       this.editEndpoint.setValue({
         name: endpoint.name,
@@ -167,7 +167,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
         clientID: endpoint.client_id ?? '',
         clientSecret: '',
         allowSSO: endpoint.sso_allowed,
-        caCert: endpoint.caCert || '' });
+        caCert: endpoint.ca_cert || '' });
       this.editEndpoint.controls.url.disable();
       this.updateControls();
     });
