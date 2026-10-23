@@ -47,7 +47,7 @@ import {
   KubeStorageClass,
   StratosError,
 } from '../../services/endpoint-data/kube-types';
-import { kubeListErrorState } from '../list-types/kube-list-errors';
+import { kubeListErrorState, reportKubeListErrors } from '../list-types/kube-list-errors';
 import { KubeSortSpec, KubeViewPipeline } from '../list-types/kube-view-pipeline';
 import { KubernetesSignalConfigContext } from './kubernetes-signal-config-registry';
 
@@ -143,6 +143,9 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
     });
   });
 
+  const errorState = kubeListErrorState(kubeGuid, errors);
+  reportKubeListErrors(errorState.errorsByCnsi, injector);
+
   return {
     pagedItems: view.pagedItems,
     totalFilteredResults: view.totalFilteredResults,
@@ -150,7 +153,7 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
     pageIndex: state.pageIndex,
     pageSize: state.pageSize,
     isAnyLoading: isLoading,
-    ...kubeListErrorState(kubeGuid, errors),
+    ...errorState,
     columns,
     getRowKey,
     emptyMessage,

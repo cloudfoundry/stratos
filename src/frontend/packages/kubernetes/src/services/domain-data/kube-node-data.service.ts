@@ -100,6 +100,7 @@ export class KubeNodeDataService {
       const next: StratosError = {
         scope: 'envelope',
         code,
+        status,
         title: 'kube-nodes',
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],

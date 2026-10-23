@@ -138,6 +138,7 @@ export class KubeHelmDataService {
           this._releaseErrors.update(curr => [...curr, {
             scope: 'envelope',
             code: list.error.statusCode === 401 || list.error.statusCode === 403 ? 'UNAUTHORIZED' : 'FETCH_ERROR',
+            status: list.error.statusCode,
             title: 'helm-releases',
             detail: proxyErrorReason(list),
             affected: [endpointId],
@@ -316,6 +317,7 @@ export class KubeHelmDataService {
     const next: StratosError = {
       scope: 'envelope',
       code,
+      status,
       title,
       detail: this.unwrapErrorMessage(err),
     };

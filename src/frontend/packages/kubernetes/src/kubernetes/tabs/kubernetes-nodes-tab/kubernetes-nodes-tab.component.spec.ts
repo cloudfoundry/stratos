@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { EndpointErrorEventsService } from '@stratosui/store';
 
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
@@ -73,6 +74,15 @@ describe('KubernetesNodesTabComponent', () => {
     await fixture.whenStable();
     expect(el.querySelector('[data-test="loading"]')).toBeNull();
     expect(el.querySelector('[data-test="empty"]')).not.toBeNull();
+  });
+
+  it('records a failed node load in the endpoint error history', async () => {
+    await mount({
+      [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },
+    });
+    expect(TestBed.inject(EndpointErrorEventsService).errorsForEndpoint(KUBE_GUID)()).toEqual([
+      expect.objectContaining({ eventCode: '500', message: 'Error proxing request: dial tcp: i/o timeout' }),
+    ]);
   });
 
   it('shows the failed-load state with the endpoint\'s reason and Retry when the node load fails', async () => {

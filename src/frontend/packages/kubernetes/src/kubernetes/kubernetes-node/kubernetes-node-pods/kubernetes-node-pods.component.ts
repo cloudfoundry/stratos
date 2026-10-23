@@ -1,11 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, WritableSignal, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, WritableSignal, inject, signal } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { KubePod } from '../../../services/endpoint-data/kube-types';
-import { kubeListErrorState } from '../../list-types/kube-list-errors';
+import { kubeListErrorState, reportKubeListErrors } from '../../list-types/kube-list-errors';
 import {
   KubernetesNodePodsSignalConfigService,
 } from '../../list-types/kubernetes-node-pods/kubernetes-node-pods-signal-config.service';
@@ -25,12 +25,16 @@ import {
 export class KubernetesNodePodsComponent {
   private readonly nodeService = inject(KubernetesNodeService);
   readonly signalConfig = inject(KubernetesNodePodsSignalConfigService);
+  private readonly injector = inject(Injector);
 
   readonly listConfig: WritableSignal<SignalListConfig<KubePod> | undefined> = signal(undefined);
 
   constructor() {
     const { kubeGuid, nodeName } = this.nodeService;
     this.signalConfig.initialize(kubeGuid, nodeName);
+
+    const errorState = kubeListErrorState(kubeGuid, this.signalConfig.errors());
+    reportKubeListErrors(errorState.errorsByCnsi, this.injector);
 
     this.listConfig.set({
       pagedItems: this.signalConfig.view.pagedItems,
@@ -39,7 +43,7 @@ export class KubernetesNodePodsComponent {
       pageIndex: this.signalConfig.pageIndex,
       pageSize: this.signalConfig.pageSize,
       isAnyLoading: this.signalConfig.isLoading(),
-      ...kubeListErrorState(kubeGuid, this.signalConfig.errors()),
+      ...errorState,
       columns: [
         {
           header: 'Name', key: 'name',

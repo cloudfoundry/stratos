@@ -131,6 +131,7 @@ export class KubeNamespaceDataService {
       const next: StratosError = {
         scope: 'envelope',
         code,
+        status,
         title: 'kube-namespaces-direct',
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid],

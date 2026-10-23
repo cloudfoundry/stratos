@@ -272,6 +272,7 @@ export class KubeEndpointDataService {
     this.addError({
       scope: 'envelope',
       code,
+      status,
       title,
       detail: (err as Error)?.message ?? String(err),
       affected: [field],

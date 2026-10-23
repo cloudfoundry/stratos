@@ -284,6 +284,7 @@ export class KubePodDataService {
     const next: StratosError = {
       scope: 'envelope',
       code,
+      status,
       title,
       detail: (err as Error)?.message ?? String(err),
       // The scope key lets a later successful load of this scope clear it.
