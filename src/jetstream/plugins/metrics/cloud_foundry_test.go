@@ -60,6 +60,12 @@ func (p *metricsTestProxy) DoProxyRequest(requests []api.ProxyRequestInfo) (map[
 	return map[string]*api.CNSIRequest{}, nil
 }
 
+// ProxyRequest answers the per-app permission probe: the user can see the
+// app on the one Cloud Foundry in the test.
+func (p *metricsTestProxy) ProxyRequest(_ *echo.Context, _ *url.URL) (map[string]*api.CNSIRequest, error) {
+	return map[string]*api.CNSIRequest{testCFGUID: {StatusCode: http.StatusOK}}, nil
+}
+
 func (p *metricsTestProxy) SendProxiedResponse(_ *echo.Context, _ map[string]*api.CNSIRequest) error {
 	return nil
 }
@@ -184,5 +190,72 @@ func TestCellMetricsForwardsOnlyAllowedRequests(t *testing.T) {
 			require.Error(t, m.getCloudFoundryCellMetrics(c))
 			assert.Empty(t, proxy.proxied)
 		})
+	}
+}
+
+const testAppGUID = "app-1"
+
+func appMetricsParams(op string) echo.PathValues {
+	return echo.PathValues{{Name: "appId", Value: testAppGUID}, {Name: "op", Value: op}}
+}
+
+// The application Metrics tab sends a bare container metric name to
+// /pp/v1/metrics/cf/app/<guid> (metrics-tab.component.ts). The route
+// scopes it to the app by adding application_id to its selector.
+func TestAppMetricsScopesFrontendShapesToTheApp(t *testing.T) {
+	t.Parallel()
+
+	frontendMetrics := []string{
+		"firehose_container_metric_cpu_percentage",
+		"firehose_container_metric_memory_bytes",
+		"firehose_container_metric_disk_bytes",
+	}
+	for _, metric := range frontendMetrics {
+		for _, op := range []string{"query", "query_range"} {
+			proxy := &metricsTestProxy{}
+			m := &MetricsSpecification{portalProxy: proxy}
+			c := newMetricsContext(metric, appMetricsParams(op))
+
+			require.NoError(t, m.getCloudFoundryAppMetrics(c), "%s %s", op, metric)
+			require.Len(t, proxy.proxied, 1)
+			assert.Equal(t, "/api/v1/"+op, proxy.proxied[0].URI.Path)
+			assert.Equal(t, metric+`{application_id="`+testAppGUID+`",job="`+testJob+`"}`,
+				proxy.proxied[0].URI.Query().Get("query"))
+		}
+	}
+}
+
+// A query whose shape the app pages do not send must not reach the metrics
+// endpoint. The application_id label is added to one selector at most, so
+// the first four queries below would read metrics for every app.
+func TestAppMetricsRejectsOtherShapes(t *testing.T) {
+	t.Parallel()
+
+	const metric = "firehose_container_metric_cpu_percentage"
+	rejected := []string{
+		metric + `{a="1"} or up{b="2"}`,
+		metric + `{} or ` + metric + `{}`,
+		"up or " + metric + "{}",
+		metric + " or up",
+		"up",
+		"sum(" + metric + ")",
+		metric + `{application_id="other-app"}`,
+		metric + `{instance_index="0"}`,
+		metric + "[5m]",
+		metric + " ",
+		"",
+	}
+	for _, query := range rejected {
+		proxy := &metricsTestProxy{}
+		m := &MetricsSpecification{portalProxy: proxy}
+		c := newMetricsContext(query, appMetricsParams("query"))
+
+		err := m.getCloudFoundryAppMetrics(c)
+		forwarded := ""
+		if len(proxy.proxied) > 0 {
+			forwarded = proxy.proxied[0].URI.Query().Get("query")
+		}
+		assert.Error(t, err, "query %q was accepted", query)
+		assert.Empty(t, proxy.proxied, "query %q was forwarded as %q", query, forwarded)
 	}
 }

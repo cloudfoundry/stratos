@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/url"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/labstack/echo/v5"
@@ -24,6 +25,14 @@ var (
 		"firehose_value_metric_rep_capacity_total_disk",
 		"firehose_value_metric_rep_capacity_total_memory",
 		"firehose_value_metric_rep_num_cpus",
+	}
+
+	// appQueryAllowList holds the metrics the application pages chart. The
+	// app route adds the application_id selector to them itself.
+	appQueryAllowList = []string{
+		"firehose_container_metric_cpu_percentage",
+		"firehose_container_metric_memory_bytes",
+		"firehose_container_metric_disk_bytes",
 	}
 
 	// cellQuerySelector is the one label selector the cell pages add to an
@@ -50,6 +59,11 @@ func (m *MetricsSpecification) getCloudFoundryAppMetrics(c *echo.Context) error 
 	// For an application, we only support the query operation
 	if prometheusOp != "query" && prometheusOp != "query_range" {
 		return errors.New("Only 'query' or 'query_range' is supported for a Cloud Foundry application")
+	}
+
+	// Only a bare allow-listed metric name can be scoped to the application
+	if !slices.Contains(appQueryAllowList, c.Request().URL.Query().Get("query")) {
+		return errors.New("Unsupported prometheus query")
 	}
 
 	// Now make the metrics requests to the appropriate metrics endpoint
