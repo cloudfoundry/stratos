@@ -72,8 +72,34 @@ func (gep GeneratedEndpointPlugin) Register(ec *echo.Context) error {
 	return gep.portalProxy.RegisterEndpoint(ec, gep.Info)
 }
 
+// Validate checks the new token by asking the API for the user it
+// belongs to: the subtype's user info API (plugins.yaml: /user, i.e.
+// GitHub GET /user and GitLab GET /api/v4/user, as the endpoint URL ends
+// in /api/v4). A subtype with no user info API cannot be checked.
 func (gep GeneratedEndpointPlugin) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRecord api.TokenRecord) error {
-	return nil
+	subType, ok := gep.subTypes[cnsiRecord.SubType]
+	if !ok {
+		return fmt.Errorf("Unknown subtype %q for endpoint type %q", cnsiRecord.SubType, gep.GetType())
+	}
+	if len(subType.UserInfoAPI) == 0 {
+		return nil
+	}
+
+	// The request goes through the auth handler for the token's type,
+	// which uses the endpoint record's Skip SSL and CA certificate.
+	resp, err := gep.portalProxy.DoProxySingleRequestWithToken(cnsiRecord.GUID, &tokenRecord, "GET", subType.UserInfoAPI, nil, nil)
+	if err != nil {
+		return err
+	}
+	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
+		return nil
+	}
+	// The connect handler reports a rejected token, an unreachable API or
+	// a TLS failure from these.
+	if resp.Error != nil {
+		return fmt.Errorf("unable to check the token with %s: %w", subType.UserInfoAPI, resp.Error)
+	}
+	return api.ErrHTTPRequest{Status: resp.StatusCode, Response: string(resp.Response)}
 }
 
 func (gep GeneratedEndpointPlugin) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
