@@ -15,7 +15,10 @@ export interface MetricsEndpointProvider {
   endpoints: EndpointModel[];
 }
 
-@Injectable()
+// App-wide, as MetricsModule (imported by the dashboard) provided it before
+// the NgModule removal: the metrics endpoint page and the Metrics endpoint
+// card details both inject it, outside any component that provides it.
+@Injectable({ providedIn: 'root' })
 export class MetricsService {
   // W36-B Wave 3: source endpoints from EndpointsDataService instead
   // of the legacy ngrx PaginationMonitor. The metrics endpoint set was
