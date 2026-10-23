@@ -99,7 +99,8 @@ export class HelmReleasesTabComponent {
       pageIndex: this.signalConfig.pageIndex,
       pageSize: this.signalConfig.pageSize,
       isAnyLoading: this.signalConfig.isLoading(),
-      errorsByCnsi: signal(new Map()),
+      errorsByCnsi: this.signalConfig.errorsByEndpoint(),
+      errorDetail: this.signalConfig.errorDetail(),
       pageSizeOptions: { table: [10, 25, 50, 100], card: [9, 45, 90] },
       columns: [
         {

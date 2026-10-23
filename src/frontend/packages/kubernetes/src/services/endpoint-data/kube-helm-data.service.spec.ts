@@ -197,4 +197,25 @@ describe('KubeHelmDataService', () => {
 
     expect(svc.allReleases()().map(r => r.guid)).toEqual(['kube-2:ns2:rel-b']);
   });
+
+  // Jetstream answers per endpoint; a cluster it could not list is that
+  // endpoint's error entry, not "no releases".
+  it('loadReleases records an endpoint\'s error entry with its reason and keeps the others', async () => {
+    const promise = svc.loadReleases();
+    httpMock.expectOne(RELEASES_URL).flush({
+      'kube-1': [{ name: 'rel-a', namespace: 'ns1', info: { status: 'deployed' }, chart: { metadata: { version: '1.0.0' } } }],
+      'kube-2': {
+        error: { statusCode: 500, status: 'Could not list the Helm releases' },
+        errorResponse: 'Kubernetes cluster unreachable',
+      },
+    });
+    await promise;
+
+    expect(svc.allReleases()().map(r => r.endpointId)).toEqual(['kube-1']);
+    expect(svc.releaseErrors()()).toEqual([expect.objectContaining({
+      title: 'helm-releases',
+      detail: 'Could not list the Helm releases: Kubernetes cluster unreachable',
+      affected: ['kube-2'],
+    })]);
+  });
 });

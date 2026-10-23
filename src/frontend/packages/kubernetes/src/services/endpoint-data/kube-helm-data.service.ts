@@ -2,6 +2,8 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
+import { isProxyErrorEntry, proxyErrorReason } from '@stratosui/store';
+
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
 import { KubeEndpointEviction } from './kube-endpoint-eviction';
@@ -21,7 +23,8 @@ import {
 // Wire model (preserved verbatim from the legacy `helm/store/helm.effects.ts`
 // and `kubernetes/workloads/store/workloads.effects.ts`):
 //   - Helm releases:       GET    /pp/v1/helm/releases
-//                          (response keyed by endpointId, value = HelmRelease[])
+//                          (response keyed by endpointId, value = HelmRelease[],
+//                           or the endpoint's error entry, see ProxyErrorEntry)
 //   - Helm release detail: GET    /pp/v1/helm/releases/{endpoint}/{ns}/{name}
 //   - Helm install:        POST   /pp/v1/helm/install
 //                          (body = HelmInstallPayload)
@@ -104,6 +107,12 @@ export class KubeHelmDataService {
     return this.errorsSignal;
   }
 
+  // The last release load's failures: one per endpoint that could not be
+  // listed (`affected` names it), or one for the whole request.
+  releaseErrors(): Signal<StratosError[]> {
+    return this._releaseErrors.asReadonly();
+  }
+
   // --- Load / refresh ---
 
   // Fetch releases across ALL connected helm-bearing endpoints. The
@@ -119,12 +128,23 @@ export class KubeHelmDataService {
     const live = this.eviction.currentAny();
     try {
       const resp = await firstValueFrom(
-        this.http.get<Record<string, HelmRelease[] | null>>('/pp/v1/helm/releases'),
+        this.http.get<Record<string, unknown>>('/pp/v1/helm/releases'),
       );
       const all: HelmRelease[] = [];
       Object.keys(resp ?? {}).forEach(endpointId => {
         const list = resp[endpointId];
-        if (!Array.isArray(list) || !live(endpointId)) return;
+        if (!live(endpointId)) return;
+        if (isProxyErrorEntry(list)) {
+          this._releaseErrors.update(curr => [...curr, {
+            scope: 'envelope',
+            code: list.error.statusCode === 401 || list.error.statusCode === 403 ? 'UNAUTHORIZED' : 'FETCH_ERROR',
+            title: 'helm-releases',
+            detail: proxyErrorReason(list),
+            affected: [endpointId],
+          } satisfies StratosError]);
+          return;
+        }
+        if (!Array.isArray(list)) return;
         list.forEach(raw => {
           all.push(this.normalizeRelease(raw, endpointId));
         });

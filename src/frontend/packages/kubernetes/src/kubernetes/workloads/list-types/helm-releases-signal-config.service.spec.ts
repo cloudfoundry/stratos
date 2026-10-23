@@ -131,4 +131,17 @@ describe('HelmReleasesSignalConfigService', () => {
     expect(svc.sort().direction).toBe('asc');
     expect(svc.pageIndex()).toBe(0);
   });
+
+  it('names each endpoint whose releases failed to load, with the newest reason', async () => {
+    svc.initialize();
+    const refreshing = svc.refresh();
+    httpMock.expectOne(RELEASES_URL).flush({
+      'kube-1': releasesPayload['kube-1'],
+      'kube-2': { error: { statusCode: 500, status: 'Could not list the Helm releases' }, errorResponse: 'timeout' },
+    });
+    await refreshing;
+
+    expect([...svc.errorsByEndpoint()().keys()]).toEqual(['kube-2']);
+    expect(svc.errorDetail()()).toBe('Could not list the Helm releases: timeout');
+  });
 });
