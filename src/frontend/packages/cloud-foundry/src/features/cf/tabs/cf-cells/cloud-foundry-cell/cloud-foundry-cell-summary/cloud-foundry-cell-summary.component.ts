@@ -32,6 +32,7 @@ import { CardNumberMetricComponent } from '../../../../../../../../core/src/shar
   templateUrl: './cloud-foundry-cell-summary.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
+  providers: [DatePipe],
   imports: [
     CommonModule,
     CustomTooltipDirective,

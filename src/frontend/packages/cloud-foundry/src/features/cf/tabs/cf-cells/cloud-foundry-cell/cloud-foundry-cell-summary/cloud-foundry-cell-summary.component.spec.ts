@@ -1,4 +1,3 @@
-import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
@@ -95,15 +94,14 @@ describe('CloudFoundryCellSummaryComponent', () => {
           provide: ActiveRouteCfCell,
           useValue: { cfGuid: testSCFEndpointGuid, cellId: 'testCellId' }
         },
-        DatePipe,
       ]
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CloudFoundryCellSummaryComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
