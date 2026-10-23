@@ -1,10 +1,14 @@
 package main
 
 import (
+	"context"
+	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -207,13 +211,7 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 		if cnsiRecord.CNSIType == endpointType {
 			tokenRecord, isAdmin, err := endpointPlugin.Connect(c, cnsiRecord, userID)
 			if err != nil {
-				if shadowError, ok := err.(api.ErrHTTPShadow); ok {
-					return nil, shadowError
-				}
-				return nil, api.NewHTTPShadowError(
-					http.StatusBadRequest,
-					"Could not connect to the endpoint",
-					"Could not connect to the endpoint: %s", err)
+				return nil, connectFailure(err)
 			}
 
 			err = p.setCNSITokenRecord(cnsiGUID, userID, *tokenRecord)
@@ -231,10 +229,7 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 				if clearErr := p.ClearCNSIToken(cnsiRecord, userID); clearErr != nil {
 					slog.Warn("unable to clear the token for the endpoint", "endpoint", cnsiGUID, "user", userID, "error", clearErr)
 				}
-				return nil, api.NewHTTPShadowError(
-					http.StatusBadRequest,
-					"Could not connect to the endpoint",
-					"Could not connect to the endpoint: %s", err)
+				return nil, connectFailure(err)
 			}
 
 			resp := &api.LoginRes{
@@ -338,17 +333,24 @@ func (p *portalProxy) FetchOAuth2Token(cnsiRecord api.CNSIRecord, c *echo.Contex
 	uaaRes, u, err := p.login(c, cnsiRecord.SkipSSLValidation, cnsiRecord.CACert, cnsiRecord.ClientId, cnsiRecord.ClientSecret, tokenEndpoint)
 
 	if err != nil {
-		if httpError, ok := err.(api.ErrHTTPRequest); ok {
+		// Status 0: UAA did not answer, so there is no UAA error to report.
+		if httpError, ok := err.(api.ErrHTTPRequest); ok && httpError.Status != 0 {
 			// Try and parse the Response into UAA error structure (p.login only handles UAA requests)
 			errMessage := ""
 			authError := &api.UAAErrorResponse{}
 			if err := json.Unmarshal([]byte(httpError.Response), authError); err == nil {
 				errMessage = fmt.Sprintf(": %s", authError.ErrorDescription)
 			}
-			return nil, nil, nil, api.NewHTTPShadowError(
+			_, reason, _ := classifyConnectError(err)
+			return nil, nil, nil, api.NewHTTPShadowErrorWithReason(
 				httpError.Status,
+				reason,
 				fmt.Sprintf("Could not connect to the endpoint%s", errMessage),
 				"Could not connect to the endpoint: %s", err)
+		}
+
+		if _, reason, _ := classifyConnectError(err); reason != "" {
+			return nil, nil, nil, connectFailure(err)
 		}
 
 		return nil, nil, nil, api.NewHTTPShadowError(
@@ -544,4 +546,96 @@ func (p *portalProxy) deleteCNSIToken(cnsiID string, userGUID string) error {
 	}
 
 	return nil
+}
+
+// Reasons a connect failed, sent as "reason" in the error response body
+// so the frontend can tell them apart without reading the message.
+const (
+	// The endpoint answered 401 or 403 to the credentials.
+	connectReasonAuthFailed = "auth_failed"
+	// The endpoint did not answer, or answered with a 5xx.
+	connectReasonUnreachable = "unreachable"
+	// The TLS connection failed, e.g. the certificate is not trusted.
+	connectReasonTLS = "tls"
+)
+
+// connectFailure turns an error from an endpoint plugin's Connect or
+// Validate into the response the user sees. An error the plugin already
+// shaped is kept as it is. Otherwise the status, reason and message come
+// from classifyConnectError, and the full error goes to the log.
+func connectFailure(err error) error {
+	var shadowError api.ErrHTTPShadow
+	if errors.As(err, &shadowError) {
+		return shadowError
+	}
+	status, reason, why := classifyConnectError(err)
+	return api.NewHTTPShadowErrorWithReason(
+		status,
+		reason,
+		"Could not connect to the endpoint: "+why,
+		"Could not connect to the endpoint: %s", err)
+}
+
+// classifyConnectError says why a connect failed: the response status, a
+// connectReason (empty when none applies) and a message for the user.
+//   - An answer from the endpoint (api.ErrHTTPRequest, as built by
+//     api.LogHTTPError) is reported by its status: 401 and 403 keep their
+//     status, a 5xx becomes 502, anything else 400.
+//   - A request that got no answer becomes 502, as a TLS failure or as
+//     unreachable.
+//   - Any other error is the plugin's own message, with 400.
+func classifyConnectError(err error) (int, string, string) {
+	var httpError api.ErrHTTPRequest
+	if errors.As(err, &httpError) {
+		if httpError.Status == 0 {
+			// No response: what failed is the request, in InnerError.
+			if httpError.InnerError == nil {
+				return http.StatusBadGateway, connectReasonUnreachable, "the endpoint did not answer"
+			}
+			return classifyRequestFailure(httpError.InnerError)
+		}
+		answered := fmt.Sprintf("%d %s", httpError.Status, http.StatusText(httpError.Status))
+		switch {
+		case httpError.Status == http.StatusUnauthorized:
+			return httpError.Status, connectReasonAuthFailed, "the endpoint rejected the credentials (" + answered + ")"
+		case httpError.Status == http.StatusForbidden:
+			return httpError.Status, connectReasonAuthFailed, "the endpoint refused access with these credentials (" + answered + ")"
+		case httpError.Status >= 500:
+			return http.StatusBadGateway, connectReasonUnreachable, "the endpoint answered " + answered
+		default:
+			return http.StatusBadRequest, "", "the endpoint answered " + answered
+		}
+	}
+	if isTLSFailure(err) || isUnreachable(err) {
+		return classifyRequestFailure(err)
+	}
+	return http.StatusBadRequest, "", err.Error()
+}
+
+// classifyRequestFailure reports a request that got no response.
+func classifyRequestFailure(err error) (int, string, string) {
+	if isTLSFailure(err) {
+		return http.StatusBadGateway, connectReasonTLS, "a TLS connection to the endpoint failed (" + err.Error() + ")"
+	}
+	return http.StatusBadGateway, connectReasonUnreachable, "the endpoint could not be reached (" + err.Error() + ")"
+}
+
+func isTLSFailure(err error) bool {
+	var verification *tls.CertificateVerificationError
+	var unknownAuthority x509.UnknownAuthorityError
+	var hostname x509.HostnameError
+	var invalid x509.CertificateInvalidError
+	var recordHeader tls.RecordHeaderError
+	var alert tls.AlertError
+	return errors.As(err, &verification) ||
+		errors.As(err, &unknownAuthority) ||
+		errors.As(err, &hostname) ||
+		errors.As(err, &invalid) ||
+		errors.As(err, &recordHeader) ||
+		errors.As(err, &alert)
+}
+
+func isUnreachable(err error) bool {
+	var netErr net.Error
+	return errors.As(err, &netErr) || errors.Is(err, context.DeadlineExceeded)
 }

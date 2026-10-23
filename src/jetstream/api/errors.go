@@ -24,6 +24,9 @@ type ErrHTTPRequest struct {
 type ErrorResponseBody struct {
 	Status string `json:"status"`
 	Error  string `json:"error"`
+	// Reason names the kind of failure for a client that acts on it, such
+	// as "auth_failed" or "unreachable". Empty when not classified.
+	Reason string `json:"reason,omitempty"`
 }
 
 func (e ErrHTTPShadow) Error() string {
@@ -35,10 +38,16 @@ func NewHTTPError(status int, userFacingError string) error {
 }
 
 func NewHTTPShadowError(status int, userFacingError string, fmtString string, args ...interface{}) error {
-	//Only set the HTTPError field of the ErrHTTPShadow struct if we have been passed an error message intended for logging
+	return NewHTTPShadowErrorWithReason(status, "", userFacingError, fmtString, args...)
+}
+
+// NewHTTPShadowErrorWithReason is NewHTTPShadowError with a reason in the
+// response body (see ErrorResponseBody.Reason).
+func NewHTTPShadowErrorWithReason(status int, reason string, userFacingError string, fmtString string, args ...interface{}) error {
+	// With no user-facing message the response has no body.
 	httpErrorMsg := ""
 	if len(userFacingError) > 0 {
-		errBody := ErrorResponseBody{Status: "error", Error: userFacingError}
+		errBody := ErrorResponseBody{Status: "error", Error: userFacingError, Reason: reason}
 		bytes, _ := json.Marshal(errBody)
 		httpErrorMsg = string(bytes)
 	}
