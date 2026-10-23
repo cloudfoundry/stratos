@@ -93,23 +93,23 @@ echo "=== Existing prerelease stages ==="
 echo "-- bump dev (increment) --"
 setup "v4.9.3-dev.41"
 bash "${BUMP}" bump dev || true
-assert_version "dev.41 → dev.42" "v4.9.3-dev.42"
+assert_version "dev.41 → dev.42" "4.9.3-dev.42"
 assert_has_metadata "dev bump has build metadata"
 
 echo "-- bump dev (from clean) --"
 setup "v4.9.3"
 bash "${BUMP}" bump dev || true
-assert_version "clean → dev.1" "v4.9.3-dev.1"
+assert_version "clean → dev.1" "4.9.3-dev.1"
 
 echo "-- bump rc (from dev) --"
 setup "v4.9.3-dev.5"
 bash "${BUMP}" bump rc || true
-assert_version "dev.5 → rc.1" "v4.9.3-rc.1"
+assert_version "dev.5 → rc.1" "4.9.3-rc.1"
 
 echo "-- bump rc (increment) --"
 setup "v4.9.3-rc.1"
 bash "${BUMP}" bump rc || true
-assert_version "rc.1 → rc.2" "v4.9.3-rc.2"
+assert_version "rc.1 → rc.2" "4.9.3-rc.2"
 
 echo ""
 echo "=== New prerelease stages ==="
@@ -117,32 +117,32 @@ echo "=== New prerelease stages ==="
 echo "-- bump alpha (from dev) --"
 setup "v4.9.3-dev.5"
 bash "${BUMP}" bump alpha || true
-assert_version "dev.5 → alpha.1" "v4.9.3-alpha.1"
+assert_version "dev.5 → alpha.1" "4.9.3-alpha.1"
 
 echo "-- bump alpha (increment) --"
 setup "v4.9.3-alpha.1"
 bash "${BUMP}" bump alpha || true
-assert_version "alpha.1 → alpha.2" "v4.9.3-alpha.2"
+assert_version "alpha.1 → alpha.2" "4.9.3-alpha.2"
 
 echo "-- bump beta (from alpha) --"
 setup "v4.9.3-alpha.3"
 bash "${BUMP}" bump beta || true
-assert_version "alpha.3 → beta.1" "v4.9.3-beta.1"
+assert_version "alpha.3 → beta.1" "4.9.3-beta.1"
 
 echo "-- bump beta (increment) --"
 setup "v4.9.3-beta.1"
 bash "${BUMP}" bump beta || true
-assert_version "beta.1 → beta.2" "v4.9.3-beta.2"
+assert_version "beta.1 → beta.2" "4.9.3-beta.2"
 
 echo "-- bump prerelease (from rc) --"
 setup "v4.9.3-rc.2"
 bash "${BUMP}" bump prerelease || true
-assert_version "rc.2 → prerelease.1" "v4.9.3-prerelease.1"
+assert_version "rc.2 → prerelease.1" "4.9.3-prerelease.1"
 
 echo "-- bump prerelease (increment) --"
 setup "v4.9.3-prerelease.1"
 bash "${BUMP}" bump prerelease || true
-assert_version "prerelease.1 → prerelease.2" "v4.9.3-prerelease.2"
+assert_version "prerelease.1 → prerelease.2" "4.9.3-prerelease.2"
 
 echo ""
 echo "=== Release promotion ==="
@@ -150,18 +150,18 @@ echo "=== Release promotion ==="
 echo "-- bump release (from prerelease) --"
 setup "v4.9.3-prerelease.1"
 bash "${BUMP}" bump release || true
-assert_version "prerelease.1 → release" "v4.9.3"
+assert_version "prerelease.1 → release" "4.9.3"
 assert_has_metadata "release has build metadata"
 
 echo "-- bump release (from rc) --"
 setup "v4.9.3-rc.2"
 bash "${BUMP}" bump release || true
-assert_version "rc.2 → release" "v4.9.3"
+assert_version "rc.2 → release" "4.9.3"
 
 echo "-- bump release (from dev) --"
 setup "v4.9.3-dev.5"
 bash "${BUMP}" bump release || true
-assert_version "dev.5 → release" "v4.9.3"
+assert_version "dev.5 → release" "4.9.3"
 
 echo "-- bump release (already release — should fail) --"
 setup "v4.9.3"
@@ -173,18 +173,18 @@ echo "=== Semver bumps with metadata ==="
 echo "-- bump major (from prerelease) --"
 setup "v4.9.3-rc.2"
 bash "${BUMP}" bump major || true
-assert_version "rc.2 → major" "v5.0.0"
+assert_version "rc.2 → major" "5.0.0"
 assert_has_metadata "major has build metadata"
 
 echo "-- bump minor --"
 setup "v4.9.3-dev.5"
 bash "${BUMP}" bump minor || true
-assert_version "dev.5 → minor" "v4.10.0"
+assert_version "dev.5 → minor" "4.10.0"
 
 echo "-- bump patch --"
 setup "v4.9.3-dev.5"
 bash "${BUMP}" bump patch || true
-assert_version "dev.5 → patch" "v4.9.4"
+assert_version "dev.5 → patch" "4.9.4"
 
 echo ""
 echo "=== Build metadata ==="
