@@ -174,9 +174,9 @@ func getHttpClientWIthCA(caCert string, mutating bool) *http.Client {
 	tr := createTransport(config)
 	client := &http.Client{Transport: tr}
 	if mutating {
-		client.Timeout = time.Duration(defaultHTTPClientTimeout) * time.Second
-	} else {
 		client.Timeout = time.Duration(defaultHTTPClientMutatingTimeout) * time.Second
+	} else {
+		client.Timeout = time.Duration(defaultHTTPClientTimeout) * time.Second
 	}
 	return client
 }
