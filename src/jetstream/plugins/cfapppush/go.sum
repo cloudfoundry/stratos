@@ -20,8 +20,8 @@ code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e h1:S3md
 code.cloudfoundry.org/cli-plugin-repo v0.0.0-20230525012251-b9c89116786e/go.mod h1:R1EiyOAr7lW0l/YkZNqItUNZ01Q/dYUfbTn4X4Z+82M=
 code.cloudfoundry.org/cli/v8 v8.19.1 h1:P1sHxTH3ornxqAJ7d+YCP0lDygE4KtsIbdlbtvgOL2Y=
 code.cloudfoundry.org/cli/v8 v8.19.1/go.mod h1:tozwtUezOhxpT79BLe3zRVCD+4JrFlBR72hP8qvYlQI=
-code.cloudfoundry.org/clock v1.92.0 h1:b06eh/tNNs01FmXZ8HPjyy1LLLpW1ontItclNXJIfoA=
-code.cloudfoundry.org/clock v1.92.0/go.mod h1:g1bd17aaTsgt/2pGXYLoqGK5HXl+qLrD9kvmVtx1Umo=
+code.cloudfoundry.org/clock v1.93.0 h1:CeirlI4gX1bdUWzmLEaWTAo3XVIVlt2lkJp/Q3evK0U=
+code.cloudfoundry.org/clock v1.93.0/go.mod h1:UaHrvAJqG4OPPSSLrrnWghPUn5LhJfOMzhj0BQmbTd0=
 code.cloudfoundry.org/diego-ssh v0.0.0-20230810200140-af9d79fe9c82 h1:Bns1y0jSlcvfP0u8ael+TUlnyNHsNX808zuo58bf5so=
 code.cloudfoundry.org/diego-ssh v0.0.0-20230810200140-af9d79fe9c82/go.mod h1:L2/glHnSK+wKnsG8oZZqdV2sgYY9NDo/I1aDJGhcWaM=
 code.cloudfoundry.org/go-log-cache/v2 v2.0.7 h1:yR/JjQ/RscO1n4xVAT9HDYcpx5ET/3Cq2/RhpJml6ZU=
@@ -190,8 +190,8 @@ github.com/google/pprof v0.0.0-20181206194817-3ea8567a2e57/go.mod h1:zfwlbNMJ+OI
 github.com/google/pprof v0.0.0-20190515194954-54271f7e092f/go.mod h1:zfwlbNMJ+OItoe0UupaVj+oy1omPYYDuagoSzA8v9mc=
 github.com/google/pprof v0.0.0-20200212024743-f11f1df84d12/go.mod h1:ZgVRPoUq/hfqzAqh7sHMqb3I9Rq5C59dIz2SbBwJ4eM=
 github.com/google/pprof v0.0.0-20210407192527-94a9f03dee38/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
-github.com/google/pprof v0.0.0-20261012231050-2af12c3f4d87 h1:P18JvwDzBYAeC8SIfnee/YJzKk1dysuN6rUwmF6CxZY=
-github.com/google/pprof v0.0.0-20261012231050-2af12c3f4d87/go.mod h1:yUo1AMMpsPIDFGuwDK8nLcf8+vvAd5l2O6JDZ6hpwrM=
+github.com/google/pprof v0.0.0-20261016150608-1facf8f91b50 h1:PlNWJRxu5APSV0pWqfIsZ0qt9OOGHSWfZQ4zvx+WgWs=
+github.com/google/pprof v0.0.0-20261016150608-1facf8f91b50/go.mod h1:yUo1AMMpsPIDFGuwDK8nLcf8+vvAd5l2O6JDZ6hpwrM=
 github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=

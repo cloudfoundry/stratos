@@ -6,7 +6,7 @@ replace github.com/cloudfoundry/stratos/src/jetstream/api => ../../api
 
 require (
 	code.cloudfoundry.org/cli/v8 v8.19.1
-	code.cloudfoundry.org/clock v1.92.0
+	code.cloudfoundry.org/clock v1.93.0
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
 	github.com/coder/websocket v1.8.15
 	github.com/labstack/echo/v5 v5.4.0
