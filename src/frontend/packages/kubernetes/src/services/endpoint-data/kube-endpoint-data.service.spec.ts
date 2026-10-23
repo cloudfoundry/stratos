@@ -195,4 +195,10 @@ describe('KubeEndpointDataService', () => {
 
     expect(service.unavailable()).toEqual(['kubeVersion', 'namespaces']);
   });
+
+  it('syncNodeCount sets the node count another node load measured', () => {
+    service.syncNodeCount(4);
+    expect(service.nodeCount()).toBe(4);
+    expect(service.currentData().nodeCount).toBe(4);
+  });
 });

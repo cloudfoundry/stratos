@@ -65,19 +65,8 @@ export class KubeNodeDataService {
       next.set(kubeGuid, items);
       return next;
     });
-    // Best-effort sync of the endpoint-service node count. Side-effect
-    // is contained here so the wave-2 scope doesn't have to reach into
-    // KubeEndpointDataService internals.
-    try {
-      const svc = this.registry.getService(kubeGuid) as unknown as {
-        _nodeCount?: { set?: (n: number) => void };
-      };
-      if (svc?._nodeCount?.set) {
-        svc._nodeCount.set(items.length);
-      }
-    } catch {
-      // non-fatal; endpoint cluster card recomputes on next refresh
-    }
+    // Keep the endpoint service's node count in step with this list.
+    this.registry.getService(kubeGuid).syncNodeCount(items.length);
   }
 
   errors(): Signal<StratosError[]> {

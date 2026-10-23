@@ -154,4 +154,11 @@ describe('KubeNodeDataService', () => {
     await retrying;
     expect(svc.errors()()).toEqual([]);
   });
+
+  it('refresh keeps the endpoint\'s node count in step with the list', async () => {
+    const refreshing = svc.refresh(KUBE_GUID);
+    httpMock.expectOne(NODES_URL).flush({ [KUBE_GUID]: { items: [{ metadata: { name: 'n1' } }, { metadata: { name: 'n2' } }] } });
+    await refreshing;
+    expect(TestBed.inject(KubeEndpointDataRegistry).getService(KUBE_GUID).nodeCount()).toBe(2);
+  });
 });
