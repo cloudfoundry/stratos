@@ -419,6 +419,10 @@ export interface SignalListConfig<T> {
   // in-page recovery affordance instead of an empty list until
   // re-navigation (#5577).
   readonly errorMessage?: string;
+  // The failure's reason (e.g. the endpoint's own error text), shown
+  // under errorMessage in the failed-load state. A signal, so the text
+  // follows the latest failure; nothing is shown while it is undefined.
+  readonly errorDetail?: Signal<string | undefined>;
   readonly nameFilter?: WritableSignal<string>;
   // Column keys (see SignalListColumn.key / header fallback) eligible for
   // the text-filter. When 2+ entries are provided AND filterField is

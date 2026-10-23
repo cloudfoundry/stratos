@@ -256,6 +256,29 @@ describe('SignalListComponent', () => {
     expect(onRefresh).toHaveBeenCalledTimes(1);
   });
 
+  it('shows the failed-load reason from errorDetail and follows its changes', async () => {
+    const detail = signal<string | undefined>('Error proxing request: dial tcp: i/o timeout');
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      totalFilteredResults: signal(0).asReadonly(),
+      errorsByCnsi: signal(new Map<string, unknown>([['cnsi-1', new Error('boom')]])).asReadonly(),
+      errorDetail: detail.asReadonly(),
+    };
+    await fixture.whenStable();
+    const reason = () => fixture.nativeElement.querySelector('[data-test="empty-error-detail"]');
+    expect(reason()?.textContent.trim()).toBe('Error proxing request: dial tcp: i/o timeout');
+
+    detail.set('401 Unauthorized');
+    await fixture.whenStable();
+    expect(reason()?.textContent.trim()).toBe('401 Unauthorized');
+
+    detail.set(undefined);
+    await fixture.whenStable();
+    expect(reason()).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="empty-error"]')).not.toBeNull();
+  });
+
   it('prefers the plain empty state when empty without errors', () => {
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {
