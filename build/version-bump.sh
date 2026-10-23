@@ -90,7 +90,7 @@ commit_version() {
   local version_file
   version_file="$(dirname "${PACKAGE_JSON}")/src/jetstream/VERSION"
   if [ -d "$(dirname "${version_file}")" ]; then
-    echo "${new_version#v}" > "${version_file}"
+    echo "${new_version}" > "${version_file}"
   fi
 
   echo "Version updated: ${current_version} → ${new_version}"
