@@ -169,11 +169,9 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 			return nil, fmt.Errorf("Request failed: %w", err)
 		}
 
-		if res.StatusCode != 401 {
-			return res, nil
-		}
-		return res, fmt.Errorf("Request failed with status code: %d ", res.StatusCode)
-
+		// A 401 is the cluster's answer (there is no token to refresh), so
+		// it goes back as the response, with the cluster's body.
+		return res, nil
 	}
 	return c.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
