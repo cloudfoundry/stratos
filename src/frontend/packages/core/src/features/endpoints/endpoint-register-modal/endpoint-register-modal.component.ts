@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, HostListener, Injector, OnDestroy, OnInit, ViewChild, ViewContainerRef, computed, inject, output } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { of } from 'rxjs';
@@ -34,8 +34,8 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   // so TS doesn't flag the shadowed field as an incompatible base.
   protected override injector = inject(Injector);
 
-  @Output() closeModalEvent = new EventEmitter<void>();
-  @Output() endpointRegistered = new EventEmitter<any>();
+  readonly closeModalEvent = output<void>();
+  readonly endpointRegistered = output<any>();
 
   @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false })
   // strict: ViewChild populated by Angular before loadEndpointRegistrationComponent runs.
@@ -298,6 +298,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
 
   private onEndpointRegistered() {
     console.log('Modal: onEndpointRegistered called - emitting event');
+    // TODO: The 'emit' function requires a mandatory any argument
     this.endpointRegistered.emit();
     // Small delay to show success before closing
     setTimeout(() => {

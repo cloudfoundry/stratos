@@ -2,14 +2,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   Input,
-  Output,
-  EventEmitter,
   ContentChildren,
   QueryList,
   AfterContentInit,
   ViewChild,
   TemplateRef,
-  input
+  input,
+  output
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 
@@ -49,8 +48,8 @@ export class CustomTabGroupComponent implements AfterContentInit {
   readonly backgroundColor = input("primary");
   readonly color = input("primary");
 
-  @Output() selectedIndexChange = new EventEmitter<number>();
-  @Output() selectedTabChange = new EventEmitter<MatTabChangeEvent>();
+  readonly selectedIndexChange = output<number>();
+  readonly selectedTabChange = output<MatTabChangeEvent>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit
   @ContentChildren(CustomTabComponent) tabs!: QueryList<CustomTabComponent>;

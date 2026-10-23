@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
 import { isValid, isBefore, isEqual } from 'date-fns';
 
 import { DateTimeComponent } from '../date-time/date-time.component';
@@ -63,13 +63,10 @@ export class StartEndDateComponent {
   get end(): Date | undefined {
     return this.endValue;
   }
-  @Output()
-  public endChange = new EventEmitter<Date>();
-  @Output()
-  public startChange = new EventEmitter<Date>();
+  public readonly endChange = output<Date>();
+  public readonly startChange = output<Date>();
 
-  @Output()
-  public isValid = new EventEmitter<boolean>();
+  public readonly isValid = output<boolean>();
 
   public validValue = true;
   public validMessage: string | null = null;

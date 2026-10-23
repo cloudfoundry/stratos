@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Output, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -32,5 +32,5 @@ export class PollingIndicatorComponent {
   /**
    * User has kicked off a manual poll event
    */
-  @Output() poll = new EventEmitter<boolean>();
+  readonly poll = output<boolean>();
 }

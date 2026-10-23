@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, EventEmitter, OnDestroy, OnInit, Output, inject, ChangeDetectionStrategy, input} from '@angular/core';
+import {Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy, input, output} from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -31,8 +31,8 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   readonly allowNone = input(true);
   readonly autoSelect = input(false);
 
-  @Output() selected = new EventEmitter<AnalysisReport | null>();
-  @Output() reportCount = new EventEmitter<number>();
+  readonly selected = output<AnalysisReport | null>();
+  readonly reportCount = output<number>();
 
   autoSelected = false;
   isMenuOpen = false;
@@ -66,7 +66,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
             res.push(c);
           });
         }
-        this.reportCount.next(res.length);
+        this.reportCount.emit(res.length);
         return res as AnalysisReport[];
       }),
       tap((reports: AnalysisReport[]) => {
@@ -84,7 +84,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
     if (!('id' in d) || !d.id) {
       this.selected.emit(null);
     } else {
-      this.selected.next(d as AnalysisReport);
+      this.selected.emit(d as AnalysisReport);
     }
   }
 

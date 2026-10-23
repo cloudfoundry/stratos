@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute, inject, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -102,7 +102,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     this.writeValue(val);
   }
 
-  @Output() selectionChange = new EventEmitter<MatSelectChange>();
+  readonly selectionChange = output<MatSelectChange>();
   @Output() valueChange = new EventEmitter<any>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit

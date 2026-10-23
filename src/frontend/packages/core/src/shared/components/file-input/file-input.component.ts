@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject, signal, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject, signal, input, output } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -23,8 +23,8 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   readonly accept = input.required<string>();
   readonly placeholder = input('');
-  @Output() fileSelect: EventEmitter<File> = new EventEmitter();
-  @Output() fileData: EventEmitter<string> = new EventEmitter();
+  readonly fileSelect = output<File>();
+  readonly fileData = output<string>();
 
   readonly fileFormControlName = input.required<string>();
 

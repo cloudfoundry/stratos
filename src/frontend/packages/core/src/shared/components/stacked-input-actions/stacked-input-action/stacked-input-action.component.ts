@@ -1,17 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit,
+import {
+  ChangeDetectionStrategy, AfterContentInit,
   Component,
   ElementRef,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   ViewChild,
   computed,
   input,
   signal,
- } from '@angular/core';
+  output
+} from '@angular/core';
 import { ReactiveFormsModule, Validators, FormControl, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent, AppErrorComponent, AppInputDirective } from '../../../components/custom-form-field/custom-form-field.component';
 import { CustomTooltipDirective } from '../../custom-tooltip/custom-tooltip.directive';
@@ -83,8 +83,8 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
   readonly config = input<StackedInputActionConfig | undefined>(undefined);
   readonly resolvedConfig = computed(() => this.config() || StackedInputActionComponent.defaultConfig);
 
-  @Output() stateOut = new EventEmitter<StackedInputActionUpdate>();
-  @Output() remove = new EventEmitter<any>();
+  readonly stateOut = output<StackedInputActionUpdate>();
+  readonly remove = output<any>();
 
   @ViewChild('inputElement', { static: true }) inputElement!: ElementRef;
 

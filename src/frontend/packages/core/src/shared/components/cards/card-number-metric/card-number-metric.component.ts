@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, inject, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, signal, inject, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -44,7 +44,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   readonly textOnly = input(false);
   readonly labelAtTop = input(false);
   readonly link = input<string | (() => void | string)>();
-  @Output() showAlerts = new EventEmitter<any>();
+  readonly showAlerts = output<any>();
   readonly mode = input.required<string>();
 
   // TODO: Skipped for migration because:

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ContentChildren, QueryList, AfterContentInit, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, forwardRef, ContentChildren, QueryList, AfterContentInit, input, output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
@@ -25,7 +25,7 @@ export class CustomButtonToggleComponent {
   @Input() checked = false;
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle which emits (change)
-  @Output() change = new EventEmitter<CustomButtonToggleComponent>();
+  readonly change = output<CustomButtonToggleComponent>();
 
   toggle() {
     if (this.disabled) return;
@@ -67,9 +67,9 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
     return this.multiple() ? this.selectedValues : this.selectedValues[0];
   }
 
-  @Output() valueChange = new EventEmitter<any>();
+  readonly valueChange = output<any>();
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle-group which emits (change)
-  @Output() change = new EventEmitter<MatButtonToggleChange>();
+  readonly change = output<MatButtonToggleChange>();
 
   // strict: @ContentChildren is populated by Angular before ngAfterContentInit
   @ContentChildren(CustomButtonToggleComponent) toggles!: QueryList<CustomButtonToggleComponent>;
