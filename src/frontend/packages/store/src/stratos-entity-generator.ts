@@ -18,8 +18,8 @@ function generateMetricsEndpoint() {
     labelPlural: 'Metrics',
     tokenSharing: true,
     logoUrl: '/core/assets/endpoint-icons/metrics.svg',
-    // Set at startup by core's generateCoreStratosEntities: the auth form
-    // configs live in core, which this package may not import.
+    // Set at startup by core's generateCoreStratosEntities, with the card's
+    // details component: both live in core, which this package may not import.
     authTypes: [],
     renderPriority: 1
   },

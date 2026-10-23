@@ -1,12 +1,9 @@
-import { Type } from '@angular/core';
 import {
   EndpointModel,
   EndpointsDataService,
 } from '@stratosui/store';
 import { Observable, defer, from } from 'rxjs';
 import { map, take } from 'rxjs/operators';
-
-import { EndpointListDetailsComponent } from '../../shared/components/endpoint-list/endpoint-list.helpers';
 
 export function getEndpointUsername(endpoint: EndpointModel) {
   return endpoint && endpoint.user ? endpoint.user.name : '-';
@@ -31,9 +28,6 @@ export interface EndpointIcon {
   name: string;
   font: string;
 }
-
-// Any initial endpointTypes listDetailsComponent should be added here
-export const coreEndpointListDetailsComponents: Type<EndpointListDetailsComponent>[] = [];
 
 /**
  * True when a metrics endpoint covers the endpoint: the backend names it in
