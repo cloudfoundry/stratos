@@ -2,7 +2,8 @@ import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { CurrentUserRolesDataService, type EndpointModel } from '@stratosui/store';
+import { of } from 'rxjs';
+import { CurrentUserRolesDataService, StratosCatalogEndpointEntity, entityCatalog, type EndpointModel } from '@stratosui/store';
 
 import { SessionSignalService } from '../../core/signals/session-signal.service';
 import { ConfirmationDialogService } from '../../shared/components/confirmation-dialog.service';
@@ -123,5 +124,22 @@ describe('EndpointRowActionsService', () => {
     signIn(true);
     expect(labels(ep('connected', 'guid-1', { system_shared_token: true })))
       .toEqual(['Disconnect', 'Reconnect', 'Edit', 'Unregister']);
+  });
+
+  // A type can add its own actions (Helm repositories: Synchronize).
+  it('offers the actions an endpoint type adds, after the common ones', () => {
+    const synchronize = vi.fn();
+    entityCatalog.register(new StratosCatalogEndpointEntity({
+      type: 'typed-actions', label: 'Typed', labelPlural: 'Typed', logoUrl: '', authTypes: [], unConnectable: true,
+      endpointListActions: () => [
+        { label: 'Synchronize', action: synchronize, createVisible: () => of(true) },
+        { label: 'Hidden', action: vi.fn(), createVisible: () => of(false) },
+      ],
+    }));
+    const row = ep('disconnected', 'guid-1', { cnsi_type: 'typed-actions' });
+    const actions = service.buildEndpointActions(row);
+    expect(actions.map(a => a.label)).toEqual(['Edit', 'Unregister', 'Synchronize']);
+    actions.find(a => a.label === 'Synchronize')?.invoke(row);
+    expect(synchronize).toHaveBeenCalledWith(row);
   });
 });
