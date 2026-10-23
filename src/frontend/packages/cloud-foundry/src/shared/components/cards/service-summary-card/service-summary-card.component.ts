@@ -61,8 +61,6 @@ interface SummaryView {
 export class ServiceSummaryCardComponent {
   private readonly _offering = signal<StServiceOffering | null>(null);
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set offering(value: StServiceOffering | null) {
     this._offering.set(value ?? null);

@@ -514,9 +514,6 @@ export interface SignalListConfig<T> {
   host: { class: 'block h-full min-h-0' },
 })
 export class SignalListComponent<T> implements AfterViewInit {
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input({ required: true }) config!: SignalListConfig<T>;
 
   private readonly injector = inject(Injector);

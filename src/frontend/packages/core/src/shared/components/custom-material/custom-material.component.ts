@@ -113,8 +113,6 @@ export class MatDatepickerDirective {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomDatepickerComponent {
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() selected!: Date;
   readonly selectedChange = output<Date>();
 
@@ -139,8 +137,6 @@ export class CustomDatepickerInputComponent {
   readonly valueChange = output<Date>();
   private _value!: Date;
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get value(): Date {
     return this._value;

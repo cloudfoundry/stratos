@@ -25,14 +25,8 @@ export class SidepanelPreviewComponent {
   // Null while the caller is still deriving the title (e.g. markdown preview)
   readonly title = input<string | null>();
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input()
   favorite?: UserFavorite<IFavoriteMetadata>;
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() header?: Portal<any>;
 }

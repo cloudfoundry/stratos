@@ -47,8 +47,6 @@ export class SchemaFormComponent {
   private readonly snackBar = inject(TailwindSnackBarService);
   private schema: object | undefined;
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set config(config: SchemaFormConfig | undefined) {
     // Skip if no config... or schema is the same (avoids losing existing data in form)

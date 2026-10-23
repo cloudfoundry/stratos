@@ -24,18 +24,9 @@ export class NoContentMessageComponent implements AfterViewInit {
 
   readonly icon = input<string>();
   readonly iconFont = input<string>();
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() firstLine?: string;
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() secondLine?: NoContentMessageLine | null;
   readonly otherLines = input<NoContentMessageLine[]>();
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() toolbarLink?: {
     text: string;
   };

@@ -24,16 +24,12 @@ export class UserAvatarComponent {
   readonly size = input('small');
   readonly color = input('normal');
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set allowGravatar(allowed: boolean | null) {
     this.canUseGravatar = !!allowed;
     this.update();
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set user(user: UserProfileInfo | null) {
     this.userInfo = user;

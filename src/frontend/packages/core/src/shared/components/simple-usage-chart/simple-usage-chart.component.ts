@@ -73,8 +73,6 @@ export class SimpleUsageChartComponent {
     warning: 70
 });
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set data(usageData: ISimpleUsageChartData) {
     if (usageData) {
       const {

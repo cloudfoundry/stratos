@@ -25,8 +25,6 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   // The parent's error, e.g. a failed web socket. The parent clears it at the
   // start of each attempt.
   private readonly parentError = signal<string | undefined>(undefined);
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set errorMessage(v: string | undefined) { this.parentError.set(v); }
   get errorMessage(): string | undefined { return this.parentError(); }

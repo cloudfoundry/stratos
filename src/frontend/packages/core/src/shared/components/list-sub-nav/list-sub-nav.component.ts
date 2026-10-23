@@ -184,9 +184,6 @@ export class ListSubNavComponent {
   readonly loading = input<Signal<boolean>>();
 
   /** Optional primary action. Omit for read-only lists. */
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() addAction?: ListSubNavAddAction;
 
   /** When set and emits true, swaps the right-side add button for a
@@ -206,9 +203,6 @@ export class ListSubNavComponent {
 
   /** When provided alongside `selectedCount`, a "Clear" link is rendered
    *  that calls this function when clicked. */
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() onClearSelection?: () => void;
 
   protected isCountPending(): boolean {

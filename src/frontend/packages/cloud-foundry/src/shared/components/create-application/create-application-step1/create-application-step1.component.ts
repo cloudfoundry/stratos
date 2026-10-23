@@ -58,8 +58,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   validate!: Observable<boolean>;
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input()
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 

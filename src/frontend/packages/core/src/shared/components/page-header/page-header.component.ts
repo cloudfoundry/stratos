@@ -155,8 +155,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   readonly endpointIds$ = input<Observable<string[]>>();
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set tabs(tabs: IPageSideNavTab[]) {
     if (tabs) {
@@ -170,8 +168,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set tabsHeader(header: string) {
     if (header) {
@@ -182,8 +178,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   readonly showUnderFlow = input(false);
 
   private pShowHistory = true;
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get showHistory(): boolean {
     return !this.logoutOnly() && this.pShowHistory;
@@ -196,8 +190,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public unreadEventCount$: Observable<number>;
   public eventPriorityStatus$: Observable<StratosStatus | undefined>;
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata> | null) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
       if (favorite.canFavorite()) {
@@ -233,8 +225,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   public actionsKey: StratosActionType | null;
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[] | null) {
     this.latestBreadcrumbs = breadcrumbs;

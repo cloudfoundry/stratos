@@ -63,9 +63,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   // a TemplateRef that surfaces the user's in-progress selections (CF /
   // Org / Space / offering / plan / name) so the wizard always shows
   // "what am I creating?" as later steps navigate away from the picker.
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() contextSummary?: TemplateRef<unknown>;
 
   steps: StepComponent[] = [];

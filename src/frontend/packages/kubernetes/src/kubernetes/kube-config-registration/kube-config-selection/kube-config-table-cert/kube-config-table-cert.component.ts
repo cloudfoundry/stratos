@@ -37,8 +37,6 @@ export class KubeConfigTableCertComponent extends TableCellCustom<KubeConfigFile
   initialValue$ = toObservable(this._initialValue);
   initialized = false;
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(row: KubeConfigFileCluster) {
     super.row = row;

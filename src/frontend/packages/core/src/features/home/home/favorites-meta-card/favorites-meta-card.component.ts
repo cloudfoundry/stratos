@@ -124,8 +124,6 @@ export class FavoritesMetaCardComponent {
     this.favoritesData.updateMetadata(updated);
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set favoriteEntity(favoriteEntity: UserFavorite<IFavoriteMetadata>) {
     if (favoriteEntity) {

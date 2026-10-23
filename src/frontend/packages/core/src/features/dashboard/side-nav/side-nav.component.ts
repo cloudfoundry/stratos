@@ -102,8 +102,6 @@ export class SideNavComponent implements OnInit {
 
     this.customizations = cs.get();
   }
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set iconMode(isIconMode: boolean) {
     if (isIconMode !== this.isIconMode) {
       this.isIconMode = isIconMode;

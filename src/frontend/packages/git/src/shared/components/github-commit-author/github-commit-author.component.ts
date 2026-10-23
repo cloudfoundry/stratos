@@ -11,9 +11,6 @@ import { GitCommit } from '@stratosui/git';
 })
 export class GithubCommitAuthorComponent {
   // strict: required @Input, always bound by the host template.
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() commit!: GitCommit;
   readonly showAvatar = input(true);
 }

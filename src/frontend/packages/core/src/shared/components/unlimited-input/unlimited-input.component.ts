@@ -51,9 +51,6 @@ export class UnlimitedInputComponent implements OnInit {
   readonly required = input(false);
   readonly type = input<string>();
   readonly placeholder = input('');
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() suffix!: string;
   readonly prefix = input<string>();
 
