@@ -169,9 +169,9 @@ export class CustomDatepickerToggleComponent {
   readonly for = input<any>();
 
   toggle() {
-    const for = this.for();
-    if (for && for.open) {
-      for.open();
+    const picker = this.for();
+    if (picker && picker.open) {
+      picker.open();
     }
   }
 }
