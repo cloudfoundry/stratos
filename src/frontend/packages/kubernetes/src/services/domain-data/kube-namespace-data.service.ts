@@ -46,6 +46,18 @@ export class KubeNamespaceDataService {
     });
   }
 
+  // The namespace list's load errors for the endpoint. They live on the
+  // per-endpoint service (tagged 'namespaces'; load() and
+  // refresh('namespaces') clear them), re-resolved after an eviction
+  // like namespacesForEndpoint.
+  listErrors(kubeGuid: string): Signal<StratosError[]> {
+    return computed(() => {
+      this.eviction.epoch(kubeGuid);
+      return untracked(() => this.registry.getService(kubeGuid)).errors()
+        .filter(e => e.affected?.includes('namespaces'));
+    });
+  }
+
   // Single-namespace projection by name — derived from the per-endpoint
   // cache. Callers (e.g. the namespace detail page) refresh() first.
   namespaceByName(kubeGuid: string, name: string): Signal<KubeNamespace | undefined> {
