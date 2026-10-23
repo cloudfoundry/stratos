@@ -7,6 +7,7 @@ import { httpErrorResponseToSafeString } from '../jetstream';
 import { ActionState, getDefaultActionState } from '../types/entity-pipeline.types';
 import { computeConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { SystemInfo } from '../types/system.types';
+import { EndpointLastErrorService } from './endpoint-last-error.service';
 
 /**
  * Wave-1 (W36-B) signal-native endpoints data service.
@@ -114,6 +115,7 @@ const EMPTY_FETCH_STATE: EndpointFetchingState = { fetching: false };
 @Injectable({ providedIn: 'root' })
 export class EndpointsDataService {
   private http = inject(HttpClient);
+  private lastError = inject(EndpointLastErrorService);
 
   // ---- core state ---------------------------------------------------------
 
@@ -364,6 +366,11 @@ export class EndpointsDataService {
       httpErrorResponseToSafeString(e) || 'Could not connect, please try again',
     ).then(async state => {
       this.markConnecting(guid, false, state);
+      if (state.error) {
+        this.lastError.record(guid, state.message);
+      } else {
+        this.lastError.clear(guid);
+      }
       if (!state.error) {
         // Refresh authoritative state so connectionStatus + user fields land.
         // Await so the emitted ConnectEvent reflects post-refresh user data
@@ -417,6 +424,7 @@ export class EndpointsDataService {
       'Could not unregister endpoint',
     ).then(state => {
       if (!state.error) {
+        this.lastError.clear(guid);
         const next = new Map(this._endpoints());
         next.delete(guid);
         this._endpoints.set(next);

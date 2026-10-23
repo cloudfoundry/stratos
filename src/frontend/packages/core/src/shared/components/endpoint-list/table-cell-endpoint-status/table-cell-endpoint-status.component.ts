@@ -1,6 +1,14 @@
 import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
 
-import { EndpointModel, EndpointsDataService, endpointConnectionStatus, entityCatalog, withConnectingOverlay } from '@stratosui/store';
+import {
+  EndpointLastErrorService,
+  EndpointModel,
+  EndpointsDataService,
+  describeLastConnectError,
+  endpointConnectionStatus,
+  entityCatalog,
+  withConnectingOverlay,
+} from '@stratosui/store';
 
 import { TableCellCustom } from '../../signal-list/cell-base';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
@@ -20,6 +28,7 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
 
   public connectable = true;
   private endpointsData = inject(EndpointsDataService);
+  private lastErrors = inject(EndpointLastErrorService);
 
   @Input()
   get row(): EndpointModel {
@@ -40,6 +49,14 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
       this.endpointsData.isConnecting(this.row?.guid ?? ''),
       this.endpointsData.isDisconnecting(this.row?.guid ?? ''),
     );
+  }
+
+  // Why the last connect failed, for an endpoint left Disconnected or
+  // Expired by it (a failed connect stores no token).
+  get lastError(): string | null {
+    const status = this.status;
+    const message = status === 'disconnected' || status === 'expired' ? this.lastErrors.lastError(this.row?.guid ?? '') : null;
+    return message ? describeLastConnectError(message) : null;
   }
 
   constructor() {

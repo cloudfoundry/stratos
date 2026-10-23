@@ -190,8 +190,9 @@ export interface SignalListColumn<T> {
   // column's cell/card-title; defaults to the rendered text. Used by the
   // routes card to show a route's full guid on hover while the visible title
   // shows a short-guid fallback for unnamed routes. Of the other cells, only
-  // a pill reads it: the service-instance lists put a failed operation's
-  // reason on the Last Operation pill.
+  // a pill or a dot reads it: the service-instance lists put a failed
+  // operation's reason on the Last Operation pill, the endpoints list a
+  // failed connect's reason on the Status dot.
   tooltip?: (row: T) => string;
   // Optional for kind === 'pill' or 'dot'. Returns a color family. Default: neutral.
   pillColor?: (row: T) => SignalListPillColor;

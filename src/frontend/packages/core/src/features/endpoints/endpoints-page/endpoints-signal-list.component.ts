@@ -4,9 +4,11 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 
 import {
+  EndpointLastErrorService,
   EndpointModel,
   EndpointsDataService,
   MenuItem,
+  describeLastConnectError,
   UserFavorite,
   UserFavoriteManager,
   entityCatalog,
@@ -60,6 +62,7 @@ export class EndpointsSignalListComponent {
   private rowActions = inject(EndpointRowActionsService);
   private authState = inject(EndpointAuthStateService);
   private endpointsData = inject(EndpointsDataService);
+  private lastError = inject(EndpointLastErrorService);
 
   /**
    * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above
@@ -161,6 +164,14 @@ export class EndpointsSignalListComponent {
       return s.charAt(0).toUpperCase() + s.slice(1);
     };
 
+    // A failed connect stores no token, so the endpoint reads Disconnected;
+    // hovering the status says why the last connect failed.
+    const statusTooltip = (ep: EndpointModel): string => {
+      const label = statusLabel(ep);
+      const lastError = label === 'Disconnected' || label === 'Expired' ? this.lastError.lastError(ep.guid ?? '') : null;
+      return lastError ? describeLastConnectError(lastError) : label;
+    };
+
     const statusColor = (ep: EndpointModel): SignalListPillColor => {
       if (this.endpointsData.isConnecting(ep.guid ?? '') || this.endpointsData.isDisconnecting(ep.guid ?? '')) {
         return 'warning';
@@ -224,6 +235,7 @@ export class EndpointsSignalListComponent {
           kind: 'dot',
           pillColor: statusColor,
           render: statusLabel,
+          tooltip: statusTooltip,
           widthHint: '8rem',
         },
         {
