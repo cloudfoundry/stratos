@@ -13,6 +13,8 @@ import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.
 import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
 import { KubernetesSummaryTabComponent } from './kubernetes-summary.component';
+import { By } from '@angular/platform-browser';
+import { CardNumberMetricComponent } from '@stratosui/core';
 
 describe('KubernetesSummaryTabComponent', () => {
   let component: KubernetesSummaryTabComponent;
@@ -29,8 +31,9 @@ describe('KubernetesSummaryTabComponent', () => {
     nodesInCluster: (_g: string) => signal([]) as Signal<unknown[]>, refresh: nodeRefresh,
     errors: () => nodeErrors.asReadonly(),
   };
+  const namespaces = signal<unknown[]>([]);
   const namespaceStub = {
-    namespacesForEndpoint: (_g: string) => signal([]) as Signal<unknown[]>, refresh: namespaceRefresh,
+    namespacesForEndpoint: (_g: string) => namespaces as Signal<unknown[]>, refresh: namespaceRefresh,
     namespaceListErrors: () => [],
   };
 
@@ -55,6 +58,7 @@ describe('KubernetesSummaryTabComponent', () => {
 
   beforeEach(async () => {
     nodeErrors.set([]);
+    namespaces.set([]);
     seedEndpointsDataService([kubeTestEndpoint]);
     fixture = TestBed.createComponent(KubernetesSummaryTabComponent);
     component = fixture.componentInstance;
@@ -81,5 +85,16 @@ describe('KubernetesSummaryTabComponent', () => {
     const nodesTile = el.querySelector('app-card-number-metric');
     expect(nodesTile?.textContent).toContain('-');
     expect(nodesTile?.textContent).not.toContain('0');
+  });
+
+  const tiles = () => fixture.debugElement.queryAll(By.directive(CardNumberMetricComponent))
+    .map(d => d.componentInstance as CardNumberMetricComponent);
+
+  it('labels a single namespace "Namespace", not "Node"', async () => {
+    namespaces.set([{ metadata: { name: 'default' } }]);
+    await fixture.whenStable();
+    const namespacesTile = tiles().find(t => t.label === 'Namespaces')!;
+    expect(namespacesTile.value).toBe('1');
+    expect(namespacesTile.labelSingular).toBe('Namespace');
   });
 });
