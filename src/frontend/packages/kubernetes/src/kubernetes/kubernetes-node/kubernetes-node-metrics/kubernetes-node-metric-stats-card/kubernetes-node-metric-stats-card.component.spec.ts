@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { NEVER, Subscription } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
@@ -43,10 +44,10 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -58,5 +59,18 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('shows why the metric failed to load instead of blank values', async () => {
+    fixture.destroy();
+    const error = signal<string | null>('Error proxing request: dial tcp: i/o timeout (500)');
+    TestBed.inject(KubernetesNodeService).setupMetricObservable = () =>
+      ({ entity$: NEVER, pollerSub: new Subscription(), error });
+    fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);
+    fixture.componentInstance.metric = 'container_memory_usage_bytes' as any;
+    await fixture.whenStable();
+
+    expect((fixture.nativeElement as HTMLElement).querySelector('[data-test="node-metric-error"]')?.textContent)
+      .toContain('Failed to load: Error proxing request: dial tcp: i/o timeout (500)');
   });
 });

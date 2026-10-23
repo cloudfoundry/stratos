@@ -1,4 +1,4 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
@@ -65,5 +65,29 @@ describe('MetricsDataService', () => {
 
     http.expectNone(() => true);
     expect(vi.getTimerCount()).toBe(0);
+  });
+
+  // The metrics plugin answers 200 with one entry per endpoint; a failed
+  // query is that endpoint's error entry, not missing data.
+  it('fetch rejects with the endpoint\'s status and reason for its error entry', async () => {
+    const fetching = service.fetch(request('a'));
+    http.expectOne(r => r.url.includes('query=a')).flush({
+      e1: { error: { statusCode: 503, status: '503 Service Unavailable' }, errorResponse: 'prometheus is down' },
+    });
+    const err = await fetching.catch((e: unknown) => e);
+    expect(err).toBeInstanceOf(HttpErrorResponse);
+    expect((err as HttpErrorResponse).status).toBe(503);
+    expect((err as HttpErrorResponse).error).toBe('503 Service Unavailable: prometheus is down');
+  });
+
+  it('observe reports the error entry\'s reason', async () => {
+    const obs = service.observe(signal<MetricsRequest | null>(request('a')));
+    TestBed.tick();
+    http.expectOne(r => r.url.includes('query=a')).flush({
+      e1: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },
+    });
+    await vi.waitFor(() => expect(obs.error()).toBe('Error proxing request: dial tcp: i/o timeout (500)'));
+    expect(obs.metrics()).toBeNull();
+    obs.stop();
   });
 });

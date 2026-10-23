@@ -85,6 +85,7 @@ export class KubernetesNodeService {
       })
     );
     const pollerSub: Subscription = { unsubscribe: () => observation.stop() } as Subscription;
-    return { entity$, pollerSub };
+    // error: why the last fetch failed (entity$ emits nothing then).
+    return { entity$, pollerSub, error: observation.error };
   }
 }
