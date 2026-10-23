@@ -14,8 +14,8 @@ import { DisplayValueComponent } from '../display-value/display-value.component'
 })
 export class EditableDisplayValueComponent {
 
-  readonly edit = input.required<boolean>();
-  readonly label = input.required<string>();
+  readonly edit = input<boolean>();
+  readonly label = input<string>();
   readonly value = input<any>();
 
   constructor() { }

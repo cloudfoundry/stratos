@@ -63,15 +63,15 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
   readonly dims = input<any>();
   readonly type = input('standard');
-  readonly series = input.required<any[]>();
-  readonly seriesLine = input.required<any[]>();
+  readonly series = input<any[]>();
+  readonly seriesLine = input<any[]>();
   readonly xScale = input<any>();
   readonly yScale = input<any>();
   readonly colors = input<any>();
   readonly tooltipDisabled = input(false);
-  readonly gradient = input.required<boolean>();
-  readonly activeEntries = input.required<AppAutoscalerMetricDataLine[]>();
-  readonly seriesName = input.required<string>();
+  readonly gradient = input<boolean>();
+  readonly activeEntries = input<AppAutoscalerMetricDataLine[]>();
+  readonly seriesName = input<string>();
   readonly animations = input(true);
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped series' (select) event under the same name

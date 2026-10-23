@@ -36,7 +36,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   route = inject(ActivatedRoute);
 
 
-  readonly isMarketplaceMode = input.required<boolean>();
+  readonly isMarketplaceMode = input<boolean>();
 
   public spaces$!: Observable<ISpace[]>;
   public hasSpaces$!: Observable<boolean>;

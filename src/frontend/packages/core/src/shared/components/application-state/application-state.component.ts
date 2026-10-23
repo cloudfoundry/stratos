@@ -18,7 +18,7 @@ import { ApplicationStateIconComponent } from './application-state-icon/applicat
 })
 export class ApplicationStateComponent implements OnInit {
 
-  public readonly state = input.required<Observable<StratosStatusMetadata>>();
+  public readonly state = input<Observable<StratosStatusMetadata>>();
 
   // strict: assigned in ngOnInit when the required `state` @Input is present
   public status$!: Observable<StratosStatus>;

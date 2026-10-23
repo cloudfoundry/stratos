@@ -23,7 +23,7 @@ export class SidepanelPreviewComponent {
   public sidePanelService = inject(SidePanelService);
 
   // Null while the caller is still deriving the title (e.g. markdown preview)
-  readonly title = input.required<string | null>();
+  readonly title = input<string | null>();
 
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)

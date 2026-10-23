@@ -13,9 +13,9 @@ export class DialogErrorComponent implements OnInit {
 
   constructor() { }
 
-  readonly message = input.required<string>();
+  readonly message = input<string>();
 
-  readonly show = input.required<boolean>();
+  readonly show = input<boolean>();
 
   ngOnInit() {
   }

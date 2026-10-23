@@ -37,7 +37,7 @@ export class KubernetesNodeMetricStatsCardComponent
 {
   readonly title = input("Memory");
 
-  readonly metric = input.required<KubeNodeMetric>();
+  readonly metric = input<KubeNodeMetric>();
 
   readonly period = input("Hour");
 

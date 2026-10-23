@@ -37,11 +37,11 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
   public readonly error = computed(() => this.streamError() ?? this.parentError());
 
-  readonly sshStream = input.required<Observable<any>>();
+  readonly sshStream = input<Observable<any>>();
 
-  readonly sshInput = input.required<Subject<string>>();
+  readonly sshInput = input<Subject<string>>();
 
-  public readonly connectionStatus = input.required<Observable<number>>();
+  public readonly connectionStatus = input<Observable<number>>();
 
   public readonly isConnected = signal(false);
   public readonly attemptingConnection = signal(false);

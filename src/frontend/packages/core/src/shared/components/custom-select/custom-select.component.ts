@@ -83,7 +83,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   readonly placeholder = input('');
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly required = input(false);
-  readonly name = input.required<string>();
+  readonly name = input<string>();
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
   @Input() id!: string;

@@ -153,7 +153,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   readonly hideMenu = input(false);
 
-  readonly endpointIds$ = input.required<Observable<string[]>>();
+  readonly endpointIds$ = input<Observable<string[]>>();
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

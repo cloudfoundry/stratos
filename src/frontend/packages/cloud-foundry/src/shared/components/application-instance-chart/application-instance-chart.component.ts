@@ -17,20 +17,20 @@ const APP_METRICS_BASE_URL = '/pp/v1/metrics';
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 
-  private readonly appGuid = input.required<string>();
+  private readonly appGuid = input<string>();
 
-  private readonly endpointGuid = input.required<string>();
+  private readonly endpointGuid = input<string>();
 
-  private readonly yAxisLabel = input.required<string>();
+  private readonly yAxisLabel = input<string>();
 
   // Prometheus query string
-  private readonly queryString = input.required<string>();
+  private readonly queryString = input<string>();
 
-  private readonly seriesTranslation = input.required<string>();
+  private readonly seriesTranslation = input<string>();
 
   private readonly queryRange = input(false);
 
-  public readonly title = input.required<string>();
+  public readonly title = input<string>();
 
   public instanceChartConfig!: MetricsLineChartConfig;
 

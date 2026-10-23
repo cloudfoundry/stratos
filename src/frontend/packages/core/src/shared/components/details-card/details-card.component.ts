@@ -14,9 +14,9 @@ export class DetailsCardComponent implements OnInit {
 
   constructor() { }
 
-  readonly title = input.required<string>();
+  readonly title = input<string>();
 
-  readonly busy = input.required<boolean>();
+  readonly busy = input<boolean>();
 
   ngOnInit() {
   }

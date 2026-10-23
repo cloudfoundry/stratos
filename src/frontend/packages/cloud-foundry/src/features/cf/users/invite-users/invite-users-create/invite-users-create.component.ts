@@ -49,7 +49,7 @@ export class InviteUsersCreateComponent implements OnInit {
   public valid$: Observable<boolean>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  readonly redirectUrl = input.required<string>();
+  readonly redirectUrl = input<string>();
 
   /**
    * FWT-957: signal-native step handle. Reuses the existing onNext side

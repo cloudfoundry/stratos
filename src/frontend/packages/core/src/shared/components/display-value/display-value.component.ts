@@ -14,7 +14,7 @@ export class DisplayValueComponent {
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
   @Input() label!: string;
-  readonly value = input.required<string>();
+  readonly value = input<string>();
 
   constructor() { }
 }

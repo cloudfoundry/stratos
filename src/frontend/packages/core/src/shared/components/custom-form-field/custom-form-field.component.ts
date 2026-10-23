@@ -380,8 +380,8 @@ export class CustomFormFieldComponent
 })
 export class CustomFormFieldIconComponent {
   readonly fontSet = input("material-icons");
-  readonly fontIcon = input.required<string>();
-  readonly svgIcon = input.required<string>();
+  readonly fontIcon = input<string>();
+  readonly svgIcon = input<string>();
 }
 
 @Component({
@@ -426,8 +426,8 @@ export class CustomButtonDirective {
   },
 })
 export class MatInputDirective {
-  readonly formControl = input.required<FormControl<any>>();
-  readonly formControlName = input.required<string>();
+  readonly formControl = input<FormControl<any>>();
+  readonly formControlName = input<string>();
 }
 
 @Directive({
@@ -438,8 +438,8 @@ export class MatInputDirective {
   },
 })
 export class AppInputDirective {
-  readonly formControl = input.required<FormControl<any>>();
-  readonly formControlName = input.required<string>();
+  readonly formControl = input<FormControl<any>>();
+  readonly formControlName = input<string>();
 }
 
 @Component({

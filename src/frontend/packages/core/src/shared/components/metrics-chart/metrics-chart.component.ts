@@ -50,7 +50,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   private metricsDataService = inject(MetricsDataService);
   private destroyRef = inject(DestroyRef);
 
-  public readonly metricsConfig = input.required<MetricsConfig>();
+  public readonly metricsConfig = input<MetricsConfig>();
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.

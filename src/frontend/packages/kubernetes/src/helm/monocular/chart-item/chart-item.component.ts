@@ -26,7 +26,7 @@ export class ChartItemComponent implements OnInit {
   // Truncate the description
   readonly showDescription = input(true);
 
-  readonly artifactHubAndHelmRepoTypes$ = input.required<Observable<boolean>>(); // strict: required @Input, always bound by the parent template
+  readonly artifactHubAndHelmRepoTypes$ = input<Observable<boolean>>();
 
   private chartsService = inject(ChartsService);
 

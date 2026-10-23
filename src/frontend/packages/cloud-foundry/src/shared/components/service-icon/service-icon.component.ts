@@ -18,7 +18,7 @@ export class ServiceIconComponent implements OnInit {
 
   image = '';
 
-  readonly service = input.required<StServiceOffering | null>();
+  readonly service = input<StServiceOffering | null>();
   readonly addMenuPadding = input(false);
   constructor() { }
 

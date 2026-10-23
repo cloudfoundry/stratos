@@ -27,7 +27,7 @@ export class ExtensionButtonsComponent implements OnInit {
 
   public extensionActions: StratosActionMetadata[] = [];
 
-  readonly type = input.required<StratosActionType>();
+  readonly type = input<StratosActionType>();
 
   ngOnInit() {
     this.extensionActions = getActionsFromExtensions(this.type()).map(value => ({

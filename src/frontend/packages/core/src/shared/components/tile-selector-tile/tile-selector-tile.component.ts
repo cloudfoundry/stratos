@@ -22,7 +22,7 @@ export class TileSelectorTileComponent {
   //  and migrating would break narrowing currently.
   @Input() tile!: ITileConfig;
 
-  readonly active = input.required<boolean>();
+  readonly active = input<boolean>();
 
   readonly smaller = input(false);
 

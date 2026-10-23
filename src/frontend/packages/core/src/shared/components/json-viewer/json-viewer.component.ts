@@ -24,7 +24,7 @@ export class JsonViewerComponent implements OnChanges {
 
   readonly json = input<any>();
 
-  readonly root = input.required<string>();
+  readonly root = input<string>();
 
   // Whether to expand all initially
   readonly expanded = input(true);

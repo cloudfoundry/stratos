@@ -20,7 +20,7 @@ import { ChartsService } from "../../shared/services/charts.service";
   imports: [DatePipe, RouterLink, SlicePipe],
 })
 export class ChartDetailsVersionsComponent {
-  readonly versions = input.required<ChartVersion[]>();
+  readonly versions = input<ChartVersion[]>();
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.

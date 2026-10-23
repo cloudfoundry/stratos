@@ -18,7 +18,7 @@ export class UserPermissionDirective implements OnChanges, OnDestroy {
   // async pipe emits null on first CD before the observable produces a value.
   public readonly appUserPermission = input<PermissionTypes[] | null>();
 
-  public readonly appUserPermissionEndpointGuid = input.required<string>();
+  public readonly appUserPermissionEndpointGuid = input<string>();
 
   private canSub?: Subscription;
 

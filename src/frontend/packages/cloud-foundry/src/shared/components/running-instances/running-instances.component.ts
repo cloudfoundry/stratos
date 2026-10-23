@@ -18,8 +18,8 @@ export class RunningInstancesComponent implements OnInit {
   // Desired instance count; blank until the host has the app
   readonly instances = input<number | null>();
   // strict: required @Inputs, always bound by the host template
-  readonly cfGuid = input.required<string>();
-  readonly appGuid = input.required<string>();
+  readonly cfGuid = input<string>();
+  readonly appGuid = input<string>();
 
   running: Signal<number> = signal(0);
 
