@@ -25,12 +25,12 @@ describe('BindAppsStepComponent', () => {
     });
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(BindAppsStepComponent);
     component = fixture.componentInstance;
-    component.boundAppId = '';
-    component.apps$ = of([]);
-    fixture.detectChanges();
+    fixture.componentRef.setInput('boundAppId', '');
+    fixture.componentRef.setInput('apps$', of([]));
+    await fixture.whenStable();
   });
 
   it('should create', () => {

@@ -365,7 +365,7 @@ describe('DeployApplicationStep2Component', () => {
       const deployData = TestBed.inject(CfDeployAppDataService);
       deployData.setSourceType(component.sourceType);
       deployData.setDeployBranch('gone');
-      component.isRedeploy = true;
+      fixture.componentRef.setInput('isRedeploy', true);
       const results: { success: boolean; message?: string }[] = [];
       component.onNext(0, null as any).subscribe(r => results.push(r));
 

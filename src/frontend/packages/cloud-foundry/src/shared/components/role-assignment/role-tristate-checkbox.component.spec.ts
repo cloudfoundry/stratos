@@ -16,12 +16,11 @@ describe('RoleTristateCheckboxComponent', () => {
 
     fixture = TestBed.createComponent(RoleTristateCheckboxComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('renders indeterminate when checked is null', async () => {
     fixture.componentRef.setInput('checked', null);
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const checkbox = fixture.debugElement.query(By.css('app-checkbox'));
@@ -30,8 +29,7 @@ describe('RoleTristateCheckboxComponent', () => {
   });
 
   it('emits true when an unchecked box is clicked', async () => {
-    component.checked = false;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('checked', false);
     await fixture.whenStable();
 
     const emitted: boolean[] = [];
@@ -44,8 +42,7 @@ describe('RoleTristateCheckboxComponent', () => {
   });
 
   it('emits false when a checked box is clicked', async () => {
-    component.checked = true;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('checked', true);
     await fixture.whenStable();
 
     const emitted: boolean[] = [];
@@ -57,10 +54,10 @@ describe('RoleTristateCheckboxComponent', () => {
     expect(emitted).toEqual([false]);
   });
 
-  it('does not emit when disabled', () => {
-    component.checked = false;
-    component.disabled = true;
-    fixture.detectChanges();
+  it('does not emit when disabled', async () => {
+    fixture.componentRef.setInput('checked', false);
+    fixture.componentRef.setInput('disabled', true);
+    await fixture.whenStable();
 
     const emitted: boolean[] = [];
     component.toggled.subscribe((v: boolean) => emitted.push(v));

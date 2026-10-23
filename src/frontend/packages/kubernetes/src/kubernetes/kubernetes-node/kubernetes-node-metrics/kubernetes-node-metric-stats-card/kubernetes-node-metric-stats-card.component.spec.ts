@@ -7,7 +7,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card.component';
 import { KubernetesNodeSimpleMetricComponent } from '../kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
-import { KubernetesNodeService } from '../../../services/kubernetes-node.service';
+import { KubeNodeMetric, KubernetesNodeService } from '../../../services/kubernetes-node.service';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesTestingModule } from '../../../kubernetes.testing.module';
@@ -47,6 +47,7 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
   beforeEach(async () => {
     fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('metric', KubeNodeMetric.MEMORY);
     await fixture.whenStable();
   });
 
@@ -67,7 +68,7 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
     TestBed.inject(KubernetesNodeService).setupMetricObservable = () =>
       ({ entity$: NEVER, pollerSub: new Subscription(), error });
     fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);
-    fixture.componentInstance.metric = 'container_memory_usage_bytes' as any;
+    fixture.componentRef.setInput('metric', 'container_memory_usage_bytes' as any);
     await fixture.whenStable();
 
     expect((fixture.nativeElement as HTMLElement).querySelector('[data-test="node-metric-error"]')?.textContent)

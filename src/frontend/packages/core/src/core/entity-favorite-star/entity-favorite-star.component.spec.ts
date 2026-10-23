@@ -43,14 +43,13 @@ describe('EntityFavoriteStarComponent', () => {
     // Don't call detectChanges here - let each test control when that happens
   });
 
-  it('should create', () => {
-    fixture.detectChanges();
+  it('should create', async () => {
+    await fixture.whenStable();
     expect(component).toBeTruthy();
   });
 
   it('should show unfilled star icon if not favorited', async () => {
     component.isFavorite$ = of(false);
-    fixture.detectChanges();
     await fixture.whenStable();
 
     expect(element.textContent).toContain('star_border');
@@ -58,7 +57,6 @@ describe('EntityFavoriteStarComponent', () => {
 
   it('should show filled star icon if favorited', async () => {
     component.isFavorite$ = of(true);
-    fixture.detectChanges();
     await fixture.whenStable();
 
     expect(element.textContent).toContain('star');
@@ -66,8 +64,7 @@ describe('EntityFavoriteStarComponent', () => {
 
   it('should set isFavorite based on favorite', async () => {
     vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(of(true));
-    component.favorite = favorite;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favorite', favorite);
     await fixture.whenStable();
 
     expect(element.textContent).toContain('star');
@@ -75,8 +72,7 @@ describe('EntityFavoriteStarComponent', () => {
 
   it('should set isFavorite based on favorite [2]', async () => {
     vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(of(false));
-    component.favorite = favorite;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favorite', favorite);
     await fixture.whenStable();
 
     expect(element.textContent).toContain('star_border');
@@ -86,19 +82,16 @@ describe('EntityFavoriteStarComponent', () => {
     const isFavorite$ = new BehaviorSubject<boolean>(false);
     vi.spyOn(userFavoriteManager, 'toggleFavorite').mockImplementation(() => isFavorite$.next(!isFavorite$.getValue()));
     vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(isFavorite$);
-    component.favorite = favorite;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('favorite', favorite);
     await fixture.whenStable();
 
-    // strict: the star control renders for a favorited entity after detectChanges/whenStable
+    // strict: the star control renders for a favorited entity after whenStable
     const starEl: HTMLElement = element.querySelector('[role="button"]')!;
     starEl.click();
-    fixture.detectChanges();
     await fixture.whenStable();
     expect(element.textContent).toContain('star');
 
     starEl.click();
-    fixture.detectChanges();
     await fixture.whenStable();
     expect(element.textContent).toContain('star_border');
   });
@@ -115,20 +108,20 @@ describe('EntityFavoriteStarComponent', () => {
       });
       vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(isFavorite$);
 
-      component.confirmRemoval = true;
-      component.favorite = favorite;
-      fixture.detectChanges();
+      fixture.componentRef.setInput('confirmRemoval', true);
+      fixture.componentRef.setInput('favorite', favorite);
       await vi.advanceTimersByTimeAsync(0);
+      await fixture.whenStable();
 
       // Verify initial state - should show filled star
       expect(element.textContent).toContain('star');
 
       // Click the star to trigger confirmation dialog
-      // strict: the star control renders for a favorited entity after detectChanges
+      // strict: the star control renders for a favorited entity after the first render
       const starEl: HTMLElement = element.querySelector('[role="button"]')!;
       starEl.click();
-      fixture.detectChanges();
       await vi.advanceTimersByTimeAsync(0);
+      await fixture.whenStable();
       await vi.runAllTimersAsync(); // Wait for dialog animations
 
       // Verify dialog opened in document.body (not in component element)
@@ -152,7 +145,7 @@ describe('EntityFavoriteStarComponent', () => {
       expect(toggleSpy).toHaveBeenCalledWith(favorite);
 
       // Wait for observable to update
-      fixture.detectChanges();
+      await vi.advanceTimersByTimeAsync(0);
       await fixture.whenStable();
 
       // Verify star is now unfilled
@@ -171,17 +164,17 @@ describe('EntityFavoriteStarComponent', () => {
       const toggleSpy = vi.spyOn(userFavoriteManager, 'toggleFavorite');
       vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(of(true));
 
-      component.confirmRemoval = true;
-      component.favorite = favorite;
-      fixture.detectChanges();
+      fixture.componentRef.setInput('confirmRemoval', true);
+      fixture.componentRef.setInput('favorite', favorite);
       await vi.advanceTimersByTimeAsync(0);
+      await fixture.whenStable();
 
       // Click the star
-      // strict: the star control renders for a favorited entity after detectChanges
+      // strict: the star control renders for a favorited entity after the first render
       const starEl: HTMLElement = element.querySelector('[role="button"]')!;
       starEl.click();
-      fixture.detectChanges();
       await vi.advanceTimersByTimeAsync(0);
+      await fixture.whenStable();
       await vi.runAllTimersAsync();
 
       // Find and click the "Cancel" button
@@ -206,7 +199,6 @@ describe('EntityFavoriteStarComponent', () => {
 
   it('should hide if persistence not available', async () => {
     component.endpointsService.disablePersistenceFeatures$ = of(true);
-    fixture.detectChanges();
     await fixture.whenStable();
 
     expect(element.textContent).toBe('');

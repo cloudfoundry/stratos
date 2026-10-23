@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, provideZonelessChangeDetection } from '@angular/core';
 import {
   AbstractControl,
@@ -12,13 +12,14 @@ import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '
 
 describe('CustomFormFieldComponent — Tailwind state-class getters (FWT-956)', () => {
   let component: CustomFormFieldComponent;
+  let fixture: ComponentFixture<CustomFormFieldComponent>;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [CustomFormFieldComponent],
     });
-    const fixture = TestBed.createComponent(CustomFormFieldComponent);
+    fixture = TestBed.createComponent(CustomFormFieldComponent);
     component = fixture.componentInstance;
   });
 
@@ -85,17 +86,17 @@ describe('CustomFormFieldComponent — Tailwind state-class getters (FWT-956)', 
     });
 
     it('color=accent uses accent bg', () => {
-      component.color = 'accent';
+      fixture.componentRef.setInput('color', 'accent');
       expect(component.rippleColorClasses).toContain('bg-accent');
     });
 
     it('color=warn forces danger bg', () => {
-      component.color = 'warn';
+      fixture.componentRef.setInput('color', 'warn');
       expect(component.rippleColorClasses).toContain('bg-danger');
     });
 
     it('invalid forces danger bg even when color=accent', () => {
-      component.color = 'accent';
+      fixture.componentRef.setInput('color', 'accent');
       Object.defineProperty(component, 'isInvalid', { get: () => true, configurable: true });
       expect(component.rippleColorClasses).toContain('bg-danger');
     });

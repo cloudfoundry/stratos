@@ -79,7 +79,7 @@ describe('KubernetesHomeCardComponent', () => {
   beforeEach(async () => {
     fixture = TestBed.createComponent(KubernetesHomeCardComponent);
     component = fixture.componentInstance;
-    component.endpoint = {} as EndpointModel;
+    fixture.componentRef.setInput('endpoint', {} as EndpointModel);
     await fixture.whenStable();
   });
 
@@ -91,7 +91,7 @@ describe('KubernetesHomeCardComponent', () => {
     pods.set([{ metadata: { name: 'p1' } }, { metadata: { name: 'p2' } }]);
     nodes.set([{ metadata: { name: 'n1' } }]);
     namespaces.set([{ metadata: { name: 'ns1' } }, { metadata: { name: 'ns2' } }, { metadata: { name: 'ns3' } }]);
-    component.endpoint = { guid: 'k1' } as EndpointModel;
+    fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
 
     component.load();
 
@@ -101,7 +101,7 @@ describe('KubernetesHomeCardComponent', () => {
   });
 
   it('triggers a refresh on the node and namespace services (pods auto-load)', () => {
-    component.endpoint = { guid: 'k1' } as EndpointModel;
+    fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
 
     component.load();
 
@@ -112,7 +112,7 @@ describe('KubernetesHomeCardComponent', () => {
   it('shows a count whose load failed as "-", with the reason, not 0', async () => {
     nodes.set([]);
     nodeErrors.set([{ code: 'FETCH_ERROR', title: 'kube-nodes', detail: 'Error proxying request: i/o timeout', affected: ['k1'] }]);
-    component.endpoint = { guid: 'k1' } as EndpointModel;
+    fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
 
     component.load();
     await fixture.whenStable();
@@ -125,7 +125,7 @@ describe('KubernetesHomeCardComponent', () => {
   });
 
   it('shows no failure while every count loaded', async () => {
-    component.endpoint = { guid: 'k1' } as EndpointModel;
+    fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
     component.load();
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="kube-card-failure"]')).toBeNull();
@@ -136,7 +136,7 @@ describe('KubernetesHomeCardComponent', () => {
 
   it('labels a single namespace "Namespace", not "Node"', async () => {
     namespaces.set([{ metadata: { name: 'default' } }]);
-    component.endpoint = { guid: 'k1' } as EndpointModel;
+    fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
     component.load();
     await fixture.whenStable();
     const namespacesTile = tiles().find(t => t.label === 'Namespaces')!;
