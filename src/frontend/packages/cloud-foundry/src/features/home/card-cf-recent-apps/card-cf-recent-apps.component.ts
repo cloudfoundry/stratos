@@ -1,7 +1,7 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { Component, OnInit, ChangeDetectionStrategy, computed, input } from '@angular/core';
+import { outputFromObservable, toObservable } from '@angular/core/rxjs-interop';
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, Observable, of, Subject } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
 
 import { APIResource } from '@stratosui/store';
@@ -44,7 +44,10 @@ export class CardCfRecentAppsComponent implements OnInit {
   public recentApps$!: Observable<APIResource<IApp>[]>;
   readonly allApps$ = input<Observable<APIResource<IApp>[]>>();
   readonly loading$ = input<Observable<boolean>>();
-  readonly refresh = output<any>();
+  // Backed by a Subject so ngOnInit can tell whether a parent listens:
+  // the subject is observed only while a (refresh) binding exists.
+  protected readonly refresh$ = new Subject<void>();
+  readonly refresh = outputFromObservable(this.refresh$);
   readonly endpoint = input<string>();
   readonly mode = input<string>();
   readonly showDate = input(true);
@@ -74,7 +77,7 @@ export class CardCfRecentAppsComponent implements OnInit {
       this.hasEntities$ = of(false);
       return;
     }
-    this.canRefresh = this.refresh.observed;
+    this.canRefresh = this.refresh$.observed;
     // Every live caller passes allApps$ (home, CF, org and space summaries)
     const allApps$ = this.allApps$() ?? of([]);
     this.appsLoading$ = this.loading$() ?? of(false);

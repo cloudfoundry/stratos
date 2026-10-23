@@ -5,7 +5,7 @@
         <app-card-title class="recent-apps-card__title">Recently updated applications</app-card-title>
         @if (canRefresh) {
           <app-polling-indicator [manualPoll]="(appsLoading$ | async) === false" [isPolling]="(appsLoading$ | async) ?? false"
-          (poll)="refresh.emit()"></app-polling-indicator>
+          (poll)="refresh$.next()"></app-polling-indicator>
         }
       </app-card-header>
       @if (recentApps$ | async; as apps) {
