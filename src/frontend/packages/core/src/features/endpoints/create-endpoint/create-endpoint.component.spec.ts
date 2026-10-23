@@ -2,11 +2,12 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { entityCatalog, generateStratosEntities } from '@stratosui/store';
+import { entityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TabNavService, CurrentUserPermissionsService, SidePanelService } from '@stratosui/core';
 import { AppTestModule } from '@test-framework/core-test.helper';
 
+import { generateCoreStratosEntities } from '../../metrics/metrics-endpoint';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
@@ -47,18 +48,27 @@ describe('CreateEndpointComponent', () => {
       ],
     }).compileComponents();
 
-    // Register entities AFTER modules are loaded
-    const entities = generateStratosEntities();
+    // Register entities AFTER modules are loaded, as the app does: the
+    // core-completed set, so Metrics carries its auth types.
+    const entities = generateCoreStratosEntities();
     entities.forEach(entity => entityCatalog.register(entity));
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CreateEndpointComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Metrics accepts a username/password or no login (jetstream metrics
+  // plugin Connect), so registering it offers the same optional Connect
+  // step as Cloud Foundry.
+  it('offers the optional Connect step when registering Metrics', () => {
+    expect(component.showConnectStep).toBe(true);
+    expect(fixture.nativeElement.textContent).toContain('Connect (Optional)');
   });
 });
