@@ -155,4 +155,31 @@ describe('ConnectEndpointService', () => {
       service.destroy();
     });
   });
+
+  // Enter in the form while a connect runs must not start a second one; the
+  // second submit gets the first one's result.
+  it('runs one connect for submits made while it is in flight', async () => {
+    const { injector, data } = await setup();
+    let finish!: (state: ActionState) => void;
+    const connect = vi.fn(() => new Promise<ActionState>(resolve => { finish = resolve; }));
+    Object.assign(data, { endpoints: signal(new Map()), connect });
+    const service = new ConnectEndpointService(endpointsService, config, data, injector);
+    service.setData({ authType: 'creds', authVal: { username: 'u', password: 'p' }, systemShared: false, bodyContent: '' });
+
+    const first = firstValueFrom(service.submit());
+    const second = firstValueFrom(service.submit());
+    await vi.waitFor(() => expect(connect).toHaveBeenCalled());
+    finish({ busy: false, error: false, message: '' });
+
+    expect(await first).toEqual({ success: true, errorMessage: '' });
+    expect(await second).toEqual({ success: true, errorMessage: '' });
+    expect(connect).toHaveBeenCalledTimes(1);
+
+    // A later submit connects again.
+    const third = firstValueFrom(service.submit());
+    await vi.waitFor(() => expect(connect).toHaveBeenCalledTimes(2));
+    finish({ busy: false, error: false, message: '' });
+    await third;
+    service.destroy();
+  });
 });
