@@ -679,3 +679,49 @@ describe('SteppersComponent — its own error message', () => {
     expect(open()[0]).toBe('Other message');
   });
 });
+
+// Cancel leaves the stepper: the step's leave hook runs (a signal handle's
+// onLeave, as for a legacy onLeave input).
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers cancel="/somewhere">
+      <app-step title="One" [signalHandle]="handle"></app-step>
+      <app-step title="Two" [signalHandle]="handle"></app-step>
+    </app-steppers>
+  `,
+})
+class CancelHostComponent {
+  left: (boolean | undefined)[] = [];
+  handle: SignalStepHandle = {
+    valid: signal(true),
+    onLeave: (isNext) => { this.left.push(isNext); },
+  };
+}
+
+describe('SteppersComponent — Cancel', () => {
+  let hostFixture: ComponentFixture<CancelHostComponent>;
+  let host: CancelHostComponent;
+  const cancelButton = () => hostFixture.nativeElement.querySelector('#stepper_cancel') as HTMLButtonElement;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [CancelHostComponent, RouterTestingModule.withRoutes([{ path: 'somewhere', children: [] }])],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(CancelHostComponent);
+    host = hostFixture.componentInstance;
+  });
+
+  it('runs the step\'s leave hook', async () => {
+    await hostFixture.whenStable();
+    cancelButton().click();
+    expect(host.left).toEqual([false]);
+  });
+});

@@ -498,7 +498,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   onCancel(index: number) {
-    this.steps[index].onLeave(false);
+    // invokeLeave, not onLeave: a step driven by a signal handle has its
+    // leave hook there.
+    void this.steps[index].invokeLeave(false);
     if (this.cancelReload && this.cancel) {
       // Full page load restarts the wizard from a clean state; the template
       // drops routerLink when cancelReload so this is the only navigation.
