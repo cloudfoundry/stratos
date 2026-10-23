@@ -263,3 +263,20 @@ func TestCloudFoundryConnectKeepsTheUAAReason(t *testing.T) {
 			status, body["reason"], body["error"], "auth_failed")
 	}
 }
+
+func TestConnectFailureShowsTheEndpointsMessage(t *testing.T) {
+	t.Parallel()
+
+	// A Kubernetes Status, as answered to the pods list Validate makes.
+	answer := api.ErrHTTPRequest{
+		Status:   http.StatusForbidden,
+		Response: `{"kind":"Status","status":"Failure","message":"pods is forbidden: User \"jo\" cannot list resource \"pods\"","code":403}`,
+	}
+	status, body := connectFailureResponse(t, connectWith(t, failingEndpointPlugin{validateErr: answer}))
+
+	want := `Could not connect to the endpoint: the endpoint refused access with these credentials ` +
+		`(403 Forbidden: pods is forbidden: User "jo" cannot list resource "pods")`
+	if status != http.StatusForbidden || body["error"] != want {
+		t.Errorf("got %d %q, want 403 %q", status, body["error"], want)
+	}
+}

@@ -161,7 +161,7 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 		kubeCertClient.CloseIdleConnections()
 
 		if err != nil {
-			return nil, fmt.Errorf("Request failed: %v", err)
+			return nil, fmt.Errorf("Request failed: %w", err)
 		}
 
 		if res.StatusCode != 401 {
