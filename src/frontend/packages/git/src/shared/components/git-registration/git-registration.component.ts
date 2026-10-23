@@ -22,7 +22,9 @@ import { take, map } from 'rxjs/operators';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
+import { confirmUnregisterOnPrevious } from '../../../../../core/src/features/endpoints/create-endpoint/confirm-unregister-on-previous';
 import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
+import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
   ENDPOINT_REGISTER_HANDLE,
   leaveEndpointRegistration,
@@ -98,6 +100,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
+  private confirmDialog = inject(ConfirmationDialogService);
   // Present when hosted by the Register Endpoint dialog, which this form
   // closes instead of navigating to /endpoints (the page under the dialog).
   private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
@@ -154,6 +157,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   // Previous — "Prev = start over" UX. Cleared after unregister so the
   // form can re-register cleanly.
   private registeredGuid: string | null = null;
+  private registeredName = '';
 
   registerStepHandle: SignalStepHandle = {
     valid: this.registerValid.asReadonly(),
@@ -191,6 +195,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
         this._connect()?.onEnter(data as any);
       }
     },
+    // Previous unregisters (onLeave below), so it asks first.
+    confirmPrevious: () => this.registeredGuid ?
+      confirmUnregisterOnPrevious(this.confirmDialog, this.registeredName) :
+      Promise.resolve(true),
     onLeave: async (isNext) => {
       if (isNext || !this.registeredGuid) {
         return;
@@ -440,6 +448,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     };
     if (!result.error) {
       this.registeredGuid = data.guid;
+      this.registeredName = name;
       this.snackBarService.show(`Successfully registered '${name}'`);
     }
     const success = !result.error;

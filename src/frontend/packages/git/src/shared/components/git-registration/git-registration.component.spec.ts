@@ -11,6 +11,7 @@ import { createBasicStoreModule } from '../../../../../store/testing/src/store-t
 import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { generateStratosEntities } from '../../../../../store/src/stratos-entity-generator';
+import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ENDPOINT_REGISTER_HANDLE } from '../../../../../core/src/features/endpoints/endpoint-register-modal/endpoint-register-handle';
 import { EndpointsSignalConfigService } from '../../../../../core/src/features/endpoints/endpoints-page/endpoints-signal-config.service';
 import { GitRegistrationComponent } from './git-registration.component';
@@ -102,5 +103,19 @@ describe('GitRegistrationComponent', () => {
     component.connectRef = { onNext: () => of({ success: true, redirect: true }) } as never;
     await component.connectStepHandle.submit!();
     expect(registerHandle.close).toHaveBeenCalledWith(true);
+  });
+
+  // Previous from the Connect step unregisters the endpoint just registered,
+  // so it asks first.
+  it('asks before Previous unregisters the endpoint, and stays when the user declines', async () => {
+    const openWithCancel = vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel')
+      .mockImplementation((_config, _ok, cancel) => cancel());
+    // As left by a successful Register (runRegistration).
+    Object.assign(component, { registeredGuid: 'new-guid', registeredName: 'GitHub' });
+
+    expect(await component.connectStepHandle.confirmPrevious!()).toBe(false);
+    expect(openWithCancel.mock.calls[0][0].title).toBe('Unregister Endpoint');
+    expect(openWithCancel.mock.calls[0][0].message).toContain('GitHub');
+    expect(stubSignalConfig.unregister).not.toHaveBeenCalled();
   });
 });

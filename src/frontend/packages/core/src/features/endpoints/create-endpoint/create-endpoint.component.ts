@@ -19,12 +19,14 @@ import { entityCatalog } from '@stratosui/store';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { getIdFromRoute } from '../../../core/utils.service';
+import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SignalStepHandle, StepComponent } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { ENDPOINT_REGISTER_HANDLE, leaveEndpointRegistration } from '../endpoint-register-modal/endpoint-register-handle';
 import { EndpointsSignalConfigService } from '../endpoints-page/endpoints-signal-config.service';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
+import { confirmUnregisterOnPrevious } from './confirm-unregister-on-previous';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
 
 @Component({
@@ -79,6 +81,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
+  private confirmDialog = inject(ConfirmationDialogService);
   // Present when hosted by the Register Endpoint dialog, which this form
   // closes instead of navigating to /endpoints (the page under the dialog).
   private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
@@ -95,6 +98,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // can re-register cleanly. Mirrors git-registration's pattern.
   private registeredGuid: string | null = null;
   private registeredType: string | null = null;
+  private registeredName = '';
 
   step1StepHandle: SignalStepHandle = {
     valid: this.step1Valid.asReadonly(),
@@ -110,6 +114,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       if (result.data) {
         this.registeredGuid = result.data.guid;
         this.registeredType = result.data.type;
+        this.registeredName = result.data.name;
       }
       // `redirect: true` (only emitted when finalStep is set, i.e. when
       // there's no connect step) means the form is done.
@@ -148,6 +153,10 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
         this._connect()?.onEnter(data as any);
       }
     },
+    // Previous unregisters (onLeave below), so it asks first.
+    confirmPrevious: () => this.registeredGuid ?
+      confirmUnregisterOnPrevious(this.confirmDialog, this.registeredName) :
+      Promise.resolve(true),
     onLeave: async (isNext) => {
       if (isNext || !this.registeredGuid || !this.registeredType) {
         return;
