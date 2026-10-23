@@ -100,7 +100,9 @@ func buildJSONResponse(cnsiList []string, responses map[string]*api.CNSIRequest)
 		var errorResponse []byte
 		switch {
 		case !ok:
-			errorStatus.StatusCode = 500
+			// No response at all: as ProxyRequest reports an endpoint that
+			// did not answer before its timeout.
+			errorStatus.StatusCode = http.StatusGatewayTimeout
 			errorStatus.Status = "Request timed out"
 		case cnsiResponse.Error != nil:
 			errorStatus.StatusCode = 500
@@ -109,7 +111,7 @@ func buildJSONResponse(cnsiList []string, responses map[string]*api.CNSIRequest)
 			response = cnsiResponse.Response
 		}
 		// Check the HTTP Status code to make sure that it is actually a valid response
-		if cnsiResponse.StatusCode >= 400 {
+		if ok && cnsiResponse.StatusCode >= 400 {
 			errorStatus.Status = cnsiResponse.Status
 			errorStatus.StatusCode = cnsiResponse.StatusCode
 			if errorStatus.StatusCode <= 0 {
