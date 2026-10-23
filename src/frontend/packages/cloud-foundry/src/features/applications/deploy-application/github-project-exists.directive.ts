@@ -29,7 +29,7 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
   // name) changes, so without OnChanges a token/URL added AFTER the project
   // name was entered would never be re-checked, leaving a stale "does not
   // exist" from the earlier unauthenticated / wrong-host lookup.
-  readonly appGithubProjectExists = input.required<string>();
+  readonly appGithubProjectExists = input<string>();
 
   private lastValue = '';
   // The auth context (scm,guid,token) used for the last check. `undefined`

@@ -12,7 +12,7 @@ import { Observable } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EnumerateComponent {
-  readonly collection = input.required<Observable<any[]>>();
+  readonly collection = input<Observable<any[]>>();
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.

@@ -21,12 +21,12 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   @ViewChild('inputFile', { static: true }) nativeInputFile!: ElementRef;
 
-  readonly accept = input.required<string>();
+  readonly accept = input<string>();
   readonly placeholder = input('');
   readonly fileSelect = output<File>();
   readonly fileData = output<string>();
 
-  readonly fileFormControlName = input.required<string>();
+  readonly fileFormControlName = input<string>();
 
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)

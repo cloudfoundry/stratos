@@ -18,7 +18,7 @@ import { Directive, inject, TemplateRef, input } from '@angular/core';
   standalone: true,
 })
 export class SignalListCellTemplateDirective<T = unknown> {
-  readonly name = input.required<string>({ alias: "appSignalListCell" });
+  readonly name = input<string>(undefined, { alias: 'appSignalListCell' });
 
   public readonly template = inject<TemplateRef<{ $implicit: T; row: T }>>(TemplateRef);
 }

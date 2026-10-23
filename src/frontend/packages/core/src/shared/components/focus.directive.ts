@@ -5,7 +5,7 @@ selector: '[appFocus]',
 standalone: true
 })
 export class FocusDirective implements OnChanges {
-  readonly appFocus = input.required<boolean>();
+  readonly appFocus = input<boolean>();
 
   private element = inject(ElementRef);
 

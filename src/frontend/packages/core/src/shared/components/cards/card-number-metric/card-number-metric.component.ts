@@ -34,18 +34,18 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.
   @Input() icon!: string;
-  readonly iconFont = input.required<string>();
-  readonly label = input.required<string>();
-  readonly labelSingular = input.required<string>();
-  readonly limit = input.required<string>();
-  readonly units = input.required<string>();
-  readonly value = input.required<string>();
+  readonly iconFont = input<string>();
+  readonly label = input<string>();
+  readonly labelSingular = input<string>();
+  readonly limit = input<string>();
+  readonly units = input<string>();
+  readonly value = input<string>();
   readonly showUsage = input(false);
   readonly textOnly = input(false);
   readonly labelAtTop = input(false);
   readonly link = input<string | (() => void | string)>();
   readonly showAlerts = output<any>();
-  readonly mode = input.required<string>();
+  readonly mode = input<string>();
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

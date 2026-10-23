@@ -32,7 +32,7 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
   private propagateChange!: (fsi: FileScannerInfo) => void;
   constructor() {}
 
-  readonly sourceType = input.required<string>();
+  readonly sourceType = input<string>();
 
   readonly hideTitle = input(false);
 

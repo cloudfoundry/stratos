@@ -16,19 +16,19 @@ import { PercentagePipe } from '../../pipes/percentage.pipe';
 })
 export class UsageGaugeComponent implements OnInit {
 
-  public readonly title = input.required<string>();
+  public readonly title = input<string>();
 
-  public readonly value = input.required<number>();
+  public readonly value = input<number>();
 
-  public readonly valueText = input.required<string>();
+  public readonly valueText = input<string>();
 
-  public readonly barOnly = input.required<boolean>();
+  public readonly barOnly = input<boolean>();
 
   // Change bar color to warning if this threshold is reached
-  public readonly warningAt = input.required<number>();
+  public readonly warningAt = input<number>();
 
   // Change bar color to error if this threshold is reached
-  public readonly errorAt = input.required<number>();
+  public readonly errorAt = input<number>();
 
   constructor() { }
 

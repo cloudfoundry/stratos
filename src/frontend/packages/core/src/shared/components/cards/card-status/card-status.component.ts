@@ -33,7 +33,7 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
   ]
 })
 export class CardStatusComponent {
-  readonly status$ = input.required<Observable<StratosStatus>>();
+  readonly status$ = input<Observable<StratosStatus>>();
 
   protected cardStatus = StratosStatus;
 

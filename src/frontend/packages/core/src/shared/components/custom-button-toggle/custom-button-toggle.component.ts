@@ -54,7 +54,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
   //  Your application code writes to the input. This prevents migration.
   @Input() disabled = false;
   readonly vertical = input(false);
-  readonly name = input.required<string>();
+  readonly name = input<string>();
 
   // Material API parity: mat-button-toggle-group supports a plain [value] input
   // TODO: Skipped for migration because:

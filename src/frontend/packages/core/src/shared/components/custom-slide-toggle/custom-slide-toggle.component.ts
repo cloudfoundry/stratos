@@ -32,8 +32,8 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
   //  Your application code writes to the input. This prevents migration.
   @Input() checked = false;
   readonly value = input<any>();
-  readonly name = input.required<string>();
-  readonly id = input.required<string>();
+  readonly name = input<string>();
+  readonly id = input<string>();
   readonly required = input(false);
   readonly labelPosition = input<'before' | 'after'>('after');
   readonly color = input<'primary' | 'accent' | 'warn'>('primary');

@@ -56,7 +56,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   readonly filter = input<(a: any) => void>();
 
-  readonly status = input.required<Observable<number>>();
+  readonly status = input<Observable<number>>();
 
   // How many times the parent retries before it reports the stream failed
   readonly maxReconnectAttempts = input(5);

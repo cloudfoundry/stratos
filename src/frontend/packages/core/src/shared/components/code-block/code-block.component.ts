@@ -15,8 +15,8 @@ import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {
 
-  readonly hideCopy = input.required<boolean>();
-  readonly codeBlockStyle = input.required<string>();
+  readonly hideCopy = input<boolean>();
+  readonly codeBlockStyle = input<string>();
   text = '';
   private observer!: MutationObserver;
 

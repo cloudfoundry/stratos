@@ -5,7 +5,7 @@ selector: '[appBlur]',
 standalone: true
 })
 export class BlurDirective implements OnChanges {
-  readonly appBlur = input.required<boolean>();
+  readonly appBlur = input<boolean>();
 
   private element = inject(ElementRef);
 

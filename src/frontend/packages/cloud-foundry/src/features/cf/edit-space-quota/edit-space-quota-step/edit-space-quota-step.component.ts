@@ -36,7 +36,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   private source: SignalSource<StSpaceQuota | null>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  readonly redirectUrl = input.required<string>();
+  readonly redirectUrl = input<string>();
 
   private validSignal = signal(false);
   private formStatusSub?: Subscription;

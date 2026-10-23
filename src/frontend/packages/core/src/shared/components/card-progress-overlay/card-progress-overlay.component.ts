@@ -15,8 +15,8 @@ import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 })
 export class CardProgressOverlayComponent {
 
-  readonly label = input.required<string>();
+  readonly label = input<string>();
 
-  readonly busy = input.required<Observable<boolean>>();
+  readonly busy = input<Observable<boolean>>();
 
 }

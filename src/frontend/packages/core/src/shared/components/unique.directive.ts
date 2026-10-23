@@ -11,7 +11,7 @@ export class UniqueDirective implements Validator, OnChanges {
 
   constructor() { }
 
-  readonly appUnique = input.required<any[]>();
+  readonly appUnique = input<any[]>();
 
   ngOnChanges(changes: SimpleChanges): void {
     // When the appUnique input changes, re-validate the control

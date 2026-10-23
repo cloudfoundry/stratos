@@ -16,8 +16,8 @@ export class CliCommandComponent {
 
   constructor() { }
 
-  readonly name = input.required<string>();
-  readonly msg = input.required<string>();
-  readonly syntax = input.required<string>();
+  readonly name = input<string>();
+  readonly msg = input<string>();
+  readonly syntax = input<string>();
 
 }

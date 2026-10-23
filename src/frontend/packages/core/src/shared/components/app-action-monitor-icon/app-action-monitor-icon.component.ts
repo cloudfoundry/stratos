@@ -26,7 +26,7 @@ export class AppActionMonitorIconComponent implements OnInit {
 
   // The caller supplies the action state stream directly (the only path now
   // that the ngrx EntityMonitor request-state source has been removed).
-  public readonly state = input.required<Observable<IActionMonitorComponentState>>();
+  public readonly state = input<Observable<IActionMonitorComponentState>>();
 
   @Output()
   public currentState!: Observable<IActionMonitorComponentState>;

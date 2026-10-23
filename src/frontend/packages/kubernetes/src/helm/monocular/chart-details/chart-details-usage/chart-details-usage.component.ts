@@ -16,8 +16,8 @@ import { getMonocularEndpoint } from '../../stratos-monocular.helper';
   imports: [AsyncPipe, CustomTooltipDirective, RouterLink]
 })
 export class ChartDetailsUsageComponent {
-  readonly chart = input.required<Chart>();
-  readonly currentVersion = input.required<string>(); // strict: required @Input, only rendered inside @if (currentVersion) with a bound string
+  readonly chart = input<Chart>();
+  readonly currentVersion = input<string>();
   installing!: boolean;
   public endpointsService = inject(EndpointsService);
   private route = inject(ActivatedRoute);

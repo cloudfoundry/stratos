@@ -16,6 +16,6 @@ export class MetaCardTitleComponent {
   @ViewChild(TemplateRef, { static: true })
   content!: TemplateRef<any>;
 
-  readonly noMargin = input.required<boolean>();
+  readonly noMargin = input<boolean>();
 
 }
