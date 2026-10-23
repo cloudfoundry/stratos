@@ -70,6 +70,7 @@ describe('EditEndpointStepComponent', () => {
       guid: testSCFEndpointGuid,
       client_id: '',  // Form expects a string value, not undefined
       skip_ssl_validation: false,
+      ca_cert: 'STORED-CA-CERT',
       api_endpoint: {
         Scheme: 'https',
         Opaque: '',
@@ -86,10 +87,10 @@ describe('EditEndpointStepComponent', () => {
     seedEndpointsDataService([testEndpointWithClientId]);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(EditEndpointStepComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -103,6 +104,13 @@ describe('EditEndpointStepComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // jetstream sends the stored certificate as ca_cert. Missing it, the
+  // form showed no certificate and saving cleared the stored one.
+  it('shows the stored CA certificate', () => {
+    expect(component.showCACertField()).toBe(true);
+    expect(component.editEndpoint.controls.caCert.value).toBe('STORED-CA-CERT');
   });
   // app-form-field shows a field's <app-error> text as its error line.
   it('says the name is required once it is cleared', async () => {
