@@ -11,6 +11,9 @@ const SYNC_STATUS_LABELS: Record<string, string> = {
   Failed: 'Synchronization failed',
 };
 
+/** Shown when such an endpoint reports no sync status. */
+export const NO_SYNC_STATUS = '—';
+
 /** The label for the endpoint's sync status, or null when it reports none. */
 export function endpointSyncStatusLabel(ep: EndpointModel): string | null {
   const status = ep.endpoint_metadata?.status;

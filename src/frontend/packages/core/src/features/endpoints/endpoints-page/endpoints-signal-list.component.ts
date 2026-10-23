@@ -29,7 +29,11 @@ import {
 import { SignalListCellTemplateDirective } from '../../../shared/components/signal-list/signal-list-cell-template.directive';
 import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
-import { endpointSyncStatusColor, endpointSyncStatusLabel } from '../../../shared/components/endpoint-list/endpoint-sync-status';
+import {
+  NO_SYNC_STATUS,
+  endpointSyncStatusColor,
+  endpointSyncStatusLabel,
+} from '../../../shared/components/endpoint-list/endpoint-sync-status';
 import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
 import { EndpointAuthStateService } from '../../../shared/services/endpoint-auth-state.service';
 import { EndpointRowActionsService, isEndpointExpired } from '../endpoint-row-actions.service';
@@ -150,7 +154,7 @@ export class EndpointsSignalListComponent {
 
     const statusLabel = (ep: EndpointModel): string => {
       if (needsNoLogin(ep)) {
-        return endpointSyncStatusLabel(ep) ?? '—';
+        return endpointSyncStatusLabel(ep) ?? NO_SYNC_STATUS;
       }
       // 'connecting' is a transient overlay held while a connect/reconnect is in
       // flight (EndpointsDataService.isConnecting); it outranks the settled
