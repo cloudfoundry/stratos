@@ -17,8 +17,8 @@
 
     <div class="checkbox-container">
       <input type="checkbox"
-        [id]="id()"
-        [name]="name()"
+        [attr.id]="id() ?? null"
+        [attr.name]="name() ?? null"
         [checked]="checked"
         [disabled]="disabled"
         [required]="required()"
