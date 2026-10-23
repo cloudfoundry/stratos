@@ -132,3 +132,83 @@ describe('KubeGenericResourceDataServiceBase eviction while a load is in flight'
     expect(svc.errors()()).toEqual([]);
   });
 });
+
+// The backend proxy answers 200 with one entry per endpoint; a failed
+// upstream call is an { error, errorResponse } entry, not a list.
+describe('KubeGenericResourceDataServiceBase proxy per-endpoint errors', () => {
+  const A = 'kube-a';
+  const CLUSTER_URL = '/pp/v1/proxy/api/v1/tests?limit=500';
+  let httpMock: HttpTestingController;
+  let svc: HttpTestService;
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
+    });
+    httpMock = TestBed.inject(HttpTestingController);
+    svc = build(HttpTestService);
+  });
+
+  afterEach(() => httpMock.verify());
+
+  const unreachable = {
+    [A]: {
+      error: { statusCode: 500, status: 'Error proxing request' },
+      errorResponse: 'dial tcp 10.0.0.1:6443: connect: connection refused',
+    },
+  };
+
+  it('records the endpoint\'s reason instead of reading the error as an empty list', async () => {
+    const load = svc.refresh({ kubeGuid: A });
+    httpMock.expectOne(CLUSTER_URL).flush(unreachable);
+    await load;
+
+    expect(svc.itemsInCluster(A)()).toEqual([]);
+    expect(svc.errors()()).toEqual([expect.objectContaining({
+      code: 'FETCH_ERROR',
+      detail: 'Error proxing request: dial tcp 10.0.0.1:6443: connect: connection refused',
+      affected: [A],
+    })]);
+  });
+
+  it('marks an upstream 401 as unauthorized', async () => {
+    const load = svc.refresh({ kubeGuid: A });
+    httpMock.expectOne(CLUSTER_URL).flush({
+      [A]: {
+        error: { statusCode: 401, status: '401 Unauthorized' },
+        errorResponse: { kind: 'Status', status: 'Failure', message: 'Unauthorized', code: 401 },
+      },
+    });
+    await load;
+
+    expect(svc.errors()()).toEqual([expect.objectContaining({ code: 'UNAUTHORIZED', detail: '401 Unauthorized' })]);
+  });
+
+  it('clears the endpoint\'s errors when a later load succeeds', async () => {
+    const failed = svc.refresh({ kubeGuid: A });
+    httpMock.expectOne(CLUSTER_URL).flush(unreachable);
+    await failed;
+    expect(svc.errors()()).toHaveLength(1);
+
+    const retried = svc.refresh({ kubeGuid: A });
+    httpMock.expectOne(CLUSTER_URL).flush({ [A]: { items: [] } });
+    await retried;
+
+    expect(svc.errors()()).toEqual([]);
+  });
+
+  it('rejects a delete the endpoint refused and keeps the row', async () => {
+    (svc as any)['_clusterItems'].set(new Map([[A, [{ metadata: { name: 'r1' }, kubeGuid: A }]]]));
+    const del = svc.delete(A, 'r1');
+    httpMock.expectOne('/pp/v1/proxy/api/v1/tests/r1').flush({
+      [A]: {
+        error: { statusCode: 403, status: '403 Forbidden' },
+        errorResponse: { kind: 'Status', message: 'tests "r1" is forbidden: User "u" cannot delete resource "tests"' },
+      },
+    });
+
+    await expect(del).rejects.toThrow('403 Forbidden: tests "r1" is forbidden: User "u" cannot delete resource "tests"');
+    expect(svc.itemsInCluster(A)()).toHaveLength(1);
+  });
+});

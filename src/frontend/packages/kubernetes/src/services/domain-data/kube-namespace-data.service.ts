@@ -3,6 +3,7 @@ import { Injectable, Signal, computed, inject, signal, untracked } from '@angula
 import { firstValueFrom } from 'rxjs';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
+import { KubeProxyResponse, kubeProxyResult } from '../endpoint-data/kube-proxy-response';
 import { KubeNamespace, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
 import { KubeEndpointEviction, evictErrors } from '../endpoint-data/kube-endpoint-eviction';
@@ -68,11 +69,13 @@ export class KubeNamespaceDataService {
 
   // Create a namespace on the target endpoint. POSTs through the jetstream
   // proxy (single-endpoint, targeted by the x-cap-cnsi-list header) and
-  // rejects on a non-2xx so the caller can surface the failure. Refreshes
+  // rejects on a non-2xx or the endpoint's error entry so the caller can
+  // surface the failure. Refreshes
   // the per-endpoint cache on success so the new namespace appears.
   async create(kubeGuid: string, name: string): Promise<void> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
-    await firstValueFrom(this.http.post('/pp/v1/proxy/api/v1/namespaces', { metadata: { name } }, { headers }));
+    await firstValueFrom(this.http.post<KubeProxyResponse<unknown>>('/pp/v1/proxy/api/v1/namespaces', { metadata: { name } }, { headers })
+      .pipe(kubeProxyResult(kubeGuid)));
     await this.refresh({ kubeGuid });
   }
 
@@ -89,11 +92,10 @@ export class KubeNamespaceDataService {
   async fetchDirect(kubeGuid: string): Promise<KubeNamespace[]> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     try {
-      const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeListResponse<KubeNamespace> }>(
+      const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<KubeNamespace>>>(
         `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
         { headers },
-      ));
-      const list = resp?.[kubeGuid];
+      ).pipe(kubeProxyResult<KubeListResponse<KubeNamespace>>(kubeGuid)));
       return (list?.items ?? []).map(ns => ({
         ...ns,
         kubeGuid,

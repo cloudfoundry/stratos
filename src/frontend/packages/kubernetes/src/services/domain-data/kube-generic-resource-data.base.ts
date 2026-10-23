@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
+import { KubeProxyResponse, kubeProxyResult } from '../endpoint-data/kube-proxy-response';
 import { StratosError } from '../endpoint-data/kube-types';
 
 // Shared base for the wave-3 generic-resource domain services
@@ -115,16 +116,17 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   // Signal-native resource delete (replaces the ngrx `deleteResource` action +
   // generic delete pipeline). DELETEs the k8s resource through the Jetstream
   // proxy, then drops the row from every cached scope so the lists/graph that
-  // read these signals update immediately. Errors propagate to the caller
-  // (the resource viewer renders the failure snackbar). Favorites/recents
-  // cleanup is performed by the caller, which holds the catalog entity type.
+  // read these signals update immediately. Errors, including the endpoint
+  // refusing the delete, propagate to the caller (the resource viewer
+  // renders the failure snackbar). Favorites/recents cleanup is performed
+  // by the caller, which holds the catalog entity type.
   async delete(kubeGuid: string, name: string, namespace?: string): Promise<void> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const base = `/pp/v1/proxy${this.config.apiPath}`;
     const url = (namespace && this.config.namespaced)
       ? `${base}/namespaces/${encodeURIComponent(namespace)}/${this.config.resourceName}/${encodeURIComponent(name)}`
       : `${base}/${this.config.resourceName}/${encodeURIComponent(name)}`;
-    await firstValueFrom(this.http.delete(url, { headers }));
+    await firstValueFrom(this.http.delete<KubeProxyResponse<unknown>>(url, { headers }).pipe(kubeProxyResult(kubeGuid)));
     this.removeRow(kubeGuid, name);
   }
 
@@ -162,17 +164,19 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   }
 
   // Generic list fetcher — same shape as KubeServiceDataService.fetchList:
-  // x-cap-cnsi-list header, jetstream wraps the response in a per-CNSI map.
-  // Stamps `kubeGuid` + `metadata.kubeId` on each row.
+  // x-cap-cnsi-list header, jetstream wraps the response in a per-CNSI map
+  // (an endpoint's error entry is thrown, see kubeProxyResult). Stamps
+  // `kubeGuid` + `metadata.kubeId` on each row. A good load clears the
+  // endpoint's earlier errors, so a Retry that works leaves no error state.
   private async fetchList(url: string, kubeGuid: string): Promise<Array<T & { kubeGuid: string }>> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const live = this.eviction.current(kubeGuid);
     try {
-      const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeListResponse<T> }>(
+      const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<T>>>(
         url,
         { headers },
-      ));
-      const list = resp?.[kubeGuid];
+      ).pipe(kubeProxyResult<KubeListResponse<T>>(kubeGuid)));
+      if (live()) evictErrors(this._errors, kubeGuid);
       return (list?.items ?? []).map((item) => ({
         ...item,
         kubeGuid,

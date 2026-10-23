@@ -3,6 +3,7 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
+import { KubeProxyResponse, kubeProxyResult } from '../endpoint-data/kube-proxy-response';
 import { KubeNode, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
 import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
@@ -85,11 +86,12 @@ export class KubeNodeDataService {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const live = this.eviction.current(kubeGuid);
     try {
-      const resp = await firstValueFrom(this.http.get<{ [cnsi: string]: KubeListResponse<KubeNode> }>(
+      const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<KubeNode>>>(
         `/pp/v1/proxy/api/v1/nodes?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
         { headers },
-      ));
-      const list = resp?.[kubeGuid];
+      ).pipe(kubeProxyResult<KubeListResponse<KubeNode>>(kubeGuid)));
+      // A good load clears the endpoint's earlier errors (Retry recovers).
+      if (live()) evictErrors(this._errors, kubeGuid);
       return (list?.items ?? []).map(n => ({
         ...n,
         kubeGuid,
