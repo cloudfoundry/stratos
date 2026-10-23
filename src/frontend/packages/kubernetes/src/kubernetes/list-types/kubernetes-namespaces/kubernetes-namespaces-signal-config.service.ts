@@ -1,4 +1,4 @@
-import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { EffectRef, Injectable, Injector, Signal, WritableSignal, effect, inject, runInInjectionContext, signal } from '@angular/core';
 
 import { ListStateStore, SignalListSort } from '@stratosui/core';
 
@@ -72,9 +72,9 @@ export class KubernetesNamespacesSignalConfigService {
     return this.kubeGuid ? this.namespaceData.listErrors(this.kubeGuid) : signal<StratosError[]>([]).asReadonly();
   }
 
+  // The namespace list's load (load() or refresh('namespaces')).
   isLoading(): Signal<boolean> {
-    const svc = this.kubeGuid ? this.registry.getService(this.kubeGuid) : null;
-    return computed(() => svc?.isLoading() ?? false);
+    return this.kubeGuid ? this.namespaceData.listLoading(this.kubeGuid) : signal(false).asReadonly();
   }
 
   initialize(kubeGuid: string): void {

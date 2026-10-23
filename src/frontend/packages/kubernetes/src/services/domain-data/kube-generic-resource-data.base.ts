@@ -4,6 +4,7 @@ import { firstValueFrom } from 'rxjs';
 
 import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
+import { KubeLoadTracker } from '../endpoint-data/kube-load-tracker';
 import { KubeProxyResponse, kubeProxyResult } from '../endpoint-data/kube-proxy-response';
 import { StratosError } from '../endpoint-data/kube-types';
 
@@ -44,6 +45,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   private readonly _namespaceItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _workloadItems = signal<Map<string, Array<T & { kubeGuid: string }>>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+  private readonly loads = new KubeLoadTracker();
   private readonly eviction = inject(KubeEndpointEviction);
 
   constructor() {
@@ -90,8 +92,17 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   // The failures of the list for one scope (the cluster, or a namespace
   // when given). A reactive read: call it inside a computed.
   scopeErrors(scope: { kubeGuid: string; namespace?: string }): StratosError[] {
-    const key = errorScopeKey(this.config.namespaced ? scope : { kubeGuid: scope.kubeGuid });
+    const key = this.scopeKey(scope);
     return this._errors().filter(e => e.affected?.includes(key));
+  }
+
+  // Whether the list for one scope is loading. A reactive read.
+  scopeLoading(scope: { kubeGuid: string; namespace?: string }): boolean {
+    return this.loads.isLoading(this.scopeKey(scope));
+  }
+
+  private scopeKey(scope: { kubeGuid: string; namespace?: string }): string {
+    return errorScopeKey(this.config.namespaced ? scope : { kubeGuid: scope.kubeGuid });
   }
 
   // ---- Refresh -----------------------------------------------------------
@@ -182,6 +193,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
   private async fetchList(url: string, kubeGuid: string, scopeKey: string): Promise<Array<T & { kubeGuid: string }>> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const live = this.eviction.current(kubeGuid);
+    const loaded = this.loads.start(scopeKey);
     try {
       const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<T>>>(
         url,
@@ -209,6 +221,8 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
       };
       if (live()) this._errors.update(curr => [...curr, next].slice(-50));
       return [];
+    } finally {
+      loaded();
     }
   }
 }

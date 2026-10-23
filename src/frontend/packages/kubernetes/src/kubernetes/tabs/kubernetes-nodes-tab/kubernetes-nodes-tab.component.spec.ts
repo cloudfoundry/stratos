@@ -59,6 +59,22 @@ describe('KubernetesNodesTabComponent', () => {
     expect(cfg?.columns?.length).toBeGreaterThan(0);
   });
 
+  it('shows the loading state, not the empty message, while the nodes load', async () => {
+    fixture = TestBed.createComponent(KubernetesNodesTabComponent);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[data-test="empty"]')).toBeNull();
+    expect(el.querySelector('[data-test="loading"]')).not.toBeNull();
+
+    httpMock.expectOne(NODES_URL).flush({ [KUBE_GUID]: { items: [] } });
+    // The load ends in the continuation after its response; let that run
+    // before waiting for the view (nothing is pending until it does).
+    await Promise.resolve();
+    await fixture.whenStable();
+    expect(el.querySelector('[data-test="loading"]')).toBeNull();
+    expect(el.querySelector('[data-test="empty"]')).not.toBeNull();
+  });
+
   it('shows the failed-load state with the endpoint\'s reason and Retry when the node load fails', async () => {
     await mount({
       [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },

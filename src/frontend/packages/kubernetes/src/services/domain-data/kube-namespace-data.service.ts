@@ -58,6 +58,15 @@ export class KubeNamespaceDataService {
     });
   }
 
+  // Whether the endpoint's namespace list is loading; resolved like
+  // listErrors.
+  listLoading(kubeGuid: string): Signal<boolean> {
+    return computed(() => {
+      this.eviction.epoch(kubeGuid);
+      return untracked(() => this.registry.getService(kubeGuid)).namespacesLoading();
+    });
+  }
+
   // Single-namespace projection by name — derived from the per-endpoint
   // cache. Callers (e.g. the namespace detail page) refresh() first.
   namespaceByName(kubeGuid: string, name: string): Signal<KubeNamespace | undefined> {

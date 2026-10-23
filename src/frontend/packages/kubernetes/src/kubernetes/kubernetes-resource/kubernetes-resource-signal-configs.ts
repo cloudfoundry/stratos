@@ -169,6 +169,18 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
   };
 }
 
+// Whether the scope on screen is loading, so an empty list shows the
+// loading state rather than "There are no ..." until its load ends. A
+// workload view is socket-fed and never loads.
+const NOT_LOADING = signal(false).asReadonly();
+function listLoading(
+  ctx: KubernetesSignalConfigContext,
+  namespaced: boolean,
+  scopeLoading: (scope: ListScope) => boolean,
+): Signal<boolean> {
+  return ctx.isWorkloadView ? NOT_LOADING : computed(() => scopeLoading(listScope(ctx, namespaced)));
+}
+
 // The scope a list shows: the selected namespace for a namespaced type,
 // else the whole cluster. The toolbar refresh and Retry reload this scope.
 type ListScope = { kubeGuid: string; namespace?: string };
@@ -301,7 +313,7 @@ export function buildPodsSignalConfig(
     'Loading pods…',
     ctx.isWorkloadView ? undefined : () => podData.refresh(listScope(ctx, true)),
     listErrors(ctx, true, scope => podData.scopeErrors(scope)),
-    signal(false).asReadonly(),
+    listLoading(ctx, true, scope => podData.scopeLoading(scope)),
   );
 }
 
@@ -389,7 +401,7 @@ export function buildServicesSignalConfig(
     'Loading services…',
     ctx.isWorkloadView ? undefined : () => serviceData.refresh(listScope(ctx, true)),
     listErrors(ctx, true, scope => serviceData.scopeErrors(scope)),
-    signal(false).asReadonly(),
+    listLoading(ctx, true, scope => serviceData.scopeLoading(scope)),
   );
 }
 
@@ -445,7 +457,7 @@ export function buildNamespacesSignalConfig(
     'Loading namespaces…',
     () => namespaceData.refresh({ kubeGuid: ctx.kubeGuid }),
     namespaceData.listErrors(ctx.kubeGuid),
-    signal(false).asReadonly(),
+    namespaceData.listLoading(ctx.kubeGuid),
   );
 }
 
@@ -503,7 +515,7 @@ function buildGenericResourceConfig<T extends GenericRow>(
     loadingMessage,
     ctx.isWorkloadView ? undefined : () => dataSvc.refresh(listScope(ctx, namespaced)),
     listErrors(ctx, namespaced, scope => dataSvc.scopeErrors(scope)),
-    signal(false).asReadonly(),
+    listLoading(ctx, namespaced, scope => dataSvc.scopeLoading(scope)),
   );
 }
 

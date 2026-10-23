@@ -2,7 +2,6 @@ import { EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effe
 
 import { ListStateStore, SignalListSort } from '@stratosui/core';
 
-import { KubeEndpointDataRegistry } from '../../../services/endpoint-data/kube-endpoint-data.registry';
 import { KubeNode, StratosError } from '../../../services/endpoint-data/kube-types';
 import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
 import { errorsForEndpoint } from '../kube-list-errors';
@@ -20,7 +19,6 @@ import { KubeViewPipeline, KubeSortSpec } from '../kube-view-pipeline';
 @Injectable({ providedIn: 'root' })
 export class KubernetesNodesSignalConfigService {
   private readonly nodeData = inject(KubeNodeDataService);
-  private readonly registry = inject(KubeEndpointDataRegistry);
   private readonly injector = inject(Injector);
 
   private kubeGuid = '';
@@ -65,9 +63,10 @@ export class KubernetesNodesSignalConfigService {
     return errorsForEndpoint(this.kubeGuid, this.nodeData.errors());
   }
 
+  // The node list's own load (not the endpoint's summary load).
   isLoading(): Signal<boolean> {
-    const svc = this.kubeGuid ? this.registry.getService(this.kubeGuid) : null;
-    return computed(() => svc?.isLoading() ?? false);
+    const kubeGuid = this.kubeGuid;
+    return computed(() => this.nodeData.loading(kubeGuid));
   }
 
   initialize(kubeGuid: string): void {

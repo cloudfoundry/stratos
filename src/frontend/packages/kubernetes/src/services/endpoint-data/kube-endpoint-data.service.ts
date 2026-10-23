@@ -1,9 +1,10 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
-import { Signal, signal } from '@angular/core';
-import { firstValueFrom, Observable, of, ReplaySubject } from 'rxjs';
+import { Signal, computed, signal } from '@angular/core';
+import { defer, firstValueFrom, Observable, of, ReplaySubject } from 'rxjs';
 import { catchError, finalize, map, tap } from 'rxjs/operators';
 
 import { KubeListResponse, KUBE_LIST_DEFAULT_LIMIT } from './kube-paged-response';
+import { KubeLoadTracker } from './kube-load-tracker';
 import { KubeProxyResponse, kubeProxyResult } from './kube-proxy-response';
 import {
   KubeEndpointData,
@@ -44,6 +45,7 @@ export class KubeEndpointDataService {
   private readonly _errors = signal<StratosError[]>([]);
   private readonly _unavailable = signal<string[]>([]);
   private readonly _lastFetched = signal<Date | null>(null);
+  private readonly loads = new KubeLoadTracker();
 
   readonly kubeVersion: Signal<string | null> = this._kubeVersion.asReadonly();
   readonly nodeCount: Signal<number> = this._nodeCount.asReadonly();
@@ -53,6 +55,8 @@ export class KubeEndpointDataService {
   readonly errors: Signal<StratosError[]> = this._errors.asReadonly();
   readonly unavailable: Signal<string[]> = this._unavailable.asReadonly();
   readonly lastFetched: Signal<Date | null> = this._lastFetched.asReadonly();
+  // The namespace list is loading (load() or refresh('namespaces')).
+  readonly namespacesLoading: Signal<boolean> = computed(() => this.loads.isLoading('namespaces'));
 
   // ReplaySubject(1) — late subscribers get the last emission so they
   // don't hang on a stream that already completed before they wired up.
@@ -108,10 +112,13 @@ export class KubeEndpointDataService {
       map(() => undefined as void),
     );
 
-    const namespacesReq = this.http.get<KubeProxyResponse<KubeListResponse<KubeNamespace>>>(
-      `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
-      { headers },
-    ).pipe(
+    const namespacesReq = defer(() => {
+      const loaded = this.loads.start('namespaces');
+      return this.http.get<KubeProxyResponse<KubeListResponse<KubeNamespace>>>(
+        `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
+        { headers },
+      ).pipe(finalize(loaded));
+    }).pipe(
       kubeProxyResult<KubeListResponse<KubeNamespace>>(this.kubeGuid),
       tap(list => {
         const items = (list?.items ?? []).map(ns => ({
@@ -200,6 +207,7 @@ export class KubeEndpointDataService {
     }
     if (scope === 'namespaces') {
       const headers = new HttpHeaders({ 'x-cap-cnsi-list': this.kubeGuid });
+      const loaded = this.loads.start('namespaces');
       try {
         const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<KubeNamespace>>>(
           `/pp/v1/proxy/api/v1/namespaces?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
@@ -214,6 +222,8 @@ export class KubeEndpointDataService {
         this.clearUnavailable('namespaces');
       } catch (err) {
         this.markUnavailable('namespaces', err, 'kube-namespaces');
+      } finally {
+        loaded();
       }
       return;
     }
