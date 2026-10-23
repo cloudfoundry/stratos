@@ -191,12 +191,11 @@ func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIReco
 	// Error performing the request?
 	if err != nil {
 		slog.Error("error performing the http request", "url", metricsMetadataEndpoint, "response", res, "error", err)
-		// Most request errors (refused, timeout, TLS) come without a response
+		// Most request errors (refused, timeout, TLS) come without a
+		// response. Returned as they are, so the connect handler reports
+		// an unreachable endpoint or a TLS failure.
 		if res == nil {
-			return nil, false, api.NewHTTPShadowError(
-				http.StatusBadRequest,
-				"Could not connect to the endpoint",
-				"Could not connect to the endpoint: %s", err)
+			return nil, false, fmt.Errorf("unable to fetch the metrics metadata: %w", err)
 		}
 		errMessage := ""
 		if res.StatusCode == http.StatusUnauthorized {
