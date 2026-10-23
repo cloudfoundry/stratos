@@ -100,3 +100,21 @@ func TestCertAuthStillRefusesAnUntrustedCluster(t *testing.T) {
 		t.Fatal("expected a cluster with no trusted CA and no Skip SSL to be refused")
 	}
 }
+
+func TestCertAuthPassesOnA401(t *testing.T) {
+	cluster := httptest.NewTLSServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = io.WriteString(w, `{"kind":"Status","message":"Unauthorized","code":401}`)
+	}))
+	defer cluster.Close()
+
+	res, err := certFlowRequest(t, cluster, api.CNSIRecord{GUID: "kube", CACert: caPEM(cluster)})
+	if err != nil {
+		t.Fatalf("expected the cluster's 401 as the response, got error %v", err)
+	}
+	defer res.Body.Close()
+	body, _ := io.ReadAll(res.Body)
+	if res.StatusCode != http.StatusUnauthorized || len(body) == 0 {
+		t.Errorf("got %d %q, want the cluster's 401 and body", res.StatusCode, body)
+	}
+}
