@@ -205,12 +205,17 @@ export class KubeConfigImportComponent implements OnDestroy {
     // the legacy ngrx pairwise/busy-edge dance, so we just emit the
     // initial busy state and the final settled state directly.
     reg.actionState.next({ busy: true, error: false, completed: false, message: '' });
+    // The cluster's CA (certificate-authority-data, base64 PEM) replaces
+    // skipping validation, as on the other register paths. A
+    // certificate-authority file path cannot be read from the browser.
+    const caCert = decodeCACert(reg.cluster.cluster['certificate-authority-data']);
     this.endpointsSignalConfig.register({
       endpointType: KUBERNETES_ENDPOINT_TYPE,
       endpointSubType: reg.cluster._subType ?? null,
       name: reg.cluster.name,
       endpoint: reg.cluster.cluster.server,
-      skipSslValidation: reg.cluster.cluster['insecure-skip-tls-verify'],
+      skipSslValidation: caCert ? false : reg.cluster.cluster['insecure-skip-tls-verify'],
+      caCert,
     }).then(result => {
       reg.actionState.next({
         busy: false,
@@ -375,4 +380,16 @@ export class KubeConfigImportComponent implements OnDestroy {
     }
   };
 
+}
+
+// certificate-authority-data is base64 PEM; '' when absent or not base64.
+function decodeCACert(data: string | undefined): string {
+  if (!data) {
+    return '';
+  }
+  try {
+    return atob(data);
+  } catch {
+    return '';
+  }
 }
