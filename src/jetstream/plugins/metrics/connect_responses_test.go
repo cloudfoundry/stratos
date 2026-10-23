@@ -1,8 +1,10 @@
 package metrics
 
 import (
+	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"strings"
 	"sync"
 	"testing"
@@ -79,4 +81,37 @@ func TestInfoClosesTheResponseBody(t *testing.T) {
 		require.Len(t, transport.bodies, 1, "status %d", status)
 		assert.True(t, transport.bodies[0].isClosed(), "status %d: Info left the response body open", status)
 	}
+}
+
+func TestConnectReportsTheStatusConfigAnswer(t *testing.T) {
+	t.Parallel()
+
+	// No Stratos metadata (404), so Connect checks for a Prometheus
+	// endpoint, which refuses the credentials.
+	transport := &answers{status: map[string]int{"/api/v1/status/config": http.StatusUnauthorized}}
+	m := &MetricsSpecification{portalProxy: &answeringProxy{transport: transport}}
+	endpoint, _ := url.Parse("https://metrics.example.com")
+
+	_, _, err := m.Connect(newConnectContext(), api.CNSIRecord{APIEndpoint: endpoint}, "user-1")
+
+	var answered api.ErrHTTPRequest
+	require.True(t, errors.As(err, &answered), "got %T: %v", err, err)
+	assert.Equal(t, http.StatusUnauthorized, answered.Status)
+	assert.Equal(t, "/api/v1/status/config answered Unauthorized", answered.Response)
+}
+
+func TestConnectReportsAFailedStatusConfigRequest(t *testing.T) {
+	t.Parallel()
+
+	refused := errors.New("connection refused")
+	transport := &answers{fail: map[string]error{"/api/v1/status/config": refused}}
+	m := &MetricsSpecification{portalProxy: &answeringProxy{transport: transport}}
+	endpoint, _ := url.Parse("https://metrics.example.com")
+
+	_, _, err := m.Connect(newConnectContext(), api.CNSIRecord{APIEndpoint: endpoint}, "user-1")
+
+	var answered api.ErrHTTPRequest
+	require.True(t, errors.As(err, &answered), "got %T: %v", err, err)
+	assert.Equal(t, 0, answered.Status, "no answer, so no status")
+	assert.ErrorIs(t, answered.InnerError, refused)
 }
