@@ -235,6 +235,18 @@ for given in "v5.0.0-rc.1" "5.0.0-rc.1"; do
   fi
 done
 
+echo "-- set rejects a bad version as given --"
+setup "4.9.3"
+actual=$(bash "${BUMP}" set 4.9 2>&1 | head -1 || true)
+if [[ "${actual}" == "Invalid version format: 4.9" ]]; then
+  PASS=$((PASS + 1))
+  echo "  ✓ error names '4.9'"
+else
+  FAIL=$((FAIL + 1))
+  echo "  ✗ error: expected 'Invalid version format: 4.9', got '${actual}'"
+fi
+assert_version "package.json unchanged" "4.9.3"
+
 echo ""
 echo "=== Dry run ==="
 
