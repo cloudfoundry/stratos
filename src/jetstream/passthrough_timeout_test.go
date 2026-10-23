@@ -140,3 +140,23 @@ func TestBuildJSONResponseReportsAnEndpointWithNoResponse(t *testing.T) {
 		t.Errorf("expected the answered endpoint's response, got %v", built["answered"])
 	}
 }
+
+func TestDoRequestReportsAFailedProxyRequest(t *testing.T) {
+	t.Parallel()
+
+	pp := &portalProxy{AuthProviders: map[string]api.AuthProvider{}}
+	pp.AddAuthProvider("failing", api.AuthProvider{
+		Handler: func(*api.CNSIRequest, *http.Request) (*http.Response, error) {
+			return nil, errors.New("connection refused")
+		},
+	})
+	target, _ := url.Parse("https://endpoint.example.com/api/v1/pods")
+	request := &api.CNSIRequest{GUID: "endpoint", Method: http.MethodGet, URL: target,
+		Token: &api.TokenRecord{AuthType: "failing"}}
+
+	pp.doRequest(request, nil)
+
+	if request.StatusCode != http.StatusInternalServerError || request.Status != "Error proxying request" {
+		t.Errorf("got %d %q, want 500 %q", request.StatusCode, request.Status, "Error proxying request")
+	}
+}
