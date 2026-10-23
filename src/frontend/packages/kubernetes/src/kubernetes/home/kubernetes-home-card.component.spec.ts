@@ -12,6 +12,8 @@ import { KubePodDataService } from '../../services/domain-data/kube-pod-data.ser
 import { KubeNodeDataService } from '../../services/domain-data/kube-node-data.service';
 import { KubeNamespaceDataService } from '../../services/domain-data/kube-namespace-data.service';
 import { KubernetesHomeCardComponent } from './kubernetes-home-card.component';
+import { By } from '@angular/platform-browser';
+import { CardNumberMetricComponent } from '../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
 
 describe('KubernetesHomeCardComponent', () => {
   let component: KubernetesHomeCardComponent;
@@ -127,5 +129,18 @@ describe('KubernetesHomeCardComponent', () => {
     component.load();
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="kube-card-failure"]')).toBeNull();
+  });
+
+  const tiles = () => fixture.debugElement.queryAll(By.directive(CardNumberMetricComponent))
+    .map(d => d.componentInstance as CardNumberMetricComponent);
+
+  it('labels a single namespace "Namespace", not "Node"', async () => {
+    namespaces.set([{ metadata: { name: 'default' } }]);
+    component.endpoint = { guid: 'k1' } as EndpointModel;
+    component.load();
+    await fixture.whenStable();
+    const namespacesTile = tiles().find(t => t.label === 'Namespaces')!;
+    expect(namespacesTile.value).toBe('1');
+    expect(namespacesTile.labelSingular).toBe('Namespace');
   });
 });

@@ -28,7 +28,7 @@
             <app-tile>
               <app-card-number-metric [textOnly]="true"
                 link="/kubernetes/{{kubeEndpointService.baseKube.guid}}/namespaces" icon="language" label="Namespaces"
-                labelSingular="Node" value="{{ namespaceCount$ | async }}">
+                labelSingular="Namespace" value="{{ namespaceCount$ | async }}">
               </app-card-number-metric>
             </app-tile>
             <app-tile>
