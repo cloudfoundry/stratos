@@ -60,7 +60,7 @@ import { cfApiInterceptor } from "@stratosui/cloud-foundry";
  * Entity Registration Flow:
  * 1. EntityCatalogModule.forFeature(generateCoreStratosEntities) - MUST BE FIRST
  *    - Registers the Stratos entities: today only the Metrics endpoint type,
- *      with the auth types the store package cannot declare
+ *      with the auth types and card details the store package cannot declare
  *    - Registration is SYNCHRONOUS - completes before component constructors
  *
  * 2. Core infrastructure modules (Store, Router, etc.)
