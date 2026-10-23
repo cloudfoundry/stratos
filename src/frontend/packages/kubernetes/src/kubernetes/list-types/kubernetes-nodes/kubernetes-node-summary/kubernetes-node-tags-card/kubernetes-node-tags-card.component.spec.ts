@@ -40,10 +40,12 @@ describe('KubernetesNodeTagsCardComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(KubernetesNodeTagsCardComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('title', 'Labels');
+    fixture.componentRef.setInput('mode', 'labels');
+    await fixture.whenStable();
   });
 
   it('should create', () => {

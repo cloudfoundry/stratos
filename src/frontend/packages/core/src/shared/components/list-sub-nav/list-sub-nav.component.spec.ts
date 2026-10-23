@@ -33,59 +33,59 @@ describe('ListSubNavComponent — original behaviour', () => {
     return fixture.nativeElement as HTMLElement;
   }
 
-  it('renders title with the count from the bound signal', () => {
-    component.title = 'Total Routes';
-    component.count = signal(12).asReadonly();
-    fixture.detectChanges();
+  it('renders title with the count from the bound signal', async () => {
+    fixture.componentRef.setInput('title', 'Total Routes');
+    fixture.componentRef.setInput('count', signal(12).asReadonly());
+    await fixture.whenStable();
 
     const title = html().querySelector('[data-test="list-sub-nav-title"]')!;
     expect(title.textContent).toContain('Total Routes');
     expect(title.textContent).toContain('12');
   });
 
-  it('uses plural label form even when count is 0 or 1', () => {
-    component.title = 'Total Endpoints';
+  it('uses plural label form even when count is 0 or 1', async () => {
+    fixture.componentRef.setInput('title', 'Total Endpoints');
     const c = signal(0);
-    component.count = c.asReadonly();
-    fixture.detectChanges();
+    fixture.componentRef.setInput('count', c.asReadonly());
+    await fixture.whenStable();
 
     let title = html().querySelector('[data-test="list-sub-nav-title"]')!;
     expect(title.textContent).toContain('Total Endpoints');
     expect(title.textContent).toContain('0');
 
     c.set(1);
-    fixture.detectChanges();
+    await fixture.whenStable();
     title = html().querySelector('[data-test="list-sub-nav-title"]')!;
     expect(title.textContent).toContain('Total Endpoints');
     expect(title.textContent).toContain('1');
   });
 
-  it('renders blinking pending dots instead of the count while loading() is true', () => {
-    component.title = 'Total Users';
-    component.count = signal(0).asReadonly();
+  it('renders blinking pending dots instead of the count while loading() is true', async () => {
+    fixture.componentRef.setInput('title', 'Total Users');
+    fixture.componentRef.setInput('count', signal(0).asReadonly());
     const loading = signal(true);
-    component.loading = loading.asReadonly();
-    fixture.detectChanges();
+    fixture.componentRef.setInput('loading', loading.asReadonly());
+    await fixture.whenStable();
 
     let title = html().querySelector('[data-test="list-sub-nav-title"]')!;
     expect(title.querySelector('[data-test="count-pending"]')).toBeTruthy();
     expect(title.textContent).not.toContain('0');
 
     loading.set(false);
-    fixture.detectChanges();
+    await fixture.whenStable();
     title = html().querySelector('[data-test="list-sub-nav-title"]')!;
     expect(title.textContent).toContain('0');
     expect(title.querySelector('[data-test="count-pending"]')).toBeNull();
   });
 
-  it('renders the add button when addAction is provided', () => {
-    component.title = 'Total Routes';
-    component.count = signal(0).asReadonly();
-    component.addAction = {
+  it('renders the add button when addAction is provided', async () => {
+    fixture.componentRef.setInput('title', 'Total Routes');
+    fixture.componentRef.setInput('count', signal(0).asReadonly());
+    fixture.componentRef.setInput('addAction', {
       label: 'Add Route',
       invoke: () => undefined,
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     const btn = html().querySelector('[data-test="list-sub-nav-add"]') as HTMLButtonElement | null;
     expect(btn).toBeTruthy();
@@ -93,60 +93,60 @@ describe('ListSubNavComponent — original behaviour', () => {
     expect(btn!.disabled).toBe(false);
   });
 
-  it('omits the add button entirely when addAction is undefined', () => {
-    component.title = 'Total Events';
-    component.count = signal(5).asReadonly();
-    fixture.detectChanges();
+  it('omits the add button entirely when addAction is undefined', async () => {
+    fixture.componentRef.setInput('title', 'Total Events');
+    fixture.componentRef.setInput('count', signal(5).asReadonly());
+    await fixture.whenStable();
 
     expect(html().querySelector('[data-test="list-sub-nav-add"]')).toBeNull();
   });
 
-  it('hides the add button while the visible signal returns false', () => {
+  it('hides the add button while the visible signal returns false', async () => {
     const visible = signal(false);
-    component.title = 'Total Endpoints';
-    component.count = signal(0).asReadonly();
-    component.addAction = {
+    fixture.componentRef.setInput('title', 'Total Endpoints');
+    fixture.componentRef.setInput('count', signal(0).asReadonly());
+    fixture.componentRef.setInput('addAction', {
       label: 'Register Endpoint',
       invoke: () => undefined,
       visible: visible.asReadonly(),
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     expect(html().querySelector('[data-test="list-sub-nav-add"]')).toBeNull();
 
     visible.set(true);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(html().querySelector('[data-test="list-sub-nav-add"]')).toBeTruthy();
   });
 
-  it('disables the button while the disabled signal returns true', () => {
+  it('disables the button while the disabled signal returns true', async () => {
     const disabled = signal(true);
-    component.title = 'Total Routes';
-    component.count = signal(0).asReadonly();
-    component.addAction = {
+    fixture.componentRef.setInput('title', 'Total Routes');
+    fixture.componentRef.setInput('count', signal(0).asReadonly());
+    fixture.componentRef.setInput('addAction', {
       label: 'Add Route',
       invoke: () => undefined,
       disabled: disabled.asReadonly(),
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     const btn = html().querySelector('[data-test="list-sub-nav-add"]') as HTMLButtonElement;
     expect(btn.disabled).toBe(true);
 
     disabled.set(false);
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(btn.disabled).toBe(false);
   });
 
-  it('invokes the action when the button is clicked', () => {
+  it('invokes the action when the button is clicked', async () => {
     let called = 0;
-    component.title = 'Total Routes';
-    component.count = signal(0).asReadonly();
-    component.addAction = {
+    fixture.componentRef.setInput('title', 'Total Routes');
+    fixture.componentRef.setInput('count', signal(0).asReadonly());
+    fixture.componentRef.setInput('addAction', {
       label: 'Add Route',
       invoke: () => { called++; },
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     const btn = html().querySelector('[data-test="list-sub-nav-add"]') as HTMLButtonElement;
     btn.click();
@@ -167,8 +167,8 @@ describe('ListSubNavComponent — action buttons', () => {
     fixture = TestBed.createComponent(ListSubNavComponent);
     component = fixture.componentInstance;
     // Provide required inputs
-    component.title = 'Total Users';
-    component.count = signal(10).asReadonly();
+    fixture.componentRef.setInput('title', 'Total Users');
+    fixture.componentRef.setInput('count', signal(10).asReadonly());
   });
 
   function html(): HTMLElement {
@@ -176,7 +176,7 @@ describe('ListSubNavComponent — action buttons', () => {
   }
 
   // ── Test 1: renders visible actions, hides invisible ones ─────────────────
-  it('renders one button per visible action; an action with visible() === false is NOT rendered', () => {
+  it('renders one button per visible action; an action with visible() === false is NOT rendered', async () => {
     const visibleAction: ListSubNavAction = {
       label: 'Edit',
       invoke: () => undefined,
@@ -188,21 +188,21 @@ describe('ListSubNavComponent — action buttons', () => {
       visible: signal(false).asReadonly(),
       dataTest: 'action-delete',
     };
-    component.actions = [visibleAction, hiddenAction];
-    fixture.detectChanges();
+    fixture.componentRef.setInput('actions', [visibleAction, hiddenAction]);
+    await fixture.whenStable();
 
     expect(html().querySelector('[data-test="action-edit"]')).toBeTruthy();
     expect(html().querySelector('[data-test="action-delete"]')).toBeNull();
   });
 
   // ── Test 2: variant classes ───────────────────────────────────────────────
-  it('applies red classes for destructive, bg-primary for primary, and border classes for default', () => {
-    component.actions = [
+  it('applies red classes for destructive, bg-primary for primary, and border classes for default', async () => {
+    fixture.componentRef.setInput('actions', [
       { label: 'Remove', invoke: () => undefined, variant: 'destructive', dataTest: 'btn-destructive' },
       { label: 'Save',   invoke: () => undefined, variant: 'primary',     dataTest: 'btn-primary' },
       { label: 'More',   invoke: () => undefined, variant: 'default',     dataTest: 'btn-default' },
-    ];
-    fixture.detectChanges();
+    ]);
+    await fixture.whenStable();
 
     const destructiveBtn = html().querySelector('[data-test="btn-destructive"]') as HTMLButtonElement;
     const primaryBtn     = html().querySelector('[data-test="btn-primary"]')     as HTMLButtonElement;
@@ -217,8 +217,8 @@ describe('ListSubNavComponent — action buttons', () => {
   });
 
   // ── Test 3: disabled + title logic ───────────────────────────────────────
-  it('disabled action has disabled attribute and title = disabledReason; enabled has tooltip or label', () => {
-    component.actions = [
+  it('disabled action has disabled attribute and title = disabledReason; enabled has tooltip or label', async () => {
+    fixture.componentRef.setInput('actions', [
       {
         label: 'Remove',
         invoke: () => undefined,
@@ -233,8 +233,8 @@ describe('ListSubNavComponent — action buttons', () => {
         tooltip: 'Edit user',
         dataTest: 'btn-enabled',
       },
-    ];
-    fixture.detectChanges();
+    ]);
+    await fixture.whenStable();
 
     const disabledBtn = html().querySelector('[data-test="btn-disabled"]') as HTMLButtonElement;
     const enabledBtn  = html().querySelector('[data-test="btn-enabled"]')  as HTMLButtonElement;
@@ -247,23 +247,23 @@ describe('ListSubNavComponent — action buttons', () => {
   });
 
   // ── Test 3b: enabled without tooltip falls back to label ─────────────────
-  it('enabled action with no tooltip uses label as title', () => {
-    component.actions = [
+  it('enabled action with no tooltip uses label as title', async () => {
+    fixture.componentRef.setInput('actions', [
       { label: 'Export', invoke: () => undefined, dataTest: 'btn-export' },
-    ];
-    fixture.detectChanges();
+    ]);
+    await fixture.whenStable();
 
     const btn = html().querySelector('[data-test="btn-export"]') as HTMLButtonElement;
     expect(btn.title).toBe('Export');
   });
 
   // ── Test 4: clicking an enabled action calls its invoke ───────────────────
-  it('clicking an enabled action calls its invoke', () => {
+  it('clicking an enabled action calls its invoke', async () => {
     const invoke = vi.fn();
-    component.actions = [
+    fixture.componentRef.setInput('actions', [
       { label: 'Edit', invoke, dataTest: 'btn-invoke' },
-    ];
-    fixture.detectChanges();
+    ]);
+    await fixture.whenStable();
 
     const btn = html().querySelector('[data-test="btn-invoke"]') as HTMLButtonElement;
     btn.click();
@@ -272,12 +272,12 @@ describe('ListSubNavComponent — action buttons', () => {
   });
 
   // ── Test 5: selectedCount + Clear control ────────────────────────────────
-  it('selectedCount() > 0 renders "N selected" + Clear control that calls onClearSelection', () => {
+  it('selectedCount() > 0 renders "N selected" + Clear control that calls onClearSelection', async () => {
     const count = signal(3);
     const clearSpy = vi.fn();
-    component.selectedCount = count.asReadonly();
-    component.onClearSelection = clearSpy;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('selectedCount', count.asReadonly());
+    fixture.componentRef.setInput('onClearSelection', clearSpy);
+    await fixture.whenStable();
 
     const selectedEl = html().querySelector('[data-test="list-sub-nav-selected"]');
     expect(selectedEl).toBeTruthy();
@@ -290,25 +290,25 @@ describe('ListSubNavComponent — action buttons', () => {
     expect(clearSpy).toHaveBeenCalledOnce();
   });
 
-  it('selectedCount() === 0 renders neither the selected group nor Clear', () => {
-    component.selectedCount = signal(0).asReadonly();
-    component.onClearSelection = vi.fn();
-    fixture.detectChanges();
+  it('selectedCount() === 0 renders neither the selected group nor Clear', async () => {
+    fixture.componentRef.setInput('selectedCount', signal(0).asReadonly());
+    fixture.componentRef.setInput('onClearSelection', vi.fn());
+    await fixture.whenStable();
 
     expect(html().querySelector('[data-test="list-sub-nav-selected"]')).toBeNull();
     expect(html().querySelector('[data-test="list-sub-nav-clear"]')).toBeNull();
   });
 
   // ── Test 6: regression — addAction still renders alongside actions ────────
-  it('existing addAction still renders (blue) and is unaffected when actions is also provided', () => {
-    component.addAction = {
+  it('existing addAction still renders (blue) and is unaffected when actions is also provided', async () => {
+    fixture.componentRef.setInput('addAction', {
       label: 'Add User',
       invoke: () => undefined,
-    };
-    component.actions = [
+    });
+    fixture.componentRef.setInput('actions', [
       { label: 'Remove', invoke: () => undefined, variant: 'destructive', dataTest: 'btn-remove' },
-    ];
-    fixture.detectChanges();
+    ]);
+    await fixture.whenStable();
 
     const addBtn    = html().querySelector('[data-test="list-sub-nav-add"]') as HTMLButtonElement;
     const removeBtn = html().querySelector('[data-test="btn-remove"]') as HTMLButtonElement;
@@ -320,8 +320,8 @@ describe('ListSubNavComponent — action buttons', () => {
   });
 
   // ── Test 7: regression — no actions/selectedCount renders as before ───────
-  it('with no actions or selectedCount, component renders title and count as before', () => {
-    fixture.detectChanges();
+  it('with no actions or selectedCount, component renders title and count as before', async () => {
+    await fixture.whenStable();
 
     const title = html().querySelector('[data-test="list-sub-nav-title"]');
     expect(title).toBeTruthy();

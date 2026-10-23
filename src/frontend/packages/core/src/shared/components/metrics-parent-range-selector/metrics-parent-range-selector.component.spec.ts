@@ -79,7 +79,7 @@ describe('MetricsParentRangeSelectorComponent', () => {
       windowValue: '1:hour',
     };
     const charts = [0, 1].map(() => {
-      const chart = { metricsConfig: { request: base }, currentRequest: base, applyRequest: vi.fn() };
+      const chart = { metricsConfig: () => ({ request: base }), currentRequest: base, applyRequest: vi.fn() };
       chart.applyRequest.mockImplementation((req: MetricsRequest) => chart.currentRequest = req);
       return chart;
     });

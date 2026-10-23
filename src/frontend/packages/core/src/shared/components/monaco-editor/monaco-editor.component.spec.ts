@@ -50,7 +50,7 @@ describe('MonacoEditorComponent', () => {
 
   it('loads monaco on demand and emits the component once the editor exists', async () => {
     const fixture = TestBed.createComponent(MonacoEditorComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     let emitted: MonacoEditorComponent | undefined;
     fixture.componentInstance.editorInit.subscribe(c => emitted = c);
@@ -61,7 +61,7 @@ describe('MonacoEditorComponent', () => {
 
   it('does not create the editor when destroyed before monaco resolves', async () => {
     const fixture = TestBed.createComponent(MonacoEditorComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     let emitted = false;
     fixture.componentInstance.editorInit.subscribe(() => emitted = true);
@@ -83,7 +83,7 @@ describe('MonacoEditorComponent', () => {
     vi.spyOn(monaco.editor, 'create').mockReturnValue(stub as any);
 
     const fixture = TestBed.createComponent(MonacoEditorComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
     await fixture.componentInstance.ngAfterViewInit();
 
     const emitted: string[] = [];
@@ -99,7 +99,7 @@ describe('MonacoEditorComponent', () => {
     const setModelLanguage = vi.spyOn(monaco.editor, 'setModelLanguage');
 
     const fixture = TestBed.createComponent(MonacoEditorComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
     await fixture.componentInstance.ngAfterViewInit();
 
     fixture.componentInstance.setLanguage('json');
@@ -122,7 +122,7 @@ describe('MonacoEditorComponent', () => {
     const setTheme = vi.spyOn(monaco.editor, 'setTheme');
 
     const fixture = TestBed.createComponent(MonacoEditorComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
     await fixture.componentInstance.ngAfterViewInit();
 
     const branding = TestBed.inject(StratosBrandingService);
@@ -141,8 +141,8 @@ describe('MonacoEditorComponent', () => {
     const setTheme = vi.spyOn(monaco.editor, 'setTheme');
 
     const fixture = TestBed.createComponent(MonacoEditorComponent);
-    fixture.componentInstance.options = { theme: 'hc-black' };
-    fixture.detectChanges();
+    fixture.componentRef.setInput('options', { theme: 'hc-black' });
+    await fixture.whenStable();
     await fixture.componentInstance.ngAfterViewInit();
 
     const branding = TestBed.inject(StratosBrandingService);

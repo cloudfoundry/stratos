@@ -1,4 +1,4 @@
-import { Component, provideZonelessChangeDetection } from '@angular/core';
+import { Component, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { By } from '@angular/platform-browser';
@@ -6,22 +6,32 @@ import { CustomTooltipDirective } from './custom-tooltip.directive';
 
 @Component({
   imports: [CustomTooltipDirective],
-  template: `<button matTooltip="placeholder">host</button>`
+  template: `<button [matTooltip]="text()">host</button>`
 })
-class TestHostComponent { }
+class TestHostComponent {
+  readonly text = signal('placeholder');
+}
 
 describe('CustomTooltipDirective', () => {
   let fixture: ComponentFixture<TestHostComponent>;
   let directive: CustomTooltipDirective;
 
-  beforeEach(() => {
-    vi.useFakeTimers();
+  // Binds the tooltip text through the host template, as an app does.
+  // Timers are fake, so run the change-detection timer before waiting.
+  async function setText(text: string) {
+    fixture.componentInstance.text.set(text);
+    await vi.advanceTimersByTimeAsync(0);
+    await fixture.whenStable();
+  }
+
+  beforeEach(async () => {
     TestBed.configureTestingModule({
       providers: [provideZonelessChangeDetection()],
       imports: [TestHostComponent],
     }).compileComponents();
     fixture = TestBed.createComponent(TestHostComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
+    vi.useFakeTimers();
     const el = fixture.debugElement.query(By.directive(CustomTooltipDirective));
     directive = el.injector.get(CustomTooltipDirective);
   });
@@ -35,8 +45,8 @@ describe('CustomTooltipDirective', () => {
   // Tooltips carry simple HTML markup (e.g. <b> for emphasis), so the
   // directive renders sanitized HTML rather than plain text — formatting is
   // preserved while XSS vectors are stripped.
-  it('preserves safe HTML formatting such as <b>', () => {
-    directive.tooltipText = 'roles for <b>alice</b>';
+  it('preserves safe HTML formatting such as <b>', async () => {
+    await setText('roles for <b>alice</b>');
     directive.onMouseEnter(new MouseEvent('mouseenter'));
     vi.advanceTimersByTime(300);
 
@@ -50,8 +60,8 @@ describe('CustomTooltipDirective', () => {
   // pointer (e.g. a menu opening), which left tooltips stuck open. While a
   // tooltip is visible, a document-level mousemove guard hides it as soon as
   // the pointer is outside the host.
-  it('hides when the pointer moves outside the host even if mouseleave never fired', () => {
-    directive.tooltipText = 'Recent activity';
+  it('hides when the pointer moves outside the host even if mouseleave never fired', async () => {
+    await setText('Recent activity');
     directive.onMouseEnter(new MouseEvent('mouseenter'));
     vi.advanceTimersByTime(300);
     expect(document.body.querySelector('.custom-tooltip')).toBeTruthy();
@@ -62,8 +72,8 @@ describe('CustomTooltipDirective', () => {
     expect(document.body.querySelector('.custom-tooltip')).toBeNull();
   });
 
-  it('stays visible while the pointer moves within the host', () => {
-    directive.tooltipText = 'Recent activity';
+  it('stays visible while the pointer moves within the host', async () => {
+    await setText('Recent activity');
     directive.onMouseEnter(new MouseEvent('mouseenter'));
     vi.advanceTimersByTime(300);
 
@@ -74,8 +84,8 @@ describe('CustomTooltipDirective', () => {
   });
 
   // Clicking the host usually opens a menu — the tooltip must not linger over it
-  it('hides immediately on mousedown', () => {
-    directive.tooltipText = 'User menu';
+  it('hides immediately on mousedown', async () => {
+    await setText('User menu');
     directive.onMouseEnter(new MouseEvent('mouseenter'));
     vi.advanceTimersByTime(300);
     expect(document.body.querySelector('.custom-tooltip')).toBeTruthy();
@@ -87,8 +97,8 @@ describe('CustomTooltipDirective', () => {
 
   // Tooltip text can carry untrusted values (e.g. CF usernames). The
   // sanitizer must drop scripts and event handlers while keeping the text.
-  it('strips XSS vectors (scripts, event handlers) from tooltip text', () => {
-    directive.tooltipText = '<img src=x onerror="alert(1)"><script>alert(2)</script>alice';
+  it('strips XSS vectors (scripts, event handlers) from tooltip text', async () => {
+    await setText('<img src=x onerror="alert(1)"><script>alert(2)</script>alice');
     directive.onMouseEnter(new MouseEvent('mouseenter'));
     vi.advanceTimersByTime(300);
 

@@ -32,16 +32,14 @@ describe('LoadingPageComponent', () => {
       element = fixture.nativeElement;
 
       loadingSubject = new BehaviorSubject<boolean>(true);
-      component.isLoading = loadingSubject.asObservable();
+      fixture.componentRef.setInput('isLoading', loadingSubject.asObservable());
       component.ngOnInit();
 
-      fixture.detectChanges();
       await fixture.whenStable();
-      fixture.detectChanges();
     });
 
     it('should show default message', () => {
-      expect(element.textContent).toContain(component.text);
+      expect(element.textContent).toContain(component.text());
     });
 
     it('should show a loading indicator until is done', () => {
@@ -55,9 +53,7 @@ describe('LoadingPageComponent', () => {
 
       loadingSubject.next(false);
 
-      fixture.detectChanges();
       await fixture.whenStable();
-      fixture.detectChanges();
 
       indicator = element.querySelector('[data-test="loading-page-indicator"]');
       expect(indicator).toBeFalsy();
