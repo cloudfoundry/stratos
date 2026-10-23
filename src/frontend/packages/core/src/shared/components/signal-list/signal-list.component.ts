@@ -1,6 +1,7 @@
-import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ContentChild, ContentChildren, QueryList, ElementRef, TemplateRef, ViewChild, signal, DestroyRef, inject, AfterViewInit } from '@angular/core';
+import { Component, HostListener, Input, Signal, WritableSignal, ChangeDetectionStrategy, ContentChild, ContentChildren, QueryList, ElementRef, TemplateRef, ViewChild, signal, DestroyRef, inject, AfterViewInit, Injector } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { EndpointsDataService } from '@stratosui/store';
 
 import { UsageGaugeComponent } from '../usage-gauge/usage-gauge.component';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
@@ -514,6 +515,15 @@ export interface SignalListConfig<T> {
 })
 export class SignalListComponent<T> implements AfterViewInit {
   @Input({ required: true }) config!: SignalListConfig<T>;
+
+  private readonly injector = inject(Injector);
+
+  // The error banner's label for an errorsByCnsi key: the endpoint's name,
+  // or the key itself when no endpoint has that guid. Resolved only while
+  // the banner shows, so lists without errors need no endpoint data.
+  endpointLabel(cnsiGuid: string): string {
+    return this.injector.get(EndpointsDataService).endpoints().get(cnsiGuid)?.name || cnsiGuid;
+  }
 
   // Optional content-projected template for fully-custom card rendering.
   // When supplied AND viewMode is 'card', signal-list delegates the card

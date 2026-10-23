@@ -378,7 +378,7 @@
   @if (config.errorsByCnsi().size > 0) {
     <div data-test="errors" class="px-4 py-1 text-sm text-danger-shade-700 bg-danger-shade-50 border-b border-content-border">
       @for (entry of config.errorsByCnsi() | keyvalue; track entry.key) {
-        <div>{{ entry.key }}: failed to load</div>
+        <div>{{ endpointLabel(entry.key) }}: failed to load</div>
       }
     </div>
   }
