@@ -1,8 +1,9 @@
 import { Component, EnvironmentInjector, Injector, OnDestroy } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FormBuilder } from '@angular/forms';
+import { FormBuilder, UntypedFormGroup } from '@angular/forms';
 import { describe, it, expect, beforeEach } from 'vitest';
 
+import { IAuthForm } from '../../../../store/src/extension-types';
 import { KubeConfigAuthHelper } from './kube-config-auth.helper';
 import { KubeConfigFileUser } from './kube-config.types';
 
@@ -10,8 +11,8 @@ let destroyed = 0;
 
 // An auth form that offers body content but fails to build its values.
 @Component({ selector: 'app-failing-auth-form', template: '', standalone: true })
-class FailingAuthFormComponent implements OnDestroy {
-  formGroup: unknown;
+class FailingAuthFormComponent implements IAuthForm, OnDestroy {
+  formGroup = new UntypedFormGroup({});
   getBody() { return ''; }
   getValues(): never { throw new Error('bad values'); }
   ngOnDestroy() { destroyed += 1; }
