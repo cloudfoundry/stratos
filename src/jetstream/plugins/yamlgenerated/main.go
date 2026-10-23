@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"net/http"
 	"net/url"
 	"os"
 	"strings"
@@ -72,34 +71,10 @@ func (gep GeneratedEndpointPlugin) Register(ec *echo.Context) error {
 	return gep.portalProxy.RegisterEndpoint(ec, gep.Info)
 }
 
-// Validate checks the new token by asking the API for the user it
-// belongs to: the subtype's user info API (plugins.yaml: /user, i.e.
-// GitHub GET /user and GitLab GET /api/v4/user, as the endpoint URL ends
-// in /api/v4). A subtype with no user info API cannot be checked.
+// Validate has nothing left to check: Connect already asked the user info
+// API with the new token (fetchUsername) and failed if it was refused.
 func (gep GeneratedEndpointPlugin) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRecord api.TokenRecord) error {
-	subType, ok := gep.subTypes[cnsiRecord.SubType]
-	if !ok {
-		return fmt.Errorf("Unknown subtype %q for endpoint type %q", cnsiRecord.SubType, gep.GetType())
-	}
-	if len(subType.UserInfoAPI) == 0 {
-		return nil
-	}
-
-	// The request goes through the auth handler for the token's type,
-	// which uses the endpoint record's Skip SSL and CA certificate.
-	resp, err := gep.portalProxy.DoProxySingleRequestWithToken(cnsiRecord.GUID, &tokenRecord, "GET", subType.UserInfoAPI, nil, nil)
-	if err != nil {
-		return err
-	}
-	if resp.StatusCode >= 200 && resp.StatusCode < 300 {
-		return nil
-	}
-	// The connect handler reports a rejected token, an unreachable API or
-	// a TLS failure from these.
-	if resp.Error != nil {
-		return fmt.Errorf("unable to check the token with %s: %w", subType.UserInfoAPI, resp.Error)
-	}
-	return api.ErrHTTPRequest{Status: resp.StatusCode, Response: string(resp.Response)}
+	return nil
 }
 
 func (gep GeneratedEndpointPlugin) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
@@ -148,7 +123,9 @@ func (gep GeneratedEndpointPlugin) Connect(ec *echo.Context, cnsiRecord api.CNSI
 			AuthType:  api.AuthTypeBearer,
 			AuthToken: base64EncodedAuthString,
 		}
-		tr.RefreshToken = gep.fetchUsername(subType, &cnsiRecord, tr)
+		if tr.RefreshToken, err = gep.fetchUsername(subType, &cnsiRecord, tr); err != nil {
+			return nil, false, err
+		}
 	case api.AuthConnectTypeToken:
 		authString := ec.FormValue("token")
 		base64EncodedAuthString := base64.StdEncoding.EncodeToString([]byte(authString))
@@ -157,39 +134,51 @@ func (gep GeneratedEndpointPlugin) Connect(ec *echo.Context, cnsiRecord api.CNSI
 			AuthType:  api.AuthTypeToken,
 			AuthToken: base64EncodedAuthString,
 		}
-		tr.RefreshToken = gep.fetchUsername(subType, &cnsiRecord, tr)
+		if tr.RefreshToken, err = gep.fetchUsername(subType, &cnsiRecord, tr); err != nil {
+			return nil, false, err
+		}
 	}
 
 	return tr, false, nil
 }
 
-// We support a basic mechanism for fetching the username of the user if configured
-func (gep GeneratedEndpointPlugin) fetchUsername(config pluginConfig, cnsiRecord *api.CNSIRecord, tr *api.TokenRecord) string {
-	if len(config.UserInfoAPI) == 0 || len(config.UserInfoPath) == 0 {
-		// Not configured
-		return defaultTokenUsername
+// fetchUsername asks the subtype's user info API (plugins.yaml: /user, i.e.
+// GitHub GET /user and GitLab GET /api/v4/user, as a GitLab endpoint URL
+// ends in /api/v4) for the user the token belongs to. This is also the
+// token check: an error status or a failed request is returned, so a token
+// the API refuses does not connect. The request goes through the auth
+// handler for the token's type, which uses the endpoint record's Skip SSL
+// and CA certificate.
+//
+// defaultTokenUsername stands in for the name when there is no user info
+// API to ask (the token cannot be checked either) or the answer has no name
+// at the configured path. The git endpoint details show it as "Unknown".
+func (gep GeneratedEndpointPlugin) fetchUsername(config pluginConfig, cnsiRecord *api.CNSIRecord, tr *api.TokenRecord) (string, error) {
+	if len(config.UserInfoAPI) == 0 {
+		return defaultTokenUsername, nil
 	}
 
-	// Make a request to the user info endpoint
 	resp, err := gep.portalProxy.DoProxySingleRequestWithToken(cnsiRecord.GUID, tr, "GET", config.UserInfoAPI, nil, nil)
 	if err != nil {
-		return defaultTokenUsername
+		return "", err
 	}
-
-	if resp.StatusCode != http.StatusOK {
-		return defaultTokenUsername
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		// The connect handler reports a refused token, an unreachable API
+		// or a TLS failure from these.
+		if resp.Error != nil {
+			return "", fmt.Errorf("unable to check the token with %s: %w", config.UserInfoAPI, resp.Error)
+		}
+		return "", api.ErrHTTPRequest{Status: resp.StatusCode, Response: string(resp.Response)}
 	}
 
 	// Find the username from the returned document
 	var data map[string]interface{}
-	if err = json.Unmarshal(resp.Response, &data); err == nil {
-		name := getJSONValue(data, config.UserInfoPath)
-		if len(name) > 0 {
-			return name
+	if len(config.UserInfoPath) > 0 && json.Unmarshal(resp.Response, &data) == nil {
+		if name := getJSONValue(data, config.UserInfoPath); len(name) > 0 {
+			return name, nil
 		}
 	}
-
-	return defaultTokenUsername
+	return defaultTokenUsername, nil
 }
 
 func getJSONValue(data map[string]interface{}, valuePath string) string {

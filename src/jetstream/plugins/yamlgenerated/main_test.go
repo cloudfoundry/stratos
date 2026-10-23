@@ -5,26 +5,30 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
+	"strings"
 	"testing"
+
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
-// proxyAnswering is a PortalProxy that records the token request it is
+// proxyAnswering is a PortalProxy that records the token requests it is
 // asked to make and gives a set result. Any other method panics.
 type proxyAnswering struct {
 	api.PortalProxy
 	response *api.CNSIRequest
-	asked    *tokenRequest
+	asked    *[]tokenRequest
 }
 
 type tokenRequest struct {
 	cnsiGUID, method, url string
-	token                 *api.TokenRecord
+	token                 api.TokenRecord
 }
 
 func (p proxyAnswering) DoProxySingleRequestWithToken(cnsiGUID string, token *api.TokenRecord, method, requestURL string, _ http.Header, _ []byte) (*api.CNSIRequest, error) {
-	*p.asked = tokenRequest{cnsiGUID: cnsiGUID, method: method, url: requestURL, token: token}
+	*p.asked = append(*p.asked, tokenRequest{cnsiGUID: cnsiGUID, method: method, url: requestURL, token: *token})
 	return p.response, nil
 }
 
@@ -40,35 +44,55 @@ func gitPlugin(proxy api.PortalProxy) GeneratedEndpointPlugin {
 	}
 }
 
-func validateWith(t *testing.T, subType string, response *api.CNSIRequest) (tokenRequest, error) {
-	t.Helper()
-	asked := tokenRequest{}
-	token := api.TokenRecord{AuthType: api.AuthTypeToken, AuthToken: "dG9rZW4="}
-	err := gitPlugin(proxyAnswering{response: response, asked: &asked}).
-		Validate("user", api.CNSIRecord{GUID: "git-endpoint", SubType: subType}, token)
-	return asked, err
+var connectTypes = map[string]string{"github": api.AuthConnectTypeToken, "gitlab": api.AuthConnectTypeBearer}
+
+func connectContext(subType string) *echo.Context {
+	form := url.Values{"connect_type": {connectTypes[subType]}, "token": {"the-token"}}
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/tokens", strings.NewReader(form.Encode()))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationForm)
+	return echo.New().NewContext(req, httptest.NewRecorder())
 }
 
-func TestValidateChecksTheTokenWithTheUserAPI(t *testing.T) {
-	for _, subType := range []string{"github", "gitlab"} {
+// connectWith runs Connect and then, if it succeeded, Validate, as the
+// connect handler (DoLoginToCNSI) does.
+func connectWith(t *testing.T, subType string, response *api.CNSIRequest) (*api.TokenRecord, []tokenRequest, error) {
+	t.Helper()
+	var asked []tokenRequest
+	plugin := gitPlugin(proxyAnswering{response: response, asked: &asked})
+	cnsi := api.CNSIRecord{GUID: "git-endpoint", SubType: subType}
+	token, _, err := plugin.Connect(connectContext(subType), cnsi, "user")
+	if err == nil {
+		err = plugin.Validate("user", cnsi, *token)
+	}
+	return token, asked, err
+}
+
+func TestConnectChecksTheTokenOnceAndKeepsTheUsername(t *testing.T) {
+	for subType, body := range map[string]string{"github": `{"login":"jo"}`, "gitlab": `{"username":"jo"}`} {
 		t.Run(subType, func(t *testing.T) {
-			asked, err := validateWith(t, subType, &api.CNSIRequest{StatusCode: http.StatusOK, Response: []byte(`{"login":"jo"}`)})
+			token, asked, err := connectWith(t, subType, &api.CNSIRequest{StatusCode: http.StatusOK, Response: []byte(body)})
 			if err != nil {
-				t.Errorf("expected a token the API accepts to pass, got %v", err)
+				t.Fatalf("expected a token the API accepts to connect, got %v", err)
 			}
-			if asked.cnsiGUID != "git-endpoint" || asked.method != "GET" || asked.url != "/user" {
-				t.Errorf("asked %+v, want GET /user on git-endpoint", asked)
+			if len(asked) != 1 {
+				t.Fatalf("expected one user info request, got %d: %+v", len(asked), asked)
 			}
-			if asked.token == nil || asked.token.AuthToken != "dG9rZW4=" {
-				t.Errorf("expected the request to use the new token, got %+v", asked.token)
+			if asked[0].cnsiGUID != "git-endpoint" || asked[0].method != "GET" || asked[0].url != "/user" {
+				t.Errorf("asked %+v, want GET /user on git-endpoint", asked[0])
+			}
+			if asked[0].token.AuthToken != "dGhlLXRva2Vu" { // base64 of the-token
+				t.Errorf("expected the request to use the new token, got %+v", asked[0].token)
+			}
+			if token.RefreshToken != "jo" {
+				t.Errorf("username = %q, want %q", token.RefreshToken, "jo")
 			}
 		})
 	}
 }
 
-func TestValidateRejectsATokenTheAPIRefuses(t *testing.T) {
+func TestConnectRejectsATokenTheAPIRefuses(t *testing.T) {
 	body := `{"message":"Bad credentials","documentation_url":"https://docs.github.com/rest"}`
-	_, err := validateWith(t, "github", &api.CNSIRequest{StatusCode: http.StatusUnauthorized, Status: "401 Unauthorized", Response: []byte(body)})
+	_, _, err := connectWith(t, "github", &api.CNSIRequest{StatusCode: http.StatusUnauthorized, Status: "401 Unauthorized", Response: []byte(body)})
 
 	var answered api.ErrHTTPRequest
 	if !errors.As(err, &answered) {
@@ -79,7 +103,7 @@ func TestValidateRejectsATokenTheAPIRefuses(t *testing.T) {
 	}
 }
 
-func TestValidateReportsAnUnreachableAPI(t *testing.T) {
+func TestConnectReportsAnUnreachableAPI(t *testing.T) {
 	server := httptest.NewServer(http.NotFoundHandler())
 	address := server.URL
 	server.Close()
@@ -88,7 +112,7 @@ func TestValidateReportsAnUnreachableAPI(t *testing.T) {
 		t.Fatal("expected a request to a closed server to fail")
 	}
 
-	_, err := validateWith(t, "gitlab", &api.CNSIRequest{StatusCode: http.StatusInternalServerError,
+	_, _, err := connectWith(t, "gitlab", &api.CNSIRequest{StatusCode: http.StatusInternalServerError,
 		Status: "Error proxing request", Response: []byte(requestErr.Error()), Error: requestErr})
 
 	var netErr net.Error
@@ -97,9 +121,29 @@ func TestValidateReportsAnUnreachableAPI(t *testing.T) {
 	}
 }
 
-func TestValidateAcceptsASubTypeWithNoUserAPI(t *testing.T) {
-	plugin := GeneratedEndpointPlugin{endpointType: "git", subTypes: map[string]pluginConfig{"other": {AuthType: "Token"}}}
-	if err := plugin.Validate("user", api.CNSIRecord{SubType: "other"}, api.TokenRecord{}); err != nil {
-		t.Errorf("expected no check without a user info API, got %v", err)
+func TestConnectKeepsTheDefaultNameWhenTheAnswerHasNone(t *testing.T) {
+	token, _, err := connectWith(t, "github", &api.CNSIRequest{StatusCode: http.StatusOK, Response: []byte(`{"id":1}`)})
+	if err != nil {
+		t.Fatalf("expected an accepted token to connect, got %v", err)
+	}
+	if token.RefreshToken != defaultTokenUsername {
+		t.Errorf("username = %q, want %q", token.RefreshToken, defaultTokenUsername)
+	}
+}
+
+func TestConnectAcceptsASubTypeWithNoUserAPI(t *testing.T) {
+	var asked []tokenRequest
+	plugin := GeneratedEndpointPlugin{
+		portalProxy:  proxyAnswering{asked: &asked},
+		endpointType: "git",
+		subTypes:     map[string]pluginConfig{"github": {AuthType: "Token"}},
+	}
+	cnsi := api.CNSIRecord{SubType: "github"}
+	token, _, err := plugin.Connect(connectContext("github"), cnsi, "user")
+	if err == nil {
+		err = plugin.Validate("user", cnsi, *token)
+	}
+	if err != nil || len(asked) != 0 || token.RefreshToken != defaultTokenUsername {
+		t.Errorf("got err %v, %d requests, name %q; want no check and %q", err, len(asked), token.RefreshToken, defaultTokenUsername)
 	}
 }
