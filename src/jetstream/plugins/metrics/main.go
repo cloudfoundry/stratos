@@ -350,6 +350,7 @@ func (m *MetricsSpecification) Info(apiEndpoint string, skipSSLValidation bool, 
 	if err != nil {
 		return newCNSI, nil, err
 	}
+	defer func() { _ = resp.Body.Close() }()
 
 	// Any error code >= 400 that is not 401 means something wrong
 	if resp.StatusCode >= 400 && resp.StatusCode != 401 {
