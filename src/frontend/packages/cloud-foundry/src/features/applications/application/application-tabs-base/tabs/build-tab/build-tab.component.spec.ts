@@ -132,7 +132,7 @@ describe('BuildTabComponent', () => {
     it('renders the scale card with actions enabled', () => {
       const card = fixture.debugElement.query(By.directive(CardAppInstancesComponent));
       expect(card).toBeTruthy();
-      expect(card.componentInstance.showActions).toBe(true);
+      expect(card.componentInstance.showActions()).toBe(true);
     });
   });
 

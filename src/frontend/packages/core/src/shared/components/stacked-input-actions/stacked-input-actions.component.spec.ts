@@ -29,12 +29,12 @@ describe('StackedInputActionsComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(StackedInputActionsComponent);
     component = fixture.componentInstance;
     stateIn = new BehaviorSubject<StackedInputActionsState[]>([]);
-    component.stateIn$ = stateIn;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('stateIn$', stateIn);
+    await fixture.whenStable();
   });
 
   const host = (): HTMLElement => fixture.nativeElement;

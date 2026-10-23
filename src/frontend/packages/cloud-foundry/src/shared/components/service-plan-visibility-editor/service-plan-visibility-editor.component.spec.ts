@@ -62,13 +62,13 @@ describe('ServicePlanVisibilityEditorComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ServicePlanVisibilityEditorComponent);
     component = fixture.componentInstance;
     element = fixture.nativeElement;
-    component.servicePlan = buildPlan();
-    component.organizations = orgs;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('servicePlan', buildPlan());
+    fixture.componentRef.setInput('organizations', orgs);
+    await fixture.whenStable();
   });
 
   it('creates', () => {
@@ -117,18 +117,18 @@ describe('ServicePlanVisibilityEditorComponent', () => {
     expect(catalogStub.applyCalls).toHaveLength(0);
   });
 
-  it('emits the applied visibility once the write lands', () => {
+  it('emits the applied visibility once the write lands', async () => {
     const spy = vi.fn();
     component.applied.subscribe(spy);
     component.toggleOrg('org-2');
     component.apply();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(spy).toHaveBeenCalledWith(catalogStub.lastResult);
   });
 
-  it('non-organization scopes apply with an empty org list', () => {
+  it('non-organization scopes apply with an empty org list', async () => {
     component.setType('public');
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.canApply()).toBe(true);
     component.apply();
     expect(catalogStub.applyCalls[0].type).toBe('public');

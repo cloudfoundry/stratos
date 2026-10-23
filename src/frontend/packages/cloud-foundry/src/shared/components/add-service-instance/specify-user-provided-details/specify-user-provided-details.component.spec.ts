@@ -45,11 +45,11 @@ describe('SpecifyUserProvidedDetailsComponent', () => {
     component = fixture.componentInstance;
 
     // Set required inputs
-    component.cfGuid = 'test-cf-guid';
-    component.spaceGuid = 'test-space-guid';
-    component.appId = 'test-app-id';
+    fixture.componentRef.setInput('cfGuid', 'test-cf-guid');
+    fixture.componentRef.setInput('spaceGuid', 'test-space-guid');
+    fixture.componentRef.setInput('appId', 'test-app-id');
 
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -100,10 +100,10 @@ describe('SpecifyUserProvidedDetailsComponent.onNextUpdate', () => {
 
     const fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);
     const component = fixture.componentInstance;
-    component.cfGuid = 'cf-1';
-    component.spaceGuid = 'space-1';
-    component.appId = 'app-1';
-    component.serviceInstanceId = 'si-1';
+    fixture.componentRef.setInput('cfGuid', 'cf-1');
+    fixture.componentRef.setInput('spaceGuid', 'space-1');
+    fixture.componentRef.setInput('appId', 'app-1');
+    fixture.componentRef.setInput('serviceInstanceId', 'si-1');
     component.isUpdate = true;
     return { fixture, component, upsServiceStub, refreshSpy };
   }
@@ -202,24 +202,24 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
 
     const fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);
     const component = fixture.componentInstance;
-    component.cfGuid = 'cf-1';
-    component.spaceGuid = 'space-1';
-    component.serviceInstanceId = 'si-1';
+    fixture.componentRef.setInput('cfGuid', 'cf-1');
+    fixture.componentRef.setInput('spaceGuid', 'space-1');
+    fixture.componentRef.setInput('serviceInstanceId', 'si-1');
     return { fixture, component, credsSpy };
   }
 
-  it('fetches on load but keeps the textarea blank (blank = keep stored)', () => {
+  it('fetches on load but keeps the textarea blank (blank = keep stored)', async () => {
     const { fixture, component, credsSpy } = setup({ user: 'admin' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(credsSpy).toHaveBeenCalledTimes(1);
     expect(credsSpy).toHaveBeenCalledWith('cf-1', 'si-1');
     expect(component.createEditServiceInstance.controls.credentials.value).toBe('');
   });
 
-  it('shows the redacted structure by default, real values only after toggleReveal', () => {
+  it('shows the redacted structure by default, real values only after toggleReveal', async () => {
     const { fixture, component } = setup({ user: 'admin', password: 'p' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(component.credsMode()).toBe('redacted');
     expect(component.displayedCredentialsJson()).toContain('"user": "<redacted>"');
@@ -233,9 +233,9 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
     expect(component.displayedCredentialsJson()).not.toContain('admin');
   });
 
-  it('enterEdit fills the textarea from the sub-resource; cancelEdit blanks it', () => {
+  it('enterEdit fills the textarea from the sub-resource; cancelEdit blanks it', async () => {
     const { fixture, component } = setup({ user: 'admin', password: 'p' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     component.enterEdit();
     expect(component.credsMode()).toBe('edit');
@@ -247,23 +247,23 @@ describe('SpecifyUserProvidedDetailsComponent credentials reveal', () => {
     expect(component.createEditServiceInstance.controls.credentials.value).toBe('');
   });
 
-  it('reveal and edit round-trips are not edits — Next stays disabled', () => {
+  it('reveal and edit round-trips are not edits — Next stays disabled', async () => {
     const { fixture, component } = setup({ user: 'admin' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     component.toggleReveal();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.validate()).toBe(false);
 
     component.enterEdit();
     component.cancelEdit();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(component.validate()).toBe(false);
   });
 
-  it('fetches once — reveal and edit reuse the loaded sub-resource', () => {
+  it('fetches once — reveal and edit reuse the loaded sub-resource', async () => {
     const { fixture, component, credsSpy } = setup({ user: 'admin' });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     component.toggleReveal();
     component.enterEdit();
@@ -297,8 +297,8 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     });
     const fixture = TestBed.createComponent(SpecifyUserProvidedDetailsComponent);
     const component = fixture.componentInstance;
-    component.cfGuid = 'cf-1';
-    component.spaceGuid = 'space-1';
+    fixture.componentRef.setInput('cfGuid', 'cf-1');
+    fixture.componentRef.setInput('spaceGuid', 'space-1');
     await fixture.whenStable();
     const host = fixture.nativeElement as HTMLElement;
     return { fixture, component, host, upsServiceStub };
@@ -414,13 +414,13 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
   });
 
   it('keeps an error page\'s heading when CF does not update the instance', async () => {
-    const { component } = await setup();
+    const { fixture, component } = await setup();
     const real = TestBed.runInInjectionContext(() => new CloudFoundryUserProvidedServicesService());
     Object.assign(TestBed.inject(CloudFoundryUserProvidedServicesService), {
       updateUserProvidedService: real.updateUserProvidedService.bind(real),
     });
     component.isUpdate = true;
-    component.serviceInstanceId = 'ups-1';
+    fixture.componentRef.setInput('serviceInstanceId', 'ups-1');
 
     const pending = firstValueFrom(component.onNext());
     answerWithErrorPage('PATCH');

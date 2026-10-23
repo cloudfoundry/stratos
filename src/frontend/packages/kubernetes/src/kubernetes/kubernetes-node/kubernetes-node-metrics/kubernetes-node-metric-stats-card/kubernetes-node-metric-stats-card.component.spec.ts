@@ -6,7 +6,7 @@ import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } 
 import { BaseTestModules } from '../../../../../../core/test-framework/core-test.helper';
 import { KubernetesNodeMetricStatsCardComponent } from './kubernetes-node-metric-stats-card.component';
 import { KubernetesNodeSimpleMetricComponent } from '../kubernetes-node-simple-metric/kubernetes-node-simple-metric.component';
-import { KubernetesNodeService } from '../../../services/kubernetes-node.service';
+import { KubeNodeMetric, KubernetesNodeService } from '../../../services/kubernetes-node.service';
 import { BaseKubeGuid } from '../../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../../services/kubernetes-endpoint.service';
 import { KubernetesTestingModule } from '../../../kubernetes.testing.module';
@@ -43,10 +43,11 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('metric', KubeNodeMetric.MEMORY);
+    await fixture.whenStable();
   });
 
   afterEach(() => {

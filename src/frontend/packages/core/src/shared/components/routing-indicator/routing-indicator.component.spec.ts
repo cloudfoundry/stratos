@@ -74,7 +74,7 @@ describe('RoutingIndicatorComponent', () => {
   it('hides the bar when the navigation ends in NavigationError', async () => {
     start();
     await advance(10000);
-    expect(bar().componentInstance.value).toBe(95);
+    expect(bar().componentInstance.value()).toBe(95);
 
     error();
     await advance(300);
@@ -91,7 +91,7 @@ describe('RoutingIndicatorComponent', () => {
     await advance(1000);
     // A fresh run starts low again instead of sitting at the 95 % ceiling.
     expect(bar()).toBeTruthy();
-    expect(bar().componentInstance.value).toBeLessThan(95);
+    expect(bar().componentInstance.value()).toBeLessThan(95);
 
     end();
     await advance(300);

@@ -61,9 +61,9 @@ describe('SteppersComponent', () => {
   // the initial filter. Routes step would never appear even after routes
   // loaded. This test pins the filter path to mark for check.
   it('re-filters visible steps and marks for check when a step unhides', () => {
-    const stepA = Object.assign(new StepComponent(), { title: 'A' });
-    const stepB = Object.assign(new StepComponent(), { title: 'B' });
-    const stepC = Object.assign(new StepComponent(), { title: 'C' });
+    const stepA = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'A' });
+    const stepB = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'B' });
+    const stepC = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'C' });
     stepA.hidden = true;
     stepB.hidden = false;
     stepC.hidden = false;
@@ -86,8 +86,8 @@ describe('SteppersComponent', () => {
   // bind-service wizard's Service Instance step rendered empty. Delivery
   // must happen after the activating render, with the routed enterData.
   it('delivers onEnter after the activating render, not synchronously', async () => {
-    const stepA = Object.assign(new StepComponent(), { title: 'A' });
-    const stepB = Object.assign(new StepComponent(), { title: 'B' });
+    const stepA = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'A' });
+    const stepB = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'B' });
     stepA.valid = true;
     const entered: unknown[] = [];
     stepB.signalHandle = {

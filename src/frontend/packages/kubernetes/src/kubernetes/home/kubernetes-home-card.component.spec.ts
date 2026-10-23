@@ -56,11 +56,11 @@ describe('KubernetesHomeCardComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(KubernetesHomeCardComponent);
     component = fixture.componentInstance;
-    component.endpoint = {} as EndpointModel;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('endpoint', {} as EndpointModel);
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -71,7 +71,7 @@ describe('KubernetesHomeCardComponent', () => {
     pods.set([{ metadata: { name: 'p1' } }, { metadata: { name: 'p2' } }]);
     nodes.set([{ metadata: { name: 'n1' } }]);
     namespaces.set([{ metadata: { name: 'ns1' } }, { metadata: { name: 'ns2' } }, { metadata: { name: 'ns3' } }]);
-    component.endpoint = { guid: 'k1' } as EndpointModel;
+    fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
 
     component.load();
 
@@ -81,7 +81,7 @@ describe('KubernetesHomeCardComponent', () => {
   });
 
   it('triggers a refresh on the node and namespace services (pods auto-load)', () => {
-    component.endpoint = { guid: 'k1' } as EndpointModel;
+    fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
 
     component.load();
 

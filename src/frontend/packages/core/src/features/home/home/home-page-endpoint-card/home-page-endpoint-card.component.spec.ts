@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component, NO_ERRORS_SCHEMA, provideZonelessChangeDetection } from '@angular/core';
+import { Component, NO_ERRORS_SCHEMA, input, provideZonelessChangeDetection } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { provideHttpClient } from '@angular/common/http';
@@ -72,9 +72,9 @@ describe('HomePageEndpointCardComponent', () => {
     vi.spyOn(userFavoriteManager, 'getFavoriteEndpointFromEntity').mockReturnValue(mockFavorite as any);
 
     // Set required input
-    fixture.componentInstance.endpoint = mockEndpoint;
+    fixture.componentRef.setInput('endpoint', mockEndpoint);
 
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -143,8 +143,8 @@ describe('HomePageEndpointCardComponent', () => {
   it('should load component from homeCard.component() when endpoint entity provided', async () => {
     @Component({ selector: 'app-mock-card', template: '', standalone: true })
     class MockCardComponent {
-      endpoint: any;
-      layout: any;
+      readonly endpoint = input<any>();
+      readonly layout = input<any>();
     }
 
     const mockEntity = {
@@ -158,5 +158,7 @@ describe('HomePageEndpointCardComponent', () => {
     await component.createCard(mockEntity);
     expect(component['ref']).toBeTruthy();
     expect(component['ref'].instance).toBeInstanceOf(MockCardComponent);
+    // The host hands the card its endpoint through the card's input.
+    expect((component['ref'].instance as unknown as MockCardComponent).endpoint()).toBe(component.endpoint);
   });
 });
