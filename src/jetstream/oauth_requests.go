@@ -51,13 +51,15 @@ func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *api.CNSIRequest, req *http.R
 				return nil, fmt.Errorf("request failed: %w", err)
 			}
 
-			if res.StatusCode != 401 {
+			// A 401 after the refresh is the endpoint's answer to a fresh
+			// token (e.g. the autoscaler refusing a user who is not a space
+			// developer): return it, so the caller passes its status and
+			// body on rather than reporting a proxy error.
+			if res.StatusCode != 401 || got401 {
 				return res, nil
 			}
-
-			if got401 {
-				return res, errors.New("failed to authorize")
-			}
+			// Retrying: this response is not returned.
+			_ = res.Body.Close()
 			got401 = true
 		}
 	}
