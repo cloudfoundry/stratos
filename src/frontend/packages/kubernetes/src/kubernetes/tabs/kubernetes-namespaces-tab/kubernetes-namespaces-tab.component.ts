@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute } from '@angular/router';
 import { ChangeDetectionStrategy, Component, WritableSignal, inject, signal } from '@angular/core';
 
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
@@ -33,7 +32,6 @@ import {
   imports: [CommonModule, SignalListComponent],
 })
 export class KubernetesNamespacesTabComponent {
-  private readonly activatedRoute = inject(ActivatedRoute);
   private readonly kubeEndpointService = inject(KubernetesEndpointService);
   readonly signalConfig = inject(KubernetesNamespacesSignalConfigService);
 
@@ -90,11 +88,6 @@ export class KubernetesNamespacesTabComponent {
       viewMode: this.signalConfig.viewMode,
       sort: this.signalConfig.sort,
     });
-
-    // Touch activatedRoute so the linter doesn't complain about an
-    // unused field — kept for parity with the legacy component which
-    // injected it (sub-routes may need it later).
-    void this.activatedRoute;
   }
 }
 
