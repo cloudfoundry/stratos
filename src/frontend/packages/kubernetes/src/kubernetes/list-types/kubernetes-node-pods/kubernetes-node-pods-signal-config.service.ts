@@ -16,7 +16,6 @@ import { ListStateStore, SignalListSort } from '@stratosui/core';
 import { KubeEndpointDataRegistry } from '../../../services/endpoint-data/kube-endpoint-data.registry';
 import { KubePod, StratosError } from '../../../services/endpoint-data/kube-types';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
-import { errorsForEndpoint } from '../kube-list-errors';
 
 interface KubeSortSpec<T> {
   field: string;
@@ -131,9 +130,9 @@ export class KubernetesNodePodsSignalConfigService {
   // destroys the prior filter effect instead of stacking one per navigation.
   private filterEffect?: EffectRef;
 
-  // The pod loads' failures for this endpoint.
+  // The failures of this node's pod list (not other pod scopes).
   errors(): Signal<StratosError[]> {
-    return errorsForEndpoint(this.kubeGuid, this.podData.errors());
+    return computed(() => this.podData.scopeErrors({ kubeGuid: this.kubeGuid, nodeName: this.nodeName }));
   }
 
   isLoading(): Signal<boolean> {

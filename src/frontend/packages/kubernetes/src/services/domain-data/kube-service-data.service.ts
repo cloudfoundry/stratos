@@ -20,6 +20,10 @@ import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/k
 // with different filtering semantics).
 
 const nsKey = (kubeGuid: string, namespace: string) => `${kubeGuid}/${namespace}`;
+// The list a load fills, tagged on its errors (second `affected` entry)
+// so a list shows, and a good load clears, only its own failures.
+const errorScopeKey = (scope: { kubeGuid: string; namespace?: string }) =>
+  scope.namespace ? `ns:${scope.kubeGuid}:${scope.namespace}` : `cluster:${scope.kubeGuid}`;
 const workloadKey = (kubeGuid: string, namespace: string, release: string) =>
   `${kubeGuid}/${namespace}/${release}`;
 
@@ -45,7 +49,7 @@ export class KubeServiceDataService {
       evictKeys(this._namespaceServices, owned);
       evictKeys(this._workloadServices, owned);
       evictKeys(this._clusterEndpoints, owned);
-      evictErrors(this._errors, kubeGuid);
+      evictErrors(this._errors, kubeGuid, a => a === kubeGuid || a.split(':')[1] === kubeGuid);
     });
   }
 
@@ -82,6 +86,14 @@ export class KubeServiceDataService {
 
   errors(): Signal<StratosError[]> {
     return this._errors.asReadonly();
+  }
+
+  // The failures of the services list for one scope (the cluster, or a
+  // namespace when given); endpoints-list failures are not included. A
+  // reactive read: call it inside a computed.
+  scopeErrors(scope: { kubeGuid: string; namespace?: string }): StratosError[] {
+    const key = errorScopeKey(scope);
+    return this._errors().filter(e => e.title === 'kube-services' && e.affected?.includes(key));
   }
 
   // ---- Delete ------------------------------------------------------------
@@ -153,28 +165,29 @@ export class KubeServiceDataService {
 
   private async fetchClusterServices(kubeGuid: string): Promise<KubeService[]> {
     const url = `/pp/v1/proxy/api/v1/services?limit=${KUBE_LIST_DEFAULT_LIMIT}`;
-    return this.fetchList<KubeService>(url, kubeGuid, 'kube-services');
+    return this.fetchList<KubeService>(url, kubeGuid, 'kube-services', errorScopeKey({ kubeGuid }));
   }
 
   private async fetchNamespacedServices(kubeGuid: string, namespace: string): Promise<KubeService[]> {
     const url = `/pp/v1/proxy/api/v1/namespaces/${encodeURIComponent(namespace)}/services?limit=${KUBE_LIST_DEFAULT_LIMIT}`;
-    return this.fetchList<KubeService>(url, kubeGuid, 'kube-services');
+    return this.fetchList<KubeService>(url, kubeGuid, 'kube-services', errorScopeKey({ kubeGuid, namespace }));
   }
 
   private async fetchClusterEndpoints(kubeGuid: string): Promise<KubeEndpoint[]> {
     const url = `/pp/v1/proxy/api/v1/endpoints?limit=${KUBE_LIST_DEFAULT_LIMIT}`;
-    return this.fetchList<KubeEndpoint>(url, kubeGuid, 'kube-endpoints');
+    return this.fetchList<KubeEndpoint>(url, kubeGuid, 'kube-endpoints', errorScopeKey({ kubeGuid }));
   }
 
   // Generic list fetcher — same shape as KubeNamespaceDataService.fetchDirect:
   // x-cap-cnsi-list header, jetstream wraps the response in a per-CNSI map
   // (an endpoint's error entry is thrown, see kubeProxyResult). A good load
-  // clears this list's earlier errors for the endpoint (Retry recovers);
+  // clears the earlier errors of its list (title + scope; Retry recovers):
   // services and endpoints load together, so the title keeps them apart.
   private async fetchList<T extends { metadata?: { name?: string } }>(
     url: string,
     kubeGuid: string,
     title: string,
+    scopeKey: string,
   ): Promise<Array<T & { kubeGuid: string }>> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const live = this.eviction.current(kubeGuid);
@@ -184,9 +197,8 @@ export class KubeServiceDataService {
         { headers },
       ).pipe(kubeProxyResult<KubeListResponse<T>>(kubeGuid)));
       if (live()) {
-        this._errors.update(curr => curr.some(e => e.title === title && e.affected?.includes(kubeGuid))
-          ? curr.filter(e => !(e.title === title && e.affected?.includes(kubeGuid)))
-          : curr);
+        const mine = (e: StratosError) => e.title === title && !!e.affected?.includes(scopeKey);
+        this._errors.update(curr => curr.some(mine) ? curr.filter(e => !mine(e)) : curr);
       }
       return (list?.items ?? []).map((item) => ({
         ...item,
@@ -201,7 +213,7 @@ export class KubeServiceDataService {
         code,
         title,
         detail: (err as Error)?.message ?? String(err),
-        affected: [kubeGuid],
+        affected: [kubeGuid, scopeKey],
       };
       if (live()) this._errors.update(curr => [...curr, next].slice(-50));
       return [];
