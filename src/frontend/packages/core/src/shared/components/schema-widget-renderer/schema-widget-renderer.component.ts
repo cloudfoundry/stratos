@@ -97,9 +97,9 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
   private readonly _working = signal<any>({});
 
   /**
-   * Rebuilt in ngOnInit/ngOnChanges (not a computed): `_buildFields` reads
-   * plain @Input properties (schema, _basePointer), not signals, so a computed
-   * would never recompute. Task 10 reassigns [schema] on the SAME instance
+   * Rebuilt in ngOnInit/ngOnChanges (not a computed): a rebuild also resets
+   * the branch and map-row state and may emit renderError, side effects a
+   * computed must not have. Task 10 reassigns [schema] on the SAME instance
    * (service-plan switch) — rebuilding on input change keeps the form in sync.
    */
   readonly fields = signal<FieldDescriptor[]>([]);
