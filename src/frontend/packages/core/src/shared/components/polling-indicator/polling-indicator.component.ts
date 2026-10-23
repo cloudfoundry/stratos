@@ -32,5 +32,5 @@ export class PollingIndicatorComponent {
   /**
    * User has kicked off a manual poll event
    */
-  readonly poll = output<boolean>();
+  readonly poll = output<void>();
 }

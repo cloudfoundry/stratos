@@ -54,8 +54,8 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   readonly scheme = input<any>();
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped chart's (select) event under the same name
-  readonly select = output();
-  readonly activate = output();
+  readonly select = output<{ event: ChartEvent | undefined; active: object[] | undefined }>();
+  readonly activate = output<{ event: ChartEvent; active: object[] }>();
   readonly deactivate = output();
 
   public comboChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };

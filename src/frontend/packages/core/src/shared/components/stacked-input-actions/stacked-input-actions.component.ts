@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Injector, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, Signal, inject, input, output } from '@angular/core';
-import { Observable, Subscription } from 'rxjs';
+import { Observable, Unsubscribable } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -60,7 +60,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
       update: StackedInputActionUpdate | null
     }
   } = {};
-  private subs: Subscription[] = [];
+  private subs: Unsubscribable[] = [];
 
   addComponent(): void {
     const componentRef = this.inputs.createComponent(StackedInputActionComponent);

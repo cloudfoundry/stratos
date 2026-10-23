@@ -38,7 +38,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   readonly closeModalEvent = output<void>();
   // The hosted form registered an endpoint and is done; the page refreshes,
   // says so and closes the dialog.
-  readonly endpointRegistered = output<any>();
+  readonly endpointRegistered = output<void>();
 
   @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false })
   // strict: ViewChild populated by Angular before loadEndpointRegistrationComponent runs.
