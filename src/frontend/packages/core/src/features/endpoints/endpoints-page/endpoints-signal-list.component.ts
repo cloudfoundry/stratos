@@ -29,6 +29,7 @@ import {
 import { SignalListCellTemplateDirective } from '../../../shared/components/signal-list/signal-list-cell-template.directive';
 import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
+import { endpointSyncStatusColor, endpointSyncStatusLabel } from '../../../shared/components/endpoint-list/endpoint-sync-status';
 import { TableCellEndpointAddressComponent } from '../../../shared/components/endpoint-list/table-cell-endpoint-address/table-cell-endpoint-address.component';
 import { EndpointAuthStateService } from '../../../shared/services/endpoint-auth-state.service';
 import { EndpointRowActionsService, isEndpointExpired } from '../endpoint-row-actions.service';
@@ -142,7 +143,15 @@ export class EndpointsSignalListComponent {
 
     const userLabel = (ep: EndpointModel): string => ep.user?.name ?? '';
 
+    // A type that needs no login is never connected or disconnected; like
+    // the endpoint card, show its sync status instead.
+    const needsNoLogin = (ep: EndpointModel): boolean =>
+      !!entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type)?.definition?.unConnectable;
+
     const statusLabel = (ep: EndpointModel): string => {
+      if (needsNoLogin(ep)) {
+        return endpointSyncStatusLabel(ep) ?? '—';
+      }
       // 'connecting' is a transient overlay held while a connect/reconnect is in
       // flight (EndpointsDataService.isConnecting); it outranks the settled
       // states because an active operation is what the user most wants to see.
@@ -173,6 +182,9 @@ export class EndpointsSignalListComponent {
     };
 
     const statusColor = (ep: EndpointModel): SignalListPillColor => {
+      if (needsNoLogin(ep)) {
+        return endpointSyncStatusColor(ep);
+      }
       if (this.endpointsData.isConnecting(ep.guid ?? '') || this.endpointsData.isDisconnecting(ep.guid ?? '')) {
         return 'warning';
       }
