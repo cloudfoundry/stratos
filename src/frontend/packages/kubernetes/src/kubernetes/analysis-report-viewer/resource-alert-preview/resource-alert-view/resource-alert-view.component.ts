@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 
 interface ResourceAlert {
   namespace?: string;
@@ -23,6 +23,8 @@ export class ResourceAlertViewComponent {
 
   alertInfo?: ResourceAlertGroup[];
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set alerts(data: any) {
     if (data) {
@@ -31,7 +33,7 @@ export class ResourceAlertViewComponent {
     }
   }
 
-  @Input() showHeader = true;
+  readonly showHeader = input(true);
 
   normalize(data: ResourceAlert[]): ResourceAlertGroup[] {
     // Normalize the alerts into groups

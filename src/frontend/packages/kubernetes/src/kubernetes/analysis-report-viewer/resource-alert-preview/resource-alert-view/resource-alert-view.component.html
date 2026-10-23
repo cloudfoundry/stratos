@@ -2,7 +2,7 @@
   <div>
     @for (group of alertInfo; track group) {
       <div>
-        @if (showHeader) {
+        @if (showHeader()) {
           <div class="font-bold py-1">{{group.name}}</div>
         }
         @for (alert of group.alerts; track alert) {

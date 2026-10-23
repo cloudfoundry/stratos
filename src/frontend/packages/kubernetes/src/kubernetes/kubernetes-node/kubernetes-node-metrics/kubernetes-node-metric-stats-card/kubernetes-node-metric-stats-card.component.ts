@@ -1,11 +1,11 @@
 import { AsyncPipe, DecimalPipe } from "@angular/common";
 import {
   Component,
-  Input,
   OnDestroy,
   OnInit,
   inject,
   ChangeDetectionStrategy,
+  input
 } from "@angular/core";
 import { Observable, Subscription } from "rxjs";
 
@@ -32,17 +32,13 @@ import { KubernetesNodeSimpleMetricComponent } from "../kubernetes-node-simple-m
 export class KubernetesNodeMetricStatsCardComponent
   implements OnInit, OnDestroy
 {
-  @Input()
-  title = "Memory";
+  readonly title = input("Memory");
 
-  @Input()
-  metric!: KubeNodeMetric;
+  readonly metric = input.required<KubeNodeMetric>();
 
-  @Input()
-  period = "Hour";
+  readonly period = input("Hour");
 
-  @Input()
-  unit?: string;
+  readonly unit = input<string>();
 
   max$!: Observable<number>;
   mean$!: Observable<number>;
@@ -51,14 +47,14 @@ export class KubernetesNodeMetricStatsCardComponent
 
   ngOnInit() {
     const maxMetric = this.kubeNodeService.setupMetricObservable(
-      this.metric,
+      this.metric(),
       MetricStatistic.MAXIMUM,
     );
     this.subscriptions.push(maxMetric.pollerSub);
     this.max$ = maxMetric.entity$;
 
     const meanMetric = this.kubeNodeService.setupMetricObservable(
-      this.metric,
+      this.metric(),
       MetricStatistic.AVERAGE,
     );
     this.subscriptions.push(meanMetric.pollerSub);

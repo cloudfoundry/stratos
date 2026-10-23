@@ -1,5 +1,5 @@
-<div class="card meta-card {{status$ && statusBackground? (status$ | async): '' }}"
-  [ngClass]="{'meta-card-pointer': clickAction, 'meta-card__plain': mode === 'plain'}"
+<div class="card meta-card {{status$ && statusBackground()? (status$ | async): '' }}"
+  [ngClass]="{'meta-card-pointer': clickAction, 'meta-card__plain': mode() === 'plain'}"
   [attr.role]="clickAction ? 'button' : null"
   [attr.tabindex]="clickAction ? 0 : null"
   (click)="clickAction ? clickAction() : null"
@@ -20,19 +20,19 @@
   @if (title) {
     <div class="meta-card__header">
       <div
-        [ngClass]="statusIconByTitle ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
+        [ngClass]="statusIconByTitle() ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
         <div
-          [ngClass]="statusIconByTitle ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
+          [ngClass]="statusIconByTitle() ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
           <ng-container *ngTemplateOutlet="title.content"></ng-container>
         </div>
-        @if (statusIconByTitle) {
+        @if (statusIconByTitle()) {
           <div class="meta-card__header-container__title--with-icon__icon">
             <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
           </div>
         }
       </div>
       @if (favorite) {
-        <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval" class="meta-card__favorite"
+        <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval()" class="meta-card__favorite"
           [favorite]="favorite">
         </app-entity-favorite-star>
       }
@@ -68,7 +68,7 @@
           }
         </div>
       }
-      @if (!statusIconByTitle) {
+      @if (!statusIconByTitle()) {
         <ng-container *ngTemplateOutlet="statusIconTmple"></ng-container>
       }
     </div>
@@ -86,9 +86,9 @@
   </div>
 </div>
 <ng-template #statusIconTmple>
-  @if (statusIcon && status$) {
+  @if (statusIcon() && status$) {
     <app-application-state-icon [status]="status$ | async"
-      [title]="statusIconTooltip">
+      [title]="statusIconTooltip()">
     </app-application-state-icon>
   }
 </ng-template>

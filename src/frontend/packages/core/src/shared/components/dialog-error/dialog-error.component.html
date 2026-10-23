@@ -1,6 +1,6 @@
-@if (show) {
+@if (show()) {
   <div class="dialog-error flex items-center gap-2 p-4 bg-danger-shade-50 text-danger-shade-700 rounded-md border border-danger-shade-200">
     <span class="material-icons text-danger-shade-500">warning</span>
-    <span>{{message}}</span>
+    <span>{{message()}}</span>
   </div>
 }

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject, signal, Input } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectionStrategy, Injector, inject, signal, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -64,7 +64,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   private formStatusSub?: Subscription;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  readonly redirectUrl = input.required<string>();
 
   /**
    * FWT-957: signal-native step handle. Performs the two-stage update
@@ -86,7 +86,7 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
           throw leadError('Failed to update space quota', err);
         }
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
 

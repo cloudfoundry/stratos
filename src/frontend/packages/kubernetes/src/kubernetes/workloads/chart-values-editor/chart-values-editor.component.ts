@@ -53,6 +53,8 @@ enum EditorMode {
 })
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set config(config: ChartValuesConfig | undefined) {
     if (config) {
       this.schemaUrl = config.schemaUrl;

@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject, input } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -42,6 +42,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pConnectService!: ConnectEndpointService;
   // A host may bind this before its own service exists (create-endpoint's
   // connect step); the setter ignores the unset value and waits for the real one.
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set connectService(service: ConnectEndpointService | undefined) {
     if (!service || this.pConnectService) {
       return;
@@ -53,6 +55,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     return this.pConnectService;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set disabled(disabled: boolean) {
     if (this.endpointForm) {
       if (disabled) { this.endpointForm.disable(); } else { this.endpointForm.enable(); }
@@ -63,7 +67,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   /**
    * Make the form submit as if it had a button - aka on pressing return
    */
-  @Input() formSubmit = false;
+  readonly formSubmit = input(false);
 
   @Output() valid = new EventEmitter<boolean>();
   @Output() authType = new EventEmitter<EndpointAuthTypeConfig>();

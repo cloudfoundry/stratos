@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, ViewEncapsulation  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, ViewEncapsulation, input } from '@angular/core';
 
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
@@ -29,17 +29,19 @@ export class RingChartComponent implements OnInit, OnChanges {
     }
   };
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() data: any[] = [];
-  @Input() label = 'Total';
-  @Input() scheme: any = 'cool';
-  @Input() customColors: any[] = [];
+  readonly label = input('Total');
+  readonly scheme = input<any>('cool');
+  readonly customColors = input<any[]>([]);
 
-  @Input() onClick: ($event: Event) => void = () => { };
-  @Input() onActivate: ($event: Event) => void = () => { };
-  @Input() onDeactivate: ($event: Event) => void = () => { };
-  @Input() valueFormatting: (value: number) => any = value => value;
-  @Input() nameFormatting: (value: string) => any = label => label;
-  @Input() percentageFormatting: (value: number) => any = percentage => percentage;
+  readonly onClick = input<($event: Event) => void>(() => { });
+  readonly onActivate = input<($event: Event) => void>(() => { });
+  readonly onDeactivate = input<($event: Event) => void>(() => { });
+  readonly valueFormatting = input<(value: number) => any>(value => value);
+  readonly nameFormatting = input<(value: string) => any>(label => label);
+  readonly percentageFormatting = input<(value: number) => any>(percentage => percentage);
 
   ngOnInit() {
     if (!this.data) {
@@ -71,8 +73,9 @@ export class RingChartComponent implements OnInit, OnChanges {
   }
 
   getBackgroundColors(): string[] {
-    if (this.customColors && this.customColors.length > 0) {
-      return this.customColors.map(c => c.value || c);
+    const customColors = this.customColors();
+    if (customColors && customColors.length > 0) {
+      return customColors.map(c => c.value || c);
     }
     // Default color scheme
     const defaultColors = ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'];

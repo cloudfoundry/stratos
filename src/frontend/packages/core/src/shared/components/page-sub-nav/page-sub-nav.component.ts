@@ -17,6 +17,8 @@ export class PageSubNavComponent implements AfterViewInit, OnDestroy {
   private tabNavService = inject(TabNavService);
   private viewContainerRef = inject(ViewContainerRef);
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set breadcrumbs(crumbs: IHeaderBreadcrumbLink[]) {
     this.tabNavService.setSubNavBreadcrumbs(crumbs);

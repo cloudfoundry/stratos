@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, Input, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -88,7 +88,7 @@ export class DeployApplicationStep2Component
   private peProjectName$ = toObservable(this.deployData.projectName);
 
 
-  @Input() isRedeploy = false;
+  readonly isRedeploy = input(false);
 
   // Display details of the redeploy commit. A signal, so the OnPush view
   // repaints when the lookup resolves.
@@ -224,7 +224,7 @@ export class DeployApplicationStep2Component
         const branchName = this.deployData.deployBranchName();
         return observableOf({
           success: false,
-          message: this.isRedeploy && branchName ?
+          message: this.isRedeploy() && branchName ?
             `Branch ${branchName} was not found in ${this.repository}.` :
             `Select a branch to deploy from ${this.repository}.`,
         });
@@ -236,7 +236,7 @@ export class DeployApplicationStep2Component
             branch,
             url: repo.clone_url,
             accessToken: this.accessToken,
-            commit: this.isRedeploy ? this.redeployCommitSha : undefined,
+            commit: this.isRedeploy() ? this.redeployCommitSha : undefined,
             endpointGuid,
           }, null);
           return { success: true, data };
@@ -314,7 +314,7 @@ export class DeployApplicationStep2Component
 
     this.stepperText$ = this.canDeployType$.pipe(
       switchMap(canDeployType => canDeployType ?
-        this.isRedeploy ? of('Review source details') : this.sourceType$.pipe(map(st => st.helpText)) :
+        this.isRedeploy() ? of('Review source details') : this.sourceType$.pipe(map(st => st.helpText)) :
         of(null)
       )
     );
@@ -334,7 +334,7 @@ export class DeployApplicationStep2Component
     // strict: NgForm.statusChanges is non-null once the form exists, which is
     // guaranteed by the time ngAfterContentInit runs for the static form.
     this.validate = this.sourceSelectionForm.statusChanges!.pipe(map(() => {
-      return this.sourceSelectionForm.valid || this.isRedeploy;
+      return this.sourceSelectionForm.valid || this.isRedeploy();
     }));
   }
 
@@ -346,7 +346,7 @@ export class DeployApplicationStep2Component
       filter(p => !!p),
       map(p => (!!p.exists && !!p.data) ? p.data : null),
       tap(p => {
-        if (!!p && !this.isRedeploy) {
+        if (!!p && !this.isRedeploy()) {
           this.deployData.setDeployBranch(p.default_branch);
         }
       })
@@ -385,7 +385,7 @@ export class DeployApplicationStep2Component
         if (branch && !!projectInfo && branch.projectName === projectInfo.full_name) {
           this.deployData.setBranch(branch);
 
-          if (this.isRedeploy) {
+          if (this.isRedeploy()) {
             const commitSha = commit || branch.commit?.sha;
             this.redeployCommitSha = commitSha;
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, input } from '@angular/core';
 import { isValid, isBefore, isEqual } from 'date-fns';
 
 import { DateTimeComponent } from '../date-time/date-time.component';
@@ -24,6 +24,8 @@ export class StartEndDateComponent {
   }
 
   // Accepts null/undefined so callers can bind not-yet-chosen range values
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set start(start: Date | null | undefined) {
     this.valid = true;
@@ -42,6 +44,8 @@ export class StartEndDateComponent {
     return this.startValue;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set end(end: Date | null | undefined) {
     this.valid = true;
@@ -91,17 +95,16 @@ export class StartEndDateComponent {
   // Undefined (caller bound nothing) falls back to the default range check.
   // Validators receive whichever date is missing as null/undefined, so a custom
   // validator can also check a lone date.
-  @Input()
-  public validate: ((start: Date | undefined, end: Date | undefined) => string | null) | undefined =
-    (start: Date | undefined, end: Date | undefined): string | null => {
-      if (!end || !start) {
+  public readonly validate = input<((start: Date | undefined, end: Date | undefined) => string | null) | undefined>((start: Date | undefined, end: Date | undefined): string | null => {
+    if (!end || !start) {
         return null;
-      }
-      return isBefore(end, start) ? 'Start date must be before end date.' : null;
     }
+    return isBefore(end, start) ? 'Start date must be before end date.' : null;
+});
 
   private pValidate(start: Date | undefined, end: Date | undefined): boolean {
-    this.validMessage = this.validate ? this.validate(start, end) : null;
+    const validate = this.validate();
+    this.validMessage = validate ? validate(start, end) : null;
     return !this.validMessage;
   }
 

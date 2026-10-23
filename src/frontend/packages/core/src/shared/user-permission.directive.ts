@@ -1,4 +1,4 @@
-import { Directive, Input, OnChanges, OnDestroy, SimpleChanges, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+import { Directive, OnChanges, OnDestroy, SimpleChanges, TemplateRef, ViewContainerRef, inject, input } from '@angular/core';
 import { combineLatest, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -16,11 +16,9 @@ export class UserPermissionDirective implements OnChanges, OnDestroy {
 
   // Accept null/undefined so `*appUserPermission="observable | async"` works —
   // async pipe emits null on first CD before the observable produces a value.
-  @Input()
-  public appUserPermission: PermissionTypes[] | null | undefined;
+  public readonly appUserPermission = input<PermissionTypes[] | null>();
 
-  @Input()
-  public appUserPermissionEndpointGuid!: string;
+  public readonly appUserPermissionEndpointGuid = input.required<string>();
 
   private canSub?: Subscription;
 
@@ -42,13 +40,14 @@ export class UserPermissionDirective implements OnChanges, OnDestroy {
     this.canSub = undefined;
     this.viewContainer.clear();
 
-    if (!this.appUserPermission || this.appUserPermission.length === 0) {
+    const appUserPermission = this.appUserPermission();
+    if (!appUserPermission || appUserPermission.length === 0) {
       return;
     }
 
-    const checks: Observable<boolean>[] = this.appUserPermission.map(
+    const checks: Observable<boolean>[] = appUserPermission.map(
       (permission: PermissionTypes) =>
-        this.currentUserPermissionsService.can(permission, this.appUserPermissionEndpointGuid)
+        this.currentUserPermissionsService.can(permission, this.appUserPermissionEndpointGuid())
     );
 
     this.canSub = combineLatest(checks).pipe(

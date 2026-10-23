@@ -5,24 +5,24 @@
     [class.disabled]="disabled"
     [class.checked]="checked"
     [class.indeterminate]="indeterminate"
-    [class.invalid]="invalid"
-    [class.color-primary]="color === 'primary'"
-    [class.color-accent]="color === 'accent'"
-    [class.color-warn]="color === 'warn'"
-    [attr.aria-invalid]="invalid || null"
-    [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null"
+    [class.invalid]="invalid()"
+    [class.color-primary]="color() === 'primary'"
+    [class.color-accent]="color() === 'accent'"
+    [class.color-warn]="color() === 'warn'"
+    [attr.aria-invalid]="invalid() || null"
+    [attr.aria-describedby]="invalid() && errorMessage ? 'error-' + (id() || name()) : null"
     (click)="toggle()"
     (keydown.enter)="toggle()"
     (keydown.space)="toggle(); $event.preventDefault()">
 
     <div class="checkbox-container">
       <input type="checkbox"
-        [id]="id"
-        [name]="name"
+        [id]="id()"
+        [name]="name()"
         [checked]="checked"
         [disabled]="disabled"
-        [required]="required"
-        [value]="value"
+        [required]="required()"
+        [value]="value()"
         class="checkbox-input"
         tabindex="-1"
         (click)="$event.stopPropagation()">
@@ -52,9 +52,9 @@
     </span>
   </div>
 
-  @if (invalid && errorMessage) {
+  @if (invalid() && errorMessage) {
     <div class="checkbox-error">
-      <div [id]="'error-' + (id || name)" role="alert" aria-live="polite">
+      <div [id]="'error-' + (id() || name())" role="alert" aria-live="polite">
         {{ errorMessage }}
       </div>
     </div>

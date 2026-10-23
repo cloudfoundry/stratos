@@ -1,10 +1,10 @@
 <nav class="page-side-nav" [ngClass]="{'page-side-nav__desktop': (isMobile$ | async) === false}">
   <div class="page-side-nav__items-header">
-    {{ header }}
+    {{ header() }}
   </div>
   <div class="page-side-nav__items-compact-header">
     <app-custom-icon class="page-side-nav__items-compact-dropdown">arrow_drop_down</app-custom-icon>
-    <small> {{ header }}</small>
+    <small> {{ header() }}</small>
     <div class="page-side-nav__items-compact-tab-label"> {{ activeTab$ | async }}</div>
   </div>
   <ul class="page-side-nav__items">

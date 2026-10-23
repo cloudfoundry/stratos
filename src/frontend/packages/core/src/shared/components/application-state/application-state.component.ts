@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { StratosStatus, StratosStatusMetadata } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -18,8 +18,7 @@ import { ApplicationStateIconComponent } from './application-state-icon/applicat
 })
 export class ApplicationStateComponent implements OnInit {
 
-  @Input()
-  public state!: Observable<StratosStatusMetadata>;
+  public readonly state = input.required<Observable<StratosStatusMetadata>>();
 
   // strict: assigned in ngOnInit when the required `state` @Input is present
   public status$!: Observable<StratosStatus>;
@@ -30,24 +29,23 @@ export class ApplicationStateComponent implements OnInit {
   // strict: assigned in ngOnInit; startWith(null) makes the first emission null
   public label$!: Observable<string | null>;
 
-  @Input()
-  public hideIcon = false;
+  public readonly hideIcon = input(false);
 
-  @Input()
-  public initialStateOnly = false;
+  public readonly initialStateOnly = input(false);
 
   constructor() { }
 
   ngOnInit() {
-    if (this.state) {
-      this.status$ = this.state.pipe(
+    const stateValue = this.state();
+    if (stateValue) {
+      this.status$ = stateValue.pipe(
         map(state => state.indicator)
       );
-      this.subLabel$ = this.state.pipe(
+      this.subLabel$ = stateValue.pipe(
         map(state => state.subLabel),
         startWith(null)
       );
-      this.label$ = this.state.pipe(
+      this.label$ = stateValue.pipe(
         map(state => state.label),
         startWith(null)
       );

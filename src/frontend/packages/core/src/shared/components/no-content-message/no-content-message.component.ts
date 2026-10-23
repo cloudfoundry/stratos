@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -22,17 +22,26 @@ export interface NoContentMessageLine {
 })
 export class NoContentMessageComponent implements AfterViewInit {
 
-  @Input() icon?: string;
-  @Input() iconFont?: string;
+  readonly icon = input<string>();
+  readonly iconFont = input<string>();
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() firstLine?: string;
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() secondLine?: NoContentMessageLine | null;
-  @Input() otherLines?: NoContentMessageLine[];
+  readonly otherLines = input<NoContentMessageLine[]>();
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() toolbarLink?: {
     text: string;
   };
-  @Input() toolbarAlign?: string;
+  readonly toolbarAlign = input<string>();
 
-  @Input() mode?: string;
+  readonly mode = input<string>();
 
   @ViewChild('toolBarLinkElement', { static: false }) toolBarLinkElement?: ElementRef;
   private renderer = inject(Renderer2);
@@ -42,8 +51,9 @@ export class NoContentMessageComponent implements AfterViewInit {
     // Note - Only execute after a delay. The final place of the target element may change given visibility of other menu items
     // (polling disabled, notification bell). We should come back to this and replace the timeout with a better way of determining readyness
     setTimeout(() => {
-      if (this.toolBarLinkElement && this.toolbarAlign) {
-        const elem = document.getElementById(this.toolbarAlign);
+      const toolbarAlign = this.toolbarAlign();
+      if (this.toolBarLinkElement && toolbarAlign) {
+        const elem = document.getElementById(toolbarAlign);
         if (elem) {
           const right = document.body.clientWidth - elem.getBoundingClientRect().right - 3;
           this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', right + 'px');

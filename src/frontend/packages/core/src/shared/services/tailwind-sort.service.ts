@@ -19,9 +19,19 @@ export interface TailwindSortable {
   standalone: true
 })
 export class TailwindSortDirective {
+  // TODO: Skipped for migration because:
+  //  Class of this input is manually instantiated. This is discouraged and prevents
+  //  migration.
   @Input('tailwindSort') sortables: { [key: string]: TailwindSortable } = {};
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() active = '';
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() direction: TailwindSortDirection = '';
+  // TODO: Skipped for migration because:
+  //  Class of this input is manually instantiated. This is discouraged and prevents
+  //  migration.
   @Input() disabled = false;
 
   @Output() sortChange = new EventEmitter<TailwindSort>();
@@ -61,10 +71,24 @@ export class TailwindSortDirective {
   standalone: true
 })
 export class TailwindSortHeaderDirective {
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input('tailwindSortHeader') id!: string;
+  // TODO: Skipped for migration because:
+  //  Class of this input is manually instantiated. This is discouraged and prevents
+  //  migration.
   @Input() arrowPosition: 'before' | 'after' = 'after';
+  // TODO: Skipped for migration because:
+  //  Class of this input is manually instantiated. This is discouraged and prevents
+  //  migration.
   @Input() start: TailwindSortDirection = 'asc';
+  // TODO: Skipped for migration because:
+  //  Class of this input is manually instantiated. This is discouraged and prevents
+  //  migration.
   @Input() disabled = false;
+  // TODO: Skipped for migration because:
+  //  Class of this input is manually instantiated. This is discouraged and prevents
+  //  migration.
   @Input() disableClear = false;
 
   private _sort = inject(TailwindSortDirective);

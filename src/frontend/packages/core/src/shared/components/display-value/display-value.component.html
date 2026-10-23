@@ -4,7 +4,7 @@
   }
   <div>
     @if (displayCustom.children.length === 0) {
-      <span>{{value}}</span>
+      <span>{{value()}}</span>
     }
     <div #displayCustom>
       <ng-content></ng-content>

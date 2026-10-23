@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy, input} from '@angular/core';
 import { SidePanelService } from '@stratosui/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -25,9 +25,9 @@ export class AnalysisReportRunnerComponent implements OnInit {
   // namespaceAnalyzers$ on the service can emit null, so the union is honest.
   analyzers$!: Observable<KubernetesAnalysisType[] | null>;
   menuOpen = false;
-  @Input() kubeId!: string;
-  @Input() namespace!: string;
-  @Input() app!: string;
+  readonly kubeId = input.required<string>();
+  readonly namespace = input.required<string>();
+  readonly app = input.required<string>();
   public analysisService = inject(KubernetesAnalysisService);
   private sidePanelService = inject(SidePanelService);
 
@@ -42,11 +42,11 @@ export class AnalysisReportRunnerComponent implements OnInit {
   }
 
   public runAnalysis(id: string) {
-    this.analysisService.run(id, this.kubeId, this.namespace, this.app);
+    this.analysisService.run(id, this.kubeId(), this.namespace(), this.app());
   }
 
   ngOnInit(): void {
-    if (this.namespace) {
+    if (this.namespace()) {
       this.analyzers$ = this.analysisService.namespaceAnalyzers$;
     } else {
       this.analyzers$ = this.analysisService.analyzers$;

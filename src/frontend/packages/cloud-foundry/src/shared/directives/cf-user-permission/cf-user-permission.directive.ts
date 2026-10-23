@@ -1,4 +1,4 @@
-import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
+import { Directive, OnDestroy, OnInit, TemplateRef, ViewContainerRef, inject, input } from '@angular/core';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
@@ -15,25 +15,21 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   private viewContainer = inject(ViewContainerRef);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
-  @Input()
-  public appCfUserPermission!: CfCurrentUserPermissions;
+  public readonly appCfUserPermission = input.required<CfCurrentUserPermissions>();
 
-  @Input()
-  public appCfUserPermissionEndpointGuid!: string;
+  public readonly appCfUserPermissionEndpointGuid = input.required<string>();
 
-  @Input()
-  private appCfUserPermissionOrganizationGuid!: string;
+  private readonly appCfUserPermissionOrganizationGuid = input.required<string>();
 
-  @Input()
-  private appCfUserPermissionSpaceGuid!: string;
+  private readonly appCfUserPermissionSpaceGuid = input.required<string>();
 
   private canSub!: Subscription;
 
   public ngOnInit() {
-    this.canSub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid).pipe(
+    this.canSub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid()).pipe(
       switchMap(() => this.currentUserPermissionsService.can(
-        this.appCfUserPermission,
-        this.appCfUserPermissionEndpointGuid,
+        this.appCfUserPermission(),
+        this.appCfUserPermissionEndpointGuid(),
         this.getOrgOrSpaceGuid(),
         this.getSpaceGuid()
       ))
@@ -59,15 +55,17 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   }
 
   private getOrgOrSpaceGuid() {
-    if (this.appCfUserPermissionSpaceGuid && !this.appCfUserPermissionOrganizationGuid) {
-      return this.appCfUserPermissionSpaceGuid;
+    const appCfUserPermissionSpaceGuid = this.appCfUserPermissionSpaceGuid();
+    const appCfUserPermissionOrganizationGuid = this.appCfUserPermissionOrganizationGuid();
+    if (appCfUserPermissionSpaceGuid && !appCfUserPermissionOrganizationGuid) {
+      return appCfUserPermissionSpaceGuid;
     }
-    return this.appCfUserPermissionOrganizationGuid;
+    return appCfUserPermissionOrganizationGuid;
   }
 
   private getSpaceGuid() {
-    if (this.appCfUserPermissionOrganizationGuid) {
-      return this.appCfUserPermissionSpaceGuid;
+    if (this.appCfUserPermissionOrganizationGuid()) {
+      return this.appCfUserPermissionSpaceGuid();
     }
     return null;
   }

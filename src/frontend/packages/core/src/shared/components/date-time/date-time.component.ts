@@ -29,6 +29,8 @@ export class DateTimeComponent implements OnDestroy {
   @Output()
   public dateTimeChange = new EventEmitter<Date | null | undefined>();
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get dateTime(): Date | null {
     return this.dateTimeValue;

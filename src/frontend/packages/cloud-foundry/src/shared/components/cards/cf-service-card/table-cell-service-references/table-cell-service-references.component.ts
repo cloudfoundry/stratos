@@ -15,6 +15,8 @@ import { StServiceOffering } from "../../../../../services/endpoint-data/stratos
   imports: [ClickStopPropagationDirective],
 })
 export class TableCellServiceReferencesComponent extends TableCellCustom<StServiceOffering> {
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(offering: StServiceOffering) {
     super.row = offering;

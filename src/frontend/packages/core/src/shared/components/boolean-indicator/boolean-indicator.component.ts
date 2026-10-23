@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject, input } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -50,9 +50,11 @@ export class BooleanIndicatorComponent {
 
   public booleanOutput!: IBooleanOutput;
   // Invert the text labels with the icons (No text for yes value and vice-versa)
-  @Input() inverse = false;
+  readonly inverse = input(false);
   // Should we use a subtle display - this won't show the No option as danger (typically red)
   private pSubtle = true;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get subtle(): boolean {
     return this.pSubtle;
@@ -64,6 +66,8 @@ export class BooleanIndicatorComponent {
   }
 
   private pShowText = true;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get showText(): boolean {
     return this.pShowText;
@@ -93,6 +97,8 @@ export class BooleanIndicatorComponent {
   };
 
   private pType!: BooleanIndicatorTypeValue;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get type(): BooleanIndicatorTypeValue {
     return this.pType;
@@ -106,6 +112,8 @@ export class BooleanIndicatorComponent {
   // undefined/null render the 'Unknown' indicator (see updateBooleanOutput),
   // so callers can bind not-yet-loaded data, including `| async` streams.
   private pIsTrue?: boolean | null;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get isTrue(): boolean | null | undefined {
     return this.pIsTrue;
@@ -121,7 +129,7 @@ export class BooleanIndicatorComponent {
     this.booleanOutput = this.getIconTextAndSeverity({
       isTrue: this.isTrue ?? undefined,
       isUnknown,
-      inverse: this.inverse,
+      inverse: this.inverse(),
       subtle: this.subtle
     });
   }

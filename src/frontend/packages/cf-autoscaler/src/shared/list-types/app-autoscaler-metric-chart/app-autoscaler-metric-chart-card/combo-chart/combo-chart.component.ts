@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Input, Output, ViewEncapsulation, OnChanges, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Output, ViewEncapsulation, OnChanges, inject, input } from '@angular/core';
 import { ChartConfiguration, ChartEvent } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -23,35 +23,35 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   private cdr = inject(ChangeDetectorRef);
 
 
-  @Input() width = 400;
-  @Input() height = 300;
-  @Input() legend = false;
-  @Input() xAxis = false;
-  @Input() yAxis = false;
-  @Input() showXAxisLabel = false;
-  @Input() showYAxisLabel = false;
-  @Input() showGridLines = true;
-  @Input() tooltipDisabled = false;
-  @Input() animations = true;
-  @Input() xAxisLabel!: string;
-  @Input() yAxisLabel!: string;
+  readonly width = input(400);
+  readonly height = input(300);
+  readonly legend = input(false);
+  readonly xAxis = input(false);
+  readonly yAxis = input(false);
+  readonly showXAxisLabel = input(false);
+  readonly showYAxisLabel = input(false);
+  readonly showGridLines = input(true);
+  readonly tooltipDisabled = input(false);
+  readonly animations = input(true);
+  readonly xAxisLabel = input.required<string>();
+  readonly yAxisLabel = input.required<string>();
   // Name of the metric series; used as the bar dataset label (tooltips).
-  @Input() metricName!: string;
+  readonly metricName = input.required<string>();
   // Ensure the y axis extends at least this far, so trigger thresholds
   // near the top of the range stay visible.
-  @Input() yScaleMax?: number;
+  readonly yScaleMax = input<number>();
   // Flat time-bucket points — one bar per point.
-  @Input() results: AppAutoscalerMetricDataPoint[] = [];
+  readonly results = input<AppAutoscalerMetricDataPoint[]>([]);
   // Trigger threshold mark-lines: one flat line series per scaling rule.
-  @Input() lineChart: AppAutoscalerMetricDataLine[] = [];
+  readonly lineChart = input<AppAutoscalerMetricDataLine[]>([]);
   // Colour overrides matched by name: time-bucket names for the bars plus
   // trigger names for the threshold lines (see buildMetricColorData).
-  @Input() customColors: AppAutoscalerMetricDataPoint[] = [];
+  readonly customColors = input<AppAutoscalerMetricDataPoint[]>([]);
   // Informational legend entries (trigger threshold ranges) shown instead
   // of the dataset labels, matching the legacy custom legend.
-  @Input() legendData: AppAutoscalerMetricLegend[] = [];
-  @Input() colorSchemeLine: any;
-  @Input() scheme: any;
+  readonly legendData = input<AppAutoscalerMetricLegend[]>([]);
+  readonly colorSchemeLine = input<any>();
+  readonly scheme = input<any>();
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped chart's (select) event under the same name
   @Output() select = new EventEmitter();
@@ -67,15 +67,15 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   }
 
   private updateChartData() {
-    const results = this.results ?? [];
-    const lines = this.lineChart ?? [];
-    const colorByName = new Map<string, string>((this.customColors ?? []).map(item => [item.name, String(item.value)]));
+    const results = this.results() ?? [];
+    const lines = this.lineChart() ?? [];
+    const colorByName = new Map<string, string>((this.customColors() ?? []).map(item => [item.name, String(item.value)]));
 
     // Bars: one per pre-formatted time bucket, coloured by trigger state.
-    const barFallback: string = this.scheme?.domain?.[0] ?? '#01579b';
+    const barFallback: string = this.scheme()?.domain?.[0] ?? '#01579b';
     const datasets: ChartConfiguration['data']['datasets'] = [{
       type: 'bar',
-      label: this.metricName,
+      label: this.metricName(),
       data: results.map(point => Number(point.value)),
       backgroundColor: results.map(point => colorByName.get(point.name) || barFallback),
       yAxisID: 'y',
@@ -83,7 +83,7 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
 
     // Threshold mark-lines share the bars' unit and scale, so they render
     // on the same axis; colours come from the trigger colour map.
-    const lineFallback: string[] = this.colorSchemeLine?.domain ?? ['#01579b'];
+    const lineFallback: string[] = this.colorSchemeLine()?.domain ?? ['#01579b'];
     lines.forEach((series, index) => {
       const color = colorByName.get(series.name) || lineFallback[index % lineFallback.length];
       datasets.push({
@@ -110,45 +110,45 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
     return {
       responsive: true,
       maintainAspectRatio: false,
-      animation: this.animations ? undefined : false,
+      animation: this.animations() ? undefined : false,
       interaction: {
         intersect: false,
       },
       scales: {
         x: {
-          display: this.xAxis,
+          display: this.xAxis(),
           grid: {
             display: false,
           },
           title: {
-            display: this.showXAxisLabel && !!this.xAxisLabel,
-            text: this.xAxisLabel ?? '',
+            display: this.showXAxisLabel() && !!this.xAxisLabel(),
+            text: this.xAxisLabel() ?? '',
           },
         },
         y: {
           type: 'linear',
-          display: this.yAxis,
+          display: this.yAxis(),
           position: 'left',
           beginAtZero: true,
-          suggestedMax: this.yScaleMax,
+          suggestedMax: this.yScaleMax(),
           grid: {
-            display: this.showGridLines,
+            display: this.showGridLines(),
           },
           title: {
-            display: this.showYAxisLabel && !!this.yAxisLabel,
-            text: this.yAxisLabel ?? '',
+            display: this.showYAxisLabel() && !!this.yAxisLabel(),
+            text: this.yAxisLabel() ?? '',
           },
         },
       },
       plugins: {
         legend: {
-          display: this.legend,
+          display: this.legend(),
           // The legend lists trigger threshold ranges (informational),
           // not toggleable datasets — mirror the legacy custom legend.
-          ...(this.legendData?.length ? {
+          ...(this.legendData()?.length ? {
             onClick: () => { /* informational entries — nothing to toggle */ },
             labels: {
-              generateLabels: () => this.legendData.map(item => ({
+              generateLabels: () => this.legendData().map(item => ({
                 text: item.name,
                 fillStyle: item.value,
                 strokeStyle: item.value,
@@ -158,7 +158,7 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
           } : {}),
         },
         tooltip: {
-          enabled: !this.tooltipDisabled,
+          enabled: !this.tooltipDisabled(),
         },
       },
     };

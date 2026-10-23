@@ -21,6 +21,8 @@ export class TableCellServiceCfBreadcrumbsComponent extends TableCellCustom<StSe
   private endpoints = inject(EndpointsSignalService);
   private cfRoles = inject(CfCurrentUserRolesSignalService);
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(offering: StServiceOffering) {
     super.row = offering;

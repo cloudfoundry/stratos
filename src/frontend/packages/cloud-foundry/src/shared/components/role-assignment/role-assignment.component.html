@@ -1,5 +1,5 @@
 <!-- Org multi-select picker (hidden when lockedOrg is set) -->
-@if (!lockedOrg) {
+@if (!lockedOrg()) {
   <div data-testid="org-picker" class="role-assignment__picker rounded border border-content-border bg-content-bg-alt overflow-hidden">
     <input
       type="text"
@@ -53,7 +53,7 @@
 
 <!-- View toggle: accordion ↔ split. Hidden for lockedOrg (single org) and
      until at least one org is picked. -->
-@if (!lockedOrg && pickedOrgs().length > 0) {
+@if (!lockedOrg() && pickedOrgs().length > 0) {
   <div class="role-assignment__toolbar flex items-center justify-end mt-3">
     <button
       type="button"
@@ -163,7 +163,7 @@
   }
 </ng-template>
 
-@if (viewMode() === 'split' && !lockedOrg) {
+@if (viewMode() === 'split' && !lockedOrg()) {
   <!-- Two-pane master/detail. Panes stack on narrow widths (grid-cols-1). -->
   <div
     data-testid="role-pane-split"
@@ -237,7 +237,7 @@
         <span class="role-assignment__summary shrink-0 text-xs text-content-muted" data-testid="org-role-summary">
           <ng-container [ngTemplateOutlet]="orgSummary" [ngTemplateOutletContext]="{ orgGuid: org.metadata.guid }"></ng-container>
         </span>
-        @if (!lockedOrg) {
+        @if (!lockedOrg()) {
           <button
             type="button"
             (click)="removePickedOrg(org.metadata.guid)"

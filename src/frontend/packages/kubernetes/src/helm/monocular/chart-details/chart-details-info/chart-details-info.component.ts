@@ -23,6 +23,9 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
 ]
 })
 export class ChartDetailsInfoComponent implements OnInit {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() chart!: Chart;
   // Signals: both arrive from HTTP after the first render, and an OnPush view
   // under zoneless CD only repaints for signal writes.
@@ -35,6 +38,8 @@ export class ChartDetailsInfoComponent implements OnInit {
     return this.pCurrentVersion;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set currentVersion(version: ChartVersion) {
     this.pCurrentVersion = version;
     if (version) {

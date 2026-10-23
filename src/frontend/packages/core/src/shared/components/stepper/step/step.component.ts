@@ -117,11 +117,15 @@ export class StepComponent {
 
   pHidden = false;
 
+  // TODO: Skipped for migration because:
+  //  Class of this input is referenced in the signature of another class.
   @Input()
   title!: string;
 
   @Output() hiddenChange = new EventEmitter<boolean>();
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set hidden(hidden: boolean) {
     this.pHidden = hidden;
@@ -135,6 +139,8 @@ export class StepComponent {
     return this.signalHandle?.hidden ? this.signalHandle.hidden() : this.pHidden;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set valid(value: boolean) {
     if (this._valid !== value) {
@@ -164,6 +170,8 @@ export class StepComponent {
   // re-evaluated and the Previous/Close buttons stay stuck in the state
   // they were in at the initial view bind.
   private _canClose = true;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set canClose(v: boolean) {
     if (this._canClose !== v) {
@@ -177,16 +185,22 @@ export class StepComponent {
   @Output() canCloseChange = new EventEmitter<boolean>();
 
   private _hideCloseButton = false;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set hideCloseButton(v: boolean) { this._hideCloseButton = v; }
   get hideCloseButton(): boolean {
     return this.signalHandle?.hideCloseButton ? this.signalHandle.hideCloseButton() : this._hideCloseButton;
   }
 
+  // TODO: Skipped for migration because:
+  //  Class of this input is referenced in the signature of another class.
   @Input()
   hideNextButton = false;
 
   private _nextButtonText = 'Next';
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set nextButtonText(v: string) { this._nextButtonText = v; }
   get nextButtonText(): string {
@@ -194,6 +208,8 @@ export class StepComponent {
   }
 
   private _finishButtonText = 'Finish';
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set finishButtonText(v: string) { this._finishButtonText = v; }
   get finishButtonText(): string {
@@ -201,6 +217,8 @@ export class StepComponent {
   }
 
   private _cancelButtonText = 'Cancel';
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set cancelButtonText(v: string) { this._cancelButtonText = v; }
   get cancelButtonText(): string {
@@ -208,6 +226,8 @@ export class StepComponent {
   }
 
   private _disablePrevious = false;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set disablePrevious(v: boolean) {
     if (this._disablePrevious !== v) {
@@ -223,6 +243,8 @@ export class StepComponent {
   // A signal, like signalHandle.blocked, so the stepper's first-step entry
   // effect re-runs when a legacy [blocked] binding clears.
   private _blocked = signal(false);
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set blocked(v: boolean) { this._blocked.set(v); }
   get blocked(): boolean {
@@ -230,6 +252,8 @@ export class StepComponent {
   }
 
   private _destructiveStep = false;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set destructiveStep(v: boolean) { this._destructiveStep = v; }
   get destructiveStep(): boolean {
@@ -239,6 +263,8 @@ export class StepComponent {
   @ViewChild(TemplateRef, { static: true })
   content!: TemplateRef<any>;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set skip(v: boolean) {
     this._skip = v;
@@ -252,18 +278,26 @@ export class StepComponent {
   private _skip = false;
 
   private _showBusy = false;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set showBusy(v: boolean) { this._showBusy = v; }
   get showBusy(): boolean {
     return this.signalHandle?.showBusy ? this.signalHandle.showBusy() : this._showBusy;
   }
 
+  // TODO: Skipped for migration because:
+  //  Class of this input is referenced in the signature of another class.
   @Input()
   onNext: StepOnNextFunction = () => observableOf({ success: true })
 
+  // TODO: Skipped for migration because:
+  //  Class of this input is referenced in the signature of another class.
   @Input()
   onEnter: (data: any) => void = () => { }
 
+  // TODO: Skipped for migration because:
+  //  Class of this input is referenced in the signature of another class.
   @Input()
   onLeave: (isNext?: boolean) => void = () => { }
 
@@ -282,6 +316,8 @@ export class StepComponent {
    * effective validity / skip / submission delegate to this handle. Wider
    * consumer migration to this shape tracked at FWT-957.
    */
+  // TODO: Skipped for migration because:
+  //  Class of this input is referenced in the signature of another class.
   @Input()
   signalHandle?: SignalStepHandle;
 

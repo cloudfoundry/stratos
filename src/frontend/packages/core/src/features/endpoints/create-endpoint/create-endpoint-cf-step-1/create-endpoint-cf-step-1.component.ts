@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit, Component, Injector, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, Injector, Input, inject, input } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -66,8 +66,10 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   registerForm: FormGroup<CreateEndpointForm>;
 
-  @Input() finalStep = false;
+  readonly finalStep = input(false);
   private pFixedUrl!: string;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get fixedUrl(): string {
     return this.pFixedUrl;
@@ -205,7 +207,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     const success = !result.error;
     return {
       success,
-      redirect: success && this.finalStep,
+      redirect: success && this.finalStep(),
       message: success ? '' : result.message,
       data
     };

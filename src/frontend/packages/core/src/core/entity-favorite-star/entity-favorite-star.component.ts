@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, inject, Input, ChangeDetectionStrategy, input } from '@angular/core';
 import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -23,6 +23,8 @@ import { CustomIconComponent } from '../../shared/components/custom-material/cus
 })
 export class EntityFavoriteStarComponent {
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     const name = favorite.getPrettyTypeName();
@@ -32,10 +34,9 @@ export class EntityFavoriteStarComponent {
     this.pFavourite = favorite;
   }
 
-  @Input()
-  public confirmRemoval = false;
+  public readonly confirmRemoval = input(false);
 
-  @Input() small = false;
+  readonly small = input(false);
 
   public isFavorite$!: Observable<boolean>;
 
@@ -48,7 +49,7 @@ export class EntityFavoriteStarComponent {
 
   public toggleFavorite(event: Event) {
     event.stopPropagation();
-    if (this.confirmRemoval) {
+    if (this.confirmRemoval()) {
       this.isFavorite$.pipe(
         take(1),
         tap(is => {

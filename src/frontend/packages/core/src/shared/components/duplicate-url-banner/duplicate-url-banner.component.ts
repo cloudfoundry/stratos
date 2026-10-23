@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -28,7 +28,7 @@ import { EndpointModel, formatDuplicateUrlEndpointsMessage } from '@stratosui/st
             @if (message) {
               {{ message }}
             } @else {
-              {{ nounPlural }} from each are shown together — use the filter to narrow to a single endpoint.
+              {{ nounPlural() }} from each are shown together — use the filter to narrow to a single endpoint.
             }
           </div>
         </span>
@@ -39,20 +39,23 @@ import { EndpointModel, formatDuplicateUrlEndpointsMessage } from '@stratosui/st
 export class DuplicateUrlBannerComponent implements OnInit {
   // Scoped, connected-endpoint stream for the host page. Required — there's
   // no sensible default endpoint type to fall back to.
-  @Input({ required: true }) endpoints$!: Observable<EndpointModel[]>;
+  readonly endpoints$ = input.required<Observable<EndpointModel[]>>();
 
   // Subject noun for the banner — each host page passes its own wording.
-  @Input() nounPlural: string = 'Endpoints';
+  readonly nounPlural = input<string>('Endpoints');
 
   // Full replacement for the trailing sentence, for host pages where the
   // "shown together — use the filter" wording doesn't apply (e.g. the
   // Cloud Foundry endpoint picker, which lists endpoints, not entities).
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() message: string = '';
 
   sharedUrlMessage$!: Observable<string | null>;
 
   ngOnInit(): void {
-    this.sharedUrlMessage$ = this.endpoints$.pipe(
+    this.sharedUrlMessage$ = this.endpoints$().pipe(
       map((endpoints: EndpointModel[]) => formatDuplicateUrlEndpointsMessage(endpoints)),
     );
   }

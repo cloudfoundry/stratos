@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { AfterContentInit, Component, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable, Subject } from 'rxjs';
 import { take, distinctUntilChanged, filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
@@ -36,7 +36,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
   private state$ = toObservable(this.rolesData.state);
   private changedRoles$ = toObservable(this.rolesData.changedRoles);
 
-  @Input() setUsernames = false;
+  readonly setUsernames = input(false);
 
   changes$!: Observable<CfRoleChangeWithNames[]>;
 
@@ -135,7 +135,7 @@ export class UsersRolesConfirmComponent implements OnInit, AfterContentInit {
           .sort((a, b) => naturalCompare(a.username, b.username))
       )
     );
-    this.changes$ = this.setUsernames ? changesViaUsername : changesViaUserGuid;
+    this.changes$ = this.setUsernames() ? changesViaUsername : changesViaUserGuid;
   }
 
 }

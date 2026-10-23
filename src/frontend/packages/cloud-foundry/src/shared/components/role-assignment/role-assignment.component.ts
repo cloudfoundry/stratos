@@ -2,7 +2,6 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
-  Input,
   OnDestroy,
   OnInit,
   Output,
@@ -10,7 +9,7 @@ import {
   effect,
   inject,
   input,
-  signal,
+  signal
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Subscription, combineLatest } from 'rxjs';
@@ -78,12 +77,15 @@ function readPersistedViewMode(): RoleAssignmentViewMode {
   imports: [AppBusyComponent, RoleTristateCheckboxComponent, NgTemplateOutlet],
 })
 export class RoleAssignmentComponent implements OnInit, OnDestroy {
-  @Input({ required: true }) cfGuid!: string;
+  readonly cfGuid = input.required<string>();
   readonly users = input<StUser[]>([]);
   readonly baseline = input<CfUserRolesSelected>({});
   /** True while the host is still resolving existing roles (existingRoles$). */
   readonly loading = input<boolean>(false);
-  @Input() lockedOrg?: { guid: string; name: string };
+  readonly lockedOrg = input<{
+    guid: string;
+    name: string;
+}>();
 
   @Output() changeSet = new EventEmitter<CfRoleChange[]>();
 
@@ -197,7 +199,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     effect(() => {
       const orgs = this.allOrgs();
       const baseline = this.baseline();
-      if (this.baselineSeeded || this.lockedOrg || orgs.length === 0) {
+      if (this.baselineSeeded || this.lockedOrg() || orgs.length === 0) {
         return;
       }
       const orgGuids = new Set<string>();
@@ -240,7 +242,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     this.loadOrgs();
 
     // lockedOrg: seed pickedOrgs from it once orgs load (or immediately if lockedOrg is set)
-    if (this.lockedOrg) {
+    if (this.lockedOrg()) {
       // We create a minimal APIResource shape from the lockedOrg hint
       // We'll wait for allOrgs to fill so we get the real entity, or use stub
       this.seedLockedOrg();
@@ -258,7 +260,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   loadOrgs(): void {
     this.orgsLoading.set(true);
     this.orgsError.set(null);
-    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid).subscribe({
+    const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid()).subscribe({
       next: orgs => {
         this.allOrgs.set(orgs);
         this.resolvePermissions(orgs);
@@ -281,7 +283,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     }
     // Build one combineLatest over all per-org observables, resolve once
     const obs = orgs.map(o =>
-      this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid, o.metadata.guid).pipe(
+      this.userPerms.can(CfCurrentUserPermissions.ORGANIZATION_CHANGE_ROLES, this.cfGuid(), o.metadata.guid).pipe(
         map(can => ({ guid: o.metadata.guid, can })),
       ),
     );
@@ -294,7 +296,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
       this.canEditByOrg.set(map);
 
       // If lockedOrg is set, seed from real org list once permissions resolved
-      if (this.lockedOrg && this.pickedOrgs().length === 0) {
+      if (this.lockedOrg() && this.pickedOrgs().length === 0) {
         this.seedLockedOrg();
       }
     });
@@ -304,10 +306,11 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
   // --- Locked org seeding ---
 
   private seedLockedOrg(): void {
-    if (!this.lockedOrg) {
+    const lockedOrg = this.lockedOrg();
+    if (!lockedOrg) {
       return;
     }
-    const existing = this.allOrgs().find(o => o.metadata.guid === this.lockedOrg!.guid);
+    const existing = this.allOrgs().find(o => o.metadata.guid === this.lockedOrg()!.guid);
     if (existing) {
       this.pickedOrgs.set([existing]);
       this.loadSpacesFor(existing.metadata.guid);
@@ -316,16 +319,16 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
       // Org not yet loaded — create a stub so the UI can render
       const stub: APIResource<IOrganization> = {
         metadata: {
-          guid: this.lockedOrg.guid,
+          guid: lockedOrg.guid,
           created_at: '',
           updated_at: '',
           url: '',
         },
-        entity: { name: this.lockedOrg.name },
+        entity: { name: lockedOrg.name },
       };
       this.pickedOrgs.set([stub]);
-      this.loadSpacesFor(this.lockedOrg.guid);
-      this.expandedByOrg.update(set => { const next = new Set(set); next.add(this.lockedOrg!.guid); return next; });
+      this.loadSpacesFor(lockedOrg.guid);
+      this.expandedByOrg.update(set => { const next = new Set(set); next.add(this.lockedOrg()!.guid); return next; });
     }
   }
 
@@ -410,7 +413,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     this.spacesFailed.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
     // The spinner clears on every outcome: a value, an error, or completion without a value.
     const done = () => this.spacesLoading.update(s => { const next = new Set(s); next.delete(orgGuid); return next; });
-    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid, orgGuid).subscribe({
+    const spaceSub = this.cfRolesService.fetchSpacesForOrg(this.cfGuid(), orgGuid).subscribe({
       next: spaces => {
         this.spacesByOrg.update(m => ({ ...m, [orgGuid]: spaces }));
         done();
@@ -431,7 +434,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
       return;
     }
     const obs = spaces.map(space =>
-      this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid, orgGuid, space.guid).pipe(
+      this.userPerms.can(CfCurrentUserPermissions.SPACE_CHANGE_ROLES, this.cfGuid(), orgGuid, space.guid).pipe(
         map(can => ({ key: `${orgGuid}:${space.guid}`, can })),
       ),
     );

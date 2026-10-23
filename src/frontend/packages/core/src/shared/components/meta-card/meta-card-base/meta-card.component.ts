@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ContentChild, Input, HostListener, contentChildren, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ContentChild, Input, HostListener, contentChildren, signal, input } from '@angular/core';
 import { combineLatest, Observable, of as observableOf, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -53,9 +53,15 @@ export class MetaCardComponent {
   @ContentChild(MetaCardTitleComponent, { static: true })
   title!: MetaCardTitleComponent;
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   status$?: Observable<StratosStatus>;
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   favorite?: UserFavorite<IFavoriteMetadata> | null;
 
@@ -64,30 +70,28 @@ export class MetaCardComponent {
   // the ngrx list framework — live cards supply [favorite] explicitly. The
   // only remaining [entityConfig] binder, card-app, is dead `list/` code
   // deleted in workstream D; this input keeps it compiling until then.
-  @Input()
-  entityConfig: unknown;
+  readonly entityConfig = input<unknown>();
 
-  @Input()
-  public confirmFavoriteRemoval = false;
+  public readonly confirmFavoriteRemoval = input(false);
 
-  @Input()
-  statusIcon = true;
+  readonly statusIcon = input(true);
 
-  @Input()
-  statusIconByTitle = false;
+  readonly statusIconByTitle = input(false);
 
-  @Input()
-  statusIconTooltip!: string;
+  readonly statusIconTooltip = input.required<string>();
 
-  @Input()
-  statusBackground = false;
+  readonly statusBackground = input(false);
 
-  @Input()
-  mode!: string;
+  readonly mode = input.required<string>();
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   clickAction?: () => void;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set actionMenu(actionMenu: MenuItem[] | null) {
     if (actionMenu) {

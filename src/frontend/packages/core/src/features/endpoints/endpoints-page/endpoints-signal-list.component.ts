@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 
@@ -68,7 +68,7 @@ export class EndpointsSignalListComponent {
    * the modal). Optional so consumers without registration capability can
    * mount the list with count-only.
    */
-  @Input() addAction?: ListSubNavAddAction;
+  readonly addAction = input<ListSubNavAddAction>();
 
   /** Reactive count for the L5 sub-nav row. Wired in the constructor —
    *  `endpointsConfig.view` is built by initialize() and isn't available

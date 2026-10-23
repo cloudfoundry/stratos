@@ -43,7 +43,7 @@ export class MetricsParentRangeSelectorComponent implements AfterContentInit, On
     if (!this.metricsCharts || !this.metricsCharts.first) {
       return;
     }
-    const baseRequest = this.metricsCharts.first.metricsConfig.request;
+    const baseRequest = this.metricsCharts.first.metricsConfig().request;
     // Subscribe before init(): init() commits the first windowed request at
     // once, on a plain Subject, and the charts must not miss it.
     this.requestSub = this.rangeSelectorManager.request$.subscribe(next => {

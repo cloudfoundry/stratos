@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, Input, OnDestroy, ViewChild, inject, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnDestroy, ViewChild, inject, signal, input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 
@@ -35,7 +35,7 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   form!: SpaceQuotaDefinitionFormComponent;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  readonly redirectUrl = input.required<string>();
 
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
@@ -50,7 +50,7 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
       } catch (err: unknown) {
         throw leadError('Failed to create space quota', err);
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
 

@@ -11,17 +11,17 @@
   <div class="legend">
     <div class="advanced-pie-legend">
       <div class="total-value">{{ getTotal() }}</div>
-      <div class="total-label">{{ label }}</div>
+      <div class="total-label">{{ label() }}</div>
     </div>
     <div class="custom-legend">
       @for (item of data; track item.name || $index; let i = $index) {
         <div class="legend-item" role="button" tabindex="0"
-          (click)="onClick(item)"
-          (keydown.enter)="onClick(item)"
-          (keydown.space)="onClick(item); $event.preventDefault()">
+          (click)="onClick()(item)"
+          (keydown.enter)="onClick()(item)"
+          (keydown.space)="onClick()(item); $event.preventDefault()">
           <div class="legend-color" [style.background-color]="getItemColor(i)"></div>
-          <span class="legend-label">{{ nameFormatting(item.name) }}</span>
-          <span class="legend-value">{{ valueFormatting(item.value) }}</span>
+          <span class="legend-label">{{ nameFormatting()(item.name) }}</span>
+          <span class="legend-value">{{ valueFormatting()(item.value) }}</span>
         </div>
       }
     </div>

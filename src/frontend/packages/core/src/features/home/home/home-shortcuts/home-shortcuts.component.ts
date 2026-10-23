@@ -18,6 +18,9 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
 })
 export class HomeShortcutsComponent {
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() shortcuts: HomeCardShortcut[] = [];
 
 }

@@ -9,7 +9,7 @@
           {{ alert }}
         </div>
       }
-      <div class="loading-page__text">{{ text }}</div>
+      <div class="loading-page__text">{{ text() }}</div>
       <div class="flex justify-center" data-test="loading-page-indicator">
         @switch (resolved()) {
           @case ('logo') {

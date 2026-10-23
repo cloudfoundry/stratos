@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -10,11 +10,14 @@ import { CommonModule } from '@angular/common';
 })
 export class PanelComponent {
   // Title of the panel
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() title = '';
   // Display a gray background
-  @Input() background = false;
+  readonly background = input(false);
   // Show a border
-  @Input() border = false;
+  readonly border = input(false);
   // Set the size of the panel to 80%
-  @Input() container = false;
+  readonly container = input(false);
 }

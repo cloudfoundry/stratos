@@ -90,11 +90,15 @@ export class ServiceRecentInstancesCardComponent implements OnInit, OnDestroy {
     return matches.slice(0, RECENT_ITEMS_COUNT);
   });
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set cfGuid(value: string) {
     this._cfGuid.set(value ?? '');
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set serviceGuid(value: string) {
     this._serviceGuid.set(value ?? '');

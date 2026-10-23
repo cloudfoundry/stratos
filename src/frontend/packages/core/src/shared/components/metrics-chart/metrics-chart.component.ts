@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, DestroyRef, Input, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, DestroyRef, Input, OnDestroy, OnInit, computed, inject, signal, input } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
@@ -50,10 +50,15 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   private metricsDataService = inject(MetricsDataService);
   private destroyRef = inject(DestroyRef);
 
-  @Input()
-  public metricsConfig!: MetricsConfig;
+  public readonly metricsConfig = input.required<MetricsConfig>();
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   public chartConfig?: MetricsLineChartConfig;
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   public title!: string;
 
@@ -87,8 +92,9 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
     if (!metrics) {
       return null;
     }
-    const mapped = this.mapMetricsToChartData(metrics, this.metricsConfig);
-    const filtered = this.metricsConfig.filterSeries ? this.metricsConfig.filterSeries(mapped) : mapped;
+    const mapped = this.mapMetricsToChartData(metrics, this.metricsConfig());
+    const metricsConfig = this.metricsConfig();
+    const filtered = metricsConfig.filterSeries ? metricsConfig.filterSeries(mapped) : mapped;
     if (!filtered.length) {
       return [];
     }
@@ -133,11 +139,12 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   };
 
   private sort(metricsArray: ChartSeries[]) {
-    if (this.metricsConfig.sort) {
+    const metricsConfig = this.metricsConfig();
+    if (metricsConfig.sort) {
       const newMetricsArray = [
         ...metricsArray
       ];
-      return newMetricsArray.sort(this.metricsConfig.sort);
+      return newMetricsArray.sort(metricsConfig.sort);
     }
     return metricsArray;
   }
@@ -151,7 +158,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
         start,
         end,
         step,
-        this.metricsConfig,
+        this.metricsConfig(),
       );
     }
     this.convertToChartJsData(result);
@@ -159,13 +166,13 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   }
 
   ngOnInit() {
-    this.requestSignal.set(this.metricsConfig.request);
+    this.requestSignal.set(this.metricsConfig().request);
     this.observation = this.metricsDataService.observe(this.requestSignal);
   }
 
   ngAfterContentInit() {
     if (this.timeRangeSelector) {
-      this.timeRangeSelector.baseRequest = this.metricsConfig.request;
+      this.timeRangeSelector.baseRequest = this.metricsConfig().request;
       this.timeRangeSelector.request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((req: MetricsRequest) => {
         this.requestSignal.set(req);
       });
@@ -200,7 +207,8 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   }
 
   public getTooltipValue(model: { value: string; }) {
-    return this.metricsConfig.tooltipValueFormatter ? this.metricsConfig.tooltipValueFormatter(model.value) : model.value;
+    const metricsConfig = this.metricsConfig();
+    return metricsConfig.tooltipValueFormatter ? metricsConfig.tooltipValueFormatter(model.value) : model.value;
   }
 
   public getSeriesTooltipModel(model: any) {

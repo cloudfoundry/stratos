@@ -32,6 +32,8 @@ export class TableCellEndpointAddressComponent extends TableCellCustom<EndpointM
   public endpointAddress$!: Observable<string>;
   public isDuplicate$!: Observable<boolean>;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(row: EndpointModel | RowWithEndpointId) {
     super.row = row;

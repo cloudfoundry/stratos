@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, Output, ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, Output, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -26,13 +26,12 @@ export class AppActionMonitorIconComponent implements OnInit {
 
   // The caller supplies the action state stream directly (the only path now
   // that the ngrx EntityMonitor request-state source has been removed).
-  @Input()
-  public state!: Observable<IActionMonitorComponentState>;
+  public readonly state = input.required<Observable<IActionMonitorComponentState>>();
 
   @Output()
   public currentState!: Observable<IActionMonitorComponentState>;
 
   ngOnInit() {
-    this.currentState = this.state;
+    this.currentState = this.state();
   }
 }

@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 
@@ -14,10 +14,21 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class EntitySummaryTitleComponent {
-  @Input() title?: string;
+  readonly title = input<string>();
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() subTitle?: string;
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() info?: string;
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() subText?: string;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get imagePath(): string | null {
     return this.image;
@@ -25,12 +36,12 @@ export class EntitySummaryTitleComponent {
   set imagePath(image: string | null) {
     this.image = image;
   }
-  @Input() fallBackIcon?: string;
-  @Input() fallBackIconFont?: string;
+  readonly fallBackIcon = input<string>();
+  readonly fallBackIconFont = input<string>();
   public image: string | null = null;
 
   public failedImageLoad() {
-    if (this.fallBackIcon) {
+    if (this.fallBackIcon()) {
       this.image = null;
     }
   }

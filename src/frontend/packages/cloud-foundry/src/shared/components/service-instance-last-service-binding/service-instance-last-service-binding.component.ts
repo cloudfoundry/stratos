@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { BooleanIndicatorComponent } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
@@ -17,6 +17,6 @@ import { IServiceInstance } from '../../../cf-api-svc.types';
   ],
 })
 export class ServiceInstanceLastServiceBindingComponent {
-  @Input() serviceInstance!: APIResource<IServiceInstance>;
-  @Input() alignRight = false;
+  readonly serviceInstance = input.required<APIResource<IServiceInstance>>();
+  readonly alignRight = input(false);
 }

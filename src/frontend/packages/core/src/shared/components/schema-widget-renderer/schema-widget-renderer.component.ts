@@ -1,12 +1,12 @@
 import {
   Component,
   EventEmitter,
-  Input,
   OnChanges,
   OnInit,
   Output,
   forwardRef,
   signal,
+  input
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { classifyNode, mergeAllOf } from './schema-resolve.util';
@@ -30,18 +30,18 @@ export interface FieldDescriptor {
   templateUrl: './schema-widget-renderer.component.html',
 })
 export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
-  @Input() schema: JsonSchema = {};
-  @Input() data: any = {};
+  readonly schema = input<JsonSchema>({});
+  readonly data = input<any>({});
   /** Back-compat inputs — accepted, not used by this renderer. */
-  @Input() framework: any;
-  @Input() options: any;
-  @Input() loadExternalAssets: any;
+  readonly framework = input<any>();
+  readonly options = input<any>();
+  readonly loadExternalAssets = input<any>();
   /**
    * Internal: JSON Pointer prefix for this subtree. Set by the parent when
    * recursing so child field pointers reflect the full path from the root
    * (e.g. "/network" → child "/network/cidr"). Not part of the public API.
    */
-  @Input() _basePointer: string = '';
+  readonly _basePointer = input<string>('');
 
   /** Emits the full data object on every scalar/child edit. */
   @Output() changes = new EventEmitter<any>();
@@ -65,11 +65,11 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
    * a field's `pointer`. Forwarded to recursive children so nested fields can
    * also highlight. Never blocks or disables — display only.
    */
-  @Input() warnings: SchemaWarning[] = [];
+  readonly warnings = input<SchemaWarning[]>([]);
 
   /** Returns true when a warning targets this pointer — drives the amber border. */
   hasWarning(pointer: string): boolean {
-    return this.warnings.some(w => w.path === pointer);
+    return this.warnings().some(w => w.path === pointer);
   }
 
   /** Returns the raw verbatim text for an `unknown`-kind fallback textarea. */
@@ -152,7 +152,7 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     this._anyOfSelected.set({});
     this._mapRows.set({});
     this._mapRowIdCounter = 0;
-    this._working.set(structuredClone(this.data ?? {}));
+    this._working.set(structuredClone(this.data() ?? {}));
     try {
       this.fields.set(this._buildFields());
     } catch (e: any) {
@@ -568,7 +568,7 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
    */
   activeOneOfNode(field: FieldDescriptor): ResolvedNode {
     const branch = (field.schema.oneOf ?? [])[this.activeOneOf(field.pointer)] ?? {};
-    return classifyNode(branch, this.schema ?? {});
+    return classifyNode(branch, this.schema() ?? {});
   }
 
   /**
@@ -636,7 +636,7 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     deselectedIndex: number,
     stillSelected: number[],
   ): void {
-    const root = this.schema ?? {};
+    const root = this.schema() ?? {};
     const deselectedProps = classifyNode(branches[deselectedIndex] ?? {}, root).schema.properties ?? {};
     const deselectedKeys = Object.keys(deselectedProps);
     if (deselectedKeys.length === 0) {
@@ -677,7 +677,7 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     if (selectedBranches.length === 1) {
       return selectedBranches[0];
     }
-    return mergeAllOf({ allOf: selectedBranches }, this.schema ?? {});
+    return mergeAllOf({ allOf: selectedBranches }, this.schema() ?? {});
   }
 
   /** Returns a display label for a branch schema (title or fallback). */
@@ -690,7 +690,7 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
   // ---------------------------------------------------------------------------
 
   private _buildFields(): FieldDescriptor[] {
-    const schema = this.schema ?? {};
+    const schema = this.schema() ?? {};
     const root = schema;
     const resolved = classifyNode(schema, root);
 
@@ -703,7 +703,7 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
 
     return Object.entries(props).map(([key, propSchema]) => {
       const childResolved = classifyNode(propSchema, root);
-      const pointer = `${this._basePointer}/${key}`;
+      const pointer = `${this._basePointer()}/${key}`;
       return {
         pointer,
         key,
@@ -749,8 +749,9 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
    * pointer relative to this component's own working-data slice.
    */
   private _localPointer(pointer: string): string {
-    if (this._basePointer && pointer.startsWith(this._basePointer)) {
-      return pointer.slice(this._basePointer.length) || '/';
+    const _basePointer = this._basePointer();
+    if (_basePointer && pointer.startsWith(_basePointer)) {
+      return pointer.slice(_basePointer.length) || '/';
     }
     return pointer;
   }

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -39,6 +39,8 @@ export class PageSideNavComponent implements OnInit {
 
 
   pTabs: IPageSideNavTab[] = [];
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set tabs(tabs: IPageSideNavTab[]) {
     if (!tabs) {
       this.pTabs = [];
@@ -58,8 +60,7 @@ export class PageSideNavComponent implements OnInit {
 
   // Bound from async-piped streams that may emit null/undefined before the
   // header resolves; interpolation renders those as an empty string.
-  @Input()
-  public header: string | null | undefined;
+  public readonly header = input<string | null>();
   public activeTab$!: Observable<string>;
   public breadcrumbs$!: Observable<IBreadcrumb[]>;
   public isMobile$: Observable<boolean>;

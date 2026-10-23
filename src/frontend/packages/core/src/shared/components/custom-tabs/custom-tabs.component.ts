@@ -9,6 +9,7 @@ import {
   AfterContentInit,
   ViewChild,
   TemplateRef,
+  input
 } from "@angular/core";
 import { NgTemplateOutlet } from "@angular/common";
 
@@ -24,9 +25,9 @@ export interface MatTabChangeEvent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabComponent {
-  @Input() label = "";
-  @Input() disabled = false;
-  @Input() textLabel = "";
+  readonly label = input("");
+  readonly disabled = input(false);
+  readonly textLabel = input("");
 
   @ViewChild(TemplateRef, { static: true }) content!: TemplateRef<any>;
 
@@ -42,9 +43,11 @@ export class CustomTabComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabGroupComponent implements AfterContentInit {
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() selectedIndex = 0;
-  @Input() backgroundColor = "primary";
-  @Input() color = "primary";
+  readonly backgroundColor = input("primary");
+  readonly color = input("primary");
 
   @Output() selectedIndexChange = new EventEmitter<number>();
   @Output() selectedTabChange = new EventEmitter<MatTabChangeEvent>();
@@ -60,7 +63,7 @@ export class CustomTabGroupComponent implements AfterContentInit {
     if (index < 0 || index >= this.tabs.length) return;
 
     const newTab = this.tabs.toArray()[index];
-    if (newTab.disabled) return;
+    if (newTab.disabled()) return;
 
     this.tabs.forEach((tab, i) => {
       tab.isActive = i === index;

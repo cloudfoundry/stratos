@@ -1,11 +1,11 @@
 <div class="simple-graph__wrapper">
-  <div class="simple-graph__title"><span class="simple-graph__title-inner-text">{{ chartTitle }}</span>
+  <div class="simple-graph__title"><span class="simple-graph__title-inner-text">{{ chartTitle() }}</span>
   @if (chartData.unknown > 0) {
     <app-custom-icon [matTooltip]="chartData.warningText" class="simple-graph__title-unknown-warning" inline
     >warning</app-custom-icon>
   }
 </div>
-<div class="simple-graph" [ngStyle]="{height: height}">
+<div class="simple-graph" [ngStyle]="{height: height()}">
   <div class="simple-graph__inner">
     <canvas baseChart
       [data]="chartData.chartJsData"

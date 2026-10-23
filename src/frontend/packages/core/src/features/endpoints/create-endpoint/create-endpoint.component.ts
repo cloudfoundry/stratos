@@ -5,7 +5,6 @@ import {
   ChangeDetectorRef,
   Component,
   ComponentRef,
-  Input,
   OnDestroy,
   OnInit,
   ViewChild,
@@ -13,6 +12,7 @@ import {
   computed,
   inject,
   signal,
+  input
 } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { entityCatalog } from '@stratosui/store';
@@ -47,7 +47,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // pageHeader signal — the inner one's ngOnDestroy on modal close clears
   // the signal and the outer (endpoints-page) header disappears until a
   // hard reload.
-  @Input() hideHeader = false;
+  readonly hideHeader = input(false);
 
   showConnectStep: boolean;
 

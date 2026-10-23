@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, input } from '@angular/core';
 
 import { ITileConfig, ITileIconConfig, ITileImgConfig } from '../tile/tile-selector.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -17,13 +17,16 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class TileSelectorTileComponent {
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() tile!: ITileConfig;
 
-  @Input() active!: boolean;
+  readonly active = input.required<boolean>();
 
-  @Input() smaller = false;
+  readonly smaller = input(false);
 
-  @Input() compact = false;
+  readonly compact = input(false);
 
   @Output() tileSelect = new EventEmitter<ITileConfig>();
 

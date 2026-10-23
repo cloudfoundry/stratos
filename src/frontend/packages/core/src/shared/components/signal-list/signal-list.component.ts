@@ -508,6 +508,9 @@ export interface SignalListConfig<T> {
   host: { class: 'block h-full min-h-0' },
 })
 export class SignalListComponent<T> implements AfterViewInit {
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input({ required: true }) config!: SignalListConfig<T>;
 
   // Optional content-projected template for fully-custom card rendering.
@@ -1035,7 +1038,7 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   cellTemplateFor(col: SignalListColumn<T>): TemplateRef<{ $implicit: T; row: T }> | undefined {
     if (col.kind !== 'template' || !col.templateName || !this.cellTemplates) return undefined;
-    return this.cellTemplates.find(d => d.name === col.templateName)?.template;
+    return this.cellTemplates.find(d => d.name() === col.templateName)?.template;
   }
 
   // Per-row state (RowState) -------------------------------------------
@@ -1123,7 +1126,7 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   // The projected `__rowMessage` template, if the host supplied one.
   rowMessageTemplate(): TemplateRef<{ $implicit: T; row: T }> | undefined {
-    return this.cellTemplates?.find(d => d.name === SignalListComponent.ROW_MESSAGE_TEMPLATE)?.template;
+    return this.cellTemplates?.find(d => d.name() === SignalListComponent.ROW_MESSAGE_TEMPLATE)?.template;
   }
 
   // Per-segment text classes: bold emphasis + optional tone color.

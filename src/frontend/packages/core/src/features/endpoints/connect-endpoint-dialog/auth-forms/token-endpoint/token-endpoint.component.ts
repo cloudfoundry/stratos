@@ -25,7 +25,13 @@ interface TokenAuthForm {
 export class TokenEndpointComponent implements IAuthForm {
   public showToken = false;
 
+  // TODO: Skipped for migration because:
+  //  This input overrides a field from a superclass, while the superclass field
+  //  is not migrated.
   @Input() formGroup!: FormGroup<TokenAuthForm>;
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() config: any = {};
 }

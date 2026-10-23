@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ContentChildren, QueryList, AfterContentInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, ContentChildren, QueryList, AfterContentInit, input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
@@ -16,8 +16,12 @@ export interface MatButtonToggleChange {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomButtonToggleComponent {
-  @Input() value: any;
+  readonly value = input<any>();
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() disabled = false;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() checked = false;
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle which emits (change)
@@ -45,18 +49,22 @@ export class CustomButtonToggleComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomButtonToggleGroupComponent implements ControlValueAccessor, AfterContentInit {
-  @Input() multiple = false;
+  readonly multiple = input(false);
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() disabled = false;
-  @Input() vertical = false;
-  @Input() name!: string;
+  readonly vertical = input(false);
+  readonly name = input.required<string>();
 
   // Material API parity: mat-button-toggle-group supports a plain [value] input
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set value(value: any) {
     this.writeValue(value);
   }
   get value(): any {
-    return this.multiple ? this.selectedValues : this.selectedValues[0];
+    return this.multiple() ? this.selectedValues : this.selectedValues[0];
   }
 
   @Output() valueChange = new EventEmitter<any>();
@@ -86,20 +94,21 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
 
     this._onTouched();
 
-    if (this.multiple) {
-      const index = this.selectedValues.indexOf(toggle.value);
+    const multiple = this.multiple();
+    if (multiple) {
+      const index = this.selectedValues.indexOf(toggle.value());
       if (index === -1) {
-        this.selectedValues.push(toggle.value);
+        this.selectedValues.push(toggle.value());
       } else {
         this.selectedValues.splice(index, 1);
       }
     } else {
-      this.selectedValues = [toggle.value];
+      this.selectedValues = [toggle.value()];
     }
 
     this.updateToggles();
 
-    const value = this.multiple ? this.selectedValues : this.selectedValues[0];
+    const value = multiple ? this.selectedValues : this.selectedValues[0];
     this._onChange(value);
 
     this.change.emit({
@@ -116,15 +125,16 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
       return;
     }
     this.toggles.forEach(toggle => {
-      toggle.checked = this.selectedValues.includes(toggle.value);
+      toggle.checked = this.selectedValues.includes(toggle.value());
     });
   }
 
   // ControlValueAccessor implementation
   writeValue(value: any): void {
-    if (this.multiple && Array.isArray(value)) {
+    const multiple = this.multiple();
+    if (multiple && Array.isArray(value)) {
       this.selectedValues = value;
-    } else if (!this.multiple && value !== undefined) {
+    } else if (!multiple && value !== undefined) {
       this.selectedValues = [value];
     } else {
       this.selectedValues = [];

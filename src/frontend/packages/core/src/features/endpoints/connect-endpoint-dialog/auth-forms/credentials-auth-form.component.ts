@@ -33,12 +33,17 @@ export class CredentialsAuthFormComponent implements IAuthForm {
     passwordLabel: 'Password'
   };
 
+  // TODO: Skipped for migration because:
+  //  This input overrides a field from a superclass, while the superclass field
+  //  is not migrated.
   @Input() formGroup!: FormGroup<CredentialsAuthForm>;
 
   get config(): any {
     return this.pConfig;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set config(v: any) {
     if (v) {
       this.pConfig = v;
