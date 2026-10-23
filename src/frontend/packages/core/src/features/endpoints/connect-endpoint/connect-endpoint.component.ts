@@ -6,6 +6,7 @@ import { CustomCheckboxComponent } from '../../../shared/components/custom-check
 import { CustomSelectComponent, CustomOptionComponent } from '../../../shared/components/custom-select/custom-select.component';
 import { EndpointsDataService, entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
 import { Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 
 import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -174,6 +175,14 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
         authType: new FormControl('', { nonNullable: true }),
         systemShared: new FormControl(false, { nonNullable: true })
       });
+    }
+  }
+
+  // Enter in the form connects, for hosts that ask for it (formSubmit). The
+  // connect runs when its Observable is subscribed.
+  submitForm() {
+    if (this.formSubmit && this.endpointForm.valid) {
+      this.subs.push(this.connectService.submit().pipe(take(1)).subscribe());
     }
   }
 
