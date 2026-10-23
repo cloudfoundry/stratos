@@ -86,4 +86,17 @@ describe('TableCellEndpointStatusComponent', () => {
     expect(text).toContain('Sync Pending');
     expect(text).not.toContain('Disconnected');
   });
+
+  // Same placeholder as the endpoints list when there is no sync status.
+  it('shows the list\'s placeholder when a type that needs no login has no sync status', async () => {
+    entityCatalog.register(new StratosCatalogEndpointEntity({
+      type: 'test-no-login', label: 'No login', labelPlural: 'No login', logoUrl: '', authTypes: [], unConnectable: true,
+    }));
+    const repoFixture = TestBed.createComponent(TableCellEndpointStatusComponent);
+    repoFixture.componentInstance.row = {
+      guid: 'repo-2', cnsi_type: 'test-no-login', name: 'repo', connectionStatus: 'disconnected',
+    } as EndpointModel;
+    await repoFixture.whenStable();
+    expect((repoFixture.nativeElement as HTMLElement).textContent?.trim()).toBe('—');
+  });
 });

@@ -13,7 +13,7 @@ import {
 import { TableCellCustom } from '../../signal-list/cell-base';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { AppBusyComponent } from '../../busy-indicator/busy-indicator.component';
-import { endpointSyncStatusLabel } from '../endpoint-sync-status';
+import { NO_SYNC_STATUS, endpointSyncStatusLabel } from '../endpoint-sync-status';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',
@@ -53,6 +53,8 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   }
 
   // Sync status of a type that needs no login (shared with the endpoints list).
+  readonly noSyncStatus = NO_SYNC_STATUS;
+
   get syncLabel(): string | null {
     return endpointSyncStatusLabel(this.row);
   }
