@@ -52,6 +52,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   // router navigation. Needed by first-run setup, which has no in-app
   // destination and wants Cancel to hard-refresh back to the flow's start.
   @Input() cancelReload = false;
+  // When set, Cancel calls this instead of navigating to `cancel`: for a
+  // stepper whose host is not a route, such as the Register Endpoint dialog.
+  @Input() cancelAction?: () => void;
   @Input() nextButtonProgress = true;
   @Input() basePreviousRedirect: StepperRedirectPayload | null = this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
@@ -501,6 +504,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     // invokeLeave, not onLeave: a step driven by a signal handle has its
     // leave hook there.
     void this.steps[index].invokeLeave(false);
+    if (this.cancelAction) {
+      this.cancelAction();
+      return;
+    }
     if (this.cancelReload && this.cancel) {
       // Full page load restarts the wizard from a clean state; the template
       // drops routerLink when cancelReload so this is the only navigation.

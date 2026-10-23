@@ -90,11 +90,11 @@
           </div>
           <div class="steppers-navigation-right flex items-center space-x-3">
             <!-- Cancel button -->
-            @if (!steps[currentIndex()].hideCloseButton && cancel) {
+            @if (!steps[currentIndex()].hideCloseButton && (cancel || cancelAction)) {
               <button id="stepper_cancel"
                 class="btn btn-secondary"
-                [routerLink]="cancelReload ? null : (cancel$ | async)"
-                [queryParams]="cancelReload ? null : (cancelQueryParams$ | async)"
+                [routerLink]="cancelReload || cancelAction ? null : (cancel$ | async)"
+                [queryParams]="cancelReload || cancelAction ? null : (cancelQueryParams$ | async)"
                 [disabled]="!canCancel(currentIndex())"
                 (click)="onCancel(currentIndex())">
                 {{ this.getCancelButtonText(currentIndex()) }}

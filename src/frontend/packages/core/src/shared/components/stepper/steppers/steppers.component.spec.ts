@@ -6,6 +6,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
@@ -681,12 +682,14 @@ describe('SteppersComponent — its own error message', () => {
 });
 
 // Cancel leaves the stepper: the step's leave hook runs (a signal handle's
-// onLeave, as for a legacy onLeave input).
+// onLeave, as for a legacy onLeave input), and a host that is not a route of
+// its own (the Register Endpoint dialog) can take Cancel itself instead of a
+// router navigation.
 @Component({
   standalone: true,
   imports: [SteppersComponent, StepComponent],
   template: `
-    <app-steppers cancel="/somewhere">
+    <app-steppers cancel="/somewhere" [cancelAction]="cancelAction">
       <app-step title="One" [signalHandle]="handle"></app-step>
       <app-step title="Two" [signalHandle]="handle"></app-step>
     </app-steppers>
@@ -694,6 +697,7 @@ describe('SteppersComponent — its own error message', () => {
 })
 class CancelHostComponent {
   left: (boolean | undefined)[] = [];
+  cancelAction?: () => void;
   handle: SignalStepHandle = {
     valid: signal(true),
     onLeave: (isNext) => { this.left.push(isNext); },
@@ -723,5 +727,16 @@ describe('SteppersComponent — Cancel', () => {
     await hostFixture.whenStable();
     cancelButton().click();
     expect(host.left).toEqual([false]);
+  });
+
+  it('hands Cancel to the host instead of navigating when given a cancel action', async () => {
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl');
+    host.cancelAction = vi.fn();
+    await hostFixture.whenStable();
+    cancelButton().click();
+    await hostFixture.whenStable();
+    expect(host.cancelAction).toHaveBeenCalledTimes(1);
+    expect(host.left).toEqual([false]);
+    expect(navigate).not.toHaveBeenCalled();
   });
 });
