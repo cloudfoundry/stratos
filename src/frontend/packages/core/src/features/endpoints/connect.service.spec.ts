@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, Injector, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActionState, EndpointFetchingState, EndpointModel, EndpointsDataService } from '@stratosui/store';
+import { firstValueFrom } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { EndpointsService } from '../../core/endpoints.service';
@@ -101,5 +102,57 @@ describe('ConnectEndpointService', () => {
     // Only the live connect's connecting-state bridge re-reads.
     expect(reads() - before).toBe(1);
     live.destroy();
+  });
+
+  // An endpoint editor can change TLS options in the connect form; they
+  // are saved to the endpoint, then the connect runs with them.
+  describe('TLS options', () => {
+    const stored = { guid: 'ep-1', name: 'ep', cnsi_type: 'cf', sso_allowed: true, skip_ssl_validation: false, ca_cert: '' } as EndpointModel;
+
+    async function tlsSetup(updateResult: ActionState) {
+      const base = await setup();
+      const calls: string[] = [];
+      const update = vi.fn(async () => { calls.push('update'); return updateResult; });
+      const connect = vi.fn(async () => { calls.push('connect'); return { busy: false, error: false, message: '' }; });
+      Object.assign(base.data, { endpoints: signal(new Map([['ep-1', stored]])), update, connect });
+      const service = new ConnectEndpointService(endpointsService, config, base.data, base.injector);
+      return { ...base, service, update, connect, calls };
+    }
+
+    const submitWith = (service: ConnectEndpointService, tls: { skipSSL: boolean; caCert: string }) => {
+      service.setData({ authType: 'creds', authVal: { username: 'u', password: 'p' }, systemShared: false, bodyContent: '', tls });
+      return firstValueFrom(service.submit());
+    };
+
+    it('saves changed options, then connects', async () => {
+      const { service, update, calls } = await tlsSetup({ busy: false, error: false, message: '' });
+      const result = await submitWith(service, { skipSSL: true, caCert: '' });
+      expect(result.success).toBe(true);
+      expect(calls).toEqual(['update', 'connect']);
+      expect(update).toHaveBeenCalledWith('ep-1', {
+        endpointType: 'cf', name: 'ep', skipSSL: true, setClientInfo: false, allowSSO: true, caCert: '',
+      });
+      service.destroy();
+    });
+
+    it('does not connect when saving fails, and says why', async () => {
+      const { fixture, service, connect } = await tlsSetup({ busy: false, error: true, message: 'SSL error' });
+      const errors: (string | null)[] = [];
+      const sub = service.connectingError$.subscribe(e => errors.push(e));
+      const result = await submitWith(service, { skipSSL: false, caCert: 'PEM' });
+      await fixture.whenStable();
+      expect(result).toEqual({ success: false, errorMessage: 'SSL error' });
+      expect(connect).not.toHaveBeenCalled();
+      expect(errors).toContain('SSL error');
+      sub.unsubscribe();
+      service.destroy();
+    });
+
+    it('connects without saving when the options are unchanged', async () => {
+      const { service, calls } = await tlsSetup({ busy: false, error: false, message: '' });
+      await submitWith(service, { skipSSL: false, caCert: '' });
+      expect(calls).toEqual(['connect']);
+      service.destroy();
+    });
   });
 });
