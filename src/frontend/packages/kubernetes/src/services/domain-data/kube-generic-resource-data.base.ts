@@ -215,6 +215,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
       const next: StratosError = {
         scope: 'envelope',
         code,
+        status,
         title: this.config.title,
         detail: (err as Error)?.message ?? String(err),
         affected: [kubeGuid, scopeKey],

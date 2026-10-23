@@ -6,6 +6,7 @@ import { TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 
 import { HttpTestingController } from '@angular/common/http/testing';
+import { EndpointErrorEventsService } from '@stratosui/store';
 
 import { KubeEndpointDataRegistry } from '../../services/endpoint-data/kube-endpoint-data.registry';
 import { KubeJobDataService } from '../../services/domain-data/kube-generic-resource-data.services';
@@ -149,6 +150,20 @@ describe('kubernetes-resource-signal-configs — load failures', () => {
     expect(cfgA.onRefresh).toBeDefined();
     expect(cfgB.errorsByCnsi().size).toBe(0);
     expect(cfgB.errorDetail?.()).toBeUndefined();
+  });
+
+  // Like CF list pages, a failure feeds the endpoint error history behind
+  // the page-header error banner and /errors/:endpointId.
+  it('records the list\'s failure in the endpoint error history', async () => {
+    buildJobsSignalConfig(ctxFor('kube-a') as any, TestBed.inject(Injector));
+    const load = TestBed.inject(KubeJobDataService).refresh({ kubeGuid: 'kube-a' });
+    httpMock.expectOne('/pp/v1/proxy/apis/batch/v1/jobs?limit=500').flush(unreachable('kube-a'));
+    await load;
+    TestBed.tick();
+
+    expect(TestBed.inject(EndpointErrorEventsService).errorsForEndpoint('kube-a')()).toEqual([
+      expect.objectContaining({ eventCode: '500', message: 'Error proxing request: dial tcp: i/o timeout' }),
+    ]);
   });
 
   it('workload view, which has no Retry, does not show REST load failures', async () => {
