@@ -22,6 +22,7 @@ import { getIdFromRoute } from '../../../core/utils.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SignalStepHandle, StepComponent } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
+import { ENDPOINT_REGISTER_HANDLE, leaveEndpointRegistration } from '../endpoint-register-modal/endpoint-register-handle';
 import { EndpointsSignalConfigService } from '../endpoints-page/endpoints-signal-config.service';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
@@ -60,8 +61,9 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // used when the endpoint type ships its own registrationComponent (e.g.
   // KubeConfigRegistrationComponent, GitRegistrationComponent); those
   // children manage their own steppers and are migrated separately. The
-  // handles below only drive the legacy inline 2-step flow rendered when
-  // no custom registrationComponent is wired up.
+  // handles below only drive the inline flow (Register, plus Connect for
+  // types that can connect) rendered when no custom registrationComponent
+  // is wired up.
   @ViewChild('step1', { static: false }) step1?: CreateEndpointCfStep1Component;
 
   // Signal-backed (not a plain field): the connect step is instantiated
@@ -77,6 +79,10 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
+  // Present when hosted by the Register Endpoint dialog, which this form
+  // closes instead of navigating to /endpoints (the page under the dialog).
+  private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
+  readonly cancelAction = this.registerHandle ? () => this.registerHandle!.close(false) : undefined;
 
   // step1.validate is an Observable — we mirror it into a signal once the
   // view initialises (it's constructed lazily in ngAfterContentInit).
@@ -105,10 +111,10 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
         this.registeredGuid = result.data.guid;
         this.registeredType = result.data.type;
       }
-      // Legacy `redirect: true` (only emitted when finalStep is set, i.e.
-      // when there's no connect step) means "navigate back to /endpoints".
+      // `redirect: true` (only emitted when finalStep is set, i.e. when
+      // there's no connect step) means the form is done.
       if (result.redirect) {
-        await this.router.navigate(['/endpoints']);
+        await leaveEndpointRegistration(this.registerHandle, this.router, true);
         return;
       }
       // Hand the registration result to the connect step via the stepper's
@@ -161,10 +167,9 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
         throw new Error(result.message || 'Failed to connect endpoint');
       }
       // Connect's legacy onNext always returns redirect:true on success,
-      // meaning "navigate to the stepper's cancel URL" — for this stepper
-      // that is /endpoints.
+      // meaning the form is done.
       if (result.redirect) {
-        await this.router.navigate(['/endpoints']);
+        await leaveEndpointRegistration(this.registerHandle, this.router, true);
       }
     },
   };

@@ -110,7 +110,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public readonly noEndpoints = signal(0);
 
   public canBackupRestore$: Observable<boolean>;
-  public showRegisterModal = false;
+  public readonly showRegisterModal = signal(false);
   public isInitialised$: Observable<boolean>;
 
   private snackBarText = {
@@ -258,16 +258,22 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     } catch (error) {
       console.error('Error hiding snackbar:', error);
     }
+
+    // Leaving with the Register dialog open (e.g. through the side nav)
+    // must still release the page scroll the dialog locked.
+    if (this.showRegisterModal()) {
+      this.closeRegisterModal();
+    }
   }
 
   // Modal methods
   openRegisterModal() {
-    this.showRegisterModal = true;
+    this.showRegisterModal.set(true);
     this.endpointModalService.openModal();
   }
 
   closeRegisterModal() {
-    this.showRegisterModal = false;
+    this.showRegisterModal.set(false);
     this.endpointModalService.closeModal();
   }
 

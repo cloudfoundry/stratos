@@ -1,4 +1,4 @@
-<app-steppers [cancel]="cancelUrl">
+<app-steppers [cancel]="cancelUrl" [cancelAction]="cancelAction">
   <app-step title="Select Config File" [signalHandle]="selectionStepHandle">
     <app-kube-config-selection #selector [applyStarted]="applyStarted()"></app-kube-config-selection>
   </app-step>

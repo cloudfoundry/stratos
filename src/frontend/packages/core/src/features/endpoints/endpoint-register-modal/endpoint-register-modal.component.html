@@ -16,20 +16,20 @@
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
               <span class="material-icons text-white text-xl">
-                {{ selectedEndpointInfo ? 'arrow_back' : 'add_circle_outline' }}
+                {{ selectedEndpointInfo() ? 'arrow_back' : 'add_circle_outline' }}
               </span>
             </div>
             <div>
               <h2 class="text-xl font-bold text-white">
-                {{ selectedEndpointInfo ? 'Register ' + selectedEndpointInfo.label + ' Endpoint' : 'Register Endpoint' }}
+                {{ selectedEndpointInfo() ? 'Register ' + selectedEndpointInfo()!.label + ' Endpoint' : 'Register Endpoint' }}
               </h2>
               <p class="text-white/90 text-sm">
-                {{ selectedEndpointInfo ? 'Configure your endpoint settings' : 'Select the type of endpoint to register' }}
+                {{ selectedEndpointInfo() ? 'Configure your endpoint settings' : 'Select the type of endpoint to register' }}
               </p>
             </div>
           </div>
           <div class="flex items-center space-x-2">
-            @if (selectedEndpointInfo) {
+            @if (selectedEndpointInfo()) {
               <button
                 (click)="goBackToSelection()"
                 class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
@@ -51,7 +51,7 @@
       <div class="p-6 max-h-[70vh] overflow-y-auto overflow-x-hidden custom-scrollbar">
 
         <!-- Endpoint type selection -->
-        @if (!selectedEndpointInfo) {
+        @if (!selectedEndpointInfo()) {
           <div>
             <app-tile-selector
               [options]="(tileSelectorConfig$ | async) ?? []"
@@ -63,7 +63,7 @@
         }
 
         <!-- Endpoint registration form -->
-        @if (selectedEndpointInfo) {
+        @if (selectedEndpointInfo()) {
           <div class="space-y-6">
             <!-- Dynamic component container for the endpoint registration -->
             <div #endpointFormContainer class="">
@@ -77,21 +77,23 @@
       <div class="px-6 py-4 border-t rounded-b-2xl bg-[var(--card-header-bg)] border-[var(--card-border)]">
         <div class="flex items-center justify-between">
           <div class="text-sm text-[var(--content-muted)]">
-            @if (!selectedEndpointInfo) {
+            @if (selectedEndpointInfo(); as selected) {
+              <span>Configure your {{ selected.label }} endpoint</span>
+            } @else {
               <span>Select an endpoint type to continue with registration</span>
             }
-            @if (selectedEndpointInfo) {
-              <span>Configure your {{ selectedEndpointInfo.label }} endpoint</span>
-            }
           </div>
-          <div class="flex space-x-3">
-            <button
-              (click)="closeModal()"
-              class="btn btn-secondary"
-              >
-              Cancel
-            </button>
-          </div>
+          <!-- Once a type is picked, its form's stepper has the Cancel. -->
+          @if (!selectedEndpointInfo()) {
+            <div class="flex space-x-3">
+              <button
+                (click)="closeModal()"
+                class="btn btn-secondary"
+                >
+                Cancel
+              </button>
+            </div>
+          }
         </div>
       </div>
     </div>

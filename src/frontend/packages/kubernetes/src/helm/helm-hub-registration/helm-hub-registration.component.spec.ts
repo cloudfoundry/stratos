@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { UserService } from '../../../../core/src/core/user.service';
+import { ENDPOINT_REGISTER_HANDLE } from '../../../../core/src/features/endpoints/endpoint-register-modal/endpoint-register-handle';
 import { EndpointsSignalConfigService } from '../../../../core/src/features/endpoints/endpoints-page/endpoints-signal-config.service';
 import { BaseTestModules } from '../../../../core/test-framework/core-test.helper';
 import { HelmReleaseActivatedRouteMock } from '../helm-testing.module';
@@ -22,9 +23,11 @@ describe('HelmHubRegistrationComponent', () => {
   let component: HelmHubRegistrationComponent;
   let fixture: ComponentFixture<HelmHubRegistrationComponent>;
   let stubSignalConfig: ReturnType<typeof makeStubEndpointsSignalConfig>;
+  let registerHandle: { close: ReturnType<typeof vi.fn> };
 
   beforeEach(async () => {
     stubSignalConfig = makeStubEndpointsSignalConfig();
+    registerHandle = { close: vi.fn() };
     await TestBed.configureTestingModule({
       imports: [
         ...BaseTestModules,
@@ -35,18 +38,33 @@ describe('HelmHubRegistrationComponent', () => {
         UserService,
         HelmReleaseActivatedRouteMock,
         { provide: EndpointsSignalConfigService, useValue: stubSignalConfig },
+        // Rendered inside the Register Endpoint dialog
+        { provide: ENDPOINT_REGISTER_HANDLE, useValue: registerHandle },
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(HelmHubRegistrationComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // Inside the Register Endpoint dialog the form closes the dialog through
+  // its handle instead of navigating to the page under it.
+  it('closes the dialog, reporting the registration, once registered', async () => {
+    await component.registerStepHandle.submit!();
+    expect(registerHandle.close).toHaveBeenCalledWith(true);
+  });
+
+  it('closes the dialog on Cancel', async () => {
+    (fixture.nativeElement.querySelector('#stepper_cancel') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(registerHandle.close).toHaveBeenCalledWith(false);
   });
 });

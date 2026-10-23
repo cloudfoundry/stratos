@@ -1,4 +1,4 @@
-<app-steppers [cancel]="'/endpoints'">
+<app-steppers [cancel]="'/endpoints'" [cancelAction]="cancelAction">
   <app-step title="Register" [signalHandle]="registerStepHandle">
     <div class="p-6">
       <h3 class="text-xl font-semibold mb-4">Select the type of {{ gitTypes[epSubType].label }} to register</h3>

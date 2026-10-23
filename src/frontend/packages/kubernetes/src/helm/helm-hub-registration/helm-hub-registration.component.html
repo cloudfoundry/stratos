@@ -1,4 +1,4 @@
-<app-steppers cancel="/endpoints">
+<app-steppers cancel="/endpoints" [cancelAction]="cancelAction">
   <app-step title="" [signalHandle]="registerStepHandle" finishButtonText="Register">
     <div>
       <p>Artifact Hub is a public repository for Helm Charts.</p>
