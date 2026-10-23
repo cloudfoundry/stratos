@@ -168,7 +168,7 @@ describe('KubeGenericResourceDataServiceBase proxy per-endpoint errors', () => {
     expect(svc.errors()()).toEqual([expect.objectContaining({
       code: 'FETCH_ERROR',
       detail: 'Error proxing request: dial tcp 10.0.0.1:6443: connect: connection refused',
-      affected: [A],
+      affected: [A, 'cluster:kube-a'],
     })]);
   });
 

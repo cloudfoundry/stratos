@@ -31,6 +31,10 @@ export interface KubeGenericResourceConfig {
 const nsKey = (kubeGuid: string, namespace: string) => `${kubeGuid}/${namespace}`;
 const workloadKey = (kubeGuid: string, namespace: string, release: string) =>
   `${kubeGuid}/${namespace}/${release}`;
+// The list a load fills, tagged on its errors (second `affected` entry)
+// so a list shows, and a good load clears, only its own failures.
+const errorScopeKey = (scope: { kubeGuid: string; namespace?: string }) =>
+  scope.namespace ? `ns:${scope.kubeGuid}:${scope.namespace}` : `cluster:${scope.kubeGuid}`;
 
 export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: { name: string; namespace?: string; kubeId?: string; creationTimestamp?: string } }> {
   protected abstract readonly http: HttpClient;
@@ -48,7 +52,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
       evictKeys(this._clusterItems, owned);
       evictKeys(this._namespaceItems, owned);
       evictKeys(this._workloadItems, owned);
-      evictErrors(this._errors, kubeGuid);
+      evictErrors(this._errors, kubeGuid, a => a === kubeGuid || a.split(':')[1] === kubeGuid);
     });
   }
 
@@ -81,6 +85,13 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
 
   errors(): Signal<StratosError[]> {
     return this._errors.asReadonly();
+  }
+
+  // The failures of the list for one scope (the cluster, or a namespace
+  // when given). A reactive read: call it inside a computed.
+  scopeErrors(scope: { kubeGuid: string; namespace?: string }): StratosError[] {
+    const key = errorScopeKey(this.config.namespaced ? scope : { kubeGuid: scope.kubeGuid });
+    return this._errors().filter(e => e.affected?.includes(key));
   }
 
   // ---- Refresh -----------------------------------------------------------
@@ -155,20 +166,20 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
 
   private async fetchCluster(kubeGuid: string): Promise<Array<T & { kubeGuid: string }>> {
     const url = `/pp/v1/proxy${this.config.apiPath}/${this.config.resourceName}?limit=${KUBE_LIST_DEFAULT_LIMIT}`;
-    return this.fetchList(url, kubeGuid);
+    return this.fetchList(url, kubeGuid, errorScopeKey({ kubeGuid }));
   }
 
   private async fetchNamespaced(kubeGuid: string, namespace: string): Promise<Array<T & { kubeGuid: string }>> {
     const url = `/pp/v1/proxy${this.config.apiPath}/namespaces/${encodeURIComponent(namespace)}/${this.config.resourceName}?limit=${KUBE_LIST_DEFAULT_LIMIT}`;
-    return this.fetchList(url, kubeGuid);
+    return this.fetchList(url, kubeGuid, errorScopeKey({ kubeGuid, namespace }));
   }
 
   // Generic list fetcher — same shape as KubeServiceDataService.fetchList:
   // x-cap-cnsi-list header, jetstream wraps the response in a per-CNSI map
   // (an endpoint's error entry is thrown, see kubeProxyResult). Stamps
   // `kubeGuid` + `metadata.kubeId` on each row. A good load clears the
-  // endpoint's earlier errors, so a Retry that works leaves no error state.
-  private async fetchList(url: string, kubeGuid: string): Promise<Array<T & { kubeGuid: string }>> {
+  // earlier errors of its scope, so a Retry that works leaves no error state.
+  private async fetchList(url: string, kubeGuid: string, scopeKey: string): Promise<Array<T & { kubeGuid: string }>> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const live = this.eviction.current(kubeGuid);
     try {
@@ -176,7 +187,11 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
         url,
         { headers },
       ).pipe(kubeProxyResult<KubeListResponse<T>>(kubeGuid)));
-      if (live()) evictErrors(this._errors, kubeGuid);
+      if (live()) {
+        this._errors.update(curr => curr.some(e => e.affected?.includes(scopeKey))
+          ? curr.filter(e => !e.affected?.includes(scopeKey))
+          : curr);
+      }
       return (list?.items ?? []).map((item) => ({
         ...item,
         kubeGuid,
@@ -190,7 +205,7 @@ export abstract class KubeGenericResourceDataServiceBase<T extends { metadata: {
         code,
         title: this.config.title,
         detail: (err as Error)?.message ?? String(err),
-        affected: [kubeGuid],
+        affected: [kubeGuid, scopeKey],
       };
       if (live()) this._errors.update(curr => [...curr, next].slice(-50));
       return [];

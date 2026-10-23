@@ -317,4 +317,15 @@ describe('KubePodDataService', () => {
     httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces/ns/pods/p1').flush({ [KUBE_GUID]: { error: { statusCode: 403, status: '403 Forbidden' }, errorResponse: { kind: 'Status', message: 'denied' } } });
     await expect(deleting).rejects.toThrow('403 Forbidden: denied');
   });
+
+  it('scopeErrors keeps a cluster-wide failure off the node and namespace scopes', async () => {
+    const refreshing = svc.refresh({ kubeGuid: KUBE_GUID });
+    httpMock.expectOne(CLUSTER_PODS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' } } });
+    await refreshing;
+
+    expect(svc.scopeErrors({ kubeGuid: KUBE_GUID })).toHaveLength(1);
+    expect(svc.scopeErrors({ kubeGuid: KUBE_GUID, nodeName: 'node-1' })).toEqual([]);
+    expect(svc.scopeErrors({ kubeGuid: KUBE_GUID, namespace: 'ns' })).toEqual([]);
+    expect(svc.scopeErrors({ kubeGuid: 'other' })).toEqual([]);
+  });
 });

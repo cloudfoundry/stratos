@@ -62,6 +62,16 @@ export class KubePodDataService {
     return this._errors.asReadonly();
   }
 
+  // The failures of the pod list for one scope: a node's pods, a
+  // namespace's, or the whole cluster's. A reactive read: call it inside
+  // a computed.
+  scopeErrors(scope: { kubeGuid: string; namespace?: string; nodeName?: string }): StratosError[] {
+    const key = scope.namespace ? nsKey(scope.kubeGuid, scope.namespace)
+      : scope.nodeName ? nodeKey(scope.kubeGuid, scope.nodeName)
+        : clusterKey(scope.kubeGuid);
+    return this._errors().filter(e => e.affected?.includes(key));
+  }
+
   // -- Public read APIs ----------------------------------------------------
 
   podsInCluster(kubeGuid: string): Signal<KubePod[]> {

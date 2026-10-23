@@ -47,7 +47,7 @@ import {
   KubeStorageClass,
   StratosError,
 } from '../../services/endpoint-data/kube-types';
-import { errorsForEndpoint, kubeListErrorState } from '../list-types/kube-list-errors';
+import { kubeListErrorState } from '../list-types/kube-list-errors';
 import { KubeSortSpec, KubeViewPipeline } from '../list-types/kube-view-pipeline';
 import { KubernetesSignalConfigContext } from './kubernetes-signal-config-registry';
 
@@ -196,11 +196,17 @@ function loadSelectedNamespace(
   });
 }
 
-// A list's load failures: the data service's errors for this endpoint.
-// A workload view is socket-fed and has no Retry, so it shows none.
+// A list's load failures: the data service's errors for the scope on
+// screen, so a cluster-wide failure does not show on a namespace view
+// (or the reverse). A workload view is socket-fed and has no Retry, so
+// it shows none.
 const NO_ERRORS = signal<StratosError[]>([]).asReadonly();
-function listErrors(ctx: KubernetesSignalConfigContext, errors: Signal<StratosError[]>): Signal<StratosError[]> {
-  return ctx.isWorkloadView ? NO_ERRORS : errorsForEndpoint(ctx.kubeGuid, errors);
+function listErrors(
+  ctx: KubernetesSignalConfigContext,
+  namespaced: boolean,
+  scopeErrors: (scope: ListScope) => StratosError[],
+): Signal<StratosError[]> {
+  return ctx.isWorkloadView ? NO_ERRORS : computed(() => scopeErrors(listScope(ctx, namespaced)));
 }
 
 // Factory: Pods (entity type `pod` in kubeEntityCatalog). Switches
@@ -294,7 +300,7 @@ export function buildPodsSignalConfig(
     'No pods match the current filter',
     'Loading pods…',
     ctx.isWorkloadView ? undefined : () => podData.refresh(listScope(ctx, true)),
-    listErrors(ctx, podData.errors()),
+    listErrors(ctx, true, scope => podData.scopeErrors(scope)),
     signal(false).asReadonly(),
   );
 }
@@ -382,7 +388,7 @@ export function buildServicesSignalConfig(
     'No services match the current filter',
     'Loading services…',
     ctx.isWorkloadView ? undefined : () => serviceData.refresh(listScope(ctx, true)),
-    listErrors(ctx, serviceData.errors()),
+    listErrors(ctx, true, scope => serviceData.scopeErrors(scope)),
     signal(false).asReadonly(),
   );
 }
@@ -496,7 +502,7 @@ function buildGenericResourceConfig<T extends GenericRow>(
     emptyFilterMessage,
     loadingMessage,
     ctx.isWorkloadView ? undefined : () => dataSvc.refresh(listScope(ctx, namespaced)),
-    listErrors(ctx, dataSvc.errors()),
+    listErrors(ctx, namespaced, scope => dataSvc.scopeErrors(scope)),
     signal(false).asReadonly(),
   );
 }

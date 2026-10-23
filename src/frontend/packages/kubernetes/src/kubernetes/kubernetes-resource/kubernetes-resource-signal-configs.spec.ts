@@ -162,6 +162,30 @@ describe('kubernetes-resource-signal-configs — load failures', () => {
     expect(cfg.errorsByCnsi().size).toBe(0);
   });
 
+  it('a list shows only the failure of the scope it shows', async () => {
+    const injector = TestBed.inject(Injector);
+    const selected = signal<string | undefined>(undefined);
+    const cfg = buildJobsSignalConfig(
+      { kubeGuid: 'kube-a', selectedNamespace: selected.asReadonly(), isWorkloadView: false } as any, injector);
+    const jobs = TestBed.inject(KubeJobDataService);
+
+    const load = jobs.refresh({ kubeGuid: 'kube-a' });
+    httpMock.expectOne('/pp/v1/proxy/apis/batch/v1/jobs?limit=500').flush(unreachable('kube-a'));
+    await load;
+    expect(cfg.errorsByCnsi().size).toBe(1);
+
+    // The namespace view loads its own list fine: the cluster failure is not its.
+    selected.set('ns-a');
+    TestBed.tick();
+    httpMock.expectOne('/pp/v1/proxy/apis/batch/v1/namespaces/ns-a/jobs?limit=500')
+      .flush({ 'kube-a': { items: [] } });
+    await TestBed.inject(ApplicationRef).whenStable();
+    expect(cfg.errorsByCnsi().size).toBe(0);
+
+    selected.set(undefined);
+    expect(cfg.errorsByCnsi().size).toBe(1);
+  });
+
   it('namespaces list shows the failure of the namespace load it lists', async () => {
     const injector = TestBed.inject(Injector);
     const cfg = buildNamespacesSignalConfig(ctxFor('kube-a') as any, injector);
