@@ -27,3 +27,7 @@
   listed and why; their releases used to go missing silently.
 - Kubernetes list failures reach the page-header error banner and the
   endpoint's error page, as Cloud Foundry list failures do.
+- The Namespaces tile on the Kubernetes Summary tab and home card reads
+  "1 Namespace" for a single namespace (it said "1 Node"), and the
+  Summary tab's Pods tile opens the pod list (it linked to a page that
+  does not exist).
