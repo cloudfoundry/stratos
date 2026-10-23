@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, OnDestroy, signal, computed, ChangeDetectionStrategy, inject, input } from '@angular/core';
+import { Component, OnDestroy, OnInit, signal, computed, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -92,7 +92,7 @@ function redactValues(value: unknown): unknown {
     StatefulIconComponent
   ]
 })
-export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
+export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private upsService = inject(CloudFoundryUserProvidedServicesService);
   modeService = inject(CsiModeService);
@@ -126,7 +126,6 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       tags: new FormControl<any[]>([], { nonNullable: true }) });
     this.bindExistingInstance = new FormGroup<BindExistingInstanceForm>({
       serviceInstances: new FormControl('', { validators: [Validators.required], nonNullable: true }) });
-    this.initUpdate(serviceInstanceId, endpointId);
     this.setupValidate();
     // Fetch on load so the redacted structure preview renders without a
     // click; real values stay off-screen until explicitly shown.
@@ -244,6 +243,14 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   formMode = CreateServiceFormMode.CreateServiceInstance;
 
   private originalFormValue: IUserProvidedServiceInstanceData | null = null;
+
+  ngOnInit(): void {
+    // Not in the constructor: the update snapshot (originalFormValue) reads
+    // the spaceGuid input, which is only set once the component is created.
+    const { endpointId, serviceInstanceId } =
+      this.route && this.route.snapshot ? this.route.snapshot.params : { endpointId: null, serviceInstanceId: null };
+    this.initUpdate(serviceInstanceId, endpointId);
+  }
 
   ngOnDestroy(): void {
     safeUnsubscribe(...this.subscriptions);
