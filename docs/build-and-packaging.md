@@ -457,35 +457,36 @@ dev → alpha → beta → rc → prerelease → release
 
 | Command | Example input | Result |
 |---------|--------------|--------|
-| `make bump patch` | `v4.9.3-dev.38` | `v4.9.4` |
-| `make bump minor` | `v4.9.3-dev.38` | `v4.10.0` |
-| `make bump major` | `v4.9.3-dev.38` | `v5.0.0` |
+| `make bump patch` | `4.9.3-dev.38` | `4.9.4` |
+| `make bump minor` | `4.9.3-dev.38` | `4.10.0` |
+| `make bump major` | `4.9.3-dev.38` | `5.0.0` |
 
 **Prerelease bumps** (operate on the current semver core — create `.1` if the
 stage is new, otherwise increment the counter):
 
 | Command | Example input | Result |
 |---------|--------------|--------|
-| `make bump dev` | `v4.9.3` | `v4.9.3-dev.1` |
-| `make bump dev` | `v4.9.3-dev.38` | `v4.9.3-dev.39` |
-| `make bump alpha` | `v4.9.3-dev.38` | `v4.9.3-alpha.1` |
-| `make bump beta` | `v4.9.3-alpha.2` | `v4.9.3-beta.1` |
-| `make bump rc` | `v4.9.3-beta.1` | `v4.9.3-rc.1` |
-| `make bump rc` | `v4.9.3-rc.1` | `v4.9.3-rc.2` |
-| `make bump prerelease` | `v4.9.3-rc.2` | `v4.9.3-prerelease.1` |
+| `make bump dev` | `4.9.3` | `4.9.3-dev.1` |
+| `make bump dev` | `4.9.3-dev.38` | `4.9.3-dev.39` |
+| `make bump alpha` | `4.9.3-dev.38` | `4.9.3-alpha.1` |
+| `make bump beta` | `4.9.3-alpha.2` | `4.9.3-beta.1` |
+| `make bump rc` | `4.9.3-beta.1` | `4.9.3-rc.1` |
+| `make bump rc` | `4.9.3-rc.1` | `4.9.3-rc.2` |
+| `make bump prerelease` | `4.9.3-rc.2` | `4.9.3-prerelease.1` |
+| `make bump set TO=5.0.0-rc.1` | any | `5.0.0-rc.1` |
 
 To strip the prerelease suffix and finalize a release, use `FINAL=strip` on
 the release verb — see [Finalizing a release](#finalizing-a-release) below.
 
 **Automatic build metadata.** Every `make bump` appends
 `+build.YYYYMMDD.SHORT-SHA` per SemVer 2.0.0, e.g.
-`v4.9.3-dev.42+build.20260410.79d3982a`. Build metadata is ignored by version
+`4.9.3-dev.42+build.20260410.79d3982a`. Build metadata is ignored by version
 precedence rules but provides traceability from binary to source.
 
-**Explicit set.** For an arbitrary version string, call the script directly:
+**Explicit set.** For an arbitrary version string, pass it in `TO`:
 
 ```bash
-./build/version-bump.sh set v5.0.0-rc.1
+make bump set TO=5.0.0-rc.1
 ```
 
 **Preview a bump** without writing files: use `DRYRUN=yes` (see
@@ -508,6 +509,7 @@ the command shape.
 |----------|-------------|
 | `DRYRUN=yes` | Preview actions without executing. Wired to `bump` (prints the new version without writing `package.json`) and to `check e2e` / `test e2e` (passes `--list` to Playwright, listing tests without running them). |
 | `FINAL=strip` | Strip prerelease suffix from the version (persisted to `package.json`), then re-invoke Make with the remaining goals. Useful as a one-shot finalize-then-package on the release verb. |
+| `TO=...` | The version `make bump set` writes, e.g. `TO=4.9.4-dev.1`. Separate from `VERSION` so a chained `make bump set build` still stamps the `+build` metadata. |
 | `VERSION=...` | Override the version from `package.json` for this invocation only (not persisted). |
 | `PLATFORM=os/arch` | Override backend build platform. Syntax is Go's own `GOOS`/`GOARCH` values, lowercase, slash-separated — not a Stratos-specific format. `os`: `linux`, `darwin`, `windows`. `arch`: `amd64`, `arm64`. Those are the six combinations this project builds/tests (see Supported Platforms in `developer-environment.md`); Go itself supports more `GOOS`/`GOARCH` pairs than that if you need one we don't list. |
 
