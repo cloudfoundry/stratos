@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"slices"
 	"strings"
 	"time"
 
@@ -258,7 +259,8 @@ func (p *portalProxy) adminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-// endpointAdminMiddleware - checks if user is admin or endpointadmin
+// endpointAdminMiddleware - lets a Stratos admin, or a user who holds the
+// stratos.endpointadmin scope, through
 func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		slog.Debug("endpointAdminMiddleware")
@@ -273,7 +275,7 @@ func (p *portalProxy) endpointAdminMiddleware(h echo.HandlerFunc) echo.HandlerFu
 			return c.NoContent(http.StatusUnauthorized)
 		}
 
-		endpointAdmin := strings.Contains(strings.Join(u.Scopes, ""), "stratos.endpointadmin")
+		endpointAdmin := slices.Contains(u.Scopes, "stratos.endpointadmin")
 
 		if !endpointAdmin && !u.Admin {
 			return handleSessionError(p.Config, c, errors.New("Unauthorized"), false, "You must be a Stratos admin or endpointAdmin to access this API")
