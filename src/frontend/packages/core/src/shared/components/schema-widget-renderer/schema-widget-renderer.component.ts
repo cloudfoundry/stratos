@@ -1,12 +1,11 @@
 import {
   Component,
-  EventEmitter,
   OnChanges,
   OnInit,
-  Output,
   forwardRef,
   signal,
-  input
+  input,
+  output
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { classifyNode, mergeAllOf } from './schema-resolve.util';
@@ -44,20 +43,20 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
   readonly _basePointer = input<string>('');
 
   /** Emits the full data object on every scalar/child edit. */
-  @Output() changes = new EventEmitter<any>();
+  readonly changes = output<any>();
 
   /**
    * Emitted when `_buildFields()` throws during schema parsing. Carries an
    * actionable message that the wrapper (SchemaFormComponent) can display inline
    * and via snackbar, and uses to auto-switch to JSON view.
    */
-  @Output() renderError = new EventEmitter<string>();
+  readonly renderError = output<string>();
 
   /**
    * Emitted as [] on every edit — validity is advisory and surfaced by the
    * wrapper (SchemaFormComponent); kept here only for contract compatibility.
    */
-  @Output() validationErrors = new EventEmitter<any[]>();
+  readonly validationErrors = output<any[]>();
 
   /**
    * Advisory warnings from the wrapper's schema validation pass.

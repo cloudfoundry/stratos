@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, forwardRef, input, output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface MatCheckboxChange {
@@ -45,8 +45,8 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
   @Input() errorMessage = '';
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-checkbox which emits (change)
-  @Output() change = new EventEmitter<MatCheckboxChange>();
-  @Output() indeterminateChange = new EventEmitter<boolean>();
+  readonly change = output<MatCheckboxChange>();
+  readonly indeterminateChange = output<boolean>();
 
   private _onChange = (_value: any) => {};
   private _onTouched = () => {};

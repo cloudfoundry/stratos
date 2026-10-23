@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, forwardRef, input, output } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 
@@ -44,7 +44,7 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
   @Input() errorMessage = '';
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-slide-toggle which emits (change)
-  @Output() change = new EventEmitter<MatSlideToggleChange>();
+  readonly change = output<MatSlideToggleChange>();
 
   private _onChange = (_value: any) => {};
   private _onTouched = () => {};

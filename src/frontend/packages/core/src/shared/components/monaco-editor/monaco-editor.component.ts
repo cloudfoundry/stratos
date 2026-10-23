@@ -3,13 +3,12 @@ import {
   Component,
   effect,
   ElementRef,
-  EventEmitter,
   forwardRef,
   inject,
   OnDestroy,
-  Output,
   ViewChild,
-  input
+  input,
+  output
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -53,10 +52,10 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
 
   readonly options = input<MonacoEditorOptions>({});
   readonly model = input<MonacoEditorModel>();
-  @Output() editorInit = new EventEmitter<MonacoEditorComponent>();
+  readonly editorInit = output<MonacoEditorComponent>();
   // Fires for every content change, including ones no ngModel is bound to —
   // consumers without a CVA binding have no other change signal.
-  @Output() valueChange = new EventEmitter<string>();
+  readonly valueChange = output<string>();
 
   private branding = inject(StratosBrandingService);
   private editor: import('monaco-editor').editor.IStandaloneCodeEditor | undefined;

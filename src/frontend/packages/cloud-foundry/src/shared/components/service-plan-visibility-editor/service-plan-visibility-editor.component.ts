@@ -1,15 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Output,
   Signal,
   WritableSignal,
   computed,
   effect,
   inject,
   signal,
-  input
+  input,
+  output
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
@@ -54,7 +53,7 @@ export class ServicePlanVisibilityEditorComponent {
   readonly organizations = input<readonly VisibilityOrgOption[]>([]);
 
   // Emits the applied visibility record once the write lands.
-  @Output() applied = new EventEmitter<StServicePlanVisibility>();
+  readonly applied = output<StServicePlanVisibility>();
 
   readonly visibilityTypes: readonly VisibilityType[] = ['public', 'admin', 'organization', 'space'];
 

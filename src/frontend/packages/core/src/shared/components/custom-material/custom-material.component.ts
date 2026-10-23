@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, Directive, booleanAttribute, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Directive, booleanAttribute, input, output } from '@angular/core';
 
 // Custom Icon Component
 @Component({
@@ -116,7 +116,7 @@ export class CustomDatepickerComponent {
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
   @Input() selected!: Date;
-  @Output() selectedChange = new EventEmitter<Date>();
+  readonly selectedChange = output<Date>();
 
   onDateChange(event: any) {
     const date = new Date(event.target.value);
@@ -136,7 +136,7 @@ export class CustomDatepickerComponent {
 })
 export class CustomDatepickerInputComponent {
   readonly matDatepicker = input<any>();
-  @Output() valueChange = new EventEmitter<Date>();
+  readonly valueChange = output<Date>();
   private _value!: Date;
 
   // TODO: Skipped for migration because:

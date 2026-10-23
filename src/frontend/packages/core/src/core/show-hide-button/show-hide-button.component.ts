@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, output } from '@angular/core';
 
 @Component({
   selector: 'app-show-hide-button',
@@ -11,8 +11,7 @@ export class ShowHideButtonComponent {
 
   private pShow = false;
 
-  @Output()
-  changed = new EventEmitter<boolean>();
+  readonly changed = output<boolean>();
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

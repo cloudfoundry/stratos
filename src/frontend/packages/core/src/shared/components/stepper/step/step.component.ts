@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, Signal, TemplateRef, ViewChild, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Signal, TemplateRef, ViewChild, signal, output } from '@angular/core';
 import { from, Observable, of as observableOf } from 'rxjs';
 
 import { StepperRedirectPayload } from '../stepper.types';
@@ -110,7 +110,7 @@ export class StepComponent {
   // write is invisible to it (a step's markForCheck walks the declaration
   // tree, which doesn't include the steppers view). Without this the
   // destructive confirm step's Apply stayed disabled forever under zoneless.
-  @Output() busyChange = new EventEmitter<boolean>();
+  readonly busyChange = output<boolean>();
   set busy(v: boolean) {
     if (this._busy !== v) {
       this._busy = v;
@@ -127,7 +127,7 @@ export class StepComponent {
   @Input()
   title!: string;
 
-  @Output() hiddenChange = new EventEmitter<boolean>();
+  readonly hiddenChange = output<boolean>();
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
@@ -163,7 +163,7 @@ export class StepComponent {
   }
   private _valid = true;
 
-  @Output() validChange = new EventEmitter<boolean>();
+  readonly validChange = output<boolean>();
 
   // Setter-backed inputs that emit change events so the parent stepper
   // component can re-run change detection. Under OnPush + zoneless change
@@ -187,7 +187,7 @@ export class StepComponent {
   get canClose(): boolean {
     return this.signalHandle?.canClose ? this.signalHandle.canClose() : this._canClose;
   }
-  @Output() canCloseChange = new EventEmitter<boolean>();
+  readonly canCloseChange = output<boolean>();
 
   private _hideCloseButton = false;
   // TODO: Skipped for migration because:
@@ -243,7 +243,7 @@ export class StepComponent {
   get disablePrevious(): boolean {
     return this.signalHandle?.disablePrevious ? this.signalHandle.disablePrevious() : this._disablePrevious;
   }
-  @Output() disablePreviousChange = new EventEmitter<boolean>();
+  readonly disablePreviousChange = output<boolean>();
 
   // A signal, like signalHandle.blocked, so the stepper's first-step entry
   // effect re-runs when a legacy [blocked] binding clears.
