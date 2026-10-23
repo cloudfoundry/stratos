@@ -113,7 +113,7 @@ func TestConnectReportsAnUnreachableAPI(t *testing.T) {
 	}
 
 	_, _, err := connectWith(t, "gitlab", &api.CNSIRequest{StatusCode: http.StatusInternalServerError,
-		Status: "Error proxing request", Response: []byte(requestErr.Error()), Error: requestErr})
+		Status: "Error proxying request", Response: []byte(requestErr.Error()), Error: requestErr})
 
 	var netErr net.Error
 	if !errors.As(err, &netErr) {

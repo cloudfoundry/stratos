@@ -485,7 +485,7 @@ func (p *portalProxy) doRequest(cnsiRequest *api.CNSIRequest, done chan<- *api.C
 
 	if err != nil {
 		cnsiRequest.StatusCode = 500
-		cnsiRequest.Status = "Error proxing request"
+		cnsiRequest.Status = "Error proxying request"
 		cnsiRequest.Response = []byte(err.Error())
 		cnsiRequest.Error = err
 	} else if res.Body != nil {

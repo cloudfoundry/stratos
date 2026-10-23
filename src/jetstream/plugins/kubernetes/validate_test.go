@@ -49,7 +49,7 @@ func TestValidateKeepsTheRequestFailure(t *testing.T) {
 		t.Fatal("expected a request to a closed server to fail")
 	}
 
-	err := validateWith(&api.CNSIRequest{StatusCode: http.StatusInternalServerError, Status: "Error proxing request",
+	err := validateWith(&api.CNSIRequest{StatusCode: http.StatusInternalServerError, Status: "Error proxying request",
 		Response: []byte(requestErr.Error()), Error: requestErr})
 
 	var netErr net.Error
