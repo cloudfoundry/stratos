@@ -13,6 +13,7 @@ import {
 } from './create-endpoint/create-endpoint-base-step/create-endpoint-base-step.component';
 import { CreateEndpointComponent } from './create-endpoint/create-endpoint.component';
 import { EditEndpointComponent } from './edit-endpoint/edit-endpoint.component';
+import { canEditEndpointGuard } from './endpoint-permissions.service';
 import { EndpointsPageComponent } from './endpoints-page/endpoints-page.component';
 
 export const ENDPOINTS_ROUTES: Routes = [
@@ -36,7 +37,8 @@ export const ENDPOINTS_ROUTES: Routes = [
   },
   {
     path: 'edit/:id',
-    component: EditEndpointComponent
+    component: EditEndpointComponent,
+    canActivate: [canEditEndpointGuard]
   },
   {
     path: 'backup-restore',
