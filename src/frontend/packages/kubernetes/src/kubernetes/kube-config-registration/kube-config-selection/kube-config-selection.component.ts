@@ -45,7 +45,7 @@ import { KubeConfigTableUserSelectComponent } from './kube-config-table-user-sel
 })
 export class KubeConfigSelectionComponent {
 
-  readonly applyStarted = input.required<boolean>();
+  readonly applyStarted = input<boolean>();
 
   public helper = inject(KubeConfigHelper);
   private snackbarService = inject(TailwindSnackBarService);

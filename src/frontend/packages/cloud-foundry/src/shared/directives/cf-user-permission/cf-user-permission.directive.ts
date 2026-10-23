@@ -15,13 +15,13 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   private viewContainer = inject(ViewContainerRef);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
-  public readonly appCfUserPermission = input.required<CfCurrentUserPermissions>();
+  public readonly appCfUserPermission = input<CfCurrentUserPermissions>();
 
-  public readonly appCfUserPermissionEndpointGuid = input.required<string>();
+  public readonly appCfUserPermissionEndpointGuid = input<string>();
 
-  private readonly appCfUserPermissionOrganizationGuid = input.required<string>();
+  private readonly appCfUserPermissionOrganizationGuid = input<string>();
 
-  private readonly appCfUserPermissionSpaceGuid = input.required<string>();
+  private readonly appCfUserPermissionSpaceGuid = input<string>();
 
   private canSub!: Subscription;
 

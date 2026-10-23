@@ -6,7 +6,7 @@ standalone: true
 })
 export class TableCellStatusDirective implements OnChanges {
 
-  readonly appTableCellStatus = input.required<string>();
+  readonly appTableCellStatus = input<string>();
 
   private readonly el: ElementRef;
   private readonly renderer: Renderer2;

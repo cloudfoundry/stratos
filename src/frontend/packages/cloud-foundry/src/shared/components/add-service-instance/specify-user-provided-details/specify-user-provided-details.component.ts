@@ -219,10 +219,10 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public validate = signal(false);
   private subscriptions: Subscription[] = [];
 
-  public readonly cfGuid = input.required<string>();
-  public readonly spaceGuid = input.required<string>();
-  public readonly appId = input.required<string>();
-  public readonly serviceInstanceId = input.required<string>();
+  public readonly cfGuid = input<string>();
+  public readonly spaceGuid = input<string>();
+  public readonly appId = input<string>();
+  public readonly serviceInstanceId = input<string>();
 
   public readonly showModeSelection = input(false);
 

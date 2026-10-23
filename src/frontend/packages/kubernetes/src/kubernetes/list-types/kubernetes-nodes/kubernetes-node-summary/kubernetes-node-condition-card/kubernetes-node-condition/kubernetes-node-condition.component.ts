@@ -17,7 +17,7 @@ import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../.
 export class KubernetesNodeConditionComponent implements OnInit {
 
 
-  readonly condition = input.required<ConditionType | `${ConditionType}`>(); // strict: required @Input, templates bind literal strings (condition="Ready")
+  readonly condition = input<ConditionType | `${ConditionType}`>(); // templates bind literal strings (condition="Ready")
   // boolean | undefined: an "Unknown" condition status renders as the indicator's unknown state
   condition$!: Observable<boolean | undefined>; // strict: assigned in ngOnInit before the template reads it
   hasCondition$!: Observable<boolean>; // strict: assigned in ngOnInit before the template reads it

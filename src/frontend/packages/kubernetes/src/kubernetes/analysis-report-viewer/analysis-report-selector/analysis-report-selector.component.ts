@@ -25,8 +25,8 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   // strict: assigned in ngOnInit before the template's async pipe reads it
   public analyzers$!: Observable<AnalysisReport[]>;
 
-  readonly endpoint = input.required<string>();
-  readonly path = input.required<string>();
+  readonly endpoint = input<string>();
+  readonly path = input<string>();
   readonly prompt = input('Overlay');
   readonly allowNone = input(true);
   readonly autoSelect = input(false);

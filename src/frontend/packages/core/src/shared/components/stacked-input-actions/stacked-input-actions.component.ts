@@ -37,9 +37,9 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   private injector = inject(Injector);
 
 
-  readonly stateIn$ = input.required<Observable<StackedInputActionsState[]>>();
+  readonly stateIn$ = input<Observable<StackedInputActionsState[]>>();
   readonly isEmailInput = input(true);
-  readonly stackedActionConfig = input.required<StackedInputActionConfig>();
+  readonly stackedActionConfig = input<StackedInputActionConfig>();
 
   readonly stateOut = output<StackedInputActionsUpdate>();
 

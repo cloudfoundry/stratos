@@ -17,6 +17,6 @@ import { IServiceInstance } from '../../../cf-api-svc.types';
   ],
 })
 export class ServiceInstanceLastServiceBindingComponent {
-  readonly serviceInstance = input.required<APIResource<IServiceInstance>>();
+  readonly serviceInstance = input<APIResource<IServiceInstance>>();
   readonly alignRight = input(false);
 }

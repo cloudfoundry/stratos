@@ -35,9 +35,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   private fb = inject(FormBuilder);
 
 
-  readonly boundAppId = input.required<string>();
+  readonly boundAppId = input<string>();
 
-  readonly apps$ = input.required<Observable<APIResource<IApp>[]>>();
+  readonly apps$ = input<Observable<APIResource<IApp>[]>>();
 
   validate = signal<boolean>(true);
   serviceInstanceGuid!: string;

@@ -18,6 +18,6 @@ import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 export class ApplicationStateIconComponent {
 
   // Accepts null so callers can bind `status$ | async` directly
-  public readonly status = input.required<StratosStatus | null>();
+  public readonly status = input<StratosStatus | null>();
 
 }

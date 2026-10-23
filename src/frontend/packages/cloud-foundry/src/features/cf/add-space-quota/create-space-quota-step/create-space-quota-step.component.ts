@@ -35,7 +35,7 @@ export class CreateSpaceQuotaStepComponent implements AfterViewInit, OnDestroy {
   form!: SpaceQuotaDefinitionFormComponent;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  readonly redirectUrl = input.required<string>();
+  readonly redirectUrl = input<string>();
 
   private validSignal = signal(false);
   private formStatusSub?: Subscription;

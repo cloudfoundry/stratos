@@ -33,10 +33,10 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   readonly showGridLines = input(true);
   readonly tooltipDisabled = input(false);
   readonly animations = input(true);
-  readonly xAxisLabel = input.required<string>();
-  readonly yAxisLabel = input.required<string>();
+  readonly xAxisLabel = input<string>();
+  readonly yAxisLabel = input<string>();
   // Name of the metric series; used as the bar dataset label (tooltips).
-  readonly metricName = input.required<string>();
+  readonly metricName = input<string>();
   // Ensure the y axis extends at least this far, so trigger thresholds
   // near the top of the range stay visible.
   readonly yScaleMax = input<number>();

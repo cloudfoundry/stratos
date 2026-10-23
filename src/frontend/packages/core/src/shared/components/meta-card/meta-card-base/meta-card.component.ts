@@ -78,11 +78,11 @@ export class MetaCardComponent {
 
   readonly statusIconByTitle = input(false);
 
-  readonly statusIconTooltip = input.required<string>();
+  readonly statusIconTooltip = input<string>();
 
   readonly statusBackground = input(false);
 
-  readonly mode = input.required<string>();
+  readonly mode = input<string>();
 
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)

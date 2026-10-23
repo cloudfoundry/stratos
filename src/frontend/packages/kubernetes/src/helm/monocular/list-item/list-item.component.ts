@@ -24,9 +24,9 @@ export class ListItemComponent implements OnInit {
 
   readonly height = input('default');
   public readonly artifactHubAndHelmRepoTypes$ = input<Observable<boolean>>();
-  readonly chart = input.required<Chart>();
+  readonly chart = input<Chart>();
 
-  public readonly detailUrl = input.required<string>(); // strict: required @Input, always bound by the parent template
+  public readonly detailUrl = input<string>();
   public showArtifactHub$!: Observable<boolean>;
 
   ngOnInit() {

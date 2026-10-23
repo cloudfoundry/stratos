@@ -64,7 +64,7 @@ export class EditOrganizationStepComponent implements OnInit, OnDestroy {
   private formStatusSub?: Subscription;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  readonly redirectUrl = input.required<string>();
+  readonly redirectUrl = input<string>();
 
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
