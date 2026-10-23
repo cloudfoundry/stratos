@@ -170,8 +170,10 @@ describe('EndpointsPageComponent', () => {
   });
 
   // The Register Endpoint dialog reports a registration when its form is
-  // done; the page refreshes, says so and closes the dialog.
-  it('closes the Register dialog and says so when an endpoint was registered', async () => {
+  // done; the page refreshes and closes the dialog. The form already said
+  // "Successfully registered '<name>'" when the endpoint was registered, so
+  // the page adds no second message.
+  it('closes the Register dialog when an endpoint was registered', async () => {
     mockSnackBarService.show.mockClear();
     mockEndpointModalService.closeModal.mockClear();
     component.openRegisterModal();
@@ -184,7 +186,7 @@ describe('EndpointsPageComponent', () => {
 
     expect(fixture.debugElement.query(By.directive(EndpointRegisterModalComponent))).toBeNull();
     expect(mockEndpointModalService.closeModal).toHaveBeenCalledTimes(1);
-    expect(mockSnackBarService.show).toHaveBeenCalledWith('Endpoint registered successfully!', 'OK', 5000);
+    expect(mockSnackBarService.show).not.toHaveBeenCalledWith('Endpoint registered successfully!', 'OK', 5000);
   });
 
   // The open dialog locks the page scroll (body.modal-open); leaving the page

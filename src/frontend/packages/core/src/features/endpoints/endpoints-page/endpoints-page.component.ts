@@ -293,8 +293,8 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
       console.error('Error checking endpoints after registration:', error);
     }
 
-    // Show success message
-    this.snackBarService.show('Endpoint registered successfully!', 'OK', 5000);
+    // No message here: the registration form said "Successfully registered
+    // '<name>'" when the endpoint was registered.
 
     // Close the modal
     this.closeRegisterModal();
