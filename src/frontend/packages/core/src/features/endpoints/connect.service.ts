@@ -12,7 +12,7 @@ export interface ConnectAuthParams {
   password?: string;
   token?: string;
 }
-import { combineLatest, defer, from, Observable, of, ReplaySubject, Subject, Subscription, timer } from 'rxjs';
+import { combineLatest, defer, from, merge, Observable, of, ReplaySubject, Subject, Subscription, timer } from 'rxjs';
 import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../core/endpoints.service';
@@ -32,11 +32,19 @@ export interface ConnectEndpointConfig {
   username?: string;
 }
 
+// TLS options for the endpoint, set in the connect form by a user who may
+// edit the endpoint. Saved to the endpoint before the connect runs.
+export interface ConnectEndpointTls {
+  skipSSL: boolean;
+  caCert: string;
+}
+
 export interface ConnectEndpointData {
   authType: string;
   authVal: ConnectAuthParams;
   systemShared: boolean;
   bodyContent: string;
+  tls?: ConnectEndpointTls;
 }
 
 // Why is this here instead of somewhere more common? Answer - Because it'd create circulate dependencies due to reliance on entityCatalog
@@ -58,6 +66,8 @@ export class ConnectEndpointService {
 
   public connectingError$!: Observable<string | null>;
   private hasConnected = new Subject<boolean>();
+  // Why saving the TLS options failed; null once a new attempt starts.
+  private saveError = new Subject<string | null>();
 
   // This Observable is used to observe when conenction has completed
   public hasConnected$: Observable<boolean> = this.hasConnected.asObservable();
@@ -174,9 +184,12 @@ export class ConnectEndpointService {
         return of(newBusy);
       })
     );
-    this.connectingError$ = this.update$.pipe(
-      filter(() => this.hasAttemptedConnect),
-      map(update => update.error ? update.message || 'Could not connect to the endpoint' : null)
+    this.connectingError$ = merge(
+      this.saveError,
+      this.update$.pipe(
+        filter(() => this.hasAttemptedConnect),
+        map(update => update.error ? update.message || 'Could not connect to the endpoint' : null)
+      ),
     );
 
     this.setupCombinedObservables();
@@ -214,6 +227,42 @@ export class ConnectEndpointService {
   }
 
   public submit(): Observable<{ success: boolean, errorMessage: string }> {
+    return defer(() => from(this.saveTls())).pipe(
+      switchMap(saveFailure => {
+        if (saveFailure !== null) {
+          return of({ success: false, errorMessage: saveFailure });
+        }
+        return this.connect();
+      }),
+    );
+  }
+
+  // Save TLS options that differ from the endpoint's, so the connect uses
+  // them. Resolves to why saving failed, or null.
+  private async saveTls(): Promise<string | null> {
+    this.saveError.next(null);
+    const tls = this.pData?.tls;
+    const endpoint = this.endpointsData.endpoints().get(this.config.guid);
+    if (!tls || !endpoint || (tls.skipSSL === !!endpoint.skip_ssl_validation && tls.caCert === (endpoint.ca_cert ?? ''))) {
+      return null;
+    }
+    const state = await this.endpointsData.update(this.config.guid, {
+      endpointType: this.config.type,
+      name: endpoint.name,
+      skipSSL: tls.skipSSL,
+      setClientInfo: false,
+      allowSSO: endpoint.sso_allowed,
+      caCert: tls.caCert,
+    });
+    if (!state.error) {
+      return null;
+    }
+    const message = state.message || 'Could not save the TLS options';
+    this.saveError.next(message);
+    return message;
+  }
+
+  private connect(): Observable<{ success: boolean, errorMessage: string }> {
     this.hasAttemptedConnect = true;
     const { authType, authVal, systemShared } = this.pData;
     // bodyContent is intentionally unused — see body: null comment below.

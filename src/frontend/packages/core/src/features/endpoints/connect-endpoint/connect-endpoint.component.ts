@@ -1,15 +1,16 @@
 
-import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../shared/components/custom-select/custom-select.component';
-import { entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
+import { EndpointsDataService, entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
 import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
-import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService } from '../connect.service';
+import { ConnectEndpointConfig, ConnectEndpointData, ConnectEndpointService, ConnectEndpointTls } from '../connect.service';
+import { EndpointPermissionsService } from '../endpoint-permissions.service';
 import { getRememberedUsername } from '../remembered-username';
 
 /**
@@ -20,6 +21,12 @@ interface EndpointForm {
   authType: FormControl<string>;
   systemShared: FormControl<boolean>;
   [key: string]: AbstractControl<any>;
+}
+
+interface TlsForm {
+  skipSSL: FormControl<boolean>;
+  useCACert: FormControl<boolean>;
+  caCert: FormControl<string>;
 }
 
 @Component({
@@ -37,6 +44,16 @@ interface EndpointForm {
 })
 export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
+  private endpointsData = inject(EndpointsDataService);
+  private permissions = inject(EndpointPermissionsService);
+
+  // The endpoint's TLS options, offered to a user who may edit the endpoint
+  // (they are saved to it before the connect). A CA certificate replaces
+  // skipping validation, as in Register and Edit.
+  readonly tlsEditable = signal(false);
+  readonly useCACert = signal(false);
+  private tlsForm?: FormGroup<TlsForm>;
+  private lastSkipSSL = false;
 
   private pDisabled = false;
   private pConnectService!: ConnectEndpointService;
@@ -54,10 +71,10 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   }
 
   @Input() set disabled(disabled: boolean) {
-    if (this.endpointForm) {
-      if (disabled) { this.endpointForm.disable(); } else { this.endpointForm.enable(); }
-    }
     this.pDisabled = disabled;
+    if (this.endpointForm) {
+      this.setFormEnabled();
+    }
   }
 
   /**
@@ -126,6 +143,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     // when the same user is reconnecting.
     this.prefillUsername(config);
     this.authChanged();
+
+    this.addTlsOptions(config);
 
     // Template container reference is not available at construction
     this.createComponent(this.autoSelected);
@@ -196,7 +215,58 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     // must not overwrite the form component's `config = {}` default with
     // undefined — templates read fields like config.helpText unguarded.
     this.authFormComponentRef.instance.config = authType.config ?? {};
-    if (this.pDisabled) { this.endpointForm.disable(); } else { this.endpointForm.enable(); }
+    this.setFormEnabled();
+  }
+
+  private setFormEnabled() {
+    if (this.pDisabled) {
+      this.endpointForm.disable();
+      return;
+    }
+    this.endpointForm.enable();
+    // Enabling the form also enables Skip SSL, which a CA certificate replaces.
+    if (this.useCACert()) {
+      this.tlsForm?.controls.skipSSL.disable({ emitEvent: false });
+    }
+  }
+
+  private addTlsOptions(config: ConnectEndpointConfig) {
+    const endpoint = this.endpointsData.endpoints().get(config.guid);
+    if (!endpoint || !this.permissions.canManage(endpoint)) {
+      return;
+    }
+    const caCert = endpoint.ca_cert ?? '';
+    this.lastSkipSSL = !!endpoint.skip_ssl_validation;
+    this.tlsForm = this.fb.nonNullable.group({
+      skipSSL: caCert ? false : this.lastSkipSSL,
+      useCACert: !!caCert,
+      caCert,
+    });
+    this.endpointForm.addControl('tls', this.tlsForm);
+    this.useCACert.set(!!caCert);
+    this.tlsEditable.set(true);
+    this.subs.push(this.tlsForm.controls.useCACert.valueChanges.subscribe(useCACert => this.toggleCACert(useCACert)));
+  }
+
+  private toggleCACert(useCACert: boolean) {
+    const skipSSL = this.tlsForm!.controls.skipSSL;
+    this.useCACert.set(useCACert);
+    if (useCACert) {
+      this.lastSkipSSL = skipSSL.value;
+      skipSSL.setValue(false);
+      skipSSL.disable();
+    } else {
+      skipSSL.enable();
+      skipSSL.setValue(this.lastSkipSSL);
+    }
+  }
+
+  private getTls(): ConnectEndpointTls | undefined {
+    if (!this.tlsForm) {
+      return undefined;
+    }
+    const { skipSSL, useCACert, caCert } = this.tlsForm.getRawValue();
+    return useCACert ? { skipSSL: false, caCert } : { skipSSL, caCert: '' };
   }
 
   private sameAuthTypeFormFields(a: string[], b: string[]): boolean {
@@ -232,6 +302,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       authVal,
       systemShared: systemShared ?? false,
       bodyContent: this.bodyContent,
+      tls: this.getTls(),
     };
   }
 
