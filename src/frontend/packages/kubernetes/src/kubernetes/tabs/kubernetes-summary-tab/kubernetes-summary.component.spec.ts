@@ -97,4 +97,12 @@ describe('KubernetesSummaryTabComponent', () => {
     expect(namespacesTile.value).toBe('1');
     expect(namespacesTile.labelSingular).toBe('Namespace');
   });
+
+  it('links each tile to an existing list route', () => {
+    expect(tiles().map(t => t.link)).toEqual([
+      '/kubernetes/anything/nodes',
+      '/kubernetes/anything/namespaces',
+      '/kubernetes/anything/resource/pod',
+    ]);
+  });
 });
