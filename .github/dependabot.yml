@@ -33,6 +33,11 @@ updates:
         patterns:
           - "vitest"
           - "@vitest/*"
+      # The Analog plugin and its vitest integration release in lockstep;
+      # #6059 moved the plugin alone and left vitest-angular a minor behind.
+      analog:
+        patterns:
+          - "@analogjs/*"
     ignore:
       # TypeScript majors are pinned by Angular's supported range; they move
       # with the framework upgrade, not on their own.
