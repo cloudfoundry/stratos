@@ -18,6 +18,10 @@ import {
   StepComponent,
   SteppersComponent,
 } from '@stratosui/core';
+import {
+  ENDPOINT_REGISTER_HANDLE,
+  leaveEndpointRegistration,
+} from '../../../../core/src/features/endpoints/endpoint-register-modal/endpoint-register-handle';
 import { KubeConfigHelper } from './kube-config.helper';
 import { KubeConfigImportComponent } from './kube-config-import/kube-config-import.component';
 import { KubeConfigSelectionComponent } from './kube-config-selection/kube-config-selection.component';
@@ -56,9 +60,12 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
-  // Cancel target shared between the stepper's cancel attr and the
-  // submit() Router.navigate call so the two stay in sync.
+  // Cancel target of the stepper on the /endpoints/new page.
   readonly cancelUrl = '/endpoints';
+  // Present when hosted by the Register Endpoint dialog, which this form
+  // closes instead of navigating to /endpoints (the page under the dialog).
+  private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
+  readonly cancelAction = this.registerHandle ? () => this.registerHandle!.close(false) : undefined;
 
   private selectionValid = signal<boolean>(false);
   private importerBusy = signal<boolean>(false);
@@ -138,10 +145,10 @@ export class KubeConfigRegistrationComponent implements OnDestroy {
         throw new Error(result.message || 'Failed to import kube config');
       }
       if (result.redirect) {
-        // Legacy `redirect: true` (no payload) meant "navigate to the
-        // stepper's cancel URL". cancelUrl is the single source of truth
-        // shared with the <app-steppers [cancel]> binding.
-        await this.router.navigateByUrl(this.cancelUrl);
+        // `redirect: true` (no payload): Close after the import. Each row
+        // already shows what its import did, so this reports no
+        // registration (no success message over failed rows).
+        await leaveEndpointRegistration(this.registerHandle, this.router, false);
         return;
       }
       if (result.ignoreSuccess) {

@@ -41,7 +41,7 @@
 </div>
 
 <!-- Register Endpoint Modal -->
-@if (showRegisterModal) {
+@if (showRegisterModal()) {
   <app-endpoint-register-modal
     (closeModalEvent)="closeRegisterModal()"
     (endpointRegistered)="onEndpointRegistered()"

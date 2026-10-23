@@ -5,7 +5,7 @@
 }
 
 @if (!component) {
-  <app-steppers cancel="/endpoints">
+  <app-steppers cancel="/endpoints" [cancelAction]="cancelAction">
     <app-step [title]="'Register'" [signalHandle]="step1StepHandle">
       <app-create-endpoint-cf-step-1 #step1 [finalStep]="!showConnectStep"></app-create-endpoint-cf-step-1>
     </app-step>

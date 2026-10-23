@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, Type, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { of } from 'rxjs';
@@ -16,6 +16,7 @@ import {
   isCreateEndpointTile,
 } from '../create-endpoint/create-endpoint-base-step/base-endpoint-tile-manager';
 import { TileSelectorComponent } from '../../../shared/components/tile-selector/tile-selector.component';
+import { ENDPOINT_REGISTER_HANDLE, EndpointRegisterHandle } from './endpoint-register-handle';
 
 @Component({
   selector: 'app-endpoint-register-modal',
@@ -35,13 +36,15 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   protected override injector = inject(Injector);
 
   @Output() closeModalEvent = new EventEmitter<void>();
-  @Output() endpointRegistered = new EventEmitter<any>();
+  // The hosted form registered an endpoint and is done; the page refreshes,
+  // says so and closes the dialog.
+  @Output() endpointRegistered = new EventEmitter<void>();
 
   @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false })
   // strict: ViewChild populated by Angular before loadEndpointRegistrationComponent runs.
   endpointFormContainer!: ViewContainerRef;
 
-  selectedEndpointInfo: ITileConfig<ICreateEndpointTilesData> | null = null;
+  readonly selectedEndpointInfo = signal<ITileConfig<ICreateEndpointTilesData> | null>(null);
   componentRef: ComponentRef<any> | null = null;
 
   private cdr = inject(ChangeDetectorRef);
@@ -68,10 +71,7 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     }
   }
 
-  // Close the modal on Escape. Using HostListener (not raw addEventListener)
-  // keeps the event inside Angular's handler pipeline so change detection
-  // fires under zoneless mode — needed so the parent's *appUserPermission
-  // directive re-evaluates after showRegisterModal flips to false.
+  // Close the modal on Escape.
   @HostListener('document:keydown.escape')
   public onEscape() {
     this.closeModal();
@@ -81,13 +81,10 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   // narrow before storing/loading the typed create-endpoint tile.
   onTileSelected(tile: ITileConfig | null) {
     if (isCreateEndpointTile(tile)) {
-      this.selectedEndpointInfo = tile;
-      // Force the @if(selectedEndpointInfo) branch to render synchronously
-      // so the #endpointFormContainer ViewChild is available — then load
-      // the registration component in the same task. The previous code
-      // used setTimeout(..., 100) which left an empty form container
-      // visible for ~100ms, producing a visible blink between tile
-      // selection and the loaded form.
+      this.selectedEndpointInfo.set(tile);
+      // Render the @if(selectedEndpointInfo()) branch synchronously so the
+      // #endpointFormContainer ViewChild is available, then load the
+      // registration component in the same task (no empty-form blink).
       this.cdr.detectChanges();
       this.loadEndpointRegistrationComponent(tile);
     }
@@ -110,178 +107,69 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
 
     const epType = tile.data.parentType || tile.data.type;
     const epSubType = tile.data.parentType ? tile.data.type : '';
-    
-    console.log('Loading endpoint registration for:', { epType, epSubType });
+    const registrationComponent = entityCatalog.getEndpoint(epType, epSubType)?.definition.registrationComponent;
 
-    // Get the endpoint definition
-    const endpoint = entityCatalog.getEndpoint(epType, epSubType);
-    console.log('Found endpoint definition:', endpoint);
-
-    if (endpoint && endpoint.definition.registrationComponent) {
+    if (registrationComponent) {
       try {
-        // Create mock route parameters like the original create-endpoint component
-        const mockParams: Params = {
-          type: epType,
-          subtype: epSubType
-        };
-
-        const mockQueryParams = {}; // Add any needed query params here
-
-        const mockActivatedRoute = {
-          snapshot: {
-            params: mockParams,
-            paramMap: {
-              get: (key: string) => mockParams[key]
-            },
-            queryParams: mockQueryParams
-          } as ActivatedRouteSnapshot,
-          params: of(mockParams),
-          paramMap: of({
-            get: (key: string) => mockParams[key]
-          }),
-          queryParams: of(mockQueryParams)
-        } as unknown as ActivatedRoute;
-
-        // Create a custom injector that provides the mock ActivatedRoute
-        const componentInjector = Injector.create({
-          providers: [
-            { provide: ActivatedRoute, useValue: mockActivatedRoute }
-          ],
-          parent: this.injector
-        });
-
-        // Create the component with the custom injector
-        this.componentRef = this.endpointFormContainer.createComponent(
-          endpoint.definition.registrationComponent, { index: 0, injector: componentInjector }
-        );
-        // Suppress any nested <app-page-header> — we're inside the modal which
-        // has its own header. Two nested page-headers clobber the TabNavService
-        // pageHeader signal on modal close. Safe no-op if the component doesn't
-        // declare a hideHeader input.
-        (this.componentRef.instance as any).hideHeader = true;
-
-        console.log('Registration component created successfully:', this.componentRef);
-
-        // Hook into the component's registration success
-        this.hookIntoComponentSuccess();
-
+        this.createRegistrationComponent(registrationComponent, epType, epSubType);
+        return;
       } catch (error) {
         console.error('Error creating endpoint registration component:', error);
-        
-        // Fallback: try to load the create-endpoint component
-        this.loadCreateEndpointComponent(epType, epSubType);
       }
-    } else {
-      // Fallback: load the create-endpoint component for endpoints without custom registration
-      console.log('No custom registration component, loading create-endpoint component');
-      this.loadCreateEndpointComponent(epType, epSubType);
     }
+    // Types without their own registration component (or whose component
+    // failed) use the generic create-endpoint form.
+    import('../create-endpoint/create-endpoint.component')
+      .then(module => this.createRegistrationComponent(module.CreateEndpointComponent, epType, epSubType))
+      .catch(error => console.error('Error loading create-endpoint component:', error));
   }
 
-  private loadCreateEndpointComponent(epType: string, epSubType: string) {
-    try {
-      // Import and load the create-endpoint component
-      import('../create-endpoint/create-endpoint.component').then(module => {
-        // Create mock route parameters
-        const mockParams: Params = {
-          type: epType,
-          subtype: epSubType
-        };
+  // The registration components read their endpoint type from the route, as
+  // on the /endpoints/new pages; inside the dialog they get a stand-in route,
+  // and the handle they close the dialog with.
+  private createRegistrationComponent(component: Type<any>, epType: string, epSubType: string) {
+    const params: Params = {
+      type: epType,
+      subtype: epSubType
+    };
+    const queryParams = {};
+    const route = {
+      snapshot: {
+        params,
+        paramMap: {
+          get: (key: string) => params[key]
+        },
+        queryParams
+      } as ActivatedRouteSnapshot,
+      params: of(params),
+      paramMap: of({
+        get: (key: string) => params[key]
+      }),
+      queryParams: of(queryParams)
+    } as unknown as ActivatedRoute;
+    const handle: EndpointRegisterHandle = {
+      close: registered => registered ? this.endpointRegistered.emit() : this.closeModal(),
+    };
 
-        const mockQueryParams = {}; // Add any needed query params here
+    const injector = Injector.create({
+      providers: [
+        { provide: ActivatedRoute, useValue: route },
+        { provide: ENDPOINT_REGISTER_HANDLE, useValue: handle },
+      ],
+      parent: this.injector
+    });
 
-        const mockActivatedRoute = {
-          snapshot: {
-            params: mockParams,
-            paramMap: {
-              get: (key: string) => mockParams[key]
-            },
-            queryParams: mockQueryParams
-          } as ActivatedRouteSnapshot,
-          params: of(mockParams),
-          paramMap: of({
-            get: (key: string) => mockParams[key]
-          }),
-          queryParams: of(mockQueryParams)
-        } as unknown as ActivatedRoute;
-
-        const componentInjector = Injector.create({
-          providers: [
-            { provide: ActivatedRoute, useValue: mockActivatedRoute }
-          ],
-          parent: this.injector
-        });
-
-        this.componentRef = this.endpointFormContainer.createComponent(
-          module.CreateEndpointComponent, { index: 0, injector: componentInjector }
-        );
-        // Hide the inner <app-page-header> — we're inside the modal which
-        // has its own header. Without this the nested header clobbers the
-        // outer endpoints-page header via TabNavService.
-        (this.componentRef.instance as any).hideHeader = true;
-        console.log('Create-endpoint component loaded:', this.componentRef);
-        
-        this.hookIntoComponentSuccess();
-      });
-    } catch (error) {
-      console.error('Error loading create-endpoint component:', error);
-    }
-  }
-
-  private hookIntoComponentSuccess() {
-    // Try to hook into various success patterns
-    if (this.componentRef?.instance) {
-      const instance = this.componentRef.instance;
-      
-      // Check for onNext method (stepper pattern)
-      if (instance.onNext) {
-        const originalOnNext = instance.onNext.bind(instance);
-        instance.onNext = () => {
-          const result = originalOnNext();
-          this.handleRegistrationResult(result);
-          return result;
-        };
-      }
-
-      // Check for success events
-      if (instance.success && typeof instance.success.subscribe === 'function') {
-        instance.success.subscribe(() => {
-          this.onEndpointRegistered();
-        });
-      }
-      
-      // Check for registration complete events
-      if (instance.registrationComplete && typeof instance.registrationComplete.subscribe === 'function') {
-        instance.registrationComplete.subscribe(() => {
-          this.onEndpointRegistered();
-        });
-      }
-    }
-  }
-
-  private handleRegistrationResult(result: any) {
-    if (result && typeof result.subscribe === 'function') {
-      // Handle observable result
-      result.subscribe((response: any) => {
-        console.log('Registration response:', response);
-        if (response && response.success) {
-          this.onEndpointRegistered();
-        }
-      });
-    } else if (result && typeof result.then === 'function') {
-      // Handle promise result
-      result.then((success: boolean) => {
-        console.log('Registration result:', success);
-        if (success) {
-          this.onEndpointRegistered();
-        }
-      });
-    }
+    this.componentRef = this.endpointFormContainer.createComponent(component, { index: 0, injector });
+    // Suppress any nested <app-page-header> — we're inside the modal which
+    // has its own header. Two nested page-headers clobber the TabNavService
+    // pageHeader signal on modal close. Safe no-op if the component doesn't
+    // declare a hideHeader input.
+    (this.componentRef.instance as any).hideHeader = true;
   }
 
   goBackToSelection() {
-    this.selectedEndpointInfo = null;
-    
+    this.selectedEndpointInfo.set(null);
+
     // Clear the form component
     if (this.endpointFormContainer) {
       this.endpointFormContainer.clear();
@@ -294,14 +182,5 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
 
   closeModal() {
     this.closeModalEvent.emit();
-  }
-
-  private onEndpointRegistered() {
-    console.log('Modal: onEndpointRegistered called - emitting event');
-    this.endpointRegistered.emit();
-    // Small delay to show success before closing
-    setTimeout(() => {
-      this.closeModal();
-    }, 1000);
   }
 }
