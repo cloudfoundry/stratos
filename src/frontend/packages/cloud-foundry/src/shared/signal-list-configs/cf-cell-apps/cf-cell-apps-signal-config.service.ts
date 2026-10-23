@@ -37,18 +37,20 @@ interface PrometheusVectorResult {
 
 // CPU-percentage metric exposes one vector per running app instance,
 // labelled with application_id + instance_index. Used as the source-of-
-// truth for "which apps are on this cell right now". HEALTHY metrics
-// are cell-level; this one is per-instance and is what the legacy
-// CfCellAppsDataSource queried as well.
+// truth for "which apps are on this cell right now".
+//
+// It is queried on the CF-level route (/pp/v1/metrics/cf), as the list
+// did before the signal rewrite. That route answers only for a CF admin
+// (the backend looks for cloud_controller.admin in the token scopes).
+// The cells route (/pp/v1/metrics/cf/cells) does no permission check
+// and accepts only rep metrics, so it rejects this query.
 const METRIC_CPU = 'firehose_container_metric_cpu_percentage';
-const CELL_METRICS_BASE_URL = '/pp/v1/metrics/cf/cells';
+const CF_METRICS_BASE_URL = '/pp/v1/metrics/cf';
 
-// CF Cell Apps list config — single-CNSI, single-cell, read-only.
-// Drives the Apps tab on the cell-detail page. Replaces
-// CfCellAppsListConfigService + CfCellAppsDataSource (ngrx
-// FetchCFMetricsPaginatedAction + ListDataSource) with a direct
-// metrics fetch + per-app native lookup, mirroring W2's
-// CfCellHealthSignalConfigService.
+// CF Cell Apps list config: single-CNSI, single-cell, read-only.
+// Drives the App Instances tab on the cell-detail page. Fetches the
+// metric above, then looks up each app on /pp/v1/cf/apps/:cnsi/:guid
+// for its name, space and org.
 @Injectable({ providedIn: 'root' })
 export class CfCellAppsSignalConfigService {
   private readonly http = inject(HttpClient);
@@ -139,7 +141,7 @@ export class CfCellAppsSignalConfigService {
   private async fetchPlacements(): Promise<{ appGuid: string; instanceIndex: number }[] | null> {
     const req: MetricsRequest = {
       endpointGuid: this.cnsiGuid,
-      url: CELL_METRICS_BASE_URL,
+      url: CF_METRICS_BASE_URL,
       query: new MetricQueryConfig(`${METRIC_CPU}{bosh_job_id="${this.cellId}"}`),
       queryType: MetricQueryType.QUERY,
       windowValue: null,
