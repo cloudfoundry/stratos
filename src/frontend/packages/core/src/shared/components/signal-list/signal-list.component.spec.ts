@@ -2,6 +2,10 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { EndpointModel } from '@stratosui/store';
+import { seedEndpointsDataService } from '@stratosui/store/testing';
 import { SignalListComponent } from './signal-list.component';
 import type { SignalListConfig, SignalListDropdown, SignalListDropdownOption, SignalListMultiFilter, SignalListRowState } from './signal-list.component';
 import type { SignalListRangeValue } from './range-filter';
@@ -9,8 +13,10 @@ import { SignalListCellTemplateDirective } from './signal-list-cell-template.dir
 
 // SignalListComponent now applies [routerLink] to the card / table row when a
 // link column is present, so the RouterLink directive needs a router injector.
+// The error banner names endpoints from EndpointsDataService, which needs an
+// HttpClient (the testing backend: no request leaves the test).
 beforeEach(() => {
-  TestBed.configureTestingModule({ providers: [provideRouter([])] });
+  TestBed.configureTestingModule({ providers: [provideRouter([]), provideHttpClient(), provideHttpClientTesting()] });
 });
 
 @Component({
@@ -258,6 +264,19 @@ describe('SignalListComponent', () => {
     retry.click();
     await fixture.whenStable();
     expect(onRefresh).toHaveBeenCalledTimes(1);
+  });
+
+  it('names each failing endpoint in the error banner, by name when it is known', async () => {
+    seedEndpointsDataService([{ guid: 'cnsi-1', name: 'prod-cf' } as EndpointModel]);
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      errorsByCnsi: signal(new Map<string, unknown>([['cnsi-1', new Error('boom')], ['cnsi-gone', new Error('boom')]])).asReadonly(),
+    };
+    await fixture.whenStable();
+    const lines = [...fixture.nativeElement.querySelectorAll('[data-test="errors"] > div')]
+      .map((d: Element) => d.textContent!.trim());
+    expect(lines).toEqual(['prod-cf: failed to load', 'cnsi-gone: failed to load']);
   });
 
   it('shows the failed-load reason from errorDetail and follows its changes', async () => {
