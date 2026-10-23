@@ -1,8 +1,7 @@
 {
   "extends": "../../../tsconfig.spec.json",
   "compilerOptions": {
-    "outDir": "../../../../out-tsc",
-    "types": ["vitest/globals", "node"]
+    "outDir": "../../../../out-tsc"
   },
   "files": ["src/test-setup.ts"],
   "include": ["**/*.spec.ts", "**/*.d.ts", "../../vitest.workspace.setup.ts"]
