@@ -228,14 +228,14 @@ func (m *MetricsSpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIReco
 		response, err := h.Do(req)
 		if err != nil {
 			slog.Error("error fetching /api/v1/status/config", "url", statusEndpoint, "response", response, "error", err)
-			return nil, false, api.LogHTTPError(res, err)
+			return nil, false, api.LogHTTPError(response, err)
 		}
 
 		defer func() { _ = response.Body.Close() }()
 		if response.StatusCode != http.StatusOK {
 			slog.Error("unexpected status fetching /api/v1/status/config",
 				"url", statusEndpoint, "status", response.StatusCode)
-			return nil, false, api.LogHTTPError(res, err)
+			return nil, false, api.LogHTTPError(response, nil)
 		}
 
 		tr.Metadata, _ = m.createMetadata(cnsiRecord.APIEndpoint, h, auth)
