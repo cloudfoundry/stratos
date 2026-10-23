@@ -740,3 +740,64 @@ describe('SteppersComponent — Cancel', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 });
+
+// A step can ask before Previous leaves it (e.g. when leaving undoes work).
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [signalHandle]="first"></app-step>
+      <app-step title="Two" [signalHandle]="second"></app-step>
+    </app-steppers>
+  `,
+})
+class ConfirmPreviousHostComponent {
+  answer = false;
+  left: (boolean | undefined)[] = [];
+  first: SignalStepHandle = { valid: signal(true) };
+  second: SignalStepHandle = {
+    valid: signal(true),
+    confirmPrevious: () => Promise.resolve(this.answer),
+    onLeave: (isNext) => { this.left.push(isNext); },
+  };
+}
+
+describe('SteppersComponent — Previous with a confirmation', () => {
+  let hostFixture: ComponentFixture<ConfirmPreviousHostComponent>;
+  let host: ConfirmPreviousHostComponent;
+  let steppers: SteppersComponent;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [ConfirmPreviousHostComponent, RouterTestingModule],
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(ConfirmPreviousHostComponent);
+    host = hostFixture.componentInstance;
+    await hostFixture.whenStable();
+    steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    steppers.setActive(1);
+    await hostFixture.whenStable();
+  });
+
+  const clickPrevious = async () => {
+    (hostFixture.nativeElement.querySelector('#stepper_previous') as HTMLButtonElement).click();
+    await hostFixture.whenStable();
+  };
+
+  it('stays on the step when the user declines', async () => {
+    host.answer = false;
+    await clickPrevious();
+    expect(steppers.currentIndex()).toBe(1);
+    expect(host.left).toEqual([]);
+  });
+
+  it('goes back when the user agrees', async () => {
+    host.answer = true;
+    await clickPrevious();
+    expect(steppers.currentIndex()).toBe(0);
+    expect(host.left).toEqual([false]);
+  });
+});
