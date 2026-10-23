@@ -194,7 +194,7 @@
     "@types/webpack": "^5.28.5",
     "@vitest/coverage-v8": "^5.0.3",
     "@vitest/ui": "5.0.3",
-    "acorn": "8.18.0",
+    "acorn": "8.19.0",
     "adm-zip": "0.6.1",
     "angular-eslint": "22.6.0",
     "baseline-browser-mapping": "^2.11.27",
