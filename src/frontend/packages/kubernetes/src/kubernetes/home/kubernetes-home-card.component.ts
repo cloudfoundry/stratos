@@ -30,7 +30,8 @@ import { CardNumberMetricComponent } from '../../../../core/src/shared/component
 })
 export class KubernetesHomeCardComponent {
 
-  readonly endpoint = input<EndpointModel>();
+  // Always set by the home page host (HomePageEndpointCard contract).
+  readonly endpoint = input.required<EndpointModel>();
 
   // strict: backing field for the @Input() layout setter; assigned before the getter is read in the template
   pLayout!: HomePageCardLayout;

@@ -292,7 +292,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   public updateLayout() {
     this._layout.set(this.pLayout);
     if (this.ref && this.ref.instance) {
-      this.ref.instance.layout = this.pLayout;
+      this.ref.setInput('layout', this.pLayout);
     }
   }
 
@@ -307,8 +307,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
     }
 
     this.ref = this.customCard.createComponent(component);
-    this.ref.instance.endpoint = this.endpoint;
-    this.ref.instance.layout = this.pLayout;
+    this.ref.setInput('endpoint', this.endpoint);
+    this.ref.setInput('layout', this.pLayout);
     this.loadCardIfReady();
   }
 
