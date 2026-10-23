@@ -389,11 +389,13 @@ func (p *portalProxy) SendProxiedResponse(c *echo.Context, responses map[string]
 	}
 
 	if shouldPassthrough {
-		cnsiGUID := cnsiList[0]
-		res, ok := responses[cnsiGUID]
-		if !ok {
-			return echo.NewHTTPError(http.StatusRequestTimeout, "Request timed out")
+		// A passthrough goes to one endpoint (ProxyRequest refuses more).
+		// No response means ProxyRequest stopped waiting for it at its
+		// overall timeout: the endpoint did not answer in time.
+		if len(cnsiList) == 0 {
+			return echo.NewHTTPError(http.StatusGatewayTimeout, "Request timed out")
 		}
+		res := responses[cnsiList[0]]
 
 		// in passthrough mode, set the status code to that of the single response
 		c.Response().WriteHeader(res.StatusCode)
