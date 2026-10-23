@@ -110,6 +110,21 @@ describe('KubeConfigImportComponent', () => {
       return actions;
     }
 
+    // A kubeconfig cluster may carry its CA as certificate-authority-data
+    // (base64 PEM). Register it like the other register paths do: the CA
+    // replaces skipping validation.
+    it('registers a cluster with the CA certificate from its kubeconfig', async () => {
+      vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect').mockReturnValue(AUTH_DATA as any);
+      const pem = '-----BEGIN CERTIFICATE-----\nMIIB\n-----END CERTIFICATE-----\n';
+      const withCA = makeCluster('a');
+      withCA.cluster['certificate-authority-data'] = btoa(pem);
+
+      await runImport([withCA, makeCluster('b')]);
+
+      expect(stubSignalConfig.register).toHaveBeenNthCalledWith(1, expect.objectContaining({ caCert: pem, skipSslValidation: false }));
+      expect(stubSignalConfig.register).toHaveBeenNthCalledWith(2, expect.objectContaining({ caCert: '', skipSslValidation: true }));
+    });
+
     it('connects each cluster and moves on to the next', async () => {
       vi.spyOn(KubeConfigAuthHelper.prototype, 'getAuthDataForConnect').mockReturnValue(AUTH_DATA as any);
 
