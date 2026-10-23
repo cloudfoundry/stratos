@@ -645,7 +645,7 @@ $(call register, clean, e2e)
 # ── Check (quality gates) ────────────────────────────────────
 # make check          — lint + gate (default)
 # make check lint     — ESLint + go vet + golangci-lint
-# make check gate     — lint + library type checks + unit tests + production build (= bun run gate-check)
+# make check gate     — lint + library and spec type checks + unit tests + production build (= bun run gate-check)
 # make check tests    — unit tests only
 # make check coverage — unit tests with coverage, frontend + backend
 # make check frontend coverage — Vitest coverage only (coverage/frontend/)
@@ -704,7 +704,7 @@ $(call register, check, lint)
 
 
 define check.gate
-	@echo "Running gate checks (lint + library type checks + unit tests + production build)..."
+	@echo "Running gate checks (lint + library and spec type checks + unit tests + production build)..."
 	$(ensure_golangci_lint)
 	bun run gate-check
 	$(go_check_all)
