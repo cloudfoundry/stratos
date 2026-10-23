@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"net"
 	"net/http"
+	"sync"
 	"syscall"
 	"time"
 )
@@ -22,7 +23,17 @@ var (
 	defaultHTTPClientTimeout           int64
 	defaultHTTPClientMutatingTimeout   int64
 	defaultHTTPClientConnectionTimeout int64
+
+	// Clients for endpoints with a CA certificate, by caClientKey, so their
+	// requests share a transport (and its connections) as the standard
+	// clients do.
+	caClients sync.Map
 )
+
+type caClientKey struct {
+	caCert   string
+	mutating bool
+}
 
 func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeout int64) {
 	slog.Debug("initializeHTTPClients")
@@ -42,6 +53,8 @@ func initializeHTTPClients(timeout int64, timeoutMutating int64, connectionTimeo
 	defaultHTTPClientTimeout = timeout
 	defaultHTTPClientMutatingTimeout = timeoutMutating
 	defaultHTTPClientConnectionTimeout = connectionTimeout
+	// Clients built with the previous settings are dropped.
+	caClients.Clear()
 
 	tr := createTransport(&tls.Config{InsecureSkipVerify: false})
 	httpClient.Transport = tr
@@ -133,8 +146,6 @@ func (p *portalProxy) GetHttpClientForRequest(req *http.Request, skipSSLValidati
 func (p *portalProxy) getHttpClient(skipSSLValidation bool, caCert string, mutating bool) http.Client {
 	// We need to create a client with the specified CA Cert
 	if len(caCert) > 0 {
-		// TODO: Remove
-		slog.Warn("Using HTTP client with CA Cert")
 		return *getHttpClientWIthCA(caCert, mutating)
 	}
 	var client http.Client
@@ -155,6 +166,12 @@ func (p *portalProxy) getHttpClient(skipSSLValidation bool, caCert string, mutat
 }
 
 func getHttpClientWIthCA(caCert string, mutating bool) *http.Client {
+	key := caClientKey{caCert: caCert, mutating: mutating}
+	if client, ok := caClients.Load(key); ok {
+		return client.(*http.Client)
+	}
+	slog.Debug("creating an HTTP client for an endpoint CA certificate", "mutating", mutating)
+
 	rootCAs, err := x509.SystemCertPool()
 
 	if rootCAs == nil || err != nil {
@@ -178,5 +195,6 @@ func getHttpClientWIthCA(caCert string, mutating bool) *http.Client {
 	} else {
 		client.Timeout = time.Duration(defaultHTTPClientTimeout) * time.Second
 	}
-	return client
+	stored, _ := caClients.LoadOrStore(key, client)
+	return stored.(*http.Client)
 }
