@@ -4,7 +4,7 @@ import { toSignal, toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { SafeResourceUrl } from '@angular/platform-browser';
 import { Router, RouterModule } from '@angular/router';
-import { interval, Observable, Subscription } from 'rxjs';
+import { combineLatest, interval, Observable, Subscription } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -27,6 +27,7 @@ import { entityCatalog } from '@stratosui/store';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
 import { KubeNodeDataService } from '../../../services/domain-data/kube-node-data.service';
 import { KubeNamespaceDataService } from '../../../services/domain-data/kube-namespace-data.service';
+import { KubeClusterLoadFailures } from '../../../services/domain-data/kube-cluster-load-failures';
 import { KubernetesNode, KubernetesPod } from '../../store/kube.types';
 import { CaaspNodesData, KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 
@@ -87,6 +88,7 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   private podData = inject(KubePodDataService);
   private nodeData = inject(KubeNodeDataService);
   private namespaceData = inject(KubeNamespaceDataService);
+  private failures = inject(KubeClusterLoadFailures);
   private router = inject(Router);
   private injector = inject(Injector);
 
@@ -147,6 +149,14 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
   // strict: assigned in ngOnInit before the template subscribes
   public isLoading$!: Observable<boolean>;
 
+  // Why a cluster list failed to load (shown above the charts), and
+  // whether the node list did (its charts are then hidden: they would
+  // chart an empty list). A failed count shows "-", not 0.
+  private readonly guid = computed(() => this.kubeEndpointService.baseKube.guid);
+  readonly failureReason = computed(() => this.failures.any(this.guid()));
+  readonly nodesFailed = computed(() => !!this.failures.nodes(this.guid()));
+  readonly podsFailed = computed(() => !!this.failures.pods(this.guid()));
+
   // Go the Kubernetes Dashboard configuration page
   public configureDashboard() {
     const guid = this.kubeEndpointService.baseKube.guid;
@@ -169,9 +179,14 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     this.refreshAll(guid);
     this.poll(guid);
 
-    this.podCount$ = this.kubeEndpointService.getCountObservable(pods$);
-    this.nodeCount$ = this.kubeEndpointService.getCountObservable(nodes$);
-    this.namespaceCount$ = this.kubeEndpointService.getCountObservable(namespaces$);
+    const failedOrCount = (count$: Observable<number | null>, failed: () => string | undefined) =>
+      combineLatest([count$, toObservable(computed(failed), { injector: this.injector })]).pipe(
+        map(([count, reason]) => reason ? null : count),
+      );
+    this.podCount$ = failedOrCount(this.kubeEndpointService.getCountObservable(pods$), () => this.failures.pods(guid));
+    this.nodeCount$ = failedOrCount(this.kubeEndpointService.getCountObservable(nodes$), () => this.failures.nodes(guid));
+    this.namespaceCount$ = failedOrCount(
+      this.kubeEndpointService.getCountObservable(namespaces$), () => this.failures.namespaces(guid));
 
     this.podCapacity$ = this.kubeEndpointService.getPodCapacity(nodes$, pods$);
     this.diskPressure$ = this.kubeEndpointService.getNodeStatusCount(nodes$, 'DiskPressure', {
@@ -223,13 +238,14 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
       const nodesReadySignal = toSignal(this.nodesReady$, { initialValue: null as any });
       const networkUnavailableSignal = toSignal(this.networkUnavailable$, { initialValue: null as any });
 
-      // Compute loading state - false when all are loaded
+      // Compute loading state - false when all are loaded. A count whose
+      // load failed stays null but is done: the page shows the failure.
       const isLoadingComputed = computed(() => {
         // Check if all required data is loaded
         return !(
           endpointDetailsSignal() !== null &&
-          podCountSignal() !== null &&
-          nodeCountSignal() !== null &&
+          (podCountSignal() !== null || this.podsFailed()) &&
+          (nodeCountSignal() !== null || this.nodesFailed()) &&
           podCapacitySignal() !== null &&
           diskPressureSignal() !== null &&
           memoryPressureSignal() !== null &&
@@ -247,8 +263,8 @@ export class KubernetesSummaryTabComponent implements OnInit, OnDestroy {
     this.polls.push(interval(10000).subscribe(() => this.refreshAll(guid)));
   }
 
-  // Refresh the three cluster caches. Each data service dedups in-flight
-  // fetches, so overlapping polls don't stack duplicate requests.
+  // Refresh the three cluster caches. Each refresh sends its own request
+  // (none is deduplicated against one already in flight).
   private refreshAll(guid: string) {
     void this.podData.refresh({ kubeGuid: guid });
     void this.nodeData.refresh(guid);

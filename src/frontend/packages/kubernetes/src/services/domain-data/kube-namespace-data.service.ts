@@ -51,11 +51,14 @@ export class KubeNamespaceDataService {
   // refresh('namespaces') clear them), re-resolved after an eviction
   // like namespacesForEndpoint.
   listErrors(kubeGuid: string): Signal<StratosError[]> {
-    return computed(() => {
-      this.eviction.epoch(kubeGuid);
-      return untracked(() => this.registry.getService(kubeGuid)).errors()
-        .filter(e => e.affected?.includes('namespaces'));
-    });
+    return computed(() => this.namespaceListErrors(kubeGuid));
+  }
+
+  // listErrors as a plain reactive read (call it inside a computed).
+  namespaceListErrors(kubeGuid: string): StratosError[] {
+    this.eviction.epoch(kubeGuid);
+    return untracked(() => this.registry.getService(kubeGuid)).errors()
+      .filter(e => e.affected?.includes('namespaces'));
   }
 
   // Whether the endpoint's namespace list is loading; resolved like
