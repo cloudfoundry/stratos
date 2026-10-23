@@ -1,4 +1,5 @@
-import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Injectable, Signal, inject, signal } from '@angular/core';
 import { combineLatest, defer, Observable, from } from 'rxjs';
 import { map, shareReplay, switchMap } from 'rxjs/operators';
 
@@ -9,7 +10,7 @@ import {
 } from '../../../../../../../core/src/shared/components/metrics-chart/metrics.component.helpers';
 import { MetricQueryConfig } from '../../../../../../../store/src/actions/metrics.actions';
 import { MetricsDataService, MetricsRequest } from '../../../../../../../store/src/services/metrics-data.service';
-import { IMetricMatrixResult, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
+import { IMetricMatrixResult, IMetrics, IMetricVectorResult } from '../../../../../../../store/src/types/base-metric.types';
 import { IMetricCell, MetricQueryType } from '../../../../../../../store/src/types/metric.types';
 import { ActiveRouteCfCell } from '../../../cf-page.types';
 
@@ -47,22 +48,28 @@ export class CloudFoundryCellService {
 
   cfGuid!: string;
   cellId!: string;
-  cellMetric$!: Observable<IMetricCell>;
+  cellMetric$!: Observable<IMetricCell | null>;
 
-  healthy$!: Observable<string>;
-  cpus$!: Observable<string>;
+  healthy$!: Observable<string | null>;
+  cpus$!: Observable<string | null>;
 
-  usageContainers$!: Observable<string>;
-  remainingContainers$!: Observable<string>;
-  totalContainers$!: Observable<string>;
+  usageContainers$!: Observable<number | null>;
+  remainingContainers$!: Observable<string | null>;
+  totalContainers$!: Observable<string | null>;
 
-  usageDisk$!: Observable<string>;
-  remainingDisk$!: Observable<string>;
-  totalDisk$!: Observable<string>;
+  usageDisk$!: Observable<number | null>;
+  remainingDisk$!: Observable<string | null>;
+  totalDisk$!: Observable<string | null>;
 
-  usageMemory$!: Observable<string>;
-  remainingMemory$!: Observable<string>;
-  totalMemory$!: Observable<string>;
+  usageMemory$!: Observable<number | null>;
+  remainingMemory$!: Observable<string | null>;
+  totalMemory$!: Observable<string | null>;
+
+  // Set when any cell metric request fails. Each failed request yields
+  // null on its observable instead of erroring, so the page renders and
+  // shows this message rather than leaving the fields blank.
+  private readonly _error = signal<string | null>(null);
+  readonly error: Signal<string | null> = this._error.asReadonly();
 
   constructor() {
     const activeRouteCfCell = inject(ActiveRouteCfCell);
@@ -83,12 +90,11 @@ export class CloudFoundryCellService {
     this.usageDisk$ = this.generateUsage(this.remainingDisk$, this.totalDisk$);
     this.usageMemory$ = this.generateUsage(this.remainingMemory$, this.totalMemory$);
 
-    // Probe both the post-v2.31 and pre-v2.31 health metrics; the first
-    // one that returns a value wins. Mirrors the previous CfCellHelper
-    // pagination probe but without the ngrx round-trip.
+    // Pick the health metric once (see probeHealthMetric), then read the
+    // cell's labels and its health value from that metric.
     const healthMetric$ = defer(() => from(this.probeHealthMetric())).pipe(shareReplay(1));
     this.cellMetric$ = healthMetric$.pipe(
-      switchMap(metric => this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, true) as Observable<IMetricCell>)
+      switchMap(metric => this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, true) as Observable<IMetricCell | null>)
     );
     this.healthy$ = healthMetric$.pipe(
       switchMap(metric => this.generate(metric))
@@ -121,16 +127,17 @@ export class CloudFoundryCellService {
     return lineChartConfig;
   }
 
-  private generate(metric: string): Observable<string> {
-    return this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, false) as Observable<string>;
+  private generate(metric: string): Observable<string | null> {
+    return this.generateForMetric<IMetricVectorResult<IMetricCell>>(metric, false) as Observable<string | null>;
   }
 
   // Single-value vector lookup. If `returnMetric` is true, returns the
-  // sample's `metric` label-set (used for the health-metric probe);
-  // otherwise returns the sample value or null.
+  // sample's `metric` label-set (the cell's labels); otherwise returns
+  // the sample value. Returns null when there is no sample or the
+  // request failed (see fetchOrNull).
   private generateForMetric<T>(metric: string, returnMetric: boolean): Observable<IMetricCell | string | null> {
     const req: MetricsRequest = this.cellMetricRequest(metric);
-    return from(this.metricsDataService.fetch<T>(req)).pipe(
+    return from(this.fetchOrNull<T>(req)).pipe(
       map(entity => {
         const data = entity?.data as any;
         if (!data || !data.result || data.result.length === 0) {
@@ -154,13 +161,22 @@ export class CloudFoundryCellService {
     };
   }
 
-  // Picks the live health metric. Newer Diego (v2.31+) emits
-  // `HEALTHY` (garden_health_check_failed); older Diego emits
-  // `HEALTHY_DEP` (unhealthy_cell). We try the new one first and fall
-  // back if it returns no samples for this cell.
+  // Fetches a metric; on failure records the error and resolves to null.
+  private fetchOrNull<T>(req: MetricsRequest): Promise<IMetrics<T> | null> {
+    return this.metricsDataService.fetch<T>(req).catch((err: unknown) => {
+      const status = err instanceof HttpErrorResponse ? ` (HTTP ${err.status})` : '';
+      this._error.set(`Failed to load the metrics for this cell${status}`);
+      return null;
+    });
+  }
+
+  // Picks the health metric. Newer Diego (v2.31+) emits `HEALTHY`
+  // (garden_health_check_failed); older Diego emits `HEALTHY_DEP`
+  // (unhealthy_cell). Returns HEALTHY when it has a sample for this
+  // cell, otherwise HEALTHY_DEP without checking that one has data.
   private async probeHealthMetric(): Promise<CellMetrics.HEALTHY | CellMetrics.HEALTHY_DEP> {
     const tryFetch = async (metric: CellMetrics) => {
-      const m = await this.metricsDataService.fetch<any>(this.cellMetricRequest(metric));
+      const m = await this.fetchOrNull<any>(this.cellMetricRequest(metric));
       const result = m?.data?.result as any[] | undefined;
       return result && result.length > 0;
     };
@@ -170,9 +186,10 @@ export class CloudFoundryCellService {
     return CellMetrics.HEALTHY_DEP;
   }
 
-  private generateUsage(remaining$: Observable<string>, total$: Observable<string>): Observable<any> {
+  // Used = total - remaining; null when either value is missing.
+  private generateUsage(remaining$: Observable<string | null>, total$: Observable<string | null>): Observable<number | null> {
     return combineLatest([remaining$, total$]).pipe(
-      map(([remaining, total]) => Number(total) - Number(remaining))
+      map(([remaining, total]) => (remaining === null || total === null) ? null : Number(total) - Number(remaining))
     );
   }
 }

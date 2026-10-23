@@ -1,11 +1,11 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
-import { of as observableOf } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { Observable, of as observableOf } from 'rxjs';
 
 import { MetricsConfig } from '@stratosui/core';
 import {
@@ -27,7 +27,7 @@ class MockCloudFoundryCellService {
   cellId = 'cellId';
   cellMetric$ = observableOf(null);
 
-  healthy$ = observableOf(null);
+  healthy$: Observable<string | null> = observableOf(null);
   cpus$ = observableOf(null);
 
   usageContainers$ = observableOf(null);
@@ -65,8 +65,17 @@ class MockCloudFoundryCellService {
 describe('CloudFoundryCellSummaryComponent', () => {
   let component: CloudFoundryCellSummaryComponent;
   let fixture: ComponentFixture<CloudFoundryCellSummaryComponent>;
+  let http: HttpTestingController;
+  let cellService: MockCloudFoundryCellService;
+
+  const el = (): HTMLElement => fixture.nativeElement as HTMLElement;
+  const isHealthRequest = (r: { url: string }) => r.url.startsWith('/pp/v1/metrics/cf/cells/');
+  const healthyText = (): string =>
+    el().querySelector('app-boolean-indicator span.text-sm')?.textContent?.trim() ?? '';
+  const statusBar = (): Element | null => el().querySelector('app-card-status > div');
 
   beforeEach(async () => {
+    cellService = new MockCloudFoundryCellService();
     await TestBed.configureTestingModule({
       imports: [CloudFoundryCellSummaryComponent],
       providers: [
@@ -88,7 +97,7 @@ describe('CloudFoundryCellSummaryComponent', () => {
         },
         {
           provide: CloudFoundryCellService,
-          useValue: new MockCloudFoundryCellService(),
+          useFactory: () => cellService,
         },
         {
           provide: ActiveRouteCfCell,
@@ -98,13 +107,51 @@ describe('CloudFoundryCellSummaryComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(async () => {
+  const create = async () => {
+    http = TestBed.inject(HttpTestingController);
     fixture = TestBed.createComponent(CloudFoundryCellSummaryComponent);
     component = fixture.componentInstance;
     await fixture.whenStable();
+  };
+
+  it('should create', async () => {
+    await create();
+    expect(component).toBeTruthy();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
+  it('shows an error with Retry, not "no health history", when the health request fails', async () => {
+    await create();
+    const fail = { status: 500, statusText: 'Internal Server Error' };
+    // Current metric first, then the pre-v2.31 fallback.
+    (await vi.waitFor(() => http.expectOne(isHealthRequest))).flush('boom', fail);
+    (await vi.waitFor(() => http.expectOne(isHealthRequest))).flush('boom', fail);
+    await vi.waitFor(async () => {
+      await fixture.whenStable();
+      expect(el().querySelector('[data-test="empty-error"]')).not.toBeNull();
+    });
+    expect(el().querySelector('[data-test="empty-error"]')?.textContent).toContain('Failed to load the cell health history');
+    expect(el().querySelector('[data-test="empty-error-retry"]')).not.toBeNull();
+    expect(el().querySelector('[data-test="empty"]')).toBeNull();
+  });
+
+  it('reads no health sample as unknown, not unhealthy', async () => {
+    cellService.healthy$ = observableOf(null);
+    await create();
+    expect(healthyText()).toBe('Unknown');
+    expect(statusBar()?.className ?? '').not.toContain('bg-danger');
+  });
+
+  it('reads a 0 sample as healthy', async () => {
+    cellService.healthy$ = observableOf('0');
+    await create();
+    expect(healthyText()).toBe('Yes');
+    expect(statusBar()?.className).toContain('bg-success');
+  });
+
+  it('reads a 1 sample as unhealthy', async () => {
+    cellService.healthy$ = observableOf('1');
+    await create();
+    expect(healthyText()).toBe('No');
+    expect(statusBar()?.className).toContain('bg-danger');
   });
 });

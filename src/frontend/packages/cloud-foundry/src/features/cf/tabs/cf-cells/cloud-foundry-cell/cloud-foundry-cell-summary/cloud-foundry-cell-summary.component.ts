@@ -54,17 +54,25 @@ export class CloudFoundryCellSummaryComponent {
   private datePipe = inject(DatePipe);
 
   public status$: Observable<StratosStatus>;
+  // true = healthy, false = unhealthy, null = no sample (shown as Unknown).
+  public healthy$: Observable<boolean | null>;
   public healthListConfig: WritableSignal<SignalListConfig<CfCellHealthEntry> | undefined> = signal(undefined);
 
   constructor() {
     const cfCellService = this.cfCellService;
 
-    this.status$ = cfCellService.healthy$.pipe(
-      map(health => {
-        if (health === undefined) {
+    // The health metric is 0 when the cell passed the garden health check
+    // and 1 when it failed. The service yields null when there is no
+    // sample for this cell; that is not a failed check.
+    this.healthy$ = cfCellService.healthy$.pipe(
+      map(health => (health === null || health === undefined) ? null : health === '0')
+    );
+    this.status$ = this.healthy$.pipe(
+      map(healthy => {
+        if (healthy === null) {
           return StratosStatus.NONE;
         }
-        return health === '0' ? StratosStatus.OK : StratosStatus.ERROR;
+        return healthy ? StratosStatus.OK : StratosStatus.ERROR;
       })
     );
 
@@ -95,7 +103,7 @@ export class CloudFoundryCellSummaryComponent {
       pageIndex: this.healthConfig.pageIndex,
       pageSize: this.healthConfig.pageSize,
       isAnyLoading: computed(() => this.healthConfig.availability() === undefined),
-      errorsByCnsi: signal(new Map()),
+      errorsByCnsi: this.healthConfig.errorsByCnsi,
       columns: [
         {
           header: 'Date/Time', key: 'dateTime', sortField: 'timestamp',
@@ -113,6 +121,7 @@ export class CloudFoundryCellSummaryComponent {
       ],
       getRowKey: (r: CfCellHealthEntry) => `${r.timestamp}:${r.state}`,
       emptyMessage: 'Cell has no health history',
+      errorMessage: 'Failed to load the cell health history',
       loadingMessage: 'Loading cell health…',
       hidePagerWhenSingle: true,
       onRefresh: () => this.healthConfig.refresh(),
