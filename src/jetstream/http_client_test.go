@@ -56,3 +56,25 @@ func TestCACertClientUsesTheTimeoutForTheRequestKind(t *testing.T) {
 		t.Errorf("mutating shared client timeout %v, want 120s", got)
 	}
 }
+
+// Requests to an endpoint with a CA certificate share one client (and so
+// its transport's connections) per CA certificate and request kind.
+func TestCACertClientIsReused(t *testing.T) {
+	p := &portalProxy{}
+	const ca = "a CA certificate for TestCACertClientIsReused"
+
+	first := p.getHttpClient(false, ca, false)
+	second := p.getHttpClient(false, ca, false)
+	if first.Transport == nil || first.Transport != second.Transport {
+		t.Errorf("expected the second request to reuse the client's transport")
+	}
+
+	mutating := p.getHttpClient(false, ca, true)
+	if mutating.Timeout != time.Duration(defaultHTTPClientMutatingTimeout)*time.Second {
+		t.Errorf("mutating client timeout %v, want the mutating timeout", mutating.Timeout)
+	}
+	other := p.getHttpClient(false, "another CA certificate", false)
+	if other.Transport == first.Transport {
+		t.Errorf("expected a different CA certificate to get its own client")
+	}
+}
