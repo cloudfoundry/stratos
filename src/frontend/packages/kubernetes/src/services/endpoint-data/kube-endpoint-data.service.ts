@@ -233,6 +233,12 @@ export class KubeEndpointDataService {
     await firstValueFrom(this.load());
   }
 
+  // The node count from a node-list load made elsewhere
+  // (KubeNodeDataService), so the cluster summary matches that list.
+  syncNodeCount(count: number): void {
+    this._nodeCount.set(count);
+  }
+
   invalidate(): void {
     this._lastFetched.set(null);
   }
