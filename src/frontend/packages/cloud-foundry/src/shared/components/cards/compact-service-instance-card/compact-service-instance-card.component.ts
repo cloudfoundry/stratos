@@ -29,6 +29,8 @@ export class CompactServiceInstanceCardComponent {
 
   private _serviceInstance: StServiceInstance | null = null;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get serviceInstance(): StServiceInstance | null {
     return this._serviceInstance;

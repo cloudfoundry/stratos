@@ -63,6 +63,9 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() endpoint!: EndpointModel;
 
   // strict: assigned by computeEffectiveLayout via the @Input set layout accessor
@@ -77,6 +80,8 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   private rawLayout!: HomePageCardLayout;
 
   // Null until the parent's persisted layout hydrates; the guard below skips it.
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set layout(value: HomePageCardLayout | null) {
     if (value) {
       this.rawLayout = value;

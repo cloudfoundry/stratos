@@ -1,6 +1,6 @@
 <div class="relative block p-4 rounded bg-[var(--card-bg)] text-[color:var(--content-text)] border border-[color:var(--card-border)] shadow-none h-full">
   <app-card-status [status$]="status$"></app-card-status>
-  @if (!showActions) {
+  @if (!showActions()) {
     <a class="block no-underline cursor-pointer" [routerLink]="['../instances']" title="Go to Instances tab">
       <div class="card-header">
         <h2 class="card-title">Instances</h2>
@@ -32,7 +32,7 @@
     </div>
   }
   @if (canEdit()) {
-    @if (showActions && !isEditing) {
+    @if (showActions() && !isEditing) {
       <div class="absolute top-4 right-4 flex gap-1 text-right">
         <button (click)="edit()" class="btn btn-icon" [disabled]="isUpdating()">
           <span class="material-icons">edit</span>
@@ -45,7 +45,7 @@
         </button>
       </div>
     }
-    @if (showActions && isEditing) {
+    @if (showActions() && isEditing) {
       <div class="absolute top-4 right-4 flex gap-1 text-right">
         <button (click)="finishEdit(false)" class="btn btn-icon" [disabled]="isUpdating()">
           <span class="material-icons">clear</span>

@@ -86,12 +86,16 @@ export class ServiceBrokerCardComponent implements OnInit {
     };
   });
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set cfGuid(value: string) {
     this._cfGuid.set(value ?? '');
     this.refreshBroker();
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set brokerGuid(value: string | null | undefined) {
     this._brokerGuid.set(value ?? '');

@@ -1,10 +1,10 @@
 <div>
-  @if (loading) {
+  @if (loading()) {
     <div class="text-center my-8">
       <app-busy class="text-primary" size="2rem" context="monocular"></app-busy>
     </div>
   }
-  @if (!loading) {
+  @if (!loading()) {
     <ng-content></ng-content>
   }
 </div>

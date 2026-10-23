@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { DisplayValueComponent } from '../display-value/display-value.component';
 
@@ -14,9 +14,9 @@ import { DisplayValueComponent } from '../display-value/display-value.component'
 })
 export class EditableDisplayValueComponent {
 
-  @Input() edit!: boolean;
-  @Input() label!: string;
-  @Input() value: any;
+  readonly edit = input.required<boolean>();
+  readonly label = input.required<string>();
+  readonly value = input<any>();
 
   constructor() { }
 

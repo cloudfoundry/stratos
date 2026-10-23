@@ -1,5 +1,5 @@
 import { AsyncPipe, NgStyle } from '@angular/common';
-import {Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, OnInit, inject, ChangeDetectionStrategy, input} from '@angular/core';
 import { Observable } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
@@ -17,26 +17,20 @@ import { ConditionType, ConditionTypeLabels, KubernetesCondition } from '../../.
 export class KubernetesNodeConditionComponent implements OnInit {
 
 
-  @Input()
-  condition!: ConditionType | `${ConditionType}`; // strict: required @Input, templates bind literal strings (condition="Ready")
+  readonly condition = input.required<ConditionType | `${ConditionType}`>(); // strict: required @Input, templates bind literal strings (condition="Ready")
   // boolean | undefined: an "Unknown" condition status renders as the indicator's unknown state
   condition$!: Observable<boolean | undefined>; // strict: assigned in ngOnInit before the template reads it
   hasCondition$!: Observable<boolean>; // strict: assigned in ngOnInit before the template reads it
 
-  @Input()
-  overrideCondition$?: Observable<boolean>;
+  readonly overrideCondition$ = input<Observable<boolean>>();
 
-  @Input()
-  type: BooleanIndicatorTypeValue = 'yes-no';
+  readonly type = input<BooleanIndicatorTypeValue>('yes-no');
 
-  @Input()
-  inverse = false;
+  readonly inverse = input(false);
 
-  @Input()
-  subtle = false;
+  readonly subtle = input(false);
 
-  @Input()
-  paddingTop = '20px';
+  readonly paddingTop = input('20px');
 
   public titles = ConditionTypeLabels;
 
@@ -54,10 +48,11 @@ export class KubernetesNodeConditionComponent implements OnInit {
   public kubeNodeService = inject(KubernetesNodeService);
 
   ngOnInit() {
-    this.condition$ = this.overrideCondition$ ? this.overrideCondition$ : this.kubeNodeService.node$.pipe(
+    const overrideCondition$ = this.overrideCondition$();
+    this.condition$ = overrideCondition$ ? overrideCondition$ : this.kubeNodeService.node$.pipe(
       filter(p => !!p && !!p.entity),
       map(p => p.entity.status.conditions),
-      map(conditions => conditions.filter(o => o.type === this.condition)),
+      map(conditions => conditions.filter(o => o.type === this.condition())),
       filter(conditions => !!conditions.length),
       map(conditions => this.shouldBeGreen(conditions[0]))
     );

@@ -5,7 +5,7 @@
     <div class="metrics-range-selector__overlay-inner">
       <h3>Choose time window</h3>
       <app-start-end-date (isValid)="rangeSelectorManager.dateValid = $event" [(start)]="rangeSelectorManager.start"
-      [(end)]="rangeSelectorManager.end" [validate]="validate"></app-start-end-date>
+      [(end)]="rangeSelectorManager.end" [validate]="validate()"></app-start-end-date>
       <div class="metrics-range-selector__overlay-buttons">
         <button class="btn btn-primary metrics-range-selector__overlay-set" type="button"
           (click)="rangeSelectorManager.commit?.(); showOverlay = false"

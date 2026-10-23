@@ -1,6 +1,6 @@
 import { Portal, PortalModule } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, inject, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
@@ -23,11 +23,16 @@ export class SidepanelPreviewComponent {
   public sidePanelService = inject(SidePanelService);
 
   // Null while the caller is still deriving the title (e.g. markdown preview)
-  @Input()
-  title!: string | null;
+  readonly title = input.required<string | null>();
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   favorite?: UserFavorite<IFavoriteMetadata>;
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() header?: Portal<any>;
 }

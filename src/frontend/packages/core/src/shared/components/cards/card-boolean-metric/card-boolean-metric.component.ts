@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -13,12 +13,15 @@ import { Router } from '@angular/router';
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() icon!: string;
-  @Input() iconFont!: string;
-  @Input() label!: string;
-  @Input() value!: string;
-  @Input() textOnly = false;
-  @Input() link?: () => void | string;
+  readonly iconFont = input.required<string>();
+  readonly label = input.required<string>();
+  readonly value = input.required<string>();
+  readonly textOnly = input(false);
+  readonly link = input<() => void | string>();
 
   formattedValue!: string;
 
@@ -33,7 +36,8 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
   }
 
   format() {
-    if (this.value === undefined || this.value === '') {
+    const value = this.value();
+    if (value === undefined || value === '') {
       this.handleNoValue();
     } else {
       this.handleValue();
@@ -45,7 +49,7 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
   }
 
   handleValue() {
-    if (this.value.toString() === 'true') {
+    if (this.value().toString() === 'true') {
       this.formattedValue = 'Yes';
     } else {
       this.formattedValue = 'No';
@@ -53,10 +57,10 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
   }
 
   goToLink() {
-    if (typeof (this.link) === 'string') {
-      this.router.navigate([this.link]);
+    if (typeof (this.link()) === 'string') {
+      this.router.navigate([this.link()]);
     } else {
-      this.link?.();
+      this.link()?.();
     }
   }
 }

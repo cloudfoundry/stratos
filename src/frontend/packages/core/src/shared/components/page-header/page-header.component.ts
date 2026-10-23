@@ -1,7 +1,7 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, input } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -147,15 +147,16 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   // previous owner instead of leaving the outlet empty).
   private previousPortal: Portal<any> | undefined;
 
-  @Input() hideSideNavButton = false;
+  readonly hideSideNavButton = input(false);
 
-  @Input() hideEndpointErrors = false;
+  readonly hideEndpointErrors = input(false);
 
-  @Input() hideMenu = false;
+  readonly hideMenu = input(false);
 
-  @Input()
-  endpointIds$!: Observable<string[]>;
+  readonly endpointIds$ = input.required<Observable<string[]>>();
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set tabs(tabs: IPageSideNavTab[]) {
     if (tabs) {
@@ -169,6 +170,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set tabsHeader(header: string) {
     if (header) {
@@ -176,12 +179,14 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  @Input() showUnderFlow = false;
+  readonly showUnderFlow = input(false);
 
   private pShowHistory = true;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get showHistory(): boolean {
-    return !this.logoutOnly && this.pShowHistory;
+    return !this.logoutOnly() && this.pShowHistory;
   }
   set showHistory(showHistory: boolean) {
     this.pShowHistory = showHistory;
@@ -191,6 +196,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public unreadEventCount$: Observable<number>;
   public eventPriorityStatus$: Observable<StratosStatus | undefined>;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata> | null) {
     if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
       if (favorite.canFavorite()) {
@@ -226,6 +233,8 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   public actionsKey: StratosActionType | null;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[] | null) {
     this.latestBreadcrumbs = breadcrumbs;
@@ -234,7 +243,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
-  @Input() logoutOnly?: boolean;
+  readonly logoutOnly = input<boolean>();
 
   private getBreadcrumb(breadcrumbs: IHeaderBreadcrumb[] | null) {
     if (!breadcrumbs || !breadcrumbs.length) {

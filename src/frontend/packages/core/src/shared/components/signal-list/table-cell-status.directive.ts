@@ -1,4 +1,4 @@
-import { Directive, ElementRef, Input, OnChanges, SimpleChanges, Renderer2, inject } from '@angular/core';
+import { Directive, ElementRef, OnChanges, SimpleChanges, Renderer2, inject, input } from '@angular/core';
 
 @Directive({
 selector: '[appTableCellStatus]',
@@ -6,7 +6,7 @@ standalone: true
 })
 export class TableCellStatusDirective implements OnChanges {
 
-  @Input() appTableCellStatus!: string;
+  readonly appTableCellStatus = input.required<string>();
 
   private readonly el: ElementRef;
   private readonly renderer: Renderer2;

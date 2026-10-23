@@ -1,7 +1,7 @@
 <div class="flex flex-col justify-center pt-6 text-center">
   <img class="self-center pt-3 pb-4 w-60 mb-4" [src]="themeLogo()" alt="" />
   <h1 class="hidden">
-    {{ title || themeTitle() }}
+    {{ title() || themeTitle() }}
   </h1>
   @if (themeSubtitle()) {
     <p class="text-content-muted text-sm">

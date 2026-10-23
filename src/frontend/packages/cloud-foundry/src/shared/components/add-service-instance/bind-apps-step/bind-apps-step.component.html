@@ -4,10 +4,10 @@
     <app-form-field>
       <app-label>App</app-label>
       <app-select class="form-control" formControlName="apps">
-        @if (!boundAppId) {
+        @if (!boundAppId()) {
           <app-option></app-option>
         }
-        @for (app of apps$ | async; track app) {
+        @for (app of apps$() | async; track app) {
           <app-option [value]="app.metadata.guid">{{ app.entity.name }}</app-option>
         }
       </app-select>

@@ -13,6 +13,8 @@ import { RowState } from './row-state.types';
 export abstract class TableCellCustom<T, C = any> {
   // strict: backing field for the required `row` @Input, set by Angular before render
   protected pRow!: T;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get row(): T {
     return this.pRow;
@@ -32,6 +34,8 @@ export abstract class TableCellCustom<T, C = any> {
 
   // strict: backing field for the `config` @Input, set by Angular before render
   protected pConfig!: C;
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set config(config: C) {
     this.pConfig = config;

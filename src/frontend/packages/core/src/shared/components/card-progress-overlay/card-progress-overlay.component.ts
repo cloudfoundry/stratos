@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
@@ -15,8 +15,8 @@ import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 })
 export class CardProgressOverlayComponent {
 
-  @Input() label!: string;
+  readonly label = input.required<string>();
 
-  @Input() busy!: Observable<boolean>;
+  readonly busy = input.required<Observable<boolean>>();
 
 }

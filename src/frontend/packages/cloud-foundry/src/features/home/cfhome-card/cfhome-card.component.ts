@@ -61,10 +61,14 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
 
   get layout(): HomePageCardLayout { return this.cardLayout(); }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set layout(value: HomePageCardLayout) {
     if (value) { this.cardLayout.set(value); }
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set endpoint(value: EndpointModel) {
     // strict: a registered endpoint always carries a guid; it is only
     // optional on the shared EndpointModel shape.

@@ -10,11 +10,11 @@
           class="inline-flex"
           appClickStopPropagation       
           [class.animate-scale-pop-in]="didUserPressCopy() === 'yes and saw succeeded'"
-          [attr.aria-label]="tooltip || 'Copy to clipboard'"
-          [title]="tooltip"
-          (click)="copyToClipboard(text)">
+          [attr.aria-label]="tooltip() || 'Copy to clipboard'"
+          [title]="tooltip()"
+          (click)="copyToClipboard(text())">
         <span 
-          [ngClass]="{'text-sm': compact, 'text-base': !compact}"
+          [ngClass]="{'text-sm': compact(), 'text-base': !compact()}"
           class="material-icons cursor-pointer text-content-muted hover:text-content-text transition-opacity duration-300">
           content_copy
        </span>
@@ -24,18 +24,18 @@
       <div class="col-start-1 row-start-1 justify-self-end flex items-center gap-1 transition-opacity duration-300">
         <span class="material-icons text-status-danger"
           [title]="'Failed to copy text. This might be due to security settings surrounding the clipboard API.'"
-          [ngClass]="{'text-sm': compact, 'text-base': !compact}">
+          [ngClass]="{'text-sm': compact(), 'text-base': !compact()}">
           error
         </span>
       </div>
     }
     @case ('yes and succeeded') {
       <div class="col-start-1 row-start-1 justify-self-end flex items-center gap-1 transition-opacity duration-300">
-      @if (showSuccessText) {
+      @if (showSuccessText()) {
         <span class="text-sm text-success-shade-600 whitespace-nowrap">Copied to clipboard</span>
       }
       <span class="material-icons text-success-shade-600 animate-scale-pop-in"
-        [ngClass]="{'text-sm': compact, 'text-base': !compact}">
+        [ngClass]="{'text-sm': compact(), 'text-base': !compact()}">
         check_circle
       </span>
     </div>

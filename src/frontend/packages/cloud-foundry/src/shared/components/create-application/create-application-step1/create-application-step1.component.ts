@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit, Signal, ViewChild, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { AfterContentInit, Component, Input, OnInit, Signal, ViewChild, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -36,8 +36,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   route = inject(ActivatedRoute);
 
 
-  @Input()
-  isMarketplaceMode!: boolean;
+  readonly isMarketplaceMode = input.required<boolean>();
 
   public spaces$!: Observable<ISpace[]>;
   public hasSpaces$!: Observable<boolean>;
@@ -48,7 +47,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   @ViewChild('cfForm', { static: true })
   cfForm!: NgForm;
 
-  @Input() isRedeploy = false;
+  readonly isRedeploy = input(false);
 
   // A deploy scoped to an endpoint arrives with an `endpointGuid` query
   // param (e.g. from a CF's Applications tab). The CF is fixed for the
@@ -59,6 +58,8 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   validate!: Observable<boolean>;
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
@@ -140,11 +141,11 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     this.hasSpaces$ = this.spaces$.pipe(
       map(spaces => !!spaces.length)
     );
-    if (this.isRedeploy) {
+    if (this.isRedeploy()) {
       this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
     }
 
-    if (this.isMarketplaceMode) {
+    if (this.isMarketplaceMode()) {
       this.stepperText = 'Select an organization and space for the service instance.';
     }
   }
@@ -153,8 +154,8 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     // strict: cfForm is a `static: true` ViewChild, so the NgForm and its
     // statusChanges stream are initialised by the time ngAfterContentInit runs.
     this.validate = this.cfForm.statusChanges!.pipe(
-      startWith(this.cfForm.valid || this.isRedeploy),
-      map(() => this.cfForm.valid || this.isRedeploy),
+      startWith(this.cfForm.valid || this.isRedeploy()),
+      map(() => this.cfForm.valid || this.isRedeploy()),
       observeOn(asapScheduler)
     );
   }

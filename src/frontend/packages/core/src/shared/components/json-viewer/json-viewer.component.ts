@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnChanges, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 export interface Segment {
@@ -22,18 +22,18 @@ export interface Segment {
 })
 export class JsonViewerComponent implements OnChanges {
 
-  @Input() json: any;
+  readonly json = input<any>();
 
-  @Input() root!: string;
+  readonly root = input.required<string>();
 
   // Whether to expand all initially
-  @Input() expanded = true;
+  readonly expanded = input(true);
   /**
    * deprecated It will be always true and deleted in version 3.0.0
    */
-  @Input() cleanOnChange = true;
+  readonly cleanOnChange = input(true);
 
-  @Input() small = false;
+  readonly small = input(false);
 
   segments: Segment[] = [];
 
@@ -52,20 +52,21 @@ export class JsonViewerComponent implements OnChanges {
   }
 
   ngOnChanges() {
-    if (this.cleanOnChange) {
+    if (this.cleanOnChange()) {
       this.segments = [];
     }
 
-    if (!this.json) {
+    const json = this.json();
+    if (!json) {
       return;
     }
 
-    if (typeof this.json === 'object') {
-      Object.keys(this.json).forEach(key => {
-        this.segments.push(this.parseKeyValue(key, this.json[key]));
+    if (typeof json === 'object') {
+      Object.keys(json).forEach(key => {
+        this.segments.push(this.parseKeyValue(key, this.json()[key]));
       });
     } else {
-      this.segments.push(this.parseKeyValue(`(${typeof this.json})`, this.json));
+      this.segments.push(this.parseKeyValue(`(${typeof json})`, json));
     }
   }
 
@@ -85,7 +86,7 @@ export class JsonViewerComponent implements OnChanges {
       value,
       type: undefined,
       description: '' + value,
-      expanded: this.expanded
+      expanded: this.expanded()
     };
 
     switch (typeof segment.value) {

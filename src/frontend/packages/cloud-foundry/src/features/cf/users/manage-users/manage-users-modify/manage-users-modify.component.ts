@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnDestroy, OnInit, Signal, ChangeDetectionStrategy, inject, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, Signal, ChangeDetectionStrategy, inject, computed, signal, input } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { take,
@@ -50,7 +50,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   private isRemove$$ = toObservable(this.rolesData.isRemove);
   private isSetByUsername$$ = toObservable(this.rolesData.isSetByUsername);
 
-  @Input() setUsernames = false;
+  readonly setUsernames = input(false);
 
   /** Signal exposing rolesData.users for template + tests. */
   readonly rolesDataUsers: Signal<StUser[]> = this.rolesData.users;
@@ -90,7 +90,7 @@ export class UsersRolesModifyComponent implements OnInit, OnDestroy {
   private subs: Subscription[] = [];
 
   ngOnInit() {
-    if (this.setUsernames) {
+    if (this.setUsernames()) {
       this.blocked.set(false);
     } else {
       this.subs.push(this.cfRolesService.loading$.subscribe(loading => this.blocked.set(loading)));

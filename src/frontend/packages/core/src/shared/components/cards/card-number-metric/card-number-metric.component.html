@@ -1,16 +1,16 @@
 <ng-template #content>
   <div class="number-metric-card">
-    @if (!textOnly) {
+    @if (!textOnly()) {
       <div
         class="card p-4 relative"
-        [ngClass]="{'border-0 shadow-none bg-transparent number-metric-card__plain': mode === 'plain'}">
+        [ngClass]="{'border-0 shadow-none bg-transparent number-metric-card__plain': mode() === 'plain'}">
         <app-card-status [status$]="status$"></app-card-status>
         <div class="flex items-start space-x-4">
           @if (icon) {
             <span class="text-3xl text-content-muted shrink-0"
-            [ngClass]="iconFont === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon }}</span>
+            [ngClass]="iconFont() === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon }}</span>
           }
-          <div class="flex-1" [ngClass]="{'flex flex-col-reverse': labelAtTop, 'flex flex-col': !labelAtTop}">
+          <div class="flex-1" [ngClass]="{'flex flex-col-reverse': labelAtTop(), 'flex flex-col': !labelAtTop()}">
             @if ((status$ | async); as status) {
               <div class="number-metric-card-value"
                 [ngClass]="{'text-content-muted opacity-50': isUnlimited}"
@@ -22,7 +22,7 @@
                       'text-warning-shade-500': status === 'warning',
                       'text-content-text': status !== 'error' && status !== 'warning'
                     }">{{ formattedValue }}</span>
-                  @if (limit) {
+                  @if (limit()) {
                     <span class="text-lg text-content-muted"> / {{ formattedLimit }}</span>
                   }
                 </div>
@@ -32,8 +32,8 @@
               </div>
             }
             <div class="number-metric-card-label text-sm text-content-muted"
-              [ngClass]="{'mb-2': labelAtTop, 'mt-1': !labelAtTop}">
-              {{ labelSingular && value === '1' ? labelSingular : label }}
+              [ngClass]="{'mb-2': labelAtTop(), 'mt-1': !labelAtTop()}">
+              {{ labelSingular() && value() === '1' ? labelSingular() : label() }}
             </div>
           </div>
         </div>
@@ -70,12 +70,12 @@
     } @else {
       <div class="number-metric-card__container">
         <div class="number-metric-card__container-inner"
-          [ngClass]="{'number-metric-card__container-inner-reverse': labelAtTop}">
+          [ngClass]="{'number-metric-card__container-inner-reverse': labelAtTop()}">
           @if ((status$ | async); as status) {
             <div class="number-metric-card__value text-content-text">
               <span class="number-metric-card__usage-count"
               [ngClass]="{'text-danger-shade-500': status === 'error', 'text-warning-shade-500': status === 'warning', 'text-content-text': status !== 'error' && status !== 'warning'}">{{ formattedValue }}</span>
-              @if (limit) {
+              @if (limit()) {
                 <span class="number-metric-card__limit text-content-muted"> / {{ formattedLimit }}</span>
               }
               @if (usage) {
@@ -83,7 +83,7 @@
               }
             </div>
           }
-          <div class="number-metric-card__label text-content-muted">{{ labelSingular && value === '1' ? labelSingular : label }}</div>
+          <div class="number-metric-card__label text-content-muted">{{ labelSingular() && value() === '1' ? labelSingular() : label() }}</div>
         </div>
       </div>
     }
@@ -91,7 +91,7 @@
 </ng-template>
 
 
-@if (link) {
+@if (link()) {
   <ng-container #text>
     <a role="button" tabindex="0"
       (click)="goToLink()"

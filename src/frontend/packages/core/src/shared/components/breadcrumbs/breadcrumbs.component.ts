@@ -15,5 +15,8 @@ export class BreadcrumbsComponent {
   // the ?breadcrumbs= key resolution (page-header resolves it reactively).
   // Colour/size are inherited from the host context so the trail sits inline
   // with an adjacent page title.
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() breadcrumbs: IBreadcrumbLink[] | null = [];
 }

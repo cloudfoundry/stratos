@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, Input, OnInit, ViewChild, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, OnInit, ViewChild, computed, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -43,8 +43,7 @@ export class CardAutoscalerDefaultComponent implements OnInit {
   appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal | false | null>;
   applicationInstances$!: Observable<number | null | undefined>;
 
-  @Input()
-  onUpdate: () => void = () => { }
+  readonly onUpdate = input<() => void>(() => { });
 
   ngOnInit() {
     const cfGuid = this.applicationService.cfGuid;

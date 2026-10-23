@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
-import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, Input } from '@angular/core';
+import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, input } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -52,7 +52,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
   private formStatusSub?: Subscription;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  readonly redirectUrl = input.required<string>();
 
   /**
    * FWT-957: signal-native step handle. Reads validity from validSignal,
@@ -67,7 +67,7 @@ export class CreateSpaceStepComponent extends AddEditSpaceStepBase implements On
       } catch (err: unknown) {
         throw leadError('Failed to create space', err);
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
 

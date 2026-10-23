@@ -1,6 +1,6 @@
 
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, Input, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, Input, computed, effect, inject, runInInjectionContext, signal, input } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { take, defaultIfEmpty } from 'rxjs/operators';
@@ -31,8 +31,7 @@ export class FavoritesMetaCardComponent {
   private injector = inject(Injector);
 
 
-  @Input()
-  public endpoint: any;
+  public readonly endpoint = input<any>();
 
   // strict: assigned in the @Input set favoriteEntity setter before any read
   public favorite!: UserFavorite<IFavoriteMetadata>;
@@ -125,6 +124,8 @@ export class FavoritesMetaCardComponent {
     this.favoritesData.updateMetadata(updated);
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set favoriteEntity(favoriteEntity: UserFavorite<IFavoriteMetadata>) {
     if (favoriteEntity) {

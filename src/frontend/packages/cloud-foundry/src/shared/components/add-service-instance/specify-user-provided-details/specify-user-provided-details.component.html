@@ -1,4 +1,4 @@
-@if (!modeService.isEditServiceInstanceMode() && showModeSelection && !!(serviceBindingForApplication$ | async)) {
+@if (!modeService.isEditServiceInstanceMode() && showModeSelection() && !!(serviceBindingForApplication$ | async)) {
   <div>
     <div class="flex flex-col gap-3 mb-4">
       @for (mode of formModes; track mode) {

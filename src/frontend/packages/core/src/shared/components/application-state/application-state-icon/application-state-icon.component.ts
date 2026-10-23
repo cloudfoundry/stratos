@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { StratosStatus } from '@stratosui/store';
 import { CustomIconComponent } from '../../custom-material/custom-material.component';
@@ -18,6 +18,6 @@ import { ApplicationStateIconPipe } from './application-state-icon.pipe';
 export class ApplicationStateIconComponent {
 
   // Accepts null so callers can bind `status$ | async` directly
-  @Input() public status!: StratosStatus | null;
+  public readonly status = input.required<StratosStatus | null>();
 
 }

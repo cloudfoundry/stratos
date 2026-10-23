@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, ViewEncapsulation, input } from '@angular/core';
 
 @Component({
   selector: 'app-details-card',
@@ -14,11 +14,9 @@ export class DetailsCardComponent implements OnInit {
 
   constructor() { }
 
-  @Input()
-  title!: string;
+  readonly title = input.required<string>();
 
-  @Input()
-  busy!: boolean;
+  readonly busy = input.required<boolean>();
 
   ngOnInit() {
   }

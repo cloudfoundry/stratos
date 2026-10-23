@@ -1,20 +1,20 @@
 <ng-template #content>
   <div class="boolean-metric-card h-full">
-    @if (!textOnly) {
+    @if (!textOnly()) {
       <div class="card p-4 flex items-center space-x-4">
         @if (icon) {
-          <span class="material-icons text-2xl" [class]="'material-icons-' + (iconFont || 'outlined')">{{ icon }}</span>
+          <span class="material-icons text-2xl" [class]="'material-icons-' + (iconFont() || 'outlined')">{{ icon }}</span>
         }
         <div class="flex-1">
           <div class="boolean-metric-card-value text-2xl font-bold text-content-text">{{ formattedValue }}</div>
-          <div class="boolean-metric-card-label text-sm text-content-muted">{{ label }}</div>
+          <div class="boolean-metric-card-label text-sm text-content-muted">{{ label() }}</div>
         </div>
       </div>
     } @else {
       <div class="boolean-metric-card-container p-2">
         <div>
           <div class="boolean-metric-card-value text-xl font-semibold text-content-text">{{ formattedValue }}</div>
-          <div class="boolean-metric-card-label text-xs text-content-muted">{{ label }}</div>
+          <div class="boolean-metric-card-label text-xs text-content-muted">{{ label() }}</div>
         </div>
       </div>
     }
@@ -22,7 +22,7 @@
 </ng-template>
 
 
-@if (link) {
+@if (link()) {
   <ng-container #text>
     <a role="button" tabindex="0"
       (click)="goToLink()"

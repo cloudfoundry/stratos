@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { combineLatest, of } from 'rxjs';
@@ -45,7 +45,7 @@ import { KubeConfigTableUserSelectComponent } from './kube-config-table-user-sel
 })
 export class KubeConfigSelectionComponent {
 
-  @Input() applyStarted!: boolean;
+  readonly applyStarted = input.required<boolean>();
 
   public helper = inject(KubeConfigHelper);
   private snackbarService = inject(TailwindSnackBarService);
@@ -220,7 +220,7 @@ export class KubeConfigSelectionComponent {
   }
 
   onEnter = () => {
-    if (!this.applyStarted) {
+    if (!this.applyStarted()) {
       return;
     }
     // Handle back from review step (ensure newly registered endpoints are taken into account)

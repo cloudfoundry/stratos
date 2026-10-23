@@ -4,24 +4,24 @@
   [class.invalid]="isInvalid"
   [class.valid]="isValid"
   [class.disabled]="isDisabled"
-  [class.appearance-standard]="appearance === 'standard'"
-  [class.appearance-fill]="appearance === 'fill'"
-  [class.appearance-outline]="appearance === 'outline'"
-  [class.appearance-legacy]="appearance === 'legacy'"
-  [class.color-primary]="color === 'primary'"
-  [class.color-accent]="color === 'accent'"
-  [class.color-warn]="color === 'warn'"
-  [class.float-label-never]="floatLabel === 'never'"
-  [class.float-label-always]="floatLabel === 'always'"
-  [class.float-label-auto]="floatLabel === 'auto'">
+  [class.appearance-standard]="appearance() === 'standard'"
+  [class.appearance-fill]="appearance() === 'fill'"
+  [class.appearance-outline]="appearance() === 'outline'"
+  [class.appearance-legacy]="appearance() === 'legacy'"
+  [class.color-primary]="color() === 'primary'"
+  [class.color-accent]="color() === 'accent'"
+  [class.color-warn]="color() === 'warn'"
+  [class.float-label-never]="floatLabel() === 'never'"
+  [class.float-label-always]="floatLabel() === 'always'"
+  [class.float-label-auto]="floatLabel() === 'auto'">
 
   <div class="form-field-wrapper relative">
 
     <!-- Main form field flex container -->
     <div class="form-field-flex flex items-baseline box-border relative transition-all duration-200"
-         [class.w-full]="!fitContent"
-         [class.w-max]="fitContent"
-         [class.max-w-full]="fitContent">
+         [class.w-full]="!fitContent()"
+         [class.w-max]="fitContent()"
+         [class.max-w-full]="fitContent()">
 
       <!-- Prefix (optional) -->
       @if (hasPrefix) {
@@ -37,11 +37,11 @@
            shrinks the infix to its content so the trigger fits the
            value (e.g. select showing "run.adepttech.ca"). -->
       <div class="form-field-infix block relative min-w-0"
-           [class.flex-auto]="!fitContent"
-           [class.flex-none]="fitContent"
-           [class.w-max]="fitContent"
+           [class.flex-auto]="!fitContent()"
+           [class.flex-none]="fitContent()"
+           [class.w-max]="fitContent()"
            [style.padding]="'0.25em 0'"
-           [style.min-width.px]="fitContent ? null : 180">
+           [style.min-width.px]="fitContent() ? null : 180">
 
         <!-- Input content -->
         <ng-content select="input, textarea, select, app-select"></ng-content>
@@ -52,7 +52,7 @@
             [for]="inputId"
             [class]="labelClasses"
             [attr.aria-hidden]="true">
-            @if (isRequired && !hideRequiredMarker) {
+            @if (isRequired && !hideRequiredMarker()) {
               <span class="text-danger mr-0.5 font-medium" aria-label="required">*</span>
             }
             {{ placeholder }}
@@ -96,7 +96,7 @@
     </div>
 
     <!-- Underline (for standard and legacy appearances) -->
-    @if (appearance === 'standard' || appearance === 'legacy') {
+    @if (appearance() === 'standard' || appearance() === 'legacy') {
       <div class="form-field-underline relative w-full h-px transition-colors duration-200"
            [class]="underlineColorClasses">
       <span class="form-field-ripple absolute bottom-0 left-0 w-full h-0.5

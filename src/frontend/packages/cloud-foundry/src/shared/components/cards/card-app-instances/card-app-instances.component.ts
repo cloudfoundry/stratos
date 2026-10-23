@@ -2,11 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
-  Input,
   OnDestroy,
   ViewChild,
   computed,
   inject,
+  input
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
@@ -74,9 +74,9 @@ export class CardAppInstancesComponent implements OnDestroy {
   private cups = inject(CurrentUserPermissionsService);
 
   /** Should the card show the scale/edit actions? */
-  @Input() showActions = false;
+  readonly showActions = input(false);
 
-  @Input() busy: any;
+  readonly busy = input<any>();
 
   @ViewChild('instanceField', { static: true }) instanceField!: ElementRef;
 

@@ -1,30 +1,30 @@
 <!-- history is set when used in the dropdown menu to only show recent history-->
 
-@if (!history && ((hasHits$ | async) === true)) {
+@if (!history() && ((hasHits$ | async) === true)) {
   <app-card>
     <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
   </app-card>
 }
 
-@if (!history && ((hasHits$ | async) === false)) {
+@if (!history() && ((hasHits$ | async) === false)) {
   <ng-container *ngTemplateOutlet="noActivity"></ng-container>
 }
 
-@if (history) {
+@if (history()) {
   <div>
     @if ((hasHits$ | async) === true) {
       <div>
         <ng-container *ngTemplateOutlet="historyTemplate"></ng-container>
       </div>
     } @else {
-      <app-no-content-message [mode]="mode" icon="schedule" [secondLine]="{text: 'Session activity will appear here'}"></app-no-content-message>
+      <app-no-content-message [mode]="mode()" icon="schedule" [secondLine]="{text: 'Session activity will appear here'}"></app-no-content-message>
     }
   </div>
 }
 
 <ng-template #historyTemplate>
   @if (recentEntities$ | async; as recentEntities) {
-    <div class="recent-tab" [ngClass]="{standalone: !!history}">
+    <div class="recent-tab" [ngClass]="{standalone: !!history()}">
       @if (recentEntities && recentEntities.length > 0) {
         <div class="recent-entities">
           @for (countedEntity of recentEntities; track countedEntity) {
@@ -55,5 +55,5 @@
 </ng-template>
 
 <ng-template #noActivity>
-  <app-no-content-message [mode]="mode" icon="schedule" [secondLine]="{text: 'Session activity will appear here'}"></app-no-content-message>
+  <app-no-content-message [mode]="mode()" icon="schedule" [secondLine]="{text: 'Session activity will appear here'}"></app-no-content-message>
 </ng-template>

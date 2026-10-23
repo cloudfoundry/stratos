@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, OnChanges , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, OnChanges, ChangeDetectionStrategy, input } from '@angular/core';
 
 
 @Component({
@@ -12,7 +12,7 @@ export class ViewBuildpackComponent implements OnInit, OnChanges {
 
   constructor() { }
 
-  @Input() buildPack: string | undefined;
+  readonly buildPack = input<string>();
   isWebLink!: boolean;
 
   ngOnInit() { }

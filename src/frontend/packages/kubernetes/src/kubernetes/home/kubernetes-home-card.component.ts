@@ -1,4 +1,4 @@
-import { Component, Input, Signal, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Signal, computed, inject, signal, ChangeDetectionStrategy, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
@@ -30,7 +30,7 @@ import { CardNumberMetricComponent } from '../../../../core/src/shared/component
 })
 export class KubernetesHomeCardComponent {
 
-  @Input() endpoint!: EndpointModel;
+  readonly endpoint = input.required<EndpointModel>();
 
   // strict: backing field for the @Input() layout setter; assigned before the getter is read in the template
   pLayout!: HomePageCardLayout;
@@ -39,6 +39,8 @@ export class KubernetesHomeCardComponent {
     return this.pLayout;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
       this.pLayout = value;
@@ -90,7 +92,7 @@ export class KubernetesHomeCardComponent {
   // Card is instructed to load its view by the container, whn it is visible
   load(): Observable<boolean> {
     // strict: home cards only render for registered endpoints, which always have a guid
-    const guid = this.endpoint.guid!;
+    const guid = this.endpoint().guid!;
     // Drives the count computeds; pods auto-load on read, node/namespace
     // need an explicit refresh to populate their cluster caches.
     this.guidSig.set(guid);

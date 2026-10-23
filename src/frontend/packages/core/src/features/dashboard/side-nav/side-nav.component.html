@@ -52,7 +52,7 @@
 
     <!-- Navigation Items -->
     <ul class="nav-items flex-1 py-2 space-y-1">
-      @for (tab of tabs; track tab) {
+      @for (tab of tabs(); track tab) {
         <li class="nav-item-container">
           @if (revealHiddenItems || !tab.hidden || (tab.hidden && (tab.hidden | async) === false)) {
             <a

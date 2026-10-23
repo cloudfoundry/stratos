@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild, input } from '@angular/core';
 
 import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard.component';
 
@@ -15,8 +15,8 @@ import { CopyToClipboardComponent } from '../copy-to-clipboard/copy-to-clipboard
 })
 export class CodeBlockComponent implements OnInit, OnDestroy {
 
-  @Input() hideCopy!: boolean;
-  @Input() codeBlockStyle!: string;
+  readonly hideCopy = input.required<boolean>();
+  readonly codeBlockStyle = input.required<string>();
   text = '';
   private observer!: MutationObserver;
 

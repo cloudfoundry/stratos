@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnInit, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
 
 import { PercentagePipe } from '../../pipes/percentage.pipe';
 
@@ -16,19 +16,19 @@ import { PercentagePipe } from '../../pipes/percentage.pipe';
 })
 export class UsageGaugeComponent implements OnInit {
 
-  @Input() public title!: string;
+  public readonly title = input.required<string>();
 
-  @Input() public value!: number;
+  public readonly value = input.required<number>();
 
-  @Input() public valueText!: string;
+  public readonly valueText = input.required<string>();
 
-  @Input() public barOnly!: boolean;
+  public readonly barOnly = input.required<boolean>();
 
   // Change bar color to warning if this threshold is reached
-  @Input() public warningAt!: number;
+  public readonly warningAt = input.required<number>();
 
   // Change bar color to error if this threshold is reached
-  @Input() public errorAt!: number;
+  public readonly errorAt = input.required<number>();
 
   constructor() { }
 

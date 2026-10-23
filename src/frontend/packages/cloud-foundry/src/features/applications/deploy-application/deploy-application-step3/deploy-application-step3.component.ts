@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component, EnvironmentInjector, Input, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, EnvironmentInjector, OnDestroy, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import {
   BehaviorSubject,
@@ -46,7 +46,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
 
 
   // The app being redeployed; none on a first deploy
-  @Input() redeployAppGuid?: string;
+  readonly redeployAppGuid = input<string>();
 
   // The deployed app: the redeployed one, or the one a first deploy
   // looked up. Each deploy starts again from the input.
@@ -253,7 +253,7 @@ export class DeployApplicationStep3Component implements OnDestroy {
     this.disablePreviousSubject.next(true);
     this.appNotFoundSubject.next(false);
     // A retry of a first deploy may deploy another app; look it up again
-    this.appGuid = this.redeployAppGuid;
+    this.appGuid = this.redeployAppGuid();
 
     // If we were passed data, then we came from the File System step
     if (fsDeployer) {

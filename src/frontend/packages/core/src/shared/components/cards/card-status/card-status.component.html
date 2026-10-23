@@ -1,4 +1,4 @@
-@if ((status$ | async); as status) {
+@if ((status$() | async); as status) {
   <div
     class="absolute top-0 left-0 w-full h-1 rounded-t-lg transition-colors duration-[1ms] ease-in"
      [ngClass]="{

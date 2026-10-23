@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Output, EventEmitter, forwardRef, input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR, FormsModule } from '@angular/forms';
 
 
@@ -25,15 +25,22 @@ export interface MatSlideToggleChange {
   ]
 })
 export class CustomSlideToggleComponent implements ControlValueAccessor {
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() disabled = false;
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() checked = false;
-  @Input() value: any;
-  @Input() name!: string;
-  @Input() id!: string;
-  @Input() required = false;
-  @Input() labelPosition: 'before' | 'after' = 'after';
-  @Input() color: 'primary' | 'accent' | 'warn' = 'primary';
-  @Input() invalid = false;
+  readonly value = input<any>();
+  readonly name = input.required<string>();
+  readonly id = input.required<string>();
+  readonly required = input(false);
+  readonly labelPosition = input<'before' | 'after'>('after');
+  readonly color = input<'primary' | 'accent' | 'warn'>('primary');
+  readonly invalid = input(false);
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() errorMessage = '';
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-slide-toggle which emits (change)

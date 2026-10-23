@@ -1,4 +1,4 @@
-import { Directive, Input, ElementRef, Renderer2, OnDestroy, HostListener, SecurityContext, inject, numberAttribute } from '@angular/core';
+import { Directive, ElementRef, Renderer2, OnDestroy, HostListener, SecurityContext, inject, numberAttribute, input } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { setSanitizedHTML } from '../../../core/browser-helper';
@@ -14,14 +14,14 @@ export class CustomTooltipDirective implements OnDestroy {
   private renderer = inject(Renderer2);
   private sanitizer = inject(DomSanitizer);
 
-  @Input('matTooltip') tooltipText: string = '';
-  @Input('matTooltipPosition') position: 'above' | 'below' | 'left' | 'right' = 'above';
+  readonly tooltipText = input<string>('', { alias: "matTooltip" });
+  readonly position = input<'above' | 'below' | 'left' | 'right'>('above', { alias: "matTooltipPosition" });
   // eslint-disable-next-line @angular-eslint/no-input-rename -- intentional: drop-in replacement for Angular Material's matTooltip; the matTooltipClass alias IS the public API
-  @Input('matTooltipClass') tooltipClass: string = '';
+  readonly tooltipClass = input<string>('', { alias: "matTooltipClass" });
   // Coerce attribute-form values (matTooltipShowDelay="1000") like Material did
-  @Input({ alias: 'matTooltipShowDelay', transform: numberAttribute }) showDelay: number = 250;
-  @Input({ alias: 'matTooltipHideDelay', transform: numberAttribute }) hideDelay: number = 100;
-  @Input('matTooltipDisabled') disabled: boolean = false;
+  readonly showDelay = input<number, unknown>(250, { alias: "matTooltipShowDelay", transform: numberAttribute });
+  readonly hideDelay = input<number, unknown>(100, { alias: "matTooltipHideDelay", transform: numberAttribute });
+  readonly disabled = input<boolean>(false, { alias: "matTooltipDisabled" });
 
   private tooltipElement: HTMLElement | null = null;
   private showTimeout: any;
@@ -29,11 +29,12 @@ export class CustomTooltipDirective implements OnDestroy {
 
   @HostListener('mouseenter', ['$event'])
   onMouseEnter(_event: MouseEvent) {
-    if (!this.disabled && this.tooltipText && this.tooltipText.trim()) {
+    const tooltipText = this.tooltipText();
+    if (!this.disabled() && tooltipText && tooltipText.trim()) {
       this.clearTimeouts();
       this.showTimeout = setTimeout(() => {
         this.showTooltip();
-      }, this.showDelay);
+      }, this.showDelay());
     }
   }
 
@@ -42,7 +43,7 @@ export class CustomTooltipDirective implements OnDestroy {
     this.clearTimeouts();
     this.hideTimeout = setTimeout(() => {
       this.hideTooltip();
-    }, this.hideDelay);
+    }, this.hideDelay());
   }
 
   // Clicking the host usually opens a menu/dialog — don't leave the tooltip
@@ -72,8 +73,9 @@ export class CustomTooltipDirective implements OnDestroy {
 
     const el = this.renderer.createElement('div');
     this.renderer.addClass(el, 'custom-tooltip');
-    if (this.tooltipClass) {
-      this.renderer.addClass(el, this.tooltipClass);
+    const tooltipClass = this.tooltipClass();
+    if (tooltipClass) {
+      this.renderer.addClass(el, tooltipClass);
     }
     // Tooltips DO carry simple HTML markup (e.g. <b> for emphasis), so plain
     // textContent isn't an option. But tooltip text can also carry untrusted
@@ -86,7 +88,7 @@ export class CustomTooltipDirective implements OnDestroy {
     // string, because DomSanitizer.sanitize ends in .toString(). The sanitize
     // call stays because it is what protects the innerHTML fallback inside
     // setSanitizedHTML, on browsers that have no setHTML of their own.
-    const safeHtml = this.sanitizer.sanitize(SecurityContext.HTML, this.tooltipText) ?? '';
+    const safeHtml = this.sanitizer.sanitize(SecurityContext.HTML, this.tooltipText()) ?? '';
     setSanitizedHTML(el, safeHtml);
 
     // Apply visual styles BEFORE positioning so getBoundingClientRect()
@@ -135,7 +137,7 @@ export class CustomTooltipDirective implements OnDestroy {
     // both sides are tight (the viewport-clamp logic below picks up the
     // pieces). 8px is the gap between host and tooltip (matches the
     // explicit `- 8` / `+ 8` offsets in the position calc).
-    let pos = this.position;
+    let pos = this.position();
     if (pos === 'above' && hostRect.top - tooltipRect.height - 8 < 8 &&
         hostRect.bottom + tooltipRect.height + 8 <= window.innerHeight - 8) {
       pos = 'below';

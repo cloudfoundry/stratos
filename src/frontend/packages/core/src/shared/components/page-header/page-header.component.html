@@ -6,7 +6,7 @@
           <!-- Mobile menu toggle -->
           @if (isMobile$ | async) {
             <div class="page-header-nav-toggle-wrapper">
-              @if (!hideSideNavButton) {
+              @if (!hideSideNavButton()) {
                 <button
                   class="p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="Toggle menu"
@@ -93,7 +93,7 @@
             <app-theme-toggle></app-theme-toggle>
 
             <!-- Copy UAA token button -->
-            @if (!hideMenu && !logoutOnly && !environment.hideUserMenu) {
+            @if (!hideMenu() && !logoutOnly() && !environment.hideUserMenu) {
               <div class="relative">
                 <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   (click)="toggleTokenMenu()"
@@ -167,7 +167,7 @@
             }
 
             <!-- User menu -->
-            @if (!hideMenu && !environment.hideUserMenu) {
+            @if (!hideMenu() && !environment.hideUserMenu) {
               <div class="relative">
                 <button id="userMenu"
                   class="page-header-menu-button page-header-usermenu p-2 hover:bg-white/10 rounded-md transition-colors"
@@ -190,7 +190,7 @@
                         </div>
                       </div>
                       <!-- Menu items -->
-                      @if (!logoutOnly) {
+                      @if (!logoutOnly()) {
                         <div class="space-y-1">
                           <button class="w-full text-left px-3 py-2 text-sm text-content-text hover:bg-content-secondary rounded-md transition-colors"
                             routerLink="/about"
@@ -231,10 +231,10 @@
         </div>
 
         <!-- Header events -->
-        @if (!hideEndpointErrors) {
+        @if (!hideEndpointErrors()) {
           <app-page-header-events
             class="header-events z-[1]"
-            [endpointIds$]="endpointIds$">
+            [endpointIds$]="endpointIds$()">
           </app-page-header-events>
         }
       </div>

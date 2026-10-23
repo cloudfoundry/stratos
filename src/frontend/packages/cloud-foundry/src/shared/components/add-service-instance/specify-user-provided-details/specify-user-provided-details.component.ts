@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent } from '@stratosui/core';
 import { HttpParams, HttpRequest } from '@angular/common/http';
-import { Component, Input, OnDestroy, signal, computed, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, OnDestroy, signal, computed, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ReactiveFormsModule, FormsModule, Validators, FormControl, FormGroup, ValidatorFn } from '@angular/forms';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { ActivatedRoute } from '@angular/router';
@@ -219,17 +219,12 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public validate = signal(false);
   private subscriptions: Subscription[] = [];
 
-  @Input()
-  public cfGuid!: string;
-  @Input()
-  public spaceGuid!: string;
-  @Input()
-  public appId!: string;
-  @Input()
-  public serviceInstanceId!: string;
+  public readonly cfGuid = input.required<string>();
+  public readonly spaceGuid = input.required<string>();
+  public readonly appId = input.required<string>();
+  public readonly serviceInstanceId = input.required<string>();
 
-  @Input()
-  public showModeSelection = false;
+  public readonly showModeSelection = input(false);
 
   public appNameChecking = new AppNameUniqueChecking();
   public readonly nameTakenMessage = 'A service instance with this name already exists. Please enter a different one.';
@@ -344,7 +339,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   private boundServiceInstanceGuidsForApp(): Set<string> {
     const out = new Set<string>();
-    if (!this.appId || !this.appDetailData) {
+    const appId = this.appId();
+    if (!appId || !this.appDetailData) {
       return out;
     }
     const bindings = this.appDetailData.serviceBindings();
@@ -355,7 +351,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       // type=app bindings carry an app ref; the picker only cares about
       // bindings to *this* app since UPS-to-other-app bindings remain
       // selectable for binding to the current app.
-      if (b.type === 'app' && b.app?.guid === this.appId && b.serviceInstance?.guid) {
+      if (b.type === 'app' && b.app?.guid === appId && b.serviceInstance?.guid) {
         out.add(b.serviceInstance.guid);
       }
     }
@@ -397,10 +393,10 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
       .set('return', 'counts')
       .set('type', 'user-provided')
       .set('names', name)
-      .set('space_guids', this.spaceGuid);
+      .set('space_guids', this.spaceGuid());
     return new HttpRequest(
       'GET',
-      `/pp/${proxyAPIVersion}/cf/service_instances/${this.cfGuid}`,
+      `/pp/${proxyAPIVersion}/cf/service_instances/${this.cfGuid()}`,
       { params },
     );
   };
@@ -413,9 +409,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   private onNextCreate(): Observable<StepOnNextResult> {
     const data = this.getServiceData();
-    const guid = `user-services-instance-${this.cfGuid}-${this.spaceGuid}-${data.name}`;
+    const guid = `user-services-instance-${this.cfGuid()}-${this.spaceGuid()}-${data.name}`;
     return this.upsService.createUserProvidedService(
-      this.cfGuid,
+      this.cfGuid(),
       guid,
       data as IUserProvidedServiceInstanceData,
     ).pipe(
@@ -465,8 +461,8 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private onNextUpdate(): Observable<StepOnNextResult> {
     const updateData = this.getServiceData();
     return this.upsService.updateUserProvidedService(
-      this.cfGuid,
-      this.serviceInstanceId,
+      this.cfGuid(),
+      this.serviceInstanceId(),
       updateData
     ).pipe(
       switchMap(result => {
@@ -483,7 +479,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
         // syslog drain url, etc.) is included via ?return=summary on the v3
         // bindings handler — refreshing pulls in the just-updated UPS shape.
         // No-op outside the app-detail route hierarchy.
-        const appId = this.appId || this.route.snapshot.queryParamMap.get('appId');
+        const appId = this.appId() || this.route.snapshot.queryParamMap.get('appId');
         const refresh = this.appDetailData && appId
           ? from(this.appDetailData.refresh('serviceBindings'))
           : observableOf<void>(undefined);
@@ -495,7 +491,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   private getServiceData(): IUserProvidedServiceInstanceData {
     const formValue = this.createEditServiceInstance.value;
     return {
-      spaceGuid: this.spaceGuid,
+      spaceGuid: this.spaceGuid(),
       name: formValue.name!,
       route_service_url: formValue.route_service_url || undefined,
       syslog_drain_url: formValue.syslog_drain_url || undefined,

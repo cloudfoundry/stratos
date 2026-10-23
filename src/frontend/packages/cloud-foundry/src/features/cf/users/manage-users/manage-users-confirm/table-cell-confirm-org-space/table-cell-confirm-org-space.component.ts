@@ -15,6 +15,8 @@ import { TableCellCustom } from '../../../../../../../../core/src/shared/compone
 })
 export class TableCellConfirmOrgSpaceComponent extends TableCellCustom<CfRoleChangeWithNames> {
   chipsConfig!: AppChip[];
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(row: CfRoleChangeWithNames) {
     super.row = row;

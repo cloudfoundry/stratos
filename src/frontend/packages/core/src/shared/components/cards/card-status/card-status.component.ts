@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { Observable } from 'rxjs';
 
 import { StratosStatus } from '@stratosui/store';
@@ -33,7 +33,7 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
   ]
 })
 export class CardStatusComponent {
-  @Input() status$!: Observable<StratosStatus>;
+  readonly status$ = input.required<Observable<StratosStatus>>();
 
   protected cardStatus = StratosStatus;
 

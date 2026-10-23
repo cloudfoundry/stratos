@@ -1,7 +1,7 @@
 @if (tile) {
-  <div class="tile-selector-parent" [ngClass]="{'smaller': smaller, 'compact': compact}">
+  <div class="tile-selector-parent" [ngClass]="{'smaller': smaller(), 'compact': compact()}">
     <div class="tile-selector" role="button" tabindex="0"
-      [ngClass]="{'tile-selector__active': active, 'tile-selector__taller': !!tile.description}"
+      [ngClass]="{'tile-selector__active': active(), 'tile-selector__taller': !!tile.description}"
       (click)="onClick(tile)"
       (keydown.enter)="onClick(tile)"
       (keydown.space)="onClick(tile); $event.preventDefault()">

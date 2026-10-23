@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, Input, OnInit, Signal, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, computed, OnInit, Signal, signal, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
@@ -49,7 +49,7 @@ export class InviteUsersCreateComponent implements OnInit {
   public valid$: Observable<boolean>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  readonly redirectUrl = input.required<string>();
 
   /**
    * FWT-957: signal-native step handle. Reuses the existing onNext side
@@ -65,7 +65,7 @@ export class InviteUsersCreateComponent implements OnInit {
       if (res.error) {
         throw new Error(res.errorMessage || 'Failed to invite users');
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
   public stateIn = signal<StackedInputActionsState[]>([]);

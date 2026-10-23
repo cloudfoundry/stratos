@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, Input, OnDestroy, OnInit, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, OnInit, effect, inject, runInInjectionContext, signal, input } from '@angular/core';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -55,7 +55,7 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
     appTasksLimit: FormControl<number | string>;
   }>;
 
-  @Input() quota: StSpaceQuota | null = null;
+  readonly quota = input<StSpaceQuota | null>(null);
 
   constructor() {
     const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
@@ -73,7 +73,8 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   setupForm() {
-    const initial: SpaceQuotaFormValues | null = this.quota ? spaceQuotaToFormValues(this.quota) : null;
+    const quota = this.quota();
+    const initial: SpaceQuotaFormValues | null = quota ? spaceQuotaToFormValues(quota) : null;
 
     this.formGroup = new FormGroup({
       name: new FormControl(initial?.name ?? '', {
@@ -115,7 +116,8 @@ export class SpaceQuotaDefinitionFormComponent implements OnInit, OnDestroy {
   }
 
   validateNameTaken = (value: string | null = null) => {
-    if (this.quota && value === this.quota.name) {
+    const quota = this.quota();
+    if (quota && value === quota.name) {
       return true;
     }
     if (this.allQuotas) {

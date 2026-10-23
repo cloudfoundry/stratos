@@ -1,5 +1,5 @@
 @if (!!offering) {
-  <app-meta-card [clickAction]="!disableCardClick ? goToServiceInstances : undefined"
+  <app-meta-card [clickAction]="!disableCardClick() ? goToServiceInstances : undefined"
     >
     <app-meta-card-title [noMargin]="true">
       <div class="flex flex-row justify-between w-full">

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, Input, ViewChild, input } from '@angular/core';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -64,15 +64,17 @@ export class SimpleUsageChartComponent {
 
   @ViewChild('colors', { static: true }) colorsElement!: ElementRef;
 
-  @Input() chartTitle = 'Usage';
+  readonly chartTitle = input('Usage');
 
-  @Input() height = '250px';
+  readonly height = input('250px');
 
-  @Input() thresholds: IChartThresholds = {
+  readonly thresholds = input<IChartThresholds>({
     danger: 85,
     warning: 70
-  };
+});
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set data(usageData: ISimpleUsageChartData) {
     if (usageData) {
       const {
@@ -147,23 +149,24 @@ export class SimpleUsageChartComponent {
   private getColors(total: number, used: number) {
     const percentage = (used / total) * 100;
     // I'm sure this can be tidies up - NJ
-    if (this.thresholds) {
-      if (this.thresholds.danger !== undefined) {
-        if (this.thresholds.inverted) {
-          if (percentage < this.thresholds.danger) {
+    const thresholds = this.thresholds();
+    if (thresholds) {
+      if (thresholds.danger !== undefined) {
+        if (thresholds.inverted) {
+          if (percentage < thresholds.danger) {
             return this.getColorScheme('danger');
           }
-        } else if (percentage > this.thresholds.danger) {
+        } else if (percentage > thresholds.danger) {
           return this.getColorScheme('danger');
         }
       }
 
-      if (this.thresholds.warning !== undefined) {
-        if (this.thresholds.inverted) {
-          if (percentage < this.thresholds.warning) {
+      if (thresholds.warning !== undefined) {
+        if (thresholds.inverted) {
+          if (percentage < thresholds.warning) {
             return this.getColorScheme('warning');
           }
-        } else if (percentage > this.thresholds.warning) {
+        } else if (percentage > thresholds.warning) {
           return this.getColorScheme('warning');
         }
       }

@@ -1,15 +1,15 @@
 <div class="metadata-item">
   @if (icon && !tooltip) {
-    <app-custom-icon class="metadata-item__icon" [fontSet]="iconFont" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</app-custom-icon>
+    <app-custom-icon class="metadata-item__icon" [fontSet]="iconFont()" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</app-custom-icon>
   }
   @if (icon && tooltip) {
-    <app-custom-icon matTooltip="{{ tooltip }}" [fontSet]="iconFont" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</app-custom-icon>
+    <app-custom-icon matTooltip="{{ tooltip }}" [fontSet]="iconFont()" class="metadata-item__icon" [ngClass]="{'metadata-item__icon_spacer': (icon === '-')}">{{ icon }}</app-custom-icon>
   }
   <div class="metadata-item__content" [ngClass]="{'metadata-item__content-label-only': metadataValue.childNodes.length === 0}">
     @if (label) {
       <div [ngClass]="{'metadata-item__label-only': metadataValue.childNodes.length === 0}" class="metadata-item__label">
         <span>{{ label }}</span>
-        @if (clipboardValue) {
+        @if (clipboardValue()) {
           <!-- Inline copy glyph: sits next to the label like a textual
                trailing character. nbsp gives breathing room without using
                flex gap (which would re-introduce a separate baseline). -->
@@ -29,12 +29,12 @@
       <div #metadataValue>
         <ng-content></ng-content>
       </div>
-      @if (!edit) {
+      @if (!edit()) {
         <div>
           <ng-content select="[view]"></ng-content>
         </div>
       }
-      @if (edit) {
+      @if (edit()) {
         <div>
           <ng-content select="[edit]"></ng-content>
         </div>
