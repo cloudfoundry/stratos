@@ -43,6 +43,7 @@
 # Variables:
 #   FINAL=strip                 Strip prerelease from version (persisted)
 #   DRYRUN=yes                  Preview actions without executing
+#   TO=X.Y.Z[-pre.N]            Version for `make bump set`
 #   VERSION=X.Y.Z               Override version (project convention: no v,
 #                               matching package.json/semver.org — a v is
 #                               accepted too, it's just baked in as given)
@@ -377,8 +378,8 @@ frontend backend website booklets cf github aio pages dist repo version e2e acti
 	@:
 
 # No-op targets for bump modifiers (consumed by BUMP_MOD filter).
-.PHONY: major minor patch rc alpha beta prerelease
-major minor patch rc alpha beta prerelease:
+.PHONY: major minor patch rc alpha beta prerelease set
+major minor patch rc alpha beta prerelease set:
 	@:
 
 # ── Load action registry ─────────────────────────────────────
@@ -1469,20 +1470,28 @@ endif
 # bump uses its own modifier set not shared with other verbs,
 # so it is wired manually rather than via register/declare_verb.
 
-$(_HIDE)BUMP_MOD := $(filter major minor patch dev alpha beta rc prerelease,$(MAKECMDGOALS))
+$(_HIDE)BUMP_MOD := $(filter major minor patch dev alpha beta rc prerelease set,$(MAKECMDGOALS))
 
+# `set` takes its value from TO, not VERSION: VERSION overrides the
+# build's version, so a chained `bump set build` would bake in the bare
+# value without the +build metadata the bump writes to package.json.
 .PHONY: bump
 bump:
 	@set -- $($(_HIDE)BUMP_MOD); \
 	if [ $$# -eq 0 ]; then \
-		echo "Usage: make bump <major|minor|patch|dev|alpha|beta|rc|prerelease>" >&2; \
+		echo "Usage: make bump <major|minor|patch|dev|alpha|beta|rc|prerelease|set TO=X.Y.Z[-pre.N]>" >&2; \
 		exit 1; \
 	elif [ $$# -gt 1 ]; then \
 		echo "Only one bump modifier allowed" >&2; \
 		exit 1; \
 	fi
 	@chmod +x build/version-bump.sh
+ifeq ($($(_HIDE)BUMP_MOD),set)
+	@[ -n "$(TO)" ] || { echo "ERROR: no version to set — set TO=X.Y.Z (e.g. make bump set TO=4.9.4-dev.1)" >&2; exit 1; }
+	@./build/version-bump.sh set $(TO) $(if $(filter yes,$(DRYRUN)),--dry-run)
+else
 	@./build/version-bump.sh bump $($(_HIDE)BUMP_MOD) $(if $(filter yes,$(DRYRUN)),--dry-run)
+endif
 
 # ── Help ──────────────────────────────────────────────────────
 .PHONY: help
@@ -1590,10 +1599,12 @@ help:
 	@echo "  make bump beta            Set/increment beta prerelease (beta.N)"
 	@echo "  make bump rc              Set/increment rc prerelease (rc.N)"
 	@echo "  make bump prerelease      Set/increment prerelease (prerelease.N)"
+	@echo "  make bump set TO=X.Y.Z    Set an exact version (e.g. TO=4.9.4-dev.1)"
 	@echo ""
 	@echo "Variables:"
 	@echo "  FINAL=strip               Strip prerelease from version (persisted)"
 	@echo "  DRYRUN=yes                Preview actions without executing"
+	@echo "  TO=X.Y.Z[-pre.N]          Version for make bump set"
 	@echo "  VERSION=X.Y.Z             Override version (convention: no v — see docs)"
 	@echo "  PLATFORM=os/arch          Override target platform"
 	@echo "  TAG=vX.Y.Z                Tag for publish/unpublish/stamp tag/untag"
