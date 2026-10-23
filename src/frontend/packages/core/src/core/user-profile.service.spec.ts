@@ -12,7 +12,10 @@ import { UserProfileService } from './user-profile.service';
 const SESSION: SessionData = {
   valid: true,
   user: { guid: 'user-1', name: 'admin', admin: true, scopes: [] },
-} as SessionData;
+  sessionExpiresOn: Date.now() + 60 * 60 * 1000,
+  plugins: { demo: false },
+  config: {},
+};
 
 const PROFILE = { id: 'user-1', userName: 'admin', emails: [] } as unknown as UserProfileInfo;
 

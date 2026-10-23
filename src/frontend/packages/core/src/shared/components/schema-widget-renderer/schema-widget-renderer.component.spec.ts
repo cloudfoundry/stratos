@@ -303,7 +303,7 @@ describe('SchemaWidgetRenderer render error fallback', () => {
     let err = '';
     f.componentInstance.renderError.subscribe((m: string) => (err = m));
     // re-run build so the subscription is in place before the emit
-    f.componentInstance.ngOnChanges({} as any);
+    f.componentInstance.ngOnChanges();
     f.detectChanges();
     expect(f.componentInstance.fields()).toEqual([]);
     expect(err).toContain('Edit the parameters directly as JSON');
