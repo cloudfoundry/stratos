@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject, input, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, input, signal, output } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -87,8 +87,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
    */
   readonly formSubmit = input(false);
 
-  @Output() valid = new EventEmitter<boolean>();
-  @Output() authType = new EventEmitter<EndpointAuthTypeConfig>();
+  readonly valid = output<boolean>();
+  readonly authType = output<EndpointAuthTypeConfig>();
 
   // Component reference for the dynamically created auth form
   @ViewChild('authForm', { read: ViewContainerRef, static: true })
@@ -161,7 +161,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       // auth-form component finished swapping, causing submit() to throw
       // on destructuring authType from undefined pData.
       this.setData();
-      this.valid.next(this.endpointForm.valid);
+      this.valid.emit(this.endpointForm.valid);
     }));
 
     // Seed pData up-front so submit() works even if valueChanges hasn't fired.
@@ -169,7 +169,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
 
     // Set initial valid status
     this.endpointForm.updateValueAndValidity();
-    this.valid.next(this.endpointForm.valid);
+    this.valid.emit(this.endpointForm.valid);
   }
 
   ngOnInit() {
@@ -209,7 +209,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       this.createComponent(authType);
     }
     this.bodyContent = '';
-    this.authType.next(authType);
+    this.authType.emit(authType);
   }
 
   // Dynamically create the component for the selected auth type

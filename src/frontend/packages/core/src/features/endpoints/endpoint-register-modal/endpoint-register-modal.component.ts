@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, HostListener, Injector, OnDestroy, OnInit, Output, Type, ViewChild, ViewContainerRef, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, HostListener, Injector, OnDestroy, OnInit, Type, ViewChild, ViewContainerRef, computed, inject, signal, output } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { of } from 'rxjs';
@@ -35,10 +35,10 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
   // so TS doesn't flag the shadowed field as an incompatible base.
   protected override injector = inject(Injector);
 
-  @Output() closeModalEvent = new EventEmitter<void>();
+  readonly closeModalEvent = output<void>();
   // The hosted form registered an endpoint and is done; the page refreshes,
   // says so and closes the dialog.
-  @Output() endpointRegistered = new EventEmitter<void>();
+  readonly endpointRegistered = output<any>();
 
   @ViewChild('endpointFormContainer', { read: ViewContainerRef, static: false })
   // strict: ViewChild populated by Angular before loadEndpointRegistrationComponent runs.

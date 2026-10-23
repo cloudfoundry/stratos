@@ -1,15 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
   OnDestroy,
   OnInit,
-  Output,
   computed,
   effect,
   inject,
   input,
-  signal
+  signal,
+  output
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { Subscription, combineLatest } from 'rxjs';
@@ -87,7 +86,7 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     name: string;
 }>();
 
-  @Output() changeSet = new EventEmitter<CfRoleChange[]>();
+  readonly changeSet = output<CfRoleChange[]>();
 
   // --- Role definitions ---
 

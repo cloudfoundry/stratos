@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
 
 import { ITileConfig } from '../tile/tile-selector.types';
 import { TileSelectorTileComponent } from '../tile-selector-tile/tile-selector-tile.component';
@@ -56,7 +56,7 @@ export class TileSelectorComponent {
     return this.pOptions;
   }
 
-  @Output() selection = new EventEmitter<ITileConfig | null>();
+  readonly selection = output<ITileConfig | null>();
   public selected: ITileConfig | null = null;
 
   constructor() { }

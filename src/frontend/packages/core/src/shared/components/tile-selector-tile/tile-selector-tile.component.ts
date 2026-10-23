@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
 
 import { ITileConfig, ITileIconConfig, ITileImgConfig } from '../tile/tile-selector.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -28,7 +28,7 @@ export class TileSelectorTileComponent {
 
   readonly compact = input(false);
 
-  @Output() tileSelect = new EventEmitter<ITileConfig>();
+  readonly tileSelect = output<ITileConfig>();
 
   public onClick(tile: ITileConfig) {
     this.tileSelect.emit(tile);

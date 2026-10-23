@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 
-import { ChangeDetectionStrategy, Component, EventEmitter, OnChanges, Output, SimpleChanges, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnChanges, SimpleChanges, input, output } from '@angular/core';
 
 import { AppAutoscalerMetricDataLine, AppAutoscalerMetricDataPoint } from '../../../../../store/app-autoscaler.types';
 
@@ -75,10 +75,10 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
   readonly animations = input(true);
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped series' (select) event under the same name
-  @Output() select = new EventEmitter();
-  @Output() activate = new EventEmitter();
-  @Output() deactivate = new EventEmitter();
-  @Output() bandwidth = new EventEmitter<number>();
+  readonly select = output();
+  readonly activate = output();
+  readonly deactivate = output();
+  readonly bandwidth = output<number>();
 
   bars!: any[];
   x: any;

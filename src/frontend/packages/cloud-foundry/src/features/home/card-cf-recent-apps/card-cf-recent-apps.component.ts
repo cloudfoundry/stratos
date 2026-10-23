@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnInit, Output, ChangeDetectionStrategy, computed, input } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, input, output } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AsyncPipe, CommonModule } from '@angular/common';
 import { combineLatest, Observable, of } from 'rxjs';
@@ -44,7 +44,7 @@ export class CardCfRecentAppsComponent implements OnInit {
   public recentApps$!: Observable<APIResource<IApp>[]>;
   readonly allApps$ = input<Observable<APIResource<IApp>[]>>();
   readonly loading$ = input<Observable<boolean>>();
-  @Output() refresh = new EventEmitter<any>();
+  readonly refresh = output<any>();
   readonly endpoint = input<string>();
   readonly mode = input<string>();
   readonly showDate = input(true);

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, Signal, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Injector, OnDestroy, OnInit, ViewChild, ViewContainerRef, signal, Signal, inject, input, output } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -41,7 +41,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   readonly isEmailInput = input(true);
   readonly stackedActionConfig = input.required<StackedInputActionConfig>();
 
-  @Output() stateOut = new EventEmitter<StackedInputActionsUpdate>();
+  readonly stateOut = output<StackedInputActionsUpdate>();
 
   @ViewChild('inputs', { read: ViewContainerRef, static: true })
   inputs!: ViewContainerRef;

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, ViewChild, ViewContainerRef, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewContainerRef, signal, inject, output } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -90,7 +90,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
     this.updateLayout();
   }
 
-  @Output() loaded = new EventEmitter<void>();
+  readonly loaded = output<void>();
 
   // strict: assigned in ngOnInit before the template subscribes
   favorites$!: Observable<any>;
@@ -333,10 +333,10 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
       ).subscribe({
         next: () => {
           this._status.set(Status.OK);
-          this.loaded.next(void 0);
+          this.loaded.emit(void 0);
         },
         error: () => {
-          this.loaded.next(void 0);
+          this.loaded.emit(void 0);
           this._status.set(Status.Error);
           this.sub.unsubscribe();
         }

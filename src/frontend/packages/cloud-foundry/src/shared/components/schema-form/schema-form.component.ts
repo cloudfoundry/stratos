@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, DestroyRef, EventEmitter, Input, Output, computed, inject, signal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, Input, computed, inject, signal, effect, output } from '@angular/core';
 import {
   MonacoEditorComponent,
   MonacoEditorOptions,
@@ -68,8 +68,8 @@ export class SchemaFormComponent {
     }
   }
 
-  @Output() dataChange = new EventEmitter<object | null>();
-  @Output() validChange = new EventEmitter<boolean>();
+  readonly dataChange = output<object | null>();
+  readonly validChange = output<boolean>();
 
   readonly data = signal<object | null>(null);
   readonly parseValid = signal<boolean>(true);   // the ONLY submission gate

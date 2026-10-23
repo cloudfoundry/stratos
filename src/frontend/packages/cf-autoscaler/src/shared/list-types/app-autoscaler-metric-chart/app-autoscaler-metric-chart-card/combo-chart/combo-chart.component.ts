@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, EventEmitter, Output, ViewEncapsulation, OnChanges, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ViewEncapsulation, OnChanges, inject, input, output } from '@angular/core';
 import { ChartConfiguration, ChartEvent } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
 
@@ -54,9 +54,9 @@ export class AppAutoscalerComboChartComponent implements OnChanges {
   readonly scheme = input<any>();
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped chart's (select) event under the same name
-  @Output() select = new EventEmitter();
-  @Output() activate = new EventEmitter();
-  @Output() deactivate = new EventEmitter();
+  readonly select = output();
+  readonly activate = output();
+  readonly deactivate = output();
 
   public comboChartData: ChartConfiguration['data'] = { labels: [], datasets: [] };
   public comboChartOptions: ChartConfiguration['options'] = this.buildOptions();
