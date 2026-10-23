@@ -201,6 +201,22 @@ else
   echo "  ✗ metadata format: got '${actual}'"
 fi
 
+echo "-- SHA comes from this repo, not the caller's directory --"
+setup "v4.9.3"
+other_repo="${TMPDIR}/other-repo"
+git init -q "${other_repo}"
+git -C "${other_repo}" -c user.name=t -c user.email=t@t commit -q --allow-empty -m init
+(cd "${other_repo}" && bash "${BUMP}" bump dev) || true
+expected_sha=$(git -C "${SCRIPT_DIR}/.." rev-parse --short HEAD)
+actual=$(get_version)
+if [[ "${actual}" == *".${expected_sha}" ]]; then
+  PASS=$((PASS + 1))
+  echo "  ✓ SHA is this repo's HEAD"
+else
+  FAIL=$((FAIL + 1))
+  echo "  ✗ SHA: expected *.${expected_sha}, got '${actual}'"
+fi
+
 echo ""
 echo "=== Dry run ==="
 
