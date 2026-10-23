@@ -1,6 +1,6 @@
 import { Component, OnInit, Output, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Observable } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
@@ -32,6 +32,7 @@ export class AppActionMonitorIconComponent implements OnInit {
   public currentState!: Observable<IActionMonitorComponentState>;
 
   ngOnInit() {
-    this.currentState = this.state();
+    // No state stream bound: render nothing, as the async pipe did for undefined.
+    this.currentState = this.state() ?? EMPTY;
   }
 }

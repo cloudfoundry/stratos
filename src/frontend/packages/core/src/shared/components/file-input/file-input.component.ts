@@ -88,18 +88,14 @@ export class FileInputComponent implements OnInit, OnDestroy {
     this.files = [];
     this.name = '';
     this.nativeInputFile.nativeElement.value = '';
-    if (this.formGroupControl) {
-      this.formGroupControl.control.controls[this.fileFormControlName()].setValue('');
-    }
+    this.fileControl()?.setValue('');
     this.fileData.emit('');
   }
 
   onPathInput($event: Event) {
     const input = $event.target as HTMLInputElement;
     this.name = input.value;
-    if (this.formGroupControl) {
-      this.formGroupControl.control.controls[this.fileFormControlName()].setValue(input.value);
-    }
+    this.fileControl()?.setValue(input.value);
     this.fileData.emit(input.value);
   }
 
@@ -116,6 +112,13 @@ export class FileInputComponent implements OnInit, OnDestroy {
   }
 
   private updateFileState(value: string | ArrayBuffer | null) {
-    this.formGroupControl.control.controls[this.fileFormControlName()].setValue(value);
+    this.fileControl()?.setValue(value);
+  }
+
+  // The control this input writes: set only inside a FormGroupName and
+  // with fileFormControlName bound.
+  private fileControl() {
+    const name = this.fileFormControlName();
+    return this.formGroupControl && name ? this.formGroupControl.control.controls[name] : undefined;
   }
 }

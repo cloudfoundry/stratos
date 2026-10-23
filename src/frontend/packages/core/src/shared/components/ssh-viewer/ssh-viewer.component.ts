@@ -37,9 +37,11 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
   public readonly error = computed(() => this.streamError() ?? this.parentError());
 
-  readonly sshStream = input<Observable<any>>();
+  // Both hosts (app SSH, kube console) bind the stream pair; the
+  // terminal cannot connect without them.
+  readonly sshStream = input.required<Observable<any>>();
 
-  readonly sshInput = input<Subject<string>>();
+  readonly sshInput = input.required<Subject<string>>();
 
   public readonly connectionStatus = input<Observable<number>>();
 

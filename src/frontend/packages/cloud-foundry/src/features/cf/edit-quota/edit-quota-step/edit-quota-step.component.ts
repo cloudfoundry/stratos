@@ -35,7 +35,8 @@ export class EditQuotaStepComponent implements OnDestroy {
   private source: SignalSource<StOrgQuota | null>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  readonly redirectUrl = input<string>();
+  // The one host stepper binds where to go on success.
+  readonly redirectUrl = input.required<string>();
 
   private validSignal = signal(false);
   private formStatusSub?: Subscription;

@@ -219,8 +219,9 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
   public validate = signal(false);
   private subscriptions: Subscription[] = [];
 
-  public readonly cfGuid = input<string>();
-  public readonly spaceGuid = input<string>();
+  // The one host (add-service-instance) always binds both.
+  public readonly cfGuid = input.required<string>();
+  public readonly spaceGuid = input.required<string>();
   public readonly appId = input<string>();
   public readonly serviceInstanceId = input<string>();
 
@@ -460,9 +461,12 @@ export class SpecifyUserProvidedDetailsComponent implements OnDestroy {
 
   private onNextUpdate(): Observable<StepOnNextResult> {
     const updateData = this.getServiceData();
+    // Update mode is set from the route, which also names the instance
+    // that initUpdate loaded.
+    const serviceInstanceId = this.serviceInstanceId() || this.route.snapshot.params.serviceInstanceId;
     return this.upsService.updateUserProvidedService(
       this.cfGuid(),
-      this.serviceInstanceId(),
+      serviceInstanceId,
       updateData
     ).pipe(
       switchMap(result => {

@@ -17,14 +17,15 @@ const APP_METRICS_BASE_URL = '/pp/v1/metrics';
 })
 export class ApplicationInstanceChartComponent implements OnInit {
 
-  protected readonly appGuid = input<string>();
+  // The request cannot be built without the app, endpoint and query.
+  protected readonly appGuid = input.required<string>();
 
-  protected readonly endpointGuid = input<string>();
+  protected readonly endpointGuid = input.required<string>();
 
-  protected readonly yAxisLabel = input<string>();
+  protected readonly yAxisLabel = input('');
 
   // Prometheus query string
-  protected readonly queryString = input<string>();
+  protected readonly queryString = input.required<string>();
 
   protected readonly seriesTranslation = input<string>();
 

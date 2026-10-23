@@ -40,7 +40,7 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
     if (value === undefined || value === '') {
       this.handleNoValue();
     } else {
-      this.handleValue();
+      this.handleValue(value);
     }
   }
 
@@ -48,8 +48,8 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
     this.formattedValue = '-';
   }
 
-  handleValue() {
-    if (this.value().toString() === 'true') {
+  handleValue(value: string) {
+    if (value.toString() === 'true') {
       this.formattedValue = 'Yes';
     } else {
       this.formattedValue = 'No';
@@ -57,10 +57,11 @@ export class CardBooleanMetricComponent implements OnInit, OnChanges {
   }
 
   goToLink() {
-    if (typeof (this.link()) === 'string') {
-      this.router.navigate([this.link()]);
+    const link = this.link();
+    if (typeof link === 'string') {
+      this.router.navigate([link]);
     } else {
-      this.link()?.();
+      link?.();
     }
   }
 }

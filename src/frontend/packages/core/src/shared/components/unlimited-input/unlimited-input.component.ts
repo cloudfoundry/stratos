@@ -45,11 +45,12 @@ import { CF_QUOTA_UNLIMITED } from "../../../core/cf-quota.types";
 export class UnlimitedInputComponent implements OnInit {
   public ctrlContainer = inject(FormGroupDirective);
 
-  readonly name = input<string>();
+  // The form control to drive; every host names one.
+  readonly name = input.required<string>();
   readonly value = input<any>();
-  readonly required = input<boolean>();
+  readonly required = input(false);
   readonly type = input<string>();
-  readonly placeholder = input<string>();
+  readonly placeholder = input('');
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
   //  and migrating would break narrowing currently.

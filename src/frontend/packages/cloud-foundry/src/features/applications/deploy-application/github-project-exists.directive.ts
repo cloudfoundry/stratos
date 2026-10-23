@@ -99,7 +99,7 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
   }
 
   private getTypeAndEndpointWithAuth(): [GitSCMType, string, string, string] | null {
-    const res = this.appGithubProjectExists().split(',');
+    const res = (this.appGithubProjectExists() ?? '').split(',');
     if (res.length >= 4) {
       // A PAT can legitimately contain commas — rejoin everything after the
       // scm type + endpoint guid + base URL so the token is passed intact.

@@ -48,7 +48,7 @@ export class ChartDetailsVersionsComponent {
 
   showMoreLink(): boolean {
     const versions = this.versions();
-    return versions && versions.length > 5 && !this.showAllVersions;
+    return !!versions && versions.length > 5 && !this.showAllVersions;
   }
 
   setShowAllVersions() {
@@ -67,7 +67,7 @@ export class ChartDetailsVersionsComponent {
 
   getNonDevelopmentVersion(): ChartVersion[] {
     const nonDevel: ChartVersion[] = [];
-    for (const version of this.versions()) {
+    for (const version of this.versions() ?? []) {
       if (version.attributes.version.indexOf("-") === -1) {
         nonDevel.push(version);
       }

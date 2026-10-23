@@ -64,7 +64,8 @@ export class EditSpaceStepComponent extends AddEditSpaceStepBase implements OnIn
   private formStatusSub?: Subscription;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  readonly redirectUrl = input<string>();
+  // The one host stepper binds where to go on success.
+  readonly redirectUrl = input.required<string>();
 
   /**
    * FWT-957: signal-native step handle. Performs the two-stage update

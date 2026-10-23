@@ -102,7 +102,7 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
           }
         </span>
       </div>
-      @if (isAdding() && isAdding()()) {
+      @if (isAdding()?.()) {
         <!-- Inline add-form slot. When the consumer flips its isAdding signal
              true, the right side of the row swaps the add button for the
              projected form. Used by Variables (Name/Value inputs + save/

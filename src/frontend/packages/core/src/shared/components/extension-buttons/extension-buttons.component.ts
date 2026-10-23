@@ -30,7 +30,11 @@ export class ExtensionButtonsComponent implements OnInit {
   readonly type = input<StratosActionType>();
 
   ngOnInit() {
-    this.extensionActions = getActionsFromExtensions(this.type()).map(value => ({
+    const type = this.type();
+    if (!type) {
+      return;
+    }
+    this.extensionActions = getActionsFromExtensions(type).map(value => ({
       ...value,
       visible$: value.visible$ || of(true)
     }));
