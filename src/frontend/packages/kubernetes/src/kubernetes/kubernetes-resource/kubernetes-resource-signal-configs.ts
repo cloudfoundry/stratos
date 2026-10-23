@@ -46,6 +46,7 @@ import {
   KubeStorageClass,
   StratosError,
 } from '../../services/endpoint-data/kube-types';
+import { errorsForEndpoint, kubeListErrorState } from '../list-types/kube-list-errors';
 import { KubeSortSpec, KubeViewPipeline } from '../list-types/kube-view-pipeline';
 import { KubernetesSignalConfigContext } from './kubernetes-signal-config-registry';
 
@@ -78,9 +79,11 @@ function formatAge(iso?: string): string {
 //
 // `dataSignal` is a Signal<T[]> that re-emits when the underlying data
 // service updates. `nameFilter` and `sort` are WritableSignals so the
-// signal-list toolbar can drive them directly.
+// signal-list toolbar can drive them directly. `errors` are the list's
+// own load failures for `kubeGuid` (see kubeListErrorState).
 function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
   injector: Injector,
+  kubeGuid: string,
   stateKey: string,
   dataSignal: Signal<T[]>,
   sortExtractors: Map<string, (row: T) => unknown>,
@@ -146,16 +149,7 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
     pageIndex: state.pageIndex,
     pageSize: state.pageSize,
     isAnyLoading: isLoading,
-    errorsByCnsi: computed(() => {
-      const map = new Map<string, unknown>();
-      const errs = errors();
-      if (errs.length) {
-        // Group all errors under the first affected guid (or 'unknown').
-        const guid = errs[0]?.affected?.[0] ?? 'unknown';
-        map.set(guid, errs);
-      }
-      return map;
-    }),
+    ...kubeListErrorState(kubeGuid, errors),
     columns,
     getRowKey,
     emptyMessage,
@@ -172,6 +166,13 @@ function buildSignalListConfig<T extends { metadata?: { name?: string } }>(
     viewMode: state.viewMode,
     sort,
   };
+}
+
+// A list's load failures: the data service's errors for this endpoint.
+// A workload view is socket-fed and has no Retry, so it shows none.
+const NO_ERRORS = signal<StratosError[]>([]).asReadonly();
+function listErrors(ctx: KubernetesSignalConfigContext, errors: Signal<StratosError[]>): Signal<StratosError[]> {
+  return ctx.isWorkloadView ? NO_ERRORS : errorsForEndpoint(ctx.kubeGuid, errors);
 }
 
 // Factory: Pods (entity type `pod` in kubeEntityCatalog). Switches
@@ -255,6 +256,7 @@ export function buildPodsSignalConfig(
 
   return buildSignalListConfig<KubePod>(
     injector,
+    ctx.kubeGuid,
     'kube-resource-pods',
     dataSignal,
     sortExtractors,
@@ -264,7 +266,7 @@ export function buildPodsSignalConfig(
     'No pods match the current filter',
     'Loading pods…',
     ctx.isWorkloadView ? undefined : () => podData.refresh({ kubeGuid: ctx.kubeGuid }),
-    podData.errors(),
+    listErrors(ctx, podData.errors()),
     signal(false).asReadonly(),
   );
 }
@@ -341,6 +343,7 @@ export function buildServicesSignalConfig(
 
   return buildSignalListConfig<KubeService>(
     injector,
+    ctx.kubeGuid,
     'kube-resource-services',
     dataSignal,
     sortExtractors,
@@ -350,7 +353,7 @@ export function buildServicesSignalConfig(
     'No services match the current filter',
     'Loading services…',
     ctx.isWorkloadView ? undefined : () => serviceData.refresh({ kubeGuid: ctx.kubeGuid }),
-    serviceData.errors(),
+    listErrors(ctx, serviceData.errors()),
     signal(false).asReadonly(),
   );
 }
@@ -396,6 +399,7 @@ export function buildNamespacesSignalConfig(
 
   return buildSignalListConfig<KubeNamespace>(
     injector,
+    ctx.kubeGuid,
     'kube-resource-namespaces',
     dataSignal,
     sortExtractors,
@@ -405,7 +409,7 @@ export function buildNamespacesSignalConfig(
     'No namespaces match the current filter',
     'Loading namespaces…',
     () => namespaceData.refresh({ kubeGuid: ctx.kubeGuid }),
-    namespaceData.errors(),
+    namespaceData.listErrors(ctx.kubeGuid),
     signal(false).asReadonly(),
   );
 }
@@ -414,7 +418,10 @@ export function buildNamespacesSignalConfig(
 // Wave-3 generic-resource factories
 // ---------------------------------------------------------------------------
 // Each factory mirrors buildServicesSignalConfig — eager-refresh data
-// service, namespace dropdown switches between cluster/namespace fetch.
+// service; the namespace dropdown switches the read between the cluster
+// and namespace caches. Only the cluster list is fetched here (the
+// shell's initial refresh, the toolbar refresh and Retry), so nothing
+// fills the namespace cache that a selected namespace reads.
 // `buildGenericResourceConfig` collapses the common (data signal +
 // state-key + buildSignalListConfig) call so each per-entity factory only
 // declares its sortExtractors + columns + labels.
@@ -449,6 +456,7 @@ function buildGenericResourceConfig<T extends GenericRow>(
 
   return buildSignalListConfig<T & { kubeGuid: string }>(
     injector,
+    ctx.kubeGuid,
     stateKey,
     dataSignal,
     sortExtractors,
@@ -458,7 +466,7 @@ function buildGenericResourceConfig<T extends GenericRow>(
     emptyFilterMessage,
     loadingMessage,
     ctx.isWorkloadView ? undefined : () => dataSvc.refresh({ kubeGuid: ctx.kubeGuid }),
-    dataSvc.errors(),
+    listErrors(ctx, dataSvc.errors()),
     signal(false).asReadonly(),
   );
 }

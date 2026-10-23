@@ -4,6 +4,7 @@ import { ChangeDetectionStrategy, Component, WritableSignal, inject, signal } fr
 import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
 import { KubeNode } from '../../../services/endpoint-data/kube-types';
+import { kubeListErrorState } from '../../list-types/kube-list-errors';
 import {
   KubernetesNodesSignalConfigService,
 } from '../../list-types/kubernetes-nodes/kubernetes-nodes-signal-config.service';
@@ -45,7 +46,7 @@ export class KubernetesNodesTabComponent {
       pageIndex: this.signalConfig.pageIndex,
       pageSize: this.signalConfig.pageSize,
       isAnyLoading: this.signalConfig.isLoading(),
-      errorsByCnsi: signal(new Map()),
+      ...kubeListErrorState(kubeGuid, this.signalConfig.errors()),
       columns: [
         {
           header: 'Name', key: 'name',

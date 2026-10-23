@@ -5,6 +5,7 @@ import { SignalListComponent, SignalListConfig } from '@stratosui/core';
 
 import { KubernetesNodeService } from '../../services/kubernetes-node.service';
 import { KubePod } from '../../../services/endpoint-data/kube-types';
+import { kubeListErrorState } from '../../list-types/kube-list-errors';
 import {
   KubernetesNodePodsSignalConfigService,
 } from '../../list-types/kubernetes-node-pods/kubernetes-node-pods-signal-config.service';
@@ -38,7 +39,7 @@ export class KubernetesNodePodsComponent {
       pageIndex: this.signalConfig.pageIndex,
       pageSize: this.signalConfig.pageSize,
       isAnyLoading: this.signalConfig.isLoading(),
-      errorsByCnsi: signal(new Map()),
+      ...kubeListErrorState(kubeGuid, this.signalConfig.errors()),
       columns: [
         {
           header: 'Name', key: 'name',

@@ -6,11 +6,16 @@ import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
+import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesNodesTabComponent } from './kubernetes-nodes-tab.component';
+
+const KUBE_GUID = 'kube-1';
+const NODES_URL = '/pp/v1/proxy/api/v1/nodes?limit=500';
 
 describe('KubernetesNodesTabComponent', () => {
   let component: KubernetesNodesTabComponent;
   let fixture: ComponentFixture<KubernetesNodesTabComponent>;
+  let httpMock: HttpTestingController;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
@@ -25,30 +30,45 @@ describe('KubernetesNodesTabComponent', () => {
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();
-  });
-
-  beforeEach(() => {
-    fixture = TestBed.createComponent(KubernetesNodesTabComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
-    // Absorb the initial node fetch dispatched by signalConfig.loadAll()
-    const httpMock = TestBed.inject(HttpTestingController);
-    httpMock.match(() => true);
+    TestBed.overrideProvider(KubernetesEndpointService, { useValue: { kubeGuid: KUBE_GUID } });
+    httpMock = TestBed.inject(HttpTestingController);
   });
 
   afterEach(() => {
     // Absorb any pending company-config / branding requests
-    const httpMock = TestBed.inject(HttpTestingController);
     httpMock.match(() => true);
   });
 
-  it('should create', () => {
+  // The constructor starts the node load; answer it, then let the view settle.
+  const mount = async (nodesResponse: object) => {
+    fixture = TestBed.createComponent(KubernetesNodesTabComponent);
+    component = fixture.componentInstance;
+    httpMock.expectOne(NODES_URL).flush(nodesResponse);
+    await fixture.whenStable();
+  };
+
+  it('should create', async () => {
+    await mount({ [KUBE_GUID]: { items: [] } });
     expect(component).toBeTruthy();
   });
 
-  it('exposes a SignalListConfig once initialized', () => {
+  it('exposes a SignalListConfig once initialized', async () => {
+    await mount({ [KUBE_GUID]: { items: [] } });
     expect(component.listConfig()).toBeDefined();
     const cfg = component.listConfig();
     expect(cfg?.columns?.length).toBeGreaterThan(0);
+  });
+
+  it('shows the failed-load state with the endpoint\'s reason and Retry when the node load fails', async () => {
+    await mount({
+      [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },
+    });
+
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[data-test="empty"]')).toBeNull();
+    expect(el.querySelector('[data-test="empty-error"]')).not.toBeNull();
+    expect(el.querySelector('[data-test="empty-error-detail"]')?.textContent?.trim())
+      .toBe('Error proxing request: dial tcp: i/o timeout');
+    expect(el.querySelector('[data-test="empty-error-retry"]')).not.toBeNull();
   });
 });
