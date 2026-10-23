@@ -12,7 +12,7 @@ PACKAGE_JSON="${PACKAGE_JSON:-${ROOT_DIR}/package.json}"
 build_metadata() {
   local date_stamp sha_stamp
   date_stamp=$(date -u +%Y%m%d)
-  sha_stamp=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  sha_stamp=$(git -C "${ROOT_DIR}" rev-parse --short HEAD 2>/dev/null || echo "unknown")
   echo "+build.${date_stamp}.${sha_stamp}"
 }
 
