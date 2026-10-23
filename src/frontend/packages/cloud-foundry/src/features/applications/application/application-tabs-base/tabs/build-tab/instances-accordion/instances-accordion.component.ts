@@ -26,6 +26,9 @@ import {
 import {
   CfAppInstancesSignalConfigService,
 } from '../../../../../../../shared/signal-list-configs/app-instance/cf-app-instances-signal-config.service';
+import {
+  CfAppInstanceCellsService,
+} from '../../../../../../../shared/signal-list-configs/app-instance/cf-app-instance-cells.service';
 import { AppInstanceActionsService } from '../../../../../../../shared/services/app-instance-actions.service';
 import { InstanceUsageChartComponent } from '../../../../../../../shared/components/instance-usage-chart/instance-usage-chart.component';
 import type { StAppStat } from '../../../../../../../services/endpoint-data/stratos-types';
@@ -66,12 +69,14 @@ import { AppDetailDataService } from '../../../../../app-detail-data.service';
   providers: [
     AppInstanceActionsService,
     CfAppInstancesSignalConfigService,
+    CfAppInstanceCellsService,
   ],
 })
 export class InstancesAccordionComponent implements OnDestroy {
   private dataService = inject(AppDetailDataService);
   private actionsService = inject(AppInstanceActionsService);
   private instancesConfig = inject(CfAppInstancesSignalConfigService);
+  private instanceCells = inject(CfAppInstanceCellsService);
   private confirmDialog = inject(ConfirmationDialogService);
   private snackBar = inject(TailwindSnackBarService);
   private router = inject(Router);
@@ -102,8 +107,12 @@ export class InstancesAccordionComponent implements OnDestroy {
   private readonly _isAnyLoading: Signal<boolean> = computed(() => this.dataService.loading().stats);
   private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
 
-  /** SignalListConfig consumed by `<app-signal-list>`. Built once on construction. */
-  readonly listConfig: SignalListConfig<StAppStat>;
+  /**
+   * SignalListConfig consumed by `<app-signal-list>`. Gains a Cell column,
+   * after Index, once `CfAppInstanceCellsService` finds cell metrics for
+   * the app's CF.
+   */
+  readonly listConfig: Signal<SignalListConfig<StAppStat>>;
 
   // ---------------------------------------------------------------------------
   // Header / proportion-bar reads
@@ -150,7 +159,10 @@ export class InstancesAccordionComponent implements OnDestroy {
       return col;
     });
 
-    this.listConfig = {
+    const cellColumn = this.instanceCells.buildColumn();
+    const columnsWithCell = [...columns.slice(0, 1), cellColumn, ...columns.slice(1)];
+
+    const baseConfig: SignalListConfig<StAppStat> = {
       pagedItems: this.instancesConfig.view.pagedItems,
       totalFilteredResults: this.instancesConfig.view.totalFilteredResults,
       totalPages: this.instancesConfig.view.totalPages,
@@ -173,6 +185,10 @@ export class InstancesAccordionComponent implements OnDestroy {
       viewMode: this.instancesConfig.viewMode,
       sort: this.instancesConfig.sort,
     };
+    this.listConfig = computed(() => this.instanceCells.available()
+      ? { ...baseConfig, columns: columnsWithCell }
+      : baseConfig);
+    void this.instanceCells.start();
   }
 
   /**
