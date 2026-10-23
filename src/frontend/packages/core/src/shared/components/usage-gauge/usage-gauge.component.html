@@ -5,11 +5,13 @@
       {{ title() }}
     </div>
   }
+  @let error = errorAt();
+  @let warning = warningAt();
   <div class="usage-gauge__bar">
     <div class="usage-gauge__progress-bar-background"></div>
     <div #usageBar [style.width.%]="value() * 100" [ngClass]="{
-      'usage-gauge__error': errorAt() && value() >= errorAt(),
-      'usage-gauge__warning': warningAt() && value() >= warningAt()
+      'usage-gauge__error': error && value() >= error,
+      'usage-gauge__warning': warning && value() >= warning
     }" class="usage-gauge__progress-bar">
     </div>
   </div>

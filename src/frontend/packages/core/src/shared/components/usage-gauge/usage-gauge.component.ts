@@ -18,7 +18,7 @@ export class UsageGaugeComponent implements OnInit {
 
   public readonly title = input<string>();
 
-  public readonly value = input<number>();
+  public readonly value = input(0);
 
   public readonly valueText = input<string>();
 

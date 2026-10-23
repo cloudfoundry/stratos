@@ -63,8 +63,8 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
   readonly dims = input<any>();
   readonly type = input('standard');
-  readonly series = input<any[]>();
-  readonly seriesLine = input<any[]>();
+  readonly series = input<any[]>([]);
+  readonly seriesLine = input<any[]>([]);
   readonly xScale = input<any>();
   readonly yScale = input<any>();
   readonly colors = input<any>();

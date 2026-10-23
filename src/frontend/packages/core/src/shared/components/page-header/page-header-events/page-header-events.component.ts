@@ -25,7 +25,7 @@ export class PageHeaderEventsComponent implements OnInit {
   // TODO: Skipped for migration because:
   //  Your application code writes to the input. This prevents migration.
   @Input()
-  public endpointIds$!: Observable<string[]>;
+  public endpointIds$?: Observable<string[]>;
   public readonly simpleErrorMessage = input(false);
 
   public errorMessage$!: Observable<string>;

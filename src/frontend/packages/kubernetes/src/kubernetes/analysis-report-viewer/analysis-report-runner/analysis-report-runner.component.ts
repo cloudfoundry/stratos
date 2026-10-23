@@ -25,7 +25,8 @@ export class AnalysisReportRunnerComponent implements OnInit {
   // namespaceAnalyzers$ on the service can emit null, so the union is honest.
   analyzers$!: Observable<KubernetesAnalysisType[] | null>;
   menuOpen = false;
-  readonly kubeId = input<string>();
+  // Every host binds the endpoint the analysis runs against.
+  readonly kubeId = input.required<string>();
   readonly namespace = input<string>();
   readonly app = input<string>();
   public analysisService = inject(KubernetesAnalysisService);

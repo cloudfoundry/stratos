@@ -25,9 +25,10 @@ import { KubernetesNodeService } from '../../../../services/kubernetes-node.serv
 export class KubernetesNodeTagsCardComponent implements OnInit {
 
 
-  readonly mode = input<string>();
+  // Both hosts bind mode (the metadata key to list) and title.
+  readonly mode = input.required<string>();
 
-  readonly title = input<string>();
+  readonly title = input.required<string>();
 
   chipTags$!: Observable<AppChip[]>;  public kubeNodeService = inject(KubernetesNodeService); // strict: assigned in ngOnInit before the template reads it
 
