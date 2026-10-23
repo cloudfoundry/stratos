@@ -35,6 +35,26 @@ const declared = (manifest, sections) =>
 
 const root = declared(read('package.json'), ['dependencies', 'devDependencies'])
 
+// Root packages of one family must name one version. angular-eslint (the
+// meta package eslint.config.mjs imports) left at 22.5.0 while the scoped
+// @angular-eslint/* went to 22.6.0 made bun nest a second template parser
+// with its own compiler copy; label-has-associated-control's instanceof
+// check then failed and lint reported 22 false label warnings (#6039).
+const FAMILIES = [['angular-eslint', '@angular-eslint/']]
+
+const split = FAMILIES.flatMap(([meta, scope]) =>
+  Object.entries(root)
+    .filter(([dep, version]) => meta in root && dep.startsWith(scope) && version !== root[meta])
+    .map(([dep, version]) => `  ${meta} ${root[meta]}  ${dep} ${version}`))
+
+if (split.length) {
+  console.error(`root package family version split (${split.length}):`)
+  console.error(split.join('\n'))
+  console.error('')
+  console.error('Move every package of the family to one version in package.json.')
+  process.exit(1)
+}
+
 const drift = []
 let checked = 0
 
