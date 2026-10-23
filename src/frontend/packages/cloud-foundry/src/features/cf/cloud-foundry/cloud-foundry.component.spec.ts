@@ -3,7 +3,7 @@ import { Signal, WritableSignal, computed, importProvidersFrom, provideZonelessC
 import { Router, provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { of } from 'rxjs';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 
 import { EndpointRowActionsService, TabNavService } from '@stratosui/core';
 import type { EndpointModel } from '@stratosui/store';
@@ -94,7 +94,11 @@ describe('CloudFoundryComponent', () => {
         ['ep-alpha', ['windows2016']],
       ]));
 
-    component.listConfig().sort.set({ field: 'stacks', direction: 'asc' });
+    const sort = component.listConfig().sort;
+    if (!sort) {
+      throw new Error('the endpoint list config has no sort signal');
+    }
+    sort.set({ field: 'stacks', direction: 'asc' });
 
     const guids = component.listConfig().pagedItems().map(e => e.guid);
     // By name ascending this would be [ep-alpha, ep-bravo]; by stack name
@@ -117,7 +121,7 @@ describe('CloudFoundryComponent single-CF shortcut', () => {
   let endpoints: WritableSignal<EndpointModel[]>;
   let resolveReady: () => void;
   let ready: Promise<void>;
-  let navigate: ReturnType<typeof vi.fn>;
+  let navigate: Mock<Router['navigate']>;
 
   // Reproduces a cold load: the component is constructed while the endpoint
   // list is still empty and the first /pp/v1/info call is in flight, and the
@@ -135,7 +139,7 @@ describe('CloudFoundryComponent single-CF shortcut', () => {
   beforeEach(async () => {
     endpoints = signal<EndpointModel[]>([]);
     ready = new Promise<void>(resolve => { resolveReady = resolve; });
-    navigate = vi.fn().mockResolvedValue(true);
+    navigate = vi.fn<Router['navigate']>().mockResolvedValue(true);
 
     const availableCFEndpoints: Signal<EndpointModel[]> = computed(() => endpoints());
     const cfService = {

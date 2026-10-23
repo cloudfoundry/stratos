@@ -131,8 +131,8 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
     const svc = TestBed.inject(CloudFoundrySpaceService);
     const seen: (string | null)[] = [];
     const sub = svc.userRole$.subscribe(r => seen.push(r));
-    users.set([{ guid: 'me', username: 'me', cnsiGuid: 'cf-1', orgRoles: [], spaceRoles: [],
-      spaceRoles: [{ spaceGuid: 'space-1', roles: ['developer'] }] } as unknown as StUser]);
+    users.set([{ guid: 'me', username: 'me', cnsiGuid: 'cf-1', orgRoles: [],
+      spaceRoles: [{ orgGuid: 'org-1', spaceGuid: 'space-1', roles: ['developer'] }] }]);
     TestBed.tick();
     expect(seen.at(-1)).toBe('Developer');
     sub.unsubscribe();

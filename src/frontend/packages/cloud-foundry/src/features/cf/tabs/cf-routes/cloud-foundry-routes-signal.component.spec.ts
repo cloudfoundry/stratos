@@ -21,7 +21,12 @@ import type { StRoute } from '../../../../services/endpoint-data/stratos-types';
 // progress snackbar.
 function makeSnackBar() {
   const ref = { update: vi.fn(), dismiss: vi.fn(), afterDismissed: vi.fn(), onAction: vi.fn(), dismissWithAction: vi.fn() };
-  return { ref, open: vi.fn(() => ref), show: vi.fn(() => ref), error: vi.fn(() => ref) };
+  return {
+    ref,
+    open: vi.fn<TailwindSnackBarService['open']>(() => ref),
+    show: vi.fn<TailwindSnackBarService['show']>(() => ref),
+    error: vi.fn<TailwindSnackBarService['error']>(() => ref),
+  };
 }
 const flush = async (n = 16) => { for (let i = 0; i < n; i++) { await Promise.resolve(); } };
 

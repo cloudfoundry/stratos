@@ -9,8 +9,20 @@ import {
   lastOperationReasonPieces,
 } from './service-instance-columns';
 
-const withOp = (lastOperation?: StLastOperation): StServiceInstance =>
-  ({ guid: 'si-1', cnsiGuid: 'cf-1', name: 'db', type: 'managed', tags: [], lastOperation } as StServiceInstance);
+const withOp = (lastOperation: StLastOperation): StServiceInstance => ({
+  guid: 'si-1',
+  cnsiGuid: 'cf-1',
+  name: 'db',
+  type: 'managed',
+  tags: [],
+  lastOperation,
+  space: { guid: 'space-1' },
+  createdAt: '',
+});
+
+// What the last-operation helpers read from an instance the backend sent
+// without lastOperation, which it leaves out when CF reports none.
+const noOp = {};
 
 describe('lastOperationLabel', () => {
   it('names the operation type with its state', () => {
@@ -34,7 +46,7 @@ describe('lastOperationLabel', () => {
 
   // The backend omits lastOperation when CF sends none.
   it('is empty when there is no last operation', () => {
-    expect(lastOperationLabel(withOp(undefined))).toBe('');
+    expect(lastOperationLabel(noOp)).toBe('');
     expect(lastOperationLabel(withOp({}))).toBe('');
   });
 });
@@ -52,7 +64,7 @@ describe('lastOperationColor', () => {
   });
 
   it('is neutral when there is no last operation', () => {
-    expect(lastOperationColor(withOp(undefined))).toBe('neutral');
+    expect(lastOperationColor(noOp)).toBe('neutral');
   });
 });
 
@@ -69,7 +81,7 @@ describe('lastOperationReason', () => {
 
   it('is empty when a failure has no description', () => {
     expect(lastOperationReason(withOp({ type: 'create', state: 'failed' }))).toBe('');
-    expect(lastOperationReason(withOp(undefined))).toBe('');
+    expect(lastOperationReason(noOp)).toBe('');
   });
 });
 
