@@ -247,6 +247,12 @@ jobs:
         # new one, so it is covered by the existing required check.
         run: bun run typecheck-libs
 
+      - name: Type-check the specs
+        # Vitest does not type-check and the library configs exclude
+        # *.spec.ts, so nothing else type-checks the specs. Like the
+        # library check, it needs the build info generated above.
+        run: bun run typecheck-specs
+
   test-frontend:
     name: Frontend Tests
     runs-on: ubuntu-latest
