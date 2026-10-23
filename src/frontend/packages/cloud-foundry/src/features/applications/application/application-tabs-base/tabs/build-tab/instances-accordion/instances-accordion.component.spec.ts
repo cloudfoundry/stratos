@@ -13,6 +13,8 @@ import { Router, provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { EndpointsDataService } from '@stratosui/store';
+
 import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock } from '@test-framework/cf';
 import {
@@ -43,6 +45,13 @@ describe('InstancesAccordionComponent', () => {
   const spaceSig: WritableSignal<any> = signal(undefined);
   const appSig: WritableSignal<any> = signal(undefined);
   const statsSig: WritableSignal<any[]> = signal([]);
+  // metadata.metrics of the app's CF endpoint; undefined = no metrics endpoint.
+  const endpointMetricsSig: WritableSignal<string | undefined> = signal(undefined);
+
+  const makeEndpointsStub = () => ({
+    whenReady: () => Promise.resolve(),
+    endpoints: computed(() => new Map([['cnsi-1', { guid: 'cnsi-1', metadata: { metrics: endpointMetricsSig() } }]])),
+  });
 
   const makeDataStub = () => ({
     app: appSig.asReadonly(),
@@ -120,6 +129,7 @@ describe('InstancesAccordionComponent', () => {
     spaceSig.set(undefined);
     appSig.set(undefined);
     statsSig.set([]);
+    endpointMetricsSig.set(undefined);
 
     await TestBed.configureTestingModule({
       imports: [InstancesAccordionComponent],
@@ -134,6 +144,7 @@ describe('InstancesAccordionComponent', () => {
         { provide: AppApplicationActionsService, useFactory: makeActionsStub },
         { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
         { provide: TailwindSnackBarService, useFactory: makeSnackStub },
+        { provide: EndpointsDataService, useFactory: makeEndpointsStub },
       ],
       schemas: [CUSTOM_ELEMENTS_SCHEMA],
     })
@@ -171,19 +182,19 @@ describe('InstancesAccordionComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders without throwing', () => {
-    expect(() => fixture.detectChanges()).not.toThrow();
+  it('renders without throwing', async () => {
+    await expect(fixture.whenStable()).resolves.not.toThrow();
   });
 
   it('is collapsed by default', () => {
     expect(component.open()).toBe(false);
   });
 
-  it('builds a signal-list config from the wave-2 service', () => {
-    fixture.detectChanges();
-    expect(component.listConfig).toBeTruthy();
-    expect(component.listConfig.pagedItems).toBeTruthy();
-    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+  it('builds a signal-list config from the wave-2 service', async () => {
+    await fixture.whenStable();
+    expect(component.listConfig()).toBeTruthy();
+    expect(component.listConfig().pagedItems).toBeTruthy();
+    const actionsCol = component.listConfig().columns.find(c => c.key === 'actions');
     expect(actionsCol).toBeTruthy();
     expect(actionsCol!.actions).toBeTruthy();
   });
@@ -235,6 +246,7 @@ describe('InstancesAccordionComponent', () => {
           { provide: AppApplicationActionsService, useFactory: makeActionsStub },
           { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
           { provide: TailwindSnackBarService, useFactory: makeSnackStub },
+          { provide: EndpointsDataService, useFactory: makeEndpointsStub },
         ],
         schemas: [CUSTOM_ELEMENTS_SCHEMA],
       })
@@ -258,7 +270,7 @@ describe('InstancesAccordionComponent', () => {
       const localFixture = TestBed.createComponent(InstancesAccordionComponent);
       const localComponent = localFixture.componentInstance;
       localComponent.toggle(); // expand so the interval control renders
-      localFixture.detectChanges();
+      await localFixture.whenStable();
 
       const select: HTMLSelectElement = localFixture.debugElement.query(By.css('select')).nativeElement;
       // default 5000 → "5s" is the displayed selection, not blank
@@ -267,7 +279,7 @@ describe('InstancesAccordionComponent', () => {
 
       // changing the interval updates the displayed selection
       localComponent.setSampleInterval(10000);
-      localFixture.detectChanges();
+      await localFixture.whenStable();
       expect(select.value).toBe('10000');
       expect(select.options[select.selectedIndex]?.text).toBe('10s');
 
@@ -294,6 +306,7 @@ describe('InstancesAccordionComponent', () => {
           { provide: AppApplicationActionsService, useFactory: makeActionsStub },
           { provide: ConfirmationDialogService, useFactory: makeConfirmStub },
           { provide: TailwindSnackBarService, useFactory: makeSnackStub },
+          { provide: EndpointsDataService, useFactory: makeEndpointsStub },
         ],
         schemas: [CUSTOM_ELEMENTS_SCHEMA],
       })
@@ -317,7 +330,7 @@ describe('InstancesAccordionComponent', () => {
       const localFixture = TestBed.createComponent(InstancesAccordionComponent);
       const localComponent = localFixture.componentInstance;
       localComponent.toggle();          // expand so the three charts render
-      localFixture.detectChanges();
+      await localFixture.whenStable();
       return { localFixture, localComponent };
     };
 
@@ -407,8 +420,8 @@ describe('InstancesAccordionComponent', () => {
   });
 
   it('opens a confirmation dialog before killing an instance, and only kills on confirm', async () => {
-    fixture.detectChanges();
-    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    await fixture.whenStable();
+    const actionsCol = component.listConfig().columns.find(c => c.key === 'actions');
     const rowActions = actionsCol!.actions!({ index: 2 } as any);
     const killAction = rowActions[0];
     expect(killAction.label).toBe('Terminate');
@@ -427,20 +440,20 @@ describe('InstancesAccordionComponent', () => {
 
   describe('SSH row action', () => {
     const rowActionsAt = (row: any) => {
-      const col = component.listConfig.columns.find(c => c.key === 'actions');
+      const col = component.listConfig().columns.find(c => c.key === 'actions');
       return col!.actions!(row);
     };
 
-    it('elides SSH when sshEnabled is false', () => {
-      fixture.detectChanges();
+    it('elides SSH when sshEnabled is false', async () => {
+      await fixture.whenStable();
       appDetailSig.set({ sshEnabled: false });
       spaceSig.set({ allowSsh: true });
       const actions = rowActionsAt({ index: 0, state: 'RUNNING' });
       expect(actions.find(a => a.label === 'SSH')).toBeUndefined();
     });
 
-    it('shows SSH enabled when both flags on and row is RUNNING', () => {
-      fixture.detectChanges();
+    it('shows SSH enabled when both flags on and row is RUNNING', async () => {
+      await fixture.whenStable();
       appDetailSig.set({ sshEnabled: true });
       spaceSig.set({ allowSsh: true });
       const actions = rowActionsAt({ index: 0, state: 'RUNNING' });
@@ -449,8 +462,8 @@ describe('InstancesAccordionComponent', () => {
       expect(ssh!.disabled).toBeFalsy();
     });
 
-    it('SSH invoke navigates to the legacy ssh route with cfGuid/appGuid/index', () => {
-      fixture.detectChanges();
+    it('SSH invoke navigates to the legacy ssh route with cfGuid/appGuid/index', async () => {
+      await fixture.whenStable();
       appDetailSig.set({ sshEnabled: true });
       spaceSig.set({ allowSsh: true });
       const router = TestBed.inject(Router);
@@ -460,6 +473,95 @@ describe('InstancesAccordionComponent', () => {
       const ssh = actions.find(a => a.label === 'SSH');
       ssh!.invoke({ index: 3, state: 'RUNNING' } as any);
       expect(navigateSpy).toHaveBeenCalledWith(['/applications', 'cnsi-1', 'app-1', 'ssh', 3]);
+    });
+  });
+  describe('Cell column', () => {
+    const CELL_HEALTH = 'firehose_value_metric_rep_garden_health_check_failed';
+    const CELL_HEALTH_DEP = 'firehose_value_metric_rep_unhealthy_cell';
+    const APP_CPU_URL = '/pp/v1/metrics/cf/app/app-1/query?query=firehose_container_metric_cpu_percentage';
+
+    const vector = (result: unknown[]) => ({ 'cnsi-1': { status: 'success', data: { resultType: 'vector', result } } });
+    const cellsProbe = (metric: string) => (r: { url: string }) =>
+      r.url === `/pp/v1/metrics/cf/cells/query?query=${metric}`;
+    const columnKeys = () => component.listConfig().columns.map(c => c.key);
+    const cellColumn = () => component.listConfig().columns.find(c => c.key === 'cell');
+
+    // The component checks for cell metrics when it is created, so build
+    // a fresh one after setting the endpoint up.
+    const recreate = async () => {
+      fixture.destroy();
+      fixture = TestBed.createComponent(InstancesAccordionComponent);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    };
+
+    it('is absent when the CF has no metrics endpoint', async () => {
+      const http = TestBed.inject(HttpTestingController);
+      await recreate();
+      expect(columnKeys()).not.toContain('cell');
+      http.expectNone(r => r.url.startsWith('/pp/v1/metrics/'));
+    });
+
+    it('is absent when the cells report no health metric', async () => {
+      endpointMetricsSig.set('metrics-1');
+      const http = TestBed.inject(HttpTestingController);
+      await recreate();
+      (await vi.waitFor(() => http.expectOne(cellsProbe(CELL_HEALTH)))).flush(vector([]));
+      (await vi.waitFor(() => http.expectOne(cellsProbe(CELL_HEALTH_DEP)))).flush(vector([]));
+      await fixture.whenStable();
+      expect(columnKeys()).not.toContain('cell');
+    });
+
+    it('is inserted after Index when cell metrics exist and links each instance to its cell', async () => {
+      endpointMetricsSig.set('metrics-1');
+      statsSig.set([{ index: 0, state: 'RUNNING' }, { index: 1, state: 'RUNNING' }]);
+      const http = TestBed.inject(HttpTestingController);
+      await recreate();
+      (await vi.waitFor(() => http.expectOne(cellsProbe(CELL_HEALTH))))
+        .flush(vector([{ metric: { bosh_job_id: 'cell-a' }, value: [1, '0'] }]));
+
+      // Placement is read from the app-scoped route, for this app's CF.
+      const placement = await vi.waitFor(() => http.expectOne(APP_CPU_URL));
+      expect(placement.request.headers.get('x-cap-cnsi-list')).toBe('cnsi-1');
+      placement.flush(vector([
+        { metric: { instance_index: '0', bosh_job_id: 'cell-a' }, value: [1, '0.1'] },
+        { metric: { instance_index: '1', bosh_job_id: 'cell-b' }, value: [1, '0.2'] },
+      ]));
+      await vi.waitFor(() => expect(cellColumn()?.render({ index: 1 } as any)).toBe('cell-b'));
+      await fixture.whenStable();
+
+      expect(columnKeys()).toEqual(['index', 'cell', 'actions']);
+      expect(cellColumn()!.header).toBe('Cell');
+      expect(cellColumn()!.link!({ index: 0 } as any)).toEqual(['/cloud-foundry', 'cnsi-1', 'cells', 'cell-a', 'summary']);
+      expect(cellColumn()!.render({ index: 0 } as any)).toBe('cell-a');
+    });
+
+    it('reads placement again when an instance has no cell yet', async () => {
+      endpointMetricsSig.set('metrics-1');
+      statsSig.set([{ index: 0, state: 'RUNNING' }]);
+      const http = TestBed.inject(HttpTestingController);
+      await recreate();
+      (await vi.waitFor(() => http.expectOne(cellsProbe(CELL_HEALTH))))
+        .flush(vector([{ metric: { bosh_job_id: 'cell-a' }, value: [1, '0'] }]));
+      (await vi.waitFor(() => http.expectOne(APP_CPU_URL)))
+        .flush(vector([{ metric: { instance_index: '0', bosh_job_id: 'cell-a' }, value: [1, '0.1'] }]));
+      await vi.waitFor(() => expect(cellColumn()?.render({ index: 0 } as any)).toBe('cell-a'));
+
+      // A new instance appears in the stats before it reports metrics.
+      statsSig.set([{ index: 0, state: 'RUNNING' }, { index: 1, state: 'STARTING' }]);
+      await fixture.whenStable();
+      (await vi.waitFor(() => http.expectOne(APP_CPU_URL)))
+        .flush(vector([
+          { metric: { instance_index: '0', bosh_job_id: 'cell-a' }, value: [1, '0.1'] },
+          { metric: { instance_index: '1', bosh_job_id: 'cell-c' }, value: [1, '0.1'] },
+        ]));
+      await vi.waitFor(() => expect(cellColumn()!.render({ index: 1 } as any)).toBe('cell-c'));
+      expect(cellColumn()!.link!({ index: 1 } as any)).toEqual(['/cloud-foundry', 'cnsi-1', 'cells', 'cell-c', 'summary']);
+
+      // Every instance has a cell now: a stats update does not refetch.
+      statsSig.set([{ index: 0, state: 'RUNNING' }, { index: 1, state: 'RUNNING' }]);
+      await fixture.whenStable();
+      http.expectNone(APP_CPU_URL);
     });
   });
 });

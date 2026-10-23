@@ -8,8 +8,9 @@ import type { StAppStat } from '../../../services/endpoint-data/stratos-types';
 import { AppInstanceActionsService } from '../../services/app-instance-actions.service';
 
 // CF App Instances signal-list config — single-app, per-instance rows of
-// the app-detail Instances tab. Tab-scoped (NOT providedIn:'root') so
-// filter/sort state resets when the user navigates between apps.
+// the instances list on the app Summary page (InstancesAccordionComponent).
+// Provided by that component (NOT providedIn:'root'), so filter state
+// resets when the user navigates between apps.
 @Injectable()
 export class CfAppInstancesSignalConfigService {
   private readonly dataService = inject(AppDetailDataService);
@@ -88,10 +89,9 @@ export class CfAppInstancesSignalConfigService {
     });
   }
 
-  // Builds the column set for the Instances tab. The CF Cell column is
-  // omitted here because it needs cf-cell metrics the signal-native data
-  // path doesn't surface yet; the consuming component appends it when
-  // metrics are available (CfCellHelper.hasCellMetrics gates).
+  // Builds the column set for the instances list. The Cell column is not
+  // built here: InstancesAccordionComponent inserts the one from
+  // CfAppInstanceCellsService after Index when the CF has cell metrics.
   buildColumns(): SignalListColumn<StAppStat>[] {
     const columns: SignalListColumn<StAppStat>[] = [
       {
