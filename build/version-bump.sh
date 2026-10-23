@@ -159,6 +159,7 @@ case "${1:-}" in
     esac
     ;;
   set)
+    validate_version "${2:-}"
     commit_version "${2:-}"
     ;;
   show)
