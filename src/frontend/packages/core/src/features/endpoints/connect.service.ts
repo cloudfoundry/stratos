@@ -13,7 +13,7 @@ export interface ConnectAuthParams {
   token?: string;
 }
 import { combineLatest, defer, from, merge, Observable, of, ReplaySubject, Subject, Subscription, timer } from 'rxjs';
-import { delay, distinctUntilChanged, filter, map, pairwise, startWith, switchMap, tap } from 'rxjs/operators';
+import { delay, distinctUntilChanged, filter, finalize, map, pairwise, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../core/endpoints.service';
 import { safeUnsubscribe } from '../../core/utils.service';
@@ -83,6 +83,7 @@ export class ConnectEndpointService {
   private bridgeTeardowns: (() => void)[] = [];
 
   private hasAttemptedConnect!: boolean;
+  private inFlight?: Observable<{ success: boolean, errorMessage: string }>;
   private pData!: ConnectEndpointData;
 
   // We need a delay to ensure the BE has finished registering the endpoint.
@@ -227,14 +228,25 @@ export class ConnectEndpointService {
   }
 
   public submit(): Observable<{ success: boolean, errorMessage: string }> {
-    return defer(() => from(this.saveTls())).pipe(
-      switchMap(saveFailure => {
-        if (saveFailure !== null) {
-          return of({ success: false, errorMessage: saveFailure });
-        }
-        return this.connect();
-      }),
-    );
+    // One connect at a time: a submit while one runs (Enter pressed again,
+    // or Enter after the Connect button) shares it instead of starting
+    // another.
+    return defer(() => {
+      if (!this.inFlight) {
+        this.inFlight = from(this.saveTls()).pipe(
+          switchMap(saveFailure => {
+            if (saveFailure !== null) {
+              return of({ success: false, errorMessage: saveFailure });
+            }
+            return this.connect();
+          }),
+          take(1),
+          finalize(() => this.inFlight = undefined),
+          shareReplay({ bufferSize: 1, refCount: false }),
+        );
+      }
+      return this.inFlight;
+    });
   }
 
   // Save TLS options that differ from the endpoint's, so the connect uses
