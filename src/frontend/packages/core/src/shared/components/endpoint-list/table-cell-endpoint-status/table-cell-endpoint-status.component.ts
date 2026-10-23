@@ -13,6 +13,7 @@ import {
 import { TableCellCustom } from '../../signal-list/cell-base';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { AppBusyComponent } from '../../busy-indicator/busy-indicator.component';
+import { endpointSyncStatusLabel } from '../endpoint-sync-status';
 
 @Component({
   selector: 'app-table-cell-endpoint-status',
@@ -49,6 +50,11 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
       this.endpointsData.isConnecting(this.row?.guid ?? ''),
       this.endpointsData.isDisconnecting(this.row?.guid ?? ''),
     );
+  }
+
+  // Sync status of a type that needs no login (shared with the endpoints list).
+  get syncLabel(): string | null {
+    return endpointSyncStatusLabel(this.row);
   }
 
   // Why the last connect failed, for an endpoint left Disconnected or

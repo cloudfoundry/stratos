@@ -48,25 +48,25 @@
     @if (row.endpoint_metadata?.status; as status) {
       @if (status === 'Synchronized') {
         @if (config.showLabel) {
-          <span class="mr-2">Synchronized </span>
+          <span class="mr-2">{{ syncLabel }}</span>
         }
         <app-custom-icon>cloud_done</app-custom-icon>
       }
       @if (status === 'Synchronizing') {
         @if (config.showLabel) {
-          <span class="mr-2">Synchronizing </span>
+          <span class="mr-2">{{ syncLabel }}</span>
         }
         <app-busy class="text-primary" size="1.25rem" context="endpoint-status"></app-busy>
       }
       @if (status === 'Pending') {
         @if (config.showLabel) {
-          <span class="mr-2">Sync Pending</span>
+          <span class="mr-2">{{ syncLabel }}</span>
         }
         <app-custom-icon>hourglass_empty</app-custom-icon>
       }
       @if (status === 'Failed') {
         @if (config.showLabel) {
-          <span class="mr-2">Synchronization failed</span>
+          <span class="mr-2">{{ syncLabel }}</span>
         }
         <app-custom-icon>sync_problem</app-custom-icon>
       }

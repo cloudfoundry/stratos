@@ -5,7 +5,7 @@ import { of } from 'rxjs';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { vi } from 'vitest';
 import type { EndpointModel } from '@stratosui/store';
-import { EndpointLastErrorService, UserFavoriteManager } from '@stratosui/store';
+import { EndpointLastErrorService, StratosCatalogEndpointEntity, UserFavoriteManager, entityCatalog } from '@stratosui/store';
 
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { EndpointAuthStateService } from '../../../shared/services/endpoint-auth-state.service';
@@ -127,5 +127,35 @@ describe('EndpointsSignalListComponent - expired status + reconnect action', () 
   it('shows no last error on a connected endpoint', () => {
     TestBed.inject(EndpointLastErrorService).record('guid-1', 'Could not connect to the endpoint (400)');
     expect(statusColumn().tooltip?.(ep('connected')) ?? 'Connected').toBe('Connected');
+  });
+
+  // A type that needs no login (Helm repository) is never connected or
+  // disconnected: the card shows its sync status, and so does the list.
+  describe('for a type that needs no login', () => {
+    const repo = (status?: string) => ({
+      guid: 'repo-1', name: 'repo', cnsi_type: 'test-no-login', connectionStatus: 'disconnected',
+      endpoint_metadata: status ? { status } : undefined,
+    } as unknown as EndpointModel);
+
+    beforeEach(() => {
+      entityCatalog.register(new StratosCatalogEndpointEntity({
+        type: 'test-no-login', label: 'No login', labelPlural: 'No login', logoUrl: '', authTypes: [], unConnectable: true,
+      }));
+    });
+
+    it('shows the sync status, not Disconnected', () => {
+      const status = statusColumn();
+      expect(status.render(repo('Synchronized'))).toBe('Synchronized');
+      expect(status.pillColor?.(repo('Synchronized'))).toBe('success');
+      expect(status.render(repo('Synchronizing'))).toBe('Synchronizing');
+      expect(status.render(repo('Pending'))).toBe('Sync Pending');
+      expect(status.render(repo('Failed'))).toBe('Synchronization failed');
+      expect(status.pillColor?.(repo('Failed'))).toBe('danger');
+    });
+
+    it('shows no status when it has none', () => {
+      expect(statusColumn().render(repo())).toBe('—');
+      expect(statusColumn().pillColor?.(repo())).toBe('neutral');
+    });
   });
 });
