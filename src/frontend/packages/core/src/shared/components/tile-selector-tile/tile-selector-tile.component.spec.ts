@@ -23,7 +23,7 @@ describe('TileSelectorTileComponent', () => {
   });
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(TileSelectorTileComponent) as ComponentFixture<TileSelectorTileComponent<ITileImgConfig>>;
+    fixture = TestBed.createComponent(TileSelectorTileComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

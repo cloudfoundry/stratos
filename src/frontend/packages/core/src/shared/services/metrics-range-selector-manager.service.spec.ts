@@ -6,6 +6,16 @@ import { MetricQueryConfig, MetricQueryType, MetricsRequest } from '@stratosui/s
 import { MetricsRangeSelectorManagerService } from './metrics-range-selector-manager.service';
 import { MetricsRangeSelectorService } from './metrics-range-selector.service';
 
+// Returns the numeric start or end query param; throws when it is missing
+// or not a number, so the arithmetic below runs on real values.
+function numericParam(request: MetricsRequest, key: 'start' | 'end'): number {
+  const value = request.query.params?.[key];
+  if (typeof value !== 'number') {
+    throw new Error(`query param ${key} is ${String(value)}, expected a number`);
+  }
+  return value;
+}
+
 describe('MetricsRangeSelectorManagerService', () => {
   beforeEach(() => {
     TestBed.configureTestingModule({
@@ -49,12 +59,12 @@ describe('MetricsRangeSelectorManagerService', () => {
 
     expect(requests.length).toBe(3);
     expect(tick).toHaveBeenCalledTimes(2);
-    const ends = requests.map(request => request.query.params?.end);
+    const ends = requests.map(request => numericParam(request, 'end'));
     expect(ends[1] - ends[0]).toBe(manager.pollInterval / 1000);
     expect(ends[2] - ends[1]).toBe(manager.pollInterval / 1000);
     for (const request of requests) {
       expect(request.windowValue).toBe('1:hour');
-      expect(request.query.params?.end - request.query.params?.start).toBe(60 * 60);
+      expect(numericParam(request, 'end') - numericParam(request, 'start')).toBe(60 * 60);
     }
   });
 
