@@ -109,3 +109,34 @@ func TestProxyRequestReportsAnEndpointThatTimedOut(t *testing.T) {
 		t.Errorf("got %s, want an error entry for slow-endpoint with 504 %q", rec.Body.String(), "Request timed out")
 	}
 }
+
+// buildJSONResponse is given the endpoints to report on. One with no
+// response must get an error entry, not a nil dereference. (Its only
+// caller, SendProxiedResponse, passes the response keys, so it cannot
+// happen there today.)
+func TestBuildJSONResponseReportsAnEndpointWithNoResponse(t *testing.T) {
+	t.Parallel()
+
+	var built map[string]*json.RawMessage
+	func() {
+		defer func() {
+			if r := recover(); r != nil {
+				t.Fatalf("buildJSONResponse panicked: %v", r)
+			}
+		}()
+		built = buildJSONResponse([]string{"answered", "missing"}, map[string]*api.CNSIRequest{
+			"answered": {GUID: "answered", StatusCode: http.StatusOK, Response: []byte(`{"items":[]}`)},
+		})
+	}()
+
+	var missing PassthroughError
+	if built["missing"] == nil || json.Unmarshal(*built["missing"], &missing) != nil || missing.Error == nil {
+		t.Fatalf("expected an error entry for the endpoint with no response, got %v", built["missing"])
+	}
+	if missing.Error.StatusCode != http.StatusGatewayTimeout || missing.Error.Status != "Request timed out" {
+		t.Errorf("got %d %q, want %d %q", missing.Error.StatusCode, missing.Error.Status, http.StatusGatewayTimeout, "Request timed out")
+	}
+	if built["answered"] == nil || string(*built["answered"]) != `{"items":[]}` {
+		t.Errorf("expected the answered endpoint's response, got %v", built["answered"])
+	}
+}
