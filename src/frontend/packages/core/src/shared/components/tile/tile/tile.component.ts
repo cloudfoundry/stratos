@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, AfterContentInit, Input, ViewEncapsulation, HostBinding  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, AfterContentInit, ViewEncapsulation, HostBinding, input } from '@angular/core';
 
 @Component({
   selector: 'app-tile',
@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, OnInit, AfterContentInit, Input, Vi
 })
 export class TileComponent implements OnInit, AfterContentInit {
 
-  @Input() size?: string;
+  readonly size = input<string>();
 
   @HostBinding('class.app-tile-1-3') public isOneThirdFixed = false;
 
@@ -20,9 +20,10 @@ export class TileComponent implements OnInit, AfterContentInit {
   }
 
   ngAfterContentInit() {
-    if (this.size) {
+    const size = this.size();
+    if (size) {
 
-      if (this.size === '1of3') {
+      if (size === '1of3') {
         this.isOneThirdFixed = true;
       }
     }

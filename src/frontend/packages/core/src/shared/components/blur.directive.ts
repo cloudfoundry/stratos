@@ -1,16 +1,16 @@
-import { Directive, ElementRef, Input, OnChanges, inject } from '@angular/core';
+import { Directive, ElementRef, OnChanges, inject, input } from '@angular/core';
 
 @Directive({
 selector: '[appBlur]',
 standalone: true
 })
 export class BlurDirective implements OnChanges {
-  @Input() appBlur!: boolean;
+  readonly appBlur = input.required<boolean>();
 
   private element = inject(ElementRef);
 
   public ngOnChanges() {
-    if (this.appBlur) {
+    if (this.appBlur()) {
       this.blur();
     }
   }

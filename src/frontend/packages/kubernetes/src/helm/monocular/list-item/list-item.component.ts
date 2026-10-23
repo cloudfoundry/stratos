@@ -1,5 +1,5 @@
 import { AsyncPipe, NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CustomTooltipDirective } from '@stratosui/core';
 import { Observable, of } from 'rxjs';
@@ -22,18 +22,19 @@ import { Chart } from '../shared/models/chart';
 })
 export class ListItemComponent implements OnInit {
 
-  @Input() height = 'default';
-  @Input() public artifactHubAndHelmRepoTypes$?: Observable<boolean>;
-  @Input() chart!: Chart;
+  readonly height = input('default');
+  public readonly artifactHubAndHelmRepoTypes$ = input<Observable<boolean>>();
+  readonly chart = input.required<Chart>();
 
-  @Input() public detailUrl!: string; // strict: required @Input, always bound by the parent template
+  public readonly detailUrl = input.required<string>(); // strict: required @Input, always bound by the parent template
   public showArtifactHub$!: Observable<boolean>;
 
   ngOnInit() {
-    this.showArtifactHub$ = this.artifactHubAndHelmRepoTypes$ ? this.artifactHubAndHelmRepoTypes$.pipe(
+    const artifactHubAndHelmRepoTypes$ = this.artifactHubAndHelmRepoTypes$();
+    this.showArtifactHub$ = artifactHubAndHelmRepoTypes$ ? artifactHubAndHelmRepoTypes$.pipe(
       map(artifactHubAndHelmRepoTypes =>
         // Only show if we have artifact hub registered, there's other helm repo's also registered and this chart is from artifact hub
-        artifactHubAndHelmRepoTypes && !!this.chart.monocularEndpointId
+        artifactHubAndHelmRepoTypes && !!this.chart().monocularEndpointId
       ),
     ) : of(false);
   }

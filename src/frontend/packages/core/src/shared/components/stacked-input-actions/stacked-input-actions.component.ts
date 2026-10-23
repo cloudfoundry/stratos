@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, Injector, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, Signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, EventEmitter, Injector, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, signal, Signal, inject, input } from '@angular/core';
 import { Observable, Subscription } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 
@@ -37,9 +37,9 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
   private injector = inject(Injector);
 
 
-  @Input() stateIn$!: Observable<StackedInputActionsState[]>;
-  @Input() isEmailInput = true;
-  @Input() stackedActionConfig!: StackedInputActionConfig;
+  readonly stateIn$ = input.required<Observable<StackedInputActionsState[]>>();
+  readonly isEmailInput = input(true);
+  readonly stackedActionConfig = input.required<StackedInputActionConfig>();
 
   @Output() stateOut = new EventEmitter<StackedInputActionsUpdate>();
 
@@ -70,7 +70,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     // Inputs go through setInput so the OnPush component is marked for check.
     componentRef.setInput('key', this.count++);
     componentRef.setInput('position', this.inputs.length - 1);
-    componentRef.setInput('config', this.stackedActionConfig);
+    componentRef.setInput('config', this.stackedActionConfig());
     // Handle when the component wants to be removed
     this.subs.push(stackedAction.remove.subscribe(() => {
       this.removeComponent(stackedAction);
@@ -160,7 +160,7 @@ export class StackedInputActionsComponent implements OnInit, OnDestroy {
     // Add the first component
     this.addComponent();
     // Push state change into their respective components
-    this.subs.push(this.stateIn$.subscribe(states => {
+    this.subs.push(this.stateIn$().subscribe(states => {
       // Disable the 'add new' button
       this.disabled.set(states.some(state => state.result === StackedInputActionResult.PROCESSING));
       // Push state using signal update function

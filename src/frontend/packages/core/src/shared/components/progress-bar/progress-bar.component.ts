@@ -1,10 +1,10 @@
 import {
   Component,
-  Input,
   OnInit,
   OnChanges,
   SimpleChanges,
   ChangeDetectionStrategy,
+  input
 } from "@angular/core";
 import { CommonModule } from "@angular/common";
 
@@ -25,10 +25,10 @@ import { CommonModule } from "@angular/common";
   template: `
     <div
       class="relative w-full overflow-hidden"
-      [class.h-1]="!customHeight"
-      [style.height]="customHeight"
+      [class.h-1]="!customHeight()"
+      [style.height]="customHeight()"
       role="progressbar"
-      [attr.aria-valuenow]="mode === 'determinate' ? value : null"
+      [attr.aria-valuenow]="mode() === 'determinate' ? value() : null"
       aria-valuemin="0"
       aria-valuemax="100"
     >
@@ -37,7 +37,7 @@ import { CommonModule } from "@angular/common";
 
       <!-- Indeterminate animation. Two looks: the Material two-bar slide
            (default) and a gradient sweep; pass variant="sweep" to pin. -->
-      @if (mode === "indeterminate" && variant !== "sweep") {
+      @if (mode() === "indeterminate" && variant() !== "sweep") {
         <!-- Secondary bar (darker, behind) -->
         <div
           class="absolute h-full animate-progress-indeterminate-secondary z-10"
@@ -49,7 +49,7 @@ import { CommonModule } from "@angular/common";
           [ngClass]="progressBarPrimaryClass"
         ></div>
       }
-      @if (mode === "indeterminate" && variant === "sweep") {
+      @if (mode() === "indeterminate" && variant() === "sweep") {
         <div
           class="absolute inset-0 busy-shimmer bg-[length:200%_100%]"
           style="background-image: linear-gradient(90deg,
@@ -60,16 +60,16 @@ import { CommonModule } from "@angular/common";
       }
 
       <!-- Determinate progress -->
-      @if (mode === "determinate") {
+      @if (mode() === "determinate") {
         <div
           class="absolute h-full transition-all duration-300 ease-out"
           [ngClass]="progressBarClass"
-          [style.width.%]="value"
+          [style.width.%]="value()"
         ></div>
       }
 
       <!-- Query animation (reverse indeterminate) -->
-      @if (mode === "query") {
+      @if (mode() === "query") {
         <div
           class="absolute h-full animate-progress-query"
           [ngClass]="progressBarClass"
@@ -77,20 +77,20 @@ import { CommonModule } from "@angular/common";
       }
 
       <!-- Buffer mode (shows two bars) -->
-      @if (mode === "buffer") {
+      @if (mode() === "buffer") {
         <div
           class="absolute h-full transition-all duration-300 ease-out bg-content-border"
-          [style.width.%]="bufferValue"
+          [style.width.%]="bufferValue()"
         ></div>
         <div
           class="absolute h-full transition-all duration-300 ease-out"
           [ngClass]="progressBarClass"
-          [style.width.%]="value"
+          [style.width.%]="value()"
         ></div>
       }
 
       <!-- Solid mode (static bar at 100%) -->
-      @if (mode === "solid") {
+      @if (mode() === "solid") {
         <div
           class="absolute h-full w-full"
           [ngClass]="progressBarClass"
@@ -180,25 +180,20 @@ export class ProgressBarComponent implements OnInit, OnChanges {
    * - query: Shows query animation
    * - solid: Shows a solid bar at 100% (no animation)
    */
-  @Input() mode:
-    | "indeterminate"
-    | "determinate"
-    | "buffer"
-    | "query"
-    | "solid" = "indeterminate";
+  readonly mode = input<"indeterminate" | "determinate" | "buffer" | "query" | "solid">("indeterminate");
 
   /** Indeterminate look: Material two-bar slide (default) or gradient sweep. */
-  @Input() variant?: 'slide' | 'sweep';
+  readonly variant = input<'slide' | 'sweep'>();
 
   /**
    * Progress value (0-100) for determinate mode
    */
-  @Input() value: number = 0;
+  readonly value = input<number>(0);
 
   /**
    * Buffer value (0-100) for buffer mode
    */
-  @Input() bufferValue: number = 0;
+  readonly bufferValue = input<number>(0);
 
   /**
    * Color of the progress bar
@@ -206,12 +201,12 @@ export class ProgressBarComponent implements OnInit, OnChanges {
    * - accent: Cyan
    * - warn: Red
    */
-  @Input() color: "primary" | "accent" | "warn" = "primary";
+  readonly color = input<"primary" | "accent" | "warn">("primary");
 
   /**
    * Optional custom height (CSS value like '2px', '4px', etc.)
    */
-  @Input() customHeight?: string;
+  readonly customHeight = input<string>();
 
   /**
    * CSS classes for the progress bar based on color
@@ -234,7 +229,7 @@ export class ProgressBarComponent implements OnInit, OnChanges {
    * Update the CSS class for the progress bar based on color
    */
   private updateProgressBarClass(): void {
-    switch (this.color) {
+    switch (this.color()) {
       case "primary":
         this.progressBarClass = "bg-brand-500";
         this.progressBarPrimaryClass = "bg-brand-400"; // Lighter blue

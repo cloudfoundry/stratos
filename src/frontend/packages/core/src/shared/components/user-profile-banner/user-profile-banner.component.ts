@@ -20,11 +20,15 @@ export class UserProfileBannerComponent {
   userProfile: any;
   canUseGravatar!: boolean;
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set allowGravatar(allowed: boolean) {
     this.canUseGravatar = allowed;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set user(user: UserProfileInfo) {
     this.userProfile = user;

@@ -74,6 +74,8 @@ export class StackedInputActionComponent implements OnInit, OnDestroy, AfterCont
       uniqueError: 'Email is not unique'
     }
   };
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() stateIn$!: Observable<StackedInputActionsState | null>;
   readonly position = input<number>(0);
   readonly showRemove = input(false);

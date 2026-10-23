@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
@@ -55,12 +55,15 @@ export class ProfileSettingsComponent {
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
 
-  @Input() show: { [settingName: string]: boolean; } = {
+  readonly show = input<{
+    [settingName: string]: boolean;
+}>({
     [ProfileSettingsTypes.GRAVATAR]: true,
     [ProfileSettingsTypes.SESSION_TIMEOUT]: true,
     [ProfileSettingsTypes.POLLING]: true,
     [ProfileSettingsTypes.THEME]: true,
-    [ProfileSettingsTypes.STORAGE]: true };
+    [ProfileSettingsTypes.STORAGE]: true
+});
 
   hasMultipleThemes = true;
 

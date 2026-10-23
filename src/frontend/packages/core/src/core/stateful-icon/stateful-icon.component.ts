@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, TemplateRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, TemplateRef, inject, input } from '@angular/core';
 
 import { StratosStatus } from '@stratosui/store';
 import { CustomIconComponent } from '../../shared/components/custom-material/custom-material.component';
@@ -31,6 +31,8 @@ type StatefulIconDefinition = IconDefinition | IconTemplateDefinition;
 export class StatefulIconComponent {
   private cdr = inject(ChangeDetectorRef);
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set state(state: StratosStatus) {
     this.stateKey = state;
@@ -39,8 +41,7 @@ export class StatefulIconComponent {
   }
   public allStateKeys = StratosStatus;
   public stateKey!: StratosStatus;
-  @Input()
-  public inline = false;
+  public readonly inline = input(false);
 
   private stateDefinitions: {
     [key: string]: StatefulIconDefinition;

@@ -1,4 +1,4 @@
-import { Directive, forwardRef, Input, inject, OnChanges, SimpleChanges } from '@angular/core';
+import { Directive, forwardRef, inject, OnChanges, SimpleChanges, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, NG_ASYNC_VALIDATORS, Validator } from '@angular/forms';
 import { GitSCMService, GitSCMType } from '@stratosui/git';
@@ -29,7 +29,7 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
   // name) changes, so without OnChanges a token/URL added AFTER the project
   // name was entered would never be re-checked, leaving a stale "does not
   // exist" from the earlier unauthenticated / wrong-host lookup.
-  @Input() appGithubProjectExists!: string;
+  readonly appGithubProjectExists = input.required<string>();
 
   private lastValue = '';
   // The auth context (scm,guid,token) used for the last check. `undefined`
@@ -55,7 +55,7 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
     if (!change) {
       return;
     }
-    const auth = this.appGithubProjectExists ?? '';
+    const auth = this.appGithubProjectExists() ?? '';
 
     // First render just records the baseline. Do NOT clear projectExists here:
     // the redeploy path pre-seeds checkProjectExists() before navigating to
@@ -99,7 +99,7 @@ export class GithubProjectExistsDirective implements Validator, OnChanges {
   }
 
   private getTypeAndEndpointWithAuth(): [GitSCMType, string, string, string] | null {
-    const res = this.appGithubProjectExists.split(',');
+    const res = this.appGithubProjectExists().split(',');
     if (res.length >= 4) {
       // A PAT can legitimately contain commas — rejoin everything after the
       // scm type + endpoint guid + base URL so the token is passed intact.

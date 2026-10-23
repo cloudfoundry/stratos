@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, inject, signal, input } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -21,13 +21,16 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   @ViewChild('inputFile', { static: true }) nativeInputFile!: ElementRef;
 
-  @Input() accept!: string;
-  @Input() placeholder = '';
+  readonly accept = input.required<string>();
+  readonly placeholder = input('');
   @Output() fileSelect: EventEmitter<File> = new EventEmitter();
   @Output() fileData: EventEmitter<string> = new EventEmitter();
 
-  @Input() fileFormControlName!: string;
+  readonly fileFormControlName = input.required<string>();
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() buttonLabel = '';
 
   private files!: File[];
@@ -86,7 +89,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
     this.name = '';
     this.nativeInputFile.nativeElement.value = '';
     if (this.formGroupControl) {
-      this.formGroupControl.control.controls[this.fileFormControlName].setValue('');
+      this.formGroupControl.control.controls[this.fileFormControlName()].setValue('');
     }
     this.fileData.emit('');
   }
@@ -95,7 +98,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
     const input = $event.target as HTMLInputElement;
     this.name = input.value;
     if (this.formGroupControl) {
-      this.formGroupControl.control.controls[this.fileFormControlName].setValue(input.value);
+      this.formGroupControl.control.controls[this.fileFormControlName()].setValue(input.value);
     }
     this.fileData.emit(input.value);
   }
@@ -113,6 +116,6 @@ export class FileInputComponent implements OnInit, OnDestroy {
   }
 
   private updateFileState(value: string | ArrayBuffer | null) {
-    this.formGroupControl.control.controls[this.fileFormControlName].setValue(value);
+    this.formGroupControl.control.controls[this.fileFormControlName()].setValue(value);
   }
 }

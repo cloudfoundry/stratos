@@ -2,15 +2,15 @@
   <div class="flex m-[10px]">
     <!-- <img *ngIf="imagePath" class="entity-summary__logo" title="{{ title }}'s image" src="{{ imagePath }}"> -->
     @if (image) {
-      <img class="grow-0 shrink-0 basis-16 max-h-16 self-center h-16 object-contain w-16" title="{{ title }}'s image" [src]="image"
-        (error)="failedImageLoad()" alt="{{ title }}">
+      <img class="grow-0 shrink-0 basis-16 max-h-16 self-center h-16 object-contain w-16" title="{{ title() }}'s image" [src]="image"
+        (error)="failedImageLoad()" alt="{{ title() }}">
     } @else {
-      <app-custom-icon class="grow-0 shrink-0 basis-16 max-h-16 text-[54px]" fontSet="{{fallBackIconFont}}">{{fallBackIcon}}</app-custom-icon>
+      <app-custom-icon class="grow-0 shrink-0 basis-16 max-h-16 text-[54px]" fontSet="{{fallBackIconFont()}}">{{fallBackIcon()}}</app-custom-icon>
     }
 
     <div class="flex-1 ml-[10px]">
       <div class="flex items-baseline">
-        <h1 class="m-0">{{ title }} </h1>
+        <h1 class="m-0">{{ title() }} </h1>
         @if (info) {
           <app-custom-icon class="text-xl ml-[10px] opacity-40" matTooltip="{{ info }}">
           info</app-custom-icon>

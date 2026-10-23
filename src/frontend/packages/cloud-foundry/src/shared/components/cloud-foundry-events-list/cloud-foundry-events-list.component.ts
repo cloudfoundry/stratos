@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectionStrategy, Input, OnChanges, OnInit, SimpleChanges, WritableSignal, computed, effect, inject, signal, untracked } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnChanges, OnInit, SimpleChanges, WritableSignal, computed, effect, inject, signal, untracked, input } from '@angular/core';
 
 import { SignalListCellTemplateDirective, SignalListComponent, SignalListConfig, SignalListDropdown, TailwindDialogService } from '@stratosui/core';
 
@@ -34,13 +34,13 @@ import { EventDetailComponent, hasEventMetadata, parseEventData } from './event-
   ],
 })
 export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
-  @Input() orgGuid?: string;
-  @Input() spaceGuid?: string;
-  @Input() targetGuid?: string;
+  readonly orgGuid = input<string>();
+  readonly spaceGuid = input<string>();
+  readonly targetGuid = input<string>();
   // Restricts visible events to those whose `type` contains this
   // substring. App tabs set this to `'audit.app'` so platform-level
   // events (org/space CRUD) don't bleed into the app event log.
-  @Input() typeMustContain?: string;
+  readonly typeMustContain = input<string>();
 
   cfEndpointService = inject(CloudFoundryEndpointService);
   private eventsConfig = inject(CfAuditEventsSignalConfigService);
@@ -139,7 +139,7 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
   }
 
   private buildListConfig(): SignalListConfig<StAuditEvent> {
-    const isFoundationWide = !this.orgGuid && !this.spaceGuid && !this.targetGuid;
+    const isFoundationWide = !this.orgGuid() && !this.spaceGuid() && !this.targetGuid();
     const filterDropdowns: SignalListDropdown[] = isFoundationWide
       ? [
         {
@@ -230,10 +230,10 @@ export class CloudFoundryEventsListComponent implements OnInit, OnChanges {
   }
 
   private applyBasePredicate(): void {
-    const orgGuid = this.orgGuid;
-    const spaceGuid = this.spaceGuid;
-    const targetGuid = this.targetGuid;
-    const typeMustContain = this.typeMustContain;
+    const orgGuid = this.orgGuid();
+    const spaceGuid = this.spaceGuid();
+    const targetGuid = this.targetGuid();
+    const typeMustContain = this.typeMustContain();
     this.eventsConfig.basePredicate.set((e: StAuditEvent) => {
       if (orgGuid && e.organizationGuid !== orgGuid) return false;
       if (spaceGuid && e.spaceGuid !== spaceGuid) return false;

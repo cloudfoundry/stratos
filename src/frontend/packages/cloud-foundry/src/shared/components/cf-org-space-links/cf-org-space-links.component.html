@@ -15,7 +15,7 @@
   }
 }
 @if (service.getSpaceName() | async) {
-  <a [routerLink]="service.getSpaceURL()" [queryParams]="spaceBreadCrumbs">{{
+  <a [routerLink]="service.getSpaceURL()" [queryParams]="spaceBreadCrumbs()">{{
     service.getSpaceName() | async
   }}</a>
 }

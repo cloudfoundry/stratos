@@ -1,4 +1,4 @@
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { CodeBlockComponent } from '@stratosui/core';
 
@@ -16,8 +16,8 @@ export class CliCommandComponent {
 
   constructor() { }
 
-  @Input() name!: string;
-  @Input() msg!: string;
-  @Input() syntax!: string;
+  readonly name = input.required<string>();
+  readonly msg = input.required<string>();
+  readonly syntax = input.required<string>();
 
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnDestroy, signal, ChangeDetectionStrategy, inject } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, signal, ChangeDetectionStrategy, inject, input } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Observable, of as observableOf, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -35,11 +35,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   private fb = inject(FormBuilder);
 
 
-  @Input()
-  boundAppId!: string;
+  readonly boundAppId = input.required<string>();
 
-  @Input()
-  apps$!: Observable<APIResource<IApp>[]>;
+  readonly apps$ = input.required<Observable<APIResource<IApp>[]>>();
 
   validate = signal<boolean>(true);
   serviceInstanceGuid!: string;
@@ -67,8 +65,9 @@ export class BindAppsStepComponent implements OnDestroy, AfterContentInit {
   }
 
   private setBoundApp() {
-    if (this.boundAppId) {
-      this.apps.setValue(this.boundAppId);
+    const boundAppId = this.boundAppId();
+    if (boundAppId) {
+      this.apps.setValue(boundAppId);
       this.apps.disable();
       this.guideText = 'Specify binding params (optional)';
     }

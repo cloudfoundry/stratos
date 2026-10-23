@@ -1,15 +1,16 @@
-import { ChangeDetectionStrategy, AfterViewInit,
+import {
+  ChangeDetectionStrategy, AfterViewInit,
   Component,
   effect,
   ElementRef,
   EventEmitter,
   forwardRef,
   inject,
-  Input,
   OnDestroy,
   Output,
   ViewChild,
- } from '@angular/core';
+  input
+} from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
@@ -50,8 +51,8 @@ export interface MonacoEditorOptions {
 export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlValueAccessor {
   @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef<HTMLDivElement>;
 
-  @Input() options: MonacoEditorOptions = {};
-  @Input() model?: MonacoEditorModel;
+  readonly options = input<MonacoEditorOptions>({});
+  readonly model = input<MonacoEditorModel>();
   @Output() editorInit = new EventEmitter<MonacoEditorComponent>();
   // Fires for every content change, including ones no ngModel is bound to —
   // consumers without a CVA binding have no other change signal.
@@ -67,7 +68,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     // Callers that pin options.theme opt out of the sync.
     effect(() => {
       const dark = this.branding.isDarkMode();
-      if (!this.editor || this.options.theme || !this.monaco) {
+      if (!this.editor || this.options().theme || !this.monaco) {
         return;
       }
       this.monaco.editor.setTheme(dark ? 'vs-dark' : 'vs');
@@ -109,11 +110,11 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     // Merge default options with provided options
     const editorOptions = {
       value: this.value,
-      language: this.model?.language || 'plaintext',
-      theme: this.options.theme || (this.branding.isDarkMode() ? 'vs-dark' : 'vs'),
+      language: this.model()?.language || 'plaintext',
+      theme: this.options().theme || (this.branding.isDarkMode() ? 'vs-dark' : 'vs'),
       automaticLayout: false,
       readOnly: this.disabled,
-      ...this.options,
+      ...this.options(),
     };
 
     // Create the editor
@@ -121,14 +122,15 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     this.editor = editor;
 
     // Set model if uri is provided
-    if (this.model?.uri) {
-      const uri = monaco.Uri.parse(this.model.uri);
+    const modelValue = this.model();
+    if (modelValue?.uri) {
+      const uri = monaco.Uri.parse(modelValue.uri);
       let model = monaco.editor.getModel(uri);
 
       if (!model) {
         model = monaco.editor.createModel(
           this.value,
-          this.model.language || 'plaintext',
+          modelValue.language || 'plaintext',
           uri
         );
       }
@@ -152,7 +154,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     });
 
     // Setup resize observer if automaticLayout is false
-    if (this.options.automaticLayout === false) {
+    if (this.options().automaticLayout === false) {
       this.setupResizeObserver();
     }
 

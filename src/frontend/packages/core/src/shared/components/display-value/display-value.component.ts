@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 
 
 @Component({
@@ -10,8 +10,11 @@ import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
 })
 export class DisplayValueComponent {
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() label!: string;
-  @Input() value!: string;
+  readonly value = input.required<string>();
 
   constructor() { }
 }

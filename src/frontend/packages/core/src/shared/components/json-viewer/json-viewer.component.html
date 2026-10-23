@@ -1,4 +1,4 @@
-<section class="ngx-json-viewer" [ngClass]="{'small-text': small}">
+<section class="ngx-json-viewer" [ngClass]="{'small-text': small()}">
   @for (segment of segments; track segment) {
     <section
       [ngClass]="['segment', 'segment-type-' + segment.type]">
@@ -24,12 +24,12 @@
       </section>
       @if (segment.expanded && isExpandable(segment)) {
         <section class="children">
-          <app-json-viewer root="false" [json]="segment.value" [expanded]="expanded"></app-json-viewer>
+          <app-json-viewer root="false" [json]="segment.value" [expanded]="expanded()"></app-json-viewer>
         </section>
       }
     </section>
   }
-  @if (root !== 'false' && segments.length === 0) {
+  @if (root() !== 'false' && segments.length === 0) {
     <div>Nothing to show</div>
   }
 </section>

@@ -23,6 +23,9 @@ interface CertsAuthForm {
   ]
 })
 export class KubernetesCertsAuthFormComponent implements IEndpointAuthComponent {
+  // TODO: Skipped for migration because:
+  //  This input overrides a field from a superclass, while the superclass field
+  //  is not migrated.
   @Input() formGroup!: FormGroup<CertsAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 
 

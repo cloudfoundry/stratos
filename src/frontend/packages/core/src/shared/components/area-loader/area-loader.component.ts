@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
@@ -42,25 +42,25 @@ export function pickAreaVariant(context: string): AreaLoaderVariant {
         @switch (resolved()) {
           @case ('dots') {
             <app-busy variant="dots" size="1.75rem" class="text-primary"></app-busy>
-            <span class="text-lg">{{ message }}</span>
+            <span class="text-lg">{{ message() }}</span>
           }
           @case ('sweep') {
             <span class="block h-7 w-7 rounded-full animate-spin"
                   style="background: conic-gradient(from 0deg, transparent 0deg 250deg, var(--color-primary) 360deg);
                          -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);
                          mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #000 0);"></span>
-            <span class="text-lg">{{ message }}</span>
+            <span class="text-lg">{{ message() }}</span>
           }
           @case ('shimmer') {
             <span class="text-lg busy-shimmer bg-clip-text text-transparent bg-[length:200%_100%]"
                   style="background-image: linear-gradient(90deg,
                            color-mix(in srgb, var(--color-primary) 35%, transparent),
                            var(--color-primary),
-                           color-mix(in srgb, var(--color-primary) 35%, transparent));">{{ message }}</span>
+                           color-mix(in srgb, var(--color-primary) 35%, transparent));">{{ message() }}</span>
           }
           @default {
             <app-busy variant="arc" size="1.75rem" class="text-primary"></app-busy>
-            <span class="text-lg">{{ message }}</span>
+            <span class="text-lg">{{ message() }}</span>
           }
         }
       </div>
@@ -69,16 +69,17 @@ export function pickAreaVariant(context: string): AreaLoaderVariant {
 })
 export class AppAreaLoaderComponent {
   /** The "Loading <thing>…" text. Also the default variant context. */
-  @Input() message = 'Loading…';
+  readonly message = input('Loading…');
 
   /** Pin a specific variant; overrides `context`. */
-  @Input() variant?: AreaLoaderVariant;
+  readonly variant = input<AreaLoaderVariant>();
 
   /** Stable string for the deterministic pick; defaults to the message. */
-  @Input() context?: string;
+  readonly context = input<string>();
 
   protected resolved(): AreaLoaderVariant {
-    if (this.variant) return this.variant;
-    return pickAreaVariant(this.context ?? this.message);
+    const variant = this.variant();
+    if (variant) return variant;
+    return pickAreaVariant(this.context() ?? this.message());
   }
 }

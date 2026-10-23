@@ -12,6 +12,7 @@ import {
   ChangeDetectionStrategy,
   forwardRef,
   contentChildren,
+  input
 } from "@angular/core";
 import { FormControl, NgControl } from "@angular/forms";
 
@@ -75,10 +76,13 @@ import { CustomSelectComponent } from "../custom-select/custom-select.component"
 export class CustomFormFieldComponent
   implements AfterContentInit, AfterViewInit, OnDestroy
 {
-  @Input() appearance: "legacy" | "standard" | "fill" | "outline" = "standard";
-  @Input() color: "primary" | "accent" | "warn" = "primary";
-  @Input() floatLabel: "always" | "never" | "auto" = "always";
-  @Input() hideRequiredMarker = false;
+  readonly appearance = input<"legacy" | "standard" | "fill" | "outline">("standard");
+  readonly color = input<"primary" | "accent" | "warn">("primary");
+  readonly floatLabel = input<"always" | "never" | "auto">("always");
+  readonly hideRequiredMarker = input(false);
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() hintLabel = "";
 
   /**
@@ -88,7 +92,7 @@ export class CustomFormFieldComponent
    * `<app-form-field class="w-1/2" [fitContent]="true">` to get a
    * content-width trigger sitting above a 50% underline.
    */
-  @Input() fitContent = false;
+  readonly fitContent = input(false);
 
   @ContentChild(forwardRef(() => AppInputDirective), {
     read: ElementRef,
@@ -121,11 +125,11 @@ export class CustomFormFieldComponent
   ngAfterContentInit() {
     // Handle app-select components
     if (this.selectComponent) {
-      this.placeholder = this.selectComponent.placeholder || "";
-      this.isRequired = this.selectComponent.required;
+      this.placeholder = this.selectComponent.placeholder() || "";
+      this.isRequired = this.selectComponent.required();
       this.inputId =
         this.selectComponent.id ||
-        this.selectComponent.name ||
+        this.selectComponent.name() ||
         `form-field-${Math.random().toString(36).substr(2, 9)}`;
 
       // Set select id if not present
@@ -228,9 +232,10 @@ export class CustomFormFieldComponent
   }
 
   get shouldFloatLabel(): boolean {
+    const floatLabel = this.floatLabel();
     return (
-      this.floatLabel === "always" ||
-      (this.floatLabel === "auto" && (this.focused || this.hasValue))
+      floatLabel === "always" ||
+      (floatLabel === "auto" && (this.focused || this.hasValue))
     );
   }
 
@@ -286,9 +291,10 @@ export class CustomFormFieldComponent
   get rippleColorClasses(): string {
     const transform = this.focused ? "scale-x-100" : "scale-x-0";
     let bg: string;
-    if (this.isInvalid || this.color === "warn") bg = "bg-danger";
+    const color = this.color();
+    if (this.isInvalid || color === "warn") bg = "bg-danger";
     else if (this.isValid) bg = "bg-success";
-    else if (this.color === "accent") bg = "bg-accent";
+    else if (color === "accent") bg = "bg-accent";
     else bg = "bg-input-focus-border";
     return `${bg} ${transform}`;
   }
@@ -373,9 +379,9 @@ export class CustomFormFieldComponent
   standalone: true,
 })
 export class CustomFormFieldIconComponent {
-  @Input() fontSet = "material-icons";
-  @Input() fontIcon!: string;
-  @Input() svgIcon!: string;
+  readonly fontSet = input("material-icons");
+  readonly fontIcon = input.required<string>();
+  readonly svgIcon = input.required<string>();
 }
 
 @Component({
@@ -386,13 +392,13 @@ export class CustomFormFieldIconComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "mat-icon-button",
-    "[class.mat-button-disabled]": "disabled",
-    "[attr.disabled]": "disabled || null",
+    "[class.mat-button-disabled]": "disabled()",
+    "[attr.disabled]": "disabled() || null",
   },
 })
 export class CustomIconButtonDirective {
-  @Input() disabled = false;
-  @Input() color: "primary" | "accent" | "warn" = "primary";
+  readonly disabled = input(false);
+  readonly color = input<"primary" | "accent" | "warn">("primary");
 }
 
 @Component({
@@ -403,13 +409,13 @@ export class CustomIconButtonDirective {
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     class: "mat-button",
-    "[class.mat-button-disabled]": "disabled",
-    "[attr.disabled]": "disabled || null",
+    "[class.mat-button-disabled]": "disabled()",
+    "[attr.disabled]": "disabled() || null",
   },
 })
 export class CustomButtonDirective {
-  @Input() disabled = false;
-  @Input() color: "primary" | "accent" | "warn" = "primary";
+  readonly disabled = input(false);
+  readonly color = input<"primary" | "accent" | "warn">("primary");
 }
 
 @Directive({
@@ -420,8 +426,8 @@ export class CustomButtonDirective {
   },
 })
 export class MatInputDirective {
-  @Input() formControl!: FormControl<any>;
-  @Input() formControlName!: string;
+  readonly formControl = input.required<FormControl<any>>();
+  readonly formControlName = input.required<string>();
 }
 
 @Directive({
@@ -432,8 +438,8 @@ export class MatInputDirective {
   },
 })
 export class AppInputDirective {
-  @Input() formControl!: FormControl<any>;
-  @Input() formControlName!: string;
+  readonly formControl = input.required<FormControl<any>>();
+  readonly formControlName = input.required<string>();
 }
 
 @Component({
@@ -450,13 +456,13 @@ export class MatSuffixDirective {}
 @Component({
   selector: "app-label",
   template:
-    '<label class="mat-form-field-label" [attr.for]="labelFor"><ng-content></ng-content></label>',
+    '<label class="mat-form-field-label" [attr.for]="labelFor()"><ng-content></ng-content></label>',
   styleUrls: ["./custom-form-field.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class MatLabelComponent {
-  @Input() labelFor = "";
+  readonly labelFor = input("");
 }
 
 @Component({

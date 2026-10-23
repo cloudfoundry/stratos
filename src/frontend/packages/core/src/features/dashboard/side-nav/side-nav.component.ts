@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Observable, map } from 'rxjs';
@@ -102,6 +102,8 @@ export class SideNavComponent implements OnInit {
 
     this.customizations = cs.get();
   }
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set iconMode(isIconMode: boolean) {
     if (isIconMode !== this.isIconMode) {
       this.isIconMode = isIconMode;
@@ -112,7 +114,7 @@ export class SideNavComponent implements OnInit {
     return this.isIconMode;
   }
 
-  @Input() tabs: SideNavItem[] = [];
+  readonly tabs = input<SideNavItem[]>([]);
   @Output() changedMode = new EventEmitter();
   private isIconMode = true;
 

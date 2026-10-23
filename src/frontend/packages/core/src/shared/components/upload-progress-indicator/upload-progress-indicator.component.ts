@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomProgressBarSelectorComponent } from '../custom-material/custom-material.component';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
@@ -18,6 +18,6 @@ export class UploadProgressIndicatorComponent {
 
   constructor() { }
 
-  @Input() value!: number;
+  readonly value = input.required<number>();
 
 }

@@ -1,17 +1,17 @@
 <app-tile-grid [fit]="true">
   <app-tile-group class="tile-group-3-cols tile-group-compact">
     <app-tile>
-      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/nodes" icon="apps" label="Nodes"
+      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint().guid}}/nodes" icon="apps" label="Nodes"
         labelSingular="Node" value="{{ nodeCount() }}">
       </app-card-number-metric>
     </app-tile>
     <app-tile>
-      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/resource/namespace" icon="language"
+      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint().guid}}/resource/namespace" icon="language"
         label="Namespaces" labelSingular="Namespace" value="{{ namespaceCount() }}">
       </app-card-number-metric>
     </app-tile>
     <app-tile>
-      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint.guid}}/resource/pod" icon="apps" label="Pods"
+      <app-card-number-metric mode="plain" link="/kubernetes/{{endpoint().guid}}/resource/pod" icon="apps" label="Pods"
         labelSingular="Pod" value="{{ podCount() }}">
       </app-card-number-metric>
     </app-tile>

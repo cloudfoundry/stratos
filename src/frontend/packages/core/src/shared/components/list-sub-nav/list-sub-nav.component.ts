@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Signal, computed, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Signal, computed, signal, input } from '@angular/core';
 
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
@@ -94,15 +94,15 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
     <div data-test="list-sub-nav"
          [class]="rowClasses">
       <div class="text-base font-semibold text-content-text whitespace-nowrap" data-test="list-sub-nav-title">
-        {{ title }}: <span class="text-content-muted font-medium inline-flex items-center">
+        {{ title() }}: <span class="text-content-muted font-medium inline-flex items-center">
           @if (isCountPending()) {
             <app-busy variant="dots" size="1em" data-test="count-pending"></app-busy>
           } @else {
-            {{ count() }}
+            {{ count()() }}
           }
         </span>
       </div>
-      @if (isAdding && isAdding()) {
+      @if (isAdding() && isAdding()()) {
         <!-- Inline add-form slot. When the consumer flips its isAdding signal
              true, the right side of the row swaps the add button for the
              projected form. Used by Variables (Name/Value inputs + save/
@@ -117,7 +117,7 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
           @if (showSelected()) {
             <span data-test="list-sub-nav-selected"
                   class="flex items-center gap-1.5 text-sm text-content-muted">
-              {{ selectedCount!() }} selected
+              {{ selectedCount()!() }} selected
               @if (onClearSelection) {
                 <button
                   type="button"
@@ -131,7 +131,7 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
           }
 
           <!-- Contextual action buttons -->
-          @for (action of actions; track action.label) {
+          @for (action of actions(); track action.label) {
             @if (isActionVisible(action)) {
               <button
                 type="button"
@@ -170,43 +170,50 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
 export class ListSubNavComponent {
   /** Left-side label, e.g. "Total Routes". Plural always — colon and count
    *  are appended by the template. */
-  @Input({ required: true }) title!: string;
+  readonly title = input.required<string>();
 
   /** Reactive count source. For signal-list pages this is typically
    *  `config.totalFilteredResults`. Legacy callers can wrap an Observable
    *  with `toSignal()`. */
-  @Input({ required: true }) count!: Signal<number>;
+  readonly count = input.required<Signal<number>>();
 
   /** When provided and true, the count renders as an ellipsis instead of
    *  a number. Wire to "not loaded yet" (e.g. `!hasLoadedOnce()`), not to
    *  refresh-in-flight — a hard `0` before the first fetch lands reads as
    *  "empty" and makes the page look broken (#5766). */
-  @Input() loading?: Signal<boolean>;
+  readonly loading = input<Signal<boolean>>();
 
   /** Optional primary action. Omit for read-only lists. */
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() addAction?: ListSubNavAddAction;
 
   /** When set and emits true, swaps the right-side add button for a
    *  projected `[subNavForm]` slot — lets pages with an inline add form
    *  (Variables) host it on the same row as the title rather than as a
    *  separate row. */
-  @Input() isAdding?: Signal<boolean>;
+  readonly isAdding = input<Signal<boolean>>();
 
   /** Optional list of contextual action buttons (e.g. bulk-operation
    *  buttons) rendered between the selection indicator and the add button.
    *  Buttons whose `visible` signal returns false are omitted from the DOM. */
-  @Input() actions?: readonly ListSubNavAction[];
+  readonly actions = input<readonly ListSubNavAction[]>();
 
   /** When provided, shows "N selected" text on the right side while the
    *  signal returns a value greater than zero. */
-  @Input() selectedCount?: Signal<number>;
+  readonly selectedCount = input<Signal<number>>();
 
   /** When provided alongside `selectedCount`, a "Clear" link is rendered
    *  that calls this function when clicked. */
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() onClearSelection?: () => void;
 
   protected isCountPending(): boolean {
-    return !!this.loading && this.loading();
+    const loading = this.loading();
+    return !!loading && loading();
   }
 
   protected readonly isAddVisible = computed(() => {
@@ -220,7 +227,7 @@ export class ListSubNavComponent {
    *  an inline form keep the natural compact button-row height. */
   protected get rowClasses(): string {
     const base = 'flex items-center justify-between gap-3 px-6 py-3 bg-content-bg border-b border-content-border';
-    return this.isAdding ? `${base} min-h-[4.25rem]` : base;
+    return this.isAdding() ? `${base} min-h-[4.25rem]` : base;
   }
 
   protected readonly isAddDisabled = computed(() => {
@@ -248,7 +255,8 @@ export class ListSubNavComponent {
   }
 
   protected showSelected(): boolean {
-    return !!this.selectedCount && this.selectedCount() > 0;
+    const selectedCount = this.selectedCount();
+    return !!selectedCount && selectedCount() > 0;
   }
 
   /** Constant count signal helper — useful for test stubs and pages that

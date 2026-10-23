@@ -23,6 +23,8 @@ export class AnalysisInfoCardComponent {
 
   public mAanalyzer = {};
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set analyzer(analyzer: any) {
     if (analyzer && analyzer.descriptionUrl) {
       this.content$ = this.getDescription(analyzer.descriptionUrl);

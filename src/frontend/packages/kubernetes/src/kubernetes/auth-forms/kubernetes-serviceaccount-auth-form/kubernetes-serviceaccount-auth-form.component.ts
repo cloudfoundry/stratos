@@ -15,5 +15,8 @@ interface ServiceAccountAuthForm {
   imports: [ReactiveFormsModule]
 })
 export class KubernetesSATokenAuthFormComponent implements IAuthForm {
+  // TODO: Skipped for migration because:
+  //  This input overrides a field from a superclass, while the superclass field
+  //  is not migrated.
   @Input() formGroup!: FormGroup<ServiceAccountAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 }

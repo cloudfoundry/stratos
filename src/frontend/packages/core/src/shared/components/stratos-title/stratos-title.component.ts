@@ -1,9 +1,9 @@
 import {
   Component,
-  Input,
   computed,
   inject,
   ChangeDetectionStrategy,
+  input
 } from "@angular/core";
 import { StratosBrandingService } from "../../../../../theme/stratos-branding.service";
 
@@ -18,7 +18,7 @@ export class StratosTitleComponent {
   private branding = inject(StratosBrandingService);
 
   // Optional title
-  @Input() title?: string;
+  readonly title = input<string>();
 
   // Theme-related signals (computed from theme service)
   public themeTitle = computed(

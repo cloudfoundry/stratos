@@ -1,4 +1,4 @@
-import { Component, Input, effect, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, effect, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -71,10 +71,9 @@ export class RecentEntitiesComponent {
   // write-back effect from re-emitting the same correction.
   private lastPersisted = new Map<string, string>();
 
-  @Input()
-  public history = false;
+  public readonly history = input(false);
 
-  @Input() mode?: string;
+  readonly mode = input<string>();
 
   public recentEntities$: Observable<RenderableRecent[]>;
   public hasHits$: Observable<boolean>;

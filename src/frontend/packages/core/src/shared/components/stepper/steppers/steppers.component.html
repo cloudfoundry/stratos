@@ -79,7 +79,7 @@
         <!-- Navigation buttons -->
         <div class="steppers-navigation flex items-center justify-between border-t pt-6">
           <div class="steppers-navigation-left">
-            @if (steps.length !== 1 || basePreviousRedirect) {
+            @if (steps.length !== 1 || basePreviousRedirect()) {
               <button id="stepper_previous"
                 class="btn btn-secondary"
                 (click)="goPrevious()"
@@ -90,11 +90,11 @@
           </div>
           <div class="steppers-navigation-right flex items-center space-x-3">
             <!-- Cancel button -->
-            @if (!steps[currentIndex()].hideCloseButton && (cancel || cancelAction)) {
+            @if (!steps[currentIndex()].hideCloseButton && (cancel() || cancelAction())) {
               <button id="stepper_cancel"
                 class="btn btn-secondary"
-                [routerLink]="cancelReload || cancelAction ? null : (cancel$ | async)"
-                [queryParams]="cancelReload || cancelAction ? null : (cancelQueryParams$ | async)"
+                [routerLink]="cancelReload() || cancelAction() ? null : (cancel$ | async)"
+                [queryParams]="cancelReload() || cancelAction() ? null : (cancelQueryParams$ | async)"
                 [disabled]="!canCancel(currentIndex())"
                 (click)="onCancel(currentIndex())">
                 {{ this.getCancelButtonText(currentIndex()) }}

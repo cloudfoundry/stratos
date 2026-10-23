@@ -1,9 +1,9 @@
 <b>{{ stepperText }}</b>
 <form #cfForm="ngForm" class="create-app-step-1 stepper-form">
-  @if (!isMarketplaceMode) {
+  @if (!isMarketplaceMode()) {
     <app-form-field>
       <app-select id="cf" #cfSelect="ngModel" placeholder="Cloud Foundry" [autoSelectSingleOption]="false"
-        [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy || endpointScoped"
+        [disabled]="cfOrgSpaceService.cf.loading() || isRedeploy() || endpointScoped"
         [ngModel]="cfOrgSpaceService.cf.select()"
         (selectionChange)="onCfChange($event.value)" [required]="true" name="cf"
         [appFocus]="!cfOrgSpaceService.cf.loading()">
@@ -18,11 +18,11 @@
   }
   <app-form-field>
     <app-select id="org" #orgSelect="ngModel" placeholder="Organization" [autoSelectSingleOption]="false"
-      [disabled]="!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy"
+      [disabled]="!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy()"
       [loading]="cfOrgSpaceService.org.loading()"
       [ngModel]="cfOrgSpaceService.org.select()"
       (selectionChange)="onOrgChange($event.value)" [required]="true" name="org"
-      [appFocus]="isMarketplaceMode && !(!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy)">
+      [appFocus]="isMarketplaceMode() && !(!cfOrgSpaceService.cf.select() || cfOrgSpaceService.org.loading() || isRedeploy())">
       <app-option [value]="null">None</app-option>
       @for (org of cfOrgSpaceService.org.list(); track org) {
         <app-option [value]="org.guid" [label]="org.name">
@@ -36,7 +36,7 @@
   </app-form-field>
   <app-form-field>
     <app-select id="space" #spaceSelect="ngModel" placeholder="Space" [autoSelectSingleOption]="false"
-      [disabled]="!cfOrgSpaceService.org.select() || cfOrgSpaceService.space.loading() || isRedeploy"
+      [disabled]="!cfOrgSpaceService.org.select() || cfOrgSpaceService.space.loading() || isRedeploy()"
       [loading]="cfOrgSpaceService.space.loading()"
       [ngModel]="cfOrgSpaceService.space.select()"
       (selectionChange)="onSpaceChange($event.value)" [required]="true" name="space">

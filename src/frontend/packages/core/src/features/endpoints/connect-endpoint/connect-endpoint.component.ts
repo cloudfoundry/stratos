@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild, ViewContainerRef, inject, input, signal } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -60,6 +60,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pConnectService!: ConnectEndpointService;
   // A host may bind this before its own service exists (create-endpoint's
   // connect step); the setter ignores the unset value and waits for the real one.
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set connectService(service: ConnectEndpointService | undefined) {
     if (!service || this.pConnectService) {
       return;
@@ -71,6 +73,8 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     return this.pConnectService;
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set disabled(disabled: boolean) {
     this.pDisabled = disabled;
     if (this.endpointForm) {
@@ -81,7 +85,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   /**
    * Make the form submit as if it had a button - aka on pressing return
    */
-  @Input() formSubmit = false;
+  readonly formSubmit = input(false);
 
   @Output() valid = new EventEmitter<boolean>();
   @Output() authType = new EventEmitter<EndpointAuthTypeConfig>();
@@ -181,7 +185,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   // Enter in the form connects, for hosts that ask for it (formSubmit). The
   // connect runs when its Observable is subscribed.
   submitForm() {
-    if (this.formSubmit && this.endpointForm.valid) {
+    if (this.formSubmit() && this.endpointForm.valid) {
       this.subs.push(this.connectService.submit().pipe(take(1)).subscribe());
     }
   }

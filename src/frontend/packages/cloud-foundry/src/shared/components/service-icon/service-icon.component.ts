@@ -1,4 +1,4 @@
-import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { CustomIconComponent } from '@stratosui/core';
@@ -18,14 +18,14 @@ export class ServiceIconComponent implements OnInit {
 
   image = '';
 
-  @Input() service!: StServiceOffering | null;
-  @Input() addMenuPadding = false;
+  readonly service = input.required<StServiceOffering | null>();
+  readonly addMenuPadding = input(false);
   constructor() { }
 
   ngOnInit() {
     // brokerCatalogMetadata is already a decoded map; the V2 path JSON-parsed
     // entity.extra. imageUrl is the only field this component reads.
-    const imageUrl = this.service?.brokerCatalogMetadata?.imageUrl;
+    const imageUrl = this.service()?.brokerCatalogMetadata?.imageUrl;
     if (typeof imageUrl === 'string') {
       this.image = imageUrl;
     }

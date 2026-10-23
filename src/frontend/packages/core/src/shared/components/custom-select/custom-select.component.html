@@ -2,17 +2,17 @@
   [ngClass]="{
     'disabled opacity-60 pointer-events-none cursor-not-allowed': disabled,
     'open': isOpen,
-    'invalid': invalid
+    'invalid': invalid()
   }"
-  [attr.aria-invalid]="invalid || null"
-  [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
+  [attr.aria-invalid]="invalid() || null"
+  [attr.aria-describedby]="invalid() && errorMessage() ? 'error-' + (id || name()) : null">
 
   <div class="select-trigger flex items-center justify-between py-1.5 px-2.5 border border-[var(--input-border,#d1d5db)] rounded-md bg-[var(--input-bg)] text-[var(--input-text)] cursor-pointer select-none min-h-[32px] transition-[border-color] duration-150 ease-in-out hover:border-[var(--input-border-hover,#9ca3af)] focus-within:outline-none"
     #selectTrigger role="combobox" tabindex="0"
     [class.border-primary]="isOpen"
     [attr.aria-expanded]="isOpen"
     aria-haspopup="listbox"
-    [attr.aria-controls]="isOpen ? 'select-listbox-' + (id || name) : null"
+    [attr.aria-controls]="isOpen ? 'select-listbox-' + (id || name()) : null"
     (click)="toggle()"
     (keydown.enter)="toggle()"
     (keydown.space)="toggle(); $event.preventDefault()">
@@ -26,16 +26,16 @@
       <span class="col-start-1 row-start-1 truncate"
         [class.select-trigger-placeholder]="!displayValue || displayValue === ''"
         [class.select-trigger-value]="displayValue && displayValue !== ''">
-        {{ displayValue && displayValue !== '' ? displayValue : (placeholder || 'Select...') }}
-        @if (required && (!displayValue || displayValue === '')) {
+        {{ displayValue && displayValue !== '' ? displayValue : (placeholder() || 'Select...') }}
+        @if (required() && (!displayValue || displayValue === '')) {
           <span class="text-danger ml-0.5 font-medium" aria-label="required">*</span>
         }
       </span>
     </span>
     <div class="flex items-center gap-1 ml-2">
-      @if (loading) {
+      @if (loading()) {
         <div class="text-[var(--text-muted,#666)] flex items-center" aria-label="Loading">
-          <app-busy size="12px" [context]="placeholder || name || 'select'"></app-busy>
+          <app-busy size="12px" [context]="placeholder() || name() || 'select'"></app-busy>
         </div>
       } @else {
         <div class="text-[var(--text-muted,#666)] flex items-center transition-transform duration-200"
@@ -69,7 +69,7 @@
       </div>
     }
     <div class="options-container" role="listbox" tabindex="-1"
-      [id]="'select-listbox-' + (id || name)"
+      [id]="'select-listbox-' + (id || name())"
       (click)="onOptionsClick($event)"
       (keydown.enter)="onOptionsClick($event)"
       (keydown.space)="onOptionsClick($event); $event.preventDefault()">

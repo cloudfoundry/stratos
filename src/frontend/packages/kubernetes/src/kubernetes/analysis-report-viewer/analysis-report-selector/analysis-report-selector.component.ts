@@ -1,5 +1,5 @@
 import { AsyncPipe } from '@angular/common';
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, inject, ChangeDetectionStrategy } from '@angular/core';
+import {Component, EventEmitter, OnDestroy, OnInit, Output, inject, ChangeDetectionStrategy, input} from '@angular/core';
 import { formatDistance } from 'date-fns';
 import { Observable, Subscription } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
@@ -25,11 +25,11 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   // strict: assigned in ngOnInit before the template's async pipe reads it
   public analyzers$!: Observable<AnalysisReport[]>;
 
-  @Input() endpoint!: string;
-  @Input() path!: string;
-  @Input() prompt = 'Overlay';
-  @Input() allowNone = true;
-  @Input() autoSelect = false;
+  readonly endpoint = input.required<string>();
+  readonly path = input.required<string>();
+  readonly prompt = input('Overlay');
+  readonly allowNone = input(true);
+  readonly autoSelect = input(false);
 
   @Output() selected = new EventEmitter<AnalysisReport | null>();
   @Output() reportCount = new EventEmitter<number>();
@@ -51,10 +51,10 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.analyzers$ = this.analysisService.getByPath(this.endpoint, this.path, true).pipe(
+    this.analyzers$ = this.analysisService.getByPath(this.endpoint(), this.path(), true).pipe(
       map((reports: AnalysisReport[]) => {
         const res: Array<AnalysisReport | { title: string }> = [];
-        if (this.allowNone) {
+        if (this.allowNone()) {
           res.push({ title: 'None' });
         }
         if (reports) {
@@ -70,7 +70,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
         return res as AnalysisReport[];
       }),
       tap((reports: AnalysisReport[]) => {
-        if (!this.autoSelected && this.autoSelect && reports.length > 0) {
+        if (!this.autoSelected && this.autoSelect() && reports.length > 0) {
           this.onSelected(reports[0]);
         }
       })
@@ -89,7 +89,7 @@ export class AnalysisReportSelectorComponent implements OnInit, OnDestroy {
   }
 
   public refreshReports($event: MouseEvent) {
-    this.analysisService.getByPath(this.endpoint, this.path, true);
+    this.analysisService.getByPath(this.endpoint(), this.path(), true);
     $event.preventDefault();
     $event.cancelBubble = true;
   }

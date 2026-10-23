@@ -1,16 +1,16 @@
-import { Directive, ElementRef, Input, OnChanges, inject } from '@angular/core';
+import { Directive, ElementRef, OnChanges, inject, input } from '@angular/core';
 
 @Directive({
 selector: '[appFocus]',
 standalone: true
 })
 export class FocusDirective implements OnChanges {
-  @Input() appFocus!: boolean;
+  readonly appFocus = input.required<boolean>();
 
   private element = inject(ElementRef);
 
   public ngOnChanges() {
-    if (this.appFocus) {
+    if (this.appFocus()) {
       this.focus();
     }
   }

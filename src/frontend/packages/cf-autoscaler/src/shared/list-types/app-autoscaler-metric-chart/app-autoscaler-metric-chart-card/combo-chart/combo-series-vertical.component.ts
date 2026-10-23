@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, OnChanges, Output, SimpleChanges, input } from '@angular/core';
 
 import { AppAutoscalerMetricDataLine, AppAutoscalerMetricDataPoint } from '../../../../../store/app-autoscaler.types';
 
@@ -30,14 +30,14 @@ function formatLabel(label: any): string {
         [data]="bar.data"
         [orientation]="'vertical'"
         [roundEdges]="bar.roundEdges"
-        [gradient]="gradient"
+        [gradient]="gradient()"
         [isActive]="isActive(bar.data)"
-        [animations]="animations"
+        [animations]="animations()"
         (select)="onClick($event)"
         (activate)="activate.emit($event)"
         (deactivate)="deactivate.emit($event)"
         ngx-tooltip
-        [tooltipDisabled]="tooltipDisabled"
+        [tooltipDisabled]="tooltipDisabled()"
         [tooltipPlacement]="'top'"
         [tooltipType]="'tooltip'"
         [tooltipTitle]="bar.tooltipText">
@@ -61,18 +61,18 @@ function formatLabel(label: any): string {
 })
 export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
-  @Input() dims: any;
-  @Input() type = 'standard';
-  @Input() series!: any[];
-  @Input() seriesLine!: any[];
-  @Input() xScale: any;
-  @Input() yScale: any;
-  @Input() colors: any;
-  @Input() tooltipDisabled = false;
-  @Input() gradient!: boolean;
-  @Input() activeEntries!: AppAutoscalerMetricDataLine[];
-  @Input() seriesName!: string;
-  @Input() animations = true;
+  readonly dims = input<any>();
+  readonly type = input('standard');
+  readonly series = input.required<any[]>();
+  readonly seriesLine = input.required<any[]>();
+  readonly xScale = input<any>();
+  readonly yScale = input<any>();
+  readonly colors = input<any>();
+  readonly tooltipDisabled = input(false);
+  readonly gradient = input.required<boolean>();
+  readonly activeEntries = input.required<AppAutoscalerMetricDataLine[]>();
+  readonly seriesName = input.required<string>();
+  readonly animations = input(true);
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional ngx-charts API parity: re-emits the wrapped series' (select) event under the same name
   @Output() select = new EventEmitter();
@@ -90,23 +90,24 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
 
   update(): void {
     let width: number;
-    if (this.series.length) {
-      width = this.xScale.bandwidth();
+    const series = this.series();
+    if (series.length) {
+      width = this.xScale().bandwidth();
       this.bandwidth.emit(width);
     }
 
     let d0 = 0;
     let total: number;
-    if (this.type === 'normalized') {
-      total = this.series.map((d: any) => d.value).reduce((sum: number, d: any) => sum + d, 0);
+    if (this.type() === 'normalized') {
+      total = series.map((d: any) => d.value).reduce((sum: number, d: any) => sum + d, 0);
     }
 
-    this.bars = this.series.map((d: any, index: number) => {
+    this.bars = series.map((d: any, index: number) => {
 
       let value = d.value;
       const label = d.name;
       const formattedLabel = formatLabel(label);
-      const roundEdges = this.type === 'standard';
+      const roundEdges = this.type() === 'standard';
 
       const bar: any = {
         value,
@@ -120,26 +121,27 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
         y: 0
       };
 
-      if (this.type === 'standard') {
-        bar.height = Math.abs(this.yScale(value) - this.yScale(0));
-        bar.x = this.xScale(label);
+      const type = this.type();
+      if (type === 'standard') {
+        bar.height = Math.abs(this.yScale()(value) - this.yScale()(0));
+        bar.x = this.xScale()(label);
 
         if (value < 0) {
-          bar.y = this.yScale(0);
+          bar.y = this.yScale()(0);
         } else {
-          bar.y = this.yScale(value);
+          bar.y = this.yScale()(value);
         }
-      } else if (this.type === 'stacked') {
+      } else if (type === 'stacked') {
         const offset0 = d0;
         const offset1 = offset0 + value;
         d0 += value;
 
-        bar.height = this.yScale(offset0) - this.yScale(offset1);
+        bar.height = this.yScale()(offset0) - this.yScale()(offset1);
         bar.x = 0;
-        bar.y = this.yScale(offset1);
+        bar.y = this.yScale()(offset1);
         bar.offset0 = offset0;
         bar.offset1 = offset1;
-      } else if (this.type === 'normalized') {
+      } else if (type === 'normalized') {
         let offset0 = d0;
         let offset1 = offset0 + value;
         d0 += value;
@@ -152,34 +154,37 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
           offset1 = 0;
         }
 
-        bar.height = this.yScale(offset0) - this.yScale(offset1);
+        bar.height = this.yScale()(offset0) - this.yScale()(offset1);
         bar.x = 0;
-        bar.y = this.yScale(offset1);
+        bar.y = this.yScale()(offset1);
         bar.offset0 = offset0;
         bar.offset1 = offset1;
         value = (offset1 - offset0).toFixed(2);
       }
 
-      if (this.colors.scaleType === 'ordinal') {
-        bar.color = this.colors.getColor(label);
+      const colors = this.colors();
+      if (colors.scaleType === 'ordinal') {
+        bar.color = colors.getColor(label);
       } else {
-        if (this.type === 'standard') {
-          bar.color = this.colors.getColor(value);
-          bar.gradientStops = this.colors.getLinearGradientStops(value);
+        if (type === 'standard') {
+          bar.color = colors.getColor(value);
+          bar.gradientStops = colors.getLinearGradientStops(value);
         } else {
-          bar.color = this.colors.getColor(bar.offset1);
-          bar.gradientStops = this.colors.getLinearGradientStops(bar.offset1, bar.offset0);
+          bar.color = colors.getColor(bar.offset1);
+          bar.gradientStops = colors.getLinearGradientStops(bar.offset1, bar.offset0);
         }
       }
 
       let tooltipLabel = formattedLabel;
-      if (this.seriesName) {
-        tooltipLabel = `${this.seriesName} • ${formattedLabel}`;
+      const seriesName = this.seriesName();
+      if (seriesName) {
+        tooltipLabel = `${seriesName} • ${formattedLabel}`;
       }
 
-      this.getSeriesTooltips(this.seriesLine, index);
-      const lineValue = this.seriesLine[0].series[index].value;
-      const _lineName = this.seriesLine[0].series[index].name;
+      const seriesLine = this.seriesLine();
+      this.getSeriesTooltips(seriesLine, index);
+      const lineValue = seriesLine[0].series[index].value;
+      const _lineName = seriesLine[0].series[index].name;
       bar.tooltipText = `
         <span class="tooltip-label">${tooltipLabel}</span>
         <span class="tooltip-val"> Y1 - ${value.toLocaleString()} • Y2 - ${lineValue.toLocaleString()}%</span>
@@ -196,10 +201,11 @@ export class AppAutoscalerComboSeriesVerticalComponent implements OnChanges {
   }
 
   isActive(entry: AppAutoscalerMetricDataLine): boolean {
-    if (!this.activeEntries) {
+    const activeEntries = this.activeEntries();
+    if (!activeEntries) {
       return false;
     }
-    const item = this.activeEntries.find(d => {
+    const item = activeEntries.find(d => {
       return entry.name === d.name && entry.series === d.series;
     });
     return item !== undefined;

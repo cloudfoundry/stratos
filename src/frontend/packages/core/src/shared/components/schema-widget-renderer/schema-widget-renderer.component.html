@@ -11,7 +11,7 @@
         @case ('object') {
           <div class="pl-4 border-l border-content-border">
             <json-schema-form [schema]="f.schema" [data]="valueAt(f.pointer)"
-              [_basePointer]="f.pointer" [warnings]="warnings"
+              [_basePointer]="f.pointer" [warnings]="warnings()"
               (changes)="onChild(f.pointer, $event)"></json-schema-form>
           </div>
         }
@@ -28,7 +28,7 @@
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="itemSchema(f)"
                       [data]="valueAt(itemPointer(f.pointer, $index))"
-                      [_basePointer]="itemPointer(f.pointer, $index)" [warnings]="warnings"
+                      [_basePointer]="itemPointer(f.pointer, $index)" [warnings]="warnings()"
                       (changes)="onChild(itemPointer(f.pointer, $index), $event)"></json-schema-form>
                   </div>
                 }
@@ -64,7 +64,7 @@
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="mapValueSchema(f)"
                       [data]="row.value"
-                      [_basePointer]="itemPointer(f.pointer, row.id)" [warnings]="warnings"
+                      [_basePointer]="itemPointer(f.pointer, row.id)" [warnings]="warnings()"
                       (changes)="onMapChildChange(f.pointer, row.id, $event)"></json-schema-form>
                   </div>
                 }
@@ -92,7 +92,7 @@
                   <div class="flex-1 pl-4 border-l border-content-border">
                     <json-schema-form [schema]="itemSch"
                       [data]="valueAt(itemPointer(f.pointer, $index))"
-                      [_basePointer]="itemPointer(f.pointer, $index)" [warnings]="warnings"
+                      [_basePointer]="itemPointer(f.pointer, $index)" [warnings]="warnings()"
                       (changes)="onChild(itemPointer(f.pointer, $index), $event)"></json-schema-form>
                   </div>
                 }
@@ -149,7 +149,7 @@
               <div class="pl-4 border-l border-content-border">
                 <json-schema-form [schema]="branchNode.schema"
                   [data]="valueAt(f.pointer)"
-                  [_basePointer]="f.pointer" [warnings]="warnings"
+                  [_basePointer]="f.pointer" [warnings]="warnings()"
                   (changes)="onChild(f.pointer, $event)"></json-schema-form>
               </div>
             }
@@ -172,7 +172,7 @@
               <div class="pl-4 border-l border-content-border">
                 <json-schema-form [schema]="mergedAnyOf(f.pointer, f.schema.anyOf)"
                   [data]="valueAt(f.pointer)"
-                  [_basePointer]="f.pointer" [warnings]="warnings"
+                  [_basePointer]="f.pointer" [warnings]="warnings()"
                   (changes)="onChild(f.pointer, $event)"></json-schema-form>
               </div>
             }

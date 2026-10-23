@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { Component, Injector, Input, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { Component, Injector, OnDestroy, OnInit, ChangeDetectionStrategy, effect, inject, runInInjectionContext, signal, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, ReactiveFormsModule, ValidatorFn, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -49,7 +49,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
   private formStatusSub?: Subscription;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  readonly redirectUrl = input.required<string>();
 
   signalHandle: SignalStepHandle = {
     valid: this.validSignal.asReadonly(),
@@ -76,7 +76,7 @@ export class CreateOrganizationStepComponent implements OnInit, OnDestroy {
       } catch (err: unknown) {
         throw leadError('Failed to create organization', err);
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
 

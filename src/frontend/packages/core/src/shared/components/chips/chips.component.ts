@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject, input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -45,6 +45,8 @@ export class AppChipsComponent implements OnInit {
   public atLowerLimit = true;
 
   private pChips: AppChip[] = [];
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get chips(): AppChip[] {
     return this.pChips;
@@ -54,16 +56,15 @@ export class AppChipsComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
-  @Input()
-  stacked = false;
+  readonly stacked = input(false);
 
-  @Input()
-  orientation: 'rtl' | 'ltr' = 'ltr';
+  readonly orientation = input<'rtl' | 'ltr'>('ltr');
 
-  @Input()
-  lowerLimit = 3;
+  readonly lowerLimit = input(3);
 
   private pDisplayProperty = 'value';
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get displayProperty(): string {
     return this.pDisplayProperty;
@@ -76,15 +77,16 @@ export class AppChipsComponent implements OnInit {
   public limit!: number;
 
   ngOnInit() {
-    this.limit = this.lowerLimit;
+    this.limit = this.lowerLimit();
   }
 
   public toggleLimit() {
-    if (this.limit === this.lowerLimit) {
+    const lowerLimit = this.lowerLimit();
+    if (this.limit === lowerLimit) {
       this.limit = this.chips.length;
       this.atLowerLimit = false;
     } else {
-      this.limit = this.lowerLimit;
+      this.limit = lowerLimit;
       this.atLowerLimit = true;
     }
     this.cdr.markForCheck();

@@ -9,8 +9,8 @@
       </svg>
     </div>
   }
-  <a [href]="detailUrl" [routerLink]="detailUrl">
-    <div class="list-item-content" [ngClass]="{'list-item__auto-height': height === 'auto'}">
+  <a [href]="detailUrl()" [routerLink]="detailUrl()">
+    <div class="list-item-content" [ngClass]="{'list-item__auto-height': height() === 'auto'}">
       <div class="list-item-logo">
         <ng-content select=".list-item-logo"></ng-content>
       </div>

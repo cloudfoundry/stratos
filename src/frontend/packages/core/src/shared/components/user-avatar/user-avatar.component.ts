@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UserProfileInfo } from '@stratosui/store';
 
@@ -21,15 +21,19 @@ export class UserAvatarComponent {
   private canUseGravatar = false;
   private userInfo: UserProfileInfo | null = null;
 
-  @Input() size = 'small';
-  @Input() color = 'normal';
+  readonly size = input('small');
+  readonly color = input('normal');
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set allowGravatar(allowed: boolean | null) {
     this.canUseGravatar = !!allowed;
     this.update();
   }
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set user(user: UserProfileInfo | null) {
     this.userInfo = user;

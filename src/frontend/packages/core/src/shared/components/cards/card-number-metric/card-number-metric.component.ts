@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, signal, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -30,20 +30,25 @@ enum AlertLevel {
 })
 export class CardNumberMetricComponent implements OnInit, OnChanges {
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input() icon!: string;
-  @Input() iconFont!: string;
-  @Input() label!: string;
-  @Input() labelSingular!: string;
-  @Input() limit!: string;
-  @Input() units!: string;
-  @Input() value!: string;
-  @Input() showUsage = false;
-  @Input() textOnly = false;
-  @Input() labelAtTop = false;
-  @Input() link?: string | (() => void | string);
+  readonly iconFont = input.required<string>();
+  readonly label = input.required<string>();
+  readonly labelSingular = input.required<string>();
+  readonly limit = input.required<string>();
+  readonly units = input.required<string>();
+  readonly value = input.required<string>();
+  readonly showUsage = input(false);
+  readonly textOnly = input(false);
+  readonly labelAtTop = input(false);
+  readonly link = input<string | (() => void | string)>();
   @Output() showAlerts = new EventEmitter<any>();
-  @Input() mode!: string;
+  readonly mode = input.required<string>();
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set alerts(alerts: any[]) {
     if (alerts) {
@@ -73,7 +78,7 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   }
 
   format() {
-    if (this.value === '') {
+    if (this.value() === '') {
       this.handleNoValue();
     } else {
       this.handleValue();
@@ -86,48 +91,50 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   }
 
   handleValue() {
-    const value = parseInt(this.value, 10);
+    const value = parseInt(this.value(), 10);
     this.isUnlimited = false;
     if (isUnlimited(value)) {
       this.formattedValue = 'Unlimited';
       this.isUnlimited = true;
     } else {
-      this.formattedValue = this.formatForUnits(this.value);
+      this.formattedValue = this.formatForUnits(this.value());
     }
 
-    if (!this.limit) {
+    const limitValue = this.limit();
+    if (!limitValue) {
       return;
     }
 
-    const status = determineCardStatus(parseInt(this.value, 10), parseInt(this.limit, 10));
+    const status = determineCardStatus(parseInt(this.value(), 10), parseInt(limitValue, 10));
     this._status.set(status);
 
-    const limit = parseInt(this.limit, 10);
+    const limit = parseInt(limitValue, 10);
     if (isUnlimited(limit)) {
       this.formattedLimit = '∞';
       this.usage = '';
     } else {
-      this.formattedLimit = this.formatForUnits(this.limit);
-      this.usage = this.showUsage ? (100 * value / limit).toFixed(2) : '';
+      this.formattedLimit = this.formatForUnits(limitValue);
+      this.usage = this.showUsage() ? (100 * value / limit).toFixed(2) : '';
     }
   }
 
   formatForUnits(v: string): string {
-    if (!this.units) {
+    const units = this.units();
+    if (!units) {
       return v;
     }
     const n = parseInt(v, 10);
-    switch (this.units) {
+    switch (units) {
       default:
         return this.utils.mbToHumanSize(n);
     }
   }
 
   goToLink() {
-    if (typeof (this.link) === 'string') {
-      this.router.navigate([this.link]);
+    if (typeof (this.link()) === 'string') {
+      this.router.navigate([this.link()]);
     } else {
-      this.link?.();
+      this.link()?.();
     }
   }
 

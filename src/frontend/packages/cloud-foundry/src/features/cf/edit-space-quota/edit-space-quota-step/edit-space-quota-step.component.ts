@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnDestroy, Signal, ViewChild, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, Signal, ViewChild, computed, inject, signal, input } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { firstValueFrom, Subscription } from 'rxjs';
 
@@ -36,7 +36,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
   private source: SignalSource<StSpaceQuota | null>;
 
   /** FWT-957: post-success navigation target supplied by parent. */
-  @Input() redirectUrl!: string;
+  readonly redirectUrl = input.required<string>();
 
   private validSignal = signal(false);
   private formStatusSub?: Subscription;
@@ -69,7 +69,7 @@ export class EditSpaceQuotaStepComponent implements OnDestroy {
       } catch (err: unknown) {
         throw leadError('Failed to update space quota', err);
       }
-      await this.router.navigateByUrl(this.redirectUrl);
+      await this.router.navigateByUrl(this.redirectUrl());
     },
   };
 

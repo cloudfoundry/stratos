@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith } from 'rxjs/operators';
 
@@ -29,8 +29,10 @@ export interface EndpointMissingMessageParts {
 })
 export class EndpointsMissingComponent implements OnInit {
 
+  // TODO: Skipped for migration because:
+  //  The input cannot be migrated because the field is overridden by a subclass.
   @Input() showToolbarHint = true;
-  @Input() showDirectToEndpointMessage = true;
+  readonly showDirectToEndpointMessage = input(true);
 
   noContent$!: Observable<EndpointMissingMessageParts | null>;
 

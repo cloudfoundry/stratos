@@ -2,16 +2,16 @@
   <div class="custom-slide-toggle"
     [class.disabled]="disabled"
     [class.checked]="checked"
-    [class.invalid]="invalid"
-    [attr.aria-invalid]="invalid || null"
-    [attr.aria-describedby]="invalid && errorMessage ? 'error-' + (id || name) : null">
+    [class.invalid]="invalid()"
+    [attr.aria-invalid]="invalid() || null"
+    [attr.aria-describedby]="invalid() && errorMessage ? 'error-' + (id() || name()) : null">
 
     <label class="slide-toggle-label"
-      [attr.for]="id"
-      [class.label-before]="labelPosition === 'before'"
-      [class.label-after]="labelPosition === 'after'">
+      [attr.for]="id()"
+      [class.label-before]="labelPosition() === 'before'"
+      [class.label-after]="labelPosition() === 'after'">
 
-      @if (labelPosition === 'before') {
+      @if (labelPosition() === 'before') {
         <span class="slide-toggle-content">
           <ng-content></ng-content>
         </span>
@@ -27,9 +27,9 @@
           class="slide-toggle-input"
           [checked]="checked"
           [disabled]="disabled"
-          [name]="name"
-          [id]="id"
-          [required]="required"
+          [name]="name()"
+          [id]="id()"
+          [required]="required()"
           (change)="toggle()"
           />
         <div class="slide-toggle-thumb-container">
@@ -37,7 +37,7 @@
         </div>
       </div>
 
-      @if (labelPosition === 'after') {
+      @if (labelPosition() === 'after') {
         <span class="slide-toggle-content">
           <ng-content></ng-content>
         </span>
@@ -45,9 +45,9 @@
     </label>
   </div>
 
-  @if (invalid && errorMessage) {
+  @if (invalid() && errorMessage) {
     <div class="slide-toggle-error">
-      <div [id]="'error-' + (id || name)" role="alert" aria-live="polite">
+      <div [id]="'error-' + (id() || name())" role="alert" aria-live="polite">
         {{ errorMessage }}
       </div>
     </div>

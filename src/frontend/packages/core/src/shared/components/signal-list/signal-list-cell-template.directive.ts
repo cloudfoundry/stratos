@@ -1,4 +1,4 @@
-import { Directive, inject, Input, TemplateRef } from '@angular/core';
+import { Directive, inject, TemplateRef, input } from '@angular/core';
 
 // Tags an <ng-template> as a named cell renderer for a SignalList column
 // of `kind: 'template'`. SignalListComponent collects every directive
@@ -18,7 +18,7 @@ import { Directive, inject, Input, TemplateRef } from '@angular/core';
   standalone: true,
 })
 export class SignalListCellTemplateDirective<T = unknown> {
-  @Input('appSignalListCell') name!: string;
+  readonly name = input.required<string>({ alias: "appSignalListCell" });
 
   public readonly template = inject<TemplateRef<{ $implicit: T; row: T }>>(TemplateRef);
 }

@@ -1,9 +1,9 @@
 import {
   Component,
   forwardRef,
-  Input,
   signal,
   ChangeDetectionStrategy,
+  input
 } from "@angular/core";
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from "@angular/forms";
 import { take, filter } from "rxjs/operators";
@@ -32,9 +32,9 @@ export class DeployApplicationFsComponent implements ControlValueAccessor {
   private propagateChange!: (fsi: FileScannerInfo) => void;
   constructor() {}
 
-  @Input() sourceType!: string;
+  readonly sourceType = input.required<string>();
 
-  @Input() hideTitle = false;
+  readonly hideTitle = input(false);
 
   sourceData = signal<FileScannerInfo | undefined>(undefined);
 

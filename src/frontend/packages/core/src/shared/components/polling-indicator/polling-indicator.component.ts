@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -20,15 +20,15 @@ export class PollingIndicatorComponent {
   /**
    * Is polling currently happening
    */
-  @Input() isPolling?: boolean;
+  readonly isPolling = input<boolean>();
   /**
    * Can a manual poll be kicked off?
    */
-  @Input() manualPoll = false;
+  readonly manualPoll = input(false);
   /**
    * Show the min-fab version of button
    */
-  @Input() fabButton = false;
+  readonly fabButton = input(false);
   /**
    * User has kicked off a manual poll event
    */

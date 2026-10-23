@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute, inject, input } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -15,11 +15,11 @@ export interface MatSelectChange {
   template: `<div #optionContent
     class="custom-option-content py-2 px-3 cursor-pointer whitespace-nowrap"
     [class.selected]="selected"
-    [class.disabled]="disabled"
+    [class.disabled]="disabled()"
     [ngClass]="{
       'bg-info-50 dark:bg-info-900/40 text-primary': selected,
       'text-content-text hover:bg-content-secondary': !selected,
-      'opacity-50 cursor-not-allowed hover:bg-transparent': disabled
+      'opacity-50 cursor-not-allowed hover:bg-transparent': disabled()
     }"
     ><ng-content></ng-content></div>`,
   styleUrls: ['./custom-select.component.css'],
@@ -30,9 +30,11 @@ export interface MatSelectChange {
 export class CustomOptionComponent implements AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
 
-  @Input() value: any;
-  @Input() label?: string;
-  @Input() disabled = false;
+  readonly value = input<any>();
+  readonly label = input<string>();
+  readonly disabled = input(false);
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() selected = false;
 
   @ViewChild('optionContent', { static: true }) optionContent!: ElementRef;
@@ -40,7 +42,7 @@ export class CustomOptionComponent implements AfterViewInit {
   private _displayText?: string;
 
   ngAfterViewInit() {
-    if (!this.label && this.optionContent) {
+    if (!this.label() && this.optionContent) {
       this._displayText = this.optionContent.nativeElement.textContent?.trim();
       this.cdr.markForCheck();
     }
@@ -51,7 +53,8 @@ export class CustomOptionComponent implements AfterViewInit {
     // carry object values ([value]="domain"), and returning the object
     // here crashed applyOptionFilter's .toLowerCase() the moment such an
     // option had empty projected text.
-    return this.label || this._displayText || (typeof this.value === 'string' ? this.value : '');
+    const value = this.value();
+    return this.label() || this._displayText || (typeof value === 'string' ? value : '');
   }
 }
 
@@ -74,20 +77,26 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private cdr = inject(ChangeDetectorRef);
   private elementRef = inject(ElementRef);
 
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() disabled = false;
-  @Input() placeholder = '';
-  @Input({ transform: booleanAttribute }) multiple = false;
-  @Input() required = false;
-  @Input() name!: string;
+  readonly placeholder = input('');
+  readonly multiple = input(false, { transform: booleanAttribute });
+  readonly required = input(false);
+  readonly name = input.required<string>();
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input() id!: string;
-  @Input() invalid = false;
-  @Input() errorMessage = '';
-  @Input() autoSelectSingleOption = true; // Auto-select when only one option exists
-  @Input({ transform: booleanAttribute }) loading = false;
+  readonly invalid = input(false);
+  readonly errorMessage = input('');
+  readonly autoSelectSingleOption = input(true); // Auto-select when only one option exists
+  readonly loading = input(false, { transform: booleanAttribute });
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get value(): any {
-    return this.multiple ? this.selectedValues : this.selectedValues[0];
+    return this.multiple() ? this.selectedValues : this.selectedValues[0];
   }
   set value(val: any) {
     this.writeValue(val);
@@ -160,13 +169,13 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   private checkAutoSelect() {
     // Auto-select single option if enabled and no value is currently selected
-    if (this.autoSelectSingleOption &&
-        !this.multiple &&
+    if (this.autoSelectSingleOption() &&
+        !this.multiple() &&
         this.selectedValues.length === 0 &&
         this.options &&
         this.options.length === 1) {
       const singleOption = this.options.first;
-      if (singleOption && !singleOption.disabled) {
+      if (singleOption && !singleOption.disabled()) {
         // Auto-select the single option
         this.selectOption(singleOption);
       }
@@ -186,7 +195,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     }
 
     this.isOpen = !this.isOpen;
-    this._interacting = this.isOpen && this.multiple;
+    this._interacting = this.isOpen && this.multiple();
     if (!this.isOpen) {
       // Clear filter on close so the next open shows the full list.
       this.searchTerm = '';
@@ -243,20 +252,22 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   }
 
   selectOption(option: CustomOptionComponent) {
-    if (option.disabled) return;
+    if (option.disabled()) return;
 
-    if (this.multiple) {
-      const index = this.selectedValues.indexOf(option.value);
+    const multiple = this.multiple();
+    if (multiple) {
+      const index = this.selectedValues.indexOf(option.value());
       if (index === -1) {
-        this.selectedValues = [...this.selectedValues, option.value];
+        this.selectedValues = [...this.selectedValues, option.value()];
       } else {
         this.selectedValues = this.selectedValues.filter((_, i) => i !== index);
       }
     } else {
-      if (option.value === null || option.value === undefined) {
+      const valueValue = option.value();
+      if (valueValue === null || valueValue === undefined) {
         this.selectedValues = [];
       } else {
-        this.selectedValues = [option.value];
+        this.selectedValues = [valueValue];
       }
       this.isOpen = false;
     }
@@ -264,7 +275,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     this.updateDisplayValue();
     this.updateOptions();
 
-    const value = this.multiple ? this.selectedValues : (this.selectedValues[0] ?? null);
+    const value = multiple ? this.selectedValues : (this.selectedValues[0] ?? null);
     this._onChange(value);
 
     this.selectionChange.emit({
@@ -279,14 +290,14 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private updateDisplayValue() {
     if (this.selectedValues.length === 0) {
       this.displayValue = '';
-    } else if (this.multiple && this.selectedValues.length > 1) {
+    } else if (this.multiple() && this.selectedValues.length > 1) {
       this.displayValue = `${this.selectedValues.length} selected`;
     } else {
       // Single selection, or multi with exactly 1 selected — show the item name.
       // When the matching option isn't found yet (async @for not rendered), show
       // empty so the placeholder displays instead of flashing a raw value/GUID.
       if (this.options) {
-        const selectedOption = this.options.find(opt => opt.value === this.selectedValues[0]);
+        const selectedOption = this.options.find(opt => opt.value() === this.selectedValues[0]);
         this.displayValue = selectedOption ? selectedOption.displayText : '';
       } else {
         this.displayValue = '';
@@ -298,7 +309,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private updateOptions() {
     if (this.options) {
       this.options.forEach(option => {
-        const isSelected = this.selectedValues.includes(option.value);
+        const isSelected = this.selectedValues.includes(option.value());
         if (option.selected !== isSelected) {
           option.selected = isSelected;
           option['cdr'].markForCheck();
@@ -316,9 +327,10 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
       return;
     }
 
-    if (this.multiple && Array.isArray(value)) {
+    const multiple = this.multiple();
+    if (multiple && Array.isArray(value)) {
       this.selectedValues = value || [];
-    } else if (!this.multiple && value !== undefined && value !== null) {
+    } else if (!multiple && value !== undefined && value !== null) {
       this.selectedValues = [value];
     } else {
       this.selectedValues = [];

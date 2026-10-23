@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, booleanAttribute, inject } from '@angular/core';
+import { Component, Input, ChangeDetectionStrategy, booleanAttribute, inject, input } from '@angular/core';
 import { Router } from '@angular/router';
 
 import {
@@ -68,8 +68,10 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   };
 
   // Attribute form (disableCardClick / disableCardClick="true") coerces to boolean
-  @Input({ transform: booleanAttribute }) disableCardClick = false;
+  readonly disableCardClick = input(false, { transform: booleanAttribute });
 
+  // TODO: Skipped for migration because:
+  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(row: StServiceOffering) {
     super.row = row;

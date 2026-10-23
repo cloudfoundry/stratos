@@ -1,6 +1,6 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { Component, Input, OnInit, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
 import { BehaviorSubject, Observable } from 'rxjs';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
@@ -35,20 +35,23 @@ export class LoadingPageComponent implements OnInit {
   // path (entityId/entitySchema → isFetching/isDeleting) was removed: the
   // detail pages that used it now pass their signal-native isLoading, and the
   // delete flow navigates away rather than painting a "deleting" overlay here.
+  // TODO: Skipped for migration because:
+  //  Your application code writes to the input. This prevents migration.
   @Input()
   isLoading!: Observable<boolean>;
 
-  @Input()
-  text = 'Retrieving your data';
+  readonly text = input('Retrieving your data');
 
+  // TODO: Skipped for migration because:
+  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
+  //  and migrating would break narrowing currently.
   @Input()
   alert = '';
 
   /** Pin an indicator look; omitted → deterministic pick from the pool
    *  keyed on `text`, so a given page keeps one look across visits while
    *  different pages vary. */
-  @Input()
-  variant?: LoadingPageVariant;
+  readonly variant = input<LoadingPageVariant>();
 
   private branding = inject(StratosBrandingService, { optional: true });
 
@@ -57,10 +60,11 @@ export class LoadingPageComponent implements OnInit {
   );
 
   protected resolved(): LoadingPageVariant {
-    if (this.variant) return this.variant;
+    const variant = this.variant();
+    if (variant) return variant;
     let h = 0;
-    for (let i = 0; i < this.text.length; i++) {
-      h = (h * 31 + this.text.charCodeAt(i)) | 0;
+    for (let i = 0; i < this.text().length; i++) {
+      h = (h * 31 + this.text().charCodeAt(i)) | 0;
     }
     return VARIANT_POOL[Math.abs(h) % VARIANT_POOL.length];
   }

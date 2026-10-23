@@ -3,7 +3,7 @@
     (click)="toggleFavorite($event)"
     (keydown.enter)="toggleFavorite($event)"
     (keydown.space)="toggleFavorite($event); $event.preventDefault()"
-    [ngClass]="small ? 'h-5 w-5' : 'h-6 w-6'">
+    [ngClass]="small() ? 'h-5 w-5' : 'h-6 w-6'">
     @switch (isFavorite$ | async) {
       @case (true) {
         <app-custom-icon matTooltip="Unset as favorite" aria-label="Set as Favorite">star</app-custom-icon>

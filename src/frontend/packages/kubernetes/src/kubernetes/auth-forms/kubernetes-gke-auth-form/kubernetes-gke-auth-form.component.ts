@@ -19,6 +19,9 @@ interface GKEAuthForm {
   ]
 })
 export class KubernetesGKEAuthFormComponent implements IEndpointAuthComponent {
+  // TODO: Skipped for migration because:
+  //  This input overrides a field from a superclass, while the superclass field
+  //  is not migrated.
   @Input() formGroup!: FormGroup<GKEAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {

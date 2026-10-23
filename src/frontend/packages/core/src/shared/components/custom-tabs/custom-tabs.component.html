@@ -1,20 +1,20 @@
 <div class="custom-tab-group">
-  <div class="tab-header" [attr.data-background-color]="backgroundColor">
+  <div class="tab-header" [attr.data-background-color]="backgroundColor()">
     <div class="tab-labels">
       @for (tab of getTabsArray(); track $index; let i = $index) {
         <div
           class="tab-label"
-          [attr.data-test]="'custom-tab-' + (tab.label || tab.textLabel)"
+          [attr.data-test]="'custom-tab-' + (tab.label() || tab.textLabel())"
           role="tab" tabindex="0"
           [attr.aria-selected]="tab.isActive"
           [class.active]="tab.isActive"
-          [class.disabled]="tab.disabled"
-          [attr.data-color]="color"
+          [class.disabled]="tab.disabled()"
+          [attr.data-color]="color()"
           (click)="selectTab(i)"
           (keydown.enter)="selectTab(i)"
           (keydown.space)="selectTab(i); $event.preventDefault()"
           >
-          {{ tab.label || tab.textLabel }}
+          {{ tab.label() || tab.textLabel() }}
         </div>
       }
     </div>

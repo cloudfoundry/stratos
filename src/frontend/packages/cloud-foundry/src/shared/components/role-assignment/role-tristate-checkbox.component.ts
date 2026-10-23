@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Output, input } from '@angular/core';
 import { CustomCheckboxComponent, CustomTooltipDirective } from '@stratosui/core';
 
 /**
@@ -18,16 +18,16 @@ import { CustomCheckboxComponent, CustomTooltipDirective } from '@stratosui/core
 })
 export class RoleTristateCheckboxComponent {
   /** true = checked, false = unchecked, null = indeterminate */
-  @Input() checked: boolean | null = false;
-  @Input() disabled = false;
-  @Input() label = '';
-  @Input() tooltip = '';
+  readonly checked = input<boolean | null>(false);
+  readonly disabled = input(false);
+  readonly label = input('');
+  readonly tooltip = input('');
 
   /** Emits the new explicit boolean when the user toggles the checkbox. */
   @Output() toggled = new EventEmitter<boolean>();
 
   onChange(next: boolean): void {
-    if (this.disabled) {
+    if (this.disabled()) {
       return;
     }
     this.toggled.emit(next);

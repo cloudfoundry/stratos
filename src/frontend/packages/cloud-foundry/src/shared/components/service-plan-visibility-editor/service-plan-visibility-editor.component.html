@@ -1,4 +1,4 @@
-@if (servicePlan) {
+@if (servicePlan()) {
   <div class="visibility-editor" data-test="visibility-editor">
     <fieldset class="visibility-editor__type">
       <legend>Visibility</legend>
@@ -24,7 +24,7 @@
           <span class="visibility-editor__count" data-test="selected-count">{{ selectedCount() }} selected</span>
         </div>
         <ul class="visibility-editor__org-list">
-          @for (org of organizations; track org.guid) {
+          @for (org of organizations(); track org.guid) {
             <li>
               <label>
                 <input

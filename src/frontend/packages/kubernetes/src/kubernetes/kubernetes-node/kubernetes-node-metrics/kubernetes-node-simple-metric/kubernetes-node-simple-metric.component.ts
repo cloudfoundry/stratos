@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
 
 @Component({
@@ -10,25 +10,23 @@ import { formatCPUTime } from '../../../kubernetes-metrics.helpers';
 export class KubernetesNodeSimpleMetricComponent {
 
   // strict: required @Input, set by Angular before the template reads it
-  @Input()
-  key!: string;
+  readonly key = input.required<string>();
 
   // strict: required @Input, set by Angular before the template reads it.
   // Callers bind interpolated (already formatted) values, so this is a string.
-  @Input()
-  value!: string;
+  readonly value = input.required<string>();
 
   // Optional - callers may omit the unit; formatValue() falls back to ''
-  @Input()
-  unit?: string;
+  readonly unit = input<string>();
 
   public formatValue() {
-    switch (this.unit) {
+    const unitValue = this.unit();
+    switch (unitValue) {
       case 'secs':
-        return formatCPUTime(this.value);
+        return formatCPUTime(this.value());
       default: {
-        const unit = this.unit || '';
-        return `${this.value} ${unit}`;
+        const unit = unitValue || '';
+        return `${this.value()} ${unit}`;
       }
     }
   }
