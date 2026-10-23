@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { defer, of } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { CurrentUserRolesDataService, EndpointModel, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { seedEndpointsDataService } from '@stratosui/store/testing';
 import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
@@ -90,5 +91,22 @@ describe('ConnectEndpointComponent', () => {
       expect(fixture.nativeElement.textContent).not.toContain('Skip SSL validation for the endpoint');
       expect(sent?.tls).toBeUndefined();
     });
+  });
+
+  // The Connect dialog submits on Enter (formSubmit). The connect runs only
+  // when its Observable is subscribed.
+  it('connects when the form is submitted with Enter', async () => {
+    const connected = vi.fn();
+    component.formSubmit = true;
+    component.connectService = {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: () => undefined,
+      submit: () => defer(() => { connected(); return of({ success: true, errorMessage: '' }); }),
+    } as unknown as ConnectEndpointService;
+    await fixture.whenStable();
+    component.endpointForm.get('authValues')?.patchValue({ username: 'u', password: 'p' });
+    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+    await fixture.whenStable();
+    expect(connected).toHaveBeenCalledTimes(1);
   });
 });
