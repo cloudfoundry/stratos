@@ -34,6 +34,10 @@ interface PrometheusVectorResult {
   values?: [number, string][];
 }
 
+type HealthFetch =
+  | { ok: true; rows: CfCellHealthEntry[] }
+  | { ok: false; error: unknown };
+
 interface PrometheusResponseEnvelope {
   [cnsiGuid: string]: {
     status?: string;
@@ -86,6 +90,12 @@ export class CfCellHealthSignalConfigService {
   private readonly _availability: WritableSignal<boolean | undefined> = signal(undefined);
   readonly availability: Signal<boolean | undefined> = this._availability.asReadonly();
 
+  // Holds the CNSI guid -> error of the last failed load, or an empty
+  // map. The list shows its error state with Retry while this is
+  // non-empty and there are no rows.
+  private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
+  readonly errorsByCnsi: Signal<Map<string, unknown>> = this._errorsByCnsi.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: CfCellHealthEntry) => unknown>> = signal(new Map());
 
   view!: ViewPipeline<CfCellHealthEntry>;
@@ -96,6 +106,7 @@ export class CfCellHealthSignalConfigService {
     this.state.resetPageOnScopeChange(`${cnsiGuid}:${cellId}`);
     this.cnsiGuid = cnsiGuid;
     this.cellId = cellId;
+    this._errorsByCnsi.set(new Map());
     this.view = new ViewPipeline<CfCellHealthEntry>(
       this.rows,
       this.filter,
@@ -106,40 +117,47 @@ export class CfCellHealthSignalConfigService {
     );
   }
 
+  // Uses the first health metric that has samples for this cell. When
+  // neither has any, shows the error of the first failed request, or an
+  // empty history when both requests succeeded.
   async loadAll(): Promise<void> {
     if (!this.cnsiGuid || !this.cellId) return;
-    let rows = await this.fetchHealth(METRIC_HEALTHY);
-    let usedMetric: string | null = METRIC_HEALTHY;
-    if (rows === null || rows.length === 0) {
-      const fallback = await this.fetchHealth(METRIC_HEALTHY_DEPRECATED);
-      if (fallback !== null && fallback.length > 0) {
-        rows = fallback;
-        usedMetric = METRIC_HEALTHY_DEPRECATED;
+    let failure: { error: unknown } | null = null;
+    for (const metric of [METRIC_HEALTHY, METRIC_HEALTHY_DEPRECATED]) {
+      const res = await this.fetchHealth(metric);
+      if (res.ok && res.rows.length > 0) {
+        this.activeMetric = metric;
+        this.showRows(res.rows);
+        return;
+      }
+      if (!res.ok && !failure) {
+        failure = { error: res.error };
       }
     }
-    if (rows && rows.length > 0) {
-      this.activeMetric = usedMetric;
-      this._rows.set(rows);
-      this._availability.set(true);
-    } else if (rows === null) {
-      this._rows.set([]);
-      this._availability.set(false);
-    } else {
-      this._rows.set([]);
-      this._availability.set(false);
-    }
+    this._rows.set([]);
+    this._errorsByCnsi.set(failure ? new Map([[this.cnsiGuid, failure.error]]) : new Map());
+    this._availability.set(false);
   }
 
+  // Refetches the metric that last had data. A failure keeps the rows
+  // already shown and flags the error.
   async refresh(): Promise<void> {
     if (!this.activeMetric) {
       await this.loadAll();
       return;
     }
-    const rows = await this.fetchHealth(this.activeMetric);
-    if (rows !== null) {
-      this._rows.set(rows);
-      this._availability.set(true);
+    const res = await this.fetchHealth(this.activeMetric);
+    if (res.ok) {
+      this.showRows(res.rows);
+    } else {
+      this._errorsByCnsi.set(new Map([[this.cnsiGuid, res.error]]));
     }
+  }
+
+  private showRows(rows: CfCellHealthEntry[]): void {
+    this._rows.set(rows);
+    this._errorsByCnsi.set(new Map());
+    this._availability.set(true);
   }
 
   registerSortExtractor(fieldKey: string, extractor: (row: CfCellHealthEntry) => unknown): void {
@@ -150,7 +168,7 @@ export class CfCellHealthSignalConfigService {
     });
   }
 
-  private async fetchHealth(metric: string): Promise<CfCellHealthEntry[] | null> {
+  private async fetchHealth(metric: string): Promise<HealthFetch> {
     const query = `${metric}{bosh_job_id="${this.cellId}"}`;
     const url = `/pp/v1/metrics/cf/cells/query?query=${encodeURIComponent(query)}`;
     try {
@@ -161,12 +179,12 @@ export class CfCellHealthSignalConfigService {
       );
       const cnsiResp = resp?.[this.cnsiGuid];
       const result = cnsiResp?.data?.result ?? [];
-      if (!result.length) return [];
+      if (!result.length) return { ok: true, rows: [] };
       const values = result[0].values;
-      if (!values || !values.length) return [];
-      return mapMetricsToStates(values);
-    } catch {
-      return null;
+      if (!values || !values.length) return { ok: true, rows: [] };
+      return { ok: true, rows: mapMetricsToStates(values) };
+    } catch (error) {
+      return { ok: false, error };
     }
   }
 }

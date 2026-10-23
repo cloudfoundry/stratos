@@ -12,7 +12,7 @@
       <div class="flex-1">
         <app-metadata-item class="mt-0" icon="wallpaper" label="Environment">{{ (cfCellService.cellMetric$ | async)?.environment}}</app-metadata-item>
         <app-metadata-item icon="local_hospital" label="Healthy" matTooltip="Has the cell passed the garden backend health check?">
-          <app-boolean-indicator [isTrue]="(status$ | async) === 'ok'" type="yes-no" [subtle]="false" [showText]="true"></app-boolean-indicator>
+          <app-boolean-indicator [isTrue]="healthy$ | async" type="yes-no" [subtle]="false" [showText]="true"></app-boolean-indicator>
         </app-metadata-item>
         @if (cfCellService.cpus$ | async; as cpus) {
           <app-metadata-item icon="developer_board" label="Number of CPUs">{{ cpus }}</app-metadata-item>

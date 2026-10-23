@@ -81,6 +81,12 @@ export class CfCellAppsSignalConfigService {
   private readonly _isLoading: WritableSignal<boolean> = signal(false);
   readonly isLoading: Signal<boolean> = this._isLoading.asReadonly();
 
+  // Holds the CNSI guid -> error of the last failed metrics request, or
+  // an empty map. The list shows its error state with Retry while this
+  // is non-empty and there are no rows.
+  private readonly _errorsByCnsi: WritableSignal<Map<string, unknown>> = signal(new Map());
+  readonly errorsByCnsi: Signal<Map<string, unknown>> = this._errorsByCnsi.asReadonly();
+
   private readonly _sortExtractors: WritableSignal<Map<string, (row: CfCellAppRow) => unknown>> = signal(new Map());
 
   // Per-cnsi app-detail cache — only used for the eager join during
@@ -96,6 +102,7 @@ export class CfCellAppsSignalConfigService {
     this.state.resetPageOnScopeChange(`${cnsiGuid}:${cellId}`);
     this.cnsiGuid = cnsiGuid;
     this.cellId = cellId;
+    this._errorsByCnsi.set(new Map());
     this.view = new ViewPipeline<CfCellAppRow>(
       this.rows,
       this.filter,
@@ -148,6 +155,7 @@ export class CfCellAppsSignalConfigService {
     };
     try {
       const metrics = await this.metricsDataService.fetch<PrometheusVectorResult>(req);
+      this._errorsByCnsi.set(new Map());
       const result = (metrics?.data?.result ?? []) as PrometheusVectorResult[];
       const out: { appGuid: string; instanceIndex: number }[] = [];
       for (const r of result) {
@@ -158,7 +166,8 @@ export class CfCellAppsSignalConfigService {
         out.push({ appGuid, instanceIndex });
       }
       return out;
-    } catch {
+    } catch (err) {
+      this._errorsByCnsi.set(new Map([[this.cnsiGuid, err]]));
       return null;
     }
   }
