@@ -18,21 +18,12 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class MetadataItemComponent {
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() icon!: string;
 
   public readonly iconFont = input<string>();
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() public label?: string;
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() public tooltip?: string;
 
   // Are we editing?

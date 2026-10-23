@@ -22,8 +22,6 @@ export class PageHeaderEventsComponent implements OnInit {
   private activatedRoute = inject(ActivatedRoute);
   private eventService = inject(GlobalEventService);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input()
   public endpointIds$?: Observable<string[]>;
   public readonly simpleErrorMessage = input(false);

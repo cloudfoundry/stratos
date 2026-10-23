@@ -44,8 +44,6 @@ export class ServicePlanPublicComponent {
     return '';
   });
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get servicePlan(): StServicePlan | null {
     return this._servicePlan();

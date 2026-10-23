@@ -13,9 +13,6 @@ import { Router } from '@angular/router';
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() icon!: string;
   readonly iconFont = input<string>();
   readonly label = input<string>();

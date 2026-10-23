@@ -64,8 +64,6 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   private logStreamSubject = new BehaviorSubject<Observable<any>>(NEVER);
 
   // A different stream is a new log: what the last one showed goes
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set logStream(stream: Observable<any>) {
     const next = stream || NEVER;

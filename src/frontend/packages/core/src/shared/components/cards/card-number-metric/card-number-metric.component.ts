@@ -30,9 +30,6 @@ enum AlertLevel {
 })
 export class CardNumberMetricComponent implements OnInit, OnChanges {
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() icon!: string;
   readonly iconFont = input<string>();
   readonly label = input<string>();
@@ -47,8 +44,6 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   readonly showAlerts = output<any>();
   readonly mode = input<string>();
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set alerts(alerts: any[]) {
     if (alerts) {

@@ -23,8 +23,6 @@ import { CustomIconComponent } from '../../shared/components/custom-material/cus
 })
 export class EntityFavoriteStarComponent {
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
     const name = favorite.getPrettyTypeName();

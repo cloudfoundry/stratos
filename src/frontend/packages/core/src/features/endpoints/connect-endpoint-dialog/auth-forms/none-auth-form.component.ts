@@ -16,8 +16,5 @@ export type NoneAuthFormValue = Record<string, never>;
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NoneAuthFormComponent implements IAuthForm {
-  // TODO: Skipped for migration because:
-  //  This input overrides a field from a superclass, while the superclass field
-  //  is not migrated.
   @Input() formGroup!: FormGroup<NoneAuthFormValue>;
 }

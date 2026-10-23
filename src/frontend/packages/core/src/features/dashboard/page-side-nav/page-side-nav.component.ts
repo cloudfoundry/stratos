@@ -39,8 +39,6 @@ export class PageSideNavComponent implements OnInit {
 
 
   pTabs: IPageSideNavTab[] = [];
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set tabs(tabs: IPageSideNavTab[]) {
     if (!tabs) {
       this.pTabs = [];

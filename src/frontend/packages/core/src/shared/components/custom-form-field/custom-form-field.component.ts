@@ -80,9 +80,6 @@ export class CustomFormFieldComponent
   readonly color = input<"primary" | "accent" | "warn">("primary");
   readonly floatLabel = input<"always" | "never" | "auto">("always");
   readonly hideRequiredMarker = input(false);
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() hintLabel = "";
 
   /**

@@ -96,8 +96,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
   // leave it unset.
   readonly actionMenu = input<MenuItem[] | null>(null);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() component: EndpointListDetailsComponent | null = null;
   private endpointDetails!: ViewContainerRef;
   @ViewChild('endpointDetails', { read: ViewContainerRef, static: true }) set content(content: ViewContainerRef) {
@@ -105,8 +103,6 @@ export class EndpointCardComponent extends CardCell<EndpointModel> implements On
     this.updateInnerComponent();
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(row: EndpointModel) {
     super.row = row;

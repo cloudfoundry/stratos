@@ -70,8 +70,6 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   // Attribute form (disableCardClick / disableCardClick="true") coerces to boolean
   readonly disableCardClick = input(false, { transform: booleanAttribute });
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(row: StServiceOffering) {
     super.row = row;

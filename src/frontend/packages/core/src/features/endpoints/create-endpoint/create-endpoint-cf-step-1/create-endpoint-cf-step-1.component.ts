@@ -68,8 +68,6 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
   readonly finalStep = input(false);
   private pFixedUrl!: string;
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get fixedUrl(): string {
     return this.pFixedUrl;

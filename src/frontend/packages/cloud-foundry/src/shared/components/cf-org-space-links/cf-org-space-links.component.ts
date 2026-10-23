@@ -16,9 +16,6 @@ import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.servic
 })
 export class CfOrgSpaceLinksComponent {
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() service!: CfOrgSpaceLabelService;
   // Query params for the space link (e.g. { breadcrumbs: 'services-wall' })
   readonly spaceBreadCrumbs = input<Params>();

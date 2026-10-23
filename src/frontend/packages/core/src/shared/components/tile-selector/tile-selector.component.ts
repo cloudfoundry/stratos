@@ -19,19 +19,13 @@ export class TileSelectorComponent {
   public pOptions: ITileConfig[] = [];
   public hiddenOptions: ITileConfig[] = [];
   public showingMore = false;
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() smallerTiles = false;
   readonly compactTiles = input(false);
   private pDynamicSmallerTiles = 0;
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set dynamicSmallerTiles(tiles: number) {
     this.pDynamicSmallerTiles = tiles;
     this.updateSmallerTiles();
   }
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set options(options: ITileConfig[]) {
     if (!options) {
       return;

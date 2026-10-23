@@ -17,9 +17,6 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class TileSelectorTileComponent {
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() tile!: ITileConfig;
 
   readonly active = input<boolean>();

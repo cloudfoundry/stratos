@@ -26,8 +26,6 @@ export class AnalysisReportViewerComponent implements OnDestroy {
 
   private id!: string;
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set report(report: AnalysisReport | null) {
     if (report === null || report.id === this.id) {

@@ -29,8 +29,6 @@ export class RingChartComponent implements OnInit, OnChanges {
     }
   };
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() data: any[] = [];
   readonly label = input('Total');
   readonly scheme = input<any>('cool');
