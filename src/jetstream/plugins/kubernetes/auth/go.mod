@@ -16,7 +16,7 @@ require (
 	github.com/cloudfoundry/stratos/src/jetstream/plugins/kubernetes v0.0.0-00010101000000-000000000000
 	github.com/labstack/echo/v5 v5.4.0
 	k8s.io/client-go v0.37.1
-	sigs.k8s.io/aws-iam-authenticator v0.7.22
+	sigs.k8s.io/aws-iam-authenticator v0.7.23
 )
 
 require (
