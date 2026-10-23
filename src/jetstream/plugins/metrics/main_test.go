@@ -2,6 +2,7 @@ package metrics
 
 import (
 	"errors"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -55,9 +56,11 @@ func TestConnectReportsAnUnreachableEndpoint(t *testing.T) {
 		_, _, err = m.Connect(newConnectContext(), cnsi, "user-1")
 	})
 	require.Error(t, err)
+	// Unshaped, so the connect handler can report it as unreachable.
 	var shadow api.ErrHTTPShadow
-	require.True(t, errors.As(err, &shadow), "got %T: %v", err, err)
-	assert.Equal(t, "Could not connect to the endpoint", shadow.UserFacingError)
+	assert.False(t, errors.As(err, &shadow), "got a shaped error: %v", err)
+	var netErr net.Error
+	assert.True(t, errors.As(err, &netErr), "expected the request failure, got %T: %v", err, err)
 }
 
 func TestUrlComparision(t *testing.T) {
