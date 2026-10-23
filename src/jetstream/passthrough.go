@@ -293,8 +293,21 @@ func (p *portalProxy) ProxyRequest(c *echo.Context, uri *url.URL) (map[string]*a
 		case res := <-done:
 			responses[res.GUID] = res
 		case <-deadline:
-			// Return whatever we have so far rather than blocking
+			// Return whatever we have so far rather than blocking, and a
+			// timeout for each endpoint that has not answered, so the
+			// per-endpoint response reports it (buildJSONResponse turns it
+			// into the usual {error, errorResponse} entry).
 			slog.Warn("Proxy request timed out waiting for all responses", "received", len(responses), "expected", len(cnsiList))
+			for _, cnsi := range cnsiList {
+				if _, ok := responses[cnsi]; !ok {
+					responses[cnsi] = &api.CNSIRequest{
+						GUID:       cnsi,
+						StatusCode: http.StatusGatewayTimeout,
+						Status:     "Request timed out",
+						Error:      errors.New("the endpoint did not answer in time"),
+					}
+				}
+			}
 			return responses, nil
 		}
 	}
@@ -390,8 +403,8 @@ func (p *portalProxy) SendProxiedResponse(c *echo.Context, responses map[string]
 
 	if shouldPassthrough {
 		// A passthrough goes to one endpoint (ProxyRequest refuses more).
-		// No response means ProxyRequest stopped waiting for it at its
-		// overall timeout: the endpoint did not answer in time.
+		// ProxyRequest reports an endpoint that did not answer in time as a
+		// 504 entry; an empty map can still come from another caller.
 		if len(cnsiList) == 0 {
 			return echo.NewHTTPError(http.StatusGatewayTimeout, "Request timed out")
 		}
