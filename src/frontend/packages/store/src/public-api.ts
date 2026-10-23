@@ -207,6 +207,7 @@ export { describeLastConnectError, EndpointLastErrorService } from './services/e
 // metrics.effects.ts once all consumers (chart component + range
 // selectors + 4 call sites) migrate to this service.
 export { MetricsDataService } from './services/metrics-data.service';
+export { ProxyErrorEntry, isProxyErrorEntry, proxyErrorReason } from './services/proxy-error-entry';
 export type {
   MetricsFetchState,
   MetricsObservation,
