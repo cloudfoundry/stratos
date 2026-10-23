@@ -1,3 +1,4 @@
+import { describe, expect, it } from 'vitest';
 import { computeChecked, diffToChanges, RoleSelection } from './role-tristate';
 import { OrgUserRoleNames, SpaceUserRoleNames } from '../../../store/types/cf-user.types';
 
