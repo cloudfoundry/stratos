@@ -108,10 +108,12 @@ func (c *KubernetesSpecification) Validate(userGUID string, cnsiRecord api.CNSIR
 	}
 
 	if response.StatusCode >= 400 {
+		// Wrapped, not flattened to text: the connect handler reports a
+		// rejected token, an unreachable cluster or a TLS failure from it.
 		if response.Error != nil {
-			return fmt.Errorf("Unable to connect to endpoint: %s", response.Error.Error())
+			return fmt.Errorf("unable to list pods: %w", response.Error)
 		}
-		return fmt.Errorf("Unable to connect to endpoint: %d => %s", response.StatusCode, response.Status)
+		return api.ErrHTTPRequest{Status: response.StatusCode, Response: string(response.Response)}
 	}
 
 	return nil

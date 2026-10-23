@@ -48,7 +48,7 @@ func (p *portalProxy) OAuthHandlerFunc(cnsiRequest *api.CNSIRequest, req *http.R
 			client := p.GetHttpClientForRequest(req, cnsi.SkipSSLValidation, cnsi.CACert)
 			res, err := client.Do(req)
 			if err != nil {
-				return nil, fmt.Errorf("request failed: %v", err)
+				return nil, fmt.Errorf("request failed: %w", err)
 			}
 
 			if res.StatusCode != 401 {

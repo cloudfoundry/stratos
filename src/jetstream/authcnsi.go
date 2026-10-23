@@ -579,8 +579,9 @@ func connectFailure(err error) error {
 // classifyConnectError says why a connect failed: the response status, a
 // connectReason (empty when none applies) and a message for the user.
 //   - An answer from the endpoint (api.ErrHTTPRequest, as built by
-//     api.LogHTTPError) is reported by its status: 401 and 403 keep their
-//     status, a 5xx becomes 502, anything else 400.
+//     api.LogHTTPError) is reported by its status, and its message when it
+//     has one: 401 and 403 keep their status, a 5xx becomes 502, anything
+//     else 400.
 //   - A request that got no answer becomes 502, as a TLS failure or as
 //     unreachable.
 //   - Any other error is the plugin's own message, with 400.
@@ -595,6 +596,9 @@ func classifyConnectError(err error) (int, string, string) {
 			return classifyRequestFailure(httpError.InnerError)
 		}
 		answered := fmt.Sprintf("%d %s", httpError.Status, http.StatusText(httpError.Status))
+		if message := answerMessage(httpError.Response); message != "" {
+			answered += ": " + message
+		}
 		switch {
 		case httpError.Status == http.StatusUnauthorized:
 			return httpError.Status, connectReasonAuthFailed, "the endpoint rejected the credentials (" + answered + ")"
@@ -610,6 +614,18 @@ func classifyConnectError(err error) (int, string, string) {
 		return classifyRequestFailure(err)
 	}
 	return http.StatusBadRequest, "", err.Error()
+}
+
+// answerMessage is the "message" of a JSON answer, as Kubernetes (a
+// Status), GitHub and GitLab give with an error status. Empty otherwise.
+func answerMessage(body string) string {
+	var answer struct {
+		Message string `json:"message"`
+	}
+	if json.Unmarshal([]byte(body), &answer) != nil {
+		return ""
+	}
+	return strings.TrimSpace(answer.Message)
 }
 
 // classifyRequestFailure reports a request that got no response.
