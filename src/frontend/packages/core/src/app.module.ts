@@ -18,7 +18,6 @@ import {
   EntityCatalogHelper,
   EntityCatalogHelpers,
   AppStoreModule,
-  generateStratosEntities,
 } from "@stratosui/store";
 import { StratosThemeModule } from "../../theme/theme.module";
 import { filter, take } from "rxjs/operators";
@@ -32,6 +31,7 @@ import { ExtensionService } from "./core/extension/extension-service";
 import { CurrentUserPermissionsService } from "./core/permissions/current-user-permissions.service";
 import { CustomImportModule } from "./custom-import.module";
 import { DashboardModule } from "./features/dashboard/dashboard.module";
+import { generateCoreStratosEntities } from "./features/metrics/metrics-endpoint";
 import { HomeModule } from "./features/home/home.module";
 import { LoginModule } from "./features/login/login.module";
 import { NoEndpointsNonAdminComponent } from "./features/no-endpoints-non-admin/no-endpoints-non-admin.component";
@@ -58,9 +58,9 @@ import { cfApiInterceptor } from "@stratosui/cloud-foundry";
  * CRITICAL: Module import order must be preserved for correct entity catalog initialization
  *
  * Entity Registration Flow:
- * 1. EntityCatalogModule.forFeature(generateStratosEntities) - MUST BE FIRST
- *    - Registers core Stratos entities (endpoint, systemInfo, userFavorites, etc.)
- *    - These entities are required by all feature modules
+ * 1. EntityCatalogModule.forFeature(generateCoreStratosEntities) - MUST BE FIRST
+ *    - Registers the Stratos entities: today only the Metrics endpoint type,
+ *      with the auth types the store package cannot declare
  *    - Registration is SYNCHRONOUS - completes before component constructors
  *
  * 2. Core infrastructure modules (Store, Router, etc.)
@@ -83,7 +83,7 @@ import { cfApiInterceptor } from "@stratosui/cloud-foundry";
     NoEndpointsNonAdminComponent,
     // Modules
     // CRITICAL: Core Stratos entities MUST register first - required by all feature modules
-    EntityCatalogModule.forFeature(generateStratosEntities),
+    EntityCatalogModule.forFeature(generateCoreStratosEntities),
     RouteModule,
     AppStoreModule,
     BrowserModule,

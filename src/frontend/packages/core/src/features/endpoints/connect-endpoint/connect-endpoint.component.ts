@@ -89,16 +89,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private init(config: ConnectEndpointConfig) {
     const endpoint = entityCatalog.getEndpoint(config.type, config.subType);
     // Populate the valid auth types for the endpoint that we want to connect to.
-    // Some entity definitions live in the @stratosui/store package, which by
-    // design cannot import from @stratosui/core where BaseEndpointAuth is
-    // defined — so they declare `authTypes: []` and rely on this fallback.
-    // Without it the dynamic auth-form lookup throws, leaving the wizard
-    // stuck with no Connect step rendered (regression from PR #4517 which
-    // cleaned the store->core dependency without replacing the lost configs).
-    const declaredAuthTypes = endpoint?.definition?.authTypes ?? [];
-    const baseAuthTypes = declaredAuthTypes.length > 0
-      ? declaredAuthTypes
-      : [BaseEndpointAuth.UsernamePassword, BaseEndpointAuth.None];
+    // Types declared in @stratosui/store (Metrics) get theirs from core at
+    // startup; see generateCoreStratosEntities.
+    const baseAuthTypes = endpoint?.definition?.authTypes ?? [];
 
     // Remove SSO if not allowed on this endpoint
     if (config.ssoAllowed) {
