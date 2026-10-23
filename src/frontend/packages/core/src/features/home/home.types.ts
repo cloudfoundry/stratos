@@ -1,7 +1,6 @@
 import { Observable } from 'rxjs';
 
 import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../../store/src/public-api';
 import { UserFavorite } from './../../../../store/src/types/user-favorites.types';
 
 // Layout for a home page card
@@ -16,10 +15,11 @@ export class HomePageCardLayout {
   }
 }
 
+// A card component declares `endpoint` (EndpointModel) and `layout`
+// (HomePageCardLayout) inputs. The host sets them with
+// ComponentRef.setInput, so a card may use signal or decorator inputs;
+// load() is the only member the host calls on the instance.
 export abstract class HomePageEndpointCard {
-  // strict: abstract card contract; concrete cards assign these (matches endpoint!)
-  public layout!: HomePageCardLayout;
-  public endpoint!: EndpointModel;
   public load!: () => Observable<boolean>;
 }
 
