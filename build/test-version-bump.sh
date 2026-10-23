@@ -218,6 +218,24 @@ else
 fi
 
 echo ""
+echo "=== Set round-trips the prefix ==="
+
+for given in "v5.0.0-rc.1" "5.0.0-rc.1"; do
+  echo "-- set ${given} --"
+  setup "4.9.3"
+  bash "${BUMP}" set "${given}" || true
+  assert_version "package.json keeps '${given}'" "${given}"
+  actual=$(cat "${TMPDIR}/src/jetstream/VERSION")
+  if [[ "${actual}" == "${given}+build."* ]]; then
+    PASS=$((PASS + 1))
+    echo "  ✓ VERSION keeps '${given}'"
+  else
+    FAIL=$((FAIL + 1))
+    echo "  ✗ VERSION: expected '${given}+build.*', got '${actual}'"
+  fi
+done
+
+echo ""
 echo "=== Dry run ==="
 
 echo "-- dry-run does not modify --"
