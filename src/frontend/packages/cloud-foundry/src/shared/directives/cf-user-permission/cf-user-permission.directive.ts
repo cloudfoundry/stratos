@@ -19,9 +19,9 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
 
   public readonly appCfUserPermissionEndpointGuid = input<string>();
 
-  private readonly appCfUserPermissionOrganizationGuid = input<string>();
+  protected readonly appCfUserPermissionOrganizationGuid = input<string>();
 
-  private readonly appCfUserPermissionSpaceGuid = input<string>();
+  protected readonly appCfUserPermissionSpaceGuid = input<string>();
 
   private canSub!: Subscription;
 
