@@ -3,6 +3,7 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
+import { KubeLoadTracker } from '../endpoint-data/kube-load-tracker';
 import { KubeProxyResponse, kubeProxyResult } from '../endpoint-data/kube-proxy-response';
 import { KubeNode, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
@@ -26,6 +27,7 @@ export class KubeNodeDataService {
   // this cache so multiple pages on the same endpoint share one fetch.
   private readonly _nodes = signal<Map<string, KubeNode[]>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+  private readonly loads = new KubeLoadTracker();
 
   constructor() {
     this.eviction.register(kubeGuid => {
@@ -82,9 +84,15 @@ export class KubeNodeDataService {
     return this._errors.asReadonly();
   }
 
+  // Whether the endpoint's node list is loading. A reactive read.
+  loading(kubeGuid: string): boolean {
+    return this.loads.isLoading(kubeGuid);
+  }
+
   private async fetchNodes(kubeGuid: string): Promise<KubeNode[]> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const live = this.eviction.current(kubeGuid);
+    const loaded = this.loads.start(kubeGuid);
     try {
       const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<KubeNode>>>(
         `/pp/v1/proxy/api/v1/nodes?limit=${KUBE_LIST_DEFAULT_LIMIT}`,
@@ -109,6 +117,8 @@ export class KubeNodeDataService {
       };
       if (live()) this._errors.update(curr => [...curr, next].slice(-50));
       return [];
+    } finally {
+      loaded();
     }
   }
 }

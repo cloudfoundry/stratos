@@ -1,9 +1,10 @@
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
-import { Observable, firstValueFrom, of } from 'rxjs';
-import { catchError, map, shareReplay } from 'rxjs/operators';
+import { Observable, defer, firstValueFrom, of } from 'rxjs';
+import { catchError, finalize, map, shareReplay } from 'rxjs/operators';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
+import { KubeLoadTracker } from '../endpoint-data/kube-load-tracker';
 import { KubeProxyResponse, kubeProxyResult } from '../endpoint-data/kube-proxy-response';
 import { KubeEndpointEviction, evictErrors, evictKeys } from '../endpoint-data/kube-endpoint-eviction';
 import { KubePod, KubePodContainerStatus, StratosError } from '../endpoint-data/kube-types';
@@ -53,6 +54,7 @@ export class KubePodDataService {
   private readonly _byScope = signal<Map<string, CacheEntry>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
   private readonly _unavailable = signal<Set<string>>(new Set());
+  private readonly loads = new KubeLoadTracker();
 
   constructor() {
     this.eviction.register(kubeGuid => this.evictEndpoint(kubeGuid));
@@ -66,10 +68,13 @@ export class KubePodDataService {
   // namespace's, or the whole cluster's. A reactive read: call it inside
   // a computed.
   scopeErrors(scope: { kubeGuid: string; namespace?: string; nodeName?: string }): StratosError[] {
-    const key = scope.namespace ? nsKey(scope.kubeGuid, scope.namespace)
-      : scope.nodeName ? nodeKey(scope.kubeGuid, scope.nodeName)
-        : clusterKey(scope.kubeGuid);
+    const key = scopeKey(scope);
     return this._errors().filter(e => e.affected?.includes(key));
+  }
+
+  // Whether the pod list for one scope is loading. A reactive read.
+  scopeLoading(scope: { kubeGuid: string; namespace?: string; nodeName?: string }): boolean {
+    return this.loads.isLoading(scopeKey(scope));
   }
 
   // -- Public read APIs ----------------------------------------------------
@@ -203,6 +208,15 @@ export class KubePodDataService {
   private fetchPods(kubeGuid: string, key: string, title: string, url: string): Observable<KubePod[]> {
     const live = this.eviction.current(kubeGuid);
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
+    return defer(() => {
+      const loaded = this.loads.start(key);
+      return this.fetchPodList(kubeGuid, key, title, url, headers, live).pipe(finalize(loaded));
+    });
+  }
+
+  private fetchPodList(
+    kubeGuid: string, key: string, title: string, url: string, headers: HttpHeaders, live: () => boolean,
+  ): Observable<KubePod[]> {
     return this.http.get<KubeProxyResponse<KubeListResponse<KubePod>>>(url, { headers }).pipe(
       kubeProxyResult<KubeListResponse<KubePod>>(kubeGuid),
       map(list => live() ? this.absorbResponse(key, kubeGuid, list) : []),
@@ -292,6 +306,12 @@ export class KubePodDataService {
 }
 
 // --- helpers ---------------------------------------------------------------
+
+function scopeKey(scope: { kubeGuid: string; namespace?: string; nodeName?: string }): string {
+  if (scope.namespace) return nsKey(scope.kubeGuid, scope.namespace);
+  if (scope.nodeName) return nodeKey(scope.kubeGuid, scope.nodeName);
+  return clusterKey(scope.kubeGuid);
+}
 
 function clusterKey(kubeGuid: string): string {
   return `cluster:${kubeGuid}`;

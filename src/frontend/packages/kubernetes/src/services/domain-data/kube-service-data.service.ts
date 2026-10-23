@@ -3,6 +3,7 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { KUBE_LIST_DEFAULT_LIMIT, KubeListResponse } from '../endpoint-data/kube-paged-response';
+import { KubeLoadTracker } from '../endpoint-data/kube-load-tracker';
 import { KubeProxyResponse, kubeProxyResult } from '../endpoint-data/kube-proxy-response';
 import { KubeEndpoint, KubeService, StratosError } from '../endpoint-data/kube-types';
 import { KubeEndpointDataRegistry } from '../endpoint-data/kube-endpoint-data.registry';
@@ -41,6 +42,7 @@ export class KubeServiceDataService {
   private readonly _workloadServices = signal<Map<string, KubeService[]>>(new Map());
   private readonly _clusterEndpoints = signal<Map<string, KubeEndpoint[]>>(new Map());
   private readonly _errors = signal<StratosError[]>([]);
+  private readonly loads = new KubeLoadTracker();
 
   constructor() {
     this.eviction.register(kubeGuid => {
@@ -94,6 +96,11 @@ export class KubeServiceDataService {
   scopeErrors(scope: { kubeGuid: string; namespace?: string }): StratosError[] {
     const key = errorScopeKey(scope);
     return this._errors().filter(e => e.title === 'kube-services' && e.affected?.includes(key));
+  }
+
+  // Whether the services list for one scope is loading. A reactive read.
+  scopeLoading(scope: { kubeGuid: string; namespace?: string }): boolean {
+    return this.loads.isLoading(`kube-services|${errorScopeKey(scope)}`);
   }
 
   // ---- Delete ------------------------------------------------------------
@@ -191,6 +198,7 @@ export class KubeServiceDataService {
   ): Promise<Array<T & { kubeGuid: string }>> {
     const headers = new HttpHeaders({ 'x-cap-cnsi-list': kubeGuid });
     const live = this.eviction.current(kubeGuid);
+    const loaded = this.loads.start(`${title}|${scopeKey}`);
     try {
       const list = await firstValueFrom(this.http.get<KubeProxyResponse<KubeListResponse<T>>>(
         url,
@@ -217,6 +225,8 @@ export class KubeServiceDataService {
       };
       if (live()) this._errors.update(curr => [...curr, next].slice(-50));
       return [];
+    } finally {
+      loaded();
     }
   }
 }

@@ -292,3 +292,75 @@ describe('kubernetes-resource-signal-configs — namespace selection', () => {
     httpMock.expectNone(() => true);
   });
 });
+
+// While a list's load is on the wire the list shows its loading state,
+// not a flash of "There are no ...".
+describe('kubernetes-resource-signal-configs — loading', () => {
+  let httpMock: HttpTestingController;
+
+  beforeEach(() => {
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        KubeEndpointDataRegistry,
+        KubeJobDataService,
+        KubeServiceDataService,
+        KubePodDataService,
+        KubeNamespaceDataService,
+      ],
+    });
+    httpMock = TestBed.inject(HttpTestingController);
+  });
+
+  const ctx = (namespace?: string) =>
+    ({ kubeGuid: 'kube-a', selectedNamespace: signal(namespace).asReadonly(), isWorkloadView: false }) as any;
+  const empty = { 'kube-a': { items: [] } };
+
+  it('generic resource list is loading while its scope loads', async () => {
+    const cfg = buildJobsSignalConfig(ctx(), TestBed.inject(Injector));
+    expect(cfg.isAnyLoading()).toBe(false);
+    const load = TestBed.inject(KubeJobDataService).refresh({ kubeGuid: 'kube-a' });
+    expect(cfg.isAnyLoading()).toBe(true);
+    httpMock.expectOne('/pp/v1/proxy/apis/batch/v1/jobs?limit=500').flush(empty);
+    await load;
+    expect(cfg.isAnyLoading()).toBe(false);
+  });
+
+  it('generic resource list ignores another scope\'s load', () => {
+    const cfg = buildJobsSignalConfig(ctx(), TestBed.inject(Injector));
+    void TestBed.inject(KubeJobDataService).refresh({ kubeGuid: 'kube-a', namespace: 'ns-a' });
+    expect(cfg.isAnyLoading()).toBe(false);
+    httpMock.match(() => true);
+  });
+
+  it('services list is loading while its scope loads', async () => {
+    const cfg = buildServicesSignalConfig(ctx(), TestBed.inject(Injector));
+    const load = TestBed.inject(KubeServiceDataService).refresh({ kubeGuid: 'kube-a' });
+    expect(cfg.isAnyLoading()).toBe(true);
+    httpMock.expectOne('/pp/v1/proxy/api/v1/services?limit=500').flush(empty);
+    httpMock.expectOne('/pp/v1/proxy/api/v1/endpoints?limit=500').flush(empty);
+    await load;
+    expect(cfg.isAnyLoading()).toBe(false);
+  });
+
+  it('pods list is loading while its scope loads', async () => {
+    const cfg = buildPodsSignalConfig(ctx(), TestBed.inject(Injector));
+    cfg.pagedItems();
+    expect(cfg.isAnyLoading()).toBe(true);
+    httpMock.expectOne('/pp/v1/proxy/api/v1/pods?limit=500').flush(empty);
+    await TestBed.inject(ApplicationRef).whenStable();
+    expect(cfg.isAnyLoading()).toBe(false);
+  });
+
+  it('namespaces list is loading while the namespace list loads', async () => {
+    const cfg = buildNamespacesSignalConfig(ctx(), TestBed.inject(Injector));
+    const load = TestBed.inject(KubeNamespaceDataService).refresh({ kubeGuid: 'kube-a' });
+    expect(cfg.isAnyLoading()).toBe(true);
+    httpMock.expectOne('/pp/v1/proxy/api/v1/namespaces?limit=500').flush(empty);
+    await load;
+    expect(cfg.isAnyLoading()).toBe(false);
+  });
+});

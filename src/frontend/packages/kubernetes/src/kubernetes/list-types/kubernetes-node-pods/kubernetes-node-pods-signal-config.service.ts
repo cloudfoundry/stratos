@@ -13,7 +13,6 @@ import {
 
 import { ListStateStore, SignalListSort } from '@stratosui/core';
 
-import { KubeEndpointDataRegistry } from '../../../services/endpoint-data/kube-endpoint-data.registry';
 import { KubePod, StratosError } from '../../../services/endpoint-data/kube-types';
 import { KubePodDataService } from '../../../services/domain-data/kube-pod-data.service';
 
@@ -86,7 +85,6 @@ class KubePodViewPipeline {
 @Injectable({ providedIn: 'root' })
 export class KubernetesNodePodsSignalConfigService {
   private readonly podData = inject(KubePodDataService);
-  private readonly registry = inject(KubeEndpointDataRegistry);
   private readonly injector = inject(Injector);
 
   private kubeGuid = '';
@@ -135,9 +133,10 @@ export class KubernetesNodePodsSignalConfigService {
     return computed(() => this.podData.scopeErrors({ kubeGuid: this.kubeGuid, nodeName: this.nodeName }));
   }
 
+  // This node's pod list load (not the endpoint's summary load).
   isLoading(): Signal<boolean> {
-    const svc = this.kubeGuid ? this.registry.getService(this.kubeGuid) : null;
-    return computed(() => svc?.isLoading() ?? false);
+    const scope = { kubeGuid: this.kubeGuid, nodeName: this.nodeName };
+    return computed(() => this.podData.scopeLoading(scope));
   }
 
   initialize(kubeGuid: string, nodeName: string): void {
