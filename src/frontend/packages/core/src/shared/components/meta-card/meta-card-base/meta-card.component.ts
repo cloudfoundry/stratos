@@ -19,14 +19,6 @@ import { MetaCardItemComponent } from '../meta-card-item/meta-card-item.componen
 import { MetaCardTitleComponent } from '../meta-card-title/meta-card-title.component';
 
 
-export function createMetaCardMenuItemSeparator(): MenuItem {
-  return {
-    label: '-',
-    separator: true,
-    action: () => { }
-  };
-}
-
 @Component({
   selector: 'app-meta-card',
   templateUrl: './meta-card.component.html',
