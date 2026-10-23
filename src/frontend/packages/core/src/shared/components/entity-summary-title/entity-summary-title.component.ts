@@ -15,20 +15,9 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class EntitySummaryTitleComponent {
   readonly title = input<string>();
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() subTitle?: string;
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() info?: string;
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() subText?: string;
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get imagePath(): string | null {
     return this.image;

@@ -24,8 +24,6 @@ export class StartEndDateComponent {
   }
 
   // Accepts null/undefined so callers can bind not-yet-chosen range values
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set start(start: Date | null | undefined) {
     this.valid = true;
@@ -44,8 +42,6 @@ export class StartEndDateComponent {
     return this.startValue;
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set end(end: Date | null | undefined) {
     this.valid = true;

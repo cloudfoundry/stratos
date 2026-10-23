@@ -13,8 +13,6 @@ export class ShowHideButtonComponent {
 
   readonly changed = output<boolean>();
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get show(): boolean {
     return this.pShow;

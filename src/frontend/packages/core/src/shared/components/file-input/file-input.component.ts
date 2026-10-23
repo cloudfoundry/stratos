@@ -28,9 +28,6 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   readonly fileFormControlName = input<string>();
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() buttonLabel = '';
 
   private files!: File[];

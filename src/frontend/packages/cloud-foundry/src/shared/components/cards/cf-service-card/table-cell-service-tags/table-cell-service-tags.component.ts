@@ -18,8 +18,6 @@ export class TableCellServiceTagsComponent extends TableCellCustom<StServiceOffe
   // Plain string-keyed chips — the cell only sets `value`/`hideClearButton$`
   tags: AppChip[] = [];
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set row(offering: StServiceOffering) {
     super.row = offering;

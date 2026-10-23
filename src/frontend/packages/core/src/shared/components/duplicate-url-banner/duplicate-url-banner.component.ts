@@ -47,9 +47,6 @@ export class DuplicateUrlBannerComponent implements OnInit {
   // Full replacement for the trailing sentence, for host pages where the
   // "shown together — use the filter" wording doesn't apply (e.g. the
   // Cloud Foundry endpoint picker, which lists endpoints, not entities).
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() message: string = '';
 
   sharedUrlMessage$!: Observable<string | null>;

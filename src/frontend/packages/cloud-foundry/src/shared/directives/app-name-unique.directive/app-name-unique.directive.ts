@@ -48,22 +48,11 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
   private http = inject(HttpClient);
 
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() appApplicationNameUnique!: AppNameUniqueChecking;
-  // TODO: Skipped for migration because:
-  //  Class of this input is manually instantiated. This is discouraged and prevents
-  //  migration.
   @Input() appApplicationNameUniqueRequest!: UniqueValidatorRequestBuilder;
-  // TODO: Skipped for migration because:
-  //  Class of this input is manually instantiated. This is discouraged and prevents
-  //  migration.
   @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.totalResults > 0;
   // Text app-form-field shows for a taken name. Without it the error is
   // { appNameTaken: true } and the field shows its stock "Invalid value".
-  // TODO: Skipped for migration because:
-  //  Class of this input is manually instantiated. This is discouraged and prevents
-  //  migration.
   @Input() appApplicationNameUniqueMessage?: string;
 
   constructor() {

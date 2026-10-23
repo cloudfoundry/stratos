@@ -10,9 +10,6 @@ import { CommonModule } from '@angular/common';
 })
 export class PanelComponent {
   // Title of the panel
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() title = '';
   // Display a gray background
   readonly background = input(false);

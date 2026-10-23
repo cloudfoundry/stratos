@@ -17,11 +17,7 @@ export interface MatButtonToggleChange {
 })
 export class CustomButtonToggleComponent {
   readonly value = input<any>();
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() disabled = false;
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() checked = false;
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-button-toggle which emits (change)
@@ -50,15 +46,11 @@ export class CustomButtonToggleComponent {
 })
 export class CustomButtonToggleGroupComponent implements ControlValueAccessor, AfterContentInit {
   readonly multiple = input(false);
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() disabled = false;
   readonly vertical = input(false);
   readonly name = input<string>();
 
   // Material API parity: mat-button-toggle-group supports a plain [value] input
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set value(value: any) {
     this.writeValue(value);

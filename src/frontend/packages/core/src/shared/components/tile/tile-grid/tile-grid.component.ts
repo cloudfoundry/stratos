@@ -10,9 +10,6 @@ import { ChangeDetectionStrategy, Component, ViewEncapsulation, HostBinding, Inp
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileGridComponent {
-  // TODO: Skipped for migration because:
-  //  This input is used in combination with `@HostBinding` and migrating would
-  //  break.
   @HostBinding('class.app-tile-grid-fit')
   @Input() public fit = false;
 }

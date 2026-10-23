@@ -23,8 +23,6 @@ export class ResourceAlertViewComponent {
 
   alertInfo?: ResourceAlertGroup[];
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set alerts(data: any) {
     if (data) {

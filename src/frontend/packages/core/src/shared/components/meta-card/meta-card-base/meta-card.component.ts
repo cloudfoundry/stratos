@@ -53,15 +53,9 @@ export class MetaCardComponent {
   @ContentChild(MetaCardTitleComponent, { static: true })
   title!: MetaCardTitleComponent;
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input()
   status$?: Observable<StratosStatus>;
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input()
   favorite?: UserFavorite<IFavoriteMetadata> | null;
 
@@ -84,14 +78,9 @@ export class MetaCardComponent {
 
   readonly mode = input<string>();
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input()
   clickAction?: () => void;
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set actionMenu(actionMenu: MenuItem[] | null) {
     if (actionMenu) {

@@ -19,9 +19,6 @@ interface ConfigAuthForm {
   ]
 })
 export class KubernetesConfigAuthFormComponent implements IEndpointAuthComponent {
-  // TODO: Skipped for migration because:
-  //  This input overrides a field from a superclass, while the superclass field
-  //  is not migrated.
   @Input() formGroup!: FormGroup<ConfigAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {

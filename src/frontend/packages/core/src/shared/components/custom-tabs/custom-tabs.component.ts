@@ -42,8 +42,6 @@ export class CustomTabComponent {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CustomTabGroupComponent implements AfterContentInit {
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() selectedIndex = 0;
   readonly backgroundColor = input("primary");
   readonly color = input("primary");

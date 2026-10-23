@@ -42,8 +42,6 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pConnectService!: ConnectEndpointService;
   // A host may bind this before its own service exists (create-endpoint's
   // connect step); the setter ignores the unset value and waits for the real one.
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set connectService(service: ConnectEndpointService | undefined) {
     if (!service || this.pConnectService) {
       return;
@@ -55,8 +53,6 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     return this.pConnectService;
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set disabled(disabled: boolean) {
     if (this.endpointForm) {
       if (disabled) { this.endpointForm.disable(); } else { this.endpointForm.enable(); }

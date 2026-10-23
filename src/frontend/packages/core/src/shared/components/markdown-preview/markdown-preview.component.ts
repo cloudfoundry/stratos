@@ -31,8 +31,6 @@ export class MarkdownPreviewComponent implements PreviewableComponent {
   // null is a sentinel meaning "title not yet derived from the document"
   readonly title = signal<string | null>('');
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set documentUrl(value: string) {
     if (value && this._documentUrl !== value) {

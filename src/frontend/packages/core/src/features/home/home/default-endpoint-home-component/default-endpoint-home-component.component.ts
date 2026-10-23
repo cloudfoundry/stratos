@@ -28,17 +28,12 @@ export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCar
     return this.pLayout;
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set layout(value: HomePageCardLayout) {
     if (value) {
       this.pLayout = value;
     }
   }
 
-  // TODO: Skipped for migration because:
-  //  This input overrides a field from a superclass, while the superclass field
-  //  is not migrated.
   @Input() endpoint!: EndpointModel;
 
   ngOnInit(): void {

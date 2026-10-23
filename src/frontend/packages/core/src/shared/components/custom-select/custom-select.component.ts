@@ -33,8 +33,6 @@ export class CustomOptionComponent implements AfterViewInit {
   readonly value = input<any>();
   readonly label = input<string>();
   readonly disabled = input(false);
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() selected = false;
 
   @ViewChild('optionContent', { static: true }) optionContent!: ElementRef;
@@ -77,23 +75,17 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private cdr = inject(ChangeDetectorRef);
   private elementRef = inject(ElementRef);
 
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() disabled = false;
   readonly placeholder = input('');
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly required = input(false);
   readonly name = input<string>();
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input() id!: string;
   readonly invalid = input(false);
   readonly errorMessage = input('');
   readonly autoSelectSingleOption = input(true); // Auto-select when only one option exists
   readonly loading = input(false, { transform: booleanAttribute });
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get value(): any {
     return this.multiple() ? this.selectedValues : this.selectedValues[0];

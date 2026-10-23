@@ -17,9 +17,6 @@ import { ListItemComponent } from '../list-item/list-item.component';
 export class ChartItemComponent implements OnInit {
   public iconUrl!: string;
   // Chart to represent
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() chart!: Chart;
   // Show version form by default
   readonly showVersion = input(true);

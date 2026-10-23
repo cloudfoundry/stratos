@@ -13,8 +13,5 @@ import { Observable } from 'rxjs';
 })
 export class EnumerateComponent {
   readonly collection = input<Observable<any[]>>();
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() labelPath!: string;
 }

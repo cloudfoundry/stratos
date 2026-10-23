@@ -15,9 +15,6 @@ import { TabNavItem } from '../../../tab-nav.types';
 })
 export class NestedTabsComponent implements OnInit {
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input()
   tabs: TabNavItem[] = [];
   constructor() {

@@ -35,16 +35,11 @@ export class LoadingPageComponent implements OnInit {
   // path (entityId/entitySchema → isFetching/isDeleting) was removed: the
   // detail pages that used it now pass their signal-native isLoading, and the
   // delete flow navigates away rather than painting a "deleting" overlay here.
-  // TODO: Skipped for migration because:
-  //  Your application code writes to the input. This prevents migration.
   @Input()
   isLoading!: Observable<boolean>;
 
   readonly text = input('Retrieving your data');
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input()
   alert = '';
 

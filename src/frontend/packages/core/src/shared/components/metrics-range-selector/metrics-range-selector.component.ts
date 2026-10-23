@@ -56,8 +56,6 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
 
   private baseRequestValue!: MetricsRequest;
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set baseRequest(req: MetricsRequest) {
     this.baseRequestValue = req;
@@ -67,8 +65,6 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     return this.baseRequestValue;
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set times(customTimes: ITimeRange[]) {
     if (customTimes && customTimes.length > 0) {
@@ -77,15 +73,11 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
     }
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set selectedTimeValue(timeValue: string) {
     this.rangeSelectorManager.metricRangeService.defaultTimeValue = timeValue;
   }
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   set pollInterval(interval: number) {
     if (interval) {

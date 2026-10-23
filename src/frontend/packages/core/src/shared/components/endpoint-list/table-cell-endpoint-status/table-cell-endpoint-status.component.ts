@@ -21,8 +21,6 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   public connectable = true;
   private endpointsData = inject(EndpointsDataService);
 
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get row(): EndpointModel {
     return super.row;

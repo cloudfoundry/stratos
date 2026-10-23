@@ -19,9 +19,6 @@ import { CustomTooltipDirective } from '@stratosui/core';
   imports: [CommonModule, CustomTooltipDirective],
 })
 export class TristateValueComponent {
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
   @Input() value: string | number | null | undefined;
   readonly unavailable = input<boolean | undefined>(false);
   readonly unavailableTooltip = input('Not exposed by V3 API');

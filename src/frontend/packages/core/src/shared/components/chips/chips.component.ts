@@ -45,8 +45,6 @@ export class AppChipsComponent implements OnInit {
   public atLowerLimit = true;
 
   private pChips: AppChip[] = [];
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get chips(): AppChip[] {
     return this.pChips;
@@ -63,8 +61,6 @@ export class AppChipsComponent implements OnInit {
   readonly lowerLimit = input(3);
 
   private pDisplayProperty = 'value';
-  // TODO: Skipped for migration because:
-  //  Accessor inputs cannot be migrated as they are too complex.
   @Input()
   get displayProperty(): string {
     return this.pDisplayProperty;
