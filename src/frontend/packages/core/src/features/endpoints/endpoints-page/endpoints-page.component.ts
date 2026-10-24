@@ -24,7 +24,7 @@ import { safeUnsubscribe } from '../../../core/utils.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { EndpointsMissingComponent } from '../../../shared/components/endpoints-missing/endpoints-missing.component';
 import { ListSubNavComponent } from '../../../shared/components/list-sub-nav/list-sub-nav.component';
-import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
+import { TailwindSnackBarRef, TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { SessionService } from '../../../shared/services/session.service';
 import { EndpointModalService } from '../endpoint-register-modal/endpoint-modal.service';
 import { EndpointRegisterModalComponent } from '../endpoint-register-modal/endpoint-register-modal.component';
@@ -117,6 +117,7 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     message: `There are no connected endpoints, connect with your personal credentials to get started.`,
     action: 'Got it'
   };
+  private noConnectedSnackBar?: TailwindSnackBarRef<unknown>;
 
   public customizations: CustomizationsMetadata;
 
@@ -173,11 +174,15 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
     clearInterval(this.healthCheckTimeout);
   }
 
+  // Only this page's own message: hide() would also dismiss others, such as
+  // the Register form's "Successfully registered", which arrives just
+  // before the endpoints update.
   private showSnackBar(show: boolean) {
     if (show) {
-      this.snackBarService.show(this.snackBarText.message, this.snackBarText.action, 20000);
+      this.noConnectedSnackBar = this.snackBarService.show(this.snackBarText.message, this.snackBarText.action, 20000);
     } else {
-      this.snackBarService.hide();
+      this.noConnectedSnackBar?.dismiss();
+      this.noConnectedSnackBar = undefined;
     }
   }
 
