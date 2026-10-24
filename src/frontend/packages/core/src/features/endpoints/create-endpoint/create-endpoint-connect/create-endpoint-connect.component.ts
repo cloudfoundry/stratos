@@ -67,6 +67,11 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     // Entered again after Previous: end the earlier connect first
     this.connectService?.destroy();
     this.connectService = new ConnectEndpointService(this.endpointsService, data, this.endpointsData, this.injector);
+    // Each registration starts unticked: a choice made for an earlier
+    // endpoint does not carry over.
+    this.doConnect = false;
+    this.valid = false;
+    this.helpDocumentUrl = undefined;
     // OnPush change detection: setting a non-signal field doesn't notify
     // the template, so the success message renders without the endpoint
     // name until something else triggers a check. Force a tick.

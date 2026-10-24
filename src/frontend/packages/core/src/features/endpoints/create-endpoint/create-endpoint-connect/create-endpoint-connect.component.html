@@ -11,6 +11,7 @@
       endpoints page.
     </div>
   </div>
+  @if (doConnect) {
   <div>
     <div class="connect__title">
       <span class="connect__title-inner text-[var(--content-text)]">Connection Credentials</span>
@@ -20,8 +21,9 @@
         </button>
       }
     </div>
-    <app-connect-endpoint [disabled]="!doConnect" class="stepper-form" (valid)="valid = $event"
+    <app-connect-endpoint class="stepper-form" (valid)="valid = $event"
       (authType)="helpDocumentUrl = $event.help" [connectService]="connectService">
     </app-connect-endpoint>
   </div>
+  }
 </div>
