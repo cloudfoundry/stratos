@@ -3,7 +3,8 @@
     <h3 class="card-title">Latest Readings</h3>
   </div>
   <app-scroll-fade class="flex-1">
-    <dl class="p-4 grid grid-cols-2 gap-x-8 text-sm">
+    <!-- Like a table cell, a column never shrinks below its widest reading; a narrow box scrolls sideways -->
+    <dl class="p-4 grid grid-cols-[repeat(2,minmax(max-content,1fr))] gap-x-8 text-[13px]">
       @for (r of readings(); track r.name) {
         <div class="flex justify-between gap-4 py-0.5 border-b border-content-border">
           <dt class="text-content-muted">{{ r.name }}</dt>
