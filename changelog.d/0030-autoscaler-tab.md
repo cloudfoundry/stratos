@@ -14,3 +14,8 @@
   in effect (default or schedule) and when they next change, the last
   scaling event and its cool-down, and each metric's latest value
   against its scale-out and scale-in thresholds.
+
+[Maintainability]
+- The shared card header shows the shaded title band the other cards
+  use by default; the cards that had no band keep their look with the
+  new `plain` option.
