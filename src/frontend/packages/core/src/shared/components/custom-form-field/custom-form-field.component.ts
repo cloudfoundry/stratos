@@ -118,6 +118,7 @@ export class CustomFormFieldComponent
   private isInitialized = false;
 
   private cdr = inject(ChangeDetectorRef);
+  private placeholderObserver?: MutationObserver;
 
   ngAfterContentInit() {
     // Handle app-select components
@@ -157,6 +158,14 @@ export class CustomFormFieldComponent
     else if (this.inputElement) {
       const input = this.inputElement.nativeElement;
       this.placeholder = input.placeholder || "";
+      // The placeholder is the label. A bound placeholder can arrive after
+      // this read (the Connect dialog's credentials name their fields from
+      // the endpoint type), so follow it.
+      this.placeholderObserver = new MutationObserver(() => {
+        this.placeholder = input.placeholder || "";
+        this.cdr.markForCheck();
+      });
+      this.placeholderObserver.observe(input, { attributes: true, attributeFilter: ["placeholder"] });
       this.isRequired = input.required;
       this.inputId =
         input.id || `form-field-${Math.random().toString(36).substr(2, 9)}`;
@@ -224,6 +233,7 @@ export class CustomFormFieldComponent
   }
 
   ngOnDestroy() {
+    this.placeholderObserver?.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
   }
