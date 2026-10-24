@@ -32,4 +32,18 @@ describe('FileInputComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  const pathField = () => (fixture.nativeElement as HTMLElement).querySelector('input[type="text"]');
+
+  it('names the path field after the placeholder it is given', async () => {
+    fixture.componentRef.setInput('placeholder', 'kubeconfig');
+    await fixture.whenStable();
+    expect(pathField()?.getAttribute('aria-label')).toBe('kubeconfig');
+  });
+
+  // The stock placeholder says no file is chosen; that is a state, not a name.
+  it('names the path field File when it is given no placeholder', () => {
+    expect(pathField()?.getAttribute('placeholder')).toBe('No file selected');
+    expect(pathField()?.getAttribute('aria-label')).toBe('File');
+  });
 });
