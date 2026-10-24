@@ -54,4 +54,19 @@ describe('StackedInputActionComponent', () => {
     const id = input.getAttribute('aria-errormessage');
     expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe('Email is required');
   });
+
+  // Remove was a bare icon: the mouse could click it, the keyboard could
+  // not reach it, and a screen reader heard nothing.
+  it('offers Remove as a named button that keyboard users can reach', async () => {
+    fixture.componentRef.setInput('showRemove', true);
+    await fixture.whenStable();
+    const remove = fixture.nativeElement.querySelector('[data-test="stacked-input-remove"]') as HTMLButtonElement;
+    expect(remove.tagName).toBe('BUTTON');
+    expect(remove.getAttribute('aria-label')).toBe('Remove');
+
+    const emitted = vi.fn();
+    component.remove.subscribe(emitted);
+    remove.click();
+    expect(emitted).toHaveBeenCalledTimes(1);
+  });
 });
