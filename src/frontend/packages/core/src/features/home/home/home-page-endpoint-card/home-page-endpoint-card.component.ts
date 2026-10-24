@@ -11,6 +11,7 @@ import {
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { CustomTooltipDirective } from '../../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { MultilineTitleComponent } from '../../../../shared/components/multiline-title/multiline-title.component';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
 import { TailwindDialogService } from '../../../../shared/services/tailwind-dialog.service';
@@ -44,6 +45,7 @@ enum Status {
   standalone: true,
   imports: [
     AppBusyComponent,
+    CustomTooltipDirective,
     CommonModule,
     RouterModule,
     MultilineTitleComponent,

@@ -20,7 +20,7 @@
         </div>
       }
       <div class="endpoint-card__title-text">
-        <app-multiline-title class="endpoint-card__title-link">{{ row.name }}</app-multiline-title>
+        <app-multiline-title class="endpoint-card__title-link" [matTooltip]="row.name">{{ row.name }}</app-multiline-title>
         <div class="endpoint-card__title-subtext">
           {{!endpointCatalogEntity ? 'Unknown' : endpointCatalogEntity.definition.label}}
           <!--
