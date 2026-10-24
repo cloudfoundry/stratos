@@ -414,6 +414,20 @@ describe('RoleAssignmentComponent', () => {
     expect(filtered[0].name).toBe('Alpha Space');
   });
 
+  it('names the org search and space filter fields', async () => {
+    await setup();
+    const fixture = await createFixture();
+
+    const search = picker(fixture).querySelector('input[type="text"]');
+    expect(search?.getAttribute('aria-label')).toBe('Search organizations');
+
+    fixture.componentInstance.pickOrg(o1);
+    await fixture.whenStable();
+    const filter = orgSection(fixture, 'o1')?.querySelector('input.role-assignment__space-search');
+    expect(filter).toBeTruthy();
+    expect(filter!.getAttribute('aria-label')).toBe('Filter spaces in Org One');
+  });
+
   // ── New behavior tests (Phase 4 role-widget additions) ─────────────────────
 
   it('A: seeds pickedOrgs from baseline on init (collapsed, not o3)', async () => {
