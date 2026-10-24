@@ -20,3 +20,10 @@
 - The note that an address is already registered names only endpoints
   of the same type, so a Metrics endpoint beside the Cloud Foundry it
   watches is not called a duplicate.
+- Logging in no longer reports "Couldn't check credentials" when the
+  login worked but connecting the auto-registered Cloud Foundry endpoint
+  failed. The login completes and the failure is logged.
+- With an endpoint of another type, such as Metrics, registered at the
+  auto-registered Cloud Foundry API's URL, logging in connects the
+  Cloud Foundry endpoint rather than trying the other one with Cloud
+  Foundry credentials.
