@@ -3,7 +3,7 @@
   <form class="stepper-form" [formGroup]="stepperForm">
     <app-form-field>
       <app-label>App</app-label>
-      <app-select class="form-control" formControlName="apps">
+      <app-select class="form-control" formControlName="apps" ariaLabel="App">
         @if (!boundAppId()) {
           <app-option></app-option>
         }

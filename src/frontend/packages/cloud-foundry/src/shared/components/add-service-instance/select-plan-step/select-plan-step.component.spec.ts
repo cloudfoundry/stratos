@@ -56,6 +56,13 @@ describe('SelectPlanStepComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('names its drop-down "Service Plan"', async () => {
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
+    expect(trigger).toBeTruthy();
+    expect(trigger!.getAttribute('aria-label')).toBe('Service Plan');
+  });
+
   /**
    * The parent wizard's selectPlanHandle.valid reads this component's
    * `validate` signal. Whenever the user picks a plan in the dropdown,
