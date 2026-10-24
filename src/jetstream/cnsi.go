@@ -434,8 +434,10 @@ func (p *portalProxy) GetCNSIRecord(guid string) (api.CNSIRecord, error) {
 	return rec, nil
 }
 
-func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (api.CNSIRecord, error) {
-	slog.Debug("GetAdminCNSIRecordByEndpoint", "apiEndpoint", endpoint)
+// GetAdminCNSIRecordByEndpoint finds the admin-registered endpoint of the
+// given type at a URL; endpoints of other types may share the URL.
+func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string, cnsiType string) (api.CNSIRecord, error) {
+	slog.Debug("GetAdminCNSIRecordByEndpoint", "apiEndpoint", endpoint, "type", cnsiType)
 	var rec *api.CNSIRecord
 
 	endpointList, err := p.listCNSIByAPIEndpoint(endpoint)
@@ -445,7 +447,7 @@ func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string) (api.CNSIRec
 
 	// search for endpoint created by an admin
 	for _, endpoint := range endpointList {
-		if len(endpoint.Creator) == 0 {
+		if len(endpoint.Creator) == 0 && endpoint.CNSIType == cnsiType {
 			rec = endpoint
 		}
 	}
