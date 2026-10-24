@@ -72,4 +72,22 @@ describe('EditAutoscalerPolicyStep1Component', () => {
     expect(component.editLimitForm.valid).toBe(true);
     expect(await firstValueFrom(component.valid$)).toBe(true);
   });
+
+  // The autoscaler rejects only min > max, so a pinned policy (min == max)
+  // must be accepted.
+  it('allows the minimum count up to the maximum count', async () => {
+    TestBed.inject(HttpTestingController).expectOne(r => r.url.endsWith('/policy'))
+      .flush('Policy Not Found', { status: 404, statusText: 'Not Found' });
+    await vi.waitFor(() => expect(component.editLimitForm.controls.instance_max_count.value).toBe(10));
+    const { instance_min_count: min, instance_max_count: max } = component.editLimitForm.controls;
+
+    max.setValue(1);
+    min.setValue(1);
+    expect(min.valid).toBe(true);
+    expect(max.valid).toBe(true);
+
+    min.setValue(2);
+    expect(min.hasError('alertInvalidPolicyMinimumRange')).toBe(true);
+    expect(max.hasError('alertInvalidPolicyMaximumRange')).toBe(true);
+  });
 });

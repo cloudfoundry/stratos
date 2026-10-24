@@ -278,9 +278,9 @@ export class EditAutoscalerPolicyStep4Component extends EditAutoscalerPolicyDire
 export function validateRecurringSpecificMin(editForm: FormGroup<any>, editMutualValidation: { limit: boolean }): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const invalid = editForm &&
-      numberWithFractionOrExceedRange(control.value, 1, editForm.controls.instance_max_count.value - 1, true);
+      numberWithFractionOrExceedRange(control.value, 1, editForm.controls.instance_max_count.value, true);
     const lastValid = editMutualValidation.limit;
-    editMutualValidation.limit = editForm && control.value < editForm.controls.instance_max_count.value;
+    editMutualValidation.limit = editForm && control.value <= editForm.controls.instance_max_count.value;
     if (editForm && lastValid !== editMutualValidation.limit) {
       editForm.controls.instance_max_count.updateValueAndValidity();
     }
@@ -294,9 +294,9 @@ export function validateRecurringSpecificMin(editForm: FormGroup<any>, editMutua
 export function validateRecurringSpecificMax(editForm: FormGroup<any>, editMutualValidation: { limit: boolean }): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const invalid = editForm && numberWithFractionOrExceedRange(control.value,
-      editForm.controls.instance_min_count.value + 1, Number.MAX_VALUE, true);
+      editForm.controls.instance_min_count.value, Number.MAX_VALUE, true);
     const lastValid = editMutualValidation.limit;
-    editMutualValidation.limit = editForm && editForm.controls.instance_min_count.value < control.value;
+    editMutualValidation.limit = editForm && editForm.controls.instance_min_count.value <= control.value;
     if (editForm && lastValid !== editMutualValidation.limit) {
       editForm.controls.instance_min_count.updateValueAndValidity();
     }

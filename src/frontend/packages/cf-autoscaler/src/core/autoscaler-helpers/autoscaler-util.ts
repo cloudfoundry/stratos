@@ -138,8 +138,8 @@ export class AutoscalerConstants {
 }
 
 export const PolicyAlert = {
-  alertInvalidPolicyMinimumRange: 'The Minimum Instance Count must be an integer less than the Maximum Instance Count.',
-  alertInvalidPolicyMaximumRange: 'The Maximum Instance Count must be an integer greater than the Minimum Instance Count.',
+  alertInvalidPolicyMinimumRange: 'The Minimum Instance Count must be an integer no greater than the Maximum Instance Count.',
+  alertInvalidPolicyMaximumRange: 'The Maximum Instance Count must be an integer no less than the Minimum Instance Count.',
   alertInvalidPolicyInitialMaximumRange:
     'The Initial Minimum Instance Count must be an integer between Minimum Instance Count and Maximum Instance Count.',
   alertInvalidPolicyTriggerMetricName: 'Invalid metric type name, only combination of letters, numbers and underlines "_" are allowed.',
