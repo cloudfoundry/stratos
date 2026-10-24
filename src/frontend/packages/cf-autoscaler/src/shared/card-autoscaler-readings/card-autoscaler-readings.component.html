@@ -1,9 +1,9 @@
 <div class="card flex flex-col h-full">
-  <!-- The times wrap below the title when the box is narrow -->
-  <div class="card-header flex flex-wrap items-baseline justify-between gap-x-4">
+  <!-- The times sit on their own line, so a narrow box never splits them from the title -->
+  <div class="card-header">
     <h3 class="card-title">Latest Readings</h3>
     @if (taken(); as taken) {
-      <span data-test="readings-taken" class="text-sm text-content-muted tabular-nums whitespace-nowrap">{{ taken }}</span>
+      <div data-test="readings-taken" class="text-sm text-content-muted tabular-nums whitespace-nowrap">{{ taken }}</div>
     }
   </div>
   <app-scroll-fade class="flex-1">
