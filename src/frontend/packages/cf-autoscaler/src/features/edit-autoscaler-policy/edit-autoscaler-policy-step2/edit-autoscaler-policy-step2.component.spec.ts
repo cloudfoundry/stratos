@@ -388,6 +388,26 @@ describe('EditAutoscalerPolicyStep2Component', () => {
       expect(form!.querySelector('[name="unit"], [formcontrolname="unit"]')).toBeNull();
     });
 
+    // The edit row reads as a sentence, so its fields have no room for a
+    // visible label; each carries the placeholder's text as its name.
+    it('names every field of the edit row', () => {
+      create();
+      component.addTrigger();
+      fixture.componentRef.changeDetectorRef.markForCheck();
+      fixture.detectChanges();
+
+      const form: HTMLElement = fixture.nativeElement.querySelector('form');
+      const fields = Array.from(form.querySelectorAll<HTMLInputElement | HTMLSelectElement>('input, select'));
+      expect(fields.map(f => f.getAttribute('aria-label'))).toEqual([
+        'Metric Type', 'Operator', 'Threshold', 'Breach Duration', 'Adjustment', 'Adjustment Type', 'Cooldown',
+      ]);
+      for (const field of fields) {
+        if (field instanceof HTMLInputElement) {
+          expect(field.getAttribute('aria-label')).toBe(field.placeholder);
+        }
+      }
+    });
+
     it('shows the fixed unit for the metric', () => {
       create();
       expect(component.getMetricUnit('memoryused')).toBe('MB');

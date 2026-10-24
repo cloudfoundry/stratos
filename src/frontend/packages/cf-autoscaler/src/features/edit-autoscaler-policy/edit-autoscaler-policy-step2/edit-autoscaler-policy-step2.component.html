@@ -27,7 +27,7 @@
                       <span>If average</span>
                       @if (metricTypes.length > 1) {
                         <div class="form-group min-w-0 shrink-0">
-                          <input type="text" name="metric_type" formControlName="metric_type"
+                          <input type="text" name="metric_type" formControlName="metric_type" aria-label="Metric Type"
                             placeholder="Metric Type" required class="input-sm"
                             list="metricTypeList">
                           <datalist id="metricTypeList">
@@ -41,7 +41,7 @@
                       }
                       @if (metricTypes.length > 1) {
                         <div class="form-group min-w-0 shrink-0">
-                          <select name="operator" formControlName="operator" required class="select-sm">
+                          <select name="operator" formControlName="operator" aria-label="Operator" required class="select-sm">
                             <option value="" disabled>Operator</option>
                             @for (operator of operatorTypes; track $index) {
                               <option [value]="operator">
@@ -52,22 +52,22 @@
                         </div>
                       }
                       <div class="form-group min-w-0 shrink-0">
-                        <input type="number" name="threshold" formControlName="threshold" required
+                        <input type="number" name="threshold" formControlName="threshold" aria-label="Threshold" required
                           placeholder="Threshold" class="input-sm">
                       </div>
                       <span>{{getMetricUnit(editMetricType)}} for</span>
                       <div class="form-group min-w-0 shrink-0">
-                        <input type="number" name="breach_duration_secs" formControlName="breach_duration_secs"
+                        <input type="number" name="breach_duration_secs" formControlName="breach_duration_secs" aria-label="Breach Duration"
                           placeholder="Breach Duration" class="input-sm">
                       </div>
                       <span>seconds, then {{editScaleType==='upper'?'add':'remove'}}</span>
                       <div class="form-group min-w-0 shrink-0">
-                        <input type="number" name="adjustment" formControlName="adjustment" required
+                        <input type="number" name="adjustment" formControlName="adjustment" aria-label="Adjustment" required
                           placeholder="Adjustment" class="input-sm">
                       </div>
                       @if (metricTypes.length > 1) {
                         <div class="form-group min-w-0 shrink-0">
-                          <select name="adjustment_type" formControlName="adjustment_type" required class="select-sm">
+                          <select name="adjustment_type" formControlName="adjustment_type" aria-label="Adjustment Type" required class="select-sm">
                             <option value="" disabled>Adjustment Type</option>
                             <option [value]="'value'">instances</option>
                             <option [value]="'percentage'">% instances</option>
@@ -76,7 +76,7 @@
                       }
                       <span>. Cooldown:</span>
                       <div class="form-group min-w-0 shrink-0">
-                        <input type="number" name="cool_down_secs" formControlName="cool_down_secs"
+                        <input type="number" name="cool_down_secs" formControlName="cool_down_secs" aria-label="Cooldown"
                           placeholder="Cooldown" class="input-sm">
                       </div>
                       <span>seconds.</span>
