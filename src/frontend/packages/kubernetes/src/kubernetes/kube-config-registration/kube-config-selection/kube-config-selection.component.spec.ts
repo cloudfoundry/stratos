@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { firstValueFrom } from 'rxjs';
 
 import { entityCatalog } from '@stratosui/store';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
@@ -51,5 +52,34 @@ describe('KubeConfigSelectionComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The cell's edit box replaces the name text; it takes the column's name.
+  it('names the inline cluster name box', async () => {
+    const helper = TestBed.inject(KubeConfigHelper);
+    await firstValueFrom(helper.parse(`
+apiVersion: v1
+kind: Config
+clusters:
+- name: c1
+  cluster:
+    server: https://1.2.3.4:6443
+contexts:
+- name: c1
+  context:
+    cluster: c1
+    user: u1
+users:
+- name: u1
+  user:
+    token: t
+`));
+    await fixture.whenStable();
+    const [cluster] = await firstValueFrom(helper.clusters$);
+    component.startEdit(cluster);
+    await fixture.whenStable();
+    const box = (fixture.nativeElement as HTMLElement).querySelector('[data-test="row"] input:not([type])');
+    expect(box).toBeTruthy();
+    expect(box!.getAttribute('aria-label')).toBe('Name');
   });
 });
