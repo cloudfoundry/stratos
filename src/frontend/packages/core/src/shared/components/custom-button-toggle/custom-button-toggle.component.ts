@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, forwardRef, ContentChildren, QueryList, AfterContentInit, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, forwardRef, ContentChildren, QueryList, AfterContentInit, input, output, ChangeDetectorRef, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 
@@ -16,6 +16,8 @@ export interface MatButtonToggleChange {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomButtonToggleComponent {
+  private readonly cdr = inject(ChangeDetectorRef);
+
   readonly value = input<any>();
   @Input() disabled = false;
   @Input() checked = false;
@@ -26,6 +28,14 @@ export class CustomButtonToggleComponent {
   toggle() {
     if (this.disabled) return;
     this.change.emit(this);
+  }
+
+  // The group sets checked and disabled from code, so under OnPush the
+  // toggle repaints only when marked.
+  setState(checked: boolean, disabled: boolean) {
+    this.checked = checked;
+    this.disabled = disabled;
+    this.cdr.markForCheck();
   }
 }
 
@@ -45,6 +55,8 @@ export class CustomButtonToggleComponent {
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CustomButtonToggleGroupComponent implements ControlValueAccessor, AfterContentInit {
+  private readonly cdr = inject(ChangeDetectorRef);
+
   readonly multiple = input(false);
   @Input() disabled = false;
   readonly vertical = input(false);
@@ -117,7 +129,7 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
       return;
     }
     this.toggles.forEach(toggle => {
-      toggle.checked = this.selectedValues.includes(toggle.value());
+      toggle.setState(this.selectedValues.includes(toggle.value()), toggle.disabled);
     });
   }
 
@@ -144,9 +156,10 @@ export class CustomButtonToggleGroupComponent implements ControlValueAccessor, A
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+    this.cdr.markForCheck();
     if (this.toggles) {
       this.toggles.forEach(toggle => {
-        toggle.disabled = isDisabled;
+        toggle.setState(toggle.checked, isDisabled);
       });
     }
   }
