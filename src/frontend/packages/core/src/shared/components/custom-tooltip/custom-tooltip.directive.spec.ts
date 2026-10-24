@@ -212,6 +212,22 @@ describe('CustomTooltipDirective keyboard and screen reader support', () => {
     expect(document.activeElement).toBe(other);
   });
 
+  // Dialogs, menus, selects and the side panel close on Escape: with no
+  // tooltip on screen the press must reach them untouched.
+  it('leaves Escape alone when no tooltip is shown', () => {
+    const page = vi.fn();
+    document.addEventListener('keydown', page);
+    host.focus();
+    vi.advanceTimersByTime(100);
+    expect(tip()).toBeNull();
+    const escape = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    host.dispatchEvent(escape);
+    document.removeEventListener('keydown', page);
+
+    expect(escape.defaultPrevented).toBe(false);
+    expect(page).toHaveBeenCalledTimes(1);
+  });
+
   it('ignores keys other than Escape', () => {
     host.focus();
     vi.advanceTimersByTime(300);
