@@ -2,24 +2,29 @@
   [actions]="policyActions" [addAction]="createPolicyAction"></app-list-sub-nav>
 <div class="flex flex-col gap-5 p-6 w-full">
   @if (appAutoscalerPolicy(); as policy) {
-    <div class="grid gap-5 lg:grid-cols-2">
-      @if (policy.enabled) {
-        <div class="relative min-w-0">
-          <app-card-autoscaler-default></app-card-autoscaler-default>
+    @if (policy.enabled) {
+      <!-- The Instances box sets the row height; the Now box scrolls within it -->
+      <div class="grid gap-5 lg:grid-cols-2">
+        <app-card-autoscaler-default class="block min-w-0"></app-card-autoscaler-default>
+        <div class="relative min-w-0 h-96 lg:h-auto">
+          <app-card-autoscaler-now class="block h-full lg:absolute lg:inset-0" [policy]="policy"
+            [metrics]="appAutoscalerAppMetrics()" [history]="appAutoscalerScalingHistory()"></app-card-autoscaler-now>
         </div>
-      }
+      </div>
+    }
+    <div class="flex flex-col gap-5">
       @if (policy.enabled) {
         <div class="relative min-w-0">
           @if (!policy.scaling_rules?.length) {
             <app-card-app-usage></app-card-app-usage>
           }
           @if (policy.scaling_rules?.length) {
-            <app-card>
-              <app-card-header>
-                <app-card-title>Latest Metrics</app-card-title>
-              </app-card-header>
-              <app-card-content>
-                <div class="flex flex-wrap gap-x-10 gap-y-4">
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Latest Metrics</h3>
+              </div>
+              <div class="p-4">
+                <div class="grid grid-cols-3 md:grid-cols-4 justify-items-start gap-x-10 gap-y-4">
                   @for (metric of appAutoscalerAppMetricNames(); track metric) {
                     <div>
                       <app-metadata-item class="my-0" label={{metric.name}}>
@@ -34,7 +39,7 @@
                     </div>
                   }
                 </div>
-              </app-card-content>
+              </div>
               <div class="absolute bottom-2.5 right-6 pt-0 text-right">
                 <app-polling-indicator [manualPoll]="true" (poll)="loadLatestMetricsUponPolicy()">
                 </app-polling-indicator>
@@ -42,7 +47,7 @@
                   <app-custom-icon>launch</app-custom-icon>
                 </button>
               </div>
-            </app-card>
+            </div>
           }
         </div>
       }
@@ -51,15 +56,15 @@
   @if (appAutoscalerPolicy(); as policy) {
     <div>
       @if (policy.enabled) {
-        <div class="grid gap-5 lg:grid-cols-2">
+        <div class="flex flex-col gap-5">
           <div class="relative min-w-0">
-            <app-card>
-              <app-card-header>
-                <app-card-title>Scaling Rules </app-card-title>
-              </app-card-header>
-              <app-card-content>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Scaling Rules </h3>
+              </div>
+              <div class="p-4">
                 <div class="block pb-2">
-                  <div class="overflow-x-auto">
+                  <app-scroll-fade>
                     <table class="min-w-full divide-y divide-content-border">
                       <thead class="bg-content-secondary">
                         <tr>
@@ -92,31 +97,31 @@
                         }
                       </tbody>
                     </table>
-                  </div>
+                  </app-scroll-fade>
                   @if (policy && policy.scaling_rules_form && policy.scaling_rules_form.length === 0) {
                     <div class="mt-2 text-center py-8 text-content-muted"
                       >No scaling rules.
                     </div>
                   }
                 </div>
-              </app-card-content>
-            </app-card>
+              </div>
+            </div>
           </div>
           <div class="relative min-w-0">
-            <app-card>
-              <app-card-header>
-                <app-card-title>
+            <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">
                   Scheduled Limit Rules
                   @if (policy.schedules) {
                     <span>
                       in {{policy.schedules.timezone}}
                     </span>
                   }
-                </app-card-title>
-              </app-card-header>
-              <app-card-content>
+                </h3>
+              </div>
+              <div class="p-4">
                 <div class="block pb-2 autoscaler-table-policy-specific">
-                  <div class="overflow-x-auto">
+                  <app-scroll-fade>
                     <table class="min-w-full divide-y divide-content-border">
                       <thead class="bg-content-secondary">
                         <tr>
@@ -160,7 +165,7 @@
                         }
                       </tbody>
                     </table>
-                  </div>
+                  </app-scroll-fade>
                   @if (policy && policy.schedules && policy.schedules.specific_date && policy.schedules.specific_date.length === 0) {
                     <div class="mt-2 text-center py-8 text-content-muted"
                       >
@@ -169,7 +174,7 @@
                 </div>
                 <br />
                 <div class="block pb-2 autoscaler-table-policy-recurring">
-                  <div class="overflow-x-auto">
+                  <app-scroll-fade>
                     <table class="min-w-full divide-y divide-content-border">
                       <thead class="bg-content-secondary">
                         <tr>
@@ -225,15 +230,15 @@
                         }
                       </tbody>
                     </table>
-                  </div>
+                  </app-scroll-fade>
                   @if (policy && policy.schedules && policy.schedules.specific_date && !policy.schedules.recurring_schedule?.length) {
                     <div class="mt-2 text-center py-8 text-content-muted"
                       >
                     No recurring schedule.</div>
                   }
                 </div>
-              </app-card-content>
-            </app-card>
+              </div>
+            </div>
           </div>
         </div>
       }
@@ -248,13 +253,13 @@
       }
       @if (appAutoscalerScalingHistory(); as scalingHistory) {
         <div class="relative">
-          <app-card>
-            <app-card-header class="flex flex-1 h-10 justify-between pt-0">
-              <app-card-title>Latest Events </app-card-title>
-            </app-card-header>
-            <app-card-content>
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Latest Events </h3>
+            </div>
+            <div class="p-4">
               <div class="block pb-2">
-                <div class="overflow-x-auto">
+                <app-scroll-fade>
                   <table class="min-w-full divide-y divide-content-border">
                     <thead class="bg-content-secondary">
                       <tr>
@@ -292,14 +297,14 @@
                       }
                     </tbody>
                   </table>
-                </div>
+                </app-scroll-fade>
                 @if (scalingHistory.length === 0) {
                   <div class="mt-2 text-center py-8 text-content-muted"
                     >
                   No events.</div>
                 }
               </div>
-            </app-card-content>
+            </div>
             <div class="absolute bottom-2.5 right-6 pt-0 text-right">
               <app-polling-indicator (poll)="fetchScalingHistory()"
                 [manualPoll]="!scalingHistoryLoading()"
@@ -309,7 +314,7 @@
                 <app-custom-icon>launch</app-custom-icon>
               </button>
             </div>
-          </app-card>
+          </div>
         </div>
       }
     </div>
