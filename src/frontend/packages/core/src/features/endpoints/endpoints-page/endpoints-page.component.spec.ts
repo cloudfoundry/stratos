@@ -189,6 +189,15 @@ describe('EndpointsPageComponent', () => {
     expect(mockSnackBarService.show).not.toHaveBeenCalledWith('Endpoint registered successfully!', 'OK', 5000);
   });
 
+  // The page's own "no connected endpoints" message is the only one it may
+  // clear: the Register form's "Successfully registered '<name>'" arrives
+  // just before the endpoints update, and hide() would dismiss it too.
+  it('leaves messages it did not open alone', async () => {
+    mockSnackBarService.hide.mockClear();
+    fixture.destroy();
+    expect(mockSnackBarService.hide).not.toHaveBeenCalled();
+  });
+
   // The open dialog locks the page scroll (body.modal-open); leaving the page
   // with it open must release it.
   it('releases the page scroll when it goes away with the Register dialog open', async () => {
