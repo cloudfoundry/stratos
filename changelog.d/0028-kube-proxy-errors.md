@@ -1,4 +1,4 @@
-[BugFixes]
+[BugFixes: Kubernetes]
 - A Kubernetes list whose cluster could not be reached, or whose token
   had expired or was refused, showed its "There are no …" message as
   if the cluster were empty. The Nodes, Namespaces, node Pods and

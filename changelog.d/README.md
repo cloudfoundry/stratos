@@ -74,14 +74,22 @@ subcategories in list order, then any others in the order they landed.
 Subcategories are free-form. Pick one from the list below when it fits;
 a name that is not on it still works, and assembly prints a note naming
 it. If a new name will be used again, add it to the list in the same PR.
+The list names the Stratos core areas first and the plugins after them,
+so in each section the plugin fixes follow the core ones.
 
 <!-- subcategories -->
 - Accessibility
 - Applications
+- Endpoints
 - Organizations and Spaces
 - Performance
 - Services
 - Users and Roles
+- Autoscaler
+- Git
+- Helm
+- Kubernetes
+- Metrics
 <!-- /subcategories -->
 
 ### Lists read as columns, not sentences
