@@ -280,7 +280,7 @@ describe('SignalListComponent', () => {
   });
 
   it('shows the failed-load reason from errorDetail and follows its changes', async () => {
-    const detail = signal<string | undefined>('Error proxing request: dial tcp: i/o timeout');
+    const detail = signal<string | undefined>('Error proxying request: dial tcp: i/o timeout');
     const fixture = TestBed.createComponent(Host);
     fixture.componentInstance.config = {
       ...fixture.componentInstance.config,
@@ -290,7 +290,7 @@ describe('SignalListComponent', () => {
     };
     await fixture.whenStable();
     const reason = () => fixture.nativeElement.querySelector('[data-test="empty-error-detail"]');
-    expect(reason()?.textContent.trim()).toBe('Error proxing request: dial tcp: i/o timeout');
+    expect(reason()?.textContent.trim()).toBe('Error proxying request: dial tcp: i/o timeout');
 
     detail.set('401 Unauthorized');
     await fixture.whenStable();

@@ -111,7 +111,7 @@ describe('KubernetesHomeCardComponent', () => {
 
   it('shows a count whose load failed as "-", with the reason, not 0', async () => {
     nodes.set([]);
-    nodeErrors.set([{ code: 'FETCH_ERROR', title: 'kube-nodes', detail: 'Error proxing request: i/o timeout', affected: ['k1'] }]);
+    nodeErrors.set([{ code: 'FETCH_ERROR', title: 'kube-nodes', detail: 'Error proxying request: i/o timeout', affected: ['k1'] }]);
     component.endpoint = { guid: 'k1' } as EndpointModel;
 
     component.load();
@@ -121,7 +121,7 @@ describe('KubernetesHomeCardComponent', () => {
     const el: HTMLElement = fixture.nativeElement;
     const values = [...el.querySelectorAll('.number-metric-card-value')].map(v => v.textContent!.trim());
     expect(values[0]).toBe('-');
-    expect(el.querySelector('[data-test="kube-card-failure"]')?.textContent).toContain('Error proxing request: i/o timeout');
+    expect(el.querySelector('[data-test="kube-card-failure"]')?.textContent).toContain('Error proxying request: i/o timeout');
   });
 
   it('shows no failure while every count loaded', async () => {

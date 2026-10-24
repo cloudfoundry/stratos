@@ -4,7 +4,7 @@ import { isProxyErrorEntry, proxyErrorReason } from './proxy-error-entry';
 
 describe('isProxyErrorEntry', () => {
   it('recognises the proxy\'s per-endpoint error entry only', () => {
-    expect(isProxyErrorEntry({ error: { statusCode: 500, status: 'Error proxing request' } })).toBe(true);
+    expect(isProxyErrorEntry({ error: { statusCode: 500, status: 'Error proxying request' } })).toBe(true);
     expect(isProxyErrorEntry({ items: [] })).toBe(false);
     expect(isProxyErrorEntry({ error: 'text' })).toBe(false);
     expect(isProxyErrorEntry(null)).toBe(false);
@@ -15,9 +15,9 @@ describe('isProxyErrorEntry', () => {
 describe('proxyErrorReason', () => {
   it('appends the transport error text', () => {
     expect(proxyErrorReason({
-      error: { statusCode: 500, status: 'Error proxing request' },
+      error: { statusCode: 500, status: 'Error proxying request' },
       errorResponse: 'dial tcp 10.0.0.1:6443: i/o timeout',
-    })).toBe('Error proxing request: dial tcp 10.0.0.1:6443: i/o timeout');
+    })).toBe('Error proxying request: dial tcp 10.0.0.1:6443: i/o timeout');
   });
 
   it('drops a detail the status line already says', () => {

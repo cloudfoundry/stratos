@@ -63,7 +63,7 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
 
   it('shows why the metric failed to load instead of blank values', async () => {
     fixture.destroy();
-    const error = signal<string | null>('Error proxing request: dial tcp: i/o timeout (500)');
+    const error = signal<string | null>('Error proxying request: dial tcp: i/o timeout (500)');
     TestBed.inject(KubernetesNodeService).setupMetricObservable = () =>
       ({ entity$: NEVER, pollerSub: new Subscription(), error });
     fixture = TestBed.createComponent(KubernetesNodeMetricStatsCardComponent);
@@ -71,6 +71,6 @@ describe('KubernetesNodeMetricStatsCardComponent', () => {
     await fixture.whenStable();
 
     expect((fixture.nativeElement as HTMLElement).querySelector('[data-test="node-metric-error"]')?.textContent)
-      .toContain('Failed to load: Error proxing request: dial tcp: i/o timeout (500)');
+      .toContain('Failed to load: Error proxying request: dial tcp: i/o timeout (500)');
   });
 });

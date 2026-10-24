@@ -30,7 +30,7 @@ describe('kubeProxyResult', () => {
   it('ignores another endpoint\'s error entry', async () => {
     await expect(read({
       'kube-a': { items: [] },
-      'kube-b': { error: { statusCode: 500, status: 'Error proxing request' } },
+      'kube-b': { error: { statusCode: 500, status: 'Error proxying request' } },
     })).resolves.toEqual({ items: [] });
   });
 });

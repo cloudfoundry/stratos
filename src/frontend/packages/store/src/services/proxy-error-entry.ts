@@ -6,7 +6,7 @@
 // resource:
 //   { error: { statusCode, status }, errorResponse }
 // statusCode/status are the upstream code and status line, 500 "Error
-// proxing request" when the request itself failed (e.g. the endpoint is
+// proxying request" when the request itself failed (e.g. the endpoint is
 // unreachable), or 400 "Unable to retrieve CNSI token record" with no
 // stored token. errorResponse is the upstream body (e.g. a Kubernetes
 // Status object) or a JSON string (e.g. the transport error text).

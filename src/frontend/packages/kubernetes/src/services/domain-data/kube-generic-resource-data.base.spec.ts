@@ -154,7 +154,7 @@ describe('KubeGenericResourceDataServiceBase proxy per-endpoint errors', () => {
 
   const unreachable = {
     [A]: {
-      error: { statusCode: 500, status: 'Error proxing request' },
+      error: { statusCode: 500, status: 'Error proxying request' },
       errorResponse: 'dial tcp 10.0.0.1:6443: connect: connection refused',
     },
   };
@@ -167,7 +167,7 @@ describe('KubeGenericResourceDataServiceBase proxy per-endpoint errors', () => {
     expect(svc.itemsInCluster(A)()).toEqual([]);
     expect(svc.errors()()).toEqual([expect.objectContaining({
       code: 'FETCH_ERROR',
-      detail: 'Error proxing request: dial tcp 10.0.0.1:6443: connect: connection refused',
+      detail: 'Error proxying request: dial tcp 10.0.0.1:6443: connect: connection refused',
       affected: [A, 'cluster:kube-a'],
     })]);
   });

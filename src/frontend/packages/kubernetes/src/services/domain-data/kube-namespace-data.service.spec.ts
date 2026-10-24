@@ -165,10 +165,10 @@ describe('KubeNamespaceDataService', () => {
   // The proxy answers 200 with a per-endpoint error entry for a failed call.
   it('fetchDirect records a per-endpoint proxy error with its reason', async () => {
     const fetching = svc.fetchDirect(KUBE_GUID);
-    httpMock.expectOne(NS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    httpMock.expectOne(NS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' } });
     await expect(fetching).resolves.toEqual([]);
     expect(svc.errors()()).toEqual([expect.objectContaining({
-      detail: 'Error proxing request: dial tcp: i/o timeout',
+      detail: 'Error proxying request: dial tcp: i/o timeout',
     })]);
   });
 
