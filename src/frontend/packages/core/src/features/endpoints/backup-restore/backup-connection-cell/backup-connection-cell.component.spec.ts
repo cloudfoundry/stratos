@@ -43,4 +43,11 @@ describe('BackupConnectionCellComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('names its drop-down "Connection Details"', async () => {
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
+    expect(trigger).toBeTruthy();
+    expect(trigger!.getAttribute('aria-label')).toBe('Connection Details');
+  });
 });

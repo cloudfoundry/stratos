@@ -1,6 +1,6 @@
 @if (connectable) {
   <app-form-field>
-    <app-select [(value)]="service.state[row.guid ?? ''][backupType.CONNECT]"
+    <app-select ariaLabel="Connection Details" [(value)]="service.state[row.guid ?? ''][backupType.CONNECT]"
       [disabled]="!service.state[row.guid ?? ''][backupType.ENDPOINT]">
       <app-option [value]="connectionTypes.NONE">None</app-option>
       <app-option [value]="connectionTypes.CURRENT" [disabled]="!!userConnectionWarning"
