@@ -39,4 +39,11 @@ describe('KubernetesConfigAuthFormComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('names the kubeconfig file picker after its caption', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const path = root.querySelector('app-file-input input[type="text"]');
+    const caption = root.querySelector(`#${path?.getAttribute('aria-labelledby')}`);
+    expect(caption?.textContent?.trim()).toBe('Specify `kubeconfig` file:');
+  });
 });
