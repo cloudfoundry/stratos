@@ -106,6 +106,13 @@ describe('EditEndpointStepComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('labels the CA certificate box with its caption', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const box = root.querySelector('textarea[formControlName="caCert"]');
+    expect(box?.id, 'box has an id').toBeTruthy();
+    expect(root.querySelector(`label[for="${box!.id}"]`)?.textContent?.trim()).toBe('Specify CA Certificate:');
+  });
+
   // jetstream sends the stored certificate as ca_cert. Missing it, the
   // form showed no certificate and saving cleared the stored one.
   it('shows the stored CA certificate', () => {
