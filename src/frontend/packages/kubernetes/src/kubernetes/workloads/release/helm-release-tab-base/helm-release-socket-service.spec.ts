@@ -2,7 +2,8 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { of, Subject } from 'rxjs';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import {
   KubeJobDataService, KubePersistentVolumeClaimDataService, KubeReplicaSetDataService,
@@ -14,6 +15,15 @@ import { TailwindSnackBarService } from '../../../../../../core/src/shared/servi
 import { HelmReleaseDataService } from '../helm-release-data.service';
 import { HelmReleaseHelperService } from '../tabs/helm-release-helper.service';
 import { HelmReleaseSocketService } from './helm-release-socket-service';
+
+// Each connection gets a server stream the test drives
+const ws = vi.hoisted(() => ({ server: undefined as any }));
+vi.mock('rxjs-websockets', () => ({
+  default: () => {
+    ws.server = new Subject<string>();
+    return of(() => ws.server);
+  },
+}));
 
 // Minimal stub for HelmReleaseHelperService — only the fields read by
 // HelmReleaseSocketService are needed.
@@ -128,5 +138,51 @@ describe('HelmReleaseSocketService.writeManifestResources', () => {
     const r = releaseData.resources('cnsi-1:ns-a:rel-x')();
     expect(r?.endpointId).toBe('cnsi-1');
     expect(r?.kind).toBe('Resources');
+  });
+});
+
+describe('HelmReleaseSocketService.ngOnDestroy', () => {
+  const ref = { dismiss: vi.fn(), afterDismissed: () => of(null) };
+  const snackbar = { show: vi.fn(() => ref), hide: vi.fn() };
+
+  beforeEach(() => {
+    ref.dismiss.mockClear();
+    snackbar.show.mockClear();
+    snackbar.hide.mockClear();
+    TestBed.resetTestingModule();
+    TestBed.configureTestingModule({
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        HelmReleaseSocketService,
+        { provide: HelmReleaseHelperService, useValue: { ...stubHelper, guidAsUrlFragment: () => 'rel' } },
+        { provide: TailwindSnackBarService, useValue: snackbar },
+      ],
+    });
+  });
+
+  // Leaving the release clears only the service's own manifest warning;
+  // hide() would also dismiss other features' messages.
+  it('dismisses only its own manifest errors warning', () => {
+    const socket = TestBed.inject(HelmReleaseSocketService);
+    socket.start();
+    ws.server.next(JSON.stringify({ kind: 'ManifestErrors', data: true }));
+    expect(snackbar.show).toHaveBeenCalledTimes(1);
+
+    socket.ngOnDestroy();
+
+    expect(ref.dismiss).toHaveBeenCalledTimes(1);
+    expect(snackbar.hide).not.toHaveBeenCalled();
+  });
+
+  it('leaves other messages alone when it showed no warning', () => {
+    const socket = TestBed.inject(HelmReleaseSocketService);
+    socket.start();
+
+    socket.ngOnDestroy();
+
+    expect(ref.dismiss).not.toHaveBeenCalled();
+    expect(snackbar.hide).not.toHaveBeenCalled();
   });
 });

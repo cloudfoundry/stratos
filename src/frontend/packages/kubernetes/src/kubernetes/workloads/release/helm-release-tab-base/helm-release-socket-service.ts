@@ -3,7 +3,10 @@ import { of, Subject, Subscription } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
 import { catchError, share, switchMap } from 'rxjs/operators';
 
-import { TailwindSnackBarService } from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
+import {
+  TailwindSnackBarRef,
+  TailwindSnackBarService,
+} from '../../../../../../core/src/shared/services/tailwind-snackbar.service';
 import {
   KubeJobDataService, KubePersistentVolumeClaimDataService, KubeReplicaSetDataService,
   KubeRoleDataService, KubeSecretDataService, KubeServiceAccountDataService,
@@ -43,6 +46,9 @@ export class HelmReleaseSocketService implements OnDestroy {
   private sub?: Subscription;
   private sendToSocket = new Subject<any>();
   public isPaused = false;
+  // The "Errors were found when parsing this workload" warning, cleared when
+  // the release page goes away.
+  private manifestErrorsSnackBar?: TailwindSnackBarRef<unknown>;
 
   public start() {
     if (this.isStarted()) {
@@ -120,7 +126,9 @@ export class HelmReleaseSocketService implements OnDestroy {
           this.writeReleaseResources(messageObj);
         } else if (messageObj.kind === 'ManifestErrors') {
           if (messageObj.data) {
-            this.snackbarService.show('Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss');
+            this.manifestErrorsSnackBar = this.snackbarService.show(
+              'Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss'
+            );
           }
         }
       }
@@ -188,7 +196,10 @@ export class HelmReleaseSocketService implements OnDestroy {
     if (this.sub) {
       this.sub.unsubscribe();
     }
-    this.snackbarService.hide();
+    // Only this service's own warning: hide() would also dismiss other
+    // features' messages.
+    this.manifestErrorsSnackBar?.dismiss();
+    this.manifestErrorsSnackBar = undefined;
   }
 
   // Write the socket-streamed release graph into the signal data service
