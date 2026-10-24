@@ -3,12 +3,12 @@
 <div class="flex flex-col gap-5 p-6 w-full">
   @if (appAutoscalerPolicy(); as policy) {
     @if (policy.enabled) {
-      <!-- The Instances box sets the row height; the Now box scrolls within it -->
+      <!-- The Instances box sets the row height; Latest Readings scrolls within it -->
       <div class="grid gap-5 lg:grid-cols-2">
         <app-card-autoscaler-default class="block min-w-0"></app-card-autoscaler-default>
         <div class="relative min-w-0 h-96 lg:h-auto">
-          <app-card-autoscaler-now class="block h-full lg:absolute lg:inset-0" [policy]="policy"
-            [metrics]="appAutoscalerAppMetrics()" [history]="appAutoscalerScalingHistory()"></app-card-autoscaler-now>
+          <app-card-autoscaler-readings class="block h-full lg:absolute lg:inset-0" [policy]="policy"
+            [metrics]="appAutoscalerAppMetrics()"></app-card-autoscaler-readings>
         </div>
       </div>
     }
