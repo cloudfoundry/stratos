@@ -53,12 +53,14 @@
                 <input [attr.data-map-key]="f.pointer" [value]="row.key"
                   (input)="setMapKey(f.pointer, row.id, $any($event.target).value)"
                   placeholder="key"
+                  [attr.aria-label]="f.title + ' key'"
                   class="w-1/3 px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
                 @if (isScalarMapValue(f)) {
                   <input [attr.data-map-value]="f.pointer" [type]="mapValueInputType(f)"
                     [value]="row.value ?? ''"
                     (input)="setMapValue(f.pointer, row.id, $event, mapValueSchema(f))"
                     placeholder="value"
+                    [attr.aria-label]="f.title + ' value'"
                     class="flex-1 px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
                 } @else {
                   <div class="flex-1 pl-4 border-l border-content-border">

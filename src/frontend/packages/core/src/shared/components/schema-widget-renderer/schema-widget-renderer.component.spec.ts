@@ -161,6 +161,17 @@ describe('SchemaWidgetRenderer map editor + tuple', () => {
     expect(emitted.labels).toEqual({ foo:'bar' });
   });
 
+  // The key and value boxes sit side by side under the map's label, which
+  // names neither; each names itself after the map.
+  it('names the key and value fields of a map row', async () => {
+    const f = await mount({ type:'object', properties:{ labels:{ type:'object', additionalProperties:{ type:'string' } } } });
+    f.nativeElement.querySelector('button[data-map-add="/labels"]').click(); await f.whenStable();
+    const keyInput:HTMLInputElement = f.nativeElement.querySelector('input[data-map-key="/labels"]');
+    const valInput:HTMLInputElement = f.nativeElement.querySelector('input[data-map-value="/labels"]');
+    expect(keyInput.getAttribute('aria-label')).toBe('labels key');
+    expect(valInput.getAttribute('aria-label')).toBe('labels value');
+  });
+
   it('object-valued map recurses and emits nested child data (not {})', async () => {
     const f = await mount({ type:'object', properties:{ creds:{ type:'object',
       additionalProperties:{ type:'object', properties:{ host:{ type:'string' } } } } } });
