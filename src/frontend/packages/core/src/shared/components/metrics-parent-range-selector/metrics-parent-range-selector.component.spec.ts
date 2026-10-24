@@ -43,6 +43,13 @@ describe('MetricsParentRangeSelectorComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('names its drop-down "Time window"', async () => {
+    await fixture.whenStable();
+    const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
+    expect(trigger).toBeTruthy();
+    expect(trigger!.getAttribute('aria-label')).toBe('Time window');
+  });
+
   it('stops the window poll when the selector is destroyed', () => {
     vi.useFakeTimers();
     const manager = fixture.debugElement.injector.get(MetricsRangeSelectorManagerService);
