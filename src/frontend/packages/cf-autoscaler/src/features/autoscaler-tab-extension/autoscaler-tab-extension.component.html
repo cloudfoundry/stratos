@@ -2,14 +2,14 @@
   [actions]="policyActions" [addAction]="createPolicyAction"></app-list-sub-nav>
 <div class="flex flex-col gap-5 p-6 w-full">
   @if (appAutoscalerPolicy(); as policy) {
-    <div class="flex flex-col gap-5">
+    <div class="grid gap-5 lg:grid-cols-2">
       @if (policy.enabled) {
-        <div class="relative">
+        <div class="relative min-w-0">
           <app-card-autoscaler-default></app-card-autoscaler-default>
         </div>
       }
       @if (policy.enabled) {
-        <div class="relative">
+        <div class="relative min-w-0">
           @if (!policy.scaling_rules?.length) {
             <app-card-app-usage></app-card-app-usage>
           }
@@ -51,8 +51,8 @@
   @if (appAutoscalerPolicy(); as policy) {
     <div>
       @if (policy.enabled) {
-        <div class="flex flex-col gap-5">
-          <div class="relative">
+        <div class="grid gap-5 lg:grid-cols-2">
+          <div class="relative min-w-0">
             <app-card>
               <app-card-header>
                 <app-card-title>Scaling Rules </app-card-title>
@@ -102,7 +102,7 @@
               </app-card-content>
             </app-card>
           </div>
-          <div class="relative">
+          <div class="relative min-w-0">
             <app-card>
               <app-card-header>
                 <app-card-title>
