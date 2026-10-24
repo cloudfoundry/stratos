@@ -1,7 +1,11 @@
-import { Directive, ElementRef, Renderer2, OnDestroy, HostListener, SecurityContext, inject, numberAttribute, input } from '@angular/core';
+import {
+  Directive, ElementRef, Renderer2, OnChanges, OnDestroy, HostListener, SecurityContext, inject, numberAttribute, input
+} from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { setSanitizedHTML } from '../../../core/browser-helper';
+
+let nextId = 0;
 
 @Directive({
   selector: '[matTooltip]',
@@ -9,7 +13,7 @@ import { setSanitizedHTML } from '../../../core/browser-helper';
   exportAs: 'matTooltip',
   standalone: true
 })
-export class CustomTooltipDirective implements OnDestroy {
+export class CustomTooltipDirective implements OnChanges, OnDestroy {
   private elementRef = inject(ElementRef);
   private renderer = inject(Renderer2);
   private sanitizer = inject(DomSanitizer);
@@ -24,26 +28,34 @@ export class CustomTooltipDirective implements OnDestroy {
   readonly disabled = input<boolean>(false, { alias: "matTooltipDisabled" });
 
   private tooltipElement: HTMLElement | null = null;
+  private readonly tooltipId = `custom-tooltip-${nextId++}`;
   private showTimeout: any;
   private hideTimeout: any;
+  private tooltipUnlisteners: (() => void)[] = [];
+  // The tooltip stays while either holds (WCAG 2.2 SC 1.4.13 "persistent").
+  // Hovering covers the tooltip itself as well as the host, so the pointer
+  // can move onto the tooltip ("hoverable").
+  private hovering = false;
+  private focused = false;
+
+  ngOnChanges() {
+    // The tooltip no longer has anything valid to say
+    if (!this.canShow()) {
+      this.clearTimeouts();
+      this.hideTooltip();
+    }
+  }
 
   @HostListener('mouseenter', ['$event'])
   onMouseEnter(_event: MouseEvent) {
-    const tooltipText = this.tooltipText();
-    if (!this.disabled() && tooltipText && tooltipText.trim()) {
-      this.clearTimeouts();
-      this.showTimeout = setTimeout(() => {
-        this.showTooltip();
-      }, this.showDelay());
-    }
+    this.hovering = true;
+    this.scheduleShow();
   }
 
   @HostListener('mouseleave', ['$event'])
   onMouseLeave(_event: MouseEvent) {
-    this.clearTimeouts();
-    this.hideTimeout = setTimeout(() => {
-      this.hideTooltip();
-    }, this.hideDelay());
+    this.hovering = false;
+    this.scheduleHide();
   }
 
   // Clicking the host usually opens a menu/dialog — don't leave the tooltip
@@ -54,17 +66,88 @@ export class CustomTooltipDirective implements OnDestroy {
     this.hideTooltip();
   }
 
+  // focusin/focusout bubble, so a host that wraps a focusable control (a
+  // span around a button) shows the tooltip for that control too. Only
+  // :focus-visible focus counts: a mouse click also focuses a button, but
+  // the click already dismissed the tooltip and usually opens a menu.
+  @HostListener('focusin', ['$event'])
+  onFocusIn(event: FocusEvent) {
+    if (!(event.target instanceof Element) || !event.target.matches(':focus-visible')) {
+      return;
+    }
+    this.focused = true;
+    this.scheduleShow();
+  }
+
+  @HostListener('focusout', ['$event'])
+  onFocusOut(event: FocusEvent) {
+    // Focus moving between controls inside the host is not leaving it
+    if (event.relatedTarget instanceof Node && this.elementRef.nativeElement.contains(event.relatedTarget)) {
+      return;
+    }
+    this.focused = false;
+    this.scheduleHide();
+  }
+
   // Chrome does not fire mouseleave when the hovered element moves or changes
   // under the pointer (menu opening, layout shift), which left tooltips stuck
   // open until the pointer happened to re-cross the host. While a tooltip is
   // visible, watch pointer movement at the document level and hide as soon as
-  // the pointer is outside the host.
+  // the pointer is outside the host and the tooltip. A pending hide means
+  // mouseleave did fire and the pointer may be crossing the gap onto the
+  // tooltip, so that hide is left to run (or be cancelled) on its own.
   private onDocumentMouseMove = (event: MouseEvent) => {
-    if (!this.elementRef.nativeElement.contains(event.target as Node)) {
+    const target = event.target as Node;
+    if (this.elementRef.nativeElement.contains(target) || this.tooltipElement?.contains(target)) {
+      return;
+    }
+    this.hovering = false;
+    if (!this.focused && !this.hideTimeout) {
       this.clearTimeouts();
       this.hideTooltip();
     }
   };
+
+  // Escape dismisses the tooltip without moving focus or the pointer
+  // (SC 1.4.13 "dismissible"). It listens on the document because a hover
+  // tooltip's host is often not the focused element. The key is consumed,
+  // as Material's tooltip did, so the same press does not also close the
+  // dialog or menu the host sits in.
+  private onDocumentKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      this.clearTimeouts();
+      this.hideTooltip();
+    }
+  };
+
+  private canShow(): boolean {
+    const text = this.tooltipText();
+    return !this.disabled() && !!text && !!text.trim();
+  }
+
+  private scheduleShow() {
+    this.clearTimeouts();
+    // Already showing (pointer back on the host, focus while hovered):
+    // keep it rather than rebuilding it after another show delay
+    if (this.tooltipElement || !this.canShow()) {
+      return;
+    }
+    this.showTimeout = setTimeout(() => {
+      this.showTooltip();
+    }, this.showDelay());
+  }
+
+  private scheduleHide() {
+    if (this.hovering || this.focused) {
+      return;
+    }
+    this.clearTimeouts();
+    this.hideTimeout = setTimeout(() => {
+      this.hideTooltip();
+    }, this.hideDelay());
+  }
 
   private showTooltip() {
     if (this.tooltipElement) {
@@ -101,7 +184,6 @@ export class CustomTooltipDirective implements OnDestroy {
     this.renderer.setStyle(el, 'top', '-9999px');
     this.renderer.setStyle(el, 'left', '-9999px');
     this.renderer.setStyle(el, 'z-index', '10000');
-    this.renderer.setStyle(el, 'pointer-events', 'none');
     this.renderer.setStyle(el, 'background-color', '#333');
     this.renderer.setStyle(el, 'color', 'white');
     this.renderer.setStyle(el, 'padding', '8px 12px');
@@ -111,18 +193,57 @@ export class CustomTooltipDirective implements OnDestroy {
     this.renderer.setStyle(el, 'word-wrap', 'break-word');
     this.renderer.setStyle(el, 'box-shadow', '0 2px 8px rgba(0,0,0,0.3)');
 
+    // Screen readers announce the tooltip as the host's description
+    this.renderer.setAttribute(el, 'role', 'tooltip');
+    this.renderer.setAttribute(el, 'id', this.tooltipId);
+    this.setDescribedBy(true);
+
+    // The tooltip takes the pointer (no pointer-events: none), so the user can
+    // move onto it to read it, and it stays until the pointer leaves it too
+    this.tooltipUnlisteners = [
+      this.renderer.listen(el, 'mouseenter', () => {
+        this.hovering = true;
+        this.clearTimeouts();
+      }),
+      this.renderer.listen(el, 'mouseleave', () => {
+        this.hovering = false;
+        this.scheduleHide();
+      }),
+    ];
+
     this.tooltipElement = el;
     this.renderer.appendChild(document.body, el);
     document.addEventListener('mousemove', this.onDocumentMouseMove, true);
+    document.addEventListener('keydown', this.onDocumentKeyDown, true);
 
     this.positionTooltip();
   }
 
   private hideTooltip() {
     document.removeEventListener('mousemove', this.onDocumentMouseMove, true);
+    document.removeEventListener('keydown', this.onDocumentKeyDown, true);
     if (this.tooltipElement) {
+      this.tooltipUnlisteners.forEach(unlisten => unlisten());
+      this.tooltipUnlisteners = [];
+      this.setDescribedBy(false);
       this.renderer.removeChild(document.body, this.tooltipElement);
       this.tooltipElement = null;
+    }
+  }
+
+  // Add or remove the tooltip's id in the host's aria-describedby, keeping
+  // any ids the host's template already put there
+  private setDescribedBy(shown: boolean) {
+    const host: HTMLElement = this.elementRef.nativeElement;
+    const ids = (host.getAttribute('aria-describedby') ?? '').split(/\s+/)
+      .filter(id => id && id !== this.tooltipId);
+    if (shown) {
+      ids.push(this.tooltipId);
+    }
+    if (ids.length) {
+      this.renderer.setAttribute(host, 'aria-describedby', ids.join(' '));
+    } else {
+      this.renderer.removeAttribute(host, 'aria-describedby');
     }
   }
 
