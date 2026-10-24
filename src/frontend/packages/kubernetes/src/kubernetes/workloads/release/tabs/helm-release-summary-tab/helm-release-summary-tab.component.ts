@@ -23,7 +23,7 @@ import { AnalysisReportRunnerComponent } from '../../../../analysis-report-viewe
 import { AnalysisReportSelectorComponent } from '../../../../analysis-report-viewer/analysis-report-selector/analysis-report-selector.component';
 import { WorkloadLiveReloadComponent } from '../../workload-live-reload/workload-live-reload.component';
 
-import { TailwindSnackBarService } from '@stratosui/core';
+import { TailwindSnackBarRef, TailwindSnackBarService } from '@stratosui/core';
 import {
   ResourceAlertPreviewComponent } from '../../../../analysis-report-viewer/resource-alert-preview/resource-alert-preview.component';
 import { KubernetesAnalysisService } from '../../../../services/kubernetes.analysis.service';
@@ -111,6 +111,9 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
   // Yellow: #FFC107
 
   private deleted = false;
+  // The last "Failed to delete release" message, stale once a retry deletes
+  // the release.
+  private deleteFailedSnackBar?: TailwindSnackBarRef<unknown>;
   // strict: assigned in the constructor inside runInInjectionContext.
   public chartData$!: Observable<HelmReleaseChartData>;
   public resources$!: Observable<any[]>;
@@ -279,15 +282,18 @@ export class HelmReleaseSummaryTabComponent implements OnDestroy {
         this.router.navigate(['./workloads']);
       }).catch((err: Error) => {
         this.endDelete();
-        this.snackbarService.show('Failed to delete release', 'Close');
+        this.deleteFailedSnackBar = this.snackbarService.show('Failed to delete release', 'Close');
         console.error('Failed to delete release: ', err);
       });
     });
   }
 
   ngOnDestroy() {
+    // Only this tab's own message: hide() would also dismiss other features'
+    // messages.
     if (this.deleted) {
-      this.snackbarService.hide();
+      this.deleteFailedSnackBar?.dismiss();
+      this.deleteFailedSnackBar = undefined;
     }
   }
 
