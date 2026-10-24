@@ -2375,3 +2375,72 @@ describe('SignalListComponent range filter (filterRanges)', () => {
     });
   });
 });
+
+// Controls that show no text of their own take their names from what sits
+// beside them: the row's title cell, the column being filtered, or the
+// "Sort:" / "Items per page:" captions.
+describe('SignalListComponent control names', () => {
+  const name = (el: Element | null) => el?.getAttribute('aria-label');
+
+  it('names the row checkboxes after their row and the select-all box', async () => {
+    const fixture = TestBed.createComponent(SelectAllHost);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(name(root.querySelector('[data-test="select-all"]'))).toBe('Select all');
+    const boxes = Array.from(root.querySelectorAll('[data-test="row-checkbox"]'));
+    expect(boxes.map(name)).toEqual(['Select one', 'Select two', 'Select three']);
+
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+    await fixture.whenStable();
+    const cardBoxes = Array.from(root.querySelectorAll('[data-test="card-select-checkbox"]'));
+    expect(cardBoxes.map(name)).toEqual(['Select one', 'Select two', 'Select three']);
+  });
+
+  it('names the row radios after their column and row', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        { header: 'Pick', key: 'pick', kind: 'radio', render: () => '', radio: { selectedKey: signal<string | null>(null) } },
+      ],
+    };
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(Array.from(root.querySelectorAll('[data-test="row-radio"]')).map(name)).toEqual(['Pick one', 'Pick two']);
+
+    fixture.componentInstance.config = { ...fixture.componentInstance.config, viewMode: signal<'table' | 'card'>('card') };
+    await fixture.whenStable();
+    expect(Array.from(root.querySelectorAll('[data-test="row-radio"]')).map(name)).toEqual(['Pick one', 'Pick two']);
+  });
+
+  it('names the sort and items-per-page drop-downs after their captions', async () => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      viewMode: signal<'table' | 'card'>('card'),
+      columns: [{ header: 'Name', sortField: 'name', render: r => r.name }],
+      sort: signal({ field: 'name', direction: 'asc' as const }),
+    };
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    expect(name(root.querySelector('[data-test="sort-controls"] select'))).toBe('Sort');
+    expect(name(root.querySelector('[data-test="page-size"]'))).toBe('Items per page');
+  });
+
+  it('names the range popup fields after the filtered column', async () => {
+    const fixture = TestBed.createComponent(RangeFilterHost);
+    await fixture.whenStable();
+    const root: HTMLElement = fixture.nativeElement;
+    (root.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+    expect(name(root.querySelector('[data-test="range-mode"]'))).toBe('Last Refreshed range type');
+    expect(name(root.querySelector('[data-test="range-op"]'))).toBe('Last Refreshed comparison');
+    expect(name(root.querySelector('[data-test="range-a"]'))).toBe('Last Refreshed value');
+
+    fixture.componentInstance.selectedRange.set({ op: 'between', a: '2026-05-01', b: '2026-06-01' });
+    await fixture.whenStable();
+    expect(name(root.querySelector('[data-test="range-a"]'))).toBe('Last Refreshed start');
+    expect(name(root.querySelector('[data-test="range-b"]'))).toBe('Last Refreshed end');
+  });
+});

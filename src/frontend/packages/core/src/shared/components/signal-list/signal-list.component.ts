@@ -1468,9 +1468,21 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Falls back to "Filter by Name" for the single-field case.
   filterPlaceholder(): string {
     if (!this.showFilterFieldSelector()) return 'Filter by Name';
-    const key = this.config.filterField!();
+    return `Filter by ${this.filterFieldHeader()}`;
+  }
+
+  // Header of the column the filter-field selector names.
+  filterFieldHeader(): string {
+    const key = this.config.filterField?.();
     const col = this.config.columns.find(c => this.columnKey(c) === key);
-    return `Filter by ${col?.header ?? 'Name'}`;
+    return col?.header ?? 'Name';
+  }
+
+  // Accessible name of a row's checkbox or radio: the column's header (or
+  // "Select" for an unheaded selection column) and the row's title cell.
+  rowSelectLabel(col: SignalListColumn<T>, row: T): string {
+    const title = this.titleColumn()?.render(row) ?? '';
+    return `${col.header || 'Select'} ${title}`.trim();
   }
 
   onSortFieldChange(field: string): void {
