@@ -10,7 +10,7 @@
   }
   @if (textToMatch) {
     <div class="confirm-dialog__enter-text mb-4">
-      <span class="block mb-2 text-content-muted">Please type <b class="font-semibold text-content-text">{{textToMatch}}</b> to continue.</span>
+      <label class="block mb-2 text-content-muted" for="typeToConfirm">Please type <b class="font-semibold text-content-text">{{textToMatch}}</b> to continue.</label>
       <div class="form-field">
         <input (paste)="handlePaste($event)" required class="input" id="typeToConfirm" [(ngModel)]="matchValue"
           [pattern]="textToMatch">
