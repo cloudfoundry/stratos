@@ -92,10 +92,11 @@
 
   <!-- Full-width sections below grid -->
   <div [ngClass]="{ 'create-endpoint__shown': showCACertField }" class="create-endpoint__advanced" spellcheck="false">
-    <span class="create-endpoint__cacert-title text-sm mb-2 block text-[var(--content-text)]"
-      >Specify CA Certificate:</span
+    <label class="create-endpoint__cacert-title text-sm mb-2 block text-[var(--content-text)]" for="ca-cert"
+      >Specify CA Certificate:</label
     >
     <textarea
+      id="ca-cert"
       rows="10"
       appInput
       formControlName="caCertField"

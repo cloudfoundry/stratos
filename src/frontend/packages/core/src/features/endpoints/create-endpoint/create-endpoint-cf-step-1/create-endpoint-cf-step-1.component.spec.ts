@@ -77,6 +77,13 @@ describe('CreateEndpointCfStep1Component', () => {
     expect(component).toBeTruthy();
   });
 
+  it('labels the CA certificate box with its caption', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const box = root.querySelector('textarea[formControlName="caCertField"]');
+    expect(box?.id, 'box has an id').toBeTruthy();
+    expect(root.querySelector(`label[for="${box!.id}"]`)?.textContent?.trim()).toBe('Specify CA Certificate:');
+  });
+
   describe('URL Validation', () => {
     it('should accept valid hostnames without protocol', () => {
       const urlControl = component.registerForm.controls.urlField;
