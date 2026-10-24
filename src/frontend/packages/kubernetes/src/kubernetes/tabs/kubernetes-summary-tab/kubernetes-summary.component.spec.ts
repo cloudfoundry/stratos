@@ -93,13 +93,13 @@ describe('KubernetesSummaryTabComponent', () => {
   it('labels a single namespace "Namespace", not "Node"', async () => {
     namespaces.set([{ metadata: { name: 'default' } }]);
     await fixture.whenStable();
-    const namespacesTile = tiles().find(t => t.label === 'Namespaces')!;
-    expect(namespacesTile.value).toBe('1');
-    expect(namespacesTile.labelSingular).toBe('Namespace');
+    const namespacesTile = tiles().find(t => t.label() === 'Namespaces')!;
+    expect(namespacesTile.value()).toBe('1');
+    expect(namespacesTile.labelSingular()).toBe('Namespace');
   });
 
   it('links each tile to an existing list route', () => {
-    expect(tiles().map(t => t.link)).toEqual([
+    expect(tiles().map(t => t.link())).toEqual([
       '/kubernetes/anything/nodes',
       '/kubernetes/anything/namespaces',
       '/kubernetes/anything/resource/pod',
