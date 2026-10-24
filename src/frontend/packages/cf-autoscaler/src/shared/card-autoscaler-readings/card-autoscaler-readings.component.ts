@@ -28,7 +28,8 @@ export class CardAutoscalerReadingsComponent {
       return {
         name,
         value: value === undefined ? null : Number(value),
-        unit: AutoscalerConstants.getMetricUnit(name, map[name].upper?.[0]?.unit || map[name].lower?.[0]?.unit),
+        // The unit map pads percent (' % ') for the rule text; a value reads 10%
+        unit: AutoscalerConstants.getMetricUnit(name, map[name].upper?.[0]?.unit || map[name].lower?.[0]?.unit).trim(),
       };
     });
   });
