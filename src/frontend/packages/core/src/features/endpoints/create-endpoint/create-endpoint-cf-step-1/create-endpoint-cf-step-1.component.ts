@@ -7,6 +7,7 @@ import { AppInputDirective, CustomFormFieldComponent, AppErrorComponent } from '
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { ActivatedRoute } from '@angular/router';
 import {
+  EndpointModel,
   EndpointsDataService,
   StratosCatalogEndpointEntity,
   entityCatalog,
@@ -37,6 +38,15 @@ interface CreateEndpointForm {
   clientSecretField: FormControl<string>;
   createSystemEndpointField: FormControl<boolean>;
   caCertField: FormControl<string>;
+}
+
+// Other endpoints of the same type at the same host. A different type at the
+// same host (a Metrics endpoint beside the Cloud Foundry it watches) is not a
+// duplicate.
+export function endpointsSharingUrl(
+  endpoints: Record<string, EndpointModel>, host: string, type: string, guid?: string,
+): EndpointModel[] {
+  return Object.values(endpoints).filter(e => e.api_endpoint?.Host === host && e.cnsi_type === type && e.guid !== guid);
 }
 
 @Component({
@@ -185,22 +195,14 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     };
     if (!result.error) {
       this.snackBarService.show(`Successfully registered '${name}'`);
-      // Warn if another endpoint is already registered with the same URL.
+      // Warn if another endpoint of this type is already registered with the same URL.
       // Multiple registrations are permitted (different users/operators may each need their own),
       // but the user should know about existing registrations.
-      const urlHost = new URL(url).host;
-      // Delay past the endpoints-page subscription that calls snackBarService.hide()
-      // when endpoint connectivity state updates after registration completes.
-      setTimeout(() => {
-        const entities = this.endpointsSignals.endpoints();
-        const dupes = Object.values(entities).filter(e =>
-          e.api_endpoint?.Host === urlHost && e.guid !== result.guid
-        );
-        if (dupes.length > 0) {
-          const names = dupes.map(e => e.name).join(', ');
-          this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`, 'Dismiss');
-        }
-      }, 1500);
+      const dupes = endpointsSharingUrl(this.endpointsSignals.endpoints(), new URL(url).host, type ?? '', result.guid);
+      if (dupes.length > 0) {
+        const names = dupes.map(e => e.name).join(', ');
+        this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`, 'Dismiss');
+      }
     }
     const success = !result.error;
     return {
