@@ -3,7 +3,7 @@ import { join } from 'path';
 import { DatePipe } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { ChangeDetectorRef, provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
 import { addDays, format, setHours, setMinutes } from 'date-fns';
@@ -326,6 +326,28 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       const result = await firstValueFrom(component.updatePolicy(3, null as never));
 
       expect(result.message).toBe('Could not create policy: network down');
+    });
+  });
+
+  describe('field names', () => {
+    it('labels the date time and instance count fields', async () => {
+      create();
+      await fixture.whenStable();
+      component.addSpecificDate();
+      fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+      await fixture.whenStable();
+
+      const form: HTMLElement = fixture.nativeElement.querySelector('form');
+      const labelOf = (control: string) => {
+        const field = form.querySelector(`[formControlName="${control}"]`);
+        expect(field?.id, `${control} has an id`).toBeTruthy();
+        return form.querySelector(`label[for="${field!.id}"]`)?.textContent?.trim();
+      };
+      expect(labelOf('start_date_time')).toBe('Start');
+      expect(labelOf('end_date_time')).toBe('End');
+      expect(labelOf('instance_min_count')).toBe('Minimum');
+      expect(labelOf('initial_min_instance_count')).toBe('Initial Minimum');
+      expect(labelOf('instance_max_count')).toBe('Maximum');
     });
   });
 });
