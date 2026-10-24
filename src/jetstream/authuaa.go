@@ -229,9 +229,10 @@ func (p *portalProxy) loginToUAA(c *echo.Context) (*api.LoginRes, error) {
 			return nil, err
 		}
 
-		err = p.ExecuteLoginHooks(c)
-		if err != nil {
-			slog.Warn("login hooks failed", "error", err)
+		// The session is set: a failed hook (such as auto-connecting the
+		// auto-registered endpoint) does not fail the login.
+		if hookErr := p.ExecuteLoginHooks(c); hookErr != nil {
+			slog.Warn("login hooks failed", "error", hookErr)
 		}
 
 		uaaAdmin := strings.Contains(uaaRes.Scope, p.Config.ConsoleConfig.ConsoleAdminScope)

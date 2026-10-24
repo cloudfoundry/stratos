@@ -79,6 +79,57 @@ func TestLoginToUAA(t *testing.T) {
 	})
 }
 
+// A login hook (such as auto-connecting the auto-registered Cloud Foundry)
+// runs after the session is set. Its failure is logged, not returned: the
+// user is logged in, and a 500 made the page say "Couldn't check
+// credentials" while a refresh showed the home page.
+func TestLoginToUAAWithAFailingLoginHook(t *testing.T) {
+	t.Parallel()
+
+	Convey("UAA login with a failing login hook", t, func() {
+		req := setupMockReq("POST", "", map[string]string{
+			"username": "admin",
+			"password": "changeme",
+		})
+
+		_, _, ctx, pp, db, mock := setupHTTPTest(req)
+		defer db.Close()
+
+		mockUAA := setupMockServer(t,
+			msRoute("/oauth/token"),
+			msMethod("POST"),
+			msStatus(http.StatusOK),
+			msBody(jsonMust(mockUAAResponse)))
+
+		defer mockUAA.Close()
+		pp.Config.ConsoleConfig = new(api.ConsoleConfig)
+		uaaURL, _ := url.Parse(mockUAA.URL)
+		pp.Config.ConsoleConfig.UAAEndpoint = uaaURL
+		pp.Config.ConsoleConfig.SkipSSLValidation = true
+		pp.Config.ConsoleConfig.AuthEndpointType = string(api.Remote)
+		err := pp.InitStratosAuthService(api.AuthEndpointTypes[pp.Config.ConsoleConfig.AuthEndpointType])
+		So(err, ShouldBeNil)
+
+		hookRan := false
+		_ = pp.AddLoginHook(0, func(c *echo.Context) error {
+			hookRan = true
+			return errors.New("could not auto-connect")
+		})
+
+		mock.ExpectQuery(selectAnyFromTokens).
+			WillReturnRows(testutils.ExpectNoRows())
+
+		mock.ExpectExec(insertIntoTokens).
+			WillReturnResult(sqlmock.NewResult(1, 1))
+
+		loginErr := pp.StratosAuthService.Login(ctx)
+
+		So(hookRan, ShouldBeTrue)
+		So(loginErr, ShouldBeNil)
+		So(mock.ExpectationsWereMet(), ShouldBeNil)
+	})
+}
+
 func TestLocalLogin(t *testing.T) {
 	t.Parallel()
 
