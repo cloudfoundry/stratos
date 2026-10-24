@@ -9,10 +9,16 @@ type LastErrors = Record<string, string>;
 /**
  * The text the endpoints page shows for an endpoint whose last connect
  * failed. Worded as the last error so it cannot read as the endpoint's
- * current state, which only a new connect tells.
+ * current state, which only a new connect tells. Trailing dots are
+ * dropped by a scan, not /\.+$/: the message is the endpoint's, and a run
+ * of '.' not at the end makes that pattern backtrack quadratically.
  */
 export function describeLastConnectError(message: string): string {
-  return `The last error was ${message.replace(/\.+$/, '')}. Reconnect to get the latest status.`;
+  let end = message.length;
+  while (end > 0 && message[end - 1] === '.') {
+    end--;
+  }
+  return `The last error was ${message.slice(0, end)}. Reconnect to get the latest status.`;
 }
 
 /**

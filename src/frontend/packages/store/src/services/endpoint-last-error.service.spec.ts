@@ -97,4 +97,15 @@ describe('EndpointLastErrorService', () => {
     expect(describeLastConnectError('Could not connect to the endpoint (400)'))
       .toBe('The last error was Could not connect to the endpoint (400). Reconnect to get the latest status.');
   });
+
+  // The message is the endpoint's answer. A run of '.' not at the end made
+  // a /\.+$/ trim backtrack quadratically.
+  it('drops trailing dots in linear time', () => {
+    expect(describeLastConnectError('Bad credentials...'))
+      .toBe('The last error was Bad credentials. Reconnect to get the latest status.');
+    const start = performance.now();
+    expect(describeLastConnectError('.'.repeat(100_000) + 'x'))
+      .toBe(`The last error was ${'.'.repeat(100_000)}x. Reconnect to get the latest status.`);
+    expect(performance.now() - start).toBeLessThan(500);
+  });
 });
