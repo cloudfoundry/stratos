@@ -4,6 +4,7 @@ import { Router } from '@angular/router';
 
 import {
   CardCell,
+  CustomTooltipDirective,
   EndpointsSignalService,
   MetaCardComponent,
   MetaCardItemComponent,
@@ -35,6 +36,7 @@ import { TableCellServiceTagsComponent } from './table-cell-service-tags/table-c
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
+    CustomTooltipDirective,
     MetaCardComponent,
     MetaCardItemComponent,
     MetaCardKeyComponent,

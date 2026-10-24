@@ -3,7 +3,7 @@
     >
     <app-meta-card-title [noMargin]="true">
       <div class="flex flex-row justify-between w-full">
-        <app-multiline-title>{{ getDisplayName() }}</app-multiline-title>
+        <app-multiline-title [matTooltip]="getDisplayName()">{{ getDisplayName() }}</app-multiline-title>
         <app-service-icon [service]="offering"></app-service-icon>
       </div>
     </app-meta-card-title>
