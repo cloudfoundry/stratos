@@ -35,8 +35,7 @@ export class CardAutoscalerReadingsComponent {
         value: value === undefined ? null : Number(value),
         time: latest?.target?.[0]?.time,
         color: typeof color === 'string' ? color : null,
-        // The unit map pads percent (' % ') for the rule text; a value reads 10%
-        unit: AutoscalerConstants.getMetricUnit(name, map[name].upper?.[0]?.unit || map[name].lower?.[0]?.unit).trim(),
+        unit: AutoscalerConstants.getMetricUnit(name, map[name].upper?.[0]?.unit || map[name].lower?.[0]?.unit),
       };
     });
   });
