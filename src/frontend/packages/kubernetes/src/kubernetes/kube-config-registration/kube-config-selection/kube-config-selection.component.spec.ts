@@ -1,8 +1,8 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { firstValueFrom } from 'rxjs';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { entityCatalog } from '@stratosui/store';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
@@ -50,10 +50,6 @@ describe('KubeConfigSelectionComponent', () => {
     fixture.detectChanges();
   });
 
-  it('should create', () => {
-    expect(component).toBeTruthy();
-  });
-
   // The cell's edit box replaces the name text; it takes the column's name.
   it('names the inline cluster name box', async () => {
     const helper = TestBed.inject(KubeConfigHelper);
@@ -81,5 +77,9 @@ users:
     const box = (fixture.nativeElement as HTMLElement).querySelector('[data-test="row"] input:not([type])');
     expect(box).toBeTruthy();
     expect(box!.getAttribute('aria-label')).toBe('Name');
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
   });
 });
