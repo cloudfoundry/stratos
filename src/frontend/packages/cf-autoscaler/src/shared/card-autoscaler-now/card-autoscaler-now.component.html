@@ -1,0 +1,70 @@
+<div class="card flex flex-col h-full">
+  <div class="card-header">
+    <h3 class="card-title">Now</h3>
+  </div>
+  <app-scroll-fade class="flex-1">
+    <div class="p-4 space-y-4">
+      <app-metadata-item data-test="now-limits" label="Limits in effect">
+        <div class="text-lg font-semibold">{{ limits().min }} – {{ limits().max }}</div>
+        <div class="text-sm text-content-muted">
+          @switch (limits().source) {
+            @case ('specific') { Specific date schedule until {{ limits().until }} }
+            @case ('recurring') { Recurring schedule until {{ limits().until }} }
+            @default { Default limits }
+          }
+          @if (limits().next; as next) {
+            · {{ next.min }} – {{ next.max }} from {{ next.at }}
+          }
+          @if (limits().source !== 'default' || limits().next) {
+            ({{ timezone() }})
+          }
+        </div>
+      </app-metadata-item>
+      <app-metadata-item data-test="now-last-scaling" label="Last scaling">
+        @if (lastEvent(); as e) {
+          <div>
+            Scaled {{ e.old_instances > e.new_instances ? 'down' : 'up' }} from {{ e.old_instances }} to {{ e.new_instances }}
+            @if (e.status !== 0) { (failed) }
+          </div>
+          <div class="text-sm text-content-muted">
+            {{ e.timestamp / 1000000 | date:'medium' }}
+            @if (coolDown(); as until) {
+              · cool-down until {{ until | date:'mediumTime' }}
+            }
+          </div>
+        } @else {
+          <div class="text-content-muted">No scaling events</div>
+        }
+      </app-metadata-item>
+      @if (metricRows().length) {
+        <app-metadata-item data-test="now-metrics" label="Latest metrics">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-left text-xs text-content-muted uppercase tracking-wider">
+                <th class="py-1 pr-4 font-medium">Metric</th>
+                <th class="py-1 pr-4 font-medium text-right">Now</th>
+                <th class="py-1 pr-4 font-medium">Scale out</th>
+                <th class="py-1 font-medium">Scale in</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-content-border">
+              @for (m of metricRows(); track m.name) {
+                <tr>
+                  <td class="py-1 pr-4 whitespace-nowrap">
+                    <span class="inline-block size-2 rounded-full mr-1.5 align-middle bg-content-border"
+                      [style.background-color]="m.color"></span>{{ m.name }}
+                  </td>
+                  <td class="py-1 pr-4 whitespace-nowrap text-right tabular-nums">
+                    @if (m.value !== null) { {{ m.value | number:'1.0-2' }}{{ m.unit }} } @else { – }
+                  </td>
+                  <td class="py-1 pr-4 whitespace-nowrap">{{ m.scaleOut || '–' }}</td>
+                  <td class="py-1 whitespace-nowrap">{{ m.scaleIn || '–' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </app-metadata-item>
+      }
+    </div>
+  </app-scroll-fade>
+</div>
