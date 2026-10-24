@@ -1961,7 +1961,7 @@ describe('SignalListComponent checklist-popup filter (filterMultis)', () => {
   });
 
   describe('popup Clear button', () => {
-    async function openPopup(fixture: ReturnType<typeof TestBed.createComponent<MultiFilterHost>>): HTMLButtonElement {
+    async function openPopup(fixture: ReturnType<typeof TestBed.createComponent<MultiFilterHost>>): Promise<HTMLButtonElement> {
       (fixture.nativeElement.querySelector('[data-test="multi-filter-toggle"]') as HTMLButtonElement).click();
       await fixture.whenStable();
       return fixture.nativeElement.querySelector('[data-test="multi-filter-clear"]') as HTMLButtonElement;
@@ -2340,7 +2340,7 @@ describe('SignalListComponent range filter (filterRanges)', () => {
   });
 
   describe('popup Clear button', () => {
-    async function openPopup(fixture: ReturnType<typeof TestBed.createComponent<RangeFilterHost>>): HTMLButtonElement {
+    async function openPopup(fixture: ReturnType<typeof TestBed.createComponent<RangeFilterHost>>): Promise<HTMLButtonElement> {
       (fixture.nativeElement.querySelector('[data-test="range-filter-toggle"]') as HTMLButtonElement).click();
       await fixture.whenStable();
       return fixture.nativeElement.querySelector('[data-test="range-filter-clear"]') as HTMLButtonElement;
