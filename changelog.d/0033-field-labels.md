@@ -23,3 +23,21 @@
   - File pickers: the path field.
   - Forms built from a service's JSON schema: the key and value of each
     map row.
+- Controls that had no name at all now have one, taken from the
+  caption, prompt or column a sighted user sees beside them:
+  - Lists: each row's select checkbox or radio (named after the row),
+    the select-all checkbox, the card view's Sort drop-down, the
+    Items per page drop-down, and the range filter's type, comparison
+    and value fields (named after the filtered column).
+  - Confirmation dialogs that ask you to type a name: the field is
+    labelled by its "Please type ... to continue." prompt.
+  - Register Endpoint and Edit Endpoint: the CA certificate box is
+    labelled by its "Specify CA Certificate:" caption.
+  - Forms built from a service's JSON schema: yes/no checkboxes, the
+    JSON fallback box and the oneOf choice are labelled by the field's
+    label; array and tuple items and a oneOf value are named after the
+    field.
+  - Kubernetes endpoint credentials: the certificate, key and token
+    boxes and the kubeconfig, certificate and GKE credentials file
+    pickers are named by their captions.
+  - Import Kubeconfig: the box for renaming a cluster.
