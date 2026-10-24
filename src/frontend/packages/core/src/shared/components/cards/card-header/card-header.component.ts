@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, booleanAttribute } from '@angular/core';
+import { ChangeDetectionStrategy, Component, booleanAttribute, input } from '@angular/core';
 
 /**
  * Card header component using Tailwind CSS
@@ -11,7 +11,7 @@ import { ChangeDetectionStrategy, Component, Input, booleanAttribute } from '@an
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="px-6 py-4 border-b border-[var(--card-border)] flex items-center justify-between"
-      [style.background-color]="plain ? null : 'var(--card-header-bg)'">
+      [style.background-color]="plain() ? null : 'var(--card-header-bg)'">
       <ng-content></ng-content>
     </div>
   `,
@@ -22,5 +22,5 @@ import { ChangeDetectionStrategy, Component, Input, booleanAttribute } from '@an
   `]
 })
 export class CardHeaderComponent {
-  @Input({ transform: booleanAttribute }) plain = false;
+  readonly plain = input(false, { transform: booleanAttribute });
 }
