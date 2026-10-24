@@ -1,4 +1,4 @@
-[BugFixes: Applications]
+[BugFixes: Autoscaler]
 - An autoscaler policy can pin an app to one instance count: the policy
   editor now accepts a minimum equal to the maximum, for the default
   limits and for both schedule types, as the autoscaler does.
@@ -11,7 +11,7 @@
 - Scaling rule conditions read evenly (`>= 80% for 120 secs.`): percent
   had padding no other unit had, and the operator had no spaces.
 
-[Features: Applications]
+[Features: Autoscaler]
 - The Autoscale tab has a Latest Readings box beside Instances, with
   each policy metric's latest value as a number, a dot in the gauge's
   status colour, and when the oldest and newest readings were taken.
