@@ -353,9 +353,28 @@ it without the raw formatting codes:
 | `make dev website` | Docusaurus dev server with hot reload — reads `docs/` directly (`path: '../docs'` in `website/docusaurus.config.js`), no separate conversion step |
 | `make build website` | Build the HTML site into `website/build/` |
 | `make build booklets` | Render curated `docs/` subsets to standalone PDF/epub via Quarto — see `docs/booklets/README.md` for how a booklet's chapter list ("spine") is defined |
+| `make deploy website pages` | Force-push `HEAD` to your fork's `pages-preview` branch; the Deploy Website workflow builds it and publishes `https://<you>.github.io/stratos/` |
+| `make deploy website cf` | `cf push` the built site (`website/manifest.yml`, a static app) to the current `cf target` |
+| `make build deploy website cf` | Build the site, then push it |
 
 Booklets need the `quarto` tool (see `developer-environment.md`); the
 website only needs `bun` (already required).
+
+The upstream site publishes from `develop` on its own
+(`.github/workflows/website-deploy.yml`); `deploy website pages` is for
+previewing on a fork. Before the first preview, enable Pages on the fork
+and allow the preview branch to deploy:
+
+```bash
+gh api -X POST repos/<you>/stratos/pages -f build_type=workflow
+gh api -X POST repos/<you>/stratos/environments/github-pages/deployment-branch-policies -f name=pages-preview
+```
+
+The second command needs the `github-pages` environment, which the first
+deploy creates. The preview pushes to the `origin` remote; set
+`PAGES_REMOTE` in `site.mk` if your fork is another remote. See
+[website/README.md](https://github.com/cloudfoundry/stratos/blob/develop/website/README.md#deployment)
+for details.
 
 Booklet source (`docs/booklets/`) lives inside `docs/` but is excluded from
 the published site (`exclude` in `docusaurus.config.js`) — CI renders
