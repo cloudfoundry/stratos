@@ -391,7 +391,7 @@ describe('EditAutoscalerPolicyStep2Component', () => {
     it('shows the fixed unit for the metric', () => {
       create();
       expect(component.getMetricUnit('memoryused')).toBe('MB');
-      expect(component.getMetricUnit('cpuutil')).toBe(' % ');
+      expect(component.getMetricUnit('cpuutil')).toBe('%');
       expect(component.getMetricUnit('custom_metric')).toBe('');
     });
   });

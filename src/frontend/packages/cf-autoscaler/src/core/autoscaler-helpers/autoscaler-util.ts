@@ -79,7 +79,7 @@ export class AutoscalerConstants {
       interval: 40,
     },
     memoryutil: {
-      unit_internal: ' % ',
+      unit_internal: '%',
       interval: 40,
     },
     responsetime: {
@@ -91,11 +91,11 @@ export class AutoscalerConstants {
       interval: 40,
     },
     cpu: {
-      unit_internal: ' % ',
+      unit_internal: '%',
       interval: 40,
     },
     cpuutil: {
-      unit_internal: ' % ',
+      unit_internal: '%',
       interval: 40,
     },
     disk: {
@@ -103,7 +103,7 @@ export class AutoscalerConstants {
       interval: 40,
     },
     diskutil: {
-      unit_internal: ' % ',
+      unit_internal: '%',
       interval: 40,
     }
   };
