@@ -7,6 +7,8 @@ import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
 
 import { ApplicationEnvVarsHelper } from '../../application/application-tabs-base/tabs/build-tab/application-env-vars.service';
+import { CfDeployAppDataService } from '../../../../services/domain-data/cf-deploy-app-data.service';
+import { DEPLOY_TYPES_IDS } from '../deploy-application-steps.types';
 import { DeployApplicationOptionsStepComponent } from './deploy-application-options-step.component';
 
 describe('DeployApplicationOptionsStepComponent', () => {
@@ -63,5 +65,25 @@ describe('DeployApplicationOptionsStepComponent', () => {
 
     c.no_route.setValue(true);
     expect(c.random_route.disabled).toBe(true);
+  });
+
+  it('names every text field and drop-down with a visible label', async () => {
+    TestBed.inject(CfDeployAppDataService).setSourceType({ id: DEPLOY_TYPES_IDS.GIT_URL, name: 'Git URL' });
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const root: HTMLElement = fixture.nativeElement;
+    const fields = Array.from(root.querySelectorAll<HTMLInputElement | HTMLSelectElement>(
+      'input:not([type="checkbox"]), select'));
+    expect(fields.length).toBe(14);
+    for (const field of fields) {
+      const name = field.getAttribute('formControlName');
+      expect(field.id, `${name} has an id`).not.toBe('');
+      const label = root.querySelector(`label[for="${field.id}"]`);
+      expect(label?.textContent?.trim(), `${name} is labelled`).toBeTruthy();
+      if (field instanceof HTMLInputElement) {
+        expect(label?.textContent?.trim()).toBe(field.placeholder);
+      }
+    }
   });
 });
