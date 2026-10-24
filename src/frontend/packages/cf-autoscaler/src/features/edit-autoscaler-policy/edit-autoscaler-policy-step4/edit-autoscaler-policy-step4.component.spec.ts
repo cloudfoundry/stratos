@@ -200,12 +200,15 @@ describe('EditAutoscalerPolicyStep4Component', () => {
       expect(controls().start_date_time.valid).toBe(true);
     });
 
-    it('requires the minimum count below the maximum count', () => {
+    it('allows the minimum count up to the maximum count', () => {
       setControl('instance_max_count', 4);
-      expect(setControl('instance_min_count', 4).hasError('alertInvalidPolicyMinimumRange')).toBe(true);
+      expect(setControl('instance_min_count', 4).valid).toBe(true);
+      expect(controls().instance_max_count.valid).toBe(true);
+
+      expect(setControl('instance_min_count', 5).hasError('alertInvalidPolicyMinimumRange')).toBe(true);
       expect(controls().instance_max_count.hasError('alertInvalidPolicyMaximumRange')).toBe(true);
 
-      setControl('instance_max_count', 5);
+      setControl('instance_max_count', 6);
       expect(controls().instance_min_count.valid).toBe(true);
       expect(controls().instance_max_count.valid).toBe(true);
     });

@@ -95,9 +95,9 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   validateGlobalLimitMin(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editLimitForm ?
-        numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.controls.instance_max_count.value - 1, true) : false;
+        numberWithFractionOrExceedRange(control.value, 1, this.editLimitForm.controls.instance_max_count.value, true) : false;
       const lastValid = this.editLimitValid;
-      this.editLimitValid = this.editLimitForm && control.value < this.editLimitForm.controls.instance_max_count.value;
+      this.editLimitValid = this.editLimitForm && control.value <= this.editLimitForm.controls.instance_max_count.value;
       if (this.editLimitForm && this.editLimitValid !== lastValid) {
         this.editLimitForm.controls.instance_max_count.updateValueAndValidity();
       }
@@ -108,9 +108,9 @@ export class EditAutoscalerPolicyStep1Component extends EditAutoscalerPolicyDire
   validateGlobalLimitMax(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
       const invalid = this.editLimitForm ? numberWithFractionOrExceedRange(control.value,
-        this.editLimitForm.controls.instance_min_count.value + 1, Number.MAX_VALUE, true) : false;
+        this.editLimitForm.controls.instance_min_count.value, Number.MAX_VALUE, true) : false;
       const lastValid = this.editLimitValid;
-      this.editLimitValid = this.editLimitForm && this.editLimitForm.controls.instance_min_count.value < control.value;
+      this.editLimitValid = this.editLimitForm && this.editLimitForm.controls.instance_min_count.value <= control.value;
       if (this.editLimitForm && this.editLimitValid !== lastValid) {
         this.editLimitForm.controls.instance_min_count.updateValueAndValidity();
       }
