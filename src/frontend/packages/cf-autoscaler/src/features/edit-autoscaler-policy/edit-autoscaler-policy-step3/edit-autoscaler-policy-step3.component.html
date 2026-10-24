@@ -55,11 +55,11 @@
                                 @if (editEffectiveType==='custom') {
                                   <div class="mt-2 grid grid-cols-2 gap-2">
                                     <div class="form-group">
-                                      <input type="date" name="start_date" formControlName="start_date" required
+                                      <input type="date" name="start_date" formControlName="start_date" aria-label="From" required
                                         placeholder="From" class="input">
                                     </div>
                                     <div class="form-group">
-                                      <input type="date" name="end_date" formControlName="end_date" required
+                                      <input type="date" name="end_date" formControlName="end_date" aria-label="To" required
                                         placeholder="To" class="input">
                                     </div>
                                   </div>
@@ -80,9 +80,9 @@
                             </div>
                           </app-metadata-item>
                           <div class="form-group">
-                            <label class="label" for="days_of_week">Repeat On</label>
+                            <label class="label" [for]="editRepeatType === 'month' ? 'days_of_month' : 'days_of_week'">Repeat On</label>
                             @if (editRepeatType==='week') {
-                              <select multiple name="days_of_week"
+                              <select multiple id="days_of_week" name="days_of_week"
                                 formControlName="days_of_week" required class="select" size="4">
                                 @for (day of weekdayOptions; track $index; let dayIndex = $index) {
                                   <option [value]="dayIndex">
@@ -92,7 +92,7 @@
                               </select>
                             }
                             @if (editRepeatType==='month') {
-                              <select multiple name="days_of_month"
+                              <select multiple id="days_of_month" name="days_of_month"
                                 formControlName="days_of_month" required class="select" size="4">
                                 @for (day of monthdayOptions; track $index; let dayIndex = $index) {
                                   <option [value]="dayIndex">
@@ -107,11 +107,13 @@
                           <app-metadata-item label="Repeat Time">
                             <div class="grid grid-cols-2 gap-2">
                               <div class="form-group">
-                                <input type="time" name="start_time" formControlName="start_time" required
+                                <label class="label" for="recurring-start-time">Start</label>
+                                <input id="recurring-start-time" type="time" name="start_time" formControlName="start_time" required
                                   placeholder="Start" class="input">
                               </div>
                               <div class="form-group">
-                                <input type="time" name="end_time" formControlName="end_time" required
+                                <label class="label" for="recurring-end-time">End</label>
+                                <input id="recurring-end-time" type="time" name="end_time" formControlName="end_time" required
                                   placeholder="End" class="input">
                               </div>
                             </div>
@@ -119,15 +121,18 @@
                           <app-metadata-item label="Instance Count">
                             <div class="grid grid-cols-3 gap-2">
                               <div class="form-group">
-                                <input type="number" name="instance_min_count" formControlName="instance_min_count" required
+                                <label class="label" for="recurring-instance-min">Minimum</label>
+                                <input id="recurring-instance-min" type="number" name="instance_min_count" formControlName="instance_min_count" required
                                   placeholder="Minimum" class="input">
                               </div>
                               <div class="form-group">
-                                <input type="number" name="" formControlName="initial_min_instance_count"
+                                <label class="label" for="recurring-initial-min">Initial Minimum</label>
+                                <input id="recurring-initial-min" type="number" name="" formControlName="initial_min_instance_count"
                                   placeholder="Initial Minimum" class="input">
                               </div>
                               <div class="form-group">
-                                <input type="number" name="instance_max_count" formControlName="instance_max_count" required
+                                <label class="label" for="recurring-instance-max">Maximum</label>
+                                <input id="recurring-instance-max" type="number" name="instance_max_count" formControlName="instance_max_count" required
                                   placeholder="Maximum" class="input">
                               </div>
                             </div>
