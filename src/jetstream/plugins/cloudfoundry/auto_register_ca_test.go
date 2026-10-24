@@ -97,7 +97,7 @@ func (m *autoRegProxy) GetEndpointTypeSpec(_ string) (api.EndpointPlugin, error)
 }
 
 // No existing record, so the hook takes the auto-register path.
-func (m *autoRegProxy) GetAdminCNSIRecordByEndpoint(_ string) (api.CNSIRecord, error) {
+func (m *autoRegProxy) GetAdminCNSIRecordByEndpoint(_, _ string) (api.CNSIRecord, error) {
 	return api.CNSIRecord{}, errors.New("not found")
 }
 

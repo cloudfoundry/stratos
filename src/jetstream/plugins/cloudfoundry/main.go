@@ -335,7 +335,7 @@ func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, api.CNS
 		return "", api.CNSIRecord{}, nil
 	}
 	// Error is populated if there was an error OR there was no record
-	cfCnsi, err := c.portalProxy.GetAdminCNSIRecordByEndpoint(cfAPI)
+	cfCnsi, err := c.portalProxy.GetAdminCNSIRecordByEndpoint(cfAPI, EndpointType)
 	return cfAPI, cfCnsi, err
 }
 
