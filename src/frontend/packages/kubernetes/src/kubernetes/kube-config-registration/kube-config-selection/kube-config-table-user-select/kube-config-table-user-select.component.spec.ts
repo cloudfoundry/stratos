@@ -44,4 +44,15 @@ describe('KubeConfigTableUserSelectComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('names its drop-down "User"', async () => {
+    const withUsers = TestBed.createComponent(KubeConfigTableUserSelectComponent);
+    withUsers.componentInstance.row = {
+      _users: [{ name: 'u1' }],
+    } as Partial<KubeConfigFileCluster> as KubeConfigFileCluster;
+    await withUsers.whenStable();
+    const trigger = (withUsers.nativeElement as HTMLElement).querySelector('[role="combobox"]');
+    expect(trigger).toBeTruthy();
+    expect(trigger!.getAttribute('aria-label')).toBe('User');
+  });
 });
