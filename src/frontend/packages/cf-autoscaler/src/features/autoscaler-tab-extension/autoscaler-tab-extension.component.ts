@@ -32,12 +32,12 @@ import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
   CustomIconComponent,
+  ListSubNavAction,
+  ListSubNavAddAction,
+  ListSubNavComponent,
   MetadataItemComponent,
   NoContentMessageComponent,
   PollingIndicatorComponent,
-  TileComponent,
-  TileGridComponent,
-  TileGroupComponent
 } from '@stratosui/core';
 import {
   ApplicationMonitorService,
@@ -126,9 +126,7 @@ interface AutoscalerTabPaginationParams {
   imports: [
     CommonModule,
     BaseChartDirective,
-    TileGridComponent,
-    TileGroupComponent,
-    TileComponent,
+    ListSubNavComponent,
     CardWrapperComponent,
     CardHeaderComponent,
     CardTitleComponent,
@@ -203,6 +201,21 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     const history = this.appAutoscalerScalingHistory();
     return this.noPolicy() && (!history || history.length === 0);
   });
+
+  // The sub-nav row the other app tabs use (Routes, Variables): the rule
+  // count on the left, the policy actions on the right.
+  readonly scalingRuleCount = computed(() => this.appAutoscalerPolicy()?.scaling_rules_form?.length ?? 0);
+  readonly policyPending = computed(() => !this.appAutoscalerPolicy() && !this.noPolicy() && !this.policyError());
+  private readonly hasPolicy = computed(() => !!this.appAutoscalerPolicy());
+  readonly policyActions: ListSubNavAction[] = [
+    { label: 'Edit Policy', icon: 'edit', invoke: () => this.updatePolicyPage(), visible: this.hasPolicy },
+    { label: 'Delete Policy', icon: 'delete', variant: 'destructive', invoke: () => this.disableAutoscaler(), visible: this.hasPolicy },
+  ];
+  readonly createPolicyAction: ListSubNavAddAction = {
+    label: 'Create Policy',
+    invoke: () => this.updatePolicyPage(true),
+    visible: computed(() => this.noPolicy()),
+  };
 
   public noPolicyMessageFirstLine = 'This application has no Autoscaler Policy';
   public noPolicyMessageSecondLine = {
