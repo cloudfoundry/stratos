@@ -30,6 +30,10 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   @Input() buttonLabel = '';
 
+  // Id of a caption the consumer shows for the picker. When set, it names
+  // the path field instead of the placeholder.
+  readonly labelledBy = input('');
+
   private files!: File[];
 
   public name = '';

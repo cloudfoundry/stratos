@@ -46,4 +46,13 @@ describe('FileInputComponent', () => {
     expect(pathField()?.getAttribute('placeholder')).toBe('No file selected');
     expect(pathField()?.getAttribute('aria-label')).toBe('File');
   });
+
+  // A form that captions the picker with its own text points the path
+  // field at that caption.
+  it('points the path field at the caption it is given', async () => {
+    expect(pathField()?.hasAttribute('aria-labelledby')).toBe(false);
+    fixture.componentRef.setInput('labelledBy', 'cert-caption');
+    await fixture.whenStable();
+    expect(pathField()?.getAttribute('aria-labelledby')).toBe('cert-caption');
+  });
 });
