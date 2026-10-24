@@ -8,6 +8,8 @@
   longer run past their card, and the schedule tables scroll instead of
   cutting off their last column, with the edge shade the lists use to
   show there is more.
+- Scaling rule conditions read evenly (`>= 80% for 120 secs.`): percent
+  had padding no other unit had, and the operator had no spaces.
 
 [Features: Applications]
 - The Autoscale tab has a Latest Readings box beside Instances, with
