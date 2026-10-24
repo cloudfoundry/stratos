@@ -5,7 +5,7 @@ go 1.27.1
 require (
 	github.com/coder/websocket v1.8.15
 	github.com/gorilla/sessions v1.4.0
-	github.com/labstack/echo/v5 v5.4.0
+	github.com/labstack/echo/v5 v5.4.1
 	go.uber.org/mock v0.6.0
 )
 
