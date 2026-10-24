@@ -111,6 +111,24 @@ describe('EditAutoscalerPolicyStep3Component', () => {
       });
     });
 
+    // The Effective Duration and Repeat By choices are radio groups bound to
+    // the form: drawing the edit row must not throw, the radios show the
+    // form's values, and picking one writes it back.
+    it('draws the edit row with its radios bound to the form', async () => {
+      create();
+      await fixture.whenStable();
+      const el: HTMLElement = fixture.nativeElement;
+      (el.querySelector('#autoscaler-policy-edit-add') as HTMLButtonElement).click();
+      await fixture.whenStable();
+      const radio = (id: string) => el.querySelector(`#${id}`) as HTMLInputElement;
+      expect(radio('effective-always').checked).toBe(true);
+      expect(radio('repeat-week').checked).toBe(true);
+
+      radio('repeat-month').click();
+      await fixture.whenStable();
+      expect(controls().repeat_type.value).toBe('month');
+    });
+
     it('writes a weekly schedule back on confirm and leaves edit mode', () => {
       create();
       component.addRecurringSchedule();
