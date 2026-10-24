@@ -2,8 +2,13 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { of } from 'rxjs';
 
 import { entityCatalog } from '@stratosui/store';
+import {
+  TailwindSnackBarRef,
+  TailwindSnackBarService,
+} from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { KubernetesBaseTestModules } from '../../kubernetes.testing.module';
 import { kubeEntityCatalog } from '../../kubernetes-entity-generator';
 import { KubeConfigHelper } from '../kube-config.helper';
@@ -51,5 +56,25 @@ describe('KubeConfigSelectionComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  // A new parse clears only this step's own "Failed to load Kube Config"
+  // message; hide() would also dismiss other features' messages.
+  it('clears only its own parse error when parsing again', async () => {
+    const snackbar = TestBed.inject(TailwindSnackBarService);
+    const firstRef = { dismiss: vi.fn(), afterDismissed: () => of(null) };
+    const show = vi.spyOn(snackbar, 'show').mockReturnValue(firstRef as unknown as TailwindSnackBarRef<unknown>);
+    const hide = vi.spyOn(snackbar, 'hide');
+    vi.spyOn(TestBed.inject(KubeConfigHelper), 'parse').mockReturnValue(of('bad yaml'));
+
+    component.clustersParse('first');
+    await fixture.whenStable();
+    expect(show).toHaveBeenCalledWith('Failed to load Kube Config: bad yaml', 'Close');
+    expect(firstRef.dismiss).not.toHaveBeenCalled();
+
+    component.clustersParse('second');
+    await fixture.whenStable();
+    expect(firstRef.dismiss).toHaveBeenCalledTimes(1);
+    expect(hide).not.toHaveBeenCalled();
   });
 });

@@ -15,7 +15,10 @@ import {
 import {
   SignalListCellTemplateDirective,
 } from '../../../../../core/src/shared/components/signal-list/signal-list-cell-template.directive';
-import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
+import {
+  TailwindSnackBarRef,
+  TailwindSnackBarService,
+} from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { KubeConfigHelper } from '../kube-config.helper';
 import { KubeConfigFileCluster } from '../kube-config.types';
 import { KubeConfigTableCertComponent } from './kube-config-table-cert/kube-config-table-cert.component';
@@ -49,6 +52,8 @@ export class KubeConfigSelectionComponent {
 
   public helper = inject(KubeConfigHelper);
   private snackbarService = inject(TailwindSnackBarService);
+  // The last "Failed to load Kube Config" message, cleared by the next parse.
+  private parseErrorSnackBar?: TailwindSnackBarRef<unknown>;
 
   // Clusters as a signal. `helper.clusters$` filters to truthy arrays, so
   // this starts empty and populates once a kube config is parsed. Drives
@@ -210,11 +215,14 @@ export class KubeConfigSelectionComponent {
     }))
   );
 
+  // Only this step's own message: hide() would also dismiss other features'
+  // messages.
   clustersParse(cluster: string) {
-    this.snackbarService.hide();
+    this.parseErrorSnackBar?.dismiss();
+    this.parseErrorSnackBar = undefined;
     this.helper.parse(cluster).pipe(take(1)).subscribe(errorString => {
       if (errorString) {
-        this.snackbarService.show(`Failed to load Kube Config: ${errorString}`, 'Close');
+        this.parseErrorSnackBar = this.snackbarService.show(`Failed to load Kube Config: ${errorString}`, 'Close');
       }
     });
   }
