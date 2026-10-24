@@ -320,3 +320,48 @@ describe('SchemaWidgetRenderer render error fallback', () => {
     expect(err).toContain('Edit the parameters directly as JSON');
   });
 });
+
+// Each field's label names the field's one control by id; the controls a
+// field repeats or adds (array and tuple items, a oneOf branch's value)
+// carry the field's title in an aria-label instead.
+describe('SchemaWidgetRenderer control names', () => {
+  const labelFor = (el: HTMLElement, control: Element | null) => {
+    expect(control?.id, 'control has an id').toBeTruthy();
+    return el.querySelector(`label[for="${control!.id}"]`)?.textContent?.trim();
+  };
+
+  it('labels the boolean, JSON fallback and oneOf branch selector by the field label', async () => {
+    const f = await mount({ type:'object', properties:{
+      flag:{ type:'boolean' },
+      weird:{ not:{} },
+      x:{ oneOf:[{ type:'string' }, { type:'number' }] },
+    } });
+    const el: HTMLElement = f.nativeElement;
+    expect(labelFor(el, el.querySelector('input[type="checkbox"][data-path="/flag"]'))).toBe('flag');
+    expect(labelFor(el, el.querySelector('textarea[data-json="/weird"]'))).toBe('weird');
+    expect(labelFor(el, el.querySelector('select[data-branch="/x"]'))).toBe('x');
+    expect(el.querySelector('input[data-path="/x"]')?.getAttribute('aria-label')).toBe('x value');
+  });
+
+  it('names oneOf enum and boolean branch values after the field', async () => {
+    const f = await mount({ type:'object', properties:{
+      e:{ oneOf:[{ enum:['a', 'b'] }] },
+      b:{ oneOf:[{ type:'boolean' }] },
+    } });
+    const el: HTMLElement = f.nativeElement;
+    expect(el.querySelector('select[data-path="/e"]')?.getAttribute('aria-label')).toBe('e value');
+    expect(el.querySelector('input[data-path="/b"]')?.getAttribute('aria-label')).toBe('b value');
+  });
+
+  it('names array and tuple items after the field and their position', async () => {
+    const f = await mount({ type:'object', properties:{
+      hosts:{ type:'array', items:{ type:'string' } },
+      pair:{ type:'array', items:[{ type:'string' }, { type:'integer' }] },
+    } });
+    const el: HTMLElement = f.nativeElement;
+    el.querySelector<HTMLButtonElement>('button[data-add="/hosts"]')!.click(); await f.whenStable();
+    expect(el.querySelector('input[data-path="/hosts/0"]')?.getAttribute('aria-label')).toBe('hosts item 1');
+    expect(el.querySelector('input[data-path="/pair/0"]')?.getAttribute('aria-label')).toBe('pair item 1');
+    expect(el.querySelector('input[data-path="/pair/1"]')?.getAttribute('aria-label')).toBe('pair item 2');
+  });
+});

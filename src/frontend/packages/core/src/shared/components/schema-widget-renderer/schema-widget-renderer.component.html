@@ -21,6 +21,7 @@
               <div class="flex items-center gap-2">
                 @if (isScalarItem(f)) {
                   <input [attr.data-path]="itemPointer(f.pointer, $index)"
+                    [attr.aria-label]="f.title + ' item ' + ($index + 1)"
                     [type]="itemInputType(f)" [value]="valueAt(itemPointer(f.pointer, $index)) ?? ''"
                     (input)="setArrayItemScalar(itemPointer(f.pointer, $index), $event, itemSchema(f))"
                     class="flex-1 px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
@@ -86,6 +87,7 @@
               <div class="flex items-center gap-2">
                 @if (isScalarTupleItem(itemSch)) {
                   <input [attr.data-path]="itemPointer(f.pointer, $index)"
+                    [attr.aria-label]="f.title + ' item ' + ($index + 1)"
                     [type]="tupleItemInputType(itemSch)"
                     [value]="valueAt(itemPointer(f.pointer, $index)) ?? ''"
                     (input)="setTupleItemScalar(f.pointer, $index, $event, itemSch)"
@@ -117,7 +119,7 @@
         }
         @case ('oneOf') {
           <div class="space-y-2">
-            <select [attr.data-branch]="f.pointer"
+            <select [id]="f.pointer" [attr.data-branch]="f.pointer"
               (change)="selectBranch(f.pointer, +$any($event.target).value)"
               class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary">
               @for (branch of f.schema.oneOf; track $index) {
@@ -129,11 +131,13 @@
             @if (isScalarBranch(branchNode.kind)) {
               @if (branchNode.kind === 'boolean') {
                 <input type="checkbox" [attr.data-path]="f.pointer"
+                  [attr.aria-label]="f.title + ' value'"
                   [checked]="valueAt(f.pointer) === true"
                   (change)="setBranchScalar(f.pointer, branchNode.kind, $event)"
                   class="h-4 w-4 rounded border-content-border" />
               } @else if (branchNode.kind === 'enum') {
                 <select [attr.data-path]="f.pointer"
+                  [attr.aria-label]="f.title + ' value'"
                   (change)="setBranchScalar(f.pointer, branchNode.kind, $event)"
                   class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary">
                   <option value="">Select an option</option>
@@ -143,6 +147,7 @@
                 </select>
               } @else {
                 <input [attr.data-path]="f.pointer" [type]="branchInputType(branchNode.kind)"
+                  [attr.aria-label]="f.title + ' value'"
                   [value]="valueAt(f.pointer) ?? ''"
                   (input)="setBranchScalar(f.pointer, branchNode.kind, $event)"
                   class="w-full px-3 py-2 border border-content-border rounded-md bg-content-bg text-content-text focus:ring-1 focus:ring-primary focus:border-primary" />
@@ -194,13 +199,13 @@
           </select>
         }
         @case ('boolean') {
-          <input type="checkbox" [attr.data-path]="f.pointer"
+          <input type="checkbox" [id]="f.pointer" [attr.data-path]="f.pointer"
             [checked]="valueAt(f.pointer) === true" (change)="setBool(f, $event)"
             [class.border-warning-400]="hasWarning(f.pointer)"
             class="h-4 w-4 rounded border-content-border" />
         }
         @case ('unknown') {
-          <textarea [attr.data-json]="f.pointer"
+          <textarea [id]="f.pointer" [attr.data-json]="f.pointer"
             [value]="jsonTextAt(f.pointer)"
             (input)="onJsonInput(f.pointer, $event)"
             rows="4"
