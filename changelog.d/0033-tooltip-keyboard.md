@@ -8,3 +8,6 @@
   next one closes the dialog.
 - Tooltips on text, icons and other elements that cannot take keyboard
   focus are still shown on hover only.
+- The Remove control beside each user name in Add User, Invite Users
+  and Manage Users is now a button, so keyboard and screen reader users
+  can reach and use it.

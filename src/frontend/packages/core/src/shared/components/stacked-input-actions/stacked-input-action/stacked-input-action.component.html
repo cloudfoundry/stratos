@@ -22,8 +22,9 @@
   </form>
   <div class="input-action__detail">
     @if (showRemove()) {
-      <app-custom-icon class="input-action__detail__remove" [ngClass]="{'disabled': textFormControl.disabled}"
-      (click)="!textFormControl.disabled && remove.emit()" [matTooltip]="'Remove'">indeterminate_check_box</app-custom-icon>
+      <button type="button" class="input-action__detail__remove btn btn-icon" aria-label="Remove"
+        [disabled]="textFormControl.disabled" (click)="remove.emit()" [matTooltip]="'Remove'"
+        data-test="stacked-input-remove"><app-custom-icon aria-hidden="true">indeterminate_check_box</app-custom-icon></button>
     }
     @let st = state();
     @if (st && (st.result === result.SUCCEEDED || st.result === result.FAILED)) {
