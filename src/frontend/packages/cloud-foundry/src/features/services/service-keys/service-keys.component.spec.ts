@@ -77,6 +77,14 @@ describe('ServiceKeysComponent — busy-state spinners', () => {
     expect(spinner(fixture.nativeElement)).toBeNull();
   });
 
+  it('names the key name field in the create form', async () => {
+    component.isAdding.set(true);
+    await fixture.whenStable();
+    const input = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>('input[name="keyName"]');
+    expect(input).not.toBeNull();
+    expect(input!.getAttribute('aria-label')).toBe('Key name');
+  });
+
   it('shows a spinner in the create form while creating', async () => {
     component.isAdding.set(true);
     await fixture.whenStable();
