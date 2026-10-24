@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input, forwardRef, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, forwardRef, input, output, ChangeDetectorRef, inject } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 export interface MatCheckboxChange {
@@ -23,6 +23,8 @@ export interface MatCheckboxChange {
   ]
 })
 export class CustomCheckboxComponent implements ControlValueAccessor {
+  private readonly cdr = inject(ChangeDetectorRef);
+
   @Input() disabled = false;
   @Input() indeterminate = false;
   @Input() checked = false;
@@ -59,9 +61,11 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
     this.indeterminateChange.emit(this.indeterminate);
   }
 
-  // ControlValueAccessor implementation
+  // ControlValueAccessor implementation. The form calls these from code, not
+  // through a binding, so under OnPush the view must be marked for check.
   writeValue(value: boolean): void {
     this.checked = value;
+    this.cdr.markForCheck();
   }
 
   registerOnChange(fn: any): void {
@@ -74,5 +78,6 @@ export class CustomCheckboxComponent implements ControlValueAccessor {
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+    this.cdr.markForCheck();
   }
 }
