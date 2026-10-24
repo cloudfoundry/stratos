@@ -1,0 +1,19 @@
+<div class="card flex flex-col h-full">
+  <div class="card-header">
+    <h3 class="card-title">Latest Readings</h3>
+  </div>
+  <app-scroll-fade class="flex-1">
+    <dl class="p-4 grid grid-cols-2 gap-x-8 text-sm">
+      @for (r of readings(); track r.name) {
+        <div class="flex justify-between gap-4 py-0.5 border-b border-content-border">
+          <dt class="text-content-muted">{{ r.name }}</dt>
+          <dd class="tabular-nums whitespace-nowrap">
+            @if (r.value !== null) { {{ r.value | number:'1.0-2' }}{{ r.unit }} } @else { – }
+          </dd>
+        </div>
+      } @empty {
+        <div class="col-span-2 text-content-muted">No metrics in the policy.</div>
+      }
+    </dl>
+  </app-scroll-fade>
+</div>

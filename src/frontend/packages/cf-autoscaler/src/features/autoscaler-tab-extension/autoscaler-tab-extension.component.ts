@@ -58,7 +58,7 @@ import {
   AppAutoscalerPolicyLocal,
   AppScalingTrigger } from '../../store/app-autoscaler.types';
 import { CardAutoscalerDefaultComponent } from '../../shared/card-autoscaler-default/card-autoscaler-default.component';
-import { CardAutoscalerNowComponent } from '../../shared/card-autoscaler-now/card-autoscaler-now.component';
+import { CardAutoscalerReadingsComponent } from '../../shared/card-autoscaler-readings/card-autoscaler-readings.component';
 
 // Re-typed pagination param shape kept locally so the template / handlers
 // don't have to import the legacy AutoscalerPaginationParams from the
@@ -126,7 +126,7 @@ interface AutoscalerTabPaginationParams {
     BaseChartDirective,
     ListSubNavComponent,
     CardAutoscalerDefaultComponent,
-    CardAutoscalerNowComponent,
+    CardAutoscalerReadingsComponent,
     CardAppUsageComponent,
     CustomIconComponent,
     MetadataItemComponent,
