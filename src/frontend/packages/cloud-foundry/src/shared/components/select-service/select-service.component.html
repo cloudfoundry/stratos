@@ -2,8 +2,7 @@
 <div class="select-service">
   <form class="stepper-form" [formGroup]="stepperForm">
     <app-form-field>
-      <app-label>Service</app-label>
-      <app-select class="form-control" formControlName="service" ariaLabel="Service">
+      <app-select class="form-control" formControlName="service" placeholder="Choose Service">
         @for (service of services$ | async; track service.guid) {
           <app-option [value]="service.guid">{{ service.name }}</app-option>
         }

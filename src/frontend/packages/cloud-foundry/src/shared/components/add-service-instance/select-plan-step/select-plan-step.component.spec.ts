@@ -56,11 +56,13 @@ describe('SelectPlanStepComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('names its drop-down "Service Plan"', async () => {
+  // The caption is shown inside the empty drop-down and is also its name.
+  it('shows and names its drop-down "Choose Service Plan"', async () => {
     await fixture.whenStable();
     const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
     expect(trigger).toBeTruthy();
-    expect(trigger!.getAttribute('aria-label')).toBe('Service Plan');
+    expect(trigger!.getAttribute('aria-label')).toBe('Choose Service Plan');
+    expect(trigger!.textContent).toContain('Choose Service Plan');
   });
 
   /**

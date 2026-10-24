@@ -54,10 +54,11 @@ describe('SelectServiceComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('names its drop-down "Service"', async () => {
+  it('shows and names its drop-down "Choose Service"', async () => {
     await fixture.whenStable();
     const trigger = (fixture.nativeElement as HTMLElement).querySelector('[role="combobox"]');
     expect(trigger).toBeTruthy();
-    expect(trigger!.getAttribute('aria-label')).toBe('Service');
+    expect(trigger!.getAttribute('aria-label')).toBe('Choose Service');
+    expect(trigger!.textContent).toContain('Choose Service');
   });
 });

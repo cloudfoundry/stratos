@@ -45,5 +45,8 @@
   reader announced only the chosen value. Each is now named after its
   placeholder, or where it has none after the caption or column beside
   it: Backup Endpoints' Connection Details, the metrics Time window,
-  the service wizard's Service, Service Plan and App, and Import
-  Kubeconfig's Type and User.
+  and Import Kubeconfig's Type and User.
+- Create Service: the Service, Plan and Bind App drop-downs had
+  captions that never appeared on screen. They now show "Choose
+  Service", "Choose Service Plan" and "Choose App" inside the empty
+  drop-down, which is also the name a screen reader announces.

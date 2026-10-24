@@ -2,8 +2,7 @@
   <b>{{guideText}}</b>
   <form class="stepper-form" [formGroup]="stepperForm">
     <app-form-field>
-      <app-label>App</app-label>
-      <app-select class="form-control" formControlName="apps" ariaLabel="App">
+      <app-select class="form-control" formControlName="apps" placeholder="Choose App">
         @if (!boundAppId()) {
           <app-option></app-option>
         }
