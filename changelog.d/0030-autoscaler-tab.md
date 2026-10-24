@@ -10,10 +10,8 @@
   show there is more.
 
 [Features: Applications]
-- The Autoscale tab has a Now box beside Instances: the instance limits
-  in effect (default or schedule) and when they next change, the last
-  scaling event and its cool-down, and each metric's latest value
-  against its scale-out and scale-in thresholds.
+- The Autoscale tab has a Latest Readings box beside Instances, with
+  each policy metric's latest value as a number.
 
 [Maintainability]
 - The shared card header shows the shaded title band the other cards
