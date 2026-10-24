@@ -1,5 +1,5 @@
-import { DatePipe, DecimalPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Signal, computed, input } from '@angular/core';
+import { DecimalPipe, formatDate } from '@angular/common';
+import { ChangeDetectionStrategy, Component, LOCALE_ID, Signal, computed, inject, input } from '@angular/core';
 
 import { ScrollFadeComponent } from '@stratosui/core';
 
@@ -15,11 +15,13 @@ import { AppAutoscalerMetricDataLocal, AppAutoscalerPolicyLocal } from '../../st
   templateUrl: './card-autoscaler-readings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  imports: [DatePipe, DecimalPipe, ScrollFadeComponent],
+  imports: [DecimalPipe, ScrollFadeComponent],
 })
 export class CardAutoscalerReadingsComponent {
   readonly policy = input.required<AppAutoscalerPolicyLocal>();
   readonly metrics = input<Record<string, Signal<{ entity: AppAutoscalerMetricDataLocal }[]>>>({});
+
+  private readonly locale = inject(LOCALE_ID);
 
   readonly readings = computed(() => {
     const map = this.policy().scaling_rules_map ?? {};
@@ -39,9 +41,17 @@ export class CardAutoscalerReadingsComponent {
     });
   });
 
-  // The oldest reading's time (ms), so the box never looks fresher than it is
-  readonly asOf = computed(() => {
+  // When the oldest and newest readings were taken, compact ISO in local
+  // time: 2026-10-24 02:03:11–02:03:41, the date once when both share it
+  readonly taken = computed(() => {
     const times = this.readings().map(r => r.time).filter((t): t is number => t !== undefined);
-    return times.length ? Math.min(...times) * 1000 : null;
+    if (!times.length) {
+      return null;
+    }
+    const [oldest, newest] = [Math.min(...times), Math.max(...times)].map(t => formatDate(t * 1000, 'yyyy-MM-dd HH:mm:ss', this.locale));
+    if (oldest === newest) {
+      return oldest;
+    }
+    return `${oldest}–${newest.slice(0, 10) === oldest.slice(0, 10) ? newest.slice(11) : newest}`;
   });
 }
