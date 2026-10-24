@@ -12,7 +12,7 @@
 [Features: Applications]
 - The Autoscale tab has a Latest Readings box beside Instances, with
   each policy metric's latest value as a number, a dot in the gauge's
-  status colour, and the time of the readings.
+  status colour, and when the oldest and newest readings were taken.
 
 [Maintainability]
 - The shared card header shows the shaded title band the other cards
