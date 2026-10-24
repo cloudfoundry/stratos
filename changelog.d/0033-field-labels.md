@@ -41,3 +41,9 @@
     boxes and the kubeconfig, certificate and GKE credentials file
     pickers are named by their captions.
   - Import Kubeconfig: the box for renaming a cluster.
+- Drop-downs built on the shared select had no name at all: a screen
+  reader announced only the chosen value. Each is now named after its
+  placeholder, or where it has none after the caption or column beside
+  it: Backup Endpoints' Connection Details, the metrics Time window,
+  the service wizard's Service, Service Plan and App, and Import
+  Kubeconfig's Type and User.
