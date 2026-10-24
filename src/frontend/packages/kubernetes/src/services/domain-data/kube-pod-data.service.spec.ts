@@ -302,13 +302,13 @@ describe('KubePodDataService', () => {
   // The proxy answers 200 with a per-endpoint error entry for a failed call.
   it('records a per-endpoint proxy error with its reason instead of an empty list', async () => {
     const refreshing = svc.refresh({ kubeGuid: KUBE_GUID });
-    httpMock.expectOne(CLUSTER_PODS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    httpMock.expectOne(CLUSTER_PODS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' } });
     await refreshing;
 
     expect(svc.podsInCluster(KUBE_GUID)()).toEqual([]);
     expect(svc.errors()()).toEqual([expect.objectContaining({
       code: 'FETCH_ERROR',
-      detail: 'Error proxing request: dial tcp: i/o timeout',
+      detail: 'Error proxying request: dial tcp: i/o timeout',
     })]);
   });
 
@@ -320,7 +320,7 @@ describe('KubePodDataService', () => {
 
   it('scopeErrors keeps a cluster-wide failure off the node and namespace scopes', async () => {
     const refreshing = svc.refresh({ kubeGuid: KUBE_GUID });
-    httpMock.expectOne(CLUSTER_PODS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' } } });
+    httpMock.expectOne(CLUSTER_PODS_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' } } });
     await refreshing;
 
     expect(svc.scopeErrors({ kubeGuid: KUBE_GUID })).toHaveLength(1);

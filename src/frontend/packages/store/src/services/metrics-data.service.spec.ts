@@ -84,9 +84,9 @@ describe('MetricsDataService', () => {
     const obs = service.observe(signal<MetricsRequest | null>(request('a')));
     TestBed.tick();
     http.expectOne(r => r.url.includes('query=a')).flush({
-      e1: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },
+      e1: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' },
     });
-    await vi.waitFor(() => expect(obs.error()).toBe('Error proxing request: dial tcp: i/o timeout (500)'));
+    await vi.waitFor(() => expect(obs.error()).toBe('Error proxying request: dial tcp: i/o timeout (500)'));
     expect(obs.metrics()).toBeNull();
     obs.stop();
   });

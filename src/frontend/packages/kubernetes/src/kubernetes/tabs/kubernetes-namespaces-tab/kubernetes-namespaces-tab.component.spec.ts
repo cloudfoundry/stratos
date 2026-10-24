@@ -12,7 +12,7 @@ import { KubernetesNamespacesTabComponent } from './kubernetes-namespaces-tab.co
 
 const KUBE_GUID = 'kube-1';
 const unreachable = {
-  [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },
+  [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' },
 };
 
 describe('KubernetesNamespacesTabComponent', () => {
@@ -54,7 +54,7 @@ describe('KubernetesNamespacesTabComponent', () => {
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('[data-test="empty"]')).toBeNull();
     expect(el.querySelector('[data-test="empty-error-detail"]')?.textContent?.trim())
-      .toBe('Error proxing request: dial tcp: i/o timeout');
+      .toBe('Error proxying request: dial tcp: i/o timeout');
     expect(el.querySelector('[data-test="empty-error-retry"]')).not.toBeNull();
   });
 

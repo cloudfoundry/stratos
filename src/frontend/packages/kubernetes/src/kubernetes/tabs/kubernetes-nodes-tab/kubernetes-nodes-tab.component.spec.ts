@@ -78,23 +78,23 @@ describe('KubernetesNodesTabComponent', () => {
 
   it('records a failed node load in the endpoint error history', async () => {
     await mount({
-      [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },
+      [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' },
     });
     expect(TestBed.inject(EndpointErrorEventsService).errorsForEndpoint(KUBE_GUID)()).toEqual([
-      expect.objectContaining({ eventCode: '500', message: 'Error proxing request: dial tcp: i/o timeout' }),
+      expect.objectContaining({ eventCode: '500', message: 'Error proxying request: dial tcp: i/o timeout' }),
     ]);
   });
 
   it('shows the failed-load state with the endpoint\'s reason and Retry when the node load fails', async () => {
     await mount({
-      [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },
+      [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' },
     });
 
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('[data-test="empty"]')).toBeNull();
     expect(el.querySelector('[data-test="empty-error"]')).not.toBeNull();
     expect(el.querySelector('[data-test="empty-error-detail"]')?.textContent?.trim())
-      .toBe('Error proxing request: dial tcp: i/o timeout');
+      .toBe('Error proxying request: dial tcp: i/o timeout');
     expect(el.querySelector('[data-test="empty-error-retry"]')).not.toBeNull();
   });
 });

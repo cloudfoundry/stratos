@@ -10,7 +10,7 @@ import { MetricsChartComponent } from './metrics-chart.component';
 // skipped suite waited for were deleted in 2847befc2b).
 describe('MetricsChartComponent load failure', () => {
   it('shows why the metrics failed to load instead of an empty chart', async () => {
-    const error = signal<string | null>('Error proxing request: dial tcp: i/o timeout (500)');
+    const error = signal<string | null>('Error proxying request: dial tcp: i/o timeout (500)');
     const observation = {
       metrics: signal(null).asReadonly(), fetching: signal(false).asReadonly(), error: error.asReadonly(),
       refresh: async () => undefined, stop: () => undefined,
@@ -27,7 +27,7 @@ describe('MetricsChartComponent load failure', () => {
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('[data-test="metrics-chart-error"]')?.textContent)
-      .toContain('Failed to load metrics: Error proxing request: dial tcp: i/o timeout (500)');
+      .toContain('Failed to load metrics: Error proxying request: dial tcp: i/o timeout (500)');
 
     error.set(null);
     await fixture.whenStable();

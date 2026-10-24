@@ -108,7 +108,7 @@ describe('kubernetes-resource-signal-configs — workload mode', () => {
 // and the endpoint's reason, not an empty list.
 describe('kubernetes-resource-signal-configs — load failures', () => {
   const unreachable = (guid: string) => ({
-    [guid]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' },
+    [guid]: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' },
   });
   let httpMock: HttpTestingController;
 
@@ -146,7 +146,7 @@ describe('kubernetes-resource-signal-configs — load failures', () => {
 
     expect(cfgA.totalFilteredResults()).toBe(0);
     expect([...cfgA.errorsByCnsi().keys()]).toEqual(['kube-a']);
-    expect(cfgA.errorDetail?.()).toBe('Error proxing request: dial tcp: i/o timeout');
+    expect(cfgA.errorDetail?.()).toBe('Error proxying request: dial tcp: i/o timeout');
     expect(cfgA.onRefresh).toBeDefined();
     expect(cfgB.errorsByCnsi().size).toBe(0);
     expect(cfgB.errorDetail?.()).toBeUndefined();
@@ -162,7 +162,7 @@ describe('kubernetes-resource-signal-configs — load failures', () => {
     TestBed.tick();
 
     expect(TestBed.inject(EndpointErrorEventsService).errorsForEndpoint('kube-a')()).toEqual([
-      expect.objectContaining({ eventCode: '500', message: 'Error proxing request: dial tcp: i/o timeout' }),
+      expect.objectContaining({ eventCode: '500', message: 'Error proxying request: dial tcp: i/o timeout' }),
     ]);
   });
 
@@ -210,7 +210,7 @@ describe('kubernetes-resource-signal-configs — load failures', () => {
     await load;
 
     expect([...cfg.errorsByCnsi().keys()]).toEqual(['kube-a']);
-    expect(cfg.errorDetail?.()).toBe('Error proxing request: dial tcp: i/o timeout');
+    expect(cfg.errorDetail?.()).toBe('Error proxying request: dial tcp: i/o timeout');
   });
 });
 

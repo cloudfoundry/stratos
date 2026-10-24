@@ -178,12 +178,12 @@ describe('KubeServiceDataService', () => {
   // The proxy answers 200 with a per-endpoint error entry for a failed call.
   it('records a per-endpoint proxy error with its reason, cleared by a later good load', async () => {
     const failing = svc.refresh({ kubeGuid: KUBE_GUID });
-    httpMock.expectOne(SERVICES_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxing request' }, errorResponse: 'dial tcp: i/o timeout' } });
+    httpMock.expectOne(SERVICES_URL).flush({ [KUBE_GUID]: { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'dial tcp: i/o timeout' } });
     httpMock.expectOne(ENDPOINTS_URL).flush({ [KUBE_GUID]: { items: [] } });
     await failing;
     expect(svc.errors()()).toEqual([expect.objectContaining({
       title: 'kube-services',
-      detail: 'Error proxing request: dial tcp: i/o timeout',
+      detail: 'Error proxying request: dial tcp: i/o timeout',
     })]);
 
     const retrying = svc.refresh({ kubeGuid: KUBE_GUID });
