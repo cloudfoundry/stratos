@@ -149,7 +149,7 @@ describe('AutoscalerTabExtensionComponent', () => {
       .forEach(req => req.flush('Not Found', { status: 404, statusText: 'Not Found' }));
     await settle();
 
-    expect(fixture.nativeElement.querySelector('button[name="add"]')).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="list-sub-nav-add"]')).not.toBeNull();
   });
 
   it('shows why the autoscaler refused the app instead of offering a policy', async () => {
@@ -163,7 +163,7 @@ describe('AutoscalerTabExtensionComponent', () => {
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('The application is not bound to Auto-Scaling service');
     expect(text).not.toContain('no Autoscaler Policy');
-    expect(fixture.nativeElement.querySelector('button[name="add"]')).toBeNull();
+    expect(fixture.nativeElement.querySelector('[data-test="list-sub-nav-add"]')).toBeNull();
     // The events would be refused for the same reason
     expect(httpMock.match(r => r.url.endsWith('/event')).length).toBe(0);
   });
