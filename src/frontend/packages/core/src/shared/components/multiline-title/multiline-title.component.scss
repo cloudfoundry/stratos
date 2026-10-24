@@ -6,10 +6,13 @@
   -webkit-box-orient: vertical;
   display: -webkit-box;
   -webkit-line-clamp: 2;
-  max-height: 2.5em;
   overflow: hidden;
   position: relative;
   text-overflow: ellipsis;
   width: 100%;
-  word-break: break-all;
+  /* Break between words; break inside one only when it alone is too long.
+     break-all split names mid-word ("norm-metrics-t / est"), and a
+     max-height of 2.5em cut the second line, which line-clamp already
+     limits. */
+  overflow-wrap: anywhere;
 }
