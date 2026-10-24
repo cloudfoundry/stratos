@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient } from '@angular/common/http';
-import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { HttpTestingController, provideHttpClientTesting, TestRequest } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { firstValueFrom } from 'rxjs';
 
@@ -18,7 +18,7 @@ const vector = (value: string, metric: Record<string, string> = {}) => ({
   [CNSI]: { status: 'success', data: { resultType: 'vector', result: [{ metric, value: [1, value] }] } },
 });
 
-const flushWhenSent = async (http: HttpTestingController, metric: string, body: unknown, opts?: { status: number; statusText: string }) => {
+const flushWhenSent = async (http: HttpTestingController, metric: string, body: Parameters<TestRequest['flush']>[0], opts?: { status: number; statusText: string }) => {
   for (let i = 0; i < 50; i++) {
     const reqs = http.match(isQuery(metric));
     if (reqs.length) {
