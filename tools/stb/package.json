@@ -29,8 +29,8 @@
     "@types/node": "^22.20.1",
     "@typescript-eslint/eslint-plugin": "^8.65.0",
     "@typescript-eslint/parser": "^8.65.0",
-    "@vitest/browser": "^4.1.10",
-    "@vitest/browser-playwright": "^4.1.10",
+    "@vitest/browser": "^4.1.12",
+    "@vitest/browser-playwright": "^4.1.12",
     "eslint": "^9.39.5",
     "globals": "^14.0.0",
     "jsdom": "^27.4.0",
@@ -38,7 +38,7 @@
     "prettier": "^3.9.6",
     "typescript": "^5.9.3",
     "vite": "^7.3.6",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.12"
   },
   "overrides": {
     "source-map-js": "^1.2.2"
