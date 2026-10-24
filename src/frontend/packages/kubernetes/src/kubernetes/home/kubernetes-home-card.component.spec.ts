@@ -139,15 +139,15 @@ describe('KubernetesHomeCardComponent', () => {
     fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
     component.load();
     await fixture.whenStable();
-    const namespacesTile = tiles().find(t => t.label === 'Namespaces')!;
-    expect(namespacesTile.value).toBe('1');
-    expect(namespacesTile.labelSingular).toBe('Namespace');
+    const namespacesTile = tiles().find(t => t.label() === 'Namespaces')!;
+    expect(namespacesTile.value()).toBe('1');
+    expect(namespacesTile.labelSingular()).toBe('Namespace');
   });
 
   it('links each tile to an existing list route', async () => {
     fixture.componentRef.setInput('endpoint', { guid: 'k1' } as EndpointModel);
     await fixture.whenStable();
-    expect(tiles().map(t => t.link)).toEqual([
+    expect(tiles().map(t => t.link())).toEqual([
       '/kubernetes/k1/nodes',
       '/kubernetes/k1/resource/namespace',
       '/kubernetes/k1/resource/pod',

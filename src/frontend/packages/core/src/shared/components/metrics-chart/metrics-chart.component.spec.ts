@@ -23,7 +23,7 @@ describe('MetricsChartComponent load failure', () => {
       ],
     });
     const fixture = TestBed.createComponent(MetricsChartComponent);
-    fixture.componentInstance.metricsConfig = { request: {} as any, getSeriesName: () => '' };
+    fixture.componentRef.setInput('metricsConfig', { request: {} as any, getSeriesName: () => '' });
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
     expect(el.querySelector('[data-test="metrics-chart-error"]')?.textContent)

@@ -97,7 +97,7 @@ describe('ConnectEndpointComponent', () => {
   // when its Observable is subscribed.
   it('connects when the form is submitted with Enter', async () => {
     const connected = vi.fn();
-    component.formSubmit = true;
+    fixture.componentRef.setInput('formSubmit', true);
     component.connectService = {
       config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
       setData: () => undefined,
