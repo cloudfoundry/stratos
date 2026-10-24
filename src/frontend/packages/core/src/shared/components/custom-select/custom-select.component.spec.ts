@@ -180,3 +180,33 @@ describe('CustomSelectComponent and the Escape key', () => {
     expect(reachedDocument).toHaveBeenCalledTimes(1);
   });
 });
+
+// The trigger is a combobox, which takes no name from the value it shows.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select data-test="named" ariaLabel="Time window" placeholder="Pick one"><app-option value="a">A</app-option></app-select>
+    <app-select data-test="placeholder" placeholder="Domain"><app-option value="a">A</app-option></app-select>
+    <app-select data-test="bare"><app-option value="a">A</app-option></app-select>
+  `,
+})
+class NamedSelectHostComponent {}
+
+describe('CustomSelectComponent accessible name', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    });
+  });
+
+  it('names the combobox with ariaLabel, else the placeholder, else nothing', async () => {
+    const fixture = TestBed.createComponent(NamedSelectHostComponent);
+    await fixture.whenStable();
+    const trigger = (name: string) =>
+      (fixture.nativeElement as HTMLElement).querySelector(`[data-test="${name}"] [role="combobox"]`);
+    expect(trigger('named')?.getAttribute('aria-label')).toBe('Time window');
+    expect(trigger('placeholder')?.getAttribute('aria-label')).toBe('Domain');
+    expect(trigger('bare')?.hasAttribute('aria-label')).toBe(false);
+  });
+});

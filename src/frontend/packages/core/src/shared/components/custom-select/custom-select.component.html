@@ -9,6 +9,7 @@
 
   <div class="select-trigger flex items-center justify-between py-1.5 px-2.5 border border-[var(--input-border,#d1d5db)] rounded-md bg-[var(--input-bg)] text-[var(--input-text)] cursor-pointer select-none min-h-[32px] transition-[border-color] duration-150 ease-in-out hover:border-[var(--input-border-hover,#9ca3af)] focus-within:outline-none"
     #selectTrigger role="combobox" tabindex="0"
+    [attr.aria-label]="ariaLabel() || placeholder() || null"
     [class.border-primary]="isOpen"
     [attr.aria-expanded]="isOpen"
     aria-haspopup="listbox"

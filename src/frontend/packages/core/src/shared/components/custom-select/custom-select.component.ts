@@ -77,6 +77,9 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
 
   @Input() disabled = false;
   readonly placeholder = input('');
+  // Name of the combobox trigger, which takes no name from the value it
+  // shows. Falls back to the placeholder.
+  readonly ariaLabel = input('');
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly required = input(false);
   readonly name = input<string>();
