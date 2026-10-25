@@ -126,11 +126,29 @@ describe('EndpointsDataService', () => {
     await svc.whenReady(); // should not fire another request
   });
 
+  // A refresh must not look like the first load: the endpoints page shows
+  // its loader only until the first fetch settles.
+  it('stays hydrated, keeping the endpoints, while a refresh loads', async () => {
+    expect(svc.hydrated()).toBe(false);
+    const first = svc.getAll();
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await first;
+    expect(svc.hydrated()).toBe(true);
+
+    const refresh = svc.getAll();
+    expect(svc.loading()).toBe(true);
+    expect(svc.hydrated()).toBe(true);
+    expect(svc.endpoints().size).toBe(3);
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await refresh;
+  });
+
   it('getAll() failure populates error and still marks hydrated', async () => {
     const p = svc.getAll().catch(() => undefined);
     httpMock.expectOne(SYSTEM_INFO_URL).flush('boom', { status: 500, statusText: 'err' });
     await p;
     expect(svc.error()).not.toBeNull();
+    expect(svc.hydrated()).toBe(true);
     await svc.whenReady(); // hydrated even on failure
   });
 
