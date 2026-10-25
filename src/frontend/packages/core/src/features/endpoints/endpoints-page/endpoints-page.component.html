@@ -7,9 +7,9 @@
            here because it's page-level admin, not a "create new endpoint"
            verb. -->
       @if (canBackupRestore$ | async) {
-        <button id="stratos-restore-backup" class="btn btn-icon" type="button"
+        <button id="stratos-restore-backup" class="btn btn-icon" type="button" aria-label="Backup/Restore Endpoints"
           [routerLink]="'/endpoints/backup-restore'" matTooltip="Backup/Restore Endpoints">
-          <span class="material-icons">settings_backup_restore</span>
+          <span class="material-icons" aria-hidden="true">settings_backup_restore</span>
         </button>
       }
     </div>
