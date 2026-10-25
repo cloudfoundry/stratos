@@ -219,11 +219,15 @@ export class ConnectEndpointService {
     return defer(() => {
       if (!this.inFlight) {
         this.inFlight = from(this.saveTls()).pipe(
-          switchMap(saveFailure => {
-            if (saveFailure !== null) {
-              return of({ success: false, errorMessage: saveFailure });
+          switchMap(({ failure, previous }) => {
+            if (failure !== null) {
+              return of({ success: false, errorMessage: failure });
             }
-            return this.connect();
+            // The options were saved for this connect only: a connect that
+            // fails puts them back (the form keeps the edit for a retry).
+            return this.connect().pipe(
+              switchMap(result => result.success || !previous ? of(result) : from(this.restoreTls(previous, result))),
+            );
           }),
           take(1),
           finalize(() => this.inFlight = undefined),
@@ -235,15 +239,44 @@ export class ConnectEndpointService {
   }
 
   // Save TLS options that differ from the endpoint's, so the connect uses
-  // them. Resolves to why saving failed, or null.
-  private async saveTls(): Promise<string | null> {
+  // them. Resolves to why saving failed (or null) and, once saved, the
+  // options the endpoint had before.
+  private async saveTls(): Promise<{ failure: string | null, previous?: ConnectEndpointTls }> {
     this.saveError.next(null);
     const tls = this.pData?.tls;
     const endpoint = this.endpointsData.endpoints().get(this.config.guid);
-    if (!tls || !endpoint || (tls.skipSSL === !!endpoint.skip_ssl_validation && tls.caCert === (endpoint.ca_cert ?? ''))) {
-      return null;
+    if (!endpoint) {
+      return { failure: null };
     }
-    const state = await this.endpointsData.update(this.config.guid, {
+    const previous = { skipSSL: !!endpoint.skip_ssl_validation, caCert: endpoint.ca_cert ?? '' };
+    if (!tls || (tls.skipSSL === previous.skipSSL && tls.caCert === previous.caCert)) {
+      return { failure: null };
+    }
+    const state = await this.updateTls(endpoint, tls);
+    if (!state.error) {
+      return { failure: null, previous };
+    }
+    const message = state.message || 'Could not save the TLS options';
+    this.saveError.next(message);
+    return { failure: message };
+  }
+
+  // Put back the options saved for a connect that failed. The connect's
+  // error stands; a failure to restore is added to it.
+  private async restoreTls(previous: ConnectEndpointTls, result: { success: boolean, errorMessage: string }) {
+    const endpoint = this.endpointsData.endpoints().get(this.config.guid);
+    const state = endpoint ? await this.updateTls(endpoint, previous) : { error: true, message: 'The endpoint is no longer known' };
+    if (!state.error) {
+      return result;
+    }
+    const errorMessage = `${result.errorMessage || 'Could not connect to the endpoint'} ` +
+      `(the endpoint's previous TLS options could not be restored: ${state.message || 'unknown error'})`;
+    this.saveError.next(errorMessage);
+    return { success: false, errorMessage };
+  }
+
+  private updateTls(endpoint: EndpointModel, tls: ConnectEndpointTls): Promise<ActionState> {
+    return this.endpointsData.update(this.config.guid, {
       endpointType: this.config.type,
       name: endpoint.name,
       skipSSL: tls.skipSSL,
@@ -251,12 +284,6 @@ export class ConnectEndpointService {
       allowSSO: endpoint.sso_allowed,
       caCert: tls.caCert,
     });
-    if (!state.error) {
-      return null;
-    }
-    const message = state.message || 'Could not save the TLS options';
-    this.saveError.next(message);
-    return message;
   }
 
   private connect(): Observable<{ success: boolean, errorMessage: string }> {

@@ -109,14 +109,22 @@ describe('ConnectEndpointService', () => {
   describe('TLS options', () => {
     const stored = { guid: 'ep-1', name: 'ep', cnsi_type: 'cf', sso_allowed: true, skip_ssl_validation: false, ca_cert: '' } as EndpointModel;
 
-    async function tlsSetup(updateResult: ActionState) {
+    async function tlsSetup(updateResult: ActionState, connectResult: ActionState = { busy: false, error: false, message: '' }) {
       const base = await setup();
       const calls: string[] = [];
-      const update = vi.fn(async () => { calls.push('update'); return updateResult; });
-      const connect = vi.fn(async () => { calls.push('connect'); return { busy: false, error: false, message: '' }; });
-      Object.assign(base.data, { endpoints: signal(new Map([['ep-1', stored]])), update, connect });
+      const endpoints = signal(new Map([['ep-1', stored]]));
+      // Like the real update, a saved change shows in the endpoint list
+      const update = vi.fn(async (_guid: string, opts: { skipSSL: boolean; caCert: string }) => {
+        calls.push('update');
+        if (!updateResult.error) {
+          endpoints.set(new Map([['ep-1', { ...stored, skip_ssl_validation: opts.skipSSL, ca_cert: opts.caCert }]]));
+        }
+        return updateResult;
+      });
+      const connect = vi.fn(async () => { calls.push('connect'); return connectResult; });
+      Object.assign(base.data, { endpoints, update, connect });
       const service = new ConnectEndpointService(endpointsService, config, base.data, base.injector);
-      return { ...base, service, update, connect, calls };
+      return { ...base, service, update, connect, calls, endpoints };
     }
 
     const submitWith = (service: ConnectEndpointService, tls: { skipSSL: boolean; caCert: string }) => {
@@ -152,6 +160,68 @@ describe('ConnectEndpointService', () => {
       const { service, calls } = await tlsSetup({ busy: false, error: false, message: '' });
       await submitWith(service, { skipSSL: false, caCert: '' });
       expect(calls).toEqual(['connect']);
+      service.destroy();
+    });
+
+    // A failed connect must not leave the endpoint changed: the options go
+    // back to what they were, and the next attempt saves them again.
+    it('puts the options back when the connect fails', async () => {
+      const { service, update, calls, endpoints } = await tlsSetup(
+        { busy: false, error: false, message: '' },
+        { busy: false, error: true, message: 'Unauthorized' },
+      );
+      const result = await submitWith(service, { skipSSL: true, caCert: '' });
+      expect(result).toEqual({ success: false, errorMessage: 'Unauthorized' });
+      expect(calls).toEqual(['update', 'connect', 'update']);
+      expect(update).toHaveBeenNthCalledWith(1, 'ep-1', {
+        endpointType: 'cf', name: 'ep', skipSSL: true, setClientInfo: false, allowSSO: true, caCert: '',
+      });
+      expect(update).toHaveBeenNthCalledWith(2, 'ep-1', {
+        endpointType: 'cf', name: 'ep', skipSSL: false, setClientInfo: false, allowSSO: true, caCert: '',
+      });
+      expect(endpoints().get('ep-1')?.skip_ssl_validation).toBe(false);
+
+      await submitWith(service, { skipSSL: true, caCert: '' });
+      expect(calls).toEqual(['update', 'connect', 'update', 'update', 'connect', 'update']);
+      service.destroy();
+    });
+
+    it('puts back a replaced CA certificate', async () => {
+      const { service, update, endpoints } = await tlsSetup(
+        { busy: false, error: false, message: '' },
+        { busy: false, error: true, message: 'Unauthorized' },
+      );
+      endpoints.set(new Map([['ep-1', { ...stored, ca_cert: 'OLD PEM' }]]));
+      await submitWith(service, { skipSSL: false, caCert: 'NEW PEM' });
+      expect(update).toHaveBeenNthCalledWith(2, 'ep-1', expect.objectContaining({ skipSSL: false, caCert: 'OLD PEM' }));
+      service.destroy();
+    });
+
+    it('says so when the options could not be put back', async () => {
+      const { fixture, service, update } = await tlsSetup(
+        { busy: false, error: false, message: '' },
+        { busy: false, error: true, message: 'Unauthorized' },
+      );
+      const errors: (string | null)[] = [];
+      const sub = service.connectingError$.subscribe(e => errors.push(e));
+      // The dialog is up, its state bridges running, before Connect is pressed
+      await fixture.whenStable();
+      update.mockImplementationOnce(async () => ({ busy: false, error: false, message: '' }))
+        .mockImplementationOnce(async () => ({ busy: false, error: true, message: 'Bad Gateway' }));
+      const result = await submitWith(service, { skipSSL: true, caCert: '' });
+      await fixture.whenStable();
+      expect(result.success).toBe(false);
+      expect(result.errorMessage).toBe(errors.at(-1));
+      expect(errors.at(-1)).toContain('Unauthorized');
+      expect(errors.at(-1)).toContain('could not be restored');
+      sub.unsubscribe();
+      service.destroy();
+    });
+
+    it('keeps the saved options when the connect succeeds', async () => {
+      const { service, calls } = await tlsSetup({ busy: false, error: false, message: '' });
+      await submitWith(service, { skipSSL: true, caCert: '' });
+      expect(calls).toEqual(['update', 'connect']);
       service.destroy();
     });
   });
