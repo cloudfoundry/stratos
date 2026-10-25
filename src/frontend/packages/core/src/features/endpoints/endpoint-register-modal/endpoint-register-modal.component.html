@@ -18,9 +18,8 @@
         <div class="relative flex items-center justify-between">
           <div class="flex items-center space-x-3">
             <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
-              <span class="material-icons text-white text-xl">
-                {{ selectedEndpointInfo() ? 'arrow_back' : 'add_circle_outline' }}
-              </span>
+              <!-- Decorative: the Back button on the right goes back. -->
+              <span class="material-icons text-white text-xl" aria-hidden="true">add_circle_outline</span>
             </div>
             <div>
               <h2 id="endpoint-register-title" class="text-xl font-bold text-white">
@@ -34,17 +33,21 @@
           <div class="flex items-center space-x-2">
             @if (selectedEndpointInfo()) {
               <button
+                type="button"
                 (click)="goBackToSelection()"
+                aria-label="Back"
                 class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
                 >
-                <span class="material-icons text-white text-lg">arrow_back</span>
+                <span class="material-icons text-white text-lg" aria-hidden="true">arrow_back</span>
               </button>
             }
             <button
+              type="button"
               (click)="closeModal()"
+              aria-label="Close"
               class="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-full flex items-center justify-center transition-all duration-200 hover:scale-110"
               >
-              <span class="material-icons text-white text-lg">close</span>
+              <span class="material-icons text-white text-lg" aria-hidden="true">close</span>
             </button>
           </div>
         </div>
