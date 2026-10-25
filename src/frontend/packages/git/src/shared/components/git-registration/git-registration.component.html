@@ -1,7 +1,7 @@
 <app-steppers [cancel]="'/endpoints'" [cancelAction]="cancelAction">
   <app-step title="Register" [signalHandle]="registerStepHandle">
     <div class="p-6">
-      <h3 class="text-xl font-semibold mb-4">Select the type of {{ gitTypes[epSubType].label }} to register</h3>
+      <h3 id="git-type-heading" class="text-xl font-semibold mb-4">Select the type of {{ gitTypes[epSubType].label }} to register</h3>
       @if (autoSelectNote) {
         <div
           class="mb-4 px-3 py-2 text-sm rounded border border-content-border bg-content-secondary text-content-muted"
@@ -11,7 +11,8 @@
       }
       @if (registerForm) {
         <form class="space-y-4" [formGroup]="registerForm">
-          <div class="space-y-3">
+          <!-- One named group, so arrow keys move between the types. -->
+          <div class="space-y-3" role="radiogroup" aria-labelledby="git-type-heading">
             @for (gitTypeEntry of gitTypes[epSubType].types | keyvalue; track gitTypeEntry) {
               <div class="block">
                 <label
@@ -24,6 +25,7 @@
                   <input
                     [attr.id]="'gitType-' + gitTypeEntry.key"
                     type="radio"
+                    name="selectedType"
                     formControlName="selectedType"
                     [value]="gitTypeEntry.key"
                     class="mt-1 text-brand-600 focus:ring-brand-500 border-content-border"

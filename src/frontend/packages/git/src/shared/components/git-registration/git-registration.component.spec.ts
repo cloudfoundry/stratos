@@ -91,6 +91,26 @@ describe('GitRegistrationComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // One group, so arrow keys move between the types.
+  it('groups the type radios under the step heading', async () => {
+    // The form is built once the endpoint lists arrive.
+    component['init']();
+    component['cdr'].markForCheck();
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    const radios = Array.from(el.querySelectorAll('input[type="radio"]')) as HTMLInputElement[];
+    expect(radios.length).toBeGreaterThan(1);
+    const names = new Set(radios.map(r => r.getAttribute('name')));
+    expect(names.size).toBe(1);
+    expect([...names][0]).toBeTruthy();
+
+    const group = el.querySelector('[role="radiogroup"]') as HTMLElement;
+    expect(group).toBeTruthy();
+    radios.forEach(r => expect(group.contains(r)).toBe(true));
+    const label = el.querySelector(`#${group.getAttribute('aria-labelledby')}`);
+    expect(label?.textContent).toContain('Select the type of');
+  });
+
   // Inside the Register Endpoint dialog the form closes the dialog through
   // its handle instead of navigating to the page under it.
   it('closes the dialog on Cancel', async () => {
