@@ -44,6 +44,15 @@ export class EndpointPermissionsService {
   }
 
   /**
+   * Connect with a token shared with every user (system_shared on POST
+   * /api/v1/tokens). A Stratos admin only (jetstream authcnsi.go
+   * DoLoginToCNSI).
+   */
+  canShareConnection(): boolean {
+    return this.isAdmin();
+  }
+
+  /**
    * Disconnect (DELETE /api/v1/tokens/:id). A shared connection belongs to
    * every user, so only a Stratos admin may drop it (jetstream authcnsi.go
    * logoutOfCNSI).

@@ -119,7 +119,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     }
 
     // Not all endpoint types might allow token sharing - typically types like metrics do
-    this.canShareEndpointToken = endpoint?.definition?.tokenSharing ?? false;
+    this.canShareEndpointToken = (endpoint?.definition?.tokenSharing ?? false) && this.permissions.canShareConnection();
 
     // Create the endpoint form
     this.autoSelected = (this.authTypesForEndpoint.length > 0) ? this.authTypesForEndpoint[0] : { form: null } as EndpointAuthTypeConfig;

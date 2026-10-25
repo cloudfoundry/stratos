@@ -79,6 +79,29 @@ describe('ConnectEndpointComponent', () => {
     expect(inputs.map(i => i.getAttribute('autocomplete'))).toEqual(['off', 'new-password']);
   });
 
+  // jetstream refuses a shared connect from anyone but a Stratos admin
+  // (authcnsi.go DoLoginToCNSI), so only an admin is offered it.
+  describe('sharing the connection', () => {
+    const open = async (admin: boolean) => {
+      TestBed.inject(CurrentUserRolesDataService).applySessionScopes({ admin, guid: 'me-guid', name: 'me', scopes: [] });
+      fixture.componentRef.setInput('connectService', {
+        config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+        setData: () => undefined,
+      } as unknown as ConnectEndpointService);
+      await fixture.whenStable();
+    };
+
+    it('is offered to a Stratos admin for a type that shares tokens', async () => {
+      await open(true);
+      expect(fixture.nativeElement.textContent).toContain('Share this endpoint connection');
+    });
+
+    it('is not offered to other users', async () => {
+      await open(false);
+      expect(fixture.nativeElement.textContent).not.toContain('Share this endpoint connection');
+    });
+  });
+
   // The TLS options are an edit of the endpoint, so the form offers them only
   // to a user who may edit it; the connect then saves them first.
   describe('TLS options', () => {
