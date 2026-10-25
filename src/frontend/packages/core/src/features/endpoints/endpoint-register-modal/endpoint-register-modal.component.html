@@ -2,7 +2,8 @@
 <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
 
   <!-- Modal container -->
-  <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up">
+  <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up"
+    role="dialog" aria-modal="true" aria-labelledby="endpoint-register-title">
 
     <!-- Modal content. No `transform` class: it would create a containing
          block for the CustomSelect dropdown's position:fixed panel, breaking
@@ -20,7 +21,7 @@
               </span>
             </div>
             <div>
-              <h2 class="text-xl font-bold text-white">
+              <h2 id="endpoint-register-title" class="text-xl font-bold text-white">
                 {{ selectedEndpointInfo() ? 'Register ' + selectedEndpointInfo()!.label + ' Endpoint' : 'Register Endpoint' }}
               </h2>
               <p class="text-white/90 text-sm">
