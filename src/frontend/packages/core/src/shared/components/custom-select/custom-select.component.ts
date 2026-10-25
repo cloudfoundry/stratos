@@ -5,6 +5,8 @@ import { Subscription } from 'rxjs';
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
 
+let nextSelectUid = 0;
+
 export interface MatSelectChange {
   source: CustomSelectComponent;
   value: any;
@@ -25,7 +27,13 @@ export interface MatSelectChange {
   styleUrls: ['./custom-select.component.css'],
   standalone: true,
   imports: [NgClass],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  // The host is the listbox's child, so it carries the option semantics
+  host: {
+    role: 'option',
+    '[attr.aria-selected]': 'selected',
+    '[attr.aria-disabled]': 'disabled() || null',
+  },
 })
 export class CustomOptionComponent implements AfterViewInit {
   private cdr = inject(ChangeDetectorRef);
@@ -84,6 +92,11 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   readonly required = input(false);
   readonly name = input<string>();
   @Input() id!: string;
+  // Keeps list ids unique for selects given neither an id nor a name
+  private readonly uid = `${++nextSelectUid}`;
+  get listboxId(): string {
+    return `select-listbox-${this.id || this.name() || this.uid}`;
+  }
   readonly invalid = input(false);
   readonly errorMessage = input('');
   readonly autoSelectSingleOption = input(true); // Auto-select when only one option exists
