@@ -144,7 +144,7 @@ export class EndpointsDataService {
   // Wave 5 will read this. Wave 1 records it but does not act on it.
   private lastGetAllLogin = false;
   private hydrationPromise: Promise<EndpointModel[]> | null = null;
-  private hydrated = false;
+  private readonly _hydrated = signal<boolean>(false);
   private readyResolvers: Array<() => void> = [];
 
   // ---- public signal surface ---------------------------------------------
@@ -157,6 +157,14 @@ export class EndpointsDataService {
 
   readonly loading: Signal<boolean> = this._loading.asReadonly();
   readonly error: Signal<string | null> = this._error.asReadonly();
+
+  /**
+   * True once the first `getAll()` has settled (loaded or failed), and from
+   * then on. Unlike `loading`, a later refresh does not clear it, so a
+   * first-load placeholder keyed on it does not replace endpoints already
+   * shown.
+   */
+  readonly hydrated: Signal<boolean> = this._hydrated.asReadonly();
 
   /** Delta-list of recent disconnects. Consumers read + clear via {@link clearDisconnected}. */
   readonly disconnectedSignal: Signal<EndpointDisconnectEvent[]> = this._disconnected.asReadonly();
@@ -230,7 +238,7 @@ export class EndpointsDataService {
    * never had to coordinate the initial fetch themselves.
    */
   whenReady(): Promise<void> {
-    if (this.hydrated) {
+    if (this._hydrated()) {
       return Promise.resolve();
     }
     if (!this.hydrationPromise) {
@@ -481,7 +489,7 @@ export class EndpointsDataService {
   }
 
   private markHydrated(): void {
-    this.hydrated = true;
+    this._hydrated.set(true);
     const resolvers = this.readyResolvers;
     this.readyResolvers = [];
     resolvers.forEach(r => r());

@@ -33,6 +33,10 @@ export class EndpointStatusSignalService {
   readonly error: Signal<boolean> = computed(() => !!this.status().error);
   readonly message: Signal<string> = computed(() => this.status().message ?? '');
 
-  /** True once the initial endpoints fetch has completed (loading flipped false). */
-  readonly initialised: Signal<boolean> = computed(() => !this.loading());
+  /**
+   * True once the initial endpoints fetch has completed, and from then on:
+   * a refresh (after a registration, say) keeps what is already shown
+   * instead of going back to the first-load placeholder.
+   */
+  readonly initialised: Signal<boolean> = this.endpointsService.hydrated;
 }
