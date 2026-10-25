@@ -63,7 +63,7 @@ describe('ConnectEndpointComponent', () => {
     const inputs = Array.from(el.querySelectorAll<HTMLInputElement>('app-credentials-auth-form input'));
     expect(inputs.map(i => i.placeholder)).toEqual(['Username', 'Password']);
     const labels = Array.from(el.querySelectorAll('app-credentials-auth-form label'));
-    expect(labels.map(l => l.textContent?.replace('*', '').trim())).toEqual(['Username', 'Password']);
+    expect(labels.map(l => l.textContent?.replaceAll('*', '').trim())).toEqual(['Username', 'Password']);
     expect(labels.map(l => l.getAttribute('for'))).toEqual(inputs.map(i => i.id));
   });
 
