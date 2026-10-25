@@ -27,3 +27,47 @@
   auto-registered Cloud Foundry API's URL, logging in connects the
   Cloud Foundry endpoint rather than trying the other one with Cloud
   Foundry credentials.
+- With user endpoints enabled, a Metrics endpoint at a Cloud Foundry
+  API's URL no longer hides that Cloud Foundry endpoint. A user's own
+  endpoint now hides only a system endpoint of the same type at the
+  same URL.
+- After registering an endpoint, the endpoints list stays on screen
+  while it refreshes instead of briefly showing "Loading endpoints".
+- The Connect form labels the username and password fields of
+  endpoint types that give no labels of their own, such as Metrics.
+- The browser no longer fills the console login into an endpoint's
+  Connect credentials.
+- Only Stratos admins are offered "Share this endpoint connection",
+  which the server refuses for other users.
+- A failed connect puts back the endpoint's previous TLS options (Skip
+  SSL validation, CA certificate) instead of leaving the change saved.
+- A failed Reconnect keeps the Connect dialog open with its error,
+  instead of closing as if it had connected.
+- The Register dialog's connect step names what to enter for a
+  single-token login, such as "Personal Access Token", and its help
+  button no longer covers the title.
+- Opening help from the Register dialog no longer hides the dialog's
+  Connect and close buttons, and help that cannot be loaded says so.
+- The Artifact Hub registration text no longer shows backticks around
+  "Register".
+
+[BugFixes: Git]
+- The GitHub and GitLab connect help opens again instead of showing an
+  empty "Javascript is required" page, and the Git logo shows.
+
+[BugFixes: Accessibility]
+- The Register Endpoint and Connect dialogs are announced as dialogs,
+  named by their titles. Opening Register Endpoint moves focus into it,
+  Tab stays inside, and closing it returns focus to the button that
+  opened it.
+- Icon buttons are announced by name (Back, Close, Refresh, First page,
+  Next page, Actions, Help on connecting, Backup/Restore Endpoints)
+  instead of their icon text, and menu items and dialog titles no
+  longer include icon names.
+- Endpoint cards can be opened from the keyboard through their title.
+- The github.com and GitHub Enterprise choices on the Register step are
+  one radio group, so arrow keys move between them.
+- Select lists announce their options with their selected and disabled
+  states, and the control is linked to its list.
+- The closed side panel can no longer be reached with Tab or announced
+  as a button.
