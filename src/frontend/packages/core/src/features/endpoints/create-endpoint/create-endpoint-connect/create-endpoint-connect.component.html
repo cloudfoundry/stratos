@@ -17,7 +17,7 @@
     <div class="connect__title gap-2">
       <span class="connect__title-inner min-w-0 text-[var(--content-text)]">{{ credentialsTitle() }}</span>
       @if (helpDocumentUrl()) {
-        <button [appBlur]="true" class="connect__title-help btn btn-icon shrink-0" type="button" (click)="showHelp()">
+        <button [appBlur]="true" class="connect__title-help btn btn-icon shrink-0" type="button" aria-label="Help on connecting" (click)="showHelp()">
           <app-custom-icon>help</app-custom-icon>
         </button>
       }

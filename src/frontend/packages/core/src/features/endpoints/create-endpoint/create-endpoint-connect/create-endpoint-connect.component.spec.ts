@@ -136,6 +136,12 @@ describe('CreateEndpointConnectComponent', () => {
       expect(title.querySelector('button.connect__title-help')?.classList).toContain('shrink-0');
     });
 
+    // An icon-only button: its name is all a screen reader has
+    it('names the help button', async () => {
+      const title = await connectNow('token-endpoint');
+      expect(title.querySelector('button.connect__title-help')?.getAttribute('aria-label')).toBe('Help on connecting');
+    });
+
     it('reads Connection Credentials for other auth types', async () => {
       const title = await connectNow('metrics');
       expect(title.querySelector('.connect__title-inner')?.textContent?.trim()).toBe('Connection Credentials');
