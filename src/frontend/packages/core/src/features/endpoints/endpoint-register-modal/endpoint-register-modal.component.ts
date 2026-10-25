@@ -1,3 +1,4 @@
+import { A11yModule } from '@angular/cdk/a11y';
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, HostListener, Injector, OnDestroy, OnInit, Type, ViewChild, ViewContainerRef, computed, inject, reflectComponentType, signal, output } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -24,6 +25,7 @@ import { ENDPOINT_REGISTER_HANDLE, EndpointRegisterHandle } from './endpoint-reg
   styleUrls: ['./endpoint-register-modal.component.scss'],
   standalone: true,
   imports: [
+    A11yModule,
     CommonModule,
     TileSelectorComponent
   ],

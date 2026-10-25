@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, input, provideZonelessChangeDetection } from '@angular/core';
+import { InteractivityChecker } from '@angular/cdk/a11y';
+import { ChangeDetectionStrategy, Component, inject, input, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EntityCatalogHelper, EntityCatalogHelpers, StratosCatalogEndpointEntity, entityCatalog } from '@stratosui/store';
@@ -17,6 +18,22 @@ import { EndpointRegisterModalComponent } from './endpoint-register-modal.compon
 })
 class TestRegistrationComponent {
   handle = inject(ENDPOINT_REGISTER_HANDLE);
+}
+
+// Opens the dialog from a button, as the endpoints page does.
+@Component({
+  selector: 'app-test-opener',
+  template: `
+    <button id="opener" type="button" (click)="open.set(true)">Register Endpoint</button>
+    @if (open()) {
+      <app-endpoint-register-modal (closeModalEvent)="open.set(false)"></app-endpoint-register-modal>
+    }
+  `,
+  imports: [EndpointRegisterModalComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestOpenerComponent {
+  open = signal(false);
 }
 
 // Stands in for the create-endpoint form, which has its own page header.
@@ -46,7 +63,20 @@ describe('EndpointRegisterModalComponent', () => {
   beforeEach(async () => {
     TestBed.configureTestingModule({
       imports: [...BaseTestModules, EndpointRegisterModalComponent],
-      providers: [...STORE_TEST_PROVIDERS, provideZonelessChangeDetection()],
+      providers: [
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+        // The test DOM has no layout, so the focus trap would find nothing
+        // visible, and so nothing focusable.
+        {
+          provide: InteractivityChecker, useValue: {
+            isFocusable: (el: HTMLElement) => el.matches('button, [tabindex]'),
+            isTabbable: (el: HTMLElement) => el.matches('button, [tabindex]:not([tabindex="-1"])'),
+            isVisible: () => true,
+            isDisabled: () => false,
+          },
+        },
+      ],
     });
     EntityCatalogHelpers.SetEntityCatalogHelper(TestBed.inject(EntityCatalogHelper));
     entityCatalog.register(new StratosCatalogEndpointEntity({
@@ -108,5 +138,40 @@ describe('EndpointRegisterModalComponent', () => {
     const text = fixture.nativeElement.textContent;
     expect(text).toContain('Form');
     expect(text).not.toContain('Own header');
+  });
+
+  describe('focus', () => {
+    let host: ComponentFixture<TestOpenerComponent>;
+    const opener = () => host.nativeElement.querySelector('#opener') as HTMLButtonElement;
+    const dialog = () => host.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+
+    beforeEach(async () => {
+      host = TestBed.createComponent(TestOpenerComponent);
+      await host.whenStable();
+      opener().focus();
+      opener().click();
+      await host.whenStable();
+    });
+
+    it('moves into the dialog when it opens', () => {
+      expect(dialog().contains(document.activeElement)).toBe(true);
+    });
+
+    it('wraps Tab and Shift+Tab within the dialog', () => {
+      const buttons = Array.from(dialog().querySelectorAll('button'));
+      // Tab past the last control or Shift+Tab before the first lands on
+      // the guard either side of the dialog.
+      (dialog().nextElementSibling as HTMLElement).focus();
+      expect(document.activeElement).toBe(buttons[0]);
+      (dialog().previousElementSibling as HTMLElement).focus();
+      expect(document.activeElement).toBe(buttons[buttons.length - 1]);
+    });
+
+    it('returns to the opener when the dialog closes', async () => {
+      dialog().querySelector('button')!.focus();
+      host.componentInstance.open.set(false);
+      await host.whenStable();
+      expect(document.activeElement).toBe(opener());
+    });
   });
 });
