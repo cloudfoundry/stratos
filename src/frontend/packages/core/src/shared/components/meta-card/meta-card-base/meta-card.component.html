@@ -39,8 +39,8 @@
       @if (actionMenu && (showMenu$ | async)) {
         <div class="meta-card__header-container__actions relative" appClickStopPropagation>
           <button class="btn btn-icon meta-card__header__button" type="button" (click)="toggleMenu()"
-            [disabled]="isDeleting$ | async">
-            <app-custom-icon>more_vert</app-custom-icon>
+            [disabled]="isDeleting$ | async" aria-label="Actions" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()">
+            <app-custom-icon aria-hidden="true">more_vert</app-custom-icon>
           </button>
           @if (menuOpen()) {
             <div class="absolute right-0 top-full mt-1 bg-content-bg rounded-md shadow-lg ring-1 ring-black/5 z-50 min-w-[160px]">
@@ -53,7 +53,7 @@
                         [disabled]="menuItem.disabled | async"
                         (click)="menuItemClick(menuItem)">
                         @if (menuItem.icon) {
-                          <app-custom-icon>{{menuItem.icon}}</app-custom-icon>
+                          <app-custom-icon aria-hidden="true">{{menuItem.icon}}</app-custom-icon>
                         }
                         <span>{{menuItem.label}}</span>
                       </button>
