@@ -1,14 +1,14 @@
 <div [formGroup]="formGroup">
   <div formGroupName="authValues" class="flex flex-col">
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Cluster" formControlName="cluster">
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Cluster" formControlName="cluster" autocomplete="off">
     </app-form-field>
     <app-form-field>
-      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Access Key ID" formControlName="access_key">
+      <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Access Key ID" formControlName="access_key" autocomplete="off">
     </app-form-field>
     <app-form-field>
       <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Secret Access Key" [type]="!showPassword ? 'password' : 'text'"
-        formControlName="secret_key">
+        formControlName="secret_key" autocomplete="new-password">
       <span appSuffix>
         <app-show-hide-button (changed)="showPassword = $event"></app-show-hide-button>
       </span>
