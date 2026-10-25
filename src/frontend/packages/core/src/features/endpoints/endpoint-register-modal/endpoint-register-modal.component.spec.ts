@@ -131,6 +131,21 @@ describe('EndpointRegisterModalComponent', () => {
     expect(cancelButtons().length).toBe(0);
   });
 
+  it('names its icon buttons and hides their glyphs', async () => {
+    await selectType();
+    const el = fixture.nativeElement as HTMLElement;
+    const iconButtons = Array.from(el.querySelectorAll('button')).filter(b => b.querySelector('.material-icons'));
+    expect(iconButtons.map(b => b.getAttribute('aria-label'))).toEqual(['Back', 'Close']);
+    el.querySelectorAll('.material-icons').forEach(icon => expect(icon.getAttribute('aria-hidden')).toBe('true'));
+  });
+
+  it('shows one back arrow once a type is picked', async () => {
+    await selectType();
+    const arrows = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('.material-icons'))
+      .filter(icon => icon.textContent?.trim() === 'arrow_back');
+    expect(arrows.length).toBe(1);
+  });
+
   // The dialog has its own header. Setting hideHeader as a plain field
   // replaced the form's signal input, and the form rendered empty.
   it('hides the form\'s own header and still shows the form', async () => {
