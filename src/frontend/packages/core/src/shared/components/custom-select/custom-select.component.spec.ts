@@ -210,3 +210,65 @@ describe('CustomSelectComponent accessible name', () => {
     expect(trigger('bare')?.hasAttribute('aria-label')).toBe(false);
   });
 });
+
+// The Connect dialog's Auth Type select, as a screen reader meets it.
+@Component({
+  standalone: true,
+  imports: [CustomSelectComponent, CustomOptionComponent],
+  template: `
+    <app-select placeholder="Auth Type" [value]="'creds'">
+      <app-option value="creds">Username and Password</app-option>
+      <app-option value="sso">Single Sign-On (SSO)</app-option>
+      <app-option value="none" [disabled]="true">No Authentication</app-option>
+    </app-select>
+  `,
+})
+class AuthTypeHostComponent {}
+
+describe('CustomSelectComponent roles and states', () => {
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
+    });
+  });
+
+  async function render() {
+    const fixture = TestBed.createComponent(AuthTypeHostComponent);
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const trigger = el.querySelector('[role="combobox"]') as HTMLElement;
+    const listbox = el.querySelector('[role="listbox"]') as HTMLElement;
+    return { fixture, el, trigger, listbox };
+  }
+
+  it('names the combobox and points it at its list, open or closed', async () => {
+    const { fixture, trigger, listbox } = await render();
+    expect(trigger.getAttribute('aria-label')).toBe('Auth Type');
+    expect(listbox.id).toBeTruthy();
+    expect(trigger.getAttribute('aria-controls')).toBe(listbox.id);
+
+    trigger.click();
+    await fixture.whenStable();
+    expect(trigger.getAttribute('aria-expanded')).toBe('true');
+    expect(trigger.getAttribute('aria-controls')).toBe(listbox.id);
+  });
+
+  it('gives each item the option role and its selected and disabled states', async () => {
+    const { fixture, listbox } = await render();
+    const options = () => Array.from(listbox.querySelectorAll('[role="option"]'));
+    expect(options().map(o => o.textContent?.trim())).toEqual(['Username and Password', 'Single Sign-On (SSO)', 'No Authentication']);
+    expect(options().map(o => o.getAttribute('aria-selected'))).toEqual(['true', 'false', 'false']);
+    expect(options().map(o => o.getAttribute('aria-disabled'))).toEqual([null, null, 'true']);
+
+    // Picking another option moves the selected state with it.
+    (options()[1].querySelector('.custom-option-content') as HTMLElement).click();
+    await fixture.whenStable();
+    expect(options().map(o => o.getAttribute('aria-selected'))).toEqual(['false', 'true', 'false']);
+  });
+
+  it('keeps list ids apart when selects have no id or name', async () => {
+    const a = await render();
+    const b = await render();
+    expect(a.listbox.id).not.toBe(b.listbox.id);
+  });
+});

@@ -13,7 +13,7 @@
     [class.border-primary]="isOpen"
     [attr.aria-expanded]="isOpen"
     aria-haspopup="listbox"
-    [attr.aria-controls]="isOpen ? 'select-listbox-' + (id || name()) : null"
+    [attr.aria-controls]="listboxId"
     (click)="toggle()"
     (keydown.enter)="toggle()"
     (keydown.space)="toggle(); $event.preventDefault()">
@@ -70,7 +70,7 @@
       </div>
     }
     <div class="options-container" role="listbox" tabindex="-1"
-      [id]="'select-listbox-' + (id || name())"
+      [id]="listboxId"
       (click)="onOptionsClick($event)"
       (keydown.enter)="onOptionsClick($event)"
       (keydown.space)="onOptionsClick($event); $event.preventDefault()">
