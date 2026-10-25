@@ -2444,3 +2444,58 @@ describe('SignalListComponent control names', () => {
     expect(name(root.querySelector('[data-test="range-b"]'))).toBe('Last Refreshed end');
   });
 });
+
+// Material icon ligatures are text: left exposed, a glyph names an icon-only
+// button ("first_page") or prefixes a menu item ("link Connect").
+describe('SignalListComponent icon glyphs and accessible names', () => {
+  const render = async (extra: Partial<SignalListConfig<{ name: string }>> = {}) => {
+    const fixture = TestBed.createComponent(Host);
+    fixture.componentInstance.config = {
+      ...fixture.componentInstance.config,
+      columns: [
+        { header: 'Name', render: r => r.name },
+        {
+          header: '', kind: 'actions', render: () => '',
+          actions: () => [{ label: 'Connect', icon: 'link', invoke: () => {} }],
+        },
+      ],
+      ...extra,
+    };
+    await fixture.whenStable();
+    return fixture;
+  };
+
+  it('names the icon-only refresh and paging buttons', async () => {
+    const fixture = await render();
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('[data-test="refresh"]')!.getAttribute('aria-label')).toBe('Refresh');
+    const labels = Array.from(el.querySelectorAll('button[title$=" page"]')).map(b => b.getAttribute('aria-label'));
+    expect(labels).toEqual(['First page', 'Previous page', 'Next page', 'Last page']);
+  });
+
+  it('hides icon glyphs, so a menu item is named by its label alone', async () => {
+    const fixture = await render();
+    const el: HTMLElement = fixture.nativeElement;
+    (el.querySelector('[data-test="row-actions"]') as HTMLButtonElement).click();
+    await fixture.whenStable();
+
+    const exposed = Array.from(el.querySelectorAll('.material-icons'))
+      .filter(i => i.getAttribute('aria-hidden') !== 'true')
+      .map(i => i.textContent!.trim());
+    expect(exposed).toEqual([]);
+  });
+
+  it('hides the glyphs of card view and the empty state too', async () => {
+    const card = await render({ viewMode: signal<'table' | 'card'>('card') });
+    (card.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement).click();
+    await card.whenStable();
+    const empty = await render({ pagedItems: signal([]).asReadonly(), totalFilteredResults: signal(0).asReadonly() });
+
+    for (const el of [card.nativeElement, empty.nativeElement] as HTMLElement[]) {
+      const exposed = Array.from(el.querySelectorAll('.material-icons'))
+        .filter(i => i.getAttribute('aria-hidden') !== 'true')
+        .map(i => i.textContent!.trim());
+      expect(exposed).toEqual([]);
+    }
+  });
+});
