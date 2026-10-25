@@ -53,4 +53,32 @@ describe('DashboardBaseComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  describe('side panel', () => {
+    const panel = (): HTMLElement => fixture.nativeElement.querySelector('.dashboard-side-help-outer');
+
+    beforeEach(async () => {
+      fixture.detectChanges();
+      await fixture.whenStable();
+    });
+
+    // The closed panel sits off screen but was a role="button" tabindex="0"
+    // div, so Tab landed in it and its whole text became one button name.
+    it('is a labelled panel, not a button', () => {
+      expect(panel().getAttribute('role')).not.toBe('button');
+      expect(panel().hasAttribute('tabindex')).toBe(false);
+      expect(panel().tagName).toBe('ASIDE');
+      expect(panel().getAttribute('aria-label')).toBeTruthy();
+    });
+
+    it('is out of the tab order and accessibility tree while closed', () => {
+      expect(panel().hasAttribute('inert')).toBe(true);
+    });
+
+    it('is reachable while open', async () => {
+      TestBed.inject(SidePanelService).open();
+      await fixture.whenStable();
+      expect(panel().hasAttribute('inert')).toBe(false);
+    });
+  });
 });

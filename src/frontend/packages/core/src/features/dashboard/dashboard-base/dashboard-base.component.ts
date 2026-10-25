@@ -119,10 +119,6 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       .subscribe(isMobile => isMobile ? this.dashboardData.enableMobileNav() : this.dashboardData.disableMobileNav());
   }
 
-  sideHelpClosed() {
-    this.sidePanelService.hide();
-  }
-
   ngAfterViewInit() {
     this.sidePanelService.setContainer(this.previewPanelContainer);
 
