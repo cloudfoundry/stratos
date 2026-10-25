@@ -109,6 +109,11 @@
                 "output": "/kubernetes/assets"
               },
               {
+                "glob": "**/*",
+                "input": "src/frontend/packages/git/assets",
+                "output": "/git/assets"
+              },
+              {
                 "glob": "company-config.json",
                 "input": "src/frontend/packages/theme",
                 "output": "/assets"

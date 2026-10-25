@@ -47,7 +47,7 @@ class GitEntityCatalog {
       labelPlural: 'Git',
       icon: 'cloud_foundry',
       iconFont: 'stratos-icons',
-      logoUrl: '/core/assets/Git-logo.png',
+      logoUrl: '/git/assets/Git-logo.png',
       authTypes: [],
       registrationComponent: GitRegistrationComponent,
       registeredLimit: () => 0,
@@ -60,7 +60,7 @@ class GitEntityCatalog {
           labelShort: 'Github',
           authTypes: [{
             ...BaseEndpointAuth.Token,
-            help: '/core/assets/connect/github.md',
+            help: '/git/assets/connect/github.md',
             config: {
               title: 'Personal Access Token',
               helpText: 'Enter a GitHub Personal Access Token with "repo" scope to access your repositories. You can create one at https://github.com/settings/tokens'
@@ -76,7 +76,7 @@ class GitEntityCatalog {
           labelShort: 'Gitlab',
           authTypes: [{
             ...BaseEndpointAuth.Bearer,
-            help: '/core/assets/connect/gitlab.md',
+            help: '/git/assets/connect/gitlab.md',
             config: {
               title: 'Personal Access Token',
               helpText: 'Enter a GitLab Personal Access Token with "api" and "read_repository" scopes to access your repositories. You can create one at https://gitlab.com/-/profile/personal_access_tokens'
