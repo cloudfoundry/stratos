@@ -54,6 +54,14 @@ describe('DialogConfirmComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  // The warning glyph sits inside the heading; its ligature must not join
+  // the heading's name ("Titlewarning").
+  it('keeps the warning icon out of the heading name', () => {
+    const icon = element.querySelector('h1 .confirm-dialog__warn-icon');
+    expect(icon).toBeTruthy();
+    expect(icon?.getAttribute('aria-hidden')).toBe('true');
+  });
+
   it('should close when clicked on cancel', () => {
     const spy = vi.spyOn(component.dialogRef, 'close');
     const cancelButton = element.querySelector('button');
