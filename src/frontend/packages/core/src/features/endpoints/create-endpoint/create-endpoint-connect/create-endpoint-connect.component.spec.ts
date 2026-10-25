@@ -128,6 +128,14 @@ describe('CreateEndpointConnectComponent', () => {
       expect(title.querySelector('button.connect__title-help')).not.toBeNull();
     });
 
+    // The help button sat on the title's last letter
+    it('keeps the help button clear of the title', async () => {
+      const title = await connectNow('token-endpoint');
+      expect(title.classList).toContain('gap-2');
+      expect(title.querySelector('.connect__title-inner')?.classList).toContain('min-w-0');
+      expect(title.querySelector('button.connect__title-help')?.classList).toContain('shrink-0');
+    });
+
     it('reads Connection Credentials for other auth types', async () => {
       const title = await connectNow('metrics');
       expect(title.querySelector('.connect__title-inner')?.textContent?.trim()).toBe('Connection Credentials');
