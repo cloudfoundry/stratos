@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { EndpointsDataService } from '@stratosui/store';
+import { EndpointAuthTypeConfig, EndpointsDataService } from '@stratosui/store';
 
 import { EndpointsService } from '../../../../core/endpoints.service';
 import { BlurDirective } from '../../../../shared/components/blur.directive';
@@ -38,8 +38,11 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
 
   public validate!: Observable<boolean>;
-  // Unset until an auth type with a help document is selected.
-  public helpDocumentUrl: string | undefined;
+  // Unset until an auth type with a help document is selected. Signals:
+  // the connect form names its auth type while this template renders.
+  public readonly helpDocumentUrl = signal<string | undefined>(undefined);
+  private static readonly defaultCredentialsTitle = 'Connection Credentials';
+  public readonly credentialsTitle = signal(CreateEndpointConnectComponent.defaultCredentialsTitle);
   // Unset until the stepper calls onEnter; the step's template can render
   // before that (it is projected as soon as the step becomes current).
   public connectService?: ConnectEndpointService;
@@ -56,11 +59,19 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   get doConnect(): boolean { return this.doConnectSignal(); }
   set doConnect(v: boolean) { this.doConnectSignal.set(v); }
 
+  // An auth type that titles its one field (a Git host's Personal Access
+  // Token) says what to enter better than "Connection Credentials".
+  authTypeChanged(authType: EndpointAuthTypeConfig) {
+    this.helpDocumentUrl.set(authType.help);
+    this.credentialsTitle.set(authType.config?.title || CreateEndpointConnectComponent.defaultCredentialsTitle);
+  }
+
   showHelp() {
-    if (!this.helpDocumentUrl) {
+    const documentUrl = this.helpDocumentUrl();
+    if (!documentUrl) {
       return;
     }
-    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl: this.helpDocumentUrl });
+    this.sidePanelService.showModal(MarkdownPreviewComponent, { documentUrl });
   }
 
   onEnter = (data: ConnectEndpointConfig) => {
@@ -71,7 +82,8 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     // endpoint does not carry over.
     this.doConnect = false;
     this.valid = false;
-    this.helpDocumentUrl = undefined;
+    this.helpDocumentUrl.set(undefined);
+    this.credentialsTitle.set(CreateEndpointConnectComponent.defaultCredentialsTitle);
     // OnPush change detection: setting a non-signal field doesn't notify
     // the template, so the success message renders without the endpoint
     // name until something else triggers a check. Force a tick.
