@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, provideZonelessChangeDetection } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, input, provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { EntityCatalogHelper, EntityCatalogHelpers, StratosCatalogEndpointEntity, entityCatalog } from '@stratosui/store';
@@ -19,6 +19,16 @@ class TestRegistrationComponent {
   handle = inject(ENDPOINT_REGISTER_HANDLE);
 }
 
+// Stands in for the create-endpoint form, which has its own page header.
+@Component({
+  selector: 'app-test-headed-registration',
+  template: '@if (!hideHeader()) { <h1>Own header</h1> }<p>Form</p>',
+  changeDetection: ChangeDetectionStrategy.OnPush,
+})
+class TestHeadedRegistrationComponent {
+  readonly hideHeader = input(false);
+}
+
 describe('EndpointRegisterModalComponent', () => {
   let component: EndpointRegisterModalComponent;
   let fixture: ComponentFixture<EndpointRegisterModalComponent>;
@@ -26,8 +36,8 @@ describe('EndpointRegisterModalComponent', () => {
   const cancelButtons = () => Array.from(fixture.nativeElement.querySelectorAll('button') as NodeListOf<HTMLButtonElement>)
     .filter(b => b.textContent?.trim() === 'Cancel');
 
-  const selectType = async () => {
-    const tile = { label: 'Test', data: { type: 'test-registration', parentType: '' } } as ITileConfig<ICreateEndpointTilesData>;
+  const selectType = async (type = 'test-registration') => {
+    const tile = { label: 'Test', data: { type, parentType: '' } } as ITileConfig<ICreateEndpointTilesData>;
     component.onTileSelected(tile);
     await fixture.whenStable();
     return component.componentRef!.instance as TestRegistrationComponent;
@@ -42,6 +52,10 @@ describe('EndpointRegisterModalComponent', () => {
     entityCatalog.register(new StratosCatalogEndpointEntity({
       type: 'test-registration', label: 'Test', labelPlural: 'Tests', logoUrl: '', authTypes: [],
       registrationComponent: TestRegistrationComponent,
+    }));
+    entityCatalog.register(new StratosCatalogEndpointEntity({
+      type: 'test-headed-registration', label: 'Headed', labelPlural: 'Headed', logoUrl: '', authTypes: [],
+      registrationComponent: TestHeadedRegistrationComponent,
     }));
     fixture = TestBed.createComponent(EndpointRegisterModalComponent);
     component = fixture.componentInstance;
@@ -77,5 +91,14 @@ describe('EndpointRegisterModalComponent', () => {
     expect(cancelButtons().length).toBe(1);
     await selectType();
     expect(cancelButtons().length).toBe(0);
+  });
+
+  // The dialog has its own header. Setting hideHeader as a plain field
+  // replaced the form's signal input, and the form rendered empty.
+  it('hides the form\'s own header and still shows the form', async () => {
+    await selectType('test-headed-registration');
+    const text = fixture.nativeElement.textContent;
+    expect(text).toContain('Form');
+    expect(text).not.toContain('Own header');
   });
 });

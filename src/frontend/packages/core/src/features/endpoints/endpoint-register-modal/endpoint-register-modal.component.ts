@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, HostListener, Injector, OnDestroy, OnInit, Type, ViewChild, ViewContainerRef, computed, inject, signal, output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, HostListener, Injector, OnDestroy, OnInit, Type, ViewChild, ViewContainerRef, computed, inject, reflectComponentType, signal, output } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ActivatedRouteSnapshot, Params } from '@angular/router';
 import { of } from 'rxjs';
@@ -162,9 +162,11 @@ export class EndpointRegisterModalComponent extends BaseEndpointTileManager impl
     this.componentRef = this.endpointFormContainer.createComponent(component, { index: 0, injector });
     // Suppress any nested <app-page-header> — we're inside the modal which
     // has its own header. Two nested page-headers clobber the TabNavService
-    // pageHeader signal on modal close. Safe no-op if the component doesn't
-    // declare a hideHeader input.
-    (this.componentRef.instance as any).hideHeader = true;
+    // pageHeader signal on modal close. setInput, not a field write: the
+    // input is a signal, and only some forms declare it.
+    if (reflectComponentType(component)?.inputs.some(i => i.propName === 'hideHeader')) {
+      this.componentRef.setInput('hideHeader', true);
+    }
   }
 
   goBackToSelection() {
