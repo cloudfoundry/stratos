@@ -3,8 +3,11 @@
 <!-- 'expired' intentionally skips the endpoint-card--disconnected dimming: the
      signal-list renders it as an amber warning pill (needs attention), and
      dimming the card would work against that - it should stay as noticeable as
-     connected. -->
-<app-meta-card class="endpoint-card" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
+     connected.
+     The title link is the keyboard route to the endpoint; the card-wide click
+     is a mouse convenience, so tabindex="-1" keeps RouterLink from adding a
+     second, unlabelled tab stop for the same destination. -->
+<app-meta-card class="endpoint-card" tabindex="-1" [routerLink]="endpointLink" [appDisableRouterLink]="!endpointLink"
   [ngClass]="{'endpoint-card--no-link': !endpointLink, 'endpoint-card--disconnected': connectionStatus === 'disconnected'}"
   [favorite]="favorite" [actionMenu]="actionMenu()" [status$]="cardStatus$" [statusIcon]="false" [statusBackground]="true">
   <app-meta-card-title>
@@ -20,7 +23,14 @@
         </div>
       }
       <div class="endpoint-card__title-text">
-        <app-multiline-title class="endpoint-card__title-link" [matTooltip]="row.name">{{ row.name }}</app-multiline-title>
+        @if (endpointLink) {
+          <!-- stopPropagation: the card's own routerLink would navigate again -->
+          <a class="endpoint-card__title-link block hover:underline" [routerLink]="endpointLink" (click)="$event.stopPropagation()">
+            <app-multiline-title [matTooltip]="row.name">{{ row.name }}</app-multiline-title>
+          </a>
+        } @else {
+          <app-multiline-title [matTooltip]="row.name">{{ row.name }}</app-multiline-title>
+        }
         <div class="endpoint-card__title-subtext">
           {{!endpointCatalogEntity ? 'Unknown' : endpointCatalogEntity.definition.label}}
           <!--
