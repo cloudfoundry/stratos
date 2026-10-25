@@ -51,6 +51,22 @@ describe('ConnectEndpointComponent', () => {
     expect(component.authTypesForEndpoint.map(a => a.value)).toEqual(['creds', 'none']);
   });
 
+  // Metrics' username and password auth type gives no field labels of its
+  // own; the fields still need a visible label and an accessible name.
+  it('labels the username and password fields of an auth type without labels', async () => {
+    component.connectService = {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: () => undefined,
+    } as unknown as ConnectEndpointService;
+    await fixture.whenStable();
+    const el: HTMLElement = fixture.nativeElement;
+    const inputs = Array.from(el.querySelectorAll<HTMLInputElement>('app-credentials-auth-form input'));
+    expect(inputs.map(i => i.placeholder)).toEqual(['Username', 'Password']);
+    const labels = Array.from(el.querySelectorAll('app-credentials-auth-form label'));
+    expect(labels.map(l => l.textContent?.replace('*', '').trim())).toEqual(['Username', 'Password']);
+    expect(labels.map(l => l.getAttribute('for'))).toEqual(inputs.map(i => i.id));
+  });
+
   // The TLS options are an edit of the endpoint, so the form offers them only
   // to a user who may edit it; the connect then saves them first.
   describe('TLS options', () => {

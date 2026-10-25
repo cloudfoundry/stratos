@@ -27,11 +27,12 @@ export class CredentialsAuthFormComponent implements IAuthForm {
 
   showPassword = false;
 
-  // Custom labels for the input fields
-  pConfig: any = {
+  // Labels for the input fields, which an auth type's config may rename
+  private static readonly defaultLabels = {
     usernameLabel: 'Username',
     passwordLabel: 'Password'
   };
+  pConfig: any = { ...CredentialsAuthFormComponent.defaultLabels };
 
   @Input() formGroup!: FormGroup<CredentialsAuthForm>;
 
@@ -39,9 +40,9 @@ export class CredentialsAuthFormComponent implements IAuthForm {
     return this.pConfig;
   }
 
+  // The connect form passes `{}` for an auth type without a config (Metrics'
+  // username and password), which must not blank the labels.
   @Input() set config(v: any) {
-    if (v) {
-      this.pConfig = v;
-    }
+    this.pConfig = { ...CredentialsAuthFormComponent.defaultLabels, ...v };
   }
 }
