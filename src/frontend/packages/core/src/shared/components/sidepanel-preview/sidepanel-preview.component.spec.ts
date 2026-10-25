@@ -43,4 +43,12 @@ describe('SidepanelPreviewComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // The close glyph is ligature text; unlabelled, the button read "close".
+  it('names the close button by its purpose', async () => {
+    await fixture.whenStable();
+    const close = fixture.nativeElement.querySelector('button') as HTMLButtonElement;
+    expect(close.getAttribute('aria-label')).toBe('Close');
+    expect(close.querySelector('app-custom-icon')!.getAttribute('aria-hidden')).toBe('true');
+  });
 });

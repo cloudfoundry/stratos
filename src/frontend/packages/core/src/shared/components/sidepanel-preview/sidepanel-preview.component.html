@@ -14,8 +14,8 @@
     </div>
     <button class="btn btn-icon absolute right-[5px]"
       [ngClass]="sidePanelService.previewMode() ? 'top-[3px]' : 'top-[7px]'"
-      type="button" (click)="sidePanelService.hide()">
-      <app-custom-icon>close</app-custom-icon>
+      type="button" aria-label="Close" (click)="sidePanelService.hide()">
+      <app-custom-icon aria-hidden="true">close</app-custom-icon>
     </button>
   </div>
   <div class="flex-1 overflow-y-auto custom-scrollbar p-[12px_15px] relative bg-[var(--card-bg)]">
