@@ -541,7 +541,7 @@ describe('TailwindDialogService', () => {
       expect(handle).toBeTruthy();
 
       handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 100 }));
-      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 160, clientY: 140 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 160, clientY: 140 }));
 
       // getBoundingClientRect is 0,0 in jsdom, so left/top == the delta.
       expect(panel.style.position).toBe('fixed');
@@ -549,6 +549,50 @@ describe('TailwindDialogService', () => {
       expect(panel.style.top).toBe('40px');
 
       document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+
+    // A release outside the window (or swallowed by the browser) sends no
+    // mouseup; the next move then arrives with no button held.
+    it('should end the drag when the mouse moves with no button held', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDraggableDialogComponent, { draggable: true });
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      const handle = panel.querySelector('[data-dialog-drag-handle]') as HTMLElement;
+
+      handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 100 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 160, clientY: 140 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 0, clientX: 300, clientY: 300 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 0, clientX: 400, clientY: 400 }));
+
+      expect(panel.style.left).toBe('60px');
+      expect(panel.style.top).toBe('40px');
+
+      dialogRef.close();
+      await vi.advanceTimersByTimeAsync(300);
+      vi.useRealTimers();
+    });
+
+    it('should end the drag when the window loses focus', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open(TestDraggableDialogComponent, { draggable: true });
+      await vi.advanceTimersByTimeAsync(0);
+
+      const panel = document.querySelector('.rounded-lg') as HTMLElement;
+      const handle = panel.querySelector('[data-dialog-drag-handle]') as HTMLElement;
+
+      handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 100 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 160, clientY: 140 }));
+      window.dispatchEvent(new Event('blur'));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 300, clientY: 300 }));
+
+      expect(panel.style.left).toBe('60px');
+      expect(panel.style.top).toBe('40px');
+
       dialogRef.close();
       await vi.advanceTimersByTimeAsync(300);
       vi.useRealTimers();
@@ -567,12 +611,12 @@ describe('TailwindDialogService', () => {
       // Drag far past the bottom-right — must pin to the viewport edge, not run
       // off-screen (panel offsetWidth/Height are 0 in jsdom, so the cap is the
       // full innerWidth/innerHeight).
-      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 99999, clientY: 99999 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 99999, clientY: 99999 }));
       expect(parseInt(panel.style.left)).toBe(window.innerWidth);
       expect(parseInt(panel.style.top)).toBe(window.innerHeight);
 
       // Drag far past the top-left — must pin to 0, not go negative.
-      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: -99999, clientY: -99999 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: -99999, clientY: -99999 }));
       expect(parseInt(panel.style.left)).toBe(0);
       expect(parseInt(panel.style.top)).toBe(0);
 
@@ -627,7 +671,7 @@ describe('TailwindDialogService', () => {
       expect(handle.style.cursor).toBe('move');
 
       handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 100 }));
-      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 130, clientY: 120 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 130, clientY: 120 }));
       expect(panel.style.left).toBe('30px');
       expect(panel.style.top).toBe('20px');
 
@@ -647,7 +691,7 @@ describe('TailwindDialogService', () => {
       expect(handle.style.cursor).not.toBe('move');
 
       handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: 100, clientY: 100 }));
-      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, clientX: 160, clientY: 140 }));
+      document.dispatchEvent(new MouseEvent('mousemove', { bubbles: true, buttons: 1, clientX: 160, clientY: 140 }));
       expect(panel.style.left).toBe('');
       expect(panel.style.top).toBe('');
 

@@ -514,6 +514,12 @@ export class TailwindDialogService {
         const startX = e.clientX;
         const startY = e.clientY;
         const onMove = (m: MouseEvent) => {
+          // No button held: the release never reached us (outside the
+          // window, or taken by the browser), so the drag is over.
+          if (m.buttons === 0) {
+            onUp();
+            return;
+          }
           // Clamp to the viewport so the panel (and its action buttons) can
           // never be dragged off-screen — it's position:fixed/overflow:hidden,
           // so anything past the edge would be unreachable.
@@ -528,9 +534,11 @@ export class TailwindDialogService {
         const onUp = () => {
           document.removeEventListener('mousemove', onMove);
           document.removeEventListener('mouseup', onUp);
+          window.removeEventListener('blur', onUp);
         };
         document.addEventListener('mousemove', onMove);
         document.addEventListener('mouseup', onUp);
+        window.addEventListener('blur', onUp);
         e.preventDefault();
       });
     }
