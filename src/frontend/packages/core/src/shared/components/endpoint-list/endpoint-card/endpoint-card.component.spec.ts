@@ -80,4 +80,28 @@ describe('EndpointCardComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // The card navigated on click only: no link, role or tab stop, so keyboard
+  // users could not open the endpoint.
+  it('links the title to the endpoint page', async () => {
+    await fixture.whenStable();
+    const link: HTMLAnchorElement | null = fixture.nativeElement.querySelector('a.endpoint-card__title-link');
+    expect(link).not.toBeNull();
+    expect(link!.getAttribute('href')).toBe('/endpoints/metrics/test-endpoint-guid');
+    expect(link!.textContent).toContain('Test Metrics Endpoint');
+  });
+
+  // The title link is the tab stop; the card itself stays mouse-only so Tab
+  // does not land on the same destination twice.
+  it('keeps the card itself out of the tab order', async () => {
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('app-meta-card').getAttribute('tabindex')).not.toBe('0');
+  });
+
+  it('shows a plain title when the endpoint has no page to open', async () => {
+    fixture.componentRef.setInput('row', { ...component.row, connectionStatus: 'disconnected' } as EndpointModel);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.querySelector('a.endpoint-card__title-link')).toBeNull();
+    expect(fixture.nativeElement.textContent).toContain('Test Metrics Endpoint');
+  });
 });
