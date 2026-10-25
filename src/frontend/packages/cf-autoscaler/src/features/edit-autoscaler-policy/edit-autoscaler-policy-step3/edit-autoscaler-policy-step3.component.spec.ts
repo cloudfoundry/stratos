@@ -1,6 +1,7 @@
 import { DatePipe } from '@angular/common';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { ChangeDetectorRef, Directive, forwardRef, provideZonelessChangeDetection } from '@angular/core';
+import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -16,6 +17,20 @@ import { AutoscalerConstants } from '../../../core/autoscaler-helpers/autoscaler
 import { AppRecurringSchedule } from '../../../store/app-autoscaler.types';
 import { EditAutoscalerPolicyService } from '../edit-autoscaler-policy-service';
 import { EditAutoscalerPolicyStep3Component } from './edit-autoscaler-policy-step3.component';
+
+// The edit row binds effective_type and repeat_type with formControlName
+// on the <div> that wraps each radio pair, and a <div> has no value
+// accessor, so rendering the row throws NG01203. Stand one in, so the
+// row's fields can be inspected.
+@Directive({
+  selector: 'div[formControlName]',
+  providers: [{ provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => DivValueAccessorStub), multi: true }],
+})
+class DivValueAccessorStub implements ControlValueAccessor {
+  writeValue() {}
+  registerOnChange() {}
+  registerOnTouched() {}
+}
 
 const day = (offset: number) => format(addDays(new Date(), offset), AutoscalerConstants.MomentFormateDate);
 
@@ -351,6 +366,42 @@ describe('EditAutoscalerPolicyStep3Component', () => {
       setControl('start_date', day(5));
 
       expect(setControl('days_of_week', [0]).valid).toBe(true);
+    });
+  });
+
+  describe('field names', () => {
+    async function render(schedule: AppRecurringSchedule) {
+      TestBed.overrideComponent(EditAutoscalerPolicyStep3Component, { add: { imports: [DivValueAccessorStub] } });
+      create([schedule]);
+      await fixture.whenStable();
+      component.editRecurringSchedule(0);
+      fixture.componentRef.injector.get(ChangeDetectorRef).markForCheck();
+      await fixture.whenStable();
+      return fixture.nativeElement.querySelector('form') as HTMLElement;
+    }
+    const labelOf = (form: HTMLElement, control: string) => {
+      const field = form.querySelector(`[formControlName="${control}"]`);
+      expect(field?.id, `${control} has an id`).toBeTruthy();
+      return form.querySelector(`label[for="${field!.id}"]`)?.textContent?.trim();
+    };
+
+    it('labels the time, instance count and weekday fields', async () => {
+      const form = await render(weekly());
+      expect(labelOf(form, 'start_time')).toBe('Start');
+      expect(labelOf(form, 'end_time')).toBe('End');
+      expect(labelOf(form, 'instance_min_count')).toBe('Minimum');
+      expect(labelOf(form, 'initial_min_instance_count')).toBe('Initial Minimum');
+      expect(labelOf(form, 'instance_max_count')).toBe('Maximum');
+      expect(labelOf(form, 'days_of_week')).toBe('Repeat On');
+    });
+
+    // From and To sit inside the Custom radio's label, where another
+    // label cannot go.
+    it('names the custom date range and month day fields', async () => {
+      const form = await render(weekly({ days_of_week: undefined, days_of_month: [1], start_date: day(1), end_date: day(2) }));
+      expect(form.querySelector('[formControlName="start_date"]')?.getAttribute('aria-label')).toBe('From');
+      expect(form.querySelector('[formControlName="end_date"]')?.getAttribute('aria-label')).toBe('To');
+      expect(labelOf(form, 'days_of_month')).toBe('Repeat On');
     });
   });
 });

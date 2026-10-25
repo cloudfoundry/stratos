@@ -3,7 +3,7 @@ import { AfterContentInit, Component, OnDestroy, signal, ChangeDetectionStrategy
 import { ReactiveFormsModule, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { Observable, of as observableOf, Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, pathGet, StepOnNextResult } from '@stratosui/core';
+import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, pathGet, StepOnNextResult } from '@stratosui/core';
 import { APIResource } from '@stratosui/store';
 import { IServicePlan } from '../../../../cf-api-svc.types';
 import { IApp } from '../../../../cf-api.types';
@@ -24,7 +24,6 @@ interface BindAppsForm {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     SchemaFormComponent

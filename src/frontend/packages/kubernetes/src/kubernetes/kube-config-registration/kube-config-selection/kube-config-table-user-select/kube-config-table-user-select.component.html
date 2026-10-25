@@ -1,6 +1,6 @@
 @if (hasUser) {
   <div>
-    <app-select [(value)]="selected" (selectionChange)="valueChanged($event.value)">
+    <app-select ariaLabel="User" [(value)]="selected" (selectionChange)="valueChanged($event.value)">
       <app-option [value]="''">Register Only</app-option>
       @for (user of row._users; track user) {
         <app-option [value]="user.name">{{ user.name }}</app-option>

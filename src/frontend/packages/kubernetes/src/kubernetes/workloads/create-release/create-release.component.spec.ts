@@ -157,6 +157,19 @@ describe('CreateReleaseComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('names the cluster, name and namespace fields', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const labelOf = (control: string) => {
+      const field = root.querySelector(`[formControlName="${control}"]`);
+      expect(field?.id, `${control} has an id`).toBeTruthy();
+      return root.querySelector(`label[for="${field!.id}"]`)?.textContent?.trim();
+    };
+    expect(root.querySelector('select[formControlName="endpoint"]')?.getAttribute('aria-label'))
+      .toBe('Kubernetes cluster');
+    expect(labelOf('releaseName')).toBe('Name');
+    expect(labelOf('releaseNamespace')).toBe('Namespace');
+  });
+
   // Endpoint preselection: a single cluster is selected outright, and with
   // several the first one is preselected.
   const createWithEndpoints = (guids: string[]) => {

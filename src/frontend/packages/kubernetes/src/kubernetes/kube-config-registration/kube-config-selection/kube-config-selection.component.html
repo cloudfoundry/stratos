@@ -5,6 +5,7 @@
         @if (editRowId() === row._id) {
           <div class="flex items-center gap-1">
             <input
+              aria-label="Name"
               class="flex-1 min-w-0 px-2 py-1 text-sm border border-content-border rounded bg-content-bg text-content-text"
               [value]="editRowName()"
               (click)="$event.stopPropagation()"

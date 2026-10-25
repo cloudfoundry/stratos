@@ -1,7 +1,7 @@
 <div [formGroup]="formGroup" class="p-4 space-y-4">
   <div formGroupName="authValues" class="space-y-4">
-    <label class="label" for="kubeconfig">Specify `kubeconfig` file:</label>
-    <app-file-input placeholder="kubeconfig" fileFormControlName="kubeconfig">
+    <span class="label" id="kubeconfig-caption">Specify `kubeconfig` file:</span>
+    <app-file-input placeholder="kubeconfig" fileFormControlName="kubeconfig" labelledBy="kubeconfig-caption">
     </app-file-input>
     <input formControlName="kubeconfig" hidden="true">
   </div>

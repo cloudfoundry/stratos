@@ -1,7 +1,7 @@
 <div [formGroup]="formGroup">
   <div formGroupName="authValues" class="flex flex-col">
-    <span>Select an `Application Default Credentials' file:</span>
-    <app-file-input placeholder="gkeconfig" fileFormControlName="gkeconfig">
+    <span id="gkeconfig-caption">Select an `Application Default Credentials' file:</span>
+    <app-file-input placeholder="gkeconfig" fileFormControlName="gkeconfig" labelledBy="gkeconfig-caption">
     </app-file-input>
     <input appInput formControlName="gkeconfig" hidden=true>
   </div>

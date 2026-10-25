@@ -34,11 +34,13 @@
                           <app-metadata-item label="Effective Date Time">
                             <div class="grid grid-cols-2 gap-2">
                               <div class="form-group">
-                                <input type="datetime-local" name="start_date_time" formControlName="start_date_time" required
+                                <label class="label" for="specific-start">Start</label>
+                                <input id="specific-start" type="datetime-local" name="start_date_time" formControlName="start_date_time" required
                                   placeholder="Start" class="input">
                               </div>
                               <div class="form-group">
-                                <input type="datetime-local" name="end_date_time" formControlName="end_date_time" required
+                                <label class="label" for="specific-end">End</label>
+                                <input id="specific-end" type="datetime-local" name="end_date_time" formControlName="end_date_time" required
                                   placeholder="End" class="input">
                               </div>
                             </div>
@@ -48,15 +50,18 @@
                           <app-metadata-item label="Instance Count">
                             <div class="grid grid-cols-3 gap-2">
                               <div class="form-group">
-                                <input type="number" name="instance_min_count" formControlName="instance_min_count" required
+                                <label class="label" for="specific-instance-min">Minimum</label>
+                                <input id="specific-instance-min" type="number" name="instance_min_count" formControlName="instance_min_count" required
                                   placeholder="Minimum" class="input">
                               </div>
                               <div class="form-group">
-                                <input type="number" name="initial_min_instance_count" formControlName="initial_min_instance_count"
+                                <label class="label" for="specific-initial-min">Initial Minimum</label>
+                                <input id="specific-initial-min" type="number" name="initial_min_instance_count" formControlName="initial_min_instance_count"
                                   placeholder="Initial Minimum" class="input">
                               </div>
                               <div class="form-group">
-                                <input type="number" name="instance_max_count" formControlName="instance_max_count" required
+                                <label class="label" for="specific-instance-max">Maximum</label>
+                                <input id="specific-instance-max" type="number" name="instance_max_count" formControlName="instance_max_count" required
                                   placeholder="Maximum" class="input">
                               </div>
                             </div>

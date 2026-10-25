@@ -3,11 +3,11 @@
     <app-tab-group>
       <app-tab label="Certificate Files">
         <div class="flex flex-col pt-4">
-          <span>Specify Certificate file:</span>
-          <app-file-input fileFormControlName="cert" placeholder="cert">
+          <span id="kube-cert-file-caption">Specify Certificate file:</span>
+          <app-file-input fileFormControlName="cert" placeholder="cert" labelledBy="kube-cert-file-caption">
           </app-file-input>
-          <span>Specify Certificate key file:</span>
-          <app-file-input fileFormControlName="certKey" placeholder="certKey">
+          <span id="kube-cert-key-file-caption">Specify Certificate key file:</span>
+          <app-file-input fileFormControlName="certKey" placeholder="certKey" labelledBy="kube-cert-key-file-caption">
           </app-file-input>
           <input formControlName="cert" hidden="true">
           <input formControlName="certKey" hidden="true">
@@ -15,11 +15,11 @@
       </app-tab>
       <app-tab label="Certificate Content">
         <div class="flex flex-col gap-3 pt-4" spellcheck="false">
-          <span class="text-sm">Specify Certificate:</span>
-          <textarea rows="8" formControlName="cert"
+          <label class="text-sm" for="kube-cert">Specify Certificate:</label>
+          <textarea id="kube-cert" rows="8" formControlName="cert"
             class="w-full focus:outline-none min-h-[200px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
-          <span class="text-sm">Specify Certificate key:</span>
-          <textarea rows="8" formControlName="certKey"
+          <label class="text-sm" for="kube-cert-key">Specify Certificate key:</label>
+          <textarea id="kube-cert-key" rows="8" formControlName="certKey"
             class="w-full focus:outline-none min-h-[200px] resize-y font-mono text-sm border border-content-border rounded-md p-3 bg-content-bg focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
         </div>
       </app-tab>

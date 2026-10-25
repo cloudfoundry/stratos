@@ -20,8 +20,8 @@
         </app-checkbox>
         <app-checkbox appInput id="useCACert" [checked]="showCACertField()" (change)="toggleCACertField()">Use a CA Certificate for the endpoint</app-checkbox>
         <div [ngClass]="{'edit-endpoint__shown': showCACertField()}" class="edit-endpoint__advanced" spellcheck=false>
-          <span class="edit-endpoint__cacert-title text-sm font-medium text-[var(--content-text)]">Specify CA Certificate:</span>
-          <textarea rows="10" class="edit-endpoint__cacert input font-mono text-sm bg-[var(--input-bg)] text-[var(--input-text)] border-[var(--input-border)]" appInput formControlName="caCert" name="caCert"></textarea>
+          <label class="edit-endpoint__cacert-title text-sm font-medium text-[var(--content-text)]" for="ca-cert">Specify CA Certificate:</label>
+          <textarea id="ca-cert" rows="10" class="edit-endpoint__cacert input font-mono text-sm bg-[var(--input-bg)] text-[var(--input-text)] border-[var(--input-border)]" appInput formControlName="caCert" name="caCert"></textarea>
         </div>
         @if (showAdvancedFields) {
           <div class="edit-endpoint__section">

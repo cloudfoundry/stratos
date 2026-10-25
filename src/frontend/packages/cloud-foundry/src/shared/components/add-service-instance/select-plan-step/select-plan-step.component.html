@@ -2,8 +2,7 @@
   <div #noplans></div>
   <form class="stepper-form" [formGroup]="stepperForm">
     <app-form-field>
-      <app-label>Service Plan</app-label>
-      <app-select class="form-control" formControlName="servicePlans" [appFocus]="!!(servicePlans$ | async)">
+      <app-select class="form-control" formControlName="servicePlans" placeholder="Choose Service Plan" [appFocus]="!!(servicePlans$ | async)">
         @for (servicePlan of servicePlans$ | async; track servicePlan.guid) {
           <app-option [value]="servicePlan.guid">{{ servicePlan.name }}</app-option>
         }

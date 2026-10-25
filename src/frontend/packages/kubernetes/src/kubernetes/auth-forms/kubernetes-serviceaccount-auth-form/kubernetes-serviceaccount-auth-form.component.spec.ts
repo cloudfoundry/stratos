@@ -40,4 +40,11 @@ describe('KubernetesSATokenAuthFormComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('labels the token box with its caption', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const box = root.querySelector('textarea[formControlName="token"]');
+    expect(box?.id, 'token has an id').toBeTruthy();
+    expect(root.querySelector(`label[for="${box!.id}"]`)?.textContent?.trim()).toBe('Token:');
+  });
 });

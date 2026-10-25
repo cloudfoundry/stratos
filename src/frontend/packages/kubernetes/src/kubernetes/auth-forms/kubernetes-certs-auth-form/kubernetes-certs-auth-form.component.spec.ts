@@ -43,4 +43,21 @@ describe('KubernetesCertsAuthFormComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('names each file picker and certificate box after its caption', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const captionOf = (el: Element | null) =>
+      root.querySelector(`#${el?.getAttribute('aria-labelledby')}`)?.textContent?.trim();
+    const paths = root.querySelectorAll('app-file-input input[type="text"]');
+    expect(captionOf(paths[0])).toBe('Specify Certificate file:');
+    expect(captionOf(paths[1])).toBe('Specify Certificate key file:');
+
+    const labelOf = (control: string) => {
+      const box = root.querySelector(`textarea[formControlName="${control}"]`);
+      expect(box?.id, `${control} has an id`).toBeTruthy();
+      return root.querySelector(`label[for="${box!.id}"]`)?.textContent?.trim();
+    };
+    expect(labelOf('cert')).toBe('Specify Certificate:');
+    expect(labelOf('certKey')).toBe('Specify Certificate key:');
+  });
 });

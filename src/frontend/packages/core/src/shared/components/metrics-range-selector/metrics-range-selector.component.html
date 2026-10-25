@@ -19,7 +19,7 @@
       (keydown.space)="showOverlay = false; $event.preventDefault()"></div>
   </div>
   <app-form-field>
-    <app-select [(value)]="rangeSelectorManager.selectedTimeRange">
+    <app-select ariaLabel="Time window" [(value)]="rangeSelectorManager.selectedTimeRange">
       @for (time of rangeSelectorManager.times; track time) {
         <app-option [value]="time">
           {{time.label}}

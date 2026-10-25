@@ -96,6 +96,7 @@
               @if (fr.valueType === 'date') {
                 <select
                   data-test="range-mode"
+                  [attr.aria-label]="filterFieldHeader() + ' range type'"
                   class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
                   [value]="fr.selected()?.mode ?? 'date'"
                   (change)="updateRange(fr, { mode: $any($event.target).value })">
@@ -106,6 +107,7 @@
               }
               <select
                 data-test="range-op"
+                [attr.aria-label]="filterFieldHeader() + ' comparison'"
                 class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
                 [value]="fr.selected()?.op ?? 'gte'"
                 (change)="updateRange(fr, { op: $any($event.target).value })">
@@ -117,6 +119,7 @@
               </select>
               <input
                 data-test="range-a"
+                [attr.aria-label]="filterFieldHeader() + ((fr.selected()?.op ?? 'gte') === 'between' ? ' start' : ' value')"
                 [type]="fr.valueType === 'date' && !isRelativeRange(fr) ? 'date' : 'number'"
                 [attr.min]="isRelativeRange(fr) ? 1 : null"
                 class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
@@ -125,6 +128,7 @@
               @if ((fr.selected()?.op ?? 'gte') === 'between') {
                 <input
                   data-test="range-b"
+                  [attr.aria-label]="filterFieldHeader() + ' end'"
                   [type]="fr.valueType === 'date' && !isRelativeRange(fr) ? 'date' : 'number'"
                   [attr.min]="isRelativeRange(fr) ? 1 : null"
                   class="text-sm border border-content-border rounded bg-content-bg text-content-text px-1 py-0.5"
@@ -234,6 +238,7 @@
       <div data-test="sort-controls" class="flex items-center gap-1 text-sm text-content-muted">
         <span>Sort:</span>
         <select
+          aria-label="Sort"
           (change)="onSortFieldChange($any($event.target).value)"
           class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
           @for (col of sortableColumns(); track col.key) {
@@ -477,6 +482,7 @@
                       @if (checkboxColumn(); as cbCol) {
                         <input
                           data-test="card-select-checkbox"
+                          [attr.aria-label]="rowSelectLabel(cbCol, row)"
                           type="checkbox"
                           [checked]="isCheckboxSelected(cbCol, row)"
                           [disabled]="isCheckboxDisabled(cbCol, row)"
@@ -536,6 +542,7 @@
                     <span class="text-content-muted">{{ col.header }}</span>
                     <input
                       data-test="row-radio"
+                      [attr.aria-label]="rowSelectLabel(col, row)"
                       type="radio"
                       [name]="'signal-list-radio-card-' + (col.key ?? col.header)"
                       [checked]="isRadioSelected(col, row)"
@@ -648,6 +655,7 @@
                   @if (col.kind === 'checkbox' && col.checkbox?.selectAll) {
                     <input
                       data-test="select-all"
+                      aria-label="Select all"
                       type="checkbox"
                       [checked]="selectAllChecked(col)"
                       [indeterminate]="selectAllIndeterminate(col)"
@@ -799,6 +807,7 @@
                   } @else if (col.kind === 'radio' && col.radio) {
                     <input
                       data-test="row-radio"
+                      [attr.aria-label]="rowSelectLabel(col, row)"
                       type="radio"
                       [name]="'signal-list-radio-' + (col.key ?? col.header)"
                       [checked]="isRadioSelected(col, row)"
@@ -810,6 +819,7 @@
                   } @else if (col.kind === 'checkbox' && col.checkbox) {
                     <input
                       data-test="row-checkbox"
+                      [attr.aria-label]="rowSelectLabel(col, row)"
                       type="checkbox"
                       [checked]="isCheckboxSelected(col, row)"
                       [disabled]="isCheckboxDisabled(col, row)"
@@ -911,6 +921,7 @@
       <span>Items per page:</span>
       <select
         data-test="page-size"
+        aria-label="Items per page"
         (change)="onPageSizeChange($any($event.target).value)"
         class="px-2 py-1 border border-content-border rounded bg-content-bg text-content-text">
         @for (opt of pageSizeOptions(); track opt) {

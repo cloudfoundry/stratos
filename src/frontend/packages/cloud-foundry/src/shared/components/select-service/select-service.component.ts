@@ -15,7 +15,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest, Observable, of as observableOf, Subject } from 'rxjs';
 import { catchError, filter, map, takeUntil } from 'rxjs/operators';
 
-import { CustomFormFieldComponent, MatLabelComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult, naturalCompare } from '@stratosui/core';
+import { CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, StepOnNextResult, naturalCompare } from '@stratosui/core';
 import { ServicesWallService } from '../../../features/services/services/services-wall.service';
 import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 import { CfServiceCardComponent } from '../cards/cf-service-card/cf-service-card.component';
@@ -43,7 +43,6 @@ interface SelectServiceForm {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     CfServiceCardComponent

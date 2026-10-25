@@ -1,7 +1,7 @@
 import { AsyncPipe, CommonModule, TitleCasePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Injector, OnDestroy, ViewChild, ViewContainerRef, effect, inject, runInInjectionContext, signal } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CustomFormFieldComponent, MatLabelComponent } from '@stratosui/core';
+import { CustomFormFieldComponent } from '@stratosui/core';
 import { CustomSelectComponent, CustomOptionComponent } from '@stratosui/core';
 import { naturalCompare } from '@stratosui/core';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -56,7 +56,6 @@ interface SelectPlanForm {
     CommonModule,
     ReactiveFormsModule,
     CustomFormFieldComponent,
-    MatLabelComponent,
     CustomSelectComponent,
     CustomOptionComponent,
     AsyncPipe,

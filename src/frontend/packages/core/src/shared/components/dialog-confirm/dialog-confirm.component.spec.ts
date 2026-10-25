@@ -63,6 +63,13 @@ describe('DialogConfirmComponent', () => {
     expect(spy).toHaveBeenCalled();
   });
 
+  it('labels the type-to-confirm field with its prompt', () => {
+    const input = element.querySelector<HTMLInputElement>('#typeToConfirm');
+    expect(input).toBeTruthy();
+    const label = element.querySelector(`label[for="${input!.id}"]`);
+    expect(label?.textContent?.replace(/\s+/g, ' ').trim()).toBe('Please type textToMatch to continue.');
+  });
+
   it('should enable confirm button if matches text', () => {
     const confirm: HTMLButtonElement | null = element.querySelector('.confirm-dialog__confirm');
     const input: HTMLInputElement | null = element.querySelector('input');

@@ -8,7 +8,7 @@
   [addAction]="addKeyAction" [isAdding]="isAdding">
   <div subNavForm class="flex items-center gap-2">
     <input class="rounded border border-content-border bg-content-bg px-2 py-1 text-sm"
-      type="text" name="keyName" autocomplete="off" placeholder="Key name"
+      type="text" name="keyName" autocomplete="off" placeholder="Key name" aria-label="Key name"
       [value]="newKeyName()" (input)="newKeyName.set($any($event.target).value)"
       (keydown.enter)="createKey()" [disabled]="creating()" />
     <button type="button"

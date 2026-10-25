@@ -6,7 +6,7 @@
     <form [formGroup]="details" class="stepper-form flex-1">
       <b>Select the Kubernetes cluster to install to</b>
       <div class="form-group">
-        <select class="select w-full" formControlName="endpoint" name="endpoint">
+        <select class="select w-full" formControlName="endpoint" name="endpoint" aria-label="Kubernetes cluster">
           <option value="" disabled>Select a Kubernetes cluster</option>
           @for (kube of kubeEndpoints$ | async; track kube) {
             <option [value]="kube.guid">
@@ -18,7 +18,9 @@
       <br>
         <b>Specify name and namespace for the installation</b>
         <div class="form-group">
+          <label class="label" for="release-name">Name</label>
           <input #releaseNameInputField
+            id="release-name"
             class="input w-full"
             placeholder="Name"
             name="releaseName"
@@ -27,7 +29,9 @@
         </div>
 
         <div class="form-group relative">
+          <label class="label" for="release-namespace">Namespace</label>
           <input type="text"
+            id="release-namespace"
             class="input w-full"
             placeholder="Namespace"
             formControlName="releaseNamespace"

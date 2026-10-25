@@ -6,24 +6,28 @@
         <!--- Section -->
         <div class="deploy-options__title"><b>General</b></div>
         <div class="form-field" [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
-          <input class="input" placeholder="Application Name" formControlName="name">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-name">Application Name</label>
+          <input id="deploy-name" class="input" placeholder="Application Name" formControlName="name">
         </div>
         <div class="form-field">
-          <input class="input" name="instanceCount" placeholder="Number of Instances" formControlName="instances"
+          <label class="block text-sm text-content-muted mb-1" for="deploy-instances">Number of Instances</label>
+          <input id="deploy-instances" class="input" name="instanceCount" placeholder="Number of Instances" formControlName="instances"
             type="number">
         </div>
         <!--- End Section -->
         <!--- Section -->
         <div class="deploy-options__title"><b>Quota</b></div>
         <div class="form-field">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-disk-quota">Disk Quota</label>
           <div class="relative">
-            <input class="input pr-10" name="diskQuota" placeholder="Disk Quota" formControlName="disk_quota" type="number">
+            <input id="deploy-disk-quota" class="input pr-10" name="diskQuota" placeholder="Disk Quota" formControlName="disk_quota" type="number">
             <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-content-muted">MB</span>
           </div>
         </div>
         <div class="form-field">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-memory-quota">Memory Quota</label>
           <div class="relative">
-            <input class="input pr-10" name="memoryQuota" placeholder="Memory Quota" formControlName="memory" type="number">
+            <input id="deploy-memory-quota" class="input pr-10" name="memoryQuota" placeholder="Memory Quota" formControlName="memory" type="number">
             <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-content-muted">MB</span>
           </div>
         </div>
@@ -41,10 +45,12 @@
           </label>
         </div>
         <div class="form-field">
-          <input class="input" name="host" placeholder="Host" formControlName="host">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-host">Host</label>
+          <input id="deploy-host" class="input" name="host" placeholder="Host" formControlName="host">
         </div>
         <div class="form-field">
-          <select class="input" name="domain" formControlName="domain">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-domain">Domain</label>
+          <select id="deploy-domain" class="input" name="domain" formControlName="domain">
             <option value="" disabled>Domain</option>
             @for (domain of domains$ | async; track domain.guid) {
               <option [value]="domain.name">
@@ -54,9 +60,10 @@
           </select>
         </div>
         <div class="form-field">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-path">Path</label>
           <div class="relative">
             <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-content-muted">/&nbsp;</span>
-            <input class="input pl-8" name="path" placeholder="Path" formControlName="path">
+            <input id="deploy-path" class="input pl-8" name="path" placeholder="Path" formControlName="path">
           </div>
         </div>
         <!--- End Section -->
@@ -71,7 +78,8 @@
           </label>
         </div>
         <div class="form-field">
-          <select class="input" name="stack" formControlName="stack">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-stack">Stack</label>
+          <select id="deploy-stack" class="input" name="stack" formControlName="stack">
             <option value="">Stack</option>
             @for (stack of stacks$ | async; track stack.guid) {
               <option [value]="stack.name">
@@ -81,14 +89,17 @@
           </select>
         </div>
         <div class="form-field">
-          <input class="input" name="buildpack" placeholder="Custom buildpack" formControlName="buildpack">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-buildpack">Custom buildpack</label>
+          <input id="deploy-buildpack" class="input" name="buildpack" placeholder="Custom buildpack" formControlName="buildpack">
           <p class="mt-1 text-sm text-content-muted">Custom buildpack by name or Git URL</p>
         </div>
         <div class="form-field" [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
-          <input class="input" placeholder="Docker Image" formControlName="dockerImage">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-docker-image">Docker Image</label>
+          <input id="deploy-docker-image" class="input" placeholder="Docker Image" formControlName="dockerImage">
         </div>
         <div class="form-field" [ngClass]="{'hidden': sourceType.id === DEPLOY_TYPES_IDS.DOCKER_IMG}">
-          <input class="input" placeholder="Docker Username" formControlName="dockerUsername">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-docker-username">Docker Username</label>
+          <input id="deploy-docker-username" class="input" placeholder="Docker Username" formControlName="dockerUsername">
           <p class="mt-1 text-sm text-content-muted">Docker Username works with the Application's `CF_DOCKER_PASSWORD` environment variable</p>
         </div>
         <!--- End Section -->
@@ -97,10 +108,12 @@
         <!--- Section -->
         <div class="deploy-options__title"><b>Run</b></div>
         <div class="form-field">
-          <input class="input" name="startCommand" placeholder="Start Command" formControlName="startCmd">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-start-command">Start Command</label>
+          <input id="deploy-start-command" class="input" name="startCommand" placeholder="Start Command" formControlName="startCmd">
         </div>
         <div class="form-field">
-          <select class="input" name="healthCheckType" formControlName="healthCheckType">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-health-check-type">Health Check Type</label>
+          <select id="deploy-health-check-type" class="input" name="healthCheckType" formControlName="healthCheckType">
             <option value="">Health Check Type</option>
             @for (check of healthCheckTypes; track check) {
               <option [value]="check">
@@ -110,8 +123,9 @@
           </select>
         </div>
         <div class="form-field">
+          <label class="block text-sm text-content-muted mb-1" for="deploy-health-check-timeout">Health Check Timeout</label>
           <div class="relative">
-            <input class="input pr-20" name="healthCheckTimeout" placeholder="Health Check Timeout" formControlName="time"
+            <input id="deploy-health-check-timeout" class="input pr-20" name="healthCheckTimeout" placeholder="Health Check Timeout" formControlName="time"
               type="number">
             <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-content-muted">seconds</span>
           </div>

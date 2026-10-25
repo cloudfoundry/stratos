@@ -34,4 +34,11 @@ describe('DateTimeComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // A date or time field never shows its placeholder, so it cannot be the name.
+  it('names the date and time fields', () => {
+    const el: HTMLElement = fixture.nativeElement;
+    expect(el.querySelector('input[type="date"]')?.getAttribute('aria-label')).toBe('Choose a date');
+    expect(el.querySelector('input[type="time"]')?.getAttribute('aria-label')).toBe('Choose time');
+  });
 });
