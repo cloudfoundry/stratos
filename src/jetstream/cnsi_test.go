@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql/driver"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
@@ -787,6 +788,61 @@ func TestListCNSIsWithUserEndpointsEnabled(t *testing.T) {
 			})
 
 		})
+	})
+}
+
+// Endpoints of different types may share a URL: a Metrics endpoint can be
+// registered at the Cloud Foundry API's address. With user endpoints on, a
+// user's own endpoint hides the system endpoint it duplicates, but only one
+// of the same type; two system endpoints never hide each other.
+func TestBuildCNSIListHidesOnlyTheSameTypeOfSystemEndpoint(t *testing.T) {
+	t.Parallel()
+
+	Convey("Listing endpoints for an endpoint admin with user endpoints on", t, func() {
+		ctrl := gomock.NewController(t)
+		mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
+		defer ctrl.Finish()
+
+		pp, db, mock := setupPortalProxyWithAuthService(mockStratosAuth)
+		defer db.Close()
+		pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
+
+		res := httptest.NewRecorder()
+		req := setupMockReq("GET", "", nil)
+		_, ctx := setupEchoContext(res, req)
+
+		user := setupMockUser(mockUserGUID, false, []string{"stratos.endpointadmin"})
+		if errSession := pp.setSessionValues(ctx, user.SessionValues); errSession != nil {
+			t.Error(errors.New("unable to mock/stub user in session object"))
+		}
+		mockStratosAuth.EXPECT().GetUser(gomock.Eq(user.ConnectedUser.GUID)).Return(user.ConnectedUser, nil)
+
+		row := func(name, url, cnsiType, creator string, admin bool) []driver.Value {
+			args := createEndpointRowArgs(name, url, mockAuthEndpoint, mockTokenEndpoint, creator, admin)
+			args[0] = name
+			args[2] = cnsiType
+			return args
+		}
+		ownRows := testutils.GetEmptyCNSIRows().
+			AddRow(row("own-metrics", "https://127.0.0.1:50002", "metrics", user.ConnectedUser.GUID, false)...)
+		systemRows := testutils.GetEmptyCNSIRows().
+			AddRow(row("system-cf", "https://127.0.0.1:50001", "cf", "", true)...).
+			AddRow(row("system-metrics-at-cf", "https://127.0.0.1:50001", "metrics", "", true)...).
+			AddRow(row("system-metrics", "https://127.0.0.1:50002", "metrics", "", true)...).
+			AddRow(row("system-cf-at-own-metrics", "https://127.0.0.1:50002", "cf", "", true)...)
+
+		mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs(user.ConnectedUser.GUID).WillReturnRows(ownRows)
+		mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").WillReturnRows(systemRows)
+
+		list, err := pp.buildCNSIList(ctx)
+		So(err, ShouldBeNil)
+		So(mock.ExpectationsWereMet(), ShouldBeNil)
+
+		names := []string{}
+		for _, endpoint := range list {
+			names = append(names, endpoint.Name)
+		}
+		So(names, ShouldResemble, []string{"own-metrics", "system-cf", "system-metrics-at-cf", "system-cf-at-own-metrics"})
 	})
 }
 
