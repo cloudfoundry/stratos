@@ -786,16 +786,17 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 					WillReturnRows(testutils.GetEmptyTokenRows().
 						AddRow("", mockUAAToken, mockUAAToken, time.Now().Add(-time.Hour).Unix(), false, "", "", "", nil, false))
 
-				// remove other connection, since it has the same api url
-				mock.ExpectExec(deleteTokens).
-					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).
-					WillReturnResult(sqlmock.NewResult(1, 1))
-
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
 					WillReturnRows(testutils.ExpectNoRows())
 
 				mock.ExpectExec(insertIntoTokens).
+					WillReturnResult(sqlmock.NewResult(1, 1))
+
+				// only once the new connection works: remove the other
+				// connection, since it has the same api url
+				mock.ExpectExec(deleteTokens).
+					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				err := pp.loginToCNSI(ctxConnectToUser1)
