@@ -86,6 +86,14 @@ describe('EndpointRegisterModalComponent', () => {
     expect(registered).not.toHaveBeenCalled();
   });
 
+  it('is a modal dialog named by its title', () => {
+    const dialog = fixture.nativeElement.querySelector('[role="dialog"]') as HTMLElement;
+    expect(dialog).toBeTruthy();
+    expect(dialog.getAttribute('aria-modal')).toBe('true');
+    const title = dialog.querySelector(`#${dialog.getAttribute('aria-labelledby')}`);
+    expect(title?.textContent?.trim()).toBe('Register Endpoint');
+  });
+
   // The form's own stepper has the Cancel once a type is picked.
   it('shows its own Cancel only while a type is being picked', async () => {
     expect(cancelButtons().length).toBe(1);
