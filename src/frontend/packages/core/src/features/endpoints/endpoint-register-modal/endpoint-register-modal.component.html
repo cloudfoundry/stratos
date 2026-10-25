@@ -1,9 +1,11 @@
 <!-- Modal backdrop with backdrop blur -->
 <div class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-fade-in">
 
-  <!-- Modal container -->
+  <!-- Modal container. The focus trap moves focus in on open, keeps Tab
+       inside, and gives focus back to the opener on close. -->
   <div class="relative w-full max-w-5xl mx-auto animate-modal-slide-up"
-    role="dialog" aria-modal="true" aria-labelledby="endpoint-register-title">
+    role="dialog" aria-modal="true" aria-labelledby="endpoint-register-title"
+    cdkTrapFocus cdkTrapFocusAutoCapture>
 
     <!-- Modal content. No `transform` class: it would create a containing
          block for the CustomSelect dropdown's position:fixed panel, breaking
