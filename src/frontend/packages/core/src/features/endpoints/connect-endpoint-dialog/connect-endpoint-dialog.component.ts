@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy, signal, Injector, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, afterNextRender, signal, Injector, inject } from '@angular/core';
 import { AppProgressBarComponent } from '../../../shared/components/progress-bar/app-progress-bar.component';
 import { MAT_DIALOG_DATA, TailwindDialogConfig, TailwindDialogRef } from '../../../shared/services/tailwind-dialog.service';
 import { Observable, Subscription } from 'rxjs';
@@ -65,6 +65,9 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
 
   private endpointsData!: EndpointsDataService;
 
+  // Per endpoint: the dialog is modeless, so two may be open at once
+  readonly titleId = `connect-endpoint-dialog-title-${this.data.guid}`;
+
   // A failed reconnect does not touch the stored token, so if the endpoint
   // was already connected it still is. Read alongside the error message to
   // reassure the user their session survived the failed attempt.
@@ -86,6 +89,11 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     });
     // delay(0) fixes expression changed error
     this.helpDocument$ = toObservable(this._helpDocument, { injector: this.injector }).pipe(startWith(''), delay(0));
+
+    // Name the dialog by its title. The id depends on the endpoint, which
+    // the call sites' shared open() options cannot name.
+    const host: HTMLElement = inject(ElementRef).nativeElement;
+    afterNextRender(() => host.closest('[role="dialog"]')?.setAttribute('aria-labelledby', this.titleId));
   }
 
   showHelp(helpDocumentUrl: string) {

@@ -6,7 +6,7 @@
 }
 <div class="connection-dialog">
   <div class="connection-dialog__title" data-dialog-drag-handle>
-    <h2 class="dialog-title">
+    <h2 [id]="titleId" class="flex-1 m-0 text-lg font-semibold text-content-text">
       Connect to {{ data.name }}
     </h2>
     @if (helpDocument$ | async; as link) {
