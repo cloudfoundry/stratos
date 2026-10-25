@@ -182,4 +182,50 @@ describe('ConnectEndpointService', () => {
     await third;
     service.destroy();
   });
+
+  // The dialog closes on hasConnected$. An endpoint being Reconnected is
+  // connected before, during and after the attempt, so its being connected
+  // says nothing about how the attempt went.
+  describe('reporting a connect', () => {
+    const connectedEndpoint = { guid: 'ep-1', name: 'ep', api_endpoint: { Host: 'api.example.com' }, user: { name: 'u' } } as unknown as EndpointModel;
+
+    async function reconnect(result: ActionState) {
+      const base = await setup();
+      base.endpoint.set(connectedEndpoint);
+      const connect = vi.fn(async () => result);
+      Object.assign(base.data, { endpoints: signal(new Map()), connect });
+      const service = new ConnectEndpointService(endpointsService, config, base.data, base.injector);
+      const connected = vi.fn();
+      const sub = service.hasConnected$.subscribe(connected);
+      await base.fixture.whenStable();
+
+      vi.useFakeTimers();
+      try {
+        service.setData({ authType: 'creds', authVal: { username: 'u', password: 'wrong' }, systemShared: false, bodyContent: '' });
+        const submitted = await firstValueFrom(service.submit());
+        // The endpoint list is refreshed meanwhile (here: a new object for
+        // the same, still connected endpoint).
+        base.endpoint.set({ ...connectedEndpoint });
+        TestBed.tick();
+        await vi.advanceTimersByTimeAsync(3000);
+        return { submitted, connected };
+      } finally {
+        vi.useRealTimers();
+        sub.unsubscribe();
+        service.destroy();
+      }
+    }
+
+    it('does not report a failed reconnect as connected', async () => {
+      const { submitted, connected } = await reconnect({ busy: false, error: true, message: 'Unauthorized' });
+      expect(submitted.success).toBe(false);
+      expect(connected).not.toHaveBeenCalled();
+    });
+
+    it('reports a reconnect that succeeds, once', async () => {
+      const { submitted, connected } = await reconnect({ busy: false, error: false, message: '' });
+      expect(submitted.success).toBe(true);
+      expect(connected).toHaveBeenCalledTimes(1);
+    });
+  });
 });

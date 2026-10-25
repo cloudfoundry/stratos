@@ -12,7 +12,7 @@ export interface ConnectAuthParams {
   token?: string;
 }
 import { combineLatest, defer, from, merge, Observable, of, ReplaySubject, Subject, Subscription, timer } from 'rxjs';
-import { delay, distinctUntilChanged, filter, finalize, map, pairwise, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
+import { delay, filter, finalize, map, pairwise, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../core/endpoints.service';
 import { safeUnsubscribe } from '../../core/utils.service';
@@ -50,6 +50,8 @@ export class ConnectEndpointService {
 
   public connectingError$!: Observable<string | null>;
   private hasConnected = new Subject<boolean>();
+  // Each tokens call that succeeded
+  private connectSucceeded = new Subject<void>();
   // Why saving the TLS options failed; null once a new attempt starts.
   private saveError = new Subject<string | null>();
 
@@ -108,16 +110,15 @@ export class ConnectEndpointService {
       }
     }));
 
-    this.subs.push(this.connected$.pipe(
-      // Gate on hasAttemptedConnect (like connectingError$): for an
-      // already-connected endpoint (Reconnect flow) the endpoint carries a
-      // user from the moment the dialog opens, and without the gate the
-      // pre-existing connection reads as an instant success - the dialog
-      // self-closes with a "Connected" snackbar before any input.
-      filter(([isConnected]) => isConnected && this.hasAttemptedConnect),
+    // Report a connect only once the tokens call succeeded. An endpoint
+    // being Reconnected is connected throughout, so watching it for a
+    // user read any refresh of the endpoint list during a failed attempt
+    // (e.g. after saving its TLS options) as success, and the dialog
+    // closed with no error shown.
+    this.subs.push(this.connectSucceeded.pipe(
+      switchMap(() => this.connected$.pipe(filter(([isConnected]) => isConnected), take(1))),
       delay(this.connectDelay),
       tap(() => this.hasConnected.next(true)),
-      distinctUntilChanged(([isConnected], [oldIsConnected]) => isConnected && oldIsConnected),
     ).subscribe(([, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
     );
   }
@@ -300,6 +301,7 @@ export class ConnectEndpointService {
           if (username) {
             rememberUsername(this.config.guid, username);
           }
+          this.connectSucceeded.next();
         }
         return {
           success: !actionState.error,
