@@ -42,4 +42,11 @@ describe('TokenEndpointComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // A password-type field: browsers fill a saved password into it unless
+  // told it takes a new one (they ignore "off" there).
+  it('keeps the browser from filling in a saved password', () => {
+    const input: HTMLInputElement = fixture.nativeElement.querySelector('input');
+    expect(input.getAttribute('autocomplete')).toBe('new-password');
+  });
 });

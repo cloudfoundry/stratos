@@ -42,4 +42,11 @@ describe('KubernetesAWSAuthFormComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  // The secret key is a password-type field, so the browser would fill in
+  // the console login it saved for this site.
+  it('keeps the browser from filling in the console login', () => {
+    const inputs = Array.from(fixture.nativeElement.querySelectorAll('input')) as HTMLInputElement[];
+    expect(inputs.map(i => i.getAttribute('autocomplete'))).toEqual(['off', 'off', 'new-password']);
+  });
 });

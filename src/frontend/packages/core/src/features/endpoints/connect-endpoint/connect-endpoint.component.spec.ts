@@ -67,6 +67,18 @@ describe('ConnectEndpointComponent', () => {
     expect(labels.map(l => l.getAttribute('for'))).toEqual(inputs.map(i => i.id));
   });
 
+  // The credentials are the endpoint's, not the console login the browser
+  // saved for this site, so the browser must not fill that in.
+  it('keeps the browser from filling in the console login', async () => {
+    component.connectService = {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: () => undefined,
+    } as unknown as ConnectEndpointService;
+    await fixture.whenStable();
+    const inputs = Array.from(fixture.nativeElement.querySelectorAll('app-credentials-auth-form input')) as HTMLInputElement[];
+    expect(inputs.map(i => i.getAttribute('autocomplete'))).toEqual(['off', 'new-password']);
+  });
+
   // The TLS options are an edit of the endpoint, so the form offers them only
   // to a user who may edit it; the connect then saves them first.
   describe('TLS options', () => {
