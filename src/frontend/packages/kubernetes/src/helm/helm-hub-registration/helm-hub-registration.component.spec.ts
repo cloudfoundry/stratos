@@ -55,6 +55,12 @@ describe('HelmHubRegistrationComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('names the Register button without markdown backticks', () => {
+    const text = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(text).toContain('by clicking Register below.');
+    expect(text).not.toContain('`');
+  });
+
   // Inside the Register Endpoint dialog the form closes the dialog through
   // its handle instead of navigating to the page under it.
   it('closes the dialog, reporting the registration, once registered', async () => {
