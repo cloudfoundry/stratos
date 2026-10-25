@@ -918,3 +918,13 @@ body.modal-open {
     background: var(--input-border);
   }
 }
+
+/* While the side panel (help) is open, full-screen dialog backdrops stop at
+   its left edge, so a dialog re-centres beside the panel instead of under it
+   and keeps its close and action buttons usable. The panel is w-96. On a
+   narrow screen the panel covers the width anyway, so leave the backdrop. */
+@media (min-width: 768px) {
+  body.side-panel-open .fixed.inset-0 {
+    right: 24rem;
+  }
+}
