@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { Validators, FormControl } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
@@ -45,7 +45,8 @@ const testEndpoint = new StratosCatalogEndpointEntity({
         password: new FormControl('', [Validators.required])
           },
       types: new Array<string>(),
-      component: CredentialsAuthFormComponent
+      component: CredentialsAuthFormComponent,
+      help: '/core/assets/connect/test.md',
     }
   ],
   renderPriority: 1
@@ -114,5 +115,14 @@ describe('ConnectEndpointDialogComponent', () => {
     expect(panel.getAttribute('aria-labelledby')).toBe(title.id);
     dialogFixture.destroy();
     panel.remove();
+  });
+
+  // An icon-only button: its name is all a screen reader has
+  it('names the help button', async () => {
+    await vi.waitFor(async () => {
+      await fixture.whenStable();
+      expect(fixture.nativeElement.querySelector('.connection-dialog__help')).not.toBeNull();
+    });
+    expect(fixture.nativeElement.querySelector('.connection-dialog__help').getAttribute('aria-label')).toBe('Help on connecting');
   });
 });

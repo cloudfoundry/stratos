@@ -10,8 +10,8 @@
       Connect to {{ data.name }}
     </h2>
     @if (helpDocument$ | async; as link) {
-      <button [appBlur]="true" class="connection-dialog__help btn-icon" (click)="showHelp(link)">
-        <i class="material-icons">help</i>
+      <button [appBlur]="true" class="connection-dialog__help btn-icon" type="button" aria-label="Help on connecting" (click)="showHelp(link)">
+        <i class="material-icons" aria-hidden="true">help</i>
       </button>
     }
   </div>
