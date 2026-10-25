@@ -280,3 +280,40 @@ func TestConnectFailureShowsTheEndpointsMessage(t *testing.T) {
 		t.Errorf("got %d %q, want 403 %q", status, body["error"], want)
 	}
 }
+
+func TestSameURLAlternatives(t *testing.T) {
+	t.Parallel()
+
+	const user = "user-1"
+	system := &api.CNSIRecord{GUID: "system", CNSIType: "cf"}
+	otherSystem := &api.CNSIRecord{GUID: "other-system", CNSIType: "cf"}
+	own := &api.CNSIRecord{GUID: "own", CNSIType: "cf", Creator: user}
+	othersOwn := &api.CNSIRecord{GUID: "others-own", CNSIType: "cf", Creator: "user-2"}
+	metrics := &api.CNSIRecord{GUID: "metrics", CNSIType: "metrics"}
+	sameURL := []*api.CNSIRecord{system, otherSystem, own, othersOwn, metrics}
+
+	guids := func(records []*api.CNSIRecord) string {
+		names := []string{}
+		for _, r := range records {
+			names = append(names, r.GUID)
+		}
+		return strings.Join(names, ",")
+	}
+
+	cases := []struct {
+		name   string
+		target *api.CNSIRecord
+		want   string
+	}{
+		{"own endpoint replaces the system ones of its type", own, "system,other-system"},
+		{"system endpoint replaces the user's own", system, "own"},
+		{"another user's endpoint is never touched", othersOwn, ""},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := guids(sameURLAlternatives(*tc.target, sameURL, user)); got != tc.want {
+				t.Errorf("alternatives = %q, want %q", got, tc.want)
+			}
+		})
+	}
+}
