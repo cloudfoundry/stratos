@@ -94,4 +94,25 @@ describe('ConnectEndpointDialogComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  // Same header as the app's other dialogs (e.g. the Disconnect confirm),
+  // and the title names the dialog for assistive technology.
+  it('heads the dialog with its title, which names the dialog', async () => {
+    const panel = document.createElement('div');
+    panel.setAttribute('role', 'dialog');
+    document.body.appendChild(panel);
+    const dialogFixture = TestBed.createComponent(ConnectEndpointDialogComponent);
+    panel.appendChild(dialogFixture.nativeElement);
+    await dialogFixture.whenStable();
+
+    const title = panel.querySelector('h2') as HTMLElement;
+    expect(title.textContent?.trim()).toBe('Connect to Test');
+    expect(title.classList).toContain('text-lg');
+    expect(title.classList).toContain('font-semibold');
+    expect(title.closest('[data-dialog-drag-handle]')).not.toBeNull();
+    expect(title.id).toBeTruthy();
+    expect(panel.getAttribute('aria-labelledby')).toBe(title.id);
+    dialogFixture.destroy();
+    panel.remove();
+  });
 });
