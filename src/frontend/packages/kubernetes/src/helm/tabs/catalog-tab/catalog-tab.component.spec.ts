@@ -80,9 +80,7 @@ describe('CatalogTabComponent', () => {
     expect(component).toBeTruthy();
   });
   const helmEndpoint = (guid: string, subType: string) => ({ guid, cnsi_type: HELM_ENDPOINT_TYPE, sub_type: subType });
-  const sidebar = (): HTMLElement | null =>
-    [...fixture.nativeElement.querySelectorAll('h3')]
-      .find((h: HTMLElement) => h.textContent?.includes('Filter By Repository'))?.parentElement ?? null;
+  const sidebar = (): HTMLElement | null => fixture.nativeElement.querySelector('[data-test="repo-sidebar"]');
 
   it('shows the repository sidebar when there are several helm repositories', async () => {
     endpointsList.set([helmEndpoint('r1', HELM_REPO_ENDPOINT_TYPE), helmEndpoint('r2', HELM_REPO_ENDPOINT_TYPE)]);
@@ -90,6 +88,14 @@ describe('CatalogTabComponent', () => {
 
     expect(sidebar()).not.toBeNull();
     expect(component.collapsed()).toBe(true);
+  });
+
+  it('names the repository filter once, by its field label', async () => {
+    endpointsList.set([helmEndpoint('r1', HELM_REPO_ENDPOINT_TYPE), helmEndpoint('r2', HELM_REPO_ENDPOINT_TYPE)]);
+    await fixture.whenStable();
+
+    const text = sidebar()?.textContent ?? '';
+    expect(text.match(/filter by repository/gi)?.length).toBe(1);
   });
 
   it('shows the repository sidebar expanded when Artifact Hub is connected', async () => {
