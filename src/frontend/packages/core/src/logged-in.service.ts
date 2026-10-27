@@ -130,7 +130,9 @@ export class LoggedInService {
 
     const dialogRef = this.dialog.open(LogOutDialogComponent, {
       data: { expiryDate },
-      disableClose: true
+      disableClose: true,
+      // Escape answers the prompt: a user pressing a key is still there.
+      escapeResult: true
     });
 
     dialogRef.afterClosed().subscribe((verify: boolean = false) => {

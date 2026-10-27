@@ -338,7 +338,9 @@ describe('TailwindDialogService', () => {
       vi.useRealTimers();
     });
 
-    it('should NOT close on ESC key when disableClose is true', async () => {
+    // disableClose only blocks the backdrop click; Escape is the keyboard
+    // user's way out of a dialog (ARIA dialog pattern), so it always closes.
+    it('should close on ESC key when disableClose is true', async () => {
       vi.useFakeTimers();
       const dialogRef = service.open(TestDialogComponent, { disableClose: true });
       await vi.advanceTimersByTimeAsync(0);
@@ -348,16 +350,30 @@ describe('TailwindDialogService', () => {
         closed = true;
       });
 
-      // Press ESC key
-      const escapeEvent = new KeyboardEvent('keydown', { key: 'Escape' });
-      document.dispatchEvent(escapeEvent);
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
 
       await vi.advanceTimersByTimeAsync(300);
-      expect(closed).toBe(false);
+      expect(closed).toBe(true);
+      vi.useRealTimers();
+    });
 
-      // Manually close for cleanup
-      dialogRef.close();
+    it('should close with escapeResult on ESC key', async () => {
+      vi.useFakeTimers();
+      const dialogRef = service.open<TestDialogComponent, unknown, boolean>(TestDialogComponent, {
+        disableClose: true,
+        escapeResult: true,
+      });
+      await vi.advanceTimersByTimeAsync(0);
+
+      let result: boolean | undefined;
+      dialogRef.afterClosed().subscribe(r => {
+        result = r;
+      });
+
+      document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
       await vi.advanceTimersByTimeAsync(300);
+      expect(result).toBe(true);
       vi.useRealTimers();
     });
 
