@@ -86,6 +86,13 @@ export interface EndpointConnectOptions {
   body?: FormData | null;
 }
 
+// Another endpoint at the same address the user is also connected to,
+// named by the backend after a connect.
+export interface AlsoConnectedEndpoint {
+  guid: string;
+  name: string;
+}
+
 export interface EndpointRegisterOptions {
   endpointType: EndpointType;
   endpointSubType?: string | null;
@@ -348,7 +355,7 @@ export class EndpointsDataService {
     return result;
   }
 
-  async connect(guid: string, opts: EndpointConnectOptions): Promise<ActionState> {
+  async connect(guid: string, opts: EndpointConnectOptions): Promise<ActionState & { alsoConnected?: AlsoConnectedEndpoint[] }> {
     if (opts.authType === 'sso') {
       // Special-case SSO — redirect kicks the browser away; nothing to await.
       const loc = window.location.protocol + '//' + window.location.hostname +
@@ -370,9 +377,13 @@ export class EndpointsDataService {
     }
 
     this.markConnecting(guid, true);
+    let alsoConnected: AlsoConnectedEndpoint[] = [];
     return this.runMutation(guid, 'POST', TOKENS_URL, body, e =>
       httpErrorResponseToSafeString(e) || 'Could not connect, please try again',
-    ).then(async state => {
+    // The tokens response is a LoginRes, not an endpoint.
+    response => {
+      alsoConnected = (response as { also_connected?: AlsoConnectedEndpoint[] } | null)?.also_connected ?? [];
+    }).then(async state => {
       this.markConnecting(guid, false, state);
       if (state.error) {
         this.lastError.record(guid, state.message);
@@ -398,7 +409,7 @@ export class EndpointsDataService {
           });
         }
       }
-      return state;
+      return { ...state, alsoConnected };
     });
   }
 
