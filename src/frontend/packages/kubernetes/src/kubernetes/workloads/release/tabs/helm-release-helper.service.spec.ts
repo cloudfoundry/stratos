@@ -45,7 +45,7 @@ describe('HelmReleaseHelperService', () => {
       httpMock.expectOne(DETAIL_URL).flush({ name: 'rel-x', namespace: 'ns-a', chart: { metadata: { name: 'nginx' } } });
       const rel: any = await firstValueFrom(helper.release$);
       expect(rel.name).toBe('rel-x');
-      expect(rel.chart.metadata.icon).toBe('/core/assets/custom/app_placeholder.svg');
+      expect(rel.chart.metadata.icon).toBe('/kubernetes/assets/custom/app_placeholder.svg');
     });
 
     it('fetchReleaseHistory loads and emits the revisions array', async () => {
