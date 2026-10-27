@@ -42,7 +42,11 @@
 - The Connect form labels the username and password fields of
   endpoint types that give no labels of their own, such as Metrics.
 - The browser no longer fills the console login into an endpoint's
-  Connect credentials.
+  Connect credentials, or into the Client ID and Client Secret under
+  Advanced Options when registering or editing an endpoint, where it
+  was saved and made every connect fail with "Bad credentials". The
+  user-invite client, backup and restore passwords and setup wizards
+  are marked the same way.
 - Only Stratos admins are offered "Share this endpoint connection",
   which the server refuses for other users.
 - A failed connect puts back the endpoint's previous TLS options (Skip
