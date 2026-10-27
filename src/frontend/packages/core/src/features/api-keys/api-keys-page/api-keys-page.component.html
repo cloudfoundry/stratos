@@ -17,7 +17,9 @@
         <p>Your API Key has been successfully created. Use the following information to connect to <app-product-name></app-product-name>.</p>
         <p><i>Please safely record these details, there is no later way to view them</i></p>
         <ul>
-          <li id="apikey-secret">Secret: {{ details.secret }}</li>
+          <li id="apikey-secret" class="flex items-center gap-1">Secret: {{ details.secret }}
+            <app-copy-to-clipboard [text]="details.secret" tooltip="Copy to clipboard" />
+          </li>
         </ul>
         <button (click)="clearKeyDetails()" class="btn btn-danger" type="button">Close</button>
       </app-card-content>
