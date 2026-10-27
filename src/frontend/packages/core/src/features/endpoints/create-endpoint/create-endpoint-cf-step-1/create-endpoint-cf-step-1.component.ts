@@ -182,7 +182,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       ssoAllowed: this.registerForm.value.ssoAllowedField ? !!this.registerForm.value.ssoAllowedField : false
     };
     if (!result.error) {
-      this.snackBarService.show(`Successfully registered '${name}'`);
+      // 7 s: it shows while the dialog moves to its Connect step.
+      this.snackBarService.show(`Successfully registered '${name}'`, undefined, 7000);
       // Another endpoint at the same URL is not warned about here: the
       // endpoints page's banner says so above Total Endpoints.
     }

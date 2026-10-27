@@ -449,7 +449,8 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     if (!result.error) {
       this.registeredGuid = data.guid;
       this.registeredName = name;
-      this.snackBarService.show(`Successfully registered '${name}'`);
+      // 7 s: it shows while the dialog moves to its Connect step.
+      this.snackBarService.show(`Successfully registered '${name}'`, undefined, 7000);
     }
     const success = !result.error;
     return {
