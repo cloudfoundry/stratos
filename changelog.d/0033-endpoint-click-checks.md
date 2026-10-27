@@ -35,9 +35,10 @@
   same URL.
 - With user endpoints enabled, connecting to an endpoint no longer
   disconnects the user's other connections at the same URL. When a
-  personal endpoint is one of the pair, a message names the other
-  connections of the same type and offers "Disconnect all"; dismissing
-  it keeps them. Two system endpoints at one URL are not reported.
+  personal endpoint is one of the pair, the connect's one message names
+  the other connections of the same type and offers "Disconnect
+  others"; dismissing it keeps them. Two system endpoints at one URL are
+  not reported.
 - After registering an endpoint, the endpoints list stays on screen
   while it refreshes instead of briefly showing "Loading endpoints".
 - The Connect form labels the username and password fields of

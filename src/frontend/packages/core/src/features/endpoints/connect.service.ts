@@ -56,8 +56,10 @@ export class ConnectEndpointService {
   // Why saving the TLS options failed; null once a new attempt starts.
   private saveError = new Subject<string | null>();
 
-  // This Observable is used to observe when conenction has completed
+  // Emits when a connect has completed: true when this service has already
+  // told the user (its "Connected to …" offer), so the caller need not.
   public hasConnected$: Observable<boolean> = this.hasConnected.asObservable();
+  private reportedConnect = false;
   public isBusy$!: Observable<boolean>;
 
   private connecting$!: Observable<boolean>;
@@ -119,7 +121,7 @@ export class ConnectEndpointService {
     this.subs.push(this.connectSucceeded.pipe(
       switchMap(() => this.connected$.pipe(filter(([isConnected]) => isConnected), take(1))),
       delay(this.connectDelay),
-      tap(() => this.hasConnected.next(true)),
+      tap(() => this.hasConnected.next(this.reportedConnect)),
     ).subscribe(([, endpoint]) => this.endpointsService.checkEndpoint(endpoint))
     );
   }
@@ -287,13 +289,16 @@ export class ConnectEndpointService {
     });
   }
 
-  // The user is also connected, at the same address, to endpoints the
-  // backend paired with this one (a personal endpoint is involved). Every
-  // connection stays unless the user asks; dismissing keeps them all.
+  // The user is also connected, at the same address, to endpoints of this
+  // type that the backend paired with this one (a personal endpoint is
+  // involved). Every connection stays unless the user asks; dismissing
+  // keeps them all. The message reports the connect too: one connect, one
+  // message.
   private offerDisconnect(others: { guid: string, name: string }[]) {
     const snackBar = this.injector.get(TailwindSnackBarService);
     const names = others.map(other => `'${other.name}'`).join(', ');
-    snackBar.show(`You are also connected to this address through ${names}. Dismiss to keep all connected.`, 'Disconnect all')
+    snackBar.show(`Connected to '${this.config.name}'. You are also connected to this address through ${names}. ` +
+      'Dismiss to keep all connected.', 'Disconnect others')
       .onAction().pipe(take(1)).subscribe(() => others.forEach(other =>
         this.endpointsData.disconnect(other.guid).then(state => {
           if (state.error) {
@@ -344,6 +349,7 @@ export class ConnectEndpointService {
           if (username) {
             rememberUsername(this.config.guid, username);
           }
+          this.reportedConnect = !!actionState.alsoConnected?.length;
           this.connectSucceeded.next();
           if (actionState.alsoConnected?.length) {
             this.offerDisconnect(actionState.alsoConnected);

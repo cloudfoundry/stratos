@@ -12,6 +12,8 @@ import {
 } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { TailwindDialogRef, MAT_DIALOG_DATA } from '@stratosui/core';
+import { Subject } from 'rxjs';
+import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { AppTestModule } from '@test-framework/core-test.helper';
 import { SidePanelService } from '../../../shared/services/side-panel.service';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
@@ -20,6 +22,7 @@ import { CredentialsAuthFormComponent } from './auth-forms/credentials-auth-form
 import { ConnectEndpointDialogComponent } from './connect-endpoint-dialog.component';
 
 class TailwindDialogRefMock {
+  close = vi.fn();
 }
 
 class DialogDataMock implements ConnectEndpointConfig {
@@ -124,5 +127,27 @@ describe('ConnectEndpointDialogComponent', () => {
       expect(fixture.nativeElement.querySelector('.connection-dialog__help')).not.toBeNull();
     });
     expect(fixture.nativeElement.querySelector('.connection-dialog__help').getAttribute('aria-label')).toBe('Help on connecting');
+  });
+
+  // One connect, one message: when the service has already said
+  // "Connected to …" (with its offer), the dialog only closes.
+  describe('on connect', () => {
+    function connect(reported: boolean) {
+      const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show');
+      (component.connectService as unknown as { hasConnected: Subject<boolean> }).hasConnected.next(reported);
+      return { show, close: TestBed.inject(TailwindDialogRef).close };
+    }
+
+    it('says "Connected endpoint" and closes', () => {
+      const { show, close } = connect(false);
+      expect(show).toHaveBeenCalledWith("Connected endpoint 'Test'");
+      expect(close).toHaveBeenCalled();
+    });
+
+    it('only closes when the service already reported the connect', () => {
+      const { show, close } = connect(true);
+      expect(show).not.toHaveBeenCalled();
+      expect(close).toHaveBeenCalled();
+    });
   });
 });

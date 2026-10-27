@@ -83,8 +83,10 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
     this.endpointsData = endpointsData;
     this.connectService = new ConnectEndpointService(endpointsService, data, endpointsData, this.injector);
 
-    this.hasConnected = this.connectService.hasConnected$.subscribe(() => {
-      this.snackBarService.show(`Connected endpoint '${this.data.name}'`);
+    this.hasConnected = this.connectService.hasConnected$.subscribe(reported => {
+      if (!reported) {
+        this.snackBarService.show(`Connected endpoint '${this.data.name}'`);
+      }
       this.dialogRef.close();
     });
     // delay(0) fixes expression changed error
