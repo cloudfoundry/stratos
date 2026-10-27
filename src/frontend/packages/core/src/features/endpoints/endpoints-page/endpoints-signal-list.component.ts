@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Signal, WritableSignal, inject, signal, input } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 
 import {
@@ -27,6 +27,7 @@ import {
   SignalListRowAction,
 } from '../../../shared/components/signal-list/signal-list.component';
 import { SignalListCellTemplateDirective } from '../../../shared/components/signal-list/signal-list-cell-template.directive';
+import { DuplicateUrlBannerComponent } from '../../../shared/components/duplicate-url-banner/duplicate-url-banner.component';
 import { EndpointCardComponent } from '../../../shared/components/endpoint-list/endpoint-card/endpoint-card.component';
 import { EndpointListHelper } from '../../../shared/components/endpoint-list/endpoint-list.helpers';
 import {
@@ -57,6 +58,7 @@ import { EndpointsSignalConfigService } from './endpoints-signal-config.service'
     ListSubNavComponent,
     SignalListComponent,
     SignalListCellTemplateDirective,
+    DuplicateUrlBannerComponent,
     EndpointCardComponent,
     TableCellEndpointAddressComponent,
   ],
@@ -68,6 +70,10 @@ export class EndpointsSignalListComponent {
   private authState = inject(EndpointAuthStateService);
   private endpointsData = inject(EndpointsDataService);
   private lastError = inject(EndpointLastErrorService);
+
+  // Every registered endpoint, connected or not: two registrations at one
+  // URL are worth pointing out before anyone connects to them.
+  readonly registeredEndpoints$ = toObservable(this.endpointsData.endpointsList);
 
   /**
    * Primary "Register Endpoint" action surfaced on the L5 sub-nav row above

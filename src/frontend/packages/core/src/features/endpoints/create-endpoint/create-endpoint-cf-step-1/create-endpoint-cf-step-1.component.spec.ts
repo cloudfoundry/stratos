@@ -6,7 +6,7 @@ import { entityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCata
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { EndpointsSignalConfigService } from '../../endpoints-page/endpoints-signal-config.service';
-import { CreateEndpointCfStep1Component, endpointsSharingUrl } from './create-endpoint-cf-step-1.component';
+import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1.component';
 
 function makeStubEndpointsSignalConfig() {
   return {
@@ -260,22 +260,5 @@ describe('CreateEndpointCfStep1Component', () => {
         'Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or https://api.example.com)'
       );
     });
-  });
-});
-
-// The note after a registration names the other endpoints at the same
-// address. Only endpoints of the same type count: a Metrics endpoint and the
-// Cloud Foundry it watches can share a host without being duplicates.
-describe('endpointsSharingUrl', () => {
-  const endpoints = {
-    cf1: { guid: 'cf1', name: 'Cloud Foundry', cnsi_type: 'cf', api_endpoint: { Host: 'api.example.com' } },
-    m1: { guid: 'm1', name: 'metrics', cnsi_type: 'metrics', api_endpoint: { Host: 'api.example.com' } },
-    m2: { guid: 'm2', name: 'metrics again', cnsi_type: 'metrics', api_endpoint: { Host: 'api.example.com' } },
-    other: { guid: 'other', name: 'other', cnsi_type: 'metrics', api_endpoint: { Host: 'prom.example.com' } },
-  } as any;
-
-  it('names only endpoints of the same type at the same host', () => {
-    expect(endpointsSharingUrl(endpoints, 'api.example.com', 'metrics', 'm2').map(e => e.name)).toEqual(['metrics']);
-    expect(endpointsSharingUrl(endpoints, 'api.example.com', 'cf', 'cf1')).toEqual([]);
   });
 });

@@ -1,3 +1,7 @@
+<app-duplicate-url-banner
+  [endpoints$]="registeredEndpoints$"
+  message="Endpoints that share a URL are listed separately; each has its own connection.">
+</app-duplicate-url-banner>
 <app-list-sub-nav title="Total Endpoints" [count]="totalEndpoints" [addAction]="addAction()"></app-list-sub-nav>
 @if (listConfig(); as config) {
   <app-signal-list [config]="config" class="flex-1 min-h-0">
