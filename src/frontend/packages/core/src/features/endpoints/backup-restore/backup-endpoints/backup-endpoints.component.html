@@ -35,7 +35,7 @@
         <div class="form-field">
           <label class="form-label" for="backup-password">Password</label>
           <input class="form-input w-full" id="backup-password" formControlName="password" name="password" required
-            [type]="!showPassword[1] ? 'password' : 'text'">
+            [type]="!showPassword[1] ? 'password' : 'text'" autocomplete="new-password">
           <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
           </span>
@@ -52,7 +52,7 @@
         <div class="form-field">
           <label class="form-label" for="backup-password2">Confirm Password</label>
           <input class="form-input w-full" id="backup-password2" formControlName="password2" name="password2" required
-            [type]="!showPassword[2] ? 'password' : 'text'">
+            [type]="!showPassword[2] ? 'password' : 'text'" autocomplete="new-password">
           <span class="form-suffix">
             <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
           </span>

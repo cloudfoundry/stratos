@@ -121,6 +121,7 @@
           name="client_id"
           formControlName="clientIDField"
           placeholder="Client ID"
+          autocomplete="off"
         />
       </app-form-field>
       <app-form-field>
@@ -132,6 +133,7 @@
           formControlName="clientSecretField"
           placeholder="Client Secret"
           [type]="!show ? 'password' : 'text'"
+          autocomplete="new-password"
         />
         <button
           class="btn btn-icon"

@@ -28,7 +28,7 @@
                       placeholder="Password"
                       name="password"
                       required
-                      [type]="!showPassword[1] ? 'password' : 'text'">
+                      [type]="!showPassword[1] ? 'password' : 'text'" autocomplete="new-password">
                     <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                       <app-show-hide-button (changed)="showPassword[1] = $event"></app-show-hide-button>
                     </div>
@@ -44,7 +44,7 @@
                       placeholder="Confirm Password"
                       name="adminPasswordConfirm"
                       required
-                      [type]="!showPassword[2] ? 'password' : 'text'">
+                      [type]="!showPassword[2] ? 'password' : 'text'" autocomplete="new-password">
                     <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                       <app-show-hide-button (changed)="showPassword[2] = $event"></app-show-hide-button>
                     </div>
