@@ -22,7 +22,7 @@
             </label>
             <div class="form-field">
               <label class="form-label" for="clientId">Client ID</label>
-              <input id="clientId" class="input" formControlName="clientId" placeholder="Client ID">
+              <input id="clientId" class="input" formControlName="clientId" placeholder="Client ID" autocomplete="off">
             </div>
             <div class="form-field">
               <label class="form-label" for="clientSecret">Client Secret</label>
@@ -32,7 +32,8 @@
                   class="input pr-10"
                   formControlName="clientSecret"
                   placeholder="Client Secret"
-                  [type]="!show ? 'password' : 'text'">
+                  [type]="!show ? 'password' : 'text'"
+                  autocomplete="new-password">
                 <div class="absolute inset-y-0 right-0 flex items-center pr-3">
                   <app-show-hide-button (changed)="show = $event"></app-show-hide-button>
                 </div>

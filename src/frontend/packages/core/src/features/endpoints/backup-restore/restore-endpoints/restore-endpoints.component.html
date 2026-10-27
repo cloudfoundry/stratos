@@ -68,7 +68,7 @@
               formControlName="password"
               required
               [type]="!show ? 'password' : 'text'"
-              placeholder="Enter password">
+              placeholder="Enter password" autocomplete="off">
             <div class="absolute inset-y-0 right-0 flex items-center pr-3">
               <app-show-hide-button (changed)="show = $event"></app-show-hide-button>
             </div>

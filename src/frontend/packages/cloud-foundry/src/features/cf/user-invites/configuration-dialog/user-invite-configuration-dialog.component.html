@@ -15,12 +15,12 @@
     <div class="dialog-content connection-dialog__content">
       <div class="form-field">
         <label class="form-label" for="invite-client-id">Client ID</label>
-        <input id="invite-client-id" class="form-input w-full" placeholder="Client ID" formControlName="clientID">
+        <input id="invite-client-id" class="form-input w-full" placeholder="Client ID" formControlName="clientID" autocomplete="off">
       </div>
       <div class="form-field">
         <label class="form-label" for="invite-client-secret">Client Secret</label>
         <input id="invite-client-secret" class="form-input w-full" placeholder="Client Secret" formControlName="clientSecret"
-          [type]="!showSecret() ? 'password' : 'text'">
+          [type]="!showSecret() ? 'password' : 'text'" autocomplete="new-password">
         <button class="btn-icon" (click)="toggleShowSecret()" [attr.aria-label]="'Hide Secret'"
           [attr.aria-pressed]="!showSecret()" type='button'>
           <i class="material-icons">{{!showSecret() ? 'visibility_off' : 'visibility'}}</i>

@@ -29,14 +29,14 @@
             <app-checkbox appInput id="setClientInfo" name="setClientInfo" formControlName="setClientInfo">Update Client ID and Client Secret
             </app-checkbox>
             <app-form-field>
-              <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required>
+              <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_id" name="client_id" formControlName="clientID" placeholder="Client ID" required autocomplete="off">
               @if (clientID.errors && clientID.errors.required) {
                 <app-error>Client ID is required</app-error>
               }
             </app-form-field>
             <app-form-field>
               <input class="w-full placeholder:!text-transparent focus:outline-none" appInput id="client_secret" name="client_secret" formControlName="clientSecret"
-                placeholder="Client Secret" [type]="!show ? 'password' : 'text'">
+                placeholder="Client Secret" [type]="!show ? 'password' : 'text'" autocomplete="new-password">
               <button class="btn btn-icon" type="button" matSuffix (click)="show = !show" [attr.aria-label]="'Hide Secret'"
                 [attr.aria-pressed]="!show">
                 <app-custom-icon>{{!show ? 'visibility_off' : 'visibility'}}</app-custom-icon>

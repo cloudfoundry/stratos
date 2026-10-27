@@ -84,6 +84,14 @@ describe('CreateEndpointCfStep1Component', () => {
     expect(root.querySelector(`label[for="${box!.id}"]`)?.textContent?.trim()).toBe('Specify CA Certificate:');
   });
 
+  // The hidden Advanced Options sit under the Name field, so a browser
+  // with a saved console login filled it in as Client ID and Client Secret.
+  it('keeps the browser from filling the console login into the client credentials', () => {
+    const root: HTMLElement = fixture.nativeElement;
+    expect(root.querySelector('#client_id')?.getAttribute('autocomplete')).toBe('off');
+    expect(root.querySelector('#client_secret')?.getAttribute('autocomplete')).toBe('new-password');
+  });
+
   describe('URL Validation', () => {
     it('should accept valid hostnames without protocol', () => {
       const urlControl = component.registerForm.controls.urlField;
