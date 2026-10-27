@@ -239,7 +239,7 @@ export class ChartsService {
     if (url) {
       return this.updateStratosUrl(chart, `${this.hostname}${url}`);
     } else {
-      return '/core/assets/custom/placeholder.png';
+      return '/kubernetes/assets/custom/placeholder.png';
     }
   }
 

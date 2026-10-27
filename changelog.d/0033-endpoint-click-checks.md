@@ -92,3 +92,8 @@
 - The Helm charts page names its repository filter once; a heading
   "Filter By Repository" sat over the field's own label of the same
   words.
+- A Helm chart or release without a logo shows the placeholder image
+  instead of a broken image, and the Popeye and kube-score analysis
+  descriptions open. All four pointed at /core/assets, where the build
+  does not put the Kubernetes package's files, so the console page
+  answered instead.

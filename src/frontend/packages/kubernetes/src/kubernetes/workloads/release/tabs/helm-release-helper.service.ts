@@ -132,7 +132,7 @@ export class HelmReleaseHelperService {
       map((item: HelmRelease) => {
         if (!item.chart.metadata.icon) {
           const copy = JSON.parse(JSON.stringify(item));
-          copy.chart.metadata.icon = '/core/assets/custom/app_placeholder.svg';
+          copy.chart.metadata.icon = '/kubernetes/assets/custom/app_placeholder.svg';
           return copy;
         }
         return item;

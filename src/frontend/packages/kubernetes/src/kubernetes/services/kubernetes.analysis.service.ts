@@ -71,14 +71,14 @@ export class KubernetesAnalysisService {
         name: 'PopEye',
         id: 'popeye',
         namespaceAware: true,
-        descriptionUrl: '/core/assets/custom/analysis/popeye.md'
+        descriptionUrl: '/kubernetes/assets/custom/analysis/popeye.md'
       },
       'kube-score':
       {
         name: 'Kube Score',
         id: 'kube-score',
         namespaceAware: true,
-        descriptionUrl: '/core/assets/custom/analysis/kubescore.md'
+        descriptionUrl: '/kubernetes/assets/custom/analysis/kubescore.md'
       }
     };
 
