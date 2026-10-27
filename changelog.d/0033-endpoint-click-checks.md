@@ -97,3 +97,8 @@
   descriptions open. All four pointed at /core/assets, where the build
   does not put the Kubernetes package's files, so the console page
   answered instead.
+
+[BugFixes: API Keys]
+- Create an API Key has room around its title, field and buttons;
+  they ran to the dialog's edges.
+- A new key's secret has a copy button.
