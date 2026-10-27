@@ -63,7 +63,7 @@ const sidebars = {
     {
       type: 'category',
       label: 'Advanced Topics',
-      items: ['advanced/sso', 'advanced/user-endpoints', 'advanced/content-security-policy']
+      items: ['advanced/sso', 'advanced/user-endpoints', 'advanced/api-keys', 'advanced/content-security-policy']
     },
     {
       type: 'category',
