@@ -46,7 +46,11 @@ export interface TailwindDialogConfig<D = any> {
   maxHeight?: string;
   panelClass?: string | string[];
   backdropClass?: string | string[];
+  /** Block dismissal by backdrop click. Escape still closes: it is the
+   *  keyboard user's way out of any dialog (ARIA dialog pattern). */
   disableClose?: boolean;
+  /** Result the dialog closes with when the user presses Escape. */
+  escapeResult?: unknown;
   /** Let the user drag the bottom-right corner to resize the panel. The panel
    *  is pinned to a fixed viewport position so the grip tracks the cursor 1:1
    *  (a flex-centered panel would re-center and grow at half speed). */
@@ -381,21 +385,34 @@ export class TailwindDialogService {
     dialogRef: TailwindDialogRefImpl<T, R>,
     config?: TailwindDialogConfig
   ): void {
+    // Both incidental paths route through here so a dialog holding unsaved
+    // work only has to refuse once, rather than once per dismissal gesture.
+    const dismiss = (result?: R) => {
+      if (dialogRef.closeGuard?.()) {
+        return;
+      }
+      dialogRef.close(result);
+    };
+
+    // Close on Escape key
+    const escapeListener = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        // Only close if this is the topmost dialog
+        const topDialog = this.openDialogs[this.openDialogs.length - 1];
+        if (topDialog === dialogContainer) {
+          dismiss(config?.escapeResult as R);
+        }
+      }
+    };
+    document.addEventListener('keydown', escapeListener);
+    dialogRef.afterClosed().subscribe(() => document.removeEventListener('keydown', escapeListener));
+
     if (!config?.disableClose) {
       // Close on backdrop click — but only a genuine one. A drag that starts
       // inside the dialog (resize grip, text selection) and releases on the
       // backdrop makes the browser synthesize a `click` whose target resolves
       // to the common ancestor (this overlay), which would wrongly dismiss the
       // dialog. Require the press to have ALSO started on the backdrop.
-      // Both incidental paths route through here so a dialog holding unsaved
-      // work only has to refuse once, rather than once per dismissal gesture.
-      const dismiss = () => {
-        if (dialogRef.closeGuard?.()) {
-          return;
-        }
-        dialogRef.close();
-      };
-
       let pressedOnBackdrop = false;
       const pointerDownListener = (event: MouseEvent) => {
         pressedOnBackdrop = event.target === dialogContainer;
@@ -408,21 +425,8 @@ export class TailwindDialogService {
       dialogContainer.addEventListener('mousedown', pointerDownListener);
       dialogContainer.addEventListener('click', backdropClickListener);
 
-      // Close on Escape key
-      const escapeListener = (event: KeyboardEvent) => {
-        if (event.key === 'Escape') {
-          // Only close if this is the topmost dialog
-          const topDialog = this.openDialogs[this.openDialogs.length - 1];
-          if (topDialog === dialogContainer) {
-            dismiss();
-          }
-        }
-      };
-      document.addEventListener('keydown', escapeListener);
-
       // Clean up listeners when dialog closes
       dialogRef.afterClosed().subscribe(() => {
-        document.removeEventListener('keydown', escapeListener);
         dialogContainer.removeEventListener('mousedown', pointerDownListener);
         dialogContainer.removeEventListener('click', backdropClickListener);
       });
