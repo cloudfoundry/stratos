@@ -1,10 +1,11 @@
 import { ChangeDetectionStrategy, Component, computed, Injector, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActionState, EndpointFetchingState, EndpointModel, EndpointsDataService } from '@stratosui/store';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subject } from 'rxjs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { EndpointsService } from '../../core/endpoints.service';
+import { TailwindSnackBarRef, TailwindSnackBarService } from '../../shared/services/tailwind-snackbar.service';
 import { ConnectEndpointConfig, ConnectEndpointService } from './connect.service';
 
 // Stands in for the page or stepper step whose injector each connect is
@@ -259,11 +260,12 @@ describe('ConnectEndpointService', () => {
   describe('reporting a connect', () => {
     const connectedEndpoint = { guid: 'ep-1', name: 'ep', api_endpoint: { Host: 'api.example.com' }, user: { name: 'u' } } as unknown as EndpointModel;
 
-    async function reconnect(result: ActionState) {
+    async function reconnect(result: ActionState & { alsoConnected?: { guid: string, name: string }[] }) {
       const base = await setup();
       base.endpoint.set(connectedEndpoint);
       const connect = vi.fn(async () => result);
-      Object.assign(base.data, { endpoints: signal(new Map()), connect });
+      const disconnect = vi.fn(async () => ({ busy: false, error: false, message: '' }));
+      Object.assign(base.data, { endpoints: signal(new Map()), connect, disconnect });
       const service = new ConnectEndpointService(endpointsService, config, base.data, base.injector);
       const connected = vi.fn();
       const sub = service.hasConnected$.subscribe(connected);
@@ -278,7 +280,7 @@ describe('ConnectEndpointService', () => {
         base.endpoint.set({ ...connectedEndpoint });
         TestBed.tick();
         await vi.advanceTimersByTimeAsync(3000);
-        return { submitted, connected };
+        return { submitted, connected, disconnect };
       } finally {
         vi.useRealTimers();
         sub.unsubscribe();
@@ -296,6 +298,38 @@ describe('ConnectEndpointService', () => {
       const { submitted, connected } = await reconnect({ busy: false, error: false, message: '' });
       expect(submitted.success).toBe(true);
       expect(connected).toHaveBeenCalledTimes(1);
+    });
+
+    describe('with other connections at the same address', () => {
+      function watchSnackbars() {
+        const action = new Subject<void>();
+        const ref = { onAction: () => action, afterDismissed: () => new Subject() } as unknown as TailwindSnackBarRef<unknown>;
+        const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show').mockReturnValue(ref);
+        return { show, action };
+      }
+
+      it('names them and offers to disconnect them all', async () => {
+        const { show } = watchSnackbars();
+        await reconnect({ busy: false, error: false, message: '', alsoConnected: [{ guid: 'ep-2', name: 'norm-lab' }] });
+        expect(show).toHaveBeenCalledWith(expect.stringContaining('norm-lab'), 'Disconnect all');
+      });
+
+      it('disconnects them only when asked', async () => {
+        const { action } = watchSnackbars();
+        const { disconnect } = await reconnect({
+          busy: false, error: false, message: '',
+          alsoConnected: [{ guid: 'ep-2', name: 'norm-lab' }, { guid: 'ep-3', name: 'mine' }],
+        });
+        expect(disconnect).not.toHaveBeenCalled();
+        action.next();
+        expect(disconnect.mock.calls).toEqual([['ep-2'], ['ep-3']]);
+      });
+
+      it('says nothing more when none is listed', async () => {
+        const { show } = watchSnackbars();
+        await reconnect({ busy: false, error: false, message: '' });
+        expect(show).not.toHaveBeenCalledWith(expect.anything(), 'Disconnect all');
+      });
     });
   });
 });

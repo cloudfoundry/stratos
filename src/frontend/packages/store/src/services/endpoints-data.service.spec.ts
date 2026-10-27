@@ -252,6 +252,25 @@ describe('EndpointsDataService', () => {
     expect(svc.connectedSignal()[0]).toMatchObject({ guid: 'cf-2', type: 'cf' });
   });
 
+  it('connect returns the other connections the backend names', async () => {
+    const p = svc.getAll();
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    await p;
+
+    const cp = svc.connect('cf-2', {
+      endpointType: 'cf',
+      authType: 'creds',
+      authValues: { username: 'u', password: 'p' },
+      systemShared: false,
+    });
+    httpMock.expectOne('/api/v1/tokens').flush({ also_connected: [{ guid: 'cf-1', name: 'CF one' }] });
+    await new Promise(r => setTimeout(r, 0));
+    httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
+    const state = await cp;
+
+    expect(state.alsoConnected).toEqual([{ guid: 'cf-1', name: 'CF one' }]);
+  });
+
   it('clearConnected resets the connect delta queue', async () => {
     const p = svc.getAll();
     httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());

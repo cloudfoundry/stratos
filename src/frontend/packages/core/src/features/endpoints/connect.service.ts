@@ -16,6 +16,7 @@ import { delay, filter, finalize, map, pairwise, shareReplay, startWith, switchM
 
 import { EndpointsService } from '../../core/endpoints.service';
 import { safeUnsubscribe } from '../../core/utils.service';
+import { TailwindSnackBarService } from '../../shared/services/tailwind-snackbar.service';
 import { rememberUsername } from './remembered-username';
 
 export interface ConnectEndpointConfig {
@@ -286,6 +287,21 @@ export class ConnectEndpointService {
     });
   }
 
+  // The user is also connected, at the same address, to endpoints the
+  // backend paired with this one (a personal endpoint is involved). Every
+  // connection stays unless the user asks; dismissing keeps them all.
+  private offerDisconnect(others: { guid: string, name: string }[]) {
+    const snackBar = this.injector.get(TailwindSnackBarService);
+    const names = others.map(other => `'${other.name}'`).join(', ');
+    snackBar.show(`You are also connected to this address through ${names}. Dismiss to keep all connected.`, 'Disconnect all')
+      .onAction().pipe(take(1)).subscribe(() => others.forEach(other =>
+        this.endpointsData.disconnect(other.guid).then(state => {
+          if (state.error) {
+            snackBar.show(`Could not disconnect '${other.name}': ${state.message}`, 'Dismiss');
+          }
+        })));
+  }
+
   private connect(): Observable<{ success: boolean, errorMessage: string }> {
     this.hasAttemptedConnect = true;
     const { authType, authVal, systemShared } = this.pData;
@@ -329,6 +345,9 @@ export class ConnectEndpointService {
             rememberUsername(this.config.guid, username);
           }
           this.connectSucceeded.next();
+          if (actionState.alsoConnected?.length) {
+            this.offerDisconnect(actionState.alsoConnected);
+          }
         }
         return {
           success: !actionState.error,
