@@ -308,10 +308,15 @@ describe('ConnectEndpointService', () => {
         return { show, action };
       }
 
-      it('names them and offers to disconnect them all', async () => {
+      it('reports the connect, names them and offers to disconnect them', async () => {
         const { show } = watchSnackbars();
-        await reconnect({ busy: false, error: false, message: '', alsoConnected: [{ guid: 'ep-2', name: 'norm-lab' }] });
-        expect(show).toHaveBeenCalledWith(expect.stringContaining('norm-lab'), 'Disconnect all');
+        const { connected } = await reconnect({ busy: false, error: false, message: '', alsoConnected: [{ guid: 'ep-2', name: 'norm-lab' }] });
+        expect(show).toHaveBeenCalledTimes(1);
+        expect(show).toHaveBeenCalledWith(
+          "Connected to 'ep'. You are also connected to this address through 'norm-lab'. Dismiss to keep all connected.",
+          'Disconnect others');
+        // The dialog need not say "Connected endpoint" as well.
+        expect(connected).toHaveBeenCalledWith(true);
       });
 
       it('disconnects them only when asked', async () => {
@@ -325,10 +330,11 @@ describe('ConnectEndpointService', () => {
         expect(disconnect.mock.calls).toEqual([['ep-2'], ['ep-3']]);
       });
 
-      it('says nothing more when none is listed', async () => {
+      it('says nothing, and leaves the report to the dialog, when none is listed', async () => {
         const { show } = watchSnackbars();
-        await reconnect({ busy: false, error: false, message: '' });
-        expect(show).not.toHaveBeenCalledWith(expect.anything(), 'Disconnect all');
+        const { connected } = await reconnect({ busy: false, error: false, message: '' });
+        expect(show).not.toHaveBeenCalled();
+        expect(connected).toHaveBeenCalledWith(false);
       });
     });
   });
