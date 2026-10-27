@@ -17,9 +17,10 @@
   when the step is taller than the dialog.
 - "Successfully registered '<name>'" stays on screen; the endpoints page
   cleared it as soon as the endpoint list updated.
-- The note that an address is already registered names only endpoints
-  of the same type, so a Metrics endpoint beside the Cloud Foundry it
-  watches is not called a duplicate.
+- When two endpoints of one type share a URL, the endpoints page says so
+  above Total Endpoints, as the Cloud Foundry pages do, in place of a
+  message after registering that had to be dismissed. A Metrics endpoint
+  beside the Cloud Foundry it watches is not counted.
 - Logging in no longer reports "Couldn't check credentials" when the
   login worked but connecting the auto-registered Cloud Foundry endpoint
   failed. The login completes and the failure is logged.
@@ -76,3 +77,5 @@
   states, and the control is linked to its list.
 - The closed side panel can no longer be reached with Tab or announced
   as a button.
+- Escape closes the Connect and Add API Key dialogs, and answers "Yes"
+  to "Are you still there?"; these dialogs ignored it.
