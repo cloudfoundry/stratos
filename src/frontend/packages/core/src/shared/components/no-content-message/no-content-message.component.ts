@@ -46,8 +46,13 @@ export class NoContentMessageComponent implements AfterViewInit {
       if (this.toolBarLinkElement && toolbarAlign) {
         const elem = document.getElementById(toolbarAlign);
         if (elem) {
-          const right = document.body.clientWidth - elem.getBoundingClientRect().right - 3;
-          this.renderer.setStyle(this.toolBarLinkElement.nativeElement, 'right', right + 'px');
+          // The prompt is placed inside its container, which starts well
+          // below the toolbar, so measure both offsets from the container.
+          const link: HTMLElement = this.toolBarLinkElement.nativeElement;
+          const target = elem.getBoundingClientRect();
+          const box = link.parentElement!.getBoundingClientRect();
+          this.renderer.setStyle(link, 'top', (target.bottom - box.top) + 'px');
+          this.renderer.setStyle(link, 'right', (box.right - target.right - 3) + 'px');
           this.renderer.addClass(this.toolBarLinkElement.nativeElement, 'app-no-content-container__link--show');
         }
       }

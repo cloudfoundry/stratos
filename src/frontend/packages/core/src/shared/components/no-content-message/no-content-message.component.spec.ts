@@ -31,4 +31,25 @@ describe('NoContentMessageComponent', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  it('puts the toolbar prompt just below the toolbar button', () => {
+    vi.useFakeTimers();
+    const button = document.createElement('button');
+    button.id = 'toolbar-target';
+    document.body.appendChild(button);
+    vi.spyOn(button, 'getBoundingClientRect').mockReturnValue({ bottom: 60, right: 900 } as DOMRect);
+
+    const f = TestBed.createComponent(NoContentMessageComponent);
+    f.componentInstance.toolbarLink = { text: 'Create an API key' };
+    f.componentRef.setInput('toolbarAlign', 'toolbar-target');
+    f.detectChanges();
+    const link: HTMLElement = f.nativeElement.querySelector('.app-no-content-container__link');
+    vi.spyOn(link.parentElement!, 'getBoundingClientRect').mockReturnValue({ top: 200, right: 1000 } as DOMRect);
+    vi.advanceTimersByTime(500);
+
+    expect(link.style.top).toBe('-140px');
+    expect(link.style.right).toBe('97px');
+    button.remove();
+    vi.useRealTimers();
+  });
 });
