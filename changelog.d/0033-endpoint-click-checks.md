@@ -102,3 +102,6 @@
 - Create an API Key has room around its title, field and buttons;
   they ran to the dialog's edges.
 - A new key's secret has a copy button.
+- The "Create an API key" prompt on an empty API Keys page points at
+  the toolbar button instead of overlapping "You have no API keys";
+  the same prompt on an empty Home page is placed the same way.
