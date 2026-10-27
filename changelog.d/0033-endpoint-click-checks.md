@@ -89,3 +89,6 @@
 - Kubernetes and Helm pages show their icons again, such as the Helm
   charts filter toggle, analysis report status and the kube terminal;
   they showed the icon's name ("filter_list", "warning") as text.
+- The Helm charts page names its repository filter once; a heading
+  "Filter By Repository" sat over the field's own label of the same
+  words.
