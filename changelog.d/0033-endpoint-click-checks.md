@@ -15,8 +15,9 @@
   endpoint options only while "Connect to <name> now" is ticked, starts
   unticked for each registration, and keeps Previous and Connect in view
   when the step is taller than the dialog.
-- "Successfully registered '<name>'" stays on screen; the endpoints page
-  cleared it as soon as the endpoint list updated.
+- "Successfully registered '<name>'" stays on screen for 7 seconds; the
+  endpoints page cleared it as soon as the endpoint list updated, and it
+  was gone before it could be read.
 - When two endpoints of one type share a URL, the endpoints page says so
   above Total Endpoints, as the Cloud Foundry pages do, in place of a
   message after registering that had to be dismissed. A Metrics endpoint
