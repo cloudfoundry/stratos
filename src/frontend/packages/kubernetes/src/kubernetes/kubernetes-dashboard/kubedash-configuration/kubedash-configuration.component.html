@@ -28,7 +28,7 @@
             </div>
             @if (isDashboardConfigured()) {
               <button [routerLink]="dashboardLink" class="btn btn-ghost">
-                <span class="material-symbols-outlined">dashboard</span>
+                <span class="material-icons">dashboard</span>
                 <span class="ml-1">View Dashboard</span>
               </button>
             }
@@ -44,7 +44,7 @@
                 </app-boolean-indicator>
               }
               @if (!status.service) {
-                <span class="material-symbols-outlined">warning</span>
+                <span class="material-icons">warning</span>
               }
             </div>
           </div>
@@ -95,7 +95,7 @@
                 </app-boolean-indicator>
               }
               @if (!status.serviceAccount) {
-                <span class="material-symbols-outlined">warning</span>
+                <span class="material-icons">warning</span>
               }
             </div>
           </div>
@@ -104,7 +104,7 @@
               @if (isAzure()) {
                 <div>
                   <p class="flex items-center">
-                    <span class="material-symbols-outlined">warning</span>You are using the Azure deployed version of Kubernetes Dashboard.
+                    <span class="material-icons">warning</span>You are using the Azure deployed version of Kubernetes Dashboard.
                   </p>
                   <p>This version uses the Service Account 'kubernetes-dashboard' to access the Dashboard UI. You will need to
                     create a Cluster Role Binding as described
@@ -144,7 +144,7 @@
                     will
                   have full permissions over the cluster.</p>
                   <p class="flex items-center">
-                    <span class="material-symbols-outlined">warning</span>Please make sure you understand the risks involved
+                    <span class="material-icons">warning</span>Please make sure you understand the risks involved
                   </p>
                   <div class="flex justify-end w-full">
                     <button (click)="createServiceAccount()" [disabled]="isBusy()" class="btn btn-primary">Create
