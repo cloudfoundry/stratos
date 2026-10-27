@@ -288,9 +288,10 @@ func TestSameURLAlternatives(t *testing.T) {
 	system := &api.CNSIRecord{GUID: "system", CNSIType: "cf"}
 	otherSystem := &api.CNSIRecord{GUID: "other-system", CNSIType: "cf"}
 	own := &api.CNSIRecord{GUID: "own", CNSIType: "cf", Creator: user}
+	ownToo := &api.CNSIRecord{GUID: "own-too", CNSIType: "cf", Creator: user}
 	othersOwn := &api.CNSIRecord{GUID: "others-own", CNSIType: "cf", Creator: "user-2"}
 	metrics := &api.CNSIRecord{GUID: "metrics", CNSIType: "metrics"}
-	sameURL := []*api.CNSIRecord{system, otherSystem, own, othersOwn, metrics}
+	sameURL := []*api.CNSIRecord{system, otherSystem, own, ownToo, othersOwn, metrics}
 
 	guids := func(records []*api.CNSIRecord) string {
 		names := []string{}
@@ -305,9 +306,8 @@ func TestSameURLAlternatives(t *testing.T) {
 		target *api.CNSIRecord
 		want   string
 	}{
-		{"own endpoint replaces the system ones of its type", own, "system,other-system"},
-		{"system endpoint replaces the user's own", system, "own"},
-		{"another user's endpoint is never touched", othersOwn, ""},
+		{"own endpoint pairs with the system ones and the user's other own ones", own, "system,other-system,own-too"},
+		{"system endpoint pairs with the user's own ones, not other system ones", system, "own,own-too"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

@@ -214,6 +214,14 @@ type LoginRes struct {
 	APIEndpoint *url.URL       `json:"api_endpoint"`
 	Admin       bool           `json:"admin"`
 	User        *ConnectedUser `json:"user"`
+	// The user's other connections at the same address, when the pair
+	// includes a personal endpoint; theirs to keep or disconnect.
+	AlsoConnected []EndpointRef `json:"also_connected,omitempty"`
+}
+
+type EndpointRef struct {
+	GUID string `json:"guid"`
+	Name string `json:"name"`
 }
 
 type LocalLoginRes struct {
