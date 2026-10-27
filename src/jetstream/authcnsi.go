@@ -153,7 +153,7 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 		return nil, echo.NewHTTPError(http.StatusUnauthorized, "Could not find correct session value")
 	}
 
-	var replaced []*api.CNSIRecord
+	var alsoConnected []api.EndpointRef
 
 	// With user endpoints on (enabled or admin_only), a personal endpoint
 	// (one with a creator) can be connected to only by its creator; anyone
@@ -164,8 +164,8 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 			return nil, echo.NewHTTPError(http.StatusUnauthorized, "Can not connect - users are not allowed to connect to personal endpoints created by other users")
 		}
 
-		// A connected alternative at the same URL is disconnected, but only
-		// once this connection works (below).
+		// The user's other connections at the same URL stay; the response
+		// names them so the user can choose to disconnect them.
 		cnsiList, err := p.listCNSIByAPIEndpoint(cnsiRecord.APIEndpoint.String())
 		if err != nil {
 			return nil, echo.NewHTTPError(
@@ -175,8 +175,10 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 		}
 
 		for _, cnsi := range sameURLAlternatives(cnsiRecord, cnsiList, userID) {
-			if _, ok := p.GetCNSITokenRecord(cnsi.GUID, userID); ok {
-				replaced = append(replaced, cnsi)
+			// A shared connection belongs to every user, and a cleared one is
+			// not a connection.
+			if tr, ok := p.GetCNSITokenRecord(cnsi.GUID, userID); ok && !tr.SystemShared && !tr.Disconnected {
+				alsoConnected = append(alsoConnected, api.EndpointRef{GUID: cnsi.GUID, Name: cnsi.Name})
 			}
 		}
 	}
@@ -231,17 +233,12 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 				return nil, connectFailure(err)
 			}
 
-			for _, cnsi := range replaced {
-				if clearErr := p.ClearCNSIToken(*cnsi, userID); clearErr != nil {
-					slog.Warn("unable to clear the token for the endpoint", "endpoint", cnsi.GUID, "user", userID, "error", clearErr)
-				}
-			}
-
 			resp := &api.LoginRes{
-				Account:     userID,
-				TokenExpiry: tokenRecord.TokenExpiry,
-				APIEndpoint: cnsiRecord.APIEndpoint,
-				Admin:       isAdmin,
+				Account:       userID,
+				TokenExpiry:   tokenRecord.TokenExpiry,
+				APIEndpoint:   cnsiRecord.APIEndpoint,
+				Admin:         isAdmin,
+				AlsoConnected: alsoConnected,
 			}
 
 			cnsiUser, ok := p.GetCNSIUserFromToken(cnsiGUID, tokenRecord)
@@ -661,19 +658,19 @@ func isUnreachable(err error) bool {
 	return errors.As(err, &netErr) || errors.Is(err, context.DeadlineExceeded)
 }
 
-// sameURLAlternatives returns the endpoints at the same URL that stand in
-// for target: a user's own endpoint replaces the system endpoint of its
-// type in the list, so only one of the pair stays connected. System
-// endpoints never replace each other.
+// sameURLAlternatives returns the endpoints at the same URL, of target's
+// type, that the user could also be connected to, where the pair includes
+// a personal endpoint. Two system endpoints at one URL are deliberate
+// (several accounts on one foundation) and are not reported.
 func sameURLAlternatives(target api.CNSIRecord, sameURL []*api.CNSIRecord, userID string) []*api.CNSIRecord {
 	var alternatives []*api.CNSIRecord
 	for _, cnsi := range sameURL {
 		if cnsi.GUID == target.GUID || cnsi.CNSIType != target.CNSIType {
 			continue
 		}
-		ownReplacesSystem := target.Creator == userID && len(cnsi.Creator) == 0
-		systemReplacesOwn := len(target.Creator) == 0 && cnsi.Creator == userID
-		if ownReplacesSystem || systemReplacesOwn {
+		usable := cnsi.Creator == userID || len(cnsi.Creator) == 0
+		personalPair := len(target.Creator) != 0 || len(cnsi.Creator) != 0
+		if usable && personalPair {
 			alternatives = append(alternatives, cnsi)
 		}
 	}

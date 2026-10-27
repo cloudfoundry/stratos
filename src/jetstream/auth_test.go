@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"log/slog"
@@ -22,6 +23,7 @@ import (
 	mock_api "github.com/cloudfoundry/stratos/src/jetstream/api/mock"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry/stratos/src/jetstream/testutils"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -672,13 +674,13 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 		userEndpoint1Args := createEndpointRowArgs("CF Endpoint 2", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockEndpointAdmin1.ConnectedUser.GUID, mockEndpointAdmin1.ConnectedUser.Admin)
 		userEndpoint1Rows := sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).AddRow(userEndpoint1Args...)
 
-		res = httptest.NewRecorder()
+		resUser1 := httptest.NewRecorder()
 		req = setupMockReq("POST", "", map[string]string{
 			"username":  "admin",
 			"password":  "changeme",
 			"cnsi_guid": fmt.Sprintf("%v", userEndpoint1Args[0]),
 		})
-		_, ctxConnectToUser1 := setupEchoContext(res, req)
+		_, ctxConnectToUser1 := setupEchoContext(resUser1, req)
 
 		// setup everything to mock a connection to a different user endpoint
 		userEndpoint2Args := createEndpointRowArgs("CF Endpoint 3", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockEndpointAdmin2.ConnectedUser.GUID, mockEndpointAdmin2.ConnectedUser.Admin)
@@ -793,10 +795,44 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 				mock.ExpectExec(insertIntoTokens).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
-				// only once the new connection works: remove the other
-				// connection, since it has the same api url
-				mock.ExpectExec(deleteTokens).
-					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).
+				// the other connection stays; the user is told about it
+				err := pp.loginToCNSI(ctxConnectToUser1)
+				dberr := mock.ExpectationsWereMet()
+
+				Convey("there should be no error", func() {
+					So(err, ShouldBeNil)
+				})
+
+				Convey("the response should list the system endpoint", func() {
+					var resp api.LoginRes
+					So(json.Unmarshal(resUser1.Body.Bytes(), &resp), ShouldBeNil)
+					So(resp.AlsoConnected, ShouldResemble, []api.EndpointRef{{GUID: fmt.Sprintf("%v", adminEndpointArgs[0]), Name: "CF Endpoint 1"}})
+				})
+
+				Convey("there should be no db error", func() {
+					So(dberr, ShouldBeNil)
+				})
+			})
+			Convey("Connect to own endpoint while the system endpoint at the same url is shared", func() {
+				if errSession := pp.setSessionValues(ctxConnectToUser1, mockEndpointAdmin1.SessionValues); errSession != nil {
+					t.Error(errors.New("unable to mock/stub user in session object"))
+				}
+
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
+
+				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(userEndpoint1Args[3]).WillReturnRows(adminAndUserEndpointRows)
+
+				// an admin's connection shared with every user: not the user's to disconnect
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID, mockAdminGUID).
+					WillReturnRows(testutils.GetEmptyTokenRows().
+						AddRow("", mockUAAToken, mockUAAToken, time.Now().Add(-time.Hour).Unix(), false, "", "", tokens.SystemSharedUserGuid, nil, false))
+
+				mock.ExpectQuery(selectAnyFromTokens).
+					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
+					WillReturnRows(testutils.ExpectNoRows())
+
+				mock.ExpectExec(insertIntoTokens).
 					WillReturnResult(sqlmock.NewResult(1, 1))
 
 				err := pp.loginToCNSI(ctxConnectToUser1)
@@ -804,6 +840,12 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				Convey("there should be no error", func() {
 					So(err, ShouldBeNil)
+				})
+
+				Convey("the response should list nothing", func() {
+					var resp api.LoginRes
+					So(json.Unmarshal(resUser1.Body.Bytes(), &resp), ShouldBeNil)
+					So(resp.AlsoConnected, ShouldBeEmpty)
 				})
 
 				Convey("there should be no db error", func() {
