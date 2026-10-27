@@ -4,16 +4,16 @@
     <span>
       @if (sshViewer.isConnected()) {
         <button class="btn btn-icon" matTooltip="Disconnect" name="stop" (click)="sshViewer.disconnect()" [disabled]="sshViewer.attemptingConnection()">
-          <span class="material-symbols-outlined">stop</span>
+          <span class="material-icons">stop</span>
         </button>
       }
       @if (!sshViewer.isConnected()) {
         <button class="btn btn-icon" matTooltip="Connect" name="start" (click)="sshViewer.reconnect()" [disabled]="sshViewer.attemptingConnection()">
-          <span class="material-symbols-outlined">play_arrow</span>
+          <span class="material-icons">play_arrow</span>
         </button>
       }
       <button class="btn btn-icon" matTooltip="Back" [routerLink]="kubeSummaryLink">
-        <span class="material-symbols-outlined">close</span>
+        <span class="material-icons">close</span>
       </button>
     </span>
   </div>

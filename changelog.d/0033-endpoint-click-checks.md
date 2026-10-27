@@ -84,3 +84,8 @@
   as a button.
 - Escape closes the Connect and Add API Key dialogs, and answers "Yes"
   to "Are you still there?"; these dialogs ignored it.
+
+[BugFixes: Kubernetes]
+- Kubernetes and Helm pages show their icons again, such as the Helm
+  charts filter toggle, analysis report status and the kube terminal;
+  they showed the icon's name ("filter_list", "warning") as text.
