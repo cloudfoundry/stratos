@@ -1,31 +1,8 @@
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
 import { describe, expect, it } from 'vitest';
 
+import { builtFileFor } from '../../../core/test-framework/built-asset';
 import { IStratosEndpointDefinition } from '../../../store/src/entity-catalog/entity-catalog.types';
 import { gitEntityCatalog } from './git-entity-generator';
-
-const repoRoot = join(import.meta.dirname, '../../../../../..');
-
-interface AssetMapping { glob: string; input: string; output: string; }
-
-// The build copies only what angular.json lists, so resolve each URL the
-// git endpoint hands to the browser through those mappings.
-function builtFileFor(url: string): string | undefined {
-  const angular = JSON.parse(readFileSync(join(repoRoot, 'angular.json'), 'utf8'));
-  const assets: AssetMapping[] = angular.projects['stratos'].architect['build-internal'].options.assets
-    .filter((a: AssetMapping | string) => typeof a === 'object' && a.glob === '**/*');
-  for (const mapping of assets) {
-    const prefix = mapping.output.replace(/\/$/, '') + '/';
-    if (url.startsWith(prefix)) {
-      const file = join(repoRoot, mapping.input, url.slice(prefix.length));
-      if (existsSync(file)) {
-        return file;
-      }
-    }
-  }
-  return undefined;
-}
 
 function endpointUrls(): string[] {
   const def = gitEntityCatalog.gitEndpoint.definition as IStratosEndpointDefinition;
