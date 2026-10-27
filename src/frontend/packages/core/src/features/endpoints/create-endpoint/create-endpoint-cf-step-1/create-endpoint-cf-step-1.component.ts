@@ -7,7 +7,6 @@ import { AppInputDirective, CustomFormFieldComponent, AppErrorComponent } from '
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { ActivatedRoute } from '@angular/router';
 import {
-  EndpointModel,
   EndpointsDataService,
   StratosCatalogEndpointEntity,
   entityCatalog,
@@ -15,7 +14,6 @@ import {
 import { from, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
-import { EndpointsSignalService } from '../../../../core/signals/endpoints-signal.service';
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
 import { SessionService } from '../../../../shared/services/session.service';
@@ -40,15 +38,6 @@ interface CreateEndpointForm {
   caCertField: FormControl<string>;
 }
 
-// Other endpoints of the same type at the same host. A different type at the
-// same host (a Metrics endpoint beside the Cloud Foundry it watches) is not a
-// duplicate.
-export function endpointsSharingUrl(
-  endpoints: Record<string, EndpointModel>, host: string, type: string, guid?: string,
-): EndpointModel[] {
-  return Object.values(endpoints).filter(e => e.api_endpoint?.Host === host && e.cnsi_type === type && e.guid !== guid);
-}
-
 @Component({
   selector: 'app-create-endpoint-cf-step-1',
   templateUrl: './create-endpoint-cf-step-1.component.html',
@@ -71,7 +60,6 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   private fb = inject(FormBuilder);
   private snackBarService = inject(TailwindSnackBarService);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
-  private endpointsSignals = inject(EndpointsSignalService);
 
 
   registerForm: FormGroup<CreateEndpointForm>;
@@ -195,14 +183,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     };
     if (!result.error) {
       this.snackBarService.show(`Successfully registered '${name}'`);
-      // Warn if another endpoint of this type is already registered with the same URL.
-      // Multiple registrations are permitted (different users/operators may each need their own),
-      // but the user should know about existing registrations.
-      const dupes = endpointsSharingUrl(this.endpointsSignals.endpoints(), new URL(url).host, type ?? '', result.guid);
-      if (dupes.length > 0) {
-        const names = dupes.map(e => e.name).join(', ');
-        this.snackBarService.show(`Note: '${url}' is also registered as: ${names}`, 'Dismiss');
-      }
+      // Another endpoint at the same URL is not warned about here: the
+      // endpoints page's banner says so above Total Endpoints.
     }
     const success = !result.error;
     return {
