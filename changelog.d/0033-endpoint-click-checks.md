@@ -85,6 +85,10 @@
 - Escape closes the Connect and Add API Key dialogs, and answers "Yes"
   to "Are you still there?"; these dialogs ignored it.
 
+[BugFixes: Cloud Foundry]
+- An event's detail dialog has room around its contents; it ran to
+  the dialog's edges.
+
 [BugFixes: Kubernetes]
 - Kubernetes and Helm pages show their icons again, such as the Helm
   charts filter toggle, analysis report status and the kube terminal;
