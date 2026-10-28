@@ -21,7 +21,7 @@
                'steppers-header--busy': step.blocked || step.showBusy
              }">
                 @if (steps.length !== 1) {
-                  <div class="steppers-header-inner flex items-center min-w-0">
+                  <ng-template #headerBody>
                     <!-- Step indicator -->
                     <div class="steppers-header-indicator relative flex items-center justify-center shrink-0">
                       <!-- Loading spinner -->
@@ -56,7 +56,17 @@
                   }">
                       {{ step.title }}
                     </span>
-                  </div>
+                  </ng-template>
+                  @if (step.complete) {
+                    <button type="button" class="steppers-header-inner flex items-center min-w-0 cursor-pointer"
+                      [attr.aria-label]="step.title + ', completed'" (click)="goTo(i)">
+                      <ng-container *ngTemplateOutlet="headerBody"></ng-container>
+                    </button>
+                  } @else {
+                    <div class="steppers-header-inner flex items-center min-w-0">
+                      <ng-container *ngTemplateOutlet="headerBody"></ng-container>
+                    </div>
+                  }
                 }
                 <!-- Connector line -->
                 @if (!isLast) {
@@ -79,7 +89,7 @@
         <!-- Navigation buttons -->
         <div class="steppers-navigation flex items-center justify-between border-t pt-6">
           <div class="steppers-navigation-left">
-            @if (steps.length !== 1 || basePreviousRedirect()) {
+            @if (currentIndex() > 0 || !!basePreviousRedirect()) {
               <button id="stepper_previous"
                 class="btn btn-secondary"
                 (click)="goPrevious()"
