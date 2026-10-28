@@ -101,6 +101,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   readonly canUnregister = computed(() => this.review() && this.managerOfEndpoint());
   readonly personal = computed(() => this.registered()?.personal ?? false);
   readonly guid = computed(() => this.registered()?.guid ?? null);
+  // The CA the endpoint holds after the last save; the Connect step badges it.
+  readonly registeredCaCert = computed(() => this.registered()?.caCert ?? '');
   private readonly caCertValue = signal('');
   // The PEM the endpoint will have after Next: empty while the CA box is off.
   readonly effectivePem = computed(() => (this.showCACertField() ? this.caCertValue() : ''));

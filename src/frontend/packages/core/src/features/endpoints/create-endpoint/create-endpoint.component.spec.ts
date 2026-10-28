@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
@@ -100,6 +100,13 @@ describe('CreateEndpointComponent', () => {
       await component.step1StepHandle.submit!();
       expect(registerHandle.close).toHaveBeenCalledWith(true);
     });
+  });
+
+  it('labels the last button Close when not connecting', async () => {
+    const label = () => component.connectStepHandle.finishButtonText!();
+    expect(label()).toBe('Close');
+    component['_connect'].set({ doConnectSignal: signal(true) } as never);
+    expect(label()).toBe('Connect');
   });
 
   // Previous only moves: the endpoint stays registered and step 1 shows it locked.

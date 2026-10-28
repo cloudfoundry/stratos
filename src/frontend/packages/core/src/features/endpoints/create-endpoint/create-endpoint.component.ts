@@ -91,6 +91,10 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // locked and offers Unregister, which clears this.
   private registered = signal(false);
 
+  // What the Connect step's Register strip shows.
+  protected readonly address = signal('');
+  protected readonly caCert = signal('');
+
   onUnregistered() {
     this.registered.set(false);
   }
@@ -106,6 +110,8 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
         throw new Error(result.message || 'Failed to register endpoint');
       }
       this.registered.set(true);
+      this.address.set(this.step1?.registerForm?.getRawValue().urlField ?? '');
+      this.caCert.set(this.step1?.registeredCaCert?.() ?? '');
       // `redirect: true` (only emitted when finalStep is set, i.e. when
       // there's no connect step) means the form is done.
       if (result.redirect) {
@@ -134,7 +140,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
     hideCloseButton: signal(true).asReadonly(),
     finishButtonText: computed(() => {
       const c = this._connect();
-      return c?.doConnectSignal() ? 'Connect' : 'Finish';
+      return c?.doConnectSignal() ? 'Connect' : 'Close';
     }),
     onEnter: (data) => {
       // Registration result routed from step1's submit via the stepper's

@@ -1,5 +1,6 @@
 
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injector, OnDestroy, inject, signal } from '@angular/core';
+import { AsyncPipe } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injector, OnDestroy, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
@@ -13,6 +14,8 @@ import { IStepperStep, StepOnNextResult } from '../../../../shared/components/st
 import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';
+import { DialogErrorComponent } from '../../../../shared/components/dialog-error/dialog-error.component';
+import { EndpointCertificatesService, worstCertificateState } from '../../certificates/endpoint-certificates.service';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
 @Component({
@@ -25,8 +28,10 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
     CustomCheckboxComponent,
     CustomIconComponent,
     BlurDirective,
-    ConnectEndpointComponent
-],
+    ConnectEndpointComponent,
+    DialogErrorComponent,
+    AsyncPipe,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
@@ -35,7 +40,43 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   private injector = inject(Injector);
   private sidePanelService = inject(SidePanelService);
   private cdr = inject(ChangeDetectorRef);
+  private certificates = inject(EndpointCertificatesService);
 
+  // Opened from a connect rather than a registration: the endpoint already
+  // exists, so Connect now starts ticked.
+  readonly fromConnect = input(false);
+  // The endpoint is connected, so a failed attempt leaves that connection alone.
+  readonly stillConnected = input(false);
+  // Feed the Register strip.
+  readonly endpointAddress = input('');
+  readonly caCert = input('');
+  // The strip's Review link.
+  readonly review = output<void>();
+  // Set only when the CA is expiring or expired.
+  readonly caBadge = signal<'expiring' | 'expired' | null>(null);
+
+  constructor() {
+    effect(() => {
+      const pem = this.caCert();
+      void this.updateCaBadge(pem);
+    });
+  }
+
+  private badgeRun = 0;
+  private async updateCaBadge(pem: string) {
+    const run = ++this.badgeRun;
+    let state: ReturnType<typeof worstCertificateState> = null;
+    if (pem.trim()) {
+      try {
+        state = worstCertificateState(await this.certificates.decode(pem));
+      } catch {
+        state = null;
+      }
+    }
+    if (run === this.badgeRun) {
+      this.caBadge.set(state === 'expiring' || state === 'expired' ? state : null);
+    }
+  }
 
   public validate!: Observable<boolean>;
   // Unset until an auth type with a help document is selected. Signals:
@@ -78,9 +119,9 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
     // Entered again after Previous: end the earlier connect first
     this.connectService?.destroy();
     this.connectService = new ConnectEndpointService(this.endpointsService, data, this.endpointsData, this.injector);
-    // Each registration starts unticked: a choice made for an earlier
-    // endpoint does not carry over.
-    this.doConnect = false;
+    // Each entry starts fresh (ticked only when opened from a connect): a
+    // choice made for an earlier endpoint does not carry over.
+    this.doConnect = this.fromConnect();
     this.valid = false;
     this.helpDocumentUrl.set(undefined);
     this.credentialsTitle.set(CreateEndpointConnectComponent.defaultCredentialsTitle);
