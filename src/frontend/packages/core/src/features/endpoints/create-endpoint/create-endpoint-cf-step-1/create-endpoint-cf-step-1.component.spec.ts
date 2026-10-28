@@ -6,6 +6,7 @@ import { EndpointModel, EndpointsDataService, entityCatalog, generateStratosEnti
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
+import { TailwindSnackBarService } from '../../../../shared/services/tailwind-snackbar.service';
 import { EndpointCertificatesService } from '../../certificates/endpoint-certificates.service';
 import { EndpointPermissionsService } from '../../endpoint-permissions.service';
 import { EndpointsSignalConfigService } from '../../endpoints-page/endpoints-signal-config.service';
@@ -480,15 +481,30 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(result).toEqual(expect.objectContaining({ success: true, data: expect.objectContaining({ type: 'git' }) }));
     });
 
+    // As the card menu does: the server's message, and the endpoint stays.
+    it('reports a failed Unregister', async () => {
+      stubSignalConfig.unregister.mockResolvedValue({ busy: false, error: true, message: 'Endpoint in use' });
+      const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show');
+      await review(endpoint());
+      const emitted = vi.fn();
+      component.unregistered.subscribe(emitted);
+      await component.unregister();
+      expect(show).toHaveBeenCalledWith('Endpoint in use');
+      expect(component.review()).toBe(true);
+      expect(emitted).not.toHaveBeenCalled();
+    });
+
     it('stays put when the user keeps the endpoint', async () => {
       confirmAnswer = false;
       await review(endpoint());
       const emitted = vi.fn();
       component.unregistered.subscribe(emitted);
+      const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show');
       await component.unregister();
       expect(stubSignalConfig.unregister).not.toHaveBeenCalled();
       expect(component.review()).toBe(true);
       expect(emitted).not.toHaveBeenCalled();
+      expect(show).not.toHaveBeenCalled();
     });
   });
 });

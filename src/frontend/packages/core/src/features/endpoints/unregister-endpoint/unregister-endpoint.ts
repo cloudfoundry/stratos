@@ -1,5 +1,6 @@
 import { ConfirmationDialogConfig } from '../../../shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
+import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { EndpointsSignalConfigService } from '../endpoints-page/endpoints-signal-config.service';
 
 export interface UnregisterTarget {
@@ -29,11 +30,13 @@ export function isPersonalEndpoint(
 
 /**
  * Asks, then unregisters the endpoint. Resolves true once it is gone; false
- * when the user keeps it or the request fails.
+ * when the user keeps it or the request fails. A failure shows the server's
+ * message, as the endpoint card's Unregister does.
  */
 export async function confirmAndUnregister(
   dialog: ConfirmationDialogService,
   svc: EndpointsSignalConfigService,
+  snackBar: TailwindSnackBarService,
   ep: UnregisterTarget,
 ): Promise<boolean> {
   const config = new ConfirmationDialogConfig(
@@ -51,5 +54,9 @@ export async function confirmAndUnregister(
     return false;
   }
   const state = await svc.unregister(ep.guid, ep.type);
-  return !state.error;
+  if (state.error) {
+    snackBar.show(state.message || 'Action failed');
+    return false;
+  }
+  return true;
 }

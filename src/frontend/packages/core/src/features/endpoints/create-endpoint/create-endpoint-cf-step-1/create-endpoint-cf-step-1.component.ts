@@ -295,7 +295,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     if (!reg) {
       return;
     }
-    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, reg);
+    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, this.snackBarService, reg);
     if (!gone) {
       return;
     }

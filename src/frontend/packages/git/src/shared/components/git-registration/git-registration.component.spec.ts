@@ -204,6 +204,17 @@ describe('GitRegistrationComponent', () => {
       expect(registerHandle.close).not.toHaveBeenCalled();
     });
 
+    // As the card menu does: the server's message, and the endpoint stays.
+    it('reports a failed Unregister', async () => {
+      stubSignalConfig.unregister.mockResolvedValue({ busy: false, error: true, message: 'Endpoint in use' });
+      const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show');
+      vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel')
+        .mockImplementation((_config, ok) => ok());
+      await component.unregister();
+      expect(show).toHaveBeenCalledWith('Endpoint in use');
+      expect(component.registerForm.disabled).toBe(true);
+    });
+
     it('Keep it leaves the endpoint registered and locked', async () => {
       vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel')
         .mockImplementation((_config, _ok, cancel) => cancel());
