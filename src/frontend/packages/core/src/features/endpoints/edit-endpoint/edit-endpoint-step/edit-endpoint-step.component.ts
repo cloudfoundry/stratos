@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, Injector, OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, Signal, Injector, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -79,7 +79,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   readonly showCACertField = signal(false);
   lastSkipSSLValue = false;
   // The cards follow the CA box; an empty pem (CA off) shows none.
-  readonly caCertValue;
+  readonly caCertValue: Signal<string>;
   readonly certificatePem = computed(() => (this.showCACertField() ? this.caCertValue() : ''));
 
   // Signal-handle exposed to the parent stepper template (FWT-957)
