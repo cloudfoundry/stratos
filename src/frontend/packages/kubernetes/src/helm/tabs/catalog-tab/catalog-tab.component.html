@@ -3,7 +3,8 @@
   nounPlural="Charts"></app-duplicate-url-banner>
 <div class="flex flex-row max-h-full">
   @if (!hide()) {
-    <div class="flex flex-col max-h-full overflow-auto" data-test="repo-sidebar"
+    <!-- pt-5: room inside the scrolling sidebar for the field's floated label -->
+    <div class="flex flex-col max-h-full overflow-auto pt-5" data-test="repo-sidebar"
       [ngClass]="{'mr-0 min-w-0 w-0': collapsed(), 'mr-2.5 min-w-[200px] w-auto': !collapsed()}">
       <app-form-field>
         <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Filter by Repository" name="searchReposValue" [(ngModel)]="searchReposValue">
