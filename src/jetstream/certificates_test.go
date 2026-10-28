@@ -2,6 +2,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
@@ -14,6 +15,7 @@ import (
 	"errors"
 	"fmt"
 	"math/big"
+	"mime/multipart"
 	"net"
 	"net/http"
 	"net/http/httptest"
@@ -201,11 +203,63 @@ func Test_decodeCertificatesHandler_400(t *testing.T) {
 	require.ErrorContains(t, err, "No certificate found")
 }
 
+// multipartReq builds a POST with a multipart/form-data body holding the
+// given fields, as the browser's FormData sends them.
+func multipartReq(t *testing.T, fields map[string]string) *http.Request {
+	t.Helper()
+	var body bytes.Buffer
+	w := multipart.NewWriter(&body)
+	for k, v := range fields {
+		require.NoError(t, w.WriteField(k, v))
+	}
+	require.NoError(t, w.Close())
+	req := httptest.NewRequest(http.MethodPost, mockURLString, &body)
+	req.Header.Set("Content-Type", w.FormDataContentType())
+	return req
+}
+
+func Test_decodeCertificatesHandler_multipart(t *testing.T) {
+	ca := mintCA(t, "ca")
+	rec, _, ctx, pp, db, _ := setupHTTPTest(multipartReq(t, map[string]string{"ca_cert": ca.pem}))
+	defer db.Close()
+
+	require.NoError(t, pp.decodeCertificatesHandler(ctx))
+	var out []CertificateSummary
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &out))
+	require.Len(t, out, 1)
+	require.Equal(t, ca.cert.Subject.String(), out[0].Subject)
+}
+
+func Test_decodeCertificatesHandler_ignores_query_string(t *testing.T) {
+	ca := mintCA(t, "ca")
+	req := setupMockReq("POST", mockURLString+"?ca_cert="+url.QueryEscape(ca.pem), map[string]string{})
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
+
+	require.ErrorContains(t, pp.decodeCertificatesHandler(ctx), "No certificate found")
+}
+
+func Test_decodeCertificatesHandler_bad_multipart_400(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPost, mockURLString, strings.NewReader("junk"))
+	req.Header.Set("Content-Type", "multipart/form-data") // no boundary
+	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	defer db.Close()
+
+	var he api.ErrHTTPShadow
+	require.ErrorAs(t, pp.decodeCertificatesHandler(ctx), &he)
+	require.Equal(t, http.StatusBadRequest, he.HTTPError.Code)
+}
+
 // trustHandlerWithCA runs the trust handler against a stored record whose
 // token endpoint is empty, with the stored CA and form fields given.
 func trustHandlerWithCA(t *testing.T, apiURL, storedCA string, form map[string]string) (*httptest.ResponseRecorder, error) {
 	t.Helper()
-	req := setupMockReq("POST", "", form)
+	return trustHandlerWithReq(t, apiURL, storedCA, setupMockReq("POST", "", form))
+}
+
+// trustHandlerWithReq is trustHandlerWithCA for a prepared request.
+func trustHandlerWithReq(t *testing.T, apiURL, storedCA string, req *http.Request) (*httptest.ResponseRecorder, error) {
+	t.Helper()
 	rec, _, ctx, pp, db, mock := setupHTTPTest(req)
 	t.Cleanup(func() { _ = db.Close() })
 	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: mockCNSIGUID}})
@@ -251,6 +305,49 @@ func Test_trustCheck_empty_form_ca_means_no_ca(t *testing.T) {
 	out := decodeTrust(t, rec)
 	require.Len(t, out, 1)
 	require.Equal(t, "unknown authority", out[0].Reason)
+}
+
+func Test_trustCheck_multipart_form_ca_overrides_stored(t *testing.T) {
+	ca := mintCA(t, "ca")
+	srv := ca.serve(t, time.Now().Add(time.Hour))
+	req := multipartReq(t, map[string]string{"ca_cert": ca.pem})
+	rec, err := trustHandlerWithReq(t, srv.URL, mintCA(t, "wrong").pem, req)
+	require.NoError(t, err)
+	out := decodeTrust(t, rec)
+	require.Len(t, out, 1)
+	require.True(t, out[0].Trusted, out[0].Reason)
+}
+
+func Test_trustCheck_multipart_empty_form_ca_means_no_ca(t *testing.T) {
+	ca := mintCA(t, "ca")
+	srv := ca.serve(t, time.Now().Add(time.Hour))
+	req := multipartReq(t, map[string]string{"ca_cert": ""})
+	rec, err := trustHandlerWithReq(t, srv.URL, ca.pem, req)
+	require.NoError(t, err)
+	out := decodeTrust(t, rec)
+	require.Len(t, out, 1)
+	require.Equal(t, "unknown authority", out[0].Reason)
+}
+
+func Test_trustCheck_multipart_absent_form_ca_uses_stored(t *testing.T) {
+	ca := mintCA(t, "ca")
+	srv := ca.serve(t, time.Now().Add(time.Hour))
+	req := multipartReq(t, map[string]string{"other": "x"})
+	rec, err := trustHandlerWithReq(t, srv.URL, ca.pem, req)
+	require.NoError(t, err)
+	out := decodeTrust(t, rec)
+	require.Len(t, out, 1)
+	require.True(t, out[0].Trusted, out[0].Reason)
+}
+
+func Test_trustCheck_bad_multipart_400(t *testing.T) {
+	req := httptest.NewRequest(http.MethodPost, mockURLString, strings.NewReader("junk"))
+	req.Header.Set("Content-Type", "multipart/form-data") // no boundary
+	_, err := trustHandlerWithReq(t, "https://127.0.0.1:1", "", req)
+
+	var he api.ErrHTTPShadow
+	require.ErrorAs(t, err, &he)
+	require.Equal(t, http.StatusBadRequest, he.HTTPError.Code)
 }
 
 func Test_trustCheck_unknown_endpoint_404(t *testing.T) {
