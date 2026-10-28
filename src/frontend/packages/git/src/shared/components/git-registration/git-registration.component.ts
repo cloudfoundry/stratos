@@ -461,7 +461,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     if (!reg) {
       return;
     }
-    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, {
+    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, this.snackBarService, {
       guid: reg.data.guid,
       name: reg.data.name,
       type: GIT_ENDPOINT_TYPE,
