@@ -8,6 +8,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
 )
 
 func newTestPortalProxy(diagEnabled bool) *portalProxy {
@@ -94,6 +95,31 @@ func TestWireSizeMiddleware_PreservesHandlerStatus(t *testing.T) {
 	}
 	if rec.Header().Get("X-Stratos-Wire-Sizes") == "" {
 		t.Error("header should still be emitted for non-2xx JSON responses")
+	}
+}
+
+func TestWireSizeMiddleware_KeepsGzipDeferredStatus(t *testing.T) {
+	// Same order as the /pp group: gzip outside, wire-size inside. Gzip holds
+	// back the status of a response with no body, so wire-size never sees it
+	// and must not send a 200 of its own (SSO login answered an empty 200).
+	p := newTestPortalProxy(true)
+	e := echo.New()
+	e.Use(middleware.GzipWithConfig(middleware.GzipConfig{MinLength: 1024}))
+	e.Use(p.wireSizeMiddleware)
+	e.GET("/test", func(c *echo.Context) error {
+		return c.Redirect(http.StatusTemporaryRedirect, "https://uaa.example.com/oauth/authorize")
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/test", nil)
+	req.Header.Set(echo.HeaderAcceptEncoding, "gzip, deflate, br")
+	rec := httptest.NewRecorder()
+	e.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusTemporaryRedirect {
+		t.Errorf("status = %d, want 307", rec.Code)
+	}
+	if rec.Header().Get(echo.HeaderLocation) == "" {
+		t.Error("Location header missing")
 	}
 }
 
