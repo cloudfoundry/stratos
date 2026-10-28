@@ -13,6 +13,7 @@ import { generateCoreStratosEntities } from '../../metrics/metrics-endpoint';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
+import { TailwindSnackBarService } from '../../../shared/services/tailwind-snackbar.service';
 import { ENDPOINT_REGISTER_HANDLE } from '../endpoint-register-modal/endpoint-register-handle';
 import { EndpointsSignalConfigService } from '../endpoints-page/endpoints-signal-config.service';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
@@ -135,6 +136,37 @@ describe('CreateEndpointComponent', () => {
       component.onUnregistered();
       expect(component.step1StepHandle.nextButtonText!()).toBe('Register');
     });
+  });
+
+  // The Connect step shows the error under the form; the stepper adds no
+  // snackbar of its own.
+  it('shows a failed connect once, inline', async () => {
+    const error = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error');
+    component.step1 = {
+      onNext: () => of({ success: true, data: { guid: 'new-guid', type: 'metrics', name: 'my-metrics' } }),
+    } as unknown as CreateEndpointCfStep1Component;
+    await component.step1StepHandle.submit!();
+    component['step1Valid'].set(true);
+    await fixture.whenStable();
+    const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    steppers.setActive(1);
+    await fixture.whenStable();
+    const connect = fixture.debugElement.query(By.directive(CreateEndpointConnectComponent))
+      .componentInstance as CreateEndpointConnectComponent;
+    connect.onEnter({ guid: 'new-guid', name: 'my-metrics', type: 'metrics', subType: '', ssoAllowed: false });
+    const cs = connect.connectService()!;
+    vi.spyOn(cs, 'submit').mockReturnValue(of({ success: false, errorMessage: 'Bad credentials' }));
+    cs.connectingError$ = of('Bad credentials');
+    cs.isBusy$ = of(false);
+    connect.doConnect = true;
+    await fixture.whenStable();
+
+    steppers.goNext();
+    await fixture.whenStable();
+
+    expect(fixture.nativeElement.querySelector('app-dialog-error')?.textContent).toContain('Bad credentials');
+    expect(error).not.toHaveBeenCalled();
+    expect(registerHandle.close).not.toHaveBeenCalled();
   });
 
   // Back on step 1 after registering, the form shows the endpoint locked.

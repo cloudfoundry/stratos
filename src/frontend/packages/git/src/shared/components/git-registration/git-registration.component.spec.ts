@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { provideRouter } from '@angular/router';
@@ -14,6 +15,9 @@ import { generateStratosEntities } from '../../../../../store/src/stratos-entity
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { ENDPOINT_REGISTER_HANDLE } from '../../../../../core/src/features/endpoints/endpoint-register-modal/endpoint-register-handle';
 import { EndpointsSignalConfigService } from '../../../../../core/src/features/endpoints/endpoints-page/endpoints-signal-config.service';
+import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { TailwindSnackBarService } from '../../../../../core/src/shared/services/tailwind-snackbar.service';
 import { GitRegistrationComponent } from './git-registration.component';
 
 function makeStubEndpointsSignalConfig() {
@@ -173,6 +177,31 @@ describe('GitRegistrationComponent', () => {
       await component.unregister();
       expect(openWithCancel.mock.calls[0][0].message).toContain('for you');
       expect(openWithCancel.mock.calls[0][0].message).not.toContain('all users');
+    });
+
+    // The Connect step shows the error under the form; the stepper adds no
+    // snackbar of its own.
+    it('shows a failed connect once, inline', async () => {
+      const error = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error');
+      const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+      steppers.setActive(1);
+      await fixture.whenStable();
+      const connect = fixture.debugElement.query(By.directive(CreateEndpointConnectComponent))
+        .componentInstance as CreateEndpointConnectComponent;
+      connect.onEnter({ guid: 'new-guid', name: 'GitHub', type: 'git', subType: 'github', ssoAllowed: false });
+      const cs = connect.connectService()!;
+      vi.spyOn(cs, 'submit').mockReturnValue(of({ success: false, errorMessage: 'Bad credentials' }));
+      cs.connectingError$ = of('Bad credentials');
+      cs.isBusy$ = of(false);
+      connect.doConnect = true;
+      await fixture.whenStable();
+
+      steppers.goNext();
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('app-dialog-error')?.textContent).toContain('Bad credentials');
+      expect(error).not.toHaveBeenCalled();
+      expect(registerHandle.close).not.toHaveBeenCalled();
     });
 
     it('Keep it leaves the endpoint registered and locked', async () => {
