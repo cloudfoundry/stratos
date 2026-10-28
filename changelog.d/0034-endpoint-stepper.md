@@ -29,8 +29,9 @@
 - An API key is created in two steps:
   - a description and an expiry: 30, 90 or 365 days, a date, or Never
     (90 days by default)
-  - the secret, hidden until shown, with a copy button. Done closes
-    the dialog, and the secret is not shown again.
+  - the secret, hidden until shown, with a copy button. Escape does
+    not close this step. Done closes the dialog, and the secret is not
+    shown again.
 - API keys can expire. Keys created before this release never expire.
   A request that uses an expired key is refused with 401 and "API key
   expired on <date>".

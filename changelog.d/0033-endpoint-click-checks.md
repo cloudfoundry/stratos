@@ -81,8 +81,8 @@
   states, and the control is linked to its list.
 - The closed side panel can no longer be reached with Tab or announced
   as a button.
-- Escape closes the Connect and Add API Key dialogs, and answers "Yes"
-  to "Are you still there?"; these dialogs ignored it.
+- Escape closes the Connect and Create an API Key dialogs, and answers
+  "Yes" to "Are you still there?"; these dialogs ignored it.
 - The favorite star on endpoint and other cards is announced as "Add
   to favorites" or "Remove from favorites", as in lists; it read the
   opposite of its state, followed by the icon name "star_border".
@@ -112,11 +112,6 @@
   answered instead.
 
 [BugFixes: API Keys]
-- Create an API Key has room around its title, field and buttons;
-  they ran to the dialog's edges.
-- A new key's secret is hidden until you show it, has a copy button,
-  and leaves the screen when the key is deleted; it stayed on the page
-  after its key was gone.
 - The docs explain API keys: who can create them (API_KEYS_ENABLED),
   the "Authentication: Bearer" header they are sent in and the routes
   that accept them.
