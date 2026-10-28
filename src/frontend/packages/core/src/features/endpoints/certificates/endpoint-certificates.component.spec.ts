@@ -72,7 +72,7 @@ describe('EndpointCertificatesComponent', () => {
     await vi.advanceTimersByTimeAsync(300);
   }
 
-  async function flushDecode(body: unknown, status = 200) {
+  async function flushDecode(body: object, status = 200) {
     http.expectOne(DECODE).flush(body, { status, statusText: status === 200 ? 'OK' : 'Bad Request' });
     await vi.advanceTimersByTimeAsync(0);
     await fixture.whenStable();
