@@ -14,13 +14,13 @@
   <div class="connect__option">
     <p class="connect__successful-reg-text text-[var(--content-text)]">
       @if (fromConnect()) {
-        <b>{{ connectService?.config.name }}</b> is registered.
+        <b>{{ connectService()?.config.name }}</b> is registered.
       } @else {
-        <b>{{ connectService?.config.name }}</b> has been successfully registered.
+        <b>{{ connectService()?.config.name }}</b> has been successfully registered.
       }
     </p>
     <app-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
-      <b>{{ connectService?.config.name }}</b> now
+      <b>{{ connectService()?.config.name }}</b> now
       (optional).
     </app-checkbox>
     <div class="connect__subtext text-[var(--content-muted)]">You may connect this endpoint at a later date from the
@@ -39,9 +39,9 @@
       }
     </div>
     <app-connect-endpoint class="stepper-form" (valid)="valid = $event"
-      (authType)="authTypeChanged($event)" (submitted)="submitted.emit()" [connectService]="connectService">
+      (authType)="authTypeChanged($event)" (submitted)="submitted.emit()" [connectService]="connectService()">
     </app-connect-endpoint>
-    @if (connectService; as cs) {
+    @if (connectService(); as cs) {
       <app-dialog-error message="{{cs.connectingError$ | async}}"
         [show]="!!(cs.connectingError$ | async) && (cs.isBusy$ | async) === false">
       </app-dialog-error>

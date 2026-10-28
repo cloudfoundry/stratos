@@ -189,7 +189,7 @@ describe('ConnectEndpointDialogComponent', () => {
   it('Reconnect keeps the existing connection message', async () => {
     seedEndpointsDataService([cfEndpoint({ connectionStatus: 'connected' })]);
     await open();
-    const cs = connectStep().connectService!;
+    const cs = connectStep().connectService()!;
     // No 1 s settle before the error shows
     (cs as unknown as { connectDelay: number }).connectDelay = 0;
     cs.setData({ authType: 'creds', authVal: { username: 'u', password: 'p' }, systemShared: false, bodyContent: '' });
@@ -213,7 +213,7 @@ describe('ConnectEndpointDialogComponent', () => {
   it('keeps Connect disabled while a successful connect settles', async () => {
     vi.spyOn(TestBed.inject(EndpointsDataService), 'getAll').mockResolvedValue([]);
     await open();
-    const cs = connectStep().connectService!;
+    const cs = connectStep().connectService()!;
     cs.setData({ authType: 'creds', authVal: { username: 'u', password: 'p' }, systemShared: false, bodyContent: '' });
 
     const submitted = component.connectStepHandle.submit!();
@@ -288,7 +288,7 @@ describe('ConnectEndpointDialogComponent', () => {
     async function connect(reported: boolean) {
       await open();
       const show = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'show');
-      (connectStep().connectService as unknown as { hasConnected: Subject<boolean> }).hasConnected.next(reported);
+      (connectStep().connectService() as unknown as { hasConnected: Subject<boolean> }).hasConnected.next(reported);
       return { show };
     }
 
