@@ -26,9 +26,12 @@ import (
 
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
+	mock_api "github.com/cloudfoundry/stratos/src/jetstream/api/mock"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
 
@@ -169,9 +172,13 @@ func trustRequest(t *testing.T, apiURL, tokenURL string) []TrustResult {
 	defer db.Close()
 	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: mockCNSIGUID}})
 
-	rows := sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
-		AddRow(mockCNSIGUID, "ep", "cf", apiURL, "", tokenURL, "", false, "client", []byte{}, true, "", "", "", "")
-	mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockCNSIGUID).WillReturnRows(rows)
+	rows := func() *sqlmock.Rows {
+		return sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+			AddRow(mockCNSIGUID, "ep", "cf", apiURL, "", tokenURL, "", false, "client", []byte{}, true, "", "", "", "")
+	}
+	mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockCNSIGUID).WillReturnRows(rows())
+	// User endpoints are disabled: the visible list is the system endpoints.
+	mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").WillReturnRows(rows())
 
 	require.NoError(t, pp.trustCheckHandler(ctx))
 	require.Equal(t, http.StatusOK, rec.Code)
@@ -264,9 +271,12 @@ func trustHandlerWithReq(t *testing.T, apiURL, storedCA string, req *http.Reques
 	t.Cleanup(func() { _ = db.Close() })
 	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: mockCNSIGUID}})
 
-	rows := sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
-		AddRow(mockCNSIGUID, "ep", "cf", apiURL, "", "", "", false, "client", []byte{}, true, "", "", "", storedCA)
-	mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockCNSIGUID).WillReturnRows(rows)
+	rows := func() *sqlmock.Rows {
+		return sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+			AddRow(mockCNSIGUID, "ep", "cf", apiURL, "", "", "", false, "client", []byte{}, true, "", "", "", storedCA)
+	}
+	mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockCNSIGUID).WillReturnRows(rows())
+	mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").WillReturnRows(rows())
 	return rec, pp.trustCheckHandler(ctx)
 }
 
@@ -373,4 +383,47 @@ func Test_trustCheck_datastore_error_500(t *testing.T) {
 	var he api.ErrHTTPShadow
 	require.ErrorAs(t, pp.trustCheckHandler(ctx), &he)
 	require.Equal(t, http.StatusInternalServerError, he.HTTPError.Code)
+}
+
+// trustAsUser runs the trust handler with user endpoints enabled, signed in
+// as a non-admin user-1, for a stored record created by creator.
+func trustAsUser(t *testing.T, creator string) error {
+	t.Helper()
+	ctrl := gomock.NewController(t)
+	auth := mock_api.NewMockStratosAuth(ctrl)
+	pp, db, mock := setupPortalProxyWithAuthService(auth)
+	t.Cleanup(func() { _ = db.Close() })
+	pp.GetConfig().UserEndpointsEnabled = config.UserEndpointsConfigEnum.Enabled
+
+	user := setupMockUser("user-1", false, []string{})
+	auth.EXPECT().GetUser(gomock.Eq("user-1")).Return(user.ConnectedUser, nil)
+
+	_, ctx := setupEchoContext(httptest.NewRecorder(), setupMockReq("POST", "", map[string]string{}))
+	require.NoError(t, pp.setSessionValues(ctx, user.SessionValues))
+	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: mockCNSIGUID}})
+
+	row := func() *sqlmock.Rows {
+		return sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+			AddRow(mockCNSIGUID, "ep", "cf", "https://127.0.0.1:1", "", "", "", false, "client", []byte{}, true, "", "", creator, "")
+	}
+	empty := sqlmock.NewRows(datastore.GetColumnNamesForCSNIs())
+	mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockCNSIGUID).WillReturnRows(row())
+	if creator == "user-1" {
+		mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("user-1").WillReturnRows(row())
+	} else {
+		mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("user-1").WillReturnRows(empty)
+	}
+	mock.ExpectQuery(selectCreatorFromCNSIs).WithArgs("").
+		WillReturnRows(sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()))
+	return pp.trustCheckHandler(ctx)
+}
+
+func Test_trustCheck_other_users_endpoint_404(t *testing.T) {
+	var he api.ErrHTTPShadow
+	require.ErrorAs(t, trustAsUser(t, "user-2"), &he)
+	require.Equal(t, http.StatusNotFound, he.HTTPError.Code)
+}
+
+func Test_trustCheck_own_endpoint_allowed(t *testing.T) {
+	require.NoError(t, trustAsUser(t, "user-1"))
 }
