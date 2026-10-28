@@ -22,7 +22,7 @@ import { take, map } from 'rxjs/operators';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
-import { confirmAndUnregister } from '../../../../../core/src/features/endpoints/unregister-endpoint/unregister-endpoint';
+import { confirmAndUnregister, isPersonalEndpoint } from '../../../../../core/src/features/endpoints/unregister-endpoint/unregister-endpoint';
 import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
@@ -101,6 +101,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   private cdr = inject(ChangeDetectorRef);
   private endpointsSignalConfig = inject(EndpointsSignalConfigService);
   private confirmDialog = inject(ConfirmationDialogService);
+  private endpointsData = inject(EndpointsDataService);
   // Present when hosted by the Register Endpoint dialog, which this form
   // closes instead of navigating to /endpoints (the page under the dialog).
   private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
@@ -433,7 +434,12 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       ssoAllowed: false
     };
     if (!result.error) {
-      this.registered.set({ data, address: url, personal: !createSystemEndpoint });
+      this.registered.set({ data, address: url, personal: isPersonalEndpoint(
+        this.endpointsData.endpoints().get(data.guid),
+        await firstValueFrom(this.userEndpointsAndIsAdmin),
+        createSystemEndpoint,
+      ),
+    });
       this.registerForm.disable();
       // 7 s: it shows while the dialog moves to its Connect step.
       this.snackBarService.show(`Successfully registered '${name}'`, undefined, 7000);
