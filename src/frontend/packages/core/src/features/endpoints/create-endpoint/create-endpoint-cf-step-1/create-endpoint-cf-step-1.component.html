@@ -59,7 +59,7 @@
           </div>
         }
       </app-form-field>
-      @if (!review() && (userEndpointsAndIsAdmin | async)) {
+      @if (userEndpointsAndIsAdmin | async) {
         <app-checkbox
           appInput
           name="createSystemEndpoint"
@@ -119,9 +119,8 @@
     <app-endpoint-certificates [pem]="effectivePem()" [endpointGuid]="guid()"></app-endpoint-certificates>
   }
 
-  @if (!review()) {
   <div [ngClass]="{ hide: !showAdvancedFields(), show: showAdvancedFields() }" class="create-endpoint__section">
-    <div [ngClass]="{ 'create-endpoint__shown': showAdvancedOptions() }" class="create-endpoint__advanced">
+    <div [ngClass]="{ 'create-endpoint__shown': showAdvancedOptions() || review() }" class="create-endpoint__advanced">
       <h1 class="text-[var(--content-text)]">Advanced Options</h1>
       <p class="text-[var(--content-text)]">Client ID and Client Secret do not normally need to be specified.</p>
       <p class="text-[var(--content-text)]">
@@ -139,6 +138,7 @@
           autocomplete="off"
         />
       </app-form-field>
+      @if (!review()) {
       <app-form-field>
         <input
           class="w-full placeholder:!text-transparent focus:outline-none"
@@ -161,9 +161,9 @@
           <app-custom-icon>{{ !show() ? "visibility_off" : "visibility" }}</app-custom-icon>
         </button>
       </app-form-field>
+      }
     </div>
   </div>
-  }
 
   <div [ngClass]="{ hide: !endpointTypeSupportsSSO(), show: endpointTypeSupportsSSO() }" class="create-endpoint__sso">
     @if (!!registerForm.controls.ssoAllowedField.value) {
