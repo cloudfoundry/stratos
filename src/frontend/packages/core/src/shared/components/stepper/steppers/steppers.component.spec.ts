@@ -741,7 +741,8 @@ describe('SteppersComponent — Cancel', () => {
   });
 });
 
-// Previous leaves the current step through its leave hook.
+// Going back runs the leave hook of every step passed, so each can undo
+// what it started (e.g. close a socket it opened).
 @Component({
   standalone: true,
   imports: [SteppersComponent, StepComponent],
@@ -787,6 +788,22 @@ describe('SteppersComponent — going back', () => {
     await hostFixture.whenStable();
     expect(steppers.currentIndex()).toBe(1);
     expect(host.left).toEqual([['Three', false]]);
+  });
+
+  it('going back two steps leaves both, nearest first', async () => {
+    steppers.goTo(0);
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(0);
+    expect(host.left).toEqual([['Three', false], ['Two', false]]);
+  });
+
+  it('going forward leaves only the current step', async () => {
+    steppers.goTo(0);
+    await hostFixture.whenStable();
+    host.left = [];
+    steppers.setActive(1);
+    await hostFixture.whenStable();
+    expect(host.left).toEqual([['One', true]]);
   });
 });
 
