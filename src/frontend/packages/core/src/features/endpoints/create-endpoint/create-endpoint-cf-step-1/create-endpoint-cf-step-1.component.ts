@@ -143,6 +143,9 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   readonly show = signal(false);
 
   readonly showCACertField = signal(false);
+  // The Options column has something to show: TLS, Advanced Options or SSO.
+  readonly showOptions = computed(() =>
+    this.canEditTls() || (this.showAdvancedFields() && !this.review()) || this.endpointTypeSupportsSSO());
   readonly showAdvancedOptions = signal(false);
   lastSkipSSLValue = false;
 
