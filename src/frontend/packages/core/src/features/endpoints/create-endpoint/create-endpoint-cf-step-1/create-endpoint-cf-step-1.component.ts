@@ -96,8 +96,11 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   readonly review = signal(false);
   private readonly registered = signal<RegisteredEndpoint | null>(null);
   private readonly managerOfEndpoint = signal(true);
+  // A Git host takes no CA certificate, so it has no TLS to review.
+  private readonly noTls = computed(() => this.registered()?.type === 'git');
   // TLS controls: always before registering; afterwards only for those who may save them.
-  readonly canEditTls = computed(() => !this.review() || this.managerOfEndpoint());
+  readonly canEditTls = computed(() => !this.noTls() && (!this.review() || this.managerOfEndpoint()));
+  readonly showCertificates = computed(() => this.review() && !this.noTls());
   readonly canUnregister = computed(() => this.review() && this.managerOfEndpoint());
   readonly personal = computed(() => this.registered()?.personal ?? false);
   readonly guid = computed(() => this.registered()?.guid ?? null);
@@ -262,7 +265,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       subType: reg.subType,
       ssoAllowed: reg.ssoAllowed,
     };
-    if (!this.managerOfEndpoint()) {
+    if (!this.canEditTls()) {
       return { success: true, redirect: false, message: '', data };
     }
     const caOn = this.showCACertField();
