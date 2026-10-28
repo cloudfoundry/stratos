@@ -11,6 +11,7 @@ import { ApiKey } from '@stratosui/store';
 import { ApiKeysDataService } from '../api-keys-data.service';
 import {
   ApiKeysSignalConfigService,
+  calendarDays,
   keyExpiry,
   timeOfDay,
 } from '../../../shared/signal-list-configs/apiKeys/api-keys-signal-config.service';
@@ -76,9 +77,10 @@ export class ApiKeysPageComponent {
       const { state, days } = keyExpiry(k, now);
       const at = k.expires_at ? timeOfDay(new Date(k.expires_at)) : '';
       if (state === 'soon' && new Date(k.expires_at!).getTime() - now.getTime() < DAY_MS) {
+        const day = calendarDays(now, new Date(k.expires_at!)) === 0 ? 'today' : 'tomorrow';
         out.push({
           guid: k.guid, comment: k.comment, expired: false,
-          text: `"${k.comment}" expires tomorrow at ${at}. Create a replacement and update the script that uses it.`,
+          text: `"${k.comment}" expires ${day} at ${at}. Create a replacement and update the script that uses it.`,
         });
       } else if (state === 'expired' && days <= BANNER_DAYS_AFTER) {
         const when = days === 0 ? 'today' : `${days} ${days === 1 ? 'day' : 'days'} ago`;

@@ -14,7 +14,7 @@
         class="flex flex-wrap items-center justify-between gap-3 rounded border px-4 py-3"
         [class]="b.expired
           ? 'border-danger bg-danger-50 text-danger-900 dark:bg-danger-900/40 dark:text-danger-100'
-          : 'border-warning bg-warning-50 text-warning-900 dark:bg-warning-900/40 dark:text-warning-100'">
+          : 'border-warning bg-warning-50 text-content-text dark:bg-warning-900/40'">
         <span>{{ b.text }}</span>
         <button class="btn btn-secondary" type="button" (click)="createReplacement(b.comment)">Create replacement</button>
       </li>

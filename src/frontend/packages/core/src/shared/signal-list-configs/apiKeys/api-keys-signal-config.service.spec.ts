@@ -8,7 +8,8 @@ import { BASE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
 import { SignalListColumn } from '../../components/signal-list/signal-list.component';
 import { ApiKeysSignalConfigService, keyExpiry, timeOfDay } from './api-keys-signal-config.service';
 
-const NOW = new Date('2026-10-28T12:00:00Z');
+// Local noon: the calendar-day rules read the viewer's zone.
+const NOW = new Date(2026, 9, 28, 12, 0, 0);
 const DAY = 24 * 60 * 60 * 1000;
 const at = (days: number) => new Date(NOW.getTime() + days * DAY);
 
@@ -33,7 +34,7 @@ describe('keyExpiry', () => {
     expect(keyExpiry(expiring(0.0001), NOW).state).toBe('soon');
   });
   it('counts whole days since expiry', () => {
-    expect(keyExpiry(expiring(-0.5), NOW)).toEqual({ state: 'expired', days: 0 });
+    expect(keyExpiry(expiring(-0.25), NOW)).toEqual({ state: 'expired', days: 0 });
     expect(keyExpiry(expiring(-12), NOW)).toEqual({ state: 'expired', days: 12 });
   });
 });
@@ -80,8 +81,20 @@ describe('ApiKeysSignalConfigService columns', () => {
     expect(color(k)).toBe('warning');
   });
 
+  // Local calendar days, not 24-hour buckets.
+  it('says today or tomorrow by the local date', () => {
+    const seenAt = (h: number) => vi.setSystemTime(new Date(2026, 9, 28, h, 0, 0));
+    const local = (d: number, h: number) => key({ expires_at: new Date(2026, 9, d, h, 0, 0).toISOString() });
+    seenAt(9);
+    expect(cell(local(28, 15))).toBe(`today ${timeOfDay(new Date(2026, 9, 28, 15))}`);
+    seenAt(22);
+    expect(cell(local(29, 1))).toBe(`tomorrow ${timeOfDay(new Date(2026, 9, 29, 1))}`);
+    seenAt(8);
+    expect(cell(local(27, 22))).toBe('Expired 1 day ago');
+  });
+
   it('expired is danger', () => {
-    expect(cell(expiring(-0.5))).toBe('Expired today');
+    expect(cell(expiring(-0.25))).toBe('Expired today');
     expect(cell(expiring(-12))).toBe('Expired 12 days ago');
     expect(color(expiring(-12))).toBe('danger');
   });

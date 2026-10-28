@@ -15,9 +15,15 @@ const SOON_DAYS = 7;
 
 export type KeyExpiry = {
   state: 'never' | 'ok' | 'soon' | 'expired';
-  /** Whole days left (rounded up) while the key works; whole days since expiry once it does not. */
+  /** Whole days left (rounded up) while the key works; local calendar days since expiry once it does not. */
   days: number;
 };
+
+/** Whole local calendar days from `from` to `to` (DST-safe). */
+export function calendarDays(from: Date, to: Date): number {
+  const day = (d: Date) => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+  return Math.round((day(to) - day(from)) / DAY_MS);
+}
 
 /** Where a key stands against its expiry. A key is expired from the exact expiry instant. */
 export function keyExpiry(k: ApiKey, now: Date = new Date()): KeyExpiry {
@@ -26,7 +32,8 @@ export function keyExpiry(k: ApiKey, now: Date = new Date()): KeyExpiry {
   }
   const left = new Date(k.expires_at).getTime() - now.getTime();
   if (left <= 0) {
-    return { state: 'expired', days: Math.floor(-left / DAY_MS) };
+    // Calendar days: expired 22:00 yesterday is "1 day ago" at 08:00.
+    return { state: 'expired', days: calendarDays(new Date(k.expires_at), now) };
   }
   const days = Math.ceil(left / DAY_MS);
   return { state: days <= SOON_DAYS ? 'soon' : 'ok', days };
@@ -171,9 +178,9 @@ export class ApiKeysSignalConfigService {
       case 'ok': return new Date(k.expires_at!).toLocaleDateString();
       case 'soon': {
         const at = new Date(k.expires_at!);
-        // Less than a day left
+        // Less than 24 hours left: today or tomorrow, by the local calendar
         return at.getTime() - Date.now() < DAY_MS
-          ? `tomorrow ${timeOfDay(at)}`
+          ? `${calendarDays(new Date(), at) === 0 ? 'today' : 'tomorrow'} ${timeOfDay(at)}`
           : `in ${days} ${days === 1 ? 'day' : 'days'}`;
       }
       default:
