@@ -113,5 +113,6 @@
   the "Authentication: Bearer" header they are sent in and the routes
   that accept them.
 - The "Create an API key" prompt on an empty API Keys page points at
-  the toolbar button instead of overlapping "You have no API keys";
-  the same prompt on an empty Home page is placed the same way.
+  the toolbar button, below the page header, instead of overlapping "You
+  have no API keys"; the same prompt on an empty Home page is placed the
+  same way.
