@@ -50,6 +50,14 @@ export class ApiKeysPageComponent {
   private listConfigService = inject(ApiKeysSignalConfigService);
 
   public keyDetails: WritableSignal<ApiKey | null> = signal(null);
+  // The card shows the new key only while the key exists: deleting it
+  // takes its secret off the screen.
+  public newKey: Signal<ApiKey | null> = computed(() => {
+    const key = this.keyDetails();
+    return key && this.dataService.apiKeys().some(k => k.guid === key.guid) ? key : null;
+  });
+  // Hidden until asked, so a bystander does not read the key as it arrives.
+  public secretShown = signal(false);
 
   // null until the first fetch settles so the empty-state and the list
   // both stay hidden during initial load. After fetch: true if there
@@ -71,6 +79,7 @@ export class ApiKeysPageComponent {
       this.dialog.open(AddApiKeyDialogComponent, { disableClose: true, panelClass: 'p-6' }).afterClosed(),
     );
     if (newKey) {
+      this.secretShown.set(false);
       this.keyDetails.set(newKey);
     }
   }

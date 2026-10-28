@@ -106,7 +106,9 @@
 [BugFixes: API Keys]
 - Create an API Key has room around its title, field and buttons;
   they ran to the dialog's edges.
-- A new key's secret has a copy button.
+- A new key's secret is hidden until you show it, has a copy button,
+  and leaves the screen when the key is deleted; it stayed on the page
+  after its key was gone.
 - The docs explain API keys: who can create them (API_KEYS_ENABLED),
   the "Authentication: Bearer" header they are sent in and the routes
   that accept them.
