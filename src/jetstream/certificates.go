@@ -128,9 +128,27 @@ func checkTrust(hostPort, serverName, caCert string, timeout time.Duration) Trus
 	return res
 }
 
+// postedField reads one field from the request body, URL-encoded or
+// multipart, never from the query string. sent reports whether the body
+// carried the field at all, so an empty value can differ from an absent one.
+func postedField(c *echo.Context, name string) (value string, sent bool, err error) {
+	if _, err := c.FormValues(); err != nil {
+		return "", false, err
+	}
+	vals, sent := c.Request().PostForm[name]
+	if !sent || len(vals) == 0 {
+		return "", false, nil
+	}
+	return vals[0], true, nil
+}
+
 // decodeCertificatesHandler decodes the PEM in form field ca_cert.
 func (p *portalProxy) decodeCertificatesHandler(c *echo.Context) error {
-	certs, err := decodeCertificates(c.FormValue("ca_cert"))
+	pemText, _, err := postedField(c, "ca_cert")
+	if err != nil {
+		return api.NewHTTPShadowError(http.StatusBadRequest, "Could not read the form", "Certificate decode: %v", err)
+	}
+	certs, err := decodeCertificates(pemText)
 	if err != nil {
 		return api.NewHTTPShadowError(http.StatusBadRequest, err.Error(), "Certificate decode failed: %v", err)
 	}
@@ -153,10 +171,12 @@ func (p *portalProxy) trustCheckHandler(c *echo.Context) error {
 	}
 
 	caCert := rec.CACert
-	if err := c.Request().ParseForm(); err == nil {
-		if vals, sent := c.Request().PostForm["ca_cert"]; sent && len(vals) > 0 {
-			caCert = vals[0]
-		}
+	formCA, sent, err := postedField(c, "ca_cert")
+	if err != nil {
+		return api.NewHTTPShadowError(http.StatusBadRequest, "Could not read the form", "Trust check: %v", err)
+	}
+	if sent {
+		caCert = formCA
 	}
 
 	results := []TrustResult{}
