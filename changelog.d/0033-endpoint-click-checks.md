@@ -122,3 +122,5 @@
 - The favorite star on endpoint and other cards is announced as "Add
   to favorites" or "Remove from favorites", as in lists; it read the
   opposite of its state, followed by the icon name "star_border".
+- Card action menus announce their entries as menu items; the menu
+  was announced with none.
