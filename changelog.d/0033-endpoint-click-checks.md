@@ -51,8 +51,6 @@
   are marked the same way.
 - Only Stratos admins are offered "Share this endpoint connection",
   which the server refuses for other users.
-- A failed connect puts back the endpoint's previous TLS options (Skip
-  SSL validation, CA certificate) instead of leaving the change saved.
 - A failed Reconnect keeps the Connect dialog open with its error,
   instead of closing as if it had connected.
 - The Register dialog's connect step names what to enter for a
