@@ -1,8 +1,4 @@
 [Features: Endpoints]
-- The Connect dialog and Register's Connect step show Skip SSL
-  validation and the CA certificate to users who may edit the
-  endpoint. Changed settings are saved first, then the connect runs, so
-  a certificate problem no longer needs a trip to the Edit page.
 - An endpoint whose last connect failed says so after a reload: its
   card shows "The last error was <reason>. Reconnect to get the latest
   status." and the endpoints list shows the same on hover. The reason is
@@ -26,9 +22,8 @@
 - Edit Endpoint shows the stored CA certificate. It showed none, and
   saving the form removed the certificate.
 - The Register Endpoint dialog closes without reloading the page under
-  it (which left the page unable to scroll), shows one Cancel and one
-  "registered" message, and asks before Previous on the Connect step
-  unregisters the endpoint just registered.
+  it (which left the page unable to scroll), and shows one Cancel and
+  one "registered" message.
 - Pressing Enter in the Connect dialog connects, once.
 - A request to an endpoint that does not answer in time reports 504
   "Request timed out" for that endpoint instead of leaving it out of the
