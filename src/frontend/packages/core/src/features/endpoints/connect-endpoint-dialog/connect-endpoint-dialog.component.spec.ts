@@ -218,7 +218,9 @@ describe('ConnectEndpointDialogComponent', () => {
 
     const submitted = component.connectStepHandle.submit!();
     const http = TestBed.inject(HttpTestingController);
-    await vi.waitFor(() => http.expectOne(req => req.url.includes('tokens')).flush({}));
+    // The request is out and Connect shows busy before the answer comes
+    await fixture.whenStable();
+    http.expectOne(req => req.url.includes('tokens')).flush({});
     expect(await submitted).toEqual(expect.objectContaining({ ignoreSuccess: true }));
     // Credentials as filled in, so only the settling connect disables Connect
     connectStep().validSignal.set(true);

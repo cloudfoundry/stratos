@@ -11,7 +11,7 @@ export interface ConnectAuthParams {
   password?: string;
   token?: string;
 }
-import { combineLatest, defer, from, merge, Observable, of, ReplaySubject, Subject, Subscription, timer } from 'rxjs';
+import { combineLatest, defer, from, Observable, of, ReplaySubject, Subject, Subscription, timer } from 'rxjs';
 import { delay, filter, finalize, map, pairwise, shareReplay, startWith, switchMap, take, tap } from 'rxjs/operators';
 
 import { EndpointsService } from '../../core/endpoints.service';
@@ -32,19 +32,11 @@ export interface ConnectEndpointConfig {
   username?: string;
 }
 
-// TLS options for the endpoint, set in the connect form by a user who may
-// edit the endpoint. Saved to the endpoint before the connect runs.
-export interface ConnectEndpointTls {
-  skipSSL: boolean;
-  caCert: string;
-}
-
 export interface ConnectEndpointData {
   authType: string;
   authVal: ConnectAuthParams;
   systemShared: boolean;
   bodyContent: string;
-  tls?: ConnectEndpointTls;
 }
 
 export class ConnectEndpointService {
@@ -53,8 +45,6 @@ export class ConnectEndpointService {
   private hasConnected = new Subject<boolean>();
   // Each tokens call that succeeded
   private connectSucceeded = new Subject<void>();
-  // Why saving the TLS options failed; null once a new attempt starts.
-  private saveError = new Subject<string | null>();
 
   // Emits when a connect has completed: true when this service has already
   // told the user (its "Connected to …" offer), so the caller need not.
@@ -116,8 +106,7 @@ export class ConnectEndpointService {
     // Report a connect only once the tokens call succeeded. An endpoint
     // being Reconnected is connected throughout, so watching it for a
     // user read any refresh of the endpoint list during a failed attempt
-    // (e.g. after saving its TLS options) as success, and the dialog
-    // closed with no error shown.
+    // as success, and the dialog closed with no error shown.
     this.subs.push(this.connectSucceeded.pipe(
       switchMap(() => this.connected$.pipe(filter(([isConnected]) => isConnected), take(1))),
       delay(this.connectDelay),
@@ -173,12 +162,9 @@ export class ConnectEndpointService {
         return of(newBusy);
       })
     );
-    this.connectingError$ = merge(
-      this.saveError,
-      this.update$.pipe(
-        filter(() => this.hasAttemptedConnect),
-        map(update => update.error ? update.message || 'Could not connect to the endpoint' : null)
-      ),
+    this.connectingError$ = this.update$.pipe(
+      filter(() => this.hasAttemptedConnect),
+      map(update => update.error ? update.message || 'Could not connect to the endpoint' : null)
     );
 
     this.setupCombinedObservables();
@@ -221,71 +207,13 @@ export class ConnectEndpointService {
     // another.
     return defer(() => {
       if (!this.inFlight) {
-        this.inFlight = from(this.saveTls()).pipe(
-          switchMap(({ failure, previous }) => {
-            if (failure !== null) {
-              return of({ success: false, errorMessage: failure });
-            }
-            // The options were saved for this connect only: a connect that
-            // fails puts them back (the form keeps the edit for a retry).
-            return this.connect().pipe(
-              switchMap(result => result.success || !previous ? of(result) : from(this.restoreTls(previous, result))),
-            );
-          }),
+        this.inFlight = this.connect().pipe(
           take(1),
           finalize(() => this.inFlight = undefined),
           shareReplay({ bufferSize: 1, refCount: false }),
         );
       }
       return this.inFlight;
-    });
-  }
-
-  // Save TLS options that differ from the endpoint's, so the connect uses
-  // them. Resolves to why saving failed (or null) and, once saved, the
-  // options the endpoint had before.
-  private async saveTls(): Promise<{ failure: string | null, previous?: ConnectEndpointTls }> {
-    this.saveError.next(null);
-    const tls = this.pData?.tls;
-    const endpoint = this.endpointsData.endpoints().get(this.config.guid);
-    if (!endpoint) {
-      return { failure: null };
-    }
-    const previous = { skipSSL: !!endpoint.skip_ssl_validation, caCert: endpoint.ca_cert ?? '' };
-    if (!tls || (tls.skipSSL === previous.skipSSL && tls.caCert === previous.caCert)) {
-      return { failure: null };
-    }
-    const state = await this.updateTls(endpoint, tls);
-    if (!state.error) {
-      return { failure: null, previous };
-    }
-    const message = state.message || 'Could not save the TLS options';
-    this.saveError.next(message);
-    return { failure: message };
-  }
-
-  // Put back the options saved for a connect that failed. The connect's
-  // error stands; a failure to restore is added to it.
-  private async restoreTls(previous: ConnectEndpointTls, result: { success: boolean, errorMessage: string }) {
-    const endpoint = this.endpointsData.endpoints().get(this.config.guid);
-    const state = endpoint ? await this.updateTls(endpoint, previous) : { error: true, message: 'The endpoint is no longer known' };
-    if (!state.error) {
-      return result;
-    }
-    const errorMessage = `${result.errorMessage || 'Could not connect to the endpoint'} ` +
-      `(the endpoint's previous TLS options could not be restored: ${state.message || 'unknown error'})`;
-    this.saveError.next(errorMessage);
-    return { success: false, errorMessage };
-  }
-
-  private updateTls(endpoint: EndpointModel, tls: ConnectEndpointTls): Promise<ActionState> {
-    return this.endpointsData.update(this.config.guid, {
-      endpointType: this.config.type,
-      name: endpoint.name,
-      skipSSL: tls.skipSSL,
-      setClientInfo: false,
-      allowSSO: endpoint.sso_allowed,
-      caCert: tls.caCert,
     });
   }
 
