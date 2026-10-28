@@ -79,6 +79,7 @@ so in each section the plugin fixes follow the core ones.
 
 <!-- subcategories -->
 - Accessibility
+- API Keys
 - Applications
 - Endpoints
 - Organizations and Spaces
