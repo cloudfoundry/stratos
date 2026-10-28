@@ -22,11 +22,11 @@ var sqlQueries = struct {
 	DeleteAPIKey         string
 	UpdateAPIKeyLastUsed string
 }{
-	InsertAPIKey:         `INSERT INTO api_keys (guid, secret, user_guid, comment) VALUES ($1, $2, $3, $4)`,
-	GetAPIKeyBySecret:    `SELECT guid, user_guid, comment, last_used FROM api_keys WHERE secret = $1`,
-	ListAPIKeys:          `SELECT guid, user_guid, comment, last_used FROM api_keys WHERE user_guid = $1`,
+	InsertAPIKey:         `INSERT INTO api_keys (guid, secret, user_guid, comment, expires_at) VALUES ($1, $2, $3, $4, $5)`,
+	GetAPIKeyBySecret:    `SELECT guid, user_guid, comment, last_used, expires_at, last_used_refused FROM api_keys WHERE secret = $1`,
+	ListAPIKeys:          `SELECT guid, user_guid, comment, last_used, expires_at, last_used_refused FROM api_keys WHERE user_guid = $1`,
 	DeleteAPIKey:         `DELETE FROM api_keys WHERE user_guid = $1 AND guid = $2`,
-	UpdateAPIKeyLastUsed: `UPDATE api_keys SET last_used = $1 WHERE guid = $2`,
+	UpdateAPIKeyLastUsed: `UPDATE api_keys SET last_used = $1, last_used_refused = $2 WHERE guid = $3`,
 }
 
 // PgsqlAPIKeysRepository - Postgresql-backed API keys repository
@@ -61,7 +61,7 @@ func InitRepositoryProvider(databaseProvider string) {
 }
 
 // AddAPIKey - Add a new API key to the datastore.
-func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*api.APIKey, error) {
+func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string, expiresAt *time.Time) (*api.APIKey, error) {
 	slog.Debug("AddAPIKey", "user", userID)
 
 	var err error
@@ -87,16 +87,17 @@ func (p *PgsqlAPIKeysRepository) AddAPIKey(userID string, comment string) (*api.
 
 	// Store only a hash of the secret; the plaintext is returned to the caller
 	// once (below) and never persisted, so a database dump yields no usable keys.
-	err = execQuery(p, sqlQueries.InsertAPIKey, keyGUID, crypto.HashAPIKey(p.encryptionKey, keySecret), userID, comment)
+	err = execQuery(p, sqlQueries.InsertAPIKey, keyGUID, crypto.HashAPIKey(p.encryptionKey, keySecret), userID, comment, expiresAt)
 	if err != nil {
 		return nil, fmt.Errorf("AddAPIKey: %v", err)
 	}
 
 	apiKey := &api.APIKey{
-		GUID:     keyGUID,
-		Secret:   keySecret,
-		UserGUID: userID,
-		Comment:  comment,
+		GUID:      keyGUID,
+		Secret:    keySecret,
+		UserGUID:  userID,
+		Comment:   comment,
+		ExpiresAt: expiresAt,
 	}
 
 	return apiKey, err
@@ -113,6 +114,8 @@ func (p *PgsqlAPIKeysRepository) GetAPIKeyBySecret(keySecret string) (*api.APIKe
 		&apiKey.UserGUID,
 		&apiKey.Comment,
 		&apiKey.LastUsed,
+		&apiKey.ExpiresAt,
+		&apiKey.LastUsedRefused,
 	)
 
 	if err != nil {
@@ -135,7 +138,7 @@ func (p *PgsqlAPIKeysRepository) ListAPIKeys(userID string) ([]api.APIKey, error
 	result := []api.APIKey{}
 	for rows.Next() {
 		var apiKey api.APIKey
-		err = rows.Scan(&apiKey.GUID, &apiKey.UserGUID, &apiKey.Comment, &apiKey.LastUsed)
+		err = rows.Scan(&apiKey.GUID, &apiKey.UserGUID, &apiKey.Comment, &apiKey.LastUsed, &apiKey.ExpiresAt, &apiKey.LastUsedRefused)
 		if err != nil {
 			slog.Error("unable to scan an API key row", "user", userID, "error", err)
 			return nil, err
@@ -158,11 +161,11 @@ func (p *PgsqlAPIKeysRepository) DeleteAPIKey(userGUID string, keyGUID string) e
 	return nil
 }
 
-// UpdateAPIKeyLastUsed - sets API key last_used field to current time
-func (p *PgsqlAPIKeysRepository) UpdateAPIKeyLastUsed(keyGUID string) error {
+// UpdateAPIKeyLastUsed - sets the last_used field to the current time and records whether that use was refused
+func (p *PgsqlAPIKeysRepository) UpdateAPIKeyLastUsed(keyGUID string, refused bool) error {
 	slog.Debug("UpdateAPIKeyLastUsed", "key", keyGUID)
 
-	err := execQuery(p, sqlQueries.UpdateAPIKeyLastUsed, time.Now().UTC(), keyGUID)
+	err := execQuery(p, sqlQueries.UpdateAPIKeyLastUsed, time.Now().UTC(), refused, keyGUID)
 	if err != nil {
 		return fmt.Errorf("UpdateAPIKeyLastUsed: %v", err)
 	}

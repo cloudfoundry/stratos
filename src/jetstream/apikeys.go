@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
+	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	"github.com/labstack/echo/v5"
@@ -43,7 +44,19 @@ func (p *portalProxy) addAPIKey(c *echo.Context) error {
 		return echo.NewHTTPError(http.StatusForbidden, err.Error())
 	}
 
-	apiKey, err := p.APIKeysRepository.AddAPIKey(userGUID, comment)
+	var expiresAt *time.Time
+	if raw := c.FormValue("expires_at"); raw != "" {
+		t, err := time.Parse(time.RFC3339, raw)
+		if err != nil {
+			return echo.NewHTTPError(http.StatusBadRequest, "Expiry must be an RFC 3339 time")
+		}
+		if !t.After(time.Now()) {
+			return echo.NewHTTPError(http.StatusBadRequest, "Expiry must be in the future")
+		}
+		expiresAt = &t
+	}
+
+	apiKey, err := p.APIKeysRepository.AddAPIKey(userGUID, comment, expiresAt)
 	if err != nil {
 		slog.Error("error adding an API key", "user", userGUID, "error", err)
 		return errors.New("Error adding API key")
