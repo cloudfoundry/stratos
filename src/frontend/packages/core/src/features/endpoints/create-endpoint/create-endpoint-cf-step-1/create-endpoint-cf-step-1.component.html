@@ -73,7 +73,9 @@
 
     <!-- Right column: Checkbox options -->
     <div class="create-endpoint__options-column">
-      <h1 class="create-endpoint__section-title text-[var(--content-text)]">Options</h1>
+      @if (showOptions()) {
+        <h1 class="create-endpoint__section-title text-[var(--content-text)]">Options</h1>
+      }
       @if (canEditTls()) {
         <app-checkbox appInput id="skipSSL" name="skipSSL" formControlName="skipSSLField"
           >Skip SSL validation for the endpoint</app-checkbox

@@ -494,6 +494,35 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(emitted).not.toHaveBeenCalled();
     });
 
+    // The Options heading only heads something.
+    describe('the Options heading', () => {
+      const heading = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('h1'))
+        .find(h => h.textContent!.trim() === 'Options');
+
+      it('shows over the TLS controls', async () => {
+        await review(endpoint({ cnsi_type: 'metrics' }));
+        expect(heading()).toBeTruthy();
+      });
+
+      it('is gone for a Git endpoint', async () => {
+        await review(endpoint({ cnsi_type: 'git', sub_type: 'github', name: 'my-github' }));
+        expect(heading()).toBeUndefined();
+      });
+
+      it('is gone for a non-manager of a type without SSO', async () => {
+        canManage.mockReturnValue(false);
+        await review(endpoint({ cnsi_type: 'metrics' }));
+        expect(heading()).toBeUndefined();
+      });
+
+      it('stays for a non-manager of Cloud Foundry, over SSO', async () => {
+        canManage.mockReturnValue(false);
+        await review(endpoint());
+        expect(q('#ssoAllowed')).toBeTruthy();
+        expect(heading()).toBeTruthy();
+      });
+    });
+
     it('stays put when the user keeps the endpoint', async () => {
       confirmAnswer = false;
       await review(endpoint());
