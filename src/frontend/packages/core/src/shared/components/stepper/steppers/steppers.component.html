@@ -57,7 +57,7 @@
                       {{ step.title }}
                     </span>
                   </ng-template>
-                  @if (step.complete) {
+                  @if (step.complete && !steps[currentIndex()].disablePrevious && !steps[currentIndex()].hidePrevious) {
                     <button type="button" class="steppers-header-inner flex items-center min-w-0 cursor-pointer"
                       [attr.aria-label]="step.title + ', completed'" (click)="goTo(i)">
                       <ng-container *ngTemplateOutlet="headerBody"></ng-container>

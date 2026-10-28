@@ -872,3 +872,61 @@ describe('SteppersComponent — first step and start index', () => {
     expect(steppers.currentIndex()).toBe(0);
   });
 });
+
+// A step nothing can go back from: no Previous, and the completed header
+// before it is not a control that does nothing.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers>
+      <app-step title="One" [signalHandle]="first"></app-step>
+      <app-step title="Two" [signalHandle]="second"></app-step>
+    </app-steppers>
+  `,
+})
+class NoGoingBackHostComponent {
+  first: SignalStepHandle = { valid: signal(true) };
+  disable = signal(false);
+  hide = signal(false);
+  second: SignalStepHandle = { valid: signal(true), disablePrevious: this.disable, hidePrevious: this.hide };
+}
+
+describe('SteppersComponent — a step with no way back', () => {
+  let hostFixture: ComponentFixture<NoGoingBackHostComponent>;
+  let host: NoGoingBackHostComponent;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [NoGoingBackHostComponent, RouterTestingModule],
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(NoGoingBackHostComponent);
+    host = hostFixture.componentInstance;
+    await hostFixture.whenStable();
+    const steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    steppers.setActive(1);
+    await hostFixture.whenStable();
+  });
+
+  const q = (sel: string) => (hostFixture.nativeElement as HTMLElement).querySelector(sel);
+
+  it('offers Previous and a header button by default', () => {
+    expect(q('#stepper_previous')).toBeTruthy();
+    expect(q('button.steppers-header-inner')).toBeTruthy();
+  });
+
+  it('hidePrevious removes the Previous button', async () => {
+    host.hide.set(true);
+    await hostFixture.whenStable();
+    expect(q('#stepper_previous')).toBeNull();
+  });
+
+  it('a completed header is not a button while Previous is disabled', async () => {
+    host.disable.set(true);
+    await hostFixture.whenStable();
+    expect(q('button.steppers-header-inner')).toBeNull();
+    expect(q('.steppers-header-text--complete')?.textContent).toContain('One');
+  });
+});
