@@ -741,64 +741,52 @@ describe('SteppersComponent — Cancel', () => {
   });
 });
 
-// A step can ask before Previous leaves it (e.g. when leaving undoes work).
+// Previous leaves the current step through its leave hook.
 @Component({
   standalone: true,
   imports: [SteppersComponent, StepComponent],
   template: `
     <app-steppers>
-      <app-step title="One" [signalHandle]="first"></app-step>
-      <app-step title="Two" [signalHandle]="second"></app-step>
+      <app-step title="One" [signalHandle]="steps[0]"></app-step>
+      <app-step title="Two" [signalHandle]="steps[1]"></app-step>
+      <app-step title="Three" [signalHandle]="steps[2]"></app-step>
     </app-steppers>
   `,
 })
-class ConfirmPreviousHostComponent {
-  answer = false;
-  left: (boolean | undefined)[] = [];
-  first: SignalStepHandle = { valid: signal(true) };
-  second: SignalStepHandle = {
+class GoingBackHostComponent {
+  left: [string, boolean | undefined][] = [];
+  steps: SignalStepHandle[] = ['One', 'Two', 'Three'].map(title => ({
     valid: signal(true),
-    confirmPrevious: () => Promise.resolve(this.answer),
-    onLeave: (isNext) => { this.left.push(isNext); },
-  };
+    onLeave: (isNext?: boolean) => { this.left.push([title, isNext]); },
+  }));
 }
 
-describe('SteppersComponent — Previous with a confirmation', () => {
-  let hostFixture: ComponentFixture<ConfirmPreviousHostComponent>;
-  let host: ConfirmPreviousHostComponent;
+describe('SteppersComponent — going back', () => {
+  let hostFixture: ComponentFixture<GoingBackHostComponent>;
+  let host: GoingBackHostComponent;
   let steppers: SteppersComponent;
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      imports: [ConfirmPreviousHostComponent, RouterTestingModule],
+      imports: [GoingBackHostComponent, RouterTestingModule],
       providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
     });
     await TestBed.compileComponents();
-    hostFixture = TestBed.createComponent(ConfirmPreviousHostComponent);
+    hostFixture = TestBed.createComponent(GoingBackHostComponent);
     host = hostFixture.componentInstance;
     await hostFixture.whenStable();
     steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
     steppers.setActive(1);
+    steppers.setActive(2);
     await hostFixture.whenStable();
+    host.left = [];
   });
 
-  const clickPrevious = async () => {
+  it('Previous leaves the current step', async () => {
     (hostFixture.nativeElement.querySelector('#stepper_previous') as HTMLButtonElement).click();
     await hostFixture.whenStable();
-  };
-
-  it('stays on the step when the user declines', async () => {
-    host.answer = false;
-    await clickPrevious();
     expect(steppers.currentIndex()).toBe(1);
-    expect(host.left).toEqual([]);
-  });
-
-  it('goes back when the user agrees', async () => {
-    host.answer = true;
-    await clickPrevious();
-    expect(steppers.currentIndex()).toBe(0);
-    expect(host.left).toEqual([false]);
+    expect(host.left).toEqual([['Three', false]]);
   });
 });
 

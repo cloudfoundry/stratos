@@ -125,7 +125,6 @@ describe('CreateEndpointComponent', () => {
     });
 
     it('keeps the endpoint: no question, no unregister', async () => {
-      expect(component.connectStepHandle.confirmPrevious).toBeUndefined();
       expect(component.connectStepHandle.onLeave).toBeUndefined();
       expect(TestBed.inject(ConfirmationDialogService).openWithCancel).not.toHaveBeenCalled();
       expect(unregister).not.toHaveBeenCalled();
@@ -185,7 +184,7 @@ describe('CreateEndpointComponent', () => {
       const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
       steppers.setActive(1);
       await fixture.whenStable();
-      await steppers.goPrevious();
+      steppers.goPrevious();
       await fixture.whenStable();
 
       expect(steppers.currentIndex()).toBe(0);
