@@ -89,6 +89,9 @@
 [BugFixes: Cloud Foundry]
 - An event's detail dialog has room around its contents; it ran to
   the dialog's edges.
+- An event's data keeps its lines whole, scrolling sideways when one
+  is long, and wraps to show everything on hover or keyboard focus; it
+  broke values such as IDs in the middle.
 
 [BugFixes: Kubernetes]
 - Kubernetes and Helm pages show their icons again, such as the Helm
