@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { entityCatalog } from '@stratosui/store';
@@ -9,6 +10,7 @@ import { TabNavService, CurrentUserPermissionsService, SidePanelService } from '
 import { AppTestModule } from '@test-framework/core-test.helper';
 
 import { generateCoreStratosEntities } from '../../metrics/metrics-endpoint';
+import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { ConnectEndpointComponent } from '../connect-endpoint/connect-endpoint.component';
 import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { ENDPOINT_REGISTER_HANDLE } from '../endpoint-register-modal/endpoint-register-handle';
@@ -116,7 +118,7 @@ describe('CreateEndpointComponent', () => {
 
     it('keeps the endpoint: no question, no unregister', async () => {
       expect(component.connectStepHandle.confirmPrevious).toBeUndefined();
-      await component.connectStepHandle.onLeave?.(false);
+      expect(component.connectStepHandle.onLeave).toBeUndefined();
       expect(TestBed.inject(ConfirmationDialogService).openWithCancel).not.toHaveBeenCalled();
       expect(unregister).not.toHaveBeenCalled();
     });
@@ -125,6 +127,33 @@ describe('CreateEndpointComponent', () => {
       expect(component.step1StepHandle.nextButtonText!()).toBe('Next');
       component.onUnregistered();
       expect(component.step1StepHandle.nextButtonText!()).toBe('Register');
+    });
+  });
+
+  // Back on step 1 after registering, the form shows the endpoint locked.
+  describe('Previous from Connect shows step 1 locked', () => {
+    it('leaves the registered endpoint in place and locked', async () => {
+      const dialog = vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel');
+      const config = TestBed.inject(EndpointsSignalConfigService);
+      vi.spyOn(config, 'register').mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' } as never);
+      const unregister = vi.spyOn(config, 'unregister');
+      const real = fixture.debugElement.query(By.directive(CreateEndpointCfStep1Component))
+        .componentInstance as CreateEndpointCfStep1Component;
+      real.registerForm.controls.nameField.setValue('my-metrics');
+      real.registerForm.controls.urlField.setValue('metrics.example.com');
+      component.step1 = real;
+      await component.step1StepHandle.submit!();
+      const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+      steppers.setActive(1);
+      await fixture.whenStable();
+      await steppers.goPrevious();
+      await fixture.whenStable();
+
+      expect(steppers.currentIndex()).toBe(0);
+      expect(real.review()).toBe(true);
+      expect((fixture.nativeElement.querySelector('#name') as HTMLInputElement).disabled).toBe(true);
+      expect(dialog).not.toHaveBeenCalled();
+      expect(unregister).not.toHaveBeenCalled();
     });
   });
 });

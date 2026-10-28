@@ -380,6 +380,35 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(result).toEqual(expect.objectContaining({ success: false, message: 'nope' }));
     });
 
+    it('shows Client ID and the system-endpoint checkbox locked, filled from the endpoint', async () => {
+      TestBed.inject(EndpointsDataService);
+      await review(endpoint({ client_id: 'my-client', creator: { name: 'me', admin: false, system: false } }));
+      expect(component.registerForm.controls.clientIDField.value).toBe('my-client');
+      expect(component.registerForm.controls.clientIDField.disabled).toBe(true);
+      expect(component.registerForm.controls.createSystemEndpointField.value).toBe(false);
+      expect(component.registerForm.controls.createSystemEndpointField.disabled).toBe(true);
+      expect(q('#client_id')).toBeTruthy();
+    });
+
+    it('keeps edits in progress when the same endpoint arrives as a new object', async () => {
+      await review(endpoint());
+      component.registerForm.controls.skipSSLField.setValue(true);
+      fixture.componentRef.setInput('reviewEndpoint', endpoint());
+      await fixture.whenStable();
+      expect(component.registerForm.controls.skipSSLField.value).toBe(true);
+    });
+
+    it('starts clean when a different endpoint is shown', async () => {
+      await review(endpoint({ ca_cert: PEM }));
+      expect(component.registerForm.controls.skipSSLField.disabled).toBe(true);
+      fixture.componentRef.setInput('reviewEndpoint', endpoint({ guid: 'other', name: 'other-cf', skip_ssl_validation: true }));
+      await fixture.whenStable();
+      expect(component.showCACertField()).toBe(false);
+      expect(component.registerForm.controls.skipSSLField.enabled).toBe(true);
+      expect(component.registerForm.controls.skipSSLField.value).toBe(true);
+      expect(component.registerForm.controls.nameField.value).toBe('other-cf');
+    });
+
     it('never shows the Client Secret in review', async () => {
       await review(endpoint());
       expect(q('#client_secret')).toBeNull();

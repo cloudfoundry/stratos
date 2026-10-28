@@ -180,7 +180,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
 
     effect(() => {
       const ep = this.reviewEndpoint();
-      if (ep) {
+      // A refreshed copy of the same endpoint must not reset edits in progress.
+      if (ep && ep.guid !== untracked(() => this.registered()?.guid)) {
         untracked(() => this.reviewExisting(ep));
       }
     });
@@ -198,13 +199,17 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.useEndpointType(entityCatalog.getEndpoint(ep.cnsi_type ?? '', ep.sub_type));
     const form = this.registerForm.controls;
     const caCert = ep.ca_cert ?? '';
+    // Start clean: a previous fill may have left the TLS controls disabled.
+    form.skipSSLField.enable();
+    this.showCACertField.set(false);
     form.nameField.setValue(ep.name);
+    form.clientIDField.setValue(ep.client_id ?? '');
+    form.createSystemEndpointField.setValue(!(!!ep.creator && !ep.creator.system));
     form.urlField.setValue(getFullEndpointApiUrl(ep));
     form.ssoAllowedField.setValue(!!ep.sso_allowed);
     form.skipSSLField.setValue(!!ep.skip_ssl_validation);
     form.caCertField.setValue(caCert);
     this.lastSkipSSLValue = !!ep.skip_ssl_validation;
-    this.showCACertField.set(false);
     if (caCert.trim()) {
       this.toggleCACertField();
     }
@@ -404,7 +409,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   toggleCACertField() {
     this.showCACertField.update(v => !v);
     if (this.showCACertField()) {
-      this.lastSkipSSLValue = this.registerForm.value.skipSSLField ?? false;
+      this.lastSkipSSLValue = this.registerForm.getRawValue().skipSSLField ?? false;
       this.registerForm.controls.skipSSLField.setValue(false);
       this.registerForm.controls.skipSSLField.disable();
     } else {
