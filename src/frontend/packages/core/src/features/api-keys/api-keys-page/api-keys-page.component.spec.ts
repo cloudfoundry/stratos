@@ -12,7 +12,8 @@ import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.
 import { CreateApiKeyStepperComponent } from '../create-api-key-stepper/create-api-key-stepper.component';
 import { ApiKeysPageComponent } from './api-keys-page.component';
 
-const NOW = new Date('2026-10-28T12:00:00Z');
+// Local noon: the calendar-day wording reads the viewer's zone.
+const NOW = new Date(2026, 9, 28, 12, 0, 0);
 const DAY = 24 * 60 * 60 * 1000;
 const inDays = (days: number) => new Date(NOW.getTime() + days * DAY);
 
@@ -86,6 +87,29 @@ describe('ApiKeysPageComponent', () => {
     expect(norm(banners()[0])).toContain(
       `"tool" expires tomorrow at ${at}. Create a replacement and update the script that uses it.`);
     expect(banners()[0].className).not.toContain('danger');
+  });
+
+  it('names today or tomorrow by the local date', async () => {
+    const at = (day: number, hour: number) => new Date(2026, 9, day, hour).toISOString();
+    const cases: [number, number, string][] = [[9, 28 * 100 + 15, 'expires today at'], [22, 29 * 100 + 1, 'expires tomorrow at']];
+    for (const [seen, packed, words] of cases) {
+      vi.setSystemTime(new Date(2026, 9, 28, seen));
+      TestBed.resetTestingModule();
+      await TestBed.configureTestingModule({
+        imports: [ApiKeysPageComponent],
+        providers: [provideZonelessChangeDetection(), provideRouter([]), provideHttpClient(), provideHttpClientTesting(),
+          provideNoopAnimations(), { provide: TailwindDialogService, useValue: mockDialogService }],
+      }).compileComponents();
+      fixture = TestBed.createComponent(ApiKeysPageComponent);
+      await listKeys([{ ...key('k', null), expires_at: at(Math.floor(packed / 100), packed % 100) }]);
+      expect(norm(banners()[0])).toContain(`"k" ${words}`);
+    }
+  });
+
+  it('counts calendar days since expiry', async () => {
+    vi.setSystemTime(new Date(2026, 9, 28, 8));
+    await listKeys([{ ...key('k', null), expires_at: new Date(2026, 9, 27, 22).toISOString() }]);
+    expect(norm(banners()[0])).toContain('"k" expired 1 day ago at');
   });
 
   it('shows no banner for a key with days to go', async () => {
