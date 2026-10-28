@@ -1,7 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { defer, of } from 'rxjs';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, vi, type Mock } from 'vitest';
 import { CurrentUserRolesDataService, EndpointModel, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { seedEndpointsDataService } from '@stratosui/store/testing';
 import { BaseTestModules, STORE_TEST_PROVIDERS } from '@test-framework/core-test.helper';
@@ -144,20 +144,39 @@ describe('ConnectEndpointComponent', () => {
     });
   });
 
-  // The Connect dialog submits on Enter (formSubmit). The connect runs only
-  // when its Observable is subscribed.
-  it('connects when the form is submitted with Enter', async () => {
-    const connected = vi.fn();
-    fixture.componentRef.setInput('formSubmit', true);
-    component.connectService = {
-      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
-      setData: () => undefined,
-      submit: () => defer(() => { connected(); return of({ success: true, errorMessage: '' }); }),
-    } as unknown as ConnectEndpointService;
-    await fixture.whenStable();
-    component.endpointForm.get('authValues')?.patchValue({ username: 'u', password: 'p' });
-    fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
-    await fixture.whenStable();
-    expect(connected).toHaveBeenCalledTimes(1);
+  // Enter in a filled-in form tells the host, which connects the way its
+  // Connect button does; the form never connects on its own.
+  describe('on Enter', () => {
+    let connected: Mock<() => void>;
+    let submitted: Mock<() => void>;
+
+    beforeEach(async () => {
+      connected = vi.fn<() => void>();
+      submitted = vi.fn<() => void>();
+      component.submitted.subscribe(submitted);
+      component.connectService = {
+        config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+        setData: () => undefined,
+        submit: () => defer(() => { connected(); return of({ success: true, errorMessage: '' }); }),
+      } as unknown as ConnectEndpointService;
+      await fixture.whenStable();
+    });
+
+    const enter = async () => {
+      fixture.nativeElement.querySelector('form').dispatchEvent(new Event('submit'));
+      await fixture.whenStable();
+    };
+
+    it('says the form was submitted', async () => {
+      component.endpointForm.get('authValues')?.patchValue({ username: 'u', password: 'p' });
+      await enter();
+      expect(submitted).toHaveBeenCalledTimes(1);
+      expect(connected).not.toHaveBeenCalled();
+    });
+
+    it('says nothing while the form is incomplete', async () => {
+      await enter();
+      expect(submitted).not.toHaveBeenCalled();
+    });
   });
 });

@@ -52,6 +52,8 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   readonly caCert = input('');
   // The strip's Review link.
   readonly review = output<void>();
+  // Enter in the filled-in credentials form; the host connects as its button does.
+  readonly submitted = output<void>();
   // Set only when the CA is expiring or expired.
   readonly caBadge = signal<'expiring' | 'expired' | null>(null);
 

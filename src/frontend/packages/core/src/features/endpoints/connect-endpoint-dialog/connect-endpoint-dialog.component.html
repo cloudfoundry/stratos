@@ -11,7 +11,8 @@
     </app-step>
     <app-step [title]="'Connect'" [signalHandle]="connectStepHandle">
       <app-create-endpoint-connect [fromConnect]="true" [stillConnected]="stillConnected()"
-        [endpointAddress]="address()" [caCert]="caCert()" (review)="steppers.goTo(0)"></app-create-endpoint-connect>
+        [endpointAddress]="address()" [caCert]="caCert()" (review)="steppers.goTo(0)"
+        (submitted)="steppers.goNextIfAllowed()"></app-create-endpoint-connect>
     </app-step>
   </app-steppers>
 </div>

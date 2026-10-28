@@ -342,6 +342,16 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     }
   }
 
+  // Next, only when the Next button is shown and enabled. For Enter in a
+  // step's form, which must not do what the disabled button would not.
+  goNextIfAllowed(): void {
+    const index = this.currentIndex();
+    const step = this.steps[index];
+    if (step && !step.hideNextButton && !step.busy && !step.blocked && this.canGoNext(index)) {
+      this.goNext();
+    }
+  }
+
   redirect(redirectPayload?: StepperRedirectPayload): Observable<void> {
     if (redirectPayload) {
       return observableOf(this.navigate(redirectPayload));
