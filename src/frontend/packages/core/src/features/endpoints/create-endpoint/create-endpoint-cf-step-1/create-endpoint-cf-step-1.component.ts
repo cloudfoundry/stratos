@@ -14,7 +14,7 @@ import {
   entityCatalog,
   getFullEndpointApiUrl,
 } from '@stratosui/store';
-import { combineLatest, from, Observable } from 'rxjs';
+import { combineLatest, firstValueFrom, from, Observable } from 'rxjs';
 import { map, startWith } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
@@ -32,7 +32,7 @@ import { ProductNameComponent } from '../../../../shared/components/product-name
 import { ConfirmationDialogService } from '../../../../shared/components/confirmation-dialog.service';
 import { EndpointCertificatesComponent } from '../../certificates/endpoint-certificates.component';
 import { EndpointPermissionsService } from '../../endpoint-permissions.service';
-import { confirmAndUnregister } from '../../unregister-endpoint/unregister-endpoint';
+import { confirmAndUnregister, isPersonalEndpoint } from '../../unregister-endpoint/unregister-endpoint';
 
 // What the step knows about the endpoint it registered or is reviewing.
 interface RegisteredEndpoint {
@@ -356,7 +356,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     if (!result.error) {
       this.registered.set({
         ...data,
-        personal: this.isPersonal(data.guid),
+        personal: await this.isPersonal(data.guid),
         skipSSL: sslAllow,
         caCert: showCA ? (this.registerForm.value.caCertField ?? '') : '',
       });
@@ -378,9 +378,12 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   }
 
   // Personal = created by a user, not the system.
-  private isPersonal(guid: string): boolean {
-    const ep = this.endpointsData.endpoints().get(guid);
-    return ep ? !!ep.creator && !ep.creator.system : !this.registerForm.value.createSystemEndpointField;
+  private async isPersonal(guid: string): Promise<boolean> {
+    return isPersonalEndpoint(
+      this.endpointsData.endpoints().get(guid),
+      await firstValueFrom(this.userEndpointsAndIsAdmin),
+      !!this.registerForm.value.createSystemEndpointField,
+    );
   }
 
   ngAfterContentInit() {

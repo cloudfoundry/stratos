@@ -11,6 +11,23 @@ export interface UnregisterTarget {
 }
 
 /**
+ * Whether an endpoint is personal (visible to its creator only). The stored
+ * endpoint's creator decides; before it reaches the endpoints map, it is
+ * personal unless an admin left "system endpoint" ticked (only admins see
+ * that checkbox, so everyone else registers a personal endpoint).
+ */
+export function isPersonalEndpoint(
+  stored: { creator?: { system?: boolean } | null } | undefined,
+  isAdmin: boolean,
+  systemTicked: boolean,
+): boolean {
+  if (stored) {
+    return !!stored.creator && !stored.creator.system;
+  }
+  return !(isAdmin && systemTicked);
+}
+
+/**
  * Asks, then unregisters the endpoint. Resolves true once it is gone; false
  * when the user keeps it or the request fails.
  */

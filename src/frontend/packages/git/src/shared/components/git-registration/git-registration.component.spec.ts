@@ -165,6 +165,16 @@ describe('GitRegistrationComponent', () => {
       expect(fixture.nativeElement.querySelector('#unregister')).toBeNull();
     });
 
+    it('says "for you" in the row and the confirmation for a non-admin', async () => {
+      expect(fixture.nativeElement.querySelector('#unregister')!.parentElement.textContent)
+        .toContain('Remove this endpoint for you.');
+      const openWithCancel = vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel')
+        .mockImplementation((_config, _ok, cancel) => cancel());
+      await component.unregister();
+      expect(openWithCancel.mock.calls[0][0].message).toContain('for you');
+      expect(openWithCancel.mock.calls[0][0].message).not.toContain('all users');
+    });
+
     it('Keep it leaves the endpoint registered and locked', async () => {
       vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel')
         .mockImplementation((_config, _ok, cancel) => cancel());
