@@ -19,14 +19,11 @@ import { entityCatalog } from '@stratosui/store';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { getIdFromRoute } from '../../../core/utils.service';
-import { ConfirmationDialogService } from '../../../shared/components/confirmation-dialog.service';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SignalStepHandle, StepComponent } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
 import { ENDPOINT_REGISTER_HANDLE, leaveEndpointRegistration } from '../endpoint-register-modal/endpoint-register-handle';
-import { EndpointsSignalConfigService } from '../endpoints-page/endpoints-signal-config.service';
 import { CreateEndpointCfStep1Component } from './create-endpoint-cf-step-1/create-endpoint-cf-step-1.component';
-import { confirmUnregisterOnPrevious } from './confirm-unregister-on-previous';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect/create-endpoint-connect.component';
 
 @Component({
@@ -80,8 +77,6 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
 
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
-  private endpointsSignalConfig = inject(EndpointsSignalConfigService);
-  private confirmDialog = inject(ConfirmationDialogService);
   // Present when hosted by the Register Endpoint dialog, which this form
   // closes instead of navigating to /endpoints (the page under the dialog).
   private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
@@ -92,17 +87,17 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   private step1Valid = signal<boolean>(false);
   private step1ValidateSub?: Subscription;
 
-  // Tracks the endpoint guid created by step 1's submit — used by the
-  // connect-step's onLeave(isNext=false) handler to unregister on
-  // Previous ("Prev = start over"). Cleared after unregister so the form
-  // can re-register cleanly. Mirrors git-registration's pattern.
-  private registeredGuid: string | null = null;
-  private registeredType: string | null = null;
-  private registeredName = '';
+  // The endpoint step 1 registered. Previous never undoes it; step 1 shows it
+  // locked and offers Unregister, which clears this.
+  private registered = signal(false);
+
+  onUnregistered() {
+    this.registered.set(false);
+  }
 
   step1StepHandle: SignalStepHandle = {
     valid: this.step1Valid.asReadonly(),
-    nextButtonText: signal('Register').asReadonly(),
+    nextButtonText: computed(() => this.registered() ? 'Next' : 'Register'),
     submit: async () => {
       // Delegate to the existing onNext to preserve all of its
       // side-effects (snackbar, dup-endpoint warning, store dispatch).
@@ -110,12 +105,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       if (!result.success) {
         throw new Error(result.message || 'Failed to register endpoint');
       }
-      // Capture the guid+type so Previous from step 2 can unregister.
-      if (result.data) {
-        this.registeredGuid = result.data.guid;
-        this.registeredType = result.data.type;
-        this.registeredName = result.data.name;
-      }
+      this.registered.set(true);
       // `redirect: true` (only emitted when finalStep is set, i.e. when
       // there's no connect step) means the form is done.
       if (result.redirect) {
@@ -135,6 +125,7 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // step handle re-evaluates without polling.
   connectStepHandle: SignalStepHandle = {
     valid: computed(() => {
+      if (!this.registered()) return false;
       const c = this._connect();
       if (!c) return true;
       return c.doConnectSignal() ? c.validSignal() : true;
@@ -152,23 +143,6 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       if (data) {
         this._connect()?.onEnter(data as any);
       }
-    },
-    // Previous unregisters (onLeave below), so it asks first.
-    confirmPrevious: () => this.registeredGuid ?
-      confirmUnregisterOnPrevious(this.confirmDialog, this.registeredName) :
-      Promise.resolve(true),
-    onLeave: async (isNext) => {
-      if (isNext || !this.registeredGuid || !this.registeredType) {
-        return;
-      }
-      // Previous from connect step ⇒ "start over": unregister the endpoint
-      // we just created so the user can re-fill or pick a different type
-      // on a clean step 1.
-      const guid = this.registeredGuid;
-      const type = this.registeredType;
-      this.registeredGuid = null;
-      this.registeredType = null;
-      await this.endpointsSignalConfig.unregister(guid, type);
     },
     submit: async () => {
       const result = await firstValueFrom(this._connect()!.onNext());
