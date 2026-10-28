@@ -116,7 +116,9 @@ func checkTrust(hostPort, serverName, caCert string, timeout time.Duration) Trus
 	switch {
 	case errors.As(err, &invalid) && invalid.Reason == x509.Expired:
 		res.Reason = "expired"
-	case errors.As(err, &unknown):
+	// macOS verifies against the platform trust store when no extra CA is
+	// in the pool, and reports an untrusted chain as a plain error.
+	case errors.As(err, &unknown), strings.HasSuffix(err.Error(), "certificate is not trusted"):
 		res.Reason = "unknown authority"
 	case errors.As(err, &hostname):
 		res.Reason = "name mismatch"
@@ -142,7 +144,12 @@ func (p *portalProxy) trustCheckHandler(c *echo.Context) error {
 	id := c.Param("id")
 	rec, err := p.GetCNSIRecord(id)
 	if err != nil {
-		return api.NewHTTPShadowError(http.StatusNotFound, "Endpoint not found", "Trust check: %v", err)
+		// The repository signals not-found only by this message (see also
+		// the check in cnsi.go).
+		if err.Error() == "No match for that Endpoint" {
+			return api.NewHTTPShadowError(http.StatusNotFound, "Endpoint not found", "Trust check: %v", err)
+		}
+		return api.NewHTTPShadowError(http.StatusInternalServerError, "Could not look up the endpoint", "Trust check: %v", err)
 	}
 
 	caCert := rec.CACert

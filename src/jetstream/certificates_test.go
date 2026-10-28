@@ -11,6 +11,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/json"
 	"encoding/pem"
+	"errors"
 	"fmt"
 	"math/big"
 	"net"
@@ -25,6 +26,7 @@ import (
 	"github.com/stretchr/testify/require"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
 
@@ -197,4 +199,81 @@ func Test_decodeCertificatesHandler_400(t *testing.T) {
 
 	err := pp.decodeCertificatesHandler(ctx)
 	require.ErrorContains(t, err, "No certificate found")
+}
+
+// trustHandlerWithCA runs the trust handler against a stored record whose
+// token endpoint is empty, with the stored CA and form fields given.
+func trustHandlerWithCA(t *testing.T, apiURL, storedCA string, form map[string]string) (*httptest.ResponseRecorder, error) {
+	t.Helper()
+	req := setupMockReq("POST", "", form)
+	rec, _, ctx, pp, db, mock := setupHTTPTest(req)
+	t.Cleanup(func() { _ = db.Close() })
+	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: mockCNSIGUID}})
+
+	rows := sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+		AddRow(mockCNSIGUID, "ep", "cf", apiURL, "", "", "", false, "client", []byte{}, true, "", "", "", storedCA)
+	mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockCNSIGUID).WillReturnRows(rows)
+	return rec, pp.trustCheckHandler(ctx)
+}
+
+func decodeTrust(t *testing.T, rec *httptest.ResponseRecorder) []TrustResult {
+	t.Helper()
+	var out []TrustResult
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &out))
+	return out
+}
+
+func Test_trustCheck_form_ca_overrides_stored(t *testing.T) {
+	ca := mintCA(t, "ca")
+	srv := ca.serve(t, time.Now().Add(time.Hour))
+	rec, err := trustHandlerWithCA(t, srv.URL, mintCA(t, "wrong").pem, map[string]string{"ca_cert": ca.pem})
+	require.NoError(t, err)
+	out := decodeTrust(t, rec)
+	require.Len(t, out, 1)
+	require.True(t, out[0].Trusted, out[0].Reason)
+}
+
+func Test_trustCheck_absent_form_ca_uses_stored(t *testing.T) {
+	ca := mintCA(t, "ca")
+	srv := ca.serve(t, time.Now().Add(time.Hour))
+	rec, err := trustHandlerWithCA(t, srv.URL, ca.pem, map[string]string{})
+	require.NoError(t, err)
+	out := decodeTrust(t, rec)
+	require.Len(t, out, 1)
+	require.True(t, out[0].Trusted, out[0].Reason)
+}
+
+func Test_trustCheck_empty_form_ca_means_no_ca(t *testing.T) {
+	ca := mintCA(t, "ca")
+	srv := ca.serve(t, time.Now().Add(time.Hour))
+	rec, err := trustHandlerWithCA(t, srv.URL, ca.pem, map[string]string{"ca_cert": ""})
+	require.NoError(t, err)
+	out := decodeTrust(t, rec)
+	require.Len(t, out, 1)
+	require.Equal(t, "unknown authority", out[0].Reason)
+}
+
+func Test_trustCheck_unknown_endpoint_404(t *testing.T) {
+	req := setupMockReq("POST", "", map[string]string{})
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
+	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: mockCNSIGUID}})
+	mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockCNSIGUID).
+		WillReturnRows(sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()))
+
+	var he api.ErrHTTPShadow
+	require.ErrorAs(t, pp.trustCheckHandler(ctx), &he)
+	require.Equal(t, http.StatusNotFound, he.HTTPError.Code)
+}
+
+func Test_trustCheck_datastore_error_500(t *testing.T) {
+	req := setupMockReq("POST", "", map[string]string{})
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
+	ctx.SetPathValues(echo.PathValues{{Name: "id", Value: mockCNSIGUID}})
+	mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(mockCNSIGUID).WillReturnError(errors.New("connection refused"))
+
+	var he api.ErrHTTPShadow
+	require.ErrorAs(t, pp.trustCheckHandler(ctx), &he)
+	require.Equal(t, http.StatusInternalServerError, he.HTTPError.Code)
 }
