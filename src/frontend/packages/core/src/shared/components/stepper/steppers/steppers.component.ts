@@ -56,6 +56,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   // stepper whose host is not a route, such as the Register Endpoint dialog.
   readonly cancelAction = input<() => void>();
   readonly nextButtonProgress = input(true);
+  // Step to open on, with the steps before it complete. For a stepper that
+  // resumes mid-flow, e.g. one opened to review work done earlier.
+  readonly startIndex = input(0);
+  // Delivered as the onEnter data of the step at startIndex.
+  readonly startData = input<unknown>(undefined);
   readonly basePreviousRedirect = input<StepperRedirectPayload | null>(this.route.snapshot.queryParams[BASE_REDIRECT_QUERY] ? {
     path: this.route.snapshot.queryParams[BASE_REDIRECT_QUERY]
 } : null);
@@ -104,7 +109,8 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   // after the one delivery. It replaces a 5 ms setInterval that kept polling
   // for as long as the first step stayed blocked.
   private readonly firstStepEntry = effect(() => {
-    const step = this.visibleSteps()[0];
+    const index = this.startIndex();
+    const step = this.visibleSteps()[index];
     if (!step || step.blocked) {
       return;
     }
@@ -114,6 +120,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       if (this.currentIndex() !== 0) {
         return;
       }
+      if (index > 0) {
+        this.enterData = this.startData();
+        this.enterStep(index);
+        return;
+      }
       step.active = true;
       // Route through pOnEnter so signal-handle consumers receive the enter
       // callback, after the render that shows the step (see setActive).
@@ -121,7 +132,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       this.cdr.markForCheck();
       afterNextRender(() => {
         if (step.active) {
-          step.pOnEnter(this.enterData);
+          step.pOnEnter(this.enterData ?? this.startData());
         }
       }, { injector: this.injector });
     });
@@ -365,6 +376,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (this.currentIndex() === index) {
       this.setActive(index - 1);
     }
+  }
+
+  // Moves to a completed step (or any step canGoto allows), e.g. from its header.
+  goTo(index: number): void {
+    this.setActive(index);
   }
 
   setActive(index: number): void {

@@ -801,3 +801,74 @@ describe('SteppersComponent — Previous with a confirmation', () => {
     expect(host.left).toEqual([false]);
   });
 });
+
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers [basePreviousRedirect]="redirect" [startIndex]="startIndex" [startData]="startData">
+      <app-step title="One" [signalHandle]="first"></app-step>
+      <app-step title="Two" [signalHandle]="second"></app-step>
+    </app-steppers>
+  `,
+})
+class StartIndexHostComponent {
+  redirect: { path: string } | null = null;
+  startIndex = 0;
+  startData: unknown = undefined;
+  firstEnter = vi.fn();
+  secondEnter = vi.fn();
+  first: SignalStepHandle = { valid: signal(true), onEnter: this.firstEnter };
+  second: SignalStepHandle = { valid: signal(true), onEnter: this.secondEnter };
+}
+
+describe('SteppersComponent — first step and start index', () => {
+  const create = async (setup: (host: StartIndexHostComponent) => void = () => undefined) => {
+    TestBed.configureTestingModule({
+      imports: [StartIndexHostComponent, RouterTestingModule],
+      providers: [provideZonelessChangeDetection(), provideHttpClient(), provideHttpClientTesting()],
+    });
+    await TestBed.compileComponents();
+    const fixture = TestBed.createComponent(StartIndexHostComponent);
+    setup(fixture.componentInstance);
+    await fixture.whenStable();
+    const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    const previous = () => fixture.nativeElement.querySelector('#stepper_previous') as HTMLButtonElement | null;
+    return { fixture, host: fixture.componentInstance, steppers, previous };
+  };
+
+  it('renders no Previous on step 1 without a base redirect', async () => {
+    const { previous } = await create();
+    expect(previous()).toBeNull();
+  });
+
+  it('keeps Previous on step 1 when a base redirect is set', async () => {
+    const { previous } = await create(h => { h.redirect = { path: '/x' }; });
+    expect(previous()).not.toBeNull();
+    expect(previous()!.disabled).toBe(false);
+  });
+
+  it('shows Previous on step 2', async () => {
+    const { fixture, steppers, previous } = await create();
+    steppers.setActive(1);
+    await fixture.whenStable();
+    expect(previous()).not.toBeNull();
+  });
+
+  it('starts on startIndex with earlier steps complete', async () => {
+    const { host, steppers } = await create(h => { h.startIndex = 1; h.startData = { n: 7 }; });
+    expect(steppers.currentIndex()).toBe(1);
+    expect(steppers.steps[0].complete).toBe(true);
+    expect(host.secondEnter).toHaveBeenCalledWith({ n: 7 });
+    expect(host.firstEnter).not.toHaveBeenCalled();
+  });
+
+  it('goes back to a completed step from its header', async () => {
+    const { fixture, steppers } = await create(h => { h.startIndex = 1; });
+    const header = fixture.nativeElement.querySelector('.steppers-headers button') as HTMLButtonElement;
+    expect(header.getAttribute('aria-label')).toBe('One, completed');
+    header.click();
+    await fixture.whenStable();
+    expect(steppers.currentIndex()).toBe(0);
+  });
+});
