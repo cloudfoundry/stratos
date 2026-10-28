@@ -1,33 +1,17 @@
-@if (connectService.isBusy$ | async) {
-  <div class="connection-dialog__loading-wrapper">
-    <app-progress-bar class="connection-dialog__loading" color="primary" mode="indeterminate">
-    </app-progress-bar>
-  </div>
-}
 <div class="connection-dialog">
   <div class="connection-dialog__title" data-dialog-drag-handle>
     <h2 [id]="titleId" class="flex-1 m-0 text-lg font-semibold text-content-text">
       Connect to {{ data.name }}
     </h2>
-    @if (helpDocument$ | async; as link) {
-      <button [appBlur]="true" class="connection-dialog__help btn-icon" type="button" aria-label="Help on connecting" (click)="showHelp(link)">
-        <i class="material-icons" aria-hidden="true">help</i>
-      </button>
-    }
   </div>
-  <app-connect-endpoint (valid)="valid = $event" (authType)="setHelpLink($event.help)" [connectService]="connectService" [formSubmit]="true">
-  </app-connect-endpoint>
-  <app-dialog-error message="{{connectService.connectingError$ | async}}"
-    [show]="!!(connectService.connectingError$ | async) && (connectService.isBusy$ | async) === false">
-  </app-dialog-error>
-  @if (!!(connectService.connectingError$ | async) && (connectService.isBusy$ | async) === false && stillConnected) {
-    <div class="flex items-center gap-2 text-xs text-content-muted">
-      <span class="material-icons text-base">info</span>
-      <span>Your existing connection is unaffected and remains active.</span>
-    </div>
-  }
-  <div class="dialog-actions connection-dialog__actions">
-    <button (click)="dialogRef.close()" class="btn btn-secondary">Cancel</button>
-    <button (click)="connect()" [disabled]="(connectService.isBusy$ | async) || !valid" class="btn btn-primary">Connect</button>
-  </div>
+  <!-- Static steps: the stepper reads its steps once. -->
+  <app-steppers #steppers [startIndex]="1" [startData]="data" [cancelAction]="close">
+    <app-step [title]="'Register'" [signalHandle]="registerStepHandle">
+      <app-create-endpoint-cf-step-1 [reviewEndpoint]="endpoint()" (unregistered)="onUnregistered()"></app-create-endpoint-cf-step-1>
+    </app-step>
+    <app-step [title]="'Connect'" [signalHandle]="connectStepHandle">
+      <app-create-endpoint-connect [fromConnect]="true" [stillConnected]="stillConnected()"
+        [endpointAddress]="address()" [caCert]="caCert()" (review)="steppers.goTo(0)"></app-create-endpoint-connect>
+    </app-step>
+  </app-steppers>
 </div>

@@ -3,52 +3,9 @@
   flex-direction: column;
   gap: 20px;
 
-  &__content {
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__loading {
-    left: 0;
-    position: absolute;
-    right: 0;
-    top: 0;
-    &-wrapper {
-      position: relative;
-      margin: 0 -1.5rem;
-      transform: translateY(-1.5rem);
-    }
-  }
-
-  &__actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 8px;
-    margin-top: auto;
-  }
-
-  &__auth {
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__shared {
-    padding-bottom: 24px;
-  }
-
   &__title {
     display: flex;
     align-items: center;
     gap: 12px;
   }
-
-  &__help {
-    height: 32px;
-    line-height: 32px;
-    width: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
 }
-
