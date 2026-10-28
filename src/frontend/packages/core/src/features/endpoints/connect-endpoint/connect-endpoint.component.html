@@ -17,17 +17,5 @@
     <app-checkbox class="connection-dialog__shared" appInput name="systemShared"
     formControlName="systemShared">Share this endpoint connection</app-checkbox>
   }
-  @if (tlsEditable()) {
-    <div class="flex flex-col gap-2" formGroupName="tls">
-      <span class="text-sm text-content-muted">Endpoint options, saved to the endpoint when you connect:</span>
-      <app-checkbox appInput id="connectSkipSSL" name="skipSSL" formControlName="skipSSL">Skip SSL validation for the endpoint</app-checkbox>
-      <app-checkbox appInput id="connectUseCACert" name="useCACert" formControlName="useCACert">Use a CA Certificate for the endpoint</app-checkbox>
-      @if (useCACert()) {
-        <label for="connectCACert" class="text-sm text-content-text">Specify CA Certificate:</label>
-        <textarea id="connectCACert" name="caCert" formControlName="caCert" rows="6" spellcheck="false"
-          class="w-full resize-y font-mono text-sm border border-content-border rounded-md p-2 bg-content-bg text-content-text focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"></textarea>
-      }
-    </div>
-  }
   <button type="submit" class="hidden" aria-label="Submit"></button>
 </form>
