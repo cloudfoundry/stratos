@@ -67,11 +67,6 @@ export interface SignalStepHandle {
   readonly onEnter?: (data?: unknown) => void | Promise<void>;
   /** Fired when the stepper navigates out of this step. Promise awaited. */
   readonly onLeave?: (isNext?: boolean) => void | Promise<void>;
-  /**
-   * Asked before Previous leaves this step; resolve false to stay. For a
-   * step whose leave hook undoes work (e.g. unregisters an endpoint).
-   */
-  readonly confirmPrevious?: () => Promise<boolean>;
   /** UI: marks the step as destructive (red Apply button etc.). */
   readonly destructiveStep?: Signal<boolean>;
   /** UI: enables the Close button (e.g. after applyStarted flips). */

@@ -375,17 +375,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     this.router.navigate(commands, { ...extras, queryParams });
   }
 
-  // Previous button: the step may ask first (SignalStepHandle.confirmPrevious).
-  async goPrevious(): Promise<void> {
-    const index = this.currentIndex();
-    const confirm = this.steps[index]?.signalHandle?.confirmPrevious;
-    if (confirm && !(await confirm())) {
-      return;
-    }
-    // Only if nothing moved the stepper while the question was open.
-    if (this.currentIndex() === index) {
-      this.setActive(index - 1);
-    }
+  // Previous button.
+  goPrevious(): void {
+    this.setActive(this.currentIndex() - 1);
   }
 
   // Moves to a completed step (or any step canGoto allows), e.g. from its header.

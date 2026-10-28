@@ -141,7 +141,6 @@ describe('GitRegistrationComponent', () => {
 
     it('Previous from Connect keeps the endpoint and locks the fields', async () => {
       const openWithCancel = vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel');
-      expect(component.connectStepHandle.confirmPrevious).toBeUndefined();
       expect(component.connectStepHandle.onLeave).toBeUndefined();
       expect(openWithCancel).not.toHaveBeenCalled();
       expect(stubSignalConfig.unregister).not.toHaveBeenCalled();
