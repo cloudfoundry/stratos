@@ -78,6 +78,8 @@ export interface SignalStepHandle {
   readonly canClose?: Signal<boolean>;
   /** UI: disables the Previous button. */
   readonly disablePrevious?: Signal<boolean>;
+  /** UI: removes the Previous button, for a step nothing can go back from. */
+  readonly hidePrevious?: Signal<boolean>;
   /** UI: text for the Finish button. */
   readonly finishButtonText?: Signal<string>;
   /** UI: text for the Next button. */
@@ -224,6 +226,10 @@ export class StepComponent {
     return this.signalHandle?.disablePrevious ? this.signalHandle.disablePrevious() : this._disablePrevious;
   }
   readonly disablePreviousChange = output<boolean>();
+
+  get hidePrevious(): boolean {
+    return this.signalHandle?.hidePrevious ? this.signalHandle.hidePrevious() : false;
+  }
 
   // A signal, like signalHandle.blocked, so the stepper's first-step entry
   // effect re-runs when a legacy [blocked] binding clears.

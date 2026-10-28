@@ -7,33 +7,19 @@
   </div>
 </app-page-header>
 
-@if (newKey(); as details) {
-  <div class="keys-page__new">
-    <app-card class="keys-page__card">
-      <app-card-header plain>
-        <app-custom-icon>vpn_key</app-custom-icon>New API Key
-      </app-card-header>
-      <app-card-content>
-        <p>Your API Key has been successfully created. Use the following information to connect to <app-product-name></app-product-name>.</p>
-        <p><i>Please safely record these details, there is no later way to view them</i></p>
-        <ul>
-          <li id="apikey-secret" class="flex items-center gap-1">Secret:
-            @if (secretShown()) {
-              {{ details.secret }}
-            } @else {
-              <span aria-hidden="true">••••••••••••••••</span><span class="sr-only">hidden</span>
-            }
-            <button class="btn btn-icon" type="button" (click)="secretShown.set(!secretShown())"
-              [attr.aria-label]="'Hide Secret'" [attr.aria-pressed]="!secretShown()">
-              <app-custom-icon>{{ secretShown() ? 'visibility' : 'visibility_off' }}</app-custom-icon>
-            </button>
-            <app-copy-to-clipboard [text]="details.secret" tooltip="Copy to clipboard" />
-          </li>
-        </ul>
-        <button (click)="clearKeyDetails()" class="btn btn-danger" type="button">Close</button>
-      </app-card-content>
-    </app-card>
-  </div>
+@if (banners().length) {
+  <ul class="m-0 mb-4 flex list-none flex-col gap-2 p-0">
+    @for (b of banners(); track b.guid) {
+      <li data-testid="key-banner" role="status"
+        class="flex flex-wrap items-center justify-between gap-3 rounded border px-4 py-3"
+        [class]="b.expired
+          ? 'border-danger bg-danger-50 text-danger-900 dark:bg-danger-900/40 dark:text-danger-100'
+          : 'border-warning bg-warning-50 text-warning-900 dark:bg-warning-900/40 dark:text-warning-100'">
+        <span>{{ b.text }}</span>
+        <button class="btn btn-secondary" type="button" (click)="createReplacement(b.comment)">Create replacement</button>
+      </li>
+    }
+  </ul>
 }
 
 @if (hasKeys() === true) {

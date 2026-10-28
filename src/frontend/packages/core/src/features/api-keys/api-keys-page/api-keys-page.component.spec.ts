@@ -4,14 +4,17 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { provideRouter } from '@angular/router';
-import { By } from '@angular/platform-browser';
 import { of } from 'rxjs';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 
-import { CopyToClipboardComponent } from '../../../shared/components/copy-to-clipboard/copy-to-clipboard.component';
+import { timeOfDay } from '../../../shared/signal-list-configs/apiKeys/api-keys-signal-config.service';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
-import { ApiKeysDataService } from '../api-keys-data.service';
+import { CreateApiKeyStepperComponent } from '../create-api-key-stepper/create-api-key-stepper.component';
 import { ApiKeysPageComponent } from './api-keys-page.component';
+
+const NOW = new Date('2026-10-28T12:00:00Z');
+const DAY = 24 * 60 * 60 * 1000;
+const inDays = (days: number) => new Date(NOW.getTime() + days * DAY);
 
 describe('ApiKeysPageComponent', () => {
   let component: ApiKeysPageComponent;
@@ -22,6 +25,9 @@ describe('ApiKeysPageComponent', () => {
   };
 
   beforeEach(async () => {
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(NOW);
+    mockDialogService.open.mockReset();
     await TestBed.configureTestingModule({
       imports: [ApiKeysPageComponent],
       providers: [
@@ -40,59 +46,82 @@ describe('ApiKeysPageComponent', () => {
     component = fixture.componentInstance;
   });
 
+  afterEach(() => vi.useRealTimers());
+
+  async function listKeys(keys: object[]) {
+    TestBed.inject(HttpTestingController).expectOne('/pp/v1/api_keys').flush(keys);
+    await fixture.whenStable();
+  }
+  const key = (comment: string, expiresInDays: number | null) => ({
+    guid: comment, comment, user_guid: 'u', last_used: null, last_used_refused: false,
+    expires_at: expiresInDays === null ? null : inDays(expiresInDays).toISOString(),
+  });
+  const banners = () => Array.from((fixture.nativeElement as HTMLElement).querySelectorAll<HTMLElement>('[data-testid="key-banner"]'));
+  const norm = (el: Element) => el.textContent!.replace(/\s+/g, ' ').trim();
+
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('opens Create an API Key with the dialog padding', async () => {
-    mockDialogService.open.mockReturnValue({ afterClosed: () => of(null) });
+  it('opens the create stepper with the dialog padding', async () => {
+    mockDialogService.open.mockReturnValue({ afterClosed: () => of(undefined) });
     await component.addApiKey();
 
-    const config = mockDialogService.open.mock.calls.at(-1)?.[1];
+    const [type, config] = mockDialogService.open.mock.calls.at(-1)!;
+    expect(type).toBe(CreateApiKeyStepperComponent);
     expect(config.panelClass).toContain('p-6');
+    expect(config.disableClose).toBe(true);
   });
 
-  // The page's load() lists the keys; the new key is among them.
-  async function showNewKey() {
-    TestBed.inject(HttpTestingController).expectOne('/pp/v1/api_keys')
-      .flush([{ guid: 'g', comment: 'tool', user_guid: 'u', last_used: null }]);
-    await fixture.whenStable();
-    component.keyDetails.set({ guid: 'g', secret: 'the-secret' } as never);
-    await fixture.whenStable();
-  }
-  const secretText = () => fixture.nativeElement.querySelector('#apikey-secret')?.textContent ?? '';
-  const toggle = (): HTMLButtonElement => fixture.nativeElement.querySelector('#apikey-secret button[aria-label="Hide Secret"]');
-
-  it('offers to copy a new key\'s secret', async () => {
-    await showNewKey();
-
-    const copy = fixture.debugElement.query(By.directive(CopyToClipboardComponent));
-    expect(copy?.componentInstance.text()).toBe('the-secret');
-  });
-
-  // Someone looking at the screen should not read the key as it arrives.
-  it('hides a new key\'s secret until asked', async () => {
-    await showNewKey();
-    expect(secretText()).not.toContain('the-secret');
-    expect(toggle().getAttribute('aria-pressed')).toBe('true');
-    // A screen reader hears "hidden", not a run of bullets.
-    const li: HTMLElement = fixture.nativeElement.querySelector('#apikey-secret');
-    expect(li.querySelector('.sr-only')?.textContent).toBe('hidden');
-    expect(li.querySelector('[aria-hidden="true"]')?.textContent).toMatch(/^•+$/);
-
-    toggle().click();
-    await fixture.whenStable();
-    expect(secretText()).toContain('the-secret');
-    expect(toggle().getAttribute('aria-pressed')).toBe('false');
-  });
-
-  it('drops the new key\'s card when that key is deleted', async () => {
-    await showNewKey();
-    const removed = TestBed.inject(ApiKeysDataService).remove('g');
-    TestBed.inject(HttpTestingController).expectOne(r => r.method === 'DELETE').flush(null);
-    await removed;
-    await fixture.whenStable();
-
+  it('never renders a New API Key card', async () => {
+    await listKeys([key('tool', null)]);
+    expect(fixture.nativeElement.textContent).not.toContain('New API Key');
     expect(fixture.nativeElement.querySelector('#apikey-secret')).toBeNull();
+  });
+
+  it('warns a day ahead, with the time', async () => {
+    await listKeys([key('tool', 20 / 24)]);
+    expect(banners().length).toBe(1);
+    const at = timeOfDay(inDays(20 / 24));
+    expect(norm(banners()[0])).toContain(
+      `"tool" expires tomorrow at ${at}. Create a replacement and update the script that uses it.`);
+    expect(banners()[0].className).not.toContain('danger');
+  });
+
+  it('shows no banner for a key with days to go', async () => {
+    await listKeys([key('tool', 5), key('forever', null)]);
+    expect(banners().length).toBe(0);
+  });
+
+  it('refuses in red for up to 7 days after expiry', async () => {
+    await listKeys([key('tool', -3)]);
+    expect(banners().length).toBe(1);
+    expect(norm(banners()[0])).toContain(
+      `"tool" expired 3 days ago at ${timeOfDay(inDays(-3))}. Requests that use it are refused.`);
+    expect(banners()[0].className).toContain('danger');
+  });
+
+  it('says today for a key that expired today', async () => {
+    await listKeys([key('tool', -0.1)]);
+    expect(norm(banners()[0])).toContain('"tool" expired today at');
+  });
+
+  it('drops the banner after 7 days, but keeps the row', async () => {
+    await listKeys([key('tool', -8)]);
+    expect(banners().length).toBe(0);
+    expect(fixture.nativeElement.querySelector('app-signal-list')).toBeTruthy();
+    expect(fixture.nativeElement.textContent).toContain('tool');
+  });
+
+  it('Create replacement opens the stepper with the description', async () => {
+    mockDialogService.open.mockReturnValue({ afterClosed: () => of(undefined) });
+    await listKeys([key('deploy script', -1)]);
+    const button = banners()[0].querySelector('button') as HTMLButtonElement;
+    expect(button.textContent).toContain('Create replacement');
+    button.click();
+
+    const [type, config] = mockDialogService.open.mock.calls.at(-1)!;
+    expect(type).toBe(CreateApiKeyStepperComponent);
+    expect(config.data).toEqual({ comment: 'deploy script' });
   });
 });

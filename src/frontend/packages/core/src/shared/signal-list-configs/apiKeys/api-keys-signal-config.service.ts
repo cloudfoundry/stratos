@@ -7,7 +7,35 @@ import { SortSpec, ViewPipeline } from '../../../features/endpoints/endpoints-pa
 import { ConfirmationDialogConfig } from '../../components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../components/confirmation-dialog.service';
 import { ListStateStore } from '../../components/signal-list/list-state-store.service';
-import { SignalListColumn, SignalListConfig, SignalListRowAction } from '../../components/signal-list/signal-list.component';
+import { SignalListColumn, SignalListConfig, SignalListPillColor, SignalListRowAction } from '../../components/signal-list/signal-list.component';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+// A key shows amber from this many days before it expires.
+const SOON_DAYS = 7;
+
+export type KeyExpiry = {
+  state: 'never' | 'ok' | 'soon' | 'expired';
+  /** Whole days left (rounded up) while the key works; whole days since expiry once it does not. */
+  days: number;
+};
+
+/** Where a key stands against its expiry. A key is expired from the exact expiry instant. */
+export function keyExpiry(k: ApiKey, now: Date = new Date()): KeyExpiry {
+  if (!k.expires_at) {
+    return { state: 'never', days: 0 };
+  }
+  const left = new Date(k.expires_at).getTime() - now.getTime();
+  if (left <= 0) {
+    return { state: 'expired', days: Math.floor(-left / DAY_MS) };
+  }
+  const days = Math.ceil(left / DAY_MS);
+  return { state: days <= SOON_DAYS ? 'soon' : 'ok', days };
+}
+
+/** HH:MM in the viewer's zone. */
+export function timeOfDay(d: Date): string {
+  return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+}
 
 // Signal-native config for the API Keys page list. Replaces
 // ApiKeyListConfigService + ApiKeyDataSource (ngrx ListDataSource over
@@ -108,8 +136,18 @@ export class ApiKeysSignalConfigService {
       {
         header: 'Last Used', key: 'lastUsed', sortField: 'last_used',
         kind: 'text',
-        render: (k: ApiKey) => k.last_used ? new Date(k.last_used).toLocaleString() : '',
+        render: (k: ApiKey) => {
+          const when = k.last_used ? new Date(k.last_used).toLocaleString() : '';
+          return k.last_used_refused ? `${when}, refused` : when;
+        },
         widthHint: '14rem',
+      },
+      {
+        header: 'Expires', key: 'expires', sortField: 'expires_at',
+        kind: 'pill',
+        render: (k: ApiKey) => this.expiresText(k),
+        pillColor: (k: ApiKey) => this.expiresColor(k),
+        widthHint: '12rem',
       },
       {
         header: '', key: 'actions',
@@ -124,6 +162,28 @@ export class ApiKeysSignalConfigService {
         widthHint: '3rem',
       },
     ];
+  }
+
+  private expiresText(k: ApiKey): string {
+    const { state, days } = keyExpiry(k);
+    switch (state) {
+      case 'never': return 'Never';
+      case 'ok': return new Date(k.expires_at!).toLocaleDateString();
+      case 'soon': {
+        const at = new Date(k.expires_at!);
+        // Less than a day left
+        return at.getTime() - Date.now() < DAY_MS
+          ? `tomorrow ${timeOfDay(at)}`
+          : `in ${days} ${days === 1 ? 'day' : 'days'}`;
+      }
+      default:
+        return days === 0 ? 'Expired today' : `Expired ${days} ${days === 1 ? 'day' : 'days'} ago`;
+    }
+  }
+
+  private expiresColor(k: ApiKey): SignalListPillColor {
+    const { state } = keyExpiry(k);
+    return state === 'soon' ? 'warning' : state === 'expired' ? 'danger' : 'neutral';
   }
 
   private confirmDelete(key: ApiKey): void {

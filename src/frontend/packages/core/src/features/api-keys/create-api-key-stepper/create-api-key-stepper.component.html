@@ -1,0 +1,53 @@
+<div class="min-w-0">
+  <div data-dialog-drag-handle>
+    <h2 id="create-api-key-title" class="m-0 mb-4 text-xl font-semibold text-content-text">Create an API Key</h2>
+  </div>
+  <app-steppers [cancelAction]="close">
+    <app-step title="Details" [signalHandle]="detailsHandle">
+      <div class="flex flex-col gap-4">
+        <div class="flex flex-col gap-1">
+          <label for="api-key-comment" class="text-sm font-medium text-content-text">Description</label>
+          <input id="api-key-comment" class="input w-full" type="text" required [attr.maxlength]="maxComment"
+            [value]="comment()" (input)="comment.set($any($event.target).value)">
+        </div>
+        <div class="flex flex-col gap-1">
+          <label for="api-key-expiry" class="text-sm font-medium text-content-text">Expires</label>
+          <div class="flex flex-wrap items-center gap-3">
+            <select id="api-key-expiry" class="input" [value]="choice()" (change)="onChoice($any($event.target).value)">
+              <option value="30">in 30 days</option>
+              <option value="90">in 90 days</option>
+              <option value="365">in 365 days</option>
+              <option value="date">On a date</option>
+              <option value="never">Never</option>
+            </select>
+            @if (choice() === 'date') {
+              <input id="api-key-date" class="input" type="date" aria-label="Expiry date"
+                [min]="minDate" [max]="maxDate" [value]="date()" (input)="date.set($any($event.target).value)">
+            }
+            <span id="api-key-expiry-text" class="text-sm text-content-muted">{{ expiryText() }}</span>
+          </div>
+        </div>
+      </div>
+    </app-step>
+    <app-step title="Secret" [signalHandle]="secretHandle">
+      <p class="mb-4 text-content-text">
+        Your API Key has been created. Use the following secret to connect.
+        <strong>Record it now. There is no later way to view it.</strong>
+      </p>
+      <ul class="m-0 list-none p-0">
+        <li id="apikey-secret" class="flex items-center gap-1 text-content-text">Secret:
+          @if (secretShown()) {
+            <span class="break-all">{{ secret() }}</span>
+          } @else {
+            <span aria-hidden="true">••••••••••••••••</span><span class="sr-only">hidden</span>
+          }
+          <button class="btn btn-icon" type="button" (click)="secretShown.set(!secretShown())"
+            [attr.aria-label]="'Hide Secret'" [attr.aria-pressed]="!secretShown()">
+            <app-custom-icon>{{ secretShown() ? 'visibility' : 'visibility_off' }}</app-custom-icon>
+          </button>
+          <app-copy-to-clipboard [text]="secret()" tooltip="Copy to clipboard" />
+        </li>
+      </ul>
+    </app-step>
+  </app-steppers>
+</div>

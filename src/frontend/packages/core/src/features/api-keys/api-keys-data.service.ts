@@ -9,11 +9,11 @@ const apiKeysUrl = '/pp/v1/api_keys';
 // Signal-native data service for the per-user API key collection.
 // Owns the HTTP path to /pp/v1/api_keys directly — no ngrx pipeline,
 // no entity-catalog, no PaginationMonitor. Consumers (the api-keys
-// page, the add-key dialog, the per-row delete action) read `apiKeys`
+// page, the create-key stepper, the per-row delete action) read `apiKeys`
 // for rows and call load() / create() / remove() to mutate.
 //
-// Singleton (providedIn: 'root') so the page and the dialog share the
-// same row collection — after the dialog returns a new key, the page's
+// Singleton (providedIn: 'root') so the page and the stepper share the
+// same row collection — after the stepper creates a key, the page's
 // list updates synchronously without a round-trip.
 @Injectable({ providedIn: 'root' })
 export class ApiKeysDataService {
@@ -41,14 +41,16 @@ export class ApiKeysDataService {
     await this.fetch();
   }
 
-  // Throws on HTTP failure so callers (dialog submit) can surface the
+  // Throws on HTTP failure so callers (the stepper) can surface the
   // error message inline; on success the new key is appended to the
-  // shared rows signal AND returned so the dialog can show the secret.
-  async create(comment: string): Promise<ApiKey> {
+  // shared rows signal AND returned so the stepper can show the secret.
+  // `expiresAt` is an RFC 3339 time, or null for a key that never expires
+  // (no field is sent).
+  async create(comment: string, expiresAt: string | null): Promise<ApiKey> {
     try {
       const body = new HttpParams({
         encoder: new BrowserStandardEncoder(),
-        fromObject: { comment },
+        fromObject: expiresAt ? { comment, expires_at: expiresAt } : { comment },
       });
       const created = await firstValueFrom(
         this.http.post<ApiKey>(apiKeysUrl, body),
@@ -93,6 +95,9 @@ export class ApiKeysDataService {
 
   private errorMessage(err: unknown): string {
     if (err instanceof HttpErrorResponse) {
+      // The server answers { "error": "<reason>" }.
+      const reason = (err.error as { error?: unknown } | null)?.error;
+      if (typeof reason === 'string' && reason) return reason;
       return typeof err.error === 'string' ? err.error : (err.message || 'API key request failed');
     }
     if (err instanceof Error) return err.message;

@@ -1,11 +1,8 @@
-import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { firstValueFrom } from 'rxjs';
 
 import {
-  CardContentComponent,
-  CardHeaderComponent,
-  CardWrapperComponent,
   SignalListComponent,
   SignalListConfig,
 } from '@stratosui/core';
@@ -14,15 +11,26 @@ import { ApiKey } from '@stratosui/store';
 import { ApiKeysDataService } from '../api-keys-data.service';
 import {
   ApiKeysSignalConfigService,
+  keyExpiry,
+  timeOfDay,
 } from '../../../shared/signal-list-configs/apiKeys/api-keys-signal-config.service';
 import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
-import { AddApiKeyDialogComponent } from '../add-api-key-dialog/add-api-key-dialog.component';
+import { CreateApiKeyData, CreateApiKeyStepperComponent } from '../create-api-key-stepper/create-api-key-stepper.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
-import { ProductNameComponent } from '../../../shared/components/product-name.ccomponent';
 import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
-import { CopyToClipboardComponent } from '../../../shared/components/copy-to-clipboard/copy-to-clipboard.component';
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+// An expired key keeps its banner for this many days.
+const BANNER_DAYS_AFTER = 7;
+
+interface KeyBanner {
+  guid: string;
+  comment: string;
+  expired: boolean;
+  text: string;
+}
 
 @Component({
   selector: 'app-api-keys-page',
@@ -32,32 +40,17 @@ import { CopyToClipboardComponent } from '../../../shared/components/copy-to-cli
   standalone: true,
   imports: [
     CommonModule,
-    CopyToClipboardComponent,
     CustomIconComponent,
     CustomTooltipDirective,
     PageHeaderComponent,
     SignalListComponent,
     NoContentMessageComponent,
-    ProductNameComponent,
-    CardWrapperComponent,
-    CardHeaderComponent,
-    CardContentComponent,
   ],
 })
 export class ApiKeysPageComponent {
   private dialog = inject(TailwindDialogService);
   private dataService = inject(ApiKeysDataService);
   private listConfigService = inject(ApiKeysSignalConfigService);
-
-  public keyDetails: WritableSignal<ApiKey | null> = signal(null);
-  // The card shows the new key only while the key exists: deleting it
-  // takes its secret off the screen.
-  public newKey: Signal<ApiKey | null> = computed(() => {
-    const key = this.keyDetails();
-    return key && this.dataService.apiKeys().some(k => k.guid === key.guid) ? key : null;
-  });
-  // Hidden until asked, so a bystander does not read the key as it arrives.
-  public secretShown = signal(false);
 
   // null until the first fetch settles so the empty-state and the list
   // both stay hidden during initial load. After fetch: true if there
@@ -74,17 +67,38 @@ export class ApiKeysPageComponent {
     void this.dataService.load();
   }
 
-  async addApiKey(): Promise<void> {
-    const newKey = await firstValueFrom(
-      this.dialog.open(AddApiKeyDialogComponent, { disableClose: true, panelClass: 'p-6' }).afterClosed(),
-    );
-    if (newKey) {
-      this.secretShown.set(false);
-      this.keyDetails.set(newKey);
+  // One row per key that is about to expire (less than a day left) or
+  // expired up to a week ago; older expired keys stay in the list only.
+  public banners: Signal<KeyBanner[]> = computed(() => {
+    const now = new Date();
+    const out: KeyBanner[] = [];
+    for (const k of this.dataService.apiKeys()) {
+      const { state, days } = keyExpiry(k, now);
+      const at = k.expires_at ? timeOfDay(new Date(k.expires_at)) : '';
+      if (state === 'soon' && new Date(k.expires_at!).getTime() - now.getTime() < DAY_MS) {
+        out.push({
+          guid: k.guid, comment: k.comment, expired: false,
+          text: `"${k.comment}" expires tomorrow at ${at}. Create a replacement and update the script that uses it.`,
+        });
+      } else if (state === 'expired' && days <= BANNER_DAYS_AFTER) {
+        const when = days === 0 ? 'today' : `${days} ${days === 1 ? 'day' : 'days'} ago`;
+        out.push({
+          guid: k.guid, comment: k.comment, expired: true,
+          text: `"${k.comment}" expired ${when} at ${at}. Requests that use it are refused.`,
+        });
+      }
     }
+    return out;
+  });
+
+  async addApiKey(comment?: string): Promise<void> {
+    const data: CreateApiKeyData = comment === undefined ? {} : { comment };
+    await firstValueFrom(
+      this.dialog.open(CreateApiKeyStepperComponent, { data, disableClose: true, panelClass: 'p-6' }).afterClosed(),
+    );
   }
 
-  clearKeyDetails(): void {
-    this.keyDetails.set(null);
+  createReplacement(comment: string): Promise<void> {
+    return this.addApiKey(comment);
   }
 }
