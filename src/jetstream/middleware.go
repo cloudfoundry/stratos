@@ -377,6 +377,12 @@ func getAPIKeyFromHeader(c *echo.Context) (string, error) {
 	return "", errors.New("no API key in the header")
 }
 
+// apiKeyExpired reports whether the key's expiry has been reached; the expiry
+// instant itself counts as expired. A nil expiry never expires.
+func apiKeyExpired(k *api.APIKey, now time.Time) bool {
+	return k.ExpiresAt != nil && !now.Before(*k.ExpiresAt)
+}
+
 func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 	return func(c *echo.Context) error {
 		slog.Debug("apiKeyMiddleware")
@@ -405,6 +411,16 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 			return h(c)
 		}
 
+		if apiKeyExpired(apiKey, time.Now()) {
+			slog.Info("apiKeyMiddleware: API key has expired", "user", apiKey.UserGUID, "key", apiKey.GUID)
+			if err := p.APIKeysRepository.UpdateAPIKeyLastUsed(apiKey.GUID, true); err != nil {
+				slog.Error("apiKeyMiddleware: could not record the refused use",
+					"user", apiKey.UserGUID, "key", apiKey.GUID, "error", err)
+			}
+			return api.NewHTTPShadowError(http.StatusUnauthorized,
+				"API key expired on "+apiKey.ExpiresAt.UTC().Format(time.RFC3339), "API key %s expired", apiKey.GUID)
+		}
+
 		// checking if user is an admin if API keys are enabled for admins only
 		if p.Config.APIKeysEnabled == config.APIKeysConfigEnum.AdminOnly {
 			user, err := p.StratosAuthService.GetUser(apiKey.UserGUID)
@@ -431,7 +447,7 @@ func (p *portalProxy) apiKeyMiddleware(h echo.HandlerFunc) echo.HandlerFunc {
 				"user", apiKey.UserGUID, "key", apiKey.GUID, "error", err)
 		}
 
-		err = p.APIKeysRepository.UpdateAPIKeyLastUsed(apiKey.GUID)
+		err = p.APIKeysRepository.UpdateAPIKeyLastUsed(apiKey.GUID, false)
 		if err != nil {
 			slog.Error("apiKeyMiddleware: could not update the API key's last-used time",
 				"user", apiKey.UserGUID, "key", apiKey.GUID, "error", err)

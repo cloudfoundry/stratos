@@ -53,7 +53,7 @@ func TestAddAPIKey(t *testing.T) {
 		repository, _ := NewPgsqlAPIKeysRepository(db, testEncKey)
 
 		Convey("when the comment exceeds maximal length", func() {
-			_, err := repository.AddAPIKey(userID, strings.Repeat("a", 256))
+			_, err := repository.AddAPIKey(userID, strings.Repeat("a", 256), nil)
 
 			Convey("an error should be returned", func() {
 				So(err, ShouldResemble, errors.New("comment maximum length is 255 characters"))
@@ -62,10 +62,10 @@ func TestAddAPIKey(t *testing.T) {
 
 		Convey("when a key can't be inserted", func() {
 			mock.ExpectExec(insertIntoAPIKeys).
-				WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), userID, comment).
+				WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), userID, comment, nil).
 				WillReturnResult(sqlmock.NewResult(0, 0))
 
-			apiKey, err := repository.AddAPIKey(userID, comment)
+			apiKey, err := repository.AddAPIKey(userID, comment, nil)
 
 			Convey("an error should be returned", func() {
 				So(err, ShouldResemble, errors.New("AddAPIKey: no rows were updated"))
@@ -76,12 +76,27 @@ func TestAddAPIKey(t *testing.T) {
 			})
 		})
 
-		Convey("when the comment is not empty", func() {
+		Convey("when an expiry is given", func() {
+			exp := time.Now().Add(time.Hour).UTC()
 			mock.ExpectExec(insertIntoAPIKeys).
-				WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), userID, comment).
+				WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), userID, comment, exp).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
-			apiKey, err := repository.AddAPIKey(userID, comment)
+			apiKey, err := repository.AddAPIKey(userID, comment, &exp)
+
+			Convey("the expiry is stored and returned", func() {
+				So(err, ShouldBeNil)
+				So(mock.ExpectationsWereMet(), ShouldBeNil)
+				So(apiKey.ExpiresAt, ShouldResemble, &exp)
+			})
+		})
+
+		Convey("when the comment is not empty", func() {
+			mock.ExpectExec(insertIntoAPIKeys).
+				WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), userID, comment, nil).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			apiKey, err := repository.AddAPIKey(userID, comment, nil)
 
 			Convey("there should be no error returned", func() {
 				So(err, ShouldBeNil)
@@ -101,7 +116,7 @@ func TestAddAPIKey(t *testing.T) {
 func TestListAPIKeys(t *testing.T) {
 	var (
 		userID            = "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
-		rowFields         = []string{"guid", "user_guid", "comment", "last_used"}
+		rowFields         = []string{"guid", "user_guid", "comment", "last_used", "expires_at", "last_used_refused"}
 		selectUserAPIKeys = `SELECT (.+) FROM api_keys WHERE user_guid = (.+)`
 	)
 
@@ -142,13 +157,16 @@ func TestListAPIKeys(t *testing.T) {
 
 		Convey("if records exist in the DB", func() {
 			t := time.Now()
+			exp := t.Add(time.Hour)
 
 			r1 := &api.APIKey{
-				GUID:     "00000000-0000-0000-0000-000000000000",
-				Secret:   "",
-				UserGUID: userID,
-				Comment:  "First key",
-				LastUsed: &t,
+				GUID:            "00000000-0000-0000-0000-000000000000",
+				Secret:          "",
+				UserGUID:        userID,
+				Comment:         "First key",
+				LastUsed:        &t,
+				ExpiresAt:       &exp,
+				LastUsedRefused: true,
 			}
 
 			r2 := &api.APIKey{
@@ -162,8 +180,8 @@ func TestListAPIKeys(t *testing.T) {
 			expectedList := []api.APIKey{*r1, *r2}
 
 			mockRows := sqlmock.NewRows(rowFields).
-				AddRow(r1.GUID, r1.UserGUID, r1.Comment, r1.LastUsed).
-				AddRow(r2.GUID, r2.UserGUID, r2.Comment, r2.LastUsed)
+				AddRow(r1.GUID, r1.UserGUID, r1.Comment, r1.LastUsed, r1.ExpiresAt, r1.LastUsedRefused).
+				AddRow(r2.GUID, r2.UserGUID, r2.Comment, r2.LastUsed, r2.ExpiresAt, r2.LastUsedRefused)
 
 			mock.ExpectQuery(selectUserAPIKeys).WillReturnRows(mockRows)
 
@@ -190,7 +208,7 @@ func TestListAPIKeys(t *testing.T) {
 
 func TestGetAPIKeyBySecret(t *testing.T) {
 	var (
-		rowFields            = []string{"guid", "user_guid", "comment", "last_used"}
+		rowFields            = []string{"guid", "user_guid", "comment", "last_used", "expires_at", "last_used_refused"}
 		selectAPIKeyBySecret = `SELECT (.+) FROM api_keys WHERE secret = (.+)`
 	)
 
@@ -237,7 +255,7 @@ func TestGetAPIKeyBySecret(t *testing.T) {
 			}
 
 			mockRows := sqlmock.NewRows(rowFields).
-				AddRow(r.GUID, r.UserGUID, r.Comment, r.LastUsed)
+				AddRow(r.GUID, r.UserGUID, r.Comment, r.LastUsed, r.ExpiresAt, r.LastUsedRefused)
 
 			mock.ExpectQuery(selectAPIKeyBySecret).WithArgs(crypto.HashAPIKey(testEncKey, "test")).WillReturnRows(mockRows)
 
@@ -307,7 +325,7 @@ func TestDeleteAPIKey(t *testing.T) {
 func TestUpdateAPIKeyLastUsed(t *testing.T) {
 	var (
 		keyID          = "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
-		updateLastUsed = `UPDATE api_keys SET last_used = (.+) WHERE guid = (.+)`
+		updateLastUsed = `UPDATE api_keys SET last_used = (.+), last_used_refused = (.+) WHERE guid = (.+)`
 	)
 
 	Convey("Given a request to update API key last used", t, func() {
@@ -321,10 +339,10 @@ func TestUpdateAPIKeyLastUsed(t *testing.T) {
 
 		Convey("when a matching key doesn't exist", func() {
 			mock.ExpectExec(updateLastUsed).
-				WithArgs(sqlmock.AnyArg(), keyID).
+				WithArgs(sqlmock.AnyArg(), true, keyID).
 				WillReturnResult(sqlmock.NewResult(0, 0))
 
-			err := repository.UpdateAPIKeyLastUsed(keyID)
+			err := repository.UpdateAPIKeyLastUsed(keyID, true)
 
 			Convey("an error should be returned", func() {
 				So(err, ShouldResemble, errors.New("UpdateAPIKeyLastUsed: no rows were updated"))
@@ -333,10 +351,10 @@ func TestUpdateAPIKeyLastUsed(t *testing.T) {
 
 		Convey("when a matching key exists", func() {
 			mock.ExpectExec(updateLastUsed).
-				WithArgs(sqlmock.AnyArg(), keyID).
+				WithArgs(sqlmock.AnyArg(), true, keyID).
 				WillReturnResult(sqlmock.NewResult(1, 1))
 
-			err := repository.UpdateAPIKeyLastUsed(keyID)
+			err := repository.UpdateAPIKeyLastUsed(keyID, true)
 
 			Convey("DB query expectations should be met", func() {
 				So(mock.ExpectationsWereMet(), ShouldBeNil)
