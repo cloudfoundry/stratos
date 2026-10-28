@@ -159,6 +159,7 @@ describe('EditEndpointStepComponent', () => {
       component.toggleCACertField();
       await fixture.whenStable();
       expect((cards().componentInstance as EndpointCertificatesComponent).pem()).toBe('');
+      expect(fixture.nativeElement.textContent).toContain('Applies to the endpoint address and its login server (UAA).');
     });
   });
 });
