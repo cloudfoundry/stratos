@@ -89,7 +89,7 @@
         <!-- Navigation buttons -->
         <div class="steppers-navigation flex items-center justify-between border-t pt-6">
           <div class="steppers-navigation-left">
-            @if (currentIndex() > 0 || !!basePreviousRedirect()) {
+            @if ((currentIndex() > 0 || !!basePreviousRedirect()) && !steps[currentIndex()].hidePrevious) {
               <button id="stepper_previous"
                 class="btn btn-secondary"
                 (click)="goPrevious()"
