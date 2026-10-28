@@ -1315,6 +1315,8 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// CNSI operations
 	stableAPIGroup.GET("/endpoints", p.listCNSIs)
+	stableAPIGroup.POST("/endpoints/certificates/decode", p.decodeCertificatesHandler)
+	stableAPIGroup.POST("/endpoints/:id/trust", p.trustCheckHandler)
 
 	// Proxy single request
 	stableAPIGroup.GET("/proxy/:uuid/*", p.ProxySingleRequest)
