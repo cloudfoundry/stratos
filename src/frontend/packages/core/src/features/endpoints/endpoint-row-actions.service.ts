@@ -149,9 +149,9 @@ export class EndpointRowActionsService {
   }
 
   private openConnectDialog(ep: EndpointModel): void {
-    // Same data shape the legacy endpoint-list helper uses - keeps the dialog
-    // contract identical so the unchanged ConnectEndpointDialogComponent reads
-    // the same input fields it always has.
+    // Same data shape the legacy endpoint-list helper uses. The dialog's
+    // opener contract (this data and CONNECT_ENDPOINT_DIALOG_OPTIONS) is
+    // unchanged, so every opener reads the same fields.
     this.tailwindDialog.open(ConnectEndpointDialogComponent, {
       data: {
         name: ep.name,
