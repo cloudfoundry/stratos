@@ -223,9 +223,8 @@ describe('CreateEndpointConnectComponent', () => {
       fixture.componentRef.setInput('fromConnect', true);
       fixture.componentRef.setInput('stillConnected', true);
       component.onEnter(config as any);
-      (component.connectService as any).connectingError$ = of('Bad credentials');
-      (component.connectService as any).isBusy$ = of(false);
-      component['cdr'].markForCheck();
+      (component.connectService() as any).connectingError$ = of('Bad credentials');
+      (component.connectService() as any).isBusy$ = of(false);
       await fixture.whenStable();
       expect(fixture.nativeElement.textContent).toContain('Bad credentials');
       expect(fixture.nativeElement.textContent).toContain('Your existing connection is unaffected and remains active.');

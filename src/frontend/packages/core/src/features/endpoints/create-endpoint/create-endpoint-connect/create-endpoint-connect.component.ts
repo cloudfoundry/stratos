@@ -1,6 +1,6 @@
 
 import { AsyncPipe } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injector, OnDestroy, effect, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnDestroy, effect, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { Observable, of } from 'rxjs';
@@ -39,7 +39,6 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   private endpointsData = inject(EndpointsDataService);
   private injector = inject(Injector);
   private sidePanelService = inject(SidePanelService);
-  private cdr = inject(ChangeDetectorRef);
   private certificates = inject(EndpointCertificatesService);
 
   // Opened from a connect rather than a registration: the endpoint already
@@ -88,7 +87,7 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
   public readonly credentialsTitle = signal(CreateEndpointConnectComponent.defaultCredentialsTitle);
   // Unset until the stepper calls onEnter; the step's template can render
   // before that (it is projected as soon as the step becomes current).
-  public connectService?: ConnectEndpointService;
+  public readonly connectService = signal<ConnectEndpointService | undefined>(undefined);
 
   // FWT-959 Part 2: signal-backed mirrors of `valid` and `doConnect` so
   // parent steppers can wire them into a SignalStepHandle without polling
@@ -119,35 +118,32 @@ export class CreateEndpointConnectComponent implements OnDestroy, IStepperStep {
 
   onEnter = (data: ConnectEndpointConfig) => {
     // Entered again after Previous: end the earlier connect first
-    this.connectService?.destroy();
-    this.connectService = new ConnectEndpointService(this.endpointsService, data, this.endpointsData, this.injector);
+    this.connectService()?.destroy();
+    this.connectService.set(new ConnectEndpointService(this.endpointsService, data, this.endpointsData, this.injector));
     // Each entry starts fresh (ticked only when opened from a connect): a
     // choice made for an earlier endpoint does not carry over.
     this.doConnect = this.fromConnect();
     this.valid = false;
     this.helpDocumentUrl.set(undefined);
     this.credentialsTitle.set(CreateEndpointConnectComponent.defaultCredentialsTitle);
-    // OnPush change detection: setting a non-signal field doesn't notify
-    // the template, so the success message renders without the endpoint
-    // name until something else triggers a check. Force a tick.
-    this.cdr.markForCheck();
   };
 
-  onNext = (): Observable<StepOnNextResult> => this.doConnect && this.connectService ? this.connectService.submit().pipe(
-    map(res => ({
-      success: res.success,
-      message: res.errorMessage,
-      redirect: res.success
-    }))
-  ) : of({
-    success: true,
-    redirect: true
-  });
+  onNext = (): Observable<StepOnNextResult> => {
+    const service = this.connectService();
+    return this.doConnect && service ? service.submit().pipe(
+      map(res => ({
+        success: res.success,
+        message: res.errorMessage,
+        redirect: res.success
+      }))
+    ) : of({
+      success: true,
+      redirect: true
+    });
+  };
 
   ngOnDestroy() {
-    if (this.connectService) {
-      this.connectService.destroy();
-    }
+    this.connectService()?.destroy();
   }
 
 }

@@ -125,7 +125,7 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       connect.onEnter(data as ConnectEndpointConfig);
       this.connectSubs?.unsubscribe();
       this.connectBusy.set(false);
-      const service = connect.connectService;
+      const service = connect.connectService();
       if (!service) {
         return;
       }
