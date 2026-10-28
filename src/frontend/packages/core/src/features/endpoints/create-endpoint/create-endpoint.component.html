@@ -5,13 +5,14 @@
 }
 
 @if (!component) {
-  <app-steppers cancel="/endpoints" [cancelAction]="cancelAction">
+  <app-steppers #steppers cancel="/endpoints" [cancelAction]="cancelAction">
     <app-step [title]="'Register'" [signalHandle]="step1StepHandle">
       <app-create-endpoint-cf-step-1 #step1 [finalStep]="!showConnectStep" (unregistered)="onUnregistered()"></app-create-endpoint-cf-step-1>
     </app-step>
     @if (showConnectStep) {
       <app-step [title]="'Connect (Optional)'" [signalHandle]="connectStepHandle">
-        <app-create-endpoint-connect #connect></app-create-endpoint-connect>
+        <app-create-endpoint-connect #connect [endpointAddress]="address()" [caCert]="caCert()"
+          (review)="steppers.goTo(0)"></app-create-endpoint-connect>
       </app-step>
     }
   </app-steppers>

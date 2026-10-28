@@ -1,5 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
+import { of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import {
   EntityCatalogTestModuleManualStore,
@@ -13,6 +14,7 @@ import { SidePanelService } from '@stratosui/core';
 import { BaseEndpointAuth } from '../../../../core/endpoint-auth';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointService } from '../../connect.service';
+import { EndpointCertificatesService } from '../../certificates/endpoint-certificates.service';
 import { CreateEndpointConnectComponent } from './create-endpoint-connect.component';
 
 // Connects with one token, as GitHub does
@@ -32,8 +34,10 @@ const tokenEndpoint = new StratosCatalogEndpointEntity({
 describe('CreateEndpointConnectComponent', () => {
   let component: CreateEndpointConnectComponent;
   let fixture: ComponentFixture<CreateEndpointConnectComponent>;
+  let decode: ReturnType<typeof vi.fn>;
 
   beforeEach(async () => {
+    decode = vi.fn().mockResolvedValue([]);
     await TestBed.configureTestingModule({
       imports: [
         createBasicStoreModule(),
@@ -47,16 +51,17 @@ describe('CreateEndpointConnectComponent', () => {
           useValue: [...generateStratosEntities(), tokenEndpoint]
         },
         SidePanelService,
+        { provide: EndpointCertificatesService, useValue: { decode } },
         ...STORE_TEST_PROVIDERS,
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CreateEndpointConnectComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -145,6 +150,85 @@ describe('CreateEndpointConnectComponent', () => {
     it('reads Connection Credentials for other auth types', async () => {
       const title = await connectNow('metrics');
       expect(title.querySelector('.connect__title-inner')?.textContent?.trim()).toBe('Connection Credentials');
+    });
+  });
+
+  describe('opened from a connect', () => {
+    const config = { name: 'ep', guid: 'ep-1', type: 'cf', subType: null, ssoAllowed: false };
+
+    it('says is registered and defaults Connect now on', async () => {
+      fixture.componentRef.setInput('fromConnect', true);
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      expect(fixture.nativeElement.textContent).toContain('ep is registered.');
+      expect(fixture.nativeElement.textContent).not.toContain('successfully registered');
+      expect(component.doConnect).toBe(true);
+      expect(fixture.nativeElement.querySelector('app-connect-endpoint')).not.toBeNull();
+    });
+
+    it('keeps Connect now off when registering', async () => {
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      expect(fixture.nativeElement.textContent).toContain('has been successfully registered');
+      expect(component.doConnect).toBe(false);
+    });
+  });
+
+  describe('the Register strip', () => {
+    const config = { name: 'ep', guid: 'ep-1', type: 'cf', subType: null, ssoAllowed: false };
+    const strip = () => fixture.nativeElement.querySelector('.connect__strip') as HTMLElement | null;
+
+    it('shows the Register strip with a CA badge', async () => {
+      decode.mockResolvedValue([{ subject: 's', issuer: 'i', not_before: '2000-01-01T00:00:00Z', not_after: '2001-01-01T00:00:00Z', sha256: 'x' }]);
+      fixture.componentRef.setInput('endpointAddress', 'https://api.x');
+      fixture.componentRef.setInput('caCert', 'PEM');
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      await fixture.whenStable();
+
+      expect(strip()?.textContent).toContain('Registered at https://api.x');
+      expect(strip()?.textContent).toContain('CA expired');
+      const review = jestLikeReview();
+      let emitted = 0;
+      component.review.subscribe(() => emitted++);
+      review.click();
+      expect(emitted).toBe(1);
+    });
+
+    it('shows no badge for a healthy or undecodable CA', async () => {
+      fixture.componentRef.setInput('endpointAddress', 'https://api.x');
+      fixture.componentRef.setInput('caCert', 'PEM');
+      decode.mockRejectedValue(new Error('bad'));
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      await fixture.whenStable();
+      expect(strip()?.textContent).toContain('Registered at https://api.x');
+      expect(strip()?.textContent).not.toContain('CA ');
+    });
+
+    it('has no strip without an address', async () => {
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      expect(strip()).toBeNull();
+    });
+
+    function jestLikeReview(): HTMLButtonElement {
+      return strip()!.querySelector('button') as HTMLButtonElement;
+    }
+  });
+
+  describe('a failed connect', () => {
+    it('shows the error and that the existing connection is unaffected', async () => {
+      const config = { name: 'ep', guid: 'ep-1', type: 'cf', subType: null, ssoAllowed: false };
+      fixture.componentRef.setInput('fromConnect', true);
+      fixture.componentRef.setInput('stillConnected', true);
+      component.onEnter(config as any);
+      (component.connectService as any).connectingError$ = of('Bad credentials');
+      (component.connectService as any).isBusy$ = of(false);
+      component['cdr'].markForCheck();
+      await fixture.whenStable();
+      expect(fixture.nativeElement.textContent).toContain('Bad credentials');
+      expect(fixture.nativeElement.textContent).toContain('Your existing connection is unaffected and remains active.');
     });
   });
 });
