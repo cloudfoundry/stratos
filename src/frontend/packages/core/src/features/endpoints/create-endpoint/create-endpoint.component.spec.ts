@@ -100,15 +100,12 @@ describe('CreateEndpointComponent', () => {
     });
   });
 
-  // Previous from the Connect step unregisters the endpoint just registered,
-  // so it asks first.
+  // Previous only moves: the endpoint stays registered and step 1 shows it locked.
   describe('Previous from the Connect step', () => {
-    let answer: boolean;
     let unregister: ReturnType<typeof vi.fn>;
 
     beforeEach(async () => {
-      const dialog = TestBed.inject(ConfirmationDialogService);
-      vi.spyOn(dialog, 'openWithCancel').mockImplementation((_config, ok, cancel) => answer ? ok() : cancel());
+      vi.spyOn(TestBed.inject(ConfirmationDialogService), 'openWithCancel');
       unregister = vi.fn().mockResolvedValue({ error: false });
       vi.spyOn(TestBed.inject(EndpointsSignalConfigService), 'unregister').mockImplementation(unregister as never);
       component.step1 = {
@@ -117,18 +114,17 @@ describe('CreateEndpointComponent', () => {
       await component.step1StepHandle.submit!();
     });
 
-    it('asks before unregistering, and stays when the user declines', async () => {
-      answer = false;
-      expect(await component.connectStepHandle.confirmPrevious!()).toBe(false);
-      const config = vi.mocked(TestBed.inject(ConfirmationDialogService).openWithCancel).mock.calls[0][0];
-      expect(config.title).toBe('Unregister Endpoint');
-      expect(config.message).toContain('my-metrics');
+    it('keeps the endpoint: no question, no unregister', async () => {
+      expect(component.connectStepHandle.confirmPrevious).toBeUndefined();
+      await component.connectStepHandle.onLeave?.(false);
+      expect(TestBed.inject(ConfirmationDialogService).openWithCancel).not.toHaveBeenCalled();
       expect(unregister).not.toHaveBeenCalled();
     });
 
-    it('goes back when the user agrees', async () => {
-      answer = true;
-      expect(await component.connectStepHandle.confirmPrevious!()).toBe(true);
+    it('labels Next on the reviewed Register step, and invalidates Connect once unregistered', async () => {
+      expect(component.step1StepHandle.nextButtonText!()).toBe('Next');
+      component.onUnregistered();
+      expect(component.step1StepHandle.nextButtonText!()).toBe('Register');
     });
   });
 });

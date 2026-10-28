@@ -19,5 +19,7 @@ export class ConfirmationDialogConfig {
     // set, the dialog resolves with { checkboxChecked: boolean } instead
     // of plain `true` so the caller can read the user's choice.
     public checkbox?: ConfirmationCheckbox,
+    // Label of the button that dismisses the dialog.
+    public cancel = 'Cancel',
   ) { }
 }
