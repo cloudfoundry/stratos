@@ -3,6 +3,9 @@
      widest child — the "Copied to clipboard" text when shown — and the copy
      icon flows in normal layout so it aligns with its row. -->
 <div class="inline-grid items-center">
+  <!-- Tells a screen reader how the copy went; present from the start so
+       the change is announced. -->
+  <span class="sr-only" aria-live="polite">{{ didUserPressCopy() === 'yes and succeeded' ? 'Copied to clipboard' : didUserPressCopy() === 'yes but failed' ? 'Copy failed' : '' }}</span>
   @switch (didUserPressCopy()) {
     @case ('not yet')
     @case ('yes and saw succeeded'){

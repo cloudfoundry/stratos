@@ -124,3 +124,5 @@
   opposite of its state, followed by the icon name "star_border".
 - Card action menus announce their entries as menu items; the menu
   was announced with none.
+- Copy-to-clipboard buttons tell a screen reader "Copied to
+  clipboard" or "Copy failed"; only the on-screen tick or icon did.
