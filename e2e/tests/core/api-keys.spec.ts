@@ -25,6 +25,8 @@ test.describe('API Keys', () => {
   test.describe.serial('Ordered Tests', () => {
     let sharedPage: Page;
     let apiKeysPage: APIKeysListPage;
+    // The Create dialog, kept from Create to Done across the tests below
+    let dialog: ApiKeyAddDialogPage;
 
     test.beforeAll(async ({ browser, baseURL }) => {
       const context = await browser.newContext({
@@ -86,7 +88,7 @@ test.describe('API Keys', () => {
         await expect(addButton).toBeVisible();
         await addButton.click();
 
-        const dialog = new ApiKeyAddDialogPage(sharedPage);
+        dialog = new ApiKeyAddDialogPage(sharedPage);
         await dialog.waitUntilShown('Create an API Key');
 
         expect(await dialog.isDisplayed()).toBeTruthy();
@@ -105,32 +107,37 @@ test.describe('API Keys', () => {
         await expect(addButton).toBeVisible();
         await addButton.click();
 
-        const dialog = new ApiKeyAddDialogPage(sharedPage);
+        dialog = new ApiKeyAddDialogPage(sharedPage);
         await dialog.waitUntilShown();
 
         await expect(dialog.createButton).toBeDisabled();
 
-        await dialog.form.fill({ comment: newKeyComment });
+        await dialog.fillDescription(newKeyComment);
+        await dialog.chooseExpiry('30');
 
         await expect(dialog.cancelButton).toBeEnabled();
         await expect(dialog.createButton).toBeEnabled();
 
+        // The dialog stays open on its Secret step
         await dialog.create();
-        await dialog.waitUntilNotShown();
       });
     });
 
     test('new key has a secret', async () => {
-      apiKeysPage = new APIKeysListPage(sharedPage);
-
-      await apiKeysPage.waitForSecret();
-
-      const secretText = await apiKeysPage.getSecretText();
-      expect(secretText).toBeDefined();
+      // Hidden until asked
+      await expect(dialog.secretRow).toContainText('hidden');
+      const secretText = await dialog.revealSecret();
       expect(secretText.length).toBeGreaterThan(0);
 
-      await apiKeysPage.closeKeySecret();
-      await apiKeysPage.getKeySecret().waitFor({ state: 'hidden', timeout: 5000 });
+      // Either outcome shows the copy ran; the clipboard itself depends
+      // on the browser's permissions.
+      await dialog.copySecret();
+      await expect(dialog.copyStatus).toHaveText(/Copied to clipboard|Copy failed/);
+
+      // Done closes the dialog, and the secret leaves the screen with it
+      await dialog.done();
+      await dialog.waitUntilNotShown();
+      await expect(sharedPage.getByText(secretText)).toHaveCount(0);
     });
 
     test('new key is in updated table', async () => {
