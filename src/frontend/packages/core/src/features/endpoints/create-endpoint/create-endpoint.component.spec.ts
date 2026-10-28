@@ -168,6 +168,23 @@ describe('CreateEndpointComponent', () => {
     expect(registerHandle.close).not.toHaveBeenCalled();
   });
 
+  // The strip names the address as registered, as the connect dialog does.
+  it('shows the full registered address on the Connect step', async () => {
+    const config = TestBed.inject(EndpointsSignalConfigService);
+    vi.spyOn(config, 'register').mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' } as never);
+    const real = fixture.debugElement.query(By.directive(CreateEndpointCfStep1Component))
+      .componentInstance as CreateEndpointCfStep1Component;
+    real.registerForm.controls.nameField.setValue('my-metrics');
+    real.registerForm.controls.urlField.setValue('metrics.example.com');
+    component.step1 = real;
+    await component.step1StepHandle.submit!();
+    expect(config.register).toHaveBeenCalledWith(expect.objectContaining({ endpoint: 'https://metrics.example.com' }));
+    const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
+    steppers.setActive(1);
+    await fixture.whenStable();
+    expect(fixture.nativeElement.textContent).toContain('Registered at https://metrics.example.com');
+  });
+
   // Back on step 1 after registering, the form shows the endpoint locked.
   describe('Previous from Connect shows step 1 locked', () => {
     it('leaves the registered endpoint in place and locked', async () => {
