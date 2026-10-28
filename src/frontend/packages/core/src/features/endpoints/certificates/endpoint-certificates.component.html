@@ -1,0 +1,46 @@
+<div class="flex flex-col gap-3">
+  @if (decodeError()) {
+    <p class="text-sm text-danger-700 dark:text-danger-300" role="alert">{{ decodeError() }}</p>
+  }
+
+  @for (card of cards(); track card.cert.sha256) {
+    <div data-testid="cert-card" class="rounded border border-content-border p-3 text-sm">
+      <div class="flex items-start justify-between gap-2">
+        <span class="font-medium text-content-text break-all">{{ card.cert.subject }}</span>
+        @if (card.badge) {
+          <span [class]="card.badgeClasses">{{ card.badge }}</span>
+        }
+      </div>
+      <div class="text-content-muted break-all">Issued by {{ card.cert.issuer }}</div>
+      <div class="text-content-muted">
+        Valid {{ card.cert.not_before | date: 'mediumDate' }} → {{ card.cert.not_after | date: 'mediumDate' }}
+      </div>
+      <div class="text-content-muted">
+        SHA-256 <span class="font-mono text-xs break-all">{{ card.cert.sha256 }}</span>
+      </div>
+    </div>
+  }
+
+  @if (endpointGuid()) {
+    <div class="flex flex-col gap-2">
+      <div>
+        <button type="button" class="text-sm underline" [disabled]="trustBusy()" (click)="checkTrust()">
+          Check trust now
+        </button>
+      </div>
+      @if (trustError()) {
+        <p class="text-sm text-danger-700 dark:text-danger-300" role="alert">{{ trustError() }}</p>
+      }
+      @if (trust(); as results) {
+        <ul class="text-sm text-content-text" aria-live="polite">
+          @for (r of results; track r.host) {
+            <li>{{ r.trusted ? '✓' : '✗' }} {{ r.host }}: {{ r.trusted ? 'trusted' : r.reason || 'not trusted' }}</li>
+          }
+        </ul>
+        <p class="text-xs text-content-muted">
+          Checked {{ checkedAt() | date: 'mediumTime' }}. Results are not saved.
+        </p>
+      }
+    </div>
+  }
+</div>
