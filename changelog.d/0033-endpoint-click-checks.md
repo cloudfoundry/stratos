@@ -94,9 +94,9 @@
 - Kubernetes and Helm pages show their icons again, such as the Helm
   charts filter toggle, analysis report status and the kube terminal;
   they showed the icon's name ("filter_list", "warning") as text.
-- The Helm charts page names its repository filter once; a heading
-  "Filter By Repository" sat over the field's own label of the same
-  words.
+- The Helm charts page names its repository filter once, by the
+  field's own label; a heading "Filter By Repository" sat over that
+  label.
 - A Helm chart or release without a logo shows the placeholder image
   instead of a broken image, and the Popeye and kube-score analysis
   descriptions open. All four pointed at /core/assets, where the build
