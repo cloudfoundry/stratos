@@ -146,6 +146,8 @@ describe('MetaCardComponent', () => {
     const item = element.querySelector('[role="menu"] button') as HTMLButtonElement;
     expect(item.querySelector('app-custom-icon')!.getAttribute('aria-hidden')).toBe('true');
     expect(item.textContent).toContain('Connect');
+    // A menu's items are menu items, or a screen reader finds the menu empty.
+    expect(item.getAttribute('role')).toBe('menuitem');
   });
 
   it('should hide actions without permission', () => {
