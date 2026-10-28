@@ -119,3 +119,6 @@
   the toolbar button, below the page header, instead of overlapping "You
   have no API keys"; the same prompt on an empty Home page is placed the
   same way.
+- The favorite star on endpoint and other cards is announced as "Add
+  to favorites" or "Remove from favorites", as in lists; it read the
+  opposite of its state, followed by the icon name "star_border".

@@ -1,15 +1,16 @@
 @if ((endpointsService.disablePersistenceFeatures$ | async) === false) {
   <div class="flex items-center cursor-pointer" role="button" tabindex="0"
+    [attr.aria-label]="(isFavorite$ | async) ? 'Remove from favorites' : 'Add to favorites'"
     (click)="toggleFavorite($event)"
     (keydown.enter)="toggleFavorite($event)"
     (keydown.space)="toggleFavorite($event); $event.preventDefault()"
     [ngClass]="small() ? 'h-5 w-5' : 'h-6 w-6'">
     @switch (isFavorite$ | async) {
       @case (true) {
-        <app-custom-icon matTooltip="Unset as favorite" aria-label="Set as Favorite">star</app-custom-icon>
+        <app-custom-icon matTooltip="Unset as favorite" aria-hidden="true">star</app-custom-icon>
       }
       @case (false) {
-        <app-custom-icon matTooltip="Set as favorite" aria-label="Unset as Favorite">star_border</app-custom-icon>
+        <app-custom-icon matTooltip="Set as favorite" aria-hidden="true">star_border</app-custom-icon>
       }
     }
   </div>

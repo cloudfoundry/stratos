@@ -62,6 +62,18 @@ describe('EntityFavoriteStarComponent', () => {
     expect(element.textContent).toContain('star');
   });
 
+  // Named by what it does, as the list view's star is; the icon's name
+  // ("star_border") is hidden from screen readers.
+  it.each([[false, 'Add to favorites'], [true, 'Remove from favorites']])(
+    'names the button by its action (favorite: %s)', async (isFavorite, name) => {
+      component.isFavorite$ = of(isFavorite);
+      await fixture.whenStable();
+
+      const button = element.querySelector('[role="button"]') as HTMLElement;
+      expect(button.getAttribute('aria-label')).toBe(name);
+      expect(button.querySelector('app-custom-icon')?.getAttribute('aria-hidden')).toBe('true');
+    });
+
   it('should set isFavorite based on favorite', async () => {
     vi.spyOn(userFavoriteManager, 'getIsFavoriteObservable').mockReturnValue(of(true));
     fixture.componentRef.setInput('favorite', favorite);
