@@ -44,10 +44,17 @@ export class EndpointCertificatesComponent {
   protected checkedAt = signal<Date | null>(null);
 
   private decodeSeq = 0;
+  private trustSeq = 0;
 
   constructor() {
     effect(onCleanup => {
       const pem = this.pem();
+      // Trust results answer for the PEM checked: drop them, and the answer
+      // to any check still in flight.
+      this.trustSeq++;
+      this.trust.set(null);
+      this.trustError.set('');
+      this.checkedAt.set(null);
       const timer = setTimeout(() => void this.decode(pem), pem.trim() ? DEBOUNCE_MS : 0);
       onCleanup(() => clearTimeout(timer));
     });
@@ -97,14 +104,20 @@ export class EndpointCertificatesComponent {
     if (!guid || this.trustBusy()) {
       return;
     }
+    const seq = this.trustSeq;
     this.trustBusy.set(true);
     this.trustError.set('');
     try {
-      this.trust.set(await this.service.checkTrust(guid, this.pem()));
-      this.checkedAt.set(new Date());
+      const results = await this.service.checkTrust(guid, this.pem());
+      if (seq === this.trustSeq) {
+        this.trust.set(results);
+        this.checkedAt.set(new Date());
+      }
     } catch (err) {
-      this.trust.set(null);
-      this.trustError.set(certificateErrorMessage(err, 'The trust check failed.'));
+      if (seq === this.trustSeq) {
+        this.trust.set(null);
+        this.trustError.set(certificateErrorMessage(err, 'The trust check failed.'));
+      }
     } finally {
       this.trustBusy.set(false);
     }

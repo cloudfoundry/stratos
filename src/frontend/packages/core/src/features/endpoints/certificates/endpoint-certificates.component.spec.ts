@@ -123,6 +123,58 @@ describe('EndpointCertificatesComponent', () => {
     expect(el().textContent).toContain('Results are not saved.');
   });
 
+  // The results answer for the PEM checked; another PEM needs its own check.
+  describe('when the PEM changes', () => {
+    const checkNow = () => Array.from(el().querySelectorAll('button')).find(b => b.textContent?.includes('Check trust now'))!;
+
+    it('clears the trust results', async () => {
+      await setInputs('PEM', 'guid-1');
+      await flushDecode([cert(300)]);
+      checkNow().click();
+      await fixture.whenStable();
+      http.expectOne('/api/v1/endpoints/guid-1/trust').flush([{ host: 'api.x', trusted: true }]);
+      await vi.advanceTimersByTimeAsync(0);
+      await fixture.whenStable();
+      expect(el().textContent).toContain('✓ api.x: trusted');
+
+      await setInputs('PEM2', 'guid-1');
+      await flushDecode([cert(300)]);
+      expect(el().textContent).not.toContain('api.x');
+      expect(el().textContent).not.toContain('Results are not saved.');
+    });
+
+    it('clears a trust check error', async () => {
+      await setInputs('PEM', 'guid-1');
+      await flushDecode([cert(300)]);
+      checkNow().click();
+      await fixture.whenStable();
+      http.expectOne('/api/v1/endpoints/guid-1/trust')
+        .flush({ status: 'error', error: 'Endpoint not found' }, { status: 404, statusText: 'Not Found' });
+      await vi.advanceTimersByTimeAsync(0);
+      await fixture.whenStable();
+      expect(el().textContent).toContain('Endpoint not found');
+
+      await setInputs('PEM2', 'guid-1');
+      await flushDecode([cert(300)]);
+      expect(el().textContent).not.toContain('Endpoint not found');
+    });
+
+    it('drops the answer to a check of the earlier PEM', async () => {
+      await setInputs('PEM', 'guid-1');
+      await flushDecode([cert(300)]);
+      checkNow().click();
+      await fixture.whenStable();
+      const req = http.expectOne('/api/v1/endpoints/guid-1/trust');
+
+      await setInputs('PEM2', 'guid-1');
+      await flushDecode([cert(300)]);
+      req.flush([{ host: 'api.x', trusted: true }]);
+      await vi.advanceTimersByTimeAsync(0);
+      await fixture.whenStable();
+      expect(el().textContent).not.toContain('api.x');
+    });
+  });
+
   it('hides Check trust now without an endpoint', async () => {
     await setInputs('PEM', null);
     await flushDecode([cert(300)]);
