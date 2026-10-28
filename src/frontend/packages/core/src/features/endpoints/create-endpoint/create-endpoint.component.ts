@@ -152,8 +152,10 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
     },
     submit: async () => {
       const result = await firstValueFrom(this._connect()!.onNext());
+      // A failure is shown under the form, so the stepper adds no message
+      // of its own.
       if (!result.success) {
-        throw new Error(result.message || 'Failed to connect endpoint');
+        return { success: false };
       }
       // Connect's legacy onNext always returns redirect:true on success,
       // meaning the form is done.
