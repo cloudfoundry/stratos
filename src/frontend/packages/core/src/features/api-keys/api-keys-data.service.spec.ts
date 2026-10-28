@@ -31,10 +31,19 @@ describe('ApiKeysDataService.create', () => {
     await never;
   });
 
+  it('keeps no secret in the shared collection', async () => {
+    const result = service.create('CI', null);
+    http.expectOne('/pp/v1/api_keys').flush({ guid: 'a', comment: 'CI', secret: 'the-secret' });
+    expect((await result).secret).toBe('the-secret');
+    expect(service.apiKeys().map(k => k.guid)).toEqual(['a']);
+    expect(JSON.stringify(service.apiKeys())).not.toContain('the-secret');
+  });
+
   it('fails with the backend\'s error message', async () => {
     const result = service.create('CI', '2020-01-01T00:00:00.000Z');
+    // The server's error handler answers plain text.
     http.expectOne('/pp/v1/api_keys')
-      .flush({ error: 'Expiry must be in the future' }, { status: 400, statusText: 'Bad Request' });
+      .flush('Expiry must be in the future', { status: 400, statusText: 'Bad Request' });
     await expect(result).rejects.toThrow('Expiry must be in the future');
   });
 });

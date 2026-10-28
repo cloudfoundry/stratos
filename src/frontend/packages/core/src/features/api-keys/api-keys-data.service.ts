@@ -55,7 +55,9 @@ export class ApiKeysDataService {
       const created = await firstValueFrom(
         this.http.post<ApiKey>(apiKeysUrl, body),
       );
-      this._apiKeys.update(curr => [...curr, created]);
+      // The secret lives only in the create stepper, not in this
+      // session-long collection.
+      this._apiKeys.update(curr => [...curr, { ...created, secret: '' }]);
       return created;
     } catch (err) {
       throw new Error(this.errorMessage(err), { cause: err });
@@ -95,9 +97,6 @@ export class ApiKeysDataService {
 
   private errorMessage(err: unknown): string {
     if (err instanceof HttpErrorResponse) {
-      // The server answers { "error": "<reason>" }.
-      const reason = (err.error as { error?: unknown } | null)?.error;
-      if (typeof reason === 'string' && reason) return reason;
       return typeof err.error === 'string' ? err.error : (err.message || 'API key request failed');
     }
     if (err instanceof Error) return err.message;
