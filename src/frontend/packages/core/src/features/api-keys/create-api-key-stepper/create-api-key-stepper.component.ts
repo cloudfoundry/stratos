@@ -15,15 +15,23 @@ export interface CreateApiKeyData {
 type ExpiryChoice = '30' | '90' | '365' | 'date' | 'never';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
-// The server refuses an expiry after 2038-01-19T03:14:07Z; a chosen date
-// means the end of that local day, so the last pickable day is the 18th.
-const LAST_DATE = '2038-01-18';
+// The server refuses an expiry after this instant.
+const EXPIRY_CAP = Date.UTC(2038, 0, 19, 3, 14, 7);
 const MAX_COMMENT = 255;
 
 // A date input's value (yyyy-mm-dd) for a local day.
 function localDay(d: Date): string {
   const pad = (n: number) => String(n).padStart(2, '0');
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+// The last local day whose end (23:59:59) the server accepts.
+function lastPickableDay(): string {
+  const cap = new Date(EXPIRY_CAP);
+  const day = new Date(cap.getFullYear(), cap.getMonth(), cap.getDate(), 23, 59, 59);
+  return localDay(day.getTime() > EXPIRY_CAP
+    ? new Date(cap.getFullYear(), cap.getMonth(), cap.getDate() - 1)
+    : cap);
 }
 
 /**
@@ -44,9 +52,12 @@ export class CreateApiKeyStepperComponent {
   private readonly data = inject<CreateApiKeyData>(MAT_DIALOG_DATA);
 
   readonly maxComment = MAX_COMMENT;
-  readonly maxDate = LAST_DATE;
+  readonly maxDate = lastPickableDay();
   // Tomorrow, local: a date at the end of today would be gone by tonight.
-  readonly minDate = localDay(new Date(Date.now() + DAY_MS));
+  readonly minDate = (() => {
+    const now = new Date();
+    return localDay(new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1));
+  })();
 
   readonly close = () => this.dialogRef.close();
 

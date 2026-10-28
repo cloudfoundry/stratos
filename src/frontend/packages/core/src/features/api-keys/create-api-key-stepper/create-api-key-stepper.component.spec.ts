@@ -87,7 +87,10 @@ describe('CreateApiKeyStepperComponent', () => {
     await open();
     await type('#api-key-expiry', 'date', 'change');
     const date = q<HTMLInputElement>('#api-key-date')!;
-    expect(date.max).toBe('2038-01-18');
+    // The last local day that ends by the server's cap, whatever the zone.
+    const cap = Date.UTC(2038, 0, 19, 3, 14, 7);
+    const days = [16, 17, 18, 19, 20].filter(d => new Date(2038, 0, d, 23, 59, 59).getTime() <= cap);
+    expect(date.max).toBe(`2038-01-${days.at(-1)}`);
     expect(date.min).toBe('2026-10-29');
   });
 
