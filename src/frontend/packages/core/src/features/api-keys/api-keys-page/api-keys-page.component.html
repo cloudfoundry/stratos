@@ -7,7 +7,7 @@
   </div>
 </app-page-header>
 
-@if (keyDetails(); as details) {
+@if (newKey(); as details) {
   <div class="keys-page__new">
     <app-card class="keys-page__card">
       <app-card-header plain>
@@ -17,7 +17,16 @@
         <p>Your API Key has been successfully created. Use the following information to connect to <app-product-name></app-product-name>.</p>
         <p><i>Please safely record these details, there is no later way to view them</i></p>
         <ul>
-          <li id="apikey-secret" class="flex items-center gap-1">Secret: {{ details.secret }}
+          <li id="apikey-secret" class="flex items-center gap-1">Secret:
+            @if (secretShown()) {
+              {{ details.secret }}
+            } @else {
+              <span aria-hidden="true">••••••••••••••••</span><span class="sr-only">hidden</span>
+            }
+            <button class="btn btn-icon" type="button" (click)="secretShown.set(!secretShown())"
+              [attr.aria-label]="'Hide Secret'" [attr.aria-pressed]="!secretShown()">
+              <app-custom-icon>{{ secretShown() ? 'visibility' : 'visibility_off' }}</app-custom-icon>
+            </button>
             <app-copy-to-clipboard [text]="details.secret" tooltip="Copy to clipboard" />
           </li>
         </ul>
