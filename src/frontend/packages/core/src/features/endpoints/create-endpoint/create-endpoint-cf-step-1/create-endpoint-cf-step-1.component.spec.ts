@@ -463,6 +463,23 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(emitted).toHaveBeenCalled();
     });
 
+    // Git hosts take no CA certificate, so their review has no TLS to edit or show.
+    it('reviews a Git endpoint locked, with no TLS and no certificate cards', async () => {
+      await review(endpoint({ cnsi_type: 'git', sub_type: 'github', name: 'my-github' }));
+      expect(component.registerForm.controls.nameField.disabled).toBe(true);
+      expect(component.registerForm.controls.urlField.disabled).toBe(true);
+      expect(q('#skipSSL')).toBeNull();
+      expect(q('#useCACert')).toBeNull();
+      expect(q('#ca-cert')).toBeNull();
+      expect(q('app-endpoint-certificates')).toBeNull();
+      expect(q('#unregister')).toBeTruthy();
+
+      component.registerForm.controls.skipSSLField.setValue(true);
+      const result = await new Promise<any>(resolve => component.onNext(0, {} as never).subscribe(resolve));
+      expect(update).not.toHaveBeenCalled();
+      expect(result).toEqual(expect.objectContaining({ success: true, data: expect.objectContaining({ type: 'git' }) }));
+    });
+
     it('stays put when the user keeps the endpoint', async () => {
       confirmAnswer = false;
       await review(endpoint());

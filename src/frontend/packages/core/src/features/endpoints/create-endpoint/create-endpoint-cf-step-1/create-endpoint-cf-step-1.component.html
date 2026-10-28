@@ -115,7 +115,7 @@
   </div>
   }
 
-  @if (review()) {
+  @if (showCertificates()) {
     <app-endpoint-certificates [pem]="effectivePem()" [endpointGuid]="guid()"></app-endpoint-certificates>
   }
 
