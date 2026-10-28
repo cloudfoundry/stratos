@@ -12,6 +12,8 @@ import {
   generateStratosEntities,
 } from '@stratosui/store';
 import { createBasicStoreModule, seedEndpointsDataService, STORE_TEST_PROVIDERS, testSCFEndpoint, testSCFEndpointGuid } from '@stratosui/store/testing';
+import { By } from '@angular/platform-browser';
+import { EndpointCertificatesComponent } from '../../certificates/endpoint-certificates.component';
 import { EditEndpointStepComponent } from './edit-endpoint-step.component';
 
 describe('EditEndpointStepComponent', () => {
@@ -130,5 +132,33 @@ describe('EditEndpointStepComponent', () => {
 
     const id = name.getAttribute('aria-errormessage');
     expect(id && host.querySelector(`#${id}`)?.textContent?.trim()).toBe('Name is required');
+  });
+
+  describe('certificate cards', () => {
+    const cards = () => fixture.debugElement.query(By.directive(EndpointCertificatesComponent));
+
+    it('shows certificate cards for the CA in the form', async () => {
+      await fixture.whenStable();
+      const card = cards();
+      expect(card, 'cards are shown').toBeTruthy();
+      const cmp = card.componentInstance as EndpointCertificatesComponent;
+      expect(cmp.pem()).toBe('STORED-CA-CERT');
+      expect(cmp.endpointGuid()).toBe(testSCFEndpointGuid);
+      expect(fixture.nativeElement.textContent).toContain('Applies to the endpoint address and its login server (UAA).');
+    });
+
+    it('passes edits of the CA control to the cards', async () => {
+      await fixture.whenStable();
+      component.editEndpoint.controls.caCert.setValue('EDITED-PEM');
+      await fixture.whenStable();
+      expect((cards().componentInstance as EndpointCertificatesComponent).pem()).toBe('EDITED-PEM');
+    });
+
+    it('passes an empty pem when the CA certificate is switched off', async () => {
+      await fixture.whenStable();
+      component.toggleCACertField();
+      await fixture.whenStable();
+      expect((cards().componentInstance as EndpointCertificatesComponent).pem()).toBe('');
+    });
   });
 });

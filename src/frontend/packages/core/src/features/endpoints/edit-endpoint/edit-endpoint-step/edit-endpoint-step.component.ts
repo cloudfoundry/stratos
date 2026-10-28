@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Injector, OnDestroy, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, Injector, OnDestroy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
@@ -18,6 +18,7 @@ import { Observable, Subscription, firstValueFrom, from } from 'rxjs';
 import { take, filter, map, switchMap } from 'rxjs/operators';
 
 import { StepOnNextFunction, StepComponent, StepOnNextResult, SignalStepHandle } from '../../../../shared/components/stepper/step/step.component';
+import { EndpointCertificatesComponent } from '../../certificates/endpoint-certificates.component';
 import { getSSOClientRedirectURI } from '../../endpoint-helpers';
 import { getIdFromRoute, safeUnsubscribe } from './../../../../core/utils.service';
 import { IStepperStep } from './../../../../shared/components/stepper/step/step.component';
@@ -54,7 +55,8 @@ interface EditEndpointForm {
     CustomCheckboxComponent,
     CustomIconComponent,
     UniqueDirective,
-    ProductNameComponent
+    ProductNameComponent,
+    EndpointCertificatesComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -76,6 +78,9 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
   // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
   readonly showCACertField = signal(false);
   lastSkipSSLValue = false;
+  // The cards follow the CA box; an empty pem (CA off) shows none.
+  readonly caCertValue;
+  readonly certificatePem = computed(() => (this.showCACertField() ? this.caCertValue() : ''));
 
   // Signal-handle exposed to the parent stepper template (FWT-957)
   signalHandle: SignalStepHandle;
@@ -97,6 +102,7 @@ export class EditEndpointStepComponent implements OnDestroy, IStepperStep {
       allowSSO: new FormControl(false, { nonNullable: true }),
       caCert: new FormControl('', { nonNullable: true }) });
 
+    this.caCertValue = toSignal(this.editEndpoint.controls.caCert.valueChanges, { initialValue: '' });
     this.clientRedirectURI = getSSOClientRedirectURI();
 
     this.validate = this.editEndpoint.statusChanges.pipe(map(() => this.editEndpoint.valid));
