@@ -85,6 +85,13 @@
   as a button.
 - Escape closes the Connect and Add API Key dialogs, and answers "Yes"
   to "Are you still there?"; these dialogs ignored it.
+- The favorite star on endpoint and other cards is announced as "Add
+  to favorites" or "Remove from favorites", as in lists; it read the
+  opposite of its state, followed by the icon name "star_border".
+- Card action menus announce their entries as menu items; the menu
+  was announced with none.
+- Copy-to-clipboard buttons tell a screen reader "Copied to
+  clipboard" or "Copy failed"; only the on-screen tick or icon did.
 
 [BugFixes: Cloud Foundry]
 - An event's detail dialog has room around its contents; it ran to
@@ -119,10 +126,3 @@
   the toolbar button, below the page header, instead of overlapping "You
   have no API keys"; the same prompt on an empty Home page is placed the
   same way.
-- The favorite star on endpoint and other cards is announced as "Add
-  to favorites" or "Remove from favorites", as in lists; it read the
-  opposite of its state, followed by the icon name "star_border".
-- Card action menus announce their entries as menu items; the menu
-  was announced with none.
-- Copy-to-clipboard buttons tell a screen reader "Copied to
-  clipboard" or "Copy failed"; only the on-screen tick or icon did.
