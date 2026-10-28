@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"slices"
 	"strings"
 	"time"
 
@@ -157,7 +158,8 @@ func (p *portalProxy) decodeCertificatesHandler(c *echo.Context) error {
 
 // trustCheckHandler checks the trust of the stored endpoint's API host and, if
 // different, its token host. The hosts come from the stored record only. The
-// CA is the form's ca_cert when sent, else the stored one.
+// CA is the form's ca_cert when sent, else the stored one. An endpoint the
+// user cannot see in the endpoints list answers 404.
 func (p *portalProxy) trustCheckHandler(c *echo.Context) error {
 	id := c.Param("id")
 	rec, err := p.GetCNSIRecord(id)
@@ -168,6 +170,16 @@ func (p *portalProxy) trustCheckHandler(c *echo.Context) error {
 			return api.NewHTTPShadowError(http.StatusNotFound, "Endpoint not found", "Trust check: %v", err)
 		}
 		return api.NewHTTPShadowError(http.StatusInternalServerError, "Could not look up the endpoint", "Trust check: %v", err)
+	}
+
+	// The endpoint must be one the endpoints list would show this user;
+	// any other answers as not found.
+	visible, err := p.buildCNSIList(c)
+	if err != nil {
+		return api.NewHTTPShadowError(http.StatusInternalServerError, "Could not look up the endpoint", "Trust check: %v", err)
+	}
+	if !slices.ContainsFunc(visible, func(r *api.CNSIRecord) bool { return r.GUID == id }) {
+		return api.NewHTTPShadowError(http.StatusNotFound, "Endpoint not found", "Trust check: endpoint %s not visible to the user", id)
 	}
 
 	caCert := rec.CACert
