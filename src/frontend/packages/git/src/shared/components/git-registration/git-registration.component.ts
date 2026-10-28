@@ -22,7 +22,7 @@ import { take, map } from 'rxjs/operators';
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { getIdFromRoute } from '../../../../../core/src/core/utils.service';
 import { ConnectEndpointConfig } from '../../../../../core/src/features/endpoints/connect.service';
-import { confirmUnregisterOnPrevious } from '../../../../../core/src/features/endpoints/create-endpoint/confirm-unregister-on-previous';
+import { confirmAndUnregister } from '../../../../../core/src/features/endpoints/unregister-endpoint/unregister-endpoint';
 import { CreateEndpointConnectComponent } from '../../../../../core/src/features/endpoints/create-endpoint/create-endpoint-connect/create-endpoint-connect.component';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import {
@@ -152,17 +152,18 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   }
   private registerValid = signal<boolean>(false);
 
-  // Tracks the endpoint guid created by step 1's runRegistration. Used by
-  // the connect-step's onLeave(isNext=false) handler to unregister on
-  // Previous — "Prev = start over" UX. Cleared after unregister so the
-  // form can re-register cleanly.
-  private registeredGuid: string | null = null;
-  private registeredName = '';
+  // The endpoint step 1 registered. Previous never undoes it; step 1 shows it
+  // locked and offers Unregister, which clears this and reopens the form.
+  protected readonly registered = signal<{ data: ConnectEndpointConfig; address: string; personal: boolean } | null>(null);
 
   registerStepHandle: SignalStepHandle = {
-    valid: this.registerValid.asReadonly(),
-    nextButtonText: signal('Register').asReadonly(),
+    valid: computed(() => !!this.registered() || this.registerValid()),
+    nextButtonText: computed(() => this.registered() ? 'Next' : 'Register'),
     submit: async () => {
+      const done = this.registered();
+      if (done) {
+        return { data: done.data };
+      }
       const result = await this.runRegistration();
       if (!result.success) {
         throw new Error(result.message || 'Failed to register endpoint');
@@ -185,7 +186,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     hideCloseButton: signal(true).asReadonly(),
     finishButtonText: computed(() => {
       const c = this._connect();
-      return c?.doConnectSignal() ? 'Connect' : 'Finish';
+      return c?.doConnectSignal() ? 'Connect' : 'Close';
     }),
     onEnter: (data) => {
       // Registration result routed from registerStepHandle.submit via the
@@ -194,21 +195,6 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       if (data) {
         this._connect()?.onEnter(data as any);
       }
-    },
-    // Previous unregisters (onLeave below), so it asks first.
-    confirmPrevious: () => this.registeredGuid ?
-      confirmUnregisterOnPrevious(this.confirmDialog, this.registeredName) :
-      Promise.resolve(true),
-    onLeave: async (isNext) => {
-      if (isNext || !this.registeredGuid) {
-        return;
-      }
-      // Previous from connect step ⇒ "start over": unregister the endpoint
-      // we just created so the user can pick a different type/URL on a
-      // clean step 1.
-      const guid = this.registeredGuid;
-      this.registeredGuid = null;
-      await this.endpointsSignalConfig.unregister(guid, GIT_ENDPOINT_TYPE);
     },
     submit: async () => {
       const result = await firstValueFrom(this._connect()!.onNext());
@@ -447,8 +433,8 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       ssoAllowed: false
     };
     if (!result.error) {
-      this.registeredGuid = data.guid;
-      this.registeredName = name;
+      this.registered.set({ data, address: url, personal: !createSystemEndpoint });
+      this.registerForm.disable();
       // 7 s: it shows while the dialog moves to its Connect step.
       this.snackBarService.show(`Successfully registered '${name}'`, undefined, 7000);
     }
@@ -459,6 +445,26 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
       message: success ? '' : result.message,
       data
     };
+  }
+
+  /** Unregister from the step; the form reopens unlocked and filled in. */
+  async unregister(): Promise<void> {
+    const reg = this.registered();
+    if (!reg) {
+      return;
+    }
+    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsSignalConfig, {
+      guid: reg.data.guid,
+      name: reg.data.name,
+      type: GIT_ENDPOINT_TYPE,
+      personal: reg.personal,
+    });
+    if (!gone) {
+      return;
+    }
+    this.registered.set(null);
+    this.registerForm.enable();
+    this.cdr.markForCheck();
   }
 
   private updateUrlWithSuffix(url: string, defn: GithubType): string {

@@ -1,4 +1,4 @@
-<app-steppers [cancel]="'/endpoints'" [cancelAction]="cancelAction">
+<app-steppers #steppers [cancel]="'/endpoints'" [cancelAction]="cancelAction">
   <app-step title="Register" [signalHandle]="registerStepHandle">
     <div class="p-6">
       <h3 id="git-type-heading" class="text-xl font-semibold mb-4">Select the type of {{ gitTypes[epSubType].label }} to register</h3>
@@ -128,9 +128,18 @@
           }
         </form>
       }
+      @if (registered(); as reg) {
+        <div class="mt-8 pt-4 border-t border-danger-200 flex items-center justify-between gap-4">
+          <p class="text-content-muted">
+            Remove this endpoint for {{ reg.personal ? "you" : "all users" }}. Connections to it end.
+          </p>
+          <button id="unregister" type="button" class="btn btn-danger" (click)="unregister()">Unregister…</button>
+        </div>
+      }
     </div>
   </app-step>
   <app-step title="Connect (Optional)" [signalHandle]="connectStepHandle">
-    <app-create-endpoint-connect #connect></app-create-endpoint-connect>
+    <app-create-endpoint-connect #connect [endpointAddress]="registered()?.address ?? ''"
+      (review)="steppers.goTo(0)"></app-create-endpoint-connect>
   </app-step>
 </app-steppers>
