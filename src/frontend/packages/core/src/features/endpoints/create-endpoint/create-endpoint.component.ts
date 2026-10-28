@@ -19,6 +19,7 @@ import { entityCatalog } from '@stratosui/store';
 import { firstValueFrom, Subscription } from 'rxjs';
 
 import { getIdFromRoute } from '../../../core/utils.service';
+import { normalizeUrl } from '../../../shared/validators';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { SignalStepHandle, StepComponent } from '../../../shared/components/stepper/step/step.component';
 import { SteppersComponent } from '../../../shared/components/stepper/steppers/steppers.component';
@@ -110,7 +111,8 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
         throw new Error(result.message || 'Failed to register endpoint');
       }
       this.registered.set(true);
-      this.address.set(this.step1?.registerForm?.getRawValue().urlField ?? '');
+      // As registered: registration adds https:// to a bare host.
+      this.address.set(normalizeUrl(this.step1?.registerForm?.getRawValue().urlField ?? ''));
       this.caCert.set(this.step1?.registeredCaCert?.() ?? '');
       // `redirect: true` (only emitted when finalStep is set, i.e. when
       // there's no connect step) means the form is done.
