@@ -123,6 +123,12 @@ export class CreateApiKeyStepperComponent {
     },
   };
 
+  constructor() {
+    // Escape and a backdrop click would drop a secret not yet recorded:
+    // refuse them while the Secret step shows it. Done still closes.
+    this.dialogRef.closeGuard = () => this.secret() !== '';
+  }
+
   onChoice(value: string): void {
     this.choice.set(value as ExpiryChoice);
   }

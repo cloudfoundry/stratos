@@ -144,6 +144,16 @@ describe('CreateApiKeyStepperComponent', () => {
       expect(text()).toContain('Record it now. There is no later way to view it.');
     });
 
+    // Escape (and a backdrop click) would drop a secret not yet recorded;
+    // the dialog's close guard refuses them while the Secret step shows.
+    it('keeps Escape from closing; Done still closes', async () => {
+      const ref = TestBed.inject(TailwindDialogRef);
+      expect(ref.closeGuard?.()).toBe(true);
+      q<HTMLButtonElement>('#stepper_next')!.click();
+      await vi.waitFor(() => expect(close).toHaveBeenCalled());
+      expect(ref.closeGuard?.()).toBe(false);
+    });
+
     it('has no Previous and no Cancel; Done closes', async () => {
       expect(q('#stepper_previous')).toBeNull();
       expect(q('#stepper_cancel')).toBeNull();
@@ -151,6 +161,12 @@ describe('CreateApiKeyStepperComponent', () => {
       q<HTMLButtonElement>('#stepper_next')!.click();
       await vi.waitFor(() => expect(close).toHaveBeenCalled());
     });
+  });
+
+  it('lets Escape close on Details', async () => {
+    await open();
+    await type('#api-key-comment', 'CI');
+    expect(TestBed.inject(TailwindDialogRef).closeGuard?.() ?? false).toBe(false);
   });
 
   it('Cancel on Details closes', async () => {
