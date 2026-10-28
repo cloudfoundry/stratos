@@ -10,6 +10,9 @@ import (
 	"github.com/labstack/echo/v5"
 )
 
+// maxAPIKeyExpiry is the last instant a MySQL TIMESTAMP column can hold.
+var maxAPIKeyExpiry = time.Date(2038, 1, 19, 3, 14, 7, 0, time.UTC)
+
 func (p *portalProxy) checkIfAPIKeysEnabled(userGUID string) error {
 	switch p.Config.APIKeysEnabled {
 	case config.APIKeysConfigEnum.Disabled:
@@ -50,8 +53,13 @@ func (p *portalProxy) addAPIKey(c *echo.Context) error {
 		if err != nil {
 			return echo.NewHTTPError(http.StatusBadRequest, "Expiry must be an RFC 3339 time")
 		}
+		// Stored in a timestamp column without a zone: keep the instant, drop the offset.
+		t = t.UTC()
 		if !t.After(time.Now()) {
 			return echo.NewHTTPError(http.StatusBadRequest, "Expiry must be in the future")
+		}
+		if t.After(maxAPIKeyExpiry) {
+			return echo.NewHTTPError(http.StatusBadRequest, "Expiry must be before 19 January 2038")
 		}
 		expiresAt = &t
 	}

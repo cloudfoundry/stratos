@@ -349,6 +349,19 @@ func TestUpdateAPIKeyLastUsed(t *testing.T) {
 			})
 		})
 
+		Convey("when a use succeeded", func() {
+			mock.ExpectExec(updateLastUsed).
+				WithArgs(sqlmock.AnyArg(), false, keyID).
+				WillReturnResult(sqlmock.NewResult(1, 1))
+
+			err := repository.UpdateAPIKeyLastUsed(keyID, false)
+
+			Convey("the refused flag is cleared", func() {
+				So(err, ShouldBeNil)
+				So(mock.ExpectationsWereMet(), ShouldBeNil)
+			})
+		})
+
 		Convey("when a matching key exists", func() {
 			mock.ExpectExec(updateLastUsed).
 				WithArgs(sqlmock.AnyArg(), true, keyID).

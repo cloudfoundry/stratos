@@ -164,6 +164,40 @@ func Test_addAPIKey(t *testing.T) {
 				})
 			})
 
+			Convey("when the expiry is after 2038-01-19T03:14:07Z", func() {
+				ctx, _ := makeNewRequestWithParams("POST", map[string]string{"comment": "Test API key", "expires_at": "2038-01-19T03:14:08Z"})
+				ctx.Set("user_id", userID)
+
+				err := pp.addAPIKey(ctx)
+
+				Convey("should return a 400 error", func() {
+					So(err, ShouldResemble, echo.NewHTTPError(http.StatusBadRequest, "Expiry must be before 19 January 2038"))
+				})
+			})
+
+			Convey("when the expiry carries a UTC offset", func() {
+				comment := "Test API key"
+				local := time.Now().Add(48 * time.Hour).In(time.FixedZone("", 2*3600)).Truncate(time.Second)
+				expiry := local.UTC()
+
+				mockAPIRepo.
+					EXPECT().
+					AddAPIKey(gomock.Eq(userID), gomock.Eq(comment), gomock.Any()).
+					DoAndReturn(func(_, _ string, got *time.Time) (*api.APIKey, error) {
+						if got.Location() != time.UTC || !got.Equal(expiry) {
+							t.Errorf("AddAPIKey got %v, want UTC instant %v", got, expiry)
+						}
+						return &api.APIKey{UserGUID: userID, Comment: comment, ExpiresAt: got}, nil
+					})
+
+				ctx, _ := makeNewRequestWithParams("POST", map[string]string{"comment": comment, "expires_at": local.Format(time.RFC3339)})
+				ctx.Set("user_id", userID)
+
+				Convey("the repository receives the UTC instant", func() {
+					So(pp.addAPIKey(ctx), ShouldBeNil)
+				})
+			})
+
 			Convey("when the expiry is not a time", func() {
 				ctx, _ := makeNewRequestWithParams("POST", map[string]string{"comment": "Test API key", "expires_at": "soon"})
 				ctx.Set("user_id", userID)
