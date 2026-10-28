@@ -224,6 +224,24 @@ describe('ConnectEndpointDialogComponent', () => {
     connectStep().validSignal.set(true);
     await fixture.whenStable();
     expect((q('#stepper_next') as HTMLButtonElement).disabled).toBe(true);
+
+    // Nor does Enter start a second connect
+    connectStep().submitted.emit();
+    await fixture.whenStable();
+    expect(http.match(req => req.url.includes('tokens'))).toHaveLength(0);
+  });
+
+  // Enter goes through the stepper's Connect, so its busy and error handling apply.
+  it('Enter in the credentials form connects', async () => {
+    await open();
+    const form = fixture.debugElement.query(By.directive(ConnectEndpointComponent)).componentInstance as ConnectEndpointComponent;
+    form.endpointForm.get('authValues')?.patchValue({ username: 'u', password: 'p' });
+    await fixture.whenStable();
+
+    (fixture.nativeElement.querySelector('app-connect-endpoint form') as HTMLFormElement).dispatchEvent(new Event('submit'));
+    const http = TestBed.inject(HttpTestingController);
+    await vi.waitFor(() => http.expectOne(req => req.url.includes('tokens')));
+    expect(steppers().steps[1].busy).toBe(true);
   });
 
   it('git endpoint: locked fields, no certificate cards', async () => {

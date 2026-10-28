@@ -39,7 +39,7 @@
       }
     </div>
     <app-connect-endpoint class="stepper-form" (valid)="valid = $event"
-      (authType)="authTypeChanged($event)" [connectService]="connectService">
+      (authType)="authTypeChanged($event)" (submitted)="submitted.emit()" [connectService]="connectService">
     </app-connect-endpoint>
     @if (connectService; as cs) {
       <app-dialog-error message="{{cs.connectingError$ | async}}"

@@ -1,12 +1,11 @@
 
-import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, input, signal, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, signal, output } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
 import { CustomSelectComponent, CustomOptionComponent } from '../../../shared/components/custom-select/custom-select.component';
 import { EndpointsDataService, entityCatalog, EndpointAuthTypeConfig, IAuthForm, IEndpointAuthComponent } from '@stratosui/store';
 import { Subscription } from 'rxjs';
-import { take } from 'rxjs/operators';
 
 import { BaseEndpointAuth } from '../../../core/endpoint-auth';
 import { safeUnsubscribe } from '../../../core/utils.service';
@@ -79,9 +78,10 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Make the form submit as if it had a button - aka on pressing return
+   * Enter in the filled-in form. The host connects the way its Connect
+   * button does, so there is one connect path.
    */
-  readonly formSubmit = input(false);
+  readonly submitted = output<void>();
 
   readonly valid = output<boolean>();
   readonly authType = output<EndpointAuthTypeConfig>();
@@ -178,11 +178,9 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     }
   }
 
-  // Enter in the form connects, for hosts that ask for it (formSubmit). The
-  // connect runs when its Observable is subscribed.
   submitForm() {
-    if (this.formSubmit() && this.endpointForm.valid) {
-      this.subs.push(this.connectService.submit().pipe(take(1)).subscribe());
+    if (this.endpointForm.valid) {
+      this.submitted.emit();
     }
   }
 
