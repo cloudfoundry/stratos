@@ -132,7 +132,7 @@
     "@angular/router": "22.2.3",
     "@swimlane/ngx-graph": "13.0.0",
     "ajv": "^8.20.0",
-    "chart.js": "^4.5.1",
+    "chart.js": "^4.6.1",
     "core-js": "3.50.0",
     "date-fns": "^4.4.0",
     "date-fns-tz": "^3.2.0",
