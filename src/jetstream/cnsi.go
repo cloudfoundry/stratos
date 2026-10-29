@@ -819,10 +819,8 @@ func (p *portalProxy) updateEndpoint(ec *echo.Context) error {
 	setClientInfo := params.SetClientInfo
 	isSet, err := strconv.ParseBool(setClientInfo)
 	if err == nil && isSet {
-		clientID := params.ClientID
-		clientSecret := params.ClientSecret
-		endpoint.ClientId = clientID
-		endpoint.ClientSecret = clientSecret
+		endpoint.ClientId, endpoint.ClientSecret = endpointClient(params.ClientID, params.ClientSecret,
+			p.GetConfig().CFClient, p.GetConfig().CFClientSecret)
 		updates = true
 	}
 

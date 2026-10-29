@@ -67,11 +67,11 @@
   it rejected, or a client that cannot log in with a username and
   password, for which it suggests "Allow SSO login" or Client ID "cf".
   Both read as a wrong password before.
-- A Cloud Foundry endpoint registered with the console's own Client ID
-  and no Client Secret, as an endpoint's review shows the ID or a
-  browser fills it in, connects like one registered with Client ID left
-  empty. It was saved without the secret, and every connect failed with
-  "Bad credentials".
+- A Cloud Foundry endpoint registered or edited with the console's own
+  Client ID and no Client Secret, as an endpoint's review shows the ID
+  or a browser fills it in, connects like one registered with Client ID
+  left empty. It was saved without the secret, and every connect failed
+  with "Bad credentials".
 
 [BugFixes: Git]
 - The GitHub and GitLab connect help opens again instead of showing an
