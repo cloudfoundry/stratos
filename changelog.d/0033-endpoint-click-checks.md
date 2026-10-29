@@ -11,6 +11,9 @@
   longer cut off. Hovering a card's title shows its full name.
 - Debug logs no longer show endpoints' client secrets; the metrics
   plugin printed every endpoint with its secret on each page load.
+- With SSO set to skip the login page (`nosplash`), the login page says
+  "Signing in…" while the browser goes to the login server; it showed
+  only the logo and looked stuck.
 
 [BugFixes: Endpoints]
 - In Register Endpoint, the Connect step shows the credentials and

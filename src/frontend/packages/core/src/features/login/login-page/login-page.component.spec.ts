@@ -119,6 +119,38 @@ describe('LoginPageComponent', () => {
       expect(sessionStorage.getItem('stratos_login_redirect_attempts')).toBe('1');
     });
 
+    // The browser keeps showing this page until the IdP answers; with no form
+    // and no busy bar it read as stuck on the logo.
+    it('says it is signing in while the browser goes to the IdP', async () => {
+      const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+      fixture.detectChanges();
+
+      authData.auth.set({
+        loggedIn: false,
+        loggingIn: false,
+        user: null,
+        error: false,
+        errorResponse: '',
+        verifying: false,
+        sessionData: { valid: false, ssoOptions: 'nosplash,logout' } as any,
+      });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(openSpy).toHaveBeenCalledTimes(1);
+      const loading: HTMLElement = fixture.nativeElement.querySelector('#login-loading');
+      expect(loading.classList).not.toContain('hidden');
+      const status = loading.querySelector('[role="status"]');
+      expect(status?.textContent?.trim()).toBe('Signing in…');
+    });
+
+    it('stops showing busy when Back restores the page from the browser cache', () => {
+      fixture.detectChanges();
+      (component as any).navigationInProgress$.next(true);
+      component.onPageShow({ persisted: true } as PageTransitionEvent);
+      expect((component as any).navigationInProgress$.value).toBe(false);
+    });
+
     it('does NOT auto-redirect when the session is invalid but SSO is not configured', async () => {
       const ssoSpy = vi
         .spyOn(component as any, 'doSSOLoginReactive')
