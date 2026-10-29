@@ -264,6 +264,58 @@ func TestCloudFoundryConnectKeepsTheUAAReason(t *testing.T) {
 	}
 }
 
+// UAA turning down the endpoint's client reads like a wrong password; the
+// message has to point at the Client ID instead.
+func TestCloudFoundryConnectSaysWhenTheClientIsRejected(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name, answer, want string
+	}{
+		{
+			name:   "client without the password grant",
+			answer: `{"error":"invalid_client","error_description":"Unauthorized grant type: password"}`,
+			want: `Could not connect to the endpoint: Unauthorized grant type: password. ` +
+				`Client "stratos_client" cannot log in with a username and password: ` +
+				`register the endpoint with "Allow SSO login" ticked, or with Client ID "cf"`,
+		},
+		{
+			name:   "client secret wrong",
+			answer: `{"error":"invalid_client","error_description":"Bad credentials"}`,
+			want: `Could not connect to the endpoint: Bad credentials. ` +
+				`The login server rejected the endpoint's Client ID "stratos_client" or its Client Secret, ` +
+				`not your username and password`,
+		},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			uaa := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusUnauthorized)
+				_, _ = w.Write([]byte(tc.answer))
+			}))
+			defer uaa.Close()
+
+			req := setupMockReq("POST", "", map[string]string{"username": "admin", "password": "right"})
+			_, _, ctx, pp, db, _ := setupHTTPTest(req)
+			defer db.Close()
+
+			apiURL, _ := url.Parse(mockAPIEndpoint)
+			_, _, _, err := pp.FetchOAuth2Token(api.CNSIRecord{
+				GUID:                  mockCNSIGUID,
+				CNSIType:              "cf",
+				APIEndpoint:           apiURL,
+				AuthorizationEndpoint: uaa.URL,
+				ClientId:              "stratos_client",
+			}, ctx)
+
+			_, body := connectFailureResponse(t, err)
+			if body["error"] != tc.want {
+				t.Errorf("error = %q\nwant    %q", body["error"], tc.want)
+			}
+		})
+	}
+}
+
 func TestConnectFailureShowsTheEndpointsMessage(t *testing.T) {
 	t.Parallel()
 
