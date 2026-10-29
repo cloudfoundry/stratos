@@ -60,6 +60,11 @@
   Connect and close buttons, and help that cannot be loaded says so.
 - The Artifact Hub registration text no longer shows backticks around
   "Register".
+- When a Cloud Foundry login server turns down the endpoint's client
+  rather than the user, Connect says so: a Client ID or Client Secret
+  it rejected, or a client that cannot log in with a username and
+  password, for which it suggests "Allow SSO login" or Client ID "cf".
+  Both read as a wrong password before.
 
 [BugFixes: Git]
 - The GitHub and GitLab connect help opens again instead of showing an
