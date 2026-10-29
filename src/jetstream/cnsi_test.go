@@ -893,3 +893,24 @@ func TestUpdateEndpointBodyIDOverridesPath(t *testing.T) {
 		t.Errorf("expected body id to override path id, got %q", params.ID)
 	}
 }
+
+func TestEndpointClientFallsBackToTheConsoleClient(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct {
+		name, id, secret, wantID, wantSecret string
+	}{
+		{"left empty", "", "", "stratos_client", "console-secret"},
+		// Copied from another endpoint's review or filled in by the browser:
+		// the secret is never shown, so it arrives without one.
+		{"console client without its secret", "stratos_client", "", "stratos_client", "console-secret"},
+		{"console client with a secret", "stratos_client", "typed", "stratos_client", "typed"},
+		{"public client", "cf", "", "cf", ""},
+		{"other client", "my-client", "my-secret", "my-client", "my-secret"},
+	} {
+		id, secret := endpointClient(tc.id, tc.secret, "stratos_client", "console-secret")
+		if id != tc.wantID || secret != tc.wantSecret {
+			t.Errorf("%s: got (%q, %q), want (%q, %q)", tc.name, id, secret, tc.wantID, tc.wantSecret)
+		}
+	}
+}
