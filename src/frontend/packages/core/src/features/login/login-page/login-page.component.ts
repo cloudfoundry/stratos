@@ -1,4 +1,4 @@
-import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, inject } from '@angular/core';
+import { Component, OnInit, ChangeDetectionStrategy, computed, ApplicationRef, HostListener, inject } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { NgForm, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -218,6 +218,15 @@ export class LoginPageComponent implements OnInit {
     return this.redirectAttempts <= this.MAX_REDIRECT_ATTEMPTS;
   }
 
+  // Back from the IdP can restore this page from the browser's cache, still
+  // showing the busy state the redirect set.
+  @HostListener('window:pageshow', ['$event'])
+  onPageShow(event: PageTransitionEvent) {
+    if (event.persisted) {
+      this.navigationInProgress$.next(false);
+    }
+  }
+
   ngOnInit() {
     // Initialize the BehaviorSubject with current value
     this.redirectAttemptsSubject$.next(this.redirectAttempts);
@@ -423,6 +432,8 @@ export class LoginPageComponent implements OnInit {
       tap((auth): void => {
         const redirect: RouterRedirect | undefined = auth.redirect;
         const returnUrl = this.formSSOredirectURL(redirect);
+        // The page stays up until the IdP answers: keep showing that it is busy.
+        this.navigationInProgress$.next(true);
         window.open('/pp/v1/auth/sso_login?state=' + encodeURIComponent(returnUrl), '_self');
       }),
       map((): null => null)
