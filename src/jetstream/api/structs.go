@@ -2,6 +2,7 @@ package api
 
 import (
 	"fmt"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -110,6 +111,16 @@ type CNSIRecord struct {
 	Local                  bool     `json:"local"`
 	Creator                string   `json:"creator"`
 	CACert                 string   `json:"ca_cert"`
+}
+
+// LogValue keeps the client secret out of logs that print a whole record.
+func (c CNSIRecord) LogValue() slog.Value {
+	type record CNSIRecord // no LogValue, so slog prints its fields
+	r := record(c)
+	if r.ClientSecret != "" {
+		r.ClientSecret = "[REDACTED]"
+	}
+	return slog.AnyValue(r)
 }
 
 // ConnectedEndpoint

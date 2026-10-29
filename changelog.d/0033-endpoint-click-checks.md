@@ -9,6 +9,8 @@
   fields were blank lines.
 - Card titles wrap between words, not mid-word, and a second line is no
   longer cut off. Hovering a card's title shows its full name.
+- Debug logs no longer show endpoints' client secrets; the metrics
+  plugin printed every endpoint with its secret on each page load.
 
 [BugFixes: Endpoints]
 - In Register Endpoint, the Connect step shows the credentials and
