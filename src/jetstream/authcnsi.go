@@ -267,6 +267,12 @@ func (p *portalProxy) DoLoginToCNSI(c *echo.Context, cnsiGUID string, systemShar
 }
 
 func (p *portalProxy) DoLoginToCNSIwithConsoleUAAtoken(c *echo.Context, theCNSIrecord api.CNSIRecord) error {
+	// A refresh sends the linked token with the endpoint's client, and UAA
+	// refreshes a token only for the client it was issued to.
+	if theCNSIrecord.ClientId != p.GetConfig().CFClient {
+		return fmt.Errorf("endpoint %s uses client %q, not the console's client, so it cannot share the console's token",
+			theCNSIrecord.GUID, theCNSIrecord.ClientId)
+	}
 	userID, err := p.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		return errors.New("could not find correct session value")

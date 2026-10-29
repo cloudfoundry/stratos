@@ -449,10 +449,18 @@ func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string, cnsiType str
 		return api.CNSIRecord{}, err
 	}
 
-	// search for endpoint created by an admin
+	// search for endpoint created by an admin, preferring one on the console's
+	// client: the login hook links the console's token into it, and only that
+	// client can refresh the token
 	for _, endpoint := range endpointList {
 		if len(endpoint.Creator) == 0 && endpoint.CNSIType == cnsiType {
-			rec = endpoint
+			if endpoint.ClientId == p.GetConfig().CFClient {
+				rec = endpoint
+				break
+			}
+			if rec == nil {
+				rec = endpoint
+			}
 		}
 	}
 
