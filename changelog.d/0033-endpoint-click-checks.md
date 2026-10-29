@@ -72,6 +72,12 @@
   or a browser fills it in, connects like one registered with Client ID
   left empty. It was saved without the secret, and every connect failed
   with "Bad credentials".
+- With several Cloud Foundry endpoints at the auto-registered URL,
+  logging in connects one that uses the console's own client, and no
+  longer gives the console's login to an endpoint on another client.
+  That endpoint showed Connected, but renewing its token failed with
+  "Authentication expired", and the failure was recorded against the
+  console's own login.
 - The Cloud Foundry endpoint docs say which client a blank Client ID
   uses (the console's `CF_CLIENT`, not always `cf`) and what a client
   needs for password and for SSO connects, and the SSO guide explains
