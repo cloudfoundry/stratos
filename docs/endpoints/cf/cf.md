@@ -19,8 +19,23 @@ Stratos Administrator's can register endpoints via the Endpoints page.
 
 The CF API address must be supplied.
 
-The Client ID and Client Secret can usually be left blank (by default stratos will use `cf` as the client id). If you would like Stratos
-to communicate with the cf using a specific client enter them here.
+The Client ID and Client Secret can usually be left blank. Stratos then
+uses its own client, the one set by `CF_CLIENT` (`cf` when unset).
+
+The client must allow the way users connect:
+
+- **Username and password** needs a client with the `password` grant. If it
+  lacks it, Connect reports "Unauthorized grant type". `cf`, the client the
+  cf CLI uses, has it in a standard Cloud Foundry.
+- **SSO** ("Allow SSO login") needs a client with the `authorization_code`
+  grant and the Stratos SSO callback in its `redirect_uri`. If the callback
+  is missing, the login server stops with "Invalid redirect". `cf` does not
+  have it by default.
+
+A console set up for SSO often has a client that allows SSO but not
+passwords. For endpoints that users connect to with a password, enter `cf`
+as the Client ID, with no secret. Your UAA administrator can tell you what a
+client allows (`uaac client get <client id>`).
 
 To allow the user to connect to the endpoint via SSO check the box. Some of the information in the [Stratos SSO Guide](../../advanced/sso.md)
 may be helpful.

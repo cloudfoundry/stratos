@@ -72,6 +72,10 @@
   or a browser fills it in, connects like one registered with Client ID
   left empty. It was saved without the secret, and every connect failed
   with "Bad credentials".
+- The Cloud Foundry endpoint docs say which client a blank Client ID
+  uses (the console's `CF_CLIENT`, not always `cf`) and what a client
+  needs for password and for SSO connects, and the SSO guide explains
+  "Invalid redirect" when connecting an endpoint.
 
 [BugFixes: Git]
 - The GitHub and GitLab connect help opens again instead of showing an
