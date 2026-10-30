@@ -218,6 +218,15 @@ describe('ApplicationWallComponent', () => {
     expect(range!.selected).toBe(stubSignalConfig.lastRefreshedRange);
   });
 
+  it('exposes and renders application labels', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig()!;
+    expect(cfg.filterColumns).toContain('labels');
+    const column = cfg.columns.find(c => c.key === 'labels')!;
+    expect(column.render({ labels: { team: 'platform', empty: '' } } as any)).toBe('team=platform, empty=');
+    expect(column.render({} as any)).toBe('—');
+  });
+
   it('stops listening for the create permission once destroyed', () => {
     canCreate$.next(true);
     expect(component.canCreateApplication()).toBe(true);

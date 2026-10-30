@@ -32,6 +32,8 @@ interface EditApplicationForm {
   disk_quota: FormControl<number>;
   memory: FormControl<number>;
   enable_ssh: FormControl<boolean>;
+  labels: FormControl<Record<string, string>>;
+  labelInput: FormControl<string>;
 }
 
 @Component({
@@ -99,7 +101,12 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
         nonNullable: true,
         validators: [Validators.required, Validators.min(1)]
       }),
-      enable_ssh: new FormControl(false, { nonNullable: true })
+      enable_ssh: new FormControl(false, { nonNullable: true }),
+      labels: new FormControl<Record<string, string>>({}, { nonNullable: true }),
+      labelInput: new FormControl('', {
+        nonNullable: true,
+        validators: [control => control.value.trim() ? { pendingLabel: true } : null],
+      }),
     });
 
     // Track form valid+dirty as a signal so signalHandle.valid is reactive
@@ -149,6 +156,37 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private sub?: Subscription;
 
   private error = false;
+  private originalLabels: Record<string, string> = {};
+
+  addLabel(event: Event): void {
+    event.preventDefault();
+    const input = this.editAppForm.controls.labelInput;
+    const text = input.value.trim();
+    if (!text) return;
+    const separator = text.indexOf('=');
+    const key = separator < 0 ? text : text.slice(0, separator);
+    const value = separator < 0 ? '' : text.slice(separator + 1);
+    if (!key || key !== key.trim() || /\s/.test(key) || /\s/.test(value) || value.includes('=')) {
+      input.setErrors({ invalidLabel: true });
+      return;
+    }
+    const labels = this.editAppForm.controls.labels;
+    if (Object.hasOwn(labels.value, key)) {
+      input.setErrors({ duplicateLabel: true });
+      return;
+    }
+    labels.markAsDirty();
+    labels.setValue({ ...labels.value, [key]: value });
+    input.setValue('');
+  }
+
+  removeLabel(key: string): void {
+    const labels = this.editAppForm.controls.labels;
+    const next = { ...labels.value };
+    delete next[key];
+    labels.markAsDirty();
+    labels.setValue(next);
+  }
 
   ngOnInit() {
     this.sub = this.applicationService.application$.pipe(
@@ -164,12 +202,15 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       });
 
       this.createAppState.setName(this.app.name);
+      this.originalLabels = { ...this.detail.appDetail()?.app.labels };
       this.editAppForm.setValue({
         name: this.app.name,
         instances: this.app.instances,
         memory: this.app.memory,
         disk_quota: this.app.disk_quota,
         enable_ssh: this.app.enable_ssh,
+        labels: { ...this.originalLabels },
+        labelInput: '',
       });
       // Don't want the values to change while the user is editing
       this.clearSub();
@@ -185,6 +226,7 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     const otherUpdates: { [key: string]: any } = {};
     const formValue = this.editAppForm.value;
     for (const key of Object.keys(formValue)) {
+      if (key === 'labels' || key === 'labelInput') continue;
       const control = (this.editAppForm.controls as any)[key];
       if (!control || control.pristine) continue;
       const value = (formValue as any)[key];
@@ -197,7 +239,16 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
 
     const hasScale = Object.keys(scaleUpdate).length > 0;
     const hasOther = Object.keys(otherUpdates).length > 0;
-    if (!hasScale && !hasOther) {
+    const currentLabels = this.editAppForm.controls.labels.value;
+    const labelDelta: Record<string, string | null> = Object.create(null);
+    for (const key of Object.keys(this.originalLabels)) {
+      if (!Object.hasOwn(currentLabels, key)) labelDelta[key] = null;
+    }
+    for (const [key, value] of Object.entries(currentLabels)) {
+      if (!Object.hasOwn(this.originalLabels, key) || this.originalLabels[key] !== value) labelDelta[key] = value;
+    }
+    const hasLabels = Object.keys(labelDelta).length > 0;
+    if (!hasScale && !hasOther && !hasLabels) {
       return observableOf({ success: true, redirect: true });
     }
 
@@ -229,6 +280,10 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       switchMap(scaleRes => {
         if (!scaleRes.success) return observableOf(scaleRes);
         return other$.pipe(take(1));
+      }),
+      switchMap(otherRes => {
+        if (!otherRes.success || !hasLabels) return observableOf(otherRes);
+        return defer(() => from(this.detail.updateLabels(labelDelta))).pipe(map(() => ({ success: true })));
       }),
       // Refresh per-instance stats after a scale so the Instances tab's
       // table reflects the new container count. detail.update() already

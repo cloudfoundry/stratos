@@ -394,6 +394,54 @@ func TestPatchApp_NameOnly_UpdatesAppName(t *testing.T) {
 	assert.False(t, hasMeta, "name-only success should not include _meta.errors envelope")
 }
 
+func TestPatchAppLabels_ForwardsChangesAndReturnsLabels(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/v3" {
+			_, _ = w.Write([]byte(`{"links":{}}`))
+			return
+		}
+		require.Equal(t, http.MethodPatch, r.Method)
+		require.Equal(t, "/v3/apps/app-1", r.URL.Path)
+		var body map[string]interface{}
+		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
+		assert.Equal(t, map[string]interface{}{"metadata": map[string]interface{}{"labels": map[string]interface{}{"team": "platform", "old": nil, "empty": ""}}}, body)
+		_, _ = w.Write([]byte(`{"guid":"app-1","metadata":{"labels":{"team":"platform","empty":"","other":"retained"},"annotations":{"owner":"alice"}}}`))
+	}))
+	defer server.Close()
+	plugin := withSpec(t, server)
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(`{"labels":{"team":"platform","old":null,"empty":""}}`))
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
+	require.NoError(t, plugin.patchAppLabels(ctx))
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.JSONEq(t, `{"labels":{"team":"platform","empty":"","other":"retained"}}`, rec.Body.String())
+}
+
+func TestPatchAppLabels_PropagatesValidationFailure(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		if r.URL.Path == "/v3" {
+			_, _ = w.Write([]byte(`{"links":{}}`))
+			return
+		}
+		w.WriteHeader(http.StatusUnprocessableEntity)
+		_, _ = w.Write([]byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"invalid label key"}]}`))
+	}))
+	defer server.Close()
+	plugin := withSpec(t, server)
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(`{"labels":{"bad key":"value"}}`))
+	rec := httptest.NewRecorder()
+	ctx := e.NewContext(req, rec)
+	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
+	require.NoError(t, plugin.patchAppLabels(ctx))
+	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
+	assert.Contains(t, rec.Body.String(), "invalid label key")
+}
+
 // TestPatchApp_PartialFailure_ReturnsMetaErrors verifies that when one sub-call
 // (process scale) fails after a successful name update, the handler returns
 // HTTP 200 with a _meta.errors envelope describing the failed operation, and

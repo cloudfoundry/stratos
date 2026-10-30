@@ -98,6 +98,7 @@ func newAppDetailServer(t *testing.T, cfg fakeAppDetailServer) *httptest.Server 
 const (
 	stubAppJSON = `{
 		"guid":"app-1","name":"my-app","state":"STARTED",
+		"metadata":{"labels":{"example.com/team":"platform","empty":""}},
 		"relationships":{"space":{"data":{"guid":"space-1"}}},
 		"lifecycle":{"type":"buildpack","data":{"stack":"cflinuxfs4"}},
 		"created_at":"2024-01-01T00:00:00Z","updated_at":"2024-01-02T00:00:00Z"
@@ -200,6 +201,7 @@ func TestGetNativeAppDetail_DefaultModeReturnsBasicStApp(t *testing.T) {
 	assert.Equal(t, "app-1", got.GUID)
 	assert.Equal(t, "my-app", got.Name)
 	assert.Equal(t, "STARTED", got.State)
+	assert.Equal(t, map[string]string{"example.com/team": "platform", "empty": ""}, got.Labels)
 	assert.Equal(t, "cflinuxfs4", got.StackName)
 	// default mode does NOT compose process — memory/disk/instances stay zero/nil
 	assert.Nil(t, got.Memory)
@@ -291,6 +293,7 @@ func TestGetNativeAppDetail_DetailsModeHappyPath(t *testing.T) {
 
 	var got StAppDetail
 	require.NoError(t, json.NewDecoder(rec.Body).Decode(&got))
+	assert.Equal(t, map[string]string{"example.com/team": "platform", "empty": ""}, got.App.Labels)
 
 	assert.Equal(t, "app-1", got.App.GUID)
 	require.NotNil(t, got.App.Memory)

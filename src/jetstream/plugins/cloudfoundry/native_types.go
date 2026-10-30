@@ -42,12 +42,13 @@ type StApp struct {
 	// read it directly off the resource without re-stitching from the
 	// route path. See the StOrg note for the V2-era pattern this
 	// replaces.
-	CnsiGUID  string  `json:"cnsiGuid"`
-	Name      string  `json:"name"`
-	State     string  `json:"state"`
-	SpaceGUID string  `json:"spaceGuid"`
-	SpaceName string  `json:"spaceName,omitempty"`
-	OrgGUID   *string `json:"orgGuid,omitempty"`
+	CnsiGUID  string            `json:"cnsiGuid"`
+	Name      string            `json:"name"`
+	State     string            `json:"state"`
+	Labels    map[string]string `json:"labels"`
+	SpaceGUID string            `json:"spaceGuid"`
+	SpaceName string            `json:"spaceName,omitempty"`
+	OrgGUID   *string           `json:"orgGuid,omitempty"`
 	// OrgName mirrors SpaceName — populated server-side via space→org
 	// join on the same fanout that resolves SpaceName. Avoids a second
 	// frontend orgs-catalog fetch + visible-row resolver just to render

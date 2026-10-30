@@ -178,6 +178,35 @@ describe('AppDetailDataService', () => {
 
   afterEach(() => httpMock.verify());
 
+  it('updates labels from the server response and clears its busy state', async () => {
+    const loading = svc.refresh('app');
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    await loading;
+    const updating = svc.updateLabels({ team: 'platform', old: null });
+    expect(svc.updating()).toBe(true);
+    const req = httpMock.expectOne(`/pp/v1/cf/apps/${CNSI}/${APP_GUID}/labels`);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ labels: { team: 'platform', old: null } });
+    req.flush({ labels: { team: 'platform', other: '' } });
+    await updating;
+    expect(svc.appDetail()?.app.labels).toEqual({ team: 'platform', other: '' });
+    expect(svc.updating()).toBe(false);
+    for (const pending of httpMock.match(() => true)) pending.flush({ resources: [], pagination: { totalResults: 0, totalPages: 0 } });
+  });
+
+  it('preserves labels and clears busy state when an update fails', async () => {
+    const loading = svc.refresh('app');
+    httpMock.expectOne(DETAIL_URL).flush(MOCK_APP_DETAIL);
+    await loading;
+    const updating = svc.updateLabels({ bad: 'value' });
+    httpMock.expectOne(`/pp/v1/cf/apps/${CNSI}/${APP_GUID}/labels`)
+      .flush({ errors: [{ detail: 'invalid' }] }, { status: 422, statusText: 'Unprocessable Entity' });
+    await expect(updating).rejects.toBeDefined();
+    expect(svc.appDetail()?.app.labels).toBeUndefined();
+    expect(svc.updating()).toBe(false);
+    for (const pending of httpMock.match(() => true)) pending.flush({ resources: [], pagination: { totalResults: 0, totalPages: 0 } });
+  });
+
   // -------------------------------------------------------------------------
   // Initial state
   // -------------------------------------------------------------------------

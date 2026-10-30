@@ -375,6 +375,7 @@ func toStApp(r capi.App, cnsiGUID string) StApp {
 		CnsiGUID:  cnsiGUID,
 		Name:      r.Name,
 		State:     r.State,
+		Labels:    metaLabels(r.Metadata),
 		SpaceGUID: relationshipGUID(r.Relationships.Space),
 		StackName: stackName,
 		Routes:    []StAppRoute{},

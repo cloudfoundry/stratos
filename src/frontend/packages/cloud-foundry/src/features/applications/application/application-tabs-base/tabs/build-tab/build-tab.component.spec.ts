@@ -22,18 +22,20 @@ interface DataSignals {
   stratosProject?: WritableSignal<unknown>;
   app?: WritableSignal<unknown>;
   space?: WritableSignal<unknown>;
+  labels?: Record<string, string>;
 }
 
 function makeDataServiceStub({
   stratosProject = signal(null),
   app = signal({ entity: { instances: 1 } }),
   space = signal(undefined),
+  labels = {},
 }: DataSignals = {}) {
   return {
     // Minimal app-detail so the Summary template's `@if (data.appDetail())`
     // block renders (the scale card + accordion both live inside it).
     appDetail: signal({
-      app: { guid: 'app-1', state: 'STARTED', createdAt: null, routes: [] },
+      app: { guid: 'app-1', state: 'STARTED', createdAt: null, routes: [], labels, spaceGuid: 'sp-1', cnsiGuid: 'cnsi-1' },
       pkg: null,
       process: null,
       droplet: null,
@@ -129,11 +131,27 @@ describe('BuildTabComponent', () => {
       expect(fixture.nativeElement.querySelector('app-instances-accordion')).toBeTruthy();
     });
 
+    it('shows an empty labels placeholder', () => {
+      const item = Array.from(fixture.nativeElement.querySelectorAll('app-metadata-item'))
+        .find((el: any) => el.getAttribute('label') === 'Labels') as HTMLElement;
+      expect(item.textContent).toContain('—');
+    });
+
     it('renders the scale card with actions enabled', () => {
       const card = fixture.debugElement.query(By.directive(CardAppInstancesComponent));
       expect(card).toBeTruthy();
       expect(card.componentInstance.showActions()).toBe(true);
     });
+  });
+
+  it('shows application label keys and values', async () => {
+    await configure({ labels: { 'example.com/team': 'platform', empty: '' } });
+    fixture = TestBed.createComponent(BuildTabComponent);
+    await fixture.whenStable();
+    const item = Array.from(fixture.nativeElement.querySelectorAll('app-metadata-item'))
+      .find((el: any) => el.getAttribute('label') === 'Labels') as HTMLElement;
+    expect(item.textContent).toContain('example.com/team=platform');
+    expect(item.textContent).toContain('empty=');
   });
 
   // The repository links bind gitRepo$ with the async pipe, so a failed

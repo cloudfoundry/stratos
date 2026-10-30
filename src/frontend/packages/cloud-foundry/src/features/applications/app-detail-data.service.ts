@@ -428,6 +428,22 @@ export class AppDetailDataService {
     }
   }
 
+  async updateLabels(labels: Record<string, string | null>): Promise<void> {
+    this._updating.set(true);
+    const eds = this.endpointDataRegistry.acquire(this.cnsiGuid);
+    try {
+      const result = await firstValueFrom(this.http.patch<{ labels: Record<string, string> }>(
+        `/pp/v1/cf/apps/${this.cnsiGuid}/${this.appGuid}/labels`, { labels },
+      ));
+      this._appDetail.update(detail => detail ? { ...detail, app: { ...detail.app, labels: result.labels } } : detail);
+      eds.updateApp(this.appGuid, { labels: result.labels });
+      eds.applyCascade('app.update');
+    } finally {
+      this.endpointDataRegistry.release(this.cnsiGuid);
+      this._updating.set(false);
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // URL helpers
   //
