@@ -154,7 +154,7 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
     const cfg = component.listConfig();
     expect(cfg).toBeDefined();
     expect(cfg!.columns.map(c => c.header)).toEqual([
-      '', 'Name', 'Status', 'Instances', 'Memory', 'Disk', 'Created', 'Last Refreshed', '', '',
+      '', 'Name', 'Status', 'Instances', 'Memory', 'Disk', 'Labels', 'Created', 'Last Refreshed', '', '',
     ]);
     // No filter dropdowns — single-CNSI single-space tab.
     expect(cfg!.filterDropdowns).toBeUndefined();
@@ -181,6 +181,13 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
       .toBe(CloudFoundrySpaceAppsSignalComponent.formatDate('2026-07-15T12:00:00Z'));
     const withoutRefresh: any = { ...withRefresh, lastRefreshedAt: undefined };
     expect(lastRefreshedCol!.render(withoutRefresh)).toBe('—');
+  });
+
+  it('exposes labels for display and filtering', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig()!;
+    expect(cfg.filterColumns).toContain('labels');
+    expect(cfg.columns.find(c => c.key === 'labels')!.render({ labels: { team: 'platform' } } as any)).toBe('team=platform');
   });
 
   it('includes lastRefreshedAt in filterColumns and wires filterRanges to appsConfig.lastRefreshedRange', async () => {

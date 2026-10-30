@@ -74,6 +74,13 @@
                   <app-metadata-item icon="route" iconFont="stratos-icons" label="Routes">
                     {{ detail.app.routes.length || "0" }}
                   </app-metadata-item>
+                  <app-metadata-item icon="label" label="Labels">
+                    @for (label of detail.app.labels | keyvalue; track label.key) {
+                      <div>{{ label.key }}={{ label.value }}</div>
+                    } @empty {
+                      —
+                    }
+                  </app-metadata-item>
                 </div>
               </div>
             </div>

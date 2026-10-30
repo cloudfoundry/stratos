@@ -31,6 +31,7 @@ import {
 
 import { applicationEntityType } from '../../../../cf-entity-types';
 import { BulkResult, CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
+import { renderAppLabels } from '../../../../shared/signal-list-configs/app/app-labels';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
@@ -279,6 +280,11 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
           },
           ...(withStack ? [stackColumn] : []),
           {
+            header: 'Labels', key: 'labels',
+            render: renderAppLabels,
+            widthHint: '12rem',
+          },
+          {
             header: 'Created', key: 'createdAt', sortField: 'createdAt',
             render: (app: StApp) => CloudFoundryApplicationsSignalComponent.formatDate(app.createdAt),
             widthHint: '12rem',
@@ -315,8 +321,8 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
         // Name, Status, or the Org/Space column; Stack joins the list
         // (as a checklist, not text) once its column is visible.
         filterColumns: withStack
-          ? ['name', 'state', 'orgSpace', 'stackName', 'lastRefreshedAt']
-          : ['name', 'state', 'orgSpace', 'lastRefreshedAt'],
+          ? ['name', 'state', 'orgSpace', 'stackName', 'labels', 'lastRefreshedAt']
+          : ['name', 'state', 'orgSpace', 'labels', 'lastRefreshedAt'],
         // Status has no visibility gate (always ≥2 possible states) so its
         // entry is unconditional; Stack's is only wired while its column
         // is actually in filterColumns — otherwise a filterField left

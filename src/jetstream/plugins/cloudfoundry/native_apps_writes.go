@@ -528,6 +528,36 @@ type patchAppBody struct {
 	Environment map[string]interface{} `json:"environment_json,omitempty"`
 }
 
+// patchAppLabels forwards a label delta; null removes a key, while omitted
+// keys (and all annotations) remain untouched in Cloud Foundry.
+func (cf *CloudFoundrySpecification) patchAppLabels(c *echo.Context) error {
+	cnsiGUID, appGUID := c.Param("cnsiGuid"), c.Param("appGuid")
+	if cnsiGUID == "" || appGUID == "" {
+		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and appGuid are required")
+	}
+	var body struct {
+		Labels map[string]*string `json:"labels"`
+	}
+	if err := json.NewDecoder(c.Request().Body).Decode(&body); err != nil || len(body.Labels) == 0 {
+		return echo.NewHTTPError(http.StatusBadRequest, "a non-empty labels object is required")
+	}
+	userGUID, err := cf.getUserGUID(c)
+	if err != nil {
+		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
+	}
+	ctx := c.Request().Context()
+	client, err := newCapiClient(ctx, cf.nativeProxy(), cnsiGUID, userGUID)
+	if err != nil {
+		return err
+	}
+	app, err := client.Apps().Update(ctx, appGUID, &capi.AppUpdateRequest{Metadata: &capi.Metadata{Labels: body.Labels}})
+	if err != nil {
+		return handleCapiError(c, err)
+	}
+	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
+	return c.JSON(http.StatusOK, map[string]interface{}{"labels": metaLabels(app.Metadata)})
+}
+
 // metaError describes a single failed sub-call in a composed PATCH response.
 // The handler wraps every sub-call failure in this shape and surfaces them
 // via the response body's _meta.errors[] array.

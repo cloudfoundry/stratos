@@ -166,6 +166,25 @@ describe('CfAppsSignalConfigService', () => {
     expect(pred(baz)).toBe(false);
   });
 
+  it('filters app labels by key, value, or key=value without matching across labels', () => {
+    const svc = makeSvc(makeHttp());
+    const app: StApp = { guid: 'a', name: 'app', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '', labels: { 'example.com/team': 'Platform', empty: '' } };
+    const noLabels = { ...app, labels: null };
+    svc.filterField.set('labels');
+    for (const query of ['example.com/team', 'platform', 'TEAM=PLATFORM', 'empty=']) {
+      svc.nameFilter.set(query);
+      TestBed.tick();
+      expect(svc.filter()(app)).toBe(true);
+      expect(svc.filter()(noLabels)).toBe(false);
+    }
+    svc.nameFilter.set('platform, empty');
+    TestBed.tick();
+    expect(svc.filter()(app)).toBe(false);
+    svc.nameFilter.set('');
+    TestBed.tick();
+    expect(svc.filter()(noLabels)).toBe(true);
+  });
+
   it('exposes computed option signals for CF/org/space dropdowns', () => {
     const http = makeHttp();
     const svc = makeSvc(http);

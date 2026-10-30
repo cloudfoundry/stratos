@@ -28,6 +28,7 @@ export interface StApp {
   guid: string;
   name: string;
   state: string;
+  labels?: Record<string, string> | null;
   // orgGuid, spaceName, memory, diskQuota, stackName, routes are tristate-
   // bearing: optional reflects the "value does not exist" state (absent
   // when handler couldn't compose them, listed in _meta.unavailable).

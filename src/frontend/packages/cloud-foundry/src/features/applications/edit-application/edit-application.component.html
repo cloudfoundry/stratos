@@ -30,6 +30,27 @@
       <app-form-field>
         <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Memory Quota (MB)" formControlName="memory" type="number" min="1">
       </app-form-field>
+      <div>
+        <label for="app-label-input" class="block text-xs font-medium text-primary mb-2">Labels</label>
+        <div class="flex flex-wrap gap-2 items-center mb-2">
+          @for (label of editAppForm.controls.labels.value | keyvalue; track label.key) {
+            <span class="inline-flex items-center gap-1 rounded-full bg-gray-200 dark:bg-gray-700 px-3 py-1">
+              <span>{{ label.key }}={{ label.value }}</span>
+              <button type="button" class="font-bold" [attr.aria-label]="'Remove label ' + label.key" (click)="removeLabel(label.key)">×</button>
+            </span>
+          }
+        </div>
+        <input id="app-label-input" class="input w-full" formControlName="labelInput"
+          placeholder="key=value" autocomplete="off" (keydown.enter)="addLabel($event)">
+        <p class="text-sm mt-1">Type a label as key=value and press Enter. Values may be empty.</p>
+        @if (editAppForm.controls.labelInput.errors?.invalidLabel) {
+          <p role="alert">Enter a valid label as key=value.</p>
+        } @else if (editAppForm.controls.labelInput.errors?.duplicateLabel) {
+          <p role="alert">A label with this key already exists.</p>
+        } @else if (editAppForm.controls.labelInput.errors?.pendingLabel) {
+          <p>Press Enter to add this label.</p>
+        }
+      </div>
       <app-slide-toggle class="mt-2" formControlName="enable_ssh">Enable SSH to Application Instances</app-slide-toggle>
     </form>
   </app-step>

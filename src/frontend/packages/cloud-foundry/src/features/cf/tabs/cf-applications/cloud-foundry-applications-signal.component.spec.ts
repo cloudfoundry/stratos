@@ -244,6 +244,13 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
     expect(lastRefreshedCol!.render(app({ lastRefreshedAt: undefined }))).toBe('—');
   });
 
+  it('exposes labels for display and filtering', async () => {
+    await component.ngOnInit();
+    const cfg = component.listConfig()!;
+    expect(cfg.filterColumns).toContain('labels');
+    expect(cfg.columns.find(c => c.key === 'labels')!.render({ labels: { team: 'platform' } } as any)).toBe('team=platform');
+  });
+
   it('includes lastRefreshedAt in filterColumns and wires filterRanges to appsConfig.lastRefreshedRange', async () => {
     await component.ngOnInit();
     const cfg = component.listConfig();
