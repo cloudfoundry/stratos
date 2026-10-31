@@ -4,6 +4,7 @@ import { EndpointsDataService } from '@stratosui/store';
 
 import { ConnectEndpointConfig } from '../../features/endpoints/connect.service';
 import { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from '../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { EndpointAuthStateService } from './endpoint-auth-state.service';
 import { TailwindDialogService } from './tailwind-dialog.service';
 import { TailwindSnackBarService } from './tailwind-snackbar.service';
 
@@ -20,6 +21,7 @@ export class EndpointReauthReportService {
   private snackbar = inject(TailwindSnackBarService);
   private dialog = inject(TailwindDialogService);
   private router = inject(Router);
+  private authState = inject(EndpointAuthStateService);
   private reported = false;
 
   async reportOnce(): Promise<void> {
@@ -35,6 +37,7 @@ export class EndpointReauthReportService {
     if (dead.length === 1) {
       const ep = dead[0];
       const ref = this.snackbar.error(`Endpoint '${ep.name}' needs re-authentication.`, 'Reconnect');
+      this.authState.trackBanner([ep.guid ?? ''], ref);
       ref.onAction().subscribe(() => {
         // Same data shape EndpointRowActionsService.openConnectDialog uses -
         // including the username prefill (#5634) - so the Reconnect dialog
@@ -54,6 +57,7 @@ export class EndpointReauthReportService {
       });
     } else {
       const ref = this.snackbar.error(`${dead.length} endpoints need re-authentication.`, 'View');
+      this.authState.trackBanner(dead.map(ep => ep.guid ?? ''), ref);
       ref.onAction().subscribe(() => this.router.navigate(['/endpoints']));
     }
   }

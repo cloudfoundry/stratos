@@ -153,6 +153,8 @@ export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
                   `${line1}\n${codePrefix}Authentication expired. Reconnect to refresh.`,
                   'Reconnect',
                 );
+                // Withdrawn by clearStale on a reconnect or the next 2xx.
+                authState.trackBanner([cnsiGuid], ref);
                 // One-click reconnect: open the connect dialog in place for
                 // the affected endpoint. The user just clicked "Reconnect" on
                 // an error about the page they're on, so a modal here is the
@@ -189,17 +191,17 @@ export const cfApiInterceptor: HttpInterceptorFn = (req, next) => {
             } else if (reason === 'unreachable') {
               // Endpoint is down — no stale mark (reconnect won't help).
               if (authState.notifyOnce(cnsiGuid, reason)) {
-                snackbar.error(
+                authState.trackBanner([cnsiGuid], snackbar.error(
                   `${line1}\n${codePrefix}The endpoint is unreachable or down.`,
-                );
+                ));
               }
             } else {
               // Unclassified failure — neutral, complete title naming the
               // endpoint; the calling component may surface its own detail.
               if (authState.notifyOnce(cnsiGuid, reason || 'generic')) {
-                snackbar.error(
+                authState.trackBanner([cnsiGuid], snackbar.error(
                   `${line1}\n${codePrefix}Request failed.`,
-                );
+                ));
               }
             }
           }

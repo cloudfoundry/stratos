@@ -1,10 +1,12 @@
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Router } from '@angular/router';
-import { EndpointsDataService } from '@stratosui/store';
+import { EndpointDisconnectCleanupService, EndpointsDataService } from '@stratosui/store';
+import { NEVER } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ConnectEndpointDialogComponent } from '../../features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+import { EndpointAuthStateService } from './endpoint-auth-state.service';
 import { EndpointReauthReportService } from './endpoint-reauth-report.service';
 import { TailwindDialogService } from './tailwind-dialog.service';
 import { TailwindSnackBarService } from './tailwind-snackbar.service';
@@ -32,11 +34,14 @@ const endpointsDataStub = {
 // trigger its action via dismissWithAction(), same as the real
 // TailwindSnackBarRefImpl contract (onAction() fires on dismissWithAction()).
 const onActionSubscribers: Array<() => void> = [];
+const dismissSpy = vi.fn();
 const snackBarStub = {
   error: vi.fn((_msg: string, _action?: string) => ({
     onAction: () => ({
       subscribe: (cb: () => void) => { onActionSubscribers.push(cb); },
     }),
+    dismiss: dismissSpy,
+    afterDismissed: () => NEVER,
   })),
 };
 
@@ -51,11 +56,13 @@ describe('EndpointReauthReportService', () => {
     endpointsDataStub.whenReady.mockClear();
     snackBarStub.error.mockClear();
     dialogStub.open.mockClear();
+    dismissSpy.mockClear();
     onActionSubscribers.length = 0;
 
     TestBed.configureTestingModule({
       providers: [
         { provide: EndpointsDataService, useValue: endpointsDataStub },
+        { provide: EndpointDisconnectCleanupService, useValue: { registerConnectHandler: vi.fn() } },
         { provide: TailwindSnackBarService, useValue: snackBarStub },
         { provide: TailwindDialogService, useValue: dialogStub },
       ],
@@ -134,5 +141,31 @@ describe('EndpointReauthReportService', () => {
     await service.reportOnce();
     expect(snackBarStub.error).toHaveBeenCalledTimes(1);
     expect(endpointsDataStub.whenReady).toHaveBeenCalledTimes(1);
+  });
+
+  it('the banner closes once its endpoint is reconnected', async () => {
+    endpointsListSignal.set([
+      { name: 'Alpha', guid: 'g1', cnsi_type: 'cf', sub_type: '', sso_allowed: true, connectionStatus: 'expired' },
+    ]);
+    await TestBed.inject(EndpointReauthReportService).reportOnce();
+
+    TestBed.inject(EndpointAuthStateService).clearStale('g1');
+
+    expect(dismissSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('the count banner closes only once every endpoint in it is reconnected', async () => {
+    endpointsListSignal.set([
+      { name: 'Alpha', guid: 'g1', cnsi_type: 'cf', sub_type: '', sso_allowed: true, connectionStatus: 'expired' },
+      { name: 'Beta', guid: 'g2', cnsi_type: 'cf', sub_type: '', sso_allowed: true, connectionStatus: 'expired' },
+    ]);
+    await TestBed.inject(EndpointReauthReportService).reportOnce();
+    const authState = TestBed.inject(EndpointAuthStateService);
+
+    authState.clearStale('g1');
+    expect(dismissSpy).not.toHaveBeenCalled();
+
+    authState.clearStale('g2');
+    expect(dismissSpy).toHaveBeenCalledTimes(1);
   });
 });
