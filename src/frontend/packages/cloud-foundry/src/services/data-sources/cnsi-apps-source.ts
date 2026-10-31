@@ -4,6 +4,16 @@ import { CnsiEntitySource } from './cnsi-entity-source';
 import type { StApp } from '../endpoint-data/stratos-types';
 import { EndpointDataService } from '../endpoint-data/endpoint-data.service';
 
+/** One failed CAPI sub-call in a patchApp response. */
+interface PatchAppError {
+  code: string;
+  title: string;
+  detail: string;
+  affected: string[];
+}
+
+type PatchAppResponse = Partial<StApp> & { _meta?: { errors?: PatchAppError[] } };
+
 export class CnsiAppsSource extends CnsiEntitySource<StApp> {
   protected readonly entityName = 'apps';
 
@@ -59,11 +69,20 @@ export class CnsiAppsSource extends CnsiEntitySource<StApp> {
   // NOTE: app delete routes through EntityDeleteController (see
   // CfAppsSignalConfigService.deleteApp); create/update/action stay here.
 
+  // patchApp answers 200 even when a CAPI sub-call failed and lists each
+  // failure in _meta.errors. The envelope is stripped before it reaches the
+  // rows; what did apply is patched in, then the failures reject the call.
   async update(appGuid: string, patch: Partial<StApp> & Record<string, unknown>): Promise<void> {
-    const updated = await firstValueFrom(this.http.patch<StApp>(`/pp/v1/cf/apps/${this.cnsiGuid}/${appGuid}`, patch));
+    const { _meta, ...updated } = await firstValueFrom(this.http.patch<PatchAppResponse>(
+      `/pp/v1/cf/apps/${this.cnsiGuid}/${appGuid}`, patch,
+    ));
     this.patchItems(items => items.map(a => (a as { guid?: string }).guid === appGuid ? { ...a, ...updated } : a));
     this.eds?.updateApp(appGuid, updated);
     this.eds?.applyCascade('app.update');
+    const errors = _meta?.errors ?? [];
+    if (errors.length) {
+      throw new Error(errors.map(e => e.detail || e.title).join('; '));
+    }
   }
 
   async create(payload: unknown): Promise<StApp> {
