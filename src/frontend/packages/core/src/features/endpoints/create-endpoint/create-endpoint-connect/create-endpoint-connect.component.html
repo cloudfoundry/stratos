@@ -19,13 +19,20 @@
         <b>{{ connectService()?.config.name }}</b> has been successfully registered.
       }
     </p>
-    <app-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
-      <b>{{ connectService()?.config.name }}</b> now
-      (optional).
-    </app-checkbox>
-    <div class="connect__subtext text-[var(--content-muted)]">You may connect this endpoint at a later date from the
-      endpoints page.
-    </div>
+    <!-- Opened from a connect, the connect is what the user came for: not optional, not for later. -->
+    @if (fromConnect()) {
+      <app-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
+        <b>{{ connectService()?.config.name }}</b> now.
+      </app-checkbox>
+    } @else {
+      <app-checkbox class="connect__checkbox" [(ngModel)]="doConnect">Connect to
+        <b>{{ connectService()?.config.name }}</b> now
+        (optional).
+      </app-checkbox>
+      <div class="connect__subtext text-[var(--content-muted)]">You may connect this endpoint at a later date from the
+        endpoints page.
+      </div>
+    }
   </div>
   @if (doConnect) {
   <div>

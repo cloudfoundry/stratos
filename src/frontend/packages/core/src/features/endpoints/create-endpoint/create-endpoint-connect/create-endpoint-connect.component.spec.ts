@@ -172,6 +172,25 @@ describe('CreateEndpointConnectComponent', () => {
       expect(fixture.nativeElement.textContent).toContain('has been successfully registered');
       expect(component.doConnect).toBe(false);
     });
+
+    // The connect is what the user came for: not optional, not for later.
+    it('offers Connect now without the Register wording', async () => {
+      fixture.componentRef.setInput('fromConnect', true);
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      const text = (fixture.nativeElement.textContent as string).replace(/\s+/g, ' ');
+      expect(text).toContain('Connect to ep now.');
+      expect(text).not.toContain('(optional)');
+      expect(text).not.toContain('at a later date');
+    });
+
+    it('keeps the Register wording when registering', async () => {
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      const text = (fixture.nativeElement.textContent as string).replace(/\s+/g, ' ');
+      expect(text).toContain('Connect to ep now (optional).');
+      expect(text).toContain('at a later date from the endpoints page');
+    });
   });
 
   describe('the Register strip', () => {
