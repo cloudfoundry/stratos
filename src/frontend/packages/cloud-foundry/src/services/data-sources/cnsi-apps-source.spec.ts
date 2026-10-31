@@ -47,6 +47,29 @@ describe('CnsiAppsSource', () => {
     expect((src.items()[0] as any).name).toBe('new');
   });
 
+  it('update(guid, patch) rejects with the CF detail when a sub-call failed', async () => {
+    const initial = {
+      resources: [{ guid: 'a', name: 'old', state: 'STOPPED' }] as unknown as StApp[],
+      pagination: { totalResults: 1, totalPages: 1, next: null, previous: null, first: { href: '' }, last: { href: '' } }
+    };
+    // patchApp answers 200 and lists each failed CAPI sub-call in _meta.errors.
+    const partial = { guid: 'a', _meta: { errors: [
+      { code: 'CF-10008', title: 'CF-UnprocessableEntity', detail: 'name must be unique in space', affected: ['name'] },
+      { code: 'CF-10003', title: 'CF-NotAuthorized', detail: 'You are not authorized to perform the requested action', affected: ['enable_ssh'] },
+    ] } };
+    const http = {
+      get: vi.fn(() => of(initial)),
+      patch: vi.fn(() => of(partial)),
+    } as unknown as HttpClient;
+    const src = new CnsiAppsSource('cnsi-1', http);
+    await src.load();
+    await expect(src.update('a', { name: 'taken', enable_ssh: true })).rejects.toThrow(
+      'name must be unique in space; You are not authorized to perform the requested action',
+    );
+    expect(src.items()[0]).not.toHaveProperty('_meta');
+    expect((src.items()[0] as any).name).toBe('old');
+  });
+
   it('action(guid, verb) issues POST to /actions/{verb} and patches state', async () => {
     const initial = {
       resources: [{ guid: 'a', name: 'app', state: 'STOPPED' }] as unknown as StApp[],

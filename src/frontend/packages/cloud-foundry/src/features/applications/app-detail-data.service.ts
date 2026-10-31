@@ -399,7 +399,9 @@ export class AppDetailDataService {
    * which fans the body's optional fields out to the corresponding CAPI v3
    * sub-calls (name, enable_ssh, scale, env vars). Flips `updating` for the
    * duration; the summary card dims itself off this signal. Refreshes the
-   * app entity on success so callers don't have to.
+   * app entity afterwards so callers don't have to, also when the call
+   * rejects: patchApp reports each failed sub-call in _meta.errors while
+   * the others still apply, and the rejection carries the CF detail.
    *
    * Body fields are the native PATCH shape: name?, enable_ssh?, memory?,
    * disk_quota?, instances?, environment_json?.
@@ -420,8 +422,11 @@ export class AppDetailDataService {
     const eds = this.endpointDataRegistry.acquire(this.cnsiGuid);
     try {
       const source = new CnsiAppsSource(this.cnsiGuid, this.http, eds);
-      await source.update(this.appGuid, body);
-      await this.refresh('app');
+      try {
+        await source.update(this.appGuid, body);
+      } finally {
+        await this.refresh('app');
+      }
     } finally {
       this.endpointDataRegistry.release(this.cnsiGuid);
       this._updating.set(false);

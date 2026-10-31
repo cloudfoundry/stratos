@@ -207,6 +207,22 @@ describe('AppDetailDataService', () => {
     for (const pending of httpMock.match(() => true)) pending.flush({ resources: [], pagination: { totalResults: 0, totalPages: 0 } });
   });
 
+  it('update() re-reads the app and rejects when a sub-call failed', async () => {
+    const updating = svc.update({ name: 'taken', enable_ssh: false });
+    expect(svc.updating()).toBe(true);
+    httpMock.expectOne(r => r.method === 'PATCH' && r.url === `/pp/v1/cf/apps/${CNSI}/${APP_GUID}`)
+      .flush({ guid: APP_GUID, _meta: { errors: [
+        { code: 'CF-10008', title: 'CF-UnprocessableEntity', detail: 'name must be unique in space', affected: ['name'] },
+      ] } });
+    await tick();
+    // The SSH change did apply, so the detail is re-read before rejecting.
+    httpMock.expectOne(DETAIL_URL).flush({ ...MOCK_APP_DETAIL, sshEnabled: false });
+    await expect(updating).rejects.toThrow('name must be unique in space');
+    expect(svc.appDetail()?.sshEnabled).toBe(false);
+    expect(svc.updating()).toBe(false);
+    for (const pending of httpMock.match(() => true)) pending.flush({ resources: [], pagination: { totalResults: 0, totalPages: 0 } });
+  });
+
   // -------------------------------------------------------------------------
   // Initial state
   // -------------------------------------------------------------------------
