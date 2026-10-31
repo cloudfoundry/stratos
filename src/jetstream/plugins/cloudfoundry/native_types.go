@@ -45,7 +45,7 @@ type StApp struct {
 	CnsiGUID  string            `json:"cnsiGuid"`
 	Name      string            `json:"name"`
 	State     string            `json:"state"`
-	Labels    map[string]string `json:"labels"`
+	Labels    map[string]string `json:"labels,omitempty"`
 	SpaceGUID string            `json:"spaceGuid"`
 	SpaceName string            `json:"spaceName,omitempty"`
 	OrgGUID   *string           `json:"orgGuid,omitempty"`

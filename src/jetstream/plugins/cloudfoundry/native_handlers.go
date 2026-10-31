@@ -209,6 +209,16 @@ func metaLabels(m *capi.Metadata) map[string]string {
 	return normaliseStringMap(m.Labels)
 }
 
+// appLabels is metaLabels for app rows: nil when the app has no labels, so
+// the field is left out of each row of the apps list instead of an empty
+// map per app.
+func appLabels(m *capi.Metadata) map[string]string {
+	if m == nil || len(m.Labels) == 0 {
+		return nil
+	}
+	return normaliseStringMap(m.Labels)
+}
+
 func metaAnnotations(m *capi.Metadata) map[string]string {
 	if m == nil {
 		return map[string]string{}
@@ -375,7 +385,7 @@ func toStApp(r capi.App, cnsiGUID string) StApp {
 		CnsiGUID:  cnsiGUID,
 		Name:      r.Name,
 		State:     r.State,
-		Labels:    metaLabels(r.Metadata),
+		Labels:    appLabels(r.Metadata),
 		SpaceGUID: relationshipGUID(r.Relationships.Space),
 		StackName: stackName,
 		Routes:    []StAppRoute{},

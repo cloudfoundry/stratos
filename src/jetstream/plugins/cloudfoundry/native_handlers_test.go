@@ -12,6 +12,7 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
+	"github.com/fivetwenty-io/capi/v3/pkg/capi"
 	"github.com/labstack/echo/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -1494,4 +1495,24 @@ func TestGetNativeApps_GuidsFilter(t *testing.T) {
 	assert.Equal(t, "App One", resp.Resources[0].Name)
 	assert.Equal(t, "app-2", resp.Resources[1].GUID)
 	assert.Equal(t, "App Two", resp.Resources[1].Name)
+}
+
+// TestToStApp_LabelsOnlyWhenPresent verifies that an app without labels
+// leaves the field out of its JSON row, so the apps list (thousands of rows
+// per foundation) carries no empty "labels":{} per app, while an app with
+// labels, including an empty value, keeps all of them.
+func TestToStApp_LabelsOnlyWhenPresent(t *testing.T) {
+	bare, err := json.Marshal(toStApp(capi.App{Resource: capi.Resource{GUID: "app-1"}}, "cnsi-1"))
+	require.NoError(t, err)
+	assert.NotContains(t, string(bare), `"labels"`)
+
+	empty, err := json.Marshal(toStApp(capi.App{Resource: capi.Resource{GUID: "app-1"}, Metadata: &capi.Metadata{}}, "cnsi-1"))
+	require.NoError(t, err)
+	assert.NotContains(t, string(empty), `"labels"`)
+
+	team, blank := "platform", ""
+	labelled := toStApp(capi.App{Resource: capi.Resource{GUID: "app-1"}, Metadata: &capi.Metadata{
+		Labels: map[string]*string{"team": &team, "empty": &blank},
+	}}, "cnsi-1")
+	assert.Equal(t, map[string]string{"team": "platform", "empty": ""}, labelled.Labels)
 }
