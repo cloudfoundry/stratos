@@ -48,7 +48,7 @@ describe('EditApplicationComponent labels', () => {
   let component: EditApplicationComponent;
   const updateLabels = vi.fn();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     updateLabels.mockReset();
     updateLabels.mockResolvedValue(undefined);
     TestBed.configureTestingModule({
@@ -70,7 +70,7 @@ describe('EditApplicationComponent labels', () => {
     });
     fixture = TestBed.createComponent(EditApplicationComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('initializes labels and turns Enter into a removable pill', async () => {
@@ -97,6 +97,16 @@ describe('EditApplicationComponent labels', () => {
     expect(component.editAppForm.invalid).toBe(true);
     expect(updateLabels).not.toHaveBeenCalled();
     control.setValue('new=value');
+    expect(control.hasError('pendingLabel')).toBe(true);
+  });
+
+  it('clears the duplicate-key error once the colliding label is removed', () => {
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('team=new');
+    component.addLabel(new Event('keydown', { cancelable: true }));
+    expect(control.hasError('duplicateLabel')).toBe(true);
+    component.removeLabel('team');
+    expect(control.hasError('duplicateLabel')).toBe(false);
     expect(control.hasError('pendingLabel')).toBe(true);
   });
 
