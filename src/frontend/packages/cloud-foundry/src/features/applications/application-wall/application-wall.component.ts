@@ -32,7 +32,7 @@ import {
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
-import { renderAppLabels } from '../../../shared/signal-list-configs/app/app-labels';
+import { appLabelsColumn } from '../../../shared/signal-list-configs/app/app-labels';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';
@@ -435,11 +435,7 @@ export class ApplicationWallComponent implements OnInit {
             widthHint: '18rem',
           },
           ...(withStack ? [stackColumn] : []),
-          {
-            header: 'Labels', key: 'labels',
-            render: renderAppLabels,
-            widthHint: '12rem',
-          },
+          appLabelsColumn,
           {
             header: 'Created', key: 'createdAt', sortField: 'createdAt',
             render: (app: StApp) => ApplicationWallComponent.formatDate(app.createdAt),

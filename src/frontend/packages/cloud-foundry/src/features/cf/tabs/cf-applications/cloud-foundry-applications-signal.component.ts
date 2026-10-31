@@ -31,7 +31,7 @@ import {
 
 import { applicationEntityType } from '../../../../cf-entity-types';
 import { BulkResult, CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
-import { renderAppLabels } from '../../../../shared/signal-list-configs/app/app-labels';
+import { appLabelsColumn } from '../../../../shared/signal-list-configs/app/app-labels';
 import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
@@ -279,11 +279,7 @@ export class CloudFoundryApplicationsSignalComponent implements OnInit {
             widthHint: '14rem',
           },
           ...(withStack ? [stackColumn] : []),
-          {
-            header: 'Labels', key: 'labels',
-            render: renderAppLabels,
-            widthHint: '12rem',
-          },
+          appLabelsColumn,
           {
             header: 'Created', key: 'createdAt', sortField: 'createdAt',
             render: (app: StApp) => CloudFoundryApplicationsSignalComponent.formatDate(app.createdAt),
