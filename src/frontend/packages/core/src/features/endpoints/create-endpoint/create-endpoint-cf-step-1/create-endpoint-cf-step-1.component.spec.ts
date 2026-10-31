@@ -97,6 +97,21 @@ describe('CreateEndpointCfStep1Component', () => {
     expect(root.querySelector(`label[for="${box!.id}"]`)?.textContent?.trim()).toBe('Specify CA Certificate:');
   });
 
+  // A collapsed section is only 0 px tall: without inert its fields stay in
+  // the tab order and the accessibility tree.
+  it('keeps the fields of a collapsed section out of reach', async () => {
+    const root: HTMLElement = fixture.nativeElement;
+    const inert = (id: string) => root.querySelector(id)!.closest('.create-endpoint__advanced')!.hasAttribute('inert');
+    expect(inert('#client_id')).toBe(true);
+    expect(inert('#ca-cert')).toBe(true);
+
+    component.toggleAdvancedOptions();
+    component.toggleCACertField();
+    await fixture.whenStable();
+    expect(inert('#client_id')).toBe(false);
+    expect(inert('#ca-cert')).toBe(false);
+  });
+
   // The hidden Advanced Options sit under the Name field, so a browser
   // with a saved console login filled it in as Client ID and Client Secret.
   it('keeps the browser from filling the console login into the client credentials', () => {

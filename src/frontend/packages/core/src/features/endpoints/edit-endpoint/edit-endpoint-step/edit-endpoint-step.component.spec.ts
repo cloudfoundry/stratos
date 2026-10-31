@@ -121,6 +121,17 @@ describe('EditEndpointStepComponent', () => {
     expect(component.showCACertField()).toBe(true);
     expect(component.editEndpoint.controls.caCert.value).toBe('STORED-CA-CERT');
   });
+
+  // Collapsed, the box is 0 px tall: inert keeps it out of the tab order.
+  it('keeps the CA certificate box out of reach while it is switched off', async () => {
+    await fixture.whenStable();
+    const section = () => (fixture.nativeElement as HTMLElement).querySelector('#ca-cert')!.closest('.edit-endpoint__advanced')!;
+    expect(section().hasAttribute('inert')).toBe(false);
+    component.toggleCACertField();
+    await fixture.whenStable();
+    expect(section().hasAttribute('inert')).toBe(true);
+  });
+
   // app-form-field shows a field's <app-error> text as its error line.
   it('says the name is required once it is cleared', async () => {
     await fixture.whenStable();
