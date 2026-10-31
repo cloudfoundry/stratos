@@ -394,52 +394,67 @@ func TestPatchApp_NameOnly_UpdatesAppName(t *testing.T) {
 	assert.False(t, hasMeta, "name-only success should not include _meta.errors envelope")
 }
 
-func TestPatchAppLabels_ForwardsChangesAndReturnsLabels(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// TestPatchApp_NameAndLabels_OneUpdate verifies that a rename and a label
+// delta travel in a single PATCH /v3/apps/{guid}, so CF applies both or
+// neither, and that the response carries the name and labels CF returned.
+func TestPatchApp_NameAndLabels_OneUpdate(t *testing.T) {
+	appUpdates := 0
+	var receivedBody map[string]interface{}
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/v3" {
 			_, _ = w.Write([]byte(`{"links":{}}`))
 			return
 		}
-		require.Equal(t, http.MethodPatch, r.Method)
-		require.Equal(t, "/v3/apps/app-1", r.URL.Path)
-		var body map[string]interface{}
-		require.NoError(t, json.NewDecoder(r.Body).Decode(&body))
-		assert.Equal(t, map[string]interface{}{"metadata": map[string]interface{}{"labels": map[string]interface{}{"team": "platform", "old": nil, "empty": ""}}}, body)
-		_, _ = w.Write([]byte(`{"guid":"app-1","metadata":{"labels":{"team":"platform","empty":"","other":"retained"},"annotations":{"owner":"alice"}}}`))
-	}))
-	defer server.Close()
-	plugin := withSpec(t, server)
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(`{"labels":{"team":"platform","old":null,"empty":""}}`))
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
-	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
-	require.NoError(t, plugin.patchAppLabels(ctx))
+		if r.URL.Path == "/v3/apps/app-1" && r.Method == http.MethodPatch {
+			appUpdates++
+			_ = json.NewDecoder(r.Body).Decode(&receivedBody)
+			_, _ = w.Write([]byte(`{"guid":"app-1","name":"new-name","metadata":{"labels":{"team":"platform","empty":"","other":"retained"},"annotations":{"owner":"alice"}}}`))
+			return
+		}
+		http.NotFound(w, r)
+	})
+
+	rec, err := patchAppHelper(t, handler, `{"name":"new-name","labels":{"team":"platform","old":null,"empty":""}}`)
+	require.NoError(t, err)
 	assert.Equal(t, http.StatusOK, rec.Code)
-	assert.JSONEq(t, `{"labels":{"team":"platform","empty":"","other":"retained"}}`, rec.Body.String())
+	assert.Equal(t, 1, appUpdates)
+	assert.Equal(t, map[string]interface{}{
+		"name":     "new-name",
+		"metadata": map[string]interface{}{"labels": map[string]interface{}{"team": "platform", "old": nil, "empty": ""}},
+	}, receivedBody)
+	assert.JSONEq(t, `{"guid":"app-1","name":"new-name","labels":{"team":"platform","empty":"","other":"retained"}}`, rec.Body.String())
 }
 
-func TestPatchAppLabels_PropagatesValidationFailure(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+// TestPatchApp_LabelsRejected_ReturnsMetaErrors verifies that a label CF
+// rejects is reported like any other failed sub-call: 200 with a _meta.errors
+// entry naming labels and carrying CF's own code and detail.
+func TestPatchApp_LabelsRejected_ReturnsMetaErrors(t *testing.T) {
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		if r.URL.Path == "/v3" {
 			_, _ = w.Write([]byte(`{"links":{}}`))
 			return
 		}
 		w.WriteHeader(http.StatusUnprocessableEntity)
-		_, _ = w.Write([]byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"invalid label key"}]}`))
-	}))
-	defer server.Close()
-	plugin := withSpec(t, server)
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPatch, "/", strings.NewReader(`{"labels":{"bad key":"value"}}`))
-	rec := httptest.NewRecorder()
-	ctx := e.NewContext(req, rec)
-	ctx.SetPathValues(echo.PathValues{{Name: "cnsiGuid", Value: "cnsi-1"}, {Name: "appGuid", Value: "app-1"}})
-	require.NoError(t, plugin.patchAppLabels(ctx))
-	assert.Equal(t, http.StatusUnprocessableEntity, rec.Code)
-	assert.Contains(t, rec.Body.String(), "invalid label key")
+		_, _ = w.Write([]byte(`{"errors":[{"code":10008,"title":"CF-UnprocessableEntity","detail":"Metadata label key error: 'bad key' contains invalid characters"}]}`))
+	})
+
+	rec, err := patchAppHelper(t, handler, `{"labels":{"bad key":"value"}}`)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	var resp struct {
+		Labels map[string]string `json:"labels"`
+		Meta   struct {
+			Errors []metaError `json:"errors"`
+		} `json:"_meta"`
+	}
+	require.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+	assert.Nil(t, resp.Labels, "a rejected update must not report labels")
+	require.Len(t, resp.Meta.Errors, 1)
+	assert.Equal(t, "CF-10008", resp.Meta.Errors[0].Code)
+	assert.Equal(t, []string{"labels"}, resp.Meta.Errors[0].Affected)
+	assert.Contains(t, resp.Meta.Errors[0].Detail, "invalid characters")
 }
 
 // TestPatchApp_PartialFailure_ReturnsMetaErrors verifies that when one sub-call

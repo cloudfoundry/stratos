@@ -46,11 +46,11 @@ describe('EditApplicationComponent', () => {
 describe('EditApplicationComponent labels', () => {
   let fixture: ComponentFixture<EditApplicationComponent>;
   let component: EditApplicationComponent;
-  const updateLabels = vi.fn();
+  const update = vi.fn();
 
   beforeEach(async () => {
-    updateLabels.mockReset();
-    updateLabels.mockResolvedValue(undefined);
+    update.mockReset();
+    update.mockResolvedValue(undefined);
     TestBed.configureTestingModule({
       imports: [EditApplicationComponent],
       providers: [
@@ -63,7 +63,7 @@ describe('EditApplicationComponent labels', () => {
           name: 'my-app', instances: 1, memory: 256, disk_quota: 1024, enable_ssh: true, space_guid: 'sp-1',
         } } }) } },
         { provide: AppDetailDataService, useValue: {
-          appDetail: signal({ app: { labels: { team: 'old', keep: 'yes' } } }), updateLabels,
+          appDetail: signal({ app: { labels: { team: 'old', keep: 'yes' } } }), update,
         } },
         provideZonelessChangeDetection(),
       ],
@@ -86,7 +86,7 @@ describe('EditApplicationComponent labels', () => {
     fixture.nativeElement.querySelector('[aria-label="Remove label team"]').click();
     expect(component.editAppForm.controls.labels.value.team).toBeUndefined();
     expect(await firstValueFrom(component.updateApp(0, undefined as any))).toMatchObject({ success: true });
-    expect(updateLabels).toHaveBeenCalledWith({ team: null, 'example.com/team': 'platform' });
+    expect(update).toHaveBeenCalledWith({ labels: { team: null, 'example.com/team': 'platform' } });
   });
 
   it('rejects duplicate keys and blocks saving text not yet added as a pill', () => {
@@ -95,7 +95,7 @@ describe('EditApplicationComponent labels', () => {
     component.addLabel(new Event('keydown', { cancelable: true }));
     expect(control.hasError('duplicateLabel')).toBe(true);
     expect(component.editAppForm.invalid).toBe(true);
-    expect(updateLabels).not.toHaveBeenCalled();
+    expect(update).not.toHaveBeenCalled();
     control.setValue('new=value');
     expect(control.hasError('pendingLabel')).toBe(true);
   });
@@ -119,7 +119,7 @@ describe('EditApplicationComponent labels', () => {
   });
 
   it('keeps form open when the labels request fails', async () => {
-    updateLabels.mockRejectedValue(new Error('CF rejected the label'));
+    update.mockRejectedValue(new Error('CF rejected the label'));
     component.removeLabel('team');
     await expect(firstValueFrom(component.updateApp(0, undefined as any))).rejects.toThrow('CF rejected the label');
   });
