@@ -135,6 +135,17 @@ describe('CreateEndpointComponent', () => {
       component.onUnregistered();
       expect(component.step1StepHandle.nextButtonText!()).toBe('Register');
     });
+
+    // Previous · Cancel · Connect/Close, as in the Connect dialog
+    it('offers Cancel on the Connect step', () => {
+      expect(component.connectStepHandle.hideCloseButton?.() ?? false).toBe(false);
+    });
+
+    // Step 1 registered the endpoint; Cancel only skips connecting to it.
+    it('reports the registration on Cancel', () => {
+      component.cancelAction!();
+      expect(registerHandle.close).toHaveBeenCalledWith(true);
+    });
   });
 
   // The Connect step shows the error under the form; the stepper adds no
