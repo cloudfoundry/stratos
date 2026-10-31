@@ -3,6 +3,7 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { of, Subject, throwError } from 'rxjs';
 import { DestroyRef, EnvironmentInjector, createEnvironmentInjector } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { appLabelsFilterText } from './app-labels';
 import { CfAppsSignalConfigService } from './cf-apps-signal-config.service';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
 import type { StApp } from '../../../services/endpoint-data/stratos-types';
@@ -170,6 +171,7 @@ describe('CfAppsSignalConfigService', () => {
     const svc = makeSvc(makeHttp());
     const app: StApp = { guid: 'a', name: 'app', state: 'STARTED', cnsiGuid: 'cf-1', spaceGuid: 'sp-1', instances: 1, routes: [], createdAt: '', updatedAt: '', labels: { 'example.com/team': 'Platform', empty: '' } };
     const noLabels = { ...app, labels: null };
+    svc.registerFilterExtractor('labels', appLabelsFilterText);
     svc.filterField.set('labels');
     for (const query of ['example.com/team', 'platform', 'TEAM=PLATFORM', 'empty=']) {
       svc.nameFilter.set(query);

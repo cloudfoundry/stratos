@@ -6,6 +6,7 @@ import { ActivatedRoute } from '@angular/router';
 import { provideRouter } from '@angular/router';
 import { Observable, Subject, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { appLabelsFilterText } from '../../../shared/signal-list-configs/app/app-labels';
 
 import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -222,6 +223,7 @@ describe('ApplicationWallComponent', () => {
     await component.ngOnInit();
     const cfg = component.listConfig()!;
     expect(cfg.filterColumns).toContain('labels');
+    expect(stubSignalConfig.registerFilterExtractor).toHaveBeenCalledWith('labels', appLabelsFilterText);
     const column = cfg.columns.find(c => c.key === 'labels')!;
     expect(column.render({ labels: { team: 'platform', empty: '' } } as any)).toBe('team=platform, empty=');
     expect(column.render({} as any)).toBe('—');

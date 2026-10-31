@@ -29,7 +29,7 @@ import {
 
 import { applicationEntityType } from '../../../../../../../cf-entity-types';
 import { BulkResult, CfAppsSignalConfigService } from '../../../../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
-import { appLabelsColumn } from '../../../../../../../shared/signal-list-configs/app/app-labels';
+import { appLabelsColumn, appLabelsFilterText } from '../../../../../../../shared/signal-list-configs/app/app-labels';
 import { CfCurrentUserPermissions } from '../../../../../../../user-permissions/cf-user-permissions-checkers';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
@@ -322,6 +322,7 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
     // registered function instead of a second state→label mapping.
     this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
     this.appsConfig.registerFilterExtractor('state', stateLabel);
+    this.appsConfig.registerFilterExtractor('labels', appLabelsFilterText);
 
     // Default per-space tab presentation: card view at 6 per page. The
     // service's writable signals carry user toggles within a session; we
