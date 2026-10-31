@@ -116,6 +116,19 @@ describe('SignalListComponent', () => {
     const escape = (target: EventTarget) =>
       target.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
 
+    // The checklist popup listens for the same document click; a second
+    // listener for one host event was dropped, so only Escape closed the menu.
+    it('closes the open menu on a click outside it', async () => {
+      const fixture = await withActions();
+      (fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement).click();
+      await fixture.whenStable();
+      expect(menu(fixture.nativeElement)).not.toBeNull();
+
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      await fixture.whenStable();
+      expect(menu(fixture.nativeElement)).toBeNull();
+    });
+
     it('closes the open menu and returns focus to its kebab button', async () => {
       const fixture = await withActions();
       const kebab = fixture.nativeElement.querySelector('[data-test="row-actions"]') as HTMLButtonElement;
