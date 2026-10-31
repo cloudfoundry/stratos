@@ -682,9 +682,17 @@ export class SignalListComponent<T> implements AfterViewInit {
     return `repeat(auto-fill, minmax(${this.config.cardMinWidth ?? '16rem'}, 1fr))`;
   }
 
+  // What the select lists. A list whose page size is not one of the choices
+  // (API Keys pages by 10 against 5/20/50/80) would show the first choice
+  // while paging by another number, so the current size is always offered,
+  // in order, with All kept last.
   pageSizeOptions(): readonly number[] {
     const mode = this.config.viewMode ? this.config.viewMode() : 'table';
-    return this.effectivePageSizeOptions(mode);
+    const opts = this.effectivePageSizeOptions(mode);
+    const size = this.config.pageSize();
+    if (size <= 0 || opts.includes(size)) return opts;
+    const sizes = [...opts.filter(o => o > 0), size].sort((a, b) => a - b);
+    return opts.includes(-1) ? [...sizes, -1] : sizes;
   }
 
   // The option set actually offered in a view mode. Card views carry the
