@@ -464,6 +464,37 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(emitted).toHaveBeenCalled();
     });
 
+    // Advanced Options come back as they were at registration
+    describe('Advanced Options after Unregister', () => {
+      const advanced = () => q('#client_id')!.closest('.create-endpoint__advanced')!;
+      const shown = () => advanced().classList.contains('create-endpoint__shown');
+      const showBox = () => q('#showAdvanced .custom-checkbox')?.getAttribute('aria-checked');
+
+      async function registerThenUnregister(clientId = '') {
+        component.registerForm.controls.nameField.setValue('my-cf');
+        component.registerForm.controls.urlField.setValue('api.example.com');
+        component.registerForm.controls.clientIDField.setValue(clientId);
+        if (clientId) component.toggleAdvancedOptions();
+        stubSignalConfig.register.mockResolvedValue({ busy: false, error: false, message: '', guid: 'g1' });
+        await new Promise(resolve => component.onNext(0, {} as never).subscribe(resolve));
+        await fixture.whenStable();
+        await component.unregister();
+        await fixture.whenStable();
+      }
+
+      it('stay collapsed when none were entered', async () => {
+        await registerThenUnregister();
+        expect(shown()).toBe(false);
+        expect(showBox()).toBe('false');
+      });
+
+      it('stay open when a Client ID was entered', async () => {
+        await registerThenUnregister('my-client');
+        expect(shown()).toBe(true);
+        expect(showBox()).toBe('true');
+      });
+    });
+
     // Git hosts take no CA certificate, so their review has no TLS to edit or show.
     it('reviews a Git endpoint locked, with no TLS and no certificate cards', async () => {
       await review(endpoint({ cnsi_type: 'git', sub_type: 'github', name: 'my-github' }));
