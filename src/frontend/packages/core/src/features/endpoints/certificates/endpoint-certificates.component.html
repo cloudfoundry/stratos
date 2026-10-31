@@ -38,7 +38,8 @@
           }
         </ul>
         <p class="text-xs text-content-muted">
-          Checked {{ checkedAt() | date: 'mediumTime' }}. Results are not saved.
+          Checked {{ checkedAt() | date: 'mediumTime' }} against the console's trusted certificates{{ pem() ? ' and the CA above' : '' }}.
+          Results are not saved.
         </p>
       }
     </div>

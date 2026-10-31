@@ -123,6 +123,30 @@ describe('EndpointCertificatesComponent', () => {
     expect(el().textContent).toContain('Results are not saved.');
   });
 
+  // "trusted" alone read as "your CA is fine" with no CA set
+  describe('names what the check used', () => {
+    async function check(pem: string) {
+      await setInputs(pem, 'guid-1');
+      if (pem) await flushDecode([cert(300)]);
+      Array.from(el().querySelectorAll('button')).find(b => b.textContent?.includes('Check trust now'))!.click();
+      await fixture.whenStable();
+      http.expectOne('/api/v1/endpoints/guid-1/trust').flush([{ host: 'api.x', trusted: true }]);
+      await vi.advanceTimersByTimeAsync(0);
+      await fixture.whenStable();
+      return el().textContent!.replace(/\s+/g, ' ');
+    }
+
+    it('the trusted certificates and the CA when one is set', async () => {
+      expect(await check('PEM')).toContain("against the console's trusted certificates and the CA above.");
+    });
+
+    it('the trusted certificates alone without a CA', async () => {
+      const text = await check('');
+      expect(text).toContain("against the console's trusted certificates.");
+      expect(text).not.toContain('the CA above');
+    });
+  });
+
   // The results answer for the PEM checked; another PEM needs its own check.
   describe('when the PEM changes', () => {
     const checkNow = () => Array.from(el().querySelectorAll('button')).find(b => b.textContent?.includes('Check trust now'))!;
