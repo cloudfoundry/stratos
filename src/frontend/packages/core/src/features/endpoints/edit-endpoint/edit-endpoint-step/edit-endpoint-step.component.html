@@ -22,7 +22,8 @@
         <p class="text-sm text-content-muted mt-2">
           Applies to the endpoint address and its login server (UAA).
         </p>
-        <div [ngClass]="{'edit-endpoint__shown': showCACertField()}" class="edit-endpoint__advanced" spellcheck=false>
+        <!-- Collapsed is 0 px tall; inert also takes it out of the tab order and the accessibility tree. -->
+        <div [ngClass]="{'edit-endpoint__shown': showCACertField()}" [attr.inert]="showCACertField() ? null : ''" class="edit-endpoint__advanced" spellcheck=false>
           <label class="edit-endpoint__cacert-title text-sm font-medium text-[var(--content-text)]" for="ca-cert">Specify CA Certificate:</label>
           <textarea id="ca-cert" rows="10" class="edit-endpoint__cacert input font-mono text-sm bg-[var(--input-bg)] text-[var(--input-text)] border-[var(--input-border)]" appInput formControlName="caCert" name="caCert"></textarea>
         </div>

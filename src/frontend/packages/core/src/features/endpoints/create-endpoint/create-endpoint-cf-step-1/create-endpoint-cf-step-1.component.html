@@ -102,7 +102,9 @@
 
   <!-- Full-width sections below grid -->
   @if (canEditTls()) {
-  <div [ngClass]="{ 'create-endpoint__shown': showCACertField() }" class="create-endpoint__advanced" spellcheck="false">
+  <!-- Collapsed is 0 px tall; inert also takes it out of the tab order and the accessibility tree. -->
+  <div [ngClass]="{ 'create-endpoint__shown': showCACertField() }" [attr.inert]="showCACertField() ? null : ''"
+    class="create-endpoint__advanced" spellcheck="false">
     <label class="create-endpoint__cacert-title text-sm mb-2 block text-[var(--content-text)]" for="ca-cert"
       >Specify CA Certificate:</label
     >
@@ -122,7 +124,8 @@
   }
 
   <div [ngClass]="{ hide: !showAdvancedFields(), show: showAdvancedFields() }" class="create-endpoint__section">
-    <div [ngClass]="{ 'create-endpoint__shown': showAdvancedOptions() || review() }" class="create-endpoint__advanced">
+    <div [ngClass]="{ 'create-endpoint__shown': showAdvancedOptions() || review() }"
+      [attr.inert]="showAdvancedOptions() || review() ? null : ''" class="create-endpoint__advanced">
       <h1 class="text-[var(--content-text)]">Advanced Options</h1>
       <p class="text-[var(--content-text)]">Client ID and Client Secret do not normally need to be specified.</p>
       <p class="text-[var(--content-text)]">
