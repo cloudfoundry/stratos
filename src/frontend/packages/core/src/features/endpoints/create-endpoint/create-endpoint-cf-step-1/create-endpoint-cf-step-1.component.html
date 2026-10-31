@@ -90,7 +90,7 @@
         }
       }
       @if (showAdvancedFields() && !review()) {
-        <app-checkbox appInput id="showAdvanced" (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
+        <app-checkbox appInput id="showAdvanced" [checked]="showAdvancedOptions()" (change)="toggleAdvancedOptions()">Show Advanced Options</app-checkbox>
       }
       @if (endpointTypeSupportsSSO()) {
         <app-checkbox appInput id="ssoAllowed" name="ssoAllowed" formControlName="ssoAllowedField"
