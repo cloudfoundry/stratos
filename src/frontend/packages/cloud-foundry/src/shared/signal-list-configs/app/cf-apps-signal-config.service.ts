@@ -23,7 +23,6 @@ import { UnknownOutcome, unknownOutcomeOf } from '../../../services/async-jobs/u
 import type { StratosJob } from '../../../services/async-jobs/async-job.types';
 import type { SignalListDropdownOption, SignalListRangeValue } from '@stratosui/core';
 import { ListStateStore, naturalCompare, rangeMatches } from '@stratosui/core';
-import { appLabels } from './app-labels';
 
 // Re-export the bulk-endpoint response shapes so per-space app consumers
 // import a single BulkResult type without reaching across into the routes
@@ -491,7 +490,6 @@ export class CfAppsSignalConfigService {
           if (!states.includes(label)) return false;
         }
         if (q) {
-          if (field === 'labels') return appLabels(app).some(label => label.toLowerCase().includes(q));
           const hay = (extractor ? extractor(app) : (app.name ?? '')).toLowerCase();
           if (!hay.includes(q)) return false;
         }

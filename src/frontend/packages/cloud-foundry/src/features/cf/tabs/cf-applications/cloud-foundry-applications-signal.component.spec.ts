@@ -5,6 +5,7 @@ import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { of } from 'rxjs';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { appLabelsFilterText } from '../../../../shared/signal-list-configs/app/app-labels';
 
 import { ConfirmationDialogService, CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -248,6 +249,7 @@ describe('CloudFoundryApplicationsSignalComponent (component)', () => {
     await component.ngOnInit();
     const cfg = component.listConfig()!;
     expect(cfg.filterColumns).toContain('labels');
+    expect(stubAppsConfig.registerFilterExtractor).toHaveBeenCalledWith('labels', appLabelsFilterText);
     expect(cfg.columns.find(c => c.key === 'labels')!.render({ labels: { team: 'platform' } } as any)).toBe('team=platform');
   });
 

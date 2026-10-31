@@ -32,7 +32,7 @@ import {
 import { applicationEntityType } from '../../../cf-entity-types';
 import { CfEndpointsMissingComponent } from '../../../shared/components/cf-endpoints-missing/cf-endpoints-missing.component';
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
-import { appLabelsColumn } from '../../../shared/signal-list-configs/app/app-labels';
+import { appLabelsColumn, appLabelsFilterText } from '../../../shared/signal-list-configs/app/app-labels';
 import { CloudFoundryService } from '../../../shared/data-services/cloud-foundry.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { goToAppWall } from '../../cf/cf.helpers';
@@ -514,6 +514,7 @@ export class ApplicationWallComponent implements OnInit {
     this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
     this.appsConfig.registerFilterExtractor('state', stateLabel);
     this.appsConfig.registerFilterExtractor('cfOrgSpace', renderCfOrgSpace);
+    this.appsConfig.registerFilterExtractor('labels', appLabelsFilterText);
     if (cnsiGuids.length > 0) {
       void this.appsConfig.loadAll();
     }

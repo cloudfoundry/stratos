@@ -1,9 +1,18 @@
 import type { SignalListColumn } from '@stratosui/core';
 import type { StApp } from '../../../services/endpoint-data/stratos-types';
 
-/** Format each label independently so filtering cannot match across label boundaries. */
+/** Each label as key=value. */
 export function appLabels(app: StApp): string[] {
   return Object.entries(app.labels ?? {}).map(([key, value]) => `${key}=${value}`);
+}
+
+/**
+ * Text-filter haystack for the Labels column. One label per line: the
+ * filter box cannot type a newline, so a query never matches across two
+ * labels ("platform, empty" does not match team=platform plus empty=).
+ */
+export function appLabelsFilterText(app: StApp): string {
+  return appLabels(app).join('\n');
 }
 
 export function renderAppLabels(app: StApp): string {
