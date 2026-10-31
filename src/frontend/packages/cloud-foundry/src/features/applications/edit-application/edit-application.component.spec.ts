@@ -121,6 +121,36 @@ describe('EditApplicationComponent labels', () => {
     expect(component.editAppForm.invalid).toBe(true);
   });
 
+  it('ties the label input to its hint and message for assistive tech', async () => {
+    const input = fixture.nativeElement.querySelector('#app-label-input') as HTMLInputElement;
+    const describedBy = (input.getAttribute('aria-describedby') ?? '').split(' ');
+    expect(describedBy).toEqual(['app-label-hint', 'app-label-message']);
+    expect(fixture.nativeElement.querySelector('#app-label-hint').textContent).toContain('key=value');
+    const message = fixture.nativeElement.querySelector('#app-label-message') as HTMLElement;
+    expect(message.getAttribute('aria-live')).toBe('polite');
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('team=new');
+    component.addLabel(new Event('keydown', { cancelable: true }));
+    await fixture.whenStable();
+    expect(input.getAttribute('aria-invalid')).toBe('true');
+    expect(message.textContent).toContain('A label with this key already exists.');
+
+    // Text not yet added blocks Update but is not an error in the input.
+    input.value = 'fresh=value';
+    input.dispatchEvent(new Event('input'));
+    await fixture.whenStable();
+    expect(input.hasAttribute('aria-invalid')).toBe(false);
+    expect(message.textContent).toContain('Press Enter to add this label.');
+  });
+
+  it('styles label pills with theme colours, not raw greys', () => {
+    const pill = fixture.nativeElement.querySelector('[aria-label="Remove label team"]')!.parentElement as HTMLElement;
+    expect(pill.className).not.toMatch(/gray/);
+    expect(pill.className).toContain('bg-content-secondary');
+  });
+
   it('ignores the Enter that confirms an IME composition', () => {
     const control = component.editAppForm.controls.labelInput;
     control.setValue('new=value');
