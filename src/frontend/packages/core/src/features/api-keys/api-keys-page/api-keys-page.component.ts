@@ -15,12 +15,11 @@ import {
   keyExpiry,
   timeOfDay,
 } from '../../../shared/signal-list-configs/apiKeys/api-keys-signal-config.service';
-import { CustomTooltipDirective } from '../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { TailwindDialogService } from '../../../shared/services/tailwind-dialog.service';
 import { CreateApiKeyData, CreateApiKeyStepperComponent } from '../create-api-key-stepper/create-api-key-stepper.component';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 import { NoContentMessageComponent } from '../../../shared/components/no-content-message/no-content-message.component';
-import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { ListSubNavAddAction, ListSubNavComponent } from '../../../shared/components/list-sub-nav/list-sub-nav.component';
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 // An expired key keeps its banner for this many days.
@@ -41,11 +40,10 @@ interface KeyBanner {
   standalone: true,
   imports: [
     CommonModule,
-    CustomIconComponent,
-    CustomTooltipDirective,
     PageHeaderComponent,
     SignalListComponent,
     NoContentMessageComponent,
+    ListSubNavComponent,
   ],
 })
 export class ApiKeysPageComponent {
@@ -62,6 +60,12 @@ export class ApiKeysPageComponent {
   });
 
   public readonly listConfig: SignalListConfig<ApiKey>;
+
+  // The list sub-nav, as on the other list pages: "Total API Keys: N" and
+  // the add button above the list.
+  readonly keyCount: Signal<number> = computed(() => this.dataService.apiKeys().length);
+  readonly loading: Signal<boolean> = computed(() => this.hasKeys() === null);
+  readonly createAction: ListSubNavAddAction = { label: 'Create API Key', invoke: () => void this.addApiKey() };
 
   constructor() {
     this.listConfig = this.listConfigService.buildConfig();

@@ -1,10 +1,5 @@
 <app-page-header>
   <h1>API Keys</h1>
-  <div class="page-header-right">
-    <button id="stratos-api-key" class="btn btn-icon" type="button" (click)="addApiKey()" matTooltip="Create API Key">
-      <app-custom-icon>add</app-custom-icon>
-    </button>
-  </div>
 </app-page-header>
 
 @if (banners().length) {
@@ -22,14 +17,11 @@
   </ul>
 }
 
+<app-list-sub-nav title="Total API Keys" [count]="keyCount" [loading]="loading" [addAction]="createAction"></app-list-sub-nav>
+
 @if (hasKeys() === true) {
   <app-signal-list [config]="listConfig"></app-signal-list>
 }
 @if (hasKeys() === false) {
-  <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'"
-  [secondLine]="{
-      text: ''
-    }" [toolbarLink]="{
-      text: 'Create an API key'
-    }" toolbarAlign="stratos-api-key"></app-no-content-message>
+  <app-no-content-message icon="vpn_key" [firstLine]="'You have no API keys'"></app-no-content-message>
 }
