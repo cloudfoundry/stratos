@@ -14,6 +14,7 @@ import { TailwindSnackBarService } from '../../shared/services/tailwind-snackbar
 import { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from './connect-endpoint-dialog/connect-endpoint-dialog.component';
 import { EndpointPermissionsService } from './endpoint-permissions.service';
 import { EndpointsSignalConfigService } from './endpoints-page/endpoints-signal-config.service';
+import { confirmAndUnregister, isPersonalEndpoint } from './unregister-endpoint/unregister-endpoint';
 
 /**
  * True when an endpoint's stored token is expired or effectively dead —
@@ -186,22 +187,21 @@ export class EndpointRowActionsService {
     });
   }
 
-  private openUnregisterConfirm(ep: EndpointModel): void {
+  // The question the Register step's Unregister… asks.
+  private async openUnregisterConfirm(ep: EndpointModel): Promise<void> {
     const { guid, cnsi_type } = ep;
     if (!guid || !cnsi_type) {
       return;
     }
-    const config = new ConfirmationDialogConfig(
-      'Unregister Endpoint',
-      `Are you sure you want to unregister endpoint '${ep.name}'?`,
-      'Unregister',
-      true,
-    );
-    this.confirmDialog.open(config, () => {
-      void this.handleAction(this.endpointsConfig.unregisterEndpoint(guid, cnsi_type), () => {
-        this.snackBar.show(`Unregistered ${ep.name}`);
-      });
+    const gone = await confirmAndUnregister(this.confirmDialog, this.endpointsConfig, this.snackBar, {
+      guid,
+      name: ep.name,
+      type: cnsi_type,
+      personal: isPersonalEndpoint(ep, false, false),
     });
+    if (gone) {
+      this.snackBar.show(`Unregistered ${ep.name}`);
+    }
   }
 
   // W36-B Wave 3: EndpointsDataService returns a single resolved

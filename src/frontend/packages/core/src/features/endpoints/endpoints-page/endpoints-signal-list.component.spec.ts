@@ -42,7 +42,6 @@ function makeEndpointsConfigStub(): EndpointsSignalConfigService {
     refresh: vi.fn(),
     clearFilters: vi.fn(),
     disconnectEndpoint: vi.fn(),
-    unregisterEndpoint: vi.fn(),
   } as unknown as EndpointsSignalConfigService;
 }
 

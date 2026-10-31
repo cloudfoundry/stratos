@@ -207,12 +207,6 @@ export class EndpointsSignalConfigService {
     return this.endpointsData.disconnect(guid);
   }
 
-  // Same shape as disconnect — service-managed lifecycle, single
-  // resolved ActionState (with .error / .message) returned.
-  unregisterEndpoint(guid: string, _type: string): Promise<ActionState> {
-    return this.endpointsData.unregister(guid);
-  }
-
   // Promise-returning register wrapper used by the signal-native registration
   // wizards (git, create-endpoint, helm-hub, kube-config-import). Wraps the
   // ActionState observable in the same pairwise+filter-on-busy-edge pattern

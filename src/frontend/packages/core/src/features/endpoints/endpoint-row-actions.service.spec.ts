@@ -39,8 +39,8 @@ describe('EndpointRowActionsService', () => {
     TestBed.configureTestingModule({
       providers: [
         { provide: Router, useValue: { navigate: vi.fn() } },
-        { provide: EndpointsSignalConfigService, useValue: {} },
-        { provide: ConfirmationDialogService, useValue: { open: vi.fn() } },
+        { provide: EndpointsSignalConfigService, useValue: { unregister: vi.fn().mockResolvedValue({ error: false }) } },
+        { provide: ConfirmationDialogService, useValue: { open: vi.fn(), openWithCancel: vi.fn() } },
         { provide: TailwindDialogService, useValue: tailwindDialog },
         { provide: TailwindSnackBarService, useValue: { show: vi.fn() } },
         {
@@ -84,6 +84,49 @@ describe('EndpointRowActionsService', () => {
   it('offers Disconnect and Reconnect for a connected endpoint the interceptor marked stale this session', () => {
     authState.markStale('guid-1');
     expect(labels(ep('connected', 'guid-1'))).toEqual(['Disconnect', 'Reconnect', 'Edit', 'Unregister']);
+  });
+
+  // The same question the Register step's Unregister… asks
+  describe('Unregister', () => {
+    let confirm: ReturnType<typeof vi.fn>;
+    let unregister: ReturnType<typeof vi.fn>;
+    let show: ReturnType<typeof vi.fn>;
+
+    beforeEach(() => {
+      confirm = TestBed.inject(ConfirmationDialogService).openWithCancel as ReturnType<typeof vi.fn>;
+      unregister = (TestBed.inject(EndpointsSignalConfigService) as unknown as { unregister: ReturnType<typeof vi.fn> }).unregister;
+      show = TestBed.inject(TailwindSnackBarService).show as ReturnType<typeof vi.fn>;
+    });
+
+    const invoke = (row: EndpointModel) => service.buildEndpointActions(row).find(a => a.label === 'Unregister')!.invoke(row);
+
+    // The question stays open: these look only at what it asks.
+    it('asks "Unregister ep1?" with Keep it', () => {
+      void invoke(ep('connected'));
+      const config = confirm.mock.calls[0][0];
+      expect(config.title).toBe('Unregister ep1?');
+      expect(config.message).toBe('This removes the endpoint for all users and ends every connection to it. You can register it again later.');
+      expect([config.cancel, config.confirm, config.critical]).toEqual(['Keep it', 'Unregister', true]);
+    });
+
+    it('says "for you" on a personal endpoint', () => {
+      void invoke(ep('connected', 'guid-1', { creator: { name: 'me', admin: false, system: false } }));
+      expect(confirm.mock.calls[0][0].message).toContain('removes the endpoint for you');
+    });
+
+    it('unregisters and says so once confirmed', async () => {
+      confirm.mockImplementation((_config, onConfirm) => onConfirm());
+      await invoke(ep('connected'));
+      await vi.waitFor(() => expect(show).toHaveBeenCalledWith('Unregistered ep1'));
+      expect(unregister).toHaveBeenCalledWith('guid-1', 'cf');
+    });
+
+    it('does nothing when kept', async () => {
+      confirm.mockImplementation((_config, _onConfirm, onCancel) => onCancel());
+      await invoke(ep('connected'));
+      expect(unregister).not.toHaveBeenCalled();
+      expect(show).not.toHaveBeenCalled();
+    });
   });
 
   // jetstream lets only a Stratos admin edit or unregister while user
