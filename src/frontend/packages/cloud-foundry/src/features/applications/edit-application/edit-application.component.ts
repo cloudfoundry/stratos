@@ -186,6 +186,9 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     delete next[key];
     labels.markAsDirty();
     labels.setValue(next);
+    // A duplicateLabel error on the pending input is stale once its key is
+    // gone; setErrors() results are only cleared by re-running validators.
+    this.editAppForm.controls.labelInput.updateValueAndValidity();
   }
 
   ngOnInit() {
