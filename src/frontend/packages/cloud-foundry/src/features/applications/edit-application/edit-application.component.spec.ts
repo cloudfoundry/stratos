@@ -110,6 +110,14 @@ describe('EditApplicationComponent labels', () => {
     expect(control.hasError('pendingLabel')).toBe(true);
   });
 
+  it('ignores the Enter that confirms an IME composition', () => {
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('new=value');
+    component.addLabel(new KeyboardEvent('keydown', { key: 'Enter', isComposing: true, cancelable: true }));
+    expect(component.editAppForm.controls.labels.value['new']).toBeUndefined();
+    expect(control.value).toBe('new=value');
+  });
+
   it('keeps form open when the labels request fails', async () => {
     updateLabels.mockRejectedValue(new Error('CF rejected the label'));
     component.removeLabel('team');

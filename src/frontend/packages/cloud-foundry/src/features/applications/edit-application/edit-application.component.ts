@@ -159,6 +159,8 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
   private originalLabels: Record<string, string> = {};
 
   addLabel(event: Event): void {
+    // The Enter that confirms an IME composition is not "add this label".
+    if ((event as KeyboardEvent).isComposing) return;
     event.preventDefault();
     const input = this.editAppForm.controls.labelInput;
     const text = input.value.trim();
