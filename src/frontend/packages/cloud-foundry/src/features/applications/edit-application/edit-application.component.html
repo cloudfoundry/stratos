@@ -44,7 +44,7 @@
           placeholder="key=value" autocomplete="off" (keydown.enter)="addLabel($event)">
         <p class="text-sm mt-1">Type a label as key=value and press Enter. Values may be empty.</p>
         @if (editAppForm.controls.labelInput.errors?.invalidLabel) {
-          <p role="alert">Enter a valid label as key=value.</p>
+          <p role="alert">{{ editAppForm.controls.labelInput.errors?.invalidLabel }}</p>
         } @else if (editAppForm.controls.labelInput.errors?.duplicateLabel) {
           <p role="alert">A label with this key already exists.</p>
         } @else if (editAppForm.controls.labelInput.errors?.pendingLabel) {

@@ -13,6 +13,7 @@ import { CustomSlideToggleComponent } from '../../../../../core/src/shared/compo
 import { CfAppsSignalConfigService } from '../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CreateAppStateService } from '../../../shared/data-services/create-app-state.service';
 import { AppDetailDataService } from '../app-detail-data.service';
+import { labelError } from '../../../shared/signal-list-configs/app/app-labels';
 import { StatefulIconComponent } from '../../../../../core/src/core/stateful-icon/stateful-icon.component';
 import { FocusDirective } from '../../../../../core/src/shared/components/focus.directive';
 import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
@@ -168,8 +169,9 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     const separator = text.indexOf('=');
     const key = separator < 0 ? text : text.slice(0, separator);
     const value = separator < 0 ? '' : text.slice(separator + 1);
-    if (!key || key !== key.trim() || /\s/.test(key) || /\s/.test(value) || value.includes('=')) {
-      input.setErrors({ invalidLabel: true });
+    const invalid = labelError(key, value);
+    if (invalid) {
+      input.setErrors({ invalidLabel: invalid });
       return;
     }
     const labels = this.editAppForm.controls.labels;

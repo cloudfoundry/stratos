@@ -110,6 +110,17 @@ describe('EditApplicationComponent labels', () => {
     expect(control.hasError('pendingLabel')).toBe(true);
   });
 
+  it('says why Cloud Foundry would reject a label before it becomes a pill', async () => {
+    const control = component.editAppForm.controls.labelInput;
+    control.setValue('team@x=platform');
+    component.addLabel(new Event('keydown', { cancelable: true }));
+    await fixture.whenStable();
+    expect(component.editAppForm.controls.labels.value['team@x']).toBeUndefined();
+    expect(fixture.nativeElement.textContent)
+      .toContain('Label key "team@x" may only use letters, digits, "-", "_" and ".".');
+    expect(component.editAppForm.invalid).toBe(true);
+  });
+
   it('ignores the Enter that confirms an IME composition', () => {
     const control = component.editAppForm.controls.labelInput;
     control.setValue('new=value');
