@@ -526,36 +526,9 @@ type patchAppBody struct {
 	DiskQuota   *int                   `json:"disk_quota,omitempty"`
 	Instances   *int                   `json:"instances,omitempty"`
 	Environment map[string]interface{} `json:"environment_json,omitempty"`
-}
-
-// patchAppLabels forwards a label delta; null removes a key, while omitted
-// keys (and all annotations) remain untouched in Cloud Foundry.
-func (cf *CloudFoundrySpecification) patchAppLabels(c *echo.Context) error {
-	cnsiGUID, appGUID := c.Param("cnsiGuid"), c.Param("appGuid")
-	if cnsiGUID == "" || appGUID == "" {
-		return echo.NewHTTPError(http.StatusBadRequest, "cnsiGuid and appGuid are required")
-	}
-	var body struct {
-		Labels map[string]*string `json:"labels"`
-	}
-	if err := json.NewDecoder(c.Request().Body).Decode(&body); err != nil || len(body.Labels) == 0 {
-		return echo.NewHTTPError(http.StatusBadRequest, "a non-empty labels object is required")
-	}
-	userGUID, err := cf.getUserGUID(c)
-	if err != nil {
-		return echo.NewHTTPError(http.StatusUnauthorized, "could not determine user")
-	}
-	ctx := c.Request().Context()
-	client, err := newCapiClient(ctx, cf.nativeProxy(), cnsiGUID, userGUID)
-	if err != nil {
-		return err
-	}
-	app, err := client.Apps().Update(ctx, appGUID, &capi.AppUpdateRequest{Metadata: &capi.Metadata{Labels: body.Labels}})
-	if err != nil {
-		return handleCapiError(c, err)
-	}
-	c.Response().Header().Set("X-Stratos-Schema-Version", stratosSchemaVersion)
-	return c.JSON(http.StatusOK, map[string]interface{}{"labels": metaLabels(app.Metadata)})
+	// Labels is a delta: a null value removes the key, omitted keys (and all
+	// annotations) stay as they are in Cloud Foundry.
+	Labels map[string]*string `json:"labels,omitempty"`
 }
 
 // metaError describes a single failed sub-call in a composed PATCH response.
@@ -573,7 +546,7 @@ type metaError struct {
 // Stratos-shape write wrapper around CF v3's multi-endpoint app update.
 //
 // A single Stratos PATCH maps to up to four CAPI v3 sub-calls:
-//   - name           → Apps().Update
+//   - name, labels   → Apps().Update (one call, so CF applies both or neither)
 //   - enable_ssh     → Apps().UpdateFeature("ssh", …)
 //   - memory/disk_quota/instances → Processes().Scale on the web process
 //     (batched into one scale call for all three fields — affected lists the
@@ -629,10 +602,25 @@ func (cf *CloudFoundrySpecification) patchApp(c *echo.Context) error {
 		errs = append(errs, m)
 	}
 
-	// Name update — single PATCH /v3/apps/{guid}
-	if body.Name != nil {
-		if _, updErr := cfClient.Apps().Update(ctx, appGUID, &capi.AppUpdateRequest{Name: body.Name}); updErr != nil {
-			record("CAPI_NAME_UPDATE_FAILED", []string{"name"}, updErr)
+	resp := map[string]interface{}{"guid": appGUID}
+
+	// Name and label update — single PATCH /v3/apps/{guid}. The response
+	// carries what CF now holds, so callers can patch their cached row.
+	if body.Name != nil || len(body.Labels) > 0 {
+		req := &capi.AppUpdateRequest{Name: body.Name}
+		affected := []string{}
+		if body.Name != nil {
+			affected = append(affected, "name")
+		}
+		if len(body.Labels) > 0 {
+			req.Metadata = &capi.Metadata{Labels: body.Labels}
+			affected = append(affected, "labels")
+		}
+		if app, updErr := cfClient.Apps().Update(ctx, appGUID, req); updErr != nil {
+			record("CAPI_APP_UPDATE_FAILED", affected, updErr)
+		} else {
+			resp["name"] = app.Name
+			resp["labels"] = metaLabels(app.Metadata)
 		}
 	}
 
@@ -680,7 +668,6 @@ func (cf *CloudFoundrySpecification) patchApp(c *echo.Context) error {
 		}
 	}
 
-	resp := map[string]interface{}{"guid": appGUID}
 	if len(errs) > 0 {
 		resp["_meta"] = map[string]interface{}{"errors": errs}
 	}

@@ -242,8 +242,6 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       }
     }
 
-    const hasScale = Object.keys(scaleUpdate).length > 0;
-    const hasOther = Object.keys(otherUpdates).length > 0;
     const currentLabels = this.editAppForm.controls.labels.value;
     const labelDelta: Record<string, string | null> = Object.create(null);
     for (const key of Object.keys(this.originalLabels)) {
@@ -252,8 +250,13 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
     for (const [key, value] of Object.entries(currentLabels)) {
       if (!Object.hasOwn(this.originalLabels, key) || this.originalLabels[key] !== value) labelDelta[key] = value;
     }
-    const hasLabels = Object.keys(labelDelta).length > 0;
-    if (!hasScale && !hasOther && !hasLabels) {
+    if (Object.keys(labelDelta).length > 0) {
+      // Labels ride the same PATCH as the name, so CF applies both or neither.
+      otherUpdates['labels'] = labelDelta;
+    }
+    const hasScale = Object.keys(scaleUpdate).length > 0;
+    const hasOther = Object.keys(otherUpdates).length > 0;
+    if (!hasScale && !hasOther) {
       return observableOf({ success: true, redirect: true });
     }
 
@@ -273,22 +276,18 @@ export class EditApplicationComponent implements OnInit, OnDestroy {
       : observableOf({ success: true });
 
     const other$: Observable<{ success: boolean; message?: string }> = hasOther
-      ? defer(() => from(this.detail.update(otherUpdates as { name?: string; enable_ssh?: boolean }))).pipe(
+      ? defer(() => from(this.detail.update(otherUpdates))).pipe(
           map(() => ({ success: true })),
         )
       : observableOf({ success: true });
 
     return scale$.pipe(
       take(1),
-      // After scale resolves, run the name/ssh PATCH (if any). A scale
+      // After scale resolves, run the name/ssh/labels PATCH (if any). A scale
       // failure short-circuits the other update so we don't half-persist.
       switchMap(scaleRes => {
         if (!scaleRes.success) return observableOf(scaleRes);
         return other$.pipe(take(1));
-      }),
-      switchMap(otherRes => {
-        if (!otherRes.success || !hasLabels) return observableOf(otherRes);
-        return defer(() => from(this.detail.updateLabels(labelDelta))).pipe(map(() => ({ success: true })));
       }),
       // Refresh per-instance stats after a scale so the Instances tab's
       // table reflects the new container count. detail.update() already
