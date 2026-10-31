@@ -10,6 +10,7 @@ import { AppApplicationActionsService } from '../../shared/services/application-
 import { AppLifecycleStateService } from './app-lifecycle-state.service';
 import { ApplicationStateService } from '../../shared/services/application-state.service';
 import { StAppDetail, StRoute } from '../../services/endpoint-data/stratos-types';
+import { EndpointDataRegistry } from '../../services/endpoint-data/endpoint-data.registry';
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -177,6 +178,14 @@ describe('AppDetailDataService', () => {
   });
 
   afterEach(() => httpMock.verify());
+
+  it('update() clears its busy state when the endpoint data cannot be acquired', async () => {
+    vi.spyOn(TestBed.inject(EndpointDataRegistry), 'acquire').mockImplementation(() => {
+      throw new Error('registry unavailable');
+    });
+    await expect(svc.update({ name: 'x' })).rejects.toThrow('registry unavailable');
+    expect(svc.updating()).toBe(false);
+  });
 
   it('update() re-reads the app and rejects when a sub-call failed', async () => {
     const updating = svc.update({ name: 'taken', enable_ssh: false });

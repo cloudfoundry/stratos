@@ -409,20 +409,23 @@ export class AppDetailDataService {
    */
   async update(body: PatchAppBody): Promise<void> {
     this._updating.set(true);
-    // Route the PATCH through CnsiAppsSource so the canonical
-    // EDS._apps row updates immediately + the app.update cascade fires.
-    // The local refresh() below still re-fetches the rich detail
-    // (stats/env/routes) that the per-app cache doesn't track.
-    const eds = this.endpointDataRegistry.acquire(this.cnsiGuid);
     try {
-      const source = new CnsiAppsSource(this.cnsiGuid, this.http, eds);
+      // Route the PATCH through CnsiAppsSource so the canonical
+      // EDS._apps row updates immediately + the app.update cascade fires.
+      // The local refresh() below still re-fetches the rich detail
+      // (stats/env/routes) that the per-app cache doesn't track.
+      const eds = this.endpointDataRegistry.acquire(this.cnsiGuid);
       try {
-        await source.update(this.appGuid, body);
+        const source = new CnsiAppsSource(this.cnsiGuid, this.http, eds);
+        try {
+          await source.update(this.appGuid, body);
+        } finally {
+          await this.refresh('app');
+        }
       } finally {
-        await this.refresh('app');
+        this.endpointDataRegistry.release(this.cnsiGuid);
       }
     } finally {
-      this.endpointDataRegistry.release(this.cnsiGuid);
       this._updating.set(false);
     }
   }
