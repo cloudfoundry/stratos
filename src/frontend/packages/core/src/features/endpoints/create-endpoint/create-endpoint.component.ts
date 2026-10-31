@@ -81,7 +81,8 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
   // Present when hosted by the Register Endpoint dialog, which this form
   // closes instead of navigating to /endpoints (the page under the dialog).
   private registerHandle = inject(ENDPOINT_REGISTER_HANDLE, { optional: true });
-  readonly cancelAction = this.registerHandle ? () => this.registerHandle!.close(false) : undefined;
+  // Cancel after step 1 registered only skips the connect: report it.
+  readonly cancelAction = this.registerHandle ? () => this.registerHandle!.close(this.registered()) : undefined;
 
   // step1.validate is an Observable — we mirror it into a signal once the
   // view initialises (it's constructed lazily in ngAfterContentInit).
@@ -139,7 +140,6 @@ export class CreateEndpointComponent implements OnInit, AfterViewInit, OnDestroy
       return c.doConnectSignal() ? c.validSignal() : true;
     }),
     disablePrevious: signal(false).asReadonly(),
-    hideCloseButton: signal(true).asReadonly(),
     finishButtonText: computed(() => {
       const c = this._connect();
       return c?.doConnectSignal() ? 'Connect' : 'Close';
