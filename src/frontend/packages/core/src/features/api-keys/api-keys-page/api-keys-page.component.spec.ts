@@ -74,6 +74,31 @@ describe('ApiKeysPageComponent', () => {
     expect(config.disableClose).toBe(true);
   });
 
+  // The list pages' sub-nav: "Total <Things>: N" and the add button above
+  // the list, not an icon in the page header.
+  describe('the list sub-nav', () => {
+    const q = (sel: string) => (fixture.nativeElement as HTMLElement).querySelector<HTMLElement>(sel);
+
+    it('counts the keys and creates one from Create API Key', async () => {
+      mockDialogService.open.mockReturnValue({ afterClosed: () => of(undefined) });
+      await listKeys([key('a', null), key('b', 5)]);
+      expect(norm(q('[data-test="list-sub-nav-title"]')!)).toBe('Total API Keys: 2');
+      const add = q('[data-test="list-sub-nav-add"]')!;
+      expect(add.textContent).toContain('Create API Key');
+      add.click();
+      expect(mockDialogService.open.mock.calls.at(-1)![0]).toBe(CreateApiKeyStepperComponent);
+    });
+
+    // The button is right above the message: no arrow to the header.
+    it('offers Create API Key with no keys, without the toolbar hint', async () => {
+      await listKeys([]);
+      expect(norm(q('[data-test="list-sub-nav-title"]')!)).toBe('Total API Keys: 0');
+      expect(q('[data-test="list-sub-nav-add"]')).toBeTruthy();
+      expect(fixture.nativeElement.textContent).toContain('You have no API keys');
+      expect(q('.app-no-content-container__link')).toBeNull();
+    });
+  });
+
   it('never renders a New API Key card', async () => {
     await listKeys([key('tool', null)]);
     expect(fixture.nativeElement.textContent).not.toContain('New API Key');
