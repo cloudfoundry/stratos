@@ -464,7 +464,11 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
             };
           }
           if (!req.success) {
-            const messagePieces = leadPieces('Failed to create service instance binding', req.error ?? req.message);
+            const messagePieces = leadPieces(
+              createdName
+                ? `User-provided service instance "${createdName}" was created, but binding it to the application failed`
+                : 'Failed to create service instance binding',
+              req.error ?? req.message);
             return { success: false, message: piecesToText(messagePieces), messagePieces };
           } else {
             // Bind succeeded — CF mutates VCAP_SERVICES on the app. Refresh

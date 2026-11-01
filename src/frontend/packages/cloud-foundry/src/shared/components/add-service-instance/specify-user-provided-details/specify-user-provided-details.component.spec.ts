@@ -399,6 +399,20 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     expect(result.message).not.toContain('Failed to create service instance binding');
   });
 
+  it('says the instance was created when the bind after a create fails', async () => {
+    const { fixture, component } = await setup();
+    component.createEditServiceInstance.controls.name.setValue('my-ups');
+    TestBed.inject(CsiStateService).setApp('app-1', {});
+    await fixture.whenStable();
+    vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
+      .mockReturnValue(of({ success: false, message: 'bind said no' }));
+
+    const result = await firstValueFrom(component.onNext());
+
+    expect(result.success).toBe(false);
+    expect(result.message).toBe('User-provided service instance "my-ups" was created, but binding it to the application failed: bind said no');
+  });
+
   it('says a bind to an existing instance is unknown, not failed', async () => {
     const { fixture, component } = await setup();
     component.formMode = CreateServiceFormMode.BindServiceInstance;
