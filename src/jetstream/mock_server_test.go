@@ -194,6 +194,11 @@ func expectCFRow() *sqlmock.Rows {
 		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true, "", "", "", "")
 }
 
+func expectCFRowWithCA(ca string) *sqlmock.Rows {
+	return sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, true, "", "", "", ca)
+}
+
 func expectCFAndCERows() *sqlmock.Rows {
 	return sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
 		AddRow(mockCFGUID, "Some fancy CF Cluster", "cf", mockAPIEndpoint, mockAuthEndpoint, mockAuthEndpoint, mockDopplerEndpoint, true, mockClientId, cipherClientSecret, false, "", "", "", "").

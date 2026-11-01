@@ -781,10 +781,9 @@ func (p *portalProxy) updateEndpoint(ec *echo.Context) error {
 		updates = true
 	}
 
-	// CA Cert
-	caCert := params.CACert
-	if strings.Compare(endpoint.CACert, caCert) != 0 {
-		endpoint.CACert = caCert
+	// CA Cert - only when sent; an empty value clears it
+	if params.CACert != nil && endpoint.CACert != *params.CACert {
+		endpoint.CACert = *params.CACert
 		updates = true
 	}
 
