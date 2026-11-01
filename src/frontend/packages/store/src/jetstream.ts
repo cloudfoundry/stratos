@@ -63,6 +63,15 @@ export const stripMarkup = (text: string): string => piecesToText(htmlToPieces(t
 
 const textPiece = (text: string): ErrorPiece[] => [{ text, style: 'text' }];
 
+// A message that may quote an HTML page after a lead-in, such as capi's
+// `resource not found (status 404): <html>...`: the page is read, the
+// lead-in kept, and the text itself is used when the page has no words.
+const messagePieces = (text: string): ErrorPiece[] => {
+  if (!looksLikeHtml(text)) return textPiece(text);
+  const pieces = htmlToPieces(text);
+  return pieces.length ? pieces : textPiece(text);
+};
+
 /**
  * The most useful human-readable message in whatever a request threw, for
  * display after a caller's own lead-in, as styled pieces of plain text: an
@@ -88,8 +97,8 @@ export function extractHttpErrorPieces(err: unknown): ErrorPiece[] {
         if (first.message) return textPiece(first.message);
       }
       const top = body as { message?: string; error?: string };
-      if (top.message) return textPiece(top.message);
-      if (top.error) return textPiece(top.error);
+      if (top.message) return messagePieces(top.message);
+      if (top.error) return messagePieces(top.error);
     }
     if (typeof body === 'string' && body) {
       if (!looksLikeHtml(body)) return textPiece(body);

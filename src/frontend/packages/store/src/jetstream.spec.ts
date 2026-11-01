@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { describe, expect, it } from 'vitest';
 import { extractHttpErrorMessage, extractHttpErrorPieces, leadError, leadPieces, stripMarkup } from './jetstream';
-import { ErrorPiece } from './upstream-error-text';
+import { ErrorPiece, piecesToText } from './upstream-error-text';
 
 const t = (s: string): ErrorPiece => ({ text: s, style: 'text' });
 const h = (s: string): ErrorPiece => ({ text: s, style: 'heading' });
@@ -40,6 +40,16 @@ describe('extractHttpErrorPieces', () => {
 
   it('reads an HTML page sent as the whole response body', () => {
     expect(extractHttpErrorPieces(httpError(nginx502))).toEqual([h('502 Bad Gateway'), t('\nnginx')]);
+  });
+
+  it('reads an HTML page quoted in a non-envelope error, keeping its prefix', () => {
+    const prefix = 'resource not found (status 404): ';
+    for (const key of ['error', 'message']) {
+      const pieces = extractHttpErrorPieces(httpError({ [key]: prefix + nginx502 }));
+      expect(piecesToText(pieces)).toBe('resource not found (status 404):\n502 Bad Gateway\nnginx');
+      expect(extractHttpErrorMessage(httpError({ [key]: prefix + nginx502 }))).not.toContain('<');
+    }
+    expect(extractHttpErrorMessage(httpError({ error: 'quota <nil> not found' }))).toBe('quota <nil> not found');
   });
 
   it('passes a plain-text response body through untouched', () => {
