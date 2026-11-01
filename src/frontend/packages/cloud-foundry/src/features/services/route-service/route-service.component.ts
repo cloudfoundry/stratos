@@ -130,6 +130,7 @@ export class RouteServiceComponent {
     // Rebind: drop the existing binding first (route-service bindings are
     // immutable except metadata, so "edit" = unbind + rebind).
     const existing = this.binding();
+    let unbindDone = false;
     try {
       if (existing) {
         const unbound = await writeWithJob(
@@ -141,6 +142,7 @@ export class RouteServiceComponent {
           // old one may still be there cannot be right.
           return this.endedUnknown(`Unbind "${this.instanceName(existing.serviceInstanceGuid)}"`, unknownHow(unbound));
         }
+        unbindDone = true;
       }
       const body = {
         relationships: {
@@ -167,6 +169,9 @@ export class RouteServiceComponent {
       }
     } catch (err: unknown) {
       this.errorMessage.set(`Failed to bind service: ${extractHttpErrorMessage(err)}`);
+      // The old binding is already gone in CF: re-read so the page stops
+      // showing it (a retry would otherwise delete it again and get a 404).
+      if (unbindDone) this.reload();
       throw err;
     } finally {
       this.busy.set(false);
