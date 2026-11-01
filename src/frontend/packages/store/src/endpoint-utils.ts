@@ -9,6 +9,25 @@ export function getFullEndpointApiUrl(endpoint: EndpointModel) {
 }
 
 /**
+ * What two endpoint addresses are compared by: scheme and host in lower
+ * case, no default port, no repeated or trailing slash, no query or
+ * fragment. A typed address without a scheme is read as https, as
+ * registration does. Stored and displayed addresses keep their form. The
+ * backend's endpointURLKey applies the same rules.
+ */
+export function endpointUrlKey(address: string | null | undefined): string {
+  const trimmed = (address ?? '').trim();
+  const withScheme = /^[a-z][a-z0-9+.-]*:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`;
+  if (!URL.canParse(withScheme)) {
+    return trimmed;
+  }
+  // URL already lower-cases the scheme and host and drops a default port.
+  const u = new URL(withScheme);
+  const user = u.username ? `${u.username}${u.password ? `:${u.password}` : ''}@` : '';
+  return `${u.protocol}//${user}${u.host}${u.pathname.replace(/\/{2,}/g, '/').replace(/\/+$/, '')}`;
+}
+
+/**
  * Counts endpoints whose api_url appears 2+ times across the given set — i.e.
  * the number of endpoints sitting in a "shared URL" group. Returns `null`
  * when all URLs are distinct so callers can early-exit (e.g. `@if … as count`).
@@ -36,7 +55,7 @@ export function duplicateUrlStats(endpoints: EndpointModel[]): { count: number; 
   }
   const urlCounts = new Map<string, number>();
   for (const ep of endpoints) {
-    const url = getFullEndpointApiUrl(ep);
+    const url = endpointUrlKey(getFullEndpointApiUrl(ep));
     urlCounts.set(url, (urlCounts.get(url) ?? 0) + 1);
   }
   const sizes = [...urlCounts.values()].filter(count => count > 1).sort((a, b) => a - b);

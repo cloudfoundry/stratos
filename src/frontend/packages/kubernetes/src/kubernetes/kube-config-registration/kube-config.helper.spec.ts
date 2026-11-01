@@ -79,6 +79,18 @@ describe('KubeConfigHelper', () => {
     expect(rowState(clusters[0]).warning).toBe(true);
   });
 
+  it('treats an address written differently as the same URL', () => {
+    setup([endpoint('other-name', 'K8S.example.com:6443')]);
+    helper.parse(kubeConfigYaml('fresh', 'https://k8s.example.com:6443/')).subscribe();
+    expect(rowState(clusters[0]).warning).toBe(true);
+  });
+
+  it('marks connect-only when the address is written differently', () => {
+    setup([endpoint('fresh', 'K8S.example.com:6443')]);
+    helper.parse(kubeConfigYaml('fresh', 'https://k8s.example.com:6443/')).subscribe();
+    expect(clusters[0]._guid).toBe('guid-fresh');
+  });
+
   it('marks connect-only when name and URL match an existing endpoint', () => {
     setup([endpoint('fresh', '1.2.3.4:6443')]);
     helper.parse(kubeConfigYaml('fresh', 'https://1.2.3.4:6443')).subscribe();

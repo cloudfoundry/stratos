@@ -86,6 +86,7 @@
                       ? ($safeNavigationMigration((customEndpoints | async)?.urls) ?? [])
                       : ($safeNavigationMigration((existingPersonalEndpoints | async)?.urls) ?? [])
                   "
+                  [appUniqueKey]="urlKey"
                 />
                 @if (registerForm.controls.urlField.errors?.required) {
                   <div class="text-danger text-sm mt-1">URL is required</div>

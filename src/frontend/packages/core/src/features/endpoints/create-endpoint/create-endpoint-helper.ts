@@ -3,7 +3,7 @@ import { map } from 'rxjs/operators';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Injector } from '@angular/core';
 
-import { EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
+import { EndpointsDataService, endpointUrlKey, getFullEndpointApiUrl } from '@stratosui/store';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
@@ -11,6 +11,7 @@ import { SessionService } from '../../../shared/services/session.service';
 
 type EndpointObservable = Observable<{
   names: string[],
+  /** Address keys (endpointUrlKey): compare a typed address through urlKey. */
   urls: string[],
 }>;
 
@@ -21,6 +22,7 @@ export class CreateEndpointHelperComponent {
   existingSystemEndpoints: EndpointObservable;
   existingPersonalEndpoints: EndpointObservable;
   existingEndpoints: EndpointObservable;
+  readonly urlKey = endpointUrlKey;
 
   constructor(
     public sessionService: SessionService,
@@ -41,7 +43,7 @@ export class CreateEndpointHelperComponent {
     this.existingSystemEndpoints = currentPage$.pipe(
       map(endpoints => ({
         names: endpoints.filter(ep => ep.creator.system).map(ep => ep.name),
-        urls: endpoints.filter(ep => ep.creator.system).map(ep => getFullEndpointApiUrl(ep)),
+        urls: endpoints.filter(ep => ep.creator.system).map(ep => endpointUrlKey(getFullEndpointApiUrl(ep))),
       }))
     );
     this.existingPersonalEndpoints = combineLatest([
@@ -50,13 +52,13 @@ export class CreateEndpointHelperComponent {
     ]).pipe(
       map(([endpoints, profile]) => ({
         names: endpoints.filter(ep => !ep.creator.system && ep.creator.name === profile.userName).map(ep => ep.name),
-        urls: endpoints.filter(ep => !ep.creator.system && ep.creator.name === profile.userName).map(ep => getFullEndpointApiUrl(ep)),
+        urls: endpoints.filter(ep => !ep.creator.system && ep.creator.name === profile.userName).map(ep => endpointUrlKey(getFullEndpointApiUrl(ep))),
       }))
     );
     this.existingEndpoints = currentPage$.pipe(
       map(endpoints => ({
         names: endpoints.map(ep => ep.name),
-        urls: endpoints.map(ep => getFullEndpointApiUrl(ep)),
+        urls: endpoints.map(ep => endpointUrlKey(getFullEndpointApiUrl(ep))),
       }))
     );
 
