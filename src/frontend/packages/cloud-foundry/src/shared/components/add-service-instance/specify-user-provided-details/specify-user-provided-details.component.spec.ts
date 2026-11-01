@@ -13,7 +13,7 @@ import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CloudFoundryUserProvidedServicesService } from '../../../services/cloud-foundry-user-provided-services.service';
 import { ServiceCatalogDataService } from '../../../../services/endpoint-data/service-catalog-data.service';
-import { CsiModeService } from '../csi-mode.service';
+import { CreateServiceFormMode, CsiModeService } from '../csi-mode.service';
 import { CsiStateService } from '../csi-state.service';
 import { SpecifyUserProvidedDetailsComponent } from "./specify-user-provided-details.component";
 
@@ -382,6 +382,34 @@ describe('SpecifyUserProvidedDetailsComponent create form', () => {
     expect(upsServiceStub.createUserProvidedService).toHaveBeenCalledWith(
       'cf-1', expect.any(String), expect.objectContaining({ name: 'my-ups', spaceGuid: 'space-1' }));
     expect(result).toEqual({ success: true, redirect: true });
+  });
+
+  it('says an unknown bind outcome is unknown, and that the instance was created', async () => {
+    const { fixture, component } = await setup();
+    component.createEditServiceInstance.controls.name.setValue('my-ups');
+    TestBed.inject(CsiStateService).setApp('app-1', {});
+    await fixture.whenStable();
+    vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
+      .mockReturnValue(of({ success: false, unknown: 'still-running' }));
+
+    const result = await firstValueFrom(component.onNext());
+
+    expect(result.success).toBe(false);
+    expect(result.message).toContain('User-provided service instance "my-ups" was created. Binding it to the application: still running in Cloud Foundry');
+    expect(result.message).not.toContain('Failed to create service instance binding');
+  });
+
+  it('says a bind to an existing instance is unknown, not failed', async () => {
+    const { fixture, component } = await setup();
+    component.formMode = CreateServiceFormMode.BindServiceInstance;
+    TestBed.inject(CsiStateService).setApp('app-1', {});
+    await fixture.whenStable();
+    vi.spyOn(TestBed.inject(CsiModeService), 'createApplicationServiceBinding')
+      .mockReturnValue(of({ success: false, unknown: 'ended' }));
+
+    const result = await firstValueFrom(component.onNext());
+
+    expect(result.message).toContain('Binding the service instance to the application: the operation ended, but its result could not be determined.');
   });
 
   // nginx's own 502 page, as a proxy in front of Stratos sends it, through
