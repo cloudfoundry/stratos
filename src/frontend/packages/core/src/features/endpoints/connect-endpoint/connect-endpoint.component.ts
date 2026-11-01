@@ -44,11 +44,23 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private pConnectService!: ConnectEndpointService;
   // A host may bind this before its own service exists (create-endpoint's
   // connect step); the setter ignores the unset value and waits for the real one.
+  // The host makes a new service each time its step is entered; the form
+  // outlives it when the step keeps this component (the connect dialog).
   @Input() set connectService(service: ConnectEndpointService | undefined) {
-    if (!service || this.pConnectService) {
+    if (!service || service === this.pConnectService) {
       return;
     }
+    const previous = this.pConnectService;
     this.pConnectService = service;
+    if (previous && this.endpointForm && this.sameEndpoint(previous.config, service.config)) {
+      // Same endpoint: keep what was typed, and hand it to the new service.
+      this.setData();
+      this.valid.emit(this.endpointForm.valid);
+      return;
+    }
+    if (previous) {
+      this.teardown();
+    }
     this.init(service.config);
   }
   get connectService(): ConnectEndpointService {
@@ -88,6 +100,18 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private authFormComponentRef!: ComponentRef<IAuthForm>;
 
   private subs: Subscription[] = [];
+
+  private sameEndpoint(a: ConnectEndpointConfig, b: ConnectEndpointConfig): boolean {
+    return a.guid === b.guid && a.type === b.type && a.subType === b.subType;
+  }
+
+  // Drop the form built for an earlier endpoint
+  private teardown() {
+    safeUnsubscribe(...this.subs);
+    this.subs = [];
+    this.authFormComponentRef?.destroy();
+    this.container?.clear();
+  }
 
   private init(config: ConnectEndpointConfig) {
     const endpoint = entityCatalog.getEndpoint(config.type, config.subType);

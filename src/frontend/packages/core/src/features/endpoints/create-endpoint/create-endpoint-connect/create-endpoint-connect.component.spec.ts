@@ -193,6 +193,59 @@ describe('CreateEndpointConnectComponent', () => {
     });
   });
 
+  // Review, Previous or the completed Register header, then Next again: the
+  // dialog enters the step again with Connect now still ticked, so the form
+  // is not rebuilt. It must follow the new service.
+  describe('entered again with the form kept', () => {
+    const config = { name: 'ep', guid: 'ep-1', type: 'token-endpoint', subType: null, ssoAllowed: false };
+    const fill = async (token: string) => {
+      const input = fixture.nativeElement.querySelector('app-token-endpoint input') as HTMLInputElement;
+      input.value = token;
+      input.dispatchEvent(new Event('input'));
+      await fixture.whenStable();
+    };
+    const dataOf = (service: ConnectEndpointService | undefined) => (service as any).pData;
+
+    beforeEach(async () => {
+      fixture.componentRef.setInput('fromConnect', true);
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      await fill('my-token');
+    });
+
+    it('keeps Connect enabled and the typed credentials', async () => {
+      const first = component.connectService();
+      expect(component.valid).toBe(true);
+
+      component.onEnter(config as any);
+      await fixture.whenStable();
+
+      expect(component.connectService()).not.toBe(first);
+      expect(component.valid).toBe(true);
+      const input = fixture.nativeElement.querySelector('app-token-endpoint input') as HTMLInputElement;
+      expect(input.value).toBe('my-token');
+    });
+
+    it('submits on the live service', async () => {
+      component.onEnter(config as any);
+      await fixture.whenStable();
+      const live = component.connectService();
+      expect(dataOf(live)?.authType).toBe('token');
+
+      await fill('changed');
+      expect(dataOf(live)?.authVal.token).toBe('changed');
+    });
+
+    it('rebuilds the form when the endpoint changed', async () => {
+      component.onEnter({ ...config, guid: 'ep-2' } as any);
+      await fixture.whenStable();
+      const input = fixture.nativeElement.querySelector('app-token-endpoint input') as HTMLInputElement;
+      expect(input.value).toBe('');
+      expect(component.valid).toBe(false);
+      expect(dataOf(component.connectService())?.authType).toBe('token');
+    });
+  });
+
   describe('the Register strip', () => {
     const config = { name: 'ep', guid: 'ep-1', type: 'cf', subType: null, ssoAllowed: false };
     const strip = () => fixture.nativeElement.querySelector('.connect__strip') as HTMLElement | null;
