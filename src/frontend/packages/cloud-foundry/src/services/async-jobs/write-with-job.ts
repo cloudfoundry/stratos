@@ -104,7 +104,7 @@ export async function writeWithJob<T>(
   // 200-family (including 204): sync-fast. Body is the canonical fast-path
   // envelope `{state: 'COMPLETE', result: T}`; unwrap so the caller sees T
   // directly, matching the polled-handoff path's shape (job.result → state).
-  if (resp.status >= 200 && resp.status < 202) {
+  if (resp.status === 200 || resp.status === 201 || resp.status === 204) {
     return { status: 'COMPLETE', state: unwrapFastPathBody(resp.body) as T | undefined };
   }
 

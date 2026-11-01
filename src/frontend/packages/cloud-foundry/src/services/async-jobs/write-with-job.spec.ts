@@ -82,6 +82,19 @@ describe('writeWithJob', () => {
     expect(result.state).toBeNull();
   });
 
+  it('treats a 204 No Content as a completed write', async () => {
+    const promise = writeWithJob(
+      http,
+      http.delete('/pp/v1/cf/apps/cnsi/app1', { observe: 'response' }),
+    );
+
+    ctrl.expectOne('/pp/v1/cf/apps/cnsi/app1').flush(null, { status: 204, statusText: 'No Content' });
+
+    const result = await promise;
+    expect(result.status).toBe('COMPLETE');
+    expect(result.state).toBeNull();
+  });
+
   it('matches polled-path shape: fast-path envelope unwraps to the same T as job.result', async () => {
     // The whole point of the unwrap: a caller that types AsyncJobResult<T>
     // sees the same T regardless of which path served the request.
