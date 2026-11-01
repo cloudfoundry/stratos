@@ -21,6 +21,7 @@ interface BindExistingInstanceForm {
 
 import { StatefulIconComponent, safeUnsubscribe, urlValidationExpression, environment, StepOnNextResult, isValidJsonValidator } from '@stratosui/core';
 import { leadPieces, piecesToText } from '@stratosui/store';
+import { unknownOutcomeMessage } from '../../../../services/async-jobs/unknown-outcome-message';
 import { AppNameUniqueDirective } from '../../../directives/app-name-unique.directive/app-name-unique.directive';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { combineLatest as obsCombineLatest, Observable, of as observableOf, Subscription, from } from 'rxjs';
@@ -431,7 +432,7 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
           return observableOf({ success: false, redirect: false, message: piecesToText(messagePieces), messagePieces });
         }
         if (state.bindAppGuid && result.guid) {
-          return this.createApplicationServiceBinding(result.guid, state);
+          return this.createApplicationServiceBinding(result.guid, state, data.name);
         }
         return observableOf({ success: true, redirect: true });
       })
@@ -444,10 +445,24 @@ export class SpecifyUserProvidedDetailsComponent implements OnInit, OnDestroy {
     );
   }
 
-  private createApplicationServiceBinding(serviceGuid: string, data: any): Observable<StepOnNextResult> {
+  // createdName: set when this step has just created the instance, so an
+  // outcome that is not a plain success can say the instance exists.
+  private createApplicationServiceBinding(serviceGuid: string, data: any, createdName?: string): Observable<StepOnNextResult> {
     return this.modeService.createApplicationServiceBinding(serviceGuid, data.cfGuid, data.bindAppGuid, data.bindAppParams)
       .pipe(
         map(req => {
+          if (req.unknown) {
+            return {
+              success: false,
+              message: unknownOutcomeMessage(
+                createdName
+                  ? `User-provided service instance "${createdName}" was created. Binding it to the application`
+                  : 'Binding the service instance to the application',
+                'The application\'s Services tab',
+                req.unknown,
+              ),
+            };
+          }
           if (!req.success) {
             const messagePieces = leadPieces('Failed to create service instance binding', req.error ?? req.message);
             return { success: false, message: piecesToText(messagePieces), messagePieces };
