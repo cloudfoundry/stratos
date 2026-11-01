@@ -550,7 +550,9 @@ type UpdateEndpointParams struct {
 	ClientID      string `json:"clientID" form:"clientID" query:"clientID"`
 	ClientSecret  string `json:"clientSecret" form:"clientSecret" query:"clientSecret"`
 	AllowSSO      string `json:"allowSSO" form:"allowSSO" query:"allowSSO"`
-	CACert        string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
+	// CACert is a pointer so an absent ca_cert (leave the stored CA alone)
+	// differs from an empty one (clear it).
+	CACert *string `json:"ca_cert" form:"ca_cert" query:"ca_cert"`
 }
 
 // BindOnce -- allows to call *echo.Context.Bind() multiple times on the same request
