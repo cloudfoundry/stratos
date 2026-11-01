@@ -126,6 +126,8 @@ export class HelmReleaseSocketService implements OnDestroy {
           this.writeReleaseResources(messageObj);
         } else if (messageObj.kind === 'ManifestErrors') {
           if (messageObj.data) {
+            // A repeat can open a second message; keep no earlier one orphaned
+            this.manifestErrorsSnackBar?.dismiss();
             this.manifestErrorsSnackBar = this.snackbarService.show(
               'Errors were found when parsing this workload. Not all resources may be shown', 'Dismiss'
             );
