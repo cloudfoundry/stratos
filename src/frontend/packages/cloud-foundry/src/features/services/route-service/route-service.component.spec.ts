@@ -193,4 +193,33 @@ describe('RouteServiceComponent — bind patches the binding from the response',
     );
     expect(component.rebinding()).toBe(false);
   });
+  it('re-reads the binding when a rebind unbinds but the new bind fails', async () => {
+    component.selectedSiGuid.set('si-1');
+    const bound = submitBindStep();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      {
+        guid: 'b-1', route_service_url: 'https://logger.example', last_operation: { state: 'succeeded' },
+        relationships: { route: { data: { guid: 'r-1' } }, service_instance: { data: { guid: 'si-1' } } },
+      },
+      { status: 201, statusText: 'Created' },
+    );
+    await bound;
+    expect(bindingFetches).toBe(1);
+
+    component.startRebind();
+    component.selectedSiGuid.set('si-1');
+    const done = submitBindStep();
+    http.expectOne(r => r.method === 'DELETE' && r.url === '/pp/v1/cf/service_route_bindings/cf-1/b-1')
+      .flush({ state: 'COMPLETE' }, { status: 200, statusText: 'OK' });
+    await fixture.whenStable();
+    http.expectOne(r => r.method === 'POST' && r.url === '/pp/v1/cf/service_route_bindings/cf-1').flush(
+      { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'broker rejected the bind' }] },
+      { status: 422, statusText: 'Unprocessable Entity' },
+    );
+    await expect(done).rejects.toBeDefined();
+
+    // The old binding is gone in CF: the page must not keep showing it.
+    expect(component.binding()).toBeNull();
+    expect(bindingFetches).toBe(2);
+  });
 });
