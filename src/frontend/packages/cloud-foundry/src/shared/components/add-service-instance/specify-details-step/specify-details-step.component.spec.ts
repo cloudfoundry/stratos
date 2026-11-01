@@ -415,6 +415,41 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
     httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
   });
 
+  it('does not say a deferred bind is done', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: true, deferred: true }));
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    component.bindExistingInstance = true;
+    component.bindableServiceInstances$ = of([{ guid: 'si-2', name: 'instance-two' }] as StServiceInstance[]);
+    component.selectExistingInstanceForm.controls.serviceInstance.setValue('si-2');
+
+    await expect(firstValueFrom(component.onNext())).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith(
+      'Service instance "instance-two" is still provisioning. It will be bound to the application automatically when ready.',
+      'Dismiss', { duration: 4000 });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
+  it('says a deferred bind after a create is not done yet', async () => {
+    const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: true, deferred: true }));
+    const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');
+    const finalResult = firstValueFrom(component.onNext());
+    httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
+      {
+        state: 'COMPLETE',
+        result: { jobGuid: 'job-1', operation: 'service_instance.create', links: { service_instances: 'https://cf/v3/service_instances/si-new' } },
+      },
+      { status: 200, statusText: 'OK' },
+    );
+
+    await expect(finalResult).resolves.toEqual({ success: true, redirect: true });
+    expect(snackBarOpen).toHaveBeenCalledWith(
+      'Service instance "my-instance" created. It is still provisioning, so it will be bound to the application automatically when ready.',
+      'Dismiss', { duration: 4000 });
+    httpMock.match(() => true).forEach(r => r.flush({}, { status: 200, statusText: 'OK' }));
+  });
+
   it('chains into bind when bindAppGuid is set and a SI guid is extractable', async () => {
     const { component, modeServiceStub, csiStateStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
     const snackBarOpen = vi.spyOn((component as any).snackBar, 'open');

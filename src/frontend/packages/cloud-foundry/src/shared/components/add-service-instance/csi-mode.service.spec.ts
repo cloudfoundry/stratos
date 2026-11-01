@@ -277,6 +277,34 @@ describe('CsiModeService', () => {
       httpMock.verify();
     });
 
+    // The instance is still being created after the in-line wait: the bind
+    // is retried in the background, so it has not happened yet and must not
+    // come back as a plain success.
+    it('says the bind is deferred, not done, when the instance is still provisioning after the wait', async () => {
+      vi.useFakeTimers();
+      try {
+        TestBed.overrideProvider(TailwindSnackBarService, { useValue: { open: vi.fn(), error: vi.fn() } });
+        const svc = TestBed.inject(CsiModeService);
+        const httpMock = TestBed.inject(HttpTestingController);
+
+        const finalResult = firstValueFrom(svc.createApplicationServiceBinding('si-1', 'cnsi-1', 'app-1', {}));
+        await vi.advanceTimersByTimeAsync(0);
+        httpMock.expectOne('/pp/v1/cf/service_bindings/cnsi-1').flush(
+          { errors: [{ code: 10008, title: 'CF-UnprocessableEntity', detail: 'There is an operation in progress for the service instance' }] },
+          { status: 422, statusText: 'Unprocessable Entity' },
+        );
+        for (let i = 0; i < 8; i++) {
+          await vi.advanceTimersByTimeAsync(3_000);
+          httpMock.match('/pp/v1/cf/service_instances/cnsi-1/si-1')
+            .forEach(r => r.flush({ lastOperation: { type: 'create', state: 'in progress' } }));
+        }
+
+        await expect(finalResult).resolves.toEqual({ success: true, deferred: true });
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     // Recorded backend answers: a sync or async broker, on either resolve
     // path, binds the same way.
     for (const broker of ['sync', 'async']) {

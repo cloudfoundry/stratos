@@ -671,6 +671,13 @@ export class SpecifyDetailsStepComponent implements AfterContentInit {
       );
       return { success: false, message: piecesToText(messagePieces), messagePieces };
     }
+    if (bindResult.deferred) {
+      // The instance is still provisioning: the bind is retried in the
+      // background, so say what will happen, not that it is bound.
+      return this.routeToServices(created
+        ? `Service instance "${siName}" created. It is still provisioning, so it will be bound to the application automatically when ready.`
+        : `Service instance "${siName}" is still provisioning. It will be bound to the application automatically when ready.`);
+    }
     // CF mutated VCAP_SERVICES on the bound app. We routeToServices below
     // (away from any app-detail route), so the legacy ngrx prefetch was
     // priming state nothing on this navigation reads. The app's env-vars

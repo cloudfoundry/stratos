@@ -69,6 +69,10 @@ const defaultViewDetail = {
 export interface BindResult {
   success: boolean;
   unknown?: UnknownHow;
+  // The instance is still being provisioned, so the bind has not happened:
+  // it is retried in the background and its outcome reported separately.
+  // success is true (the step may leave) but the app is not bound yet.
+  deferred?: boolean;
   message?: string;
   // What a failed bind threw, so a step can show `message` styled.
   error?: unknown;
@@ -259,7 +263,7 @@ export class CsiModeService {
     // background poll + retry bind, and surface the outcome via snackbar
     // when CF settles. The user is free to navigate away in the meantime.
     void this.runBindInBackground(serviceInstanceGuid, cfGuid, appGuid, fireBind, backgroundWaitMs);
-    return { success: true };
+    return { success: true, deferred: true };
   }
 
   private async runBindInBackground(
