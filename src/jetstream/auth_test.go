@@ -705,7 +705,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
 
-				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(adminEndpointRows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(adminEndpointArgs[0], mockAdmin.ConnectedUser.GUID).
@@ -752,7 +752,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
-				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(userEndpoint1Rows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(userEndpoint1Args[0], mockEndpointAdmin1.ConnectedUser.GUID).
@@ -780,7 +780,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
 				// args is the api url
-				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(userEndpoint1Args[3]).WillReturnRows(adminAndUserEndpointRows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminAndUserEndpointRows)
 
 				// connected system endpoint found
 				mock.ExpectQuery(selectAnyFromTokens).
@@ -820,7 +820,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(userEndpoint1Rows)
 
-				mock.ExpectQuery(selectAnyFromCNSIs).WithArgs(userEndpoint1Args[3]).WillReturnRows(adminAndUserEndpointRows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminAndUserEndpointRows)
 
 				// an admin's connection shared with every user: not the user's to disconnect
 				mock.ExpectQuery(selectAnyFromTokens).
@@ -859,7 +859,7 @@ func TestLoginToCNSIWithUserEndpointsEnabled(t *testing.T) {
 
 				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
 
-				mock.ExpectQuery(selectAnyFromCNSIs).WillReturnRows(adminEndpointRows)
+				mock.ExpectQuery(selectFromCNSIs).WillReturnRows(adminEndpointRows)
 
 				mock.ExpectQuery(selectAnyFromTokens).
 					WithArgs(adminEndpointArgs[0], mockEndpointAdmin1.ConnectedUser.GUID).

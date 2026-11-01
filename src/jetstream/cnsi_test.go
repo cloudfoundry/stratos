@@ -343,7 +343,7 @@ func TestRegisterEndpointStartsRefreshRoutine(t *testing.T) {
 				)
 
 			mock.
-				ExpectQuery(selectAnyFromCNSIs).
+				ExpectQuery(selectFromCNSIs).
 				WillReturnRows(
 					sqlmock.NewRows(
 						[]string{"guid", "name", "cnsi_type", "api_endpoint", "auth_endpoint", "token_endpoint", "doppler_logging_endpoint", "skip_ssl_validation", "client_id", "client_secret", "sso_allowed", "sub_type", "meta_data", "creator", "ca_cert"},

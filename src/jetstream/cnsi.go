@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -332,26 +333,56 @@ func (p *portalProxy) ListAdminEndpoints(userID string) ([]*api.CNSIRecord, erro
 	return cnsiList, nil
 }
 
-// listCNSIByAPIEndpoint - receives a URL as string
+var repeatedSlashes = regexp.MustCompile(`/{2,}`)
+
+var defaultPorts = map[string]string{"https": "443", "http": "80"}
+
+// endpointURLKey is what two endpoint addresses are compared by: scheme
+// and host in lower case, no default port, no repeated or trailing slash,
+// no query or fragment. Stored and displayed addresses keep their form.
+// The frontend's endpointUrlKey applies the same rules.
+func endpointURLKey(u *url.URL) string {
+	scheme := strings.ToLower(u.Scheme)
+	host := strings.ToLower(u.Hostname())
+	if strings.Contains(host, ":") {
+		host = "[" + host + "]"
+	}
+	if port := u.Port(); port != "" && port != defaultPorts[scheme] {
+		host += ":" + port
+	}
+	if u.User != nil {
+		host = u.User.String() + "@" + host
+	}
+	path := strings.TrimRight(repeatedSlashes.ReplaceAllString(u.Path, "/"), "/")
+	return scheme + "://" + host + path
+}
+
+// listCNSIByAPIEndpoint returns every endpoint at the same address as the
+// given URL, compared by endpointURLKey.
 func (p *portalProxy) listCNSIByAPIEndpoint(apiEndpoint string) ([]*api.CNSIRecord, error) {
 	slog.Debug("listCNSIByAPIEndpoint", "apiEndpoint", apiEndpoint)
 
-	var err error
 	cnsiList := []*api.CNSIRecord{}
-
-	cnsiRepo, err := p.GetStoreFactory().EndpointStore()
+	target, err := url.Parse(apiEndpoint)
 	if err != nil {
 		return cnsiList, fmt.Errorf("listCNSIByAPIEndpoint: %s", err)
 	}
+	key := endpointURLKey(target)
 
-	cnsiList, err = cnsiRepo.ListByAPIEndpoint(apiEndpoint, p.Config.EncryptionKeyInBytes)
+	// A console has tens of endpoints at most, so the whole list is read and
+	// filtered here: SQL cannot apply the key the same way on every database.
+	all, err := p.ListEndpoints()
 	if err != nil {
 		return cnsiList, err
 	}
 
-	for _, cnsi := range cnsiList {
+	for _, cnsi := range all {
+		if cnsi.APIEndpoint == nil || endpointURLKey(cnsi.APIEndpoint) != key {
+			continue
+		}
 		// Ensure that trailing slash is removed from the API Endpoint
 		cnsi.APIEndpoint.Path = strings.TrimRight(cnsi.APIEndpoint.Path, "/")
+		cnsiList = append(cnsiList, cnsi)
 	}
 
 	return cnsiList, nil
