@@ -298,6 +298,46 @@ describe('CreateEndpointCfStep1Component', () => {
     });
   });
 
+  describe('already registered', () => {
+    async function withRegistered(host: string) {
+      const registered = {
+        guid: 'reg', name: 'reg', cnsi_type: 'cf',
+        api_endpoint: { Scheme: 'https', Host: host, Path: '' },
+        creator: { name: 'admin', admin: true, system: true },
+      } as EndpointModel;
+      (TestBed.inject(EndpointsDataService) as any)._endpoints.set(new Map([['reg', registered]]));
+      fixture = TestBed.createComponent(CreateEndpointCfStep1Component);
+      component = fixture.componentInstance;
+      // The scope (system or personal) comes from permissions this test
+      // does not set up; the address comparison is the same in each.
+      component.customEndpoints = component.existingEndpoints;
+      await fixture.whenStable();
+    }
+
+    async function typeUrl(value: string): Promise<string> {
+      const url = fixture.nativeElement.querySelector('#url') as HTMLInputElement;
+      url.value = value;
+      url.dispatchEvent(new Event('input', { bubbles: true }));
+      await fixture.whenStable();
+      return (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+    }
+
+    it('warns when the address is the one registered', async () => {
+      await withRegistered('API.example.com:443');
+      expect(await typeUrl('https://API.example.com:443')).toContain('An endpoint at this URL is already registered.');
+    });
+
+    it('warns when the same address is written differently', async () => {
+      await withRegistered('API.example.com:443');
+      expect(await typeUrl('api.example.com/')).toContain('An endpoint at this URL is already registered.');
+    });
+
+    it('does not warn for another port', async () => {
+      await withRegistered('api.example.com');
+      expect(await typeUrl('api.example.com:8443')).not.toContain('An endpoint at this URL is already registered.');
+    });
+  });
+
   // Review mode: the step shows what is registered. Name and address are
   // locked; for those who may manage the endpoint, TLS stays editable.
   describe('review', () => {
