@@ -62,27 +62,29 @@ func (a *noAuth) GetUser(userGUID string) (*api.ConnectedUser, error) {
 }
 
 func (a *noAuth) BeforeVerifySession(c *echo.Context) {
-	expiry := sessionNeverExpires
-
-	if _, err := a.p.GetSession(c); err != nil {
-		// No session, so create one
-		session, newErr := a.p.NewSession(c)
-		if newErr != nil {
-			slog.Warn("unable to create the session", "error", newErr)
-		} else if saveErr := a.p.SaveSession(c, session); saveErr != nil {
-			slog.Warn("unable to save the session", "error", saveErr)
-		}
+	sessionValues := map[string]interface{}{
+		"user_id": noAuthUserID,
+		"exp":     sessionNeverExpires,
 	}
 
-	sessionValues := make(map[string]interface{})
-	sessionValues["user_id"] = noAuthUserID
-	sessionValues["exp"] = expiry
+	// This runs on every verify, not only at login. A session that is
+	// already signed in as the no-auth user is kept, so repeated and
+	// overlapping calls share one session and one XSRF token. A missing or
+	// dead cookie starts a new session.
+	var err error
+	if session, getErr := a.p.GetSession(c); getErr == nil && session.Values["user_id"] == noAuthUserID {
+		err = a.p.setSessionValues(c, sessionValues)
+	} else {
+		err = a.p.setLoginSession(c, sessionValues)
+	}
 
-	if err := a.p.setLoginSession(c, sessionValues); err == nil {
-		//Makes sure the client gets the right session expiry time
-		if err := a.p.handleSessionExpiryHeader(c); err != nil {
-			slog.Warn("unable to set the session expiry header", "error", err)
-		}
+	if err != nil {
+		slog.Warn("unable to set the no-auth session", "error", err)
+		return
+	}
+	//Makes sure the client gets the right session expiry time
+	if err := a.p.handleSessionExpiryHeader(c); err != nil {
+		slog.Warn("unable to set the session expiry header", "error", err)
 	}
 }
 
