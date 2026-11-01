@@ -523,7 +523,7 @@ describe('SpecifyDetailsStepComponent.onNext (v3 + writeWithJob)', () => {
 
   it('reports a bind that ended with an unknown result after a create', async () => {
     const { component, modeServiceStub, httpMock } = await setup({ bindAppGuid: 'app-1' });
-    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, unknown: true }));
+    modeServiceStub.createApplicationServiceBinding.mockReturnValue(of({ success: false, unknown: 'ended' }));
     const finalResult = firstValueFrom(component.onNext());
 
     httpMock.expectOne('/pp/v1/cf/service_instances/cnsi-1').flush(
