@@ -176,6 +176,23 @@ describe('HelmReleaseSocketService.ngOnDestroy', () => {
     expect(snackbar.hide).not.toHaveBeenCalled();
   });
 
+  // The socket can send the warning again; the earlier one must not be
+  // left on screen with no reference to dismiss it by.
+  it('dismisses the earlier warning when it shows another', () => {
+    const first = { dismiss: vi.fn(), afterDismissed: () => of(null) };
+    const second = { dismiss: vi.fn(), afterDismissed: () => of(null) };
+    snackbar.show.mockReturnValueOnce(first as any).mockReturnValueOnce(second as any);
+    const socket = TestBed.inject(HelmReleaseSocketService);
+    socket.start();
+    ws.server.next(JSON.stringify({ kind: 'ManifestErrors', data: true }));
+    ws.server.next(JSON.stringify({ kind: 'ManifestErrors', data: true }));
+
+    socket.ngOnDestroy();
+
+    expect(first.dismiss).toHaveBeenCalled();
+    expect(second.dismiss).toHaveBeenCalledTimes(1);
+  });
+
   it('leaves other messages alone when it showed no warning', () => {
     const socket = TestBed.inject(HelmReleaseSocketService);
     socket.start();
