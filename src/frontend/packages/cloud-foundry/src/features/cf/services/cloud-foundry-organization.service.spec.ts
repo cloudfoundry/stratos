@@ -1,6 +1,6 @@
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { Signal, WritableSignal, signal } from '@angular/core';
+import { EnvironmentInjector, Injector, Signal, WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -97,6 +97,26 @@ describe('CloudFoundryOrganizationService — quotaDefinition$', () => {
     expect(quotaReads).toBe(1);
     expect(seen).toEqual([q]);
     sub.unsubscribe();
+  });
+
+  // The service is provided per org page. Each visit must leave nothing
+  // behind once the page (and its service) is destroyed.
+  it('leaves no quota bridge alive after the page is destroyed', () => {
+    const root = TestBed.inject(EnvironmentInjector);
+    for (let visit = 0; visit < 5; visit++) {
+      const page = Injector.create({ providers: [{ provide: CloudFoundryOrganizationService }], parent: root }) as Injector & { destroy(): void };
+      const svc = page.get(CloudFoundryOrganizationService);
+      svc.quotaDefinition$.subscribe();
+      org.set({ guid: 'org-1', name: 'a', quotaGuid: 'quota-1' } as StOrgDetail);
+      TestBed.tick();
+      page.destroy();
+    }
+
+    quotaReads = 0;
+    quota.set({ guid: 'quota-1', name: 'default' } as StOrgQuota);
+    TestBed.tick();
+
+    expect(quotaReads).toBe(0);
   });
 
   it('looks the quota up again only when the quota changes', () => {

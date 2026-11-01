@@ -1,4 +1,4 @@
-import { Signal, WritableSignal, signal } from '@angular/core';
+import { EnvironmentInjector, Injector, Signal, WritableSignal, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -90,6 +90,40 @@ describe('CloudFoundrySpaceService — spaceQuotaDefinition$', () => {
     expect(quotaReads).toBe(1);
     expect(seen.at(-1)).toEqual(q);
     sub.unsubscribe();
+  });
+
+  // The service is provided per space page. Each visit must leave nothing
+  // behind once the page (and its service) is destroyed.
+  it('leaves no quota bridge alive after the page is destroyed', () => {
+    const root = TestBed.inject(EnvironmentInjector);
+    for (let visit = 0; visit < 5; visit++) {
+      const page = Injector.create({ providers: [{ provide: CloudFoundrySpaceService }], parent: root }) as Injector & { destroy(): void };
+      const svc = page.get(CloudFoundrySpaceService);
+      svc.spaceQuotaDefinition$.subscribe();
+      space.set({ guid: 'space-1', name: 'a', quotaGuid: 'quota-1' } as StSpace);
+      TestBed.tick();
+      page.destroy();
+    }
+
+    quotaReads = 0;
+    quota.set({ guid: 'quota-1', name: 'small' } as StSpaceQuota);
+    TestBed.tick();
+
+    expect(quotaReads).toBe(0);
+  });
+
+  it('keeps the quota alive for a later subscriber while the page lives', () => {
+    const svc = TestBed.inject(CloudFoundrySpaceService);
+    space.set({ guid: 'space-1', name: 'a', quotaGuid: 'quota-1' } as StSpace);
+    svc.spaceQuotaDefinition$.subscribe().unsubscribe();
+    TestBed.tick();
+    const q = { guid: 'quota-1', name: 'small' } as StSpaceQuota;
+    quota.set(q);
+    TestBed.tick();
+
+    const seen: (StSpaceQuota | null)[] = [];
+    svc.spaceQuotaDefinition$.subscribe(v => seen.push(v));
+    expect(seen.at(-1)).toEqual(q);
   });
 
   it('looks the quota up again only when the quota changes', () => {

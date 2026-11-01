@@ -1,5 +1,5 @@
-import { Injectable, Injector, Signal, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { DestroyRef, Injectable, Injector, Signal, inject } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { observeSignal } from '@stratosui/store';
 import { combineLatest, Observable, of } from 'rxjs';
 import { distinctUntilChanged, filter, map, shareReplay, switchMap } from 'rxjs/operators';
@@ -35,6 +35,7 @@ export class CloudFoundrySpaceService {
   private cnsiUsers = inject(CfUsersPagedDataService);
   private spaceDataRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
+  private destroyRef = inject(DestroyRef);
 
   // Registry returns the same instance as the space-base component's provider,
   // so reads here hit the shared, in-flight-deduped signal — no extra HTTP.
@@ -155,6 +156,9 @@ export class CloudFoundrySpaceService {
       switchMap(quotaGuid => quotaGuid
         ? observeSignal(this.quotaData.spaceQuota(this.cfGuid, quotaGuid).value, this.injector)
         : of(null as StSpaceQuota | null)),
+      // observeSignal ends only on unsubscribe and shareReplay keeps its one
+      // subscription, so end it with the page that owns this service.
+      takeUntilDestroyed(this.destroyRef),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
     // Effective quota: prefer space-specific, fall back to org. Org-quota

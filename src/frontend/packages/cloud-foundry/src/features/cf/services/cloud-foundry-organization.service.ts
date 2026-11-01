@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, Injector, Signal, computed, inject } from '@angular/core';
-import { toObservable } from '@angular/core/rxjs-interop';
+import { DestroyRef, Injectable, Injector, Signal, computed, inject } from '@angular/core';
+import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
 import { Route } from '@angular/router';
 import { observeSignal } from '@stratosui/store';
 import { combineLatest, EMPTY, Observable } from 'rxjs';
@@ -76,6 +76,7 @@ export class CloudFoundryOrganizationService {
   private cnsiUsers = inject(CfUsersPagedDataService);
   private orgDataRegistry = inject(OrgDataRegistry);
   private injector = inject(Injector);
+  private destroyRef = inject(DestroyRef);
 
   readonly orgDataService = this.orgDataRegistry.acquire(
     this.activeRouteCfOrgSpace.cfGuid,
@@ -250,6 +251,9 @@ export class CloudFoundryOrganizationService {
           filter((q): q is StOrgQuota => !!q),
         );
       }),
+      // observeSignal ends only on unsubscribe and shareReplay keeps its one
+      // subscription, so end it with the page that owns this service.
+      takeUntilDestroyed(this.destroyRef),
       shareReplay({ bufferSize: 1, refCount: false }),
     );
 
