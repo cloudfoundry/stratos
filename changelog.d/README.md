@@ -81,6 +81,7 @@ so in each section the plugin fixes follow the core ones.
 - Accessibility
 - API Keys
 - Applications
+- Cloud Foundry
 - Endpoints
 - Organizations and Spaces
 - Performance
