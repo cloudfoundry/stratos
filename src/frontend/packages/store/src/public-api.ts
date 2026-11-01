@@ -149,6 +149,7 @@ export {
 export type { APIResource, EntityInfo, NormalizedResponse } from './types/api.types';
 export {
   getFullEndpointApiUrl,
+  endpointUrlKey,
   countDuplicateUrlEndpoints,
   countDuplicateUrlEndpointsByType,
   duplicateUrlStats,

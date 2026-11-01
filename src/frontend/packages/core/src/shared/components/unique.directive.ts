@@ -12,6 +12,8 @@ export class UniqueDirective implements Validator, OnChanges {
   constructor() { }
 
   readonly appUnique = input<any[]>();
+  /** Compares the value as this key, for lists held as keys (e.g. endpointUrlKey). */
+  readonly appUniqueKey = input<(value: any) => any>(value => value);
 
   ngOnChanges(changes: SimpleChanges): void {
     // When the appUnique input changes, re-validate the control
@@ -25,7 +27,7 @@ export class UniqueDirective implements Validator, OnChanges {
     this._control = c;
 
     const appUnique = this.appUnique();
-    const found = appUnique ? appUnique.indexOf(c.value) >= 0 : false;
+    const found = appUnique ? appUnique.indexOf(this.appUniqueKey()(c.value)) >= 0 : false;
     return found ? {
       appUnique: {
         message: 'Value is not unique'

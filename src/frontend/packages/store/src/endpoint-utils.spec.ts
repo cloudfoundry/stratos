@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { countDuplicateUrlEndpoints, formatDuplicateUrlEndpointsMessage } from './endpoint-utils';
+import { countDuplicateUrlEndpoints, endpointUrlKey, formatDuplicateUrlEndpointsMessage } from './endpoint-utils';
 import { EndpointModel } from './types/endpoint.types';
 
 function ep(host: string, type: string = 'cf'): EndpointModel {
@@ -103,5 +103,37 @@ describe('formatDuplicateUrlEndpointsMessage', () => {
 
   it('returns null when no URLs are shared', () => {
     expect(formatDuplicateUrlEndpointsMessage([ep('a'), ep('b')])).toBeNull();
+  });
+});
+
+// Same cases as the backend's TestEndpointURLKey: both sides must agree on
+// which addresses are the same.
+describe('endpointUrlKey', () => {
+  it.each([
+    ['https://api.example.com', 'https://API.Example.com', true],
+    ['https://api.example.com', 'HTTPS://api.example.com', true],
+    ['https://api.example.com', 'https://api.example.com:443', true],
+    ['http://api.example.com', 'http://api.example.com:80', true],
+    ['https://github.com/norman-abramovitz', 'https://github.com//norman-abramovitz', true],
+    ['https://x.example.com', 'https://x.example.com/', true],
+    ['https://x.example.com/cf', 'https://x.example.com/cf/', true],
+    ['https://api.example.com', 'https://api.example.com?a=b#c', true],
+    ['https://[::1]', 'https://[::1]:443', true],
+    ['https://api.example.com', 'https://api.example.com:8443', false],
+    ['https://api.example.com:8443', 'https://api.example.com:9443', false],
+    ['http://api.example.com', 'https://api.example.com', false],
+    ['https://x.example.com/cf', 'https://x.example.com/cf2', false],
+    ['https://x.example.com/cf', 'https://x.example.com', false],
+  ])('%s vs %s → same: %s', (a, b, same) => {
+    expect(endpointUrlKey(a) === endpointUrlKey(b)).toBe(same);
+  });
+
+  it('reads a typed address without a scheme as https, as registration does', () => {
+    expect(endpointUrlKey(' API.example.com/ ')).toBe(endpointUrlKey('https://api.example.com'));
+  });
+
+  it('counts addresses that differ only in host case and a default port as one shared URL', () => {
+    const upper = { cnsi_type: 'cf', api_endpoint: { Scheme: 'https', Host: 'API.sys.example.com:443', Path: '/' } } as unknown as EndpointModel;
+    expect(countDuplicateUrlEndpoints([ep('api.sys.example.com'), upper])).toBe(2);
   });
 });

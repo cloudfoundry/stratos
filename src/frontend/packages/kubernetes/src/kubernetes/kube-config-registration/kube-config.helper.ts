@@ -6,7 +6,7 @@ import { filter, map, take, tap } from 'rxjs/operators';
 import { EndpointsService } from '../../../../core/src/core/endpoints.service';
 import { createGuid } from '../../../../core/src/core/utils.service';
 import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
-import { getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
+import { endpointUrlKey, getFullEndpointApiUrl } from '../../../../store/src/endpoint-utils';
 import { createSignalWrapper, EndpointModel } from '../../../../store/src/public-api';
 import { KubeConfigAuthHelper } from './kube-config-auth.helper';
 import { KubeConfigFile, KubeConfigFileCluster } from './kube-config.types';
@@ -135,7 +135,7 @@ export class KubeConfigHelper {
     const found = endpoints.find(item => item.name === cluster.name);
     if (found) {
       // If the URL is the same, then we will just connect to the existing endpoint
-      if (getFullEndpointApiUrl(found) === cluster.cluster.server && !!cluster._user && !!found.guid) {
+      if (endpointUrlKey(getFullEndpointApiUrl(found)) === endpointUrlKey(cluster.cluster.server) && !!cluster._user && !!found.guid) {
         cluster._guid = found.guid;
         cluster._state.next({
           message: 'This endpoint is already registered — importing will connect it, not register a new one. Rename it to register a separate endpoint.',
@@ -151,7 +151,7 @@ export class KubeConfigHelper {
       // A registered endpoint already uses this URL under a different name.
       // Duplicate URLs are allowed (the endpoints list surfaces them with a
       // warning icon), so inform the user but don't block the import.
-      if (endpoints.find(item => getFullEndpointApiUrl(item) === cluster.cluster.server)) {
+      if (endpoints.find(item => endpointUrlKey(getFullEndpointApiUrl(item)) === endpointUrlKey(cluster.cluster.server))) {
         reset = false;
         cluster._state.next({
           message: 'Another endpoint is already registered at this URL — importing will register this as an additional endpoint.',
