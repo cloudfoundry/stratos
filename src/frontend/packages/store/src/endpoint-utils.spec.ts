@@ -101,6 +101,18 @@ describe('formatDuplicateUrlEndpointsMessage', () => {
     expect(msg).toMatch(/^2 \S+ URLs are shared by 8 endpoints \(4 and 4 per URL\); A \S+ URL is shared by 4 endpoints\.$/);
   });
 
+  // Several autoscalers for one service broker of one Cloud Foundry are the
+  // same autoscaler registered more than once, whatever addresses they use.
+  it('counts endpoints linked to one service broker as sharing it', () => {
+    const linked = (host: string, broker: string) => ({
+      ...ep(host, 'autoscaler'), endpoint_metadata: { cf_guid: 'cf-1', broker_guid: broker },
+    } as EndpointModel);
+    expect(formatDuplicateUrlEndpointsMessage([linked('as-1.sys.x.com', 'b1'), linked('as-2.sys.x.com', 'b1')]))
+      .toMatch(/^A \S+ service broker is shared by 2 endpoints\.$/);
+    expect(formatDuplicateUrlEndpointsMessage([linked('as-1.sys.x.com', 'b1'), linked('as-2.sys.x.com', 'b2')]))
+      .toBeNull();
+  });
+
   it('returns null when no URLs are shared', () => {
     expect(formatDuplicateUrlEndpointsMessage([ep('a'), ep('b')])).toBeNull();
   });

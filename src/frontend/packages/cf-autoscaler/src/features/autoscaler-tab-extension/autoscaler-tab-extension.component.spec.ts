@@ -11,6 +11,7 @@ import { describe, it, expect, beforeEach, afterAll, afterEach } from 'vitest';
 import { ApplicationService } from '@stratosui/cloud-foundry';
 import { ApplicationServiceMock } from '@test-framework/cf';
 import { CoreModule, TabNavService } from '@stratosui/core';
+import { EndpointsDataService } from '@stratosui/store';
 import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { AutoscalerTabExtensionComponent } from './autoscaler-tab-extension.component';
@@ -51,10 +52,10 @@ describe('AutoscalerTabExtensionComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(AutoscalerTabExtensionComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   afterEach(() => {
@@ -84,6 +85,44 @@ describe('AutoscalerTabExtensionComponent', () => {
 
   it('should be created', () => {
     expect(component).toBeTruthy();
+  });
+
+  // The tab says which autoscaler it talks to, and when the choice is not
+  // clear-cut.
+  describe('which autoscaler', () => {
+    const target = async (body: object) => {
+      TestBed.inject(HttpTestingController)
+        .expectOne(r => r.url.endsWith('/autoscaler/apps/mockAppGuid/target'))
+        .flush({ duplicates: { registered: [], bound: [] }, ...body });
+      await settle();
+    };
+    const text = () => (fixture.nativeElement as HTMLElement).textContent!.replace(/\s+/g, ' ');
+    const ref = (name: string) => ({ guid: name, name, url: `https://${name}.sys.x.com`, personal: false });
+
+    it('names the registered autoscaler', async () => {
+      await target({ source: 'registered', endpoint: ref('lab-autoscaler') });
+      expect(text()).toContain('Autoscaler: lab-autoscaler (https://lab-autoscaler.sys.x.com)');
+    });
+
+    it('shows the guessed address, with a way to register it', async () => {
+      (TestBed.inject(EndpointsDataService) as any)._endpoints.set(new Map([['mockCfGuid', {
+        guid: 'mockCfGuid', name: 'lab', cnsi_type: 'cf', api_endpoint: { Scheme: 'https', Host: 'api.sys.x.com', Path: '' },
+      }]]));
+      await target({ source: 'default' });
+      expect(text()).toContain('Autoscaler: https://autoscaler.sys.x.com (address guessed; not registered)');
+      const link = (fixture.nativeElement as HTMLElement).querySelector('a[href="/endpoints/new/autoscaler"]');
+      expect(link?.textContent?.trim()).toBe('Register it');
+    });
+
+    it('warns when the autoscaler is registered more than once', async () => {
+      await target({ source: 'registered', endpoint: ref('A'), duplicates: { registered: [ref('A'), ref('B')], bound: [] } });
+      expect(text()).toContain('This autoscaler is registered 2 times: A, B. Using A.');
+    });
+
+    it('warns when the app is bound to more than one autoscaler', async () => {
+      await target({ source: 'registered', endpoint: ref('X'), duplicates: { registered: [], bound: ['X', 'Y'] } });
+      expect(text()).toContain('This app is bound to 2 autoscalers: X, Y. Each can scale it.');
+    });
   });
 
   // The policy loads after the tab first renders, so the gauges must follow

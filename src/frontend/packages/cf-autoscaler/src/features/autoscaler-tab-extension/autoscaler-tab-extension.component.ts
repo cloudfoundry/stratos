@@ -13,7 +13,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { BaseChartDirective } from 'ng2-charts';
 
 import { of } from 'rxjs';
@@ -44,6 +44,7 @@ import {
   CardAppUsageComponent,
   StApp,
 } from '@stratosui/cloud-foundry';
+import { EndpointsDataService, getFullEndpointApiUrl } from '@stratosui/store';
 import { isAutoscalerEnabled } from '../../core/autoscaler-helpers/autoscaler-available';
 import { buildMetricData } from '../../core/autoscaler-helpers/autoscaler-transform-metric';
 import { AutoscalerConstants } from '../../core/autoscaler-helpers/autoscaler-util';
@@ -51,6 +52,7 @@ import { AutoscalerInfoDataService } from '../../services/domain-data/autoscaler
 import { AutoscalerMetricDataService, AutoscalerMetricQueryParams } from '../../services/domain-data/autoscaler-metric-data.service';
 import { AutoscalerPolicyDataService } from '../../services/domain-data/autoscaler-policy-data.service';
 import { AutoscalerScalingHistoryDataService } from '../../services/domain-data/autoscaler-scaling-history-data.service';
+import { AutoscalerTarget, AutoscalerTargetDataService } from '../../services/domain-data/autoscaler-target-data.service';
 import {
   AppAutoscaleMetricChart,
   AppAutoscalerEvent,
@@ -106,7 +108,9 @@ interface AutoscalerTabPaginationParams {
       catchError(() => of(false)),
     );
 
-    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid);
+    // The app's own autoscaler: a registered one need not be at the
+    // Cloud Foundry's default address.
+    const autoscalerEnabled = isAutoscalerEnabled(endpointGuid, appGuid);
 
     return canEditApp$.pipe(
       switchMap(canEditSpace => canEditSpace ? autoscalerEnabled : of(false)),
@@ -133,6 +137,7 @@ interface AutoscalerTabPaginationParams {
     PollingIndicatorComponent,
     NoContentMessageComponent,
     ScrollFadeComponent,
+    RouterLink,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -145,6 +150,8 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
   private policyData = inject(AutoscalerPolicyDataService);
   private metricData = inject(AutoscalerMetricDataService);
   private scalingHistoryData = inject(AutoscalerScalingHistoryDataService);
+  private targetData = inject(AutoscalerTargetDataService);
+  private endpointsData = inject(EndpointsDataService);
   private router = inject(Router);
   private injector = inject(Injector);
 
@@ -181,6 +188,23 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
         unit };
     });
   });
+
+  // Which autoscaler the tab talks to; null until the server says.
+  autoscalerTarget: Signal<AutoscalerTarget | null> = signal(null);
+  // The address the server guesses when no autoscaler is registered for
+  // the app: the Cloud Foundry's, with api. replaced by autoscaler.
+  readonly guessedUrl = computed(() => {
+    const cf = this.endpointsData.endpoints().get(this.applicationService.cfGuid);
+    if (!cf) {
+      return '';
+    }
+    const url = new URL(getFullEndpointApiUrl(cf));
+    url.hostname = url.hostname.startsWith('api.') ? `autoscaler.${url.hostname.slice(4)}` : `autoscaler.${url.hostname}`;
+    return url.origin;
+  });
+  readonly registeredNames = computed(() =>
+    (this.autoscalerTarget()?.duplicates.registered ?? []).map(e => e.name).join(', '));
+  readonly boundNames = computed(() => (this.autoscalerTarget()?.duplicates.bound ?? []).join(', '));
 
   // True once the policy lookup has found none (or it was detached); false
   // while it loads, so the notice does not flash before the policy lands.
@@ -255,7 +279,9 @@ export class AutoscalerTabExtensionComponent implements OnInit, OnDestroy {
     // path).
     const cfGuid = this.applicationService.cfGuid;
     const appGuid = this.applicationService.appGuid;
-    this.autoscalerInfoData.load(cfGuid);
+    this.autoscalerInfoData.load(cfGuid, appGuid);
+    this.autoscalerTarget = this.targetData.target(cfGuid, appGuid);
+    void this.targetData.load(cfGuid, appGuid);
 
     // Policy state from the signal-native data service, fetched below. The
     // policy signal holds null while loading (or with no policy) and the

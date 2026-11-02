@@ -97,16 +97,38 @@ export function formatDuplicateUrlEndpointsMessage(endpoints: EndpointModel[]): 
   }
   const clauses = dups.map(dup => {
     const label = entityCatalog.getEndpoint(dup.type)?.definition?.label ?? dup.type;
+    const [one, many, per] = dup.shared === 'broker'
+      ? ['service broker', 'service brokers', 'broker'] : ['URL', 'URLs', 'URL'];
     if (dup.sizes.length === 1) {
-      return `A ${label} URL is shared by ${dup.count} endpoints`;
+      return `A ${label} ${one} is shared by ${dup.count} endpoints`;
     }
     const sizesList = listFormat.format(dup.sizes.map(String));
-    return `${dup.sizes.length} ${label} URLs are shared by ${dup.count} endpoints (${sizesList} per URL)`;
+    return `${dup.sizes.length} ${label} ${many} are shared by ${dup.count} endpoints (${sizesList} per ${per})`;
   });
   return `${clauses.join('; ')}.`;
 }
 
-export function countDuplicateUrlEndpointsByType(endpoints: EndpointModel[]): { type: string; count: number; sizes: number[] }[] {
+/**
+ * An endpoint linked to a Cloud Foundry service broker (an autoscaler: its
+ * metadata holds cf_guid and broker_guid) is the same service as any other
+ * endpoint linked to that broker, whatever its URL.
+ */
+function brokerKey(ep: EndpointModel): string | null {
+  const meta = ep.endpoint_metadata;
+  return meta?.cf_guid && meta?.broker_guid ? `${meta.cf_guid}/${meta.broker_guid}` : null;
+}
+
+function sharedStats(keys: string[]): { count: number; sizes: number[] } | null {
+  const counts = new Map<string, number>();
+  keys.forEach(key => counts.set(key, (counts.get(key) ?? 0) + 1));
+  const sizes = [...counts.values()].filter(count => count > 1).sort((a, b) => a - b);
+  const count = sizes.reduce((sum, size) => sum + size, 0);
+  return count > 0 ? { count, sizes } : null;
+}
+
+export function countDuplicateUrlEndpointsByType(
+  endpoints: EndpointModel[],
+): { type: string; count: number; sizes: number[]; shared?: 'broker' }[] {
   if (!endpoints || endpoints.length < 2) {
     return [];
   }
@@ -120,11 +142,16 @@ export function countDuplicateUrlEndpointsByType(endpoints: EndpointModel[]): { 
       byType.set(type, [ep]);
     }
   }
-  const counts: { type: string; count: number; sizes: number[] }[] = [];
+  const counts: { type: string; count: number; sizes: number[]; shared?: 'broker' }[] = [];
   for (const [type, group] of byType) {
-    const stats = duplicateUrlStats(group);
+    const linked = group.filter(ep => brokerKey(ep));
+    const stats = duplicateUrlStats(group.filter(ep => !brokerKey(ep)));
     if (stats) {
       counts.push({ type, ...stats });
+    }
+    const brokerStats = sharedStats(linked.map(ep => brokerKey(ep)!));
+    if (brokerStats) {
+      counts.push({ type, ...brokerStats, shared: 'broker' });
     }
   }
   return counts;
