@@ -23,4 +23,14 @@ describe('Autoscaler endpoint definition', () => {
   it('sorts after Cloud Foundry (renderPriority 1)', () => {
     expect(definition.renderPriority).toBeGreaterThan(1);
   });
+
+  // An autoscaler serves one Cloud Foundry: the Register form asks which.
+  it('is registered against a Cloud Foundry', () => {
+    expect(definition.linkedToCf).toBe(true);
+  });
+
+  // Calls use the user's Cloud Foundry connection.
+  it('takes no connection of its own', () => {
+    expect(definition.unConnectable).toBe(true);
+  });
 });

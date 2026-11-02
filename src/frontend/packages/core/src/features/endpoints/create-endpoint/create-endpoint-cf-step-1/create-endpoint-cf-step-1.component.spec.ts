@@ -90,6 +90,12 @@ describe('CreateEndpointCfStep1Component', () => {
     expect(component).toBeTruthy();
   });
 
+  it('asks for no linked Cloud Foundry when registering a Cloud Foundry', async () => {
+    component.registerForm.controls.urlField.setValue('https://api.sys.example.com');
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).querySelector('#linked-cf')).toBeNull();
+  });
+
   it('labels the CA certificate box with its caption', () => {
     const root: HTMLElement = fixture.nativeElement;
     const box = root.querySelector('textarea[formControlName="caCertField"]');

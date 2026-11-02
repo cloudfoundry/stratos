@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterContentInit, Component, DestroyRef, Injector, Input, computed, effect, inject, input, output, signal, untracked } from '@angular/core';
-import { takeUntilDestroyed, toObservable } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
+import { ChangeDetectionStrategy, AfterContentInit, Component, DestroyRef, Injector, Input, computed, effect, inject, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
 import { CustomCheckboxComponent } from '../../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -14,8 +15,8 @@ import {
   entityCatalog,
   getFullEndpointApiUrl,
 } from '@stratosui/store';
-import { combineLatest, firstValueFrom, from, Observable } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { combineLatest, firstValueFrom, from, Observable, of } from 'rxjs';
+import { catchError, map, startWith, switchMap } from 'rxjs/operators';
 
 import { getIdFromRoute } from '../../../../core/utils.service';
 import { IStepperStep, StepOnNextFunction, StepOnNextResult } from '../../../../shared/components/stepper/step/step.component';
@@ -46,6 +47,30 @@ interface RegisteredEndpoint {
   skipSSL: boolean;
   caCert: string;
 }
+
+// A service broker a linked endpoint can be tied to.
+interface BrokerChoice {
+  guid: string;
+  name: string;
+  url: string;
+}
+
+function urlHost(url: string): string {
+  try {
+    return new URL(url.includes('://') ? url : `https://${url}`).hostname.toLowerCase();
+  } catch {
+    return '';
+  }
+}
+
+/** The domain an address sits on: its host without the first label, port ignored. */
+export function cfDomain(url: string): string {
+  const host = urlHost(url.trim());
+  const dot = host.indexOf('.');
+  return dot > 0 ? host.slice(dot + 1) : '';
+}
+
+const firstLabel = (url: string) => urlHost(url.trim()).split('.')[0];
 
 interface CreateEndpointForm {
   nameField: FormControl<string>;
@@ -85,6 +110,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   private permissions = inject(EndpointPermissionsService);
   private confirmDialog = inject(ConfirmationDialogService);
   private hostInjector = inject(Injector);
+  private http = inject(HttpClient);
 
   // Set: the step shows this endpoint instead of registering one.
   readonly reviewEndpoint = input<EndpointModel | null>(null);
@@ -149,6 +175,44 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   readonly showAdvancedOptions = signal(false);
   lastSkipSSLValue = false;
 
+  // A type linked to a Cloud Foundry (an autoscaler) is registered against a
+  // Cloud Foundry endpoint on the address's domain, and its broker there.
+  private readonly urlValue = signal('');
+  readonly linkedToCf = computed(() => !!this.endpoint()?.definition?.linkedToCf && !this.review());
+  readonly urlDomain = computed(() => cfDomain(this.urlValue()));
+  readonly linkedCfs = computed(() => {
+    const domain = this.urlDomain();
+    if (!this.linkedToCf() || !domain) {
+      return [];
+    }
+    return [...this.endpointsData.endpoints().values()]
+      .filter(e => e.cnsi_type === 'cf' && cfDomain(getFullEndpointApiUrl(e)) === domain)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  });
+  // The only Cloud Foundry on the domain is picked; a choice stays while listed.
+  readonly linkedCf = linkedSignal<EndpointModel[], string>({
+    source: this.linkedCfs,
+    computation: (list, previous) =>
+      list.some(e => e.guid === previous?.value) ? previous!.value : (list.length === 1 ? list[0].guid ?? '' : ''),
+  });
+  // Brokers the user can read; none (not an admin, or not connected) leaves
+  // only "not registered yet".
+  readonly brokers = toSignal(toObservable(this.linkedCf).pipe(
+    switchMap(guid => !guid ? of([] as BrokerChoice[]) :
+      this.http.get<{ resources?: BrokerChoice[] }>(`/pp/v1/cf/service_brokers/${guid}?return=base`).pipe(
+        map(res => res.resources ?? []),
+        catchError(() => of([] as BrokerChoice[])),
+      )),
+  ), { initialValue: [] as BrokerChoice[] });
+  // The broker named after the address (autoscaler → autoscalerservicebroker,
+  // the upstream and Genesis kit naming) is picked when listed.
+  readonly linkedBroker = linkedSignal<{ list: BrokerChoice[]; url: string }, string>({
+    source: computed(() => ({ list: this.brokers(), url: this.urlValue() })),
+    computation: ({ list, url }) => list.find(b => firstLabel(b.url) === `${firstLabel(url)}servicebroker`)?.guid ?? '',
+  });
+  // Registering waits for a Cloud Foundry to link to.
+  private readonly linkedCfMissing = computed(() => this.linkedToCf() && !this.linkedCf());
+
   constructor() {
     const activatedRoute = inject(ActivatedRoute);
     const sessionService = inject(SessionService);
@@ -182,9 +246,13 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     // Client Redirect URI for SSO
     this.clientRedirectURI = getSSOClientRedirectURI();
 
+    const destroyRef = inject(DestroyRef);
     this.registerForm.controls.caCertField.valueChanges
-      .pipe(takeUntilDestroyed(inject(DestroyRef)))
+      .pipe(takeUntilDestroyed(destroyRef))
       .subscribe(value => this.caCertValue.set(value));
+    this.registerForm.controls.urlField.valueChanges
+      .pipe(takeUntilDestroyed(destroyRef))
+      .subscribe(value => this.urlValue.set(value ?? ''));
 
     effect(() => {
       const ep = this.reviewEndpoint();
@@ -350,6 +418,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       createSystemEndpoint: this.registerForm.value.createSystemEndpointField,
       // A PEM left in the box after the CA box was turned off is not sent.
       caCert: showCA ? this.registerForm.value.caCertField : '',
+      ...this.linkFields(),
     });
 
     const data: ConnectEndpointConfig = {
@@ -383,6 +452,17 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     };
   }
 
+  private linkFields() {
+    if (!this.linkedToCf()) {
+      return {};
+    }
+    const broker = this.brokers().find(b => b.guid === this.linkedBroker());
+    return {
+      cfGuid: this.linkedCf(),
+      ...(broker ? { brokerGuid: broker.guid, brokerName: broker.name } : {}),
+    };
+  }
+
   // Personal = created by a user, not the system.
   private async isPersonal(guid: string): Promise<boolean> {
     return isPersonalEndpoint(
@@ -397,7 +477,8 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.validate = combineLatest([
       this.registerForm.statusChanges.pipe(startWith(this.registerForm.status)),
       toObservable(this.review, { injector: this.hostInjector }),
-    ]).pipe(map(([, review]) => review || this.registerForm.valid));
+      toObservable(this.linkedCfMissing, { injector: this.hostInjector }),
+    ]).pipe(map(([, review, linkMissing]) => review || (this.registerForm.valid && !linkMissing)));
   }
 
   setUrlValidation(endpoint?: StratosCatalogEndpointEntity) {

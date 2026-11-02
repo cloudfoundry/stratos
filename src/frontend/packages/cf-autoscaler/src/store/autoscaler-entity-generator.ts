@@ -30,11 +30,11 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     // so an empty string stands for none.
     logoUrl: '',
     authTypes: [],
-    // The Register dialog offers this type as a tile, but the backend has no
-    // autoscaler endpoint type yet, so registering is refused with a message.
-    // Autoscaler calls ride the app's Cloud Foundry endpoint and the user's
-    // CF token; nothing connects to this type.
+    // Autoscaler calls carry the user's Cloud Foundry token, so nothing
+    // connects to this type.
     unConnectable: true,
+    // Registered against the Cloud Foundry it serves, and its broker there.
+    linkedToCf: true,
     // No listDetailsComponent: omitted rather than null, as Angular TestBed
     // processes null values.
     // After Cloud Foundry (1), before the Kubernetes types (3+).
