@@ -21,6 +21,8 @@ export class TileSelectorComponent {
   public showingMore = false;
   @Input() smallerTiles = false;
   readonly compactTiles = input(false);
+  // See TileSelectorTileComponent.scaleIcon.
+  readonly scaleIcons = input(false);
   private pDynamicSmallerTiles = 0;
   @Input() set dynamicSmallerTiles(tiles: number) {
     this.pDynamicSmallerTiles = tiles;

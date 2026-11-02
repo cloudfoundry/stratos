@@ -62,6 +62,7 @@
             <app-tile-selector
               [options]="(tileSelectorConfig$ | async) ?? []"
               [dynamicSmallerTiles]="6"
+              [scaleIcons]="true"
               (selection)="onTileSelected($event)"
               class="endpoint-tile-selector">
             </app-tile-selector>

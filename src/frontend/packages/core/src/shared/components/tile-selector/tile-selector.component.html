@@ -17,7 +17,8 @@
 <ng-template #tile let-options="options" let-selected="selected">
   @for (tile of options; track tile) {
     <app-tile-selector-tile (tileSelect)="selectionChange(tile)" [tile]="tile"
-      [active]="selected === tile || !selected" [smaller]="smallerTiles" [compact]="compactTiles()">
+      [active]="selected === tile || !selected" [smaller]="smallerTiles" [compact]="compactTiles()"
+      [scaleIcon]="scaleIcons()">
     </app-tile-selector-tile>
   }
 </ng-template>

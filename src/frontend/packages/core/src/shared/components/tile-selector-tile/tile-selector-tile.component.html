@@ -7,7 +7,7 @@
       (keydown.space)="onClick(tile); $event.preventDefault()">
       <div class="tile-selector__header">
         @if (iconGraphic; as graphic) {
-          <app-custom-icon class="tile-selector__icon"
+          <app-custom-icon class="tile-selector__icon" [inline]="scaleIcon()"
           [fontSet]="graphic.matIconFont"> {{ graphic.matIcon }}</app-custom-icon>
         } @else if (imageGraphic; as graphic) {
           <img src="{{graphic.location}}" [style.transform]="graphic.transform" alt="" />

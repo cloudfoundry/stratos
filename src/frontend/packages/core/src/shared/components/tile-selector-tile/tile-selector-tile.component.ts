@@ -25,6 +25,10 @@ export class TileSelectorTileComponent {
 
   readonly compact = input(false);
 
+  // Size a font icon like the tile's logos (the tile's icon size); without
+  // it the glyph keeps its own 24px. Opted into per page.
+  readonly scaleIcon = input(false);
+
   readonly tileSelect = output<ITileConfig>();
 
   public onClick(tile: ITileConfig) {
