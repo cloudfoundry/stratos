@@ -73,6 +73,12 @@ describe('EditApplicationComponent labels', () => {
     await fixture.whenStable();
   });
 
+  // app-form-field projects only inputs, errors, hints and [matSuffix]
+  // content; anything else inside it is dropped.
+  it('shows the name check beside the name', () => {
+    expect(fixture.nativeElement.querySelector('app-form-field app-stateful-icon')).not.toBeNull();
+  });
+
   it('initializes labels and turns Enter into a removable pill', async () => {
     expect(component.editAppForm.controls.labels.value).toEqual({ team: 'old', keep: 'yes' });
     const input = fixture.nativeElement.querySelector('#app-label-input') as HTMLInputElement;

@@ -9,7 +9,7 @@
 <app-steppers cancel="/applications/{{applicationService.cfGuid}}/{{applicationService.appGuid}}">
   <app-step [title]="'Edit Application'" [signalHandle]="signalHandle">
     <form [formGroup]="editAppForm" validate class="flex flex-col gap-6 p-6">
-      <app-form-field class="relative">
+      <app-form-field>
         <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Application Name" formControlName="name" autocomplete="off" [appFocus]="true">
         @if (editAppForm.controls.name.errors?.required) {
           <app-error>Application name is required</app-error>
@@ -17,9 +17,9 @@
         @if (editAppForm.controls.name.errors?.appNameTaken) {
           <app-error>Application name already taken</app-error>
         }
-        <div class="absolute right-2 top-1/2 -translate-y-1/2">
+        <span matSuffix>
           <app-stateful-icon [state]="uniqueNameValidator.appApplicationNameUnique.status"></app-stateful-icon>
-        </div>
+        </span>
       </app-form-field>
       <app-form-field>
         <input class="w-full placeholder:!text-transparent focus:outline-none" appInput placeholder="Number of Instances" formControlName="instances" type="number">

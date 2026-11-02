@@ -36,6 +36,18 @@ describe('CreateApplicationStep2Component', () => {
   it('should be created', () => {
     expect(component).toBeTruthy();
   });
+
+  // app-form-field projects only inputs, errors, hints and [matSuffix]
+  // content; anything else inside it is dropped.
+  it('shows the name check beside a typed name', async () => {
+    const host: HTMLElement = fixture.nativeElement;
+    const input = host.querySelector<HTMLInputElement>('input[formcontrolname="appName"]')!;
+    input.value = 'my-app';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    await fixture.whenStable();
+
+    expect(host.querySelector('app-form-field app-stateful-icon')).not.toBeNull();
+  });
   // app-form-field shows a field's <app-error> text as its error line.
   it('says a taken name has been taken', async () => {
     TestBed.inject(CreateAppStateService).setCFDetails({ cloudFoundry: 'cf-1', org: 'org-1', space: 'space-1' });
