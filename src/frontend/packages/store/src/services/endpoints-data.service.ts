@@ -335,6 +335,10 @@ export class EndpointsDataService {
     const stagingGuid = '<New Endpoint>' + opts.name;
     let registeredGuid = '';
     const result = await this.runMutation(stagingGuid, 'POST', ENDPOINTS_URL, body, e => {
+      // A type this server cannot register: the address is not at fault.
+      if (e?.status === 400 && e?.error?.reason === 'unknown_endpoint_type' && e?.error?.error) {
+        return e.error.error;
+      }
       const message = 'There was a problem creating the endpoint. Please ensure the endpoint address is correct and try again. ' +
         httpErrorResponseToSafeString(e);
       if (e?.status === 403) {
