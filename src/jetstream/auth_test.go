@@ -1010,6 +1010,48 @@ func TestSetUAATokenRecord(t *testing.T) {
 
 }
 
+// An endpoint record without an API address cannot be connected to.
+func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
+	// It fails today: connect does not check the API address, since
+	// registration always stores one. Remove the skip if connect should
+	// refuse such a record.
+	t.Skip("connect does not check for a missing API address")
+	t.Parallel()
+
+	req := setupMockReq("POST", "", map[string]string{
+		"username":  "admin",
+		"password":  "changeme",
+		"cnsi_guid": mockCNSIGUID,
+	})
+
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
+
+	mockUAA := setupMockServer(t,
+		msRoute("/oauth/token"),
+		msMethod("POST"),
+		msStatus(http.StatusOK),
+		msBody(jsonMust(mockUAAResponse)))
+	defer mockUAA.Close()
+
+	mock.ExpectQuery(selectAnyFromCNSIs).
+		WithArgs(mockCNSIGUID).
+		WillReturnRows(sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+			AddRow(mockCNSIGUID, "mockCF", "cf", "", mockUAA.URL, mockUAA.URL, mockDopplerEndpoint, true, "", cipherClientSecret, true, "", "", "", ""))
+	mock.ExpectQuery(selectAnyFromTokens).WillReturnRows(testutils.ExpectNoRows())
+	mock.ExpectExec(insertIntoTokens).WillReturnResult(sqlmock.NewResult(1, 1))
+
+	sessionValues := map[string]interface{}{
+		"user_id": mockUserGUID,
+		"exp":     time.Now().AddDate(0, 0, 1).Unix(),
+	}
+	require.NoError(t, pp.setSessionValues(ctx, sessionValues))
+
+	err := pp.loginToCNSI(ctx)
+
+	require.Error(t, err, "connect must refuse an endpoint with no API address")
+}
+
 // UAA refusing the user's credentials fails the connect, and no token is
 // saved for the endpoint.
 func TestLoginToCNSIWithBadCreds(t *testing.T) {
