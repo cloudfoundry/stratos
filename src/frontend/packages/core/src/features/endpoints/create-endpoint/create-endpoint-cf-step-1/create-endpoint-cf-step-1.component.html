@@ -59,6 +59,36 @@
           An endpoint at this URL is already registered. Registration may still succeed in another scope.
         </div>
       }
+      @if (linkedToCf() && urlDomain()) {
+        @if (linkedCfs().length === 0) {
+          <p class="text-warning text-sm mt-1" role="status">
+            Register the Cloud Foundry this autoscaler serves first: no registered Cloud Foundry is on {{ urlDomain() }}
+          </p>
+        } @else {
+          <div class="flex flex-col gap-1 mt-2">
+            <label for="linked-cf" class="text-sm font-medium text-content-text">Cloud Foundry</label>
+            <select id="linked-cf" class="input" (change)="linkedCf.set($any($event.target).value)">
+              @if (linkedCfs().length > 1) {
+                <option value="" [selected]="!linkedCf()">Choose a Cloud Foundry</option>
+              }
+              @for (cf of linkedCfs(); track cf.guid) {
+                <option [value]="cf.guid" [selected]="cf.guid === linkedCf()">{{ cf.name }}</option>
+              }
+            </select>
+          </div>
+          @if (linkedCf()) {
+            <div class="flex flex-col gap-1 mt-2">
+              <label for="linked-broker" class="text-sm font-medium text-content-text">Service broker</label>
+              <select id="linked-broker" class="input" (change)="linkedBroker.set($any($event.target).value)">
+                <option value="" [selected]="!linkedBroker()">Not registered in Cloud Foundry yet</option>
+                @for (broker of brokers(); track broker.guid) {
+                  <option [value]="broker.guid" [selected]="broker.guid === linkedBroker()">{{ broker.name }}</option>
+                }
+              </select>
+            </div>
+          }
+        }
+      }
       @if (userEndpointsAndIsAdmin | async) {
         <app-checkbox
           appInput

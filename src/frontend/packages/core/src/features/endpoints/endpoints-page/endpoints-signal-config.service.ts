@@ -41,6 +41,9 @@ export interface RegisterEndpointOptions {
   ssoAllowed?: boolean;
   createSystemEndpoint?: boolean;
   caCert?: string;
+  cfGuid?: string;
+  brokerGuid?: string;
+  brokerName?: string;
 }
 
 export class ViewPipeline<T> {
@@ -246,6 +249,9 @@ export class EndpointsSignalConfigService {
       ssoAllowed = false,
       createSystemEndpoint = true,
       caCert = '',
+      cfGuid,
+      brokerGuid,
+      brokerName,
     } = opts;
     // W36-B Wave 3: delegate to EndpointsDataService.register, which
     // owns the HTTP call + lifecycle signals and returns the resolved
@@ -263,6 +269,9 @@ export class EndpointsSignalConfigService {
       ssoAllowed,
       createSystemEndpoint,
       caCert,
+      cfGuid,
+      brokerGuid,
+      brokerName,
     });
   }
 

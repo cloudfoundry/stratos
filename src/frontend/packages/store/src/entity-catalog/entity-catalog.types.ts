@@ -141,6 +141,12 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly tokenSharing?: boolean;
   readonly unConnectable?: boolean;
   /**
+   * Registered against a Cloud Foundry endpoint on the same domain (an
+   * autoscaler serves one Cloud Foundry): the Register step asks which, and
+   * which of its service brokers.
+   */
+  readonly linkedToCf?: boolean;
+  /**
    * How many endpoints of this type can be registered, 0 - many
    */
   readonly registeredLimit?: (injector: Injector) => Observable<number> | number;

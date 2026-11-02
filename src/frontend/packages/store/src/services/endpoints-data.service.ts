@@ -104,6 +104,11 @@ export interface EndpointRegisterOptions {
   ssoAllowed: boolean;
   createSystemEndpoint: boolean;
   caCert?: string;
+  // A type linked to a Cloud Foundry (linkedToCf): the Cloud Foundry
+  // endpoint and, when known, its service broker.
+  cfGuid?: string;
+  brokerGuid?: string;
+  brokerName?: string;
 }
 
 export interface EndpointUpdateOptions {
@@ -330,6 +335,13 @@ export class EndpointsDataService {
     body.set('ca_cert', opts.caCert || '');
     if (opts.endpointSubType) {
       body.set('sub_type', opts.endpointSubType);
+    }
+    if (opts.cfGuid) {
+      body.set('cf_guid', opts.cfGuid);
+    }
+    if (opts.brokerGuid) {
+      body.set('broker_guid', opts.brokerGuid);
+      body.set('broker_name', opts.brokerName || '');
     }
 
     const stagingGuid = '<New Endpoint>' + opts.name;

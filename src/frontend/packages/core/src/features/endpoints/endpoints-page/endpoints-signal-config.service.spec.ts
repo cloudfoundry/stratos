@@ -12,15 +12,17 @@ function ep(guid: string, name: string): EndpointModel {
 
 describe('EndpointsSignalConfigService', () => {
   let svc: EndpointsSignalConfigService;
+  let register: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
+    register = vi.fn().mockResolvedValue({ busy: false, error: false, message: '' });
     TestBed.configureTestingModule({
       providers: [
         {
           provide: EndpointsSignalService,
           useValue: { endpoints: signal({ a: ep('a', 'Alpha'), b: ep('b', 'Beta'), c: ep('c', 'alphabet') }) },
         },
-        { provide: EndpointsDataService, useValue: { loading: signal(false) } },
+        { provide: EndpointsDataService, useValue: { loading: signal(false), register } },
       ],
     });
     svc = TestBed.inject(EndpointsSignalConfigService);
@@ -37,6 +39,16 @@ describe('EndpointsSignalConfigService', () => {
     svc.nameFilter.set('');
     TestBed.tick();
     expect(svc.view.filteredItems().length).toBe(3);
+  });
+
+  it('passes an autoscaler\'s Cloud Foundry and broker on to register', async () => {
+    await svc.register({
+      endpointType: 'autoscaler', endpointSubType: null, name: 'as', endpoint: 'https://autoscaler.sys.x.com',
+      skipSslValidation: false, cfGuid: 'cf-1', brokerGuid: 'b1', brokerName: 'autoscaler',
+    });
+    expect(register).toHaveBeenCalledWith(expect.objectContaining({
+      cfGuid: 'cf-1', brokerGuid: 'b1', brokerName: 'autoscaler',
+    }));
   });
 
   // The service is root-provided and initialize() runs on every visit to
