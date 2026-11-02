@@ -74,6 +74,12 @@ func (c *CloudFoundrySpecification) nativeProxy() nativeCFProxy {
 // CF-InvalidAuthToken (502 to the caller) — the legacy proxy path
 // (oauth_requests.go OAuthHandlerFunc) handles this via both proactive expiry
 // and reactive 401, but native handlers bypass that wrapper entirely.
+// NewCapiClient is newCapiClient for other plugins: a capi client with the
+// user's token for a CF endpoint.
+func NewCapiClient(ctx context.Context, proxy api.PortalProxy, cnsiGUID, userGUID string) (capi.Client, error) {
+	return newCapiClient(ctx, proxy, cnsiGUID, userGUID)
+}
+
 func newCapiClient(ctx context.Context, proxy nativeCFProxy, cnsiGUID, userGUID string) (capi.Client, error) {
 	cnsiRecord, err := proxy.GetCNSIRecord(cnsiGUID)
 	if err != nil {

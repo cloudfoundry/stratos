@@ -1,6 +1,7 @@
 package autoscaler
 
 import (
+	"context"
 	"errors"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
@@ -15,6 +16,9 @@ func init() {
 // Autoscaler is a plugin to allow applications to be pushed to Cloud Foundry from Stratos
 type Autoscaler struct {
 	portalProxy api.PortalProxy
+	// brokersForApp replaces capiBrokersForApp in tests.
+	brokersForApp func(ctx context.Context, cfGUID, userGUID, appGUID string) (map[string]string, error)
+	cache         brokerCache
 }
 
 // Init creates a new Autoscaler
