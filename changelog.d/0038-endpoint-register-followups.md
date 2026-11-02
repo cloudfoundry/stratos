@@ -16,3 +16,6 @@
 - The Cloud Foundry Autoscaler tile in Register Endpoint has the
   Autoscale icon and comes after Cloud Foundry; it had the Cloud
   Foundry icon and came first, so it was picked by mistake.
+- Icons on the Register Endpoint and Backup/Restore Endpoints tiles
+  are drawn at the size of the other tiles' logos; the Autoscaler,
+  Backup and Restore icons were a fraction of it.
