@@ -12,7 +12,7 @@
         the 'Connecting' process. To do this return to the Endpoints page.
       </p>
     -->
-      <app-tile-selector [options]="(tileSelectorConfig$ | async) ?? []" [dynamicSmallerTiles]="6"
+      <app-tile-selector [options]="(tileSelectorConfig$ | async) ?? []" [dynamicSmallerTiles]="6" [scaleIcons]="true"
         (selection)="onTileSelected($event)">
       </app-tile-selector>
     </div>
