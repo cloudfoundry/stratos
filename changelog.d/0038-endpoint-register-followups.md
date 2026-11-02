@@ -9,10 +9,9 @@
   health check. A connection dropped elsewhere, such as in another tab
   or by an admin, stayed listed as Connected, and every check of it was
   refused.
-- Registering Cloud Foundry Autoscaler says "This Stratos server cannot
-  register endpoints of type "autoscaler" yet" instead of "Internal
-  Server Error (500)". Registering an endpoint of a type the server
-  does not know, or with no type, returns the same kind of message.
+- Registering an endpoint of a type the server does not know, or with
+  no type, says "This Stratos server cannot register endpoints of type
+  "<type>" yet" instead of "Internal Server Error (500)".
 - The Cloud Foundry Autoscaler tile in Register Endpoint has the
   Autoscale icon and comes after Cloud Foundry; it had the Cloud
   Foundry icon and came first, so it was picked by mistake.
