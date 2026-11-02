@@ -43,6 +43,15 @@ describe('autoscaler-available helpers', () => {
   });
 
   describe('isAutoscalerEnabled', () => {
+    // The Autoscale tab shows for an app whose registered autoscaler is not
+    // at the Cloud Foundry's default address.
+    it('checks the app\'s own autoscaler when given the app', () => {
+      const svc = TestBed.inject(AutoscalerInfoDataService);
+      const sub = isAutoscalerEnabled('ep-1', 'app-1').subscribe();
+      expect(svc.load).toHaveBeenCalledWith('ep-1', 'app-1');
+      sub.unsubscribe();
+    });
+
     it('does not read the availability signal until subscribed', () => {
       isAutoscalerEnabled('ep-1');
       TestBed.tick();

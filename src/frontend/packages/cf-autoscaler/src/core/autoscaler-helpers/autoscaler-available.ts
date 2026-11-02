@@ -85,17 +85,18 @@ export const fetchAutoscalerInfo = (
 };
 
 /**
- * Checks if autoscaler is enabled/available for the given endpoint.
+ * Checks if autoscaler is enabled/available for the given endpoint, or for
+ * the given app on it (the autoscaler the app is bound to).
  * Returns true only if autoscaler is configured and accessible.
  * Returns false if autoscaler URL is missing or service is unavailable.
  */
 export const isAutoscalerEnabled = (
   endpointGuid: string,
-  _esf?: unknown,
+  appGuid?: string,
 ): Observable<boolean> => {
   const svc = getDataService();
-  void svc.load(endpointGuid);
-  return observeSignal(svc.isAvailable(endpointGuid), requireInjector()).pipe(
+  void svc.load(endpointGuid, appGuid);
+  return observeSignal(svc.isAvailable(endpointGuid, appGuid), requireInjector()).pipe(
     distinctUntilChanged(),
     map(value => !!value),
     catchError(() => of(false)),

@@ -1,6 +1,29 @@
 <app-list-sub-nav title="Scaling Rules" [count]="scalingRuleCount" [loading]="policyPending"
   [actions]="policyActions" [addAction]="createPolicyAction"></app-list-sub-nav>
 <div class="flex flex-col gap-5 p-6 w-full">
+  @if (autoscalerTarget(); as target) {
+    <div class="flex flex-col gap-1 text-sm text-content-muted">
+      @if (target.source === 'registered' && target.endpoint) {
+        <p>Autoscaler: {{ target.endpoint.name }} ({{ target.endpoint.url }})</p>
+      } @else {
+        <p>
+          Autoscaler: {{ guessedUrl() }} (address guessed; not registered)
+          <a routerLink="/endpoints/new/autoscaler" class="text-primary hover:underline">Register it</a>
+        </p>
+      }
+      @if (target.duplicates.registered.length > 1) {
+        <p class="text-warning" role="status">
+          This autoscaler is registered {{ target.duplicates.registered.length }} times: {{ registeredNames() }}.
+          Using {{ target.endpoint?.name }}.
+        </p>
+      }
+      @if (target.duplicates.bound.length > 1) {
+        <p class="text-warning" role="status">
+          This app is bound to {{ target.duplicates.bound.length }} autoscalers: {{ boundNames() }}. Each can scale it.
+        </p>
+      }
+    </div>
+  }
   @if (appAutoscalerPolicy(); as policy) {
     @if (policy.enabled) {
       <!-- The Instances box sets the row height; Latest Readings scrolls within it -->

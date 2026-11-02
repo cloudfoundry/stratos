@@ -75,6 +75,19 @@ describe('AutoscalerInfoDataService', () => {
     expect(svc.isAvailable(ENDPOINT_GUID)()).toBe(false);
   });
 
+  // An app's info comes from the autoscaler it is bound to, which can differ
+  // from the Cloud Foundry's default one.
+  it('load() for an app asks for that app\'s autoscaler and keeps it apart', async () => {
+    const p1 = svc.load(ENDPOINT_GUID, 'app-1');
+    const req = httpMock.expectOne(r => r.url === INFO_URL && r.params.get('app') === 'app-1');
+    expect(req.request.headers.get('x-cap-cnsi-list')).toBe(ENDPOINT_GUID);
+    req.flush({ name: 'as', build: '15.3.1', support: '', description: '' });
+    await p1;
+
+    expect(svc.info(ENDPOINT_GUID, 'app-1')()?.build).toBe('15.3.1');
+    expect(svc.info(ENDPOINT_GUID)()).toBeNull();
+  });
+
   it('per-endpoint state is isolated', async () => {
     const p1 = svc.load('cf-a');
     httpMock.expectOne(INFO_URL).flush({ name: 'as', build: '3.0.0', support: '', description: '' });
