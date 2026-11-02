@@ -1026,5 +1026,10 @@ func TestPluginRegisterRouterRefusesUnknownTypesClearly(t *testing.T) {
 		if !strings.Contains(shadow.UserFacingError, tc.want) {
 			t.Errorf("type %q: message %q does not name %s", tc.endpointType, shadow.UserFacingError, tc.want)
 		}
+		// The register form shows this message alone (no "check the
+		// address" lead-in) when it sees the reason.
+		if !strings.Contains(shadow.HTTPError.Message, `"reason":"unknown_endpoint_type"`) {
+			t.Errorf("type %q: body %s lacks the unknown_endpoint_type reason", tc.endpointType, shadow.HTTPError.Message)
+		}
 	}
 }

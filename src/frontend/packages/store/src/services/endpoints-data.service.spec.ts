@@ -205,6 +205,38 @@ describe('EndpointsDataService', () => {
     expect(state.error).toBe(false);
   });
 
+  // The register form prefixed every failure with "Please ensure the endpoint
+  // address is correct". For a type the server cannot register (the
+  // Autoscaler tile) the address is not at fault, so the server's message
+  // stands alone.
+  it('register() shows an unknown-type refusal without the address hint', async () => {
+    const message = 'This Stratos server cannot register endpoints of type "autoscaler" yet';
+    const registerPromise = svc.register({
+      endpointType: 'autoscaler', name: 'as', endpoint: 'https://autoscaler.example.com',
+      skipSslValidation: false, ssoAllowed: false, createSystemEndpoint: true,
+    });
+    httpMock.expectOne('/api/v1/endpoints').flush(
+      { status: 'error', error: message, reason: 'unknown_endpoint_type' },
+      { status: 400, statusText: 'Bad Request' });
+    const state = await registerPromise;
+
+    expect(state.error).toBe(true);
+    expect(state.message).toBe(message);
+  });
+
+  it('register() keeps the address hint for other refusals', async () => {
+    const registerPromise = svc.register({
+      endpointType: 'cf', name: 'cf', endpoint: 'not a url',
+      skipSslValidation: false, ssoAllowed: false, createSystemEndpoint: true,
+    });
+    httpMock.expectOne('/api/v1/endpoints').flush(
+      { status: 'error', error: 'Failed to get API Endpoint' },
+      { status: 400, statusText: 'Bad Request' });
+    const state = await registerPromise;
+
+    expect(state.message).toContain('Please ensure the endpoint address is correct');
+  });
+
   it('clearDisconnected resets the delta queue', async () => {
     const p = svc.getAll();
     httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());
