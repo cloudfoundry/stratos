@@ -2,15 +2,19 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/testutils"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 	sqlmock "gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
@@ -363,44 +367,96 @@ func TestDoOauthFlowRequestWithFailedRefreshMethod(t *testing.T) {
 
 }
 
-func TestDoOauthFlowRequestWithValidTokenFailFirst(t *testing.T) {
-	t.Skip("Skipping for now.")
-	t.Parallel()
-
-	// This method no longer exists due to use of sql-mock.
-	// testDoOauthFlowRequest(t, true, time.Now().AddDate(0, 0, 1).Unix())
+// failFirstEndpoint answers 401 to its first request and 200 after that,
+// recording the token each request carried.
+func failFirstEndpoint(tokens *[]string) *httptest.Server {
+	var mu sync.Mutex
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		mu.Lock()
+		defer mu.Unlock()
+		*tokens = append(*tokens, r.Header.Get("Authorization"))
+		if len(*tokens) == 1 {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+	}))
 }
 
-func TestDoOauthFlowRequestWithExpiredTokenFailFirst(t *testing.T) {
-	t.Skip("Skipping for now.")
-	t.Parallel()
-
-	// This method no longer exists due to use of sql-mock.
-	// testDoOauthFlowRequest(t, true, time.Now().AddDate(0, 0, -1).Unix())
-}
-
-func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
-	t.Skip("Skipping for now - need to verify whether still needed.")
-	t.Parallel()
-
-	req, _ := http.NewRequest("GET", "/v2/info", nil)
-	pp := setupPortalProxy(nil)
-
-	var mockTokenRecord = api.TokenRecord{
-		AuthToken:   mockUAAToken,
-		TokenExpiry: 0,
+func countingRefresh(refreshes *int32) api.RefreshOAuthTokenFunc {
+	return func(bool, string, string, string, string, string) (api.TokenRecord, error) {
+		n := atomic.AddInt32(refreshes, 1)
+		return api.TokenRecord{AuthToken: fmt.Sprintf("refreshed-%d", n), TokenExpiry: time.Now().Add(time.Hour).Unix()}, nil
 	}
-	pp.setCNSITokenRecord("not-the-right-guid", testutils.MockAccount, mockTokenRecord)
+}
+
+// A token the endpoint refuses although it has not expired (revoked, or
+// the clocks disagree) is refreshed once and the request retried with it.
+func TestDoOauthFlowRequestWithValidTokenFailFirst(t *testing.T) {
+	t.Parallel()
+
+	var tokens []string
+	endpoint := failFirstEndpoint(&tokens)
+	defer endpoint.Close()
+	var refreshes int32
+
+	req, _ := http.NewRequest(http.MethodGet, endpoint.URL+"/v3/apps", nil)
+	handler := (&portalProxy{}).OAuthHandlerFunc(&api.CNSIRequest{GUID: "cf", UserGUID: "user"}, req, countingRefresh(&refreshes))
+	res, err := handler(api.TokenRecord{AuthToken: "current", TokenExpiry: time.Now().Add(time.Hour).Unix()}, api.CNSIRecord{})
+
+	require.NoError(t, err)
+	defer res.Body.Close()
+	require.Equal(t, http.StatusOK, res.StatusCode)
+	require.Equal(t, int32(1), refreshes)
+	require.Equal(t, []string{"bearer current", "bearer refreshed-1"}, tokens)
+}
+
+// An expired token is refreshed before the request. When the endpoint
+// still refuses that first request, the request is retried once more.
+func TestDoOauthFlowRequestWithExpiredTokenFailFirst(t *testing.T) {
+	t.Parallel()
+
+	var tokens []string
+	endpoint := failFirstEndpoint(&tokens)
+	defer endpoint.Close()
+	var refreshes int32
+
+	req, _ := http.NewRequest(http.MethodGet, endpoint.URL+"/v3/apps", nil)
+	handler := (&portalProxy{}).OAuthHandlerFunc(&api.CNSIRequest{GUID: "cf", UserGUID: "user"}, req, countingRefresh(&refreshes))
+	res, err := handler(api.TokenRecord{AuthToken: "expired", TokenExpiry: time.Now().Add(-time.Hour).Unix()}, api.CNSIRecord{})
+
+	require.NoError(t, err)
+	defer res.Body.Close()
+	require.Equal(t, http.StatusOK, res.StatusCode)
+	require.Len(t, tokens, 2)
+	require.NotContains(t, tokens, "bearer expired", "the expired token is never sent")
+}
+
+// Without a stored token for the user there is nothing to authorize the
+// request with: it fails without reaching the endpoint.
+func TestDoOauthFlowRequestWithMissingCNSITokenRecord(t *testing.T) {
+	t.Parallel()
+
+	var requests int32
+	endpoint := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		atomic.AddInt32(&requests, 1)
+	}))
+	defer endpoint.Close()
+
+	req, _ := http.NewRequest(http.MethodGet, endpoint.URL+"/v2/info", nil)
+	_, _, _, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
+
+	mock.ExpectQuery(selectAnyFromTokens).WillReturnRows(testutils.ExpectNoRows())
 
 	_, err := pp.DoOAuthFlowRequest(&api.CNSIRequest{
 		GUID:     testutils.MockCFGUID,
 		UserGUID: testutils.MockAccount,
 	}, req)
 
-	Convey("Oauth flow request erroneously succeeded", func() {
-		So(err, ShouldNotBeNil)
-	})
-
+	require.ErrorContains(t, err, "could not find token")
+	require.Zero(t, atomic.LoadInt32(&requests))
+	require.NoError(t, mock.ExpectationsWereMet())
 }
 
 func TestDoOauthFlowRequestWithInvalidCNSIRequest(t *testing.T) {
