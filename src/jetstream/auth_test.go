@@ -26,6 +26,7 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/tokens"
 	"github.com/cloudfoundry/stratos/src/jetstream/testutils"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -1009,39 +1010,9 @@ func TestSetUAATokenRecord(t *testing.T) {
 
 }
 
-func TestLoginToCNSIWithMissingAPIEndpoint(t *testing.T) {
-	t.Skip("Skipping for now - need to verify whether still needed.")
-	t.Parallel()
-
-	req := setupMockReq("POST", "", map[string]string{
-		"username":  "admin",
-		"password":  "changeme",
-		"cnsi_guid": mockCNSIGUID,
-	})
-
-	_, _, ctx, pp, db, _ := setupHTTPTest(req)
-	defer db.Close()
-
-	mockUAA := setupMockServer(t,
-		msRoute("/oauth/token"),
-		msMethod("POST"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockUAAResponse)))
-
-	defer mockUAA.Close()
-
-	if err := pp.loginToCNSI(ctx); err == nil {
-		t.Error("Login against CNSI should fail if API endpoint not specified")
-	}
-
-	// testTokenKey := mkTokenRecordKey("", mockUserGuid)
-	// if _, ok := pp.CNSITokenMap[testTokenKey]; ok {
-	// 	t.Error("Token should not be saved in CNSI map if API endpoint not specified")
-	// }
-}
-
+// UAA refusing the user's credentials fails the connect, and no token is
+// saved for the endpoint.
 func TestLoginToCNSIWithBadCreds(t *testing.T) {
-	t.Skip("Skipping for now - need to verify whether still needed.")
 	t.Parallel()
 
 	req := setupMockReq("POST", "", map[string]string{
@@ -1050,25 +1021,34 @@ func TestLoginToCNSIWithBadCreds(t *testing.T) {
 		"cnsi_guid": mockCNSIGUID,
 	})
 
-	_, _, ctx, pp, db, _ := setupHTTPTest(req)
+	_, _, ctx, pp, db, mock := setupHTTPTest(req)
 	defer db.Close()
 
 	mockUAA := setupMockServer(t,
 		msRoute("/oauth/token"),
 		msMethod("POST"),
-		msStatus(http.StatusOK),
-		msBody(jsonMust(mockUAAResponse)))
-
+		msStatus(http.StatusUnauthorized),
+		msBody(`{"error":"unauthorized","error_description":"Bad credentials"}`))
 	defer mockUAA.Close()
 
-	if err := pp.loginToCNSI(ctx); err != nil {
-		t.Error(err)
-	}
+	mock.ExpectQuery(selectAnyFromCNSIs).
+		WithArgs(mockCNSIGUID).
+		WillReturnRows(sqlmock.NewRows(datastore.GetColumnNamesForCSNIs()).
+			AddRow(mockCNSIGUID, "mockCF", "cf", mockUAA.URL, mockUAA.URL, mockUAA.URL, mockDopplerEndpoint, true, "", cipherClientSecret, true, "", "", "", ""))
 
-	// testTokenKey := mkTokenRecordKey(mockCNSIGuid, mockUserGuid)
-	// if _, ok := pp.CNSITokenMap[testTokenKey]; !ok {
-	// 	t.Errorf("Token was not saved in CNSI map")
-	// }
+	sessionValues := map[string]interface{}{
+		"user_id": mockUserGUID,
+		"exp":     time.Now().AddDate(0, 0, 1).Unix(),
+	}
+	require.NoError(t, pp.setSessionValues(ctx, sessionValues))
+
+	err := pp.loginToCNSI(ctx)
+
+	var httpErr api.ErrHTTPShadow
+	require.ErrorAs(t, err, &httpErr)
+	require.Equal(t, http.StatusUnauthorized, httpErr.HTTPError.Code)
+	require.Contains(t, fmt.Sprint(httpErr.HTTPError.Message), "Bad credentials", "UAA's reason reaches the user")
+	require.NoError(t, mock.ExpectationsWereMet(), "nothing beyond the endpoint lookup: no token is saved")
 }
 
 func TestVerifySession(t *testing.T) {
