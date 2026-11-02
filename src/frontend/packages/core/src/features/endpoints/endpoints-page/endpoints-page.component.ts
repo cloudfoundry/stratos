@@ -165,8 +165,14 @@ export class EndpointsPageComponent implements AfterViewInit, OnDestroy, OnInit 
   public extensionActions: StratosActionMetadata[] = getActionsFromExtensions(StratosActionType.Endpoints);
 
   private startEndpointHealthCheckPulse() {
+    // Re-read the list first: checks run only on endpoints listed as
+    // connected, and a connection dropped on the server (another tab, an
+    // admin, a refused refresh) otherwise stays Connected here and is
+    // checked, and refused, every tick.
     this.healthCheckTimeout = window.setInterval(() => {
-      this.endpointsService.checkAllEndpoints();
+      this.endpointsData.getAll(false)
+        .catch(err => console.error('Failed to refresh endpoints for the health check:', err))
+        .finally(() => this.endpointsService.checkAllEndpoints());
     }, 30000);
   }
 
