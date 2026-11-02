@@ -167,14 +167,12 @@ export class EndpointsService {
     this.endpointHealthChecks.checkEndpoint(endpoint);
   }
 
+  // Reads the signal, not endpoints$: toObservable replays what its effect
+  // last pushed, which lags a just-reloaded list until the next change
+  // detection, so a check right after a reload saw the old connections.
   public checkAllEndpoints() {
-    this.endpoints$.pipe(
-      take(1),
-      catchError((error): Observable<IRequestEntityTypeState<EndpointModel>> => {
-        console.error('Error checking all endpoints:', error);
-        return of({} as IRequestEntityTypeState<EndpointModel>);
-      })
-    ).subscribe(endpoints => Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid])));
+    const endpoints = this.endpointsSignals.endpoints();
+    Object.keys(endpoints).forEach(guid => this.checkEndpoint(endpoints[guid]));
   }
 
 
