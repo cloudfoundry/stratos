@@ -994,19 +994,20 @@ func TestUpdateEndpointCACert(t *testing.T) {
 	}
 }
 
-// Registering a type with no register route (the Autoscaler tile: the
-// backend has no autoscaler endpoint type) returned a plain error, which
-// the user saw as a bare "Internal Server Error (500)".
+// Registering a type with no register route (first seen with the
+// Autoscaler tile, before the backend had an autoscaler endpoint type)
+// returned a plain error, which the user saw as a bare "Internal Server
+// Error (500)".
 func TestPluginRegisterRouterRefusesUnknownTypesClearly(t *testing.T) {
 	t.Parallel()
 
 	for _, tc := range []struct{ endpointType, want string }{
-		{"autoscaler", `"autoscaler"`},
+		{"nosuchtype", `"nosuchtype"`},
 		{"", "endpoint type"},
 	} {
 		req := setupMockReq("POST", "", map[string]string{
-			"cnsi_name":     "Some fancy Autoscaler",
-			"api_endpoint":  "https://autoscaler.example.com",
+			"cnsi_name":     "Some endpoint",
+			"api_endpoint":  "https://nosuchtype.example.com",
 			"endpoint_type": tc.endpointType,
 		})
 		_, _, ctx, pp, db, _ := setupHTTPTest(req)

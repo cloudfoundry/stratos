@@ -29,7 +29,7 @@ func (a *Autoscaler) GetMiddlewarePlugin() (api.MiddlewarePlugin, error) {
 
 // GetEndpointPlugin gets the endpoint plugin for this plugin
 func (a *Autoscaler) GetEndpointPlugin() (api.EndpointPlugin, error) {
-	return nil, errors.New("Not implemented")
+	return a, nil
 }
 
 // GetRoutePlugin gets the route plugin for this plugin
