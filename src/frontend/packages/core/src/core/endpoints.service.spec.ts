@@ -1,5 +1,5 @@
 import { inject, TestBed } from '@angular/core/testing';
-import { provideZonelessChangeDetection, signal } from '@angular/core';
+import { ApplicationRef, provideZonelessChangeDetection, signal } from '@angular/core';
 import { ActivatedRouteSnapshot, Router, RouterStateSnapshot } from '@angular/router';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { defer, firstValueFrom, Observable, of } from 'rxjs';
@@ -46,6 +46,26 @@ describe('EndpointsService', () => {
     expect(await firstValueFrom(service.hasMetrics('cf-covered'))).toBe(true);
     expect(await firstValueFrom(service.hasMetrics('cf-plain'))).toBe(false);
     expect(await firstValueFrom(service.hasMetrics('cf-unknown'))).toBe(false);
+  });
+  // The endpoints page's 30-second check re-reads the list and then checks
+  // it. The check read toObservable(endpoints), which replays the value its
+  // effect last pushed; that effect runs at the next change detection, so
+  // the check saw the list from before the re-read and probed an endpoint
+  // the server had just reported disconnected.
+  it('checks the endpoint list as it is now, not as last emitted', async () => {
+    const data = TestBed.inject(EndpointsDataService);
+    const list = signal(new Map([['ep', { guid: 'ep', connectionStatus: 'connected' } as EndpointModel]]));
+    vi.spyOn(data, 'endpoints').mockImplementation(() => list());
+    const service = TestBed.inject(EndpointsService);
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    const checked: string[] = [];
+    vi.spyOn(service, 'checkEndpoint').mockImplementation(ep => { checked.push(`${ep.guid}:${ep.connectionStatus}`); });
+    list.set(new Map([['ep', { guid: 'ep', connectionStatus: 'disconnected' } as EndpointModel]]));
+    service.checkAllEndpoints();
+    await TestBed.inject(ApplicationRef).whenStable();
+
+    expect(checked).toEqual(['ep:disconnected']);
   });
 });
 
