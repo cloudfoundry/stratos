@@ -133,3 +133,36 @@ func TestGetAdminCNSIRecordByEndpointMatchesTheAddressNotTheString(t *testing.T)
 
 	require.NoError(t, mock.ExpectationsWereMet())
 }
+
+// Several admin endpoints may share the auto-register URL and the console's
+// client (duplicates are allowed). The login hook took whichever one the
+// database returned first, so a second endpoint at that address could be
+// connected at login instead of the auto-registered one.
+func TestGetAdminCNSIRecordByEndpointPrefersTheAutoRegisteredName(t *testing.T) {
+	req := setupMockReq("GET", "", nil)
+	_, _, _, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
+	pp.Config.CFClient = "console-client"
+
+	other := testutils.GetTestCNSIRecord()
+	other.GUID = "other-guid"
+	other.Name = "norm-lab"
+	other.ClientId = "console-client"
+	autoReg := testutils.GetTestCNSIRecord()
+	autoReg.GUID = "auto-reg-guid"
+	autoReg.Name = "Cloud Foundry"
+	autoReg.ClientId = "console-client"
+
+	mock.ExpectQuery(selectFromCNSIs).WillReturnRows(testutils.GetCNSIRows(other, autoReg))
+	rec, err := pp.GetAdminCNSIRecordByEndpoint(autoReg.APIEndpoint.String(), "cf")
+	require.NoError(t, err)
+	require.Equal(t, autoReg.GUID, rec.GUID, "the default auto-register name wins a tie")
+
+	pp.Config.AutoRegisterCFName = "norm-lab"
+	mock.ExpectQuery(selectFromCNSIs).WillReturnRows(testutils.GetCNSIRows(autoReg, other))
+	rec, err = pp.GetAdminCNSIRecordByEndpoint(autoReg.APIEndpoint.String(), "cf")
+	require.NoError(t, err)
+	require.Equal(t, other.GUID, rec.GUID, "a configured AUTO_REG_CF_NAME wins a tie")
+
+	require.NoError(t, mock.ExpectationsWereMet())
+}

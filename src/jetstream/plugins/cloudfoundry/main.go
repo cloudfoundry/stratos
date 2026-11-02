@@ -247,11 +247,7 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 	if cfCnsi.CNSIType == "" {
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
-		// Allow the auto-registration name to be configured
-		autoRegName := c.portalProxy.GetConfig().AutoRegisterCFName
-		if len(autoRegName) == 0 {
-			autoRegName = "Cloud Foundry"
-		}
+		autoRegName := c.portalProxy.GetConfig().AutoRegisterName()
 
 		caCert, err := resolveAutoRegisterCACert(*c.portalProxy.GetConfig())
 		if err != nil {
