@@ -1179,8 +1179,10 @@ func (p *portalProxy) pluginRegisterRouter(c *echo.Context) error {
 		return err
 	}
 
+	// A request error, not a server one: a plain error reaches the user as a
+	// bare "Internal Server Error (500)".
 	if params.EndpointType == "" {
-		return errors.New("endpoint_type parameter is missing")
+		return api.NewHTTPError(http.StatusBadRequest, "No endpoint type given")
 	}
 
 	if val, ok := p.PluginRegisterRoutes[params.EndpointType]; ok {
@@ -1188,7 +1190,8 @@ func (p *portalProxy) pluginRegisterRouter(c *echo.Context) error {
 		return val(c)
 	}
 
-	return fmt.Errorf("unknown endpoint_type %s", params.EndpointType)
+	return api.NewHTTPError(http.StatusBadRequest,
+		fmt.Sprintf("This Stratos server cannot register endpoints of type %q yet", params.EndpointType))
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {

@@ -993,3 +993,38 @@ func TestUpdateEndpointCACert(t *testing.T) {
 		})
 	}
 }
+
+// Registering a type with no register route (the Autoscaler tile: the
+// backend has no autoscaler endpoint type) returned a plain error, which
+// the user saw as a bare "Internal Server Error (500)".
+func TestPluginRegisterRouterRefusesUnknownTypesClearly(t *testing.T) {
+	t.Parallel()
+
+	for _, tc := range []struct{ endpointType, want string }{
+		{"autoscaler", `"autoscaler"`},
+		{"", "endpoint type"},
+	} {
+		req := setupMockReq("POST", "", map[string]string{
+			"cnsi_name":     "Some fancy Autoscaler",
+			"api_endpoint":  "https://autoscaler.example.com",
+			"endpoint_type": tc.endpointType,
+		})
+		_, _, ctx, pp, db, _ := setupHTTPTest(req)
+
+		err := pp.pluginRegisterRouter(ctx)
+		db.Close()
+
+		// api.NewHTTPError puts the message in the body's "error" field,
+		// which is what the register form shows.
+		var shadow api.ErrHTTPShadow
+		if !errors.As(err, &shadow) {
+			t.Fatalf("type %q: want a user-facing HTTP error, got %v", tc.endpointType, err)
+		}
+		if shadow.HTTPError.Code != http.StatusBadRequest {
+			t.Errorf("type %q: want 400, got %d", tc.endpointType, shadow.HTTPError.Code)
+		}
+		if !strings.Contains(shadow.UserFacingError, tc.want) {
+			t.Errorf("type %q: message %q does not name %s", tc.endpointType, shadow.UserFacingError, tc.want)
+		}
+	}
+}
