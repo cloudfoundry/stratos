@@ -21,20 +21,24 @@ export function generateASEntities(): StratosBaseCatalogEntity[] {
     type: AUTOSCALER_ENDPOINT_TYPE,
     label: 'Cloud Foundry Autoscaler',
     labelPlural: 'Cloud Foundry Autoscalers',
-    icon: 'cloud_foundry',
+    // The Autoscale tab's icon: with Cloud Foundry's own icon, and sorted
+    // first, the Register tile was picked by mistake for a Cloud Foundry
+    // endpoint.
+    icon: 'meter',
     iconFont: 'stratos-icons',
-    // No logoUrl for virtual endpoints - they don't appear in endpoint listings
-    // and don't need image-based branding. logoUrl is a required string on the
-    // endpoint definition, so use an empty string sentinel; rendering is driven
-    // by icon/iconFont instead.
+    // No image: the tile draws icon/iconFont. logoUrl is a required string,
+    // so an empty string stands for none.
     logoUrl: '',
     authTypes: [],
-    // Autoscaler is a virtual endpoint type - it doesn't appear in the endpoints list
-    // as it's a feature running on CF endpoints, not a separate connectable endpoint
+    // The Register dialog offers this type as a tile, but the backend has no
+    // autoscaler endpoint type yet, so registering is refused with a message.
+    // Autoscaler calls ride the app's Cloud Foundry endpoint and the user's
+    // CF token; nothing connects to this type.
     unConnectable: true,
-    // No listDetailsComponent needed for virtual endpoints - omit the property entirely
-    // rather than setting it to null, as Angular TestBed will try to process null values
-    renderPriority: 0,
+    // No listDetailsComponent: omitted rather than null, as Angular TestBed
+    // processes null values.
+    // After Cloud Foundry (1), before the Kubernetes types (3+).
+    renderPriority: 2,
   };
   return [
     generateAutoscalerEndpointEntity(endpointDefinition),
