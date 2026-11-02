@@ -1,84 +1,54 @@
 package autoscaler
 
 import (
+	"net/http"
 	"net/url"
 
 	"github.com/labstack/echo/v5"
 )
 
-func (a *Autoscaler) getAutoscalerInfo(echoContext *echo.Context) error {
-	healthURL, _ := url.Parse("/v1/info")
-	responses, err := a.portalProxy.ProxyRequest(echoContext, healthURL)
-	if err != nil {
-		// Return 404 if autoscaler URL is not configured or cannot be reached
-		// This allows frontend to gracefully handle missing autoscaler
-		return echo.NewHTTPError(404, "Autoscaler not available")
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
+func passErr(err error) error { return err }
+
+// getAutoscalerInfo and getAutoscalerHealth take ?app=<guid> to reach the
+// app's registered autoscaler; without it they use today's address.
+func (a *Autoscaler) getAutoscalerInfo(c *echo.Context) error {
+	return a.forward(c, c.QueryParam("app"), http.MethodGet, "/v1/info", func(error) error {
+		// 404 lets the frontend treat a missing autoscaler gracefully.
+		return echo.NewHTTPError(http.StatusNotFound, "Autoscaler not available")
+	})
 }
 
-func (a *Autoscaler) getAutoscalerHealth(echoContext *echo.Context) error {
-	healthURL, _ := url.Parse("/health")
-	responses, err := a.portalProxy.ProxyRequest(echoContext, healthURL)
-	if err != nil {
-		// Return 503 if autoscaler health check fails
-		return echo.NewHTTPError(503, "Autoscaler health check failed")
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
+func (a *Autoscaler) getAutoscalerHealth(c *echo.Context) error {
+	return a.forward(c, c.QueryParam("app"), http.MethodGet, "/health", func(error) error {
+		return echo.NewHTTPError(http.StatusServiceUnavailable, "Autoscaler health check failed")
+	})
 }
 
-func (a *Autoscaler) getAutoscalerPolicy(echoContext *echo.Context) error {
-	appID := echoContext.Param("appId")
-	policyURL, _ := url.Parse("/v1/apps/" + appID + "/policy")
-	responses, err := a.portalProxy.ProxyRequest(echoContext, policyURL)
-	if err != nil {
-		// Return appropriate error - could be 404 (no policy) or connection error
-		return err
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
+func (a *Autoscaler) getAutoscalerPolicy(c *echo.Context) error {
+	appID := c.Param("appId")
+	return a.forward(c, appID, http.MethodGet, "/v1/apps/"+appID+"/policy", passErr)
 }
 
-func (a *Autoscaler) attachAutoscalerPolicy(echoContext *echo.Context) error {
-	appID := echoContext.Param("appId")
-	policyURL, _ := url.Parse("/v1/apps/" + appID + "/policy")
-	responses, err := a.portalProxy.ProxyRequest(echoContext, policyURL)
-	if err != nil {
-		return err
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
+func (a *Autoscaler) attachAutoscalerPolicy(c *echo.Context) error {
+	appID := c.Param("appId")
+	return a.forward(c, appID, http.MethodPut, "/v1/apps/"+appID+"/policy", passErr)
 }
 
-func (a *Autoscaler) detachAutoscalerPolicy(echoContext *echo.Context) error {
-	appID := echoContext.Param("appId")
-	policyURL, _ := url.Parse("/v1/apps/" + appID + "/policy")
-	responses, err := a.portalProxy.ProxyRequest(echoContext, policyURL)
-	if err != nil {
-		return err
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
+func (a *Autoscaler) detachAutoscalerPolicy(c *echo.Context) error {
+	appID := c.Param("appId")
+	return a.forward(c, appID, http.MethodDelete, "/v1/apps/"+appID+"/policy", passErr)
 }
 
-func (a *Autoscaler) getAutoscalerMetric(echoContext *echo.Context) error {
-	appID := echoContext.Param("appId")
-	metricType := echoContext.Param("metricType")
-	queryURL := historyQuery(echoContext.QueryParams())
-	metricURL, _ := url.Parse("/v1/apps/" + appID + "/aggregated_metric_histories/" + metricType + queryURL)
-	responses, err := a.portalProxy.ProxyRequest(echoContext, metricURL)
-	if err != nil {
-		return err
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
+func (a *Autoscaler) getAutoscalerMetric(c *echo.Context) error {
+	appID := c.Param("appId")
+	path := "/v1/apps/" + appID + "/aggregated_metric_histories/" + c.Param("metricType") + historyQuery(c.QueryParams())
+	return a.forward(c, appID, http.MethodGet, path, passErr)
 }
 
-func (a *Autoscaler) getAutoscalerEvent(echoContext *echo.Context) error {
-	appID := echoContext.Param("appId")
-	queryURL := historyQuery(echoContext.QueryParams())
-	eventURL, _ := url.Parse("/v1/apps/" + appID + "/scaling_histories" + queryURL)
-	responses, err := a.portalProxy.ProxyRequest(echoContext, eventURL)
-	if err != nil {
-		return err
-	}
-	return a.portalProxy.SendProxiedResponse(echoContext, responses)
+func (a *Autoscaler) getAutoscalerEvent(c *echo.Context) error {
+	appID := c.Param("appId")
+	path := "/v1/apps/" + appID + "/scaling_histories" + historyQuery(c.QueryParams())
+	return a.forward(c, appID, http.MethodGet, path, passErr)
 }
 
 // historyQuery builds the query for the autoscaler's history endpoints from

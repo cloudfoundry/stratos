@@ -38,10 +38,12 @@ func (p *registerProxy) GetCNSIRecord(guid string) (api.CNSIRecord, error) {
 	return rec, nil
 }
 
-// GetHttpClient sends every request to the test server, whatever the host,
-// so the URLs can sit on a real-looking domain.
-func (p *registerProxy) GetHttpClient(bool, string) http.Client {
-	addr := p.server.Listener.Addr().String()
+func (p *registerProxy) GetHttpClient(bool, string) http.Client { return routeTo(p.server) }
+
+// routeTo sends every request to the test server, whatever the host, so
+// URLs can sit on a real-looking domain.
+func routeTo(s *httptest.Server) http.Client {
+	addr := s.Listener.Addr().String()
 	return http.Client{Transport: &http.Transport{
 		DialContext: func(ctx context.Context, network, _ string) (net.Conn, error) {
 			return (&net.Dialer{}).DialContext(ctx, network, addr)

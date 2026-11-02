@@ -50,6 +50,7 @@ func (a *Autoscaler) AddAdminGroupRoutes(echoGroup *echo.Group) {
 func (a *Autoscaler) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/autoscaler/info", a.getAutoscalerInfo)
 	echoGroup.GET("/autoscaler/health", a.getAutoscalerHealth)
+	echoGroup.GET("/autoscaler/apps/:appId/target", a.getAutoscalerTarget)
 	echoGroup.GET("/autoscaler/apps/:appId/policy", a.getAutoscalerPolicy)
 	echoGroup.PUT("/autoscaler/apps/:appId/policy", a.attachAutoscalerPolicy)
 	echoGroup.DELETE("/autoscaler/apps/:appId/policy", a.detachAutoscalerPolicy)
