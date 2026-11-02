@@ -473,18 +473,50 @@ func (p *portalProxy) GetCNSIRecord(guid string) (api.CNSIRecord, error) {
 // given type at a URL; endpoints of other types may share the URL.
 func (p *portalProxy) GetAdminCNSIRecordByEndpoint(endpoint string, cnsiType string) (api.CNSIRecord, error) {
 	slog.Debug("GetAdminCNSIRecordByEndpoint", "apiEndpoint", endpoint, "type", cnsiType)
-	var rec *api.CNSIRecord
 
 	endpointList, err := p.listCNSIByAPIEndpoint(endpoint)
 	if err != nil {
 		return api.CNSIRecord{}, err
 	}
+	return p.pickAdminCNSIRecord(endpointList, cnsiType)
+}
 
-	// search for endpoint created by an admin, preferring one on the console's
-	// client: the login hook links the console's token into it, and only that
-	// client can refresh the token. Duplicates are allowed, so several may be
-	// on that client; the one with the auto-register name wins, as the
-	// database returns them in no set order.
+// GetUserConnectedAdminCNSIRecordByEndpoint is GetAdminCNSIRecordByEndpoint
+// limited to the endpoints the user is connected to (their own live token,
+// not a shared one). Duplicates are allowed, so the user may use one of
+// several at the URL; that one is the user's choice.
+func (p *portalProxy) GetUserConnectedAdminCNSIRecordByEndpoint(endpoint string, cnsiType string, userGUID string) (api.CNSIRecord, error) {
+	slog.Debug("GetUserConnectedAdminCNSIRecordByEndpoint", "apiEndpoint", endpoint, "type", cnsiType, "user", userGUID)
+
+	endpointList, err := p.listCNSIByAPIEndpoint(endpoint)
+	if err != nil {
+		return api.CNSIRecord{}, err
+	}
+	connected, err := p.ListEndpointsByUser(userGUID)
+	if err != nil {
+		return api.CNSIRecord{}, err
+	}
+	isConnected := make(map[string]bool, len(connected))
+	for _, ce := range connected {
+		isConnected[ce.GUID] = true
+	}
+
+	mine := []*api.CNSIRecord{}
+	for _, rec := range endpointList {
+		if isConnected[rec.GUID] {
+			mine = append(mine, rec)
+		}
+	}
+	return p.pickAdminCNSIRecord(mine, cnsiType)
+}
+
+// pickAdminCNSIRecord picks the admin-registered endpoint of the given type,
+// preferring one on the console's client: the login hook links the console's
+// token into it, and only that client can refresh the token. Duplicates are
+// allowed, so several may be on that client; the one with the auto-register
+// name wins, as the database returns them in no set order.
+func (p *portalProxy) pickAdminCNSIRecord(endpointList []*api.CNSIRecord, cnsiType string) (api.CNSIRecord, error) {
+	var rec *api.CNSIRecord
 	consoleClient := p.GetConfig().CFClient
 	autoRegName := p.GetConfig().AutoRegisterName()
 	for _, endpoint := range endpointList {

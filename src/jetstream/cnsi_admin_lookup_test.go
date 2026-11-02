@@ -4,8 +4,10 @@ import (
 	"net/url"
 	"testing"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/testutils"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
 
 // Endpoints of different types may share a URL: a Metrics endpoint can be
@@ -163,6 +165,71 @@ func TestGetAdminCNSIRecordByEndpointPrefersTheAutoRegisteredName(t *testing.T) 
 	rec, err = pp.GetAdminCNSIRecordByEndpoint(autoReg.APIEndpoint.String(), "cf")
 	require.NoError(t, err)
 	require.Equal(t, other.GUID, rec.GUID, "a configured AUTO_REG_CF_NAME wins a tie")
+
+	require.NoError(t, mock.ExpectationsWereMet())
+}
+
+const selectUserConnectedCNSIs = `SELECT (.+) FROM cnsis c, tokens t WHERE (.+)`
+
+func connectedTo(recs ...*api.CNSIRecord) *sqlmock.Rows {
+	connected := []*api.ConnectedEndpoint{}
+	for _, rec := range recs {
+		ce := testutils.GetTestConnectedEndpoint()
+		ce.GUID = rec.GUID
+		ce.Name = rec.Name
+		ce.APIEndpoint = rec.APIEndpoint
+		ce.Creator = rec.Creator
+		connected = append(connected, ce)
+	}
+	return testutils.GetConnectedEndpointsRows(connected...)
+}
+
+// The login hook auto-connects one admin endpoint at the auto-register URL.
+// With duplicates there, the one the user already uses is the one they
+// want: a user who connected norm-lab got the auto-registered endpoint
+// connected at every login instead.
+func TestGetUserConnectedAdminCNSIRecordByEndpoint(t *testing.T) {
+	req := setupMockReq("GET", "", nil)
+	_, _, _, pp, db, mock := setupHTTPTest(req)
+	defer db.Close()
+	pp.Config.CFClient = "console-client"
+
+	autoReg := testutils.GetTestCNSIRecord()
+	autoReg.GUID = "auto-reg-guid"
+	autoReg.Name = "Cloud Foundry"
+	autoReg.ClientId = "console-client"
+	other := testutils.GetTestCNSIRecord()
+	other.GUID = "other-guid"
+	other.Name = "norm-lab"
+	other.ClientId = "console-client"
+	personal := testutils.GetTestCNSIRecord()
+	personal.GUID = "personal-guid"
+	personal.Name = "mine"
+	personal.Creator = "user-1"
+	all := testutils.GetCNSIRows(autoReg, other, personal)
+	addr := autoReg.APIEndpoint.String()
+
+	mock.ExpectQuery(selectFromCNSIs).WillReturnRows(all)
+	mock.ExpectQuery(selectUserConnectedCNSIs).WillReturnRows(connectedTo(other))
+	rec, err := pp.GetUserConnectedAdminCNSIRecordByEndpoint(addr, "cf", "user-1")
+	require.NoError(t, err)
+	require.Equal(t, other.GUID, rec.GUID, "the endpoint the user is connected to wins")
+
+	mock.ExpectQuery(selectFromCNSIs).WillReturnRows(testutils.GetCNSIRows(autoReg, other, personal))
+	mock.ExpectQuery(selectUserConnectedCNSIs).WillReturnRows(connectedTo(other, autoReg))
+	rec, err = pp.GetUserConnectedAdminCNSIRecordByEndpoint(addr, "cf", "user-1")
+	require.NoError(t, err)
+	require.Equal(t, autoReg.GUID, rec.GUID, "connected to several: the auto-register name wins")
+
+	mock.ExpectQuery(selectFromCNSIs).WillReturnRows(testutils.GetCNSIRows(autoReg, other, personal))
+	mock.ExpectQuery(selectUserConnectedCNSIs).WillReturnRows(connectedTo(personal))
+	_, err = pp.GetUserConnectedAdminCNSIRecordByEndpoint(addr, "cf", "user-1")
+	require.Error(t, err, "a personal endpoint is not an admin one")
+
+	mock.ExpectQuery(selectFromCNSIs).WillReturnRows(testutils.GetCNSIRows(autoReg, other))
+	mock.ExpectQuery(selectUserConnectedCNSIs).WillReturnRows(connectedTo())
+	_, err = pp.GetUserConnectedAdminCNSIRecordByEndpoint(addr, "cf", "user-1")
+	require.Error(t, err, "no connection: nothing the user prefers")
 
 	require.NoError(t, mock.ExpectationsWereMet())
 }
