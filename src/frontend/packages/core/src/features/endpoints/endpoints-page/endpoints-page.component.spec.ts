@@ -6,7 +6,7 @@ import { By } from '@angular/platform-browser';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { RouterTestingModule } from '@angular/router/testing';
 import { of, Subject } from 'rxjs';
-import { EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
+import { EndpointsDataService, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
@@ -206,5 +206,30 @@ describe('EndpointsPageComponent', () => {
     mockEndpointModalService.closeModal.mockClear();
     fixture.destroy();
     expect(mockEndpointModalService.closeModal).toHaveBeenCalledTimes(1);
+  });
+  // The pulse checked the endpoint list the page loaded when it opened. After
+  // the server dropped a connection the page still said Connected, so every
+  // tick fetched /pp/v1/cf/info and got 403 "no token for endpoint" (76 times
+  // in 38 minutes on the lab).
+  it('re-reads the endpoint list before each health check tick', async () => {
+    vi.useFakeTimers();
+    try {
+      const order: string[] = [];
+      const getAll = vi.spyOn(TestBed.inject(EndpointsDataService), 'getAll')
+        .mockImplementation(async () => { order.push('getAll'); return []; });
+      mockEndpointsService.checkAllEndpoints.mockImplementation(() => { order.push('check'); });
+      getAll.mockClear();
+      order.length = 0;
+
+      (component as unknown as { startEndpointHealthCheckPulse(): void }).startEndpointHealthCheckPulse();
+      await vi.advanceTimersByTimeAsync(30000);
+
+      expect(order).toEqual(['getAll', 'check']);
+      expect(getAll).toHaveBeenCalledWith(false);
+    } finally {
+      fixture.destroy();
+      mockEndpointsService.checkAllEndpoints.mockReset();
+      vi.useRealTimers();
+    }
   });
 });
