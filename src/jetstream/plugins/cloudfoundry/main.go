@@ -244,7 +244,8 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 	}
 
 	// CF auto reg cnsi entry missing, attempt to register
-	if cfCnsi.CNSIType == "" {
+	existed := cfCnsi.CNSIType != ""
+	if !existed {
 		cfEndpointSpec, _ := c.portalProxy.GetEndpointTypeSpec("cf")
 
 		autoRegName := c.portalProxy.GetConfig().AutoRegisterName()
@@ -267,14 +268,20 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 		slog.Info("Found an existing Cloud Foundry endpoint, will not auto-register", "url", cfAPI)
 	}
 
+	// The console-wide pick, the same for every user (info, user invites).
 	if c.portalProxy.GetConfig().CloudFoundryInfo == nil {
 		c.portalProxy.GetConfig().CloudFoundryInfo = &api.CFInfo{}
 	}
 	c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.GUID
 
-	slog.Info("Determining whether the user should auto-connect", "url", cfAPI, "user", userGUID)
+	connectCnsi := cfCnsi
+	if existed {
+		connectCnsi = c.userPreferredEndpoint(cfAPI, cfCnsi, userGUID)
+	}
 
-	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
+	slog.Info("Determining whether the user should auto-connect", "url", cfAPI, "endpoint", connectCnsi.Name, "user", userGUID)
+
+	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(connectCnsi.GUID, userGUID)
 	if ok && cfTokenRecord.Disconnected {
 		// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
 		slog.Info("No: the user previously disconnected, so will not auto-connect", "url", cfAPI, "user", userGUID)
@@ -284,14 +291,14 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 		// If using SSO login, then copy the tokens, else connect with the same credentials
 		if c.portalProxy.GetConfig().SSOLogin {
 			slog.Info("Auto-connecting to the auto-registered endpoint with the UAA token")
-			err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, cfCnsi) // no need to login twice
+			err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, connectCnsi) // no need to login twice
 			if err != nil {
 				slog.Warn("could not use the console UAA token to log in to the auto-registered endpoint", "err", err)
 				return err
 			}
 		} else {
 			slog.Info("Auto-connecting to the auto-registered endpoint with credentials")
-			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
+			_, err = c.portalProxy.DoLoginToCNSI(context, connectCnsi.GUID, false)
 			if err != nil {
 				slog.Warn("could not auto-connect with credentials to the auto-registered endpoint", "err", err)
 				return err
@@ -299,6 +306,23 @@ func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 		}
 	}
 	return nil
+}
+
+// userPreferredEndpoint is the admin endpoint at the auto-register URL the
+// user is connected to, or cfCnsi when they use none. Duplicates are
+// allowed, so a user who connected another endpoint there (norm-lab beside
+// Cloud Foundry) got the console-wide pick connected at every login
+// instead of their own. With SSO login the console's token is linked in,
+// which only an endpoint on the console's client can take.
+func (c *CloudFoundrySpecification) userPreferredEndpoint(cfAPI string, cfCnsi api.CNSIRecord, userGUID string) api.CNSIRecord {
+	mine, err := c.portalProxy.GetUserConnectedAdminCNSIRecordByEndpoint(cfAPI, EndpointType, userGUID)
+	if err != nil {
+		return cfCnsi
+	}
+	if c.portalProxy.GetConfig().SSOLogin && mine.ClientId != c.portalProxy.GetConfig().CFClient {
+		return cfCnsi
+	}
+	return mine
 }
 
 // resolveAutoRegisterCACert returns the CA the auto-registered endpoint should
