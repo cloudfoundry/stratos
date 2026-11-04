@@ -6,6 +6,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { NEVER, of } from 'rxjs';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from "@test-framework/core-test.helper";
@@ -15,7 +16,6 @@ import { CoreModule } from '../../../../core/core.module';
 import { MDAppModule } from '../../../../core/md.module';
 import { SignalStepHandle, StepComponent } from '../step/step.component';
 import { SteppersComponent } from './steppers.component';
-import { TailwindSnackBarService } from '../../../services/tailwind-snackbar.service';
 
 describe('SteppersComponent', () => {
   let component: SteppersComponent;
@@ -570,7 +570,7 @@ describe('SteppersComponent — all steps hidden, then shown', () => {
 });
 
 // A step whose submit fails with an HTML error page from a proxy: the
-// snackbar shows the page's heading and message as styled pieces.
+// stepper shows the page's heading and message as styled pieces.
 @Component({
   standalone: true,
   imports: [SteppersComponent, StepComponent],
@@ -592,92 +592,89 @@ class FailingStepHostComponent {
   };
 }
 
+// The reason sits above the buttons. A toast, at the bottom of the page,
+// covered a dialog's Cancel and Next.
 describe('SteppersComponent — failed step', () => {
-  it('shows an HTML error page as its heading and message', async () => {
-    const snackBar = { error: vi.fn(() => ({ dismiss: vi.fn() })), dismiss: vi.fn() };
+  const setUp = async () => {
     TestBed.configureTestingModule({
       imports: [FailingStepHostComponent, RouterTestingModule],
       providers: [
         provideZonelessChangeDetection(),
         provideHttpClient(),
         provideHttpClientTesting(),
-        { provide: TailwindSnackBarService, useValue: snackBar },
       ],
     });
     await TestBed.compileComponents();
     const hostFixture = TestBed.createComponent(FailingStepHostComponent);
     await hostFixture.whenStable();
     const steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
-
-    steppers.goNext();
-    await vi.waitFor(() => expect(snackBar.error).toHaveBeenCalled());
-
-    expect(snackBar.error).toHaveBeenCalledWith(
-      [
-        { text: '504 Gateway Time-out', style: 'heading' },
-        { text: '\nThe server didn\'t respond in time.', style: 'text' },
-      ],
-      'Dismiss',
-      { panelClass: 'stepper-snack-bar' },
-    );
-  });
-});
-
-// The stepper clears its own error before the next try and when it goes
-// away. Other messages open beside it, as tabs, are not its to close.
-describe('SteppersComponent — its own error message', () => {
-  const setUp = async (snackBar?: unknown) => {
-    TestBed.configureTestingModule({
-      imports: [FailingStepHostComponent, RouterTestingModule],
-      providers: [
-        provideZonelessChangeDetection(),
-        provideHttpClient(),
-        provideHttpClientTesting(),
-        ...(snackBar ? [{ provide: TailwindSnackBarService, useValue: snackBar }] : []),
-      ],
-    });
-    await TestBed.compileComponents();
-    const hostFixture = TestBed.createComponent(FailingStepHostComponent);
-    await hostFixture.whenStable();
-    const steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
-    return { hostFixture, steppers };
+    const root: HTMLElement = hostFixture.nativeElement;
+    const reason = () => root.querySelector('[role="alert"]');
+    return { hostFixture, steppers, root, reason };
   };
+  const failed = (message: string) => of({ success: false, message, data: {}, redirect: false, ignoreSuccess: false });
 
-  afterEach(() => document.querySelectorAll('.snackbar-box').forEach(box => box.remove()));
+  it('shows an HTML error page as its heading and message', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    steppers.goNext();
+    await vi.waitFor(() => expect(steppers.stepError()).not.toBeNull());
+    await hostFixture.whenStable();
 
-  it('closes only its own error before the next try', async () => {
-    const ref = { dismiss: vi.fn() };
-    const snackBar = { error: vi.fn(() => ref), dismiss: vi.fn() };
-    const { steppers } = await setUp(snackBar);
-    steppers.goNext();
-    await vi.waitFor(() => expect(snackBar.error).toHaveBeenCalledTimes(1));
-    steppers.goNext();
-    expect(ref.dismiss).toHaveBeenCalledTimes(1);
-    expect(snackBar.dismiss).not.toHaveBeenCalled();
+    expect(reason()!.querySelector('.font-semibold')!.textContent).toBe('504 Gateway Time-out');
+    expect(reason()!.textContent).toContain('The server didn\'t respond in time.');
   });
 
-  it('closes only its own error when it is destroyed', async () => {
-    const ref = { dismiss: vi.fn() };
-    const snackBar = { error: vi.fn(() => ref), dismiss: vi.fn() };
-    const { hostFixture, steppers } = await setUp(snackBar);
+  it('shows a plain message above the buttons, not in a toast', async () => {
+    const { hostFixture, steppers, root, reason } = await setUp();
+    steppers.steps[0].invokeNext = () => failed('nope');
     steppers.goNext();
-    await vi.waitFor(() => expect(snackBar.error).toHaveBeenCalledTimes(1));
-    hostFixture.destroy();
-    expect(ref.dismiss).toHaveBeenCalledTimes(1);
-    expect(snackBar.dismiss).not.toHaveBeenCalled();
+    await hostFixture.whenStable();
+
+    expect(reason()!.textContent).toContain('nope');
+    const buttons = root.querySelector('.steppers-navigation')!;
+    expect(reason()!.compareDocumentPosition(buttons) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(document.querySelector('.snackbar-box:not([inert])')).toBeNull();
   });
 
-  it('leaves another open message up when it retries', async () => {
-    const { steppers } = await setUp();
-    const service = TestBed.inject(TailwindSnackBarService);
-    const open = () => Array.from(document.querySelectorAll('.snackbar-box:not([inert]) .snackbar-message'))
-      .map(m => m.textContent);
+  it('shows what a step threw, and lets the user retry', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    steppers.steps[0].invokeNext = () => { throw new Error('boom'); };
     steppers.goNext();
-    await vi.waitFor(() => expect(open()).toHaveLength(1));
-    service.show('Other message', 'Dismiss');
+    await hostFixture.whenStable();
+
+    expect(reason()!.textContent).toContain('An error occurred: boom');
+    expect(steppers.steps[0].busy).toBe(false);
+  });
+
+  it('clears the reason before the next try', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    const invokeNext = vi.fn(() => failed('nope'));
+    steppers.steps[0].invokeNext = invokeNext;
     steppers.goNext();
-    await vi.waitFor(() => expect(open()).toHaveLength(2));
-    expect(open()[0]).toBe('Other message');
+    await hostFixture.whenStable();
+    expect(reason()).not.toBeNull();
+
+    invokeNext.mockReturnValue(NEVER as never);
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(reason()).toBeNull();
+  });
+
+  it('clears the reason on going back from the step', async () => {
+    const { hostFixture, steppers, reason } = await setUp();
+    steppers.steps[0].invokeNext = () => of({ success: true, message: '', data: {}, redirect: false, ignoreSuccess: false });
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(1);
+    steppers.steps[1].invokeNext = () => failed('nope');
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(reason()).not.toBeNull();
+
+    steppers.goTo(0);
+    await hostFixture.whenStable();
+    expect(steppers.currentIndex()).toBe(0);
+    expect(reason()).toBeNull();
   });
 });
 

@@ -86,6 +86,9 @@
         <div class="steppers-contents mb-8">
           <span *ngTemplateOutlet="steps[currentIndex()].content"></span>
         </div>
+        @if (stepError(); as error) {
+          <p class="text-sm text-danger-700 dark:text-danger-300 mb-4 break-words" role="alert"><app-error-text [pieces]="error" /></p>
+        }
         <!-- Navigation buttons -->
         <div class="steppers-navigation flex items-center justify-between border-t pt-6">
           <div class="steppers-navigation-left">

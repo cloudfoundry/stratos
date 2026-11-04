@@ -1,15 +1,15 @@
 import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Injector, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { RoutingHistoryService } from '@stratosui/store';
+import { ErrorPiece, RoutingHistoryService } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf, Subscription, Unsubscribable } from 'rxjs';
 import { take, catchError, defaultIfEmpty, finalize, map, switchMap } from 'rxjs/operators';
 
-import { TailwindSnackBarService, TailwindSnackBarRef } from '../../../services/tailwind-snackbar.service';
 import { BASE_REDIRECT_QUERY, StepperRedirectPayload } from '../stepper.types';
 import { SteppersService } from '../steppers.service';
 import { StepComponent, StepOnNextResult } from './../step/step.component';
 import { DotContentComponent } from '../../../../core/dot-content/dot-content.component';
+import { ErrorTextComponent } from '../../error-text/error-text.component';
 import { AppBusyComponent } from '../../busy-indicator/busy-indicator.component';
 
 @Component({
@@ -23,7 +23,8 @@ import { AppBusyComponent } from '../../busy-indicator/busy-indicator.component'
     AppBusyComponent,
     CommonModule,
     RouterModule,
-    DotContentComponent
+    DotContentComponent,
+    ErrorTextComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   // The internal `.steppers-wrapper` uses `flex: 1; min-height: 0` to fill
@@ -36,7 +37,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   private steppersService = inject(SteppersService);
   private router = inject(Router);
   private routingHistory = inject(RoutingHistoryService);
-  private snackBar = inject(TailwindSnackBarService);
   private route = inject(ActivatedRoute);
   private cdr = inject(ChangeDetectorRef);
   private injector = inject(Injector);
@@ -79,7 +79,9 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   stepValidateSub: Subscription | null = null;
 
   private enterData: any;
-  private snackBarRef!: TailwindSnackBarRef<any>;
+  // Why the current step's last try failed. It sits above the buttons: a toast,
+  // at the bottom of the page, covered a dialog's Cancel and Next.
+  readonly stepError = signal<readonly ErrorPiece[] | null>(null);
 
   // Mirrors `steps` so firstStepEntry re-runs whenever the steps re-filter.
   private readonly visibleSteps = signal<StepComponent[]>([]);
@@ -173,10 +175,6 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   ngOnDestroy() {
     this.hiddenSubs.forEach(sub => sub.unsubscribe());
     this.unsubscribeNext();
-    // Only the stepper's own error; other open messages stay.
-    if (this.snackBarRef) {
-      this.snackBarRef.dismiss();
-    }
   }
 
   ngAfterContentInit() {
@@ -246,11 +244,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   }
 
   goNext(): void {
-    // Close the stepper's previous error, if there was one, through its
-    // ref; other messages open beside it as tabs are not the stepper's.
-    if (this.snackBarRef) {
-      this.snackBarRef.dismiss();
-    }
+    this.stepError.set(null);
     this.unsubscribeNext();
     if (this.currentIndex() < this.steps.length) {
       const step = this.steps[this.currentIndex()];
@@ -260,7 +254,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
       // before it returns an observable, or signal-handle.submit() throwing
       // sync). Without a try/catch, the throw escapes goNext, step.busy
       // stays true, and the Next/Finish button is stuck as a spinner
-      // forever. Catch, surface via snackbar, reset busy.
+      // forever. Catch, show the reason, reset busy.
       let obs$: Observable<StepOnNextResult> | unknown;
       try {
         obs$ = step.invokeNext(this.currentIndex());
@@ -269,11 +263,10 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         step.busy = false;
         this.showNextButtonProgress = false;
         this.cdr.markForCheck();
-        this.snackBarRef = this.snackBar.error(
-          `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
-          'Dismiss',
-          { panelClass: 'stepper-snack-bar' },
-        );
+        this.stepError.set([{
+          text: `An error occurred: ${(err as Error)?.message || err || 'Unknown error'}`,
+          style: 'text',
+        }]);
         return;
       }
 
@@ -320,11 +313,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
               this.setActive(this.currentIndex() + 1);
             }
           } else if (!success && (messagePieces?.length || message)) {
-            this.snackBarRef = this.snackBar.error(
-              messagePieces?.length ? messagePieces : message ?? '',
-              'Dismiss',
-              { panelClass: 'stepper-snack-bar' },
-            );
+            this.stepError.set(messagePieces?.length ? messagePieces : [{ text: message ?? '', style: 'text' }]);
           }
           return observableOf(undefined);
         }),
@@ -394,6 +383,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
     if (!this.canGoto(index)) {
       return;
     }
+    this.stepError.set(null);
 
     // 1) Leave the previous step (with an indication if this is a Next or Previous transition)
     const current = this.currentIndex();
