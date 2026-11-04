@@ -121,7 +121,7 @@
             }
             <!-- Next/Submit button -->
             @if (!steps[currentIndex()].hideNextButton) {
-              <button id="stepper_next"
+              <button id="stepper_next" #nextButton
                 class="steppers-navigation-right-next btn flex items-center space-x-2"
                 [attr.aria-describedby]="stepError() ? 'stepper_error' : null"
                   [ngClass]="{
