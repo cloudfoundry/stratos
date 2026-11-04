@@ -631,8 +631,11 @@ describe('SteppersComponent — failed step', () => {
     await hostFixture.whenStable();
 
     expect(reason()!.textContent).toContain('nope');
-    const buttons = root.querySelector('.steppers-navigation')!;
-    expect(reason()!.compareDocumentPosition(buttons) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    // In the button row: a dialog's body scrolls under that row, which would
+    // hide a reason placed just before it.
+    expect(root.querySelector('.steppers-navigation [role="alert"]')).toBe(reason());
+    const next = root.querySelector('#stepper_next')!;
+    expect(reason()!.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(document.querySelector('.snackbar-box:not([inert])')).toBeNull();
   });
 
