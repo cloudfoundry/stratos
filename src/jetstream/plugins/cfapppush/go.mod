@@ -6,12 +6,12 @@ replace github.com/cloudfoundry/stratos/src/jetstream/api => ../../api
 
 require (
 	code.cloudfoundry.org/cli/v8 v8.19.1
-	code.cloudfoundry.org/clock v1.93.0
+	code.cloudfoundry.org/clock v1.94.0
 	github.com/cloudfoundry/stratos/src/jetstream/api v0.0.0-00010101000000-000000000000
 	github.com/coder/websocket v1.8.15
-	github.com/labstack/echo/v5 v5.4.2
+	github.com/labstack/echo/v5 v5.4.4
 	github.com/mholt/archives v0.1.5
-	go.yaml.in/yaml/v4 v4.0.0-rc.6
+	go.yaml.in/yaml/v4 v4.0.0-rc.7
 )
 
 require (
@@ -90,8 +90,8 @@ require (
 	gopkg.in/cheggaaa/pb.v1 v1.0.28 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	k8s.io/apimachinery v0.37.1 // indirect
-	k8s.io/client-go v0.37.1 // indirect
+	k8s.io/apimachinery v0.37.2 // indirect
+	k8s.io/client-go v0.37.2 // indirect
 	k8s.io/klog/v2 v2.140.0 // indirect
 	k8s.io/kube-openapi v0.0.0-20260721132016-d427ff9ee9ad // indirect
 	k8s.io/utils v0.0.0-20260626114624-be93311217bd // indirect
