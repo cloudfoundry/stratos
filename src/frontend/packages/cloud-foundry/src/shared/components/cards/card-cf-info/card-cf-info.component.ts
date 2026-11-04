@@ -2,7 +2,7 @@ import { Component, inject, ChangeDetectionStrategy, OnInit, computed } from '@a
 import { CommonModule } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 
-import { TailwindDialogService, MetadataItemComponent } from '@stratosui/core';
+import { TailwindDialogService, MetadataItemComponent, UrlPartsPipe } from '@stratosui/core';
 import { AutoscalerInfoDataService } from '@stratosui/cf-autoscaler';
 import { CloudFoundryEndpointService } from '../../../../features/cf/services/cloud-foundry-endpoint.service';
 import {
@@ -27,6 +27,7 @@ import { UserInviteConfigureService, UserInviteService } from '../../../../featu
   imports: [
     CommonModule,
     MetadataItemComponent,
+    UrlPartsPipe,
   ],
 })
 export class CardCfInfoComponent implements OnInit {

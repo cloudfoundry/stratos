@@ -6,13 +6,15 @@ import { getFullEndpointApiUrl } from '../../../../../../store/src/endpoint-util
 import { EndpointModel } from '../../../../../../store/src/public-api';
 import { HomePageCardLayout, HomePageEndpointCard } from '../../home.types';
 import { MetadataItemComponent } from '../../../../shared/components/metadata-item/metadata-item.component';
+import { UrlPartsPipe } from '../../../../shared/pipes/url-parts.pipe';
 
 @Component({
   selector: 'app-default-endpoint-home-component',
   templateUrl: './default-endpoint-home-component.component.html',
   standalone: true,
   imports: [
-    MetadataItemComponent
+    MetadataItemComponent,
+    UrlPartsPipe,
 ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

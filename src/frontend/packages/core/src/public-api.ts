@@ -205,6 +205,7 @@ export { PercentagePipe } from './shared/pipes/percentage.pipe';
 export { InfinityPipe } from './core/infinity.pipe';
 export { MbToHumanSizePipe } from './shared/pipes/mb-to-human-size.pipe';
 export { UptimePipe } from './shared/pipes/uptime.pipe';
+export { UrlPartsPipe } from './shared/pipes/url-parts.pipe';
 
 // Directives
 export { BlurDirective } from './shared/components/blur.directive';
