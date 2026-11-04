@@ -199,10 +199,10 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     },
     submit: async () => {
       const result = await firstValueFrom(this._connect()!.onNext());
-      // A failure is shown under the form, so the stepper adds no message
-      // of its own.
+      // The stepper gives the reason, in view: the dialog's body scrolls
+      // under its button row.
       if (!result.success) {
-        return { success: false };
+        return { success: false, message: result.message };
       }
       // Connect's legacy onNext returns redirect:true on success: the
       // form is done.

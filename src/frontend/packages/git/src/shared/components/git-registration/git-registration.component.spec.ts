@@ -178,9 +178,9 @@ describe('GitRegistrationComponent', () => {
       expect(openWithCancel.mock.calls[0][0].message).not.toContain('all users');
     });
 
-    // The Connect step shows the error under the form; the stepper adds no
-    // snackbar of its own.
-    it('shows a failed connect once, inline', async () => {
+    // In the stepper's reason: the dialog's body scrolls under the button row,
+    // which hid an error placed under the form.
+    it('shows a failed connect once, in the stepper', async () => {
       const error = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error');
       const steppers = fixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
       steppers.setActive(1);
@@ -198,7 +198,8 @@ describe('GitRegistrationComponent', () => {
       steppers.goNext();
       await fixture.whenStable();
 
-      expect(fixture.nativeElement.querySelector('app-dialog-error')?.textContent).toContain('Bad credentials');
+      expect(fixture.nativeElement.querySelector('#stepper_error')?.textContent).toContain('Bad credentials');
+      expect(fixture.nativeElement.querySelector('app-dialog-error')).toBeNull();
       expect(error).not.toHaveBeenCalled();
       expect(registerHandle.close).not.toHaveBeenCalled();
     });

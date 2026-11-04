@@ -290,7 +290,7 @@ describe('CreateEndpointConnectComponent', () => {
   });
 
   describe('a failed connect', () => {
-    it('shows the error and that the existing connection is unaffected', async () => {
+    it('says the existing connection is unaffected, and leaves the reason to the stepper', async () => {
       const config = { name: 'ep', guid: 'ep-1', type: 'cf', subType: null, ssoAllowed: false };
       fixture.componentRef.setInput('fromConnect', true);
       fixture.componentRef.setInput('stillConnected', true);
@@ -298,7 +298,7 @@ describe('CreateEndpointConnectComponent', () => {
       (component.connectService() as any).connectingError$ = of('Bad credentials');
       (component.connectService() as any).isBusy$ = of(false);
       await fixture.whenStable();
-      expect(fixture.nativeElement.textContent).toContain('Bad credentials');
+      expect(fixture.nativeElement.textContent).not.toContain('Bad credentials');
       expect(fixture.nativeElement.textContent).toContain('Your existing connection is unaffected and remains active.');
     });
   });

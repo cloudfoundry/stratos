@@ -148,9 +148,9 @@ describe('CreateEndpointComponent', () => {
     });
   });
 
-  // The Connect step shows the error under the form; the stepper adds no
-  // snackbar of its own.
-  it('shows a failed connect once, inline', async () => {
+  // In the stepper's reason: the dialog's body scrolls under the button row,
+  // which hid an error placed under the form.
+  it('shows a failed connect once, in the stepper', async () => {
     const error = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error');
     component.step1 = {
       onNext: () => of({ success: true, data: { guid: 'new-guid', type: 'metrics', name: 'my-metrics' } }),
@@ -174,7 +174,8 @@ describe('CreateEndpointComponent', () => {
     steppers.goNext();
     await fixture.whenStable();
 
-    expect(fixture.nativeElement.querySelector('app-dialog-error')?.textContent).toContain('Bad credentials');
+    expect(fixture.nativeElement.querySelector('#stepper_error')?.textContent).toContain('Bad credentials');
+    expect(fixture.nativeElement.querySelector('app-dialog-error')).toBeNull();
     expect(error).not.toHaveBeenCalled();
     expect(registerHandle.close).not.toHaveBeenCalled();
   });

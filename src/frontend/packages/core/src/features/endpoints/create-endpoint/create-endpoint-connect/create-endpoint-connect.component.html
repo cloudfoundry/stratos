@@ -49,9 +49,6 @@
       (authType)="authTypeChanged($event)" (submitted)="submitted.emit()" [connectService]="connectService()">
     </app-connect-endpoint>
     @if (connectService(); as cs) {
-      <app-dialog-error message="{{cs.connectingError$ | async}}"
-        [show]="!!(cs.connectingError$ | async) && (cs.isBusy$ | async) === false">
-      </app-dialog-error>
       @if (!!(cs.connectingError$ | async) && (cs.isBusy$ | async) === false && stillConnected()) {
         <div class="flex items-center gap-2 text-xs text-content-muted">
           <span class="material-icons text-base">info</span>

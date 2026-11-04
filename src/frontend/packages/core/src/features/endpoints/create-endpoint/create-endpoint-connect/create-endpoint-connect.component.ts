@@ -14,7 +14,6 @@ import { IStepperStep, StepOnNextResult } from '../../../../shared/components/st
 import { SidePanelService } from '../../../../shared/services/side-panel.service';
 import { ConnectEndpointComponent } from '../../connect-endpoint/connect-endpoint.component';
 import { ConnectEndpointConfig, ConnectEndpointService } from '../../connect.service';
-import { DialogErrorComponent } from '../../../../shared/components/dialog-error/dialog-error.component';
 import { EndpointCertificatesService, worstCertificateState } from '../../certificates/endpoint-certificates.service';
 import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 
@@ -29,7 +28,6 @@ import { CustomIconComponent } from '../../../../shared/components/custom-materi
     CustomIconComponent,
     BlurDirective,
     ConnectEndpointComponent,
-    DialogErrorComponent,
     AsyncPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush

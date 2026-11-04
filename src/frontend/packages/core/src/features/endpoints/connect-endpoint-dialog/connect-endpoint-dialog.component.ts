@@ -145,9 +145,8 @@ export class ConnectEndpointDialogComponent implements OnDestroy {
       }
       const result = await firstValueFrom(connect.onNext());
       // Success closes the dialog once the endpoint reads connected
-      // (hasConnected$). A failure is shown under the form, so the stepper
-      // adds no message of its own.
-      return result.success ? { ignoreSuccess: true } : { success: false };
+      // (hasConnected$). The stepper gives a failure's reason.
+      return result.success ? { ignoreSuccess: true } : { success: false, message: result.message };
     },
   };
 
