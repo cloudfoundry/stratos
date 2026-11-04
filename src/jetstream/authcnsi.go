@@ -584,17 +584,16 @@ func connectFailure(err error) error {
 		"Could not connect to the endpoint: %s", err)
 }
 
-// clientRejectedHint says what to change when UAA turns down the endpoint's
-// client rather than the user: "Bad credentials" alone reads like a wrong
-// password.
+// clientRejectedHint says what to check when UAA answers invalid_client. It
+// gives that answer, "Bad credentials", for a wrong user as well as a wrong
+// client, so the message names both. "Unauthorized grant type" is the client's.
 func clientRejectedHint(authError *api.UAAErrorResponse, clientID string) string {
 	switch {
 	case strings.HasPrefix(authError.ErrorDescription, "Unauthorized grant type"):
 		return fmt.Sprintf(`. Client %q cannot log in with a username and password: `+
 			`register the endpoint with "Allow SSO login" ticked, or with Client ID "cf"`, clientID)
 	case authError.Error == "invalid_client":
-		return fmt.Sprintf(`. The login server rejected the endpoint's Client ID %q or its Client Secret, `+
-			`not your username and password`, clientID)
+		return fmt.Sprintf(`. Check the username and password, and the endpoint's Client ID %q and Client Secret`, clientID)
 	}
 	return ""
 }

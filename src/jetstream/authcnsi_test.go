@@ -264,8 +264,9 @@ func TestCloudFoundryConnectKeepsTheUAAReason(t *testing.T) {
 	}
 }
 
-// UAA turning down the endpoint's client reads like a wrong password; the
-// message has to point at the Client ID instead.
+// "Bad credentials" alone reads like a wrong password, and a client without
+// the password grant is not one. UAA gives the same answer for a wrong user as
+// for a wrong client, so that message names both.
 func TestCloudFoundryConnectSaysWhenTheClientIsRejected(t *testing.T) {
 	t.Parallel()
 
@@ -280,11 +281,10 @@ func TestCloudFoundryConnectSaysWhenTheClientIsRejected(t *testing.T) {
 				`register the endpoint with "Allow SSO login" ticked, or with Client ID "cf"`,
 		},
 		{
-			name:   "client secret wrong",
+			name:   "wrong user or wrong client",
 			answer: `{"error":"invalid_client","error_description":"Bad credentials"}`,
 			want: `Could not connect to the endpoint: Bad credentials. ` +
-				`The login server rejected the endpoint's Client ID "stratos_client" or its Client Secret, ` +
-				`not your username and password`,
+				`Check the username and password, and the endpoint's Client ID "stratos_client" and Client Secret`,
 		},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
