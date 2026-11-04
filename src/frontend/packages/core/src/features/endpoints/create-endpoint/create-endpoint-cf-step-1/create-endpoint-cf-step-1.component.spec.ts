@@ -330,17 +330,17 @@ describe('CreateEndpointCfStep1Component', () => {
 
     it('warns when the address is the one registered', async () => {
       await withRegistered('API.example.com:443');
-      expect(await typeUrl('https://API.example.com:443')).toContain('An endpoint at this URL is already registered.');
+      expect(await typeUrl('https://API.example.com:443')).toContain('An endpoint at this address is already registered. You can register it again.');
     });
 
     it('warns when the same address is written differently', async () => {
       await withRegistered('API.example.com:443');
-      expect(await typeUrl('api.example.com/')).toContain('An endpoint at this URL is already registered.');
+      expect(await typeUrl('api.example.com/')).toContain('An endpoint at this address is already registered. You can register it again.');
     });
 
     it('does not warn for another port', async () => {
       await withRegistered('api.example.com');
-      expect(await typeUrl('api.example.com:8443')).not.toContain('An endpoint at this URL is already registered.');
+      expect(await typeUrl('api.example.com:8443')).not.toContain('An endpoint at this address is already registered. You can register it again.');
     });
   });
 
