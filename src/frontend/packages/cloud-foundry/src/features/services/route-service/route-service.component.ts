@@ -10,6 +10,7 @@ import {
   StepComponent,
   StepOnNextResult,
   SteppersComponent,
+  UrlPartsPipe,
 } from '@stratosui/core';
 import { UnknownHow, unknownHow, unknownOutcomeMessage } from '../../../services/async-jobs/unknown-outcome-message';
 import { writeWithJob } from '../../../services/async-jobs/write-with-job';
@@ -34,7 +35,7 @@ import { extractHttpErrorMessage } from '@stratosui/store';
   templateUrl: './route-service.component.html',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [PageHeaderComponent, SteppersComponent, StepComponent, DialogErrorComponent],
+  imports: [PageHeaderComponent, SteppersComponent, StepComponent, DialogErrorComponent, UrlPartsPipe],
 })
 export class RouteServiceComponent {
   private http = inject(HttpClient);

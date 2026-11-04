@@ -14,7 +14,7 @@
     <app-meta-card-value>
       @if (b?.url; as url) {
         <a [href]="url" target="_blank" rel="noopener noreferrer" appClickStopPropagation>
-          {{ url }}<span class="sr-only"> (opens in a new tab)</span>
+          @for (part of url | urlParts; track $index) {{{ part }}<wbr>}<span class="sr-only"> (opens in a new tab)</span>
           <span class="material-icons align-middle" aria-hidden="true">launch</span>
         </a>
       }

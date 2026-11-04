@@ -13,7 +13,7 @@
       <div>
         <h1 class="text-base">Home</h1>
         <div>
-          <a class="text-sm break-all" href="{{ chart.attributes.home }}" target="_blank">{{chart.attributes.home}}</a>
+          <a class="text-sm wrap-anywhere" href="{{ chart.attributes.home }}" target="_blank">@for (part of chart.attributes.home | urlParts; track $index) {{{ part }}<wbr>}</a>
         </div>
       </div>
     }
@@ -32,7 +32,7 @@
         <h1 class="text-base">Related</h1>
         @for (source of sources; track source) {
           <div>
-            <a href="{{ source }}" class="text-sm break-all" target="_blank">{{ source }}</a>
+            <a href="{{ source }}" class="text-sm wrap-anywhere" target="_blank">@for (part of source | urlParts; track $index) {{{ part }}<wbr>}</a>
           </div>
         }
       </div>
@@ -48,7 +48,7 @@
         <h1 class="text-base">Chart</h1>
         @for (url of currentVersion.attributes.urls; track url) {
           <div>
-            <a href="{{ url }}" class="text-sm break-all" target="_blank">{{ url }}</a>
+            <a href="{{ url }}" class="text-sm wrap-anywhere" target="_blank">@for (part of url | urlParts; track $index) {{{ part }}<wbr>}</a>
           </div>
         }
       </div>
