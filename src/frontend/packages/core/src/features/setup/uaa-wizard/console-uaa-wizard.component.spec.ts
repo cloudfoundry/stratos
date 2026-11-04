@@ -22,7 +22,7 @@ describe('ConsoleUaaWizardComponent', () => {
   const nextButton = () => el().querySelector<HTMLButtonElement>('#stepper_next')!;
   const scopeSelect = () => el().querySelector<HTMLSelectElement>('#uaaScope');
   const overlayShown = () => !!el().querySelector('.loading-page__overlay');
-  const errorSnack = () => document.querySelector('.snackbar-error .snackbar-message')?.textContent ?? '';
+  const stepError = () => el().querySelector('app-steppers [role="alert"]')?.textContent?.trim() ?? '';
 
   // A flushed response resolves the step through a chain of promises that
   // no pending task tracks, so drain the microtasks before waiting for CD.
@@ -76,7 +76,6 @@ describe('ConsoleUaaWizardComponent', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
-    document.querySelectorAll('.snackbar-error').forEach(s => s.remove());
   });
 
   it('should be created', () => {
@@ -97,7 +96,7 @@ describe('ConsoleUaaWizardComponent', () => {
 
       expect(scopeSelect()).toBeNull();
       expect(nextButton().disabled).toBe(false);
-      expect(errorSnack()).toContain('did not answer');
+      expect(stepError()).toContain('did not answer');
     });
 
     // Regression (#6020): the step read the replayed state of the previous
@@ -112,7 +111,7 @@ describe('ConsoleUaaWizardComponent', () => {
       await settle();
 
       expect(scopeSelect()).toBeNull();
-      expect(errorSnack()).toContain('Failed to authenticate with UAA');
+      expect(stepError()).toContain('Failed to authenticate with UAA');
 
       nextButton().click();
       flushScopes(['openid', 'stratos.admin']);
@@ -137,14 +136,14 @@ describe('ConsoleUaaWizardComponent', () => {
       await settle();
 
       expect(scopeSelect()).toBeNull();
-      expect(errorSnack()).toContain('Failed to authenticate with UAA');
+      expect(stepError()).toContain('Failed to authenticate with UAA');
     });
 
     it('does not advance when the UAA returns no scopes for the admin user', async () => {
       await reachScopeStep([]);
 
       expect(scopeSelect()).toBeNull();
-      expect(errorSnack()).toContain('no scopes');
+      expect(stepError()).toContain('no scopes');
     });
 
     it('words a failed scope check as a credentials check, not a save', async () => {
@@ -155,7 +154,7 @@ describe('ConsoleUaaWizardComponent', () => {
       flushCheckError('Failed to authenticate with UAA - check Client ID, Secret and credentials');
       await settle();
 
-      expect(errorSnack()).toBe('Failed to check the UAA credentials. Failed to authenticate with UAA - check Client ID, Secret and credentials');
+      expect(stepError()).toBe('Failed to check the UAA credentials. Failed to authenticate with UAA - check Client ID, Secret and credentials');
     });
   });
 
@@ -176,7 +175,7 @@ describe('ConsoleUaaWizardComponent', () => {
     });
 
     // Regression (#6020): a failed save left the full-screen overlay up
-    // forever, with the error snackbar hidden behind it.
+    // forever, with the error hidden behind it.
     it('clears the overlay and shows the error when the save fails', async () => {
       await reachScopeStep(['openid', 'stratos.admin']);
 
@@ -189,7 +188,7 @@ describe('ConsoleUaaWizardComponent', () => {
 
       expect(component.applyingSetup()).toBe(false);
       expect(overlayShown()).toBe(false);
-      expect(errorSnack()).toContain('database unavailable');
+      expect(stepError()).toContain('database unavailable');
     });
 
     it('saves the chosen scope and reloads once the backend leaves setup mode', async () => {
@@ -205,7 +204,7 @@ describe('ConsoleUaaWizardComponent', () => {
       await settle();
 
       expect(assign).toHaveBeenCalledWith(`${window.location.protocol}//${window.location.host}`);
-      expect(errorSnack()).toBe('');
+      expect(stepError()).toBe('');
     });
 
     it('clears the overlay and shows an error when the backend never confirms the setup', async () => {
@@ -229,7 +228,7 @@ describe('ConsoleUaaWizardComponent', () => {
 
       expect(component.applyingSetup()).toBe(false);
       expect(overlayShown()).toBe(false);
-      expect(errorSnack()).toContain('did not confirm');
+      expect(stepError()).toContain('did not confirm');
     });
 
     it('clears the overlay and shows an error when the save never answers', async () => {
@@ -244,7 +243,7 @@ describe('ConsoleUaaWizardComponent', () => {
 
       expect(component.applyingSetup()).toBe(false);
       expect(overlayShown()).toBe(false);
-      expect(errorSnack()).toContain('did not answer');
+      expect(stepError()).toContain('did not answer');
       httpMock.expectNone(VERIFY_URL);
     });
   });

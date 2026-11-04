@@ -251,7 +251,7 @@ export class BackupEndpointsComponent implements OnDestroy {
       const userCancelledDialog = () => {
         // Match legacy behavior: cancel returned `success: false` with no
         // message, leaving the user on the password step. Reject with an
-        // empty message so the stepper snackbar stays quiet.
+        // empty message so the stepper shows no error.
         reject(new Error(''));
       };
 

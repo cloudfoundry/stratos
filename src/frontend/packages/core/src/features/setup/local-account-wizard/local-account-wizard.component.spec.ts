@@ -20,7 +20,7 @@ describe('LocalAccountWizardComponent', () => {
   const el = (): HTMLElement => fixture.nativeElement;
   const finishButton = () => el().querySelector<HTMLButtonElement>('#stepper_next')!;
   const overlayShown = () => !!el().querySelector('.loading-page__overlay');
-  const errorSnack = () => document.querySelector('.snackbar-error .snackbar-message')?.textContent ?? '';
+  const stepError = () => el().querySelector('app-steppers [role="alert"]')?.textContent?.trim() ?? '';
 
   // A flushed response resolves the step through a chain of promises that
   // no pending task tracks, so drain the microtasks before waiting for CD.
@@ -55,7 +55,6 @@ describe('LocalAccountWizardComponent', () => {
   afterEach(() => {
     vi.useRealTimers();
     vi.restoreAllMocks();
-    document.querySelectorAll('.snackbar-error').forEach(s => s.remove());
   });
 
   it('should create', () => {
@@ -70,7 +69,7 @@ describe('LocalAccountWizardComponent', () => {
   });
 
   // Regression (#6020): a failed save left the full-screen overlay up
-  // forever, with the error snackbar hidden behind it.
+  // forever, with the error hidden behind it.
   it('clears the overlay and shows the error when the save fails', async () => {
     await submitPassword();
 
@@ -79,7 +78,7 @@ describe('LocalAccountWizardComponent', () => {
 
     expect(component.applyingSetup()).toBe(false);
     expect(overlayShown()).toBe(false);
-    expect(errorSnack()).toContain('database unavailable');
+    expect(stepError()).toContain('database unavailable');
   });
 
   it('clears the overlay and shows an error when the backend never confirms the setup', async () => {
@@ -102,7 +101,7 @@ describe('LocalAccountWizardComponent', () => {
 
     expect(component.applyingSetup()).toBe(false);
     expect(overlayShown()).toBe(false);
-    expect(errorSnack()).toContain('did not confirm');
+    expect(stepError()).toContain('did not confirm');
   });
 
   it('clears the overlay and shows an error when the save never answers', async () => {
@@ -118,7 +117,7 @@ describe('LocalAccountWizardComponent', () => {
 
     expect(component.applyingSetup()).toBe(false);
     expect(overlayShown()).toBe(false);
-    expect(errorSnack()).toContain('did not answer');
+    expect(stepError()).toContain('did not answer');
     httpMock.expectNone(VERIFY_URL);
   });
 
@@ -132,6 +131,6 @@ describe('LocalAccountWizardComponent', () => {
     await settle();
 
     expect(assign).toHaveBeenCalledWith(`${window.location.protocol}//${window.location.host}`);
-    expect(errorSnack()).toBe('');
+    expect(stepError()).toBe('');
   });
 });

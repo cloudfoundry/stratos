@@ -15,7 +15,7 @@ export interface StepOnNextResult {
   success: boolean;
   message?: string;
   // `message` as styled pieces (an upstream HTML error page keeps its
-  // heading); the stepper's error snackbar shows these when set.
+  // heading); the stepper shows these above its buttons when set.
   messagePieces?: readonly ErrorPiece[];
   // Should we redirect to the store previous state?
   redirect?: boolean;
@@ -41,8 +41,8 @@ export interface SignalStepHandle {
   readonly valid: Signal<boolean>;
   /**
    * Optional submission action invoked when the user clicks Next/Finish.
-   * Resolves on success; rejects with an Error to surface a snackbar via
-   * the existing stepper plumbing. Resolving with `{ ignoreSuccess: true }`
+   * Resolves on success; rejects with an Error for the stepper to show its
+   * message above the buttons. Resolving with `{ ignoreSuccess: true }`
    * preserves the legacy `StepOnNextResult.ignoreSuccess` semantic — the
    * step reports success without auto-advancing or emitting the success
    * snackbar (used by the `manage-users` two-click apply).

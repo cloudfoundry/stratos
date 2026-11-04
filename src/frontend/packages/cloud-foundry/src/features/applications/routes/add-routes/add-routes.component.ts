@@ -84,7 +84,7 @@ const pathPattern = `^([\\w\\-\\/\\!\\#\\[\\]\\@\\&\\$\\'\\(\\)\\*\\+\\;\\=\\,]*
  * Orphan-on-attach-fail (create succeeds, attach fails): the action
  * service throws an error whose message names the orphan route GUID + URL
  * verbatim; the rejection propagates up through signalHandle.submit to
- * the stepper which surfaces it via the existing snackbar plumbing.
+ * the stepper, which shows it above its buttons.
  */
 @Component({
   selector: 'app-add-routes',
@@ -482,7 +482,7 @@ export class AddRoutesComponent implements OnInit, OnDestroy {
    * Submit dispatch. Row-selected wins over the form (validate() ensures
    * the two intents don't both produce valid=true). Resolves on success
    * (signalHandle.submit unwraps), rejects with an Error to surface the
-   * message via stepper snackbar.
+   * message above the stepper's buttons.
    */
   async runSubmit(): Promise<void> {
     if (this.hasSelectedRoute()) {
