@@ -7,13 +7,13 @@ import { RouterTestingModule } from '@angular/router/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
 
-import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, generateStratosEntities, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
+import { EntityCatalogHelper, EntityCatalogHelpers, EntityCatalogTestModule, generateStratosEntities, StratosStatus, TEST_CATALOGUE_ENTITIES } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../../shared/shared.module';
 import { TabNavService } from '../../../tab-nav.service';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
-import { MetricsService } from '../services/metrics-service';
+import { MetricsEndpointProvider, MetricsService } from '../services/metrics-service';
 import { MetricsComponent } from './metrics.component';
 
 describe('MetricsComponent', () => {
@@ -74,5 +74,30 @@ describe('MetricsComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('draws an endpoint icon in the font it names', async () => {
+    const iconFixture = TestBed.createComponent(MetricsComponent);
+    iconFixture.componentInstance.metricsEndpoint$ = of({
+      provider: { guid: 'metrics-guid', name: 'metrics' },
+      endpoints: []
+    } as unknown as MetricsEndpointProvider);
+    iconFixture.componentInstance.metricsInfo$ = of([{
+      known: true,
+      name: 'cf',
+      url: 'https://api.example.test',
+      icon: { name: 'cloud_foundry', font: 'stratos-icons' },
+      metadata: {},
+      status: of(StratosStatus.OK)
+    }]);
+    iconFixture.detectChanges();
+    await iconFixture.whenStable();
+
+    const spans: HTMLElement[] = Array.from(iconFixture.nativeElement.querySelectorAll('span'));
+    const icon = spans.find(span => span.textContent?.trim() === 'cloud_foundry');
+    expect(icon).toBeTruthy();
+    // Under material-icons the name splits into the "cloud" and "foundry" ligatures.
+    expect(icon!.classList.contains('stratos-icons')).toBe(true);
+    expect(icon!.classList.contains('material-icons')).toBe(false);
   });
 });
