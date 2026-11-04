@@ -185,7 +185,7 @@ describe('ConnectEndpointDialogComponent', () => {
     expect(show).toHaveBeenCalledWith('Unregistered CF');
   });
 
-  // The connect step says so once; the dialog adds no copy of its own.
+  // The stepper gives the reason; the connect step adds the note, once.
   it('Reconnect keeps the existing connection message', async () => {
     seedEndpointsDataService([cfEndpoint({ connectionStatus: 'connected' })]);
     await open();
@@ -198,7 +198,10 @@ describe('ConnectEndpointDialogComponent', () => {
     const http = TestBed.inject(HttpTestingController);
     await vi.waitFor(() => http.expectOne(req => req.url.includes('tokens'))
       .flush({ error: 'Bad credentials' }, { status: 401, statusText: 'Unauthorized' }));
-    expect(await submitted).toEqual(expect.objectContaining({ success: false }));
+    expect(await submitted).toEqual(expect.objectContaining({
+      success: false,
+      message: expect.stringContaining('Bad credentials'),
+    }));
 
     const note = 'Your existing connection is unaffected and remains active.';
     await vi.waitFor(async () => {
