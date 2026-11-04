@@ -11,7 +11,7 @@
   & > * {
     margin-bottom: 20px;
   }
-  > mat-icon {
+  > app-custom-icon {
     font-size: 96px;
     height: 96px;
     width: 96px;
@@ -54,7 +54,7 @@
     max-width: 200px;
     padding: 10px;
 
-    > mat-icon {
+    > app-custom-icon {
       font-size: 72px;
       height: 72px;
       width: 72px;
