@@ -174,6 +174,11 @@ describe('HomePageEndpointCardComponent', () => {
     const icon = card.nativeElement.querySelector('.card-header i.stratos-icons');
     expect(icon?.textContent?.trim()).toBe('meter');
     expect(card.nativeElement.querySelector('.card-header img')).toBeNull();
+    // inline lets the host's size reach the glyph; the box keeps the title in
+    // line with its neighbours, whose images are 48px.
+    expect(icon.classList).toContain('inline');
+    expect(icon.closest('app-custom-icon').classList).toContain('text-[48px]');
+    expect(icon.closest('app-custom-icon').parentElement.classList).toContain('w-12');
     card.destroy();
     getEndpoint.mockRestore();
   });
