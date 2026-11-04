@@ -88,10 +88,13 @@
         </div>
         <!-- Navigation buttons -->
         <div class="steppers-navigation flex flex-wrap items-center justify-between border-t pt-6">
-          <!-- In this row: a dialog's body scrolls under it, so a reason placed before it is hidden. -->
-          @if (stepError(); as error) {
-            <p class="w-full text-sm text-danger-700 dark:text-danger-300 mb-4 break-words" role="alert"><app-error-text [pieces]="error" /></p>
-          }
+          <!-- In this row: a dialog's body scrolls under it, so a reason placed before it is hidden.
+               On the page before any failure: screen readers miss a live region that arrives with its text. -->
+          <div id="stepper_error" class="w-full" role="alert">
+            @if (stepError(); as error) {
+              <p class="text-sm text-danger-700 dark:text-danger-300 mb-4 break-words"><app-error-text [pieces]="error" /></p>
+            }
+          </div>
           <div class="steppers-navigation-left">
             @if ((currentIndex() > 0 || !!basePreviousRedirect()) && !steps[currentIndex()].hidePrevious) {
               <button id="stepper_previous"
@@ -120,6 +123,7 @@
             @if (!steps[currentIndex()].hideNextButton) {
               <button id="stepper_next"
                 class="steppers-navigation-right-next btn flex items-center space-x-2"
+                [attr.aria-describedby]="stepError() ? 'stepper_error' : null"
                   [ngClass]="{
                     'btn-danger': steps[currentIndex()].destructiveStep,
                     'btn-primary': !steps[currentIndex()].destructiveStep

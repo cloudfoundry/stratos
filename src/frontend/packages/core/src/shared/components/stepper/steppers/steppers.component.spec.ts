@@ -609,7 +609,7 @@ describe('SteppersComponent — failed step', () => {
     await hostFixture.whenStable();
     const steppers = hostFixture.debugElement.query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
     const root: HTMLElement = hostFixture.nativeElement;
-    const reason = () => root.querySelector('[role="alert"]');
+    const reason = () => root.querySelector('[role="alert"] p');
     return { hostFixture, steppers, root, reason };
   };
   const failed = (message: string) => of({ success: false, message, data: {}, redirect: false, ignoreSuccess: false });
@@ -633,7 +633,7 @@ describe('SteppersComponent — failed step', () => {
     expect(reason()!.textContent).toContain('nope');
     // In the button row: a dialog's body scrolls under that row, which would
     // hide a reason placed just before it.
-    expect(root.querySelector('.steppers-navigation [role="alert"]')).toBe(reason());
+    expect(root.querySelector('.steppers-navigation [role="alert"] p')).toBe(reason());
     const next = root.querySelector('#stepper_next')!;
     expect(reason()!.compareDocumentPosition(next) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
     expect(document.querySelector('.snackbar-box:not([inert])')).toBeNull();
@@ -678,6 +678,39 @@ describe('SteppersComponent — failed step', () => {
     await hostFixture.whenStable();
     expect(steppers.currentIndex()).toBe(0);
     expect(reason()).toBeNull();
+  });
+
+  // Screen readers miss a live region that arrives with its text.
+  it('has its alert region on the page before a step fails', async () => {
+    const { hostFixture, steppers, root } = await setUp();
+    const region = root.querySelector('[role="alert"]')!;
+    expect(region.textContent!.trim()).toBe('');
+
+    steppers.steps[0].invokeNext = () => failed('nope');
+    steppers.goNext();
+    await hostFixture.whenStable();
+
+    expect(root.querySelector('[role="alert"]')).toBe(region);
+    expect(region.textContent).toContain('nope');
+  });
+
+  it('describes Next by the reason only while there is one', async () => {
+    const { hostFixture, steppers, root } = await setUp();
+    const next = root.querySelector('#stepper_next')!;
+    const region = root.querySelector('[role="alert"]')!;
+    expect(next.hasAttribute('aria-describedby')).toBe(false);
+
+    const invokeNext = vi.fn(() => failed('nope'));
+    steppers.steps[0].invokeNext = invokeNext;
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(region.id).toBeTruthy();
+    expect(next.getAttribute('aria-describedby')).toBe(region.id);
+
+    invokeNext.mockReturnValue(NEVER as never);
+    steppers.goNext();
+    await hostFixture.whenStable();
+    expect(next.hasAttribute('aria-describedby')).toBe(false);
   });
 });
 
