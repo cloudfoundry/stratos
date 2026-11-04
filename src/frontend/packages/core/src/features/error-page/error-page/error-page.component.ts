@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { DomSanitizer, SafeUrl } from '@angular/platform-browser';
 import { ActivatedRoute, RouterModule } from '@angular/router';
+import { UrlPartsPipe } from '../../../shared/pipes/url-parts.pipe';
 import {
   EndpointModel,
   EndpointsDataService,
@@ -30,6 +31,7 @@ import { CustomIconComponent } from '../../../shared/components/custom-material/
     PageHeaderComponent,
     CardWrapperComponent,
     CustomIconComponent,
+    UrlPartsPipe,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

@@ -36,7 +36,7 @@
                 </h3>
                 <span class="text-sm text-content-text mt-1.5 break-words text-balance">{{ error.message }}</span>
                 @if (error.metadata.url) {
-                  <span class="text-xs text-content-muted mt-1 break-all font-mono">{{ error.metadata.url }}</span>
+                  <span class="text-xs text-content-muted mt-1 wrap-anywhere font-mono">@for (part of error.metadata.url | urlParts; track $index) {{{ part }}<wbr>}</span>
                 }
                 @if (error.metadata.errorResponse) {
                   <pre class="text-xs mt-2 p-2 rounded-md overflow-x-auto bg-content-canvas border border-content-border text-content-text">{{ (error.metadata.errorResponse) | json }}</pre>

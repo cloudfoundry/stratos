@@ -1,6 +1,6 @@
 
 import { Component, Input, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
-import { CardWrapperComponent } from '@stratosui/core';
+import { CardWrapperComponent, UrlPartsPipe } from '@stratosui/core';
 import { of } from 'rxjs';
 import { take, catchError,  } from 'rxjs/operators';
 
@@ -19,7 +19,8 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
   imports: [
     CardWrapperComponent,
     ChartDetailsUsageComponent,
-    ChartDetailsVersionsComponent
+    ChartDetailsVersionsComponent,
+    UrlPartsPipe,
 ]
 })
 export class ChartDetailsInfoComponent implements OnInit {

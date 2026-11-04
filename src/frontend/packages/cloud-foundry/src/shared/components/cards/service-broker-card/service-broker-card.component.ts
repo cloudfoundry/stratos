@@ -10,6 +10,7 @@ import {
   MetaCardKeyComponent,
   MetaCardTitleComponent,
   MetaCardValueComponent,
+  UrlPartsPipe,
 } from '@stratosui/core';
 import { ServiceCatalogDataService, SignalSource } from '../../../../services/endpoint-data/service-catalog-data.service';
 import { SpaceDataRegistry } from '../../../../services/endpoint-data/space-data.registry';
@@ -48,6 +49,7 @@ interface BrokerSpaceLink {
     BooleanIndicatorComponent,
     ClickStopPropagationDirective,
     TristateValueComponent,
+    UrlPartsPipe,
   ],
 })
 export class ServiceBrokerCardComponent implements OnInit {

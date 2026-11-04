@@ -52,7 +52,7 @@
           @if (b.routeServiceUrl) {
             <tr>
               <td class="py-1 pr-8 align-top text-content-muted">Route service URL</td>
-              <td class="py-1 align-top font-mono break-all">{{ b.routeServiceUrl }}</td>
+              <td class="py-1 align-top font-mono wrap-anywhere">@for (part of b.routeServiceUrl | urlParts; track $index) {{{ part }}<wbr>}</td>
             </tr>
           }
           <tr>
