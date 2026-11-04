@@ -8,7 +8,7 @@
       } @else {
         <p>
           Autoscaler: {{ guessedUrl() }} (address guessed; not registered)
-          <a routerLink="/endpoints/new/autoscaler" class="text-primary hover:underline">Register it</a>
+          <a routerLink="/endpoints/new/autoscaler" [queryParams]="{ url: guessedUrl() }" class="text-primary hover:underline">Register it</a>
         </p>
       }
       @if (target.duplicates.registered.length > 1) {

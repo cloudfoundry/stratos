@@ -253,6 +253,11 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     this.registerForm.controls.urlField.valueChanges
       .pipe(takeUntilDestroyed(destroyRef))
       .subscribe(value => this.urlValue.set(value ?? ''));
+    // A page that knows the address can link here with it.
+    const linkedUrl = activatedRoute.snapshot.queryParams['url'];
+    if (linkedUrl) {
+      this.registerForm.controls.urlField.setValue(linkedUrl);
+    }
 
     effect(() => {
       const ep = this.reviewEndpoint();
