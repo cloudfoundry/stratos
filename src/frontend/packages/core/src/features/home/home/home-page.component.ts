@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, computed, Injector, OnInit, Signal, effect, signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, HostListener, Injector, OnInit, Signal, effect, signal, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import {
@@ -369,4 +369,20 @@ export class HomePageComponent implements OnInit {
   // Layout menu open state. Held here rather than toggled onto the DOM node so
   // the trigger's aria-expanded reflects it.
   public layoutMenuOpen = signal(false);
+
+  onLayoutMenuEscape(event: Event, trigger: HTMLElement): void {
+    if (!this.layoutMenuOpen()) {
+      return;
+    }
+    event.stopPropagation();
+    this.layoutMenuOpen.set(false);
+    trigger.focus();
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.layoutMenuOpen() && !(event.target as HTMLElement).closest('.dropdown')) {
+      this.layoutMenuOpen.set(false);
+    }
+  }
 }

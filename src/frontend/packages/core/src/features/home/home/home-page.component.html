@@ -32,9 +32,10 @@
     <span class="mx-3 h-6 border-l border-content-border" aria-hidden="true"></span>
     <div class="relative inline-block">
       <div class="dropdown">
-        <button class="btn btn-secondary flex items-center space-x-1"
+        <button #layoutTrigger class="btn btn-secondary flex items-center space-x-1"
           type="button" title="Card layout" aria-label="Card layout"
           [attr.aria-expanded]="layoutMenuOpen()"
+          (keydown.escape)="onLayoutMenuEscape($event, layoutTrigger)"
           (click)="layoutMenuOpen.set(!layoutMenuOpen())">
           <span class="material-icons">view_week</span>
           <span class="material-icons">arrow_drop_down</span>
@@ -46,6 +47,7 @@
                 <div>
                   @if (layout) {
                     <button (click)="onChangeLayout(layout); layoutMenuOpen.set(false)"
+                      (keydown.escape)="onLayoutMenuEscape($event, layoutTrigger)"
                       class="layout-dropdown__option"
                       [attr.aria-current]="layout.id === layoutID">
                       <span>{{ layout.title }}</span>
