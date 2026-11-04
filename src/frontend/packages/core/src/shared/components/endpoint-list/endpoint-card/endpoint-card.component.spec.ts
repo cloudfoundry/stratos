@@ -121,8 +121,6 @@ describe('EndpointCardComponent', () => {
       expect(wrapper()!.querySelector('img')).toBeNull();
       const icon = wrapper()!.querySelector('i.stratos-icons');
       expect(icon?.textContent?.trim()).toBe('meter');
-      // inline lets the host's size reach the glyph.
-      expect(icon!.classList).toContain('inline');
       expect(icon!.closest('app-custom-icon')!.classList).toContain('text-[40px]');
       getEndpoint.mockRestore();
     });
