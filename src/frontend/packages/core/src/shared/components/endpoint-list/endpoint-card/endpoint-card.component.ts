@@ -23,6 +23,7 @@ import { safeUnsubscribe } from '../../../../core/utils.service';
 import { CardCell } from '../../signal-list/cell-base';
 import { EndpointListDetailsComponent, EndpointListHelper } from '../endpoint-list.helpers';
 import { CopyToClipboardComponent } from '../../copy-to-clipboard/copy-to-clipboard.component';
+import { CustomIconComponent } from '../../custom-material/custom-material.component';
 import { SessionService } from '../../../services/session.service';
 import { CurrentUserPermissionsService } from '../../../../core/permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from '../../../../core/permissions/stratos-user-permissions.checker';
@@ -59,6 +60,7 @@ import { DisableRouterLinkDirective } from '../../../../core/disable-router-link
     MultilineTitleComponent,
     CopyToClipboardComponent,
     BooleanIndicatorComponent,
+    CustomIconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
