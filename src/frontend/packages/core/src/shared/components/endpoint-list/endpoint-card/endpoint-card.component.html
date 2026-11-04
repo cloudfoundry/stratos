@@ -23,7 +23,7 @@
         </div>
       } @else if (!!endpointCatalogEntity && endpointCatalogEntity.definition.icon) {
         <div class="endpoint-card__image-wrapper">
-          <app-custom-icon class="text-[40px] max-md:text-[32px] leading-none" aria-hidden="true" inline [fontSet]="endpointCatalogEntity.definition.iconFont">{{ endpointCatalogEntity.definition.icon }}</app-custom-icon>
+          <app-custom-icon class="text-[40px] max-md:text-[32px]" aria-hidden="true" [fontSet]="endpointCatalogEntity.definition.iconFont">{{ endpointCatalogEntity.definition.icon }}</app-custom-icon>
         </div>
       }
       <div class="endpoint-card__title-text">
