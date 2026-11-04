@@ -11,6 +11,7 @@ import {
 import { EndpointModel, entityCatalog } from '../../../../../../store/src/public-api';
 import { UserFavoriteManager } from '../../../../../../store/src/user-favorite-manager';
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
+import { CustomIconComponent } from '../../../../shared/components/custom-material/custom-material.component';
 import { CustomTooltipDirective } from '../../../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { MultilineTitleComponent } from '../../../../shared/components/multiline-title/multiline-title.component';
 import { SidePanelMode, SidePanelService } from '../../../../shared/services/side-panel.service';
@@ -52,6 +53,7 @@ enum Status {
     EntityFavoriteStarComponent,
     HomeShortcutsComponent,
     FavoritesMetaCardComponent,
+    CustomIconComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

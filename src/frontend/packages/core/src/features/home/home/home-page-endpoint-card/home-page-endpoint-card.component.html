@@ -6,6 +6,8 @@
           <div class="shrink-0">
             @if (definition.logoUrl) {
               <img class="h-12 w-12 object-contain" [src]="definition.logoUrl" alt="" />
+            } @else if (definition.icon) {
+              <app-custom-icon aria-hidden="true" [fontSet]="definition.iconFont">{{ definition.icon }}</app-custom-icon>
             }
           </div>
           <div class="flex-1 min-w-0">

@@ -6,7 +6,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { of } from 'rxjs';
-import { EndpointModel, UserFavoriteManager, UserFavorite, IEndpointFavMetadata } from '@stratosui/store';
+import { EndpointModel, UserFavoriteManager, UserFavorite, IEndpointFavMetadata, entityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { SidePanelService } from '@stratosui/core';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
@@ -160,5 +160,21 @@ describe('HomePageEndpointCardComponent', () => {
     expect(component['ref'].instance).toBeInstanceOf(MockCardComponent);
     // The host hands the card its endpoint through the card's input.
     expect((component['ref'].instance as unknown as MockCardComponent).endpoint()).toBe(component.endpoint);
+  });
+
+  // A type with no image file, such as the autoscaler, has only a font icon.
+  it('draws the font icon when the type has no image', async () => {
+    const getEndpoint = vi.spyOn(entityCatalog, 'getEndpoint').mockReturnValue({
+      definition: { label: 'Test type', unConnectable: true, logoUrl: '', icon: 'meter', iconFont: 'stratos-icons' },
+    } as never);
+    const card = TestBed.createComponent(HomePageEndpointCardComponent);
+    card.componentRef.setInput('endpoint', { cnsi_type: 'test-type', guid: 'g', name: 'n' } as EndpointModel);
+    await card.whenStable();
+
+    const icon = card.nativeElement.querySelector('.card-header i.stratos-icons');
+    expect(icon?.textContent?.trim()).toBe('meter');
+    expect(card.nativeElement.querySelector('.card-header img')).toBeNull();
+    card.destroy();
+    getEndpoint.mockRestore();
   });
 });
