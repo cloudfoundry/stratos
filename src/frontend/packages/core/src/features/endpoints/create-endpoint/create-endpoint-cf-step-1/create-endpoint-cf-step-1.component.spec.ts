@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { afterEach, describe, it, expect, beforeEach, vi } from 'vitest';
 import { ActivatedRoute } from '@angular/router';
 import { EndpointModel, EndpointsDataService, entityCatalog, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers, StratosCatalogEndpointEntity } from '@stratosui/store';
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -301,6 +301,33 @@ describe('CreateEndpointCfStep1Component', () => {
       expect(errorFor(url)).toBe(
         'Invalid API URL. Enter a valid hostname or URL (e.g., api.example.com or https://api.example.com)'
       );
+    });
+  });
+
+  // A page that knows the address can link here with it, as the autoscaler
+  // tab's "Register it" does. The address is checked like a typed one.
+  describe('an address in the link', () => {
+    const open = async (url: string) => {
+      TestBed.inject(ActivatedRoute).snapshot.queryParams = { url };
+      fixture = TestBed.createComponent(CreateEndpointCfStep1Component);
+      component = fixture.componentInstance;
+      await fixture.whenStable();
+    };
+
+    afterEach(() => {
+      TestBed.inject(ActivatedRoute).snapshot.queryParams = {};
+    });
+
+    it('starts the form with it, and leaves the name to the user', async () => {
+      await open('https://autoscaler.sys.x.com');
+      expect(component.registerForm.value.urlField).toBe('https://autoscaler.sys.x.com');
+      expect(component.registerForm.value.nameField).toBe('');
+      expect(component.urlDomain()).toBeTruthy();
+    });
+
+    it('marks an invalid address as it would a typed one', async () => {
+      await open('not a url');
+      expect(component.registerForm.controls.urlField.errors?.invalidUrl).toBeTruthy();
     });
   });
 

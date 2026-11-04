@@ -110,8 +110,10 @@ describe('AutoscalerTabExtensionComponent', () => {
       }]]));
       await target({ source: 'default' });
       expect(text()).toContain('Autoscaler: https://autoscaler.sys.x.com (address guessed; not registered)');
-      const link = (fixture.nativeElement as HTMLElement).querySelector('a[href="/endpoints/new/autoscaler"]');
+      const link = (fixture.nativeElement as HTMLElement).querySelector('a[href^="/endpoints/new/autoscaler"]');
       expect(link?.textContent?.trim()).toBe('Register it');
+      const href = new URL(link!.getAttribute('href')!, 'https://console');
+      expect(href.searchParams.get('url')).toBe('https://autoscaler.sys.x.com');
     });
 
     it('warns when the autoscaler is registered more than once', async () => {
