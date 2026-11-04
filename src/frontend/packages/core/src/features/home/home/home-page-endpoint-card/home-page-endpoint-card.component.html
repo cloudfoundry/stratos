@@ -3,11 +3,11 @@
     <div class="card-header border-b card-header-border">
       <div class="flex items-center justify-between w-full">
         <div class="flex items-center space-x-4" [class.cursor-pointer]="!disconnected" [routerLink]="disconnected ? null : link">
-          <div class="shrink-0">
+          <div class="shrink-0 h-12 w-12 flex items-center justify-center">
             @if (definition.logoUrl) {
               <img class="h-12 w-12 object-contain" [src]="definition.logoUrl" alt="" />
             } @else if (definition.icon) {
-              <app-custom-icon aria-hidden="true" [fontSet]="definition.iconFont">{{ definition.icon }}</app-custom-icon>
+              <app-custom-icon class="text-[48px] leading-none" aria-hidden="true" inline [fontSet]="definition.iconFont">{{ definition.icon }}</app-custom-icon>
             }
           </div>
           <div class="flex-1 min-w-0">
