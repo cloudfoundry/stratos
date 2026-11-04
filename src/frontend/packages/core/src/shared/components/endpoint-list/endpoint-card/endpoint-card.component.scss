@@ -81,12 +81,12 @@
   }
 
   &__address {
+    align-items: center;
     display: flex;
     min-height: 24px;
 
     &__value {
-      align-items: center;
-      display: flex;
+      min-width: 0;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
