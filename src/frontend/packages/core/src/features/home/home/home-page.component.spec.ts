@@ -236,6 +236,35 @@ describe('HomePageComponent', () => {
       expect(trigger.getAttribute('aria-expanded')).toBe('true');
     });
 
+    it('Escape closes the card layout menu and returns focus to its trigger', async () => {
+      const { root } = await renderHeader();
+      const trigger = root.querySelector('.dropdown > button') as HTMLButtonElement;
+      trigger.click();
+      expect(component.layoutMenuOpen()).toBe(true);
+
+      const option = root.querySelector('.layout-dropdown__option') as HTMLButtonElement;
+      option.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+
+      expect(component.layoutMenuOpen()).toBe(false);
+      expect(document.activeElement).toBe(trigger);
+
+      trigger.click();
+      trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(component.layoutMenuOpen()).toBe(false);
+    });
+
+    it('a click outside closes the card layout menu; one on its panel does not', async () => {
+      const { root } = await renderHeader();
+      const trigger = root.querySelector('.dropdown > button') as HTMLButtonElement;
+      trigger.click();
+
+      (root.querySelector('.layout-dropdown__panel') as HTMLElement).click();
+      expect(component.layoutMenuOpen()).toBe(true);
+
+      document.body.click();
+      expect(component.layoutMenuOpen()).toBe(false);
+    });
+
     // The tick is only faded to opacity-0 for unselected layouts, so without
     // aria-hidden its "done" ligature lands in every option's accessible name.
     it('layout options keep the tick glyph out of their accessible name', async () => {
