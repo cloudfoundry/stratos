@@ -155,7 +155,7 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   }
 
   // Wraps an HTTP observable so failures bubble out as Error(prefix: detail)
-  // — the stepper surfaces .message in the snackbar.
+  // — the stepper shows .message above its buttons.
   private tagError<T>(prefix: string): (src: Observable<T>) => Observable<T> {
     return src => src.pipe(
       catchError((err: HttpErrorResponse) => throwError(() => new Error(

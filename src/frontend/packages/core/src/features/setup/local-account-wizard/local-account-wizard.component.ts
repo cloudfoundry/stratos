@@ -113,7 +113,7 @@ export class LocalAccountWizardComponent implements OnInit {
         throw new Error(SETUP_NOT_CONFIRMED_MESSAGE);
       }
     } catch (err) {
-      // Clear the overlay so the stepper's error snackbar is visible.
+      // Clear the overlay so the stepper's error is visible.
       this.applyingSetup.set(false);
       throw err;
     }
