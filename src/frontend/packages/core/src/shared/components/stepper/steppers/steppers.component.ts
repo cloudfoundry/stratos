@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, Injector, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, ElementRef, Injector, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked, input, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorPiece, RoutingHistoryService } from '@stratosui/store';
@@ -82,6 +82,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   // Why the current step's last try failed. It sits above the buttons: a toast,
   // at the bottom of the page, covered a dialog's Cancel and Next.
   readonly stepError = signal<readonly ErrorPiece[] | null>(null);
+  private readonly nextButton = viewChild<ElementRef<HTMLButtonElement>>('nextButton');
 
   // Mirrors `steps` so firstStepEntry re-runs whenever the steps re-filter.
   private readonly visibleSteps = signal<StepComponent[]>([]);
@@ -312,8 +313,11 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
             } else {
               this.setActive(this.currentIndex() + 1);
             }
-          } else if (!success && (messagePieces?.length || message)) {
-            this.stepError.set(messagePieces?.length ? messagePieces : [{ text: message ?? '', style: 'text' }]);
+          } else {
+            if (!success && (messagePieces?.length || message)) {
+              this.stepError.set(messagePieces?.length ? messagePieces : [{ text: message ?? '', style: 'text' }]);
+            }
+            this.restoreNextFocus();
           }
           return observableOf(undefined);
         }),
@@ -329,6 +333,16 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
         })
       ).subscribe();
     }
+  }
+
+  // Busy disables Next, and the browser then moves its focus to the page. A
+  // step that stays gives it back, unless the user has since gone elsewhere.
+  private restoreNextFocus(): void {
+    afterNextRender(() => {
+      if (document.activeElement === document.body) {
+        this.nextButton()?.nativeElement.focus();
+      }
+    }, { injector: this.injector });
   }
 
   // Next, only when the Next button is shown and enabled. For Enter in a

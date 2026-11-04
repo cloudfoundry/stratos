@@ -6,7 +6,7 @@ import { provideZonelessChangeDetection } from '@angular/core';
 import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
-import { NEVER, of } from 'rxjs';
+import { NEVER, of, Subject } from 'rxjs';
 import { Router } from '@angular/router';
 import { RouterTestingModule } from '@angular/router/testing';
 import { createBasicStoreModule } from "@test-framework/core-test.helper";
@@ -14,7 +14,7 @@ import { createBasicStoreModule } from "@test-framework/core-test.helper";
 import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../../core/core.module';
 import { MDAppModule } from '../../../../core/md.module';
-import { SignalStepHandle, StepComponent } from '../step/step.component';
+import { SignalStepHandle, StepComponent, StepOnNextResult } from '../step/step.component';
 import { SteppersComponent } from './steppers.component';
 
 describe('SteppersComponent', () => {
@@ -711,6 +711,46 @@ describe('SteppersComponent — failed step', () => {
     steppers.goNext();
     await hostFixture.whenStable();
     expect(next.hasAttribute('aria-describedby')).toBe(false);
+  });
+
+  // A browser moves focus to the page when the focused button is disabled.
+  // The test DOM does not, so the blur stands in for it, before the render
+  // that disables the button: it ignores a blur on a disabled one.
+  it('gives focus back to Next when a step fails', async () => {
+    const { hostFixture, steppers, root } = await setUp();
+    const next = root.querySelector<HTMLButtonElement>('#stepper_next')!;
+    const result = new Subject<StepOnNextResult>();
+    steppers.steps[0].invokeNext = () => result;
+    next.focus();
+    steppers.goNext();
+    next.blur();
+    await hostFixture.whenStable();
+    expect(next.disabled).toBe(true);
+    expect(document.activeElement).toBe(document.body);
+
+    result.next({ success: false, message: 'nope', data: {}, redirect: false, ignoreSuccess: false });
+    await hostFixture.whenStable();
+
+    expect(next.disabled).toBe(false);
+    expect(document.activeElement).toBe(next);
+  });
+
+  it('leaves focus where the user moved it while the step was busy', async () => {
+    const { hostFixture, steppers, root } = await setUp();
+    const next = root.querySelector<HTMLButtonElement>('#stepper_next')!;
+    const field = document.createElement('input');
+    root.appendChild(field);
+    const result = new Subject<StepOnNextResult>();
+    steppers.steps[0].invokeNext = () => result;
+    next.focus();
+    steppers.goNext();
+    field.focus();
+    await hostFixture.whenStable();
+
+    result.next({ success: false, message: 'nope', data: {}, redirect: false, ignoreSuccess: false });
+    await hostFixture.whenStable();
+
+    expect(document.activeElement).toBe(field);
   });
 });
 
