@@ -19,12 +19,12 @@ describe('BooleanIndicatorComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(BooleanIndicatorComponent);
     component = fixture.componentInstance;
-    component.type = BooleanIndicatorType.enabledDisabled;
-    component.isTrue = true;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('type', BooleanIndicatorType.enabledDisabled);
+    fixture.componentRef.setInput('isTrue', true);
+    await fixture.whenStable();
     element = fixture.nativeElement;
   });
 
@@ -36,20 +36,15 @@ describe('BooleanIndicatorComponent', () => {
     expect(element.textContent).toContain('Enabled');
   });
 
-  it('should hide text if set', () => {
-    component.showText = false;
-    // Component setter calls markForCheck(), but we need detectChanges in zoneless mode
-    fixture.detectChanges();
+  it('should hide text if set', async () => {
+    fixture.componentRef.setInput('showText', false);
+    await fixture.whenStable();
     expect(element.textContent).not.toContain('Enabled');
   });
 
-  it('should show unknown if not boolean value', () => {
-    // strict: the component renders "Unknown" for non-boolean isTrue by design
-    // (`typeof this.isTrue !== 'boolean'`); the input's `boolean` type understates
-    // the runtime contract this test verifies.
-    (component as { isTrue: boolean | null }).isTrue = null;
-    // Component setter calls markForCheck(), but we need detectChanges in zoneless mode
-    fixture.detectChanges();
+  it('should show unknown if not boolean value', async () => {
+    fixture.componentRef.setInput('isTrue', null);
+    await fixture.whenStable();
     expect(element.textContent).toContain('Unknown');
   });
 });

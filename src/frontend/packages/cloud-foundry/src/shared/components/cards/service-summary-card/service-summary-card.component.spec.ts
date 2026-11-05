@@ -40,19 +40,19 @@ describe('ServiceSummaryCardComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ServiceSummaryCardComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  it('renders the offering description and tags when an offering is bound', () => {
-    component.offering = offeringFixture;
-    fixture.detectChanges();
+  it('renders the offering description and tags when an offering is bound', async () => {
+    fixture.componentRef.setInput('offering', offeringFixture);
+    await fixture.whenStable();
     const host: HTMLElement = fixture.nativeElement;
     expect(host.textContent).toContain('Shared service for app-autoscaler');
     expect(host.textContent).toContain('simple');

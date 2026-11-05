@@ -39,11 +39,11 @@ describe('CompactServiceInstanceCardComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CompactServiceInstanceCardComponent);
     component = fixture.componentInstance;
-    component.serviceInstance = instance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('serviceInstance', instance);
+    await fixture.whenStable();
   });
 
   it('should create', () => {

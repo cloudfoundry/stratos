@@ -67,10 +67,9 @@ describe('CFHomeCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(CFHomeCardComponent);
     component = fixture.componentInstance;
-    // Set required inputs before detectChanges
-    component.endpoint = { guid: 'test-guid' } as any;
-    component.layout = { x: 1, y: 1 } as any;
-    // Don't call detectChanges() to avoid complex initialization
+    // The inputs the home page sets. No render: that needs the endpoint data.
+    fixture.componentRef.setInput('endpoint', { guid: 'test-guid' });
+    fixture.componentRef.setInput('layout', { x: 1, y: 1 });
   });
 
   it('should create', () => {
@@ -140,8 +139,8 @@ describe('CFHomeCardComponent follows the endpoint data (#6021)', () => {
       .compileComponents();
 
     fixture = TestBed.createComponent(CFHomeCardComponent);
-    fixture.componentInstance.endpoint = { guid: 'test-guid' } as any;
-    fixture.componentInstance.layout = { x: 1, y: 1 } as any;
+    fixture.componentRef.setInput('endpoint', { guid: 'test-guid' });
+    fixture.componentRef.setInput('layout', { x: 1, y: 1 });
     fixture.componentInstance.load().subscribe();
     await fixture.whenStable();
   });

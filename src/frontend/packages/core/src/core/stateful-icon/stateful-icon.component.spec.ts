@@ -25,10 +25,10 @@ describe('StatefulIconComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(StatefulIconComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
     element = fixture.nativeElement;
   });
 
@@ -36,18 +36,16 @@ describe('StatefulIconComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should icon based on state key', () => {
-    component.state = StratosStatus.OK;
-    // Setter calls markForCheck(), but we need detectChanges in zoneless mode
-    fixture.detectChanges();
+  it('should icon based on state key', async () => {
+    fixture.componentRef.setInput('state', StratosStatus.OK);
+    await fixture.whenStable();
 
     expect(element.textContent).toContain('done');
   });
 
-  it('should show spinner if state key is busy', () => {
-    component.state = StratosStatus.BUSY;
-    // Setter calls markForCheck(), but we need detectChanges in zoneless mode
-    fixture.detectChanges();
+  it('should show spinner if state key is busy', async () => {
+    fixture.componentRef.setInput('state', StratosStatus.BUSY);
+    await fixture.whenStable();
 
     expect(element.querySelector('app-busy')).toBeTruthy();
   });
