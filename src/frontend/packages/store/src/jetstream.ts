@@ -1,4 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
+import { isProxyErrorEntry, proxyErrorReason } from './services/proxy-error-entry';
 import { ErrorPiece, htmlToPieces, looksLikeHtml, piecesToText } from './upstream-error-text';
 
 // API Version to use when making back-end API requests to Jetstraam
@@ -72,11 +73,14 @@ const messagePieces = (text: string): ErrorPiece[] => {
 /**
  * The most useful human-readable message in whatever a request threw, for
  * display after a caller's own lead-in, as styled pieces of plain text: an
- * HTML error page keeps its heading and line breaks. Handles three backend
+ * HTML error page keeps its heading and line breaks. Handles four backend
  * body shapes:
  *   - CF passthrough: { errors: [{ detail, title, code }] }
  *   - Stratos job envelope: { state, errors: [{ message, code, detail }] }
  *   - handleCapiError fallback: { error: "..." }
+ *   - Jetstream's own wrapped error: { error: { message, status, statusCode },
+ *     errorResponse }; with no message it is the proxy's entry for an
+ *     endpoint that failed, read as its status line and the endpoint's words
  * and a body that is a string: an HTML page from a proxy in front of
  * Stratos is read as one, any other text is kept as it is. An Error that
  * carries `pieces` (StratosJobError) gives those.
@@ -93,9 +97,12 @@ export function extractHttpErrorPieces(err: unknown): ErrorPiece[] {
         if (first.title) return textPiece(first.title);
         if (first.message) return textPiece(first.message);
       }
-      const top = body as { message?: string; error?: string };
+      const top = body as { message?: string; error?: unknown };
       if (top.message) return messagePieces(top.message);
-      if (top.error) return messagePieces(top.error);
+      if (typeof top.error === 'string' && top.error) return messagePieces(top.error);
+      const wrapped = top.error as { message?: unknown } | null | undefined;
+      if (typeof wrapped?.message === 'string' && wrapped.message) return messagePieces(wrapped.message);
+      if (isProxyErrorEntry(body)) return messagePieces(proxyErrorReason(body));
     }
     if (typeof body === 'string' && body) {
       if (!looksLikeHtml(body)) return textPiece(body);
