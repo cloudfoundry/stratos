@@ -20,10 +20,11 @@ describe('CardNumberMetricComponent', () => {
     TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CardNumberMetricComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('icon', 'memory');
+    await fixture.whenStable();
   });
 
   it('should create', () => {

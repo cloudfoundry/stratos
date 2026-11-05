@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import {  ChangeDetectorRef, provideZonelessChangeDetection } from '@angular/core';
+import { provideZonelessChangeDetection } from '@angular/core';
 import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { GithubCommitAuthorComponent } from './github-commit-author.component';
@@ -17,10 +17,10 @@ describe('GithubCommitAuthorComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(GithubCommitAuthorComponent);
     component = fixture.componentInstance;
-    component.commit = {
+    fixture.componentRef.setInput('commit', {
       sha: '',
       commit: {
         author: {
@@ -40,8 +40,8 @@ describe('GithubCommitAuthorComponent', () => {
       scmType: 'github',
       projectName: 'test',
       endpointGuid: '',
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
     element = fixture.nativeElement;
   });
 
@@ -52,7 +52,7 @@ describe('GithubCommitAuthorComponent', () => {
   it('should render avatar img', () => {
     const img = element.querySelector('img');
     // strict: fixture sets a complete author/avatar, so the img and author are present.
-    expect(img!.src).toBe(component.commit.author!.avatar_url);
+    expect(img!.src).toBe(component.commit().author!.avatar_url);
   });
 
   // An avatar host the page's Content-Security-Policy refuses (a GitHub
@@ -66,25 +66,21 @@ describe('GithubCommitAuthorComponent', () => {
 
   it('should render author name', () => {
     // strict: fixture always sets commit.commit with an author name.
-    expect(element.textContent).toContain(component.commit.commit!.author.name);
+    expect(element.textContent).toContain(component.commit().commit!.author.name);
   });
 
   it('should render github link', () => {
     const anchor = element.querySelector('a');
     // strict: fixture sets a complete author, so the anchor and author are present.
-    expect(anchor!.href).toBe(component.commit.author!.html_url);
+    expect(anchor!.href).toBe(component.commit().author!.html_url);
   });
 
-  it('should not render github link / avatar', () => {
-    // OnPush change detection requires new object reference and manual check
-    component.commit = {
-      ...component.commit,
+  it('should not render github link / avatar', async () => {
+    fixture.componentRef.setInput('commit', {
+      ...component.commit(),
       author: undefined,
-    };
-    // Manually trigger change detection for OnPush strategy
-    const cdr = fixture.debugElement.injector.get(ChangeDetectorRef);
-    cdr.markForCheck();
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     // Re-query the element after change detection
     const updatedElement = fixture.nativeElement;

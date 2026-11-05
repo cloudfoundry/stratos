@@ -106,7 +106,7 @@ describe('HomePageEndpointCardComponent', () => {
   });
 
   it('does not present a connected endpoint as disconnected', () => {
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected' };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'connected' });
     expect(component.disconnected).toBe(false);
   });
 
@@ -116,27 +116,27 @@ describe('HomePageEndpointCardComponent', () => {
     // again here from token_expiry, so an expired token is represented
     // directly as connectionStatus: 'expired' rather than the old
     // 'connected' + stale-token_expiry combination.
-    component.endpoint = { ...component.endpoint, connectionStatus: 'expired', token_expiry: 1 };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'expired', token_expiry: 1 });
     expect(component.disconnected).toBe(true);
   });
 
   it('ignores a future token expiry', () => {
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected', token_expiry: Math.floor(Date.now() / 1000) + 3600 };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'connected', token_expiry: Math.floor(Date.now() / 1000) + 3600 });
     expect(component.disconnected).toBe(false);
   });
 
   it('does not create the card twice when the endpoint input rebinds during load', () => {
     const spy = vi.spyOn(component, 'createCard').mockResolvedValue(undefined as any);
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected' };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'connected' });
     // Simulate: rebind fires while ngAfterViewInit's create is still awaiting
-    component.ngOnChanges({ endpoint: { currentValue: component.endpoint } } as any);
+    component.ngOnChanges({ endpoint: { currentValue: component.endpoint() } } as any);
     component.ngAfterViewInit();
-    component.ngOnChanges({ endpoint: { currentValue: component.endpoint } } as any);
+    component.ngOnChanges({ endpoint: { currentValue: component.endpoint() } } as any);
     expect(spy).toHaveBeenCalledTimes(1);
   });
 
   it('treats an expired access token as alive when jetstream can refresh it', () => {
-    component.endpoint = { ...component.endpoint, connectionStatus: 'connected', token_expiry: 1, token_renewable: true };
+    fixture.componentRef.setInput('endpoint', { ...component.endpoint(), connectionStatus: 'connected', token_expiry: 1, token_renewable: true });
     expect(component.disconnected).toBe(false);
   });
 
@@ -159,7 +159,7 @@ describe('HomePageEndpointCardComponent', () => {
     expect(component['ref']).toBeTruthy();
     expect(component['ref'].instance).toBeInstanceOf(MockCardComponent);
     // The host hands the card its endpoint through the card's input.
-    expect((component['ref'].instance as unknown as MockCardComponent).endpoint()).toBe(component.endpoint);
+    expect((component['ref'].instance as unknown as MockCardComponent).endpoint()).toBe(component.endpoint());
   });
 
   // A type with no image file, such as the autoscaler, has only a font icon.

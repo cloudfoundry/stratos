@@ -26,10 +26,11 @@ describe('ChartDetailsVersionsComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ChartDetailsVersionsComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('currentVersion', { attributes: { version: '1.0.0' } });
+    await fixture.whenStable();
   });
 
   it('should create', () => {

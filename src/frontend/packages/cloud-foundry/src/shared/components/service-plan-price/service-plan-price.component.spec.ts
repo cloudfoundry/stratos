@@ -25,10 +25,11 @@ describe('ServicePlanPriceComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ServicePlanPriceComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('servicePlan', { costs: [] });
+    await fixture.whenStable();
   });
 
   it('should create', () => {

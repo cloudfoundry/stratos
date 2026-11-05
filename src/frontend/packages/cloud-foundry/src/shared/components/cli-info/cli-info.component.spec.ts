@@ -28,10 +28,11 @@ describe('CliInfoComponent', () => {
       .compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CliInfoComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('context', { appName: 'app', spaceName: 'space', orgName: 'org', apiEndpoint: 'https://api.example.org', username: 'user' });
+    await fixture.whenStable();
   });
 
   it('should create', () => {
