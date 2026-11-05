@@ -8,8 +8,9 @@ import { Observable, Subject, of } from 'rxjs';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { appLabelsFilterText } from '../../../shared/signal-list-configs/app/app-labels';
 
-import { CurrentUserPermissionsService, TabNavService } from '@stratosui/core';
+import { CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
 import { ApplicationWallComponent } from './application-wall.component';
@@ -237,6 +238,17 @@ describe('ApplicationWallComponent', () => {
     expect(canCreate$.observed).toBe(false);
     canCreate$.next(false);
     expect(component.canCreateApplication()).toBe(true);
+  });
+
+  it('says why a row action failed in Cloud Foundry\'s words', async () => {
+    const snackError = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error').mockImplementation(() => undefined as never);
+    stubSignalConfig.stopApp.mockRejectedValueOnce(cfRequestFailure());
+    await component.ngOnInit();
+    const row: any = { cnsiGuid: 'cnsi-1', guid: 'app-1', name: 'test', state: 'STARTED', spaceGuid: 'sp', instances: 1 };
+    component.listConfig()!.columns.find(c => c.kind === 'actions')!.actions!(row).find(a => a.label === 'Stop')!.invoke(row);
+    await vi.waitFor(() => expect(snackError).toHaveBeenCalled());
+
+    expect(snackText(snackError.mock.calls[0][0])).toBe(`Stop failed: ${CF_FAILURE_DETAIL}`);
   });
 
   it('scopes stats polling to the wall: passes its own DestroyRef', async () => {

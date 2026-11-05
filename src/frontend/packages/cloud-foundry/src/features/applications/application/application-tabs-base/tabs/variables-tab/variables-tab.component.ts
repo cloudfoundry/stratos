@@ -23,6 +23,7 @@ import {
   TailwindDialogService,
   TailwindSnackBarService,
 } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 
 import { CodeBlockComponent } from '../../../../../../../../core/src/shared/components/code-block/code-block.component';
 import {
@@ -290,8 +291,8 @@ export class VariablesTabComponent implements OnInit {
         await this.actionsService.updateVariable(result.name, result.value);
       }
       await this.variablesConfig.refresh();
-    } catch (err: any) {
-      this.snackBar.error(`Save variable failed: ${err?.message ?? err}`);
+    } catch (err: unknown) {
+      this.snackBar.error(leadPieces('Save variable failed', err));
     }
   }
 
@@ -321,8 +322,8 @@ export class VariablesTabComponent implements OnInit {
             try {
               await this.actionsService.deleteVariable(row.name);
               await this.variablesConfig.refresh();
-            } catch (err: any) {
-              this.snackBar.error(`Delete failed: ${err?.message ?? err}`);
+            } catch (err: unknown) {
+              this.snackBar.error(leadPieces('Delete failed', err));
             }
           });
         },

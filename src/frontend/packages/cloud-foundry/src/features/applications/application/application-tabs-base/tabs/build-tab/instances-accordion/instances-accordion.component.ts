@@ -22,6 +22,7 @@ import {
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 
 import {
   CfAppInstancesSignalConfigService,
@@ -276,8 +277,8 @@ export class InstancesAccordionComponent implements OnDestroy {
           this.confirmDialog.open(confirm, async () => {
             try {
               await this.actionsService.killInstance(row.index);
-            } catch (err: any) {
-              this.snackBar.error(`Terminate failed: ${err?.message ?? err}`);
+            } catch (err: unknown) {
+              this.snackBar.error(leadPieces('Terminate failed', err));
             }
           });
         },

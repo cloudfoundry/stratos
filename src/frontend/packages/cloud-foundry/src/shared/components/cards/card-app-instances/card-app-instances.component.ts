@@ -24,6 +24,7 @@ import {
   TailwindSnackBarRef,
   TailwindSnackBarService,
 } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 import { ApplicationService } from '../../../../features/applications/application.service';
 import { AppDetailDataService } from '../../../../features/applications/app-detail-data.service';
 import { CfAppsSignalConfigService } from '../../../signal-list-configs/app/cf-apps-signal-config.service';
@@ -179,8 +180,8 @@ export class CardAppInstancesComponent implements OnDestroy {
           this.dataService.refresh('app'),
           this.dataService.refresh('stats'),
         ]);
-      } catch (err: any) {
-        this.snackBarRef = this.snackBar.error(`Failed to update instance count: ${err?.message ?? err}`);
+      } catch (err: unknown) {
+        this.snackBarRef = this.snackBar.error(leadPieces('Failed to update instance count', err));
       }
     };
     if (value === 0) {

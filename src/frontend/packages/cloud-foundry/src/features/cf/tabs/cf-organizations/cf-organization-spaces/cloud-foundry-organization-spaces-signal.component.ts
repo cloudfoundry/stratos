@@ -17,6 +17,7 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  leadPieces,
 } from '@stratosui/store';
 
 import { CurrentUserPermissionsService } from '../../../../../../../core/src/core/permissions/current-user-permissions.service';
@@ -195,8 +196,8 @@ export class CloudFoundryOrganizationSpacesSignalComponent {
         if (how) {
           this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Spaces list', how));
         }
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+      } catch (err: unknown) {
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     return [

@@ -21,6 +21,7 @@ import {
   SignalListRowAction,
   TailwindSnackBarService,
 } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 
 import {
   CfAppRoutesSignalConfigService,
@@ -158,8 +159,8 @@ export class RoutesTabComponent implements OnInit {
             try {
               await this.actionsService.unmapRoute(row.guid);
               this.dataService.removeRoute(row.guid);
-            } catch (err: any) {
-              this.snackBar.error(`Unmap failed: ${err?.message ?? err}`);
+            } catch (err: unknown) {
+              this.snackBar.error(leadPieces('Unmap failed', err));
             }
           });
         },
@@ -185,8 +186,8 @@ export class RoutesTabComponent implements OnInit {
                 void this.dataService.refresh('routes');
                 this.snackBar.error(unknownOutcomeMessage(`Delete "${label}"`, 'The Routes tab', unknownHowOf(outcome) ?? 'ended'));
               }
-            } catch (err: any) {
-              this.snackBar.error(`Delete failed: ${err?.message ?? err}`);
+            } catch (err: unknown) {
+              this.snackBar.error(leadPieces('Delete failed', err));
             }
           });
         },

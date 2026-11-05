@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
+import { leadPieces } from '@stratosui/store';
 import { Router, RouterModule } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
 import { filter, map, startWith } from 'rxjs/operators';
@@ -103,8 +104,8 @@ export class CloudFoundryOrganizationSummaryComponent {
           return;
         }
         this.router.navigate(['/cloud-foundry', cfGuid, 'organizations']);
-      } catch (err: any) {
-        this.snackBar.error(`Failed to delete organization: ${err?.message ?? err}`, 'Close');
+      } catch (err: unknown) {
+        this.snackBar.error(leadPieces('Failed to delete organization', err), 'Close');
       }
     });
   }

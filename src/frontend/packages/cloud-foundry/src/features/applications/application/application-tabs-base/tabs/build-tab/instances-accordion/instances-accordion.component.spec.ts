@@ -16,7 +16,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { EndpointsDataService } from '@stratosui/store';
 
 import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
+import { ApplicationServiceMock, CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
@@ -436,6 +436,17 @@ describe('InstancesAccordionComponent', () => {
     expect(killInstance).not.toHaveBeenCalled();
     await onConfirm();
     expect(killInstance).toHaveBeenCalledWith(2);
+  });
+
+  it('says why a terminate failed in Cloud Foundry\'s words', async () => {
+    killInstance.mockRejectedValueOnce(cfRequestFailure());
+    await fixture.whenStable();
+    const actionsCol = component.listConfig().columns.find(c => c.key === 'actions');
+    actionsCol!.actions!({ index: 2 } as any)[0].invoke({ index: 2 } as any);
+    await confirmOpen.mock.calls[0][1]();
+
+    const snack = TestBed.inject(TailwindSnackBarService) as any;
+    expect(snackText(snack.error.mock.calls[0][0])).toBe(`Terminate failed: ${CF_FAILURE_DETAIL}`);
   });
 
   describe('SSH row action', () => {

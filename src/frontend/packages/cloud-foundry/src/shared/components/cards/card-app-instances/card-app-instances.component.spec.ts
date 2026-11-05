@@ -5,6 +5,7 @@ import { of } from 'rxjs';
 import { describe, it, expect, vi } from 'vitest';
 
 import { ConfirmationDialogService, CurrentUserPermissionsService, TailwindSnackBarService } from '@stratosui/core';
+import { CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 
 import { CardAppInstancesComponent } from './card-app-instances.component';
 import { ApplicationService } from '../../../../features/applications/application.service';
@@ -214,6 +215,14 @@ describe('CardAppInstancesComponent', () => {
       expect(snackStub.error).toHaveBeenCalledWith(
         'Update instance count: the operation ended, but its result could not be determined. '
           + 'This page shows the current state.');
+    });
+
+    it('says why a scale failed in Cloud Foundry\'s words', async () => {
+      const { fixture, appsStub, snackStub } = await setup({ showActions: true, desired: 2 });
+      appsStub.scaleApp.mockRejectedValueOnce(cfRequestFailure());
+      fixture.componentInstance.scaleUp();
+      await vi.waitFor(() => expect(snackStub.error).toHaveBeenCalled());
+      expect(snackText(snackStub.error.mock.calls[0][0])).toBe(`Failed to update instance count: ${CF_FAILURE_DETAIL}`);
     });
 
     it('scaleDown invokes apps.scaleApp with desired-1', async () => {

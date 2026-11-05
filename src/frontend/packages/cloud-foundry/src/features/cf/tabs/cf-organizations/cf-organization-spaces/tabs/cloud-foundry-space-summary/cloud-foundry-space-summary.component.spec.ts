@@ -5,7 +5,7 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { EntityCatalogTestModule, TEST_CATALOGUE_ENTITIES, generateStratosEntities, EntityCatalogHelper, EntityCatalogHelpers } from '@stratosui/store';
 import { createEmptyStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
@@ -18,10 +18,14 @@ import {
 } from '@stratosui/core';
 import { cfCurrentUserPermissionsService } from '@stratosui/cloud-foundry';
 import {
+  CF_FAILURE_DETAIL,
+  cfRequestFailure,
   CloudFoundrySpaceServiceMock,
   generateActiveRouteCfOrgSpaceMock,
-  generateCfActiveRouteMock
+  generateCfActiveRouteMock,
+  snackText,
 } from '@test-framework/cf';
+import { CfSpacesSignalConfigService } from '../../../../../../../shared/signal-list-configs/space/cf-spaces-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../../../services/cloud-foundry-organization.service';
 import { CloudFoundrySpaceService } from '../../../../../services/cloud-foundry-space.service';
@@ -87,5 +91,14 @@ describe('CloudFoundrySpaceSummaryComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('says why a delete failed in Cloud Foundry\'s words', async () => {
+    const snackError = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error').mockImplementation(() => undefined as never);
+    vi.spyOn(TestBed.inject(CfSpacesSignalConfigService), 'deleteSpace').mockRejectedValueOnce(cfRequestFailure());
+
+    await component.deleteSpace();
+
+    expect(snackText(snackError.mock.calls[0][0])).toBe(`Failed to delete space: ${CF_FAILURE_DETAIL}`);
   });
 });
