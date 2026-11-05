@@ -52,6 +52,18 @@ describe('EndpointErrorEventsService', () => {
     expect(svc.errorsForEndpoint('cnsi-1')()).toHaveLength(2);
   });
 
+  it('records an upstream error page as its message, not its markup', () => {
+    const svc = new EndpointErrorEventsService();
+    // nginx's default 502 page.
+    const page = '<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n'
+      + '<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n';
+    svc.recordEndpointErrors(new Map([
+      ['cnsi-1', new HttpErrorResponse({ status: 502, statusText: 'Bad Gateway', url: '/pp/v1/cf/x', error: page })],
+    ]));
+
+    expect(svc.errorsForEndpoint('cnsi-1')()[0].message).toBe('502 Bad Gateway\nnginx');
+  });
+
   it('clearEndpoint drops that endpoint history', () => {
     const svc = new EndpointErrorEventsService();
     svc.recordEndpointErrors(new Map([['cnsi-1', http500()], ['cnsi-2', http500()]] as [string, unknown][]));

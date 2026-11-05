@@ -1,13 +1,8 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Signal, computed, signal } from '@angular/core';
 
+import { extractHttpErrorMessage } from '../jetstream';
 import { InternalEventSeverity, InternalEventState, InternalEventStateMetadata } from '../types/internal-events.types';
-
-// CAPI v3 error response shape used by `/v3/...` endpoints.
-interface CapiErrorBody {
-  errors?: Array<{ detail?: string; title?: string; code?: number | string }>;
-  error?: string;
-}
 
 /**
  * Signal-native replacement for the ngrx internal-events bus.
@@ -103,32 +98,8 @@ function toInternalEventState(err: unknown): InternalEventState<InternalEventSta
   };
 }
 
-/**
- * Best-effort extraction of a human-readable error string. Tries (in order):
- * CAPI v3 `{errors:[{detail}]}`, Stratos `{error:"..."}`, HttpErrorResponse
- * status line, native Error.message, String coercion.
- */
+// The error in the endpoint's or Jetstream's own words; an HTML error page
+// from a proxy is read as its message.
 function formatEndpointErrorDetail(err: unknown): string {
-  if (err == null) {
-    return 'failed to load';
-  }
-  if (err instanceof HttpErrorResponse) {
-    const body = err.error as CapiErrorBody | string | null | undefined;
-    if (body && typeof body === 'object') {
-      if (body.errors?.[0]?.detail) {
-        return body.errors[0].detail;
-      }
-      if (typeof body.error === 'string') {
-        return body.error;
-      }
-    }
-    if (typeof body === 'string' && body.length > 0) {
-      return body;
-    }
-    return `${err.status} ${err.statusText || 'failed to load'}`.trim();
-  }
-  if (err instanceof Error) {
-    return err.message;
-  }
-  return String(err);
+  return err == null ? 'failed to load' : extractHttpErrorMessage(err);
 }
