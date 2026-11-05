@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, Signal, WritableSignal, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { ApiKey, BrowserStandardEncoder } from '@stratosui/store';
+import { ApiKey, BrowserStandardEncoder, extractHttpErrorMessage } from '@stratosui/store';
 
 const apiKeysUrl = '/pp/v1/api_keys';
 
@@ -96,10 +96,8 @@ export class ApiKeysDataService {
   }
 
   private errorMessage(err: unknown): string {
-    if (err instanceof HttpErrorResponse) {
-      return typeof err.error === 'string' ? err.error : (err.message || 'API key request failed');
-    }
-    if (err instanceof Error) return err.message;
-    return 'API key request failed';
+    return err instanceof HttpErrorResponse || err instanceof Error
+      ? extractHttpErrorMessage(err)
+      : 'API key request failed';
   }
 }

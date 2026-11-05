@@ -46,4 +46,22 @@ describe('ApiKeysDataService.create', () => {
       .flush('Expiry must be in the future', { status: 400, statusText: 'Bad Request' });
     await expect(result).rejects.toThrow('Expiry must be in the future');
   });
+
+  it('fails with Jetstream\'s reason when the error body is JSON', async () => {
+    const result = service.create('CI', null);
+    http.expectOne('/pp/v1/api_keys')
+      .flush({ status: 'error', error: 'API keys are disabled' }, { status: 403, statusText: 'Forbidden' });
+    await expect(result).rejects.toThrow(/^API keys are disabled$/);
+  });
+
+  it('fails with the message of an upstream error page, not its markup', async () => {
+    const result = service.create('CI', null);
+    // nginx's default 502 page.
+    http.expectOne('/pp/v1/api_keys').flush(
+      '<html>\r\n<head><title>502 Bad Gateway</title></head>\r\n<body>\r\n'
+      + '<center><h1>502 Bad Gateway</h1></center>\r\n<hr><center>nginx</center>\r\n</body>\r\n</html>\r\n',
+      { status: 502, statusText: 'Bad Gateway' },
+    );
+    await expect(result).rejects.toThrow(/^502 Bad Gateway\nnginx$/);
+  });
 });

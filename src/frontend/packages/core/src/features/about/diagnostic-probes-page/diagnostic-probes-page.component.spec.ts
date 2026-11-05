@@ -55,7 +55,7 @@ describe('DiagnosticProbesPageComponent', () => {
     httpMock.expectOne(SYSTEM_INFO_URL).flush(systemInfo);
     await p;
     const fixture = TestBed.createComponent(DiagnosticProbesPageComponent);
-    fixture.detectChanges();
+    await fixture.whenStable();
     return fixture;
   }
 
@@ -73,7 +73,7 @@ describe('DiagnosticProbesPageComponent', () => {
     const done = fixture.componentInstance.probe('cf-1');
     httpMock.expectOne(PROBE_URL).flush(probeResult);
     await done;
-    fixture.detectChanges();
+    await fixture.whenStable();
     const result = fixture.nativeElement.querySelector('[data-test="probe-result"]');
     expect(result).not.toBeNull();
     expect(result.textContent).toContain('8,064');
@@ -87,7 +87,7 @@ describe('DiagnosticProbesPageComponent', () => {
     const done = fixture.componentInstance.probe('cf-1');
     httpMock.expectOne(PROBE_URL).flush({ ...probeResult, probedLimitBytes: 4096, recommendedChunk: 78 });
     await done;
-    fixture.detectChanges();
+    await fixture.whenStable();
     const verdict = fixture.nativeElement.querySelector('[data-test="probe-verdict-lower"]');
     expect(verdict).not.toBeNull();
     expect(verdict.textContent).toContain('STRATOS_CF_GUID_CHUNK=78');
@@ -98,8 +98,17 @@ describe('DiagnosticProbesPageComponent', () => {
     const done = fixture.componentInstance.probe('cf-1');
     httpMock.expectOne(PROBE_URL).flush({ detail: 'probe failed: endpoint unreachable' }, { status: 502, statusText: 'Bad Gateway' });
     await done;
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('[data-test="probe-error"]')).not.toBeNull();
     expect(fixture.componentInstance.stateFor('cf-1').running).toBe(false);
+  });
+
+  it('gives Jetstream\'s reason for a probe failure', async () => {
+    const fixture = await createHydrated();
+    const done = fixture.componentInstance.probe('cf-1');
+    httpMock.expectOne(PROBE_URL)
+      .flush({ status: 'error', error: 'Endpoint is not connected' }, { status: 400, statusText: 'Bad Request' });
+    await done;
+    expect(fixture.componentInstance.stateFor('cf-1').error).toBe('Endpoint is not connected');
   });
 });

@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, i
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
-import { EndpointModel, EndpointsDataService } from '@stratosui/store';
+import { EndpointModel, EndpointsDataService, extractHttpErrorMessage } from '@stratosui/store';
 import { AppBusyComponent } from '../../../shared/components/busy-indicator/busy-indicator.component';
 
 // Result DTO from GET /pp/v1/cf/diag/urilimit/:cnsiGuid (#5579).
@@ -77,7 +77,7 @@ export class DiagnosticProbesPageComponent {
         this.http.get<URILimitProbeResult>(`/pp/v1/cf/diag/urilimit/${guid}`));
       this.patch(guid, { running: false, result });
     } catch (e: any) {
-      const detail = e?.error?.detail ?? e?.message ?? 'probe failed';
+      const detail = e?.error?.detail ?? extractHttpErrorMessage(e);
       this.patch(guid, { running: false, error: String(detail) });
     }
   }
