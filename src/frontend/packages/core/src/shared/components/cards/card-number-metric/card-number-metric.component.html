@@ -38,7 +38,7 @@
           </div>
         </div>
         <!-- Alert badges -->
-        @if (alertInfo) {
+        @if (alertInfo(); as alertInfo) {
           <div class="number-metric-card-alerts mt-3 space-y-2" role="button" tabindex="0"
             (click)="alertsClicked()"
             (keydown.enter)="alertsClicked()"

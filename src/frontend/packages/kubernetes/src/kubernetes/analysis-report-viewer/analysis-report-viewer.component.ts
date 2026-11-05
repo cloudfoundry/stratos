@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, Type, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, OnDestroy, Type, ViewChild, ViewContainerRef, effect, inject, input, untracked } from '@angular/core';
 
 import { AnalysisReport } from '../store/kube.types';
 import { KubeScoreReportViewerComponent } from './kube-score-report-viewer/kube-score-report-viewer.component';
@@ -26,13 +26,20 @@ export class AnalysisReportViewerComponent implements OnDestroy {
 
   private id!: string;
 
-  @Input()
-  set report(report: AnalysisReport | null) {
-    if (report === null || report.id === this.id) {
-      return;
-    }
-    this.id = report.id;
-    this.updateReport(report);
+  readonly report = input<AnalysisReport | null>();
+
+  constructor() {
+    // Show a viewer for each new report; the same report again keeps its viewer.
+    effect(() => {
+      const report = this.report();
+      if (!report || report.id === this.id) {
+        return;
+      }
+      this.id = report.id;
+      // Untracked: signals the new viewer reads while it is created are not
+      // dependencies of this effect.
+      untracked(() => this.updateReport(report));
+    });
   }
 
   updateReport(report: AnalysisReport): void {

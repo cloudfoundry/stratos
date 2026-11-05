@@ -1,10 +1,10 @@
 
 import { NgClass } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, Input, computed, effect, inject, runInInjectionContext, signal, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, computed, effect, inject, runInInjectionContext, signal, input, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 import { of } from 'rxjs';
 import { take, defaultIfEmpty } from 'rxjs/operators';
-import { entityCatalog, FavoriteIconData, IFavoriteMetadata, UserFavorite, UserFavoriteManager, UserFavoritesDataService } from '@stratosui/store';
+import { entityCatalog, IFavoriteMetadata, UserFavorite, UserFavoriteManager, UserFavoritesDataService } from '@stratosui/store';
 
 import { EntityFavoriteStarComponent } from '../../../../core/entity-favorite-star/entity-favorite-star.component';
 import { FreshEntityNameService } from '../../../../core/signals/fresh-entity-name.service';
@@ -33,30 +33,28 @@ export class FavoritesMetaCardComponent {
 
   public readonly endpoint = input<any>();
 
-  // strict: assigned in the @Input set favoriteEntity setter before any read
-  public favorite!: UserFavorite<IFavoriteMetadata>;
+  // The card renders nothing until a favorite is set.
+  readonly favoriteEntity = input<UserFavorite<IFavoriteMetadata>>();
 
   // Type of favorite - e.g. 'Application'
-  // strict: assigned in the @Input set favoriteEntity setter
-  public favoriteType!: string;
+  readonly favoriteType = computed(() => this.favoriteEntity()?.getPrettyTypeName() ?? '');
 
   // getLink() returns null when the entity defines no link; the template
-  // guards every use with !!routerLink, and openFavorite early-returns.
-  public routerLink: string | null = null;
+  // guards every use with !!routerLink(), and openFavorite early-returns.
+  readonly routerLink = computed(() => this.favoriteEntity()?.getLink() ?? null);
 
-  // strict: assigned in the @Input set favoriteEntity setter
-  public icon!: FavoriteIconData;
+  readonly icon = computed(() => this.favoriteEntity()?.getIcon());
 
   // Signal: written after the first render; an OnPush view under zoneless CD only repaints for signal writes.
   readonly valid = signal(true);
-
-  // Reactive favorite, so the rendered name tracks freshly-fetched entity data.
-  private readonly favoriteSig = signal<UserFavorite<IFavoriteMetadata> | null>(null);
 
   // Name fetched on demand (see recoverNameIfMissing) when the entity is in no
   // loaded signal and the favorite carries no stored name.
   private readonly fetchedName = signal<string | null>(null);
   private nameFetchAttempted = false;
+
+  // The favorite the per-favorite state below was last reset for.
+  private stateFor?: UserFavorite<IFavoriteMetadata>;
 
   // Name precedence: live entity data → stored metadata → on-demand fetched
   // name → entity id as a last resort. The metadata deref is guarded because a
@@ -64,7 +62,7 @@ export class FavoritesMetaCardComponent {
   // unguarded `.name` throw breaks the whole card's change detection (it took
   // down the entire endpoint home card).
   readonly displayName = computed(() => {
-    const fav = this.favoriteSig();
+    const fav = this.favoriteEntity();
     if (!fav) {
       return '';
     }
@@ -85,9 +83,21 @@ export class FavoritesMetaCardComponent {
     // updates the favorites signal, the parent re-passes the favorite, and the
     // next run sees fresh === stored.
     effect(() => {
-      const fav = this.favoriteSig();
+      const fav = this.favoriteEntity();
       if (!fav) {
         return;
+      }
+      // A new favorite starts clean, and has its name looked up if it is
+      // missing. In this effect, ahead of the check below, so the lookup's
+      // own save is seen by that check.
+      if (fav !== this.stateFor) {
+        this.stateFor = fav;
+        untracked(() => {
+          this.lastPersisted = null;
+          this.fetchedName.set(null);
+          this.nameFetchAttempted = false;
+          this.recoverNameIfMissing(fav);
+        });
       }
       const fresh = this.freshNames.freshNameFor(fav);
       if (fresh && fresh !== fav.metadata?.name && fresh !== this.lastPersisted) {
@@ -124,46 +134,33 @@ export class FavoritesMetaCardComponent {
     this.favoritesData.updateMetadata(updated);
   }
 
-  @Input()
-  set favoriteEntity(favoriteEntity: UserFavorite<IFavoriteMetadata>) {
-    if (favoriteEntity) {
-      this.favorite = favoriteEntity;
-      this.favoriteType = this.favorite.getPrettyTypeName();
-      this.icon = this.favorite.getIcon();
-      this.routerLink = this.favorite.getLink();
-      this.lastPersisted = null;
-      this.fetchedName.set(null);
-      this.nameFetchAttempted = false;
-      this.favoriteSig.set(favoriteEntity);
-      this.recoverNameIfMissing(favoriteEntity);
-    }
-  }
-
   openFavorite() {
-    if (!this.routerLink) {
+    const favorite = this.favoriteEntity();
+    const routerLink = this.routerLink();
+    if (!favorite || !routerLink) {
       return;
     }
-    const entityDef = entityCatalog.getEntity(this.favorite.endpointType, this.favorite.entityType);
+    const entityDef = entityCatalog.getEntity(favorite.endpointType, favorite.entityType);
     // getIsValid hooks now use inject(HttpClient) for a direct existence
     // probe (signal-native; no ngrx pipeline), so the call must run inside
     // an injection context.
     const entityBuilder = entityDef.builders.entityBuilder;
     const getIsValid = entityBuilder?.getIsValid;
     const isValidObs = getIsValid ?
-    runInInjectionContext(this.injector, () => getIsValid(this.favorite)) : of(true);
+    runInInjectionContext(this.injector, () => getIsValid(favorite)) : of(true);
     isValidObs.pipe(take(1), defaultIfEmpty(false)).subscribe(isValid => {
       this.valid.set(isValid);
       if (!isValid) {
         const confirmation = new ConfirmationDialogConfig(
           'Remove this Favorite?',
-          `The ${this.favoriteType} for this favorite appears to have been deleted. Remove the favorite?`,
+          `The ${this.favoriteType()} for this favorite appears to have been deleted. Remove the favorite?`,
           'Remove',
           true
         );
-        this.confirmDialog.open(confirmation, () => { this.userFavoriteManager.toggleFavorite(this.favorite); });
+        this.confirmDialog.open(confirmation, () => { this.userFavoriteManager.toggleFavorite(favorite); });
       } else {
         // Navigate to the favorite
-        this.router.navigate([this.routerLink]);
+        this.router.navigate([routerLink]);
       }
     });
   }

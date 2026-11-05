@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, OnInit, signal, inject, ChangeDetectionStrategy, input, output } from '@angular/core';
+import { Component, OnChanges, OnInit, computed, signal, inject, ChangeDetectionStrategy, input, output } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -44,14 +44,21 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
   readonly showAlerts = output<any>();
   readonly mode = input<string>();
 
-  @Input()
-  set alerts(alerts: any[]) {
-    if (alerts) {
-      this.processAlerts(alerts);
-    }
-  }
+  readonly alerts = input<any[]>();
 
-  alertInfo: any;
+  // How many alerts there are at each level; undefined while there is no list.
+  readonly alertInfo = computed(() => {
+    const alerts = this.alerts();
+    if (!alerts) {
+      return undefined;
+    }
+    const count = (level: AlertLevel) => alerts.filter(alert => alert.level === level).length;
+    return {
+      info: count(AlertLevel.Info),
+      warning: count(AlertLevel.Warning),
+      error: count(AlertLevel.Error)
+    };
+  });
 
   formattedValue!: string;
   formattedLimit?: string;
@@ -135,30 +142,8 @@ export class CardNumberMetricComponent implements OnInit, OnChanges {
     }
   }
 
-  processAlerts(alerts: any[]) {
-    this.alertInfo = {
-      info: 0,
-      warning: 0,
-      error: 0
-    };
-
-    alerts.forEach((alert: any) => {
-      switch (alert.level as AlertLevel) {
-        case AlertLevel.Warning:
-          this.alertInfo.warning++;
-          break;
-        case AlertLevel.Error:
-          this.alertInfo.error++;
-          break;
-        case AlertLevel.Info:
-          this.alertInfo.info++;
-          break;
-      }
-    });
-  }
-
   public alertsClicked() {
-    this.showAlerts.emit(this.alertInfo);
+    this.showAlerts.emit(this.alertInfo());
   }
 
 }

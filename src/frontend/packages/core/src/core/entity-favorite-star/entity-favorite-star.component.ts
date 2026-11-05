@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, Input, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, computed, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CustomTooltipDirective } from '../../shared/components/custom-tooltip/custom-tooltip.directive';
 import { UserFavoriteManager, IFavoriteMetadata, UserFavorite } from '@stratosui/store';
 import { Observable } from 'rxjs';
@@ -23,36 +23,38 @@ import { CustomIconComponent } from '../../shared/components/custom-material/cus
 })
 export class EntityFavoriteStarComponent {
 
-  @Input()
-  set favorite(favorite: UserFavorite<IFavoriteMetadata>) {
-    const name = favorite.getPrettyTypeName();
-    this.confirmationDialogConfig.message =
-      `Are you sure you would you like to unfavorite this ${name ? name.toLocaleLowerCase() : 'favorite'}?`;
-    this.isFavorite$ = this.userFavoriteManager.getIsFavoriteObservable(favorite);
-    this.pFavourite = favorite;
-  }
+  private confirmDialog = inject(ConfirmationDialogService);
+  public endpointsService = inject(EndpointsService);
+  private userFavoriteManager = inject(UserFavoriteManager);
+
+  readonly favorite = input.required<UserFavorite<IFavoriteMetadata>>();
 
   public readonly confirmRemoval = input(false);
 
   readonly small = input(false);
 
-  public isFavorite$!: Observable<boolean>;
+  public readonly isFavorite$ = computed<Observable<boolean>>(
+    () => this.userFavoriteManager.getIsFavoriteObservable(this.favorite())
+  );
 
-  private confirmationDialogConfig = new ConfirmationDialogConfig('Unfavorite?', '', 'Yes', true);
-
-  private pFavourite!: UserFavorite<IFavoriteMetadata>;
-  private confirmDialog = inject(ConfirmationDialogService);
-  public endpointsService = inject(EndpointsService);
-  private userFavoriteManager = inject(UserFavoriteManager);
+  private readonly confirmationDialogConfig = computed(() => {
+    const name = this.favorite().getPrettyTypeName();
+    return new ConfirmationDialogConfig(
+      'Unfavorite?',
+      `Are you sure you would you like to unfavorite this ${name ? name.toLocaleLowerCase() : 'favorite'}?`,
+      'Yes',
+      true
+    );
+  });
 
   public toggleFavorite(event: Event) {
     event.stopPropagation();
     if (this.confirmRemoval()) {
-      this.isFavorite$.pipe(
+      this.isFavorite$().pipe(
         take(1),
         tap(is => {
           if (is) {
-            this.confirmDialog.open(this.confirmationDialogConfig, this.pToggleFavorite);
+            this.confirmDialog.open(this.confirmationDialogConfig(), this.pToggleFavorite);
           } else {
             this.pToggleFavorite();
           }
@@ -64,6 +66,6 @@ export class EntityFavoriteStarComponent {
   }
 
   private pToggleFavorite = (_res?: any) => {
-    this.userFavoriteManager.toggleFavorite(this.pFavourite);
+    this.userFavoriteManager.toggleFavorite(this.favorite());
   }
 }

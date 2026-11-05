@@ -36,7 +36,7 @@
           [favorite]="fav">
         </app-entity-favorite-star>
       }
-      @if (actionMenu && (showMenu$ | async)) {
+      @if (menuItems() && (showMenu$() | async)) {
         <div class="meta-card__header-container__actions relative" appClickStopPropagation>
           <button class="btn btn-icon meta-card__header__button" type="button" (click)="toggleMenu()"
             [disabled]="isDeleting$ | async" aria-label="Actions" aria-haspopup="menu" [attr.aria-expanded]="menuOpen()">
@@ -45,7 +45,7 @@
           @if (menuOpen()) {
             <div class="absolute right-0 top-full mt-1 bg-content-bg rounded-md shadow-lg ring-1 ring-black/5 z-50 min-w-[160px]">
               <div class="py-1" role="menu">
-                @for (menuItem of actionMenu; track menuItem) {
+                @for (menuItem of menuItems(); track menuItem) {
                   @if (menuItem.can | async) {
                     @if (!menuItem.separator) {
                       <button

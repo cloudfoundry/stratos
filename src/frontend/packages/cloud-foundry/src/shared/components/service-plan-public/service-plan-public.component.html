@@ -1,4 +1,4 @@
-@if (plan(); as servicePlan) {
+@if (servicePlan(); as servicePlan) {
   {{ servicePlan.visibilityType === 'public' ? 'Yes' : 'No' }}
 }
 @if (planAccessibility() !== 'ok') {

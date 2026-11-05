@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, input, linkedSignal, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterModule } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -38,23 +38,28 @@ export class PageSideNavComponent implements OnInit {
   private dashboardSignals = inject(DashboardSignalService);
 
 
-  pTabs: IPageSideNavTab[] = [];
-  @Input() set tabs(tabs: IPageSideNavTab[]) {
-    if (!tabs) {
-      this.pTabs = [];
-      return;
-    }
-    if (this.pTabs && tabs.length === this.pTabs.length) {
-      return;
-    }
-    this.pTabs = tabs.map(tab => ({
-      ...tab,
-      hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.activatedRoute, this.cups, this.http) : of(false))
-    }));
-  }
-  get tabs(): IPageSideNavTab[] {
-    return this.pTabs;
-  }
+  readonly tabs = input<IPageSideNavTab[] | null>();
+
+  // The tabs as rendered, each with its hidden$ gate. A new list of the same
+  // length keeps the tabs already shown, so their gates are not asked again.
+  readonly shownTabs = linkedSignal<IPageSideNavTab[] | null | undefined, IPageSideNavTab[]>({
+    source: this.tabs,
+    computation: (tabs, previous) => {
+      const shown = previous?.value ?? [];
+      if (!tabs) {
+        return [];
+      }
+      if (tabs.length === shown.length) {
+        return shown;
+      }
+      // A tab's hidden() is extension code; run it outside the reactive
+      // context so it can neither add dependencies nor fail on a signal write.
+      return untracked(() => tabs.map(tab => ({
+        ...tab,
+        hidden$: tab.hidden$ || (tab.hidden ? tab.hidden(this.activatedRoute, this.cups, this.http) : of(false))
+      })));
+    },
+  });
 
   // Bound from async-piped streams that may emit null/undefined before the
   // header resolves; interpolation renders those as an empty string.

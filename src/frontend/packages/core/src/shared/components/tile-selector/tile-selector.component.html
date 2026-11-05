@@ -1,9 +1,9 @@
 <div class="tile-selectors">
-  <ng-container *ngTemplateOutlet="tile; context:{ options: options, selected: selected }"></ng-container>
-  @if (showingMore && hiddenOptions.length > 0) {
-    <ng-container *ngTemplateOutlet="tile; context:{ options: hiddenOptions, selected: selected }"></ng-container>
+  <ng-container *ngTemplateOutlet="tile; context:{ options: shownOptions(), selected: selected }"></ng-container>
+  @if (showingMore && hiddenOptions().length > 0) {
+    <ng-container *ngTemplateOutlet="tile; context:{ options: hiddenOptions(), selected: selected }"></ng-container>
   }
-  @if (hiddenOptions.length > 0) {
+  @if (hiddenOptions().length > 0) {
     <div role="button" tabindex="0"
       (click)="toggleMore()"
       (keydown.enter)="toggleMore()"
@@ -17,7 +17,7 @@
 <ng-template #tile let-options="options" let-selected="selected">
   @for (tile of options; track tile) {
     <app-tile-selector-tile (tileSelect)="selectionChange(tile)" [tile]="tile"
-      [active]="selected === tile || !selected" [smaller]="smallerTiles" [compact]="compactTiles()"
+      [active]="selected === tile || !selected" [smaller]="useSmallerTiles()" [compact]="compactTiles()"
       [scaleIcon]="scaleIcons()">
     </app-tile-selector-tile>
   }

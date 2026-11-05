@@ -1,7 +1,7 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterViewInit, Component, Input, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, input, linkedSignal, signal, untracked } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -71,7 +71,6 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   private cups = inject(CurrentUserPermissionsService);
   private endpointsService = inject(EndpointsService);
   private currentUserPermissionsService = inject(CurrentUserPermissionsService);
-  private cdr = inject(ChangeDetectorRef);
   private http = inject(HttpClient);
   private snackBarService = inject(TailwindSnackBarService);
   private dashboardSignals = inject(DashboardSignalService);
@@ -117,14 +116,9 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   public canAPIKeys$: Observable<boolean>;
-  public breadcrumbDefinitions: IHeaderBreadcrumbLink[] | null = null;
-  private breadcrumbKey: string | null;
-  // Last [breadcrumbs] input value, retained so the queryParamMap
-  // subscription can re-resolve the active breadcrumb after a key change.
-  private latestBreadcrumbs: IHeaderBreadcrumb[] | null = null;
+  // Which of the bound breadcrumb sets to show: the URL's ?breadcrumbs= value.
+  private breadcrumbKey = signal<string | null>(null);
   public eventSeverity = InternalEventSeverity;
-  public pFavorite!: UserFavorite<IFavoriteMetadata>;
-  private pTabs!: IPageSideNavTab[];
 
   public isMobile$: Observable<boolean> = toObservable(this.dashboardSignals.isMobile);
 
@@ -155,65 +149,37 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   readonly endpointIds$ = input<Observable<string[]>>();
 
-  @Input()
-  set tabs(tabs: IPageSideNavTab[]) {
-    if (tabs) {
-      this.pTabs = tabs.map(tab => ({
-        ...tab,
-        link: tab.link === '-' ?
-          TabNavService.TabsNoLinkValue :
-          this.router.createUrlTree([tab.link], { relativeTo: this.route }).toString()
-      }));
-      this.tabNavService.setTabs(this.pTabs);
-    }
-  }
+  // Published to the side navigation by the effects in the constructor.
+  readonly tabs = input<IPageSideNavTab[]>();
 
-  @Input()
-  set tabsHeader(header: string) {
-    if (header) {
-      this.tabNavService.setHeader(header);
-    }
-  }
+  readonly tabsHeader = input<string>();
 
   readonly showUnderFlow = input(false);
 
-  private pShowHistory = true;
-  @Input()
-  get showHistory(): boolean {
-    return !this.logoutOnly() && this.pShowHistory;
-  }
-  set showHistory(showHistory: boolean) {
-    this.pShowHistory = showHistory;
-  }
+  readonly showHistory = input(true);
+  // The logout-only menu never offers the history.
+  readonly historyVisible = computed(() => !this.logoutOnly() && this.showHistory());
 
   public events$: Observable<IGlobalEvent[]>;
   public unreadEventCount$: Observable<number>;
   public eventPriorityStatus$: Observable<StratosStatus | undefined>;
 
-  @Input() set favorite(favorite: UserFavorite<IFavoriteMetadata> | null) {
-    if (favorite && (!this.pFavorite || (favorite.guid !== this.pFavorite.guid))) {
-      if (favorite.canFavorite()) {
-        this.pFavorite = favorite;
-        // A recently-visited record genuinely requires an entityId, name and
-        // router link; only record entity favorites that carry all three.
-        if (favorite.entityId && favorite.metadata) {
-          const routerLink = favorite.getLink();
-          this.recents.add({
-            guid: favorite.guid,
-            date: getTime(new Date()),
-            entityType: favorite.entityType,
-            endpointType: favorite.endpointType,
-            entityId: favorite.entityId,
-            name: favorite.metadata.name,
-            routerLink: routerLink ?? undefined,
-            prettyType: favorite.getPrettyTypeName(),
-            endpointId: favorite.endpointId,
-            metadata: { name: favorite.metadata.name },
-          });
-        }
+  readonly favorite = input<UserFavorite<IFavoriteMetadata> | null>();
+  // The favorite the star is shown for: the last one bound that can be
+  // favorited. A later null, or the same entity again, leaves it in place.
+  readonly shownFavorite = linkedSignal<
+    UserFavorite<IFavoriteMetadata> | null | undefined,
+    UserFavorite<IFavoriteMetadata> | undefined
+  >({
+    source: this.favorite,
+    computation: (favorite, previous) => {
+      const shown = previous?.value;
+      if (favorite && (!shown || favorite.guid !== shown.guid) && favorite.canFavorite()) {
+        return favorite;
       }
-    }
-  }
+      return shown;
+    },
+  });
 
   public username$: Observable<string>;
   public user$: Observable<UserProfileInfo>;
@@ -225,12 +191,13 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
 
   public actionsKey: StratosActionType | null;
 
-  @Input()
-  set breadcrumbs(breadcrumbs: IHeaderBreadcrumb[] | null) {
-    this.latestBreadcrumbs = breadcrumbs;
-    this.breadcrumbDefinitions = this.getBreadcrumb(breadcrumbs);
-    this.cdr.markForCheck();
-  }
+  readonly breadcrumbs = input<IHeaderBreadcrumb[] | null>();
+  // The breadcrumb set the URL's key selects. null, which renders no
+  // breadcrumbs element at all, only while [breadcrumbs] is not bound.
+  readonly breadcrumbDefinitions = computed<IHeaderBreadcrumbLink[] | null>(() => {
+    const breadcrumbs = this.breadcrumbs();
+    return breadcrumbs === undefined ? null : this.getBreadcrumb(breadcrumbs);
+  });
 
   // Used when non-admin logs in with no-endpoints -> only show logout in the menu
   readonly logoutOnly = input<boolean>();
@@ -243,11 +210,12 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   }
 
   private getBreadcrumbFromKey(breadcrumbs: IHeaderBreadcrumb[]) {
-    if (breadcrumbs.length === 1 || !this.breadcrumbKey) {
+    const key = this.breadcrumbKey();
+    if (breadcrumbs.length === 1 || !key) {
       return breadcrumbs[0];
     }
     return breadcrumbs.find(breadcrumb => {
-      return breadcrumb.key === this.breadcrumbKey;
+      return breadcrumb.key === key;
     }) || breadcrumbs[0];
   }
 
@@ -279,16 +247,55 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
     // arrival when the route resolves before the param lands. Seed
     // synchronously from snapshot so the initial render gets the key,
     // then subscribe reactively when queryParamMap is available.
-    this.breadcrumbKey = route.snapshot?.queryParams?.[BREADCRUMB_URL_PARAM] || null;
+    this.breadcrumbKey.set(route.snapshot?.queryParams?.[BREADCRUMB_URL_PARAM] || null);
     if (route.queryParamMap) {
       route.queryParamMap.pipe(takeUntilDestroyed()).subscribe(qp => {
-        this.breadcrumbKey = qp.get(BREADCRUMB_URL_PARAM) || null;
-        if (this.latestBreadcrumbs) {
-          this.breadcrumbDefinitions = this.getBreadcrumb(this.latestBreadcrumbs);
-          this.cdr.markForCheck();
-        }
+        this.breadcrumbKey.set(qp.get(BREADCRUMB_URL_PARAM) || null);
       });
     }
+
+    // Publish the tabs and their header to the side navigation. Resolving the
+    // links stays out of the effect's dependencies: only a new [tabs] value
+    // publishes again.
+    effect(() => {
+      const tabs = this.tabs();
+      if (tabs) {
+        untracked(() => this.tabNavService.setTabs(tabs.map(tab => ({
+          ...tab,
+          link: tab.link === '-' ?
+            TabNavService.TabsNoLinkValue :
+            this.router.createUrlTree([tab.link], { relativeTo: this.route }).toString()
+        }))));
+      }
+    });
+    effect(() => {
+      const header = this.tabsHeader();
+      if (header) {
+        this.tabNavService.setHeader(header);
+      }
+    });
+
+    // A recently-visited record genuinely requires an entityId, name and
+    // router link; only record entity favorites that carry all three.
+    effect(() => {
+      const favorite = this.shownFavorite();
+      const entityId = favorite?.entityId;
+      const metadata = favorite?.metadata;
+      if (favorite && entityId && metadata) {
+        untracked(() => this.recents.add({
+          guid: favorite.guid,
+          date: getTime(new Date()),
+          entityType: favorite.entityType,
+          endpointType: favorite.endpointType,
+          entityId,
+          name: metadata.name,
+          routerLink: favorite.getLink() ?? undefined,
+          prettyType: favorite.getPrettyTypeName(),
+          endpointId: favorite.endpointId,
+          metadata: { name: metadata.name },
+        }));
+      }
+    });
 
     this.user$ = this.userProfileService.userProfile$;
 

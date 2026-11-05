@@ -1,6 +1,6 @@
-@if (alertInfo) {
+@if (alertInfo(); as groups) {
   <div>
-    @for (group of alertInfo; track group) {
+    @for (group of groups; track group) {
       <div>
         @if (showHeader()) {
           <div class="font-bold py-1">{{group.name}}</div>

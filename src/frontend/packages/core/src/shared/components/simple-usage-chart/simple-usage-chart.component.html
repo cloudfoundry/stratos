@@ -1,22 +1,22 @@
 <div class="simple-graph__wrapper">
   <div class="simple-graph__title"><span class="simple-graph__title-inner-text">{{ chartTitle() }}</span>
-  @if (chartData.unknown > 0) {
-    <app-custom-icon [matTooltip]="chartData.warningText" class="simple-graph__title-unknown-warning" inline
+  @if (chartData().unknown > 0) {
+    <app-custom-icon [matTooltip]="chartData().warningText" class="simple-graph__title-unknown-warning" inline
     >warning</app-custom-icon>
   }
 </div>
 <div class="simple-graph" [ngStyle]="{height: height()}">
   <div class="simple-graph__inner">
     <canvas baseChart
-      [data]="chartData.chartJsData"
+      [data]="chartData().chartJsData"
       [type]="'doughnut'"
       [options]="chartOptions">
     </canvas>
-    @if (chartData.total) {
+    @if (chartData().total) {
       <div class="simple-graph__counts">
-        <div class="simple-graph__counts-count">{{ chartData.used }}</div>
+        <div class="simple-graph__counts-count">{{ chartData().used }}</div>
         <span class="simple-graph__counts-divider">/</span>
-        <div>{{ chartData.total }}</div>
+        <div>{{ chartData().total }}</div>
       </div>
     } @else {
       <div class="simple-graph__counts"> - </div>

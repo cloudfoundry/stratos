@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Injector, Input, OnInit, Signal, computed, effect, inject, runInInjectionContext, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Injector, OnInit, Signal, computed, effect, inject, input, runInInjectionContext, signal, untracked } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import {
@@ -57,8 +57,9 @@ export class ServiceBrokerCardComponent implements OnInit {
   private spaceRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
 
-  private readonly _cfGuid = signal('');
-  private readonly _brokerGuid = signal('');
+  readonly cfGuid = input('', { transform: (value: string | null | undefined) => value ?? '' });
+  readonly brokerGuid = input('', { transform: (value: string | null | undefined) => value ?? '' });
+
   private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
 
   // Acquired SpaceDataService (or null when no broker.space.guid yet),
@@ -74,12 +75,12 @@ export class ServiceBrokerCardComponent implements OnInit {
   // re-run the acquire effect.
   private readonly _spaceKey = computed(() => {
     const guid = this.broker()?.space?.guid;
-    const cnsi = this._cfGuid();
+    const cnsi = this.cfGuid();
     return guid && cnsi ? { cnsi, guid } : null;
   }, { equal: (a, b) => a?.cnsi === b?.cnsi && a?.guid === b?.guid });
 
   readonly spaceLink: Signal<BrokerSpaceLink | null> = computed(() => {
-    const cfGuid = this._cfGuid();
+    const cfGuid = this.cfGuid();
     const space = this._spaceData()?.space();
     if (!space || !cfGuid) return null;
     return {
@@ -88,26 +89,16 @@ export class ServiceBrokerCardComponent implements OnInit {
     };
   });
 
-  @Input()
-  set cfGuid(value: string) {
-    this._cfGuid.set(value ?? '');
-    this.refreshBroker();
-  }
-
-  @Input()
-  set brokerGuid(value: string | null | undefined) {
-    this._brokerGuid.set(value ?? '');
-    this.refreshBroker();
-  }
-
-  private refreshBroker(): void {
-    const cfGuid = this._cfGuid();
-    const brokerGuid = this._brokerGuid();
-    if (!cfGuid || !brokerGuid) {
-      this._brokerSource.set(null);
-      return;
-    }
-    this._brokerSource.set(this.serviceCatalog.serviceBroker(cfGuid, brokerGuid));
+  constructor() {
+    // Fetch the broker whenever either guid changes. An effect, not a
+    // computed: the fetch creates and writes signals.
+    effect(() => {
+      const cfGuid = this.cfGuid();
+      const brokerGuid = this.brokerGuid();
+      untracked(() => this._brokerSource.set(
+        cfGuid && brokerGuid ? this.serviceCatalog.serviceBroker(cfGuid, brokerGuid) : null,
+      ));
+    });
   }
 
   ngOnInit(): void {
