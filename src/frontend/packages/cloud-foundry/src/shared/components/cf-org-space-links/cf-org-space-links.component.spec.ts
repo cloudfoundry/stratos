@@ -34,7 +34,7 @@ describe('CfOrgSpaceLinksComponent', () => {
     });
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     service = {
       getCfName: vi.fn().mockReturnValue(of('CfName')),
       getCfURL: vi.fn().mockReturnValue(['/cf/path']),
@@ -48,8 +48,8 @@ describe('CfOrgSpaceLinksComponent', () => {
     component = fixture.componentInstance;
     // strict: assign the consumed-surface test double; the component only
     // touches the members CfOrgSpaceLabelServiceMock implements.
-    component.service = service as CfOrgSpaceLabelService;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('service', service as CfOrgSpaceLabelService);
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -62,7 +62,7 @@ describe('CfOrgSpaceLinksComponent', () => {
   });
 
   describe('with multiple endpoints', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // Create a new service instance with multipleConnectedEndpoints$ set to true
       service = {
         getCfName: vi.fn().mockReturnValue(of('CfName')),
@@ -78,8 +78,8 @@ describe('CfOrgSpaceLinksComponent', () => {
       component = fixture.componentInstance;
       // strict: assign the consumed-surface test double; the component only
     // touches the members CfOrgSpaceLabelServiceMock implements.
-    component.service = service as CfOrgSpaceLabelService;
-      fixture.detectChanges();
+    fixture.componentRef.setInput('service', service as CfOrgSpaceLabelService);
+      await fixture.whenStable();
     });
 
     it('should render cf if multiple', () => {

@@ -2,7 +2,7 @@ import { Component, ViewChild, provideZonelessChangeDetection, CUSTOM_ELEMENTS_S
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { IFavoriteMetadata, StratosStatus, UserFavorite, UserFavoriteManager, entityCatalog, TestEntityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
 import { generateGenericMockEntities } from '@test-framework/mock-catalog-entities';
@@ -15,13 +15,15 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
 @Component({
   imports: [MetaCardComponent, MetaCardTitleComponent],
   template: `
-    <app-meta-card>
+    <app-meta-card [favorite]="favorite()" [status$]="status$()">
       <app-meta-card-title>Title</app-meta-card-title>
     </app-meta-card>`
 })
 class WrapperComponent {
   @ViewChild(MetaCardComponent, { static: true })
   metaCard!: MetaCardComponent;
+  readonly favorite = signal<UserFavorite<IFavoriteMetadata> | undefined>(undefined);
+  readonly status$ = signal<Observable<StratosStatus> | undefined>(undefined);
 }
 
 // An item behind an @if that turns on after the first render, the way
@@ -97,7 +99,7 @@ describe('MetaCardComponent', () => {
     fixture = TestBed.createComponent(WrapperComponent);
     component = fixture.componentInstance.metaCard;
     element = fixture.debugElement.nativeElement;
-    // Don't call detectChanges here - let each test control when it happens
+    // No render here: each test sets its state first, then waits for the view
   });
 
   it('should create', () => {
@@ -111,7 +113,7 @@ describe('MetaCardComponent', () => {
     expect((component as unknown as { entityMonitorFactory?: unknown }).entityMonitorFactory).toBeUndefined();
   });
 
-  it('should show action menu', () => {
+  it('should show action menu', async () => {
     component.actionMenu = [
       {
         label: 'Action1',
@@ -123,7 +125,7 @@ describe('MetaCardComponent', () => {
         action: () => {},
       },
     ];
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // The menu button should be visible when actionMenu is set and showMenu$ is true
     const menuButton = element.querySelector('button.meta-card__header__button');
@@ -134,7 +136,6 @@ describe('MetaCardComponent', () => {
   // each item read as glyph plus label ("link Connect").
   it('names the action menu button and hides item glyphs', async () => {
     component.actionMenu = [{ label: 'Connect', icon: 'link', action: () => {}, can: of(true) }];
-    fixture.detectChanges();
     await fixture.whenStable();
 
     const menuButton = element.querySelector('button.meta-card__header__button') as HTMLButtonElement;
@@ -150,7 +151,7 @@ describe('MetaCardComponent', () => {
     expect(item.getAttribute('role')).toBe('menuitem');
   });
 
-  it('should hide actions without permission', () => {
+  it('should hide actions without permission', async () => {
     component.actionMenu = [
       {
         label: 'Action1',
@@ -158,25 +159,25 @@ describe('MetaCardComponent', () => {
         can: of(false),
       },
     ];
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     // The menu button should not be visible when all actions have can: false
     const menuButton = element.querySelector('button.meta-card__header__button');
     expect(menuButton).toBeFalsy();
   });
 
-  it('should show star if favoritable', () => {
-    component.favorite = favorite;
-    fixture.detectChanges();
+  it('should show star if favoritable', async () => {
+    fixture.componentInstance.favorite.set(favorite);
+    await fixture.whenStable();
 
     expect(element.querySelector('app-entity-favorite-star')).toBeTruthy();
   });
 
-  it('should show app state icon if status', () => {
+  it('should show app state icon if status', async () => {
     expect(element.querySelector('app-application-state-icon')).toBeFalsy();
 
-    component.status$ = of(StratosStatus.TENTATIVE);
-    fixture.detectChanges();
+    fixture.componentInstance.status$.set(of(StratosStatus.TENTATIVE));
+    await fixture.whenStable();
 
     expect(element.querySelector('app-application-state-icon')).toBeTruthy();
   });

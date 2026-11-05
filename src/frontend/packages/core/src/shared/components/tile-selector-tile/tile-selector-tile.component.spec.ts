@@ -23,10 +23,11 @@ describe('TileSelectorTileComponent', () => {
     TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(TileSelectorTileComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    fixture.componentRef.setInput('tile', new ITileConfig('Cloud Foundry', { matIcon: 'cloud' }));
+    await fixture.whenStable();
   });
 
   it('should create', () => {
