@@ -40,18 +40,15 @@ export function jetStreamErrorResponseToSafeString(response: JetStreamErrorRespo
  * Attempt to create a sensible string explaining the error object returned from a failed http request
  * @param err The raw error from a http request
  */
-export function httpErrorResponseToSafeString(err: any): string {
-  const httpResponse: HttpErrorResponse | null = isHttpErrorResponse(err);
-  if (httpResponse) {
-    if (httpResponse.error) {
-      if (typeof (httpResponse.error) === 'string') {
-        return httpResponse.error + ` (${httpResponse.status})`;
-      }
-      return httpResponse.error.error + ` (${httpResponse.status})`;
-    }
-    return JSON.stringify(httpResponse.error) + ` (${httpResponse.status})`;
+// The message of extractHttpErrorMessage followed by the HTTP status, unless
+// the message is already the status. '' when there is nothing to read, so
+// callers can fall back with `||`.
+export function httpErrorResponseToSafeString(err: unknown): string {
+  if (err instanceof HttpErrorResponse) {
+    const message = extractHttpErrorMessage(err);
+    return message.startsWith(`HTTP ${err.status}`) ? message : `${message} (${err.status})`;
   }
-  return err.message;
+  return typeof err === 'string' ? err : (err as { message?: string } | null | undefined)?.message ?? '';
 }
 
 // An upstream error detail can quote a whole HTML error page (CF embeds a
