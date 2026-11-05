@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Signal, computed, signal, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, computed, signal, input } from '@angular/core';
 
 import { AppBusyComponent } from '../busy-indicator/busy-indicator.component';
 
@@ -118,11 +118,11 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
             <span data-test="list-sub-nav-selected"
                   class="flex items-center gap-1.5 text-sm text-content-muted">
               {{ selectedCount()!() }} selected
-              @if (onClearSelection) {
+              @if (onClearSelection(); as clearSelection) {
                 <button
                   type="button"
                   data-test="list-sub-nav-clear"
-                  (click)="onClearSelection()"
+                  (click)="clearSelection()"
                   class="text-primary hover:underline font-medium">
                   Clear
                 </button>
@@ -149,17 +149,17 @@ const VARIANT_CLASSES: Record<NonNullable<ListSubNavAction['variant']>, string> 
           }
 
           <!-- Primary add button -->
-          @if (addAction && isAddVisible()) {
+          @if (isAddVisible() && addAction(); as add) {
             <button
               data-test="list-sub-nav-add"
               type="button"
               [disabled]="isAddDisabled()"
-              (click)="addAction.invoke()"
+              (click)="add.invoke()"
               class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded font-semibold text-sm
                      bg-primary text-white hover:bg-primary/90 transition-all duration-150
                      disabled:opacity-50 disabled:cursor-not-allowed">
-              <span class="material-icons text-base leading-5">{{ addAction.icon ?? 'add' }}</span>
-              <span>{{ addAction.label }}</span>
+              <span class="material-icons text-base leading-5">{{ add.icon ?? 'add' }}</span>
+              <span>{{ add.label }}</span>
             </button>
           }
         </div>
@@ -184,7 +184,7 @@ export class ListSubNavComponent {
   readonly loading = input<Signal<boolean>>();
 
   /** Optional primary action. Omit for read-only lists. */
-  @Input() addAction?: ListSubNavAddAction;
+  readonly addAction = input<ListSubNavAddAction>();
 
   /** When set and emits true, swaps the right-side add button for a
    *  projected `[subNavForm]` slot — lets pages with an inline add form
@@ -203,7 +203,7 @@ export class ListSubNavComponent {
 
   /** When provided alongside `selectedCount`, a "Clear" link is rendered
    *  that calls this function when clicked. */
-  @Input() onClearSelection?: () => void;
+  readonly onClearSelection = input<() => void>();
 
   protected isCountPending(): boolean {
     const loading = this.loading();
@@ -211,7 +211,7 @@ export class ListSubNavComponent {
   }
 
   protected readonly isAddVisible = computed(() => {
-    const v = this.addAction?.visible;
+    const v = this.addAction()?.visible;
     return v ? v() : true;
   });
 
@@ -225,7 +225,7 @@ export class ListSubNavComponent {
   }
 
   protected readonly isAddDisabled = computed(() => {
-    const d = this.addAction?.disabled;
+    const d = this.addAction()?.disabled;
     return d ? d() : false;
   });
 

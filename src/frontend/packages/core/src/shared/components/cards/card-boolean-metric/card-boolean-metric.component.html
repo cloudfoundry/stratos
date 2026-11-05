@@ -2,8 +2,8 @@
   <div class="boolean-metric-card h-full">
     @if (!textOnly()) {
       <div class="card p-4 flex items-center space-x-4">
-        @if (icon) {
-          <span class="material-icons text-2xl" [class]="'material-icons-' + (iconFont() || 'outlined')">{{ icon }}</span>
+        @if (icon()) {
+          <span class="material-icons text-2xl" [class]="'material-icons-' + (iconFont() || 'outlined')">{{ icon() }}</span>
         }
         <div class="flex-1">
           <div class="boolean-metric-card-value text-2xl font-bold text-content-text">{{ formattedValue }}</div>

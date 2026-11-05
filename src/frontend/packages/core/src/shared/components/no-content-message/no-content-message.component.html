@@ -1,19 +1,19 @@
 <div class="app-no-content-container" [ngClass]="{ 'app-no-content-container__menu': mode() === 'menu' }">
-  @if (toolbarLink?.text) {
+  @if (toolbarLink()?.text; as text) {
     <div class="app-no-content-container__link" #toolBarLinkElement>
-      <div class="app-no-content-container__link-text">{{ toolbarLink.text }}</div>
+      <div class="app-no-content-container__link-text">{{ text }}</div>
       <app-custom-icon #toolbarRef class="app-no-content-container__link-icon">reply</app-custom-icon>
     </div>
   }
   <app-custom-icon class="icon" [fontSet]="iconFont()">{{ icon() }}</app-custom-icon>
-  @if (firstLine) {
-    <div class="first-line">{{ firstLine }}</div>
+  @if (firstLine()) {
+    <div class="first-line">{{ firstLine() }}</div>
   }
   <div class="second-line">
-    @if (secondLine?.link) {
-      <a [routerLink]="secondLine.link">{{ secondLine.linkText }}</a>
+    @if (secondLine()?.link; as link) {
+      <a [routerLink]="link">{{ secondLine()?.linkText }}</a>
     }
-    {{ secondLine?.text }}
+    {{ secondLine()?.text }}
   </div>
   @for (line of otherLines(); track line) {
     <div class="second-line">

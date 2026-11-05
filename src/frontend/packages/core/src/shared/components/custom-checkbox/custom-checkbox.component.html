@@ -10,7 +10,7 @@
     [class.color-accent]="color() === 'accent'"
     [class.color-warn]="color() === 'warn'"
     [attr.aria-invalid]="invalid() || null"
-    [attr.aria-describedby]="invalid() && errorMessage ? 'error-' + (id() || name()) : null"
+    [attr.aria-describedby]="invalid() && errorMessage() ? 'error-' + (id() || name()) : null"
     (click)="toggle()"
     (keydown.enter)="toggle()"
     (keydown.space)="toggle(); $event.preventDefault()">
@@ -52,10 +52,10 @@
     </span>
   </div>
 
-  @if (invalid() && errorMessage) {
+  @if (invalid() && errorMessage()) {
     <div class="checkbox-error">
       <div [id]="'error-' + (id() || name())" role="alert" aria-live="polite">
-        {{ errorMessage }}
+        {{ errorMessage() }}
       </div>
     </div>
   }

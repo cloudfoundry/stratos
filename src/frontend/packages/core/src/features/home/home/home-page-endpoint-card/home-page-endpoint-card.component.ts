@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewContainerRef, signal, inject, output } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewContainerRef, signal, inject, output, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -67,7 +67,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   @ViewChild('customCard', { read: ViewContainerRef, static: true }) customCard!: ViewContainerRef;
 
-  @Input() endpoint!: EndpointModel;
+  readonly endpoint = input.required<EndpointModel>();
 
   // strict: assigned by computeEffectiveLayout via the @Input set layout accessor
   pLayout!: HomePageCardLayout;
@@ -148,7 +148,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   // a connect affordance instead of loading their home card — no half-loaded
   // or error card (#5588). unConnectable types (git etc.) are always "up".
   get disconnected(): boolean {
-    return !this.definition?.unConnectable && !isEndpointConnected(this.endpoint);
+    return !this.definition?.unConnectable && !isEndpointConnected(this.endpoint());
   }
 
   ngAfterViewInit() {
@@ -176,7 +176,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
     this.cardCreated = true;
     // Dynamically load the component for the Home Card for this endopoint
     // strict: cnsi_type is populated on every bound endpoint; '' default keeps the lookup well-formed
-    const endpointEntity = entityCatalog.getEndpoint(this.endpoint.cnsi_type ?? '', this.endpoint.sub_type);
+    const endpointEntity = entityCatalog.getEndpoint(this.endpoint().cnsi_type ?? '', this.endpoint().sub_type);
     if (endpointEntity && endpointEntity.definition.homeCard && endpointEntity.definition.homeCard.component) {
       this.createCard(endpointEntity);
     } else {
@@ -188,11 +188,11 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
     // Same invocation contract as the endpoints page list
     this.dialog.open(ConnectEndpointDialogComponent, {
       data: {
-        name: this.endpoint.name,
-        guid: this.endpoint.guid,
-        type: this.endpoint.cnsi_type,
-        subType: this.endpoint.sub_type,
-        ssoAllowed: this.endpoint.sso_allowed,
+        name: this.endpoint().name,
+        guid: this.endpoint().guid,
+        type: this.endpoint().cnsi_type,
+        subType: this.endpoint().sub_type,
+        ssoAllowed: this.endpoint().sso_allowed,
       },
       ...CONNECT_ENDPOINT_DIALOG_OPTIONS,
     });
@@ -200,13 +200,13 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   ngOnInit() {
     // strict: cnsi_type/guid are populated on every bound endpoint; '' default keeps the lookups well-formed
-    this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint.cnsi_type ?? '');
+    this.hasFavEntities = this.userFavoriteManager.endpointHasEntitiesThatCanFavorite(this.endpoint().cnsi_type ?? '');
     // Favorites for this endpoint
-    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint.guid ?? '');
-    this.entity = entityCatalog.getEndpoint(this.endpoint.cnsi_type ?? '', this.endpoint.sub_type);
+    this.favorites$ = this.userFavoriteManager.getFavoritesForEndpoint(this.endpoint().guid ?? '');
+    this.entity = entityCatalog.getEndpoint(this.endpoint().cnsi_type ?? '', this.endpoint().sub_type);
     if (this.entity) {
       this.definition = this.entity.definition;
-      this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint);
+      this.favorite = this.userFavoriteManager.getFavoriteEndpointFromEntity(this.endpoint());
       this.fullView = this.definition?.homeCard?.fullView ?? false;
       this.linksBelow = this.definition?.homeCard?.linksBelow ?? false;
       this.link = this.favorite ? this.favorite.getLink() : null;
@@ -221,7 +221,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
         // Get the list of shortcuts for the endpoint for the given endpoint ID
         const shortcutsFn = this.definition?.homeCard?.shortcuts;
         // strict: guid is populated on every bound endpoint; '' default keeps the lookup well-formed
-        const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint.guid ?? '') || [] : [];
+        const allShortcuts = shortcutsFn ? shortcutsFn(this.endpoint().guid ?? '') || [] : [];
         let shortcuts = allShortcuts;
         const max = (layout.y > 1) ? MAX_FAVS_COMPACT : MAX_FAVS_NORMAL;
         const totalShortcuts = allShortcuts.length;
@@ -306,7 +306,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
     }
 
     this.ref = this.customCard.createComponent(component);
-    this.ref.setInput('endpoint', this.endpoint);
+    this.ref.setInput('endpoint', this.endpoint());
     this.ref.setInput('layout', this.pLayout);
     this.loadCardIfReady();
   }
@@ -345,7 +345,7 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   public showFavoritesPanel() {
     this.sidePanelService.showMode(SidePanelMode.Narrow, FavoritesSidePanelComponent, {
-      endpoint: this.endpoint,
+      endpoint: this.endpoint(),
       favorites$: this.favorites$
     });
   }

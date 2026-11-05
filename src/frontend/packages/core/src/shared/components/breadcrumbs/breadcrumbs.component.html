@@ -1,6 +1,6 @@
-@if (breadcrumbs?.length) {
+@if (breadcrumbs()?.length) {
   <div class="breadcrumbs flex items-center text-2xl font-semibold leading-8">
-    @for (crumb of breadcrumbs; track $index) {
+    @for (crumb of breadcrumbs(); track $index) {
       @if (crumb.routerLink) {
         <a class="breadcrumb opacity-70 hover:opacity-100 transition-opacity cursor-pointer no-underline"
         [routerLink]="crumb.routerLink">{{ crumb.value }}</a>

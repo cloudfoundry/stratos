@@ -4,7 +4,7 @@
     [class.checked]="checked"
     [class.invalid]="invalid()"
     [attr.aria-invalid]="invalid() || null"
-    [attr.aria-describedby]="invalid() && errorMessage ? 'error-' + (id() || name()) : null">
+    [attr.aria-describedby]="invalid() && errorMessage() ? 'error-' + (id() || name()) : null">
 
     <label class="slide-toggle-label"
       [attr.for]="id()"
@@ -45,10 +45,10 @@
     </label>
   </div>
 
-  @if (invalid() && errorMessage) {
+  @if (invalid() && errorMessage()) {
     <div class="slide-toggle-error">
       <div [id]="'error-' + (id() || name())" role="alert" aria-live="polite">
-        {{ errorMessage }}
+        {{ errorMessage() }}
       </div>
     </div>
   }

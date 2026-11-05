@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, Input, Renderer2, ViewChild, inject, ChangeDetectionStrategy, input } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Renderer2, ViewChild, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -24,12 +24,12 @@ export class NoContentMessageComponent implements AfterViewInit {
 
   readonly icon = input<string>();
   readonly iconFont = input<string>();
-  @Input() firstLine?: string;
-  @Input() secondLine?: NoContentMessageLine | null;
+  readonly firstLine = input<string>();
+  readonly secondLine = input<NoContentMessageLine | null>();
   readonly otherLines = input<NoContentMessageLine[]>();
-  @Input() toolbarLink?: {
+  readonly toolbarLink = input<{
     text: string;
-  };
+}>();
   readonly toolbarAlign = input<string>();
 
   readonly mode = input<string>();

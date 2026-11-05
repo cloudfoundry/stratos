@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { TabNavItem } from '../../../tab-nav.types';
@@ -15,8 +15,7 @@ import { TabNavItem } from '../../../tab-nav.types';
 })
 export class NestedTabsComponent implements OnInit {
 
-  @Input()
-  tabs: TabNavItem[] = [];
+  readonly tabs = input<TabNavItem[]>([]);
   constructor() {
 
   }

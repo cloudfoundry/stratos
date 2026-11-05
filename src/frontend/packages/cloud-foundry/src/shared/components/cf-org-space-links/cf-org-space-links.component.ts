@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Params, RouterModule } from '@angular/router';
 
@@ -16,7 +16,7 @@ import { CfOrgSpaceLabelService } from '../../services/cf-org-space-label.servic
 })
 export class CfOrgSpaceLinksComponent {
 
-  @Input() service!: CfOrgSpaceLabelService;
+  readonly service = input.required<CfOrgSpaceLabelService>();
   // Query params for the space link (e.g. { breadcrumbs: 'services-wall' })
   readonly spaceBreadCrumbs = input<Params>();
 }

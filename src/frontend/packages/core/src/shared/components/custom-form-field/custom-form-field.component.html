@@ -134,11 +134,11 @@
       }
 
       <!-- Hint Text (only shown when no errors) -->
-      @if (!isInvalid && hintLabel) {
+      @if (!isInvalid && hintLabel()) {
         <div class="form-field-hint-wrapper flex justify-between gap-2 text-content-muted">
           <div class="form-field-hint flex-1 text-xs leading-tight"
             [id]="inputId + '-hint'">
-            {{ hintLabel }}
+            {{ hintLabel() }}
           </div>
           <ng-content select="mat-hint"></ng-content>
         </div>

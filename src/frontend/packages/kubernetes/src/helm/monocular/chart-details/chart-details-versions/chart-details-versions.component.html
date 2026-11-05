@@ -23,11 +23,11 @@
     </div>
   }
 </div>
-@if (currentVersion && currentVersion.attributes.app_version) {
+@if (currentVersion() && currentVersion().attributes.app_version) {
   <div>
     <h1 class="text-base">Application Version</h1>
     <div class="text-sm">
-      <span>{{ currentVersion.attributes.app_version }}</span>
+      <span>{{ currentVersion().attributes.app_version }}</span>
     </div>
   </div>
 }

@@ -1,10 +1,10 @@
-@if (tile) {
+@if (tile()) {
   <div class="tile-selector-parent" [ngClass]="{'smaller': smaller(), 'compact': compact()}">
     <div class="tile-selector" role="button" tabindex="0"
-      [ngClass]="{'tile-selector__active': active(), 'tile-selector__taller': !!tile.description}"
-      (click)="onClick(tile)"
-      (keydown.enter)="onClick(tile)"
-      (keydown.space)="onClick(tile); $event.preventDefault()">
+      [ngClass]="{'tile-selector__active': active(), 'tile-selector__taller': !!tile().description}"
+      (click)="onClick(tile())"
+      (keydown.enter)="onClick(tile())"
+      (keydown.space)="onClick(tile()); $event.preventDefault()">
       <div class="tile-selector__header">
         @if (iconGraphic; as graphic) {
           <app-custom-icon class="tile-selector__icon" [inline]="scaleIcon()"
@@ -14,10 +14,10 @@
         }
       </div>
       <div class="tile-selector__content">
-        <h3>{{ tile.label }}</h3>
+        <h3>{{ tile().label }}</h3>
       </div>
-      @if (tile && tile.description) {
-        <div class="tile-selector__description">{{ tile.description }}</div>
+      @if (tile() && tile().description) {
+        <div class="tile-selector__description">{{ tile().description }}</div>
       }
     </div>
   </div>

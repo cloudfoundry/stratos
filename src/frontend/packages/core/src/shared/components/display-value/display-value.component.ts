@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 
 @Component({
@@ -10,7 +10,7 @@ import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core'
 })
 export class DisplayValueComponent {
 
-  @Input() label?: string;
+  readonly label = input<string>();
   readonly value = input<string>();
 
   constructor() { }

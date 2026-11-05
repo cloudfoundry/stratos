@@ -11,16 +11,16 @@
     <div class="flex-1 ml-[10px]">
       <div class="flex items-baseline">
         <h1 class="m-0">{{ title() }} </h1>
-        @if (info) {
-          <app-custom-icon class="text-xl ml-[10px] opacity-40" matTooltip="{{ info }}">
+        @if (info()) {
+          <app-custom-icon class="text-xl ml-[10px] opacity-40" matTooltip="{{ info() }}">
           info</app-custom-icon>
         }
       </div>
-      @if (subTitle) {
-        <div class="text-base -mt-[3px] opacity-60"> {{ subTitle }}</div>
+      @if (subTitle()) {
+        <div class="text-base -mt-[3px] opacity-60"> {{ subTitle() }}</div>
       }
-      @if (subText) {
-        <div class="text-base opacity-60 pt-[10px]"> {{ subText }}</div>
+      @if (subText()) {
+        <div class="text-base opacity-60 pt-[10px]"> {{ subText() }}</div>
       }
     </div>
   </div>

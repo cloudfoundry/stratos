@@ -15,9 +15,9 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class EntitySummaryTitleComponent {
   readonly title = input<string>();
-  @Input() subTitle?: string;
-  @Input() info?: string;
-  @Input() subText?: string;
+  readonly subTitle = input<string>();
+  readonly info = input<string>();
+  readonly subText = input<string>();
   @Input()
   get imagePath(): string | null {
     return this.image;

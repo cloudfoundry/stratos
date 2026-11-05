@@ -1,6 +1,5 @@
 import {
   Component,
-  Input,
   ContentChild,
   ElementRef,
   AfterContentInit,
@@ -80,7 +79,7 @@ export class CustomFormFieldComponent
   readonly color = input<"primary" | "accent" | "warn">("primary");
   readonly floatLabel = input<"always" | "never" | "auto">("always");
   readonly hideRequiredMarker = input(false);
-  @Input() hintLabel = "";
+  readonly hintLabel = input("");
 
   /**
    * When true, the prefix/infix/suffix flex row shrinks to its content

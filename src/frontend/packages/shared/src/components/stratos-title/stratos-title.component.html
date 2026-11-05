@@ -1,10 +1,10 @@
 <div class="flex flex-col items-center justify-center pt-6">
   <img class="w-60 py-3 px-0 pb-4" src="/core/assets/logo.png" alt="Stratos Logo" />
   <h1 class="hidden text-3xl font-medium tracking-widest m-0 text-center uppercase text-app-text">
-    @if (title) {
-      <span>{{ title }}</span>
+    @if (title()) {
+      <span>{{ title() }}</span>
     }
-    @if (!title) {
+    @if (!title()) {
       <app-product-name></app-product-name>
     }
   </h1>

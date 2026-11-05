@@ -1,6 +1,6 @@
 import { Portal, PortalModule } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
-import { Component, Input, inject, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { IFavoriteMetadata, UserFavorite } from '../../../../../store/src/types/user-favorites.types';
 import { EntityFavoriteStarComponent } from '../../../core/entity-favorite-star/entity-favorite-star.component';
@@ -25,8 +25,7 @@ export class SidepanelPreviewComponent {
   // Null while the caller is still deriving the title (e.g. markdown preview)
   readonly title = input<string | null>();
 
-  @Input()
-  favorite?: UserFavorite<IFavoriteMetadata>;
+  readonly favorite = input<UserFavorite<IFavoriteMetadata>>();
 
-  @Input() header?: Portal<any>;
+  readonly header = input<Portal<any>>();
 }

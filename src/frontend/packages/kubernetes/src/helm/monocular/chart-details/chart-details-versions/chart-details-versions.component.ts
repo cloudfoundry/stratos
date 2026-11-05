@@ -1,6 +1,5 @@
 import {
   Component,
-  Input,
   inject,
   ChangeDetectionStrategy,
   input
@@ -21,7 +20,7 @@ import { ChartsService } from "../../shared/services/charts.service";
 })
 export class ChartDetailsVersionsComponent {
   readonly versions = input<ChartVersion[]>();
-  @Input() currentVersion!: ChartVersion;
+  readonly currentVersion = input.required<ChartVersion>();
   showAllVersions = false;
   private route = inject(ActivatedRoute);
   private chartService = inject(ChartsService);
@@ -37,9 +36,10 @@ export class ChartDetailsVersionsComponent {
   }
 
   isSelected(version: ChartVersion): boolean {
+    const currentVersion = this.currentVersion();
     return (
-      this.currentVersion &&
-      version.attributes.version === this.currentVersion.attributes.version
+      currentVersion &&
+      version.attributes.version === currentVersion.attributes.version
     );
   }
 

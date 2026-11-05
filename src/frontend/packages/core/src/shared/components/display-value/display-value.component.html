@@ -1,6 +1,6 @@
 <div class="min-w-[200px]">
-  @if (label) {
-    <div class="font-bold text-sm mb-2.5">{{label}}</div>
+  @if (label()) {
+    <div class="font-bold text-sm mb-2.5">{{label()}}</div>
   }
   <div>
     @if (displayCustom.children.length === 0) {

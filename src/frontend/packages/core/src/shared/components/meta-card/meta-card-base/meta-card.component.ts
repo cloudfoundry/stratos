@@ -45,11 +45,9 @@ export class MetaCardComponent {
   @ContentChild(MetaCardTitleComponent, { static: true })
   title!: MetaCardTitleComponent;
 
-  @Input()
-  status$?: Observable<StratosStatus>;
+  readonly status$ = input<Observable<StratosStatus>>();
 
-  @Input()
-  favorite?: UserFavorite<IFavoriteMetadata> | null;
+  readonly favorite = input<UserFavorite<IFavoriteMetadata> | null>();
 
   // Vestigial no-op input. The legacy ngrx favorite-star fallback (entity
   // monitor -> UserFavoriteManager.getFavorite) was removed with the rest of
@@ -70,8 +68,7 @@ export class MetaCardComponent {
 
   readonly mode = input<string>();
 
-  @Input()
-  clickAction?: () => void;
+  readonly clickAction = input<() => void>();
 
   @Input()
   set actionMenu(actionMenu: MenuItem[] | null) {

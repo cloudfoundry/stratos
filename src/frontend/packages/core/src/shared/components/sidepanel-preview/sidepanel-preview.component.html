@@ -4,12 +4,12 @@
     [ngClass]="sidePanelService.previewMode() ? 'h-[48px] flex-[0_0_48px]' : 'h-14 flex-[0_0_56px]'">
     <h1 class="self-center ml-3 text-[var(--content-text)]"
       [ngClass]="sidePanelService.previewMode() ? 'text-[16px]' : 'text-xl'">{{ title() }}</h1>
-    @if (favorite) {
-      <app-entity-favorite-star [small]="true" class="flex items-center ml-[10px] opacity-60" [favorite]="favorite"></app-entity-favorite-star>
+    @if (favorite(); as fav) {
+      <app-entity-favorite-star [small]="true" class="flex items-center ml-[10px] opacity-60" [favorite]="fav"></app-entity-favorite-star>
     }
     <div class="self-center flex-1 mx-[10px] mr-[50px]">
-      @if (header) {
-        <ng-container [cdkPortalOutlet]="header"></ng-container>
+      @if (header()) {
+        <ng-container [cdkPortalOutlet]="header()"></ng-container>
       }
     </div>
     <button class="btn btn-icon absolute right-[5px]"

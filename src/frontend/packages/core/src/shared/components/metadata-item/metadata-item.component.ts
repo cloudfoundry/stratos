@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, signal, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 
@@ -18,13 +18,13 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class MetadataItemComponent {
 
-  @Input() icon!: string;
+  readonly icon = input<string>();
 
   public readonly iconFont = input<string>();
 
-  @Input() public label?: string;
+  public readonly label = input<string>();
 
-  @Input() public tooltip?: string;
+  public readonly tooltip = input<string>();
 
   // Are we editing?
   public readonly edit = input<boolean>();

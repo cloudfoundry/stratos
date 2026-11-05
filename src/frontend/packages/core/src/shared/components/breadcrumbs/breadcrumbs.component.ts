@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 import { IBreadcrumbLink } from './breadcrumbs.types';
@@ -15,5 +15,5 @@ export class BreadcrumbsComponent {
   // the ?breadcrumbs= key resolution (page-header resolves it reactively).
   // Colour/size are inherited from the host context so the trail sits inline
   // with an adjacent page title.
-  @Input() breadcrumbs: IBreadcrumbLink[] | null = [];
+  readonly breadcrumbs = input<IBreadcrumbLink[] | null>([]);
 }
