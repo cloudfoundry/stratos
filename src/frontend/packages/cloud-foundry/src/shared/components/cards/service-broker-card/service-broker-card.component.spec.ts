@@ -98,8 +98,8 @@ describe('ServiceBrokerCardComponent', () => {
 
     fixture = TestBed.createComponent(ServiceBrokerCardComponent);
     component = fixture.componentInstance;
-    component.cfGuid = 'test-cf-guid';
-    component.brokerGuid = catalogStub.brokerResponse!.guid;
+    fixture.componentRef.setInput('cfGuid', 'test-cf-guid');
+    fixture.componentRef.setInput('brokerGuid', catalogStub.brokerResponse!.guid);
     await fixture.whenStable();
   };
 
@@ -147,8 +147,8 @@ describe('ServiceBrokerCardComponent', () => {
     };
     fixture = TestBed.createComponent(ServiceBrokerCardComponent);
     component = fixture.componentInstance;
-    component.cfGuid = 'test-cf-guid';
-    component.brokerGuid = catalogStub.brokerResponse.guid;
+    fixture.componentRef.setInput('cfGuid', 'test-cf-guid');
+    fixture.componentRef.setInput('brokerGuid', catalogStub.brokerResponse.guid);
     await fixture.whenStable();
 
     const host: HTMLElement = fixture.nativeElement;
@@ -165,8 +165,8 @@ describe('ServiceBrokerCardComponent', () => {
     catalogStub.lateBroker = signal<StServiceBroker | null>(null);
     fixture = TestBed.createComponent(ServiceBrokerCardComponent);
     component = fixture.componentInstance;
-    component.cfGuid = 'test-cf-guid';
-    component.brokerGuid = spaceScoped.guid;
+    fixture.componentRef.setInput('cfGuid', 'test-cf-guid');
+    fixture.componentRef.setInput('brokerGuid', spaceScoped.guid);
     await fixture.whenStable();
     expect(spaceStub.acquired).toEqual([]);
 
@@ -200,8 +200,8 @@ describe('ServiceBrokerCardComponent', () => {
     catalogStub.lateBroker = signal<StServiceBroker | null>(inSpace('space-a'));
     fixture = TestBed.createComponent(ServiceBrokerCardComponent);
     component = fixture.componentInstance;
-    component.cfGuid = 'test-cf-guid';
-    component.brokerGuid = catalogStub.brokerResponse!.guid;
+    fixture.componentRef.setInput('cfGuid', 'test-cf-guid');
+    fixture.componentRef.setInput('brokerGuid', catalogStub.brokerResponse!.guid);
     await fixture.whenStable();
     expect(spaceStub.loads).toEqual([{ key: 'test-cf-guid/space-a', closed: false }]);
 
