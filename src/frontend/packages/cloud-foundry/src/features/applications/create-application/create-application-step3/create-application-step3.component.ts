@@ -1,12 +1,13 @@
 import { Component, OnDestroy, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { from, Observable, of as observableOf, throwError } from 'rxjs';
 import { catchError, filter, map, mergeMap, switchMap } from 'rxjs/operators';
 
 import { AppErrorComponent, AppInputDirective, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, ErrorStateMatcher, ShowOnDirtyErrorStateMatcher, StepOnNextFunction } from '@stratosui/core';
+import { extractHttpErrorMessage } from '@stratosui/store';
 import { CnsiAppsSource } from '../../../../services/data-sources/cnsi-apps-source';
 import { CnsiRoutesSource } from '../../../../services/data-sources/cnsi-routes-source';
 import { EndpointDataRegistry } from '../../../../services/endpoint-data/endpoint-data.registry';
@@ -88,10 +89,7 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
         );
         return { success: true };
       }),
-      catchError((err: Error | HttpErrorResponse) => {
-        const message = err instanceof HttpErrorResponse ? this.formatHttpError(err) : err.message;
-        return observableOf({ success: false, message });
-      }),
+      catchError((err: unknown) => observableOf({ success: false, message: extractHttpErrorMessage(err) })),
     );
   };
 
@@ -158,17 +156,10 @@ export class CreateApplicationStep3Component implements OnInit, OnDestroy {
   // — the stepper shows .message above its buttons.
   private tagError<T>(prefix: string): (src: Observable<T>) => Observable<T> {
     return src => src.pipe(
-      catchError((err: HttpErrorResponse) => throwError(() => new Error(
-        `${prefix}: ${this.formatHttpError(err)}`,
+      catchError((err: unknown) => throwError(() => new Error(
+        `${prefix}: ${extractHttpErrorMessage(err)}`,
       ))),
     );
-  }
-
-  private formatHttpError(err: HttpErrorResponse): string {
-    const body = err.error;
-    if (body && typeof body === 'object' && typeof body.error === 'string') return body.error;
-    if (typeof body === 'string') return body;
-    return err.message || `HTTP ${err.status}`;
   }
 
   ngOnInit() {
