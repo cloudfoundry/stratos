@@ -1,7 +1,7 @@
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { TailwindSnackBarService } from '@stratosui/core';
-import { EndpointsDataService } from '@stratosui/store';
+import { EndpointsDataService, leadPieces } from '@stratosui/store';
 import { firstValueFrom } from 'rxjs';
 
 import { CfCurrentUserRolesDataService } from '../cf-current-user-roles-data.service';
@@ -201,7 +201,7 @@ export class CfUsersRolesDataService {
         return next;
       });
       if (!opts?.silent) {
-        this.snackBar.error(`Failed to apply role changes: ${errorMessage(e)}`);
+        this.snackBar.error(leadPieces('Failed to apply role changes', e));
       }
       return;
     }
@@ -283,13 +283,6 @@ export class CfUsersRolesDataService {
       }
     }
   }
-}
-
-function errorMessage(e: unknown): string {
-  if (e instanceof Error) {
-    return e.message;
-  }
-  return String(e);
 }
 
 interface NativeRoleChange {

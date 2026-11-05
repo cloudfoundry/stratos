@@ -3,6 +3,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TailwindSnackBarService } from '@stratosui/core';
+import { snackText } from '@test-framework/cf';
 import { describe, expect, it, beforeEach, vi } from 'vitest';
 
 import { firstValueFrom } from 'rxjs';
@@ -285,6 +286,21 @@ describe('CfUsersRolesDataService', () => {
     expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(ok)]).toBe('done');
     expect(svc.applyStatus()[CfUsersRolesDataService.changeKey(bad)]).toBe('error');
     expect(snackBar.error).toHaveBeenCalled();
+  });
+
+  it('says why the whole request failed in Cloud Foundry\'s words', async () => {
+    svc.setUsers('cf-1', [userA]);
+    svc.setChanges([{ userGuid: 'u-a', orgGuid: 'org-1', add: true, role: 'managers' as any, orgName: 'Org 1' }]);
+
+    const done = svc.executeChanges();
+    httpMock.expectOne('/pp/v1/cf/roles/cf-1/changes').flush(
+      { errors: [{ code: 10003, title: 'CF-NotAuthorized', detail: 'You are not authorized to perform the requested action' }] },
+      { status: 403, statusText: 'Forbidden' },
+    );
+    await done;
+
+    expect(snackText(snackBar.error.mock.calls[0][0]))
+      .toBe('Failed to apply role changes: You are not authorized to perform the requested action');
   });
 
   it('changeKey distinguishes add from remove of the same role', () => {
