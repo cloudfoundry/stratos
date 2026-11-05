@@ -72,12 +72,12 @@ const pages: Golden[] = [
   },
   {
     name: 'haproxy-503',
-    source: 'HAProxy 3.5-dev src/http.c http_err_msgs[HTTP_ERR_503] (body only)',
+    source: 'HAProxy 3.5-dev src/http.c http_err_msgs[HTTP_ERR_503] (body only); same bytes as a capture from a host with no backend up',
     pieces: [h('503 Service Unavailable'), t('\nNo server is available to handle this request.')],
   },
   {
     name: 'haproxy-504',
-    source: 'HAProxy 3.5-dev src/http.c http_err_msgs[HTTP_ERR_504] (body only)',
+    source: 'HAProxy 3.5-dev src/http.c http_err_msgs[HTTP_ERR_504] (body only); same bytes as a capture from an app that never answered',
     pieces: [h('504 Gateway Time-out'), t('\nThe server didn\'t respond in time.')],
   },
   {
