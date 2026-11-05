@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, inject, input } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -44,15 +44,7 @@ export class AppChipsComponent implements OnInit {
 
   public atLowerLimit = true;
 
-  private pChips: AppChip[] = [];
-  @Input()
-  get chips(): AppChip[] {
-    return this.pChips;
-  }
-  set chips(chips: AppChip[]) {
-    this.pChips = chips;
-    this.cdr.markForCheck();
-  }
+  readonly chips = input<AppChip[]>([]);
 
   readonly stacked = input(false);
 
@@ -60,15 +52,7 @@ export class AppChipsComponent implements OnInit {
 
   readonly lowerLimit = input(3);
 
-  private pDisplayProperty = 'value';
-  @Input()
-  get displayProperty(): string {
-    return this.pDisplayProperty;
-  }
-  set displayProperty(displayProperty: string) {
-    this.pDisplayProperty = displayProperty;
-    this.cdr.markForCheck();
-  }
+  readonly displayProperty = input('value');
 
   public limit!: number;
 
@@ -79,7 +63,7 @@ export class AppChipsComponent implements OnInit {
   public toggleLimit() {
     const lowerLimit = this.lowerLimit();
     if (this.limit === lowerLimit) {
-      this.limit = this.chips.length;
+      this.limit = this.chips().length;
       this.atLowerLimit = false;
     } else {
       this.limit = lowerLimit;
@@ -91,7 +75,7 @@ export class AppChipsComponent implements OnInit {
   // displayProperty allows callers to render arbitrary chip-shaped objects,
   // so the lookup has to go through a dynamic string key
   public getDisplayValue(chip: AppChip): string {
-    const value: unknown = Reflect.get(chip, this.displayProperty);
+    const value: unknown = Reflect.get(chip, this.displayProperty());
     return value == null ? '' : String(value);
   }
 

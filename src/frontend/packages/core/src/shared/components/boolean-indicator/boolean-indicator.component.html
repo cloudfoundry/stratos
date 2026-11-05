@@ -1,6 +1,6 @@
-@if (booleanOutput) {
+@if (booleanOutput(); as booleanOutput) {
   <div class="boolean-indicator flex items-center justify-end">
-    <div class="boolean-indicator-container flex items-center" [ngClass]="{'space-x-2': showText}">
+    <div class="boolean-indicator-container flex items-center" [ngClass]="{'space-x-2': showText()}">
       <span
         class="material-icons text-lg"
       [ngClass]="{
@@ -10,7 +10,7 @@
       }">
         {{ booleanOutput.icon }}
       </span>
-      @if (showText) {
+      @if (showText()) {
         <span class="text-sm text-content-muted">
           {{ booleanOutput.text }}
         </span>

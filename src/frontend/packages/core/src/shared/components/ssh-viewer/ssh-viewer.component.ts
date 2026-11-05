@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, computed, inject, signal, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, inject, signal, ChangeDetectionStrategy, input } from '@angular/core';
 import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
@@ -24,16 +24,13 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
   // The parent's error, e.g. a failed web socket. The parent clears it at the
   // start of each attempt.
-  private readonly parentError = signal<string | undefined>(undefined);
-  @Input()
-  set errorMessage(v: string | undefined) { this.parentError.set(v); }
-  get errorMessage(): string | undefined { return this.parentError(); }
+  readonly errorMessage = input<string>();
 
   // An error the backend sends as a '!' window title. It stays after the
   // stream closes, so the user sees why; reconnect() clears it.
   private readonly streamError = signal<string | undefined>(undefined);
 
-  public readonly error = computed(() => this.streamError() ?? this.parentError());
+  public readonly error = computed(() => this.streamError() ?? this.errorMessage());
 
   // Both hosts (app SSH, kube console) bind the stream pair; the
   // terminal cannot connect without them.
