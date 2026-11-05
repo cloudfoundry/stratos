@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideZonelessChangeDetection } from '@angular/core';
 import { By } from '@angular/platform-browser';
 import { describe, it, expect, beforeEach } from 'vitest';
-import { EMPTY, Observable, of, throwError } from 'rxjs';
+import { EMPTY, Observable, of, Subject, throwError } from 'rxjs';
 
 import { CfRolesService } from '../../../features/cf/users/manage-users/cf-roles.service';
 
@@ -188,6 +188,29 @@ describe('RoleAssignmentComponent', () => {
     // multi-select picker is hidden
     const picker = fixture.debugElement.query(By.css('[data-testid="org-picker"]'));
     expect(picker).toBeNull();
+  });
+
+  it('names the locked org in a change when the org list loads after the widget', async () => {
+    // The wizard opens at org scope before the org's name or the org list
+    // has arrived, so the widget first seeds a placeholder with no name.
+    const orgs$ = new Subject<unknown>();
+    await setupFetchOrgs(() => orgs$);
+    const fixture = TestBed.createComponent(RoleAssignmentComponent);
+    fixture.componentRef.setInput('cfGuid', cfGuid);
+    fixture.componentRef.setInput('users', [makeUser('u1')]);
+    fixture.componentRef.setInput('baseline', {});
+    fixture.componentRef.setInput('lockedOrg', { guid: 'o1', name: '' });
+    await fixture.whenStable();
+    const component = fixture.componentInstance;
+    const emitted: CfRoleChange[][] = [];
+    component.changeSet.subscribe((v: CfRoleChange[]) => emitted.push(v));
+
+    orgs$.next([o1, o2]);
+    await fixture.whenStable();
+    component.onToggleOrgRole(component.pickedOrgs()[0], OrgUserRoleNames.MANAGER, true);
+    await fixture.whenStable();
+
+    expect(emitted[emitted.length - 1][0].orgName).toBe('Org One');
   });
 
   it('emits a changeSet diff when a role cell is toggled', async () => {
