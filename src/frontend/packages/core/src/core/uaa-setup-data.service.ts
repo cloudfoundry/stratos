@@ -2,6 +2,8 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, Signal, inject, signal } from '@angular/core';
 import { firstValueFrom, timeout, TimeoutError } from 'rxjs';
 
+import { extractHttpErrorMessage } from '@stratosui/store';
+
 export interface UaaSetupData {
   console_client: string;
   password: string;
@@ -158,7 +160,8 @@ export class UaaSetupDataService {
           const parsed = JSON.parse(body);
           return typeof parsed === 'string' ? parsed : (parsed?.error ?? '');
         } catch {
-          return body;
+          // Not JSON: plain text, or an HTML error page read as its message.
+          return extractHttpErrorMessage(err);
         }
       }
     }
