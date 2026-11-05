@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, OnChanges, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 
@@ -13,7 +13,7 @@ import { Router } from '@angular/router';
 })
 export class CardBooleanMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon!: string;
+  readonly icon = input.required<string>();
   readonly iconFont = input<string>();
   readonly label = input<string>();
   readonly value = input<string>();

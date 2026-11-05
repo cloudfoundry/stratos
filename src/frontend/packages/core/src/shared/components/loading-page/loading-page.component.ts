@@ -40,8 +40,7 @@ export class LoadingPageComponent implements OnInit {
 
   readonly text = input('Retrieving your data');
 
-  @Input()
-  alert = '';
+  readonly alert = input('');
 
   /** Pin an indicator look; omitted → deterministic pick from the pool
    *  keyed on `text`, so a given page keeps one look across visits while

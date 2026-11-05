@@ -36,7 +36,7 @@ export class CustomSlideToggleComponent implements ControlValueAccessor {
   readonly labelPosition = input<'before' | 'after'>('after');
   readonly color = input<'primary' | 'accent' | 'warn'>('primary');
   readonly invalid = input(false);
-  @Input() errorMessage = '';
+  readonly errorMessage = input('');
 
   // eslint-disable-next-line @angular-eslint/no-output-native -- intentional Material API parity: drop-in for mat-slide-toggle which emits (change)
   readonly change = output<MatSlideToggleChange>();

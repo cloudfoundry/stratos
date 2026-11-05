@@ -1,10 +1,10 @@
-<div class="card meta-card {{status$ && statusBackground()? (status$ | async): '' }}"
-  [ngClass]="{'meta-card-pointer': clickAction, 'meta-card__plain': mode() === 'plain'}"
-  [attr.role]="clickAction ? 'button' : null"
-  [attr.tabindex]="clickAction ? 0 : null"
-  (click)="clickAction ? clickAction() : null"
-  (keydown.enter)="clickAction ? clickAction() : null"
-  (keydown.space)="clickAction ? clickAction() : null; $event.preventDefault()">
+<div class="card meta-card {{status$() && statusBackground()? (status$() | async): '' }}"
+  [ngClass]="{'meta-card-pointer': clickAction(), 'meta-card__plain': mode() === 'plain'}"
+  [attr.role]="clickAction() ? 'button' : null"
+  [attr.tabindex]="clickAction() ? 0 : null"
+  (click)="clickAction()?.()"
+  (keydown.enter)="clickAction()?.()"
+  (keydown.space)="clickAction()?.(); $event.preventDefault()">
   @if (isDeleting$ | async) {
     <div class="meta-card__deleting-overlay">
       <div class="meta-card__deleting-overlay-inner">
@@ -13,8 +13,8 @@
       </div>
     </div>
   }
-  @if (status$) {
-    <app-card-status [status$]="status$">
+  @if (status$()) {
+    <app-card-status [status$]="status$()">
     </app-card-status>
   }
   @if (title) {
@@ -31,9 +31,9 @@
           </div>
         }
       </div>
-      @if (favorite) {
+      @if (favorite(); as fav) {
         <app-entity-favorite-star [confirmRemoval]="confirmFavoriteRemoval()" class="meta-card__favorite"
-          [favorite]="favorite">
+          [favorite]="fav">
         </app-entity-favorite-star>
       }
       @if (actionMenu && (showMenu$ | async)) {
@@ -87,8 +87,8 @@
   </div>
 </div>
 <ng-template #statusIconTmple>
-  @if (statusIcon() && status$) {
-    <app-application-state-icon [status]="status$ | async"
+  @if (statusIcon() && status$()) {
+    <app-application-state-icon [status]="status$() | async"
       [title]="statusIconTooltip()">
     </app-application-state-icon>
   }

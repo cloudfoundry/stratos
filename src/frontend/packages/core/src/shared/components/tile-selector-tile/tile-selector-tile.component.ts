@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 import { ITileConfig, ITileIconConfig, ITileImgConfig } from '../tile/tile-selector.types';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
@@ -17,7 +17,7 @@ import { CustomIconComponent } from '../custom-material/custom-material.componen
 })
 export class TileSelectorTileComponent {
 
-  @Input() tile!: ITileConfig;
+  readonly tile = input.required<ITileConfig>();
 
   readonly active = input<boolean>();
 
@@ -37,12 +37,14 @@ export class TileSelectorTileComponent {
 
   // Narrow the icon/image graphic union for the template
   get iconGraphic(): ITileIconConfig | null {
-    const graphic = this.tile ? this.tile.graphic : null;
+    const tile = this.tile();
+    const graphic = tile ? tile.graphic : null;
     return graphic && 'matIcon' in graphic && graphic.matIcon ? graphic : null;
   }
 
   get imageGraphic(): ITileImgConfig | null {
-    const graphic = this.tile ? this.tile.graphic : null;
+    const tile = this.tile();
+    const graphic = tile ? tile.graphic : null;
     return graphic && 'location' in graphic ? graphic : null;
   }
 

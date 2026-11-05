@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Observable } from 'rxjs';
 
@@ -17,7 +17,7 @@ import { ListItemComponent } from '../list-item/list-item.component';
 export class ChartItemComponent implements OnInit {
   public iconUrl!: string;
   // Chart to represent
-  @Input() chart!: Chart;
+  readonly chart = input.required<Chart>();
   // Show version form by default
   readonly showVersion = input(true);
   // Truncate the description
@@ -28,11 +28,11 @@ export class ChartItemComponent implements OnInit {
   private chartsService = inject(ChartsService);
 
   ngOnInit() {
-    this.iconUrl = this.chartsService.getChartIconURL(this.chart);
+    this.iconUrl = this.chartsService.getChartIconURL(this.chart());
   }
 
   goToDetailUrl(): string {
-    return this.chartsService.getChartSummaryRoute(this.chart.attributes.repo.name, this.chart.attributes.name, undefined, undefined, this.chart);
+    return this.chartsService.getChartSummaryRoute(this.chart().attributes.repo.name, this.chart().attributes.name, undefined, undefined, this.chart());
   }
 
 }

@@ -1,14 +1,14 @@
 <div class="nested-tabs">
-  @if (tabs) {
+  @if (tabs()) {
     <nav class="summary__nav tab-nav-bar">
-      @for (tab of tabs; track tab) {
+      @for (tab of tabs(); track tab) {
         <a class="tab-link" [attr.data-test]="'nested-tab-' + tab.label" [routerLink]="[tab.link]" routerLinkActive="active-link" #rla="routerLinkActive" [class.active]="rla.isActive">
           {{tab.label}}
         </a>
       }
     </nav>
   }
-  @if (!tabs) {
+  @if (!tabs()) {
     <ng-content></ng-content>
   }
 </div>

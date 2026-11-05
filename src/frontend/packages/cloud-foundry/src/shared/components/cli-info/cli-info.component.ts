@@ -1,4 +1,4 @@
-import { Component, Input , ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { CodeBlockComponent } from '@stratosui/core';
 
@@ -21,6 +21,6 @@ export interface CFAppCLIInfoContext {
 ]
 })
 export class CliInfoComponent {
-  @Input() context!: CFAppCLIInfoContext;
+  readonly context = input.required<CFAppCLIInfoContext>();
 }
 

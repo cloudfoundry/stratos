@@ -1,6 +1,6 @@
 import { CommonModule, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
+import { Component, ChangeDetectionStrategy, input } from '@angular/core';
 
 import { StServicePlan, StServicePlanCost } from '../../../services/endpoint-data/stratos-types';
 
@@ -17,7 +17,7 @@ import { StServicePlan, StServicePlanCost } from '../../../services/endpoint-dat
 })
 export class ServicePlanPriceComponent {
 
-  @Input() servicePlan!: StServicePlan;
+  readonly servicePlan = input.required<StServicePlan>();
 
   constructor() {
     // Locale registration is required for the currency pipe to format

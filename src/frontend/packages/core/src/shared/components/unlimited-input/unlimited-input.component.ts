@@ -1,6 +1,5 @@
 import {
   Component,
-  Input,
   OnInit,
   inject,
   ChangeDetectionStrategy,
@@ -51,7 +50,7 @@ export class UnlimitedInputComponent implements OnInit {
   readonly required = input(false);
   readonly type = input<string>();
   readonly placeholder = input('');
-  @Input() suffix!: string;
+  readonly suffix = input<string>();
   readonly prefix = input<string>();
 
   unlimited = false;

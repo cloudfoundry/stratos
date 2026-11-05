@@ -6,9 +6,9 @@
         [ngClass]="{'border-0 shadow-none bg-transparent number-metric-card__plain': mode() === 'plain'}">
         <app-card-status [status$]="status$"></app-card-status>
         <div class="flex items-start space-x-4">
-          @if (icon) {
+          @if (icon()) {
             <span class="text-3xl text-content-muted shrink-0"
-            [ngClass]="iconFont() === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon }}</span>
+            [ngClass]="iconFont() === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon() }}</span>
           }
           <div class="flex-1" [ngClass]="{'flex flex-col-reverse': labelAtTop(), 'flex flex-col': !labelAtTop()}">
             @if ((status$ | async); as status) {

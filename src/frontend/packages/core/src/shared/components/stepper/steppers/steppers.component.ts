@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, ElementRef, Injector, Input, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked, input, viewChild } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, AfterContentInit, Component, ContentChildren, ElementRef, Injector, OnDestroy, OnInit, QueryList, TemplateRef, ViewEncapsulation, afterNextRender, effect, inject, signal, untracked, input, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ErrorPiece, RoutingHistoryService } from '@stratosui/store';
@@ -68,7 +68,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   // a TemplateRef that surfaces the user's in-progress selections (CF /
   // Org / Space / offering / plan / name) so the wizard always shows
   // "what am I creating?" as later steps navigate away from the picker.
-  @Input() contextSummary?: TemplateRef<unknown>;
+  readonly contextSummary = input<TemplateRef<unknown>>();
 
   steps: StepComponent[] = [];
   allSteps: StepComponent[] = [];

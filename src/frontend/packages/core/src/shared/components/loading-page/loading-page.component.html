@@ -4,9 +4,9 @@
     [@leaveLoaderAnimation]
     class="loading-page loading-page__overlay">
     <div class="loading-page__indicator">
-      @if (alert) {
+      @if (alert()) {
         <div class="loading-page__alert">
-          {{ alert }}
+          {{ alert() }}
         </div>
       }
       <div class="loading-page__text">{{ text() }}</div>

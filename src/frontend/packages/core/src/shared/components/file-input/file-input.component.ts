@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, inject, signal, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal, input, output } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -28,7 +28,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
 
   readonly fileFormControlName = input<string>();
 
-  @Input() buttonLabel = '';
+  readonly buttonLabel = input('');
 
   // Id of a caption the consumer shows for the picker. When set, it names
   // the path field instead of the placeholder.

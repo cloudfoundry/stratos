@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, OnInit, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
@@ -25,8 +25,8 @@ import { EndpointModel, formatDuplicateUrlEndpointsMessage } from '@stratosui/st
         <span>
           <div>{{ sharedUrlMsg }}</div>
           <div>
-            @if (message) {
-              {{ message }}
+            @if (message()) {
+              {{ message() }}
             } @else {
               {{ nounPlural() }} from each are shown together — use the filter to narrow to a single endpoint.
             }
@@ -47,7 +47,7 @@ export class DuplicateUrlBannerComponent implements OnInit {
   // Full replacement for the trailing sentence, for host pages where the
   // "shown together — use the filter" wording doesn't apply (e.g. the
   // Cloud Foundry endpoint picker, which lists endpoints, not entities).
-  @Input() message: string = '';
+  readonly message = input<string>('');
 
   sharedUrlMessage$!: Observable<string | null>;
 

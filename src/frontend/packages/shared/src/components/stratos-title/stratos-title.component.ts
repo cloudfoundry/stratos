@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
+import { Component, ChangeDetectionStrategy, input } from "@angular/core";
 
 @Component({
   selector: "app-stratos-title",
@@ -9,5 +9,5 @@ import { Component, Input, ChangeDetectionStrategy } from "@angular/core";
 })
 export class StratosTitleComponent {
   // Optional title
-  @Input() title?: string;
+  readonly title = input<string>();
 }

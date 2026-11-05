@@ -1,5 +1,5 @@
 
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy, signal } from '@angular/core';
+import { Component, Input, OnInit, inject, ChangeDetectionStrategy, signal, input } from '@angular/core';
 import { CardWrapperComponent, UrlPartsPipe } from '@stratosui/core';
 import { of } from 'rxjs';
 import { take, catchError,  } from 'rxjs/operators';
@@ -24,7 +24,7 @@ import { ChartDetailsVersionsComponent } from '../chart-details-versions/chart-d
 ]
 })
 export class ChartDetailsInfoComponent implements OnInit {
-  @Input() chart!: Chart;
+  readonly chart = input.required<Chart>();
   // Signals: both arrive from HTTP after the first render, and an OnPush view
   // under zoneless CD only repaints for signal writes.
   readonly versions = signal<ChartVersion[]>([]);
@@ -39,22 +39,22 @@ export class ChartDetailsInfoComponent implements OnInit {
   @Input() set currentVersion(version: ChartVersion) {
     this.pCurrentVersion = version;
     if (version) {
-      this.getSchema(this.pCurrentVersion, this.chart);
+      this.getSchema(this.pCurrentVersion, this.chart());
     }
   }
 
   private chartsService = inject(ChartsService);
 
   ngOnInit() {
-    this.loadVersions(this.chart);
+    this.loadVersions(this.chart());
   }
 
   get sources() {
-    return this.chart.attributes.sources || [];
+    return this.chart().attributes.sources || [];
   }
 
   get maintainers(): Maintainer[] {
-    return this.chart.attributes.maintainers || [];
+    return this.chart().attributes.maintainers || [];
   }
 
   loadVersions(chart: Chart): void {
@@ -68,7 +68,7 @@ export class ChartDetailsInfoComponent implements OnInit {
   maintainerUrl(maintainer: Maintainer): string {
     // Use GitHub URL with maintainer name if this is an upstream Helm repo from
     // github.com/helm/charts (i.e. stable or incubator)
-    if (this.isUpstreamHelmRepo(this.chart.attributes.repo.url)) {
+    if (this.isUpstreamHelmRepo(this.chart().attributes.repo.url)) {
       return `https://github.com/${maintainer.name}`;
     } else {
       return `mailto:${maintainer.email}`;

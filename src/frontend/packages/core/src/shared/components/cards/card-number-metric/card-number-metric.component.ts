@@ -30,7 +30,7 @@ enum AlertLevel {
 })
 export class CardNumberMetricComponent implements OnInit, OnChanges {
 
-  @Input() icon!: string;
+  readonly icon = input.required<string>();
   readonly iconFont = input<string>();
   readonly label = input<string>();
   readonly labelSingular = input<string>();
