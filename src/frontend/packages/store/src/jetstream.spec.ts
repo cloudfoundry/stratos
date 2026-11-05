@@ -60,6 +60,22 @@ describe('extractHttpErrorPieces', () => {
     expect(extractHttpErrorMessage(httpError('a < b\n<i>c</i>  d'))).toBe('a < b\n<i>c</i>  d');
   });
 
+  // A Jetstream handler's own error on the wire (api/jetstream_error.go).
+  it('reads the message of Jetstream\'s own wrapped error', () => {
+    const body = {
+      error: { statusCode: 400, status: 'Bad Request', message: 'A Release with that name already exists', method: 'POST' },
+      errorResponse: { method: '' },
+    };
+    expect(extractHttpErrorMessage(httpError(body, 400, 'Bad Request'))).toBe('A Release with that name already exists');
+  });
+
+  // The same wrapper with no message: the proxy's entry for a failed endpoint.
+  it('reads a wrapped error with no message as its status line and the endpoint\'s words', () => {
+    const body = { error: { statusCode: 500, status: 'Error proxying request' }, errorResponse: 'connection refused' };
+    expect(extractHttpErrorMessage(httpError(body, 500, 'Internal Server Error')))
+      .toBe('Error proxying request: connection refused');
+  });
+
   it('names the HTTP status when an HTML body has no readable text', () => {
     expect(extractHttpErrorMessage(httpError('<html><body><div></div></body></html>'))).toBe('HTTP 502 Bad Gateway');
   });
