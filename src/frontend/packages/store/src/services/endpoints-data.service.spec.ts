@@ -266,6 +266,26 @@ describe('EndpointsDataService', () => {
     expect(state.message).toContain('Please ensure the endpoint address is correct');
   });
 
+  it('register() gives the certificate hint with the reason of a 403', async () => {
+    const register = () => svc.register({
+      endpointType: 'cf', name: 'cf', endpoint: 'https://api.example.com',
+      skipSslValidation: false, ssoAllowed: false, createSystemEndpoint: true,
+    });
+    const hint = '. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted';
+
+    const jetstream = register();
+    httpMock.expectOne('/api/v1/endpoints').flush(
+      { status: 'error', error: 'certificate signed by unknown authority' },
+      { status: 403, statusText: 'Forbidden' });
+    expect((await jetstream).message).toBe(`certificate signed by unknown authority${hint}`);
+
+    const proxyPage = register();
+    httpMock.expectOne('/api/v1/endpoints').flush(
+      '<html><body><center><h1>403 Forbidden</h1></center><hr><center>nginx</center></body></html>',
+      { status: 403, statusText: 'Forbidden' });
+    expect((await proxyPage).message).toBe(`403 Forbidden\nnginx${hint}`);
+  });
+
   it('clearDisconnected resets the delta queue', async () => {
     const p = svc.getAll();
     httpMock.expectOne(SYSTEM_INFO_URL).flush(makeSystemInfo());

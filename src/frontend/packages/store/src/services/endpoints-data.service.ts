@@ -3,7 +3,7 @@ import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 import { EndpointType } from '../extension-types';
-import { httpErrorResponseToSafeString } from '../jetstream';
+import { extractHttpErrorMessage, httpErrorResponseToSafeString } from '../jetstream';
 import { ActionState, getDefaultActionState } from '../types/entity-pipeline.types';
 import { computeConnectionStatus, EndpointModel } from '../types/endpoint.types';
 import { SystemInfo } from '../types/system.types';
@@ -354,7 +354,7 @@ export class EndpointsDataService {
       const message = 'There was a problem creating the endpoint. Please ensure the endpoint address is correct and try again. ' +
         httpErrorResponseToSafeString(e);
       if (e?.status === 403) {
-        return `${e?.error?.error}. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted`;
+        return `${extractHttpErrorMessage(e)}. Please check "Skip SSL validation for the endpoint" if the certificate issuer is trusted`;
       }
       return message;
     }, async endpoint => {
