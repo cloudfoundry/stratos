@@ -18,24 +18,23 @@ import { getRoutesFromExtensions, StratosRouteType } from './extension-service';
  * as it would have before.
  */
 
-// Helper functions for route manipulation
+// Helper functions for route manipulation.
+// NOTE: a lazy-loaded route keeps its loaded children in the router's private
+// `_loadedRoutes` field (`_loadedConfig` before Angular 14). If Angular renames
+// it again the guard can no longer remove itself and navigates forever;
+// dynamic-extension-routes.spec.ts fails when that happens.
 function getChildRoutes(r: any) {
-  if (!r) {
-    return [];
-  }
-  const loadedRoutes = r._loadedConfig ? r._loadedConfig.routes : [];
-  return r.children ? r.children : loadedRoutes;
+  return r?.children ?? r?._loadedRoutes ?? [];
 }
 
 function setChildRoutes(r: any, newRoutes: any): void {
   if (!r) {
     return;
   }
-  const loadedRoutes = r._loadedConfig ? r._loadedConfig : {};
   if (r.children) {
     r.children = newRoutes;
   } else {
-    loadedRoutes.routes = newRoutes;
+    r._loadedRoutes = newRoutes;
   }
 }
 
