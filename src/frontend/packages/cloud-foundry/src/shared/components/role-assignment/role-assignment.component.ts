@@ -262,6 +262,10 @@ export class RoleAssignmentComponent implements OnInit, OnDestroy {
     const orgsSub = this.cfRolesService.fetchOrgs(this.cfGuid()).subscribe({
       next: orgs => {
         this.allOrgs.set(orgs);
+        // A locked org seeded before this list arrived is a placeholder
+        // with no name: swap it for the real org.
+        this.pickedOrgs.update(picked =>
+          picked.map(p => orgs.find(o => o.metadata.guid === p.metadata.guid) ?? p));
         this.resolvePermissions(orgs);
         this.orgsLoading.set(false);
       },
