@@ -1,4 +1,4 @@
-import { Component, Input, ChangeDetectionStrategy, Signal, computed, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Signal, computed, effect, inject, input, signal, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import {
@@ -25,13 +25,11 @@ export class ServicePlanPublicComponent {
   // admin/error case.
   private readonly _visibilitySource = signal<SignalSource<StServicePlanVisibility | null> | null>(null);
 
-  // Signal behind the setter input so the computeds below re-run when a
-  // parent passes the plan after the first render.
-  private readonly _servicePlan = signal<StServicePlan | null>(null);
-  readonly plan: Signal<StServicePlan | null> = this._servicePlan.asReadonly();
+  // Parents may pass the plan after the first render.
+  readonly servicePlan = input<StServicePlan | null>();
 
   readonly planAccessibility: Signal<StratosStatus> = computed(() => {
-    const plan = this._servicePlan();
+    const plan = this.servicePlan();
     if (!plan) return StratosStatus.ERROR;
     const visibility = this._visibilitySource()?.value() ?? null;
     return getPlanAccessibilityV3(plan.visibilityType === 'public', visibility);
@@ -44,19 +42,14 @@ export class ServicePlanPublicComponent {
     return '';
   });
 
-  @Input()
-  get servicePlan(): StServicePlan | null {
-    return this._servicePlan();
-  }
-
-  set servicePlan(servicePlan: StServicePlan | null) {
-    this._servicePlan.set(servicePlan);
-    if (!servicePlan) {
-      this._visibilitySource.set(null);
-      return;
-    }
-    this._visibilitySource.set(
-      this.serviceCatalog.planVisibility(servicePlan.cnsiGuid, servicePlan.guid),
-    );
+  constructor() {
+    // Fetch the visibility of each plan passed in. An effect, not a
+    // computed: the fetch creates and writes signals.
+    effect(() => {
+      const plan = this.servicePlan();
+      untracked(() => this._visibilitySource.set(
+        plan ? this.serviceCatalog.planVisibility(plan.cnsiGuid, plan.guid) : null,
+      ));
+    });
   }
 }

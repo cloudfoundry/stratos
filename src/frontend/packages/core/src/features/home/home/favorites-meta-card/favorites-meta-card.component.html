@@ -1,23 +1,25 @@
-@if (favorite) {
+@if (favoriteEntity(); as favorite) {
   <div class="card hover:shadow-md transition-shadow duration-200 fav-card"
-    [class.cursor-pointer]="!!routerLink"
-    [class.fav-card--clickable]="!!routerLink"
-    [attr.role]="routerLink ? 'button' : null"
-    [attr.tabindex]="routerLink ? 0 : null"
+    [class.cursor-pointer]="!!routerLink()"
+    [class.fav-card--clickable]="!!routerLink()"
+    [attr.role]="routerLink() ? 'button' : null"
+    [attr.tabindex]="routerLink() ? 0 : null"
     (click)="openFavorite()"
     (keydown.enter)="openFavorite()"
     (keydown.space)="openFavorite(); $event.preventDefault()"
     >
     <div class="card-body flex items-center gap-3">
       <div class="shrink-0 inline-flex items-center justify-center w-10 h-10 p-2 fav-card__icon-bg rounded-lg">
-        @if (icon.icon) {
-          <span class="fav-card__icon text-xl leading-none"
-            [ngClass]="icon.iconFont === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon.icon }}</span>
+        @if (icon(); as icon) {
+          @if (icon.icon) {
+            <span class="fav-card__icon text-xl leading-none"
+              [ngClass]="icon.iconFont === 'stratos-icons' ? 'stratos-icons' : 'material-icons'">{{ icon.icon }}</span>
+          }
         }
       </div>
       <div class="flex-1 min-w-0">
         <div class="text-sm font-medium fav-card__name truncate">{{ displayName() }}</div>
-        <div class="text-xs fav-card__type mt-1 truncate">{{ favoriteType }}</div>
+        <div class="text-xs fav-card__type mt-1 truncate">{{ favoriteType() }}</div>
       </div>
       @if (!valid()) {
         <span class="material-icons text-warning-shade-500 text-sm shrink-0" title="The entity for this favorite may have been deleted">warning</span>

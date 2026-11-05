@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, linkedSignal, output } from '@angular/core';
 
 import { ITileConfig } from '../tile/tile-selector.types';
 import { TileSelectorTileComponent } from '../tile-selector-tile/tile-selector-tile.component';
@@ -16,41 +16,30 @@ import { TileSelectorTileComponent } from '../tile-selector-tile/tile-selector-t
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TileSelectorComponent {
-  public pOptions: ITileConfig[] = [];
-  public hiddenOptions: ITileConfig[] = [];
   public showingMore = false;
-  @Input() smallerTiles = false;
+  readonly smallerTiles = input(false);
   readonly compactTiles = input(false);
   // See TileSelectorTileComponent.scaleIcon.
   readonly scaleIcons = input(false);
-  private pDynamicSmallerTiles = 0;
-  @Input() set dynamicSmallerTiles(tiles: number) {
-    this.pDynamicSmallerTiles = tiles;
-    this.updateSmallerTiles();
-  }
-  @Input() set options(options: ITileConfig[]) {
-    if (!options) {
-      return;
-    }
-    const groupedOptions = options.reduce((grouped, option) => {
-      if (option.hidden) {
-        grouped.hidden.push(option);
-      } else {
-        grouped.show.push(option);
-      }
-      return grouped;
-    }, {
-      show: [] as ITileConfig[],
-      hidden: [] as ITileConfig[]
-    });
-    this.pOptions = groupedOptions.show;
-    this.hiddenOptions = groupedOptions.hidden;
-    this.updateSmallerTiles();
-  }
+  // Use smaller tiles when more than this many are shown. 0: smallerTiles decides.
+  readonly dynamicSmallerTiles = input(0);
+  readonly options = input<ITileConfig[]>();
 
-  get options() {
-    return this.pOptions;
-  }
+  // The tiles split into those shown and those behind "Show more". Options
+  // that go back to empty keep the last tiles.
+  private readonly groupedOptions = linkedSignal<ITileConfig[] | undefined, { show: ITileConfig[], hidden: ITileConfig[] }>({
+    source: this.options,
+    computation: (options, previous) => options
+      ? { show: options.filter(option => !option.hidden), hidden: options.filter(option => option.hidden) }
+      : previous?.value ?? { show: [], hidden: [] },
+  });
+  readonly shownOptions = computed(() => this.groupedOptions().show);
+  readonly hiddenOptions = computed(() => this.groupedOptions().hidden);
+
+  readonly useSmallerTiles = computed(() => {
+    const limit = this.dynamicSmallerTiles();
+    return limit ? this.shownOptions().length > limit : this.smallerTiles();
+  });
 
   readonly selection = output<ITileConfig | null>();
   public selected: ITileConfig | null = null;
@@ -68,12 +57,6 @@ export class TileSelectorComponent {
     } else {
       this.selection.emit(tile);
       this.selected = tile;
-    }
-  }
-
-  updateSmallerTiles() {
-    if (!!this.options && !!this.pDynamicSmallerTiles) {
-      this.smallerTiles = this.options.length > this.pDynamicSmallerTiles;
     }
   }
 

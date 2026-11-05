@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewContainerRef, signal, inject, output, input } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, ComponentRef, OnChanges, OnDestroy, OnInit, SimpleChanges, ViewChild, ViewContainerRef, effect, signal, inject, output, input, untracked } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { RouterModule } from '@angular/router';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
@@ -69,25 +69,17 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
 
   readonly endpoint = input.required<EndpointModel>();
 
-  // strict: assigned by computeEffectiveLayout via the @Input set layout accessor
+  // The grid layout the home page sets, before the columnSpan adjustment.
+  // Null until the parent's persisted layout hydrates. The layout this card
+  // uses, and hands to the card it creates, is `layoutSignal`.
+  readonly layout = input<HomePageCardLayout | null>();
+
+  // strict: assigned by computeEffectiveLayout once a layout is set
   pLayout!: HomePageCardLayout;
 
-  get layout(): HomePageCardLayout {
-    return this.pLayout;
-  }
-
-  // Raw grid layout before columnSpan adjustment
-  // strict: assigned by the @Input set layout accessor; reads are guarded with if (this.rawLayout)
+  // Last non-null value of `layout`
+  // strict: assigned by the layout effect; reads are guarded with if (this.rawLayout)
   private rawLayout!: HomePageCardLayout;
-
-  // Null until the parent's persisted layout hydrates; the guard below skips it.
-  @Input() set layout(value: HomePageCardLayout | null) {
-    if (value) {
-      this.rawLayout = value;
-      this.computeEffectiveLayout();
-    }
-    this.updateLayout();
-  }
 
   readonly loaded = output<void>();
 
@@ -142,6 +134,17 @@ export class HomePageEndpointCardComponent implements OnInit, OnChanges, OnDestr
   constructor() {
     this.layout$ = toObservable(this._layout);
     this.status$ = toObservable(this._status);
+    // An effect: a layout change is also pushed into the created card.
+    effect(() => {
+      const value = this.layout();
+      untracked(() => {
+        if (value) {
+          this.rawLayout = value;
+          this.computeEffectiveLayout();
+        }
+        this.updateLayout();
+      });
+    });
   }
 
   // Disconnected (or token-expired) endpoints render a Disconnected panel with

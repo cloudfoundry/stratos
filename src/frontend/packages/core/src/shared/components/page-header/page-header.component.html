@@ -21,17 +21,17 @@
           <!-- Left content -->
           <div class="page-header-left flex items-center space-x-4">
             <!-- Breadcrumbs -->
-            @if (breadcrumbDefinitions) {
-              <app-breadcrumbs [breadcrumbs]="breadcrumbDefinitions"></app-breadcrumbs>
+            @if (breadcrumbDefinitions(); as definitions) {
+              <app-breadcrumbs [breadcrumbs]="definitions"></app-breadcrumbs>
             }
 
             <!-- Page content -->
             <ng-content></ng-content>
 
             <!-- Favorite star -->
-            @if (pFavorite) {
+            @if (shownFavorite(); as shown) {
               <app-entity-favorite-star class="page-header-favorite"
-                [favorite]="pFavorite">
+                [favorite]="shown">
               </app-entity-favorite-star>
             }
 
@@ -127,7 +127,7 @@
             }
 
             <!-- History button -->
-            @if (showHistory) {
+            @if (historyVisible()) {
               <div class="relative">
                 <button class="page-header-menu-button p-2 text-header-text hover:bg-white/10 rounded-md transition-colors"
                   matTooltip="Recent activity"
