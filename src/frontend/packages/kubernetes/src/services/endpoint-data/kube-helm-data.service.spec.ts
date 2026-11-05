@@ -115,6 +115,27 @@ describe('KubeHelmDataService', () => {
     await promise;
   });
 
+  // A Helm handler's own error on the wire (jetstream api/jetstream_error.go).
+  it('install fails with Jetstream\'s reason', async () => {
+    const promise = svc.install({
+      endpoint: 'kube-1',
+      releaseName: 'rel-x',
+      releaseNamespace: 'ns1',
+      values: '{}',
+      chart: { name: 'nginx', repo: 'bitnami', version: '1.0.0' },
+      monocularEndpoint: null,
+      chartUrl: 'http://example/nginx-1.0.0.tgz',
+    });
+    httpMock.expectOne('/pp/v1/helm/install').flush(
+      {
+        error: { statusCode: 400, status: 'Bad Request', message: 'A Release with that name already exists', method: 'POST' },
+        errorResponse: { method: '' },
+      },
+      { status: 400, statusText: 'Bad Request' },
+    );
+    await expect(promise).rejects.toThrow(/^Failed to install helm chart: A Release with that name already exists$/);
+  });
+
   it('upgrade posts to the release URL then refetches', async () => {
     const payload: HelmUpgradePayload = {
       values: '{}',

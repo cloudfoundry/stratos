@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, Signal, computed, inject, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import { isProxyErrorEntry, proxyErrorReason } from '@stratosui/store';
+import { extractHttpErrorMessage, isProxyErrorEntry, proxyErrorReason } from '@stratosui/store';
 
 import { TailwindSnackBarService } from '../../../../core/src/shared/services/tailwind-snackbar.service';
 import { EndpointModel } from '../../../../store/src/types/endpoint.types';
@@ -329,18 +329,9 @@ export class KubeHelmDataService {
     return detail ? `${fallback}: ${detail}` : fallback;
   }
 
+  // A Helm handler's failure is Jetstream's own wrapped error,
+  // { error: { message, status } }; the shared reader gives its message.
   private unwrapErrorMessage(err: unknown): string {
-    if (!err) return '';
-    const httpErr = err as HttpErrorResponse;
-    // Jetstream wraps backend errors as { error: { message, status } }
-    const inner = httpErr?.error;
-    if (inner && typeof inner === 'object') {
-      const innerMsg = (inner as { message?: string; status?: string }).message
-        ?? (inner as { status?: string }).status;
-      if (innerMsg) return innerMsg;
-    }
-    if (httpErr?.message) return httpErr.message;
-    if (err instanceof Error) return err.message;
-    return String(err);
+    return err ? extractHttpErrorMessage(err) : '';
   }
 }
