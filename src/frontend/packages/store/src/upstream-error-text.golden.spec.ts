@@ -4,8 +4,9 @@ import { describe, expect, it } from 'vitest';
 import { ErrorPiece, htmlToPieces, looksLikeHtml, piecesToText } from './upstream-error-text';
 
 // Real error bodies, byte for byte (.gitattributes keeps their CRLFs).
-// Each is transcribed from the server's own source; the values the server
-// fills in at run time (versions, hosts, paths, dates) are examples.
+// Each is transcribed from the server's own source, where the values the
+// server fills in at run time (versions, hosts, paths, dates) are examples,
+// or captured from a running Cloud Foundry where its source says so.
 
 const t = (s: string): ErrorPiece => ({ text: s, style: 'text' });
 const h = (s: string): ErrorPiece => ({ text: s, style: 'heading' });
@@ -89,6 +90,24 @@ const pages: Golden[] = [
     name: 'express-finalhandler-404',
     source: 'pillarjs/finalhandler 2.1.1 index.js createHtmlDocument',
     pieces: [code('Cannot GET /v2/catalog')],
+  },
+  {
+    name: 'tomcat-404-java-buildpack',
+    source: 'captured: Tomcat under the Java buildpack, which leaves out the report and the server version',
+    pieces: [h('HTTP Status 404 – Not Found')],
+  },
+  {
+    name: 'nginx-404-staticfile',
+    source: 'captured: nginx under the staticfile buildpack, which leaves out the version',
+    pieces: [h('404 Not Found'), t('\nnginx')],
+  },
+  {
+    name: 'cf-job-detail-html-404',
+    source: 'captured: a service instance last_operation description, Cloud Foundry quoting a broker\'s HTML 404',
+    pieces: [
+      t('The service broker rejected the request. Status Code: 404 Not Found, Body:\n'),
+      code('Cannot PUT /v2/service_instances/621e1c4b-dd3e-4140-b86c-ae0a8626015f'),
+    ],
   },
 ];
 
