@@ -10,7 +10,23 @@ import { EndpointModel, UserFavoriteManager, UserFavorite, IEndpointFavMetadata,
 import { createBasicStoreModule, STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
 import { SidePanelService } from '@stratosui/core';
 import { CoreTestingModule } from '@test-framework/core-test.modules';
+import { HomePageCardLayout } from '../../home.types';
 import { HomePageEndpointCardComponent } from './home-page-endpoint-card.component';
+
+// Stands in for an endpoint type's home card.
+@Component({ selector: 'app-mock-card', template: '', standalone: true })
+class MockCardComponent {
+  readonly endpoint = input<any>();
+  readonly layout = input<any>();
+}
+
+const mockEntity = {
+  definition: {
+    homeCard: {
+      component: () => Promise.resolve(MockCardComponent),
+    },
+  },
+};
 
 describe('HomePageEndpointCardComponent', () => {
   let component: HomePageEndpointCardComponent;
@@ -141,25 +157,29 @@ describe('HomePageEndpointCardComponent', () => {
   });
 
   it('should load component from homeCard.component() when endpoint entity provided', async () => {
-    @Component({ selector: 'app-mock-card', template: '', standalone: true })
-    class MockCardComponent {
-      readonly endpoint = input<any>();
-      readonly layout = input<any>();
-    }
-
-    const mockEntity = {
-      definition: {
-        homeCard: {
-          component: () => Promise.resolve(MockCardComponent),
-        },
-      },
-    };
-
     await component.createCard(mockEntity);
     expect(component['ref']).toBeTruthy();
     expect(component['ref'].instance).toBeInstanceOf(MockCardComponent);
     // The host hands the card its endpoint through the card's input.
     expect((component['ref'].instance as unknown as MockCardComponent).endpoint()).toBe(component.endpoint());
+  });
+
+  it('hands the card the layout the home page sets, and each later change', async () => {
+    const cardLayout = () => (component['ref'].instance as unknown as MockCardComponent).layout();
+    fixture.componentRef.setInput('layout', new HomePageCardLayout(2, 1));
+    await fixture.whenStable();
+    await component.createCard(mockEntity);
+    expect(cardLayout()).toEqual(new HomePageCardLayout(2, 1));
+
+    fixture.componentRef.setInput('layout', new HomePageCardLayout(3, 2));
+    await fixture.whenStable();
+    expect(cardLayout()).toEqual(new HomePageCardLayout(3, 2));
+    expect(component.layoutSignal()).toEqual(new HomePageCardLayout(3, 2));
+
+    // Null (the persisted layout has not hydrated) keeps the last layout.
+    fixture.componentRef.setInput('layout', null);
+    await fixture.whenStable();
+    expect(cardLayout()).toEqual(new HomePageCardLayout(3, 2));
   });
 
   // A type with no image file, such as the autoscaler, has only a font icon.

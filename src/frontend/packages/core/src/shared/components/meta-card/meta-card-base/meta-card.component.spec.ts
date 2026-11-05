@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { describe, it, expect, beforeEach } from 'vitest';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Observable, of } from 'rxjs';
-import { IFavoriteMetadata, StratosStatus, UserFavorite, UserFavoriteManager, entityCatalog, TestEntityCatalog } from '@stratosui/store';
+import { IFavoriteMetadata, MenuItem, StratosStatus, UserFavorite, UserFavoriteManager, entityCatalog, TestEntityCatalog } from '@stratosui/store';
 import { createBasicStoreModule, CoreTestingModule } from '@test-framework';
 import { generateGenericMockEntities } from '@test-framework/mock-catalog-entities';
 import { MetaCardComponent } from './meta-card.component';
@@ -15,13 +15,14 @@ import { MetaCardValueComponent } from '../meta-card-value/meta-card-value.compo
 @Component({
   imports: [MetaCardComponent, MetaCardTitleComponent],
   template: `
-    <app-meta-card [favorite]="favorite()" [status$]="status$()">
+    <app-meta-card [favorite]="favorite()" [status$]="status$()" [actionMenu]="actionMenu()">
       <app-meta-card-title>Title</app-meta-card-title>
     </app-meta-card>`
 })
 class WrapperComponent {
   @ViewChild(MetaCardComponent, { static: true })
   metaCard!: MetaCardComponent;
+  readonly actionMenu = signal<MenuItem[] | null | undefined>(undefined);
   readonly favorite = signal<UserFavorite<IFavoriteMetadata> | undefined>(undefined);
   readonly status$ = signal<Observable<StratosStatus> | undefined>(undefined);
 }
@@ -114,7 +115,7 @@ describe('MetaCardComponent', () => {
   });
 
   it('should show action menu', async () => {
-    component.actionMenu = [
+    fixture.componentInstance.actionMenu.set([
       {
         label: 'Action1',
         action: () => {},
@@ -124,7 +125,7 @@ describe('MetaCardComponent', () => {
         label: 'Action2',
         action: () => {},
       },
-    ];
+    ]);
     await fixture.whenStable();
 
     // The menu button should be visible when actionMenu is set and showMenu$ is true
@@ -135,7 +136,7 @@ describe('MetaCardComponent', () => {
   // Material icon ligatures are text: the kebab was named "more_vert" and
   // each item read as glyph plus label ("link Connect").
   it('names the action menu button and hides item glyphs', async () => {
-    component.actionMenu = [{ label: 'Connect', icon: 'link', action: () => {}, can: of(true) }];
+    fixture.componentInstance.actionMenu.set([{ label: 'Connect', icon: 'link', action: () => {}, can: of(true) }]);
     await fixture.whenStable();
 
     const menuButton = element.querySelector('button.meta-card__header__button') as HTMLButtonElement;
@@ -152,18 +153,28 @@ describe('MetaCardComponent', () => {
   });
 
   it('should hide actions without permission', async () => {
-    component.actionMenu = [
+    fixture.componentInstance.actionMenu.set([
       {
         label: 'Action1',
         action: () => {},
         can: of(false),
       },
-    ];
+    ]);
     await fixture.whenStable();
 
     // The menu button should not be visible when all actions have can: false
     const menuButton = element.querySelector('button.meta-card__header__button');
     expect(menuButton).toBeFalsy();
+  });
+
+  // Binding null keeps the menu the card already shows.
+  it('keeps the last menu when the menu is set to null', async () => {
+    fixture.componentInstance.actionMenu.set([{ label: 'Action1', action: () => {} }]);
+    await fixture.whenStable();
+    fixture.componentInstance.actionMenu.set(null);
+    await fixture.whenStable();
+
+    expect(element.querySelector('button.meta-card__header__button')).toBeTruthy();
   });
 
   it('should show star if favoritable', async () => {
