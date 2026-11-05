@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, Input, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, linkedSignal } from '@angular/core';
 import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { CustomIconComponent } from '../custom-material/custom-material.component';
 
@@ -18,20 +18,16 @@ export class EntitySummaryTitleComponent {
   readonly subTitle = input<string>();
   readonly info = input<string>();
   readonly subText = input<string>();
-  @Input()
-  get imagePath(): string | null {
-    return this.image;
-  }
-  set imagePath(image: string | null) {
-    this.image = image;
-  }
+  readonly imagePath = input<string | null>();
   readonly fallBackIcon = input<string>();
   readonly fallBackIconFont = input<string>();
-  public image: string | null = null;
+  // The image path, until the image fails to load and there is an icon to
+  // show instead. A new path starts again.
+  readonly image = linkedSignal(() => this.imagePath() ?? null);
 
   public failedImageLoad() {
     if (this.fallBackIcon()) {
-      this.image = null;
+      this.image.set(null);
     }
   }
 }

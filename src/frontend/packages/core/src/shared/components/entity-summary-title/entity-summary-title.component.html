@@ -1,7 +1,7 @@
 <div class="my-[10px]">
   <div class="flex m-[10px]">
     <!-- <img *ngIf="imagePath" class="entity-summary__logo" title="{{ title }}'s image" src="{{ imagePath }}"> -->
-    @if (image) {
+    @if (image(); as image) {
       <img class="grow-0 shrink-0 basis-16 max-h-16 self-center h-16 object-contain w-16" title="{{ title() }}'s image" [src]="image"
         (error)="failedImageLoad()" alt="{{ title() }}">
     } @else {

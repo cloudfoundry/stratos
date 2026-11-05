@@ -1,5 +1,5 @@
 import { AsyncPipe, CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, computed, inject, OnDestroy, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, computed, inject, input, OnDestroy, signal } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { Observable, of } from 'rxjs';
@@ -57,23 +57,16 @@ export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
   // Set by load(); the template and the derived state below read it.
   readonly endpointDataService = signal<EndpointDataService | null>(null);
 
-  readonly cardLayout = signal(new HomePageCardLayout(1, 1));
+  readonly layout = input<HomePageCardLayout>();
+  // 1x1 until the home page sets a layout.
+  readonly cardLayout = computed(() => this.layout() ?? new HomePageCardLayout(1, 1));
 
-  get layout(): HomePageCardLayout { return this.cardLayout(); }
+  readonly endpoint = input<EndpointModel>();
 
-  @Input() set layout(value: HomePageCardLayout) {
-    if (value) { this.cardLayout.set(value); }
-  }
-
-  @Input() set endpoint(value: EndpointModel) {
-    // strict: a registered endpoint always carries a guid; it is only
-    // optional on the shared EndpointModel shape.
-    this.guid.set(value.guid!);
-  }
-
-  // Populated by the @Input endpoint setter the home framework always
-  // supplies before load()/template read.
-  readonly guid = signal('');
+  // The home page sets the endpoint before load() or the template reads
+  // this. A registered endpoint always carries a guid; it is only optional
+  // on the shared EndpointModel shape.
+  readonly guid = computed(() => this.endpoint()?.guid ?? '');
   readonly cardLoaded = computed(() => this.endpointDataService() !== null);
   readonly recentAppsRows = computed(() => {
     const layout = this.cardLayout();

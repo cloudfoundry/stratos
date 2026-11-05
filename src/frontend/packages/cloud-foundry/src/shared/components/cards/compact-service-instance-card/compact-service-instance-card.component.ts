@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { AppChip, AppChipsComponent } from '@stratosui/core';
 import { StServiceInstance } from '../../../../services/endpoint-data/stratos-types';
@@ -25,18 +25,9 @@ import { StServiceInstance } from '../../../../services/endpoint-data/stratos-ty
   ],
 })
 export class CompactServiceInstanceCardComponent {
-  serviceInstanceTags: AppChip[] = [];
+  readonly serviceInstance = input<StServiceInstance | null>();
 
-  private _serviceInstance: StServiceInstance | null = null;
-
-  @Input()
-  get serviceInstance(): StServiceInstance | null {
-    return this._serviceInstance;
-  }
-
-  set serviceInstance(value: StServiceInstance | null) {
-    this._serviceInstance = value;
-    const tags = value?.tags ?? [];
-    this.serviceInstanceTags = tags.map(t => ({ value: t }));
-  }
+  readonly serviceInstanceTags = computed<AppChip[]>(
+    () => (this.serviceInstance()?.tags ?? []).map(t => ({ value: t })),
+  );
 }

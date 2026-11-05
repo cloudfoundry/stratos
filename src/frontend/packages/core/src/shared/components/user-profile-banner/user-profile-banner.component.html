@@ -1,15 +1,15 @@
 <div class="flex flex-row p-6">
   <div class="flex-none mr-6">
-    <app-user-avatar size="large" [allowGravatar]="canUseGravatar" fallback="initials" [user]="userProfile"></app-user-avatar>
+    <app-user-avatar size="large" [allowGravatar]="allowGravatar()" fallback="initials" [user]="user()"></app-user-avatar>
   </div>
-  @if ((name || email)) {
+  @if ((name() || email())) {
     <div class="flex-1 text-[28px]">
-      <div>{{ name }}</div>
-      <div class="text-base">{{ email }}</div>
+      <div>{{ name() }}</div>
+      <div class="text-base">{{ email() }}</div>
     </div>
   } @else {
     <div class="flex-1 text-[28px]">
-      <div>{{ username }}</div>
+      <div>{{ username() }}</div>
     </div>
   }
 </div>

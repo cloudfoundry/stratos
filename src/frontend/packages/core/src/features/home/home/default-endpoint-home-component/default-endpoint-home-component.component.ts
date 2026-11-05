@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, OnInit, input } from '@angular/core';
 
 import { Observable, of } from 'rxjs';
 
@@ -23,18 +23,8 @@ export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCar
   // strict: assigned in ngOnInit before any template read
   url!: string;
 
-  // strict: assigned via the @Input set layout accessor
-  pLayout!: HomePageCardLayout;
-
-  get layout(): HomePageCardLayout {
-    return this.pLayout;
-  }
-
-  @Input() set layout(value: HomePageCardLayout) {
-    if (value) {
-      this.pLayout = value;
-    }
-  }
+  // The home page sets a layout on every card; this one does not use it.
+  readonly layout = input<HomePageCardLayout>();
 
   @Input() endpoint!: EndpointModel;
 

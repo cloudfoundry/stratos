@@ -1,4 +1,4 @@
-import { Component, Input, Signal, computed, inject, signal, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, Signal, computed, inject, signal, ChangeDetectionStrategy, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { Observable } from 'rxjs';
@@ -33,18 +33,8 @@ export class KubernetesHomeCardComponent {
   // Always set by the home page host (HomePageEndpointCard contract).
   readonly endpoint = input.required<EndpointModel>();
 
-  // strict: backing field for the @Input() layout setter; assigned before the getter is read in the template
-  pLayout!: HomePageCardLayout;
-
-  get layout(): HomePageCardLayout {
-    return this.pLayout;
-  }
-
-  @Input() set layout(value: HomePageCardLayout) {
-    if (value) {
-      this.pLayout = value;
-    }
-  }
+  // The home page sets a layout on every card; this one does not use it.
+  readonly layout = input<HomePageCardLayout>();
 
   private podData = inject(KubePodDataService);
   private nodeData = inject(KubeNodeDataService);

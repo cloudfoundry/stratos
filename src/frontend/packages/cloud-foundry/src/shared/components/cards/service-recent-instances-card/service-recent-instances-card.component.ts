@@ -3,13 +3,13 @@ import {
   ChangeDetectionStrategy,
   Component,
   Injector,
-  Input,
   OnDestroy,
   OnInit,
   Signal,
   computed,
   effect,
   inject,
+  input,
   runInInjectionContext,
   signal,
 } from '@angular/core';
@@ -64,8 +64,9 @@ export class ServiceRecentInstancesCardComponent implements OnInit, OnDestroy {
   // Exposed for the template's <app-stateful-icon [state]> binding
   protected readonly stratosStatus = StratosStatus;
 
-  private readonly _cfGuid = signal<string>('');
-  private readonly _serviceGuid = signal<string>('');
+  // An unset or null guid reads as ''.
+  readonly cfGuid = input('', { transform: (v: string | null | undefined) => v ?? '' });
+  readonly serviceGuid = input('', { transform: (v: string | null | undefined) => v ?? '' });
   private readonly _endpointService = signal<EndpointDataService | null>(null);
 
   readonly recentInstances: Signal<StServiceInstance[] | null> = computed(() => {
@@ -77,7 +78,7 @@ export class ServiceRecentInstancesCardComponent implements OnInit, OnDestroy {
       // the array — even if it's empty — so the empty-state copy fires.
       return null;
     }
-    const offeringGuid = this._serviceGuid();
+    const offeringGuid = this.serviceGuid();
     if (!offeringGuid) return [];
     const all = svc.serviceInstances();
     const matches = all.filter(si => si.servicePlan?.serviceOffering?.guid === offeringGuid);
@@ -90,20 +91,10 @@ export class ServiceRecentInstancesCardComponent implements OnInit, OnDestroy {
     return matches.slice(0, RECENT_ITEMS_COUNT);
   });
 
-  @Input()
-  set cfGuid(value: string) {
-    this._cfGuid.set(value ?? '');
-  }
-
-  @Input()
-  set serviceGuid(value: string) {
-    this._serviceGuid.set(value ?? '');
-  }
-
   ngOnInit(): void {
     runInInjectionContext(this.injector, () => {
       effect(() => {
-        const cnsi = this._cfGuid();
+        const cnsi = this.cfGuid();
         if (!cnsi) {
           this._endpointService.set(null);
           return;
@@ -120,7 +111,7 @@ export class ServiceRecentInstancesCardComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    const cnsi = this._cfGuid();
+    const cnsi = this.cfGuid();
     if (cnsi) {
       this.registry.release(cnsi);
     }

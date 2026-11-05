@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 export enum BooleanIndicatorType {
   enabledDisabled = 'enabled-disabled',
@@ -46,32 +46,12 @@ export type booleanStringType = 'True' | 'False' | 'Unknown';
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BooleanIndicatorComponent {
-  private cdr = inject(ChangeDetectorRef);
-
-  public booleanOutput!: IBooleanOutput;
   // Invert the text labels with the icons (No text for yes value and vice-versa)
   readonly inverse = input(false);
   // Should we use a subtle display - this won't show the No option as danger (typically red)
-  private pSubtle = true;
-  @Input()
-  get subtle(): boolean {
-    return this.pSubtle;
-  }
-  set subtle(subtle: boolean) {
-    this.pSubtle = subtle;
-    this.updateBooleanOutput();
-    this.cdr.markForCheck();
-  }
+  readonly subtle = input(true);
 
-  private pShowText = true;
-  @Input()
-  get showText(): boolean {
-    return this.pShowText;
-  }
-  set showText(showText: boolean) {
-    this.pShowText = showText;
-    this.cdr.markForCheck();
-  }
+  readonly showText = input(true);
 
   private icons = {
     Yes: 'check_circle',
@@ -92,44 +72,26 @@ export class BooleanIndicatorComponent {
     Progress: 'cached'
   };
 
-  private pType!: BooleanIndicatorTypeValue;
-  @Input()
-  get type(): BooleanIndicatorTypeValue {
-    return this.pType;
-  }
-  set type(type: BooleanIndicatorTypeValue) {
-    this.pType = type;
-    this.updateBooleanOutput();
-    this.cdr.markForCheck();
-  }
+  readonly type = input<BooleanIndicatorTypeValue>();
 
-  // undefined/null render the 'Unknown' indicator (see updateBooleanOutput),
+  // undefined/null render the 'Unknown' indicator (see booleanOutput),
   // so callers can bind not-yet-loaded data, including `| async` streams.
-  private pIsTrue?: boolean | null;
-  @Input()
-  get isTrue(): boolean | null | undefined {
-    return this.pIsTrue;
-  }
-  set isTrue(isTrue: boolean | null | undefined) {
-    this.pIsTrue = isTrue;
-    this.updateBooleanOutput();
-    this.cdr.markForCheck();
-  }
+  readonly isTrue = input<boolean | null>();
 
-  private updateBooleanOutput() {
-    const isUnknown = typeof this.isTrue !== 'boolean';
-    this.booleanOutput = this.getIconTextAndSeverity({
-      isTrue: this.isTrue ?? undefined,
-      isUnknown,
+  readonly booleanOutput = computed<IBooleanOutput>(() => {
+    const isTrue = this.isTrue();
+    return this.getIconTextAndSeverity({
+      isTrue: isTrue ?? undefined,
+      isUnknown: typeof isTrue !== 'boolean',
       inverse: this.inverse(),
-      subtle: this.subtle
+      subtle: this.subtle()
     });
-  }
+  });
 
   private getIconTextAndSeverity = (
     { isTrue = false, isUnknown = false, inverse = false, subtle = true }: IBooleanConfig
   ): IBooleanOutput => {
-    if (isUnknown || !this.type) {
+    if (isUnknown || !this.type()) {
       return {
         icon: this.icons.Unknown,
         text: 'Unknown',
@@ -147,7 +109,7 @@ export class BooleanIndicatorComponent {
   };
 
   private getText = ({ isTrue = false, inverse = false }: IBooleanConfig): string => {
-    const [enabledText, disabledText] = this.getTypeText(this.type);
+    const [enabledText, disabledText] = this.getTypeText(this.type() ?? '');
     const value = inverse ? !isTrue : isTrue;
     return this.capitalizeFirstLetter(value ? enabledText : disabledText);
   };

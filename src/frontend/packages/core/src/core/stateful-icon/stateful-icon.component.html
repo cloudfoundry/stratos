@@ -1,8 +1,8 @@
-@if (selectedState || stateKey === allStateKeys.BUSY) {
+@if (selectedState() || state() === allStateKeys.BUSY) {
   <div class="flex items-center justify-center leading-6 h-6 w-6">
-    @if (stateKey !== allStateKeys.BUSY) {
+    @if (state() !== allStateKeys.BUSY) {
       <app-custom-icon [inline]="inline()"
-        [ngClass]="{'warning': stateKey === allStateKeys.WARNING, 'error': stateKey === allStateKeys.ERROR, 'ok': stateKey === allStateKeys.OK }"
+        [ngClass]="{'warning': state() === allStateKeys.WARNING, 'error': state() === allStateKeys.ERROR, 'ok': state() === allStateKeys.OK }"
         >
       {{ selectedStateIcon }}</app-custom-icon>
     } @else {
