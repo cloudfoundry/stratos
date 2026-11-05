@@ -13,7 +13,7 @@ import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
+import { ApplicationServiceMock, cfRequestFailure, snackText } from '@test-framework/cf';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
@@ -224,6 +224,32 @@ describe('RoutesTabComponent', () => {
     await onConfirm();
     expect(deleteRoute).toHaveBeenCalledWith('r2');
     expect(removeRoute).toHaveBeenCalledWith('r2');
+  });
+
+  const said = (): string => snackText(snackError.mock.calls[0][0]);
+
+  it('says why an unmap failed in Cloud Foundry\'s words', async () => {
+    unmapRoute.mockRejectedValueOnce(cfRequestFailure());
+    await fixture.whenStable();
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    actionsCol!.actions!({ guid: 'r1', url: 'foo.example.com' } as any).find(a => a.label === 'Unmap')!
+      .invoke({ guid: 'r1', url: 'foo.example.com' } as any);
+    await confirmOpen.mock.calls[0][1]();
+
+    expect(removeRoute).not.toHaveBeenCalled();
+    expect(said()).toBe('Unmap failed: The route is shared with another space.');
+  });
+
+  it('says why a delete failed in Cloud Foundry\'s words', async () => {
+    deleteRoute.mockRejectedValueOnce(cfRequestFailure());
+    await fixture.whenStable();
+    const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
+    actionsCol!.actions!({ guid: 'r2', url: 'bar.example.com' } as any).find(a => a.label === 'Delete')!
+      .invoke({ guid: 'r2', url: 'bar.example.com' } as any);
+    await confirmOpen.mock.calls[0][1]();
+
+    expect(removeRoute).not.toHaveBeenCalled();
+    expect(said()).toBe('Delete failed: The route is shared with another space.');
   });
 
   it('keeps the row, re-reads routes and says so when a delete ends with an unknown result', async () => {

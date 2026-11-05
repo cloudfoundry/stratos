@@ -25,6 +25,7 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  leadPieces,
 } from '@stratosui/store';
 
 import { applicationEntityType } from '../../../../../../../cf-entity-types';
@@ -435,8 +436,8 @@ export class CloudFoundrySpaceAppsSignalComponent implements OnInit {
         if (how) {
           this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Applications list', how));
         }
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+      } catch (err: unknown) {
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     return [

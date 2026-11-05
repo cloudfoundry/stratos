@@ -4,8 +4,10 @@ import { provideRouter } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { of } from 'rxjs';
+
+import { CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 
 import {
   TabNavService,
@@ -104,13 +106,25 @@ describe('CloudFoundryOrganizationSummaryComponent', () => {
     EntityCatalogHelpers.SetEntityCatalogHelper(helper);
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationSummaryComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('says why a delete failed in Cloud Foundry\'s words', async () => {
+    const snackError = vi.spyOn(TestBed.inject(TailwindSnackBarService), 'error').mockImplementation(() => undefined as never);
+    const confirmOpen = vi.spyOn(TestBed.inject(ConfirmationDialogService), 'open').mockImplementation(() => undefined as never);
+    vi.spyOn(mockOrgService.orgDataService, 'org').mockReturnValue({ name: 'acme' } as never);
+    vi.spyOn(mockOrgsConfig, 'deleteOrg').mockRejectedValueOnce(cfRequestFailure());
+
+    component.deleteOrgWarn();
+    await (confirmOpen.mock.calls[0][1] as () => Promise<void>)();
+
+    expect(snackText(snackError.mock.calls[0][0])).toBe(`Failed to delete organization: ${CF_FAILURE_DETAIL}`);
   });
 });

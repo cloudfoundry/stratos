@@ -23,6 +23,7 @@ export * from './cloud-foundry-endpoint-service.helper';
 export * from './cloud-foundry-organization.service.mock';
 export * from './cloud-foundry-space.service.mock';
 export * from './entity-relations-spec-helper';
+export * from './request-failure.helper';
 export * from './user-service-helper';
 export * from './service-write-contract';
 

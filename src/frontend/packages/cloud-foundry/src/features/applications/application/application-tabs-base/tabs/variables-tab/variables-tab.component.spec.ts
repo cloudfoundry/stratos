@@ -13,7 +13,7 @@ import { of } from 'rxjs';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ApplicationService, CloudFoundryService } from '@stratosui/cloud-foundry';
-import { ApplicationServiceMock } from '@test-framework/cf';
+import { ApplicationServiceMock, CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 import {
   ConfirmationDialogConfig,
   ConfirmationDialogService,
@@ -188,13 +188,13 @@ describe('VariablesTabComponent', () => {
     expect(component.envVarNames()).toEqual([]);
   });
 
-  it('triggers an initial envVars fetch on init', () => {
-    fixture.detectChanges();
+  it('triggers an initial envVars fetch on init', async () => {
+    await fixture.whenStable();
     expect(refreshScope).toHaveBeenCalledWith('envVars');
   });
 
-  it('builds a signal-list config from the wave-2 service', () => {
-    fixture.detectChanges();
+  it('builds a signal-list config from the wave-2 service', async () => {
+    await fixture.whenStable();
     expect(component.listConfig).toBeTruthy();
     const actionsCol = component.listConfig.columns.find(c => c.key === 'actions');
     expect(actionsCol).toBeTruthy();
@@ -206,7 +206,7 @@ describe('VariablesTabComponent', () => {
   // -------------------------------------------------------------------------
 
   it('opens a confirm dialog before deleting, refreshes on confirm', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     const del = rowActionsFor({ name: 'FOO', value: 'bar' }).find(a => a.label === 'Delete');
     expect(del).toBeTruthy();
 
@@ -227,16 +227,16 @@ describe('VariablesTabComponent', () => {
   // Editor dialog — Add / Edit / Rename routing
   // -------------------------------------------------------------------------
 
-  it('exposes an Edit row action alongside Delete', () => {
-    fixture.detectChanges();
+  it('exposes an Edit row action alongside Delete', async () => {
+    await fixture.whenStable();
     const actions = rowActionsFor({ name: 'FOO', value: 'bar' });
     expect(actions.find(a => a.label === 'Edit')).toBeTruthy();
     expect(actions.find(a => a.label === 'Delete')).toBeTruthy();
   });
 
-  it('Add button opens the editor dialog in add mode with all existing names', () => {
+  it('Add button opens the editor dialog in add mode with all existing names', async () => {
     envVarsSig.set({ environment: { FOO: 'a', BAR: 'b' } });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     component.addVariableAction.invoke();
 
@@ -247,9 +247,9 @@ describe('VariablesTabComponent', () => {
     expect(cfg.data.existingNames).toEqual(['FOO', 'BAR']);
   });
 
-  it('Edit row action opens the dialog pre-filled, existingNames excluding self', () => {
+  it('Edit row action opens the dialog pre-filled, existingNames excluding self', async () => {
     envVarsSig.set({ environment: { FOO: 'a', BAR: 'b' } });
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     const edit = rowActionsFor({ name: 'FOO', value: 'a' }).find(a => a.label === 'Edit');
     edit!.invoke({ name: 'FOO', value: 'a' } as any);
@@ -262,7 +262,7 @@ describe('VariablesTabComponent', () => {
   });
 
   it('add result routes to addVariable then refreshes', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     dialogResult = { name: 'NEW', value: 'v' };
 
     component.addVariableAction.invoke();
@@ -275,7 +275,7 @@ describe('VariablesTabComponent', () => {
 
   it('edit result with unchanged name routes to updateVariable', async () => {
     envVarsSig.set({ environment: { FOO: 'a' } });
-    fixture.detectChanges();
+    await fixture.whenStable();
     dialogResult = { name: 'FOO', value: 'changed' };
 
     rowActionsFor({ name: 'FOO', value: 'a' }).find(a => a.label === 'Edit')!.invoke({ name: 'FOO', value: 'a' } as any);
@@ -289,7 +289,7 @@ describe('VariablesTabComponent', () => {
 
   it('edit result with a changed name routes to renameVariable (old -> new)', async () => {
     envVarsSig.set({ environment: { FOO: 'a' } });
-    fixture.detectChanges();
+    await fixture.whenStable();
     dialogResult = { name: 'RENAMED', value: 'a' };
 
     rowActionsFor({ name: 'FOO', value: 'a' }).find(a => a.label === 'Edit')!.invoke({ name: 'FOO', value: 'a' } as any);
@@ -302,7 +302,7 @@ describe('VariablesTabComponent', () => {
   });
 
   it('cancelling the dialog (no result) performs no action service call', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     dialogResult = undefined; // cancelled
 
     component.addVariableAction.invoke();
@@ -315,7 +315,7 @@ describe('VariablesTabComponent', () => {
   });
 
   it('surfaces a snackbar error when the action service rejects', async () => {
-    fixture.detectChanges();
+    await fixture.whenStable();
     dialogResult = { name: 'NEW', value: 'v' };
     addVariable.mockRejectedValueOnce(new Error('CF-Boom'));
     const snack = TestBed.inject(TailwindSnackBarService) as any;
@@ -326,6 +326,30 @@ describe('VariablesTabComponent', () => {
     await Promise.resolve();
 
     expect(snack.error).toHaveBeenCalled();
+  });
+
+  it('says why a save failed in Cloud Foundry\'s words', async () => {
+    await fixture.whenStable();
+    dialogResult = { name: 'NEW', value: 'v' };
+    addVariable.mockRejectedValueOnce(cfRequestFailure());
+    const snack = TestBed.inject(TailwindSnackBarService) as any;
+
+    component.addVariableAction.invoke();
+    await vi.waitFor(() => expect(snack.error).toHaveBeenCalled());
+
+    expect(snackText(snack.error.mock.calls[0][0])).toBe(`Save variable failed: ${CF_FAILURE_DETAIL}`);
+  });
+
+  it('says why a delete failed in Cloud Foundry\'s words', async () => {
+    await fixture.whenStable();
+    deleteVariable.mockRejectedValueOnce(cfRequestFailure());
+    const snack = TestBed.inject(TailwindSnackBarService) as any;
+
+    rowActionsFor({ name: 'FOO', value: 'bar' }).find(a => a.label === 'Delete')!.invoke({ name: 'FOO', value: 'bar' } as any);
+    await confirmOpen.mock.calls[0][1]();
+
+    expect(configRefresh).not.toHaveBeenCalled();
+    expect(snackText(snack.error.mock.calls[0][0])).toBe(`Delete failed: ${CF_FAILURE_DETAIL}`);
   });
 
   describe('value masking (list rows)', () => {

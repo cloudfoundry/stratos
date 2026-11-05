@@ -19,6 +19,7 @@ import {
 import {
   UserFavorite,
   UserFavoriteManager,
+  leadPieces,
 } from '@stratosui/store';
 
 import { CfOrgsSignalConfigService } from '../../../../shared/signal-list-configs/org/cf-orgs-signal-config.service';
@@ -223,8 +224,8 @@ export class CloudFoundryOrganizationsSignalComponent {
         if (how) {
           this.snackBar.error(unknownOutcomeMessage(name ? `${label} "${name}"` : label, 'The Organizations list', how));
         }
-      } catch (err: any) {
-        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+      } catch (err: unknown) {
+        this.snackBar.error(leadPieces(`${label} failed`, err));
       }
     };
     return [

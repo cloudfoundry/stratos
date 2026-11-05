@@ -9,6 +9,7 @@ import { appLabelsFilterText } from '../../../../../../../shared/signal-list-con
 import { ConfirmationDialogService, CurrentUserPermissionsService, TabNavService, TailwindSnackBarService } from '@stratosui/core';
 import { of } from 'rxjs';
 import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { CF_FAILURE_DETAIL, cfRequestFailure, snackText } from '@test-framework/cf';
 import { generateCfBaseTestModulesNoShared } from '@test-framework/cloud-foundry-endpoint-service.helper';
 
 import { CloudFoundrySpaceAppsSignalComponent } from './cloud-foundry-space-apps-signal.component';
@@ -248,6 +249,16 @@ describe('CloudFoundrySpaceAppsSignalComponent', () => {
     );
     expect(deleteAction).toBeDefined();
     expect(deleteAction!.label).toBe('Delete');
+  });
+
+  it('says why a row delete failed in Cloud Foundry\'s words', async () => {
+    stubAppsConfig.deleteApp.mockRejectedValueOnce(cfRequestFailure());
+    await component.ngOnInit();
+    const row = app({ cnsiGuid: 'cnsi-1', guid: 'app-1', name: 'l9-after' });
+    component.listConfig()!.columns.find(c => c.kind === 'actions')!.actions!(row).find(a => a.label === 'Delete')!.invoke(row);
+    await vi.waitFor(() => expect(snackBar.error).toHaveBeenCalled());
+
+    expect(snackText(snackBar.error.mock.calls[0][0])).toBe(`Delete failed: ${CF_FAILURE_DETAIL}`);
   });
 
   // Bulk delete now reports the settled outcome via runBulkWithProgress
