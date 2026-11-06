@@ -35,22 +35,22 @@ describe('ChartValuesEditorComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(ChartValuesEditorComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
-  // Regression: `config` is set through an @Input setter, which Angular
-  // invokes during change detection - outside any injection context. The
-  // monaco-loaded observable must therefore be built as a field, not inside
-  // the setter path, or init() throws NG0203 before it ever requests the
-  // chart values and the editor sits on "Loading ..." forever.
-  it('requests the chart values when config arrives through the input setter', () => {
+  // Regression: `config` is applied from an effect, which runs during change
+  // detection - outside any injection context. The monaco-loaded observable
+  // must therefore be built as a field, not on that path, or init() throws
+  // NG0203 before it ever requests the chart values and the editor sits on
+  // "Loading ..." forever.
+  it('requests the chart values when config arrives through the input', async () => {
     const http = TestBed.inject(HttpTestingController);
 
     fixture.componentRef.setInput('config', { valuesUrl: '/values.yaml', schemaUrl: null });
-    expect(() => fixture.detectChanges()).not.toThrow();
+    await fixture.whenStable();
 
     expect(component.initing).toBe(false);
     http.expectOne('/values.yaml').flush('replicas: 1\n');

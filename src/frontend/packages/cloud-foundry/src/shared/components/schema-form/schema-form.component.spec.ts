@@ -29,10 +29,10 @@ describe('SchemaFormComponent', () => {
     }).compileComponents();
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
     fixture = TestBed.createComponent(SchemaFormComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
@@ -50,8 +50,8 @@ describe('SchemaFormComponent advisory validity', () => {
     const c = fixture.componentInstance;
     let lastValid = false;
     c.validChange.subscribe((v: boolean) => (lastValid = v));
-    c.config = { schema: { type: 'object', properties: { size: { type: 'integer' } } } };
-    fixture.detectChanges();
+    fixture.componentRef.setInput('config', { schema: { type: 'object', properties: { size: { type: 'integer' } } } });
+    await fixture.whenStable();
     c.setJsonText('{"size":"5"}');           // type mismatch — must NOT block
     await fixture.whenStable();
     expect(lastValid).toBe(true);
@@ -63,8 +63,8 @@ describe('SchemaFormComponent advisory validity', () => {
     const c = fixture.componentInstance;
     let lastValid = true;
     c.validChange.subscribe((v: boolean) => (lastValid = v));
-    c.config = { schema: { type: 'object' } };
-    fixture.detectChanges();
+    fixture.componentRef.setInput('config', { schema: { type: 'object' } });
+    await fixture.whenStable();
     c.setJsonText('{ not json');
     await fixture.whenStable();
     expect(lastValid).toBe(false);
@@ -91,14 +91,14 @@ describe('SchemaFormComponent render error fallback', () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
     // Set schema mode so the schema-form branch is active
-    c.config = { schema: { type: 'object', properties: { x: { type: 'string' } } } };
-    fixture.detectChanges();
+    fixture.componentRef.setInput('config', { schema: { type: 'object', properties: { x: { type: 'string' } } } });
+    await fixture.whenStable();
 
     const msg = 'This plan\'s parameter schema could not be rendered as a form (boom). Edit the parameters directly as JSON below — the broker validates them on submit.';
     c.onRenderError(msg);
-    // flush the queueMicrotask
+    // flush the queueMicrotask, then render what it set
     await Promise.resolve();
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     expect(c.schemaView()).toBe('schemaJson');
     expect(c.renderError()).toContain('Edit the parameters directly as JSON');
@@ -116,7 +116,7 @@ describe('SchemaFormComponent render error fallback', () => {
     c.formInitialData = { key: 'value' };
     c.onRenderError('Schema failed');
     await Promise.resolve();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(c.jsonText).toContain('key');
   });
 
@@ -127,26 +127,26 @@ describe('SchemaFormComponent render error fallback', () => {
     c.jsonText = '{"existing":"data"}';
     c.onRenderError('Schema failed');
     await Promise.resolve();
-    fixture.detectChanges();
+    await fixture.whenStable();
     expect(c.jsonText).toBe('{"existing":"data"}');
   });
 
   it('shows schema title and description in the render-error notice when present', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
-    c.config = {
+    fixture.componentRef.setInput('config', {
       schema: {
         title: 'DB params',
         description: 'Connection settings for the database.',
         type: 'object',
         properties: { host: { type: 'string' } },
       },
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     c.onRenderError('Could not render form.');
     await Promise.resolve();
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     const notice = fixture.nativeElement.querySelector('[data-testid="render-error-notice"]');
     expect(notice).toBeTruthy();
@@ -157,7 +157,7 @@ describe('SchemaFormComponent render error fallback', () => {
   it('bails out when the view is destroyed before the deferred callback runs', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
 
     c.onRenderError('Schema failed');
     fixture.destroy();          // tear down before the queued microtask fires
@@ -176,10 +176,10 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
-  it('copies data() into jsonText when switching from Form to JSON view', () => {
+  it('copies data() into jsonText when switching from Form to JSON view', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
-    c.config = {
+    fixture.componentRef.setInput('config', {
       schema: {
         type: 'object',
         properties: {
@@ -188,8 +188,8 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
           network: { type: 'object', properties: { subnet: { type: 'string' } } },
         },
       },
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     // Simulate the form filling in data (as the SchemaWidgetRenderer would)
     c.onFormChange({ region: 'us-west', size: 3, network: { subnet: 'x' } });
@@ -201,10 +201,10 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
     expect(c.jsonText).toBe(JSON.stringify(c.data(), null, 2));
   });
 
-  it('seeds a schema key-skeleton into the JSON view when no params are set', () => {
+  it('seeds a schema key-skeleton into the JSON view when no params are set', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
-    c.config = {
+    fixture.componentRef.setInput('config', {
       schema: {
         type: 'object',
         properties: {
@@ -213,8 +213,8 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
           network: { type: 'object', properties: { subnet: { type: 'string' } } },
         },
       },
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     // No data entered — toggle to JSON the way the radio does
     c.schemaView.set('schemaJson');
@@ -226,10 +226,10 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
     expect(c.data()).toBeNull();
   });
 
-  it('shows all fields on Form→JSON with a set value overlaid on the skeleton', () => {
+  it('shows all fields on Form→JSON with a set value overlaid on the skeleton', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
-    c.config = {
+    fixture.componentRef.setInput('config', {
       schema: {
         type: 'object',
         properties: {
@@ -238,8 +238,8 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
           network: { type: 'object', properties: { subnet: { type: 'string' } } },
         },
       },
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     // User sets one field in the form, then flips to JSON
     c.onFormChange({ region: 'us-west' });
@@ -252,13 +252,13 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
     expect(c.data()).toEqual({ region: 'us-west' });
   });
 
-  it('seeds a freshly-mounted editor with current jsonText via onMonacoInit', () => {
+  it('seeds a freshly-mounted editor with current jsonText via onMonacoInit', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
-    c.config = {
+    fixture.componentRef.setInput('config', {
       schema: { type: 'object', properties: { key: { type: 'string' } } },
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     // Populate data via form, then flip to JSON (sets jsonText)
     c.onFormChange({ key: 'hello' });
@@ -278,13 +278,13 @@ describe('SchemaFormComponent Form-to-JSON toggle', () => {
     expect(c.jsonText).toBe(JSON.stringify({ key: 'hello' }, null, 2));
   });
 
-  it('does not call setValue when the editor already has the correct text (loop guard)', () => {
+  it('does not call setValue when the editor already has the correct text (loop guard)', async () => {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
-    c.config = {
+    fixture.componentRef.setInput('config', {
       schema: { type: 'object', properties: { key: { type: 'string' } } },
-    };
-    fixture.detectChanges();
+    });
+    await fixture.whenStable();
 
     c.onFormChange({ key: 'hello' });
     c.schemaView.set('schemaJson');
@@ -321,8 +321,7 @@ describe('SchemaFormComponent editor text changes', () => {
   }> {
     const fixture = TestBed.createComponent(SchemaFormComponent);
     const c = fixture.componentInstance;
-    c.config = {};                               // no schema — raw JSON mode
-    fixture.detectChanges();
+    fixture.componentRef.setInput('config', {}); // no schema — raw JSON mode
     await fixture.whenStable();                  // mocked Monaco finishes mounting
 
     const editorDe = fixture.debugElement.query(By.directive(MonacoEditorComponent));

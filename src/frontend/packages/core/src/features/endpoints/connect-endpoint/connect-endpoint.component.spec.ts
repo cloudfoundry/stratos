@@ -42,10 +42,10 @@ describe('ConnectEndpointComponent', () => {
   });
 
   it('offers a username and password or no login for Metrics', async () => {
-    component.connectService = {
+    fixture.componentRef.setInput('connectService', {
       config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
       setData: () => undefined,
-    } as unknown as ConnectEndpointService;
+    } as unknown as ConnectEndpointService);
     await fixture.whenStable();
     expect(component.authTypesForEndpoint.map(a => a.value)).toEqual(['creds', 'none']);
   });
@@ -53,10 +53,10 @@ describe('ConnectEndpointComponent', () => {
   // Metrics' username and password auth type gives no field labels of its
   // own; the fields still need a visible label and an accessible name.
   it('labels the username and password fields of an auth type without labels', async () => {
-    component.connectService = {
+    fixture.componentRef.setInput('connectService', {
       config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
       setData: () => undefined,
-    } as unknown as ConnectEndpointService;
+    } as unknown as ConnectEndpointService);
     await fixture.whenStable();
     const el: HTMLElement = fixture.nativeElement;
     const inputs = Array.from(el.querySelectorAll<HTMLInputElement>('app-credentials-auth-form input'));
@@ -69,10 +69,10 @@ describe('ConnectEndpointComponent', () => {
   // The credentials are the endpoint's, not the console login the browser
   // saved for this site, so the browser must not fill that in.
   it('keeps the browser from filling in the console login', async () => {
-    component.connectService = {
+    fixture.componentRef.setInput('connectService', {
       config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
       setData: () => undefined,
-    } as unknown as ConnectEndpointService;
+    } as unknown as ConnectEndpointService);
     await fixture.whenStable();
     const inputs = Array.from(fixture.nativeElement.querySelectorAll('app-credentials-auth-form input')) as HTMLInputElement[];
     expect(inputs.map(i => i.getAttribute('autocomplete'))).toEqual(['off', 'new-password']);
@@ -101,14 +101,46 @@ describe('ConnectEndpointComponent', () => {
     });
   });
 
+  it('locks the form while disabled, and unlocks it again', async () => {
+    fixture.componentRef.setInput('connectService', {
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData: () => undefined,
+    } as unknown as ConnectEndpointService);
+    fixture.componentRef.setInput('disabled', true);
+    await fixture.whenStable();
+    expect(component.endpointForm.disabled).toBe(true);
+
+    fixture.componentRef.setInput('disabled', false);
+    await fixture.whenStable();
+    expect(component.endpointForm.enabled).toBe(true);
+  });
+
+  // A new service for the same endpoint must not rebuild the form.
+  it('keeps what was typed when handed a new service for the same endpoint', async () => {
+    const service = (setData: (data: ConnectEndpointData) => void) => ({
+      config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
+      setData,
+    } as unknown as ConnectEndpointService);
+    fixture.componentRef.setInput('connectService', service(() => undefined));
+    await fixture.whenStable();
+    const form = component.endpointForm;
+    form.get('authValues')?.patchValue({ username: 'u', password: 'p' });
+
+    let sent: ConnectEndpointData | undefined;
+    fixture.componentRef.setInput('connectService', service(data => { sent = data; }));
+    await fixture.whenStable();
+    expect(component.endpointForm).toBe(form);
+    expect(sent?.authVal).toMatchObject({ username: 'u', password: 'p' });
+  });
+
   // TLS options are set on Register; the credentials form carries none.
   it('offers no TLS options, even to a user who may edit the endpoint', async () => {
     TestBed.inject(CurrentUserRolesDataService).applySessionScopes({ admin: true, guid: 'me-guid', name: 'me', scopes: [] });
     let sent: ConnectEndpointData | undefined;
-    component.connectService = {
+    fixture.componentRef.setInput('connectService', {
       config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
       setData: (data: ConnectEndpointData) => { sent = data; },
-    } as unknown as ConnectEndpointService;
+    } as unknown as ConnectEndpointService);
     await fixture.whenStable();
     expect(fixture.nativeElement.textContent).not.toContain('Skip SSL validation');
     expect(fixture.nativeElement.querySelector('textarea')).toBeNull();
@@ -126,11 +158,11 @@ describe('ConnectEndpointComponent', () => {
       connected = vi.fn<() => void>();
       submitted = vi.fn<() => void>();
       component.submitted.subscribe(submitted);
-      component.connectService = {
+      fixture.componentRef.setInput('connectService', {
         config: { name: 'metrics', guid: 'metrics-guid', type: 'metrics', subType: '', ssoAllowed: false },
         setData: () => undefined,
         submit: () => defer(() => { connected(); return of({ success: true, errorMessage: '' }); }),
-      } as unknown as ConnectEndpointService;
+      } as unknown as ConnectEndpointService);
       await fixture.whenStable();
     });
 

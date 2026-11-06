@@ -90,6 +90,19 @@ describe('CreateEndpointCfStep1Component', () => {
     expect(component).toBeTruthy();
   });
 
+  it('fills in and locks an address the host fixes', async () => {
+    const urlField = component.registerForm.controls.urlField;
+    fixture.componentRef.setInput('fixedUrl', 'https://api.fixed.example.com');
+    await fixture.whenStable();
+    expect(urlField.value).toBe('https://api.fixed.example.com');
+    expect(urlField.disabled).toBe(true);
+
+    fixture.componentRef.setInput('fixedUrl', '');
+    await fixture.whenStable();
+    expect(urlField.value).toBe('');
+    expect(urlField.enabled).toBe(true);
+  });
+
   it('asks for no linked Cloud Foundry when registering a Cloud Foundry', async () => {
     component.registerForm.controls.urlField.setValue('https://api.sys.example.com');
     await fixture.whenStable();
