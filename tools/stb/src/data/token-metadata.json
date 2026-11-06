@@ -36,6 +36,13 @@
         { "name": "--nav-text",       "default": "#ffffff", "category": "color", "required": true },
         { "name": "--nav-text-muted", "default": "#9ca3af", "category": "color", "required": false }
       ]
+    },
+    {
+      "name": "Content",
+      "description": "Text in the page content.",
+      "tokens": [
+        { "name": "--content-muted", "default": "#64748b", "category": "color", "required": false }
+      ]
     }
   ]
 }
