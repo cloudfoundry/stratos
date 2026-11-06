@@ -1,7 +1,6 @@
-import { Injectable, ModuleWithProviders, NgModule } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { inject, Injectable, ModuleWithProviders, NgModule } from '@angular/core';
 import { ActivatedRoute, Route, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AppState, GeneralEntityAppState, EntityServiceFactory } from '@stratosui/store';
 import { Observable } from 'rxjs';
 
 import { IPageSideNavTab } from '../../features/dashboard/page-side-nav/page-side-nav.component';
@@ -19,18 +18,23 @@ export enum StratosTabType {
 
 export interface StratosTabMetadata {
   label: string;
-  link: string;
+  // null is the no-link sentinel (TabNavService.TabsNoLinkValue) assigned to
+  // tabs declared with '-' as their link; such tabs are filtered out before
+  // any router navigation reads the link. Decorator-registered extension tabs
+  // always supply a real string link (see StratosTabMetadataConfig).
+  link: string | null;
   icon?: string;
   iconFont?: string;
   hidden?: (
-    store: Store<AppState>,
-    esf: EntityServiceFactory,
     activatedRoute: ActivatedRoute,
-    cups: CurrentUserPermissionsService
+    cups: CurrentUserPermissionsService,
+    http: HttpClient
   ) => Observable<boolean>;
 }
 
 export interface StratosTabMetadataConfig extends StratosTabMetadata {
+  // Decorator-registered tabs always carry a concrete route path.
+  link: string;
   type: StratosTabType;
 }
 
@@ -50,7 +54,6 @@ export interface StratosActionMetadata {
   link: string;
   icon: string;
   iconFont?: string;
-  visible?: (store: Store<GeneralEntityAppState>) => Observable<boolean>;
   visible$?: Observable<boolean>;
 }
 
@@ -62,29 +65,34 @@ export interface StratosExtensionRoutes {
 }
 
 // Stores the extension metadata as defined by the decorators
-const extensionMetadata = {
+const extensionMetadata: {
+  loginComponent: any | null;
+  extensionRoutes: { [key: string]: StratosExtensionRoutes[] };
+  tabs: { [key: string]: IPageSideNavTab[] };
+  actions: { [key: string]: StratosActionMetadata[] };
+} = {
   loginComponent: null,
-  extensionRoutes: {} as { [key: string]: StratosExtensionRoutes[], },
-  tabs: {} as { [key: string]: IPageSideNavTab[], },
-  actions: {} as { [key: string]: StratosActionMetadata[], },
+  extensionRoutes: {},
+  tabs: {},
+  actions: {},
 };
 
 /**
  * Decorator for a Tab extension
  */
 export function StratosTab(props: StratosTabMetadataConfig) {
-  return target => addExtensionTab(props.type, target, props);
+  return (target: any) => addExtensionTab(props.type, target, props);
 }
 
 /**
  * Decorator for an Action extension
  */
 export function StratosAction(props: StratosActionMetadata) {
-  return target => addExtensionAction(props.type, target, props);
+  return (target: any) => addExtensionAction(props.type, target, props);
 }
 
 export function StratosLoginComponent() {
-  return target => extensionMetadata.loginComponent = target;
+  return (target: any) => extensionMetadata.loginComponent = target;
 }
 
 function addExtensionTab(tab: StratosTabType, target: any, props: StratosTabMetadataConfig) {
@@ -127,12 +135,11 @@ export class ExtEmptyModule { }
 export class ExtensionService {
 
   public metadata = extensionMetadata;
-
-  constructor(private router: Router) { }
+  private router = inject(Router);
 
   // Declare extensions - this is a trick to ensure the Angular Build Optimiser does not
   // optimize out any extension components
-  public static declare(components: any[]): ModuleWithProviders<ExtEmptyModule> {
+  public static declare(_components: any[]): ModuleWithProviders<ExtEmptyModule> {
     return {
       ngModule: ExtEmptyModule
     };
@@ -163,16 +170,18 @@ export class ExtensionService {
     let needsReset = false;
     if (dashboardRoute) {
       // Move any stratos extension routes under the dashboard base route
-      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) { }
+      while (this.moveExtensionRoute(routeConfig, dashboardRoute)) { /* intentionally empty */ }
       needsReset = true;
     }
 
     if (extensionMetadata.loginComponent) {
       // Override the component used for the login route
       const loginRouteRoot = routeConfig.find(r => r.path === 'login') || { children: [] };
-      const loginRoute = loginRouteRoot.children.find(c => c.path === '');
-      loginRoute.component = extensionMetadata.loginComponent;
-      needsReset = true;
+      const loginRoute = (loginRouteRoot.children || []).find(c => c.path === '');
+      if (loginRoute) {
+        loginRoute.component = extensionMetadata.loginComponent;
+        needsReset = true;
+      }
     }
 
     if (needsReset) {
@@ -184,7 +193,7 @@ export class ExtensionService {
     const index = routeConfig.findIndex(r => !!r.data && (!!r.data.stratosNavigation || r.data.stratosNavigationPage));
     if (index >= 0) {
       const removed = routeConfig.splice(index, 1);
-      dashboardRoute.children = dashboardRoute.children.concat(removed);
+      dashboardRoute.children = (dashboardRoute.children || []).concat(removed);
     }
     return index >= 0;
   }

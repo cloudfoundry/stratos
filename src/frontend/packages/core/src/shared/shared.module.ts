@@ -1,14 +1,11 @@
-import { CdkTableModule } from '@angular/cdk/table';
+// Removed CDK table dependency
 import { CommonModule } from '@angular/common';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { InternalEventMonitorFactory } from '@stratosui/store';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 
-import { CoreModule } from '../core/core.module';
 import { AppActionMonitorIconComponent } from './components/app-action-monitor-icon/app-action-monitor-icon.component';
-import { AppActionMonitorComponent } from './components/app-action-monitor/app-action-monitor.component';
 import {
   ApplicationStateIconComponent,
 } from './components/application-state/application-state-icon/application-state-icon.component';
@@ -20,7 +17,7 @@ import { BreadcrumbsComponent } from './components/breadcrumbs/breadcrumbs.compo
 import { CardProgressOverlayComponent } from './components/card-progress-overlay/card-progress-overlay.component';
 import { CardBooleanMetricComponent } from './components/cards/card-boolean-metric/card-boolean-metric.component';
 import { CardNumberMetricComponent } from './components/cards/card-number-metric/card-number-metric.component';
-import { CardStatusComponent } from './components/cards/card-status/card-status.component';
+import { CardStatusComponent } from './components/cards/card-status/card-status.component'; // Now standalone
 import { AppChipsComponent } from './components/chips/chips.component';
 import { CodeBlockComponent } from './components/code-block/code-block.component';
 import { ConfirmationDialogService } from './components/confirmation-dialog.service';
@@ -30,49 +27,31 @@ import { DetailsCardComponent } from './components/details-card/details-card.com
 import { DialogConfirmComponent } from './components/dialog-confirm/dialog-confirm.component';
 import { DialogErrorComponent } from './components/dialog-error/dialog-error.component';
 import { DisplayValueComponent } from './components/display-value/display-value.component';
-import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component';
-import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component';
+import { EditableDisplayValueComponent } from './components/editable-display-value/editable-display-value.component'; // Now standalone
+import { EndpointsMissingComponent } from './components/endpoints-missing/endpoints-missing.component'; // Now standalone
 import { EntitySummaryTitleComponent } from './components/entity-summary-title/entity-summary-title.component';
 import { EnumerateComponent } from './components/enumerate/enumerate.component';
-import { FileInputComponent } from './components/file-input/file-input.component';
+import { FileInputComponent } from './components/file-input/file-input.component'; // Now standalone
 import { FocusDirective } from './components/focus.directive';
 import { IntroScreenComponent } from './components/intro-screen/intro-screen.component';
 import { JsonViewerComponent } from './components/json-viewer/json-viewer.component';
-import { listCardComponents } from './components/list/list-cards/card.types';
-import { MetaCardComponent } from './components/list/list-cards/meta-card/meta-card-base/meta-card.component';
-import { MetaCardItemComponent } from './components/list/list-cards/meta-card/meta-card-item/meta-card-item.component';
-import { MetaCardKeyComponent } from './components/list/list-cards/meta-card/meta-card-key/meta-card-key.component';
-import { MetaCardTitleComponent } from './components/list/list-cards/meta-card/meta-card-title/meta-card-title.component';
-import { MetaCardValueComponent } from './components/list/list-cards/meta-card/meta-card-value/meta-card-value.component';
-import { EntityListViewComponent } from './components/list/list-generics/entity-list-view/entity-list-view.component';
-import { ListHostDirective } from './components/list/list-generics/helpers/list-host.directive';
-import { ListViewComponent } from './components/list/list-generics/list-view/list-view.component';
-import {
-  TableCellRequestMonitorIconComponent,
-} from './components/list/list-table/table-cell-request-monitor-icon/table-cell-request-monitor-icon.component';
-import {
-  TableCellSidePanelComponent,
-} from './components/list/list-table/table-cell-side-panel/table-cell-side-panel.component';
-import { TableCellStatusDirective } from './components/list/list-table/table-cell-status.directive';
-import { listTableCells } from './components/list/list-table/table-cell/table-cell.component';
-import { TableComponent } from './components/list/list-table/table.component';
-import { listTableComponents } from './components/list/list-table/table.types';
-import { ApiKeyListConfigService } from './components/list/list-types/apiKeys/apiKey-list-config.service';
-import { EndpointCardComponent } from './components/list/list-types/endpoint/endpoint-card/endpoint-card.component';
-import { EndpointListHelper } from './components/list/list-types/endpoint/endpoint-list.helpers';
-import { EndpointsListConfigService } from './components/list/list-types/endpoint/endpoints-list-config.service';
+import { MetaCardComponent } from './components/meta-card/meta-card-base/meta-card.component';
+import { MetaCardItemComponent } from './components/meta-card/meta-card-item/meta-card-item.component';
+import { MetaCardKeyComponent } from './components/meta-card/meta-card-key/meta-card-key.component';
+import { MetaCardTitleComponent } from './components/meta-card/meta-card-title/meta-card-title.component';
+import { MetaCardValueComponent } from './components/meta-card/meta-card-value/meta-card-value.component';
+import { EndpointCardComponent } from './components/endpoint-list/endpoint-card/endpoint-card.component';
+import { EndpointListHelper } from './components/endpoint-list/endpoint-list.helpers';
 import {
   TableCellEndpointNameComponent,
-} from './components/list/list-types/endpoint/table-cell-endpoint-name/table-cell-endpoint-name.component';
-import { ListComponent } from './components/list/list.component';
-import { ListConfig } from './components/list/list.component.types';
-import { MaxListMessageComponent } from './components/list/max-list-message/max-list-message.component';
+} from './components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
+import { TableCellEndpointStatusComponent } from './components/endpoint-list/table-cell-endpoint-status/table-cell-endpoint-status.component';
 import { LoadingPageComponent } from './components/loading-page/loading-page.component';
 import { LogViewerComponent } from './components/log-viewer/log-viewer.component';
 import { MarkdownContentObserverDirective } from './components/markdown-preview/markdown-content-observer.directive';
 import { MarkdownPreviewComponent } from './components/markdown-preview/markdown-preview.component';
 import { MetadataItemComponent } from './components/metadata-item/metadata-item.component';
-import { MetricsChartComponent } from './components/metrics-chart/metrics-chart.component';
+import { MetricsChartComponent} from './components/metrics-chart/metrics-chart.component'; // Now standalone
 import {
   MetricsParentRangeSelectorComponent,
 } from './components/metrics-parent-range-selector/metrics-parent-range-selector.component';
@@ -90,14 +69,14 @@ import { RoutingIndicatorComponent } from './components/routing-indicator/routin
 import { SidepanelPreviewComponent } from './components/sidepanel-preview/sidepanel-preview.component';
 import { SimpleUsageChartComponent } from './components/simple-usage-chart/simple-usage-chart.component';
 import { SnackBarReturnComponent } from './components/snackbar-return/snackbar-return.component';
-import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component';
+import { SshViewerComponent } from './components/ssh-viewer/ssh-viewer.component'; // Now standalone
 import {
   StackedInputActionComponent,
-} from './components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
+} from './components/stacked-input-actions/stacked-input-action/stacked-input-action.component'; // Now standalone
 import { StackedInputActionsComponent } from './components/stacked-input-actions/stacked-input-actions.component';
 import { StartEndDateComponent } from './components/start-end-date/start-end-date.component';
 import { SteppersModule } from './components/stepper/steppers.module';
-import { StratosTitleComponent } from './components/stratos-title/stratos-title.component';
+import { StratosTitleComponent } from './components/stratos-title/stratos-title.component'; // Now standalone
 import { TileSelectorTileComponent } from './components/tile-selector-tile/tile-selector-tile.component';
 import { TileSelectorComponent } from './components/tile-selector/tile-selector.component';
 import { TileGridComponent } from './components/tile/tile-grid/tile-grid.component';
@@ -120,213 +99,295 @@ import { LongRunningOperationsService } from './services/long-running-op.service
 import { MetricsRangeSelectorService } from './services/metrics-range-selector.service';
 import { SessionService } from './services/session.service';
 import { UserPermissionDirective } from './user-permission.directive';
+import { TailwindSortDirective, TailwindSortHeaderDirective, TailwindSortService } from './services/tailwind-sort.service';
+import { TailwindPaginatorService } from './services/tailwind-paginator.service';
+import { TailwindSnackBarService } from './services/tailwind-snackbar.service';
+import { TailwindDialogService } from './services/tailwind-dialog.service';
+import { TailwindErrorStateMatcher, TailwindDefaultErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from './services/tailwind-error-state-matcher';
+import { CustomFormFieldComponent, CustomFormFieldIconComponent, CustomIconButtonDirective, CustomButtonDirective, MatInputDirective, MatSuffixDirective } from './components/custom-form-field/custom-form-field.component';
+import { CustomCheckboxComponent } from './components/custom-checkbox/custom-checkbox.component';
+import { DisableRouterLinkDirective } from '../core/disable-router-link.directive';
+import { MatDatepickerDirective } from './components/custom-material/custom-material.component';
+import { CustomSlideToggleComponent } from './components/custom-slide-toggle/custom-slide-toggle.component';
+import { CustomSelectComponent, CustomOptionComponent } from './components/custom-select/custom-select.component';
+import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from './components/custom-button-toggle/custom-button-toggle.component';
+import { CustomTabGroupComponent, CustomTabComponent } from './components/custom-tabs/custom-tabs.component';
+import { CustomCardComponent, CustomCardHeaderComponent, CustomCardTitleComponent, CustomCardSubtitleComponent, CustomCardContentComponent, CustomCardActionsComponent, CustomCardFooterComponent } from './components/custom-card/custom-card.component';
+import { CustomTooltipDirective } from './components/custom-tooltip/custom-tooltip.directive';
+import { CustomIconComponent, CustomProgressBarSelectorComponent, CustomDialogContentComponent, CustomDialogActionsComponent, CustomDialogTitleComponent, CustomDatepickerComponent, CustomDatepickerInputComponent, CustomDatepickerToggleComponent } from './components/custom-material/custom-material.component'; // CustomProgressBarSelectorComponent now standalone
+import { NoContentMessageComponent } from './components/no-content-message/no-content-message.component';
+import { UserAvatarComponent } from './components/user-avatar/user-avatar.component';
 
 @NgModule({
   imports: [
     CommonModule,
-    CoreModule,
+    FormsModule,
+    ReactiveFormsModule,
     PageHeaderModule,
     RouterModule,
     SteppersModule,
-    CdkTableModule,
-    NgxChartsModule,
+    BaseChartDirective,
+    // Standalone components
+    CopyToClipboardComponent,
+    EntitySummaryTitleComponent,
+    DateTimeComponent,
+    CardProgressOverlayComponent,
+    UsageGaugeComponent,
+    CodeBlockComponent,
+    AppChipsComponent,
+    TileSelectorComponent,
+    TileSelectorTileComponent,
+    DetailsCardComponent,
+    CustomCheckboxComponent,
+    IntroScreenComponent,
+    DisplayValueComponent,
+    BooleanIndicatorComponent,
+    LoadingPageComponent,
+    MetadataItemComponent,
+    CardStatusComponent,
+    StratosTitleComponent,
+    EditableDisplayValueComponent,
+    EnumerateComponent,
+    UserProfileBannerComponent,
+    UserAvatarComponent,
+    NoContentMessageComponent,
+    SshViewerComponent,
+    DialogConfirmComponent,
+    DialogErrorComponent,
+    LogViewerComponent,
+    EndpointsMissingComponent,
+    FileInputComponent,
+    CustomProgressBarSelectorComponent,
+    CustomIconComponent,
+    TileComponent,
+    TileGroupComponent,
+    TileGridComponent, // Now standalone - moved to imports
+    ApplicationStateComponent,
+    ApplicationStateIconComponent,
+    PollingIndicatorComponent, // Now standalone - moved to imports
+    MultilineTitleComponent, // Now standalone - moved to imports
+    UploadProgressIndicatorComponent, // Now standalone - moved to imports
+    NestedTabsComponent, // Now standalone - moved to imports
+    CardBooleanMetricComponent, // Now standalone - moved to imports
+    CardNumberMetricComponent, // Now standalone - moved to imports
+    SnackBarReturnComponent, // Now standalone - moved to imports
+    RingChartComponent,
+    MetricsChartComponent, // Now standalone - moved to imports
+    PageSubNavComponent, // Now standalone - moved to imports
+    StartEndDateComponent, // Now standalone - moved to imports
+    BreadcrumbsComponent, // Now standalone - moved to imports
+    RoutingIndicatorComponent, // Now standalone - moved to imports
+    UnlimitedInputComponent, // Now standalone - moved to imports
+    PageSubNavSectionComponent, // Now standalone - moved to imports
+    SidepanelPreviewComponent, // Now standalone - moved to imports
+    MarkdownPreviewComponent, // Now standalone - moved to imports
+    MarkdownContentObserverDirective, // Now standalone - moved to imports
+    JsonViewerComponent, // Now standalone - moved to imports
+    SimpleUsageChartComponent, // Now standalone - moved to imports
+    MetricsParentRangeSelectorComponent, // Now standalone - moved to imports
+    AppActionMonitorIconComponent, // Now standalone - moved to imports
+    MetricsRangeSelectorComponent, // Now standalone - moved to imports
+    ProfileSettingsComponent, // Now standalone - moved to imports
+    StackedInputActionsComponent, // Now standalone - moved to imports
+    StackedInputActionComponent, // Now standalone - moved to imports
+    EndpointCardComponent, // Now standalone - moved to imports
+    ProductNameComponent, // Now standalone - moved to imports
+    // Wave 11 dependency chain - now standalone
+    MetaCardComponent, // Now standalone - moved to imports
+    MetaCardTitleComponent, // Now standalone - moved to imports
+    MetaCardItemComponent, // Now standalone - moved to imports
+    MetaCardKeyComponent, // Now standalone - moved to imports
+    MetaCardValueComponent, // Now standalone - moved to imports
+    DisableRouterLinkDirective, // Now standalone - moved to imports
+    TableCellEndpointStatusComponent, // Now standalone - moved to imports
+    TableCellEndpointNameComponent, // Now standalone - moved to imports
+    // Standalone pipes
+    PercentagePipe,
+    ApplicationStateIconPipe,
+    // === Standalone Pipes ===
+    MbToHumanSizePipe,
+    UptimePipe,
+    UsageBytesPipe,
+    ValuesPipe,
+    CapitalizeFirstPipe,
+    // === Standalone Directives ===
+    FocusDirective,
+    BlurDirective,
+    UniqueDirective,
+    UserPermissionDirective,
+    TailwindSortDirective,
+    TailwindSortHeaderDirective,
+    // === Custom Material Wrapper Components ===
+    MatInputDirective,
+    MatDatepickerDirective,
+    CustomFormFieldComponent,
+    CustomFormFieldIconComponent,
+    CustomIconButtonDirective,
+    CustomButtonDirective,
+    MatSuffixDirective,
+    CustomSlideToggleComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    CustomTabGroupComponent,
+    CustomTabComponent,
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardTitleComponent,
+    CustomCardSubtitleComponent,
+    CustomCardContentComponent,
+    CustomCardActionsComponent,
+    CustomCardFooterComponent,
+    CustomTooltipDirective,
+    CustomDialogContentComponent,
+    CustomDialogActionsComponent,
+    CustomDialogTitleComponent,
+    CustomDatepickerComponent,
+    CustomDatepickerInputComponent,
+    CustomDatepickerToggleComponent,
   ],
   declarations: [
-    LoadingPageComponent,
-    DisplayValueComponent,
-    EditableDisplayValueComponent,
-    MbToHumanSizePipe,
-    PercentagePipe,
-    UptimePipe,
-    UsageBytesPipe,
-    ValuesPipe,
-    LoadingPageComponent,
-    DetailsCardComponent,
-    FocusDirective,
-    BlurDirective,
-    UniqueDirective,
-    CodeBlockComponent,
-    LogViewerComponent,
-    EndpointsMissingComponent,
-    DialogErrorComponent,
-    SshViewerComponent,
-    ApplicationStateIconPipe,
-    ApplicationStateIconComponent,
-    ApplicationStateComponent,
-    TileComponent,
-    TileGroupComponent,
-    TileGridComponent,
-    MetadataItemComponent,
-    UsageGaugeComponent,
-    CardStatusComponent,
-    DialogConfirmComponent,
-    ListComponent,
-    ...listCardComponents,
-    ...listTableComponents,
-    FileInputComponent,
-    MetaCardComponent,
-    MetaCardTitleComponent,
-    MetaCardItemComponent,
-    MetaCardKeyComponent,
-    MetaCardValueComponent,
-    NestedTabsComponent,
-    BooleanIndicatorComponent,
-    AppChipsComponent,
-    CardBooleanMetricComponent,
-    CardNumberMetricComponent,
-    RingChartComponent,
-    MetricsChartComponent,
-    StratosTitleComponent,
-    IntroScreenComponent,
-    EnumerateComponent,
-    UploadProgressIndicatorComponent,
-    UserProfileBannerComponent,
-    AppActionMonitorComponent,
-    AppActionMonitorIconComponent,
-    UserProfileBannerComponent,
-    TableCellRequestMonitorIconComponent,
-    UserPermissionDirective,
-    CapitalizeFirstPipe,
-    RoutingIndicatorComponent,
-    DateTimeComponent,
-    StartEndDateComponent,
-    MetricsRangeSelectorComponent,
-    MetricsParentRangeSelectorComponent,
-    StackedInputActionsComponent,
-    StackedInputActionComponent,
-    MultilineTitleComponent,
-    TileSelectorComponent,
-    MarkdownPreviewComponent,
-    MarkdownContentObserverDirective,
-    EndpointCardComponent,
-    SimpleUsageChartComponent,
-    PageSubNavComponent,
-    BreadcrumbsComponent,
-    PageSubNavSectionComponent,
-    EntitySummaryTitleComponent,
-    MarkdownPreviewComponent,
-    MarkdownContentObserverDirective,
-    SnackBarReturnComponent,
-    PollingIndicatorComponent,
-    UnlimitedInputComponent,
-    JsonViewerComponent,
-    ListHostDirective,
-    ListViewComponent,
-    EntityListViewComponent,
-    CopyToClipboardComponent,
-    SidepanelPreviewComponent,
-    TileSelectorTileComponent,
-    SidepanelPreviewComponent,
-    TableCellSidePanelComponent,
-    CardProgressOverlayComponent,
-    MaxListMessageComponent,
-    ProfileSettingsComponent,
-    ProductNameComponent,
+    // All standalone components moved to imports above
   ],
   exports: [
+    // === Standalone Pipes (imported above) ===
     ApplicationStateIconPipe,
-    ApplicationStateIconComponent,
-    TableCellStatusDirective,
-    FormsModule,
-    ReactiveFormsModule,
-    LoadingPageComponent,
-    DialogErrorComponent,
-    PageHeaderModule,
-    DisplayValueComponent,
-    EditableDisplayValueComponent,
-    DetailsCardComponent,
-    SteppersModule,
     MbToHumanSizePipe,
     ValuesPipe,
     PercentagePipe,
     UsageBytesPipe,
     UptimePipe,
-    SteppersModule,
+    CapitalizeFirstPipe,
+
+    // === Standalone Directives (imported above) ===
     FocusDirective,
     BlurDirective,
     UniqueDirective,
+    UserPermissionDirective,
+    TailwindSortDirective,
+    TailwindSortHeaderDirective,
+    DisableRouterLinkDirective,
+    CustomIconButtonDirective,
+    CustomButtonDirective,
+    MatInputDirective,
+    MatDatepickerDirective,
+    MatSuffixDirective,
+    CustomTooltipDirective,
+    MarkdownContentObserverDirective,
+
+    // === Modules (can be exported without being in imports) ===
+    FormsModule,
+    ReactiveFormsModule,
+    PageHeaderModule,
+    SteppersModule,
+
+    // === Standalone Components (imported above) ===
+    ApplicationStateIconComponent,
+    ApplicationStateComponent,
+    LoadingPageComponent,
+    DialogErrorComponent,
+    DialogConfirmComponent,
+    DisplayValueComponent,
+    EditableDisplayValueComponent,
+    EnumerateComponent,
+    UserProfileBannerComponent,
+    UserAvatarComponent,
+    DetailsCardComponent,
     CodeBlockComponent,
     LogViewerComponent,
     EndpointsMissingComponent,
-    ApplicationStateComponent,
     SshViewerComponent,
     TileComponent,
     TileGroupComponent,
     TileGridComponent,
     CardStatusComponent,
+    CardBooleanMetricComponent,
+    CardNumberMetricComponent,
     MetadataItemComponent,
     UsageGaugeComponent,
-    DialogConfirmComponent,
-    ListComponent,
+    SnackBarReturnComponent,
     FileInputComponent,
     MetaCardComponent,
     MetaCardTitleComponent,
     MetaCardItemComponent,
     MetaCardKeyComponent,
     MetaCardValueComponent,
-    NestedTabsComponent,
     RingChartComponent,
     AppChipsComponent,
-    CardBooleanMetricComponent,
-    CardNumberMetricComponent,
     MetricsChartComponent,
     StratosTitleComponent,
     IntroScreenComponent,
-    UserProfileBannerComponent,
-    EnumerateComponent,
     UploadProgressIndicatorComponent,
-    AppActionMonitorComponent,
     AppActionMonitorIconComponent,
-    UserPermissionDirective,
     BooleanIndicatorComponent,
-    TableComponent,
-    CapitalizeFirstPipe,
     RoutingIndicatorComponent,
     DateTimeComponent,
     StartEndDateComponent,
     MetricsRangeSelectorComponent,
     MetricsParentRangeSelectorComponent,
-    StackedInputActionsComponent,
     StackedInputActionComponent,
-    MultilineTitleComponent,
+    StackedInputActionsComponent,
     PageSubNavComponent,
-    BreadcrumbsComponent,
     PageSubNavSectionComponent,
+    BreadcrumbsComponent,
     TileSelectorComponent,
+    TileSelectorTileComponent,
     MarkdownPreviewComponent,
-    MarkdownContentObserverDirective,
     SimpleUsageChartComponent,
     EntitySummaryTitleComponent,
-    MarkdownPreviewComponent,
-    MarkdownContentObserverDirective,
     PollingIndicatorComponent,
     UnlimitedInputComponent,
-    ListHostDirective,
-    ListViewComponent,
-    EntityListViewComponent,
     JsonViewerComponent,
-    ListHostDirective,
     CopyToClipboardComponent,
     SidepanelPreviewComponent,
-    TileSelectorTileComponent,
-    SidepanelPreviewComponent,
     TableCellEndpointNameComponent,
+    EndpointCardComponent,
     CardProgressOverlayComponent,
-    MaxListMessageComponent,
-    ...listTableCells,
     ProfileSettingsComponent,
     ProductNameComponent,
+    NoContentMessageComponent,
+
+    // === Custom Material Wrapper Components ===
+    CustomCheckboxComponent,
+    CustomFormFieldComponent,
+    CustomFormFieldIconComponent,
+    CustomIconComponent,
+    CustomProgressBarSelectorComponent,
+    CustomSlideToggleComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    CustomTabGroupComponent,
+    CustomTabComponent,
+    CustomCardComponent,
+    CustomCardHeaderComponent,
+    CustomCardTitleComponent,
+    CustomCardSubtitleComponent,
+    CustomCardContentComponent,
+    CustomCardActionsComponent,
+    CustomCardFooterComponent,
+    CustomDialogContentComponent,
+    CustomDialogActionsComponent,
+    CustomDialogTitleComponent,
+    CustomDatepickerComponent,
+    CustomDatepickerInputComponent,
+    CustomDatepickerToggleComponent,
   ],
   providers: [
-    ListConfig,
     EndpointListHelper,
-    EndpointsListConfigService,
-    ApiKeyListConfigService,
     ConfirmationDialogService,
-    InternalEventMonitorFactory,
     MetricsRangeSelectorService,
     LongRunningOperationsService,
-    SessionService
+    SessionService,
+    TailwindSortService,
+    TailwindPaginatorService,
+    TailwindSnackBarService,
+    TailwindDialogService,
+    TailwindErrorStateMatcher,
+    TailwindDefaultErrorStateMatcher,
+    TailwindShowOnDirtyErrorStateMatcher,
   ]
 })
 export class SharedModule { }

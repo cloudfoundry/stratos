@@ -1,20 +1,12 @@
+/* Rides Tailwind's shared `spin` keyframes (emitted for animate-spin,
+   single source for every rotation in the app) instead of a private
+   copy. Paused by default; .polling resumes — the icon holds its
+   current angle between polls. */
 .poll-icon {
-  animation: spin .4s infinite linear;
+  animation: spin 1s infinite linear;
   animation-play-state: paused;
-  transform: rotate(0deg);
-  transition: transform 1s linear;
 }
 
 .polling {
   animation-play-state: running;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(359deg);
-  }
 }

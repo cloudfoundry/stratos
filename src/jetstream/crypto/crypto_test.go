@@ -2,7 +2,6 @@ package crypto
 
 import (
 	"encoding/hex"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -52,7 +51,7 @@ func TestAESEncryptDecrypt(t *testing.T) {
 		})
 
 		Reset(func() {
-			os.RemoveAll(FakeVolumeName)
+			_ = os.RemoveAll(FakeVolumeName)
 		})
 
 	})
@@ -92,15 +91,51 @@ func writeFakeEncryptionKey() error {
 	var err error
 
 	// create a temporary volume
-	FakeVolumeName, err = ioutil.TempDir("", "fake-volume")
+	FakeVolumeName, err = os.MkdirTemp("", "fake-volume")
 	if err != nil {
 		return err
 	}
 
 	key := filepath.Join(FakeVolumeName, FakeKeyName)
-	if err = ioutil.WriteFile(key, FakeKey, 0666); err != nil {
+	if err = os.WriteFile(key, FakeKey, 0666); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// ReadEncryptionKey indexed the filename as f[0] to detect an absolute path,
+// which panics on an empty string. main.go reaches it whenever the volume is
+// set and the filename is not — the configuration docs/devops_guide.md shows,
+// since its guard errors only when *neither* is set despite a comment saying
+// it requires both.
+func TestReadEncryptionKeyFilenameHandling(t *testing.T) {
+
+	Convey("Given an encryption key filename that is empty", t, func() {
+
+		Convey("reading it should error rather than panic", func() {
+			So(func() { _, _ = ReadEncryptionKey("/srv/secrets", "") }, ShouldNotPanic)
+
+			_, err := ReadEncryptionKey("/srv/secrets", "")
+			So(err, ShouldNotBeNil)
+			So(err.Error(), ShouldContainSubstring, "filename")
+		})
+	})
+
+	Convey("Given an absolute encryption key filename", t, func() {
+
+		if err := writeFakeEncryptionKey(); err != nil {
+			log.Fatal(err)
+		}
+
+		Convey("it should resolve without an extra leading separator", func() {
+			result, err := ReadEncryptionKey("", filepath.Join(FakeVolumeName, FakeKeyName))
+			So(err, ShouldBeNil)
+			So(strings.ToUpper(hex.EncodeToString(result)), ShouldResemble, FakeKeyValue)
+		})
+
+		Reset(func() {
+			_ = os.RemoveAll(FakeVolumeName)
+		})
+	})
 }

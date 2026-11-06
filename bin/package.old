@@ -1,0 +1,193 @@
+#!/usr/bin/env bash
+#
+# Package Stratos for Cloud Foundry deployment.
+#
+# Builds the frontend and backend, then stages a directory that can be
+# deployed with:  cf push -p dist/cf-package
+#
+# Usage:
+#   bin/package              # build + package
+#   bin/package --skip-build # package from existing build artifacts
+#
+# Environment:
+#   VERSION   - override version (default: from package.json)
+#   GOOS      - target OS for backend binary (default: linux)
+#   GOARCH    - target arch for backend binary (default: amd64)
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ROOT_DIR="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+# Ensure we're running from the repo root
+cd "${ROOT_DIR}"
+
+VERSION="${VERSION:-$(node -p "require('./package.json').version" 2>/dev/null || echo "dev")}"
+GOOS="${GOOS:-linux}"
+GOARCH="${GOARCH:-amd64}"
+SKIP_BUILD="${1:-}"
+
+DIST_DIR="${ROOT_DIR}/dist"
+PKG_DIR="${DIST_DIR}/cf-package"
+ZIP_FILE="${DIST_DIR}/stratos-cf-${VERSION}.zip"
+
+log()   { echo "-----> $1"; }
+error() { echo "ERROR: $1" >&2; exit 1; }
+
+# -------------------------------------------------------------------
+# Preflight checks
+# -------------------------------------------------------------------
+preflight() {
+  local missing=()
+  command -v node  >/dev/null || missing+=(node)
+  command -v go    >/dev/null || missing+=(go)
+  command -v zip   >/dev/null || missing+=(zip)
+
+  if [[ ${#missing[@]} -gt 0 ]]; then
+    error "Required tools not found: ${missing[*]}"
+  fi
+}
+
+# -------------------------------------------------------------------
+# Build frontend + backend
+# -------------------------------------------------------------------
+build() {
+  if [[ "${SKIP_BUILD}" == "--skip-build" ]]; then
+    log "Skipping build (--skip-build)"
+    return
+  fi
+
+  log "Building frontend..."
+  make build-frontend
+
+  log "Building backend (${GOOS}/${GOARCH})..."
+  cd "${ROOT_DIR}/src/jetstream"
+
+  # Generate OpenAPI docs if swag is available
+  if command -v swag >/dev/null 2>&1; then
+    swag init --parseDependency 2>/dev/null || true
+  fi
+
+  GOOS="${GOOS}" GOARCH="${GOARCH}" go build \
+    -ldflags "-X main.appVersion=${VERSION}" \
+    -o "${DIST_DIR}/jetstream"
+
+  cd "${ROOT_DIR}"
+}
+
+# -------------------------------------------------------------------
+# Stage the CF deployment layout
+# -------------------------------------------------------------------
+stage() {
+  log "Staging CF package..."
+
+  # Clean previous package
+  rm -rf "${PKG_DIR}"
+  mkdir -p "${PKG_DIR}"
+
+  # Backend binary
+  if [[ -f "${DIST_DIR}/jetstream" ]]; then
+    cp "${DIST_DIR}/jetstream" "${PKG_DIR}/jetstream"
+  else
+    error "Backend binary not found at ${DIST_DIR}/jetstream. Run without --skip-build."
+  fi
+  chmod +x "${PKG_DIR}/jetstream"
+
+  # Frontend assets — backend serves from ui/
+  local ui_src=""
+  if [[ -d "${DIST_DIR}/browser" ]]; then
+    ui_src="${DIST_DIR}/browser"
+  elif [[ -d "${DIST_DIR}/stratos" ]]; then
+    ui_src="${DIST_DIR}/stratos"
+  else
+    # Angular output may be directly in dist/ (excluding our packaging artifacts)
+    ui_src=""
+    for item in "${DIST_DIR}"/*; do
+      base="$(basename "$item")"
+      case "${base}" in
+        jetstream|cf-package|release|bin|"stratos-cf-"*) continue ;;
+      esac
+      if [[ -d "$item" ]]; then
+        ui_src="$item"
+        break
+      fi
+    done
+  fi
+
+  if [[ -z "${ui_src}" ]]; then
+    error "Frontend build output not found in ${DIST_DIR}/"
+  fi
+  cp -r "${ui_src}" "${PKG_DIR}/ui"
+
+  # Config
+  cp "${ROOT_DIR}/deploy/cloud-foundry/config.properties" "${PKG_DIR}/"
+
+  # Plugins
+  if [[ -f "${ROOT_DIR}/src/jetstream/plugins.yaml" ]]; then
+    cp "${ROOT_DIR}/src/jetstream/plugins.yaml" "${PKG_DIR}/"
+  fi
+
+  # User invite templates
+  if [[ -d "${ROOT_DIR}/src/jetstream/templates" ]]; then
+    cp -r "${ROOT_DIR}/src/jetstream/templates" "${PKG_DIR}/templates"
+  fi
+
+  # Procfile for CF
+  echo "web: ./jetstream" > "${PKG_DIR}/Procfile"
+
+  # Generate CF manifest for pre-built package
+  cat > "${PKG_DIR}/manifest.yml" <<MANIFEST
+applications:
+  - name: console
+    memory: 1512M
+    disk_quota: 1024M
+    timeout: 180
+    buildpack: binary_buildpack
+    health-check-type: port
+    command: ./jetstream
+#    env:
+# Override CF API endpoint URL inferred from VCAP_APPLICATION env
+#       CF_API_URL: https://CLOUD_FOUNDRY_API_ENDPOINT
+# Force the console to use secured communication with the Cloud Foundry API endpoint
+#       CF_API_FORCE_SECURE: true
+# Turn on backend debugging
+#       LOG_LEVEL: debug
+MANIFEST
+}
+
+# -------------------------------------------------------------------
+# Create the zip
+# -------------------------------------------------------------------
+archive() {
+  log "Creating ${ZIP_FILE}..."
+  rm -f "${ZIP_FILE}"
+  cd "${PKG_DIR}"
+  zip -r "${ZIP_FILE}" . -x '*.git*' '*.DS_Store'
+  cd "${ROOT_DIR}"
+}
+
+# -------------------------------------------------------------------
+# Summary
+# -------------------------------------------------------------------
+summary() {
+  echo ""
+  log "Package complete!"
+  echo "  Version:  ${VERSION}"
+  echo "  Archive:  ${ZIP_FILE}"
+  echo "  Size:     $(du -h "${ZIP_FILE}" | cut -f1)"
+  echo ""
+  echo "Deploy with:"
+  echo "  cf push -p ${ZIP_FILE}"
+  echo "  # or"
+  echo "  cf push -p ${PKG_DIR}"
+  echo ""
+}
+
+# -------------------------------------------------------------------
+# Main
+# -------------------------------------------------------------------
+preflight
+build
+stage
+archive
+summary

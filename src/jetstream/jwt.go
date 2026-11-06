@@ -4,15 +4,14 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"strings"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
 func (p *portalProxy) GetUserTokenInfo(tok string) (u *api.JWTUserTokenInfo, err error) {
-	log.Debug("getUserTokenInfo")
+	slog.Debug("getUserTokenInfo")
 	accessToken := strings.TrimPrefix(tok, "bearer ")
 	splits := strings.Split(accessToken, ".")
 

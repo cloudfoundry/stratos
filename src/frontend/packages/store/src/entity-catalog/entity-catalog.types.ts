@@ -1,31 +1,28 @@
-import { Compiler, ComponentFactory, Injector } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { Observable } from 'rxjs';
+import type { EnvironmentInjector, Injector, Type } from '@angular/core';
+import type { Store } from '../types/action.types';
+import type { Observable } from 'rxjs';
 
-import { HomePageEndpointCard } from '../../../core/src/features/home/home.types';
-import { IListAction } from '../../../core/src/shared/components/list/list.component.types';
-import { AppState, GeneralEntityAppState } from '../app-state';
-import {
+import type { HomePageEndpointCard } from '../../../core/src/features/home/home.types';
+import type { IListAction } from '../../../core/src/shared/components/signal-list/list-action.types';
+import type { GeneralEntityAppState } from '../app-state';
+import type {
   ApiErrorMessageHandler,
   EntitiesFetchHandler,
   EntitiesInfoHandler,
   EntityFetchHandler,
   EntityInfoHandler,
-  EntityUserRolesFetch,
-  EntityUserRolesReducer,
+  PaginationPageIteratorConfig,
   PreApiRequest,
   PrePaginationApiRequest,
   SuccessfulApiResponseDataMapper,
-} from '../entity-request-pipeline/entity-request-pipeline.types';
-import {
-  PaginationPageIteratorConfig,
-} from '../entity-request-pipeline/pagination-request-base-handlers/pagination-iterator.pipe';
-import { EndpointAuthTypeConfig } from '../extension-types';
-import { EntitySchema } from '../helpers/entity-schema';
-import { EndpointModel } from '../types/endpoint.types';
-import { StratosStatus } from '../types/shared.types';
-import { UserFavorite } from '../types/user-favorites.types';
-import { UserFavoriteManager } from '../user-favorite-manager';
+} from '../types/entity-pipeline.types';
+import type { EndpointAuthTypeConfig } from '../extension-types';
+import type { EntitySchema } from '../helpers/entity-schema';
+import type { EndpointsDataService } from '../services/endpoints-data.service';
+import type { EndpointModel } from '../types/endpoint.types';
+import type { StratosStatus } from '../types/shared.types';
+import type { UserFavorite } from '../types/user-favorites.types';
+import type { UserFavoriteManager } from '../user-favorite-manager';
 
 export interface EntityCatalogEntityConfig {
   entityType: string;
@@ -44,6 +41,10 @@ export type EntityActionBuilderEntityConfig = EntityCatalogEntityConfig & Action
 
 export const extractEntityCatalogEntityConfig = (ecec: Partial<EntityCatalogEntityConfig>): EntityCatalogEntityConfig => {
   const { entityType, endpointType, subType, schemaKey } = ecec;
+  // strict: callers always supply a config with entityType + endpointType; an absent one is a programming error
+  if (entityType === undefined || endpointType === undefined) {
+    throw new Error('extractEntityCatalogEntityConfig requires both entityType and endpointType');
+  }
   return { entityType, endpointType, subType, schemaKey };
 };
 
@@ -71,9 +72,13 @@ export interface HomeCardShortcut {
 
 // Metadata for Home Card
 export interface HomeCardMetadata {
-  component?: (compiler: Compiler, injector: Injector) => Promise<ComponentFactory<HomePageEndpointCard>>;
+  component?: () => Promise<Type<HomePageEndpointCard>>;
   shortcuts?: (endpointID: string) => HomeCardShortcut[];
   fullView?: boolean;
+  columnSpan?: number;
+  // Render Favorites/Shortcuts in a strip below the card content instead of
+  // the right-hand sidebar — suits content-light cards (e.g. kubernetes)
+  linksBelow?: boolean;
 }
 
 /**
@@ -138,7 +143,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   /**
    * How many endpoints of this type can be registered, 0 - many
    */
-  readonly registeredLimit?: (store: Store<AppState>) => Observable<number> | number;
+  readonly registeredLimit?: (injector: Injector) => Observable<number> | number;
   /**
    * Indicates if this endpoint type is in tech preview and should only be shown when tech preview mode is enabled
    */
@@ -166,18 +171,13 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
     entity: any, entityKey: string, userFavoriteManager: UserFavoriteManager
   ) => UserFavorite<M>;
   /**
-   * Allows the endpoint to fetch user roles, for example when the user loads Stratos or connects an endpoint of this type
-   */
-  readonly userRolesFetch?: EntityUserRolesFetch;
-  /**
-   * Allows the user roles to be stored, updated and removed in the current user permissions section of the store
-   */
-  readonly userRolesReducer?: EntityUserRolesReducer;
-  /**
    * A list of actions that will be displayed in the endpoints lists
    * Note - These should be restricted by type
    */
-  readonly endpointListActions?: (store: Store<AppState>) => IListAction<EndpointModel>[];
+  readonly endpointListActions?: (
+    endpointsService: EndpointsDataService,
+    injector: EnvironmentInjector,
+  ) => IListAction<EndpointModel>[];
 
   /**
    * Metadata for the card to show on the Home Page for this endpoint type
@@ -185,7 +185,7 @@ export interface IStratosEndpointDefinition<T = EntityCatalogSchemas | EntitySch
   readonly homeCard?: HomeCardMetadata;
 }
 
-export interface StratosEndpointExtensionDefinition extends Omit<IStratosEndpointDefinition, 'schema'> { }
+export type StratosEndpointExtensionDefinition = Omit<IStratosEndpointDefinition, 'schema'>;
 export interface EntityTableConfig<T = any> {
   rowBuilders: EntityRowBuilder<T>[];
   showHeader?: boolean;
@@ -217,7 +217,7 @@ export interface IStratosEntityDefinition<
 }
 
 export class NonJetstreamRequestHandler<T = any> {
-  isSuccess: (request: T) => boolean;
+  isSuccess!: (request: T) => boolean;
   getErrorCode?: (request: T) => string;
 }
 
@@ -233,7 +233,7 @@ export interface IStratosEntityBuilder<T extends IEntityMetadata, Y = any> {
   getMetadata(entity: Y): T;
   // TODO This should be used in the entities schema.
   getGuid(entity: Y): string;
-  getLink?(favorite: UserFavorite<T>): string;
+  getLink?(favorite: UserFavorite<T>): string | null;
   getSubTypeLabels?(entityMetadata: T): {
     singular: string,
     plural: string,

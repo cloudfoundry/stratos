@@ -1,45 +1,69 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { ErrorStateMatcher, ShowOnDirtyErrorStateMatcher } from '@angular/material/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { delay, filter, first, map, pairwise, publishReplay, refCount, tap } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterModule } from '@angular/router';
+import { TailwindSnackBarService, TailwindSnackBarRef } from '@stratosui/core';
+import { TailwindErrorStateMatcher, TailwindShowOnDirtyErrorStateMatcher } from '@stratosui/core';
+import { BehaviorSubject, Observable } from 'rxjs';
+import { map, publishReplay, refCount } from 'rxjs/operators';
 
 import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import { safeUnsubscribe } from '../../../../core/src/core/utils.service';
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
+import { AutoscalerCredentialDataService } from '../../services/domain-data/autoscaler-credential-data.service';
 import { ConfirmationDialogConfig } from '../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../core/src/shared/components/confirmation-dialog.service';
-import { AppState } from '../../../../store/src/app-state';
-import { entityCatalog } from '../../../../store/src/entity-catalog/entity-catalog';
-import { EntityService } from '../../../../store/src/entity-service';
-import { EntityServiceFactory } from '../../../../store/src/entity-service-factory.service';
-import { ActionState } from '../../../../store/src/reducers/api-request-reducer/types';
-import { selectDeletionInfo } from '../../../../store/src/selectors/api.selectors';
-import {
-  DeleteAppAutoscalerCredentialAction,
-  UpdateAppAutoscalerCredentialAction,
-} from '../../store/app-autoscaler.actions';
 import { AppAutoscalerCredential } from '../../store/app-autoscaler.types';
+import { AppBusyComponent } from '@stratosui/core';
+
+interface AutoscalerCredentialForm {
+  actype: FormControl<boolean>;
+  acusername: FormControl<string>;
+  acpassword: FormControl<string>;
+}
+
+interface CredentialView extends AppAutoscalerCredential {
+  authHeader: string;
+  fullUrl: string;
+}
 
 @Component({
   selector: 'app-edit-autoscaler-credential',
   templateUrl: './edit-autoscaler-credential.component.html',
   styleUrls: ['./edit-autoscaler-credential.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
-    { provide: ErrorStateMatcher, useClass: ShowOnDirtyErrorStateMatcher },
+    { provide: TailwindErrorStateMatcher, useClass: TailwindShowOnDirtyErrorStateMatcher },
+  ],
+  standalone: true,
+  imports: [
+    AppBusyComponent,
+    CommonModule,
+    ReactiveFormsModule,
+    RouterModule,
+    PageHeaderComponent,
   ]
 })
 export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
+  applicationService = inject(ApplicationService);
+  private fb = inject(FormBuilder);
+  private credentialData = inject(AutoscalerCredentialDataService);
+  private appAutoscalerCredentialSnackBar = inject(TailwindSnackBarService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private cdr = inject(ChangeDetectorRef);
 
-  parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
-  applicationName$: Observable<string>;
 
-  public editCredentialForm: UntypedFormGroup;
-  public appAutoscalerCredential$: Observable<AppAutoscalerCredential>;
+  parentUrl: string;
+  applicationName$!: Observable<string | null>;
 
-  private appAutoscalerCredentialErrorSub: Subscription;
-  private appAutoscalerCredentialSnackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  public editCredentialForm: FormGroup<AutoscalerCredentialForm>;
+
+  // Signal-native data flow: createCredential() pushes a fresh value here on
+  // success; the template binds via the async pipe just like the legacy
+  // EntityServiceFactory observable did.
+  private createdCredential = new BehaviorSubject<CredentialView | null>(null);
+  public appAutoscalerCredential$: Observable<CredentialView | null> = this.createdCredential.asObservable();
+
+  private appAutoscalerCredentialSnackBarRef!: TailwindSnackBarRef<any>;
 
 
   private creating = new BehaviorSubject(false);
@@ -47,19 +71,12 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
   private deleting = new BehaviorSubject(false);
   public deleting$ = this.deleting.asObservable();
 
-  constructor(
-    public applicationService: ApplicationService,
-    private fb: UntypedFormBuilder,
-    private store: Store<AppState>,
-    private entityServiceFactory: EntityServiceFactory,
-    private appAutoscalerCredentialSnackBar: MatSnackBar,
-    private confirmDialog: ConfirmationDialogService,
-  ) {
-    this.editCredentialForm = this.fb.group({
-      actype: new UntypedFormControl({ value: true }),
-      acusername: new UntypedFormControl({ value: '', disabled: true }, Validators.required),
-      acpassword: new UntypedFormControl({ value: '', disabled: true }, Validators.required),
-    });
+  constructor() {
+    this.parentUrl = `/applications/${this.applicationService.cfGuid}/${this.applicationService.appGuid}/autoscale`;
+    this.editCredentialForm = this.fb.group<AutoscalerCredentialForm>({
+      actype: this.fb.nonNullable.control({ value: true, disabled: false }),
+      acusername: this.fb.nonNullable.control({ value: '', disabled: true }, Validators.required),
+      acpassword: this.fb.nonNullable.control({ value: '', disabled: true }, Validators.required) });
   }
 
   ngOnInit() {
@@ -68,13 +85,13 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       publishReplay(1),
       refCount()
     );
+    this.cdr.markForCheck();
   }
 
   ngOnDestroy(): void {
     if (this.appAutoscalerCredentialSnackBarRef) {
       this.appAutoscalerCredentialSnackBarRef.dismiss();
     }
-    safeUnsubscribe(this.appAutoscalerCredentialErrorSub);
   }
 
   toggleChange() {
@@ -91,58 +108,34 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
     }
   }
 
-  createCredential() {
+  async createCredential(): Promise<void> {
     this.creating.next(true);
-    let action: UpdateAppAutoscalerCredentialAction;
-    if (this.editCredentialForm.controls.actype.value) {
-      action = new UpdateAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid);
-    } else {
-      const credential: AppAutoscalerCredential = {
+    const cnsi = this.applicationService.cfGuid;
+    const appGuid = this.applicationService.appGuid;
+    const body: AppAutoscalerCredential | undefined = this.editCredentialForm.controls.actype.value
+      ? undefined
+      : {
         username: this.editCredentialForm.controls.acusername.value,
         password: this.editCredentialForm.controls.acpassword.value,
       };
-      action = new UpdateAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid, credential);
-    }
-    const updateAppAutoscalerCredentialService: EntityService = this.entityServiceFactory.create(
-      this.applicationService.appGuid,
-      action,
-    );
-    this.appAutoscalerCredential$ = updateAppAutoscalerCredentialService.entityObs$.pipe(
-      filter(({ entity, entityRequestInfo }) => {
-        return entityRequestInfo && !entityRequestInfo.creating && !entityRequestInfo.deleting.busy;
-      }),
-      map(({ entity }) => entity ? entity.entity : null),
-      map(creds => {
-        if (!creds) {
-          return;
-        }
-        return {
-          ...creds,
-          authHeader: 'basic ' + btoa(`${creds.username}:${creds.password}`),
-          fullUrl: `${creds.url}/v1/apps/${creds.app_id}/metrics`
-        };
-      }),
-      publishReplay(1),
-      refCount()
-    );
-    updateAppAutoscalerCredentialService.entityMonitor.getUpdatingSection(action.updatingKey).pipe(
-      delay(150),
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      map(([, newV]) => newV),
-      first(),
-    ).subscribe(actionState => {
-      this.creating.next(false);
-      if (actionState.error) {
-        if (this.appAutoscalerCredentialSnackBarRef) {
-          this.appAutoscalerCredentialSnackBarRef.dismiss();
-        }
-        this.appAutoscalerCredentialSnackBarRef =
-          this.appAutoscalerCredentialSnackBar.open(`Failed to create credentials: ${actionState.message}`, 'Dismiss');
+    try {
+      const creds = await this.credentialData.create(cnsi, appGuid, body);
+      this.createdCredential.next({
+        ...creds,
+        authHeader: 'basic ' + btoa(`${creds.username}:${creds.password}`),
+        fullUrl: `${creds.url}/v1/apps/${creds.app_id}/metrics`,
+      });
+    } catch (err) {
+      const message = (err as { message?: string })?.message ?? String(err);
+      if (this.appAutoscalerCredentialSnackBarRef) {
+        this.appAutoscalerCredentialSnackBarRef.dismiss();
       }
-
-    });
-    this.store.dispatch(action);
+      this.appAutoscalerCredentialSnackBarRef =
+        this.appAutoscalerCredentialSnackBar.open(`Failed to create credentials: ${message}`, 'Dismiss');
+    } finally {
+      this.creating.next(false);
+      this.cdr.markForCheck();
+    }
   }
 
   deleteCredentialConfirm() {
@@ -153,33 +146,29 @@ export class EditAutoscalerCredentialComponent implements OnInit, OnDestroy {
       true
     );
     this.confirmDialog.open(confirmation, () => {
-      this.deleteCredential().pipe(
-        first(),
-      ).subscribe(actionState => {
-        if (actionState.error) {
-          if (this.appAutoscalerCredentialSnackBarRef) {
-            this.appAutoscalerCredentialSnackBarRef.dismiss();
-          }
-          this.appAutoscalerCredentialSnackBarRef =
-            this.appAutoscalerCredentialSnackBar.open(`Failed to delete credential: ${actionState.message}`, 'Dismiss');
-        }
-      });
+      void this.deleteCredential();
     });
   }
 
-  deleteCredential(): Observable<ActionState> {
+  async deleteCredential(): Promise<void> {
     this.deleting.next(true);
-    const action = new DeleteAppAutoscalerCredentialAction(this.applicationService.appGuid, this.applicationService.cfGuid);
-    this.store.dispatch(action);
-    const entityKey = entityCatalog.getEntityKey(action);
-
-    return this.store.select(selectDeletionInfo(entityKey, this.applicationService.appGuid)).pipe(
-      delay(250),
-      pairwise(),
-      filter(([oldV, newV]) => oldV.busy && !newV.busy),
-      map(([, newV]) => newV),
-      tap(() => this.deleting.next(false))
-    );
+    const cnsi = this.applicationService.cfGuid;
+    const appGuid = this.applicationService.appGuid;
+    try {
+      await this.credentialData.delete(cnsi, appGuid);
+      // Successful delete invalidates any previously displayed creds.
+      this.createdCredential.next(null);
+    } catch (err) {
+      const message = (err as { message?: string })?.message ?? String(err);
+      if (this.appAutoscalerCredentialSnackBarRef) {
+        this.appAutoscalerCredentialSnackBarRef.dismiss();
+      }
+      this.appAutoscalerCredentialSnackBarRef =
+        this.appAutoscalerCredentialSnackBar.open(`Failed to delete credential: ${message}`, 'Dismiss');
+    } finally {
+      this.deleting.next(false);
+      this.cdr.markForCheck();
+    }
   }
 
 }

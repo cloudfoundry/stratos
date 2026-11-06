@@ -1,22 +1,20 @@
 package auth
 
 import (
-	"bytes"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net"
 	"net/http"
 	"strings"
 	"time"
 
-	// "github.com/SermoDigital/jose/jws"
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
 )
 
@@ -51,34 +49,32 @@ func (c *CertKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Tok
 	return nil
 }
 
-func (c *CertKubeAuth) extractCerts(ec echo.Context) (*KubeCertificate, error) {
+func (c *CertKubeAuth) extractCerts(ec *echo.Context) (*KubeCertificate, error) {
 
-	kubeCertAuth := &KubeCertificate{}
+	certB64 := strings.Join(strings.Fields(ec.FormValue("cert")), "")
+	certKeyB64 := strings.Join(strings.Fields(ec.FormValue("certKey")), "")
 
-	bodyReader := ec.Request().Body
-	defer bodyReader.Close()
-	buf := new(bytes.Buffer)
-	buf.ReadFrom(bodyReader)
-	body := buf.String()
-	firstColon := strings.IndexByte(body, ':')
-
-	cert, err := base64.StdEncoding.DecodeString(body[:firstColon])
-	if err != nil {
-		return nil, err
-	}
-	certKey, err := base64.StdEncoding.DecodeString(body[firstColon+1:])
-	if err != nil {
-		return nil, err
+	if len(certB64) == 0 || len(certKeyB64) == 0 {
+		return nil, errors.New("certificate and key are required")
 	}
 
-	kubeCertAuth.Certificate = string(cert)
-	kubeCertAuth.CertificateKey = string(certKey)
-	return kubeCertAuth, nil
+	cert, err := base64.StdEncoding.DecodeString(certB64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode certificate: %v", err)
+	}
+	certKey, err := base64.StdEncoding.DecodeString(certKeyB64)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode certificate key: %v", err)
+	}
 
+	return &KubeCertificate{
+		Certificate:    string(cert),
+		CertificateKey: string(certKey),
+	}, nil
 }
 
-func (c *CertKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("Kube Certs - FetchToken")
+func (c *CertKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+	slog.Debug("Kube Certs - FetchToken", "endpoint", cnsiRecord.GUID)
 
 	kubeCertAuth, err := c.extractCerts(ec)
 	if err != nil {
@@ -111,7 +107,7 @@ func (c *CertKubeAuth) GetUserFromToken(cnsiGUID string, cfTokenRecord *api.Toke
 }
 
 func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doCertAuthFlowRequest")
+	slog.Debug("doCertAuthFlowRequest", "endpoint", cnsiRequest.GUID, "user", cnsiRequest.UserGUID)
 
 	authHandler := func(tokenRec api.TokenRecord, cnsi api.CNSIRecord) (*http.Response, error) {
 
@@ -132,18 +128,18 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 
 		if len(cnsi.CACert) > 0 {
 			if ok := rootCAs.AppendCertsFromPEM([]byte(cnsi.CACert)); !ok {
-				log.Warn("Could not append the CA - using system certs only")
+				slog.Warn("could not append the endpoint CA, using system certs only", "endpoint", cnsi.GUID)
 			}
 		}
 
 		dial := (&net.Dialer{
 			Timeout:   time.Duration(30) * time.Second,
 			KeepAlive: 30 * time.Second,
-		}).Dial
+		}).DialContext
 
 		sslTransport := &http.Transport{
 			Proxy:               http.ProxyFromEnvironment,
-			Dial:                dial,
+			DialContext:         dial,
 			TLSHandshakeTimeout: 10 * time.Second, // 10 seconds is a sound default value (default is 0)
 			TLSClientConfig: &tls.Config{
 				InsecureSkipVerify: cnsi.SkipSSLValidation,
@@ -178,7 +174,7 @@ func (c *CertKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Req
 }
 
 func (c *CertKubeAuth) RefreshCertAuth(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("RefreshCertAuth")
+	slog.Debug("RefreshCertAuth", "endpoint", cnsiGUID, "user", userGUID)
 	// This shouldn't be called since cert-auth K8S shouldn't expire
 
 	userToken, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)

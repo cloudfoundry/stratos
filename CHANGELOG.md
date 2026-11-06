@@ -1,3 +1,30 @@
+## 5.0.0
+
+First release of the modernized Stratos console. The frontend was rebuilt on a
+signal-native Angular architecture (retiring the `@ngrx` entity/list stack),
+rethemed to Tailwind v4 with OKLCH design tokens, and the build/release
+pipeline was moved to GitHub Actions.
+
+**Frontend**
+
+- Signal-native migration — the entity, pagination, and list frameworks were
+  rebuilt on Angular signals, replacing the `@ngrx` store/list stack.
+- Tailwind v4 theming with OKLCH color tokens and light/dark support.
+- Monaco-based YAML editor integration.
+
+**Backend & packaging**
+
+- Pure-Go sqlite driver (`ncruces/go-sqlite3`) so the default sqlite database
+  works in the shipped binaries. The previous `mattn/go-sqlite3` is cgo-only;
+  because the release binaries are cross-compiled with `CGO_ENABLED=0`, sqlite
+  silently failed at first database access in every deployment mode.
+- Three deployment modes, all reusing the same release-built artifacts:
+  run-local platform archives (linux/darwin/windows × amd64/arm64), a
+  cf-pushable zip (binary buildpack), and a thin all-in-one docker image that
+  COPYs the prebuilt jetstream + UI onto a minimal base (no in-image build).
+- GitHub Actions release automation — a version tag builds, packages, and
+  publishes the platform archives, the cf zip, and the all-in-one image.
+
 ### 4.5.0 -  2023-11-10
 * Make builds work and abstract away architecture (#1)
 * Improvements in vulnerability checking (#8)

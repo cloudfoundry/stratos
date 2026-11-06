@@ -12,6 +12,7 @@ type TokenRepository interface {
 	FindAuthToken(userGUID string, encryptionKey []byte) (TokenRecord, error)
 	SaveAuthToken(userGUID string, tokenRecord TokenRecord, encryptionKey []byte) error
 
+	ListAllEnabledConnectedCNSITokens(encryptionKey []byte) ([]BackupTokenRecord, error)
 	FindCNSIToken(cnsiGUID string, userGUID string, encryptionKey []byte) (TokenRecord, error)
 	FindCNSITokenIncludeDisconnected(cnsiGUID string, userGUID string, encryptionKey []byte) (TokenRecord, error)
 	FindAllCNSITokenBackup(cnsiGUID string, encryptionKey []byte) ([]BackupTokenRecord, error)

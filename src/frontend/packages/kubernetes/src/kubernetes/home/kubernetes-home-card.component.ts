@@ -1,25 +1,38 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AppState } from 'frontend/packages/store/src/app-state';
-import { combineLatest, Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { Component, Input, Signal, computed, inject, signal, ChangeDetectionStrategy } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { CommonModule } from '@angular/common';
+import { Observable } from 'rxjs';
 
 import { HomePageCardLayout } from '../../../../core/src/features/home/home.types';
-import { HomeCardShortcut } from '../../../../store/src/entity-catalog/entity-catalog.types';
-import { EndpointModel } from '../../../../store/src/public-api';
-import { kubeEntityCatalog } from '../kubernetes-entity-generator';
-import { KubernetesEndpointService } from '../services/kubernetes-endpoint.service';
+import { EndpointModel } from '../../../../store/src/types/endpoint.types';
+import { KubePodDataService } from '../../services/domain-data/kube-pod-data.service';
+import { KubeNodeDataService } from '../../services/domain-data/kube-node-data.service';
+import { KubeNamespaceDataService } from '../../services/domain-data/kube-namespace-data.service';
+import { TileGridComponent } from '../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../core/src/shared/components/tile/tile/tile.component';
+import { CardNumberMetricComponent } from '../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
 
 @Component({
   selector: 'app-k8s-home-card',
   templateUrl: './kubernetes-home-card.component.html',
-  styleUrls: ['./kubernetes-home-card.component.scss']
+  styleUrls: ['./kubernetes-home-card.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardNumberMetricComponent
+  ]
 })
-export class KubernetesHomeCardComponent implements OnInit {
+export class KubernetesHomeCardComponent {
 
-  @Input() endpoint: EndpointModel;
+  @Input() endpoint!: EndpointModel;
 
-  pLayout: HomePageCardLayout;
+  // strict: backing field for the @Input() layout setter; assigned before the getter is read in the template
+  pLayout!: HomePageCardLayout;
 
   get layout(): HomePageCardLayout {
     return this.pLayout;
@@ -31,73 +44,48 @@ export class KubernetesHomeCardComponent implements OnInit {
     }
   }
 
-  public shortcuts: HomeCardShortcut[];
+  private podData = inject(KubePodDataService);
+  private nodeData = inject(KubeNodeDataService);
+  private namespaceData = inject(KubeNamespaceDataService);
 
-  public podCount$: Observable<number>;
-  public nodeCount$: Observable<number>;
-  public namespaceCount$: Observable<number>;
+  // The endpoint guid, set when the container triggers load(). Counts stay
+  // 0 until then so an unloaded card renders cleanly.
+  private guidSig = signal<string>('');
 
-  constructor(private store: Store<AppState>) { }
+  // Counts read straight off the cluster-scoped signal data services. Pods
+  // auto-load on read; node/namespace are primed by refresh() in load().
+  readonly podCount = computed(() => {
+    const guid = this.guidSig();
+    return guid ? (this.podData.podsInCluster(guid) as Signal<unknown[]>)().length : 0;
+  });
+  readonly nodeCount = computed(() => {
+    const guid = this.guidSig();
+    return guid ? (this.nodeData.nodesInCluster(guid) as Signal<unknown[]>)().length : 0;
+  });
+  readonly namespaceCount = computed(() => {
+    const guid = this.guidSig();
+    return guid ? (this.namespaceData.namespacesForEndpoint(guid) as Signal<unknown[]>)().length : 0;
+  });
 
-  ngOnInit() {
-    const guid = this.endpoint.guid;
-    this.shortcuts = [
-      {
-        title: 'View Nodes',
-        link: ['/kubernetes', guid, 'nodes'],
-        icon: 'node',
-        iconFont: 'stratos-icons'
-      },
-      {
-        title: 'View Namespaces',
-        link: ['/kubernetes', guid, 'resource', 'namespace'],
-        icon: 'namespace',
-        iconFont: 'stratos-icons'
-      }
-    ];
-  }
+  // Preserves the original load() contract: emit once the counts are wired.
+  private readonly loaded = computed(() => {
+    this.podCount();
+    this.nodeCount();
+    this.namespaceCount();
+    return true;
+  });
+  private readonly loaded$ = toObservable(this.loaded);
 
   // Card is instructed to load its view by the container, whn it is visible
   load(): Observable<boolean> {
-    const guid = this.endpoint.guid;
-    const podsObs = kubeEntityCatalog.pod.store.getPaginationService(guid);
-    const pods$ = podsObs.entities$;
-    const nodesObs = kubeEntityCatalog.node.store.getPaginationService(guid);
-    const nodes$ = nodesObs.entities$;
-    const namespacesObs = kubeEntityCatalog.namespace.store.getPaginationService(guid);
-    const namespaces$ = namespacesObs.entities$;
+    // strict: home cards only render for registered endpoints, which always have a guid
+    const guid = this.endpoint.guid!;
+    // Drives the count computeds; pods auto-load on read, node/namespace
+    // need an explicit refresh to populate their cluster caches.
+    this.guidSig.set(guid);
+    void this.nodeData.refresh(guid);
+    void this.namespaceData.refresh({ kubeGuid: guid });
 
-    this.podCount$ = pods$.pipe(map(entities => entities.length));
-    this.nodeCount$ = nodes$.pipe(map(entities => entities.length));
-    this.namespaceCount$ = namespaces$.pipe(map(entities => entities.length));
-
-    KubernetesEndpointService.hasKubeTerminalEnabled(this.store).pipe(first()).subscribe(hasKubeTerminal => {
-      if (hasKubeTerminal) {
-        this.shortcuts.push(
-          {
-            title: 'Open Terminal',
-            link: ['/kubernetes', guid, 'terminal'],
-            icon: 'terminal',
-            iconFont: 'stratos-icons'
-          }
-        );
-      }
-    });
-
-    KubernetesEndpointService.kubeDashboardConfigured(this.store, guid).pipe(first()).subscribe(hasKubeDashboard => {
-      if (hasKubeDashboard) {
-        this.shortcuts.push(
-          {
-            title: 'View Dashboard',
-            link: ['/kubernetes', guid, 'dashboard'],
-            icon: 'dashboard'
-          }
-        );
-      }
-    });
-
-    return combineLatest([this.podCount$, this.nodeCount$, this.namespaceCount$]).pipe(
-      map(() => true)
-    );
+    return this.loaded$;
   }
 }

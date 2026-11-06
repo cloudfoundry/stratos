@@ -1,4 +1,4 @@
-import { NormalizedResponse } from '../types/api.types';
+import type { NormalizedResponse } from '../types/api.types';
 
 export const ApiActionTypes = {
   API_REQUEST_START: 'API_REQUEST_START'
@@ -13,7 +13,7 @@ export const RequestTypes = {
 
 
 export class APIResponse {
-  response: NormalizedResponse;
-  totalResults: number;
-  totalPages: number;
+  response!: NormalizedResponse;
+  totalResults!: number;
+  totalPages!: number;
 }

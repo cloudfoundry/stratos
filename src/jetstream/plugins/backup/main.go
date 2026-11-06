@@ -3,13 +3,13 @@ package backup
 import (
 	"database/sql"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strconv"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 )
 
 // Module init will register plugin
@@ -63,8 +63,8 @@ func (br *BackupRestore) Init() error {
 	return nil
 }
 
-func (br *BackupRestore) backupEndpoints(c echo.Context) error {
-	log.Debug("backupEndpoints")
+func (br *BackupRestore) backupEndpoints(c *echo.Context) error {
+	slog.Debug("backupEndpoints")
 
 	userID, err := br.portalProxy.GetSessionStringValue(c, "user_id")
 	if err != nil {
@@ -87,8 +87,8 @@ func (br *BackupRestore) backupEndpoints(c echo.Context) error {
 	return ctb.BackupEndpoints(c)
 }
 
-func (br *BackupRestore) restoreEndpoints(c echo.Context) error {
-	log.Debug("restoreEndpoints")
+func (br *BackupRestore) restoreEndpoints(c *echo.Context) error {
+	slog.Debug("restoreEndpoints")
 
 	userID, err := br.portalProxy.GetSessionStringValue(c, "user_id")
 	if err != nil {

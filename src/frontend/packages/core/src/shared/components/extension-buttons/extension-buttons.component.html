@@ -1,5 +1,7 @@
-<ng-container *ngFor="let button of extensionActions">
-  <button *ngIf="button.visible$ | async" mat-icon-button [routerLink]="button.link" matTooltip="{{ button.label }}">
-    <mat-icon>{{ button.icon }}</mat-icon>
-  </button>
-</ng-container>
+@for (button of extensionActions; track button) {
+  @if (button.visible$ | async) {
+    <button class="btn btn-icon" type="button" [routerLink]="button.link" matTooltip="{{ button.label }}">
+      <app-custom-icon>{{ button.icon }}</app-custom-icon>
+    </button>
+  }
+}

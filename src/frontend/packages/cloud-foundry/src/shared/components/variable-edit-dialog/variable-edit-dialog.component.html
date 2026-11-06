@@ -1,0 +1,64 @@
+<div class="p-6 w-full flex-1 flex flex-col min-h-0">
+  <h1 id="variable-edit-dialog-title" data-dialog-drag-handle
+      class="text-lg font-semibold mb-4 text-content-text">{{ title }}</h1>
+
+  <!-- Name (full width, on top — never truncated) -->
+  <div class="mb-4">
+    <label for="variableName" class="block mb-1 text-sm text-content-muted">Name</label>
+    <input id="variableName" name="variableName" class="input w-full"
+      placeholder="Name"
+      [ngModel]="name()"
+      (ngModelChange)="name.set($event); nameTouched.set(true)"
+      (blur)="nameTouched.set(true)">
+    <!-- Always-present, fixed-height slot so showing/clearing the message
+         never changes the dialog height (no jump on the first keystroke).
+         Messages only appear once the field is touched, so a fresh create
+         dialog doesn't show "Name is required" before the user types. -->
+    <div class="mt-1 text-sm leading-5 min-h-[1.25rem]">
+      @if (visibleNameError()) {
+        <span class="text-danger-shade-500">{{ visibleNameError() }}</span>
+      } @else if (visibleNameWarning()) {
+        <span class="text-warning-shade-500">{{ visibleNameWarning() }}</span>
+      }
+    </div>
+  </div>
+
+  <!-- Value (multiline Monaco editor below, full width) — grows to fill the
+       resizable panel so dragging the corner resizes the editor. -->
+  <div class="mb-2 flex flex-col flex-1 min-h-0">
+    <div class="flex items-center justify-between mb-1">
+      <span id="variable-value-label" class="text-sm text-content-muted">Value</span>
+      <div class="flex items-center gap-2">
+        @if (jsonMode()) {
+          <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
+            {{ isMinified() ? 'Format' : 'Minify' }}
+          </button>
+        }
+        <button type="button" class="btn btn-secondary btn-sm" (click)="toggleJsonMode()">
+          {{ jsonMode() ? 'Edit as plain text' : 'Edit as JSON' }}
+        </button>
+      </div>
+    </div>
+    <!-- Fills the panel; resizing/moving the dialog is handled at the panel
+         level (drag the header to move, the corner to resize). Monaco
+         automaticLayout re-fits as the panel grows/shrinks. -->
+    <div role="group" aria-labelledby="variable-value-label"
+         class="flex-1 min-h-0 overflow-hidden border border-content-border rounded-md">
+      <app-monaco-editor
+        [model]="model()"
+        [options]="editorOptions"
+        [ngModel]="value()"
+        (ngModelChange)="value.set($event)"
+        (editorInit)="onEditorInit($event)">
+      </app-monaco-editor>
+    </div>
+    @if (jsonWarning()) {
+      <div class="mt-1 text-sm text-warning-shade-500">{{ jsonWarning() }}</div>
+    }
+  </div>
+
+  <div class="flex gap-2 justify-end mt-6">
+    <button type="button" class="btn btn-secondary" (click)="cancel()">Cancel</button>
+    <button type="button" class="btn btn-primary" (click)="save()" [disabled]="!canSave()">Save</button>
+  </div>
+</div>

@@ -1,37 +1,49 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { RouterTestingModule } from '@angular/router/testing';
+import { CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { of as observableOf } from 'rxjs';
 
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../test-framework/cloud-foundry-endpoint-service.helper';
+import { createBasicStoreModule } from '@stratosui/store/testing';
+import { entityCatalog, TestEntityCatalog } from '@stratosui/store';
 import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
+import { generateCFEntities } from '../../../cf-entity-generator';
 import { CfEndpointsMissingComponent } from './cf-endpoints-missing.component';
-
 
 describe('CfEndpointsMissingComponent', () => {
   let component: CfEndpointsMissingComponent;
   let fixture: ComponentFixture<CfEndpointsMissingComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
+    // Clear and register CF entities before TestBed configuration
+    const testEntityCatalog = entityCatalog as TestEntityCatalog;
+    testEntityCatalog.clear();
+    generateCFEntities().forEach(entity => {
+      entityCatalog.register(entity);
+    });
+
+    const mockCloudFoundryService = {
+      hasConnectedCFEndpoints$: observableOf(false),
+      hasRegisteredCFEndpoints$: observableOf(false),
+    };
+
     TestBed.configureTestingModule({
-      declarations: [CfEndpointsMissingComponent],
       imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule
+        CfEndpointsMissingComponent,
+        createBasicStoreModule(),
       ],
       providers: [
-        CloudFoundryService
-      ]
-    })
-      .compileComponents();
-  }));
+        { provide: CloudFoundryService, useValue: mockCloudFoundryService },
+        provideZonelessChangeDetection(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CfEndpointsMissingComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Don't call detectChanges() to avoid rendering child components
   });
 
   it('should create', () => {

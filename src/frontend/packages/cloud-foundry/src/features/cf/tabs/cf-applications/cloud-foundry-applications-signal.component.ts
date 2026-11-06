@@ -1,0 +1,551 @@
+import { CommonModule } from '@angular/common';
+import { HttpClient } from '@angular/common/http';
+import {
+  Component, ChangeDetectionStrategy, OnInit, Signal, WritableSignal, computed, inject, signal, Injector, effect,
+} from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { Router, RouterModule } from '@angular/router';
+import { map } from 'rxjs/operators';
+
+import {
+  ConfirmationDialogConfig,
+  ConfirmationDialogService,
+  CurrentUserPermissionsService,
+  isUnlimited,
+  ListSubNavAddAction,
+  ListSubNavComponent,
+  SignalListBulkAction,
+  SignalListColumn,
+  SignalListCompoundSegment,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListDropdown,
+  SignalListPillColor,
+  SignalListRowAction,
+  TailwindSnackBarService,
+} from '@stratosui/core';
+import {
+  UserFavorite,
+  UserFavoriteManager,
+} from '@stratosui/store';
+
+import { applicationEntityType } from '../../../../cf-entity-types';
+import { BulkResult, CfAppsSignalConfigService } from '../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
+import { CfCurrentUserPermissions } from '../../../../user-permissions/cf-user-permissions-checkers';
+import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
+import { runBulkWithProgress } from '../../../../services/async-jobs/bulk-progress';
+import type { StApp } from '../../../../services/endpoint-data/stratos-types';
+
+// Per-CF Applications tab. Scoped to one CNSI via the parent route's
+// CloudFoundryEndpointService. Mirrors the per-space tab's wiring exactly,
+// except the orchestrator is initialized for the whole CNSI rather than
+// pinned to one space.
+@Component({
+  selector: 'app-cloud-foundry-applications-signal',
+  templateUrl: './cloud-foundry-applications-signal.component.html',
+  host: { class: 'app-host-fill' },
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    ListSubNavComponent,
+    SignalListComponent,
+  ],
+})
+export class CloudFoundryApplicationsSignalComponent implements OnInit {
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  private appsConfig = inject(CfAppsSignalConfigService);
+  private userFavoriteManager = inject(UserFavoriteManager);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
+  private http = inject(HttpClient);
+  private router = inject(Router);
+  private permissionsService = inject(CurrentUserPermissionsService);
+  private readonly injector = inject(Injector);
+
+  /** Total app count for the L5 sub-nav. */
+  public totalApplications!: Signal<number>;
+  /** Reactive permission flag for the Create Application button. Built
+   *  in the constructor (injection context) so toSignal() resolves. */
+  public readonly canCreateApplication: Signal<boolean> = toSignal(
+    this.permissionsService.can(CfCurrentUserPermissions.APPLICATION_CREATE, this.cfEndpointService.cfGuid),
+    { initialValue: false },
+  );
+  /** L5 primary action — navigates to the deploy stepper with this CNSI
+   *  pre-selected via the `:endpointId` route param (the new-application
+   *  base step forwards it as `auto-select-endpoint`). */
+  public readonly createApplicationAction: ListSubNavAddAction = {
+    label: 'Create Application',
+    icon: 'add',
+    visible: this.canCreateApplication,
+    invoke: () => this.router.navigate(['/applications/new', this.cfEndpointService.cfGuid]),
+  };
+
+  private readonly favoriteAppRowKeys: Signal<ReadonlySet<string>> = toSignal(
+    this.userFavoriteManager.getAllFavorites().pipe(
+      map(([groups, entities]) => {
+        const out = new Set<string>();
+        if (!groups || !entities) return out;
+        for (const epFavGuid in groups) {
+          const g = groups[epFavGuid];
+          if (!g?.entitiesIds) continue;
+          for (const favId of g.entitiesIds) {
+            const fav = entities[favId];
+            if (fav && fav.entityType === applicationEntityType && fav.endpointType === 'cf') {
+              out.add(`${fav.endpointId}:${fav.entityId}`);
+            }
+          }
+        }
+        return out;
+      }),
+    ),
+    { initialValue: new Set<string>() },
+  );
+
+  // Selected row keys for bulk operations — key is `${cnsiGuid}:${guid}`,
+  // matching getRowKey. Owned here; the checkbox column reads/writes it and
+  // the bulk-action bar derives its targets from it. Selection can span
+  // orgs/spaces within this CNSI — the backend delete fans out per guid.
+  private readonly selectedAppKeys: WritableSignal<ReadonlySet<string>> = signal(new Set());
+
+  // True while a bulk op is in flight. Drives the bulk bar's "Working…"
+  // spinner + disabled actions. Set here (not inferred by the bar) because
+  // the work runs behind the confirm dialog, after the action's run() returns.
+  private readonly bulkRunning: WritableSignal<boolean> = signal(false);
+
+  public listConfig: WritableSignal<SignalListConfig<StApp> | undefined> = signal(undefined);
+
+  async ngOnInit(): Promise<void> {
+    const cfGuid = this.cfEndpointService.cfGuid;
+    // Drop any stale per-space lock left behind by a previous space-apps
+    // mount in the same session, then build a single-CNSI orchestrator.
+    this.appsConfig.clearLockedSpace();
+    this.appsConfig.initialize([cfGuid]);
+    this.totalApplications = this.appsConfig.view.totalItems;
+    // CNSI is pre-chosen by the URL. Pin the selection so the Org/Space
+    // options stay scoped to this CF, but don't show a (locked) Cloud Foundry
+    // dropdown — the CF is already named in the breadcrumb, and a disabled
+    // control only adds clutter. Show just the interactive Org/Space filters.
+    this.appsConfig.selectedCnsi.set(cfGuid);
+    // First open of either Org/Space dropdown lazily fetches this CF's
+    // org+space catalog. Unlike the other per-CF tabs (which read the shared
+    // EndpointDataService the parent CF page already hydrates), the apps
+    // config keeps its OWN lazy catalog so the multi-CF app wall doesn't
+    // saturate the network on mount — see CfAppsSignalConfigService.loadNames.
+    // That catalog is gated behind ensureNamesLoaded(); without this onOpen
+    // hook the dropdowns never populate beyond "All". Scope the fetch to the
+    // single CNSI in view (tighter than the wall's all-endpoints default).
+    const onDropdownOpen = () => { void this.appsConfig.ensureNamesLoaded([cfGuid]); };
+    const dropdowns: SignalListDropdown[] = [
+      {
+        label: 'Organization',
+        options: this.appsConfig.orgOptions,
+        selected: this.appsConfig.selectedOrg,
+        loading: this.appsConfig.isLoadingOrgs,
+        onOpen: onDropdownOpen,
+      },
+      {
+        label: 'Space',
+        options: this.appsConfig.spaceOptions,
+        selected: this.appsConfig.selectedSpace,
+        loading: this.appsConfig.isLoadingSpaces,
+        onOpen: onDropdownOpen,
+      },
+    ];
+    // Stack filtering rides the field-selectable filter rather than its
+    // own dropdown: "Stack" is a filter-field whose input is a checklist
+    // popup (multi-select, default all) — see SignalListMultiFilter. The
+    // stacks catalog is still fetched eagerly (visibility depends on it).
+    const stackFilterMulti = {
+      field: 'stackName',
+      options: computed(() => this.appsConfig.stackOptions().filter(o => o.value !== null).map(o => o.label)),
+      selected: this.appsConfig.selectedStacks,
+    };
+    // Status rides the same field-selectable filter, no visibility gate
+    // (CF always reports 2+ possible states): picking "Status" swaps the
+    // text input for the checklist populated from the fixed label set.
+    const statusFilterMulti = {
+      field: 'state',
+      options: this.appsConfig.statusOptions,
+      selected: this.appsConfig.selectedStates,
+    };
+    const stackColumn: SignalListColumn<StApp> = {
+      header: 'Stack', key: 'stackName', sortField: 'stackName',
+      render: (app: StApp) => app.stackName || '—',
+      widthHint: '9rem',
+    };
+    const lastRefreshedColumn: SignalListColumn<StApp> = {
+      header: 'Last Refreshed', key: 'lastRefreshedAt', sortField: 'lastRefreshedAt',
+      render: (app: StApp) => app.lastRefreshedAt
+        ? CloudFoundryApplicationsSignalComponent.formatDate(app.lastRefreshedAt) : '—',
+      widthHint: '12rem',
+    };
+
+    const stateColor = (app: StApp): SignalListPillColor => {
+      const s = (app.state ?? '').toUpperCase();
+      if (s === 'STARTED') return 'success';
+      if (s === 'CRASHED' || s === 'FAILED') return 'danger';
+      return 'neutral';
+    };
+    const stateLabel = (app: StApp): string => {
+      const s = (app.state ?? '').toUpperCase();
+      if (s === 'STARTED') return 'Deployed - Online';
+      if (s === 'STOPPED') return 'Stopped';
+      if (s === 'CRASHED') return 'Crashed';
+      if (s === 'FAILED') return 'Failed';
+      return app.state ?? '';
+    };
+
+    const buildConfig = (): SignalListConfig<StApp> => {
+      const withStack = this.appsConfig.stackUiVisible();
+      return {
+        pagedItems: this.appsConfig.view.pagedItems,
+        totalFilteredResults: this.appsConfig.view.totalFilteredResults,
+        totalPages: this.appsConfig.view.totalPages,
+        pageIndex: this.appsConfig.pageIndex,
+        pageSize: this.appsConfig.pageSize,
+        isAnyLoading: this.appsConfig.orchestrator.isAnyLoading,
+        errorsByCnsi: this.appsConfig.orchestrator.errorsByCnsi,
+        columns: [
+          {
+            header: '', key: 'select',
+            kind: 'checkbox',
+            checkbox: {
+              selectedKeys: this.selectedAppKeys,
+              selectAll: {
+                // Filtered set size, not just the current page — matches the
+                // tri-state header's "all selectable rows" semantics.
+                selectableCount: () => this.appsConfig.view.totalFilteredResults(),
+                onToggle: () => this.toggleSelectAll(),
+              },
+            },
+            render: () => '',
+            widthHint: '3rem',
+          },
+          {
+            header: 'Name', key: 'name', sortField: 'name',
+            kind: 'link',
+            link: (app: StApp) => ['/applications', app.cnsiGuid, app.guid],
+            // Tag the row link with ?breadcrumbs=cf so the app-detail page
+            // emits the CF-scoped 'Applications' breadcrumb that returns
+            // here, instead of the default global '/applications' wall.
+            linkQueryParams: () => ({ breadcrumbs: 'cf' }),
+            render: (app: StApp) => app.name,
+            widthHint: '16rem',
+          },
+          {
+            header: 'Status', key: 'state', sortField: 'state',
+            kind: 'dot',
+            pillColor: stateColor,
+            render: stateLabel,
+            widthHint: '12rem',
+          },
+          {
+            header: 'Instances', key: 'instances', sortField: 'instances',
+            render: (app: StApp) => {
+              const desired = app.instances ?? 0;
+              const rowKey = `${app.cnsiGuid}:${app.guid}`;
+              const s = this.appsConfig.appStats().get(rowKey);
+              if (!s) return `— / ${desired}`;
+              return `${s.running} / ${desired}`;
+            },
+            widthHint: '6rem',
+          },
+          {
+            header: 'Memory', key: 'memory', sortField: 'memory',
+            render: (app: StApp) => CloudFoundryApplicationsSignalComponent.formatMb(app.memory),
+            widthHint: '7rem',
+          },
+          {
+            header: 'Disk', key: 'diskQuota', sortField: 'diskQuota',
+            render: (app: StApp) => CloudFoundryApplicationsSignalComponent.formatMb(app.diskQuota),
+            widthHint: '7rem',
+          },
+          {
+            // Org/Space — the application wall's CF/Org/Space column minus the
+            // CF segment (CF is already implied by this scoped route).
+            header: 'Org/Space', key: 'orgSpace',
+            sortField: (app: StApp) => CloudFoundryApplicationsSignalComponent.renderOrgSpace(
+              app, this.appsConfig.orgNames(), this.appsConfig.spaceNames()),
+            kind: 'compound',
+            compound: (app: StApp) => CloudFoundryApplicationsSignalComponent.compoundOrgSpace(
+              app, this.appsConfig.orgNames(), this.appsConfig.spaceNames()),
+            render: (app: StApp) => CloudFoundryApplicationsSignalComponent.renderOrgSpace(
+              app, this.appsConfig.orgNames(), this.appsConfig.spaceNames()),
+            widthHint: '14rem',
+          },
+          ...(withStack ? [stackColumn] : []),
+          {
+            header: 'Created', key: 'createdAt', sortField: 'createdAt',
+            render: (app: StApp) => CloudFoundryApplicationsSignalComponent.formatDate(app.createdAt),
+            widthHint: '12rem',
+          },
+          lastRefreshedColumn,
+          {
+            header: '', key: 'favorite',
+            kind: 'favorite',
+            favorite: {
+              keys: this.favoriteAppRowKeys,
+              toggle: (app: StApp) => this.toggleAppFavorite(app),
+            },
+            render: () => '',
+            widthHint: '3rem',
+          },
+          {
+            header: '', key: 'actions',
+            kind: 'actions',
+            actions: this.buildAppActions,
+            render: () => '',
+            widthHint: '3rem',
+          },
+        ],
+        getRowKey: (app: StApp) => `${app.cnsiGuid}:${app.guid}`,
+        emptyMessage: 'There are no applications in this Cloud Foundry',
+        emptyFilterMessage: 'No applications match the current filters',
+        loadingMessage: 'Loading applications…',
+        pageSizeOptions: {
+          table: [10, 25, 50, 100],
+          card: [6, 12, 24, 48, 96],
+        },
+        nameFilter: this.appsConfig.nameFilter,
+        // Filter-by-field parity with the wall: the text filter can target
+        // Name, Status, or the Org/Space column; Stack joins the list
+        // (as a checklist, not text) once its column is visible.
+        filterColumns: withStack
+          ? ['name', 'state', 'orgSpace', 'stackName', 'lastRefreshedAt']
+          : ['name', 'state', 'orgSpace', 'lastRefreshedAt'],
+        // Status has no visibility gate (always ≥2 possible states) so its
+        // entry is unconditional; Stack's is only wired while its column
+        // is actually in filterColumns — otherwise a filterField left
+        // over at 'stackName' from another stack-visible page (the
+        // service's filter state is a shared singleton) would pop the
+        // checklist for a column not shown here.
+        filterMultis: withStack ? [statusFilterMulti, stackFilterMulti] : [statusFilterMulti],
+        filterRanges: [{
+          field: 'lastRefreshedAt',
+          valueType: 'date' as const,
+          selected: this.appsConfig.lastRefreshedRange,
+        }],
+        filterField: this.appsConfig.filterField,
+        filterDropdowns: dropdowns,
+        onRefresh: () => this.appsConfig.refresh(),
+        onClear: () => this.appsConfig.clearFilters(),
+        cardAccentColor: stateColor,
+        viewMode: this.appsConfig.viewMode,
+        sort: this.appsConfig.sort,
+        bulkActions: this.buildBulkActions(),
+        bulkRunning: this.bulkRunning,
+      };
+    };
+    // Set once synchronously so the config is available immediately (in
+    // the same tick as ngOnInit) rather than leaving listConfig undefined
+    // until the first effect flush.
+    this.listConfig.set(buildConfig());
+    // Rebuild when the stacks catalog flips visibility (it lands async
+    // after initialize()). effect() needs an injection context; ngOnInit
+    // isn't one, hence the explicit injector.
+    effect(() => { this.listConfig.set(buildConfig()); }, { injector: this.injector });
+
+    // Sort + filter extractors for the Org/Space column (composed from name
+    // maps rather than a direct StApp field), plus name/state so the
+    // filter-by-field dropdown can target each. The 'state' extractor is
+    // also what the Status checklist's predicate reuses to match a
+    // selected label back to an app — one mapping, not two.
+    const orgSpaceText = (app: StApp) => CloudFoundryApplicationsSignalComponent.renderOrgSpace(
+      app, this.appsConfig.orgNames(), this.appsConfig.spaceNames());
+    this.appsConfig.registerSortExtractor('orgSpace', orgSpaceText);
+    this.appsConfig.registerFilterExtractor('name', (app: StApp) => app.name ?? '');
+    this.appsConfig.registerFilterExtractor('state', stateLabel);
+    this.appsConfig.registerFilterExtractor('orgSpace', orgSpaceText);
+
+    // Default per-CF tab presentation matches per-space: card view at 6/page.
+    this.appsConfig.viewMode.set('card');
+    this.appsConfig.pageSize.set(6);
+
+    void this.appsConfig.loadAll();
+    this.appsConfig.startStatsPolling();
+  }
+
+  private toggleAppFavorite(app: StApp): void {
+    const fav = new UserFavorite(app.cnsiGuid, 'cf', applicationEntityType, app.guid);
+    this.userFavoriteManager.toggleFavorite(fav);
+  }
+
+  // Select-all flips between "every filtered row selected" and cleared,
+  // keyed off the full filtered set (not just the current page).
+  private toggleSelectAll(): void {
+    const filtered = this.appsConfig.view.filteredItems();
+    const selected = this.selectedAppKeys();
+    if (selected.size >= filtered.length && filtered.length > 0) {
+      this.selectedAppKeys.set(new Set());
+    } else {
+      this.selectedAppKeys.set(new Set(filtered.map(a => `${a.cnsiGuid}:${a.guid}`)));
+    }
+  }
+
+  // Resolve the selected row keys back to StApp objects from the current
+  // filtered set. Keys are `${cnsiGuid}:${guid}`; intersecting with live rows
+  // drops any stale keys for rows that have since left the view.
+  private resolveSelectedApps(keys: ReadonlySet<string>): StApp[] {
+    return this.appsConfig.view.filteredItems()
+      .filter(a => keys.has(`${a.cnsiGuid}:${a.guid}`));
+  }
+
+  // Run a bulk op with live settlement feedback; clears selection when the
+  // POST phase ends (rows are already optimistically handled by the op).
+  private async runBulk(
+    verb: string,
+    count: number,
+    op: () => Promise<BulkResult>,
+  ): Promise<void> {
+    try {
+      await runBulkWithProgress({
+        snackBar: this.snackBar,
+        http: this.http,
+        bulkRunning: this.bulkRunning,
+        noun: 'application',
+        verb,
+        progressVerb: 'Deleting',
+        doneVerb: 'deleted',
+        op,
+        refresh: () => this.appsConfig.refresh(),
+        count,
+      });
+    } finally {
+      this.selectedAppKeys.set(new Set());
+    }
+  }
+
+  // Bulk Delete, rendered in the selection bar when 1+ rows are selected.
+  // Selection can span orgs/spaces within this CNSI; the backend
+  // (/pp/v1/cf/apps/:cnsi/bulk/delete) fans out the per-app deletes. CF does
+  // not cascade-delete routes/bindings when an app goes away - the checkbox
+  // opts into cleaning those up first (#5692).
+  private buildBulkActions(): SignalListBulkAction<StApp>[] {
+    const cnsi = this.cfEndpointService.cfGuid;
+    return [
+      {
+        label: 'Delete', icon: 'delete', danger: true,
+        run: (keys: ReadonlySet<string>) => {
+          const targets = this.resolveSelectedApps(keys);
+          if (targets.length === 0) return;
+          const confirm = new ConfirmationDialogConfig(
+            'Delete Applications',
+            `Delete ${targets.length} ${targets.length === 1 ? 'application' : 'applications'}? This cannot be undone.`,
+            'Delete',
+            true,
+            { label: 'Also delete these applications\' routes and service bindings' },
+          );
+          this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
+            const guids = targets.map(a => a.guid);
+            await this.runBulk('delete', targets.length, () =>
+              result?.checkboxChecked
+                ? this.appsConfig.bulkDeleteAppsWithCleanup(cnsi, guids)
+                : this.appsConfig.bulkDeleteApps(cnsi, guids));
+          });
+        },
+      },
+    ];
+  }
+
+  private buildAppActions = (app: StApp): readonly SignalListRowAction<StApp>[] => {
+    const runAction = async (label: string, op: () => Promise<void>) => {
+      try {
+        await op();
+        await this.appsConfig.refresh();
+      } catch (err: any) {
+        this.snackBar.error(`${label} failed: ${err?.message ?? err}`);
+      }
+    };
+    return [
+      {
+        label: 'Delete', icon: 'delete', danger: true,
+        invoke: () => {
+          const confirm = new ConfirmationDialogConfig(
+            'Delete Application',
+            `Delete the app "${app.name}"? This cannot be undone.`,
+            'Delete',
+            true,
+            { label: 'Also delete this application\'s routes and service bindings' },
+          );
+          this.confirmDialog.open(confirm, async (result?: { checkboxChecked?: boolean }) => {
+            await runAction('Delete', () =>
+              result?.checkboxChecked
+                ? this.appsConfig.bulkDeleteAppsWithCleanup(app.cnsiGuid, [app.guid]).then(() => {})
+                : this.appsConfig.deleteApp(app.cnsiGuid, app.guid));
+          });
+        },
+      },
+    ];
+  };
+
+  /**
+   * Resolve an app's org + space display names. Prefers the names carried on
+   * the row from the server-side space→org / app→space join; falls back to
+   * the catalog name maps by guid, then to an em-dash placeholder (never a
+   * raw guid — guids stay in the URL/tooltip). Mirrors the application wall's
+   * resolution, minus the CF/endpoint segment (CF is implied by the route).
+   */
+  static resolveOrgSpace(
+    app: StApp,
+    orgNames: ReadonlyMap<string, string>,
+    spaceNames: ReadonlyMap<string, string>,
+  ): { orgName: string; spaceName: string } {
+    const orgName = app.orgName || (app.orgGuid ? (orgNames.get(app.orgGuid) ?? '—') : '—');
+    const spaceName = app.spaceName || (app.spaceGuid ? (spaceNames.get(app.spaceGuid) ?? '—') : '—');
+    return { orgName, spaceName };
+  }
+
+  /** Flatten org + space to a single string for sort/filter extractors. */
+  static renderOrgSpace(
+    app: StApp,
+    orgNames: ReadonlyMap<string, string>,
+    spaceNames: ReadonlyMap<string, string>,
+  ): string {
+    const { orgName, spaceName } = CloudFoundryApplicationsSignalComponent.resolveOrgSpace(app, orgNames, spaceNames);
+    return `${orgName} / ${spaceName}`;
+  }
+
+  /**
+   * Stacked Org/Space segments for the compound column. Each segment links
+   * to its CF detail page once the guid + name are both known; while a name
+   * is still '—' the segment renders as plain text (no dead anchors).
+   */
+  static compoundOrgSpace(
+    app: StApp,
+    orgNames: ReadonlyMap<string, string>,
+    spaceNames: ReadonlyMap<string, string>,
+  ): SignalListCompoundSegment[] {
+    const { orgName, spaceName } = CloudFoundryApplicationsSignalComponent.resolveOrgSpace(app, orgNames, spaceNames);
+    const orgLink = app.orgGuid && orgName !== '—'
+      ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid]
+      : undefined;
+    const spaceLink = app.orgGuid && app.spaceGuid && spaceName !== '—'
+      ? ['/cloud-foundry', app.cnsiGuid, 'organizations', app.orgGuid, 'spaces', app.spaceGuid]
+      : undefined;
+    return [
+      { text: orgName, link: orgLink },
+      { text: spaceName, link: spaceLink },
+    ];
+  }
+
+  static formatMb(mb: number | null | undefined): string {
+    if (mb == null || typeof mb !== 'number' || Number.isNaN(mb)) return '—';
+    if (isUnlimited(mb)) return '∞';
+    if (mb < 1024) return `${mb} MB`;
+    const gb = mb / 1024;
+    if (gb < 1024) return `${gb.toFixed(1)} GB`;
+    return `${(gb / 1024).toFixed(2)} TB`;
+  }
+
+  static formatDate(iso: string | null | undefined): string {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return iso;
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: 'numeric', minute: '2-digit',
+    });
+  }
+}

@@ -1,5 +1,6 @@
 import { NgModule } from '@angular/core';
 import {
+  AppInputDirective,
   CoreModule,
   CustomizationService,
   CustomizationsMetadata,
@@ -14,13 +15,13 @@ import { AppActionExtensionComponent } from './app-action-extension/app-action-e
 import { AppTabExtensionComponent } from './app-tab-extension/app-tab-extension.component';
 
 const AcmeCustomizations: CustomizationsMetadata = {
-  copyright: '&copy; 2020 ACME Corp',
   hasEula: true,
   supportInfoComponent: AcmeSupportInfoComponent,
 };
 
 @NgModule({
   imports: [
+    AppInputDirective,
     CoreModule,
     SharedModule,
     MDAppModule,

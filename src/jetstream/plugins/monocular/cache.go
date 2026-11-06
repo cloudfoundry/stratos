@@ -8,7 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"os"
@@ -17,8 +17,7 @@ import (
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/monocular/store"
-	log "github.com/sirupsen/logrus"
-	yaml "gopkg.in/yaml.v2"
+	yaml "go.yaml.in/yaml/v4"
 )
 
 // Local Helm Chart Cache
@@ -43,16 +42,18 @@ func (m *Monocular) deleteCacheForEndpoint(endpointID string) error {
 // cacheCharts will cache charts in the local folder cache
 func (m *Monocular) cacheCharts(charts []store.ChartStoreRecord) error {
 	var errorCount = 0
-	log.Debug("Cacheing charts")
+	slog.Debug("caching charts", "count", len(charts))
 	for _, chart := range charts {
-		log.Debugf("Processing: %s", chart.Name)
+		slog.Debug("caching chart", "chart", chart.Name, "version", chart.Version)
 		if err := m.cacheChart(chart); err != nil {
 			errorCount++
-			log.Warnf("Error cacheing chart: %s - %+v", chart.Name, err)
+			slog.Warn("error caching a chart",
+				"chart", chart.Name, "version", chart.Version, "error", err)
 		}
 		if _, err := m.cacheChartIcon(chart); err != nil {
 			errorCount++
-			log.Warnf("Error cacheing chart icon: %s - %+v", chart.Name, err)
+			slog.Warn("error caching a chart icon",
+				"chart", chart.Name, "version", chart.Version, "error", err)
 		}
 
 	}
@@ -63,10 +64,36 @@ func (m *Monocular) cacheCharts(charts []store.ChartStoreRecord) error {
 	return nil
 }
 
+// safeSegment returns a filesystem-safe single path segment for a cache
+// component. Chart names and versions originate from external Helm
+// repository indexes, so they must not be able to introduce path
+// separators or traversal. Any character outside [A-Za-z0-9._-] becomes
+// '_', and a segment that is only dots (".", "..") collapses to "_".
+func safeSegment(s string) string {
+	s = strings.Map(func(r rune) rune {
+		switch {
+		case r >= 'a' && r <= 'z', r >= 'A' && r <= 'Z', r >= '0' && r <= '9',
+			r == '-', r == '_', r == '.':
+			return r
+		default:
+			return '_'
+		}
+	}, s)
+	if strings.Trim(s, ".") == "" {
+		return "_"
+	}
+	// The mapping above already removes every separator and collapses an
+	// all-dot segment, so this Clean is a no-op on the value. It is here
+	// because filepath.Clean("/"+s) is the shape CodeQL's path-injection
+	// query recognises as a barrier; without it the query cannot see that
+	// this function sanitises, and every sink downstream is reported.
+	return strings.TrimPrefix(filepath.Clean("/"+s), "/")
+}
+
 // Get the cache folder path for a chart
 func (m *Monocular) getChartCacheFolder(chart store.ChartStoreRecord) string {
-	filename := fmt.Sprintf("%s_%s", chart.Name, chart.Version)
-	return path.Join(m.CacheFolder, chart.EndpointID, filename)
+	filename := fmt.Sprintf("%s_%s", safeSegment(chart.Name), safeSegment(chart.Version))
+	return path.Join(m.CacheFolder, safeSegment(chart.EndpointID), filename)
 }
 
 // cleanCacheFiles will Clean all files in the folder for an endpoint that are not referenced by any of the charts we have for that endpoint
@@ -82,19 +109,23 @@ func (m *Monocular) cleanCacheFiles(endpointID string, allCharts []store.ChartSt
 	// Don't delete the top-level cache folder for the endpoint
 	validFiles[endpointCacheFolder] = true
 	errorCount := 0
-	filepath.Walk(endpointCacheFolder, func(path string, info os.FileInfo, err error) error {
+	if err := filepath.Walk(endpointCacheFolder, func(path string, info os.FileInfo, err error) error {
 		if err == nil && info.IsDir() {
 			if _, ok := validFiles[path]; !ok {
 				// Filename does not exist in the map of valid file names
-				log.Debugf("Need to delete unused cache folder: %s", path)
+				slog.Debug("deleting an unused cache folder", "folder", path)
 				if err := os.RemoveAll(path); err != nil {
-					log.Errorf("Could not delete folder %s - %+v", path, err)
+					slog.Error("could not delete a cache folder", "folder", path, "error", err)
 					errorCount++
 				}
 			}
 		}
 		return nil
-	})
+	}); err != nil {
+		slog.Error("could not walk the cache folder for an endpoint",
+			"endpoint", endpointID, "folder", endpointCacheFolder, "error", err)
+		errorCount++
+	}
 
 	if errorCount > 0 {
 		return fmt.Errorf("Error(s) occurred cleaning unused folders from the cache folder for endpoint %s", endpointID)
@@ -105,7 +136,7 @@ func (m *Monocular) cleanCacheFiles(endpointID string, allCharts []store.ChartSt
 
 // Is there a chart digest in the given folder with the given value?
 func hasDigestFile(chartCachePath, digest string) bool {
-	data, err := ioutil.ReadFile(path.Join(chartCachePath, digestFilename))
+	data, err := os.ReadFile(path.Join(chartCachePath, digestFilename))
 	if err == nil {
 		chk := strings.TrimSpace(string(data))
 		return chk == digest
@@ -116,12 +147,16 @@ func hasDigestFile(chartCachePath, digest string) bool {
 
 // write the chart digest to a file
 func writeDigestFile(chartCachePath, digest string) error {
-	return ioutil.WriteFile(path.Join(chartCachePath, digestFilename), []byte(digest), 0644)
+	return os.WriteFile(path.Join(chartCachePath, digestFilename), []byte(digest), 0644)
 }
 
 func (m *Monocular) getChartYaml(chart store.ChartStoreRecord) *ChartMetadata {
-	// Cache the Chart if we don't have it already
-	m.cacheChart(chart)
+	// Cache the Chart if we don't have it already. readChartYaml below
+	// returns nil if the cache is missing, so a failure here degrades rather
+	// than breaks - but it should not be silent.
+	if err := m.cacheChart(chart); err != nil {
+		slog.Warn("could not cache the chart", "chart", chart.Name, "version", chart.Version, "error", err)
+	}
 	return readChartYaml(m.getChartCacheFolder(chart))
 }
 
@@ -132,14 +167,14 @@ func readChartYaml(cacheFolder string) *ChartMetadata {
 	}
 
 	// Check we can unmarshall the request
-	data, err := ioutil.ReadFile(chartCacheYamlPath)
+	data, err := os.ReadFile(chartCacheYamlPath)
 	if err != nil {
 		return nil
 	}
 
 	// Parse as yaml
 	var chartYaml ChartMetadata
-	err = yaml.Unmarshal(data, &chartYaml)
+	err = yaml.Load(data, &chartYaml)
 	if err != nil {
 		return nil
 	}
@@ -177,11 +212,12 @@ func (m *Monocular) ensureFolder(path string) error {
 // Chart.yaml, README.md, values.yaml, values.schema.json
 // Download the icon as well
 func (m *Monocular) cacheChart(chart store.ChartStoreRecord) error {
-	log.Debugf("Cacheing chart: %s, %s", chart.Name, chart.Version)
+	slog.Debug("caching a chart", "chart", chart.Name, "version", chart.Version)
 
 	chartCachePath := m.getChartCacheFolder(chart)
 	if err := m.ensureFolder(chartCachePath); err != nil {
-		log.Warnf("Could not create folder for chart downloads: %+v", err)
+		slog.Warn("could not create the folder for chart downloads",
+			"chart", chart.Name, "version", chart.Version, "folder", chartCachePath, "error", err)
 		return err
 	}
 
@@ -191,7 +227,8 @@ func (m *Monocular) cacheChart(chart store.ChartStoreRecord) error {
 func (m *Monocular) cacheChartFromURL(chartCachePath, digest, name, chartURL string) error {
 	// Check to see if we have the same digest
 	if ok := hasDigestFile(chartCachePath, digest); ok {
-		log.Debug("Skipping download - already have archive with the same digest")
+		slog.Debug("skipping the download, the cached archive has the same digest",
+			"chart", name, "digest", digest)
 		return nil
 	}
 
@@ -216,24 +253,31 @@ func (m *Monocular) cacheChartFromURL(chartCachePath, digest, name, chartURL str
 	}
 
 	// We can delete the Chart archive - don't need it anymore
-	os.Remove(archiveFile)
+	_ = os.Remove(archiveFile)
 
 	return nil
 }
 
 // Cache a chart icon
 func (m *Monocular) cacheChartIcon(chart store.ChartStoreRecord) (string, error) {
-	log.Debugf("Cacheing chart icon: %s, %s", chart.Name, chart.Version)
+	slog.Debug("caching a chart icon", "chart", chart.Name, "version", chart.Version)
 	if len(chart.IconURL) > 0 {
-		log.Debugf("Downloading chart icon: %s", chart.IconURL)
+		slog.Debug("downloading a chart icon",
+			"chart", chart.Name, "version", chart.Version, "iconURL", chart.IconURL)
 		// If icon file already exists then don't download again
 		iconFilePath := m.getIconCacheFile(chart)
 		if _, err := os.Stat(iconFilePath); os.IsNotExist(err) {
 			if err := m.ensureFolder(path.Dir(iconFilePath)); err != nil {
-				log.Error(err)
-			} else if _, err := m.downloadFile(iconFilePath, chart.IconURL); err != nil {
-				log.Errorf("Could not download chart icon: %+v", err)
-				return "", fmt.Errorf("Could not download Chart icon: %+v", err)
+				const msg = "could not create the folder for the chart icon"
+				slog.Error(msg, "chart", chart.Name, "version", chart.Version,
+					"folder", path.Dir(iconFilePath), "error", err)
+				return "", fmt.Errorf("%s: %w", msg, err)
+			}
+			if _, err := m.downloadFile(iconFilePath, chart.IconURL); err != nil {
+				const msg = "could not download the chart icon"
+				slog.Error(msg, "chart", chart.Name, "version", chart.Version,
+					"iconURL", chart.IconURL, "error", err)
+				return "", fmt.Errorf("%s: %w", msg, err)
 			}
 		}
 		return iconFilePath, nil
@@ -250,7 +294,7 @@ func (m *Monocular) downloadFile(filepath string, url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		return "", fmt.Errorf("Error downloading icon: %s - %d:%s", url, resp.StatusCode, resp.Status)
@@ -261,7 +305,7 @@ func (m *Monocular) downloadFile(filepath string, url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer out.Close()
+	defer func() { _ = out.Close() }()
 
 	// Write the body to file
 	_, err = io.Copy(out, resp.Body)
@@ -278,14 +322,16 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 
 	f, err := os.Open(archivePath)
 	if err != nil {
-		log.Error("Helm: Archive extract file: Could not open file %s - %+v", archivePath, err)
+		slog.Error("helm archive extract: could not open the archive",
+			"archive", archivePath, "chart", chartName, "error", err)
 		return err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	gzf, err := gzip.NewReader(f)
 	if err != nil {
-		log.Error("Helm: Archive extract file: Could not open zip file %s - %+v", archivePath, err)
+		slog.Error("helm archive extract: could not open the archive as gzip",
+			"archive", archivePath, "chart", chartName, "error", err)
 		return err
 	}
 
@@ -297,7 +343,8 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 		}
 
 		if err != nil {
-			log.Error("Helm: Archive extract file: Could not process archive file %s - %+v", archivePath, err)
+			slog.Error("helm archive extract: could not read the next archive entry",
+				"archive", archivePath, "chart", chartName, "error", err)
 			return err
 		}
 
@@ -313,9 +360,13 @@ func extractArchiveFiles(archivePath, chartName, downloadFolder string, filename
 				if err != nil {
 					return err
 				}
-				defer out.Close()
+				defer func() { _ = out.Close() }()
 
-				io.Copy(out, tarReader)
+				if _, err := io.Copy(out, tarReader); err != nil {
+					slog.Error("helm archive extract: could not write an extracted file",
+						"archive", archivePath, "chart", chartName, "file", downloadPath, "error", err)
+					return err
+				}
 
 				// If we have extracted all of the files we are looking for, then return early, rather than
 				// going through the rest of the files
@@ -336,7 +387,7 @@ func getFileChecksum(file string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 	hasher := sha256.New()
 	if _, err := io.Copy(hasher, f); err != nil {
 		return "", err
@@ -346,15 +397,20 @@ func getFileChecksum(file string) (string, error) {
 }
 
 // Is the specified file name one for the files we permit to be served up
-func isPermittedFile(name string) bool {
+// permittedFile reports whether name is one of the chart files that may be
+// served, and returns the matching entry from the allowlist rather than the
+// caller's string. Joining the returned constant means no caller-controlled
+// value reaches the filesystem at all — which is both stronger than comparing
+// and discarding, and visible to analysis that cannot model the comparison.
+func permittedFile(name string) (string, bool) {
 	filenames := []string{"Chart.yaml", "README.md", "values.schema.json", "values.yaml"}
 	for _, f := range filenames {
 		if f == name {
-			return true
+			return f, true
 		}
 	}
 
-	return false
+	return "", false
 }
 
 func joinURL(base, name string) string {

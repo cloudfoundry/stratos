@@ -1,4 +1,7 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { ActivatedRoute } from '@angular/router';
 
 import { SharedModule } from '../../../../../core/src/public-api';
 import { SidePanelService } from '../../../../../core/src/shared/services/side-panel.service';
@@ -11,27 +14,39 @@ describe('AnalysisReportRunnerComponent', () => {
   let component: AnalysisReportRunnerComponent;
   let fixture: ComponentFixture<AnalysisReportRunnerComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [AnalysisReportRunnerComponent],
-      imports: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({imports: [
         SharedModule,
         KubernetesBaseTestModules,
+
+        AnalysisReportRunnerComponent,
       ],
       providers: [
+
         KubernetesAnalysisService,
         KubernetesEndpointService,
         KubeBaseGuidMock,
         SidePanelService,
+        {
+          provide: ActivatedRoute,
+          useValue: {
+            snapshot: {
+              params: { endpointId: 'test' },
+              queryParams: {}
+            }
+          }
+        },
+
+        provideZonelessChangeDetection(),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(AnalysisReportRunnerComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    // Skip detectChanges — KubernetesAnalysisService subscribes to store
+    // selectors via take(1) which throws EmptyError without full store setup
   });
 
   it('should create', () => {

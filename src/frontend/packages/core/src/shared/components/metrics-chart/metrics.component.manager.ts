@@ -12,7 +12,7 @@ export class MetricsChartManager {
       result => ({
         name: metricsConfig.getSeriesName(result),
         metadata: result.metric,
-        series: result.values.map(val => ({
+        series: result.values.map((val: any) => ({
           name: metricsConfig.mapSeriesItemName ? metricsConfig.mapSeriesItemName(val[0]) : val[0],
           value: metricsConfig.mapSeriesItemValue ? metricsConfig.mapSeriesItemValue(val[1]) : val[1]
         }))
@@ -41,7 +41,7 @@ export class MetricsChartManager {
     if (!timeOrdered || !timeOrdered.length) {
       return timeOrdered;
     }
-    return timeOrdered.reduce((allSeries, series) => {
+    return timeOrdered.reduce<ChartSeries[]>((allSeries, series) => {
       let pos = 0;
       const newSeries = [];
       for (let t = start; t <= end; t += step) {
@@ -61,6 +61,7 @@ export class MetricsChartManager {
       }
       allSeries.push({
         name: series.name,
+        metadata: series.metadata,
         series: newSeries
       });
       return allSeries;

@@ -1,8 +1,20 @@
-<div class="boolean-indicator" *ngIf="booleanOutput">
-  <div class="boolean-indicator__container" [ngClass]="{'boolean-indicator__container__show-text': showText}">
-    <mat-icon
-      [ngClass]="{'boolean-indicator__container__icon-subtle': booleanOutput.subtle, 'boolean-indicator__container__icon-true': booleanOutput.isTrue, 'boolean-indicator__container__icon-false': !booleanOutput.isTrue}">
-      {{ booleanOutput.icon }}</mat-icon>
-    <div *ngIf="showText">{{ booleanOutput.text }}</div>
+@if (booleanOutput) {
+  <div class="boolean-indicator flex items-center justify-end">
+    <div class="boolean-indicator-container flex items-center" [ngClass]="{'space-x-2': showText}">
+      <span
+        class="material-icons text-lg"
+      [ngClass]="{
+        'text-content-muted': booleanOutput.subtle,
+        'text-success-shade-500': booleanOutput.isTrue && !booleanOutput.subtle,
+        'text-danger-shade-500': !booleanOutput.isTrue && !booleanOutput.subtle
+      }">
+        {{ booleanOutput.icon }}
+      </span>
+      @if (showText) {
+        <span class="text-sm text-content-muted">
+          {{ booleanOutput.text }}
+        </span>
+      }
+    </div>
   </div>
-</div>
+}

@@ -1,94 +1,92 @@
-import { Component } from '@angular/core';
-import moment from 'moment';
-import { of } from 'rxjs';
-import { map, startWith } from 'rxjs/operators';
+import { ChangeDetectionStrategy, Component, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { format } from 'date-fns';
+import { map } from 'rxjs/operators';
 
 import {
-  ITableListDataSource,
-} from '../../../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../../../../core/src/shared/components/list/list-table/table.types';
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+} from '../../../../../../../core/src/shared/components/signal-list/signal-list.component';
+import { HelmReleaseRevision } from '../../../workload.types';
 import { HelmReleaseHelperService } from './../helm-release-helper.service';
+
+// The history payload carries a `chart` block that the typed
+// HelmReleaseRevision doesn't declare (the legacy table read it via `any`).
+interface HelmReleaseHistoryRow extends HelmReleaseRevision {
+  chart: { name: string; version: string; appVersion: string };
+}
 
 @Component({
   selector: 'app-helm-release-history-tab',
   templateUrl: './helm-release-history-tab.component.html',
-  styleUrls: ['./helm-release-history-tab.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    SignalListComponent,
+  ]
 })
 export class HelmReleaseHistoryTabComponent {
 
-  public columns: ITableColumn<any>[] = [];
+  private readonly helmReleaseHelper = inject(HelmReleaseHelperService);
 
-  public dataSource: ITableListDataSource<any>;
+  // Newest revision first — matches the Helm CLI history ordering. Fixed
+  // sort, no interactive re-sort (the legacy table offered none either).
+  private readonly history: Signal<HelmReleaseHistoryRow[]> = toSignal(
+    this.helmReleaseHelper.fetchReleaseHistory().pipe(
+      map(history => ([...history] as HelmReleaseHistoryRow[]).sort((a, b) => b.revision - a.revision)),
+    ),
+    { initialValue: [] as HelmReleaseHistoryRow[] },
+  );
 
-  constructor(public helmReleaseHelper: HelmReleaseHelperService) {
+  // fetchReleaseHistory emits exactly once; "loading" is simply "no rows yet".
+  private readonly loading: Signal<boolean> = computed(() => this.history().length === 0);
 
-    // Use the ame column layout as the Helm CLI
-    this.columns = [
-      {
-        columnId: 'revision',
-        headerCell: () => 'Revision',
-        cellFlex: '1',
-        cellDefinition: {
-          valuePath: 'revision'
-        }
-      },
-      {
-        columnId: 'updated',
-        headerCell: () => 'Updated',
-        cellFlex: '3',
-        cellDefinition: {
-          getValue: row => moment(row.last_deployed).format('LLL')
-        }
-      },
-      {
-        columnId: 'status',
-        headerCell: () => 'Status',
-        cellFlex: '2',
-        cellDefinition: {
-          valuePath: 'status'
-        }
-      },
-      {
-        columnId: 'chart',
-        headerCell: () => 'Chart',
-        cellFlex: '2',
-        cellDefinition: {
-          getValue: row => `${row.chart.name}-${row.chart.version}`
-        }
-      },
-      {
-        columnId: 'app_version',
-        headerCell: () => 'App Version',
-        cellFlex: '1',
-        cellDefinition: {
-          valuePath: 'chart.appVersion'
-        }
-      },
-      {
-        columnId: 'description',
-        headerCell: () => 'Description',
-        cellFlex: '2',
-        cellDefinition: {
-          valuePath: 'description'
-        }
-      },
-    ];
+  readonly pageSize: WritableSignal<number> = signal(50);
+  readonly pageIndex: WritableSignal<number> = signal(0);
 
-    const data$ = this.helmReleaseHelper.fetchReleaseHistory().pipe(
-      map(history => [...history].sort((a, b) => b.revision - a.revision))
-    );
-    this.dataSource = {
-      connect: () => data$,
-      disconnect: () => { },
-      trackBy: (index, item) => item.revision,
-      isTableLoading$: data$.pipe(
-        map(revisions => !revisions),
-        startWith(true),
-      ),
-      getRowState: (row) => {
-        return of({});
-      }
-    };
-  }
+  private readonly pagedItems: Signal<HelmReleaseHistoryRow[]> = computed(() => {
+    const size = this.pageSize();
+    const rows = this.history();
+    if (size <= 0) return rows;
+    // Clamp a stale out-of-range index to the last available page so
+    // paging state can't render an empty page over a non-empty list
+    // (#5670).
+    const lastPage = Math.max(0, Math.ceil(rows.length / size) - 1);
+    const idx = Math.max(0, Math.min(this.pageIndex(), lastPage));
+    return rows.slice(idx * size, idx * size + size);
+  });
+  private readonly totalFilteredResults: Signal<number> = computed(() => this.history().length);
+  private readonly totalPages: Signal<number> = computed(() => {
+    const size = this.pageSize();
+    return size > 0 ? Math.max(1, Math.ceil(this.totalFilteredResults() / size)) : 1;
+  });
+
+  // Same six columns as the Helm CLI; widths track the legacy flex weights
+  // (1:3:2:2:1:2) as percentages.
+  private readonly columns: SignalListColumn<HelmReleaseHistoryRow>[] = [
+    { header: 'Revision', key: 'revision', kind: 'text', widthHint: '9%', render: r => `${r.revision}` },
+    { header: 'Updated', key: 'updated', kind: 'text', widthHint: '27%', render: r => format(new Date(r.last_deployed), 'PPPppp') },
+    { header: 'Status', key: 'status', kind: 'text', widthHint: '18%', render: r => r.status },
+    { header: 'Chart', key: 'chart', kind: 'text', widthHint: '18%', render: r => `${r.chart.name}-${r.chart.version}` },
+    { header: 'App Version', key: 'app_version', kind: 'text', widthHint: '9%', render: r => r.chart.appVersion },
+    { header: 'Description', key: 'description', kind: 'text', widthHint: '18%', render: r => r.description },
+  ];
+
+  readonly config: SignalListConfig<HelmReleaseHistoryRow> = {
+    pagedItems: this.pagedItems,
+    totalFilteredResults: this.totalFilteredResults,
+    totalPages: this.totalPages,
+    pageIndex: this.pageIndex,
+    pageSize: this.pageSize,
+    pageSizeOptions: [25, 50, 100],
+    hidePagerWhenSingle: true,
+    isAnyLoading: this.loading,
+    errorsByCnsi: signal(new Map()),
+    columns: this.columns,
+    getRowKey: r => `${r.revision}`,
+    emptyMessage: 'There is no release history',
+    loadingMessage: 'Loading release history…',
+  };
 
 }

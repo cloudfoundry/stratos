@@ -1,14 +1,15 @@
-<div class="user-profile-banner">
-  <div class="user-profile-banner__avatar">
+<div class="flex flex-row p-6">
+  <div class="flex-none mr-6">
     <app-user-avatar size="large" [allowGravatar]="canUseGravatar" fallback="initials" [user]="userProfile"></app-user-avatar>
   </div>
-  <div class="user-profile-banner__title" *ngIf="(name || email); else noNameOrEmail">
-    <div>{{ name }}</div>
-    <div class="user-profile-banner__email">{{ email }}</div>
-  </div>
-  <ng-template #noNameOrEmail>
-    <div class="user-profile-banner__title">
+  @if ((name || email)) {
+    <div class="flex-1 text-[28px]">
+      <div>{{ name }}</div>
+      <div class="text-base">{{ email }}</div>
+    </div>
+  } @else {
+    <div class="flex-1 text-[28px]">
       <div>{{ username }}</div>
     </div>
-  </ng-template>
+  }
 </div>

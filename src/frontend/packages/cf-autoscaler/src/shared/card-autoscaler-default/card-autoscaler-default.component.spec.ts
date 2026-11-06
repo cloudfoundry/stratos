@@ -1,61 +1,63 @@
-import { CommonModule } from '@angular/common';
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { CUSTOM_ELEMENTS_SCHEMA, importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { createEmptyStoreModule } from '@stratosui/store/testing';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 
-import { ApplicationService } from '../../../../cloud-foundry/src/features/applications/application.service';
-import {
-  RunningInstancesComponent,
-} from '../../../../cloud-foundry/src/shared/components/running-instances/running-instances.component';
-import { ApplicationStateService } from '../../../../cloud-foundry/src/shared/services/application-state.service';
-import { ApplicationServiceMock } from '../../../../cloud-foundry/test-framework/application-service-helper';
-import { CoreModule } from '../../../../core/src/core/core.module';
-import {
-  CopyToClipboardComponent,
-} from '../../../../core/src/shared/components/copy-to-clipboard/copy-to-clipboard.component';
-import { MetadataItemComponent } from '../../../../core/src/shared/components/metadata-item/metadata-item.component';
-import { AppTestModule } from '../../../../core/test-framework/core-test.helper';
-import { EntityCatalogHelper } from '../../../../store/src/entity-catalog/entity-catalog-entity/entity-catalog.service';
-import { EntityMonitorFactory } from '../../../../store/src/monitors/entity-monitor.factory.service';
-import { PaginationMonitorFactory } from '../../../../store/src/monitors/pagination-monitor.factory';
+import { ApplicationServiceMock, ApplicationStateService } from "@test-framework/cf";
+import { ApplicationService } from '@stratosui/cloud-foundry';
+import { CoreModule } from '@stratosui/core';
+import { generateBaseTestStoreModules } from '@test-framework/core-test.helper';
 import { CfAutoscalerTestingModule } from '../../cf-autoscaler-testing.module';
 import { CardAutoscalerDefaultComponent } from './card-autoscaler-default.component';
 
+// FWT-959 wave-3 (A-effects-cleanup): the card used to consume policy
+// data through EntityServiceFactory + GetAppAutoscalerPolicyAction. With
+// the @ngrx surface gone the spec only needs to provide the HttpClient
+// testing harness — the AutoscalerPolicyDataService is providedIn:
+// 'root' and resolves automatically. We drain the policy GET in
+// afterEach with a 404 so the data service settles into the "no policy"
+// state matching legacy test behaviour (no policy data was previously
+// emitted by the EntityServiceFactory mock either).
 describe('CardAutoscalerDefaultComponent', () => {
   let component: CardAutoscalerDefaultComponent;
   let fixture: ComponentFixture<CardAutoscalerDefaultComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        CardAutoscalerDefaultComponent,
-        MetadataItemComponent,
-        CopyToClipboardComponent,
-        RunningInstancesComponent,
-      ],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
-        CfAutoscalerTestingModule,
-        CoreModule,
-        CommonModule,
-        NoopAnimationsModule,
-        createEmptyStoreModule(),
-        AppTestModule
+        CardAutoscalerDefaultComponent,
       ],
       providers: [
+        importProvidersFrom(
+          CfAutoscalerTestingModule,
+          ...generateBaseTestStoreModules(),
+          CoreModule,
+          NoopAnimationsModule
+        ),
         { provide: ApplicationService, useClass: ApplicationServiceMock },
         ApplicationStateService,
-        EntityMonitorFactory,
-        PaginationMonitorFactory,
-        EntityCatalogHelper
-      ]
-    })
-      .compileComponents();
-  }));
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+      schemas: [CUSTOM_ELEMENTS_SCHEMA]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CardAutoscalerDefaultComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
+  });
+
+  afterEach(() => {
+    const httpMock = TestBed.inject(HttpTestingController);
+    httpMock.match(() => true).forEach(req =>
+      req.flush('Not Found', { status: 404, statusText: 'Not Found' }),
+    );
+    httpMock.verify();
   });
 
   it('should create', () => {

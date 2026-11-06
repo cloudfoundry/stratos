@@ -1,20 +1,24 @@
-import { Component, Input, OnInit, ViewEncapsulation } from '@angular/core';
+
+import { ChangeDetectionStrategy, Component, Input, OnInit, ViewEncapsulation  } from '@angular/core';
 
 @Component({
   selector: 'app-details-card',
+  standalone: true,
+  imports: [],
   templateUrl: './details-card.component.html',
   styleUrls: ['./details-card.component.scss'],
-  encapsulation: ViewEncapsulation.None
+  encapsulation: ViewEncapsulation.None,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DetailsCardComponent implements OnInit {
 
   constructor() { }
 
   @Input()
-  title: string;
+  title!: string;
 
   @Input()
-  busy: boolean;
+  busy!: boolean;
 
   ngOnInit() {
   }

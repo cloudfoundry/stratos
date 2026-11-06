@@ -1,16 +1,20 @@
 import { inject, TestBed } from '@angular/core/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { createBasicStoreModule, STORE_TEST_PROVIDERS, CoreTestingModule } from '@test-framework';
+import { SharedModule, CoreModule } from '@stratosui/core';
 
-import { CoreTestingModule } from '../../test-framework/core-test.modules';
-import { SharedModule } from '../shared/shared.module';
-import { CoreModule } from './core.module';
 import { UserService } from './user.service';
 
 describe('UserService', () => {
   beforeEach(() => {
 
     TestBed.configureTestingModule({
-      providers: [UserService],
+      providers: [
+        UserService,
+        ...STORE_TEST_PROVIDERS,
+        provideZonelessChangeDetection(),
+      ],
       imports: [
         CoreModule,
         SharedModule,

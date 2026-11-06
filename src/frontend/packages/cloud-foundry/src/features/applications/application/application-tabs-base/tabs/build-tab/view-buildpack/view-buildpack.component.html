@@ -1,2 +1,6 @@
-<span *ngIf="!isWebLink">{{ buildPack || '-' }}</span>
-<a *ngIf="isWebLink" target="buildPack" href="{{ buildPack }}" rel="noopener noreferrer">{{ buildPack }}</a>
+@if (!isWebLink) {
+  <span>{{ buildPack || '-' }}</span>
+}
+@if (isWebLink) {
+  <a target="buildPack" href="{{ buildPack }}" rel="noopener noreferrer">{{ buildPack }}</a>
+}

@@ -1,32 +1,46 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
-import { CfUserService } from '../../../../shared/data-services/cf-user.service';
+import { PageHeaderComponent } from '@stratosui/core';
+import { StepComponent } from '@stratosui/core';
+import { SteppersComponent } from '@stratosui/core';
+
 import { ActiveRouteCfOrgSpace } from '../../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../../cf.helpers';
 import { CloudFoundryEndpointService } from '../../services/cloud-foundry-endpoint.service';
 import { UserInviteConfigureService, UserInviteService } from '../../user-invites/user-invite.service';
 import { CfRolesService } from '../manage-users/cf-roles.service';
+import { InviteUsersCreateComponent } from './invite-users-create/invite-users-create.component';
 
 @Component({
   selector: 'app-invite-users',
   templateUrl: './invite-users.component.html',
-  styleUrls: ['./invite-users.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    InviteUsersCreateComponent
+  ],
   providers: [
     getActiveRouteCfOrgSpaceProvider,
     UserInviteService,
     UserInviteConfigureService,
-    CfUserService,
     CfRolesService,
     CloudFoundryEndpointService
   ]
 })
 export class InviteUsersComponent {
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+
 
   defaultCancelUrl: string;
 
-  constructor(
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = this.activeRouteCfOrgSpace;
+
     this.defaultCancelUrl = this.createReturnUrl(activeRouteCfOrgSpace);
   }
 

@@ -1,4 +1,4 @@
-import { APIResource } from '../../store/src/types/api.types';
+import { APIResource } from '@stratosui/store';
 import { IApp, IOrganization, IRoute, ISpace } from './cf-api.types';
 
 export interface ILastOperation {
@@ -22,6 +22,9 @@ export interface IServiceBinding {
   app?: APIResource<IApp>;
   service_instance_url: string;
   service_instance?: APIResource<IServiceInstance> | APIResource<IUserProvidedServiceInstance>;
+  // Async service brokers return last_operation on bindings so clients can
+  // track in-progress binds/unbinds. Not present on synchronous brokers.
+  last_operation?: ILastOperation;
   guid?: string;
   cfGuid?: string;
 }
@@ -162,4 +165,17 @@ export interface IUserProvidedServiceInstance {
   routes_url: string;
   route_service_url: string;
   cfGuid?: string;
+}
+
+export interface IUserProvidedServiceInstanceDataCredentials {
+  [name: string]: string;
+}
+
+export interface IUserProvidedServiceInstanceData {
+  spaceGuid: string;
+  name: string;
+  route_service_url?: string;
+  syslog_drain_url?: string;
+  tags?: string[];
+  credentials?: IUserProvidedServiceInstanceDataCredentials;
 }

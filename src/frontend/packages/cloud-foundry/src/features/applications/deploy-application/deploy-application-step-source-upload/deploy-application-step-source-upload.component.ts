@@ -1,10 +1,9 @@
-import { Component, OnDestroy } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
+import { Component, Injector, OnDestroy, ChangeDetectionStrategy, inject } from '@angular/core';
 import { Observable, of as observableOf } from 'rxjs';
 import { filter, map } from 'rxjs/operators';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { BytesToHumanSize, StepOnNextFunction, UploadProgressIndicatorComponent } from '@stratosui/core';
 import { CfOrgSpaceDataService } from '../../../../shared/data-services/cf-org-space-service.service';
 import { DeployApplicationDeployer, FileTransferStatus } from '../deploy-application-deployer';
 import { FileScannerInfo } from '../deploy-application-step2/deploy-application-fs/deploy-application-fs-scanner';
@@ -13,25 +12,37 @@ import { FileScannerInfo } from '../deploy-application-step2/deploy-application-
 @Component({
   selector: 'app-deploy-application-step-source-upload',
   templateUrl: './deploy-application-step-source-upload.component.html',
-  styleUrls: ['./deploy-application-step-source-upload.component.scss']
+  styleUrls: ['./deploy-application-step-source-upload.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    UploadProgressIndicatorComponent,
+    BytesToHumanSize
+  ]
 })
 export class DeployApplicationStepSourceUploadComponent implements OnDestroy {
+  cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  private injector = inject(Injector);
+
 
   public deployer: DeployApplicationDeployer;
 
   public valid$: Observable<boolean>;
 
-  constructor(store: Store<CFAppState>, public cfOrgSpaceService: CfOrgSpaceDataService,
-  ) {
-    this.deployer = new DeployApplicationDeployer(store, cfOrgSpaceService);
-    this.valid$ = this.deployer.fileTransferStatus$.pipe(
+  constructor() {
+    const cfOrgSpaceService = this.cfOrgSpaceService;
+    const injector = this.injector;
+
+    this.deployer = new DeployApplicationDeployer(cfOrgSpaceService, injector);
+    this.valid$ = this.deployer.fileTransferStatus$.asObservable().pipe(
       filter(status => !!status),
       map((status: FileTransferStatus) => status.filesSent === status.totalFiles),
     );
   }
 
   // If the user goes back then cancel any file upload in progress
-  onLeave = (isNext) => {
+  onLeave = (isNext: boolean) => {
     if (!isNext) {
       this.deployer.close();
     }

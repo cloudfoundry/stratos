@@ -10,7 +10,7 @@ import (
 
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 
-	"github.com/govau/cf-common/env"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -49,7 +49,7 @@ func TestDatastore(t *testing.T) {
 		if err != nil {
 			t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 		}
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 
 		Convey("when the database config is valid", func() {
 
@@ -255,7 +255,7 @@ func TestDatastore(t *testing.T) {
 		if err != nil {
 			t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 		}
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 
 		Convey("when the database config is valid", func() {
 
@@ -429,7 +429,7 @@ func TestDatastore(t *testing.T) {
 
 		mockEnvVarsMap := make(map[string]string)
 		mockEnvVarsMap["DB_SSL_MODE"] = mockSSLModeVerifyCA
-		mockEnvVarsMap["VCAP_SERVICES"] = `{"cf-postgresql-service": [ { "name": "mock-stratos-ssl", "credentials": { "cacrt": "mockcert", "host": "mockhost", "name": "mockname", "password": "mockpassword", "port": 5432, "username": "mockusername", "uri": "postgres://mockuser:mockpassword@mockhost:5432/mockname" } } ] }`
+		mockEnvVarsMap["VCAP_SERVICES"] = `{"cf-postgresql-service": [ { "name": "mock-stratos-ssl", "credentials": { "cacrt": "mockcert", "host": "mockhost", "name": "mockname", "password": "mockpassword", "port": 5432, "username": "mockusername", "uri": "postgres://mockusername:mockpassword@mockhost:5432/mockname?mockquery=true" } } ] }`
 
 		mockVarSet := env.NewVarSet(env.WithMapLookup(mockEnvVarsMap))
 
@@ -437,7 +437,7 @@ func TestDatastore(t *testing.T) {
 		if err != nil {
 			t.Errorf("an error '%s' was not expected when opening a stub database connection", err)
 		}
-		defer db.Close()
+		defer func() { _ = db.Close() }()
 
 		Convey("when the cloudfoundry database config is present", func() {
 
@@ -451,6 +451,43 @@ func TestDatastore(t *testing.T) {
 				So(mockDatabaseConfigSSL.Database, ShouldEqual, "mockname")
 				So(mockDatabaseConfigSSL.Host, ShouldEqual, "mockhost")
 				So(mockDatabaseConfigSSL.SSLMode, ShouldEqual, mockSSLModeVerifyCA)
+			})
+		})
+
+		Convey("when the cloudfoundry database config is present but incomplete", func() {
+
+			Convey("err will be nil and fallback to uri will be used", func() {
+				Convey("with query params present", func() {
+					mockEnvVarsMap["VCAP_SERVICES"] = `{"cf-postgresql-service": [ { "name": "mock-stratos-ssl", "credentials": { "cacrt": "mockcert", "host": "mockhost", "password": "mockpassword", "port": 5432, "username": "mockusername", "uri": "postgres://mockusername:mockpassword@mockhost:5432/mockname?mockquery=true" } } ] }`
+					mockVarSet := env.NewVarSet(env.WithMapLookup(mockEnvVarsMap))
+
+					_, err := ParseCFEnvs(&mockDatabaseConfigSSL, mockVarSet)
+					So(err, ShouldBeNil)
+					So(mockDatabaseConfigSSL.SSLRootCertificate, ShouldContainSubstring, "postgres-ssl-")
+					So(mockDatabaseConfigSSL.SSLRootCertificate, ShouldEndWith, ".crt")
+					So(mockDatabaseConfigSSL.Username, ShouldEqual, "mockusername")
+					So(mockDatabaseConfigSSL.Password, ShouldEqual, "mockpassword")
+					So(mockDatabaseConfigSSL.Database, ShouldEqual, "mockname")
+					So(mockDatabaseConfigSSL.Host, ShouldEqual, "mockhost")
+					So(mockDatabaseConfigSSL.SSLMode, ShouldEqual, mockSSLModeVerifyCA)
+					So(mockDatabaseConfigSSL.QueryParams, ShouldEqual, map[string]string{"mockquery": "true"})
+				})
+
+				Convey("without query params present", func() {
+					mockEnvVarsMap["VCAP_SERVICES"] = `{"cf-postgresql-service": [ { "name": "mock-stratos-ssl", "credentials": { "cacrt": "mockcert", "host": "mockhost", "password": "mockpassword", "port": 5432, "username": "mockusername", "uri": "postgres://mockusername:mockpassword@mockhost:5432/mockname" } } ] }`
+					mockVarSet := env.NewVarSet(env.WithMapLookup(mockEnvVarsMap))
+
+					_, err := ParseCFEnvs(&mockDatabaseConfigSSL, mockVarSet)
+					So(err, ShouldBeNil)
+					So(mockDatabaseConfigSSL.SSLRootCertificate, ShouldContainSubstring, "postgres-ssl-")
+					So(mockDatabaseConfigSSL.SSLRootCertificate, ShouldEndWith, ".crt")
+					So(mockDatabaseConfigSSL.Username, ShouldEqual, "mockusername")
+					So(mockDatabaseConfigSSL.Password, ShouldEqual, "mockpassword")
+					So(mockDatabaseConfigSSL.Database, ShouldEqual, "mockname")
+					So(mockDatabaseConfigSSL.Host, ShouldEqual, "mockhost")
+					So(mockDatabaseConfigSSL.SSLMode, ShouldEqual, mockSSLModeVerifyCA)
+					So(mockDatabaseConfigSSL.QueryParams, ShouldEqual, map[string]string{})
+				})
 			})
 		})
 	})

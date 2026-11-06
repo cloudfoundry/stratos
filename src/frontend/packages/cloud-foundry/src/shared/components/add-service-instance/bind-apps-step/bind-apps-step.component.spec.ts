@@ -1,44 +1,35 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { MaterialDesignFrameworkModule } from '@ajsf/material';
-
-import { PaginationMonitorFactory } from '../../../../../../store/src/monitors/pagination-monitor.factory';
-import {
-  generateCfBaseTestModulesNoShared,
-} from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { of } from 'rxjs';
 import { SchemaFormComponent } from '../../schema-form/schema-form.component';
 import { CsiGuidsService } from '../csi-guids.service';
+import { CsiStateService } from '../csi-state.service';
 import { BindAppsStepComponent } from './bind-apps-step.component';
 
 describe('BindAppsStepComponent', () => {
   let component: BindAppsStepComponent;
   let fixture: ComponentFixture<BindAppsStepComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [
-        BindAppsStepComponent,
-        SchemaFormComponent
-      ],
       imports: [
-        generateCfBaseTestModulesNoShared(),
-        MaterialDesignFrameworkModule
+        BindAppsStepComponent,
+        SchemaFormComponent,
       ],
       providers: [
-        { provide: ServicesService, useClass: ServicesServiceMock },
+        provideZonelessChangeDetection(),
         CsiGuidsService,
-        PaginationMonitorFactory
+        CsiStateService,
       ]
-
-
-    })
-      .compileComponents();
-  }));
+    });
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BindAppsStepComponent);
     component = fixture.componentInstance;
+    component.boundAppId = '';
+    component.apps$ = of([]);
     fixture.detectChanges();
   });
 

@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { UntypedFormBuilder } from '@angular/forms';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
@@ -9,16 +11,17 @@ describe('KubernetesGKEAuthFormComponent', () => {
   let component: KubernetesGKEAuthFormComponent;
   let fixture: ComponentFixture<KubernetesGKEAuthFormComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [KubernetesGKEAuthFormComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
         SharedModule,
-        NoopAnimationsModule
-      ]
-    })
-      .compileComponents();
-  }));
+        NoopAnimationsModule,
+
+        KubernetesGKEAuthFormComponent,
+      ],
+      providers: [provideZonelessChangeDetection()]
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesGKEAuthFormComponent);

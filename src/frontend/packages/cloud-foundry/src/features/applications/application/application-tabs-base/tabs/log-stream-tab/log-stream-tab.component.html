@@ -1,5 +1,7 @@
-<app-log-viewer
-  [filter]="filter"
-  class="app-logstream-viewer"
-  [logStream]="messages"
-  [status]="connectionStatus"></app-log-viewer>
+<div class="app-logstream-wrapper flex flex-1 flex-col min-h-0 w-full">
+  <app-log-viewer
+    [filter]="filter"
+    class="app-logstream-viewer flex flex-1 min-h-0"
+    [logStream]="messages"
+    [status]="connectionStatus"></app-log-viewer>
+</div>

@@ -1,4 +1,4 @@
-import { Action } from '@ngrx/store';
+import { Action } from '../types/action.types';
 
 import { EntityCatalogEntityConfig, extractEntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
 import { PaginatedAction, PaginationClientFilter, PaginationParam, PaginationState } from '../types/pagination.types';
@@ -111,7 +111,7 @@ export class SetPage extends BasePaginationAction implements Action {
   ) {
     super(pEntityConfig);
     if (forceLocalPage) {
-      keepPages = true;
+      this.keepPages = true;
     }
   }
   type = SET_PAGE;
@@ -133,6 +133,14 @@ export class SetClientPageSize extends BasePaginationAction implements Action {
     pEntityConfig: Partial<EntityCatalogEntityConfig>,
     public paginationKey: string,
     public pageSize: number,
+    /**
+     * Bypass the reducer's same-value guard. The list-component's view-toggle
+     * restore path needs this: when the store happens to already hold the
+     * remembered size (e.g. a stale value from a sibling code path), the
+     * guard would otherwise block the explicit restore and leave the
+     * paginator stuck on a different value than the user picked for that view.
+     */
+    public force = false,
   ) {
     super(pEntityConfig);
   }

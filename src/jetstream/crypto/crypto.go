@@ -1,10 +1,12 @@
 package crypto
 
 import (
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -37,6 +39,19 @@ func CheckPasswordHash(password string, hash []byte) error {
 	return err
 }
 
+// HashAPIKey returns a hex-encoded HMAC-SHA256 of an API key secret, keyed with
+// the server's encryption key as a pepper. API keys are high-entropy random
+// tokens, so a fast keyed hash is appropriate (unlike low-entropy user
+// passwords, which use bcrypt) and it preserves the indexed exact-match lookup
+// used to authenticate a key. Peppering with a key held outside the database
+// means a database dump alone cannot verify guessed secrets. Note: the hash is
+// tied to the encryption key, so changing that key invalidates stored API keys.
+func HashAPIKey(key []byte, secret string) string {
+	mac := hmac.New(sha256.New, key)
+	mac.Write([]byte(secret))
+	return hex.EncodeToString(mac.Sum(nil))
+}
+
 // Note:
 // When it's time to store the encrypted token in PostgreSQL, it's gets a bit
 // hairy. The encrypted token is binary data, not really text data, which
@@ -50,13 +65,13 @@ func CheckPasswordHash(password string, hash []byte) error {
 
 // EncryptToken - Encrypt a token being
 func EncryptToken(key []byte, t string) ([]byte, error) {
-	log.Debug("encryptToken")
+	slog.Debug("encryptToken")
 	var plaintextToken = []byte(t)
 	ciphertextToken, err := Encrypt(key, plaintextToken)
 	if err != nil {
-		msg := "Unable to encrypt token: %v"
-		log.Printf(msg, err)
-		return nil, fmt.Errorf(msg, err)
+		const msg = "unable to encrypt token"
+		slog.Error(msg, "error", err)
+		return nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return ciphertextToken, nil
@@ -64,12 +79,12 @@ func EncryptToken(key []byte, t string) ([]byte, error) {
 
 // DecryptToken - Decrypt a token
 func DecryptToken(key, t []byte) (string, error) {
-	log.Debug("decryptToken")
+	slog.Debug("decryptToken")
 	plaintextToken, err := Decrypt(key, t)
 	if err != nil {
-		msg := "Unable to decrypt token: %v"
-		log.Printf(msg, err)
-		return "", fmt.Errorf(msg, err)
+		const msg = "unable to decrypt token"
+		slog.Error(msg, "error", err)
+		return "", fmt.Errorf("%s: %w", msg, err)
 	}
 
 	return string(plaintextToken), nil

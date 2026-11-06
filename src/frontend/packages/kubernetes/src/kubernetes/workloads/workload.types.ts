@@ -23,6 +23,7 @@ export interface HelmRelease {
     metadata: {
       name: string;
       version: string;
+      appVersion?: string;
       icon?: string;
       description: string;
       sources: string[];
@@ -93,7 +94,7 @@ export type HelmReleaseResource = HelmReleaseKubeAPIResource | KubeStatus;
 
 @Injectable()
 export class HelmReleaseGuid {
-  guid: string;
+  guid!: string;
 }
 
 export interface HelmReleaseChartData {

@@ -1,22 +1,26 @@
-import { Component, Input } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
+import { ChangeDetectionStrategy, Component, Input, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { CustomSlideToggleComponent } from '../custom-slide-toggle/custom-slide-toggle.component';
+import { CustomTooltipDirective } from '../custom-tooltip/custom-tooltip.directive';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map } from 'rxjs/operators';
+import { take, filter, map } from 'rxjs/operators';
 
 import {
-  SetGravatarEnabledAction,
-  SetPollingEnabledAction,
-  SetSessionTimeoutAction,
-} from '../../../../../store/src/actions/dashboard-actions';
-import { AppState } from '../../../../../store/src/app-state';
-import { LocalStorageService } from '../../../../../store/src/helpers/local-storage-service';
-import { selectSessionData } from '../../../../../store/src/reducers/auth.reducer';
-import { selectDashboardState } from '../../../../../store/src/selectors/dashboard.selectors';
-import { ThemeService } from '../../../../../store/src/theme.service';
+  LocalStorageService,
+  LocalStorageSyncTypes } from '@stratosui/store';
+import { StratosBrandingService, ThemeMode } from '@stratosui/theme';
+import { BytesToHumanSize } from '../../../core/byte-formatters.pipe';
 import { CurrentUserPermissionsService } from '../../../core/permissions/current-user-permissions.service';
+import { AuthSignalService } from '../../../core/signals/auth-signal.service';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { DashboardDataService } from '../../../core/dashboard-data.service';
 import { StratosCurrentUserPermissions } from '../../../core/permissions/stratos-user-permissions.checker';
 import { UserProfileService } from '../../../core/user-profile.service';
 import { ConfirmationDialogService } from '../confirmation-dialog.service';
+import { CustomIconComponent } from '../../../shared/components/custom-material/custom-material.component';
+import { CustomButtonToggleComponent, CustomButtonToggleGroupComponent } from '../custom-button-toggle/custom-button-toggle.component';
+import { CardTitleComponent } from '../cards/card-title/card-title.component';
 
 export enum ProfileSettingsTypes {
   GRAVATAR,
@@ -28,22 +32,42 @@ export enum ProfileSettingsTypes {
 @Component({
   selector: 'app-profile-settings',
   templateUrl: './profile-settings.component.html',
-  styleUrls: ['./profile-settings.component.scss']
+  styleUrls: ['./profile-settings.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    CustomSlideToggleComponent,
+    CustomIconComponent,
+    CustomTooltipDirective,
+    CustomButtonToggleComponent,
+    CustomButtonToggleGroupComponent,
+    BytesToHumanSize,
+    CardTitleComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ProfileSettingsComponent {
+  private authSignals = inject(AuthSignalService);
+  private dashboardSignals = inject(DashboardSignalService);
+  private dashboardData = inject(DashboardDataService);
+  stratosBranding = inject(StratosBrandingService);
+  private confirmationService = inject(ConfirmationDialogService);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+
 
   @Input() show: { [settingName: string]: boolean; } = {
     [ProfileSettingsTypes.GRAVATAR]: true,
     [ProfileSettingsTypes.SESSION_TIMEOUT]: true,
     [ProfileSettingsTypes.POLLING]: true,
     [ProfileSettingsTypes.THEME]: true,
-    [ProfileSettingsTypes.STORAGE]: true,
-  };
+    [ProfileSettingsTypes.STORAGE]: true };
 
-  hasMultipleThemes: boolean;
+  hasMultipleThemes = true;
 
-  private dashboardState$ = this.store.select(selectDashboardState);
-  private sessionData$ = this.store.select(selectSessionData()).pipe(
+  // sessionData sourced from the signal-native auth projection. Filter
+  // matches the legacy behaviour (gate downstream subscribers until the
+  // first non-null payload arrives).
+  private sessionData$ = toObservable(this.authSignals.sessionData).pipe(
     filter(sessionData => !!sessionData)
   );
 
@@ -51,24 +75,23 @@ export class ProfileSettingsComponent {
 
   public types = ProfileSettingsTypes;
 
-  public timeoutSession$ = this.dashboardState$.pipe(
-    map(dashboardState => dashboardState.timeoutSession ? 'true' : 'false')
+  public timeoutSession$ = toObservable(this.dashboardSignals.timeoutSession).pipe(
+    map(v => v ? 'true' : 'false')
   );
 
-  public pollingEnabled$ = this.dashboardState$.pipe(
-    map(dashboardState => dashboardState.pollingEnabled ? 'true' : 'false')
+  public pollingEnabled$ = toObservable(this.dashboardSignals.pollingEnabled).pipe(
+    map(v => v ? 'true' : 'false')
   );
 
-  public gravatarEnabled$ = this.dashboardState$.pipe(
-    map(dashboardState => dashboardState.gravatarEnabled ? 'true' : 'false')
+  public gravatarEnabled$ = toObservable(this.dashboardSignals.gravatarEnabled).pipe(
+    map(v => v ? 'true' : 'false')
   );
 
-  public allowGravatar$ = this.dashboardState$.pipe(
-    map(dashboardState => dashboardState.gravatarEnabled)
-  );
+  public allowGravatar$ = toObservable(this.dashboardSignals.gravatarEnabled);
 
   public localStorageSize$ = this.sessionData$.pipe(
-    map(sessionData => LocalStorageService.localStorageSize(sessionData)),
+    // -1 means the size could not be determined (no user session or storage unavailable)
+    map(sessionData => sessionData && sessionData.user ? LocalStorageService.localStorageSize(sessionData) : -1),
     filter(bytes => bytes !== -1),
   );
 
@@ -86,26 +109,25 @@ export class ProfileSettingsComponent {
     const newVal = !(gravatarEnabled === 'true');
     this.setGravatarEnabled(newVal);
   }
+
+  public updateTheme(mode: string) {
+    this.stratosBranding.setThemeMode(mode as ThemeMode);
+  }
+
   private setSessionTimeout(timeoutSession: boolean) {
-    this.store.dispatch(new SetSessionTimeoutAction(timeoutSession));
+    this.dashboardData.setSessionTimeout(timeoutSession);
   }
 
   public setPollingEnabled(pollingEnabled: boolean) {
-    this.store.dispatch(new SetPollingEnabledAction(pollingEnabled));
+    this.dashboardData.setPollingEnabled(pollingEnabled);
   }
 
   public setGravatarEnabled(gravatarEnabled: boolean) {
-    this.store.dispatch(new SetGravatarEnabledAction(gravatarEnabled));
+    this.dashboardData.setGravatarEnabled(gravatarEnabled);
   }
 
-  constructor(
-    userProfileService: UserProfileService,
-    private store: Store<AppState>,
-    public themeService: ThemeService,
-    private confirmationService: ConfirmationDialogService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) {
-    this.hasMultipleThemes = themeService.getThemes().length > 1;
+  constructor() {
+    const userProfileService = inject(UserProfileService);
 
     const canEdit = userProfileService.isError$.pipe(map(e => !e));
     const hasEditPermissions = this.currentUserPermissionsService.can(StratosCurrentUserPermissions.EDIT_PROFILE);
@@ -113,7 +135,55 @@ export class ProfileSettingsComponent {
   }
 
   clearLocalStorage() {
-    this.sessionData$.pipe(first()).subscribe(sessionData => LocalStorageService.clearLocalStorage(sessionData, this.confirmationService));
+    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
+      if (sessionData && sessionData.user) {
+        LocalStorageService.clearLocalStorage(sessionData, this.confirmationService);
+      }
+    });
+  }
+
+  resetTheme() {
+    this.confirmAndReset('Reset theme to default?', () => {
+      LocalStorageService.clearThemePreferences();
+    });
+  }
+
+  resetListPreferences() {
+    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
+      if (sessionData?.user) {
+        this.confirmAndReset('Reset list and pagination preferences?', () => {
+          LocalStorageService.clearSections(sessionData, [
+            LocalStorageSyncTypes.PAGINATION,
+            LocalStorageSyncTypes.LISTS,
+          ]);
+        });
+      }
+    });
+  }
+
+  resetDashboard() {
+    this.sessionData$.pipe(take(1)).subscribe(sessionData => {
+      if (sessionData?.user) {
+        this.confirmAndReset('Reset dashboard preferences (sidebar, home layout)?', () => {
+          LocalStorageService.clearSections(sessionData, [
+            LocalStorageSyncTypes.DASHBOARD,
+          ]);
+        });
+      }
+    });
+  }
+
+  private confirmAndReset(message: string, action: () => void) {
+    this.confirmationService.openWithCancel(
+      { message, confirm: 'Reset', critical: false, title: 'Reset Preferences' },
+      (confirmed: boolean) => {
+        if (confirmed) {
+          action();
+          window.location.assign('/user-profile');
+        }
+      },
+      () => {}
+    );
   }
 
 }

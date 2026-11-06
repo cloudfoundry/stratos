@@ -1,47 +1,66 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import { ListConfig } from '../../../../../../../core/src/shared/components/list/list.component.types';
-import { CFBaseTestModules } from '../../../../../../test-framework/cf-test-helper';
-import { generateActiveRouteCfOrgSpaceMock } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
 import {
-  CloudFoundryEventsListComponent,
-} from '../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
-import {
-  CfOrganizationEventsConfigService,
-} from '../../../../../shared/components/list/list-types/cf-events/types/cf-org-events-config.service';
-import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
-import {
-  CloudFoundryUserProvidedServicesService,
-} from '../../../../../shared/services/cloud-foundry-user-provided-services.service';
-import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
-import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+  TEST_CATALOGUE_ENTITIES,
+  generateStratosEntities,
+  EntityCatalogTestModule,
+  EntityCatalogHelper,
+  EntityCatalogHelpers
+} from '@stratosui/store';
+import { STORE_TEST_PROVIDERS, testSCFEndpointGuid, populateStoreWithTestEndpoint } from '@stratosui/store/testing';
+import { generateCFEntities, generateTestCfEndpointServiceProvider } from '@test-framework/cf';
+import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CloudFoundryOrganizationEventsComponent } from './cloud-foundry-organization-events.component';
 
 describe('CloudFoundryOrganizationEventsComponent', () => {
   let component: CloudFoundryOrganizationEventsComponent;
   let fixture: ComponentFixture<CloudFoundryOrganizationEventsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
         CloudFoundryOrganizationEventsComponent,
-        CloudFoundryEventsListComponent
       ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(
+          EntityCatalogTestModule
+        ),
         {
-          provide: ListConfig,
-          useClass: CfOrganizationEventsConfigService,
+          provide: TEST_CATALOGUE_ENTITIES,
+          useValue: [
+            ...generateStratosEntities(),
+            ...generateCFEntities()
+          ]
         },
-        generateActiveRouteCfOrgSpaceMock(),
-        CloudFoundryOrganizationService,
-        CfUserService,
-        CloudFoundryEndpointService,
-        CloudFoundryUserProvidedServicesService
-      ],
-      imports: [...CFBaseTestModules]
-    })
-      .compileComponents();
-  }));
+        ...generateTestCfEndpointServiceProvider(testSCFEndpointGuid),
+        {
+          provide: ActiveRouteCfOrgSpace,
+          useValue: {
+            cfGuid: testSCFEndpointGuid,
+            orgGuid: testSCFEndpointGuid,
+            spaceGuid: testSCFEndpointGuid
+          }
+        },
+      ]
+    }).compileComponents();
+
+    const entityCatalogHelper = TestBed.inject(EntityCatalogHelper);
+    EntityCatalogHelpers.SetEntityCatalogHelper(entityCatalogHelper);
+
+    populateStoreWithTestEndpoint();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(CloudFoundryOrganizationEventsComponent);

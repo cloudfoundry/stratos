@@ -1,4 +1,6 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { EnumerateComponent } from './enumerate.component';
 
@@ -6,12 +8,13 @@ describe('EnumerateComponent', () => {
   let component: EnumerateComponent;
   let fixture: ComponentFixture<EnumerateComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [ EnumerateComponent ]
-    })
-    .compileComponents();
-  }));
+      providers: [provideZonelessChangeDetection()],
+      imports: [ EnumerateComponent ]
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EnumerateComponent);

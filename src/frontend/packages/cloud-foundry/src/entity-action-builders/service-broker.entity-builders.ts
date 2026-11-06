@@ -4,21 +4,21 @@ import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface ServiceBrokerActionBuilders extends OrchestratedActionBuilders {
   get: (
-    guid,
-    endpointGuid,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    guid: string,
+    endpointGuid: string,
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetServiceBroker;
   getMultiple: (
-    endpointGuid,
-    paginationKey,
-    { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta
+    endpointGuid: string,
+    paginationKey: string,
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetServiceBrokers;
 }
 
 export const serviceBrokerActionBuilders: ServiceBrokerActionBuilders = {
   get: (
-    guid,
-    endpointGuid,
+    guid: string,
+    endpointGuid: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceBroker(
     guid,
@@ -27,8 +27,8 @@ export const serviceBrokerActionBuilders: ServiceBrokerActionBuilders = {
     populateMissing
   ),
   getMultiple: (
-    endpointGuid,
-    paginationKey,
+    endpointGuid: string,
+    paginationKey: string,
     { includeRelations, populateMissing }: CFBasePipelineRequestActionMeta = {}
   ) => new GetServiceBrokers(endpointGuid, paginationKey, includeRelations, populateMissing)
 };

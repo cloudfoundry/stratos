@@ -1,9 +1,7 @@
-import { HttpParams, HttpRequest } from '@angular/common/http';
+import { HttpRequest } from '@angular/common/http';
 
-import { getActions } from '../../../store/src/actions/action.helper';
 import { PaginatedAction } from '../../../store/src/types/pagination.types';
 import { ICFAction } from '../../../store/src/types/request.types';
-import { IUpdateOrganization } from '../cf-api.types';
 import { cfEntityFactory } from '../cf-entity-factory';
 import {
   cfUserEntityType,
@@ -25,10 +23,6 @@ export const GET_ORGANIZATION = '[Organization] Get one';
 export const GET_ORGANIZATION_SUCCESS = '[Organization] Get one success';
 export const GET_ORGANIZATION_FAILED = '[Organization] Get one failed';
 
-export const GET_ORGANIZATIONS = '[Organization] Get all';
-export const GET_ORGANIZATIONS_SUCCESS = '[Organization] Get all success';
-export const GET_ORGANIZATIONS_FAILED = '[Organization] Get all failed';
-
 export const GET_ORGANIZATION_SPACES = '[Space] Get all org spaces';
 export const GET_ORGANIZATION_SPACES_SUCCESS = '[Space] Get all org spaces success';
 export const GET_ORGANIZATION_SPACES_FAILED = '[Space] Get all org spaces failed';
@@ -36,10 +30,6 @@ export const GET_ORGANIZATION_SPACES_FAILED = '[Space] Get all org spaces failed
 export const GET_ORGANIZATION_DOMAINS = '[Organization] Get all org domains';
 export const GET_ORGANIZATION_DOMAINS_SUCCESS = '[Organization] Get all org domains success';
 export const GET_ORGANIZATION_DOMAINS_FAILED = '[Organization] Get all org domains failed';
-
-export const DELETE_ORGANIZATION = '[Organization] Delete organization';
-export const DELETE_ORGANIZATION_SUCCESS = '[Organization] Delete organization success';
-export const DELETE_ORGANIZATION_FAILED = '[Organization] Delete organization failed';
 
 export const GET_ORGANIZATION_USERS = '[Organization] Get all org users';
 export const GET_ORGANIZATION_USERS_SUCCESS = '[Organization] Get all org users success';
@@ -54,7 +44,7 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${guid}`
+      `/pp/v1/cf/org/${endpointGuid}/${guid}`
     );
   }
   actions = [
@@ -68,18 +58,18 @@ export class GetOrganization extends CFStartAction implements ICFAction, EntityI
 }
 
 export class GetAllOrganizationSpaces extends CFStartAction implements PaginatedAction, EntityInlineParentAction, EntityInlineChildAction {
-  public schemaKey: string;
+  public schemaKey!: string;
   constructor(
     public paginationKey: string,
     public orgGuid: string,
     public endpointGuid: string,
-    public includeRelations = [],
+    public includeRelations: string[] = [],
     public populateMissing = true
   ) {
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${orgGuid}/spaces`
+      `/pp/v1/cf/org/${endpointGuid}/${orgGuid}/spaces`
     );
     this.parentGuid = orgGuid;
   }
@@ -107,8 +97,8 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
   constructor(
     public orgGuid: string,
     public endpointGuid: string,
-    public paginationKey: string = null,
-    public includeRelations = [],
+    public paginationKey: string = '',
+    public includeRelations: string[] = [],
     public populateMissing = true
   ) {
     super();
@@ -117,7 +107,7 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
     }
     this.options = new HttpRequest(
       'GET',
-      `organizations/${orgGuid}/domains`
+      `/pp/v1/cf/org/${endpointGuid}/${orgGuid}/private_domains`
     );
     this.parentGuid = orgGuid;
   }
@@ -135,95 +125,6 @@ export class GetAllOrganizationDomains extends CFStartAction implements Paginate
   parentEntityConfig = new CFEntityConfig(organizationEntityType);
 }
 
-export class GetAllOrganizations extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
-  constructor(
-    public paginationKey: string,
-    public endpointGuid: string = null,
-    public includeRelations: string[] = [],
-    public populateMissing = true
-  ) {
-    super();
-    this.options = new HttpRequest(
-      'GET',
-      'organizations'
-    );
-  }
-  actions = [
-    GET_ORGANIZATIONS,
-    GET_ORGANIZATIONS_SUCCESS,
-    GET_ORGANIZATIONS_FAILED
-  ];
-  entity = [cfEntityFactory(organizationEntityType)];
-  entityType = organizationEntityType;
-  options: HttpRequest<any>;
-  initialParams = {
-    page: 1,
-    'results-per-page': 100,
-    'order-direction': 'desc',
-    'order-direction-field': 'name',
-    'order-by': 'name'
-  };
-  flattenPagination = true;
-}
-
-export class DeleteOrganization extends CFStartAction implements ICFAction {
-  constructor(public guid: string, public endpointGuid: string) {
-    super();
-    this.options = new HttpRequest(
-      'DELETE',
-      `organizations/${guid}`,
-      {
-        params: new HttpParams({
-          fromObject: {
-            recursive: 'true',
-            async: 'false'
-          }
-        })
-      }
-    );
-  }
-  actions = [DELETE_ORGANIZATION, DELETE_ORGANIZATION_SUCCESS, DELETE_ORGANIZATION_FAILED];
-  entity = [cfEntityFactory(organizationEntityType)];
-  entityType = organizationEntityType;
-  options: HttpRequest<any>;
-  removeEntityOnDelete = true;
-}
-
-export class CreateOrganization extends CFStartAction implements ICFAction {
-  constructor(public endpointGuid: string, public createOrg: IUpdateOrganization) {
-    super();
-    this.options = new HttpRequest(
-      'POST',
-      'organizations',
-      createOrg
-    );
-    this.guid = createOrg.name;
-  }
-  actions = getActions('Organizations', 'Create Org');
-  entity = [cfEntityFactory(organizationEntityType)];
-  entityType = organizationEntityType;
-  options: HttpRequest<any>;
-  guid: string;
-}
-
-export class UpdateOrganization extends CFStartAction implements ICFAction {
-
-  public static UpdateExistingOrg = 'Updating-Existing-Org';
-  constructor(public guid: string, public endpointGuid: string, updateOrg: IUpdateOrganization) {
-    super();
-    this.options = new HttpRequest(
-      'PUT',
-      `organizations/${guid}`,
-      updateOrg
-    );
-  }
-  actions = getActions('Organizations', 'Update Org');
-  entity = [cfEntityFactory(organizationEntityType)];
-  entityType = organizationEntityType;
-  options: HttpRequest<any>;
-  updatingKey = UpdateOrganization.UpdateExistingOrg;
-}
-
 export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, EntityInlineParentAction {
 
   constructor(
@@ -235,7 +136,7 @@ export class GetAllOrgUsers extends CFStartAction implements PaginatedAction, En
     super();
     this.options = new HttpRequest(
       'GET',
-      `organizations/${guid}/users`
+      `/pp/v1/cf/users/${endpointGuid}`
     );
     // Only admin's can use the url supplied by cf to fetch missing params. These are used by validation and fail for non-admins
     this.skipValidation = !isAdmin;

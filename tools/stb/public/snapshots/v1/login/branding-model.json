@@ -1,0 +1,170 @@
+{
+  "scene": "login",
+  "nodes": [
+    {
+      "snapshotId": "auth.login.page",
+      "role": "region",
+      "name": "Login page",
+      "description": "background color for the login page",
+      "facets": {
+        "background": {
+          "color": {
+            "literal": {
+              "l": 0.97,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      },
+      "roledescription": "page"
+    },
+    {
+      "snapshotId": "auth.login.page.background",
+      "role": "img",
+      "name": "Background",
+      "description": "background image for the login page",
+      "facets": {
+        "background": {
+          "layers": [
+            {
+              "kind": "image",
+              "ref": "login-bg.svg"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card",
+      "role": "region",
+      "name": "Login card",
+      "description": "card background for the login page",
+      "facets": {
+        "background": {
+          "color": {
+            "literal": {
+              "l": 1,
+              "c": 0,
+              "h": 0
+            }
+          }
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.logo",
+      "role": "img",
+      "name": "Logo",
+      "description": "logo image for the login page",
+      "facets": {
+        "asset": {
+          "ref": "logo.svg"
+        }
+      },
+      "visibility": true
+    },
+    {
+      "snapshotId": "auth.login.page.card.title",
+      "role": "heading",
+      "name": "Welcome message",
+      "description": "welcome / company greeting heading for the login page",
+      "facets": {
+        "content": {
+          "text": "Sign in to Stratos"
+        }
+      },
+      "visibility": true
+    },
+    {
+      "snapshotId": "auth.login.page.card.subtitle",
+      "role": "paragraph",
+      "name": "Subtitle",
+      "description": "subtitle for the login page",
+      "facets": {
+        "content": {
+          "text": "Multi-cloud management"
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.message",
+      "role": "note",
+      "name": "Custom message",
+      "description": "custom message for the login page",
+      "facets": {
+        "content": {
+          "text": "Authorized users only"
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.error",
+      "role": "alert",
+      "name": "Error message",
+      "description": "error/failure message color for the login page",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.63,
+              "c": 0.23,
+              "h": 25
+            }
+          }
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.username",
+      "role": "textbox",
+      "name": "Username field",
+      "description": "input border color for the login fields",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.password",
+      "role": "textbox",
+      "name": "Password field",
+      "description": "input border color for the login fields",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.86,
+              "c": 0.01,
+              "h": 250
+            }
+          }
+        }
+      }
+    },
+    {
+      "snapshotId": "auth.login.page.card.sign-in",
+      "role": "button",
+      "name": "Sign in",
+      "description": "sign-in button color for the login page",
+      "facets": {
+        "text": {
+          "color": {
+            "literal": {
+              "l": 0.55,
+              "c": 0.15,
+              "h": 250
+            }
+          }
+        }
+      }
+    }
+  ]
+}

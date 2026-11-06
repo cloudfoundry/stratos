@@ -1,0 +1,232 @@
+import { defineConfig, devices } from '@playwright/test';
+
+import { CF_ROLES, roleProjectName, roleSpecDir, roleStatePath } from './e2e/auth.constants';
+
+// Default secrets profile — auto-detect from base URL, fall back to 'local'
+if (!process.env.E2E_PROFILE) {
+  const baseUrl = process.env.E2E_BASE_URL || '';
+  process.env.E2E_PROFILE = baseUrl.includes('adepttech') ? 'adepttech' : 'local';
+}
+
+// Anchor timestamp for backend fresh-vs-reused detection (see global-setup.ts).
+// Captured here because this module evaluates before Playwright starts (or
+// skips starting, per reuseExistingServer) the webServer processes below.
+if (!process.env.E2E_RUN_START) {
+  process.env.E2E_RUN_START = String(Date.now());
+}
+
+// Auth mode passthrough for the e2e backend. The role projects need UAA
+// (`AUTH_ENDPOINT_TYPE=remote`) auth, where a console user is a CF user;
+// jetstream reads the process environment before config.properties, so
+// exporting these before the run switches only the e2e backend.
+const AUTH_ENV_KEYS = ['AUTH_ENDPOINT_TYPE', 'UAA_ENDPOINT', 'CONSOLE_CLIENT', 'CONSOLE_ADMIN_SCOPE', 'SSO_LOGIN', 'SKIP_SSL_VALIDATION'];
+const AUTH_ENV: Record<string, string> = Object.fromEntries(
+  AUTH_ENV_KEYS.filter(k => process.env[k] !== undefined).map(k => [k, process.env[k] as string])
+);
+
+const CHROME_LAUNCH_ARGS = ['--no-sandbox', '--disable-dev-shm-usage', '--disable-infobars', '--allow-insecure-localhost'];
+
+// The browser projects run everything under e2e/tests on the admin session,
+// so the role suites are kept out of them and run once per role instead.
+const ROLE_TESTS = /tests\/roles\//;
+
+// Role suites: e2e/tests/roles/<role>/ plus the every-role spec, run as that
+// role's saved session (see e2e/auth.roles.setup.ts).
+const roleProjects = () => CF_ROLES.map(role => ({
+  name: roleProjectName(role),
+  dependencies: ['setup-roles'],
+  // A role file seeds shared state (an app, a target user's roles) in
+  // beforeAll, so its tests run in order on one worker; the four role
+  // projects still run alongside each other.
+  fullyParallel: false,
+  testMatch: [new RegExp(`tests/roles/${roleSpecDir(role)}/`), /tests\/roles\/every-role\.spec\.ts/],
+  use: {
+    ...devices['Desktop Chrome'],
+    storageState: roleStatePath(role),
+    launchOptions: { args: CHROME_LAUNCH_ARGS },
+  },
+}));
+
+// Test environment ports (separate from dev to avoid conflicts)
+const BACKEND_PORT = process.env.BACKEND_PORT || '5543';
+const FRONTEND_PORT = process.env.FRONTEND_PORT || '5540';
+
+/**
+ * Playwright configuration for Stratos E2E tests
+ * Migrated from Protractor configuration
+ */
+export default defineConfig({
+
+  // Test directory
+  testDir: './e2e/tests',
+
+  // Run tests in parallel
+  fullyParallel: true,
+
+  // Fail the build on CI if you accidentally left test.only in the source code
+  forbidOnly: !!process.env.CI,
+
+  // Retry on CI only
+  retries: process.env.CI ? 2 : 0,
+
+  // Worker count: configurable via E2E_WORKERS env var.
+  // Each worker gets its own authenticated session to avoid session contention.
+  // Default: CI=4, local=half CPU cores (Playwright default)
+  workers: process.env.E2E_WORKERS
+    ? parseInt(process.env.E2E_WORKERS)
+    : (process.env.CI ? 4 : undefined),
+
+  // Reporter configuration
+  reporter: [
+    ['html', { outputFolder: 'e2e-reports/html' }],
+    ['json', { outputFile: 'e2e-reports/results.json' }],
+    ['list']
+  ],
+
+  // Shared settings for all the projects below
+  use: {
+    // Base URL for navigation
+    baseURL: process.env.E2E_BASE_URL || `https://localhost:${FRONTEND_PORT}`,
+
+    // Collect trace when retrying the failed test
+    trace: 'on-first-retry',
+
+    // Screenshot on failure (override via E2E_SCREENSHOTS env var)
+    screenshot: (process.env.E2E_SCREENSHOTS as any) || 'only-on-failure',
+
+    // Video on failure (override via E2E_VIDEO env var)
+    video: (process.env.E2E_VIDEO as any) || 'retain-on-failure',
+
+    // Accept self-signed certificates (dev environment)
+    ignoreHTTPSErrors: true,
+
+    // Maximum time each action can take
+    actionTimeout: 10000,
+
+    // Maximum navigation time
+    navigationTimeout: 30000,
+  },
+
+  // Global timeout for each test
+  // SSO login fixtures can take 15-20s each (headless browser OAuth flow)
+  timeout: 90000,
+
+  // Run-level backstop: caps total wall-clock time for the whole test run,
+  // independent of any single test's timeout. The full 3-browser suite
+  // legitimately runs ~4h, and future tiers must fit under this ceiling
+  // too, so 6h leaves headroom without masking a genuinely stuck run
+  // (e.g. a hung fixture whose per-test timeout is itself defeated, as
+  // measured in the 32.5-minute teardown hang this backstop guards against).
+  globalTimeout: 6 * 60 * 60 * 1000,
+
+  // Report test environment status before tests start
+  globalSetup: './e2e/global-setup.ts',
+
+  // Kill test servers (identified by STRATOS_E2E env var) after tests complete
+  globalTeardown: './e2e/global-teardown.ts',
+
+  // Expect timeout
+  expect: {
+    timeout: 5000,
+  },
+
+  // Configure projects — auth setup runs once, then tests reuse saved state
+  projects: [
+    {
+      name: 'setup',
+      testDir: './e2e',
+      testMatch: /auth\.setup\.ts/,
+      // Not fully parallel: 'authenticate as admin' and 'authenticate as
+      // user' both call registerDefaultCloudFoundry(), whose idempotence
+      // check is check-then-act (GET-then-POST, see
+      // endpoint-management.helper.ts) — on a cold DB, two workers running
+      // this project concurrently can both observe "not registered" and
+      // both POST, duplicating the CF endpoint registration and breaking
+      // every list page with "Request failed". Deliberately NOT
+      // `mode: 'serial'`: serial would abort the user-setup test entirely
+      // if admin-setup fails, whereas non-parallel here just forces the
+      // two tests onto one worker so they run one at a time, in file order.
+      fullyParallel: false,
+      use: { storageState: undefined },
+    },
+    {
+      // One saved session per CF role; see e2e/auth.roles.setup.ts. Nothing
+      // here registers endpoints, so the four tests can run in parallel.
+      name: 'setup-roles',
+      testDir: './e2e',
+      testMatch: /auth\.roles\.setup\.ts/,
+      dependencies: ['setup'],
+      use: { storageState: undefined },
+    },
+    ...roleProjects(),
+    {
+      name: 'chromium',
+      dependencies: ['setup'],
+      testIgnore: ROLE_TESTS,
+      use: {
+        ...devices['Desktop Chrome'],
+        // Default to admin state — fixtures override per-test as needed
+        storageState: 'e2e/.auth/admin.json',
+        // Chrome-specific options matching Protractor config
+        launchOptions: { args: CHROME_LAUNCH_ARGS },
+      },
+    },
+
+    {
+      name: 'firefox',
+      dependencies: ['setup'],
+      testIgnore: ROLE_TESTS,
+      use: { ...devices['Desktop Firefox'], storageState: 'e2e/.auth/admin.json' },
+    },
+
+    {
+      name: 'webkit',
+      dependencies: ['setup'],
+      testIgnore: ROLE_TESTS,
+      use: { ...devices['Desktop Safari'], storageState: 'e2e/.auth/admin.json' },
+    },
+  ],
+
+  // Auto-start backend and frontend for tests using dedicated ports.
+  // Reuses existing servers if already running on these ports.
+  //
+  // Process identification: STRATOS_E2E=e2e:<backend_port> is set as an env
+  // var on both backend and frontend processes. This appears in the command
+  // line visible to pkill/pgrep, enabling targeted cleanup without PID files
+  // (which can become stale if a process crashes).
+  //
+  // The backend port is the session ID — one ID covers both processes.
+  //
+  //   ps aux | grep 'STRATOS_E2E=e2e'       # find all test sessions
+  //   ps aux | grep 'e2e:5543'             # find a specific session
+  //   pkill -f 'e2e:5543'                  # kill a specific session
+  // Skip local servers when targeting a remote deployment
+  ...(process.env.E2E_BASE_URL ? {} : {
+    webServer: [
+      {
+        // Isolate the e2e database: jetstream runs from src/jetstream, where the
+        // dev stack's config.properties sets SQLITE_KEEP_DB=true — without an
+        // override the e2e server SHARES the dev sqlite and each auth.setup
+        // registers a duplicate endpoint into it (stale duplicates then fail
+        // every list page with "Request failed"). A fresh dedicated file per
+        // run keeps e2e deterministic and leaves the dev database alone.
+        command: `cd src/jetstream && mkdir -p ../../dist/e2e-db && STRATOS_E2E=e2e:${BACKEND_PORT} CONSOLE_PROXY_TLS_ADDRESS=:${BACKEND_PORT} SQLITE_DB_DIR=../../dist/e2e-db SQLITE_KEEP_DB=false ../../dist/bin/jetstream`,
+        url: `https://localhost:${BACKEND_PORT}/pp/v1/info`,
+        reuseExistingServer: true,
+        ignoreHTTPSErrors: true,
+        timeout: 30000,
+        env: {
+          SESSION_STORE_EXPIRY: '360',
+          ...AUTH_ENV,
+        },
+      },
+      {
+        command: `STRATOS_E2E=e2e:${BACKEND_PORT} BACKEND_PORT=${BACKEND_PORT} bun run ng serve --port ${FRONTEND_PORT} --proxy-config proxy.conf.cjs`,
+        url: `https://localhost:${FRONTEND_PORT}`,
+        reuseExistingServer: true,
+        ignoreHTTPSErrors: true,
+        timeout: 120000,
+      },
+    ],
+  }),
+});

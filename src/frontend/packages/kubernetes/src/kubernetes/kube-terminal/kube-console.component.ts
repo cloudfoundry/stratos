@@ -1,9 +1,12 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { NEVER, Observable, Subject } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
+import {Component, OnInit, ViewChild, inject, ChangeDetectionStrategy } from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
+import { CustomTooltipDirective } from '@stratosui/core';
+import { EMPTY, NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 
+import { PageHeaderComponent } from '../../../../core/src/shared/components/page-header/page-header.component';
 import { IHeaderBreadcrumb } from '../../../../core/src/shared/components/page-header/page-header.types';
 import { SshViewerComponent } from '../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
 import { BaseKubeGuid } from '../kubernetes-page.types';
@@ -14,7 +17,16 @@ import { KubernetesService } from '../services/kubernetes.service';
 @Component({
   selector: 'app-kube-console',
   templateUrl: './kube-console.component.html',
-  styleUrls: ['./kube-console.component.scss'],
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    AsyncPipe,
+    CustomTooltipDirective,
+    PageHeaderComponent,
+    RouterLink,
+    SshViewerComponent,
+  ],
   providers: [
     {
       provide: BaseKubeGuid,
@@ -33,25 +45,24 @@ import { KubernetesService } from '../services/kubernetes.service';
 })
 export class KubeConsoleComponent implements OnInit {
 
-  public messages: Observable<string>;
+  // strict: the websocket payload is string | ArrayBuffer | Blob (rxjs-websockets
+  // WebSocketPayload, not exported); ssh-viewer consumes it as Observable<any>.
+  public messages!: Observable<string | ArrayBuffer | Blob>; // strict: assigned in both ngOnInit branches
 
   public connectionStatus = new Subject<number>();
 
-  public sshInput: Subject<string>;
+  public sshInput!: Subject<string>; // strict: assigned in ngOnInit when an endpoint guid is available
 
-  public errorMessage: string;
+  public errorMessage?: string;
 
-  public connected: boolean;
+  public connected = false;
 
-  public kubeSummaryLink: string;
+  public kubeSummaryLink!: string; // strict: always assigned in ngOnInit
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>; // strict: assigned in ngOnInit when an endpoint guid is available
 
-  @ViewChild('sshViewer', { static: false }) sshViewer: SshViewerComponent;
-
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-  ) { }
+  @ViewChild('sshViewer', { static: false }) sshViewer!: SshViewerComponent; // strict: @ViewChild populated after view init
+  public kubeEndpointService = inject(KubernetesEndpointService);
 
   ngOnInit() {
     this.connectionStatus.next(0);
@@ -74,16 +85,16 @@ export class KubeConsoleComponent implements OnInit {
       this.messages = connection.pipe(
         tap(() => this.connectionStatus.next(1)),
         switchMap(getResponse => getResponse(this.sshInput)),
-        catchError((e: Error) => {
+        catchError((e: Error): Observable<never> => {
           if (e.message !== normalClosureMessage && !this.sshViewer.isConnected) {
             this.errorMessage = 'Error launching Kubernetes Terminal';
           }
-          return [];
+          return EMPTY;
         }));
 
       // Breadcrumbs
       this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
-        map(endpoint => ([{
+        map((endpoint: any) => ([{
           breadcrumbs: [
             { value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` },
           ]

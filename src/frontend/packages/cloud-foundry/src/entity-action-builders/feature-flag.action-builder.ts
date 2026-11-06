@@ -3,14 +3,14 @@ import { GetAllFeatureFlags } from '../actions/feature-flags.actions';
 
 export interface FeatureFlagActionBuilders extends OrchestratedActionBuilders {
   getMultiple: (
-    endpointGuid,
-    paginationKey?,
+    endpointGuid: string,
+    paginationKey?: string,
   ) => GetAllFeatureFlags;
 }
 
 export const featureFlagActionBuilders: FeatureFlagActionBuilders = {
   getMultiple: (
-    endpointGuid,
-    paginationKey?,
+    endpointGuid: string,
+    paginationKey?: string,
   ) => new GetAllFeatureFlags(endpointGuid, paginationKey)
 };

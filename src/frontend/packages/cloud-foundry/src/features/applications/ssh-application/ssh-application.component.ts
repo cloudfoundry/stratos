@@ -1,12 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, ViewChild, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { NEVER, Observable, Subject } from 'rxjs';
 import websocketConnect, { normalClosureMessage } from 'rxjs-websockets';
-import { catchError, first, map, switchMap, tap } from 'rxjs/operators';
-
-import { CFAppState } from '../../../../../cloud-foundry/src/cf-app-state';
-import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { take, catchError, map, switchMap, tap } from 'rxjs/operators';
+import { CustomTooltipDirective, PageHeaderComponent, IHeaderBreadcrumb } from '@stratosui/core';
 import { SshViewerComponent } from '../../../../../core/src/shared/components/ssh-viewer/ssh-viewer.component';
 import { IApp } from '../../../cf-api.types';
 import { ApplicationService } from '../application.service';
@@ -15,48 +13,57 @@ import { ApplicationService } from '../application.service';
 @Component({
   selector: 'app-ssh-application',
   templateUrl: './ssh-application.component.html',
-  styleUrls: ['./ssh-application.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    CustomTooltipDirective,
+    PageHeaderComponent,
+    SshViewerComponent
+  ]
 })
 export class SshApplicationComponent implements OnInit {
+  private activatedRoute = inject(ActivatedRoute);
+  private applicationService = inject(ApplicationService);
 
-  public messages: Observable<string>;
+
+  public messages!: Observable<string>;
 
   public connectionStatus = new Subject<number>();
 
-  public sshInput: Subject<string>;
+  public sshInput!: Subject<string>;
 
-  public errorMessage: string;
+  public errorMessage!: string;
 
-  public sshRoute: string;
+  public sshRoute!: string;
 
-  public connected: boolean;
+  public connected!: boolean;
 
-  public appInstanceLink: string;
+  public appInstanceLink!: string;
 
-  public instanceId: string;
+  public instanceId!: string;
 
-  public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
+  public breadcrumbs$!: Observable<IHeaderBreadcrumb[]>;
 
-  @ViewChild('sshViewer', { static: true }) sshViewer: SshViewerComponent;
+  // strict: populated by Angular's @ViewChild query (static query resolves
+  // before ngOnInit).
+  @ViewChild('sshViewer', { static: true }) sshViewer!: SshViewerComponent;
 
   private getBreadcrumbs(
     application: IApp,
+    cfGuid: string,
+    appGuid: string,
   ) {
     return [
       {
         breadcrumbs: [
           { value: 'Applications', routerLink: '/applications' },
-          { value: application.name, routerLink: `/applications/${application.cfGuid}/${application.guid}/instances` }
+          { value: application.name, routerLink: `/applications/${cfGuid}/${appGuid}/summary` }
         ]
       },
     ];
   }
-
-  constructor(
-    private activatedRoute: ActivatedRoute,
-    private store: Store<CFAppState>,
-    private applicationService: ApplicationService,
-  ) { }
 
   ngOnInit() {
     this.connectionStatus.next(0);
@@ -65,7 +72,7 @@ export class SshApplicationComponent implements OnInit {
     this.instanceId = routeParams.index;
 
     this.appInstanceLink = (
-      `/applications/${cfGuid}/${appGuid}/instances`
+      `/applications/${cfGuid}/${appGuid}/summary`
     );
 
     if (!cfGuid || !appGuid || !this.instanceId) {
@@ -83,8 +90,8 @@ export class SshApplicationComponent implements OnInit {
 
       this.messages = connection.pipe(
         tap(() => this.connectionStatus.next(1)),
-        switchMap(getResponse => getResponse(this.sshInput)),
-        catchError((e: Error) => {
+        switchMap((getResponse: any): any[] => getResponse(this.sshInput)),
+        catchError((e: Error): any[] => {
           if (e.message !== normalClosureMessage) {
             this.errorMessage = 'Error connecting to web socket';
           }
@@ -92,8 +99,8 @@ export class SshApplicationComponent implements OnInit {
         }));
 
       this.breadcrumbs$ = this.applicationService.waitForAppEntity$.pipe(
-        map(app => this.getBreadcrumbs(app.entity.entity)),
-        first()
+        map(app => this.getBreadcrumbs(app.entity.entity, cfGuid, appGuid)),
+        take(1)
       );
     }
   }

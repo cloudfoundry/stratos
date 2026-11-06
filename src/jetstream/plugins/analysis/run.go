@@ -5,7 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"log/slog"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
@@ -13,12 +14,13 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/analysis/store"
 
-	"github.com/labstack/echo/v4"
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v5"
 )
 
-type popeyeConfig struct {
+// Referenced only by the parked sonobuoy analyzer (container/sonobuoy.go_);
+// kept so that file compiles if re-enabled.
+type popeyeConfig struct { //nolint:unused
 	Namespace string `json:"namespace"`
 	App       string `json:"app"`
 }
@@ -29,8 +31,8 @@ type KubeConfigExporter interface {
 
 const idHeaderName = "X-Stratos-Analaysis-ID"
 
-func (c *Analysis) runReport(ec echo.Context) error {
-	log.Debug("runReport")
+func (c *Analysis) runReport(ec *echo.Context) error {
+	slog.Debug("runReport")
 
 	analyzer := ec.Param("analyzer")
 	endpointID := ec.Param("endpoint")
@@ -44,7 +46,7 @@ func (c *Analysis) runReport(ec echo.Context) error {
 	}
 
 	report := store.AnalysisRecord{
-		ID:           uuid.NewV4().String(),
+		ID:           uuid.New().String(),
 		EndpointID:   endpointID,
 		EndpointType: endpoint.CNSIType,
 		UserID:       userID,
@@ -63,20 +65,24 @@ func (c *Analysis) runReport(ec echo.Context) error {
 	}
 
 	report.Name = fmt.Sprintf("Analysis report %s", analyzer)
-	dbStore.Save((report))
+	if _, err := dbStore.Save(report); err != nil {
+		return err
+	}
 
 	err = c.doRunReport(ec, analyzer, endpointID, userID, dbStore, &report)
 	if err != nil {
 		report.Status = "error"
 		report.Result = err.Error()
-		dbStore.UpdateReport(userID, &report)
+		if updateErr := dbStore.UpdateReport(userID, &report); updateErr != nil {
+			slog.Warn("could not update the analysis report", "report", report.ID, "user", userID, "error", updateErr)
+		}
 	}
 
 	return err
 
 }
 
-func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID string, dbStore store.AnalysisStore, report *store.AnalysisRecord) error {
+func (c *Analysis) doRunReport(ec *echo.Context, analyzer, endpointID, userID string, dbStore store.AnalysisStore, report *store.AnalysisRecord) error {
 
 	// Get Kube Config
 	k8s := c.portalProxy.GetPlugin("kubernetes")
@@ -105,13 +111,13 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	metadataHeader.Set("Content-Type", "application/yaml")
 	metadataHeader.Set("Content-ID", "kubeconfig")
 	part, _ := writer.CreatePart(metadataHeader)
-	part.Write([]byte(config))
+	_, _ = part.Write([]byte(config))
 
 	requestBody := make([]byte, 0)
 
 	// Read body
-	defer ec.Request().Body.Close()
-	if b, err := ioutil.ReadAll((ec.Request().Body)); err == nil {
+	defer func() { _ = ec.Request().Body.Close() }()
+	if b, err := io.ReadAll(ec.Request().Body); err == nil {
 		requestBody = b
 	}
 
@@ -120,7 +126,7 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	postHeader.Set("Content-Type", "application/json")
 	postHeader.Set("Content-ID", "body")
 	part, _ = writer.CreatePart(postHeader)
-	part.Write(requestBody)
+	_, _ = part.Write(requestBody)
 
 	// Report config
 	reportHeader := textproto.MIMEHeader{}
@@ -131,8 +137,10 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	if err != nil {
 		return errors.New("Could not serialize job")
 	}
-	part.Write(job)
-	writer.Close()
+	_, _ = part.Write(job)
+	if err := writer.Close(); err != nil {
+		return fmt.Errorf("Could not close multipart writer: %v", err)
+	}
 
 	// Post this to the Analyzer API
 	contentType := fmt.Sprintf("multipart/form-data; boundary=%s", writer.Boundary())
@@ -147,15 +155,15 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	}
 
 	if rsp.StatusCode != http.StatusOK {
-		log.Debugf("Request failed with response code: %d", rsp.StatusCode)
+		slog.Debug("Analysis job request failed", "status", rsp.StatusCode)
 		return fmt.Errorf("Analysis job failed with response code: %d", rsp.StatusCode)
 	}
 
 	// Job submitted okay
 	// Updated job is in the response
 
-	defer rsp.Body.Close()
-	response, err := ioutil.ReadAll(rsp.Body)
+	defer func() { _ = rsp.Body.Close() }()
+	response, err := io.ReadAll(rsp.Body)
 	if err != nil {
 		return errors.New("Could not read response")
 	}
@@ -172,17 +180,14 @@ func (c *Analysis) doRunReport(ec echo.Context, analyzer, endpointID, userID str
 	report.Type = updatedJob.Type
 	report.Path = updatedJob.Path
 
-	log.Debug("OK => Job submitted okay")
-	log.Debug("=======================================================")
-	log.Debugf("%+v", report)
-	log.Debug("=======================================================")
+	slog.Debug("OK => Job submitted okay", "report", report)
 
 	err = dbStore.UpdateReport(userID, report)
 	if err != nil {
 		return fmt.Errorf("Could not save report %s", err)
 	}
 
-	log.Debug("All done - job saved")
+	slog.Debug("All done - job saved", "report", report.ID)
 
 	return ec.JSON(200, report)
 }

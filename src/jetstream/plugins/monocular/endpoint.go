@@ -3,11 +3,11 @@ package monocular
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/url"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 )
 
 // GetType returns the endpoint type supported by this plugin
@@ -21,8 +21,8 @@ func (m *Monocular) GetClientId() string {
 }
 
 // Register will register a new endpoint of the type Helm
-func (m *Monocular) Register(echoContext echo.Context) error {
-	log.Debug("Helm Repository Register...")
+func (m *Monocular) Register(echoContext *echo.Context) error {
+	slog.Debug("registering a helm repository endpoint")
 	return m.portalProxy.RegisterEndpoint(echoContext, m.Info)
 }
 
@@ -32,14 +32,14 @@ func (m *Monocular) Validate(userGUID string, cnsiRecord api.CNSIRecord, tokenRe
 }
 
 // Connect to the endpoint
-func (m *Monocular) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
+func (m *Monocular) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
 	// Note: Helm Repositories don't support connecting
 	return nil, false, errors.New("Connecting not support for a Helm Repository")
 }
 
 // Info checks the endpoint type and fetches any metadata
 func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
-	log.Debug("Helm Repository Info")
+	slog.Debug("fetching helm repository info", "apiEndpoint", apiEndpoint)
 	var v2InfoResponse api.V2Info
 	var newCNSI api.CNSIRecord
 
@@ -71,5 +71,5 @@ func (m *Monocular) Info(apiEndpoint string, skipSSLValidation bool, caCert stri
 }
 
 // UpdateMetadata not needed for Helm endpoints
-func (m *Monocular) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
+func (m *Monocular) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
 }

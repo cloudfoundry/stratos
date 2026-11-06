@@ -1,0 +1,51 @@
+<div class="p-4 min-w-[24rem] max-w-[32rem]" data-test="apply-quota-to-spaces-dialog">
+  <h2 id="apply-quota-to-spaces-title" class="m-0 mb-2" data-dialog-drag-handle>
+    Apply quota to spaces
+  </h2>
+  @if (data.quotaName) {
+    <div class="text-sm opacity-60 mb-3">
+      Select the spaces that should use the <strong>{{ data.quotaName }}</strong> space quota.
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="opacity-60 py-4">Loading spaces…</div>
+  } @else if (loadError()) {
+    <div class="text-red-600 py-4">{{ loadError() }}</div>
+  } @else if (spaces().length === 0) {
+    <div class="opacity-60 py-4">There are no spaces in this organization.</div>
+  } @else {
+    <div class="max-h-[18rem] overflow-y-auto border rounded my-2">
+      @for (space of spaces(); track space.guid) {
+        <label
+          class="flex items-center gap-2 px-3 py-2 cursor-pointer hover:bg-black/5"
+          [attr.data-test-space]="space.guid"
+        >
+          <input
+            type="checkbox"
+            [checked]="isSelected(space.guid)"
+            (change)="toggle(space.guid)"
+          />
+          <span>{{ space.name }}</span>
+        </label>
+      }
+    </div>
+    <div class="text-sm opacity-60 mt-1">{{ selectedCount() }} selected</div>
+  }
+
+  <div class="flex justify-end gap-2 mt-4">
+    <button type="button" class="btn" data-test="apply-quota-cancel" (click)="cancel()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      name="apply"
+      data-test="apply-quota-submit"
+      [disabled]="!canApply()"
+      (click)="apply()"
+    >
+      Apply
+    </button>
+  </div>
+</div>

@@ -1,36 +1,57 @@
-import { Component, OnInit } from '@angular/core';
+
+import {Component, OnInit, inject, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { finalize, first, switchMap, tap } from 'rxjs/operators';
+import { take, finalize, switchMap, tap } from 'rxjs/operators';
+
+import { EntitySummaryTitleComponent } from '@stratosui/core';
 
 import { Chart } from '../shared/models/chart';
 import { ChartVersion } from '../shared/models/chart-version';
 import { ChartsService } from '../shared/services/charts.service';
 import { ConfigService } from '../shared/services/config.service';
 import { getMonocularEndpoint, stratosMonocularEndpointGuid } from '../stratos-monocular.helper';
+import { LoaderComponent } from '../loader/loader.component';
+import { PanelComponent } from '../panel/panel.component';
+import { ChartDetailsInfoComponent } from './chart-details-info/chart-details-info.component';
+import { ChartDetailsReadmeComponent } from './chart-details-readme/chart-details-readme.component';
 
 @Component({
   selector: 'app-chart-details',
   templateUrl: './chart-details.component.html',
-  styleUrls: ['./chart-details.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    EntitySummaryTitleComponent,
+    LoaderComponent,
+    PanelComponent,
+    ChartDetailsInfoComponent,
+    ChartDetailsReadmeComponent
+]
 })
 export class ChartDetailsComponent implements OnInit {
   /* This resource will be different, probably ChartVersion */
-  chart: Chart;
+  chart!: Chart;
   loading = false;
   initing = true;
-  currentVersion: ChartVersion;
-  iconUrl: string;
-  titleVersion: string;
-  chartSubTitle: string;
+  currentVersion!: ChartVersion;
+  iconUrl!: string;
+  titleVersion!: string;
+  chartSubTitle!: string;
 
-  loadingDelay: any;
+  loadingDelay: ReturnType<typeof setTimeout>;
+  private route = inject(ActivatedRoute);
+  private chartsService = inject(ChartsService);
+  private config = inject(ConfigService);
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(
-    private route: ActivatedRoute,
-    private chartsService: ChartsService,
-    private config: ConfigService,
-  ) {
+
+
+  constructor() {
+
+
     this.loadingDelay = setTimeout(() => this.loading = true, 100);
+
+
   }
 
   ngOnInit() {
@@ -38,9 +59,9 @@ export class ChartDetailsComponent implements OnInit {
       const repo = params.repo;
       const chartName = params.chartName;
 
-      if (!!chartName) {
+      if (chartName) {
         this.chartsService.getChart(repo, chartName).pipe(
-          first(),
+          take(1),
           switchMap(chart => {
             clearTimeout(this.loadingDelay);
             this.chart = chart;
@@ -49,7 +70,7 @@ export class ChartDetailsComponent implements OnInit {
               this.chartSubTitle = 'Artifact Hub - ' + this.chartSubTitle;
             }
             const version = params.version || this.chart.relationships.latestChartVersion.data.version;
-            return this.chartsService.getVersion(repo, chartName, version).pipe(first());
+            return this.chartsService.getVersion(repo, chartName, version).pipe(take(1));
           }),
           tap(chartVersion => {
             this.currentVersion = chartVersion;
@@ -61,6 +82,7 @@ export class ChartDetailsComponent implements OnInit {
             clearTimeout(this.loadingDelay);
             this.loading = false;
             this.initing = false;
+            this.cdr.markForCheck();
           })
         ).subscribe();
       }
@@ -74,6 +96,6 @@ export class ChartDetailsComponent implements OnInit {
   updateMetaTags(): void { }
 
   goToRepoUrl(): string {
-    return `/charts/${getMonocularEndpoint(null, this.chart)}/${this.chart.attributes.repo.name}`;
+    return `/charts/${getMonocularEndpoint(undefined, this.chart)}/${this.chart.attributes.repo.name}`;
   }
 }

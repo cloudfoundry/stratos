@@ -1,7 +1,7 @@
 import { ActivatedRoute } from '@angular/router';
 
 export function getParentURL(route: ActivatedRoute, removeLastParts = 1): string {
-  const reducer = (a: string, v) => {
+  const reducer = (a: string, v: any): string => {
     const p = v.url.join('/');
     return p.length > 0 ? `${a}/${p}` : a;
   };

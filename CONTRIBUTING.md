@@ -9,7 +9,7 @@ There are two main forms of contribution: reporting issues and performing code c
 If you find a problem with Stratos, report it using [GitHub issues](https://github.com/cloudfoundry/stratos/issues/new).
 
 Before reporting a new issue, please take a moment to check whether it has already been reported
-[here](https://github.com/cloudfoundry/stratos/issues). If this is the case, please:
+in the [issue tracker](https://github.com/cloudfoundry/stratos/issues). If this is the case, please:
 
 - Read all the comments to confirm that it's the same issue you're having.
 - Refrain from adding "same thing here" or "+1" comments. Just hit the
@@ -35,11 +35,13 @@ To send your code change, use GitHub pull requests. The workflow is as follows:
 
   1. Fork the project.
 
-  1. Create a branch based on `master`.
+  1. Create a branch based on `develop`.
 
-  1. Implement your change, including tests and documentation.
+  1. Implement your change, including tests and documentation. See
+     [Requirements for a change](#requirements-for-a-change) below for what a
+     reviewable change has to include.
 
-  1. Run tests to make sure your change didn't break anything.
+  1. Run `make check gate` and make sure it passes before you publish.
 
   1. Publish the branch and create a pull request.
 
@@ -53,6 +55,69 @@ See also [GitHub's guide on contributing](https://help.github.com/articles/fork-
 If you want to do multiple unrelated changes, use separate branches and pull
 requests.
 
+### Requirements for a change
+
+A change is ready for review when all of the following hold. Continuous
+integration checks every one of them on your pull request, so running them
+locally first saves a round trip.
+
+**Tests.** New functionality must arrive with tests that cover it, and a bug
+fix must arrive with a test that fails without the fix. This is the project's
+test policy and it applies to every change, not only to large ones: a change
+that adds behaviour nothing exercises is not reviewable, because nothing will
+tell us when it breaks later.
+
+Tests live beside the code they cover — `*.spec.ts` for the frontend,
+`*_test.go` for Jetstream. Run them with:
+
+```bash
+make test                 # everything
+make test frontend        # the Angular packages only
+make test backend         # Jetstream only
+```
+
+**The quality gate.** `make check gate` runs lint, the unit tests and a
+production build. It must pass before you publish:
+
+```bash
+make check gate
+```
+
+Lint is not advisory. The gate fails on any ESLint or TypeScript error, and the
+project adds its own rules under `tools/eslint-rules/` on top of the standard
+sets. Warnings are worth clearing too, even where they do not fail the build.
+
+**Documentation.** If your change alters behaviour an operator or user can
+observe — a configuration variable, an API, a header, a screen — update the
+documentation in the same pull request. Configuration variables also belong in
+`src/jetstream/config.example`.
+
+**A release-notes fragment.** Each pull request carries its own fragment in
+`changelog.d/`, written for the person upgrading rather than for the reviewer:
+
+```bash
+./build/release-notes.sh new        # names it after your branch
+```
+
+See [`changelog.d/README.md`](changelog.d/README.md) for the format. This check
+is advisory rather than blocking, because purely internal changes with no
+user-visible effect do not need a fragment — but if yours changes anything a
+user would notice, add one.
+
+**Sign-off.** Every commit needs a `Signed-off-by` line — see
+[Sign your work](#sign-your-work).
+
+### Development environment
+
+| Tool | Version        |
+|------|----------------|
+| Node | `^24` or `^26` |
+| bun  | `>= 1.3.14`    |
+| Go   | `1.27.1`       |
+
+`bun install` at the repository root sets up the frontend and the build
+tooling. `make help` lists every available target.
+
 ### Commits
 
 Each commit in the pull request should do only one thing, which is clearly
@@ -61,13 +126,18 @@ functional changes into one commit. When writing commit messages, adhere to
 [widely used
 conventions](http://tbaggery.com/2008/04/19/a-note-about-git-commit-messages.html).
 
+Subjects follow the `type(scope): summary` form used throughout the history —
+`feat(jetstream):`, `fix(cloud-foundry):`, `docs:`, `ci:`, `chore(deps):`.
+Release tooling reads these prefixes, so keeping to them matters beyond
+tidiness.
+
 When the commit fixes a bug, put a message in the body of the commit message
 pointing to the number of the issue (e.g. "Fixes #123").
 
 ### Pull requests and branches
 
-All work happens in branches. The master branch is only used as the target for pull
-requests.
+All work happens in branches. The develop branch is the target for pull
+requests; releases are cut from main.
 
 During code review you often need to update pull requests. Usually you do that
 by pushing additional commits.
@@ -110,7 +180,7 @@ signature certifies that you wrote the change or otherwise have the right to pas
 it on as an open-source change. The rules are pretty simple: if you can certify
 the below (from [developercertificate.org](http://developercertificate.org/)):
 
-```
+```text
 Developer Certificate of Origin
 Version 1.1
 
@@ -150,7 +220,9 @@ By making a contribution to this project, I certify that:
 
 Then you just add a line to each git commit message:
 
-    Signed-off-by: Joe Smith <joe.smith@email.com>
+```text
+Signed-off-by: Joe Smith <joe.smith@email.com>
+```
 
 Use your real name (sorry, no pseudonyms or anonymous contributions.)
 

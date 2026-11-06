@@ -1,50 +1,83 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { AbstractControl, ControlContainer, FormGroupDirective, Validators } from '@angular/forms';
-
-const UNLIMITED = -1;
+import {
+  Component,
+  Input,
+  OnInit,
+  inject,
+  ChangeDetectionStrategy,
+} from "@angular/core";
+import {
+  AbstractControl,
+  ControlContainer,
+  FormGroupDirective,
+  ReactiveFormsModule,
+  Validators,
+} from "@angular/forms";
+import {
+  CustomCheckboxComponent,
+  MatCheckboxChange,
+} from "../custom-checkbox/custom-checkbox.component";
+import {
+  AppInputDirective,
+  CustomFormFieldComponent,
+} from "../custom-form-field/custom-form-field.component";
+import { CF_QUOTA_UNLIMITED } from "../../../core/cf-quota.types";
 
 @Component({
-  selector: 'app-unlimited-input',
-  templateUrl: './unlimited-input.component.html',
-  styleUrls: ['./unlimited-input.component.scss'],
+  selector: "app-unlimited-input",
+  templateUrl: "./unlimited-input.component.html",
   viewProviders: [
     {
       provide: ControlContainer,
-      useExisting: FormGroupDirective
-    }
-  ]
+      useExisting: FormGroupDirective,
+    },
+  ],
+  standalone: true,
+  host: { class: "block" },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    ReactiveFormsModule,
+    AppInputDirective,
+    CustomFormFieldComponent,
+    CustomCheckboxComponent,
+  ],
 })
 export class UnlimitedInputComponent implements OnInit {
+  public ctrlContainer = inject(FormGroupDirective);
 
-  @Input() name: string;
+  @Input() name!: string;
   @Input() value: any;
-  @Input() required: boolean;
-  @Input() type: string;
-  @Input() placeholder: string;
-  @Input() suffix: string;
-  @Input() prefix: string;
+  @Input() required!: boolean;
+  @Input() type!: string;
+  @Input() placeholder!: string;
+  @Input() suffix!: string;
+  @Input() prefix!: string;
 
-  unlimited: boolean;
-  formControl: AbstractControl;
+  unlimited = false;
+  formControl!: AbstractControl;
   initialValue: any;
 
-  constructor(public ctrlContainer: FormGroupDirective) { }
+  onCheckboxChange(event: MatCheckboxChange) {
+    this.unlimited = event.checked;
+    this.onChange();
+  }
 
   onChange() {
     if (this.unlimited) {
       this.initialValue = this.formControl.value;
-      this.formControl.setValue('');
+      this.formControl.setValue("");
       this.formControl.disable();
     } else {
-      if (this.initialValue !== UNLIMITED) {
-        this.formControl.patchValue(this.initialValue);
-      }
       this.formControl.enable();
+      if (this.initialValue !== CF_QUOTA_UNLIMITED && this.initialValue != null) {
+        this.formControl.patchValue(this.initialValue);
+      } else {
+        this.formControl.setValue("");
+      }
     }
   }
 
   ngOnInit() {
-    this.formControl = this.ctrlContainer.form.get(this.name);
+    this.formControl = this.ctrlContainer.form.get(this.name)!;
     this.formControl.setValidators(Validators.min(0));
 
     if (this.formControl.value) {
@@ -52,9 +85,9 @@ export class UnlimitedInputComponent implements OnInit {
     }
   }
 
-  setInitialValues(value) {
+  setInitialValues(value: any) {
     this.initialValue = value;
-    this.unlimited = value === UNLIMITED;
+    this.unlimited = value === CF_QUOTA_UNLIMITED;
     this.onChange();
   }
 }

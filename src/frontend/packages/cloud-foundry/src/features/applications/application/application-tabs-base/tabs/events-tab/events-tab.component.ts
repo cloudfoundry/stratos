@@ -1,17 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 
-import { ListConfig } from '../../../../../../../../core/src/shared/components/list/list.component.types';
-import {
-  CfAppEventsConfigService,
-} from '../../../../../../shared/components/list/list-types/cf-events/types/cf-app-events-config.service';
+import { CloudFoundryEventsListComponent } from '../../../../../../shared/components/cloud-foundry-events-list/cloud-foundry-events-list.component';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
 
+// App-scoped Events tab. Passes the appGuid as targetGuid plus
+// `typeMustContain='audit.app'` so platform-level events (org / space
+// CRUD) don't bleed into the app event log.
 @Component({
   selector: 'app-events-tab',
   templateUrl: './events-tab.component.html',
-  styleUrls: ['./events-tab.component.scss'],
-  providers: [{
-    provide: ListConfig,
-    useClass: CfAppEventsConfigService,
-  }]
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CloudFoundryEventsListComponent,
+  ],
 })
-export class EventsTabComponent { }
+export class EventsTabComponent {
+  data = inject(AppDetailDataService);
+}

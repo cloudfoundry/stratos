@@ -1,26 +1,31 @@
-
-import { Injectable } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, AuthState } from '@stratosui/store';
-import { map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 
-@Injectable()
+import { UserSignalService } from './signals/user-signal.service';
+
+/**
+ * Legacy Observable-shaped user facade. Delegates to {@link UserSignalService}
+ * (signal-native) and exposes Observables for consumers that haven't yet
+ * migrated to signals.
+ *
+ * Kept as a thin compatibility shim so the call sites that still pull
+ * `UserService` (and the matching tests) continue to work. New code should
+ * inject `UserSignalService` directly.
+ */
+@Injectable({
+  providedIn: 'root'
+})
 export class UserService {
 
   isAdmin$: Observable<boolean>;
   isEndpointAdmin$: Observable<boolean>;
 
-  constructor(store: Store<AuthOnlyAppState>) {
-    this.isAdmin$ = store.select(s => s.auth).pipe(
-      map((auth: AuthState) => auth.sessionData && auth.sessionData.user && auth.sessionData.user.admin));
+  constructor() {
+    const userSignals = inject(UserSignalService);
 
-    this.isEndpointAdmin$ = store.select(s => s.auth).pipe(
-      map((auth: AuthState) => {
-        return (auth.sessionData
-          && auth.sessionData.user
-          && auth.sessionData.user.scopes.find(e => e === 'stratos.endpointadmin') !== undefined);
-      }));
+    this.isAdmin$ = toObservable(userSignals.isAdmin);
+    this.isEndpointAdmin$ = toObservable(userSignals.isEndpointAdmin);
   }
 
 }

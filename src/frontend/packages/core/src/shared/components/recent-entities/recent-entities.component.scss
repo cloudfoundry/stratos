@@ -2,7 +2,7 @@ $spacing: 10px;
 .type-info {
   font-size: 12px;
   line-height: 20px;
-  opacity: .6;
+  opacity: 0.6;
 }
 .recent-entity {
   display: flex;
@@ -24,7 +24,7 @@ $spacing: 10px;
     word-break: break-all;
   }
   &__icon {
-    opacity: .7;
+    opacity: 0.7;
   }
   &__icon-container {
     display: flex;

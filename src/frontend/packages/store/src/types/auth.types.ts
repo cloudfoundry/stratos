@@ -48,20 +48,27 @@ export interface SessionDataConfig {
   APIKeysEnabled?: APIKeysEnabled;
   // Default value for Home View - show only favorited endpoints?
   homeViewShowFavoritesOnly?: boolean;
+  // Hide the Sign Out button in the side nav. Cosmetic only — the header
+  // user menu keeps its own logout, gated separately by CAN_NOT_LOGOUT.
+  hideNavLogout?: boolean;
   userEndpointsEnabled?: UserEndpointsEnabled;
 }
 export interface SessionData {
   endpoints?: SessionEndpoints;
   user?: SessionUser;
   version?: {
-    proxy_version: string,
+    proxy_version: string;
     database_version: number;
+    build_date?: string;
+    git_commit?: string;
+    git_branch?: string;
   };
   valid: boolean;
   uaaError?: boolean;
   upgradeInProgress?: boolean;
   ssoOptions?: string;
-  sessionExpiresOn: number;
+  // Null for an invalid session (no session-expiry header was returned).
+  sessionExpiresOn: number | null;
   domainMismatch?: boolean;
   diagnostics?: Diagnostics;
   ['plugin-config']?: PluginConfig;
@@ -78,9 +85,67 @@ export interface SessionDataEnvelope {
   data?: SessionData;
 }
 
+/**
+ * A redirect to replay after login. Previously lived in auth.actions.ts
+ * (alongside `RouterNav`). Now a plain type owned by the auth domain and
+ * set via {@link AuthDataService.navigateAndRememberRedirect}.
+ */
+export interface RouterRedirect {
+  path: string;
+  queryParams?: {
+    [key: string]: string
+  };
+}
+
+export interface AuthUser {
+  guid: string;
+  name: string;
+  admin: boolean;
+}
+
+/**
+ * Shape of the auth state. Previously the `auth` ngrx slice (auth.reducer.ts);
+ * now owned and mutated by {@link AuthDataService} as a signal.
+ */
+export interface AuthState {
+  loggedIn: boolean;
+  loggingIn: boolean;
+  // Null until/unless a logged-in user is hydrated (default + reset states).
+  user: AuthUser | null;
+  error: boolean;
+  errorResponse: any;
+  // Null in the default/reset state, before any verify cycle resolves.
+  sessionData: SessionData | null;
+  verifying: boolean;
+  redirect?: RouterRedirect;
+  keepAlive?: boolean;
+}
+
+export interface TokenData {
+  token_guid: string;
+  auth_token: string;
+  refresh_token: string;
+  token_expiry: number;
+  disconnected: boolean;
+  auth_type: string;
+  metadata: string;
+  system_shared: boolean;
+  linked_guid: string;
+  certificate: string;
+  certificate_key: string;
+  enabled: boolean;
+}
+
+export interface AuthTokenEnvelope {
+  status: string;
+  error?: string;
+  data?: TokenData;
+}
+
 export interface Diagnostics {
   deploymentType?: string;
   gitClientVersion?: string;
+  databaseBackend?: string;
   databaseMigrations?: any;
   helmName?: string;
   helmRevision?: string;

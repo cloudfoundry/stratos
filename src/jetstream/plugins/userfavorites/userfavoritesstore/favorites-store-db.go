@@ -4,8 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
-
-	log "github.com/sirupsen/logrus"
+	"log/slog"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 )
@@ -14,7 +13,6 @@ var (
 	getFavorites           = `SELECT guid, endpoint_type, endpoint_id, entity_type, entity_id, metadata FROM favorites WHERE user_guid = $1`
 	deleteFavorite         = `DELETE FROM favorites WHERE user_guid = $1 AND guid = $2`
 	saveFavorite           = `INSERT INTO favorites (guid, user_guid, endpoint_type, endpoint_id, entity_type, entity_id, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7)`
-	setMetadata            = `UPDATE favorites SET metadata = $1 WHERE user_guid = $2 AND guid = $3`
 	deleteEndpointFavorite = `DELETE FROM favorites WHERE endpoint_id = $1`
 )
 
@@ -24,7 +22,6 @@ func InitRepositoryProvider(databaseProvider string) {
 	getFavorites = datastore.ModifySQLStatement(getFavorites, databaseProvider)
 	deleteFavorite = datastore.ModifySQLStatement(deleteFavorite, databaseProvider)
 	saveFavorite = datastore.ModifySQLStatement(saveFavorite, databaseProvider)
-	setMetadata = datastore.ModifySQLStatement(setMetadata, databaseProvider)
 	deleteEndpointFavorite = datastore.ModifySQLStatement(deleteEndpointFavorite, databaseProvider)
 }
 
@@ -40,12 +37,12 @@ func NewFavoritesDBStore(dcp *sql.DB) (FavoritesStore, error) {
 
 // List - Returns a list of all user favorites
 func (p *FavoritesDBStore) List(userGUID string) ([]*UserFavoriteRecord, error) {
-	log.Debug("List")
+	slog.Debug("List", "user", userGUID)
 	rows, err := p.db.Query(getFavorites, userGUID)
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve User Favorite records: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var favoritesList []*UserFavoriteRecord
 	favoritesList = make([]*UserFavoriteRecord, 0)
@@ -81,14 +78,6 @@ func (p *FavoritesDBStore) Delete(userGUID string, guid string) error {
 		return fmt.Errorf("Unable to delete User Favorite record: %v", err)
 	}
 
-	return nil
-}
-
-// SetMetadata will set the metadata for a User Favorite from the datastore
-func (p *FavoritesDBStore) SetMetadata(userGUID string, guid string, metadata string) error {
-	if _, err := p.db.Exec(setMetadata, metadata, userGUID, guid); err != nil {
-		return fmt.Errorf("Unable to set metadata on User Favorite record: %v", err)
-	}
 	return nil
 }
 

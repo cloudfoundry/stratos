@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"os"
 	"path"
 	"regexp"
@@ -13,16 +14,24 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/custom_errors"
 	"github.com/samber/lo"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	goosedbversion "github.com/cloudfoundry/stratos/src/jetstream/repository/goose-db-version"
-	"github.com/govau/cf-common/env"
-	log "github.com/sirupsen/logrus"
 
 	// Mysql driver
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/kat-co/vala"
 
-	// Sqlite driver
-	_ "github.com/mattn/go-sqlite3"
+	// Postgres driver. Registered here explicitly: it used to arrive via
+	// pgstore's own lib/pq import, which left with the per-provider session
+	// stores (GH #5733).
+	_ "github.com/lib/pq"
+
+	// Sqlite driver — pure-Go (sqlite compiled to wasm, run on wazero), so
+	// the driver works under CGO_ENABLED=0. mattn/go-sqlite3 is cgo-only and
+	// silently became a runtime stub in the CGO_ENABLED=0 release binaries.
+	// Registers under the name "sqlite3", so datastore and goose keep
+	// working unchanged.
+	_ "github.com/ncruces/go-sqlite3/driver"
 
 	"github.com/pressly/goose"
 )
@@ -77,17 +86,18 @@ func GetColumnNames(databaseName string, exclude ...string) []string {
 
 // DatabaseConfig represents the connection configuration parameters
 type DatabaseConfig struct {
-	DatabaseProvider        string `configName:"DATABASE_PROVIDER"`
-	Username                string `configName:"DB_USER"`
-	Password                string `configName:"DB_PASSWORD"`
-	Database                string `configName:"DB_DATABASE_NAME"`
-	Host                    string `configName:"DB_HOST"`
-	Port                    int    `configName:"DB_PORT"`
-	SSLMode                 string `configName:"DB_SSL_MODE"`
-	ConnectionTimeoutInSecs int    `configName:"DB_CONNECT_TIMEOUT_IN_SECS"`
-	SSLCertificate          string `configName:"DB_CERT"`
-	SSLKey                  string `configName:"DB_CERT_KEY"`
-	SSLRootCertificate      string `configName:"DB_ROOT_CERT"`
+	DatabaseProvider        string            `configName:"DATABASE_PROVIDER"`
+	Username                string            `configName:"DB_USER"`
+	Password                string            `configName:"DB_PASSWORD"`
+	Database                string            `configName:"DB_DATABASE_NAME"`
+	Host                    string            `configName:"DB_HOST"`
+	Port                    int               `configName:"DB_PORT"`
+	SSLMode                 string            `configName:"DB_SSL_MODE"`
+	ConnectionTimeoutInSecs int               `configName:"DB_CONNECT_TIMEOUT_IN_SECS"`
+	SSLCertificate          string            `configName:"DB_CERT"`
+	SSLKey                  string            `configName:"DB_CERT_KEY"`
+	SSLRootCertificate      string            `configName:"DB_ROOT_CERT"`
+	QueryParams             map[string]string `configName:"DB_QUERY_PARAMS"`
 }
 
 // SSLValidationMode is the PostgreSQL driver SSL validation modes
@@ -142,14 +152,15 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		return dc, err
 	}
 
-	if dc.DatabaseProvider == PGSQL {
+	switch dc.DatabaseProvider {
+	case PGSQL:
 		if dc.SSLMode == string(SSLDisabled) || dc.SSLMode == string(SSLRequired) ||
 			dc.SSLMode == string(SSLVerifyCA) || dc.SSLMode == string(SSLVerifyFull) {
 			return dc, nil
 		}
 		// Invalid SSL mode
 		return dc, fmt.Errorf("invalid SSL mode: %s", dc.SSLMode)
-	} else if dc.DatabaseProvider == MYSQL {
+	case MYSQL:
 		// Map default of disabled to false for MySQL
 		if dc.SSLMode == "disable" {
 			dc.SSLMode = "false"
@@ -160,11 +171,12 @@ func NewDatabaseConnectionParametersFromConfig(dc DatabaseConfig) (DatabaseConfi
 		// Invalid SSL mode
 		return dc, fmt.Errorf("invalid SSL mode: %s", dc.SSLMode)
 	}
-	return dc, fmt.Errorf("invalid provider %v", dc)
+	// Only name the provider — dc holds the database password
+	return dc, fmt.Errorf("invalid database provider %q", dc.DatabaseProvider)
 }
 
 func validateRequiredDatabaseParams(username, password, database, host string, port int) (err error) {
-	log.Debug("validateRequiredDatabaseParams")
+	slog.Debug("validateRequiredDatabaseParams")
 
 	err = vala.BeginValidation().Validate(
 		vala.IsNotNil(username, "username"),
@@ -183,7 +195,7 @@ func validateRequiredDatabaseParams(username, password, database, host string, p
 
 // GetConnection returns a database connection to either MySQL, PostgreSQL or SQLite
 func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
-	log.Debug("GetConnection")
+	slog.Debug("GetConnection")
 	db, err := NewGooseDBConf(dc, env)
 
 	return db, err
@@ -193,13 +205,15 @@ func GetConnection(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 func GetInMemorySQLLiteConnection() (*sql.DB, error) {
 
 	databaseFile := "file::memory:?cache=shared"
-	log.Info("Using In Memory Database file")
+	slog.Info("Using In Memory Database file")
 	db, err := sql.Open("sqlite3", databaseFile)
 	if err != nil {
 		return nil, err
 	}
 
-	goose.SetDialect("sqlite3")
+	if err := goose.SetDialect("sqlite3"); err != nil {
+		return nil, err
+	}
 
 	err = ApplyMigrations(db)
 	if err != nil {
@@ -214,34 +228,39 @@ func NewGooseDBConf(dc DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
 
 	var openStr, name string
 
-	if dc.DatabaseProvider == PGSQL {
+	switch dc.DatabaseProvider {
+	case PGSQL:
 		name = "postgres"
 		openStr = buildConnectionString(dc)
-	} else if dc.DatabaseProvider == MYSQL {
+	case MYSQL:
 		name = "mysql"
 		openStr = buildConnectionStringForMysql(dc)
-	} else {
+	default:
 		name = "sqlite3"
 		sqlDbDir := env.String("SQLITE_DB_DIR", ".")
 		openStr = path.Join(sqlDbDir, SQLiteDatabaseFile)
 		sqliteKeepDB := env.MustBool("SQLITE_KEEP_DB")
-		log.Infof("SQLite Database file: %s", openStr)
+		slog.Info("SQLite database file", "file", openStr)
 
 		if !sqliteKeepDB {
-			os.Remove(openStr)
+			if err := os.Remove(openStr); err != nil && !os.IsNotExist(err) {
+				slog.Warn("unable to remove the SQLite database file", "file", openStr, "error", err)
+			}
 		}
 	}
 
-	goose.SetDialect(name)
+	if err := goose.SetDialect(name); err != nil {
+		return nil, err
+	}
 	db, err := sql.Open(name, openStr)
 
 	return db, err
 }
 
 func buildConnectionString(dc DatabaseConfig) string {
-	log.Debug("buildConnectionString")
+	slog.Debug("buildConnectionString")
 	escapeStr := func(in string) string {
-		return strings.Replace(in, `'`, `\'`, -1)
+		return strings.ReplaceAll(in, `'`, `\'`)
 	}
 
 	connStr := fmt.Sprintf("user='%s' password='%s' dbname='%s' host='%s' port=%d connect_timeout=%d",
@@ -268,19 +287,19 @@ func buildConnectionString(dc DatabaseConfig) string {
 		connStr = connStr + fmt.Sprintf(" sslrootcert='%s'", escapeStr(dc.SSLRootCertificate))
 	}
 
-	log.Printf("DB Connection string: dbname='%s' host='%s' port=%d connect_timeout=%d",
-		escapeStr(dc.Database),
-		dc.Host,
-		dc.Port,
-		dc.ConnectionTimeoutInSecs)
+	slog.Info("DB connection string",
+		"dbname", escapeStr(dc.Database),
+		"host", dc.Host,
+		"port", dc.Port,
+		"connect_timeout", dc.ConnectionTimeoutInSecs)
 
 	return connStr
 }
 
 func buildConnectionStringForMysql(dc DatabaseConfig) string {
-	log.Debug("buildConnectionStringForMysql")
+	slog.Debug("buildConnectionStringForMysql")
 	escapeStr := func(in string) string {
-		return strings.Replace(in, `'`, `\'`, -1)
+		return strings.ReplaceAll(in, `'`, `\'`)
 	}
 
 	connStr := fmt.Sprintf("%s:%%s@tcp(%s:%d)/%s?parseTime=true",
@@ -290,16 +309,16 @@ func buildConnectionStringForMysql(dc DatabaseConfig) string {
 		escapeStr(dc.Database))
 
 	if len(dc.SSLMode) > 0 {
-		log.Infof("Setting SSL Mode for mysql: %s", dc.SSLMode)
+		slog.Info("Setting SSL mode for mysql", "sslMode", dc.SSLMode)
 		connStr = fmt.Sprintf("%s&tls=%s", connStr, dc.SSLMode)
 	}
-	log.Infof(connStr, "*********")
+	slog.Info("MySQL connection string", "connection", fmt.Sprintf(connStr, "*********"))
 	return fmt.Sprintf(connStr, escapeStr(dc.Password))
 }
 
 // Ping - ping the database to ensure the connection/pool works.
 func Ping(db *sql.DB) error {
-	log.Debug("Ping database")
+	slog.Debug("Ping database")
 	err := db.Ping()
 	if err != nil {
 		return fmt.Errorf("unable to ping the database: %+v", err)
@@ -313,8 +332,16 @@ func Ping(db *sql.DB) error {
 // SQLite uses ?
 func ModifySQLStatement(sql string, databaseProvider string) string {
 	if databaseProvider == SQLITE || databaseProvider == MYSQL {
+		// Replace positional parameters ($1, $2, etc.) with ?
 		sqlParamReplace := regexp.MustCompile(`\$[0-9]+`)
-		return sqlParamReplace.ReplaceAllString(sql, "?")
+		sql = sqlParamReplace.ReplaceAllString(sql, "?")
+
+		// Convert PostgreSQL type cast syntax (::type) to ANSI SQL CAST function
+		// This handles cases like "id::varchar" -> "CAST(id AS varchar)"
+		typeCastReplace := regexp.MustCompile(`(\w+)::(\w+)`)
+		sql = typeCastReplace.ReplaceAllString(sql, "CAST($1 AS $2)")
+
+		return sql
 	}
 
 	// Default is to return the SQL provided directly
@@ -346,19 +373,19 @@ func WaitForMigrations(db *sql.DB) error {
 			} else if errors.Is(err, custom_errors.ErrNoDatabaseVersionsFound) {
 				errorMsg = "Versions table is empty - waiting for migrations"
 			}
-			log.Infof("Database schema check: %s", errorMsg)
+			slog.Info("Database schema check", "status", errorMsg)
 		} else if databaseVersionRec.VersionID == targetVersion.Version {
-			log.Infof("Database schema is up to date (%d)", databaseVersionRec.VersionID)
+			slog.Info("Database schema is up to date", "version", databaseVersionRec.VersionID)
 			break
 		} else {
-			log.Info("Waiting for database schema to be initialized")
+			slog.Info("Waiting for database schema to be initialized")
 		}
 
 		// If our timeout boundary has been exceeded, bail out
 		if time.Until(timeout) < 0 {
 			// If we timed out and the last request was a db error, show the error
 			if err != nil {
-				log.Error(err)
+				slog.Error("timed out waiting for the database schema", "error", err)
 			}
 			return fmt.Errorf("timed out waiting for database schema to be initialized")
 		}

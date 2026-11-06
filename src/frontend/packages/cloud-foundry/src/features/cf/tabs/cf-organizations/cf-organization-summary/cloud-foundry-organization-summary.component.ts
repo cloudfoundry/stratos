@@ -1,47 +1,76 @@
-import { Component } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Store } from '@ngrx/store';
+import { CommonModule } from '@angular/common';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { CustomTooltipDirective, TailwindSnackBarService } from '@stratosui/core';
+import { Router, RouterModule } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise, startWith, tap } from 'rxjs/operators';
+import { filter, map, startWith } from 'rxjs/operators';
 
 import { ConfirmationDialogConfig } from '../../../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { RouterNav } from '../../../../../../../store/src/actions/router.actions';
-import { entityCatalog } from '../../../../../../../store/src/entity-catalog/entity-catalog';
-import { selectDeletionInfo } from '../../../../../../../store/src/selectors/api.selectors';
-import { CFAppState } from '../../../../../cf-app-state';
-import { organizationEntityType } from '../../../../../cf-entity-types';
-import { CF_ENDPOINT_TYPE } from '../../../../../cf-types';
 import { CfCurrentUserPermissions } from '../../../../../user-permissions/cf-user-permissions-checkers';
-import { goToAppWall } from '../../../cf.helpers';
+import { goToCfApplications } from '../../../cf.helpers';
+import { CfAppsSignalConfigService } from '../../../../../shared/signal-list-configs/app/cf-apps-signal-config.service';
 import { CloudFoundryEndpointService } from '../../../services/cloud-foundry-endpoint.service';
 import { CloudFoundryOrganizationService } from '../../../services/cloud-foundry-organization.service';
+import { CfOrgsSignalConfigService } from '../../../../../shared/signal-list-configs/org/cf-orgs-signal-config.service';
+import { PageSubNavComponent } from '../../../../../../../core/src/shared/components/page-sub-nav/page-sub-nav.component';
+import { TileGridComponent } from '../../../../../../../core/src/shared/components/tile/tile-grid/tile-grid.component';
+import { TileGroupComponent } from '../../../../../../../core/src/shared/components/tile/tile-group/tile-group.component';
+import { TileComponent } from '../../../../../../../core/src/shared/components/tile/tile/tile.component';
+import { CardCfOrgUserDetailsComponent } from '../../../../../shared/components/cards/card-cf-org-user-details/card-cf-org-user-details.component';
+import { LoadingPageComponent } from '../../../../../../../core/src/shared/components/loading-page/loading-page.component';
+import { CardNumberMetricComponent } from '../../../../../../../core/src/shared/components/cards/card-number-metric/card-number-metric.component';
+import { CardCfRecentAppsComponent } from '../../../../home/card-cf-recent-apps/card-cf-recent-apps.component';
+import { CfUserPermissionDirective } from '../../../../../shared/directives/cf-user-permission/cf-user-permission.directive';
+import { PollingIndicatorComponent } from '../../../../../../../core/src/shared/components/polling-indicator/polling-indicator.component';
 
 @Component({
   selector: 'app-cloud-foundry-organization-summary',
   templateUrl: './cloud-foundry-organization-summary.component.html',
-  styleUrls: ['./cloud-foundry-organization-summary.component.scss'],
-
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    CustomTooltipDirective,
+    RouterModule,
+    PageSubNavComponent,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardCfOrgUserDetailsComponent,
+    LoadingPageComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    CfUserPermissionDirective,
+    PollingIndicatorComponent
+  ]
 })
 export class CloudFoundryOrganizationSummaryComponent {
+  private appsConfig = inject(CfAppsSignalConfigService);
+  cfEndpointService = inject(CloudFoundryEndpointService);
+  cfOrgService = inject(CloudFoundryOrganizationService);
+  private confirmDialog = inject(ConfirmationDialogService);
+  private snackBar = inject(TailwindSnackBarService);
+  private orgsConfig = inject(CfOrgsSignalConfigService);
+  private router = inject(Router);
+
   appLink: () => void;
   detailsLoading$: Observable<boolean>;
   public permsOrgEdit = CfCurrentUserPermissions.ORGANIZATION_EDIT;
   public permsOrgDelete = CfCurrentUserPermissions.ORGANIZATION_DELETE;
 
-  constructor(
-    private store: Store<CFAppState>,
-    public cfEndpointService: CloudFoundryEndpointService,
-    public cfOrgService: CloudFoundryOrganizationService,
-    private confirmDialog: ConfirmationDialogService,
-    private snackBar: MatSnackBar
-  ) {
+  constructor() {
+    const appsConfig = this.appsConfig;
+    const cfEndpointService = this.cfEndpointService;
+    const cfOrgService = this.cfOrgService;
+
+    const router = this.router;
     this.appLink = () => {
-      goToAppWall(store, cfOrgService.cfGuid, cfOrgService.orgGuid);
+      goToCfApplications(appsConfig, router, cfOrgService.cfGuid, cfOrgService.orgGuid);
     };
     this.detailsLoading$ = combineLatest([
       // Wait for the apps to have been fetched, this will determine if multiple small cards are shown or now
-      cfEndpointService.appsPagObs.fetchingEntities$.pipe(
+      cfEndpointService.appsLoading$.pipe(
         filter(loading => !loading)
       ),
       cfOrgService.userProvidedServiceInstancesCount$
@@ -52,43 +81,23 @@ export class CloudFoundryOrganizationSummaryComponent {
   }
 
   deleteOrgWarn() {
-    this.cfOrgService.org$.pipe(
-      map(org => org.entity.entity.name),
-      first()
-    ).subscribe(name => {
-      const confirmation = new ConfirmationDialogConfig(
-        'Delete Organization',
-        {
-          textToMatch: name
-        },
-        'Delete',
-        true,
-      );
-      this.confirmDialog.open(confirmation, () => {
-        this.cfEndpointService.deleteOrg(
-          this.cfOrgService.orgGuid,
-          this.cfEndpointService.cfGuid
-        );
-
-        const orgEntity = entityCatalog.getEntity(CF_ENDPOINT_TYPE, organizationEntityType);
-        this.store.select(selectDeletionInfo(orgEntity.entityKey, this.cfOrgService.orgGuid)).pipe(
-          pairwise(),
-          filter(([oldV, newV]) => (oldV.busy && !newV.busy) || newV.error),
-          tap(([, newV]) => {
-            if (newV.deleted) {
-              this.store.dispatch(new RouterNav({
-                path: [
-                  'cloud-foundry',
-                  this.cfOrgService.cfGuid,
-                  'organizations'
-                ]
-              }));
-            } else if (newV.error) {
-              this.snackBar.open(`Failed to delete space: ${newV.message}`, 'Close');
-            }
-          })
-        ).subscribe();
-      });
+    const name = this.cfOrgService.orgDataService.org()?.name;
+    if (!name) return;
+    const confirmation = new ConfirmationDialogConfig(
+      'Delete Organization',
+      { textToMatch: name },
+      'Delete',
+      true,
+    );
+    this.confirmDialog.open(confirmation, async () => {
+      const cfGuid = this.cfOrgService.cfGuid;
+      const orgGuid = this.cfOrgService.orgGuid;
+      try {
+        await this.orgsConfig.deleteOrg(cfGuid, orgGuid, name);
+        this.router.navigate(['/cloud-foundry', cfGuid, 'organizations']);
+      } catch (err: any) {
+        this.snackBar.error(`Failed to delete organization: ${err?.message ?? err}`, 'Close');
+      }
     });
   }
 }

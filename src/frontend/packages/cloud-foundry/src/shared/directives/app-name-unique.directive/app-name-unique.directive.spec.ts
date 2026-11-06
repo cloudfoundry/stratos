@@ -1,55 +1,71 @@
-import { CommonModule } from '@angular/common';
-import { HttpBackend, HttpClient, HttpClientModule } from '@angular/common/http';
-import { HttpTestingController } from '@angular/common/http/testing';
-import { inject, TestBed } from '@angular/core/testing';
-import { MatDialogModule } from '@angular/material/dialog';
-import { RouterTestingModule } from '@angular/router/testing';
-import { Store } from '@ngrx/store';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { FormControl } from '@angular/forms';
+import { TestBed } from '@angular/core/testing';
+import { firstValueFrom } from 'rxjs';
+import { describe, it, expect, beforeEach } from 'vitest';
+
 import { createBasicStoreModule } from '@stratosui/store/testing';
-
-import { CoreModule } from '../../../../../core/src/core/core.module';
-import { ExtensionService } from '../../../../../core/src/core/extension/extension-service';
-import { SharedModule } from '../../../../../core/src/shared/shared.module';
-import { CoreTestingModule } from '../../../../../core/test-framework/core-test.modules';
-import { getGitHubAPIURL, GITHUB_API_URL } from '../../../../../git/src/shared/github.helpers';
-import { AppStoreModule } from '../../../../../store/src/store.module';
-import { CFAppState } from '../../../cf-app-state';
-import { ActiveRouteCfOrgSpace } from '../../../features/cf/cf-page.types';
-import { CfUserService } from '../../data-services/cf-user.service';
+import { CreateAppStateService } from '../../data-services/create-app-state.service';
 import { AppNameUniqueDirective } from './app-name-unique.directive';
-
 
 describe('AppNameUniqueDirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        AppStoreModule,
-        CommonModule,
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        MatDialogModule,
-        CoreTestingModule,
         createBasicStoreModule(),
-        HttpClientModule,
       ],
       providers: [
-        ExtensionService,
-        {
-          provide: HttpBackend,
-          useClass: HttpTestingController
-
-        },
-        HttpClient,
-        { provide: GITHUB_API_URL, useFactory: getGitHubAPIURL },
-        CfUserService,
-        ActiveRouteCfOrgSpace
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
     });
   });
-  it('should create an instance', inject([Store, HttpClient], (store: Store<CFAppState>, http: HttpClient) => {
-    const directive = new AppNameUniqueDirective(store, http);
+  it('should create an instance', () => {
+    const directive = TestBed.runInInjectionContext(() => new AppNameUniqueDirective());
     expect(directive).toBeTruthy();
-  }));
+  });
+
+  function setupValidation(name: string) {
+    TestBed.inject(CreateAppStateService).setCFDetails({ cloudFoundry: 'cf-1', org: 'org-1', space: 'space-1' });
+    const directive = TestBed.runInInjectionContext(() => new AppNameUniqueDirective());
+    directive.ngOnInit();
+    const control = new FormControl(name);
+    control.markAsDirty();
+    return firstValueFrom(directive.validate(control));
+  }
+
+  // Real 500ms debounce timer — zoneless build has no fakeAsync/tick.
+  const debounce = () => new Promise(resolve => setTimeout(resolve, 550));
+
+  it('counts apps by name via the native v3 route and flags taken names', async () => {
+    const http = TestBed.inject(HttpTestingController);
+    const result = setupValidation('my-app');
+
+    await debounce();
+    const req = http.expectOne(r =>
+      r.url === '/pp/v1/cf/apps/cf-1' &&
+      r.params.get('return') === 'counts' &&
+      r.params.get('names') === 'my-app' &&
+      r.params.get('space_guids') === 'space-1');
+    req.flush({ resources: [], totalResults: 1 });
+
+    expect(await result).toEqual({ appNameTaken: true });
+    http.verify();
+  });
+
+  it('fails open when the check request errors', async () => {
+    const http = TestBed.inject(HttpTestingController);
+    const result = setupValidation('my-app');
+
+    await debounce();
+    http.expectOne(r => r.url === '/pp/v1/cf/apps/cf-1')
+      .flush({ error: 'nope' }, { status: 500, statusText: 'Server Error' });
+
+    expect(await result).toBeNull();
+    http.verify();
+  });
 });

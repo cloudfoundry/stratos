@@ -1,8 +1,10 @@
-import { Component, ComponentFactoryResolver, Injector, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EnvironmentInjector, Injector, OnDestroy, Signal, WritableSignal, computed, inject, signal } from '@angular/core';
+
 import { UntypedFormBuilder } from '@angular/forms';
-import { Store } from '@ngrx/store';
 import { BehaviorSubject, Observable, of as observableOf, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, first, map, pairwise, startWith, withLatestFrom } from 'rxjs/operators';
+import { filter, map, startWith, take } from 'rxjs/operators';
+
+import { EndpointsDataService } from '@stratosui/store';
 
 import { EndpointsService } from '../../../../../core/src/core/endpoints.service';
 import { safeUnsubscribe } from '../../../../../core/src/core/utils.service';
@@ -11,90 +13,184 @@ import {
   ConnectEndpointData,
   ConnectEndpointService,
 } from '../../../../../core/src/features/endpoints/connect.service';
+import { EndpointsSignalConfigService } from '../../../../../core/src/features/endpoints/endpoints-page/endpoints-signal-config.service';
 import {
+  AppActionMonitorIconComponent,
   IActionMonitorComponentState,
 } from '../../../../../core/src/shared/components/app-action-monitor-icon/app-action-monitor-icon.component';
 import {
-  ITableListDataSource,
   RowState,
-} from '../../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
-import { ITableColumn } from '../../../../../core/src/shared/components/list/list-table/table.types';
+} from '../../../../../core/src/shared/components/signal-list/row-state.types';
+import {
+  SignalListColumn,
+  SignalListComponent,
+  SignalListConfig,
+  SignalListRowState,
+} from '../../../../../core/src/shared/components/signal-list/signal-list.component';
+import {
+  SignalListCellTemplateDirective,
+} from '../../../../../core/src/shared/components/signal-list/signal-list-cell-template.directive';
 import { StepOnNextFunction } from '../../../../../core/src/shared/components/stepper/step/step.component';
-import { AppState } from '../../../../../store/src/public-api';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
 import { KUBERNETES_ENDPOINT_TYPE } from '../../kubernetes-entity-factory';
 import { KubeConfigAuthHelper } from '../kube-config-auth.helper';
-import { KubeConfigFileCluster, KubeConfigImportAction, KubeImportState } from '../kube-config.types';
-import {
-  KubeConfigTableImportStatusComponent,
-} from './kube-config-table-import-status/kube-config-table-import-status.component';
+import { KubeConfigFileCluster, KubeConfigImportAction } from '../kube-config.types';
 
 const REGISTER_ACTION = 'Register endpoint';
 const CONNECT_ACTION = 'Connect endpoint';
 
+/**
+ * Signal wrapper utility for BehaviorSubject compatibility
+ * Provides dual API: Signal methods + BehaviorSubject compatibility (.next(), .asObservable())
+ * Enables zero-breaking-change migration from BehaviorSubject to Signal
+ */
+function createSignalWrapper<T>(initialValue: T) {
+  const _signal = signal<T>(initialValue);
+  // asObservable() must be callable outside injection contexts (wrappers are
+  // created and read during import execution, from step event handlers), so
+  // it is backed by a BehaviorSubject kept in sync on every write instead of
+  // a lazy toObservable(), which throws NG0203 there.
+  const _subject = new BehaviorSubject<T>(initialValue);
+  const write = (value: T) => {
+    _signal.set(value);
+    _subject.next(value);
+  };
+  const wrapper = Object.assign(
+    // Make it callable like a signal
+    () => _signal(),
+    {
+      // WritableSignal methods
+      set: write,
+      update: (fn: (value: T) => T) => write(fn(_signal())),
+      asReadonly: () => _signal.asReadonly(),
+      // BehaviorSubject compatibility methods
+      next: write,
+      getValue: () => _signal(),
+      asObservable: () => _subject.asObservable(),
+    }
+  );
+  return wrapper as WritableSignal<T> & {
+    next: (value: T) => void;
+    getValue: () => T;
+    asObservable: () => Observable<T>;
+  };
+}
+
 @Component({
-  selector: 'app-kube-config-import',
+selector: 'app-kube-config-import',
   templateUrl: './kube-config-import.component.html',
-  styleUrls: ['./kube-config-import.component.scss']
+  host: { class: 'flex flex-1' },
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    SignalListComponent,
+    SignalListCellTemplateDirective,
+    AppActionMonitorIconComponent,
+  ]
 })
 export class KubeConfigImportComponent implements OnDestroy {
 
-  done = new BehaviorSubject<boolean>(false);
+  // Top-level signals - use wrapper for BehaviorSubject compatibility
+  done = createSignalWrapper<boolean>(false);
   done$ = this.done.asObservable();
-  busy = new BehaviorSubject<boolean>(false);
+  busy = createSignalWrapper<boolean>(false);
   busy$ = this.busy.asObservable();
-  data = new BehaviorSubject<KubeConfigImportAction[]>([]);
+  data = createSignalWrapper<KubeConfigImportAction[]>([]);
   data$ = this.data.asObservable();
 
-  public dataSource: ITableListDataSource<KubeConfigImportAction> = {
-    connect: () => this.data$,
-    disconnect: () => { },
-    // Ensure unique per entry to step (in case user went back step and updated)
-    trackBy: (index, item) => item.cluster.name + this.iteration,
-    isTableLoading$: this.data$.pipe(map(data => !(data && data.length > 0))),
-    getRowState: (row: KubeConfigImportAction): Observable<RowState> => {
-      return row ? row.state.asObservable() : observableOf({});
-    }
+  // ── signal-list paging ────────────────────────────────────────────────
+  // The import list is a handful of sequential actions, so it's effectively
+  // single-page; hidePagerWhenSingle hides the pager chrome.
+  private readonly pageIndex: WritableSignal<number> = signal(0);
+  private readonly pageSize: WritableSignal<number> = signal(100);
+  private readonly totalFilteredResults: Signal<number> = computed(() => this.data().length);
+  private readonly totalPages: Signal<number> = computed(() => {
+    const size = this.pageSize();
+    return size > 0 ? Math.max(1, Math.ceil(this.totalFilteredResults() / size)) : 1;
+  });
+  private readonly pagedItems: Signal<KubeConfigImportAction[]> = computed(() => {
+    const size = this.pageSize();
+    const rows = this.data();
+    if (size <= 0) return rows;
+    // Clamp a stale out-of-range index to the last available page so
+    // paging state can't render an empty page over a non-empty list
+    // (#5670).
+    const lastPage = Math.max(0, Math.ceil(rows.length / size) - 1);
+    const idx = Math.max(0, Math.min(this.pageIndex(), lastPage));
+    return rows.slice(idx * size, idx * size + size);
+  });
+  // Loading while the actions list is still empty — mirrors the legacy
+  // isTableLoading$ = !(data && data.length > 0).
+  private readonly loading: Signal<boolean> = computed(() => this.data().length === 0);
+
+  public listConfig: SignalListConfig<KubeConfigImportAction> = {
+    pagedItems: this.pagedItems,
+    totalFilteredResults: this.totalFilteredResults,
+    totalPages: this.totalPages,
+    pageIndex: this.pageIndex,
+    pageSize: this.pageSize,
+    hidePagerWhenSingle: true,
+    isAnyLoading: this.loading,
+    errorsByCnsi: signal(new Map()),
+    // description is stable + unique per action ("Register …" / "Connect …");
+    // `action` is nulled on skip so it can't key the row. iteration keeps
+    // keys distinct across step re-entries.
+    getRowKey: (row: KubeConfigImportAction) => `${row.description}#${this.iteration}`,
+    // Per-action error/warning messages (skip notice, register/connect
+    // failures) ride rowState; `state` is a createSignalWrapper, callable
+    // as a Signal and stable per action.
+    rowState: (row: KubeConfigImportAction) => row.state as unknown as Signal<SignalListRowState>,
+    columns: this.buildColumns(),
   };
-  public columns: ITableColumn<KubeConfigImportAction>[] = [
-    {
-      columnId: 'action', headerCell: () => 'Action',
-      cellDefinition: {
-        valuePath: 'action'
+
+  private buildColumns(): SignalListColumn<KubeConfigImportAction>[] {
+    return [
+      {
+        header: 'Action', key: 'action', kind: 'text', widthHint: '16rem',
+        render: (row: KubeConfigImportAction) => row.action || '',
       },
-      cellFlex: '1',
-    },
-    {
-      columnId: 'description', headerCell: () => 'Description',
-      cellDefinition: {
-        valuePath: 'description'
+      {
+        header: 'Description', key: 'description', kind: 'text',
+        render: (row: KubeConfigImportAction) => row.description,
       },
-      cellFlex: '4',
-    },
-    // Right-hand column to show the action progress
-    {
-      columnId: 'monitorState',
-      cellComponent: KubeConfigTableImportStatusComponent,
-      cellConfig: (row) => row.actionState.asObservable(),
-      cellFlex: '0 0 24px'
+      {
+        header: '', key: 'status', kind: 'template', templateName: 'status', widthHint: '3rem',
+        render: () => '',
+      },
+    ];
+  }
+
+  // Stable per-row Observable for the action-monitor icon. `actionState`'s
+  // asObservable() mints a fresh observable each call; cache by action so the
+  // template binding doesn't re-subscribe every change-detection pass.
+  private readonly actionStateObs = new WeakMap<KubeConfigImportAction, Observable<IActionMonitorComponentState>>();
+  actionStateFor(row: KubeConfigImportAction): Observable<IActionMonitorComponentState> {
+    let obs = this.actionStateObs.get(row);
+    if (!obs) {
+      obs = row.actionState.asObservable();
+      this.actionStateObs.set(row, obs);
     }
-  ];
+    return obs;
+  }
 
   subs: Subscription[] = [];
-  applyStarted: boolean;
+  // FWT-959 Part 2: applyStarted promoted from a plain boolean to a signal
+  // wrapper so the parent can wire it into a SignalStepHandle's
+  // canClose/destructiveStep/finishButtonText computed bindings. The
+  // wrapper preserves the legacy boolean read/write API used inside this
+  // component (e.g. `if (this.applyStarted)`) via a getter/setter pair so
+  // the existing imperative call-sites don't need to learn signal syntax.
+  applyStartedSignal = signal<boolean>(false);
+  get applyStarted(): boolean { return this.applyStartedSignal(); }
+  set applyStarted(v: boolean) { this.applyStartedSignal.set(v); }
   private iteration = 0;
 
-  private connectService: ConnectEndpointService;
-
-  constructor(
-    public store: Store<AppState>,
-    public resolver: ComponentFactoryResolver,
-    private injector: Injector,
-    private fb: UntypedFormBuilder,
-    private endpointsService: EndpointsService,
-  ) {
-  }
+  private connectService?: ConnectEndpointService;
+  private environmentInjector = inject(EnvironmentInjector);
+  private injector = inject(Injector);
+  private fb = inject(UntypedFormBuilder);
+  private endpointsService = inject(EndpointsService);
+  private endpointsData = inject(EndpointsDataService);
+  private endpointsSignalConfig = inject(EndpointsSignalConfigService);
 
   // Process the next action in the list
   private processAction(actions: KubeConfigImportAction[]) {
@@ -106,7 +202,8 @@ export class KubeConfigImportComponent implements OnDestroy {
     }
 
     // Get the next action
-    const i = actions.shift();
+    // strict: actions.length === 0 was handled above, so shift() yields a value
+    const i = actions.shift()!;
     if (i.action === REGISTER_ACTION) {
       this.doRegister(i, actions);
     } else if (i.action === CONNECT_ACTION) {
@@ -118,19 +215,9 @@ export class KubeConfigImportComponent implements OnDestroy {
   }
 
   private doRegister(reg: KubeConfigImportAction, next: KubeConfigImportAction[]) {
-    const obs$ = this.registerEndpoint(
-      reg.cluster.name,
-      reg.cluster.cluster.server,
-      reg.cluster.cluster['insecure-skip-tls-verify'],
-      reg.cluster._subType
-    );
-    const mainObs$ = this.getUpdatingState(obs$).pipe(
-      startWith({ busy: true, error: false, completed: false })
-    );
-
-    this.subs.push(mainObs$.subscribe(reg.actionState));
-
-    const sub = reg.actionState.subscribe(progress => {
+    // Subscribe before kicking off registration so the row monitor sees the
+    // initial busy emit and the completion emit through reg.actionState.
+    const sub = reg.actionState.asObservable().subscribe((progress: IActionMonitorComponentState) => {
       // Not sure what the status is used for?
       reg.status = progress;
       if (progress.error && progress.message) {
@@ -155,6 +242,33 @@ export class KubeConfigImportComponent implements OnDestroy {
       }
     });
     this.subs.push(sub);
+
+    // Drive the row's actionState through busy → completed via the
+    // Promise-returning signal-config register wrapper. The wrapper hides
+    // the legacy ngrx pairwise/busy-edge dance, so we just emit the
+    // initial busy state and the final settled state directly.
+    reg.actionState.next({ busy: true, error: false, completed: false, message: '' });
+    this.endpointsSignalConfig.register({
+      endpointType: KUBERNETES_ENDPOINT_TYPE,
+      endpointSubType: reg.cluster._subType ?? null,
+      name: reg.cluster.name,
+      endpoint: reg.cluster.cluster.server,
+      skipSslValidation: reg.cluster.cluster['insecure-skip-tls-verify'],
+    }).then(result => {
+      reg.actionState.next({
+        busy: false,
+        error: result.error,
+        completed: true,
+        message: result.message,
+      });
+    }).catch(err => {
+      reg.actionState.next({
+        busy: false,
+        error: true,
+        completed: true,
+        message: err?.message ?? 'Failed to register endpoint',
+      });
+    });
   }
 
   private doConnect(connect: KubeConfigImportAction, next: KubeConfigImportAction[]) {
@@ -163,14 +277,17 @@ export class KubeConfigImportComponent implements OnDestroy {
       return;
     }
     const helper = new KubeConfigAuthHelper();
-    const data = helper.getAuthDataForConnect(this.resolver, this.injector, this.fb, connect.user);
+    const data = helper.getAuthDataForConnect(this.environmentInjector, this.injector, this.fb, connect.user);
     if (data) {
       const obs$ = this.connectEndpoint(connect, data);
 
       // Echo obs$ to the behaviour subject
       this.subs.push(obs$.subscribe(connect.actionState));
 
-      this.subs.push(connect.actionState.pipe(filter(status => status.completed), first()).subscribe(status => {
+      this.subs.push(connect.actionState.asObservable().pipe(
+        filter((status: IActionMonitorComponentState) => status.completed),
+        take(1)
+      ).subscribe((status: IActionMonitorComponentState) => {
         if (status.error) {
           connect.state.next({ message: status.message, error: true });
         }
@@ -189,36 +306,22 @@ export class KubeConfigImportComponent implements OnDestroy {
     }
   }
 
-  // Register the endpoint
-  private registerEndpoint(name: string, url: string, skipSslValidation: boolean, subType: string) {
-    return stratosEntityCatalog.endpoint.api.register<ActionState>(
-      KUBERNETES_ENDPOINT_TYPE,
-      subType,
-      name,
-      url,
-      skipSslValidation,
-      '',
-      '',
-      false
-    ).pipe(
-      filter(update => !!update)
-    );
-  }
-
   // Connect to an endpoint
   private connectEndpoint(action: KubeConfigImportAction, pData: ConnectEndpointData): Observable<IActionMonitorComponentState> {
     const config: ConnectEndpointConfig = {
       name: action.cluster.name,
-      guid: action.depends.cluster._guid || action.cluster._guid,
+      guid: action.depends?.cluster._guid || action.cluster._guid,
       type: KUBERNETES_ENDPOINT_TYPE,
-      subType: action.user._authData.subType,
+      // strict: connectEndpoint is only reached from doConnect, which returns
+      // early unless connect.user is set
+      subType: action.user!._authData.subType,
       ssoAllowed: false
     };
 
     if (this.connectService) {
       this.connectService.destroy();
     }
-    this.connectService = new ConnectEndpointService(this.endpointsService, config);
+    this.connectService = new ConnectEndpointService(this.endpointsService, config, this.endpointsData, this.injector);
     this.connectService.setData(pData);
     return this.connectService.submit().pipe(
       map(updateSection => ({
@@ -247,8 +350,9 @@ export class KubeConfigImportComponent implements OnDestroy {
           action: REGISTER_ACTION,
           description: `Register "${item.name}" with the URL "${item.cluster.server}"`,
           cluster: item,
-          state: new BehaviorSubject<RowState>({}),
-          actionState: new BehaviorSubject<any>({}),
+          // Use signal wrapper for nested dynamic state - maintains .next() and .asObservable() API
+          state: createSignalWrapper<RowState>({}),
+          actionState: createSignalWrapper<any>({}),
         };
         // Only include if the endpoint does not already exist
         if (!item._guid) {
@@ -264,9 +368,10 @@ export class KubeConfigImportComponent implements OnDestroy {
             description: `Connect "${item.name}" with the user "${user.name}"`,
             cluster: item,
             user,
-            state: new BehaviorSubject<RowState>({}),
+            // Use signal wrapper for nested dynamic state - maintains .next() and .asObservable() API
+            state: createSignalWrapper<RowState>({}),
             depends: register,
-            actionState: new BehaviorSubject<any>({}),
+            actionState: createSignalWrapper<any>({}),
           });
         }
       }
@@ -277,7 +382,6 @@ export class KubeConfigImportComponent implements OnDestroy {
   // Finish - go back to the endpoints view
   onNext: StepOnNextFunction = () => {
     if (this.applyStarted) {
-      // this.store.dispatch(new RouterNav({ path: ['endpoints'] }));
       return observableOf({ success: true, redirect: true });
 
     } else {
@@ -285,7 +389,7 @@ export class KubeConfigImportComponent implements OnDestroy {
       this.busy.next(true);
       this.data$.pipe(
         filter((data => data && data.length > 0)),
-        first()
+        take(1)
       ).subscribe(imports => {
         // Go through the imports and dispatch the actions to perform them in sequence
         this.processAction([...imports]);
@@ -293,31 +397,5 @@ export class KubeConfigImportComponent implements OnDestroy {
       return observableOf({ success: true, ignoreSuccess: true });
     }
   };
-
-  // These two should be somewhere else
-  private getUpdatingState(actionState$: Observable<ActionState>): Observable<KubeImportState> {
-    const completed$ = this.getHasCompletedObservable(actionState$.pipe(map(requestState => requestState.busy)));
-    return actionState$.pipe(
-      pairwise(),
-      withLatestFrom(completed$),
-      map(([[, requestState], completed]) => {
-        return {
-          busy: requestState.busy,
-          error: requestState.error,
-          completed,
-          message: requestState.message,
-        };
-      })
-    );
-  }
-
-  private getHasCompletedObservable(busy$: Observable<boolean>) {
-    return busy$.pipe(
-      distinctUntilChanged(),
-      pairwise(),
-      map(([oldBusy, newBusy]) => oldBusy && !newBusy),
-      startWith(false),
-    );
-  }
 
 }

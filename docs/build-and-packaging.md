@@ -1,0 +1,885 @@
+# Build and Packaging
+
+Single source of truth for the `make` build/test/package system — commands,
+workflows, and how they compose. New to the project? Read the
+[Contributor Guide](contributing_guide.md) first; it covers first-time
+setup and the day-to-day PR workflow this doc doesn't.
+
+## Prerequisites
+
+Exact tool versions are `developer-environment.md`'s job, not this doc's —
+see [Required Runtimes](developer-environment.md#required-runtimes) and
+[Optional Tools](developer-environment.md#optional-tools) there for the
+full, version-pinned list (kept in sync with `.tool-versions`). Everything
+below assumes those are already installed; this table only covers what's
+specific to *building/packaging* on top of them:
+
+| Tool | Purpose |
+|------|---------|
+| `zip` | CF and Windows release archives |
+| `swag` | optional — OpenAPI documentation generation |
+
+## Run make from the repository root
+
+All `make` commands must be invoked from the repository root. GNU make has no
+search path for locating its top-level makefile (`-I` only affects `include`
+directives inside makefiles), so invocations from subdirectories fail — and
+building components directly instead is unsafe: the root targets carry
+generated-file dependencies that ad-hoc builds skip. For example, running
+`go build` from `src/jetstream` omits the generated `extra_plugins.go`, which
+produces a backend without the Cloud Foundry plugin that crashes at startup
+when deployed as a Cloud Foundry application.
+
+**Either `make` or `gmake` works** — this Makefile targets GNU Make 3.81+ (see
+Platform-specific notes in `developer-environment.md`), so macOS's stock
+`/usr/bin/make` (3.81, frozen there for licensing reasons — Apple won't ship
+GPLv3) and a newer `gmake` (e.g. via `brew install make`) behave identically;
+verified byte-for-byte across `make help`, `make dump version`, and
+representative recipes. Whichever binary you invoke at the top level is what
+every recursive self-invocation inside the Makefile reuses too (`$(MAKE)`,
+never a hardcoded `make`), so there's nothing to keep consistent by hand —
+just pick one and it propagates correctly on its own.
+
+## Operations Reference
+
+### Building
+
+| Command | What it does | Output |
+|---------|-------------|--------|
+| `make build` | Build frontend + all backend platforms | `dist/frontend/browser/`, `dist/bin/jetstream-{os}-{arch}` |
+| `make build frontend` | Build frontend only (production) | `dist/frontend/browser/` |
+| `make build backend` | Cross-compile backend for all platforms | `dist/bin/jetstream-{os}-{arch}` |
+| `make build backend PLATFORM=linux/amd64` | Build backend for one platform | `dist/bin/jetstream` |
+| `make build cf` | Build frontend + linux/amd64 backend (CF deploy) | `dist/frontend/browser/`, `dist/bin/jetstream` |
+
+### Testing
+
+| Command | What it does |
+|---------|-------------|
+| `make test` | Run all tests (frontend + backend) |
+| `make test frontend` | Frontend tests only (Vitest) |
+| `make test backend` | Backend tests only (Go) |
+| `make test e2e` | Playwright E2E tests against deployed instance |
+
+E2E tests need CF credentials, supplied via `secrets.yaml` (plaintext,
+gitignored) or its encrypted form `secrets.yaml.enc` (committed) — see
+[Secrets Management](secrets-management.md) for the zero-plaintext
+encrypt/decrypt workflow. `make clean repo` (below) keeps `secrets.yaml`
+by default rather than sweeping it with everything else untracked.
+
+### Quality Gates
+
+| Command | What it does |
+|---------|-------------|
+| `make check` | Lint + gate (default — ESLint + go fmt/vet + golangci-lint + Vitest) |
+| `make check lint` | Lint checks (ESLint + `go fmt` + `go vet` + `golangci-lint` on both Go modules). Requires `golangci-lint` installed. Note: `go fmt` may modify files. |
+| `make check gate` | Full pre-push quality gate — mirrors what CI runs on each PR (ESLint + Vitest frontend tests + Go unit tests). Run this before every push. |
+| `make check tests` | Unit tests only |
+| `make check coverage` | Frontend unit tests with coverage (Vitest). No Go coverage. |
+| `make check e2e` | Playwright E2E core tests |
+
+ESLint and Vitest need no separate install — both are plain `devDependencies`
+in `package.json`, covered by `bun install`. `golangci-lint` is the only tool
+here that's external to the JS toolchain and needs its own install step (see
+`developer-environment.md`).
+
+Run `make check gate` before any push — it mirrors what CI runs on each PR.
+`make check e2e` requires a running Stratos instance (local or deployed);
+point it at a specific deployment via the `E2E_BASE_URL` environment
+variable (defaults to the local dev server at `https://localhost:5540`).
+
+`make test e2e`/`make check e2e` also need Playwright's browser binaries —
+`bun install` pulls in the `@playwright/test` package but does **not**
+download the browsers themselves. One-time setup: `bunx playwright install
+chromium` (the default `E2E_BROWSERS` target); add `firefox`/`webkit` if
+you'll run with `E2E_BROWSERS=firefox`, `webkit`, or `all`.
+
+#### E2E recipe variables
+
+`make check e2e` and `make test e2e` accept these recipe-level variables to
+control which browsers run and what artifacts get captured. All five compose
+freely — set any combination on one command line.
+
+| Variable | Purpose | Example |
+|----------|---------|---------|
+| `E2E_BROWSERS` | Pick which Playwright projects run. Comma-separated list (`chromium,firefox,webkit`), or `all` for every project in `playwright.config.ts`. Empty → `chromium` only (today's default). | `E2E_BROWSERS=firefox` |
+| `E2E_TRACE` | Force trace capture. Values: `on`, `off`, `retain-on-failure`, `on-first-retry`. Empty → uses `playwright.config.ts` default (`on-first-retry`). | `E2E_TRACE=on` |
+| `E2E_VIDEO` | Force video capture. Values: `on`, `off`, `retain-on-failure`, `on-first-retry`. Empty → uses `playwright.config.ts` default (`retain-on-failure`). | `E2E_VIDEO=on` |
+| `E2E_SCREENSHOTS` | Force screenshot capture. Values: `on`, `off`, `only-on-failure`. Empty → uses `playwright.config.ts` default (`only-on-failure`). | `E2E_SCREENSHOTS=on` |
+
+The cross-cutting `DRYRUN=yes` variable (also used by `make bump`, see
+Version Management below) lists tests that would run without executing
+them — useful for checking browser and filter combinations without
+spinning up a Stratos instance.
+
+**Common invocations:**
+
+```bash
+# Default — chromium only, config-default artifact handling
+make check e2e
+
+# Pick a single non-default browser
+make check e2e E2E_BROWSERS=firefox
+
+# Multiple browsers
+make check e2e E2E_BROWSERS=chromium,webkit
+
+# Every project in playwright.config.ts
+make check e2e E2E_BROWSERS=all
+
+# Capture full artifacts on every test (answers "are there images to look at?")
+make check e2e E2E_TRACE=on E2E_VIDEO=on E2E_SCREENSHOTS=on
+
+# Combine browser selection and artifact capture
+make check e2e E2E_BROWSERS=all E2E_TRACE=on E2E_VIDEO=on
+
+# List tests instead of executing (fast, no server spin-up)
+make check e2e DRYRUN=yes
+```
+
+Validation is delegated to Playwright — unknown browser names and unsupported
+artifact values produce clear errors from `playwright test` itself.
+
+### Packaging and Release
+
+| Command | Prerequisites | What it does | Output |
+|---------|--------------|-------------|--------|
+| `make stage` | `make build` | Stage artifacts for local testing | `dist/install/` with `run.sh` |
+| `make release cf` | `make build` (linux/amd64) | Create CF-pushable zip | `dist/stratos-cf-{VERSION}.zip` |
+| `make release github` | `make build` | Create all release archives | `dist/release/` (7 archives) |
+| `make release` | All of the above | Create both CF zip and GitHub archives | Both |
+
+Every artifact-producing `release` invocation finishes by staging the
+cf zip (when present) into `dist/release/` and regenerating a single
+`SHA256SUMS` over everything there. `./build/create-checksums.sh` remains
+callable standalone for the exceptional regen case (fix an asset after
+`make unpublish`, re-checksum, re-publish).
+
+### Release notes
+
+Notes accumulate continuously as per-PR fragment files in `changelog.d/`
+— each PR adds its own `NNNN-<slug>.md` (`./build/release-notes.sh new`)
+with entries under `[Breaking Changes]` / `[Features]` / `[BugFixes]` /
+`[Chores]` / `[Security Updates]` headers. `make stamp tag` assembles
+them (sections in that order, populated sections only) into the tag
+body, `make publish` reuses the tag body as the GitHub release notes,
+and `make sweep` clears the directory for the next cycle. See
+[changelog.d/README.md](https://github.com/cloudfoundry/stratos/blob/develop/changelog.d/README.md) for authoring details
+and `./build/release-notes.sh assemble` for a preview.
+
+### Publishing a release
+
+`make` owns the whole lifecycle; any runner (a human terminal, GitHub
+Actions, Concourse) is a thin caller of the same targets. Credentials come
+from the environment (`GH_TOKEN`/`GITHUB_TOKEN`, or a prior `gh auth
+login`) — never from the command line.
+
+| Command | What it does |
+|---------|-------------|
+| `make stamp tag [VERSION=X.Y.Z]` | Create + push the annotated release tag (`TAG_REMOTE`, default `origin`); the tag body carries the release notes assembled from `changelog.d/` fragments (see Release notes above) |
+| `make publish [DRAFT=yes] [TAG=vX.Y.Z]` | `gh release create --verify-tag` + upload `dist/release/*`; refuses a tag that already has a release, drafts included (GitHub happily stacks several releases on one tag); `--prerelease` derived from an alpha/beta/rc part in the tag (dev.N tags can be full releases); `--latest` from `LATEST` (see Maintenance lines below) |
+| `make unpublish TAG=vX.Y.Z` | Delete every GitHub release on the tag — drafts and duplicates included, resolved by release id since tag-based `gh` lookups can't see drafts (echoes what it will delete first; the tag survives). `TAG=` is required |
+| `make stamp untag TAG=vX.Y.Z` | Delete the tag, local + remote (echoes first). `TAG=` is required |
+| `make stamp line [LINE=X.Y]` | Cut the maintenance branch `release/X.Y.x` at the line's newest final tag (see Maintenance lines below) |
+| `make sweep` | Remove the `changelog.d/` fragments the release consumed (commit rides the next PR) |
+
+**`VERSION` and `TAG` hold the same underlying value** — whether a `v`
+prefix is present is a per-tool convention, not a semver rule, and the
+Makefile round-trips whatever you give it rather than forcing either
+way: `VERSION`'s value gets baked byte-for-byte into the binary
+(`main.appVersion`), so whatever prefix you pass shows up in the running
+app's own version string. `make bump` writes `package.json` without a
+`v` (that's the project's convention, matching semver.org — and where
+git/GitHub tags conventionally *do* carry one, since that's their own
+ecosystem's convention, handled at the tag layer via `TAG`). Unset,
+`TAG` resolves per verb from its intent: `make stamp tag` (creating a
+new tag) derives `v` + the current `VERSION` with build metadata
+stripped (`5.0.0-dev.142+build...` → `v5.0.0-dev.142`) and validates
+the result looks like `vX.Y.Z[-prerelease]` on this checkout's version
+line; `make publish` operates on a tag that already *exists*, so it
+takes the nearest existing tag instead of deriving one — deriving would
+point one release ahead the moment the post-release bump lands;
+`unpublish`/`stamp untag` delete things and refuse to guess, so they
+require an explicit `TAG=`. Any tag value GitHub accepts works when
+given explicitly. Release notes come from
+`NOTES=<file>` when given, else the annotated tag body (a pointer line
+when no fragments existed at tag time). All targets honor `DRYRUN=yes`.
+
+**Complete lifecycle**, start to finish (rollback runs the release/tag
+verbs in reverse — release first, so a half-done rollback never orphans
+the tag). A real release normally starts with `make bump <level>`
+instead of an explicit `VERSION=` — see Version Management below for
+what each bump level does; this example uses `VERSION=` throughout so
+it's copy-pastable without deciding a bump level first.
+
+**Word order matters when chaining `bump` into the same invocation as
+`build`/`release`.** Make runs multiple goals on one command line strictly
+in the order given — `bump`, `build`, and `release` have no prerequisite
+relationship forcing a different order, so Make just does what you typed.
+`make bump dev build release cf` bumps first, so the build/release pick up
+the new version. `make build release cf bump dev` builds and releases
+*first* with the still-old version, then bumps — `package.json` ends up
+one version ahead of what you just shipped, silently. If you're appending
+`bump dev` to a command you already typed rather than composing it fresh,
+put it at the front, not the end. The lifecycle below sidesteps the
+question entirely by using an explicit `VERSION=` instead of chaining
+`bump`:
+
+```bash
+make build VERSION=X.Y.Z
+make release cf github VERSION=X.Y.Z    # artifacts + SHA256SUMS
+make stamp tag VERSION=X.Y.Z            # create + push tag vX.Y.Z (notes in body)
+make publish VERSION=X.Y.Z              # gh release create + assets
+make sweep                              # drop consumed fragments
+
+make unpublish TAG=vX.Y.Z               # rollback: release first...
+make stamp untag TAG=vX.Y.Z             # ...then the tag
+```
+
+### Maintenance lines (concurrent versions)
+
+One moving HEAD can only serve one release line. The moment 5.1 work
+starts, a 5.0.X fix needs somewhere to land — and a released 4.9 keeps
+serving CF foundations on the v2 API while 5.x is v3-only. Three pieces
+make concurrent lines work, and all of them derive from per-branch
+state, so there is no per-line configuration to maintain:
+
+- **`LINE`** — the version line a checkout releases, derived from
+  `package.json`'s major.minor (develop at `5.1.0-dev` is line `5.1`; a
+  `release/5.0.x` branch is line `5.0`). Overridable per invocation.
+- **`TAG_MATCH`** — the tag-family glob (`v$(LINE).*`) filtering every
+  nearest-tag query: `publish`'s default tag and the changelog window
+  anchor. Branch ancestry usually scopes these already, but once a
+  maintenance fix back-merges into develop its tag becomes reachable
+  there — the filter keeps it from becoming develop's "nearest tag".
+  `stamp tag` also refuses to create a tag off the checkout's line.
+- **`LATEST`** — whether `publish` marks the release Latest
+  (`auto|yes|no`). `auto` marks it only when the tag is the highest
+  full-release tag of *any* line, so cutting 5.0.5 after 5.1.0 cannot
+  move the Latest pointer backwards onto a maintenance patch — nor the
+  docker `latest` tag, which release.yml derives from the same answer.
+
+A line is born with `make stamp line`: it branches `release/X.Y.x` at
+the line's highest final tag. Run bare right after tagging a final, it
+cuts the line for the release just shipped; `LINE=X.Y` retrofits an
+older one (`make stamp line LINE=4.9` branches `release/4.9.x` at
+`v4.9.4`). Patch work then targets that branch like any other: fix (or
+cherry-pick from develop), `make bump patch`, tag, publish — every
+derivation above reads the branch's own `package.json` and tags, so the
+same commands release the right line from either checkout.
+
+`changelog.d/` fragments are per-branch files, which is what makes
+their ownership per-line: a fix cherry-picked to both lines carries its
+fragment in both places, and each line's `make sweep` consumes only its
+own copies.
+
+One caveat when retrofitting an old line: the new branch carries the
+tooling its tree had at the branch point. `release/4.9.x` cut from
+`v4.9.4` predates this Makefile machinery entirely — backport the
+machinery to that branch first (or release it by hand) before using
+these verbs there.
+
+### Development
+
+| Command | What it does |
+|---------|-------------|
+| `make install` | Install dependencies (`bun install`) |
+| `make dev frontend` | Start frontend dev server with hot reload |
+| `make dev backend` | Start backend dev server |
+| `make stage` | Stage production build into `dist/install/` for local testing |
+
+Run `dev frontend` and `dev backend` in **two separate terminal windows** —
+neither backgrounds itself, and the frontend dev server proxies API calls
+to the backend port (`proxy.conf.cjs`), so both need to be running at once:
+
+```bash
+# Terminal 1
+make dev backend
+
+# Terminal 2
+make dev frontend
+```
+
+**Frontend changes are live** — `ng serve` watches and hot-reloads on save,
+no restart needed. **Backend changes are not** — `dev.backend` builds once
+(only if the binary is missing or stale for this platform) and then runs;
+editing Go source needs a stop (Ctrl-C) and a fresh `make dev backend` to
+rebuild and pick up the change.
+
+`make stage` isn't a substitute for `make dev`, despite both being "run it
+locally" — they answer different questions. `make dev` is live development:
+hot reload, unoptimized, source maps intact. `make stage` packages an
+*already-built* production artifact (`make build`'s output) into
+`dist/install/` with a `run.sh` launcher, so you can verify the actual
+shippable build runs standalone — no dev-server proxying, no watch mode.
+Use `stage` as a pre-release sanity check, not for day-to-day iteration.
+
+**`stage` needs a single, host-matching backend binary — not what a bare
+`make build` produces.** `build.backend` branches on whether `PLATFORM` is
+set:
+
+| Command | `PLATFORM` | Output |
+|---------|-----------|--------|
+| `make build` / `make build backend` | unset (default) | Cross-compiles **all six** supported platforms via `cross-compile.sh` → `dist/bin/jetstream-{os}-{arch}` (e.g. `jetstream-linux-amd64`) |
+| `make build backend PLATFORM=<os>/<arch>` | set | Builds **one** platform → plain `dist/bin/jetstream` |
+| `make dev backend` | (n/a) | Builds for the **host** platform only, automatically, if `dist/bin/jetstream` is missing or wrong for this machine |
+
+`install-local.sh` (`make stage`) looks for exactly the unqualified
+`dist/bin/jetstream` — the per-platform-named files from a bare `make
+build` don't satisfy it, and it can't run a binary built for a different
+OS/arch than the host anyway. So `make build` then `make stage` fails with
+no matching binary; `make build backend PLATFORM=<host os>/<host arch>`
+(or just `make dev backend`, then `make stage`) is what you want instead.
+
+**Cross-compiling works in either direction, any host arch.** `build.backend`
+hardcodes `CGO_ENABLED=0`, so it never invokes a C cross-compiler — Go's own
+toolchain ships every `GOOS`/`GOARCH` combination self-contained, making
+the build host-arch-independent by construction: an Apple Silicon (arm64)
+machine cross-compiles `linux/amd64` exactly as readily as an amd64 machine
+cross-compiles `linux/arm64`, verified directly. No build path needs a C
+cross-compiler: the sqlite driver is pure Go (`ncruces`), so nothing in the
+tree asks for cgo.
+
+### Documentation (docs/ → HTML or PDF/epub)
+
+`docs/` is plain markdown — read as-is on GitHub, but two commands render
+it without the raw formatting codes:
+
+| Command | What it does |
+|---------|-------------|
+| `make dev website` | Docusaurus dev server with hot reload — reads `docs/` directly (`path: '../docs'` in `website/docusaurus.config.js`), no separate conversion step |
+| `make build website` | Build the HTML site into `website/build/` |
+| `make build booklets` | Render curated `docs/` subsets to standalone PDF/epub via Quarto — see `docs/booklets/README.md` for how a booklet's chapter list ("spine") is defined |
+
+Booklets need the `quarto` tool (see `developer-environment.md`); the
+website only needs `bun` (already required).
+
+Booklet source (`docs/booklets/`) lives inside `docs/` but is excluded from
+the published site (`exclude` in `docusaurus.config.js`) — CI renders
+booklets on every PR as a downloadable artifact for review, not a publish
+target. Preview one locally with `quarto preview` (see
+`docs/booklets/README.md`).
+
+### Clean
+
+| Command | What it does |
+|---------|-------------|
+| `make clean` | Remove all build output (frontend, backend, release artifacts) |
+| `make clean frontend` | Remove frontend build only (`dist/frontend/`, `.angular`) |
+| `make clean backend` | Remove backend binaries only (`dist/bin/`) |
+| `make clean dist` | Remove everything including `node_modules` |
+| `make clean repo` | Full reset — `git clean -fdx`, fresh-clone state. Keeps `.env`, `secrets.yaml`, and `site.mk` (add `RM_SITE=yes` to drop `site.mk` too) |
+
+### Security & Dependencies
+
+| Command | What it does |
+|---------|-------------|
+| `make audit` | Default set: frontend + website + backend + actions + packages + secrets |
+| `make audit frontend` | `bun audit`, root workspace |
+| `make audit website` | `bun audit`, `website/` workspace |
+| `make audit backend` | gosec + trivy + govulncheck |
+| `make audit actions` | zizmor SAST over `.github/workflows/` |
+| `make audit packages` | osv-scanner over every lockfile and `go.mod` |
+| `make audit secrets` | gitleaks working-tree scan |
+| `make audit summary` | High/moderate/low totals only — fast triage between full runs |
+| `make audit tests` / `tree` / `history` / `licenses` | Non-default modes — see `developer-environment.md` for what each covers and why it's opt-in |
+| `make audit modrot` / `semgrep` / `codeql` | Non-default, manual-run scanners — see `developer-environment.md` for tool install |
+| `make audit sarif` | `sarif-tools` summary across `dist/*.sarif` |
+| `make audit upload` | Push `dist/*.sarif` to GitHub code scanning |
+| `make outdated` | List outdated direct deps in both stacks |
+| `make outdated frontend` | `bun outdated` |
+| `make outdated backend` | `go list -m -u all`, filtered to upgradable lines |
+| `make deps dependabot` | List open dependency PRs (requires `gh` auth + `dependencies` label) |
+
+These wrap the underlying scanners — they do not gate the build. Decide
+which findings to act on by reading the output. See `developer-environment.md`
+for tool installation.
+
+The bare `make security` target was retired in favour of `make audit backend`
+(combined gosec + trivy + govulncheck). The old name now prints a renamed-to
+message via `deprecated.mk`.
+
+#### Explaining a lockfile change
+
+A dependency bump can rewrite thousands of lockfile lines. `scripts/lockdiff.mjs`
+compares two lockfiles by package (name@version) instead of by line and
+names the origin of every added or removed package: the changed package
+that brought it into the tree. It reads `bun.lock` and npm
+`package-lock.json`, and takes `<rev>:<path>` to read a version from git:
+
+```bash
+node scripts/lockdiff.mjs origin/develop:bun.lock bun.lock
+node scripts/lockdiff.mjs origin/develop:src/frontend/packages/devkit/package-lock.json \
+  src/frontend/packages/devkit/package-lock.json --detail
+```
+
+When a change has more than one cause (a version bump plus removing
+`overrides`, say), resolve it one cause at a time, starting from the
+existing lockfile, and check each step:
+
+1. Make one change, then `npm install --package-lock-only` (or `bun install`).
+2. Run `lockdiff` against the previous step and note what the change
+   brought in. One commit per step keeps each lockfile diff to one cause.
+3. For an npm lockfile, finish with `npm dedupe --package-lock-only`.
+   Incremental resolution keeps earlier choices where they still fit, so
+   the steps leave duplicate copies behind, and the result depends on the
+   order of the steps. Dedupe removes the duplicates without re-resolving
+   the rest.
+
+bun has no dedupe. Stale copies in `bun.lock` stay until something that
+depends on them changes. Do not remove entries from `bun.lock` by hand to
+force them out: bun then re-resolves far more than the removed entries.
+Removing 13 stale entries once moved 304 packages, direct dependencies
+included, which amounts to a regeneration.
+
+Regenerate a lockfile from scratch only when nothing narrower settles the
+tree. A regeneration also moves every package that has a newer release
+within its range, which nothing asked for, and discards the existing
+resolutions. If you do regenerate, run `lockdiff` against the previous
+result to see exactly which packages that moved.
+
+### Version Management
+
+Stratos follows [SemVer 2.0.0](https://semver.org/) with a full prerelease
+lifecycle and automatic build metadata on every bump.
+
+**Lifecycle stages** (labels only — no auto-promotion; each stage is selected
+explicitly):
+
+```
+dev → alpha → beta → rc → prerelease → release
+```
+
+**Semver bumps** (strip any prerelease, then increment the component):
+
+| Command | Example input | Result |
+|---------|--------------|--------|
+| `make bump patch` | `v4.9.3-dev.38` | `v4.9.4` |
+| `make bump minor` | `v4.9.3-dev.38` | `v4.10.0` |
+| `make bump major` | `v4.9.3-dev.38` | `v5.0.0` |
+
+**Prerelease bumps** (operate on the current semver core — create `.1` if the
+stage is new, otherwise increment the counter):
+
+| Command | Example input | Result |
+|---------|--------------|--------|
+| `make bump dev` | `v4.9.3` | `v4.9.3-dev.1` |
+| `make bump dev` | `v4.9.3-dev.38` | `v4.9.3-dev.39` |
+| `make bump alpha` | `v4.9.3-dev.38` | `v4.9.3-alpha.1` |
+| `make bump beta` | `v4.9.3-alpha.2` | `v4.9.3-beta.1` |
+| `make bump rc` | `v4.9.3-beta.1` | `v4.9.3-rc.1` |
+| `make bump rc` | `v4.9.3-rc.1` | `v4.9.3-rc.2` |
+| `make bump prerelease` | `v4.9.3-rc.2` | `v4.9.3-prerelease.1` |
+
+To strip the prerelease suffix and finalize a release, use `FINAL=strip` on
+the release verb — see [Finalizing a release](#finalizing-a-release) below.
+
+**Automatic build metadata.** Every `make bump` appends
+`+build.YYYYMMDD.SHORT-SHA` per SemVer 2.0.0, e.g.
+`v4.9.3-dev.42+build.20260410.79d3982a`. Build metadata is ignored by version
+precedence rules but provides traceability from binary to source.
+
+**Explicit set.** For an arbitrary version string, call the script directly:
+
+```bash
+./build/version-bump.sh set v5.0.0-rc.1
+```
+
+**Preview a bump** without writing files: use `DRYRUN=yes` (see
+[Cross-cutting variables](#cross-cutting-variables) below).
+
+### Metadata and Diagnostics
+
+| Command | What it does |
+|---------|-------------|
+| `make stamp frontend` | Generate `build-info.ts` with version and git metadata |
+| `make dump version` | Print resolved semver, VCS metadata, and Go ldflags |
+| `make dump actions` | List all registered verb+modifier pairs |
+
+### Cross-cutting variables
+
+These variables compose with any verb and affect behavior without changing
+the command shape.
+
+| Variable | What it does |
+|----------|-------------|
+| `DRYRUN=yes` | Preview actions without executing. Wired to `bump` (prints the new version without writing `package.json`) and to `check e2e` / `test e2e` (passes `--list` to Playwright, listing tests without running them). |
+| `FINAL=strip` | Strip prerelease suffix from the version (persisted to `package.json`), then re-invoke Make with the remaining goals. Useful as a one-shot finalize-then-package on the release verb. |
+| `VERSION=...` | Override the version from `package.json` for this invocation only (not persisted). |
+| `PLATFORM=os/arch` | Override backend build platform. Syntax is Go's own `GOOS`/`GOARCH` values, lowercase, slash-separated — not a Stratos-specific format. `os`: `linux`, `darwin`, `windows`. `arch`: `amd64`, `arm64`. Those are the six combinations this project builds/tests (see Supported Platforms in `developer-environment.md`); Go itself supports more `GOOS`/`GOARCH` pairs than that if you need one we don't list. |
+
+#### Finalizing a release
+
+`FINAL=strip` on the `release` verb first strips the prerelease suffix from
+`package.json` (via `version-bump.sh bump release`) and then re-executes the
+original make goals. The typical finalize-and-package flow:
+
+```bash
+# Current: v5.0.0-rc.2+build...
+make release cf FINAL=strip
+# → Strips prerelease: v5.0.0
+# → Re-invokes: make release cf
+# → Produces: dist/stratos-cf-v5.0.0.zip
+```
+
+`FINAL=strip` errors out if the current version is already a release (no
+prerelease to strip). The only supported value is `strip`; any other value
+errors out.
+
+#### Preview a bump
+
+```bash
+make bump dev DRYRUN=yes
+# Prints: v4.9.3-dev.43+build.20260410.79d3982a
+# package.json is not modified.
+```
+
+### Common Workflows
+
+**Local development:**
+
+```bash
+make build
+make stage
+dist/install/run.sh
+```
+
+**CF deployment:**
+
+```bash
+# Bump dev version for a unique artifact name, then build + package:
+make bump dev
+make build release cf
+
+# Finalize a prerelease and package in one shot:
+make build release cf FINAL=strip
+
+# Explicit version override (not persisted to package.json; no v prefix):
+make VERSION=5.0.0 build release cf
+
+# Deploy (via site.mk or manually — see Site-Specific Overrides below):
+cf target -o system -s stratos
+cf push -f dist/cf-package/manifest.yml -p dist/stratos-cf-{VERSION}.zip
+```
+
+The `cf` modifier automatically sets `PLATFORM=linux/amd64` for backend
+compilation. The version can be overridden without editing `package.json`.
+
+> [!IMPORTANT]
+> `cf push -p` does not read `manifest.yml` from inside the zip —
+> the manifest must be passed separately with `-f` or be in the current directory.
+
+**GitHub release (automated via CI):**
+
+```bash
+make build
+make release github
+```
+
+**Version override:**
+
+Any make target respects `VERSION=` to override the version from
+`package.json`. No `v` prefix — `VERSION` is bare semver, unlike `TAG`
+(see Publishing a release above):
+
+```bash
+make VERSION=5.0.0-rc.1 build release cf
+make VERSION=5.0.0 dump version
+```
+
+## Site-Specific Overrides (site.mk)
+
+The Makefile supports site-specific customization through an optional `site.mk`
+file. This file is loaded via `-include site.mk` at the end of the Makefile,
+so it can extend or override any variable or target.
+
+`site.mk` is gitignored — it is never committed. A `site.mk.example` is
+provided as a starting point.
+
+### When to use site.mk
+
+Use `site.mk` for operations that depend on your deployment environment:
+
+- Deploy targets (`make deploy cf`) with org/space configuration
+- Environment-specific variable overrides
+- Custom CI or automation targets
+- Integration with site-specific tooling
+
+Do **not** put secrets in `site.mk`. Use environment variables or a secrets
+manager instead.
+
+### Getting started
+
+```bash
+cp site.mk.example site.mk
+# Edit site.mk to match your environment
+```
+
+### Adding help text
+
+If your `site.mk` defines a `site-help` target, `make help` will include it
+automatically:
+
+```makefile
+.PHONY: site-help
+site-help:
+	@echo ""
+	@echo "Site-specific:"
+	@echo "  make deploy cf    Push to current CF target"
+```
+
+Without a `site-help` target, `make help` shows a generic note that site.mk
+exists. Without `site.mk` at all, nothing extra is shown.
+
+### Design pattern
+
+The Makefile uses a **verb + modifier** pattern where order does not matter:
+
+```
+make <verb> [modifier...]
+make build cf              # verb=build, modifier=cf
+make cf build release      # same modifiers, different order — same result
+```
+
+Modifiers are no-op targets that set flags. The `cf` modifier forces
+`PLATFORM=linux/amd64` for build targets. Site-specific targets follow the
+same pattern — `site.mk` adds new verbs (like `deploy`) that compose with
+existing modifiers.
+
+See `site.mk.example` for the full deploy target pattern.
+
+## Validation Behavior
+
+Release targets check for required artifacts before proceeding. If something
+is missing, they print what's needed and exit:
+
+```
+ERROR: Frontend build not found at dist/frontend/browser/
+  Run: make build frontend
+```
+
+```
+ERROR: Backend binary not found at dist/bin/jetstream
+  Run: make build backend
+```
+
+```
+ERROR: Cross-compiled binaries missing: jetstream-linux-arm64 jetstream-darwin-amd64
+  Run: make build backend
+```
+
+Packaging never auto-builds. This avoids the old problem where unwanted build
+steps blocked packaging.
+
+## Migration from Old Commands
+
+| Old | New |
+|-----|-----|
+| `bin/package` | `make build && make release cf` |
+| `bin/package --skip-build` | `make release cf` (validates artifacts exist) |
+| `build/package.sh` | `make release github` |
+| `make build-frontend` | `make build frontend` |
+| `make build-backend` | `make build backend PLATFORM=linux/amd64` |
+| `make build-backend-all` | `make build backend` |
+| `make package` | `make release` |
+| `make dev-frontend` | `make dev frontend` |
+| `make dev-backend` | `make dev backend` |
+| `make install` (old) | `make install` (unchanged — installs dependencies) |
+| `make clean-dev` | `make clean` |
+| `make clean-deep` | `make clean dist` |
+| `make debug-version` | `make dump version` |
+
+## Version and Build Metadata
+
+The frontend and backend are built independently and may have different build
+dates and VCS identifiers. The package itself carries a unified version.
+
+### Package-level
+
+| Variable | Source | Description |
+|----------|--------|-------------|
+| `VERSION` | `package.json` (or env override) | Unified package version |
+
+### Frontend build metadata
+
+Captured at prebuild via `build/store-git-metadata.cjs` into
+`.stratos-git-metadata.json`:
+
+| Field | Description |
+|-------|-------------|
+| `project` | Remote origin URL |
+| `branch` | Branch name at build time |
+| `commit` | Full commit SHA at build time |
+
+### Backend build metadata
+
+Injected via Go ldflags at compile time:
+
+| Variable | Injected as | Description |
+|----------|-------------|-------------|
+| `VERSION` | `main.appVersion` | Package version |
+| `BUILD_DATE` | `main.buildDate` | UTC timestamp at compile time |
+| `GIT_COMMIT` | `main.gitCommit` | Short commit SHA at compile time |
+
+### Build environment overrides
+
+| Variable | Used by | Default | Description |
+|----------|---------|---------|-------------|
+| `PLATFORM` | `make build backend` | Host OS/arch | Target platform (`linux/amd64`, `darwin/arm64`, etc.) |
+| `VERSION` | All targets | From `package.json` | Override version string |
+
+Platform detection uses `uname` and normalizes to Go conventions (`darwin`,
+`linux`, `amd64`, `arm64`). The `PLATFORM` variable accepts any separator:
+`linux/amd64`, `linux-amd64`, or `linux_amd64`.
+
+## Package Contents
+
+### install (local testing)
+
+```
+dist/install/
+  bin/jetstream          # symlink -> dist/bin/jetstream
+  ui/                    # symlink -> dist/frontend/browser/
+  config.properties      # copy from src/jetstream/config.example
+  templates/             # copy from src/jetstream/templates/
+  plugins.yaml           # copy from src/jetstream/plugins.yaml
+  run.sh                 # wrapper that sets UI_PATH, TEMPLATE_DIR, execs jetstream
+```
+
+### release cf
+
+```
+dist/cf-package/ (zipped as stratos-cf-{VERSION}.zip)
+  jetstream              # linux binary
+  ui/                    # frontend assets
+  config.properties      # from deploy/cloud-foundry/
+  plugins.yaml           # from src/jetstream/
+  templates/             # from src/jetstream/
+  Procfile               # "web: ./jetstream"
+  manifest.yml           # CF manifest (binary_buildpack)
+```
+
+### release github (per platform)
+
+```
+stratos-{VERSION}-{os}-{arch}.tar.gz (or .zip for Windows)
+  bin/jetstream          # platform binary
+  ui/                    # frontend assets
+  config/config.example  # configuration template
+  deploy/containers/     # Docker configs
+  deploy/kubernetes/     # K8s configs
+  LICENSE, README.md, CHANGELOG.md, VERSION, README.txt
+```
+
+Plus: `stratos-{VERSION}-src.tar.gz` via `git archive`
+
+## Known Issues
+
+### ENCRYPTION_KEY required
+
+`ENCRYPTION_KEY` must be explicitly set as an environment variable or in
+`config.properties`. The old source-buildpack approach defaulted this via the
+build script, but the pre-built binary approach does not generate a default.
+If not set, jetstream fails to start with an encryption error.
+
+For CF deployments, set it in the manifest or via `cf set-env`:
+
+```bash
+cf set-env console ENCRYPTION_KEY "$(openssl rand -hex 32)"
+```
+
+## Runtime tuning — CAPI pagination
+
+The native CF v3 list endpoints (`/pp/v1/cf/orgs/{cnsi}`, `/pp/v1/cf/apps/{cnsi}`,
+`/pp/v1/cf/spaces/{cnsi}`) drain every page of the CAPI list API to return the
+full set. Two environment variables tune how jetstream paginates against CAPI,
+in case your foundation's CAPI performance differs from the defaults.
+
+### `STRATOS_CF_PER_PAGE`
+
+- **Default:** `500`
+- **Effect:** page size (`per_page=<n>`) used when fetching every page of a
+  CAPI list endpoint.
+- **Why override:** Larger values reduce round-trip count; smaller values
+  complete each request faster. On adepttech, `/v3/spaces?per_page=5000`
+  clocked ~27s/request (just under the 30s CAPI client timeout);
+  `per_page=500` completes in ~6s. A faster foundation may tolerate larger
+  pages; a slower one may need smaller.
+
+### `STRATOS_CF_MAX_PARALLEL_PAGES`
+
+- **Default:** `5`
+- **Effect:** maximum concurrent CAPI page requests issued by the drain-all
+  helpers. Page 1 is fetched synchronously to learn `total_pages`; pages 2..N
+  are then fetched with this fan-out bound.
+- **Why override:** Raise for faster total drain when CAPI tolerates more
+  concurrent requests; lower if concurrent pressure stresses CAPI or the
+  gorouter connection pool.
+
+### Applying changes
+
+Both variables are read at jetstream startup, from plain OS environment
+variables — any of the usual ways to set one works, not just `cf set-env`:
+
+**CF deployment, imperative** (change now, on a running app):
+
+```bash
+cf set-env console STRATOS_CF_PER_PAGE 1000
+cf set-env console STRATOS_CF_MAX_PARALLEL_PAGES 8
+cf restage console
+```
+
+> [!IMPORTANT]
+> `cf restart` preserves the environment variable set loaded when the
+> droplet was built and will NOT pick up `cf set-env` changes. Use `cf restage`.
+
+**CF deployment, declarative** (checked into `manifest.yml`, applied on
+the next `cf push`/`cf restage` — see the commented examples already in
+the repo's `manifest.yml`):
+
+```yaml
+applications:
+  - name: console
+    env:
+      STRATOS_CF_PER_PAGE: 1000
+      STRATOS_CF_MAX_PARALLEL_PAGES: 8
+```
+
+**Local (`make dev backend` or running the binary directly):**
+
+```bash
+export STRATOS_CF_PER_PAGE=1000
+export STRATOS_CF_MAX_PARALLEL_PAGES=8
+make dev backend
+```
+
+### Measuring the effect
+
+`DIAGNOSTICS_ENABLED=true` (same env-var mechanism as above, `FWT-934`)
+adds an `X-Stratos-Wire-Sizes` response header to JSON API responses —
+`raw_total`/`keys`/`values`/`structural`/`resources` byte breakdown plus
+`duration_ms` for that request (`wireSizeMiddleware`,
+`middleware_wiresize.go`). `duration_ms` on a CAPI-list-backed endpoint
+(orgs/apps/spaces) is the actual before/after signal for whether a
+`STRATOS_CF_PER_PAGE`/`STRATOS_CF_MAX_PARALLEL_PAGES` change helped — not
+just an abstract default to trust.
+
+Note: despite `DiagnosticsEnabled`'s doc-comment in `api/structs.go`
+describing "the admin-only `/pp/v1/admin/diagnostics` endpoint," no such
+route exists in the codebase — what's actually shipped is this response
+header on existing endpoints, not a separate admin diagnostics endpoint.
+Off by default in production; opt in per-deployment (dev/staging) via
+`DIAGNOSTICS_ENABLED`.
+
+The resolved values are logged at startup:
+
+```
+INFO STRATOS_CF_PER_PAGE=1000 (overrides default 500)
+INFO STRATOS_CF_MAX_PARALLEL_PAGES=8 (overrides default 5)
+```
+
+To confirm what's currently set on a deployed instance:
+
+```bash
+cf env console | grep -E 'STRATOS_CF_PER_PAGE|STRATOS_CF_MAX_PARALLEL_PAGES'
+```

@@ -1,76 +1,94 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
-import { Portal } from '@angular/cdk/portal';
-import { AfterViewInit, Component, NgZone, OnDestroy, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
-import { MatDrawer } from '@angular/material/sidenav';
-import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Portal, PortalModule } from '@angular/cdk/portal';
+import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, NgZone, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
+import { toObservable } from '@angular/core/rxjs-interop';
 import {
-  GetCurrentUsersRelations,
-  CloseSideNav,
-  DisableMobileNav,
-  EnableMobileNav,
-  selectDashboardState,
-  DashboardOnlyAppState,
-  stratosEntityCatalog,
-  DashboardState,
   entityCatalog,
+  UserFavoritesDataService,
 } from '@stratosui/store';
+import { DashboardSignalService } from '../../../core/signals/dashboard-signal.service';
+import { DashboardDataService, DashboardState } from '../../../core/dashboard-data.service';
 import { combineLatest, Observable, of, Subscription } from 'rxjs';
 import { distinctUntilChanged, filter, map, startWith, withLatestFrom } from 'rxjs/operators';
 
 import { CustomizationService } from '../../../core/customizations.types';
+import { naturalCompare } from '../../../shared/utils/natural-sort';
 import { EndpointsService } from '../../../core/endpoints.service';
 import { IHeaderBreadcrumbLink } from '../../../shared/components/page-header/page-header.types';
+import { EndpointReauthReportService } from '../../../shared/services/endpoint-reauth-report.service';
 import { SidePanelMode, SidePanelService } from '../../../shared/services/side-panel.service';
 import { TabNavService } from '../../../tab-nav.service';
-import { IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
+import { PageSideNavComponent, IPageSideNavTab } from '../page-side-nav/page-side-nav.component';
 import { PageHeaderService } from './../../../core/page-header-service/page-header.service';
-import { SideNavItem } from './../side-nav/side-nav.component';
+import { SideNavComponent, SideNavItem } from './../side-nav/side-nav.component';
+import { RoutingIndicatorComponent } from '../../../shared/components/routing-indicator/routing-indicator.component';
+import { ShowPageHeaderComponent } from '../../../shared/components/page-header/show-page-header/show-page-header.component';
 
 @Component({
   selector: 'app-dashboard-base',
   templateUrl: './dashboard-base.component.html',
-  styleUrls: ['./dashboard-base.component.scss']
+  styleUrls: ['./dashboard-base.component.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    PortalModule,
+    SideNavComponent,
+    PageSideNavComponent,
+    ShowPageHeaderComponent,
+    RoutingIndicatorComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 
 export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit {
-  public activeTabLabel$: Observable<string>;
-  public subNavData$: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
-  public isMobile$: Observable<boolean>;
-  public sideNavMode$: Observable<string>;
-  public sideNavMode: string;
-  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }>;
-  public rightNavState$: Observable<{ opened: boolean, component?: object, props?: object, }>;
-  private dashboardState$: Observable<DashboardState>;
-  public noMargin$: Observable<boolean>;
-  private closeSub: Subscription;
+  pageHeaderService = inject(PageHeaderService);
+  private breakpointObserver = inject(BreakpointObserver);
+  private router = inject(Router);
+  private activatedRoute = inject(ActivatedRoute);
+  private endpointsService = inject(EndpointsService);
+  tabNavService = inject(TabNavService);
+  private ngZone = inject(NgZone);
+  sidePanelService = inject(SidePanelService);
+  private cs = inject(CustomizationService);
+  private cd = inject(ChangeDetectorRef);
+  private dashboardSignals = inject(DashboardSignalService);
+  private dashboardData = inject(DashboardDataService);
+  private userFavorites = inject(UserFavoritesDataService);
+  private endpointReauthReport = inject(EndpointReauthReportService);
+
+  public activeTabLabel$!: Observable<string>;
+  public subNavData$!: Observable<[string, Portal<any>, IPageSideNavTab, IHeaderBreadcrumbLink[]]>;
+  public isMobile$: Observable<boolean> = of(false);
+  public sideNavMode$!: Observable<string>;
+  public sideNavMode!: string;
+  public mainNavState$: Observable<{ mode: string; opened: boolean; iconMode: boolean, }> = of({ mode: 'side', opened: true, iconMode: false });
+  public rightNavState$!: Observable<{ opened: boolean, component?: object, props?: object, }>;
+  private dashboardState$: Observable<DashboardState> = of({} as DashboardState);
+  public noMargin$: Observable<boolean> = of(false);
+  private closeSub!: Subscription;
   private mobileSub: Subscription;
-  private drawer: MatDrawer;
+  private resizeObserver?: ResizeObserver;
+  private mutationObserver?: MutationObserver;
+  private drawer: any;
   public iconModeOpen = false;
   public sideNavWidth = 54;
 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
   sideNaveMode = 'side';
 
-  @ViewChild('previewPanelContainer', { read: ViewContainerRef }) previewPanelContainer: ViewContainerRef;
+  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer!: ViewContainerRef;
 
-  @ViewChild('content') public content;
+  @ViewChild('content', { static: false }) public content!: ElementRef<HTMLElement>;
+
+  showScrollShadow = signal(false);
 
   // Slide-in side panel mode
   sidePanelMode: SidePanelMode = SidePanelMode.Modal;
 
-  constructor(
-    public pageHeaderService: PageHeaderService,
-    private store: Store<DashboardOnlyAppState>,
-    private breakpointObserver: BreakpointObserver,
-    private router: Router,
-    private activatedRoute: ActivatedRoute,
-    private endpointsService: EndpointsService,
-    public tabNavService: TabNavService,
-    private ngZone: NgZone,
-    public sidePanelService: SidePanelService,
-    private cs: CustomizationService
-  ) {
+  constructor() {
     this.noMargin$ = this.router.events.pipe(
       filter(event => event instanceof NavigationEnd),
       map(() => this.isNoMarginView(this.activatedRoute.snapshot)),
@@ -81,7 +99,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       startWith(false),
       distinctUntilChanged()
     );
-    this.dashboardState$ = this.store.select(selectDashboardState);
+    this.dashboardState$ = toObservable(this.dashboardSignals.dashboard);
     this.mainNavState$ = this.dashboardState$.pipe(
       map(state => {
         if (state.isMobile) {
@@ -101,16 +119,16 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     );
 
     this.mobileSub = this.isMobile$
-      .subscribe(isMobile => isMobile ? this.store.dispatch(new EnableMobileNav()) : this.store.dispatch(new DisableMobileNav()));
+      .subscribe(isMobile => isMobile ? this.dashboardData.enableMobileNav() : this.dashboardData.disableMobileNav());
   }
 
-  @ViewChild('sidenav') set sidenav(drawer: MatDrawer) {
+  @ViewChild('sidenav') set sidenav(drawer: any) {
     this.drawer = drawer;
-    if (!this.closeSub) {
+    if (!this.closeSub && drawer && drawer.closedStart) {
       // We need this for mobile to ensure the state is synced when the dashboard is closed by clicking on the backdrop.
-      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([change, state]) => {
+      this.closeSub = drawer.closedStart.pipe(withLatestFrom(this.dashboardState$)).subscribe(([_change, state]: [any, DashboardState]) => {
         if (state.isMobile) {
-          this.store.dispatch(new CloseSideNav());
+          this.dashboardData.closeSideNav();
         }
       });
     }
@@ -119,13 +137,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   public redrawSideNav() {
     // We need to do this to ensure there isn't a space left behind
     // when going from mobile to desktop
-    this.ngZone.runOutsideAngular(() => {
-      setTimeout(() => this.drawer._modeChanged.next(), 250);
-    });
-  }
-
-  dispatchRelations() {
-    this.store.dispatch(new GetCurrentUsersRelations());
+    if (this.drawer && this.drawer._modeChanged) {
+      this.ngZone.runOutsideAngular(() => {
+        setTimeout(() => this.drawer._modeChanged.next(), 250);
+      });
+    }
   }
 
   sideHelpClosed() {
@@ -134,16 +150,35 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
   ngAfterViewInit() {
     this.sidePanelService.setContainer(this.previewPanelContainer);
+
+    const el = this.content?.nativeElement;
+    if (!el) return;
+    this.updateScrollShadow(el);
+
+    // Viewport/container size changes shift clientHeight.
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.updateScrollShadow());
+      this.resizeObserver.observe(el);
+    }
+
+    // Route swaps, async-rendered content and native <details> toggles change
+    // scrollHeight without any scroll or resize event.
+    if (typeof MutationObserver !== 'undefined') {
+      this.mutationObserver = new MutationObserver(() => this.updateScrollShadow());
+      // attributes:true catches native <details> open-toggles, which change
+      // scrollHeight without adding or removing nodes.
+      this.mutationObserver.observe(el, { childList: true, subtree: true, attributes: true });
+    }
   }
 
   ngOnInit() {
-    this.subNavData$ = combineLatest(
+    this.subNavData$ = combineLatest([
       this.tabNavService.getCurrentTabHeaderObservable().pipe(
         startWith(null)
       ),
       this.tabNavService.tabSubNav$,
       this.tabNavService.tabSubNavBreadcrumbs$
-    ).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
+    ]).pipe(map(([tabNav, tabSubNav, tabSubNavBreadcrumb]: [any, any, any]) => [tabNav ? tabNav.label : null, tabSubNav, tabNav, tabSubNavBreadcrumb]));
 
     // Register all health checks for endpoint types that support this
     entityCatalog.getAllEndpointTypes().forEach(epType => {
@@ -152,14 +187,44 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
       }
     });
 
-    this.dispatchRelations();
-    stratosEntityCatalog.userFavorite.api.getAll();
+    // CF current-user roles now fetch via CfEndpointRoleSyncService's signal
+    // effect on connected CF endpoints (favorites/roles island Wave 2) — no
+    // dashboard-load dispatch needed.
+    // Initialize user favorites - fire and forget, no subscription needed
+    this.userFavorites.load();
+
+    // Once-per-session arrival report of endpoints that already need
+    // re-authentication - fire and forget, no subscription needed.
+    void this.endpointReauthReport.reportOnce();
   }
 
   ngOnDestroy() {
-    this.mobileSub.unsubscribe();
-    this.closeSub.unsubscribe();
+    if (this.mobileSub) {
+      this.mobileSub.unsubscribe();
+    }
+    if (this.closeSub) {
+      this.closeSub.unsubscribe();
+    }
+    this.resizeObserver?.disconnect();
+    this.mutationObserver?.disconnect();
     this.sidePanelService.unsetContainer();
+  }
+
+  onContentScroll(event: Event) {
+    const el = event.target as HTMLElement;
+    this.updateScrollShadow(el);
+  }
+
+  private updateScrollShadow(el?: HTMLElement) {
+    if (!el) {
+      el = this.content?.nativeElement;
+    }
+    if (!el) return;
+    const hasMore = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 4;
+    if (this.showScrollShadow() !== hasMore) {
+      this.showScrollShadow.set(hasMore);
+      this.cd.markForCheck();
+    }
   }
 
   isNoMarginView(route: ActivatedRouteSnapshot): boolean {
@@ -176,7 +241,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     let navItems = this.collectNavigationRoutes('', this.router.config);
 
     // Sort by name
-    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => a.label.localeCompare(b.label));
+    navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => naturalCompare(a.label, b.label));
 
     // Sort by position
     navItems = navItems.sort((a: SideNavItem, b: SideNavItem) => {
@@ -188,11 +253,11 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
     return navItems;
   }
 
-  private collectNavigationRoutes(path: string, routes: Route[]): SideNavItem[] {
+  private collectNavigationRoutes(path: string | undefined, routes: Route[] | undefined): SideNavItem[] {
     if (!routes) {
       return [];
     }
-    return routes.reduce((nav, route) => {
+    return routes.reduce((nav: SideNavItem[], route: Route) => {
       if (route.data && route.data.stratosNavigation) {
         const item: SideNavItem = {
           ...route.data.stratosNavigation,
@@ -200,8 +265,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
         };
         if (item.requiresEndpointType) {
           // Upstream always likes to show Cloud Foundry related endpoints - other distributions can change this behaviour
-          const alwaysShow = this.cs.get().alwaysShowNavForEndpointTypes ?
-            this.cs.get().alwaysShowNavForEndpointTypes(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
+          const alwaysShowNavFor = this.cs.get().alwaysShowNavForEndpointTypes;
+          const alwaysShow = alwaysShowNavFor ?
+            alwaysShowNavFor(item.requiresEndpointType) : (item.requiresEndpointType === 'cf');
           item.hidden = alwaysShow ? of(false) : this.endpointsService.doesNotHaveConnectedEndpointType(item.requiresEndpointType);
         } else if (item.requiresPersistence) {
           item.hidden = this.endpointsService.disablePersistenceFeatures$.pipe(startWith(true));

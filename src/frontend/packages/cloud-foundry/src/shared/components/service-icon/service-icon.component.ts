@@ -1,29 +1,33 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit , ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 
-import { APIResource } from '../../../../../store/src/types/api.types';
-import { IService, IServiceExtra } from '../../../cf-api-svc.types';
+import { CustomIconComponent } from '@stratosui/core';
+import { StServiceOffering } from '../../../services/endpoint-data/stratos-types';
 
 @Component({
   selector: 'app-service-icon',
   templateUrl: './service-icon.component.html',
-  styleUrls: ['./service-icon.component.scss']
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    CustomIconComponent
+  ]
 })
 export class ServiceIconComponent implements OnInit {
 
   image = '';
 
-  extraInfo: IServiceExtra;
-  @Input() service: APIResource<IService>;
-
+  @Input() service!: StServiceOffering | null;
   @Input() addMenuPadding = false;
   constructor() { }
 
   ngOnInit() {
-    if (this.service) {
-      this.extraInfo = this.service.entity.extra ? JSON.parse(this.service.entity.extra) : null;
-      if (this.extraInfo && this.extraInfo.imageUrl) {
-        this.image = this.extraInfo.imageUrl;
-      }
+    // brokerCatalogMetadata is already a decoded map; the V2 path JSON-parsed
+    // entity.extra. imageUrl is the only field this component reads.
+    const imageUrl = this.service?.brokerCatalogMetadata?.imageUrl;
+    if (typeof imageUrl === 'string') {
+      this.image = imageUrl;
     }
   }
 

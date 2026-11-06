@@ -2,40 +2,65 @@
   Install Chart
 </app-page-header>
 <app-steppers [cancel]="cancelUrl">
-  <app-step [title]="'Kubernetes'" [valid]="validate$ | async">
-    <form [formGroup]="details" class="stepper-form helm-create-release">
+  <app-step [title]="'Kubernetes'" [signalHandle]="detailsStepHandle">
+    <form [formGroup]="details" class="stepper-form flex-1">
       <b>Select the Kubernetes cluster to install to</b>
-      <mat-form-field>
-        <mat-select formControlName="endpoint" name="endpoint">
-          <mat-option *ngFor="let kube of kubeEndpoints$ | async" [value]="kube.guid">
-            <span>{{ kube.name }}</span>
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <div class="form-group">
+        <select class="select w-full" formControlName="endpoint" name="endpoint">
+          <option value="" disabled>Select a Kubernetes cluster</option>
+          @for (kube of kubeEndpoints$ | async; track kube) {
+            <option [value]="kube.guid">
+              {{ kube.name }}
+            </option>
+          }
+        </select>
+      </div>
       <br>
-      <b>Specify name and namespace for the installation</b>
-      <mat-form-field>
-        <input #releaseNameInputField matInput placeholder="Name" name="releaseName" formControlName="releaseName"
-          autocomplete="off">
-      </mat-form-field>
+        <b>Specify name and namespace for the installation</b>
+        <div class="form-group">
+          <input #releaseNameInputField
+            class="input w-full"
+            placeholder="Name"
+            name="releaseName"
+            formControlName="releaseName"
+            autocomplete="off">
+        </div>
 
-      <mat-form-field>
-        <input type="text" placeholder="Namespace" matInput formControlName="releaseNamespace" [matAutocomplete]="auto">
-        <mat-autocomplete #auto="matAutocomplete" autoActiveFirstOption>
-          <mat-option *ngFor="let namespace of namespaces$ | async" [value]="namespace">
-            {{namespace}}
-          </mat-option>
-        </mat-autocomplete>
-        <mat-error *ngIf="details.controls.releaseNamespace.errors?.namespaceDoesNotExist">
-          Namespace does not exist
-        </mat-error>
-      </mat-form-field>
+        <div class="form-group relative">
+          <input type="text"
+            class="input w-full"
+            placeholder="Namespace"
+            formControlName="releaseNamespace"
+            #namespaceInput>
+          @if (namespaceInput.value && (namespaces$ | async)?.length) {
+            <div class="absolute top-full left-0 w-full bg-content-bg border border-content-border rounded-md shadow-lg z-10 max-h-48 overflow-y-auto custom-scrollbar"
+              >
+              @for (namespace of namespaces$ | async; track namespace) {
+                <div
+                  class="px-3 py-2 hover:bg-content-secondary cursor-pointer"
+                  tabindex="0" role="button"
+                  (click)="details.patchValue({releaseNamespace: namespace})"
+                  (keydown.enter)="details.patchValue({releaseNamespace: namespace})">
+                  {{namespace}}
+                </div>
+              }
+            </div>
+          }
+          @if (details.controls.releaseNamespace.errors?.namespaceDoesNotExist) {
+            <div class="text-danger-shade-600 text-sm mt-1">
+              Namespace does not exist
+            </div>
+          }
+        </div>
 
-      <mat-checkbox matInput formControlName="createNamespace">Create Namespace</mat-checkbox>
+        <label class="flex items-center space-x-2" for="release-create-namespace">
+          <input id="release-create-namespace" type="checkbox" class="checkbox" formControlName="createNamespace">
+          <span>Create Namespace</span>
+        </label>
 
-    </form>
-  </app-step>
-  <app-step [title]="'Overrides'" [onNext]="submit" [finishButtonText]="'Install'" [onEnter]="onEnterOverrides">
-    <app-chart-values-editor #editor [config]="config"></app-chart-values-editor>
-  </app-step>
-</app-steppers>
+      </form>
+    </app-step>
+    <app-step [title]="'Overrides'" [signalHandle]="overridesStepHandle">
+      <app-chart-values-editor #editor [config]="config()"></app-chart-values-editor>
+    </app-step>
+  </app-steppers>

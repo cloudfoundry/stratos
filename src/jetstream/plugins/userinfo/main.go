@@ -3,13 +3,12 @@ package userinfo
 import (
 	"encoding/json"
 	"errors"
-	"io/ioutil"
+	"io"
+	"log/slog"
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
-
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Module init will register plugin
@@ -63,8 +62,8 @@ func (userInfo *UserInfo) Init() error {
 	return nil
 }
 
-func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
-	log.Debugf("getUserInfoProvider: %v", userInfo.portalProxy.GetConfig().AuthEndpointType)
+func (userInfo *UserInfo) getProvider(c *echo.Context) Provider {
+	slog.Debug("getUserInfoProvider", "authEndpointType", userInfo.portalProxy.GetConfig().AuthEndpointType)
 	if api.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == api.Local {
 		return InitLocalUserInfo(userInfo.portalProxy)
 	} else if api.AuthEndpointTypes[userInfo.portalProxy.GetConfig().AuthEndpointType] == api.AuthNone {
@@ -74,19 +73,19 @@ func (userInfo *UserInfo) getProvider(c echo.Context) Provider {
 	return InitUaaUserInfo(userInfo.portalProxy, c)
 }
 
-func (userInfo *UserInfo) preFlightChecks(c echo.Context) (string, error) {
+func (userInfo *UserInfo) preFlightChecks(c *echo.Context) (string, error) {
 	// Check session
 	_, err := userInfo.portalProxy.GetSessionInt64Value(c, "exp")
 	if err != nil {
 		msg := "Could not find session date"
-		log.Error(msg)
+		slog.Error(msg, "error", err)
 		return "", echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
 	sessionUser, err := userInfo.portalProxy.GetSessionStringValue(c, "user_id")
 	if err != nil {
 		msg := "Could not find user_id in Session"
-		log.Error(msg)
+		slog.Error(msg, "error", err)
 		return "", echo.NewHTTPError(http.StatusForbidden, msg)
 	}
 
@@ -99,7 +98,7 @@ func (userInfo *UserInfo) preFlightChecks(c echo.Context) (string, error) {
 }
 
 // get user info for the current user
-func (userInfo *UserInfo) userInfo(c echo.Context) error {
+func (userInfo *UserInfo) userInfo(c *echo.Context) error {
 	id, err := userInfo.preFlightChecks(c)
 	if err != nil {
 		return err
@@ -120,7 +119,7 @@ func (userInfo *UserInfo) userInfo(c echo.Context) error {
 }
 
 // update the user info for the current user
-func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
+func (userInfo *UserInfo) updateUserInfo(c *echo.Context) error {
 	_, err := userInfo.preFlightChecks(c)
 	if err != nil {
 		return err
@@ -128,9 +127,9 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 
 	provider := userInfo.getProvider(c)
 
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		log.Errorf("Unexpected response: %v", err)
+		slog.Error("could not read the request body", "error", err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message body")
 	}
 
@@ -160,7 +159,7 @@ func (userInfo *UserInfo) updateUserInfo(c echo.Context) error {
 }
 
 // update the user info for the current user
-func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
+func (userInfo *UserInfo) updateUserPassword(c *echo.Context) error {
 	id, err := userInfo.preFlightChecks(c)
 	if err != nil {
 		return err
@@ -168,9 +167,9 @@ func (userInfo *UserInfo) updateUserPassword(c echo.Context) error {
 
 	provider := userInfo.getProvider(c)
 
-	body, err := ioutil.ReadAll(c.Request().Body)
+	body, err := io.ReadAll(c.Request().Body)
 	if err != nil {
-		log.Errorf("Unexpected response: %v", err)
+		slog.Error("could not read the request body", "error", err)
 		return echo.NewHTTPError(http.StatusBadRequest, "Invalid message body")
 	}
 

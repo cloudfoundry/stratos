@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
+	"log/slog"
+	"os"
 
+	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/yamlgenerated"
 )
 
 func (pp *portalProxy) loadPlugins() {
 
 	pp.Plugins = make(map[string]api.StratosPlugin)
-	log.Info("Initialising plugins")
+	slog.Info("Initialising plugins")
 
 	yamlgenerated.MakePluginsFromConfig()
 
@@ -29,14 +30,14 @@ func addPlugin(pp *portalProxy, name string) bool {
 	reg, ok := api.PluginInits[name]
 	if !ok {
 		// Could not find plugin
-		log.Errorf("Could not find plugin: %s", name)
+		slog.Error("could not find the plugin", "plugin", name)
 		return false
 	}
 
 	// Add all of the plugins for the dependencies
 	for _, depend := range reg.Dependencies {
 		if !addPlugin(pp, depend) {
-			log.Errorf("Unmet dependency - skipping plugin %s", name)
+			slog.Error("unmet dependency - skipping the plugin", "plugin", name, "dependency", depend)
 			return false
 		}
 	}
@@ -44,8 +45,9 @@ func addPlugin(pp *portalProxy, name string) bool {
 	plugin, err := reg.Init(pp)
 	pp.Plugins[name] = plugin
 	if err != nil {
-		log.Fatalf("Error loading plugin: %s (%s)", name, err)
+		slog.Error("error loading the plugin", "plugin", name, "error", err)
+		os.Exit(1)
 	}
-	log.Infof("Loaded plugin: %s", name)
+	slog.Info("Loaded plugin", "plugin", name)
 	return true
 }

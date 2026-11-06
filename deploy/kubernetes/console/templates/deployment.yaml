@@ -299,6 +299,8 @@ spec:
         {{- end }}
         - name: UI_LIST_ALLOW_LOAD_MAXED
           value: {{ default "false" .Values.console.ui.listAllowLoadMaxed | quote }}
+        - name: HIDE_NAV_LOGOUT
+          value: {{ default "false" .Values.console.ui.hideNavLogout | quote }}
         {{- end }}
         - name: ANALYSIS_SERVICES_API
           value: "http://{{ .Release.Name }}-analyzers:8090"

@@ -3,21 +3,21 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log/slog"
 	"net/http"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
 )
 
 func (p *portalProxy) DoOidcFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("DoOidcFlowRequest")
+	slog.Debug("DoOidcFlowRequest")
 
 	authHandler := p.OAuthHandlerFunc(cnsiRequest, req, p.RefreshOidcToken)
 	return p.DoAuthFlowRequest(cnsiRequest, req, authHandler)
 }
 
 func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("RefreshOidcToken")
+	slog.Debug("RefreshOidcToken", "endpoint", cnsiGUID, "user", userGUID)
 	userToken, ok := p.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
 	if !ok {
 		return t, fmt.Errorf("info could not be found for user with GUID %s", userGUID)
@@ -29,13 +29,15 @@ func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUI
 
 	var scopes string
 
-	log.Info(userToken.Metadata)
+	// not logged: raw metadata JSON includes the OAuth client secret
+	// log.Info(userToken.Metadata)
 	if len(userToken.Metadata) > 0 {
 		metadata := &api.OAuth2Metadata{}
 		if err := json.Unmarshal([]byte(userToken.Metadata), metadata); err == nil {
-			log.Info(metadata)
-			log.Info(metadata.ClientID)
-			log.Info(metadata.ClientSecret)
+			// not logged: struct and ClientSecret carry the OAuth client secret
+			// log.Info(metadata)
+			// log.Info(metadata.ClientSecret)
+			slog.Info("OIDC token refresh (client secret not logged)", "clientID", metadata.ClientID)
 
 			if len(metadata.ClientID) > 0 {
 				client = metadata.ClientID
@@ -50,7 +52,14 @@ func (p *portalProxy) RefreshOidcToken(skipSSLValidation bool, cnsiGUID, userGUI
 		}
 	}
 
-	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, scopes)
+	// As in the OAuth refresh path: the endpoint's CA has to reach its token
+	// server, or a foundation with a private CA cannot refresh.
+	caCert := ""
+	if rec, recErr := p.GetCNSIRecord(cnsiGUID); recErr == nil {
+		caCert = rec.CACert
+	}
+
+	uaaRes, err := p.getUAATokenWithRefreshToken(skipSSLValidation, caCert, userToken.RefreshToken, client, clientSecret, tokenEndpointWithPath, scopes)
 	if err != nil {
 		return t, fmt.Errorf("token refresh request failed: %v", err)
 	}

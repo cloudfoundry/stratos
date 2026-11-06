@@ -1,69 +1,51 @@
-import { DOCUMENT } from '@angular/common';
-import { Component, Inject, Input, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, Input, signal } from '@angular/core';
+import { ClickStopPropagationDirective } from '../../../core/click-stop-propagation.directive';
 
 @Component({
   selector: 'app-copy-to-clipboard',
+  standalone: true,
+  imports: [CommonModule, ClickStopPropagationDirective],
   templateUrl: './copy-to-clipboard.component.html',
-  styleUrls: ['./copy-to-clipboard.component.scss']
 })
-export class CopyToClipboardComponent implements OnInit {
-  copySuccessful = false;
-  copySuccessWait = false;
-  canCopy = false;
-  private document: Document;
-
-  @Input() tooltip: string;
+export class CopyToClipboardComponent {
+  /**
+   * Required hover text (tooltip) for the copy action.
+   * Use **"Copy to clipboard"** unless there is a strong reason not to.
+   */
+  @Input({ required: true }) tooltip!: string;
   @Input() showSuccessText = true;
   @Input() text = '';
 
   // Show smaller icon
   @Input() compact = false;
 
-  constructor(
-    @Inject(DOCUMENT) document: Document,
-  ) {
-    this.document = document;
-  }
+  private defaultCopyState = 'not yet' as const;
+  readonly didUserPressCopy = signal<'not yet' | 'yes and succeeded' | 'yes but failed' | 'yes and saw succeeded'>(this.defaultCopyState);
 
-  ngOnInit() {
+  async copyToClipboard(textToCopy: string) {
     try {
-      this.canCopy = this.document.queryCommandSupported('copy');
-    } finally { }
-  }
-
-  copyToClipboard(event: MouseEvent = null) {
-    if (event) {
-      event.stopPropagation();
-    }
-
-    const textArea = this.document.createElement('textarea');
-
-    textArea.style.position = 'fixed';
-    textArea.style.top = '0';
-    textArea.style.left = '0';
-    textArea.style.width = '2em';
-    textArea.style.height = '2em';
-    textArea.style.padding = '0';
-    textArea.style.border = 'none';
-    textArea.style.outline = 'none';
-    textArea.style.boxShadow = 'none';
-    textArea.style.background = 'transparent';
-
-    textArea.value = this.text || '';
-
-    document.body.appendChild(textArea);
-
-    textArea.select();
-
-    try {
-      this.copySuccessful = document.execCommand('copy');
-      this.copySuccessWait = true;
-      setTimeout(() => this.copySuccessWait = false, 2000);
+      await navigator.clipboard.writeText(textToCopy);
+      this.didUserPressCopy.set('yes and succeeded');
+      await this.afterSomeSeconds();
+      this.didUserPressCopy.set('yes and saw succeeded');
     } catch (err) {
-      console.warn('Failed to copy to clipboard');
+      // * manual testing suggestion 
+      this.didUserPressCopy.set('yes but failed'); 
+      console.error('Failed to copy text. This might be due to security settings surrounding the clipboard API.', err);
+      await this.afterSomeSeconds(2_000);
+      this.didUserPressCopy.set(this.defaultCopyState);
     }
-
-    this.document.body.removeChild(textArea);
   }
 
+  private afterSomeSeconds(howMany: number = 800): Promise<void> {
+    return new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, howMany);
+    });
+  }
 }
+
+// * paste below in browser console to simulate a clipboard failure:
+// navigator.clipboard.writeText = async () => { throw new Error('Simulated clipboard failure') };

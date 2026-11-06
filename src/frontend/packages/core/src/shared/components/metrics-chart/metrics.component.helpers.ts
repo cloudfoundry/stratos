@@ -1,4 +1,4 @@
-import { ChartSeries, MetricsFilterSeries, IMetricMatrixResult, MetricsAction } from '@stratosui/store';
+import { ChartSeries, MetricsFilterSeries, IMetricMatrixResult, MetricsRequest } from '@stratosui/store';
 
 import { MetricsConfig } from './metrics-chart.component';
 import { YAxisTickFormattingFunc, MetricsLineChartConfig } from './metrics-chart.types';
@@ -22,7 +22,7 @@ export class MetricsChartHelpers {
     const lineChartConfig = new MetricsLineChartConfig();
     lineChartConfig.xAxisLabel = 'Time';
     lineChartConfig.yAxisLabel = yLabel;
-    if (!!yAxisTickFormatter) {
+    if (yAxisTickFormatter) {
       lineChartConfig.yAxisTickFormatting = yAxisTickFormatter;
     }
     return lineChartConfig;
@@ -33,23 +33,23 @@ export enum ChartDataTypes {
   CPU_PERCENT = 'cpu_percent',
   CPU_TIME = 'cpu_time',
 }
-export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result) => string) {
+export function getMetricsChartConfigBuilder<T = any>(getSeriesName: (result: IMetricMatrixResult<T>) => string) {
   return (
-    metricsAction: MetricsAction,
+    request: MetricsRequest,
     yAxisLabel: string,
-    dataType: ChartDataTypes = null,
+    dataType: ChartDataTypes | null = null,
     filterSeries?: MetricsFilterSeries,
     yAxisTickFormatter?: YAxisTickFormattingFunc,
     tooltipValueFormatter?: YAxisTickFormattingFunc
-  ) => buildMetricsChartConfig<T>(metricsAction, yAxisLabel, getSeriesName, dataType, filterSeries, yAxisTickFormatter,
+  ) => buildMetricsChartConfig<T>(request, yAxisLabel, getSeriesName, dataType, filterSeries, yAxisTickFormatter,
     tooltipValueFormatter);
 }
 
 export function buildMetricsChartConfig<T = any>(
-  metricsAction: MetricsAction,
+  request: MetricsRequest,
   yAxisLabel: string,
-  getSeriesName: (result) => string,
-  dataType: ChartDataTypes = null,
+  getSeriesName: (result: IMetricMatrixResult<T>) => string,
+  dataType: ChartDataTypes | null = null,
   filterSeries?: MetricsFilterSeries,
   yAxisTickFormatter?: YAxisTickFormattingFunc,
   tooltipValueFormatter?: YAxisTickFormattingFunc
@@ -63,7 +63,7 @@ export function buildMetricsChartConfig<T = any>(
       mapSeriesItemName: MetricsChartHelpers.getDateSeriesName,
       sort: MetricsChartHelpers.sortBySeriesName,
       mapSeriesItemValue: getServiceItemValueMapper(dataType),
-      metricsAction,
+      request,
       filterSeries,
       tooltipValueFormatter,
     },
@@ -71,16 +71,15 @@ export function buildMetricsChartConfig<T = any>(
   ];
 }
 
-function getServiceItemValueMapper(chartDataType: ChartDataTypes) {
+function getServiceItemValueMapper(chartDataType: ChartDataTypes | null): ((value: any) => string) | undefined {
   switch (chartDataType) {
     case ChartDataTypes.BYTES:
-      // Megabytes - this should really be dynamic based on the value
-      return (bytes) => (bytes / 1024 / 1024).toFixed(2);
+      return (bytes: number) => (bytes / 1024 / 1024).toFixed(2);
     case ChartDataTypes.CPU_PERCENT:
-      return (percent) => parseFloat(percent).toFixed(2);
+      return (percent: string | number) => parseFloat(percent.toString()).toFixed(2);
     case ChartDataTypes.CPU_TIME:
-      return (time) => parseFloat(time).toFixed(2);
+      return (time: string | number) => parseFloat(time.toString()).toFixed(2);
     default:
-      return null;
+      return undefined;
   }
 }

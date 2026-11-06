@@ -1,5 +1,12 @@
-<div *ngIf="(status$ | async) as status" class="app-card-status" [ngClass]="{'app-card-status--ok': (status === cardStatus.OK),
-  'app-card-status--warning': (status === cardStatus.WARNING),
-  'app-card-status--tentative': (status === cardStatus.TENTATIVE),
-  'app-card-status--incomplete': (status === cardStatus.INCOMPLETE),
-  'app-card-status--error': (status === cardStatus.ERROR)}"></div>
+@if ((status$ | async); as status) {
+  <div
+    class="absolute top-0 left-0 w-full h-1 rounded-t-lg transition-colors duration-[1ms] ease-in"
+     [ngClass]="{
+       'bg-success-shade-500': status === cardStatus.OK,
+       'bg-warning-shade-500': status === cardStatus.WARNING,
+       'bg-tentative': status === cardStatus.TENTATIVE,
+       'bg-info': status === cardStatus.INCOMPLETE,
+       'bg-danger-shade-500': status === cardStatus.ERROR
+     }">
+  </div>
+}

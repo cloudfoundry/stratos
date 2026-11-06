@@ -1,8 +1,6 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { CanActivate } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { RouterNav, AppState } from '@stratosui/store';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
 import { Observable, of as observableOf } from 'rxjs';
 import { catchError, map, tap } from 'rxjs/operators';
 
@@ -10,35 +8,29 @@ import { environment } from '../environments/environment';
 
 const { proxyAPIVersion } = environment;
 
-@Injectable()
-export class NotSetupGuardService implements CanActivate {
+export const notSetupGuard: CanActivateFn = (): Observable<boolean> => {
+  const http = inject(HttpClient);
+  const router = inject(Router);
 
-  constructor(
-    private http: HttpClient,
-    private store: Store<AppState>
-  ) { }
+  const url = `/api/${proxyAPIVersion}/auth/verify`;
+  return http.get(url).pipe(
+    map(_v => {
+      // If the requests succeeds, then the user has a session, so everything must be setup already
+      return false;
+    }),
+    catchError(err => {
+      const needsSetup = err.status === 503 && err.headers.has('stratos-setup-required');
+      return observableOf(needsSetup);
+    }),
+    tap(result => {
+      // False means already setup, so should not be able to access /uaa endpoint
+      if (!result) {
+        router.navigate(['/not-found']);
+      }
+    })
+  );
+};
 
-  canActivate(): Observable<boolean> {
-
-    const url = `/api/${proxyAPIVersion}/auth/verify`;
-    return this.http.get(url).pipe(
-      map(v => {
-        // If the requests succeeds, then the user has a session, so everything must be setup already
-        return false;
-      }),
-      catchError(err => {
-        const needsSetup = err.status === 503 && err.headers.has('stratos-setup-required');
-        return observableOf(needsSetup);
-      }),
-      tap(result => {
-        // False means already setup, so should not be able to access /uaa endpoint
-        if (!result) {
-          this.store.dispatch(new RouterNav({
-            path: ['/not-found']
-          }));
-        }
-      })
-    );
-  }
-
-}
+// Legacy class-based guard for backward compatibility during migration
+// @deprecated Use notSetupGuard functional guard instead
+export const NotSetupGuardService = notSetupGuard;

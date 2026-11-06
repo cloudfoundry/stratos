@@ -6,26 +6,9 @@ import (
 )
 
 func YAMLToJSONWithLabel(body interface{}) ([]byte, error) {
-	body = convert(body)
 	addLabel(body)
 	b, err := json.Marshal(body)
 	return b, err
-}
-
-func convert(i interface{}) interface{} {
-	switch x := i.(type) {
-	case map[interface{}]interface{}:
-		m2 := map[string]interface{}{}
-		for k, v := range x {
-			m2[k.(string)] = convert(v)
-		}
-		return m2
-	case []interface{}:
-		for i, v := range x {
-			x[i] = convert(v)
-		}
-	}
-	return i
 }
 
 func addLabel(resource interface{}) {

@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"io"
+	"log/slog"
 	"net/http"
 	"testing"
 
@@ -10,17 +12,16 @@ import (
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
 	mock_api "github.com/cloudfoundry/stratos/src/jetstream/api/mock"
 	mock_apikeys "github.com/cloudfoundry/stratos/src/jetstream/repository/apikeys/mock"
-	"github.com/golang/mock/gomock"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 	. "github.com/smartystreets/goconvey/convey"
+	"go.uber.org/mock/gomock"
 )
 
 func Test_addAPIKey(t *testing.T) {
 	t.Parallel()
 
 	// disabling logging noise
-	log.SetLevel(log.PanicLevel)
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	Convey("Given a request to add an API key", t, func() {
 		userID := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
@@ -30,7 +31,7 @@ func Test_addAPIKey(t *testing.T) {
 		mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 		pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 		defer ctrl.Finish()
-		defer pp.DatabaseConnectionPool.Close()
+		defer func() { _ = pp.DatabaseConnectionPool.Close() }()
 
 		Convey("when API keys are disabled", func() {
 			pp.Config.APIKeysEnabled = config.APIKeysConfigEnum.Disabled
@@ -224,14 +225,14 @@ func Test_listAPIKeys(t *testing.T) {
 	t.Parallel()
 
 	// disabling logging noise
-	log.SetLevel(log.PanicLevel)
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	ctrl := gomock.NewController(t)
 	mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
 	mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 	pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 	defer ctrl.Finish()
-	defer pp.DatabaseConnectionPool.Close()
+	defer func() { _ = pp.DatabaseConnectionPool.Close() }()
 
 	Convey("Given a request to list API keys", t, func() {
 		userID := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
@@ -313,14 +314,14 @@ func Test_deleteAPIKeys(t *testing.T) {
 	t.Parallel()
 
 	// disabling logging noise
-	log.SetLevel(log.PanicLevel)
+	slog.SetDefault(slog.New(slog.NewTextHandler(io.Discard, nil)))
 
 	ctrl := gomock.NewController(t)
 	mockAPIRepo := mock_apikeys.NewMockRepository(ctrl)
 	mockStratosAuth := mock_api.NewMockStratosAuth(ctrl)
 	pp := makeMockServer(mockAPIRepo, mockStratosAuth)
 	defer ctrl.Finish()
-	defer pp.DatabaseConnectionPool.Close()
+	defer func() { _ = pp.DatabaseConnectionPool.Close() }()
 
 	userID := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 	keyID := "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"

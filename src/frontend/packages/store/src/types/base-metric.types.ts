@@ -18,7 +18,9 @@ export interface IMetricsData<T = any> {
 }
 export interface IMetrics<T = any> {
   query: MetricQueryConfig;
-  windowValue: string;
+  // Echoes the originating request's windowValue, which is genuinely
+  // absent when no time window is selected (callers pass `windowValue: null`).
+  windowValue: string | null;
   data: IMetricsData<T>;
 }
 

@@ -1,37 +1,40 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, importProvidersFrom } from '@angular/core';
+import { provideRouter } from '@angular/router';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { CfUserService } from '../../../../../shared/data-services/cf-user.service';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+
 import { ActiveRouteCfOrgSpace } from '../../../cf-page.types';
 import { CfRolesService } from '../cf-roles.service';
 import { UsersRolesSelectComponent } from './manage-users-select.component';
-import { HttpClientModule } from '@angular/common/http';
 
 describe('UsersRolesSelectComponent', () => {
   let component: UsersRolesSelectComponent;
   let fixture: ComponentFixture<UsersRolesSelectComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
       imports: [
-        ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        NoopAnimationsModule,
-        HttpClientModule
+        UsersRolesSelectComponent,
       ],
       providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
         ActiveRouteCfOrgSpace,
         CfRolesService,
-        CfUserService
       ],
-      declarations: [UsersRolesSelectComponent]
+
     })
       .compileComponents();
-  }));
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(UsersRolesSelectComponent);

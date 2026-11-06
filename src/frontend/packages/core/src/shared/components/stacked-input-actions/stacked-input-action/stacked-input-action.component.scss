@@ -9,6 +9,10 @@
     flex: 1;
     flex-direction: row;
     margin-right: $margin;
+
+    app-form-field {
+      flex: 1;
+    }
   }
   &__detail {
     align-items: center;
@@ -22,7 +26,7 @@
       cursor: pointer;
       &.disabled {
         cursor: default;
-        opacity: .5;
+        opacity: 0.5;
       }
     }
 

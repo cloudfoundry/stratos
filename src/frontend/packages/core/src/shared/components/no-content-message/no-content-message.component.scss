@@ -6,6 +6,8 @@
   margin-top: 15vh;
   text-align: center;
   width: 100%;
+  position: relative;
+  overflow: visible;
   & > * {
     margin-bottom: 20px;
   }
@@ -30,6 +32,7 @@
     position: absolute;
     right: 113px;
     top: 54px;
+    z-index: 10;
     &-icon {
       font-size: 44px;
       height: 44px;

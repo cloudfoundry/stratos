@@ -1,11 +1,14 @@
-import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
-import { EntityMonitorFactory, MetricQueryType, IMetrics, MetricsAction, EntityMonitor } from '@stratosui/store';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
+import { CustomSelectComponent, CustomOptionComponent } from '../custom-select/custom-select.component';
+import { MetricQueryType, MetricsRequest } from '@stratosui/store';
 import { Subscription } from 'rxjs';
 
 import { MetricsRangeSelectorManagerService } from '../../services/metrics-range-selector-manager.service';
 import { ITimeRange } from '../../services/metrics-range-selector.types';
-
-import moment from 'moment';
+import { StartEndDateComponent } from '../start-end-date/start-end-date.component';
 
 @Component({
   selector: 'app-metrics-range-selector',
@@ -13,16 +16,25 @@ import moment from 'moment';
   styleUrls: ['./metrics-range-selector.component.scss'],
   providers: [
     MetricsRangeSelectorManagerService
-  ]
+  ],
+  standalone: true,
+  imports: [
+    CommonModule,
+    FormsModule,
+    CustomFormFieldComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    StartEndDateComponent
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MetricsRangeSelectorComponent implements OnDestroy {
-  private rangeSelectorSub: Subscription;
-  actionSub: Subscription;
+  rangeSelectorManager = inject(MetricsRangeSelectorManagerService);
 
-  constructor(
-    private entityMonitorFactory: EntityMonitorFactory,
-    public rangeSelectorManager: MetricsRangeSelectorManagerService
-  ) {
+  private rangeSelectorSub: Subscription;
+  private requestSub: Subscription;
+
+  constructor() {
     this.rangeSelectorSub = this.rangeSelectorManager.timeWindow$.subscribe(selectedTimeRangeValue => {
       if (selectedTimeRangeValue.queryType === MetricQueryType.RANGE_QUERY) {
         if (!this.rangeSelectorManager.committedStartEnd[0] || !this.rangeSelectorManager.committedStartEnd[1]) {
@@ -30,37 +42,27 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
         }
       }
     });
-    this.actionSub = this.rangeSelectorManager.metricsAction$.subscribe(newAction => {
-      if (newAction) {
-        this.commitAction(newAction);
+    this.requestSub = this.rangeSelectorManager.request$.subscribe(next => {
+      if (next) {
+        this.request.emit(next);
       }
     });
   }
 
-  public metricsMonitor: EntityMonitor<IMetrics>;
-
   public rangeTypes = MetricQueryType;
 
   @Output()
-  public metricsAction = new EventEmitter<MetricsAction>();
+  public request = new EventEmitter<MetricsRequest>();
 
-  private baseActionValue: MetricsAction;
+  private baseRequestValue!: MetricsRequest;
 
   @Input()
-  set baseAction(action: MetricsAction) {
-    this.baseActionValue = action;
-    this.metricsMonitor = this.entityMonitorFactory.create<IMetrics>(
-      action.guid,
-      // Look specifically for metrics entity type for the given endpoint. See #3783
-      {
-        entityType: action.entityType,
-        endpointType: action.endpointType
-      }
-    );
-    this.rangeSelectorManager.init(this.metricsMonitor, action);
+  set baseRequest(req: MetricsRequest) {
+    this.baseRequestValue = req;
+    this.rangeSelectorManager.init(req);
   }
-  get baseAction() {
-    return this.baseActionValue;
+  get baseRequest() {
+    return this.baseRequestValue;
   }
 
   @Input()
@@ -84,7 +86,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
   }
 
   @Input()
-  public validate: (start: moment.Moment, end: moment.Moment) => string;
+  public validate?: (start: Date | undefined, end: Date | undefined) => string;
 
   set showOverlay(show: boolean) {
     this.showOverlayValue = show;
@@ -96,19 +98,14 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
 
   public showOverlayValue = false;
 
-  private commitAction(action: MetricsAction) {
-    this.metricsAction.emit(action);
-  }
-
-  private tidyUp() {
+  ngOnDestroy() {
     this.rangeSelectorManager.destroy();
     if (this.rangeSelectorSub) {
       this.rangeSelectorSub.unsubscribe();
     }
-  }
-
-  ngOnDestroy() {
-    this.tidyUp();
+    if (this.requestSub) {
+      this.requestSub.unsubscribe();
+    }
   }
 
 }

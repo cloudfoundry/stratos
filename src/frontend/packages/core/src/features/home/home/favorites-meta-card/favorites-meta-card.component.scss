@@ -1,44 +1,24 @@
-.mat-card.fav-meta-card {
-  border-radius: 0;
-  box-shadow: none;
-}
+// Theme-aware styles for card structure
+.fav-card {
+  &--clickable {
+    &:hover {
+      background-color: var(--table-row-hover);
+    }
+  }
 
-.fav-meta-card {
-  align-items: center;
-  display: flex;
-  outline: none;
-  padding: 8px 10px;
-  &__clickable {
-    cursor: pointer;
+  &__icon-bg {
+    background-color: color-mix(in srgb, var(--color-primary) 10%, transparent);
   }
+
   &__icon {
-    margin-right: 4px;
-    opacity: .7;
+    color: var(--color-primary);
   }
-  &__icon-panel {
-    align-self: center;
-    display: flex;
-    justify-content: left;
-    width: 32px;
-  }
-  &__info {
-    flex: 1;
-  }
+
   &__name {
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 4px;
-    word-break: break-all;
+    color: var(--content-text);
   }
+
   &__type {
-    font-size: 12px;
-    opacity: .6;
-  }
-  &__star {
-    flex: 0;
-    opacity: .7;
-  }
-  &__error {
-    margin-right: 4px;
+    color: var(--content-muted);
   }
 }

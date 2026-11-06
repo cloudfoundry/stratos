@@ -1,19 +1,30 @@
-import { Component } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { NavigationCancel, NavigationEnd, NavigationStart, Router } from '@angular/router';
 import { interval, Observable, of as observableOf } from 'rxjs';
 import { filter, map, startWith, switchMap, delay, tap } from 'rxjs/operators';
 
+import { AppProgressBarComponent } from '../progress-bar/app-progress-bar.component';
+
 @Component({
   selector: 'app-routing-indicator',
   templateUrl: './routing-indicator.component.html',
-  styleUrls: ['./routing-indicator.component.scss']
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    AppProgressBarComponent
+  ]
 })
 export class RoutingIndicatorComponent {
+  private router = inject(Router);
+
   public value$: Observable<number>;
 
   public HIDE_VALUE = 101;
   private started = false;
-  constructor(private router: Router) {
+
+  constructor() {
     this.value$ = this.router.events.pipe(
       filter(event => {
         return (event instanceof NavigationStart && !this.started) ||

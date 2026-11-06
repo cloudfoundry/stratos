@@ -1,24 +1,60 @@
 import { HttpClient } from '@angular/common/http';
-import { Component, OnDestroy } from '@angular/core';
-import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
-import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { distinctUntilChanged, filter, map } from 'rxjs/operators';
+import { Component, OnDestroy, signal, computed, inject, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { BooleanIndicatorComponent, CardWrapperComponent, MetadataItemComponent, CardProgressOverlayComponent } from '@stratosui/core';
 
+import { BooleanIndicatorType } from '../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
 import { IHeaderBreadcrumb } from '../../../../../core/src/shared/components/page-header/page-header.types';
+import { PageHeaderModule } from '../../../../../core/src/shared/components/page-header/page-header.module';
+import { ProductNameComponent } from '../../../../../core/src/shared/components/product-name.ccomponent';
 import { BaseKubeGuid } from '../../kubernetes-page.types';
 import { KubernetesEndpointService } from '../../services/kubernetes-endpoint.service';
 import { KubernetesService } from '../../services/kubernetes.service';
-import { KubeDashboardStatus } from '../../store/kubernetes.effects';
+
+// Local copy of the kubedash status shape — wave-3 deletes the legacy
+// `store/kubernetes.effects.ts` location, so the consumer-side code holds
+// its own type definition rather than importing from store/. Matches the
+// jetstream `/pp/v1/kubedash/{guid}/status` payload.
+export interface KubeDashboardServiceInfo {
+  namespace: string;
+  name: string;
+  scheme: string;
+}
+
+export interface KubeDashboardStatus {
+  guid?: string;
+  kubeGuid?: string;
+  installed: boolean;
+  stratosInstalled?: boolean;
+  running?: boolean;
+  version?: string;
+  service?: KubeDashboardServiceInfo;
+  serviceAccount?: { metadata: { name: string; namespace: string } } | null;
+}
 
 type MessageUpdater = (msg: string) => void;
 
 @Component({
   selector: 'app-kubedash-configuration',
   templateUrl: './kubedash-configuration.component.html',
-  styleUrls: ['./kubedash-configuration.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule,
+    RouterModule,
+    BooleanIndicatorComponent,
+    CardWrapperComponent,
+    MetadataItemComponent,
+    CardProgressOverlayComponent,
+    PageHeaderModule,
+    ProductNameComponent
+  ],
   providers: [
     {
       provide: BaseKubeGuid,
@@ -58,71 +94,90 @@ export class KubedashConfigurationComponent implements OnDestroy {
 
   deleteDashboardConfirmation = new ConfirmationDialogConfig(
     'Delete Kubernetes Dashboard?',
-    'Are you sure you want to delete the Kubernetes Dashboard from this cluster?' +
+    'Are you sure you want to delete the Kubernetes Dashboard from this cluster? ' +
     'This will delete the dashboard namespace and cluster service account and role binding',
     'Delete'
   );
 
   public breadcrumbs$: Observable<IHeaderBreadcrumb[]>;
 
-  public kubeDashboardStatus$: Observable<KubeDashboardStatus>;
+  public booleanIndicatorType = BooleanIndicatorType;
 
-  private snackBarRef: MatSnackBarRef<SimpleSnackBar>;
+  // Signal-native dashboard status — fetched directly from the kubedash
+  // status endpoint, no ngrx dispatch. Wave-3 deletes the ngrx kubeEntityCatalog
+  // dashboard slice; the consumer (this component) is the only reader, so it
+  // owns its own cache.
+  private readonly _dashboardStatus = signal<KubeDashboardStatus | null>(null);
+  public readonly dashboardStatus = this._dashboardStatus.asReadonly();
+  public readonly isAzure = computed(() => {
+    const status = this._dashboardStatus();
+    return !!status && !!status.version && status.version.indexOf('azure') !== -1;
+  });
+  public readonly isDashboardConfigured = computed(() => {
+    const status = this._dashboardStatus();
+    return !!status && !!status.installed && !!status.serviceAccount && !!status.service;
+  });
 
-  public serviceAccountBusy$ = new BehaviorSubject<boolean>(false);
+  // Signals for busy state tracking
+  public serviceAccountBusy = signal<boolean>(false);
+  // Observable view — app-card-progress-overlay's `busy` input is an Observable<boolean>
+  public serviceAccountBusy$ = toObservable(this.serviceAccountBusy);
   public serviceAccountMsg = '';
 
-  public dashboardUIBusy$ = new BehaviorSubject<boolean>(false);
+  public dashboardUIBusy = signal<boolean>(false);
+  public dashboardUIBusy$ = toObservable(this.dashboardUIBusy);
   public dashboardUIMsg = '';
 
   // Are we busy with an operation - disable buttons if we are
-  public isBusy$ = new BehaviorSubject<boolean>(false);
+  public isBusy = signal<boolean>(false);
 
-  // Is the status loading
-  public isUpdatingStatus = false;
-
-  private sub: Subscription;
-
-  public isAzure$: Observable<boolean>;
+  // Is the status loading — true on first load and during refresh().
+  public isUpdatingStatus = signal<boolean>(true);
 
   public dashboardLink: string;
+  public kubeEndpointService = inject(KubernetesEndpointService);
+  private httpClient = inject(HttpClient);
+  private confirmDialog = inject(ConfirmationDialogService);
 
-  constructor(
-    public kubeEndpointService: KubernetesEndpointService,
-    private httpClient: HttpClient,
-    private confirmDialog: ConfirmationDialogService,
-    private snackBar: MatSnackBar,
-  ) {
-    this.kubeDashboardStatus$ = kubeEndpointService.kubeDashboardStatus$;
-    // Clear the updating status when we get back new dashboard status
-    this.sub = this.kubeDashboardStatus$.pipe(distinctUntilChanged()).subscribe(status => {
-      if (status !== null) {
-        this.isUpdatingStatus = false;
-      }
-    });
+  constructor() {
+    this.dashboardLink = `/kubernetes/${this.kubeEndpointService.kubeGuid}/dashboard`;
 
-    this.dashboardLink = `/kubernetes/${kubeEndpointService.kubeGuid}/dashboard`;
-
-    this.isAzure$ = this.kubeDashboardStatus$.pipe(
-      filter(status => status !== null),
-      filter(status => !!status.version),
-      map(status => status.version.indexOf('azure') !== -1)
-    );
-
-    this.breadcrumbs$ = kubeEndpointService.endpoint$.pipe(
+    this.breadcrumbs$ = this.kubeEndpointService.endpoint$.pipe(
       map(endpoint => ([{
         breadcrumbs: [{ value: endpoint.entity.name, routerLink: `/kubernetes/${endpoint.entity.guid}` }]
       }]))
     );
+
+    // Kick off initial status fetch.
+    this.refreshStatus();
   }
 
   ngOnDestroy() {
-    if (this.snackBarRef) {
-      this.snackBarRef.dismiss();
+    // No subscriptions to clean up — status is signal-backed.
+  }
+
+  // Fetch the kubedash status payload directly from jetstream. Replaces
+  // the prior `kubeEntityCatalog.dashboard.api.get(...)` ngrx dispatch.
+  private refreshStatus() {
+    const guid = this.kubeEndpointService.kubeGuid;
+    if (!guid) {
+      return;
     }
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
+    this.isUpdatingStatus.set(true);
+    this.httpClient.get<KubeDashboardStatus>(`/pp/v1/kubedash/${guid}/status`).subscribe({
+      next: (status) => {
+        this._dashboardStatus.set(status ?? null);
+        this.isUpdatingStatus.set(false);
+      },
+      error: () => {
+        // Treat fetch failure as "no status yet" — surface via the
+        // existing "Retrieving Dashboard configuration ..." spinner clearing
+        // and falling through to install / configure UI when the user
+        // re-triggers an action.
+        this._dashboardStatus.set(null);
+        this.isUpdatingStatus.set(false);
+      }
+    });
   }
 
   public createServiceAccount() {
@@ -136,7 +191,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'serviceAccount',
       'Creating Service Account ...',
       'Service Account created', 'An error occurred creating the Service Account',
-      this.serviceAccountBusy$,
+      this.serviceAccountBusy,
       (msg) => this.serviceAccountMsg = msg
     );
   }
@@ -151,7 +206,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
     this.makeRequest('delete', 'serviceAccount',
       'Deleting Service Account ...',
       'Service Account deleted',
-      'An error occurred deleting the Service Account', this.serviceAccountBusy$,
+      'An error occurred deleting the Service Account', this.serviceAccountBusy,
       (msg => this.serviceAccountMsg = msg));
   }
 
@@ -166,7 +221,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'installation',
       'Installing Kubernetes Dashboard ...',
       'Kubernetes Dashboard installed', 'An error occurred installing the Kubernetes Dashboard',
-      this.dashboardUIBusy$,
+      this.dashboardUIBusy,
       (msg) => this.dashboardUIMsg = msg
     );
   }
@@ -182,7 +237,7 @@ export class KubedashConfigurationComponent implements OnDestroy {
       'installation',
       'Deleting Kubernetes Dashboard ...',
       'Kubernetes Dashboard deleted', 'An error occurred deleting the Kubernetes Dashboard',
-      this.dashboardUIBusy$,
+      this.dashboardUIBusy,
       (msg) => this.dashboardUIMsg = msg
     );
   }
@@ -193,14 +248,14 @@ export class KubedashConfigurationComponent implements OnDestroy {
     busyMsg: string,
     okMsg: string,
     errorMsg: string,
-    busy: BehaviorSubject<boolean>,
+    busy: ReturnType<typeof signal<boolean>>,
     msgUpdater: MessageUpdater) {
     const guid = this.kubeEndpointService.kubeGuid;
     const url = `/pp/v1/kubedash/${guid}/${op}`;
     let obs;
     msgUpdater(busyMsg);
-    busy.next(true);
-    this.isBusy$.next(true);
+    busy.set(true);
+    this.isBusy.set(true);
     if (method === 'post') {
       obs = this.httpClient.post(url, {});
     } else if (method === 'delete') {
@@ -211,23 +266,24 @@ export class KubedashConfigurationComponent implements OnDestroy {
     }
 
     obs.subscribe(() => {
-      this.snackBar.open(okMsg, 'Dismiss', { duration: 3000 });
-      busy.next(false);
+      console.log(okMsg); // Replace with proper notification system if needed
+      msgUpdater(okMsg);
+      busy.set(false);
       this.refresh();
     }, (e) => {
       let msg = errorMsg;
       if (e && e.error && e.error.error) {
         msg = e.error.error;
       }
-      this.snackBarRef = this.snackBar.open(msg, 'Dismiss');
-      busy.next(false);
+      console.error(msg); // Replace with proper notification system if needed
+      msgUpdater(msg);
+      busy.set(false);
       this.refresh();
     });
   }
 
   private refresh() {
-    this.isUpdatingStatus = true;
-    this.kubeEndpointService.refreshKubernetesDashboardStatus();
-    this.isBusy$.next(false);
+    this.isBusy.set(false);
+    this.refreshStatus();
   }
 }

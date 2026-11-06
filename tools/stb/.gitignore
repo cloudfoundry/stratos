@@ -1,0 +1,7 @@
+node_modules/
+dist/
+.vite/
+.vitest-attachments/
+tests/**/__screenshots__/
+*.log
+.DS_Store

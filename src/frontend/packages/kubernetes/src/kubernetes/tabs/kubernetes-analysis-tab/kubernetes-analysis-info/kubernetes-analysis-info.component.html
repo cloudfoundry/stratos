@@ -1,7 +1,11 @@
 <app-sidepanel-preview title="Analyzers">
-  <div *ngIf="analyzers$ | async as analyzers">
-    <div *ngFor="let a of analyzers">
-      <app-analysis-info-card [analyzer]="a"></app-analysis-info-card>
+  @if (analyzers$ | async; as analyzers) {
+    <div>
+      @for (a of analyzers; track a) {
+        <div>
+          <app-analysis-info-card [analyzer]="a"></app-analysis-info-card>
+        </div>
+      }
     </div>
-  </div>
+  }
 </app-sidepanel-preview>

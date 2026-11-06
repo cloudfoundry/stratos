@@ -1,0 +1,1322 @@
+import { DestroyRef, EffectRef, Injectable, Injector, Signal, WritableSignal, computed, effect, inject, runInInjectionContext, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+import type { EndpointModel } from '@stratosui/store';
+import { endpointDropdownOptions } from '../endpoint-dropdown-options';
+import { EndpointErrorEventsService } from '@stratosui/store';
+import { CnsiAppsSource } from '../../../services/data-sources/cnsi-apps-source';
+import { CnsiStacksSource } from '../../../services/data-sources/cnsi-stacks-source';
+import { MergeOrchestrator } from '../../../services/data-sources/merge-orchestrator';
+import { wireEndpointErrorReporting } from '../endpoint-error-reporting';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { EntityDeleteController } from '../../../services/deletes/entity-delete.controller';
+import { runCfDelete } from '../../../services/deletes/run-cf-delete';
+import { applicationEntityType, routeEntityType } from '../../../cf-entity-types';
+import { serviceCredentialBindingEntityType } from '../../../entity-relations/signal/cf-relation-registrations';
+import { ViewPipeline, SortSpec } from '../../../services/data-sources/view-pipeline';
+import type { StApp, StAppRoutesResponse, StOrg, StOrgsResponse, StRoute, StServiceCredentialBinding, StServiceCredentialBindingsResponse, StSpace, StSpacesResponse, StStack } from '../../../services/endpoint-data/stratos-types';
+import { CloudFoundryService } from '../../data-services/cloud-foundry.service';
+import { writeWithJob } from '../../../services/async-jobs/write-with-job';
+import type { StratosJob } from '../../../services/async-jobs/async-job.types';
+import type { SignalListDropdownOption, SignalListRangeValue } from '@stratosui/core';
+import { ListStateStore, naturalCompare, rangeMatches } from '@stratosui/core';
+
+// Re-export the bulk-endpoint response shapes so per-space app consumers
+// import a single BulkResult type without reaching across into the routes
+// config service. The backend envelope is identical
+// (POST /pp/v1/cf/apps/:cnsi/bulk/delete) — one shape, one definition.
+export type { BulkItemState, BulkItemResult, BulkResult } from '../route/cf-routes-signal-config.service';
+import type { BulkResult } from '../route/cf-routes-signal-config.service';
+
+@Injectable({ providedIn: 'root' })
+export class CfAppsSignalConfigService {
+  orchestrator!: MergeOrchestrator<StApp>;
+  view!: ViewPipeline<StApp>;
+
+  private readonly state = inject(ListStateStore).bind('cf-apps', {
+    viewMode: 'table',
+    pageSize: [24, 25],
+    pageIndex: [0, 0],
+    sort: [{ field: 'name', direction: 'asc' }, { field: 'name', direction: 'asc' }],
+  });
+
+  // User-controlled filter / sort / pagination state.
+  readonly filter: WritableSignal<(app: StApp) => boolean> = signal(() => true);
+  readonly sort = this.state.sort as WritableSignal<SortSpec<StApp>>;
+  readonly pageSize = this.state.pageSize;
+  readonly pageIndex = this.state.pageIndex;
+  // Map of sort-field key → value-extractor function, for columns whose
+  // sort value is derived from multiple entity properties (e.g., the
+  // CF/Org/Space column that renders cnsi + org + space together). The
+  // component populates this via registerSortExtractor() after building
+  // its column config; ViewPipeline reads it through the signal passed
+  // into its constructor.
+  private readonly _sortExtractors: WritableSignal<Map<string, (row: StApp) => unknown>> = signal(new Map());
+
+  // Toolbar filter inputs. `null` for dropdowns = "All" (no constraint);
+  // empty string for nameFilter = no name constraint.
+  readonly selectedCnsi:  WritableSignal<string | null> = signal(null);
+  readonly selectedOrg:   WritableSignal<string | null> = signal(null);
+  readonly selectedSpace: WritableSignal<string | null> = signal(null);
+  readonly nameFilter:    WritableSignal<string>        = signal('');
+  // Which column the text filter compares against. Starts on 'name' —
+  // matches the pre-selector behavior. The app wall registers extractors
+  // for each filterable column and populates filterColumns in its
+  // SignalListConfig so the UI renders a selector.
+  readonly filterField:   WritableSignal<string>        = signal('name');
+  // Map of filter-field key → string extractor. Mirrors the sort
+  // extractor pattern: the app wall populates this after the column
+  // config is built. Missing keys fall back to the app's `name` field
+  // so the filter still does SOMETHING sensible if the caller mis-wires.
+  private readonly _filterExtractors: WritableSignal<Map<string, (row: StApp) => string>> = signal(new Map());
+
+  // Per-instance stats summary, keyed by rowKey (${cnsiGuid}:${appGuid}).
+  // Populated lazily for apps currently on the page by refreshStatsForKeys;
+  // the app-wall Instances column reads this signal to render "running /
+  // desired" instead of the plain desired count. Apps not yet fetched
+  // render as "— / desired" (dash reuses the em-dash convention used for
+  // unresolved CF/Org/Space lookups). A short polling interval keeps
+  // starting/crashed instances visually fresh without flooding the
+  // backend.
+  private readonly _appStats: WritableSignal<Map<string, { running: number; total: number }>> =
+    signal(new Map());
+  readonly appStats: Signal<Map<string, { running: number; total: number }>> =
+    computed(() => this._appStats());
+  private statsTimer?: ReturnType<typeof setInterval>;
+  // Reactive stats refresh effect, captured so a re-entry (root singleton +
+  // per-mount startStatsPolling) destroys the prior one instead of stacking.
+  private statsEffect?: EffectRef;
+  // Tracks `${cnsiGuid}:${appGuid}` keys with an in-flight stats request so
+  // burst signal updates during initial render don't issue 4× duplicate
+  // calls per app — the original symptom on multi-CNSI walls with slow CFs.
+  private readonly statsInFlight = new Set<string>();
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly injector = inject(Injector);
+
+  // Lazy org/space catalog loading. loadNames() runs an org+per-org-spaces
+  // fanout that on multi-CNSI walls saturates the network for many seconds,
+  // preventing `waitForLoadState('networkidle')` and (more importantly)
+  // making the page feel slow on re-entry. We now defer loadNames until a
+  // filter dropdown is first opened. This promise is the dedupe guard so
+  // multiple dropdown opens during the in-flight window collapse to one
+  // fanout. Cleared on each initialize() so a new mount can re-fetch.
+  private _namesLoadingPromise: Promise<void> | null = null;
+
+  // View mode (table / card). Default mirrors the legacy Stratos app wall.
+  readonly viewMode = this.state.viewMode;
+
+  // Bridge connected-CF endpoints (an rxjs Observable) into a signal so
+  // computed() can read it. CloudFoundryService is optional purely because
+  // tests exist that don't provide it; in the real app it's always present.
+  private readonly connectedEndpoints: Signal<EndpointModel[]>;
+
+  // Per-CNSI org/space catalogs. Keyed by cnsi guid, value is the list
+  // of orgs/spaces returned by /pp/v1/cf/orgs/{cnsi} and /pp/v1/cf/spaces/{cnsi}
+  // from initialize(). Drives the toolbar dropdowns: an org/space is listed
+  // because it exists in the CF, not because the loaded apps happen to
+  // reference it — so users can still filter by an org they just emptied
+  // (e.g. after deleting its last app), and the "no applications" result
+  // is the expected visual cue.
+  private readonly _orgsByCnsi = signal<Map<string, StOrg[]>>(new Map());
+  private readonly _spacesByCnsi = signal<Map<string, StSpace[]>>(new Map());
+
+  // Installed-stacks catalog, per scoped CNSI, fetched EAGERLY on
+  // initialize() — unlike the lazy org/space catalogs, because the stack
+  // column/filter's own visibility depends on it. Options and visibility
+  // read the catalog (what the foundation has installed), never the loaded
+  // apps: a stack with zero apps must stay selectable so an operator can
+  // filter to it, see 0 results, and conclude the stack is removable.
+  private readonly _stacksByCnsi = signal<Map<string, StStack[]>>(new Map());
+  // The cnsi guids the current mount was initialized with; scopes both
+  // visibility and the option union (wall = all connected CFs, per-CF and
+  // per-space tabs = one).
+  private readonly _scopeCnsiGuids = signal<readonly string[]>([]);
+  // Bumped per initialize() so a slow stacks fetch from a previous mount
+  // can't overwrite the new scope's catalog.
+  private _stacksGen = 0;
+
+  // Stack filter: multi-select, driven by the field-selectable filter's
+  // checklist-popup input (SignalListMultiFilter). null = all stacks (no
+  // constraint); an explicitly empty array is ALSO treated as all — the
+  // popup shows a note rather than silently emptying the app list.
+  readonly selectedStacks: WritableSignal<string[] | null> = signal(null);
+
+  // Range constraint on lastRefreshedAt, shared by all three list
+  // variants (root singleton, same as selectedStacks). null = no
+  // constraint. Unlike stack there is no visibility gate to go stale
+  // against — the column and control are always shown.
+  readonly lastRefreshedRange: WritableSignal<SignalListRangeValue | null> = signal(null);
+
+  // Stack UI (column + dropdown) shows when ANY scoped endpoint has 2+
+  // installed stacks; a single-stack foundation would render a constant
+  // column. Endpoint-scoped pages pass one guid, so "any" degenerates to
+  // "that endpoint" there.
+  readonly stackUiVisible: Signal<boolean> = computed(() => {
+    const byCnsi = this._stacksByCnsi();
+    for (const guid of this._scopeCnsiGuids()) {
+      if ((byCnsi.get(guid)?.length ?? 0) >= 2) return true;
+    }
+    return false;
+  });
+
+  // Dropdown options: installed stack NAMES (the predicate matches
+  // app.stackName, a name — stack guids never appear on app rows).
+  // Cascades to the selected CF like orgOptions does.
+  readonly stackOptions: Signal<SignalListDropdownOption[]> = computed(() => {
+    const cnsi = this.selectedCnsi();
+    const byCnsi = this._stacksByCnsi();
+    const scope = cnsi ? [cnsi] : this._scopeCnsiGuids();
+    const names = new Set<string>();
+    for (const guid of scope) {
+      for (const s of byCnsi.get(guid) ?? []) names.add(s.name);
+    }
+    const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
+    for (const name of Array.from(names).sort((a, b) => naturalCompare(a, b))) {
+      opts.push({ label: name, value: name });
+    }
+    return opts;
+  });
+
+  // Status filter: multi-select, same checklist-popup model as the stack
+  // filter above — null/[] both mean "all". Unlike stack, Status has no
+  // installed-catalog to fetch and no visibility gate: CF only reports a
+  // handful of lifecycle states, so the option set is a fixed vocabulary
+  // rather than something to discover per-endpoint.
+  readonly selectedStates: WritableSignal<string[] | null> = signal(null);
+
+  // The four user-facing labels every app-list's Status column already
+  // renders (see each consumer's local `stateLabel` mapping, also
+  // registered as the 'state' filter extractor). Kept here as the single
+  // list of checkbox options so the checklist can't drift from what the
+  // column actually shows; the LABEL → app match itself is done via the
+  // registered extractor in the filter predicate below, not a second
+  // mapping, so the two can't disagree either.
+  private static readonly STATUS_LABELS: readonly string[] =
+    ['Deployed - Online', 'Stopped', 'Crashed', 'Failed'];
+  readonly statusOptions: Signal<string[]> =
+    signal([...CfAppsSignalConfigService.STATUS_LABELS]).asReadonly();
+
+  // Loading flags for the Org / Space toolbar dropdowns — set true while
+  // loadNames() is fetching and cleared once the relevant map is populated.
+  // Drives the SignalListDropdown spinner so users see "loading" rather
+  // than an empty list.
+  private readonly _isLoadingOrgs = signal(false);
+  private readonly _isLoadingSpaces = signal(false);
+  readonly isLoadingOrgs: Signal<boolean> = this._isLoadingOrgs.asReadonly();
+  readonly isLoadingSpaces: Signal<boolean> = this._isLoadingSpaces.asReadonly();
+  // Visible-row resolver overlay: space names looked up by guid for rows
+  // currently visible in the view but whose guid wasn't in the bounded
+  // /pp/v1/cf/spaces catalog page (which caps at ~500 resources to avoid
+  // 30s gorouter timeouts on large CFs). Populated by an effect over
+  // view.pagedItems(); merged into spaceNames so the cell renderer reads
+  // a single map. Catalog wins on duplicates (no real conflict expected
+  // — same backend, same V3 resource). Keyed cnsiGuid → guid → name to
+  // mirror the catalog shape.
+  //
+  // Orgs no longer need a resolver overlay — every StApp row now carries
+  // OrgName from the server-side space→org join in
+  // getNativeApps/getNativeAppsSummary, so the cell renderer reads
+  // app.orgName directly with the catalog as a dropdown-only fallback.
+  private readonly _resolvedSpacesByCnsi = signal<Map<string, Map<string, string>>>(new Map());
+  // In-flight + already-attempted guid sets keyed `${cnsiGuid}:${guid}`.
+  // Dedup concurrent triggers from rapid pagedItems changes (page nav,
+  // filter, sort). Once a guid resolves (or its batch fails) the key
+  // stays in the set so we don't retry every effect tick — a fresh
+  // initialize() resets these via clearResolverState().
+  private readonly resolverInFlight = new Set<string>();
+  private readonly resolverAttempted = new Set<string>();
+  // Flattened guid → name lookups derived from the per-CNSI catalogs
+  // unioned with the resolver overlay. Consumers like the app-wall
+  // CF/Org/Space column read these directly and don't need to know
+  // which CF a particular guid came from.
+  readonly orgNames: Signal<Map<string, string>>;
+  readonly spaceNames: Signal<Map<string, string>>;
+  // endpoint guid → endpoint name, derived from the connected endpoints list.
+  readonly endpointNames: Signal<Map<string, string>>;
+
+  // Computed option lists for the toolbar dropdowns.
+  readonly cnsiOptions:  Signal<SignalListDropdownOption[]>;
+  readonly orgOptions:   Signal<SignalListDropdownOption[]>;
+  readonly spaceOptions: Signal<SignalListDropdownOption[]>;
+
+  // Flipped to true once the orchestrator has completed at least one load
+  // cycle. Gates the stale-selection clearer below: while apps are still
+  // loading the first time, orgOptions/spaceOptions are legitimately empty
+  // and don't yet reflect "this selection is gone".
+  private readonly _hasLoadedOnce: WritableSignal<boolean> = signal(false);
+
+  // Locked space scope for the per-space apps tab. Empty = no narrowing
+  // (the multi-CNSI app wall path); non-empty = the DATASET is narrowed to
+  // apps whose spaceGuid matches, between the orchestrator and the
+  // ViewPipeline. Scope deliberately does NOT ride the user filter: the
+  // "Total X" header reads view.totalItems (unfiltered by design,
+  // a2807cf827), so a filter-implemented scope leaked the endpoint-wide
+  // app count into the space tab's headline (#5670). Distinct from
+  // `selectedSpace` (the user's toolbar selection) so the per-space tab
+  // can pin scope without the dropdown — and so clearFilters() doesn't
+  // drop scope.
+  private readonly _lockedSpaceGuid = signal('');
+
+  private readonly endpointRegistry = inject(EndpointDataRegistry);
+  private readonly deleteController = inject(EntityDeleteController);
+  private readonly errorEvents = inject(EndpointErrorEventsService);
+  private _errorEffect?: EffectRef;
+
+  private readonly http = inject(HttpClient);
+
+  constructor() {
+    const cfService = inject(CloudFoundryService, { optional: true });
+    this.connectedEndpoints = cfService
+      ? toSignal(cfService.connectedCFEndpoints$, { initialValue: [] as EndpointModel[] })
+      : signal<EndpointModel[]>([]).asReadonly();
+
+    // CF options come from the connected endpoints list directly.
+    this.cnsiOptions = computed(() => endpointDropdownOptions(this.connectedEndpoints()));
+
+    // Endpoint guid → name, for rendering cnsi references as names
+    // (e.g., in the app-wall CF/Org/Space column).
+    this.endpointNames = computed(() => {
+      const m = new Map<string, string>();
+      for (const ep of this.connectedEndpoints() ?? []) {
+        if (ep.guid && ep.name) m.set(ep.guid, ep.name);
+      }
+      return m;
+    });
+
+    // Flatten the per-CNSI catalog signals into global guid → name maps
+    // for downstream consumers (e.g., app-wall CF/Org/Space column).
+    // Merge in the resolver overlay so guids that fell outside the
+    // bounded catalog page (the original "—" bug) still resolve once
+    // the visible-row resolver fills them in. Catalog values win on
+    // duplicates — both come from the same backend so they should
+    // agree, but the catalog is the dropdown's source of truth.
+    //
+    // orgNames is catalog-only — the row-side resolver hop is gone
+    // (every StApp now carries OrgName from the server-side join).
+    this.orgNames = computed(() => {
+      const m = new Map<string, string>();
+      for (const orgs of this._orgsByCnsi().values()) {
+        for (const o of orgs) m.set(o.guid, o.name);
+      }
+      return m;
+    });
+    this.spaceNames = computed(() => {
+      const m = new Map<string, string>();
+      for (const byGuid of this._resolvedSpacesByCnsi().values()) {
+        for (const [guid, name] of byGuid) m.set(guid, name);
+      }
+      for (const spaces of this._spacesByCnsi().values()) {
+        for (const s of spaces) m.set(s.guid, s.name);
+      }
+      return m;
+    });
+
+    // Org options come from the per-CF /pp/v1/cf/orgs catalog, scoped
+    // by the selected CF (or union across all CFs when None). Listing
+    // from the catalog — not from loaded apps — keeps an org in the
+    // dropdown even when it currently holds zero apps. That preserves
+    // the user's org filter across navigations that may empty the org
+    // (e.g., deleting its last app), and lets them continue filtering
+    // to see the "no applications" cue.
+    this.orgOptions = computed(() => {
+      const cnsi = this.selectedCnsi();
+      const byCnsi = this._orgsByCnsi();
+      const seen = new Map<string, string>();
+      const sources = cnsi ? [byCnsi.get(cnsi) ?? []] : Array.from(byCnsi.values());
+      for (const orgs of sources) {
+        for (const o of orgs) {
+          if (!seen.has(o.guid)) seen.set(o.guid, o.name);
+        }
+      }
+      const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
+      const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => naturalCompare(a, b));
+      for (const [guid, label] of sorted) opts.push({ label, value: guid });
+      return opts;
+    });
+
+    // Space options are scoped to the selected CF and, when set, the
+    // selected org. StSpace carries orgGuid so we can filter from the
+    // catalog without needing an app to exist in the space.
+    //
+    // - Org selected: the org is fixed, so the bare space name is
+    //   unambiguous. Label = space name, natural sort.
+    // - Org = All: spaces from different orgs commonly share a name
+    //   (space_1 in org_1, space_1 in org_2, …). A bare-name list would
+    //   render a wall of identical "space_1" entries, so disambiguate each
+    //   as "<space> - <org>" (mirrors the Routes/Services/Users tabs),
+    //   sorted by space name then org name. Falls back to the bare name
+    //   when the org name isn't resolved yet (catalog still draining).
+    this.spaceOptions = computed(() => {
+      const cnsi = this.selectedCnsi();
+      const org = this.selectedOrg();
+      const byCnsi = this._spacesByCnsi();
+      const sources = cnsi ? [byCnsi.get(cnsi) ?? []] : Array.from(byCnsi.values());
+      // Dedup by guid, retaining the org guid so the All-orgs branch can
+      // append the org name.
+      const seen = new Map<string, { name: string; orgGuid: string }>();
+      for (const spaces of sources) {
+        for (const s of spaces) {
+          if (org && s.orgGuid !== org) continue;
+          if (!seen.has(s.guid)) seen.set(s.guid, { name: s.name, orgGuid: s.orgGuid });
+        }
+      }
+      const opts: SignalListDropdownOption[] = [{ label: 'All', value: null }];
+      if (org) {
+        const sorted = Array.from(seen.entries()).sort(([, a], [, b]) => naturalCompare(a.name, b.name));
+        for (const [guid, s] of sorted) opts.push({ label: s.name, value: guid });
+        return opts;
+      }
+      const orgNames = this.orgNames();
+      const augmented = Array.from(seen.entries()).map(([guid, s]) => ({
+        guid,
+        spaceName: s.name,
+        orgName: orgNames.get(s.orgGuid) ?? '',
+      }));
+      augmented.sort((a, b) => {
+        const bySpace = naturalCompare(a.spaceName, b.spaceName);
+        if (bySpace !== 0) return bySpace;
+        return naturalCompare(a.orgName, b.orgName);
+      });
+      for (const s of augmented) {
+        opts.push({ label: s.orgName ? `${s.spaceName} - ${s.orgName}` : s.spaceName, value: s.guid });
+      }
+      return opts;
+    });
+
+    // After the first orchestrator load, clear any selected cnsi/org/space
+    // whose value is no longer in the computed options list. This keeps the
+    // toolbar display in sync with the filter predicate: once the user
+    // deletes the last app in an org (or disconnects the only CF matching
+    // the selection), the dropdown can't render the stale value as selected
+    // and would silently show "All" while still filtering — producing the
+    // "display says All, list says 0 apps" desync.
+    //
+    // Skip clearing org/space when the selected CF's apps source failed
+    // (e.g. /pp/v1/cf/apps/{cnsi} 504'd on a slow CAPI). Its orgOptions is
+    // empty because no apps loaded, not because the org is genuinely empty
+    // — clearing would lose a valid selection the user will want back as
+    // soon as the refresh succeeds. cnsiOptions itself is always authoritative
+    // (derived from the connected endpoints list, not the orchestrator).
+    effect(() => {
+      if (!this._hasLoadedOnce()) return;
+      const errorsByCnsi = this.orchestrator?.errorsByCnsi();
+      const cnsiValues = new Set(this.cnsiOptions().map(o => o.value));
+      const orgValues = new Set(this.orgOptions().map(o => o.value));
+      const spaceValues = new Set(this.spaceOptions().map(o => o.value));
+      const cnsi = this.selectedCnsi();
+      const org = this.selectedOrg();
+      const space = this.selectedSpace();
+      if (cnsi != null && !cnsiValues.has(cnsi)) this.selectedCnsi.set(null);
+      const selectedCfFailed = cnsi != null && errorsByCnsi?.has(cnsi);
+      // Only validate a selection against a catalog that has actually loaded.
+      // The per-CF tab loads org/space names LAZILY, so orgOptions/spaceOptions
+      // can still be just "All" long after _hasLoadedOnce flips true (esp. with
+      // pre-seeded apps). Clearing then would drop a valid filter carried in
+      // from an org/space summary. `length > 1` == the catalog has real entries;
+      // once it loads, a genuinely stale selection still clears as before.
+      const orgCatalogReady = this.orgOptions().length > 1;
+      const spaceCatalogReady = this.spaceOptions().length > 1;
+      if (!selectedCfFailed) {
+        if (orgCatalogReady && org != null && !orgValues.has(org)) this.selectedOrg.set(null);
+        if (spaceCatalogReady && space != null && !spaceValues.has(space)) this.selectedSpace.set(null);
+        // Multi-select stack: drop just the vanished name(s) rather than
+        // clearing the whole selection — an operator who picked 3 stacks
+        // and lost 1 (e.g. it was uninstalled) keeps filtering on the
+        // other 2. An empty result after dropping collapses to null
+        // (== all), matching toggleMultiOption's canonical-null contract.
+        const stackCatalogReady = this.stackOptions().length > 1;
+        const stacks = this.selectedStacks();
+        if (stackCatalogReady && stacks != null && stacks.length > 0) {
+          const validNames = new Set(this.stackOptions().map(o => o.value));
+          const kept = stacks.filter(name => validNames.has(name));
+          if (kept.length !== stacks.length) {
+            this.selectedStacks.set(kept.length > 0 ? kept : null);
+          }
+        }
+      }
+    });
+
+    // Re-derive the filter predicate whenever any of the four toolbar
+    // signals change. Writing a brand new function to `this.filter`
+    // triggers ViewPipeline.filteredItems to recompute. effect() needs an
+    // injection context; @Injectable({providedIn:'root'}) supplies one at
+    // construction time.
+    effect(() => {
+      const cnsi = this.selectedCnsi();
+      const org = this.selectedOrg();
+      const space = this.selectedSpace();
+      const stacks = this.selectedStacks();
+      const stackUiVisible = this.stackUiVisible();
+      const states = this.selectedStates();
+      const refreshed = this.lastRefreshedRange();
+      const q = this.nameFilter().trim().toLowerCase();
+      const field = this.filterField();
+      const extractors = this._filterExtractors();
+      const extractor = extractors.get(field);
+      // Reuse the SAME 'state' extractor the consumer registers for the
+      // text-filter (registerFilterExtractor('state', stateLabel)) rather
+      // than a second label mapping here — the checklist options and the
+      // predicate then can't disagree about what a state maps to.
+      const stateExtractor = extractors.get('state');
+      this.filter.set((app: StApp) => {
+        if (cnsi && app.cnsiGuid !== cnsi) return false;
+        if (org && app.orgGuid !== org) return false;
+        if (space && app.spaceGuid !== space) return false;
+        // null or [] both mean "all" — see selectedStacks doc comment.
+        // Gated on stackUiVisible: the checklist only renders (and the
+        // consumer only wires filterMultis) while the stack UI is
+        // visible, but selectedStacks is a root-singleton signal that
+        // can carry a stale selection in from a page where it WAS
+        // visible. Without this gate, a single-stack scope with no
+        // stack control on screen and no way to clear it would still
+        // silently drop every docker app — a filter with no visible
+        // control and a disabled Clear button. Status has no such gate:
+        // it has no visibility condition to go stale against, since it's
+        // always shown.
+        if (stackUiVisible && stacks && stacks.length > 0 && (!app.stackName || !stacks.includes(app.stackName))) return false;
+        if (!rangeMatches(app.lastRefreshedAt, refreshed, 'date')) return false;
+        // Same posture: an app whose label isn't one of the four known
+        // options (raw/unknown CF state, extractor unregistered) only
+        // fails to match while the filter is actually narrowed — it
+        // stays findable whenever the filter is inert.
+        if (states && states.length > 0) {
+          const label = stateExtractor ? stateExtractor(app) : (app.state ?? '');
+          if (!states.includes(label)) return false;
+        }
+        if (q) {
+          const hay = (extractor ? extractor(app) : (app.name ?? '')).toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+    });
+  }
+
+  initialize(cnsiGuids: readonly string[]): void {
+    // New scope → new data set: drop any page position the previous scope
+    // left behind (#5670). Same scope re-entry (wall → app detail → wall)
+    // keeps position. The space lock is part of the scope key — it is set
+    // by initializeForSpace before this runs, and cleared by the wall via
+    // clearLockedSpace().
+    this.state.resetPageOnScopeChange(`${cnsiGuids.join(',')}|${this._lockedSpaceGuid()}`);
+    // Reset hasLoadedOnce so the stale-selection effect is gated off while
+    // the new orchestrator reloads. Without this, returning from a detail
+    // page (e.g. after deleting an app) would see orgOptions momentarily
+    // empty, decide the user's still-valid selection is stale, and clear
+    // it — losing the filter across navigation. The effect re-fires once
+    // loadAll() completes and options are real.
+    this._hasLoadedOnce.set(false);
+    // Reset the visible-row resolver state so a fresh navigation re-
+    // resolves any guid (the underlying space/org might have been renamed
+    // or replaced since the previous mount). The overlay maps are dropped
+    // alongside the dedup sets so previously-resolved names don't bleed
+    // across initialize() calls.
+    this.clearResolverState();
+    this._scopeCnsiGuids.set([...cnsiGuids]);
+    void this.loadStacksCatalog(cnsiGuids);
+    const sources = cnsiGuids.map(guid => {
+      const eds = this.endpointRegistry.acquire(guid);
+      const source = new CnsiAppsSource(guid, this.http, eds);
+      // Warm cache seeds SYNCHRONOUSLY, at mount, so the user lands on
+      // populated rows. CnsiAppsSource.load() now joins the endpoint's
+      // shared drain as well, which covers the cold and still-in-flight
+      // cases this block never could — but that join is necessarily async,
+      // and awaiting it here would trade an instant first paint for a
+      // spinner on every warm mount.
+      if (eds.appsLastFetched() !== null) {
+        source.preSeed(eds.apps());
+      }
+      return source;
+    });
+    this.orchestrator = new MergeOrchestrator<StApp>(sources);
+    // Surface endpoint fetch errors into the signal-native error bus (banner +
+    // /errors page). Re-wire per initialize() — the orchestrator is rebuilt.
+    this._errorEffect?.destroy();
+    this._errorEffect = wireEndpointErrorReporting(this.orchestrator.errorsByCnsi, this.errorEvents, this.injector);
+    // Space scope narrows the dataset itself (not the user filter) so
+    // view.totalItems means "everything in this page's scope" on the
+    // per-space tab and the endpoint-wide set on the wall (#5670).
+    const scopedItems = computed(() => {
+      const lock = this._lockedSpaceGuid();
+      const all = this.orchestrator.allItems();
+      return lock ? all.filter(a => a.spaceGuid === lock) : all;
+    });
+    this.view = new ViewPipeline<StApp>(
+      scopedItems,
+      this.filter,
+      this.sort,
+      this.pageSize,
+      this.pageIndex,
+      this._sortExtractors.asReadonly(),
+    );
+    // Lazy org/space name resolution. Previously fired here eagerly; now
+    // deferred to `ensureNamesLoaded()`, called from the filter-dropdown
+    // onOpen hook. The page paints fast and `networkidle` settles within
+    // a few hundred ms, instead of being held busy for many seconds by
+    // the per-org spaces fanout. Visible row cells still resolve names
+    // on demand via startVisibleRowResolver below.
+    //
+    // EXCEPTION: if a previous mount left a CF/org/space selected, the
+    // stale-selection effect (`if (org != null && !orgValues.has(org))`)
+    // would clear the user's filter as soon as `_hasLoadedOnce` becomes
+    // true — because orgOptions/spaceOptions are derived from the maps
+    // loadNames populates, and they're empty until then. Eager-load in
+    // that case so the dropdown values that back the selection are
+    // present when the effect fires.
+    this._namesLoadingPromise = null;
+    if (this.selectedCnsi() != null || this.selectedOrg() != null || this.selectedSpace() != null) {
+      void this.ensureNamesLoaded(cnsiGuids);
+    }
+    // Wire the visible-row resolver: every time view.pagedItems changes
+    // (page navigation, sort, filter), collect the (cnsi, orgGuid) and
+    // (cnsi, spaceGuid) pairs that aren't already resolved (catalog or
+    // overlay) and aren't already in flight, then guid-batch fetch them.
+    this.startVisibleRowResolver();
+  }
+
+  // Per-space tab variant. Pins the scope to one CF + one space; the
+  // existing initialize() multi-CNSI plumbing does the rest. The toolbar
+  // dropdowns (CF/Org/Space) are intentionally NOT exposed by the per-space
+  // page — there's exactly one of each in scope.
+  initializeForSpace(cnsiGuid: string, spaceGuid: string): void {
+    this._lockedSpaceGuid.set(spaceGuid);
+    this.initialize([cnsiGuid]);
+  }
+
+  // Clear the per-space scope. Call from the app-wall path before the
+  // first initialize() so a stale lock from a previously-mounted space
+  // page doesn't bleed into wall results.
+  clearLockedSpace(): void {
+    this._lockedSpaceGuid.set('');
+  }
+
+  // Bumped on every initialize() so any in-flight name-resolution chunk
+  // belonging to a previous mount can detect it's stale (its captured
+  // generation no longer matches) and skip the merge step. Without this,
+  // a navigate-away-then-back during a slow CF's drain would let the
+  // stale chunk's spaces leak into the new mount's overlay.
+  private _initGen = 0;
+
+  // Org chunk size: 20 keeps URL length comfortably under common 4-8K
+  // limits (20 × 36-char UUID + commas ≈ 740 chars), each chunk's
+  // failure scope small, and the total request count tractable on CFs
+  // with hundreds of orgs.
+  private static readonly ORGS_PER_SPACES_CHUNK = 20;
+  // Per-CNSI concurrency cap: 3 chunks in flight × 2 CFs = 6 max in
+  // flight, well under browser per-host connection limits and the gorouter
+  // budget. Higher concurrency wouldn't help — CAPI is the bottleneck —
+  // and risks compounding 504s under load.
+  private static readonly SPACES_CHUNK_CONCURRENCY = 3;
+
+  // Idempotent wrapper around loadNames. Called from the filter-dropdown
+  // onOpen hook so the org+space catalog is fetched only on the first user
+  // interaction with the toolbar dropdowns. Repeated calls during the
+  // in-flight window collapse to the same promise; subsequent calls after
+  // completion are no-ops because the cached promise resolves immediately.
+  // Reset by initialize() so a fresh mount re-fetches.
+  ensureNamesLoaded(cnsiGuids: readonly string[] = []): Promise<void> {
+    if (this._namesLoadingPromise) return this._namesLoadingPromise;
+    // Caller may omit cnsiGuids when the service already knows the scope —
+    // derive from connected endpoints in that case so the dropdown
+    // onOpen handler doesn't have to forward the guids list.
+    const guids = cnsiGuids.length > 0
+      ? cnsiGuids
+      : this.connectedEndpoints().map(ep => ep.guid).filter((g): g is string => !!g);
+    if (!guids.length) return Promise.resolve();
+    this._namesLoadingPromise = this.loadNames(guids);
+    return this._namesLoadingPromise;
+  }
+
+  // Fetch the installed-stacks catalog for every scoped endpoint. Stacks
+  // are tiny (<10 per CF) so the eager fanout is one small request per
+  // endpoint. CnsiEntitySource.load() never throws — a failed endpoint
+  // contributes an empty list, which reads as "single stack": the UI
+  // stays hidden rather than erroring.
+  private async loadStacksCatalog(cnsiGuids: readonly string[]): Promise<void> {
+    const gen = ++this._stacksGen;
+    const results = await Promise.all(cnsiGuids.map(async guid => {
+      const source = new CnsiStacksSource(guid, this.http);
+      await source.load();
+      return { guid, stacks: [...source.items()] };
+    }));
+    if (gen !== this._stacksGen) return;
+    const m = new Map<string, StStack[]>();
+    for (const { guid, stacks } of results) m.set(guid, stacks);
+    this._stacksByCnsi.set(m);
+  }
+
+  private async loadNames(cnsiGuids: readonly string[]): Promise<void> {
+    const gen = ++this._initGen;
+    // Orgs are <500 in practice so a single bounded page is enough. Spaces
+    // are the problem (CFs with thousands → page 1 misses anything past
+    // #500 → "—" in the CF/Org/Space cell), so spaces are fetched per-org-
+    // batch below once orgs are known.
+    const namePerPage = 500;
+    // Join the endpoint's shared org load instead of issuing a second
+    // identical request. A summary page and this tab both want the full org
+    // list, and each used to fetch it independently — arriving here while
+    // the other's drain was still in flight produced two concurrent
+    // `/pp/v1/cf/orgs/{cnsi}?per_page=500&page=1` calls (measured: 13s and
+    // 22s, overlapping). EndpointDataService.loadOrgs() is the single owner
+    // of that state per endpoint: it serves a warm cache outright, returns
+    // the in-flight observable when a drain is already running, and its
+    // shareReplay hands a completed drain's result to a late subscriber —
+    // so joining can't hang waiting on a completion signal that already
+    // fired. Whichever page arrives first starts the load; the other joins.
+    //
+    // peek() rather than acquire(): acquire() on an unseen guid enqueues the
+    // home-card load/details/pre-warm cascade, which this tab must not
+    // trigger. initialize() has already acquired every scoped guid by the
+    // time we run, so the lookup hits; the direct fetch stays as the
+    // fallback for a guid that was never acquired (e.g. ensureNamesLoaded()
+    // deriving guids from connectedEndpoints() beyond the mounted scope).
+    const fetchOrgs = async (guid: string): Promise<{ guid: string; orgs: StOrg[] }> => {
+      const eds = this.endpointRegistry.peek(guid);
+      if (eds) {
+        try {
+          await firstValueFrom(eds.loadOrgs());
+          return { guid, orgs: eds.orgs() };
+        } catch {
+          return { guid, orgs: [] as StOrg[] };
+        }
+      }
+      return firstValueFrom(this.http.get<StOrgsResponse>(
+        `/pp/v1/cf/orgs/${guid}?per_page=${namePerPage}&page=1`,
+      ))
+        .then(r => ({ guid, orgs: r.resources as StOrg[] }))
+        .catch(() => ({ guid, orgs: [] as StOrg[] }));
+    };
+
+    this._isLoadingOrgs.set(true);
+    this._isLoadingSpaces.set(true);
+    const orgResults = await Promise.all(cnsiGuids.map(fetchOrgs));
+    if (gen !== this._initGen) { this._isLoadingOrgs.set(false); this._isLoadingSpaces.set(false); return; }
+
+    const orgMap = new Map<string, StOrg[]>();
+    for (const { guid, orgs } of orgResults) orgMap.set(guid, orgs);
+    this._orgsByCnsi.set(orgMap);
+    this._isLoadingOrgs.set(false);
+
+    // Reset the spaces map up-front so a re-initialize() doesn't render
+    // last mount's stale list while the new drain is still in flight.
+    this._spacesByCnsi.set(new Map());
+
+    // Per CNSI: order orgs priority-first (orgs holding apps on the first
+    // ~2 pages of the wall come first so visible "—"s flip immediately),
+    // then chunk into ORGS_PER_SPACES_CHUNK groups, then drain with the
+    // priority chunk awaited and the rest fired-and-forget. The priority
+    // chunk's RTT is bounded (≤20 orgs of spaces) so awaiting it yields
+    // a brief, predictable initial-mount delay in exchange for visible
+    // names on first paint.
+    // Same story as the org catalog above: an endpoint's full space list may
+    // already be cached or draining on the shared EndpointDataService (a
+    // summary page fetches `/cf/spaces/{cnsi}?per_page=500&page=N` for every
+    // page), and the per-org fanout below re-fetches exactly those spaces —
+    // measured together on one mount as 14 requests / 37.5s. When the shared
+    // slice is available, join it and seed from its result; the fanout is
+    // only worth its request count when nothing else is loading the data.
+    const drainPromises = cnsiGuids.map(async cnsi => {
+      if (await this.seedSpacesFromEndpoint(cnsi, gen)) return;
+      const orgs = orgMap.get(cnsi) ?? [];
+      const orderedOrgGuids = this.orderOrgsForCnsi(cnsi, orgs);
+      return this.drainSpacesByOrgChunks(cnsi, orderedOrgGuids, gen);
+    });
+    // Each drain awaits its own priority chunk internally before
+    // returning. A failure of one CF's drain shouldn't block the others,
+    // hence allSettled.
+    await Promise.allSettled(drainPromises);
+    this._isLoadingSpaces.set(false);
+  }
+
+  // Seeds _spacesByCnsi for one endpoint from its shared EndpointDataService
+  // space slice, joining an in-flight drain rather than starting a second
+  // one. Returns false when there's nothing to join (no cached instance, or
+  // the drain produced nothing) so the caller falls back to the per-org
+  // fanout — a slow CF whose drain failed must still get its names.
+  private async seedSpacesFromEndpoint(cnsi: string, gen: number): Promise<boolean> {
+    const eds = this.endpointRegistry.peek(cnsi);
+    if (!eds) return false;
+    try {
+      await firstValueFrom(eds.loadSpaces());
+    } catch {
+      return false;
+    }
+    // A newer initialize() started while we waited — drop the result rather
+    // than merging it into the new mount's map.
+    if (gen !== this._initGen) return true;
+    const spaces = eds.spaces();
+    if (!spaces.length) return false;
+    this._spacesByCnsi.update(curr => {
+      const next = new Map(curr);
+      next.set(cnsi, spaces.slice());
+      return next;
+    });
+    return true;
+  }
+
+  // Returns the cnsi's orgs ordered with "priority" orgs first (those
+  // whose guids appear in the first pageSize() * 2 entries of allItems
+  // for this cnsi) followed by the rest. Priority orgs only matter while
+  // the apps catalog has loaded enough rows to peek at — if allItems is
+  // still empty (initial mount race), the natural orderMap order falls
+  // back gracefully.
+  private orderOrgsForCnsi(cnsi: string, orgs: readonly StOrg[]): string[] {
+    if (!orgs.length) return [];
+    const priority = new Set<string>();
+    if (this.orchestrator) {
+      const all = this.orchestrator.allItems();
+      const peekCount = Math.max(this.pageSize() * 2, 0);
+      let seen = 0;
+      for (const app of all) {
+        if (seen >= peekCount) break;
+        if (app.cnsiGuid !== cnsi) continue;
+        if (app.orgGuid) priority.add(app.orgGuid);
+        seen++;
+      }
+    }
+    const head: string[] = [];
+    const tail: string[] = [];
+    for (const o of orgs) {
+      if (priority.has(o.guid)) head.push(o.guid);
+      else tail.push(o.guid);
+    }
+    return [...head, ...tail];
+  }
+
+  // Drains `/pp/v1/cf/spaces/{cnsi}?organization_guids=g1,g2,...` for
+  // the given priority-ordered orgs in chunks of ORGS_PER_SPACES_CHUNK,
+  // bounded to SPACES_CHUNK_CONCURRENCY in flight. Awaits the FIRST
+  // chunk so callers (loadNames → initialize) can synchronise the
+  // initial render against priority results landing; the remaining
+  // chunks are fire-and-forget. Pagination per chunk is handled inline
+  // (most chunks will fit one page since 20 orgs × ≤500 spaces is rare).
+  private async drainSpacesByOrgChunks(cnsi: string, orderedOrgGuids: readonly string[], gen: number): Promise<void> {
+    if (!orderedOrgGuids.length) return;
+    const chunkSize = CfAppsSignalConfigService.ORGS_PER_SPACES_CHUNK;
+    const chunks: string[][] = [];
+    for (let i = 0; i < orderedOrgGuids.length; i += chunkSize) {
+      chunks.push(orderedOrgGuids.slice(i, i + chunkSize));
+    }
+
+    const runChunk = async (chunk: string[]): Promise<void> => {
+      let page = 1;
+      const perPage = 500;
+      // Per-chunk pagination loop: break when no `next` link. Most chunks
+      // exit after one iteration on real CFs.
+      while (true) {
+        const url = `/pp/v1/cf/spaces/${cnsi}?organization_guids=${chunk.join(',')}&per_page=${perPage}&page=${page}`;
+        const resp = await firstValueFrom(this.http.get<StSpacesResponse>(url))
+          .catch((): StSpacesResponse | null => null);
+        if (gen !== this._initGen) return;
+        const resources = (resp?.resources ?? []) as StSpace[];
+        if (resources.length) {
+          this._spacesByCnsi.update(curr => {
+            const next = new Map(curr);
+            const existing = next.get(cnsi) ?? [];
+            // Dedup by guid in case pagination overlaps with a previous
+            // chunk's result for the same org (shouldn't happen with
+            // disjoint org chunks, but cheap insurance).
+            const seen = new Set(existing.map(s => s.guid));
+            const merged = existing.slice();
+            for (const s of resources) {
+              if (s.guid && !seen.has(s.guid)) {
+                merged.push(s);
+                seen.add(s.guid);
+              }
+            }
+            next.set(cnsi, merged);
+            return next;
+          });
+        }
+        const nextLink = (resp as unknown as { pagination?: { next?: unknown } } | null)?.pagination?.next;
+        if (!nextLink) return;
+        page++;
+      }
+    };
+
+    // Await the first (priority) chunk before returning so the caller
+    // can rely on priority orgs being in _spacesByCnsi when initialize
+    // resolves. Remaining chunks queue with a concurrency cap and run
+    // in the background.
+    await runChunk(chunks[0]);
+
+    const remaining = chunks.slice(1);
+    if (!remaining.length) return;
+    const cap = CfAppsSignalConfigService.SPACES_CHUNK_CONCURRENCY;
+    // Simple worker-pool drain. `cursor` is the shared index into
+    // `remaining`; up to `cap` workers each pull-and-run sequentially.
+    let cursor = 0;
+    const worker = async (): Promise<void> => {
+      while (cursor < remaining.length) {
+        if (gen !== this._initGen) return;
+        const idx = cursor++;
+        await runChunk(remaining[idx]);
+      }
+    };
+    const workerCount = Math.min(cap, remaining.length);
+    // Don't await — let the wall paint immediately; chunks merge into
+    // _spacesByCnsi as they land and the spaceNames computed signal
+    // pushes through to the cell renderer.
+    const workers: Promise<void>[] = [];
+    for (let i = 0; i < workerCount; i++) workers.push(worker());
+    void Promise.allSettled(workers);
+  }
+
+  // Resets the visible-row resolver overlay + dedup state. Called from
+  // initialize() so a navigation re-fetches any guid that needs resolving
+  // (catches the rename / replace case — see resolverInFlight comment for
+  // the staleness window inside one mount).
+  private clearResolverState(): void {
+    this._resolvedSpacesByCnsi.set(new Map());
+    this.resolverInFlight.clear();
+    this.resolverAttempted.clear();
+  }
+
+  // Watches view.pagedItems for (cnsi, spaceGuid) pairs whose name
+  // isn't already resolved. Fetches missing names via
+  // /pp/v1/cf/spaces/{cnsi}?guids=... batched per CNSI, capped at
+  // GUIDS_PER_BATCH per request to keep URLs under reasonable
+  // browser/server limits. Bounded by visible row count per page
+  // (~25-100), so it can't time out on large CFs the way the original
+  // bulk-drain fetch did.
+  //
+  // Orgs no longer flow through here — every StApp row carries OrgName
+  // from the server-side space→org join (see native_apps_summary.go
+  // composeStAppSummary).
+  //
+  // Idempotent: in-flight + already-attempted guid keys (cnsi:guid) are
+  // tracked to dedupe rapid pagedItems changes (page navigation, filter,
+  // sort). `attempted` retains keys after success/failure so we don't
+  // refetch every effect tick — the next initialize() resets the set.
+  private resolverEffect?: EffectRef;
+  private startVisibleRowResolver(): void {
+    // Tear down any previous mount's effect so re-initialize() (e.g. on
+    // route re-entry) doesn't stack one resolver per visit.
+    this.resolverEffect?.destroy();
+    runInInjectionContext(this.injector, () => {
+      this.resolverEffect = effect(() => {
+        const visible = this.view.pagedItems();
+        if (!visible.length) return;
+        // Build a per-CNSI set of space guids referenced by visible rows
+        // whose name isn't already known (catalog / overlay / in-flight
+        // / previously-attempted this initialize() cycle).
+        //
+        // Orgs no longer need the resolver leg — every visible row
+        // already carries OrgName from the server-side space→org join.
+        const knownSpaces = this.spaceNames();
+        const spacesToFetch = new Map<string, Set<string>>();
+        for (const row of visible) {
+          const cnsi = row.cnsiGuid;
+          if (!cnsi) continue;
+          const spaceGuid = row.spaceGuid;
+          if (spaceGuid && !knownSpaces.has(spaceGuid)) {
+            const key = `${cnsi}:${spaceGuid}`;
+            if (!this.resolverInFlight.has(key) && !this.resolverAttempted.has(key)) {
+              const set = spacesToFetch.get(cnsi) ?? new Set<string>();
+              set.add(spaceGuid);
+              spacesToFetch.set(cnsi, set);
+            }
+          }
+        }
+        for (const [cnsi, guids] of spacesToFetch) {
+          void this.resolveSpaces(cnsi, Array.from(guids));
+        }
+      });
+    });
+  }
+
+  // URL length safety: 100 guids × 36-char UUID + commas ≈ 3700 chars.
+  // Most servers accept 4-8K URLs, so 100 is a comfortable cap that also
+  // keeps a single failure scope small. Larger sets paginate.
+  private static readonly GUIDS_PER_BATCH = 100;
+
+  private async resolveSpaces(cnsi: string, guids: string[]): Promise<void> {
+    if (!guids.length) return;
+    for (const g of guids) this.resolverInFlight.add(`${cnsi}:${g}`);
+    try {
+      for (let i = 0; i < guids.length; i += CfAppsSignalConfigService.GUIDS_PER_BATCH) {
+        const batch = guids.slice(i, i + CfAppsSignalConfigService.GUIDS_PER_BATCH);
+        const url = `/pp/v1/cf/spaces/${cnsi}?guids=${batch.join(',')}&per_page=${batch.length}`;
+        const resp = await firstValueFrom(this.http.get<StSpacesResponse>(url))
+          .catch((): StSpacesResponse | null => null);
+        if (resp?.resources?.length) {
+          this._resolvedSpacesByCnsi.update(curr => {
+            const next = new Map(curr);
+            const byGuid = new Map(next.get(cnsi) ?? []);
+            for (const s of resp.resources as StSpace[]) {
+              if (s.guid && s.name) byGuid.set(s.guid, s.name);
+            }
+            next.set(cnsi, byGuid);
+            return next;
+          });
+        }
+      }
+    } finally {
+      for (const g of guids) {
+        const key = `${cnsi}:${g}`;
+        this.resolverInFlight.delete(key);
+        this.resolverAttempted.add(key);
+      }
+    }
+  }
+
+  async loadAll(): Promise<void> {
+    await this.orchestrator.load();
+    this._hasLoadedOnce.set(true);
+  }
+
+  clearFilters(): void {
+    this.selectedCnsi.set(null);
+    this.selectedOrg.set(null);
+    this.selectedSpace.set(null);
+    this.selectedStacks.set(null);
+    this.lastRefreshedRange.set(null);
+    this.selectedStates.set(null);
+    this.nameFilter.set('');
+    this.filterField.set('name');
+    this.sort.set({ field: 'name', direction: 'asc' });
+    this.pageIndex.set(0);
+  }
+
+  async refresh(): Promise<void> {
+    // No-op if the orchestrator hasn't been built — the next page that
+    // calls initialize() will fetch from scratch anyway.
+    if (!this.orchestrator) return;
+    await this.orchestrator.refresh();
+    this._hasLoadedOnce.set(true);
+  }
+
+  // Register a value-extractor for a column whose sort value can't be read
+  // as a direct property of StApp (e.g., the CF/Org/Space column which
+  // composes cnsi + org + space names). Call this after building the list
+  // config; ViewPipeline re-reads extractors on every sort change.
+  registerSortExtractor(fieldKey: string, extractor: (row: StApp) => unknown): void {
+    this._sortExtractors.update(curr => {
+      const next = new Map(curr);
+      next.set(fieldKey, extractor);
+      return next;
+    });
+  }
+
+  // Register a string extractor for a text-filter field. Used when the
+  // user selects a filter column other than 'name': the effect that
+  // derives the filter predicate reads from this map and calls the
+  // extractor to get the haystack string for each row. Re-registering
+  // the same key replaces the previous extractor.
+  registerFilterExtractor(fieldKey: string, extractor: (row: StApp) => string): void {
+    this._filterExtractors.update(curr => {
+      const next = new Map(curr);
+      next.set(fieldKey, extractor);
+      return next;
+    });
+  }
+
+  // Fetch per-instance stats for the given (cnsiGuid, appGuid) pairs in
+  // parallel and merge them into the appStats signal. Designed to be
+  // called with the keys of rows currently visible on the page — NOT
+  // every known app — to keep round-trips bounded even on large walls.
+  // Failures are swallowed per-app (the entry is cleared for that key)
+  // so one bad endpoint doesn't block the rest of the page.
+  private refreshStatsForKeys(rowKeys: readonly string[]): void {
+    if (!rowKeys.length) return;
+    // Group keys by CNSI so each CNSI is one batched request instead of
+    // one request per visible app. On a 24-app page across 4 CFs, this
+    // drops the polling cycle from 24 HTTP requests to 4. The backend's
+    // /pp/v1/cf/app-stats/{cnsi}?app_guids=g1,g2,... handler resolves
+    // process GUIDs in one shot and fans out the stats calls server-side
+    // under a bounded errgroup.
+    const byCnsi = new Map<string, string[]>();
+    for (const key of rowKeys) {
+      if (this.statsInFlight.has(key)) continue;
+      const sep = key.indexOf(':');
+      if (sep <= 0) continue;
+      const cnsiGuid = key.slice(0, sep);
+      const appGuid = key.slice(sep + 1);
+      this.statsInFlight.add(key);
+      const list = byCnsi.get(cnsiGuid);
+      if (list) {
+        list.push(appGuid);
+      } else {
+        byCnsi.set(cnsiGuid, [appGuid]);
+      }
+    }
+    for (const [cnsiGuid, appGuids] of byCnsi) {
+      const params = new HttpParams().set('app_guids', appGuids.join(','));
+      this.http
+        .get<{ apps?: Record<string, { instances?: Array<{ state?: string }> }> }>(
+          `/pp/v1/cf/app-stats/${cnsiGuid}`,
+          { params },
+        )
+        .subscribe({
+          next: (resp) => {
+            const apps = resp?.apps ?? {};
+            this._appStats.update((curr) => {
+              const next = new Map(curr);
+              for (const appGuid of appGuids) {
+                const entry = apps[appGuid];
+                const instances = Array.isArray(entry?.instances) ? entry.instances : [];
+                const running = instances.filter((i) => (i?.state ?? '').toUpperCase() === 'RUNNING').length;
+                const total = instances.length;
+                next.set(`${cnsiGuid}:${appGuid}`, { running, total });
+                this.statsInFlight.delete(`${cnsiGuid}:${appGuid}`);
+              }
+              return next;
+            });
+          },
+          error: () => {
+            // Leave any previously cached value in place — a transient
+            // 502/504 shouldn't clear the numbers the user was just looking
+            // at. Clear in-flight markers so the next poll cycle re-tries.
+            for (const appGuid of appGuids) {
+              this.statsInFlight.delete(`${cnsiGuid}:${appGuid}`);
+            }
+          },
+        });
+    }
+  }
+
+  // Kick off an initial stats fetch for the currently visible page, plus
+  // an interval-based refresh. Safe to call more than once — the timer
+  // is reset each time. Call from the app-wall once the view pipeline is
+  // initialized; registerDestroy stops the timer on teardown.
+  //
+  // Page / sort / filter changes happen more often than the poll tick,
+  // so we ALSO re-fetch reactively whenever pagedItems changes — the
+  // user navigating to page 2 sees stats fill in within a few hundred
+  // ms rather than waiting up to intervalMs.
+  startStatsPolling(intervalMs: number = 30000): void {
+    if (this.statsTimer) {
+      clearInterval(this.statsTimer);
+    }
+    const runOnce = () => {
+      const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
+      this.refreshStatsForKeys(keys);
+    };
+    runOnce();
+    this.statsTimer = setInterval(runOnce, intervalMs);
+    // effect() requires an injection context; startStatsPolling is called
+    // from the component's ngOnInit which isn't one. Wrap it explicitly.
+    //
+    // Tear down any previous mount's effect first. This service is a root
+    // singleton, so a re-entry (app-wall remounted on navigation) would
+    // otherwise stack one live effect per visit, multiplying stats fetches
+    // across a session — same reasoning as the statsTimer reset above.
+    this.statsEffect?.destroy();
+    runInInjectionContext(this.injector, () => {
+      this.statsEffect = effect(() => {
+        const keys = this.view.pagedItems().map((a) => `${a.cnsiGuid}:${a.guid}`);
+        this.refreshStatsForKeys(keys);
+      });
+    });
+    this.destroyRef.onDestroy(() => {
+      if (this.statsTimer) {
+        clearInterval(this.statsTimer);
+        this.statsTimer = undefined;
+      }
+    });
+  }
+
+  // Fetches every route currently mapped to an app, via the Stratos-native
+  // backend. Used by the signal-native delete stepper route picker.
+  //
+  // One HTTP request; the backend drains pagination server-side. Returns
+  // an empty array on 404 / error rather than throwing, so the picker can
+  // render "no routes" cleanly — a missing routes endpoint shouldn't block
+  // the user from deleting the app itself. Callers that need to distinguish
+  // "zero routes" from "fetch failed" should add explicit error handling
+  // at the call site.
+  async fetchAppRoutes(cnsiGuid: string, appGuid: string): Promise<StRoute[]> {
+    const resp = await firstValueFrom(
+      this.http.get<StAppRoutesResponse>(`/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/routes`),
+    ).catch((): StAppRoutesResponse | null => null);
+    return resp?.resources ?? [];
+  }
+
+  // Fetches every app-type service credential binding attached to an app,
+  // joined with the referenced service-instance names and types. Used by
+  // the signal-native delete stepper service bindings picker.
+  //
+  // Asks the backend for ?return=summary so serviceInstance.name/type +
+  // app.name come back inline via v3's `included` block. Returns an empty
+  // array on 404 / error rather than throwing — a broken service-binding
+  // list shouldn't block the user from deleting the app.
+  async fetchAppServiceBindings(cnsiGuid: string, appGuid: string): Promise<StServiceCredentialBinding[]> {
+    const resp = await firstValueFrom(
+      this.http.get<StServiceCredentialBindingsResponse | null>(
+        `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/service_bindings?return=summary`,
+      ),
+    ).catch((): StServiceCredentialBindingsResponse | null => null);
+    return resp?.resources ?? [];
+  }
+
+  // Deletes a service credential binding through the async-job contract.
+  // Managed bindings produce a 202 + polls; user-provided bindings resolve
+  // synchronously via the backend's 200+COMPLETE synthesis. Routed through
+  // CnsiServiceBindingsSource so the binding row is dropped from
+  // EndpointDataService._serviceCredentialBindings on success and the
+  // serviceBinding.delete cascade fires (marks apps + SI stale).
+  // Deletes a service credential binding through the EntityDeleteController
+  // chokepoint. The controller removes the binding from
+  // EndpointDataService._serviceCredentialBindings and (via reverse edges)
+  // marks the bound app + service-instance lists stale.
+  async deleteServiceBinding(cnsiGuid: string, bindingGuid: string): Promise<void> {
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: serviceCredentialBindingEntityType,
+      deleteGuid: bindingGuid,
+      path: `/pp/v1/cf/service_bindings/${cnsiGuid}/${bindingGuid}`,
+    });
+  }
+
+  // Deletes a CF route through the EntityDeleteController chokepoint. Routes
+  // are a count-only EDS slice (no row list), so the controller marks the
+  // routes slice stale + the referencing space/app lists.
+  //
+  // Used by the signal-native delete stepper when the user opts to delete
+  // attached routes alongside the app. Throws on FAILED terminal state —
+  // callers should either surface the error or swallow it (the route may fail
+  // to delete because the app delete already cascaded through CF's checks).
+  async deleteRoute(cnsiGuid: string, routeGuid: string): Promise<void> {
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: routeEntityType,
+      deleteGuid: routeGuid,
+      path: `/pp/v1/cf/routes/${cnsiGuid}/${routeGuid}`,
+    });
+  }
+
+  // Lifecycle actions. The CF v3 /v3/apps/{guid}/actions/{action} endpoints
+  // are synchronous at the HTTP layer (they return the updated app, or a
+  // Build for restage). The Stratos-native backend wraps the response in
+  // the async-job terminal envelope ({state: COMPLETE, result}) so the
+  // 200 path resolves immediately through writeWithJob — giving every
+  // write callsite a uniform client shape regardless of whether CF itself
+  // was sync or async. Thrown StratosJobError surfaces CF errors; callers
+  // should catch and surface via snackbar.
+  async startApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'start', opts);
+  }
+  async stopApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'stop', opts);
+  }
+  async restartApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'restart', opts);
+  }
+  async restageApp(cnsiGuid: string, appGuid: string, opts?: { onProgress?: (job: StratosJob) => void }): Promise<void> {
+    await this.appAction(cnsiGuid, appGuid, 'restage', opts);
+  }
+
+  private async appAction(
+    cnsiGuid: string,
+    appGuid: string,
+    action: 'start' | 'stop' | 'restart' | 'restage',
+    opts?: { onProgress?: (job: StratosJob) => void },
+  ): Promise<void> {
+    const call = this.http.post(
+      `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/actions/${action}`,
+      null,
+      { observe: 'response' },
+    );
+    await writeWithJob(this.http, call, { onProgress: opts?.onProgress });
+  }
+
+  // Scales the web process of an app through the async-job contract.
+  // Backend hits POST /v3/processes/{guid}/actions/scale which CF v3
+  // returns 202 + Location → /v3/jobs/{jobGuid}; writeWithJob resolves
+  // via fast-path 200 or handoff polling. Payload takes any subset of
+  // {instances, memory, disk_quota}; all three in MB where applicable.
+  async scaleApp(
+    cnsiGuid: string,
+    appGuid: string,
+    payload: { instances?: number; memory?: number; disk_quota?: number },
+  ): Promise<void> {
+    const call = this.http.post(
+      `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}/scale`,
+      payload,
+      { observe: 'response' },
+    );
+    await writeWithJob(this.http, call);
+  }
+
+  // Deletes an app through the EntityDeleteController chokepoint, then drops
+  // the row from the orchestrator's aggregated view (no-op when there is no
+  // orchestrator — the prior cold-fallback branch). The controller removes the
+  // app from the EDS cache and marks descendant routes/bindings + the space's
+  // app-count stale.
+  async deleteApp(cnsiGuid: string, appGuid: string, appName: string = appGuid): Promise<void> {
+    await runCfDelete(this.deleteController, this.http, {
+      cnsiGuid,
+      entityKind: applicationEntityType,
+      deleteGuid: appGuid,
+      deleteName: appName,
+      path: `/pp/v1/cf/apps/${cnsiGuid}/${appGuid}`,
+    });
+    this.orchestrator?.removeRow(cnsiGuid, appGuid);
+  }
+
+  // Bulk delete: destroys each app entity. CF v3 does not cascade-delete a
+  // route or service binding when the app goes away (only the destination/
+  // binding to that app is implicitly gone with it) - see
+  // bulkDeleteAppsWithCleanup for the opt-in cleanup path. CF v3 also has no
+  // batch delete, so the backend fans out one DELETE /v3/apps/{guid} per item
+  // and returns a BulkResult with per-guid outcomes; pending items carry an
+  // async CF job tracking completion. Optimistically drops every non-failed
+  // row from the orchestrator's aggregated view (mirrors deleteApp's
+  // removeRow) so the list reflects the request immediately without a full
+  // re-fetch — a pending delete that later fails resurfaces on the next
+  // refresh.
+  async bulkDeleteApps(cnsiGuid: string, appGuids: string[]): Promise<BulkResult> {
+    const result = await firstValueFrom(this.http.post<BulkResult>(
+      `/pp/v1/cf/apps/${cnsiGuid}/bulk/delete`,
+      { guids: appGuids },
+    ));
+    for (const item of result.results) {
+      if (item.state !== 'FAILED') {
+        this.orchestrator?.removeRow(cnsiGuid, item.guid);
+      }
+    }
+    return result;
+  }
+
+  // Opt-in cleanup variant of bulkDeleteApps: resolves each app's routes and
+  // service bindings first, deletes them, then runs the bulk app delete -
+  // otherwise a bulk delete leaves every selected app's routes behind (44 of
+  // 48 routes orphaned in one observed test space, #5692).
+  //
+  // A route is only deleted if every one of its destinations belongs to an
+  // app in this same batch - a route shared with an app NOT being deleted
+  // here must survive, matching the single-app delete wizard's per-route
+  // picker semantics.
+  //
+  // Best-effort: a route/binding delete failure is swallowed (mirrors
+  // deleteWithCleanup's per-item fan-out) so one bad relationship doesn't
+  // block the rest of the cleanup or the app deletes that follow.
+  async bulkDeleteAppsWithCleanup(cnsiGuid: string, appGuids: string[]): Promise<BulkResult> {
+    const targets = new Set(appGuids);
+    const perApp = await Promise.all(appGuids.map(async guid => ({
+      routes: await this.fetchAppRoutes(cnsiGuid, guid),
+      bindings: await this.fetchAppServiceBindings(cnsiGuid, guid),
+    })));
+
+    const routesToDelete = new Map<string, StRoute>();
+    for (const { routes } of perApp) {
+      for (const route of routes) {
+        // appGuids always carries at least the app this route was fetched
+        // for (see toStRoute); an empty/missing value would mean "unknown
+        // destinations" - treat that conservatively as "don't delete".
+        if (route.appGuids?.length && route.appGuids.every(appGuid => targets.has(appGuid))) {
+          routesToDelete.set(route.guid, route);
+        }
+      }
+    }
+    const bindingsToDelete = perApp.flatMap(({ bindings }) => bindings);
+
+    await Promise.all([
+      ...Array.from(routesToDelete.values()).map(route => this.deleteRoute(cnsiGuid, route.guid).catch(() => {})),
+      ...bindingsToDelete.map(binding => this.deleteServiceBinding(cnsiGuid, binding.guid).catch(() => {})),
+    ]);
+
+    return this.bulkDeleteApps(cnsiGuid, appGuids);
+  }
+}

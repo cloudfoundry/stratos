@@ -1,23 +1,82 @@
-<ng-template #json>
-  <form [formGroup]="jsonForm">
-    <mat-form-field class="schema-form__raw">
-      <textarea matInput placeholder="JSON" matAutosizeMinRows="2" matAutosizeMaxRows="5" formControlName="json"></textarea>
-      <mat-error *ngIf="jsonForm.controls.json.hasError('notValidJson')">
-        Not valid JSON. Please specify a valid JSON Object
-      </mat-error>
-    </mat-form-field>
-  </form>
-</ng-template>
 
-<div *ngIf="mode === 'schema'; else json" class="schema-form">
-  <mat-radio-group [(ngModel)]="schemaView" (change)="onSchemaViewChanged()" class="schema-form__radios">
-    <mat-radio-button [value]="'schemaForm'" class="schema-form__radios-btn">Form</mat-radio-button>
-    <mat-radio-button [value]="'schemaJson'" class="schema-form__radios-btn">JSON</mat-radio-button>
-  </mat-radio-group>
 
-  <div class="schema-form__form" *ngIf="schemaView === 'schemaForm'; else json">
-    <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema" [framework]="'material-design'" [data]="formInitialData" (validationErrors)="onFormValidationErrors($event)" (onChanges)="onFormChange($event)">
-    </json-schema-form>
-    <div *ngIf="!!formValidationErrorsStr" class="schema-form__form--data-bad" [innerHTML]="formValidationErrorsStr"></div>
+@if (mode === 'schema') {
+  <div class="schema-form">
+    <div class="flex gap-4 mb-4">
+      <label class="inline-flex items-center cursor-pointer" for="schema-view-form">
+        <input id="schema-view-form" type="radio" [ngModel]="schemaView()" (ngModelChange)="schemaView.set($event)" value="schemaForm" (change)="onSchemaViewChanged()" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-1 focus:ring-primary">
+        <span class="ml-2 text-sm font-medium text-content-text">Form</span>
+      </label>
+      <label class="inline-flex items-center cursor-pointer" for="schema-view-json">
+        <input id="schema-view-json" type="radio" [ngModel]="schemaView()" (ngModelChange)="schemaView.set($event)" value="schemaJson" (change)="onSchemaViewChanged()" class="w-4 h-4 accent-primary bg-content-bg border-content-border focus:ring-1 focus:ring-primary">
+        <span class="ml-2 text-sm font-medium text-content-text">JSON</span>
+      </label>
+    </div>
+    @if (renderError()) {
+      <div data-testid="render-error-notice" class="mb-3 p-3 rounded-md border border-warning-400 dark:border-warning-600 bg-warning-50 dark:bg-warning-900/30 text-warning-900 dark:text-warning-100 text-sm">
+        @if (schemaTitle) {
+          <strong class="block font-semibold mb-1">{{ schemaTitle }}</strong>
+        }
+        @if (schemaDescription) {
+          <p class="mb-1">{{ schemaDescription }}</p>
+        }
+        {{ renderError() }}
+      </div>
+    }
+    @if (schemaView() === 'schemaForm') {
+      <div class="schema-form__form">
+        <json-schema-form loadExternalAssets="false" [options]="{ addSubmit: false }" [schema]="cleanSchema ?? {}" [framework]="'material-design'" [data]="formInitialData" [warnings]="warnings()" (changes)="onFormChange($event)" (renderError)="onRenderError($event)">
+        </json-schema-form>
+        @if (warnings().length) {
+          <ul class="mt-2 text-sm text-warning list-disc pl-5">
+            @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+          </ul>
+        }
+      </div>
+    } @else {
+      <div class="flex justify-end mb-1">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
+          {{ isMinified() ? 'Format' : 'Minify' }}
+        </button>
+      </div>
+      <div class="h-[200px] min-h-[200px] min-w-[16rem] resize overflow-hidden border border-content-border rounded-md">
+        <app-monaco-editor
+          [model]="{ language: 'json' }"
+          [options]="monacoOptions"
+          (valueChange)="setJsonText($event)"
+          (editorInit)="onMonacoInit($event)">
+        </app-monaco-editor>
+      </div>
+      @if (!parseValid()) {
+        <div class="mt-1 text-sm text-warning-shade-500">Not valid JSON. Please specify a valid JSON object.</div>
+      }
+      @if (warnings().length) {
+        <ul class="mt-2 text-sm text-warning list-disc pl-5">
+          @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+        </ul>
+      }
+    }
   </div>
-</div>
+} @else {
+  <div class="flex justify-end mb-1">
+    <button type="button" class="btn btn-secondary btn-sm" (click)="toggleFormat()" [disabled]="!canFormat()">
+      {{ isMinified() ? 'Format' : 'Minify' }}
+    </button>
+  </div>
+  <div class="h-[200px] min-h-[200px] min-w-[16rem] resize overflow-hidden border border-content-border rounded-md">
+    <app-monaco-editor
+      [model]="{ language: 'json' }"
+      [options]="monacoOptions"
+      (valueChange)="setJsonText($event)"
+      (editorInit)="onMonacoInit($event)">
+    </app-monaco-editor>
+  </div>
+  @if (!parseValid()) {
+    <div class="mt-1 text-sm text-warning-shade-500">Not valid JSON. Please specify a valid JSON object.</div>
+  }
+  @if (warnings().length) {
+    <ul class="mt-2 text-sm text-warning list-disc pl-5">
+      @for (w of warnings(); track w.path + w.message) { <li>{{ w.message }}</li> }
+    </ul>
+  }
+}

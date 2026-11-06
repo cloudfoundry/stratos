@@ -4,16 +4,15 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log/slog"
 	"sort"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
-	log "github.com/sirupsen/logrus"
 )
 
 var (
 	saveChartVersion   = `INSERT INTO helm_charts (endpoint, name, repo_name, version, created, app_version, description, icon_url, chart_url, source_url, digest, is_latest, update_batch) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)`
 	updateChartVersion = `UPDATE helm_charts SET created=$1, app_version=$2, description=$3, icon_url=$4, chart_url=$5, source_url=$6, digest=$7, is_latest=$8, update_batch=$9 WHERE endpoint=$10 AND name=$11 AND repo_name=$12 AND version=$13`
-	deleteChartVersion = `DELETE FROM helm_charts WHERE endpoint = $1 AND name = $2 and version = $3`
 	deleteForEndpoint  = `DELETE FROM helm_charts WHERE endpoint = $1`
 	deleteForBatch     = `DELETE FROM helm_charts WHERE endpoint = $1 AND name = $2 and update_batch != $3`
 	renameEndpoint     = `UPDATE helm_charts SET repo_name=$1 WHERE endpoint=$2`
@@ -66,13 +65,17 @@ func (p *HelmChartDBStore) Save(chart ChartStoreRecord, batchID string) error {
 	// Get the existing record - if it has the same digest, then no need to store it
 	record, err := p.GetChart(chart.Repository, chart.Name, chart.Version)
 	if err == nil && record.Digest == chart.Digest {
-		log.Debugf("Chart already exists %s/%s-%s with digest %s", chart.Repository, chart.Name, chart.Version, chart.Digest)
+		slog.Debug("chart version already stored with the same digest",
+			"repository", chart.Repository, "chart", chart.Name,
+			"version", chart.Version, "digest", chart.Digest)
 		_, err := p.db.Exec(updateChartDigest, chart.Created, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
 		return err
 	}
 
 	if err == nil {
-		log.Debugf("Chart already exists %s/%s-%s with different digest %s", chart.Repository, chart.Name, chart.Version, chart.Digest)
+		slog.Debug("chart version already stored with a different digest, updating it",
+			"repository", chart.Repository, "chart", chart.Name,
+			"version", chart.Version, "digest", chart.Digest, "storedDigest", record.Digest)
 		// The record already exists, so update it
 		_, err := p.db.Exec(updateChartVersion, chart.Created, chart.AppVersion, truncate(chart.Description), truncate(chart.IconURL), truncate(chart.ChartURL), truncate(sourceURL), chart.Digest, chart.IsLatest, batchID, chart.EndpointID, chart.Name, chart.Repository, chart.Version)
 		return err
@@ -115,7 +118,7 @@ func (p *HelmChartDBStore) GetLatestCharts() ([]*ChartStoreRecord, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Helm Charts: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var chartList []*ChartStoreRecord
 
@@ -173,7 +176,7 @@ func (p *HelmChartDBStore) GetChartVersions(repo, name string) ([]*ChartStoreRec
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Helm Charts: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	var chartList ChartStoreRecordList
 
@@ -204,7 +207,7 @@ func (p *HelmChartDBStore) GetEndpointIDs() ([]string, error) {
 	if err != nil {
 		return nil, fmt.Errorf("Unable to retrieve Endpoint IDs: %v", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	list := make([]string, 0)
 

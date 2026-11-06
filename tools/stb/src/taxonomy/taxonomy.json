@@ -1,0 +1,10 @@
+{
+  "terms": [
+    { "term": "login", "label": "Login page" },
+    { "term": "background", "label": "Background" },
+    { "term": "card", "label": "Card surface" },
+    { "term": "title", "label": "Title" },
+    { "term": "logo", "label": "Logo" },
+    { "term": "sign-in", "label": "Sign-in button" }
+  ]
+}

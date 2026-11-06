@@ -1,4 +1,6 @@
-import { inject, TestBed } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 
 import { UtilsService } from '../../core/utils.service';
 import { PercentagePipe } from './percentage.pipe';
@@ -8,24 +10,26 @@ describe('PercentagePipe', () => {
   let pipe: PercentagePipe;
   let utilsService: UtilsService;
 
-  beforeEach(() => TestBed.configureTestingModule({
-    providers: [
-      PercentagePipe,
-      UtilsService
-    ]
-  }));
+  beforeEach(() => {
+    TestBed.configureTestingModule({
+      providers: [
+        
+        PercentagePipe,
+        UtilsService,
+        provideZonelessChangeDetection(),
+      ]
+    });
 
-  beforeEach(inject([PercentagePipe], (p: PercentagePipe) => {
-    utilsService = TestBed.get(UtilsService);
-    pipe = p;
-  }));
+    utilsService = TestBed.inject(UtilsService);
+    pipe = TestBed.inject(PercentagePipe);
+  });
 
   it('create an instance', () => {
     expect(pipe).toBeTruthy();
   });
 
   it('should call utils method', () => {
-    spyOn(utilsService, 'percent');
+    vi.spyOn(utilsService, 'percent');
     pipe.transform(1024);
 
     expect(utilsService.percent).toHaveBeenCalledWith(1024);

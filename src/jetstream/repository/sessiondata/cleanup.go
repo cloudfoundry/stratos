@@ -1,9 +1,8 @@
 package sessiondata
 
 import (
+	"log/slog"
 	"time"
-
-	log "github.com/sirupsen/logrus"
 )
 
 var defaultInterval = time.Minute * 5
@@ -46,7 +45,7 @@ func (m *SessionDataRepository) cleanup(interval time.Duration, quit <-chan stru
 			// Delete expired sessions on each tick.
 			err := m.deleteExpired()
 			if err != nil {
-				log.Printf("SessionDataRepository: unable to delete expired sessions: %v", err)
+				slog.Warn("SessionDataRepository: unable to delete expired sessions", "error", err)
 			}
 		}
 	}
@@ -54,7 +53,7 @@ func (m *SessionDataRepository) cleanup(interval time.Duration, quit <-chan stru
 
 // deleteExpired will delete session values when the session expires
 func (c *SessionDataRepository) deleteExpired() error {
-	log.Debug("Expiring session data")
+	slog.Debug("Expiring session data")
 	_, err := c.db.Exec(expireSessionData)
 	if err != nil {
 		return err

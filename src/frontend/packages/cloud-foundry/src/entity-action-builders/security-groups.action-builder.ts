@@ -4,16 +4,16 @@ import { CFBasePipelineRequestActionMeta } from '../cf-entity-generator';
 
 export interface SecurityGroupBuilders extends OrchestratedActionBuilders {
   getMultiple: (
-    endpointGuid,
-    paginationKey,
-    { includeRelations, flatten }: CFBasePipelineRequestActionMeta
+    endpointGuid: string,
+    paginationKey: string,
+    meta?: CFBasePipelineRequestActionMeta
   ) => GetAllSecurityGroups;
 }
 
 export const securityGroupBuilders: SecurityGroupBuilders = {
   getMultiple: (
-    endpointGuid,
-    paginationKey,
+    endpointGuid: string,
+    paginationKey: string,
     { includeRelations, flatten }: CFBasePipelineRequestActionMeta = {}
   ) => new GetAllSecurityGroups(endpointGuid, paginationKey, includeRelations, flatten)
 };

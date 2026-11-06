@@ -1,7 +1,8 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Store } from '@ngrx/store';
+import { Injectable, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { TailwindSnackBarService } from '@stratosui/core';
+import { AuthDataService } from '@stratosui/store';
 import { combineLatest, Observable, of as observableOf } from 'rxjs';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
 
@@ -9,8 +10,7 @@ import { CurrentUserPermissionsService } from '../../../../../core/src/core/perm
 import { environment } from '../../../../../core/src/environments/environment.prod';
 import { ConfirmationDialogConfig } from '../../../../../core/src/shared/components/confirmation-dialog.config';
 import { ConfirmationDialogService } from '../../../../../core/src/shared/components/confirmation-dialog.service';
-import { stratosEntityCatalog } from '../../../../../store/src/stratos-entity-catalog';
-import { CFAppState } from '../../../cf-app-state';
+import { CfCurrentUserRolesSignalService } from '../../../user-permissions/cf-current-user-roles-signal.service';
 import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { waitForCFPermissions } from '../cf.helpers';
@@ -49,18 +49,18 @@ export enum UserInviteSendSpaceRoles {
 interface UserInviteSend {
   org: string;
   space: string;
-  spaceRoles: { [spaceRole: string]: boolean, };
+  spaceRoles: { [spaceRole: string]: boolean; };
   emails: string[];
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserInviteConfigureService {
+  private http = inject(HttpClient);
+  private snackBar = inject(TailwindSnackBarService);
+  private confirmDialog = inject(ConfirmationDialogService);
 
-  constructor(
-    private http: HttpClient,
-    private snackBar: MatSnackBar,
-    private confirmDialog: ConfirmationDialogService,
-  ) { }
 
   configure(cfGUID: string, clientID: string, clientSecret: string): Observable<UserInviteBaseResponse> {
     const formData: FormData = new FormData();
@@ -68,8 +68,7 @@ export class UserInviteConfigureService {
     formData.append('client_secret', clientSecret);
     const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
     const obs$ = this.http.post(url, formData).pipe(
-      map(v => {
-        stratosEntityCatalog.systemInfo.api.getSystemInfo();
+      map(_v => {
         return {
           error: false
         };
@@ -97,8 +96,7 @@ export class UserInviteConfigureService {
     this.confirmDialog.open(confirmation, () => {
       const url = `/pp/${proxyAPIVersion}/invite/${cfGUID}`;
       this.http.delete(url).pipe(
-        map(v => {
-          stratosEntityCatalog.systemInfo.api.getSystemInfo();
+        map(_v => {
           return {
             error: false,
             errorMessage: ''
@@ -116,40 +114,44 @@ export class UserInviteConfigureService {
         })
       ).subscribe(res => {
         if (res.error) {
-          this.snackBar.open(res.errorMessage, 'Close');
+          this.snackBar.error(res.errorMessage, 'Close');
         }
       });
     });
   }
 }
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class UserInviteService {
+  private authData = inject(AuthDataService);
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
+  private http = inject(HttpClient);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
+  private activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
 
-  configured$: Observable<boolean>;
-  enabled$: Observable<boolean>;
-  canConfigure$: Observable<boolean>;
 
-  constructor(
-    private store: Store<CFAppState>,
-    private http: HttpClient,
-    cfEndpointService: CloudFoundryEndpointService,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-    private activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-  ) {
+  configured$!: Observable<boolean>;
+  enabled$!: Observable<boolean>;
+  canConfigure$!: Observable<boolean>;
+
+  constructor() {
+    const cfEndpointService = inject(CloudFoundryEndpointService);
+
     this.configured$ = cfEndpointService.endpoint$.pipe(
       filter(v => !!v && !!v.entity),
       // Note - metadata could be falsy if smtp server not configured/other metadata properties are missing
-      map(v => v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
+      map(v => !!v.entity.metadata && v.entity.metadata.userInviteAllowed === 'true')
     );
 
     this.canConfigure$ = combineLatest(
-      waitForCFPermissions(this.store, this.activeRouteCfOrgSpace.cfGuid),
-      this.store.select('auth')
+      waitForCFPermissions(this.cfRoles, this.activeRouteCfOrgSpace.cfGuid),
+      toObservable(this.authData.sessionData)
     ).pipe(
-      map(([cf, auth]) =>
+      map(([cf, sessionData]) =>
         cf.global.isAdmin &&
-        auth.sessionData['plugin-config'] && auth.sessionData['plugin-config'].userInvitationsEnabled === 'true')
+        !!sessionData?.['plugin-config'] && sessionData['plugin-config'].userInvitationsEnabled === 'true')
     );
   }
 
@@ -157,7 +159,7 @@ export class UserInviteService {
 
   canShowInviteUser(cfGuid: string, orgGuid: string, spaceGuid: string): Observable<boolean> {
     // Can only invite someone to an org or space and user must be admin or org manager
-    return !orgGuid ? observableOf(false) : waitForCFPermissions(this.store, cfGuid).pipe(
+    return !orgGuid ? observableOf(false) : waitForCFPermissions(this.cfRoles, cfGuid).pipe(
       switchMap(() => combineLatest(
         this.configured$,
         this.currentUserPermissionsService.can(
@@ -176,12 +178,10 @@ export class UserInviteService {
     const users: UserInviteSend = {
       org: orgGuid,
       space: spaceGuid,
-      spaceRoles: {
-        [spaceRole]: true
-      },
+      spaceRoles: spaceRole ? { [spaceRole]: true } : {},
       emails
     };
-    return this.http.post(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(
+    return this.http.post<UserInviteResponseUaa>(`/pp/${proxyAPIVersion}/invite/send/${cfGuid}`, users).pipe(
       map((response: UserInviteResponseUaa) => ({
         error: response.failed_invites.length > 0,
         ...response

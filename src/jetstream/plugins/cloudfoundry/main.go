@@ -5,14 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/url"
+	"os"
 	"strings"
 
 	"errors"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/cloudfoundry/stratos/src/jetstream/plugins/stratosjobs"
+	"github.com/labstack/echo/v5"
 )
 
 // Module init will register plugin
@@ -24,6 +26,29 @@ func init() {
 type CloudFoundrySpecification struct {
 	portalProxy  api.PortalProxy
 	endpointType string
+	// testProxy overrides portalProxy for unit tests of native handlers.
+	// Production code always leaves this nil.
+	testProxy nativeCFProxy
+
+	// asyncTracker + asyncTranslator wire this plugin into the stratosjobs
+	// contract. Populated at Init() by looking up the stratosjobs plugin
+	// through the portal proxy. Nil during plugin boot and in tests that
+	// don't install them — deleteNativeApp falls back to pre-contract
+	// behavior (bare 202) when either is nil.
+	asyncTracker    stratosjobs.Tracker
+	asyncTranslator stratosjobs.JobTranslator
+
+	// restageTranslator drives the v3 restage state machine. Separate from
+	// asyncTranslator (CFJobTranslator) because restage is composed of many
+	// CF v3 calls — it doesn't poll a single /v3/jobs/{guid}.
+	restageTranslator stratosjobs.JobTranslator
+
+	// rollbackTranslator drives the v3 rollback state machine
+	// (deployment_create + deployment_poll). Separate from
+	// restageTranslator because rollback skips the package/build/droplet
+	// stages — it reuses an existing revision's droplet via
+	// /v3/deployments {revision: ...}.
+	rollbackTranslator stratosjobs.JobTranslator
 }
 
 const (
@@ -55,8 +80,8 @@ func (c *CloudFoundrySpecification) GetType() string {
 	return EndpointType
 }
 
-func (c *CloudFoundrySpecification) Register(echoContext echo.Context) error {
-	log.Info("CloudFoundry Register...")
+func (c *CloudFoundrySpecification) Register(echoContext *echo.Context) error {
+	slog.Info("CloudFoundry Register...")
 	return c.portalProxy.RegisterEndpoint(echoContext, c.Info)
 }
 
@@ -64,8 +89,8 @@ func (c *CloudFoundrySpecification) Validate(userGUID string, cnsiRecord api.CNS
 	return nil
 }
 
-func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
-	log.Info("CloudFoundry Connect...")
+func (c *CloudFoundrySpecification) Connect(ec *echo.Context, cnsiRecord api.CNSIRecord, userId string) (*api.TokenRecord, bool, error) {
+	slog.Info("CloudFoundry Connect...")
 
 	params := new(api.LoginToCNSIParams)
 	err := api.BindOnce(params, ec)
@@ -92,18 +117,119 @@ func (c *CloudFoundrySpecification) Connect(ec echo.Context, cnsiRecord api.CNSI
 		cfAdmin = strings.Contains(strings.Join(userTokenInfo.Scope, ""), c.portalProxy.GetConfig().CFAdminIdentifier)
 	}
 
+	// If capability metadata was assumed at registration time, re-probe now that
+	// the endpoint is confirmed reachable and write confirmed values to the DB.
+	c.confirmCapabilityMetadata(cnsiRecord)
+
 	return tokenRecord, cfAdmin, nil
 }
 
+// v2APIEnabled reports whether a decoded /v2/info payload comes from a
+// foundation with the V2 API enabled. Since cloud_controller_ng#4280 a
+// v2-disabled foundation still serves /v2/info with 200 and every endpoint
+// field populated — only api_version (blanked) and support ("CF API v2 is
+// disabled") change — so a populated authorization_endpoint proves the
+// payload is real, and a populated api_version is the signal that v2 is on.
+func v2APIEnabled(v2 api.V2Info) bool {
+	return v2.AuthorizationEndpoint != "" && v2.APIVersion != ""
+}
+
+// confirmCapabilityMetadata re-probes /v2/info and /v3/info if the stored
+// metadata was assumed (both probes failed at registration). Writes confirmed
+// values back to the DB so subsequent info requests see real capability flags.
+//
+// The dual-probe is the same intentional pattern documented at the Info()
+// callsite; both sites must share v2APIEnabled so registration and connect
+// cannot disagree about the same foundation.
+func (c *CloudFoundrySpecification) confirmCapabilityMetadata(cnsiRecord api.CNSIRecord) {
+	var existing api.CFEndpointMetadata
+	if err := json.Unmarshal([]byte(cnsiRecord.Metadata), &existing); err != nil || !existing.Assumed {
+		return
+	}
+
+	apiEndpoint := cnsiRecord.APIEndpoint.String()
+	h := c.portalProxy.GetHttpClient(cnsiRecord.SkipSSLValidation, cnsiRecord.CACert)
+	confirmed := api.CFEndpointMetadata{}
+
+	uri, err := url.Parse(apiEndpoint)
+	if err != nil {
+		return
+	}
+
+	v2Uri := *uri
+	v2Uri.Path = "v2/info"
+	if res, err := h.Get(v2Uri.String()); err == nil {
+		defer func() { _ = res.Body.Close() }()
+		if res.StatusCode == 200 {
+			var v2 api.V2Info
+			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2APIEnabled(v2) {
+				confirmed.SupportsV2 = true
+			}
+		}
+	}
+
+	v3Uri := *uri
+	v3Uri.Path = "v3/info"
+	if res, err := h.Get(v3Uri.String()); err == nil {
+		defer func() { _ = res.Body.Close() }()
+		if res.StatusCode == 200 {
+			var v3 api.V3Info
+			if json.NewDecoder(res.Body).Decode(&v3) == nil && v3.Links.Self.Href != "" {
+				confirmed.SupportsV3 = true
+			}
+		}
+	}
+
+	if !confirmed.SupportsV2 && !confirmed.SupportsV3 {
+		// Still unreachable — leave Assumed=true for the next connect attempt
+		return
+	}
+
+	if metaBytes, err := json.Marshal(confirmed); err == nil {
+		if err := c.portalProxy.UpdateEndpointMetadata(cnsiRecord.GUID, string(metaBytes)); err != nil {
+			slog.Warn("CF: could not update the capability metadata", "cnsi", cnsiRecord.GUID, "err", err)
+		} else {
+			slog.Info("CF: confirmed the capability metadata",
+				"cnsi", cnsiRecord.GUID, "v2", confirmed.SupportsV2, "v3", confirmed.SupportsV3)
+		}
+	}
+}
+
 func (c *CloudFoundrySpecification) Init() error {
+	// Read the paging overrides here rather than in a package-level
+	// initialiser, which would run before the log handler is installed.
+	resolvePagingConfig()
+
 	// Add login hook to automatically register and connect to the Cloud Foundry when the user logs in
-	c.portalProxy.AddLoginHook(0, c.cfLoginHook)
+	if err := c.portalProxy.AddLoginHook(0, c.cfLoginHook); err != nil {
+		return err
+	}
+
+	// Wire into the stratosjobs contract. Plugin load order isn't
+	// guaranteed — if stratosjobs didn't register yet we log + skip, and
+	// deleteNativeApp falls back to bare 202.
+	if plug := c.portalProxy.GetPlugin(stratosjobs.PluginName); plug != nil {
+		if jobsPlugin, ok := plug.(*stratosjobs.StratosJobs); ok {
+			c.asyncTracker = jobsPlugin.Tracker()
+			c.asyncTranslator = NewCFJobTranslator(c)
+			c.restageTranslator = NewRestageJobTranslator(c)
+			c.rollbackTranslator = NewRollbackJobTranslator(c)
+		} else {
+			slog.Warn("CF plugin: plugin found but has an unexpected type; the async-job contract is disabled for CF writes",
+				"plugin", stratosjobs.PluginName, "type", fmt.Sprintf("%T", plug))
+		}
+	} else {
+		slog.Warn("CF plugin: the stratosjobs plugin is not registered; the async-job contract is disabled for CF writes")
+	}
+
 	return nil
 }
 
-func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
+func (c *CloudFoundrySpecification) cfLoginHook(context *echo.Context) error {
 
-	cfAPI, cfCnsi, err := c.fetchAutoRegisterEndpoint()
+	// Error is ignored: it is also set when no record exists, which is handled
+	// below via the empty CNSIType
+	cfAPI, cfCnsi, _ := c.fetchAutoRegisterEndpoint()
 	// CF auto reg url missing, continue as normal
 	if cfAPI == "" {
 		return nil
@@ -124,16 +250,22 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 			autoRegName = "Cloud Foundry"
 		}
 
-		log.Infof("Auto-registering cloud foundry endpoint %s as \"%s\"", cfAPI, autoRegName)
+		caCert, err := resolveAutoRegisterCACert(*c.portalProxy.GetConfig())
+		if err != nil {
+			slog.Error("could not auto-register the Cloud Foundry endpoint", "url", cfAPI, "err", err)
+			return nil
+		}
+
+		slog.Info("Auto-registering the Cloud Foundry endpoint", "url", cfAPI, "name", autoRegName, "withCACert", caCert != "")
 
 		// Auto-register the Cloud Foundry
-		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, "", false, "", false, "", cfEndpointSpec.Info)
+		cfCnsi, err = c.portalProxy.DoRegisterEndpoint(autoRegName, cfAPI, true, c.portalProxy.GetConfig().CFClient, c.portalProxy.GetConfig().CFClientSecret, "", false, "", false, caCert, cfEndpointSpec.Info)
 		if err != nil {
-			log.Errorf("Could not auto-register Cloud Foundry endpoint: %v", err)
+			slog.Error("could not auto-register the Cloud Foundry endpoint", "url", cfAPI, "err", err)
 			return nil
 		}
 	} else {
-		log.Infof("Found existing cloud foundry endpoint matching %s. Will not auto-register", cfAPI)
+		slog.Info("Found an existing Cloud Foundry endpoint, will not auto-register", "url", cfAPI)
 	}
 
 	if c.portalProxy.GetConfig().CloudFoundryInfo == nil {
@@ -141,33 +273,55 @@ func (c *CloudFoundrySpecification) cfLoginHook(context echo.Context) error {
 	}
 	c.portalProxy.GetConfig().CloudFoundryInfo.EndpointGUID = cfCnsi.GUID
 
-	log.Infof("Determining if user should auto-connect to %s.", cfAPI)
+	slog.Info("Determining whether the user should auto-connect", "url", cfAPI, "user", userGUID)
 
 	cfTokenRecord, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cfCnsi.GUID, userGUID)
 	if ok && cfTokenRecord.Disconnected {
 		// There exists a record but it's been cleared. This means user has disconnected manually. Don't auto-reconnect
-		log.Infof("No, user should not auto-connect to auto-registered cloud foundry %s (previously disconnected). ", cfAPI)
+		slog.Info("No: the user previously disconnected, so will not auto-connect", "url", cfAPI, "user", userGUID)
 	} else {
-		log.Infof("Yes, user should auto-connect to auto-registered cloud foundry %s.", cfAPI)
+		slog.Info("Yes: the user should auto-connect", "url", cfAPI, "user", userGUID)
 
 		// If using SSO login, then copy the tokens, else connect with the same credentials
 		if c.portalProxy.GetConfig().SSOLogin {
-			log.Info("Auto-connecting to the auto-registered endpoint with the UAA token")
+			slog.Info("Auto-connecting to the auto-registered endpoint with the UAA token")
 			err = c.portalProxy.DoLoginToCNSIwithConsoleUAAtoken(context, cfCnsi) // no need to login twice
 			if err != nil {
-				log.Warnf("Could not use console UAA token to login to auto-registered endpoint: %s", err.Error())
+				slog.Warn("could not use the console UAA token to log in to the auto-registered endpoint", "err", err)
 				return err
 			}
 		} else {
-			log.Info("Auto-connecting to the auto-registered endpoint with credentials")
+			slog.Info("Auto-connecting to the auto-registered endpoint with credentials")
 			_, err = c.portalProxy.DoLoginToCNSI(context, cfCnsi.GUID, false)
 			if err != nil {
-				log.Warnf("Could not auto-connect using credentials to auto-registered endpoint: %s", err.Error())
+				slog.Warn("could not auto-connect with credentials to the auto-registered endpoint", "err", err)
 				return err
 			}
 		}
 	}
 	return nil
+}
+
+// resolveAutoRegisterCACert returns the CA the auto-registered endpoint should
+// trust. Without one, a foundation using a private authority registers fine and
+// then fails every read with x509 while still reporting itself connected
+// (#5922); skip-ssl is not a substitute, as capi will not honour it.
+//
+// A path wins over an inline value and is what a Kubernetes deployment uses,
+// where the CA arrives as a mounted secret — the same precedence detectTLSCert
+// applies to CONSOLE_PROXY_CERT_PATH. A configured path that cannot be read is
+// an error rather than a fallback to no CA, which would resurrect the silent
+// failure this prevents.
+func resolveAutoRegisterCACert(pc api.PortalConfig) (string, error) {
+	if pc.AutoRegisterCFCACertPath == "" {
+		return pc.AutoRegisterCFCACert, nil
+	}
+
+	caPEM, err := os.ReadFile(pc.AutoRegisterCFCACertPath)
+	if err != nil {
+		return "", fmt.Errorf("could not read the auto-registration CA certificate: %w", err)
+	}
+	return string(caPEM), nil
 }
 
 func (c *CloudFoundrySpecification) fetchAutoRegisterEndpoint() (string, api.CNSIRecord, error) {
@@ -195,12 +349,12 @@ func (c *CloudFoundrySpecification) AddSessionGroupRoutes(echoGroup *echo.Group)
 	// Applications Log Streams
 	echoGroup.GET("/:cnsiGuid/apps/:appGuid/stream", c.appStream)
 
-	// Application Stream
-	echoGroup.GET("/:cnsiGuid/apps/:appGuid/appFirehose", c.appFirehose)
+	// Native Stratos routes — v3-backed, Stratos-shaped DTOs
+	c.addNativeRoutes(echoGroup)
 }
 
 func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation bool, caCert string) (api.CNSIRecord, interface{}, error) {
-	log.Debug("Info")
+	slog.Debug("Info", "apiEndpoint", apiEndpoint)
 	var v2InfoResponse api.V2Info
 	var apiRootResponse api.ApiRoot
 	var endpointInfo api.EndpointInfo
@@ -213,54 +367,97 @@ func (c *CloudFoundrySpecification) Info(apiEndpoint string, skipSSLValidation b
 		return newCNSI, nil, err
 	}
 
-	log.Debugf("CF:Info: SkipSSL %t Cert '%s'", skipSSLValidation, caCert)
+	slog.Debug("CF:Info", "skipSSL", skipSSLValidation, "hasCACert", caCert != "")
 	h := c.portalProxy.GetHttpClient(skipSSLValidation, caCert)
 
+	// Probe root endpoint to confirm reachability
 	res, err := h.Get(uri.String())
 	if err != nil {
 		return newCNSI, nil, err
 	}
-
 	if res.StatusCode != 200 {
 		buf := &bytes.Buffer{}
-		io.Copy(buf, res.Body)
-		defer res.Body.Close()
-
+		_, _ = io.Copy(buf, res.Body)
+		_ = res.Body.Close()
 		return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
 	}
-
 	dec := json.NewDecoder(res.Body)
 	if err = dec.Decode(&apiRootResponse); err != nil {
 		return newCNSI, nil, err
 	}
 
-	uri.Path = "v2/info"
+	metadata := api.CFEndpointMetadata{}
 
-	res, err = h.Get(uri.String())
-	if err != nil {
-		return newCNSI, nil, err
+	// Capability detection — intentional dual-probe of /v2/info and /v3/info.
+	// This is NOT an unmigrated v2 callsite; it's how Stratos discovers what
+	// the foundation supports so downstream handlers know whether to gate
+	// V3-only operations (rolling/canary deployments, restage v3 composition).
+	// Since cloud_controller_ng#4280 a v2-disabled foundation still serves
+	// /v2/info (200, api_version blanked) — see v2APIEnabled — so a 200 alone
+	// proves nothing about v2. Each probe is soft-fail; if both fail
+	// (TLS / network), we fall through to "assume v2" + Assumed=true, which
+	// triggers re-probe at Connect time via confirmCapabilityMetadata.
+
+	// Probe /v2/info — soft failure. The body is captured whenever it parses,
+	// independent of the capability verdict: a v2-disabled CF still serves
+	// app_ssh_* and min_cli_version here, and nothing else supplies them
+	// (cfappssh reads them off V2Info; ApiRootLinks does not model app_ssh).
+	v2Uri := *uri
+	v2Uri.Path = "v2/info"
+	if res, err := h.Get(v2Uri.String()); err == nil {
+		defer func() { _ = res.Body.Close() }()
+		if res.StatusCode == 200 {
+			var v2 api.V2Info
+			if json.NewDecoder(res.Body).Decode(&v2) == nil && v2.AuthorizationEndpoint != "" {
+				v2InfoResponse = v2
+				if v2APIEnabled(v2) {
+					metadata.SupportsV2 = true
+					newCNSI.TokenEndpoint = v2.TokenEndpoint
+					newCNSI.AuthorizationEndpoint = v2.AuthorizationEndpoint
+					newCNSI.DopplerLoggingEndpoint = v2.DopplerLoggingEndpoint
+				}
+			}
+		}
 	}
 
-	if res.StatusCode != 200 {
-		buf := &bytes.Buffer{}
-		io.Copy(buf, res.Body)
-		defer res.Body.Close()
-
-		return newCNSI, nil, fmt.Errorf("%s endpoint returned %d\n%s", uri.String(), res.StatusCode, buf)
+	// Probe /v3/info — soft failure; v2-only CFs will 404 here
+	v3Uri := *uri
+	v3Uri.Path = "v3/info"
+	if res, err := h.Get(v3Uri.String()); err == nil {
+		defer func() { _ = res.Body.Close() }()
+		if res.StatusCode == 200 {
+			var v3 api.V3Info
+			if json.NewDecoder(res.Body).Decode(&v3) == nil && v3.Links.Self.Href != "" {
+				metadata.SupportsV3 = true
+			}
+		}
 	}
 
-	dec = json.NewDecoder(res.Body)
-	if err = dec.Decode(&v2InfoResponse); err != nil {
-		return newCNSI, nil, err
+	if !metadata.SupportsV2 && !metadata.SupportsV3 {
+		// Probes failed (SSL error, timeout, etc.) — assume v2 conservatively.
+		// Assumed=true signals Connect() to re-probe once the endpoint is reachable.
+		slog.Warn("CF:Info: could not determine the API version, assuming v2", "apiEndpoint", apiEndpoint)
+		metadata.SupportsV2 = true
+		metadata.Assumed = true
 	}
-	newCNSI.TokenEndpoint = v2InfoResponse.TokenEndpoint
-	newCNSI.AuthorizationEndpoint = v2InfoResponse.AuthorizationEndpoint
-	newCNSI.DopplerLoggingEndpoint = v2InfoResponse.DopplerLoggingEndpoint
+
+	// When /v2/info did not prove v2 enabled (absent, disabled, or merely
+	// assumed above), source the auth/token/doppler/routing endpoints and CC
+	// API version from the root `/` links so endpoint registration (token
+	// refresh) and cf push work on a v3-only foundation. Root is available
+	// here — it is the hard reachability gate at the top of this function.
+	// No-op when v2 is genuinely enabled — /v2/info stays the source of
+	// truth (#5047).
+	backfillFromRoot(&newCNSI, &v2InfoResponse, apiRootResponse, metadata.SupportsV2 && !metadata.Assumed)
+
+	if metaBytes, err := json.Marshal(metadata); err == nil {
+		newCNSI.Metadata = string(metaBytes)
+	}
 
 	endpointInfo.ApiRoot = apiRootResponse
 	endpointInfo.V2Info = v2InfoResponse
 	return newCNSI, endpointInfo, nil
 }
 
-func (c *CloudFoundrySpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext echo.Context) {
+func (c *CloudFoundrySpecification) UpdateMetadata(info *api.Info, userGUID string, echoContext *echo.Context) {
 }

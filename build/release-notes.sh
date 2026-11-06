@@ -1,0 +1,398 @@
+#!/usr/bin/env bash
+# Release-notes fragments — see changelog.d/README.md for the convention.
+#
+#   release-notes.sh new [slug]   Create changelog.d/NNNN-<slug>.md
+#                                 (slug defaults to the current branch)
+#   release-notes.sh deps [since] Draft the dependency-updates fragment from
+#                                 the dependabot commits in the release
+#                                 window (since defaults to the last v* tag)
+#   release-notes.sh check [since] Warn if the window has dependency bumps
+#                                 with no dependency-updates fragment.
+#                                 Always exits 0 — this reports, never gates
+#   release-notes.sh assemble     Print fragments merged into the release
+#                                 layout on stdout (empty if no fragments)
+#   release-notes.sh preview      Render the assembled notes to HTML through
+#                                 GitHub's own markdown API and print the
+#                                 file path — what the release page will
+#                                 show, before a tag exists
+#   release-notes.sh sweep        git rm all fragments (post-publish; the
+#                                 removal commit rides the next PR)
+#
+# Fragments are consumed by build/create-git-tag.sh, which embeds the
+# assembled notes in the annotated release tag body; `make publish` then
+# uses the tag BODY as the notes (%(contents:body) — the subject line
+# is the tag's display name and never enters the release body).
+
+set -euo pipefail
+
+ROOT_DIR="${ROOT_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)}"
+FRAG_DIR="${FRAG_DIR:-${ROOT_DIR}/changelog.d}"
+
+# Section order is the release-notes layout: Breaking Changes lead when
+# present; Security Updates (CVE table) close.
+#
+# Maintainability sits between the user-facing sections and Chores: work
+# that keeps the codebase current rather than changing what the console
+# does — retiring an unmaintained dependency, consolidating forked or
+# vendored code, clearing a scanner finding. A reader upgrading wants it
+# above routine bumps, but it is not a feature or a fix.
+SECTION_ORDER='Breaking Changes|Features|BugFixes|Maintainability|Chores|Security Updates'
+
+fragments() {
+  find "${FRAG_DIR}" -maxdepth 1 -name '[0-9]*.md' 2>/dev/null | LC_ALL=C sort
+}
+
+# Assembly order is when each fragment LANDED, not what it was named.
+#
+# The NNNN prefix cannot carry chronology: a contributor picks it before the
+# work merges, two people branching from the same develop pick the same one,
+# and PR numbers would only give the order PRs were OPENED — nothing requires
+# them to merge in that order. The commit that ADDED the fragment is the
+# authority, and its committer date is the merge time under both rebase- and
+# squash-merge, which is how this repo lands PRs.
+#
+# So the number is now purely a filename disambiguator, and a collision
+# between concurrent PRs is harmless again.
+#
+# --follow is load-bearing: renaming a fragment (renumbering it, say) would
+# otherwise register as a fresh add and jump the entry to the end of the
+# notes. Following the rename keeps the date the content actually landed.
+#
+# A fragment git has no record of is being written right now: it sorts last,
+# as the newest. Ties keep filename order (sort -s), so assembly stays
+# deterministic — including when FRAG_DIR is outside a repo and every
+# fragment falls back to the sentinel.
+fragments_by_landing() {
+  local file landed
+  for file in $(fragments); do
+    landed=$(git -C "${ROOT_DIR}" log --follow --diff-filter=A -1 --format=%ct -- "${file}" 2>/dev/null) || landed=''
+    printf '%s\t%s\n' "${landed:-9999999999}" "${file}"
+  done | LC_ALL=C sort -n -s -k1,1 | cut -f2-
+}
+
+# Next free NNNN-<slug>.md path. Errors if the slug is empty or taken.
+next_file() {
+  local slug
+  slug=$(printf '%s' "${1:-}" | tr '[:upper:]' '[:lower:]' \
+    | tr -cs 'a-z0-9' '-' | sed 's/^-*//; s/-*$//')
+  if [ -z "${slug}" ]; then
+    echo "ERROR: empty slug (detached HEAD?) — pass one: release-notes.sh new <slug>" >&2
+    exit 1
+  fi
+  local max=0 n f
+  for f in $(fragments); do
+    n=$(basename "${f}")
+    n=$((10#${n%%-*}))
+    [ "${n}" -gt "${max}" ] && max=${n}
+  done
+  local file
+  file=$(printf '%s/%04d-%s.md' "${FRAG_DIR}" $((max + 1)) "${slug}")
+  if [ -e "${file}" ]; then
+    echo "ERROR: ${file} already exists" >&2
+    exit 1
+  fi
+  echo "${file}"
+}
+
+cmd_new() {
+  local file
+  file=$(next_file "${1:-$(git -C "${ROOT_DIR}" branch --show-current)}")
+  printf '[Features]\n- \n' > "${file}"
+  echo "${file}"
+}
+
+# The release window: <last v* tag>..HEAD, or all history before the first
+# tag. Dependabot is the reason this is derived rather than authored — it
+# opens PRs but never runs this script, so its bumps reach a release only if
+# something reads them out of the log.
+dep_range() {
+  local since="${1:-}"
+  if [ -z "${since}" ]; then
+    # TAG_MATCH (exported by make) scopes the anchor to this checkout's
+    # version line, so a maintenance tag back-merged from another line
+    # never truncates the window. At the birth of a line no tag matches
+    # yet — fall back to the nearest tag of any line (the previous
+    # line's final) rather than reporting the whole history.
+    since=$(git -C "${ROOT_DIR}" describe --tags --match "${TAG_MATCH:-v[0-9]*}" --abbrev=0 2>/dev/null || true)
+    if [ -z "${since}" ]; then
+      since=$(git -C "${ROOT_DIR}" describe --tags --match 'v[0-9]*' --abbrev=0 2>/dev/null || true)
+    fi
+  fi
+  echo "${since:+${since}..}HEAD"
+}
+
+# Bump subjects in the window, prefix stripped, deduped, oldest first.
+# Keyed on the commit-message prefix pinned in .github/dependabot.yml,
+# which also catches dependency work done by hand under the same prefix —
+# for a changelog bullet that is wanted, not a miss.
+dep_subjects() {
+  git -C "${ROOT_DIR}" log --reverse --no-merges --format='%s' \
+      --grep='^chore(deps' "$(dep_range "${1:-}")" -- 2>/dev/null \
+    | sed -E 's/^chore\(deps[^)]*\): *(bump )?//I' \
+    | awk 'NF && !seen[$0]++'
+}
+
+DEPS_SLUG='dependency-updates'
+
+cmd_deps() {
+  local subjects
+  subjects=$(dep_subjects "${1:-}")
+  if [ -z "${subjects}" ]; then
+    echo "changelog.d: no dependency bumps in $(dep_range "${1:-}") — nothing to draft"
+    return 0
+  fi
+  local file
+  file=$(next_file "${DEPS_SLUG}")
+  echo "${subjects}" | deps_fragment > "${file}"
+  echo "${file}"
+  echo "Drafted from $(echo "${subjects}" | wc -l | tr -d ' ') bump(s) in $(dep_range "${1:-}") — review it before release." >&2
+}
+
+# Bumps read as a Package/From/To table, padded so the columns also line up
+# in the plain-text tag body; a run-on sentence of twenty bumps does not.
+# Subjects without a from/to (group bumps, hand-written dependency work) list
+# under the table.
+deps_fragment() {
+  awk '
+    match($0, /^[^ ]+ from [^ ]+ to [^ ]+( in [^ ]+)?$/) {
+      split($0, f, " ")
+      n++; pkg[n] = f[1] (f[7] != "" ? " in " f[7] : ""); from[n] = f[3]; to[n] = f[5]
+      next
+    }
+    { other[++m] = $0 }
+    function pad(s, w) { return sprintf("%-" w "s", s) }
+    function rule(w) { s = ""; for (i = 0; i < w + 2; i++) s = s "-"; return s }
+    END {
+      print "[Chores]"
+      print "- Dependency updates:"
+      if (n) {
+        wp = length("Package"); wf = length("From"); wt = length("To")
+        for (i = 1; i <= n; i++) {
+          if (length(pkg[i]) > wp) wp = length(pkg[i])
+          if (length(from[i]) > wf) wf = length(from[i])
+          if (length(to[i]) > wt) wt = length(to[i])
+        }
+        print ""
+        print "| " pad("Package", wp) " | " pad("From", wf) " | " pad("To", wt) " |"
+        print "|" rule(wp) "|" rule(wf) "|" rule(wt) "|"
+        for (i = 1; i <= n; i++)
+          print "| " pad(pkg[i], wp) " | " pad(from[i], wf) " | " pad(to[i], wt) " |"
+      }
+      if (m && n) { print ""; print "- Other dependency changes:" }
+      for (i = 1; i <= m; i++) print "  - " other[i]
+    }
+  '
+}
+
+# When was dependency work last written up? Answering with a timestamp rather
+# than a yes/no is what makes the check survive an incremental window: a
+# fragment can only describe bumps that landed before it, so "does any
+# fragment mention dependencies" goes quiet the moment one does — even for
+# bumps that merge afterwards.
+#
+# The fragment side stays a loose text match: `deps` writes a DRAFT the author
+# is meant to rewrite, and prose that no longer quotes the raw subjects must
+# not warn on a well-curated release.
+#
+# A fragment git has no record of is being written right now, so it covers
+# everything; this also keeps the check quiet when FRAG_DIR sits outside the
+# repo. Prints nothing when no fragment mentions dependencies at all.
+newest_deps_fragment_time() {
+  local file t newest=0
+  for file in $(fragments); do
+    grep -qiE 'depend|bump' "${file}" 2>/dev/null || continue
+    t=$(git -C "${ROOT_DIR}" log -1 --format=%ct -- "${file}" 2>/dev/null) || t=''
+    [ -n "${t}" ] || { echo uncommitted; return 0; }
+    [ "${t}" -gt "${newest}" ] && newest=${t}
+  done
+  [ "${newest}" -gt 0 ] && echo "${newest}"
+}
+
+newest_dep_bump_time() {
+  git -C "${ROOT_DIR}" log -1 --format=%ct --no-merges \
+      --grep='^chore(deps' "$(dep_range "${1:-}")" -- 2>/dev/null
+}
+
+# The count goes to stdout unconditionally, so this doubles as an any-time
+# status command: "how much dependency work has piled up since the last
+# release" is the question that decides whether a patch build is due, and it
+# needs answering between releases, not only at tag time.
+cmd_check() {
+  local n unnamed
+  n=$(dep_subjects "${1:-}" | wc -l | tr -d ' ')
+  echo "changelog.d: ${n} dependency bump(s) in $(dep_range "${1:-}")"
+  [ "${n}" -gt 0 ] || return 0
+
+  warn_if_behind "${1:-}"
+  unnamed=$(unnamed_packages "${1:-}" | paste -sd ',' - | sed 's/,/, /g')
+  [ -z "${unnamed}" ] || echo "NOTE: not named in any fragment: ${unnamed}" >&2
+}
+
+warn_if_behind() {
+  local frag bump why
+  frag=$(newest_deps_fragment_time || true)
+  [ "${frag}" = uncommitted ] && return 0
+  bump=$(newest_dep_bump_time "${1:-}" || true)
+  { [ -n "${frag}" ] && [ -n "${bump}" ] && [ "${frag}" -ge "${bump}" ]; } && return 0
+
+  why='none of them are mentioned in any fragment'
+  [ -n "${frag}" ] && why='some landed after the newest fragment that mentions them'
+  echo "WARNING: ${why}, so they will not" >&2
+  echo "         appear in the release notes. Draft them: ./build/release-notes.sh deps" >&2
+}
+
+# The timestamp above says a fragment is newer than every bump, not that it
+# describes them: a later dependency fragment silences it for every earlier
+# bump, which is how eslint 10.11.0 nearly missed the v5.5.5 notes. Package
+# names survive the rewrite of a draft into a curated table, so a bump whose
+# package no fragment names is listed — as a note, since prose that names no
+# package is still valid coverage. A name only counts as a whole word
+# (typescript-eslint does not name eslint). A group bump has no single
+# package to look for and is left to the timestamp.
+unnamed_packages() {
+  local files pkg re
+  files=$(fragments)
+  dep_subjects "${1:-}" \
+    | awk '/^[^ ]+ from [^ ]+ to [^ ]+( in [^ ]+)?$/ && !seen[$1]++ {print $1}' \
+    | while read -r pkg; do
+        re=${pkg//./\\.}
+        # shellcheck disable=SC2086  # fragment paths contain no whitespace
+        [ -n "${files}" ] && grep -qE "(^|[^[:alnum:]@/._-])${re}([^[:alnum:]/._-]|\$)" ${files} && continue
+        echo "${pkg}"
+      done
+}
+
+cmd_assemble() {
+  local files
+  files=$(fragments_by_landing)
+  [ -n "${files}" ] || return 0
+  # shellcheck disable=SC2086  # fragment paths contain no whitespace
+  awk -v order="${SECTION_ORDER}" '
+    BEGIN {
+      norder = split(order, sections, "|")
+      for (i = 1; i <= norder; i++) valid[sections[i]] = 1
+    }
+    FNR == 1 { section = ""; delete pending }
+    /^\[[^]]+\][[:space:]]*$/ {
+      s = $0
+      sub(/^\[/, "", s); sub(/\][[:space:]]*$/, "", s)
+      if (!(s in valid)) {
+        printf "ERROR: %s: unknown section [%s]\n", FILENAME, s > "/dev/stderr"
+        err = 1; exit 1
+      }
+      section = s
+      delete pending
+      next
+    }
+    {
+      if (section == "") {
+        if ($0 ~ /^[[:space:]]*$/) next
+        printf "ERROR: %s: content before any [Section] header\n", FILENAME > "/dev/stderr"
+        err = 1; exit 1
+      }
+      # Blank lines buffer lazily so they only land between content lines
+      # of the same section in the same fragment (e.g. before a table),
+      # never at section boundaries or between merged fragments.
+      if ($0 ~ /^[[:space:]]*$/) { pending[section] = pending[section] "\n"; next }
+      buf[section] = buf[section] pending[section] $0 "\n"
+      delete pending[section]
+    }
+    END {
+      if (err) exit 1
+      for (i = 1; i <= norder; i++) {
+        s = sections[i]; b = buf[s]
+        sub(/^\n+/, "", b)
+        sub(/\n+$/, "\n", b)
+        if (b !~ /[^[:space:]]/) continue
+        if (out) printf "\n"
+        # [Section] is the authoring syntax, not the output. Emitted as a
+        # bracketed literal it renders as plain text wherever these notes
+        # land — a GitHub release body is markdown — so the published notes
+        # had no headings at all. BugFixes is an identifier and gets a
+        # display name; the rest already read as titles.
+        label = (s == "BugFixes") ? "Bug Fixes" : s
+        printf "## %s\n\n%s", label, b
+        out = 1
+      }
+    }
+  ' ${files}
+}
+
+# Rendered by GitHub's own markdown endpoint rather than a local library:
+# the question this answers is "what will the release page show", and only
+# GitHub can answer it. Two heading defects reached a published tag because
+# the only available check was assemble's plain text, where markdown that
+# renders as nothing still looks correct.
+cmd_preview() {
+  local notes out
+  notes=$(cmd_assemble)
+  if [ -z "${notes}" ]; then
+    echo "changelog.d: no fragments — nothing to preview"
+    return 0
+  fi
+  command -v gh >/dev/null 2>&1 || { echo "ERROR: preview needs the gh CLI" >&2; exit 1; }
+
+  out="${PREVIEW_OUT:-${TMPDIR:-/tmp}/stratos-release-preview.html}"
+  local title="${PREVIEW_TITLE:-Stratos release notes}"
+  local body
+  # -F, not -f, for the notes: only --field interprets a leading '@', which
+  # is what reads them from stdin. --raw-field would post the literal "@-"
+  # and GitHub would faithfully render that as a one-word document.
+  body=$(printf '%s' "${notes}" \
+    | gh api -X POST /markdown -f mode=gfm \
+        -f context=cloudfoundry/stratos -F text=@-) \
+    || { echo "ERROR: gh could not render the notes (is it authenticated?)" >&2; exit 1; }
+  case "${body}" in
+    ''|'<p>@-</p>'*) echo "ERROR: preview rendered empty — refusing to write a misleading page" >&2; exit 1 ;;
+  esac
+
+  {
+    printf '<!doctype html><html><head><meta charset="utf-8"><title>%s</title>\n' "${title}"
+    cat <<'CSS'
+<style>
+:root{color-scheme:light dark}
+body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;background:#f6f8fa;color:#1f2328}
+.wrap{max-width:860px;margin:0 auto;padding:32px 24px 80px}
+.card{background:#fff;border:1px solid #d1d9e0;border-radius:6px;padding:8px 24px 24px}
+h1{font-size:24px;margin:16px 0 4px}
+h2{font-size:20px;border-bottom:1px solid #d1d9e0;padding-bottom:.3em;margin-top:28px}
+ul{padding-left:24px}li{margin:.4em 0}
+code{background:#eff2f5;padding:.2em .4em;border-radius:6px;font-size:85%}
+a{color:#0969da;text-decoration:none}a:hover{text-decoration:underline}
+@media(prefers-color-scheme:dark){body{background:#0d1117;color:#e6edf3}
+ .card{background:#151b23;border-color:#3d444d}code{background:#262c36}
+ h2{border-color:#3d444d}a{color:#4493f8}}
+</style></head><body><div class="wrap"><div class="card">
+CSS
+    printf '<h1>%s</h1>\n' "${title}"
+    printf '%s\n' "${body}"
+    printf '</div></div></body></html>\n'
+  } > "${out}"
+
+  echo "${out}"
+  echo "$(printf '%s' "${notes}" | grep -c '^## ') section(s), $(printf '%s' "${notes}" | grep -c '^- ') bullet(s)" >&2
+}
+
+cmd_sweep() {
+  local files
+  files=$(fragments)
+  if [ -z "${files}" ]; then
+    echo "changelog.d: nothing to sweep"
+    return 0
+  fi
+  echo "${files}" | xargs git -C "${ROOT_DIR}" rm -q --
+  echo "Swept $(echo "${files}" | wc -l | tr -d ' ') fragment(s) — commit this with the next PR (e.g. the post-release bump)."
+}
+
+case "${1:-}" in
+  new)      shift; cmd_new "$@" ;;
+  deps)     shift; cmd_deps "$@" ;;
+  check)    shift; cmd_check "$@" ;;
+  assemble) cmd_assemble ;;
+  preview)  cmd_preview ;;
+  sweep)    cmd_sweep ;;
+  *)
+    echo "Usage: release-notes.sh new [slug] | deps [since] | check [since] | assemble | preview | sweep" >&2
+    exit 1
+    ;;
+esac

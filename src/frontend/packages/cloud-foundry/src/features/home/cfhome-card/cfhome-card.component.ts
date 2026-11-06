@@ -1,202 +1,173 @@
-import { Component, Input } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { BehaviorSubject, combineLatest, Observable } from 'rxjs';
-import { filter, first, map, pairwise } from 'rxjs/operators';
+import { AsyncPipe, CommonModule } from '@angular/common';
+import { Component, Input, ChangeDetectionStrategy, ChangeDetectorRef, inject, OnDestroy } from '@angular/core';
+import { Router } from '@angular/router';
+import { Observable, of } from 'rxjs';
+import { map, take, startWith } from 'rxjs/operators';
+import { EndpointDataRegistry } from '../../../services/endpoint-data/endpoint-data.registry';
+import { EndpointDataService } from '../../../services/endpoint-data/endpoint-data.service';
+import { stAppToAPIResource } from '../../../services/endpoint-data/st-app-adapter';
 
-import { BASE_REDIRECT_QUERY } from '../../../../../core/src/shared/components/stepper/stepper.types';
-import { RouterNav } from '../../../../../store/src/actions/router.actions';
-import { PaginationMonitorFactory } from '../../../../../store/src/monitors/pagination-monitor.factory';
-import { EndpointModel } from '../../../../../store/src/public-api';
-import { ActionState } from '../../../../../store/src/reducers/api-request-reducer/types';
-import { APIResource } from '../../../../../store/src/types/api.types';
+import { BASE_REDIRECT_QUERY } from '@stratosui/core';
+import { EndpointModel, APIResource } from '@stratosui/store';
 import { IApp } from '../../../cf-api.types';
-import { CFAppState } from '../../../cf-app-state';
-import { cfEntityCatalog } from '../../../cf-entity-catalog';
 import {
   ApplicationDeploySourceTypes,
   AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM,
-  AUTO_SELECT_DEPLOY_TYPE_URL_PARAM,
-} from '../../applications/deploy-application/deploy-application-steps.types';
+  AUTO_SELECT_DEPLOY_TYPE_URL_PARAM } from '../../applications/deploy-application/deploy-application-steps.types';
 import {
   AUTO_SELECT_CF_URL_PARAM,
-  IAppTileData,
-} from '../../applications/new-application-base-step/new-application-base-step.component';
+  IAppTileData } from '../../applications/new-application-base-step/new-application-base-step.component';
 import { ActiveRouteCfOrgSpace } from '../../cf/cf-page.types';
-import { goToAppWall } from '../../cf/cf.helpers';
-import { appDataSort, CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
-import { HomePageCardLayout, HomePageEndpointCard } from './../../../../../core/src/features/home/home.types';
-import { ITileConfig } from './../../../../../core/src/shared/components/tile/tile-selector.types';
-
+import { CloudFoundryEndpointService } from '../../cf/services/cloud-foundry-endpoint.service';
+import { HomePageCardLayout, HomePageEndpointCard, ITileConfig } from '@stratosui/core';
+import { TileGridComponent } from '@stratosui/core';
+import { TileGroupComponent } from '@stratosui/core';
+import { TileComponent } from '@stratosui/core';
+import { CardNumberMetricComponent } from '@stratosui/core';
+import { CardCfRecentAppsComponent } from '../card-cf-recent-apps/card-cf-recent-apps.component';
+import { TileSelectorComponent } from '@stratosui/core';
 
 @Component({
   selector: 'app-cfhome-card',
   templateUrl: './cfhome-card.component.html',
   styleUrls: ['./cfhome-card.component.scss'],
   providers: [
-    {
-      provide: ActiveRouteCfOrgSpace,
-      useValue: null,
-    },
-    CloudFoundryEndpointService
+    { provide: ActiveRouteCfOrgSpace, useValue: null },
+    CloudFoundryEndpointService,
+    ApplicationDeploySourceTypes,
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    AsyncPipe,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardNumberMetricComponent,
+    CardCfRecentAppsComponent,
+    TileSelectorComponent,
   ]
 })
-export class CFHomeCardComponent implements HomePageEndpointCard {
+export class CFHomeCardComponent implements HomePageEndpointCard, OnDestroy {
+  private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
+  private registry = inject(EndpointDataRegistry);
 
-  pLayout: HomePageCardLayout;
+  endpointDataService: EndpointDataService | null = null;
 
-  get layout(): HomePageCardLayout {
-    return this.pLayout;
-  }
+  pLayout!: HomePageCardLayout;
+
+  get layout(): HomePageCardLayout { return this.pLayout; }
 
   @Input() set layout(value: HomePageCardLayout) {
-    if (value) {
-      this.pLayout = value;
-    }
+    if (value) { this.pLayout = value; }
     this.updateLayout();
   }
 
   @Input() set endpoint(value: EndpointModel) {
-    this.guid = value.guid;
+    // strict: a registered endpoint always carries a guid; it is only
+    // optional on the shared EndpointModel shape.
+    this.guid = value.guid!;
   }
 
-  guid: string;
-
+  // strict: populated by the @Input endpoint setter the home framework
+  // always supplies before load()/template read.
+  guid!: string;
   recentAppsRows = 10;
-
-  appLink: () => void;
-
-  appCount$: Observable<number>;
-  orgCount$: Observable<number>;
-  routeCount$: Observable<number>;
-
-  hasNoApps$: Observable<boolean>;
-
+  hasNoApps$!: Observable<boolean>;
+  allApps$!: Observable<APIResource<IApp>[]>;
   cardLoaded = false;
-
-  recentApps = [];
-
-  private appStatsLoaded = new BehaviorSubject<boolean>(false);
-  private appStatsToLoad: APIResource<IApp>[] = [];
-
+  showDeployAppTiles = false;
   public tileSelectorConfig$: Observable<ITileConfig<IAppTileData>[]>;
 
-  showDeployAppTiles = false;
-
-  constructor(
-    private store: Store<CFAppState>,
-    private pmf: PaginationMonitorFactory,
-    appDeploySourceTypes: ApplicationDeploySourceTypes,
-  ) {
-    // Set a default layout
+  constructor() {
+    const appDeploySourceTypes = inject(ApplicationDeploySourceTypes);
     this.pLayout = new HomePageCardLayout(1, 1);
-
-    // Get source types for if we are showing tiles to deploy an application
     this.tileSelectorConfig$ = appDeploySourceTypes.types$.pipe(
       map(types => types.map(type =>
-        new ITileConfig<IAppTileData>(
-          type.name,
-          type.graphic,
-          {
-            type: 'deploy',
-            subType: type.id,
-            endpointGuid: type.endpointGuid
-          },
-        )
+        // strict: every SourceType emitted by types$ defines a graphic (the
+        // base types and the SCM-derived entries all set one); the field is
+        // only optional on the shared SourceType interface.
+        new ITileConfig<IAppTileData>(type.name, type.graphic!, {
+          type: 'deploy',
+          subType: type.id,
+          ...(type.endpointGuid ? { endpointGuid: type.endpointGuid } : {}),
+        })
       ))
     );
   }
 
-  // Deploy an app from the Home Card for the given endpoint
-  set selectedTile(tile: ITileConfig<IAppTileData>) {
-    const type = tile ? tile.data.type : null;
-    if (tile) {
-      const query = {
+  // The selector's (selection) output is typed against the base ITileConfig
+  // (and emits null on deselect); the tiles are built in this component with
+  // IAppTileData, so the narrowing here is sound.
+  set selectedTile(tile: ITileConfig | null) {
+    if (tile && tile.data) {
+      const data = tile.data as IAppTileData;
+      const query: Record<string, string> = {
         [BASE_REDIRECT_QUERY]: `applications/new/${this.guid}`,
-        [AUTO_SELECT_CF_URL_PARAM]: this.guid
+        [AUTO_SELECT_CF_URL_PARAM]: this.guid,
       };
-      if (tile.data.subType) {
-        query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = tile.data.subType;
-      }
-      if (tile.data.endpointGuid) {
-        query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = tile.data.endpointGuid;
-      }
-      this.store.dispatch(new RouterNav({ path: `applications/${type}`, query }));
+      if (data.subType) { query[AUTO_SELECT_DEPLOY_TYPE_URL_PARAM] = data.subType; }
+      if (data.endpointGuid) { query[AUTO_SELECT_DEPLOY_TYPE_ENDPOINT_PARAM] = data.endpointGuid; }
+      this.router.navigate(`applications/${data.type}`.split('/'), { queryParams: query });
     }
   }
 
-  // Card is instructed to load its view by the container, whn it is visible
   load(): Observable<boolean> {
     this.cardLoaded = true;
-    this.routeCount$ = CloudFoundryEndpointService.fetchRouteCount(this.store, this.pmf, this.guid);
-    this.appCount$ = CloudFoundryEndpointService.fetchAppCount(this.store, this.pmf, this.guid);
-    this.orgCount$ = CloudFoundryEndpointService.fetchOrgCount(this.store, this.pmf, this.guid);
+    this.endpointDataService = this.registry.acquire(this.guid);
+    this.cdr.markForCheck();
 
-    this.appLink = () => goToAppWall(this.store, this.guid);
-
-    const appsPagObs = cfEntityCatalog.application.store.getPaginationService(this.guid);
-
-    // When the apps are loaded, fetch the app stats
-    this.hasNoApps$ = appsPagObs.entities$.pipe(first(), map(apps => {
-      this.recentApps = apps;
-      this.appStatsToLoad = this.restrictApps(apps);
-      this.fetchAppStats();
-      this.fetchAppStats();
-      return apps.length === 0;
-    }));
-
-    const appStatLoaded$ = this.appStatsLoaded.asObservable().pipe(filter(loaded => loaded));
-    return combineLatest([
-      this.routeCount$,
-      this.appCount$,
-      this.orgCount$,
-      appsPagObs.entities$,
-      appStatLoaded$
-    ]).pipe(
-      map(() => true)
+    // afterLoad$ resolves immediately on cache hit, otherwise completes when the
+    // parallel native-route fetch finishes. Both allApps$ and hasNoApps$ share it.
+    const afterLoad$ = this.afterLoad();
+    this.allApps$ = afterLoad$.pipe(
+      map(() => this.endpointDataService!.recentApps().map(app => stAppToAPIResource(app))),
+      startWith([] as APIResource<IApp>[]),
     );
+    this.hasNoApps$ = afterLoad$.pipe(
+      map(() => this.endpointDataService!.appCount() === 0),
+    );
+
+    if (this.endpointDataService.lastFetched() !== null) {
+      return of(true);
+    }
+    return new Observable<boolean>(subscriber => {
+      const sub = this.endpointDataService!.loaded$.pipe(take(1)).subscribe({
+        next: () => { subscriber.next(true); subscriber.complete(); },
+        error: () => { subscriber.next(true); subscriber.complete(); },
+      });
+      return () => sub.unsubscribe();
+    });
+  }
+
+  ngOnDestroy(): void {
+    if (this.endpointDataService) {
+      this.registry.release(this.guid);
+    }
   }
 
   public updateLayout() {
-    const currentRows = this.recentAppsRows;
-    this.recentAppsRows = this.layout.y > 1 ? 5 : 10;
-
-    // Hide recent apps if more than 2 columns
     if (this.layout.x > 2) {
       this.recentAppsRows = 0;
-    }
-
-    // If the layout changes and there are apps to show then we need to fetch the app stats for them
-    if (this.recentAppsRows > currentRows) {
-      this.appStatsToLoad = this.restrictApps(this.recentApps);
-      this.fetchAppStats();
-    }
-
-    // Only show the deploy app tiles in the full view
-    this.showDeployAppTiles = this.layout.x === 1 && this.layout.y === 1;
-  }
-
-  // Fetch the app stats - we fetch two at a time
-  private fetchAppStats() {
-    if (this.appStatsToLoad.length > 0) {
-      const app = this.appStatsToLoad.shift();
-      if (app.entity.state === 'STARTED') {
-        cfEntityCatalog.appStats.api.getMultiple(app.metadata.guid, this.guid).pipe(
-          map(a => a as ActionState),
-          pairwise(),
-          filter(([oldR, newR]) => oldR.busy && !newR.busy),
-          first()
-        ).subscribe(a => {
-          this.fetchAppStats();
-        });
-      } else {
-        this.fetchAppStats();
-      }
+    } else if (this.layout.y > 1) {
+      this.recentAppsRows = 5;
+    } else if (this.layout.x === 2) {
+      this.recentAppsRows = 7;
     } else {
-      this.appStatsLoaded.next(true);
+      this.recentAppsRows = 10;
     }
+    this.showDeployAppTiles = this.layout.x === 1 && this.layout.y === 1;
+    this.cdr.markForCheck();
   }
 
-  private restrictApps(apps: APIResource<IApp>[]): APIResource<IApp>[] {
-    return !apps ? [] : [...apps.sort(appDataSort).slice(0, this.recentAppsRows)];
+  // Emits once when data is available — immediately on cache hit, after load otherwise.
+  private afterLoad(): Observable<void> {
+    const svc = this.endpointDataService!;
+    return svc.lastFetched() !== null
+      ? of(undefined as void)
+      : svc.loaded$.pipe(take(1));
   }
+
 }

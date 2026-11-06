@@ -1,9 +1,15 @@
-<div *ngIf="!edit">
-  <app-display-value *ngIf="displayCustom.children.length === 0" [label]="label" [value]="value"></app-display-value>
-  <div #displayCustom>
-    <ng-content select=".display-input__display"></ng-content>
+@if (!edit) {
+  <div>
+    @if (displayCustom.children.length === 0) {
+      <app-display-value [label]="label" [value]="value"></app-display-value>
+    }
+    <div #displayCustom>
+      <ng-content select=".display-input__display"></ng-content>
+    </div>
   </div>
-</div>
-<div *ngIf="edit">
-  <ng-content select=".display-input__input"></ng-content>
-</div>
+}
+@if (edit) {
+  <div>
+    <ng-content select=".display-input__input"></ng-content>
+  </div>
+}

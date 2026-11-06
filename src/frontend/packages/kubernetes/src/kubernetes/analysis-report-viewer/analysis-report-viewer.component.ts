@@ -1,13 +1,4 @@
-import {
-  Component,
-  ComponentFactoryResolver,
-  ComponentRef,
-  Input,
-  OnDestroy,
-  Type,
-  ViewChild,
-  ViewContainerRef,
-} from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ComponentRef, Input, OnDestroy, Type, ViewChild, ViewContainerRef, inject } from '@angular/core';
 
 import { AnalysisReport } from '../store/kube.types';
 import { KubeScoreReportViewerComponent } from './kube-score-report-viewer/kube-score-report-viewer.component';
@@ -18,21 +9,25 @@ export interface IReportViewer {
 }
 
 @Component({
-  selector: 'app-analysis-report-viewer',
+selector: 'app-analysis-report-viewer',
   templateUrl: './analysis-report-viewer.component.html',
-  styleUrls: ['./analysis-report-viewer.component.scss']
+
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AnalysisReportViewerComponent implements OnDestroy {
+  private cdr = inject(ChangeDetectorRef);
+
 
   // Component reference for the dynamically created auth form
   @ViewChild('reportViewer', { read: ViewContainerRef, static: true })
-  public container: ViewContainerRef;
-  private reportComponentRef: ComponentRef<IReportViewer>;
+  public container!: ViewContainerRef; // strict: static ViewChild resolved before lifecycle hooks
+  private reportComponentRef?: ComponentRef<IReportViewer>;
 
-  private id: string;
+  private id!: string;
 
-  @Input('report')
-  set report(report: AnalysisReport) {
+  @Input()
+  set report(report: AnalysisReport | null) {
     if (report === null || report.id === this.id) {
       return;
     }
@@ -40,9 +35,7 @@ export class AnalysisReportViewerComponent implements OnDestroy {
     this.updateReport(report);
   }
 
-  constructor(private resolver: ComponentFactoryResolver) { }
-
-  updateReport(report) {
+  updateReport(report: AnalysisReport): void {
     switch (report.format) {
       case 'popeye':
         this.createComponent(PopeyeReportViewerComponent, report);
@@ -62,10 +55,10 @@ export class AnalysisReportViewerComponent implements OnDestroy {
     if (this.reportComponentRef) {
       this.reportComponentRef.destroy();
     }
-    const factory = this.resolver.resolveComponentFactory<IReportViewer>(component);
-    this.reportComponentRef = this.container.createComponent<IReportViewer>(factory);
+    this.reportComponentRef = this.container.createComponent<IReportViewer>(component);
     // this.reportComponentRef.instance.setReport(report);
     this.reportComponentRef.instance.report = report;
+    this.cdr.markForCheck();
   }
 
   ngOnDestroy() {

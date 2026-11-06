@@ -1,0 +1,1584 @@
+# Stratos Makefile — verb + modifier pattern
+#
+# Usage:
+#   make build                  Build frontend + all backend platforms
+#   make build frontend         Build frontend only
+#   make build backend          Cross-compile all backend platforms
+#   make build backend PLATFORM=linux/amd64  Build single backend platform
+#   make test                   Run all tests
+#   make test frontend          Frontend tests only
+#   make test backend           Backend tests only
+#   make test e2e               Run Playwright E2E tests
+#   make release                Release all targets (cf + github) + SHA256SUMS
+#   make release cf             CF-pushable zip
+#   make release github         GitHub release archives
+#   make stamp tag              Create + push the release tag (notes from
+#                               changelog.d fragments in the tag body)
+#   make publish                Create GitHub release + upload dist/release/*
+#                               (REPLACE=yes to replace one CI already made)
+#   make unpublish TAG=vX       Delete a GitHub release (assets and
+#                               drafts included)
+#   make stamp untag TAG=vX     Delete a tag (local + remote)
+#   make stamp line [LINE=X.Y]  Cut maintenance branch release/X.Y.x at
+#                               the line's newest final tag
+#   make sweep                  Remove published changelog.d fragments
+#   make changelog              Report dependency bumps since the last tag
+#   make preview                Render the assembled release notes to HTML
+#                               (GitHub's markdown API) and print the path
+#                               (./build/release-notes.sh deps drafts them)
+#   make install                Install dependencies
+#   make stage                  Stage for local testing
+#   make clean                  Remove all build output
+#   make clean frontend         Remove frontend build only
+#   make clean backend          Remove backend binaries only
+#   make clean dist             Remove everything (including node_modules)
+#   make clean repo             Full reset: git clean -fdx (fresh-clone state)
+#   make check                  Run all quality gates (lint + gate)
+#   make check e2e              Run Playwright E2E tests
+#   make test e2e TIER=acceptance PR=1234   Tiered E2E run (see TESTING.md)
+#   make e2e clean               Sweep stratos-e2e-test labeled CF resources
+#   make stamp frontend         Generate build-info.ts with version metadata
+#   make dump version           Print resolved version variables
+#
+# Variables:
+#   FINAL=strip                 Strip prerelease from version (persisted)
+#   DRYRUN=yes                  Preview actions without executing
+#   VERSION=X.Y.Z               Override version (project convention: no v,
+#                               matching package.json/semver.org — a v is
+#                               accepted too, it's just baked in as given)
+#   PLATFORM=os/arch            Override target platform
+#   TAG=vX.Y.Z                  Tag for publish/unpublish/stamp tag/untag.
+#                               Set explicitly it applies to every verb.
+#                               Unset, each verb resolves what its intent
+#                               needs: stamp tag derives the version being
+#                               released (v + package.json, metadata
+#                               stripped), publish takes the nearest
+#                               EXISTING tag, and unpublish/stamp untag
+#                               refuse to guess and require TAG=.
+#   TAG_REMOTE=<remote>         Remote for stamp tag/untag (default: origin)
+#   LINE=X.Y                    Version line this checkout releases
+#                               (default: package.json's major.minor —
+#                               per-branch state, so a release/5.0.x
+#                               branch is line 5.0 automatically)
+#   TAG_MATCH=<glob>            Tag family scoping nearest-tag queries
+#                               (default: v$(LINE).*)
+#   DRAFT=yes                   publish creates a draft release
+#   REPLACE=yes                 publish deletes the release(s) already on
+#                               the tag and creates in their place
+#   LATEST=auto|yes|no          Whether publish marks the release Latest
+#                               (default auto: only when TAG is the
+#                               highest full-release tag of any line)
+#   NOTES=<file>                Notes file for publish (default: the
+#                               annotated tag body, assembled by stamp tag
+#                               from changelog.d fragments)
+#
+# Debug: make _HIDE= <target>  — exposes all internal variables
+#
+# See docs/build-and-packaging.md for full documentation.
+
+# ── Version (repo settings + shared core) ─────────────────────
+# Stratos versions from package.json — the current version, not the
+# core's next-tag default. `make bump` edits package.json at recipe
+# time; the core keeps version resolution lazy so chains stay correct.
+VERSION_CMD := node -p "require('./package.json').version" 2>/dev/null
+
+include version.mk
+
+# Stratos-specific build metadata and stamps — the per-repo config the
+# vendorable core deliberately excludes.
+$(_HIDE)BUILD_NODE_VERSION := $(shell node --version 2>/dev/null || echo "unknown")
+$(_HIDE)BUILD_TS_VERSION   := $(shell npx tsc --version 2>/dev/null | awk '{print $$2}' || echo "unknown")
+$(_HIDE)BUILD_BUN_VERSION  := $(shell bun --version 2>/dev/null || echo "unknown")
+
+# Lazy (=) so the backend binary's baked-in version reflects the post-bump
+# value when `bump` and `build` chain in a single Make invocation.
+$(_HIDE)GO_LDFLAGS = -X main.appVersion=$($(_HIDE)SEMVER_VERSION) -X main.buildDate=$($(_HIDE)BUILD_DATE) -X main.gitCommit=$($(_HIDE)BUILD_VCS_ID) -X main.gitBranch=$($(_HIDE)BUILD_VCS_BRANCH)
+
+# ── Frontend build info path ─────────────────────────────────
+$(_HIDE)BUILD_INFO_TS := src/frontend/packages/core/src/environments/build-info.ts
+
+# ── Stamp action ─────────────────────────────────────────────
+define stamp.frontend
+	@mkdir -p $(dir $($(_HIDE)BUILD_INFO_TS))
+	@printf "export const BUILD_INFO = {\n  version: '%s',\n  gitProject: '%s',\n  gitCommit: '%s',\n  gitBranch: '%s',\n  buildDate: '%s',\n  nodeVersion: '%s',\n  typescriptVersion: '%s',\n  bunVersion: '%s',\n};\n" \
+		"$($(_HIDE)SEMVER_VERSION)" "$($(_HIDE)BUILD_VCS_URL)" "$($(_HIDE)BUILD_VCS_ID)" "$($(_HIDE)BUILD_VCS_BRANCH)" "$($(_HIDE)BUILD_DATE)" \
+		"$($(_HIDE)BUILD_NODE_VERSION)" "$($(_HIDE)BUILD_TS_VERSION)" "$($(_HIDE)BUILD_BUN_VERSION)" \
+		> $($(_HIDE)BUILD_INFO_TS)
+	@echo "Generated $($(_HIDE)BUILD_INFO_TS)"
+endef
+
+# The unit tests import build-info.ts, which is untracked, so a fresh
+# clone or worktree has none and the checks below fail in hundreds of
+# specs. As a file target with no prerequisites it is stamped only when
+# missing: an existing file, such as the one a running dev server
+# watches, is left alone. CI stamps explicitly before its tests.
+$($(_HIDE)BUILD_INFO_TS):
+	$(stamp.frontend)
+
+define dump.version.extra
+	@echo "GO_LDFLAGS        $($(_HIDE)GO_LDFLAGS)"
+	@echo "LINE              $(LINE)"
+	@echo "TAG_MATCH         $(TAG_MATCH)"
+	@echo "HIGHEST_FULL_TAG  $($(_HIDE)HIGHEST_FULL_TAG)"
+	@echo "LATEST_RESOLVED   $($(_HIDE)LATEST_RESOLVED)"
+endef
+
+# ── Directories ───────────────────────────────────────────────
+$(_HIDE)DIST_DIR    := dist
+$(_HIDE)RELEASE_DIR := $($(_HIDE)DIST_DIR)/release
+$(_HIDE)BIN_DIR     := $($(_HIDE)DIST_DIR)/bin
+
+# ── Cross-cutting variables ───────────────────────────────────
+# DRYRUN=yes   — preview actions without executing (any verb)
+# FINAL=strip  — strip prerelease from version, persist to package.json
+DRYRUN ?=
+FINAL  ?=
+
+# Literal comma — required because $(call) and $(subst) both use commas
+# as argument separators, so a literal cannot appear inline.
+$(_HIDE)COMMA := ,
+
+# ── Platform detection ────────────────────────────────────────
+# Override with: make build PLATFORM=linux/amd64
+PLATFORM ?=
+$(_HIDE)HOST_OS   := $(shell uname -s | tr '[:upper:]' '[:lower:]')
+$(_HIDE)HOST_ARCH := $(patsubst x86_64,amd64,$(patsubst aarch64,arm64,$(shell uname -m)))
+
+# Parse PLATFORM override or default to host
+ifdef PLATFORM
+  $(_HIDE)PLAT_WORDS := $(subst /, ,$(subst -, ,$(subst _, ,$(PLATFORM))))
+  $(_HIDE)TARGET_OS   := $(word 1,$($(_HIDE)PLAT_WORDS))
+  $(_HIDE)TARGET_ARCH := $(or $(word 2,$($(_HIDE)PLAT_WORDS)),$($(_HIDE)HOST_ARCH))
+else
+  $(_HIDE)TARGET_OS   := $($(_HIDE)HOST_OS)
+  $(_HIDE)TARGET_ARCH := $($(_HIDE)HOST_ARCH)
+endif
+
+$(_HIDE)CURRENT_PLATFORM := $($(_HIDE)TARGET_OS)/$($(_HIDE)TARGET_ARCH)
+
+# Cross-compilation: set GOOS/GOARCH when target differs from host
+$(_HIDE)GO_ENV :=
+ifneq ($($(_HIDE)TARGET_OS),$($(_HIDE)HOST_OS))
+  $(_HIDE)GO_ENV += GOOS=$($(_HIDE)TARGET_OS)
+endif
+ifneq ($($(_HIDE)TARGET_ARCH),$($(_HIDE)HOST_ARCH))
+  $(_HIDE)GO_ENV += GOARCH=$($(_HIDE)TARGET_ARCH)
+endif
+
+# ── Modifier flags ───────────────────────────────────────────
+$(_HIDE)WANT_FRONTEND :=
+$(_HIDE)WANT_BACKEND  :=
+$(_HIDE)WANT_E2E      :=
+$(_HIDE)WANT_WEBSITE  :=
+$(_HIDE)WANT_BOOKLETS :=
+
+ifneq ($(filter frontend,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_FRONTEND := yes
+endif
+ifneq ($(filter backend,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_BACKEND := yes
+endif
+ifneq ($(filter e2e,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_E2E := yes
+endif
+ifneq ($(filter website,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_WEBSITE := yes
+endif
+ifneq ($(filter booklets,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_BOOKLETS := yes
+endif
+
+# Default: frontend + backend when none specified (unless e2e),
+# but only for verbs that use these modifiers (not clean/dump).
+# tag/untag/line are stamp modifiers and suppress the default, as does
+# cert (make dev cert only writes the TLS key pair).
+ifneq ($(filter build test dev stamp,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_E2E)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BOOKLETS)$(filter tag untag line cert,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_FRONTEND := yes
+  $(_HIDE)WANT_BACKEND  := yes
+endif
+endif
+
+$(_HIDE)WANT_CF     :=
+$(_HIDE)WANT_GITHUB :=
+$(_HIDE)WANT_AIO    :=
+$(_HIDE)WANT_PAGES  :=
+
+ifneq ($(filter cf,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_CF := yes
+endif
+ifneq ($(filter pages,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_PAGES := yes
+endif
+ifneq ($(filter github,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_GITHUB := yes
+endif
+ifneq ($(filter aio,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_AIO := yes
+endif
+ifneq ($(filter release,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_CF)$($(_HIDE)WANT_GITHUB)$($(_HIDE)WANT_AIO),)
+  $(_HIDE)WANT_CF     := yes
+  $(_HIDE)WANT_GITHUB := yes
+endif
+endif
+
+$(_HIDE)WANT_VERSION :=
+$(_HIDE)WANT_ACTIONS :=
+
+ifneq ($(filter version,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_VERSION := yes
+endif
+ifneq ($(filter actions,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_ACTIONS := yes
+endif
+# Default: version + actions when none specified for dump
+ifneq ($(filter dump,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_VERSION)$($(_HIDE)WANT_ACTIONS),)
+  $(_HIDE)WANT_VERSION := yes
+  $(_HIDE)WANT_ACTIONS := yes
+endif
+endif
+
+$(_HIDE)WANT_PACKAGES :=
+$(_HIDE)WANT_SECRETS  :=
+$(_HIDE)WANT_TREE     :=
+$(_HIDE)WANT_HISTORY  :=
+$(_HIDE)WANT_LICENSES :=
+$(_HIDE)WANT_MODROT   :=
+$(_HIDE)WANT_SEMGREP  :=
+$(_HIDE)WANT_CODEQL   :=
+$(_HIDE)WANT_SARIF    :=
+$(_HIDE)WANT_UPLOAD   :=
+
+ifneq ($(filter packages,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_PACKAGES := yes
+endif
+ifneq ($(filter secrets,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_SECRETS := yes
+endif
+ifneq ($(filter tree,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_TREE := yes
+endif
+ifneq ($(filter history,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_HISTORY := yes
+endif
+ifneq ($(filter licenses,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_LICENSES := yes
+endif
+ifneq ($(filter modrot,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_MODROT := yes
+endif
+ifneq ($(filter semgrep,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_SEMGREP := yes
+endif
+ifneq ($(filter codeql,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_CODEQL := yes
+endif
+ifneq ($(filter sarif,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_SARIF := yes
+endif
+ifneq ($(filter upload,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_UPLOAD := yes
+endif
+
+$(_HIDE)WANT_TAG   :=
+$(_HIDE)WANT_UNTAG :=
+$(_HIDE)WANT_LINE  :=
+$(_HIDE)WANT_CERT  :=
+
+ifneq ($(filter tag,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_TAG := yes
+endif
+ifneq ($(filter untag,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_UNTAG := yes
+endif
+ifneq ($(filter line,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_LINE := yes
+endif
+ifneq ($(filter cert,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_CERT := yes
+endif
+
+# cf modifier defaults to linux/amd64 unless PLATFORM is set
+ifeq ($($(_HIDE)WANT_CF),yes)
+  ifndef PLATFORM
+    PLATFORM := linux/amd64
+    $(_HIDE)TARGET_OS   := linux
+    $(_HIDE)TARGET_ARCH := amd64
+    $(_HIDE)GO_ENV      := GOOS=linux GOARCH=amd64
+    $(_HIDE)CURRENT_PLATFORM := linux/amd64
+  endif
+endif
+
+$(_HIDE)WANT_CLEAN_DIST :=
+$(_HIDE)WANT_CLEAN_REPO :=
+$(_HIDE)WANT_LINT       :=
+$(_HIDE)WANT_GATE       :=
+$(_HIDE)WANT_TESTS      :=
+$(_HIDE)WANT_COVERAGE   :=
+$(_HIDE)WANT_SUMMARY    :=
+$(_HIDE)WANT_DEPENDABOT :=
+
+ifneq ($(filter dist,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_CLEAN_DIST := yes
+endif
+ifneq ($(filter repo,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_CLEAN_REPO := yes
+endif
+ifneq ($(filter lint,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_LINT := yes
+endif
+ifneq ($(filter gate,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_GATE := yes
+endif
+ifneq ($(filter tests,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_TESTS := yes
+endif
+ifneq ($(filter coverage,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_COVERAGE := yes
+endif
+ifneq ($(filter summary,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_SUMMARY := yes
+endif
+ifneq ($(filter dependabot,$(MAKECMDGOALS)),)
+  $(_HIDE)WANT_DEPENDABOT := yes
+endif
+# Default: all checks when none specified
+ifneq ($(filter check,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_LINT)$($(_HIDE)WANT_GATE)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_COVERAGE)$($(_HIDE)WANT_E2E),)
+  $(_HIDE)WANT_LINT     := yes
+  $(_HIDE)WANT_GATE     := yes
+endif
+endif
+# Default: all scanners for audit when no modifier given
+ifneq ($(filter audit,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_WEBSITE)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY)$($(_HIDE)WANT_ACTIONS)$($(_HIDE)WANT_PACKAGES)$($(_HIDE)WANT_SECRETS)$($(_HIDE)WANT_TESTS)$($(_HIDE)WANT_TREE)$($(_HIDE)WANT_HISTORY)$($(_HIDE)WANT_LICENSES)$($(_HIDE)WANT_MODROT)$($(_HIDE)WANT_SEMGREP)$($(_HIDE)WANT_CODEQL)$($(_HIDE)WANT_SARIF)$($(_HIDE)WANT_UPLOAD),)
+  $(_HIDE)WANT_FRONTEND := yes
+  $(_HIDE)WANT_WEBSITE  := yes
+  $(_HIDE)WANT_BACKEND  := yes
+  $(_HIDE)WANT_ACTIONS  := yes
+  $(_HIDE)WANT_PACKAGES := yes
+  $(_HIDE)WANT_SECRETS  := yes
+endif
+endif
+# Default: frontend + backend for outdated when no modifier given
+ifneq ($(filter outdated,$(MAKECMDGOALS)),)
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_SUMMARY),)
+  $(_HIDE)WANT_FRONTEND := yes
+  $(_HIDE)WANT_BACKEND  := yes
+endif
+endif
+
+# No-op targets so modifiers don't error
+# Note: lint has its own standalone recipe — not listed here.
+.PHONY: frontend backend website booklets cf github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert
+frontend backend website booklets cf github aio pages dist repo version e2e actions packages secrets gate tests coverage summary dependabot tree history licenses modrot semgrep codeql sarif upload tag untag line cert:
+	@:
+
+# No-op targets for bump modifiers (consumed by BUMP_MOD filter).
+.PHONY: major minor patch rc alpha beta prerelease
+major minor patch rc alpha beta prerelease:
+	@:
+
+# ── Load action registry ─────────────────────────────────────
+# Variable path prevents tab-completion parsers from following
+# the include (template syntax would confuse static parsers).
+$(_HIDE)ACTIONS := actions
+include $($(_HIDE)ACTIONS).mk
+
+# ══════════════════════════════════════════════════════════════
+# Object definitions — grouped by component, not by verb.
+# Each section defines all actions for one component.
+# ══════════════════════════════════════════════════════════════
+
+# ── Frontend ──────────────────────────────────────────────────
+
+define build.frontend
+	@echo "Building frontend (production)..."
+	bun run build
+	@echo "Frontend built: $($(_HIDE)DIST_DIR)/frontend/browser/"
+endef
+$(call register, build, frontend, $(_HIDE)stamp.frontend)
+
+# Optional narrowing for the edit-test loop:
+#   PROJECT=<vitest project(s)>  e.g. PROJECT=core or PROJECT="core git"
+#   SCOPE=<path filter(s)>       e.g. SCOPE=src/frontend/packages/core/src/shared/components/stepper
+# The npm `test` script hard-codes every --project, so narrowed runs
+# invoke vitest directly.
+define test.frontend
+	@echo "Running frontend tests..."
+	$(if $(strip $(PROJECT)$(SCOPE)),bun run vitest run $(foreach p,$(PROJECT),--project $(p)) $(SCOPE),bun run test)
+endef
+$(call register, test, frontend)
+
+define clean.frontend
+	rm -rf $($(_HIDE)DIST_DIR)/frontend .angular dist-devkit
+endef
+$(call register, clean, frontend)
+
+# ── Dev TLS certificate ──────────────────────────────────────
+
+# Both dev servers (ng serve via angular.json, and jetstream via
+# config.properties) read dev-ssl/server.{crt,key}. The certificate must carry
+# a subjectAltName naming localhost: browsers have required SAN since Chrome 58
+# and ignore a bare CN, so a CN-only certificate fails with
+# ERR_CERT_COMMON_NAME_INVALID no matter how it is trusted. The certificate is
+# per-developer and gitignored — trusting one is a local decision, and a shared
+# key in the repo is a key everyone has.
+define dev.cert
+	@mkdir -p dev-ssl
+	@echo "Generating dev TLS certificate (SAN: localhost, 127.0.0.1, ::1)..."
+	@openssl req -x509 -newkey rsa:2048 -sha256 -days 398 -nodes \
+		-keyout dev-ssl/server.key -out dev-ssl/server.crt \
+		-subj '/CN=localhost/O=Stratos Development' \
+		-addext 'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:0:0:0:0:0:0:0:1' \
+		-addext 'extendedKeyUsage=serverAuth' \
+		-addext 'basicConstraints=critical,CA:TRUE' >/dev/null 2>&1
+	@chmod 600 dev-ssl/server.key
+	@echo "Wrote dev-ssl/server.crt and dev-ssl/server.key (valid 398 days)."
+	@echo ""
+	@echo "It is self-signed, so the browser still warns until it is trusted once:"
+	@echo "  macOS: sudo security add-trusted-cert -d -r trustRoot \\"
+	@echo "           -k /Library/Keychains/System.keychain dev-ssl/server.crt"
+	@echo "  Linux: sudo cp dev-ssl/server.crt /usr/local/share/ca-certificates/stratos-dev.crt \\"
+	@echo "           && sudo update-ca-certificates"
+endef
+$(call register, dev, cert)
+
+# Regenerate when absent, or when the certificate on disk predates the SAN
+# requirement — an old CN-only cert is silently useless to every browser.
+define _ensure_dev_cert
+	@if [ ! -f dev-ssl/server.crt ] || [ ! -f dev-ssl/server.key ] || \
+		! openssl x509 -in dev-ssl/server.crt -noout -ext subjectAltName 2>/dev/null \
+			| grep -q 'DNS:localhost'; then \
+		$(MAKE) --no-print-directory dev cert; \
+	fi
+endef
+
+define dev.frontend
+	$(_ensure_dev_cert)
+	BACKEND_PORT=$(BACKEND_PORT) bun run ng serve --port $(FRONTEND_PORT) --host 0.0.0.0 --disable-host-check --proxy-config proxy.conf.cjs
+endef
+$(call register, dev, frontend)
+
+# stamp.frontend recipe is defined in the version block near the top
+$(call register, stamp, frontend)
+
+# ── Backend ───────────────────────────────────────────────────
+
+# extra_plugins.go is generated from plugin-config.yaml (gitignored), so a
+# fresh checkout compiles a plugin-less jetstream unless generation runs
+# first. Internal prerequisite of every backend build; hidden from help.
+.PHONY: $(_HIDE)gen-plugins
+$(_HIDE)gen-plugins:
+	cd src/jetstream && go generate ./...
+
+define build.backend
+	@if [ -n "$(PLATFORM)" ]; then \
+		echo "Building backend for $($(_HIDE)CURRENT_PLATFORM)..."; \
+		mkdir -p $($(_HIDE)BIN_DIR); \
+		cd src/jetstream && $($(_HIDE)GO_ENV) CGO_ENABLED=0 go build -ldflags "$($(_HIDE)GO_LDFLAGS)" -o ../../$($(_HIDE)BIN_DIR)/jetstream; \
+		echo "Backend built: $($(_HIDE)BIN_DIR)/jetstream"; \
+	else \
+		echo "Cross-compiling backend for all platforms..."; \
+		chmod +x build/cross-compile.sh; \
+		./build/cross-compile.sh "$($(_HIDE)SEMVER_VERSION)" "$($(_HIDE)BUILD_DATE)" "$($(_HIDE)BUILD_VCS_ID)"; \
+		echo "All platform binaries built: $($(_HIDE)BIN_DIR)/"; \
+	fi
+endef
+$(call register, build, backend, $(_HIDE)gen-plugins)
+
+define test.backend
+	@echo "Running backend tests..."
+	@for m in $(GO_MODULES); do \
+		echo "==> test $$m"; \
+		(cd $$m && go test ./... -v -count=1) || exit 1; \
+	done
+endef
+$(call register, test, backend)
+
+define clean.backend
+	rm -rf $($(_HIDE)DIST_DIR)/bin
+	cd src/jetstream && rm -f jetstream jetstream.exe jetstream.darwin
+endef
+$(call register, clean, backend)
+
+define dev.backend
+	$(_ensure_dev_cert)
+	@NEED_BUILD=false; \
+	case "$$(uname -s)" in Darwin) BINFMT="Mach-O";; *) BINFMT="ELF";; esac; \
+	if [ ! -f $($(_HIDE)BIN_DIR)/jetstream ]; then \
+		NEED_BUILD=true; \
+	elif ! file $($(_HIDE)BIN_DIR)/jetstream | grep -q "$$BINFMT"; then \
+		echo "Backend binary is not for this platform, rebuilding..."; \
+		NEED_BUILD=true; \
+	fi; \
+	if [ "$$NEED_BUILD" = true ]; then \
+		echo "Building backend for host platform..."; \
+		$(MAKE) build backend PLATFORM=$($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH); \
+	fi
+	cd src/jetstream && CONSOLE_PROXY_TLS_ADDRESS=:$(BACKEND_PORT) SESSION_STORE_EXPIRY=$(SESSION_STORE_EXPIRY) ALLOWED_ORIGINS=$(ALLOWED_ORIGINS) ../../$($(_HIDE)BIN_DIR)/jetstream
+endef
+$(call register, dev, backend)
+
+# ── Website (documentation site) ──────────────────────────────
+
+define build.website
+	@echo "Building documentation website..."
+	cd website && bun install --frozen-lockfile && bun run build
+	@echo "Website built: website/build/"
+endef
+$(call register, build, website)
+
+define dev.website
+	cd website && bun install --frozen-lockfile && bun run start
+endef
+$(call register, dev, website)
+
+define clean.website
+	rm -rf website/build website/.docusaurus website/node_modules
+endef
+$(call register, clean, website)
+
+# ── Booklets (offline epub/PDF renderings of docs/) ──────────
+
+define build.booklets
+	@echo "Rendering documentation booklets..."
+	docs/booklets/render.sh
+	@echo "Booklets rendered: dist/booklets/"
+endef
+$(call register, build, booklets)
+
+define clean.booklets
+	rm -rf dist/booklets
+endef
+$(call register, clean, booklets)
+
+# Local dev session expiry. Mirrors the cf-package deploy default
+# (`build/release-cf.sh`) so long Playwright drives don't get bounced
+# back to /login mid-session. Override on the make line if needed.
+SESSION_STORE_EXPIRY ?= 240
+
+# ── E2E variables (consumed by test.e2e and check.e2e) ──
+# These are recipe-local, not cross-cutting. DRYRUN=yes is the
+# existing cross-cutting variable (wired to bump); the e2e recipes
+# also consume it, mapping to Playwright's --list.
+E2E_BROWSERS    ?=
+E2E_TRACE       ?=
+E2E_VIDEO       ?=
+E2E_SCREENSHOTS ?=
+
+# Tiered selection (see TESTING.md "Tiered E2E runs"). Comma lists.
+# TIER/GROUP set → recipe delegates to scripts/e2e-run.mjs and the
+# browser default becomes all three (E2E_BROWSERS still overrides).
+TIER            ?=
+GROUP           ?=
+PR              ?=
+
+# Extra zizmor flags for `make audit actions` (e.g. --persona=auditor)
+ZIZMOR_FLAGS    ?=
+
+# Helpers — translate the variables above into Playwright CLI flags.
+
+# Convert "a,b,c" → "--project=a --project=b --project=c"
+# Empty → "--project=chromium" (default)
+# "all" → ""                    (no filter; runs every project in playwright.config.ts)
+_e2e_browsers = $(if $(1),$(if $(filter all,$(1)),,$(addprefix --project=,$(subst $($(_HIDE)COMMA), ,$(1)))),--project=chromium)
+
+# Emit '--name value' iff value is non-empty
+_e2e_flag = $(if $(2),--$(1) $(2),)
+
+# Emit '--name' iff value == "yes"
+_e2e_toggle = $(if $(filter yes,$(2)),--$(1),)
+
+# ── E2E ───────────────────────────────────────────────────────
+
+# The local webServer needs a host-runnable jetstream at dist/bin/jetstream;
+# cross-compiles leave a foreign binary there (exit 126). Skipped when
+# E2E_BASE_URL targets a remote deployment (no local server started).
+define _ensure_host_backend
+	@if [ -z "$(E2E_BASE_URL)" ]; then \
+		NEED_BUILD=false; \
+		case "$$(uname -s)" in Darwin) BINFMT="Mach-O";; *) BINFMT="ELF";; esac; \
+		if [ ! -f $($(_HIDE)BIN_DIR)/jetstream ]; then \
+			NEED_BUILD=true; \
+		elif ! file $($(_HIDE)BIN_DIR)/jetstream | grep -q "$$BINFMT"; then \
+			echo "Backend binary is not for this platform - rebuilding for $($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH)..."; \
+			NEED_BUILD=true; \
+		fi; \
+		if [ "$$NEED_BUILD" = true ]; then \
+			$(MAKE) build backend PLATFORM=$($(_HIDE)HOST_OS)/$($(_HIDE)HOST_ARCH); \
+		fi; \
+	fi
+endef
+
+define test.e2e
+	$(_ensure_host_backend)
+	@if [ -n "$(TIER)$(GROUP)" ]; then \
+		echo "Running tiered E2E tests..."; \
+		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )node scripts/e2e-run.mjs \
+			$(if $(TIER),--tier $(TIER) )$(if $(GROUP),--group $(GROUP) )--browsers $(or $(E2E_BROWSERS),all) \
+			$(if $(PR),--pr $(PR) )$(call _e2e_toggle,dry-run,$(DRYRUN)); \
+	else \
+		echo "Running Playwright E2E tests..."; \
+		$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test \
+			$(call _e2e_browsers,$(E2E_BROWSERS)) \
+			$(call _e2e_flag,trace,$(E2E_TRACE)) \
+			$(call _e2e_toggle,list,$(DRYRUN)); \
+	fi
+endef
+$(call register, test, e2e)
+
+# make e2e clean — sweep stratos-e2e-test labeled CF resources left behind
+# by e2e runs (apps/routes/service instances/spaces/orgs). Direct CF API,
+# no Playwright — see scripts/e2e-clean.mjs. Deliberately not run as part
+# of any test/check recipe; an operator runs it between runs.
+define clean.e2e
+	@echo "Sweeping stratos-e2e-test labeled CF resources..."
+	DRYRUN=$(DRYRUN) node scripts/e2e-clean.mjs
+endef
+$(call register, clean, e2e)
+
+# ── Check (quality gates) ────────────────────────────────────
+# make check          — lint + gate (default)
+# make check lint     — ESLint + go vet + golangci-lint
+# make check gate     — lint + unit tests + production build (= bun run gate-check)
+# make check tests    — unit tests only
+# make check coverage — unit tests with coverage
+# make check e2e      — Playwright E2E core tests
+
+# golangci-lint has to be built by a Go at least as new as jetstream's go.mod
+# target. It refuses to load its config when its own build version is lower,
+# and a release older than the toolchain cannot decode that toolchain's export
+# data either. A packaged binary is pinned to whatever Go built it, so it dies
+# on every Go bump -- hence building from source here.
+#
+# The install toolchain is pinned to the go.mod target rather than left to the
+# local Go: on a machine running an older Go, an unpinned `go install` would
+# build a binary too old for this module all over again. GOTOOLCHAIN fetches
+# the right one, so 1.26 and 1.27 developers both end up with a working linter.
+# Bump GOLANGCI_LINT_VERSION when a newer Go needs a newer release to
+# typecheck it (that release's go.mod must allow the target below).
+GOLANGCI_LINT_VERSION ?= v2.13.1
+GOLANGCI_LINT = $(shell go env GOPATH)/bin/golangci-lint
+GOLANGCI_LINT_GO = go$(shell awk '/^go /{print $$2; exit}' src/jetstream/go.mod)
+
+define ensure_golangci_lint
+	@$(GOLANGCI_LINT) --version 2>/dev/null | \
+		grep -q "$(patsubst v%,%,$(GOLANGCI_LINT_VERSION)) built with $(GOLANGCI_LINT_GO)" || \
+		(echo "Building golangci-lint $(GOLANGCI_LINT_VERSION) with $(GOLANGCI_LINT_GO)..." && \
+		 GOTOOLCHAIN=$(GOLANGCI_LINT_GO) go install \
+		   github.com/golangci/golangci-lint/v2/cmd/golangci-lint@$(GOLANGCI_LINT_VERSION))
+endef
+
+# Every Go module in the backend, discovered rather than listed: the plugins
+# are separate modules, and naming them by hand is how five of the seven came
+# to be linted by nothing at all.
+GO_MODULES = $(shell find src/jetstream -name go.mod -not -path "*/node_modules/*" -exec dirname {} \;)
+
+# go_check_all runs the Go checks over every module. It is shared by lint and
+# gate: gate has to run the Go linters too (its own summary line has always
+# claimed it did), but bun run gate-check already covers ESLint, so only this
+# half is common to both.
+define go_check_all
+	@for m in $(GO_MODULES); do \
+		echo "==> $$m"; \
+		(cd $$m && \
+		  { [ -z "$$(gofmt -l .)" ] || { echo "not gofmt-clean:"; gofmt -l .; false; }; } && \
+		  go vet ./... && $(GOLANGCI_LINT) run ./...) || exit 1; \
+	done
+endef
+
+define check.lint
+	@echo "Running lint checks..."
+	$(ensure_golangci_lint)
+	bun run lint
+	$(go_check_all)
+endef
+$(call register, check, lint)
+
+
+define check.gate
+	@echo "Running gate checks (lint + unit tests + production build)..."
+	$(ensure_golangci_lint)
+	bun run gate-check
+	$(go_check_all)
+	@for m in $(GO_MODULES); do \
+		echo "==> test $$m"; \
+		(cd $$m && go test ./... -count=1) || exit 1; \
+	done
+endef
+$(call register, check, gate, $($(_HIDE)BUILD_INFO_TS))
+
+define check.tests
+	@echo "Running unit tests..."
+	bun run test
+	cd src/jetstream && go test ./... -v -count=1
+endef
+$(call register, check, tests, $($(_HIDE)BUILD_INFO_TS))
+
+define check.coverage
+	@echo "Running unit tests with coverage..."
+	bun run test -- --coverage
+endef
+$(call register, check, coverage, $($(_HIDE)BUILD_INFO_TS))
+
+define check.e2e
+	$(_ensure_host_backend)
+	@echo "Running Playwright E2E core tests..."
+	@$(if $(E2E_VIDEO),E2E_VIDEO=$(E2E_VIDEO) )$(if $(E2E_SCREENSHOTS),E2E_SCREENSHOTS=$(E2E_SCREENSHOTS) )npx playwright test e2e/tests/core/ \
+		$(call _e2e_browsers,$(E2E_BROWSERS)) \
+		$(call _e2e_flag,trace,$(E2E_TRACE)) \
+		$(call _e2e_toggle,list,$(DRYRUN))
+endef
+$(call register, check, e2e)
+
+# ── Audit (security scanning) ────────────────────────────────
+# make audit              — default scanners (frontend backend actions packages secrets)
+# make audit frontend     — bun audit (npm advisory DB), root workspace
+# make audit website      — bun audit (npm advisory DB), website/ workspace
+# make audit backend      — gosec + trivy + govulncheck (both Go modules)
+# make audit modrot       — modrot archived/deprecated dependency scan (needs gh auth)
+# make audit semgrep      — semgrep SAST, account policy + SARIF (needs network, manual/build-machine only)
+# make audit codeql       — CodeQL SAST, Go + JS/TS (needs codeql CLI, manual/build-machine only)
+# make audit actions      — zizmor (GitHub Actions workflow SAST)
+#                           ZIZMOR_FLAGS="--persona=auditor" for the strict rule set
+# make audit packages     — osv-scanner (all lockfiles + go.mods, one pass)
+# make audit secrets      — gitleaks (working-tree secret scan)
+# make audit tests        — gosec including _test.go files + #nosec suppression report
+# make audit tree         — trivy over the whole tree (deploy/ Dockerfiles, helm, manifests)
+# make audit history      — gitleaks full git-history secret scan (slow)
+# make audit licenses     — osv-scanner dependency license report
+# make audit sarif        — sarif-tools summary across dist/*.sarif (local, no network)
+# make audit upload       — push dist/*.sarif to GitHub code scanning, skips codeql-* (CI covers those); needs repo push access
+# make audit summary      — high/moderate/low counts only
+
+define audit.frontend
+	@echo "Running frontend audit (bun audit)..."
+	@bun audit || true
+endef
+$(call register, audit, frontend)
+
+# tools/stb isn't covered — pre-release, not worth auditing yet.
+define audit.website
+	@echo "Running website audit (bun audit)..."
+	@cd website && bun audit || true
+endef
+$(call register, audit, website)
+
+# gosec exits non-zero both when it finds issues (advisory here, hence the
+# tolerated failure) and when it cannot run at all. Those are not the same
+# thing: a gosec built against an older Go fails every package with
+# "internal error: package ... without types", and `|| true` reported that as
+# a clean audit while nothing was scanned. Findings stay advisory; a scanner
+# that did not run is an error.
+define run_gosec
+	@out=$$(cd $(1) && gosec $(2) ./... 2>&1); \
+	printf '%s\n' "$$out"; \
+	if printf '%s' "$$out" | grep -q 'internal error:'; then \
+		echo "ERROR: gosec could not scan $(1) — it is likely built against an older Go than $$(go env GOVERSION)." >&2; \
+		echo "       Rebuild it: go install github.com/securego/gosec/v2/cmd/gosec@latest" >&2; \
+		exit 1; \
+	fi; \
+	exit 0
+endef
+
+define audit.backend
+	@echo "Running backend security scans..."
+	$(call require_tool,gosec,Run: go install github.com/securego/gosec/v2/cmd/gosec@latest)
+	$(call require_tool,trivy,See https://github.com/aquasecurity/trivy)
+	$(call require_tool,govulncheck,Run: go install golang.org/x/vuln/cmd/govulncheck@latest)
+	@echo "── gosec ──"
+	$(call run_gosec,src/jetstream,-quiet)
+	$(call run_gosec,src/jetstream/api,-quiet)
+	@echo "── trivy ──"
+	trivy fs --scanners vuln,misconfig src/jetstream || true
+	@echo "── govulncheck ──"
+	cd src/jetstream && govulncheck ./... || true
+	cd src/jetstream/api && govulncheck ./... || true
+endef
+$(call register, audit, backend)
+
+# Archived / deprecated dependency scan. Needs `gh auth token` (GitHub
+# GraphQL) + network, so it is a standalone extra, not in the default set.
+# --recursive covers jetstream + api + every plugin go.mod in one query pass.
+# SARIF (modrot >= 0.10.0) lands in dist/ for GitHub code scanning upload.
+define audit.modrot
+	@echo "Running dependency-archival audit (modrot)..."
+	$(call require_tool,modrot,Run: go install github.com/norman-abramovitz/modrot@latest)
+	@mkdir -p dist
+	modrot --recursive --deprecated --resolve src/jetstream || true
+	modrot --recursive --deprecated --resolve --sarif src/jetstream > dist/modrot.sarif || true
+endef
+$(call register, audit, modrot)
+
+# Broad pattern-based SAST across the whole tree, using the org policy from
+# the logged-in Semgrep AppSec Platform account (`semgrep login`) — findings
+# also land in the account's dashboard, plus a local SARIF copy in dist/.
+# Falls back to community rules if not logged in. Needs network — standalone
+# extra, not in the default set. Run manually on the build machine.
+define audit.semgrep
+	@echo "Running Semgrep SAST (semgrep ci, account policy)..."
+	$(call require_tool,semgrep,Run: brew install semgrep)
+	@semgrep show identity > /dev/null 2>&1 || echo "Not logged in to Semgrep — falling back to community rules. Run: semgrep login"
+	@mkdir -p dist
+	semgrep ci --sarif --sarif-output=dist/semgrep.sarif || true
+endef
+$(call register, audit, semgrep)
+
+# Deep SAST via CodeQL databases (Go backend + JS/TS frontend). Needs the
+# codeql CLI with query packs installed — standalone extra, not in the
+# default set. Run manually on the build machine; SARIF output lands in dist/.
+define audit.codeql
+	@echo "Running CodeQL SAST (Go + JavaScript/TypeScript)..."
+	$(call require_tool,codeql,See https://github.com/github/codeql-action/releases)
+	@mkdir -p dist
+	@echo "── Go (src/jetstream) ──"
+	codeql database create dist/codeql-db-go --language=go --source-root=src/jetstream --overwrite
+	codeql database analyze dist/codeql-db-go codeql/go-queries --format=sarif-latest --output=dist/codeql-go.sarif
+	@echo "── JavaScript/TypeScript (src/frontend) ──"
+	codeql database create dist/codeql-db-js --language=javascript --source-root=src/frontend --overwrite
+	codeql database analyze dist/codeql-db-js codeql/javascript-queries --format=sarif-latest --output=dist/codeql-js.sarif
+	@echo "SARIF written to dist/codeql-go.sarif and dist/codeql-js.sarif"
+endef
+$(call register, audit, codeql)
+
+# Aggregate summary across every SARIF file already written to dist/
+# (modrot, semgrep, codeql, and any scanner added later) via sarif-tools.
+# Local-only, no network — run after the SARIF-emitting scanners.
+define audit.sarif
+	@echo "Running SARIF summary (sarif-tools)..."
+	$(call require_tool,sarif,Run: pip install sarif-tools)
+	@ls dist/*.sarif > /dev/null 2>&1 || (echo "No SARIF files in dist/ — run audit modrot/semgrep/codeql first." >&2 && exit 1)
+	sarif summary dist
+endef
+$(call register, audit, sarif)
+
+# Push dist/*.sarif to GitHub code scanning (same endpoint the codeql-action
+# workflow uses), so findings show up in the Security tab. Skips codeql-*
+# — .github/workflows/codeql.yml already uploads those canonically under
+# categories /language:go and /language:javascript-typescript on every push/
+# PR to develop+main; a local upload with no category would just add a
+# duplicate-looking uncategorized entry. modrot/semgrep have no CI upload
+# path, so those are the ones this target actually adds. Needs push access
+# to this repo (code-scanning upload requires write) and the commit already
+# pushed — GitHub has to recognize commit_sha/ref. The fork-only account
+# used for day-to-day work has pull-only access upstream; switch to the
+# maintainer account first (`gh auth switch`) if this 403s.
+define audit.upload
+	@echo "Uploading SARIF to GitHub code scanning..."
+	$(call require_tool,gh,See https://cli.github.com)
+	@ls dist/*.sarif > /dev/null 2>&1 || (echo "No SARIF files in dist/ — run audit modrot/semgrep/codeql first." >&2 && exit 1)
+	@commit_sha=$$(git rev-parse HEAD); \
+	ref=refs/heads/$$(git branch --show-current); \
+	for f in dist/*.sarif; do \
+		case "$$f" in dist/codeql-*.sarif) echo "── $$f ── skipped (CI already uploads CodeQL canonically)"; continue;; esac; \
+		echo "── $$f ──"; \
+		tmpfile=$$(mktemp); \
+		gzip -c "$$f" | base64 | tr -d '\n' > "$$tmpfile"; \
+		gh api repos/{owner}/{repo}/code-scanning/sarifs \
+			-f commit_sha="$$commit_sha" \
+			-f ref="$$ref" \
+			-F sarif=@"$$tmpfile" \
+			--jq '.id' || { rm -f "$$tmpfile"; exit 1; }; \
+		rm -f "$$tmpfile"; \
+	done
+endef
+$(call register, audit, upload)
+
+define audit.actions
+	@echo "Running GitHub Actions workflow audit (zizmor)..."
+	$(call require_tool,zizmor,Run: brew install zizmor)
+	@if command -v gh > /dev/null 2>&1 && gh auth token > /dev/null 2>&1; then \
+		GH_TOKEN=$$(gh auth token) zizmor $(ZIZMOR_FLAGS) .github/workflows/ || true; \
+	else \
+		zizmor --offline $(ZIZMOR_FLAGS) .github/workflows/ || true; \
+	fi
+endef
+$(call register, audit, actions)
+
+define audit.packages
+	@echo "Running dependency audit (osv-scanner)..."
+	$(call require_tool,osv-scanner,Run: brew install osv-scanner)
+	@osv-scanner scan source -r . || true
+endef
+$(call register, audit, packages)
+
+define audit.secrets
+	@echo "Running secret scan (gitleaks)..."
+	$(call require_tool,gitleaks,Run: brew install gitleaks)
+	@gitleaks dir . --no-banner --redact || { \
+		echo "ERROR: gitleaks reported findings above." >&2; \
+		echo "       Rotate anything real. Add a reviewed false positive to .gitleaks.toml." >&2; \
+		exit 1; \
+	}
+endef
+$(call register, audit, secrets)
+
+define audit.tests
+	@echo "Running gosec including test files..."
+	$(call require_tool,gosec,Run: go install github.com/securego/gosec/v2/cmd/gosec@latest)
+	$(call run_gosec,src/jetstream,-quiet -tests -track-suppressions)
+	$(call run_gosec,src/jetstream/api,-quiet -tests -track-suppressions)
+endef
+$(call register, audit, tests)
+
+define audit.tree
+	@echo "Running full-tree scan (trivy)..."
+	$(call require_tool,trivy,See https://github.com/aquasecurity/trivy)
+	trivy fs --scanners vuln,misconfig --skip-dirs '**/node_modules' --skip-dirs '**/dist' . || true
+endef
+$(call register, audit, tree)
+
+define audit.history
+	@echo "Running full git-history secret scan (gitleaks)..."
+	$(call require_tool,gitleaks,Run: brew install gitleaks)
+	gitleaks git . --no-banner --redact || true
+endef
+$(call register, audit, history)
+
+define audit.licenses
+	@echo "Running dependency license report (osv-scanner)..."
+	$(call require_tool,osv-scanner,Run: brew install osv-scanner)
+	osv-scanner scan source --licenses -r . || true
+endef
+$(call register, audit, licenses)
+
+define audit.summary
+	@echo "── Frontend (bun audit) ──"
+	@bun audit 2>&1 | grep -E "^[0-9]+ vulnerabilities" || echo "no summary line"
+	@echo "── Backend (govulncheck) ──"
+	@cd src/jetstream && govulncheck ./... 2>&1 | grep -E "^Your code is affected|This scan also found" || echo "no findings"
+endef
+$(call register, audit, summary)
+
+# ── Outdated (upgrade discovery) ─────────────────────────────
+# make outdated           — frontend + backend
+# make outdated frontend  — bun outdated (direct deps with available upgrades)
+# make outdated backend   — go list -m -u all (modules with updates)
+
+define outdated.frontend
+	@echo "Running frontend outdated check (bun outdated)..."
+	@bun outdated || true
+endef
+$(call register, outdated, frontend)
+
+define outdated.backend
+	@echo "Running backend outdated check (go list -m -u all)..."
+	@cd src/jetstream && go list -m -u all 2>&1 | grep '\[' || echo "no module updates available"
+endef
+$(call register, outdated, backend)
+
+# ── Deps (dependency management helpers) ─────────────────────
+# make deps              — defaults to dependabot listing
+# make deps dependabot   — list open dependency PRs from GitHub
+
+define deps.dependabot
+	$(call require_tool,gh,See https://cli.github.com)
+	@echo "Open dependency PRs:"
+	@gh pr list --label dependencies --state open --limit 50 \
+		--json number,title,createdAt,author \
+		--template '{{range .}}  #{{.number}}  {{.title}}  ({{timeago .createdAt}}, {{.author.login}}){{"\n"}}{{end}}'
+endef
+$(call register, deps, dependabot)
+
+# ── CF release ────────────────────────────────────────────────
+
+define release.cf
+	@chmod +x build/release-cf.sh
+	@./build/release-cf.sh "$($(_HIDE)SEMVER_VERSION)"
+endef
+$(call register, release, cf)
+
+# ── GitHub release ────────────────────────────────────────────
+
+define release.github
+	@chmod +x build/release-github.sh
+	@./build/release-github.sh "$($(_HIDE)SEMVER_VERSION)"
+endef
+$(call register, release, github)
+
+# ── All-in-one image payload ──────────────────────────────────
+# Stages dist/aio-package/ (reusing the release-built jetstream + ui) as the
+# Docker build context for deploy/all-in-one/Dockerfile. Does NOT build.
+
+define release.aio
+	@chmod +x deploy/all-in-one/stage-aio.sh
+	@./deploy/all-in-one/stage-aio.sh "$($(_HIDE)SEMVER_VERSION)"
+endef
+$(call register, release, aio)
+
+# ── Release checksums ────────────────────────────────────────
+# Checksums are a property of the artifacts: every artifact-producing
+# release invocation ends by staging the loose cf zip into
+# dist/release and regenerating a single SHA256SUMS over everything
+# there. Exact-version filenames so stale zips from earlier builds are
+# never picked up. Standalone regen (post-unpublish asset fix):
+# ./build/create-checksums.sh
+define release.checksums
+	@mkdir -p $($(_HIDE)RELEASE_DIR)
+	@for z in $($(_HIDE)DIST_DIR)/stratos-cf-$($(_HIDE)SEMVER_VERSION).zip; do \
+		if [ -f "$$z" ]; then cp "$$z" $($(_HIDE)RELEASE_DIR)/; fi; \
+	done
+	@chmod +x build/create-checksums.sh
+	@./build/create-checksums.sh "$($(_HIDE)SEMVER_VERSION)"
+endef
+$(call register_always, release, checksums)
+# Appended after every artifact modifier registration so it runs last;
+# gated on an artifact actually landing in dist/ (aio only stages a
+# docker build context — nothing to checksum).
+$(_HIDE)DEPS_release += $(if $($(_HIDE)WANT_CF)$($(_HIDE)WANT_GITHUB),$(_HIDE)release.checksums)
+
+# ── Release lifecycle (tag → publish / unpublish → untag) ────
+#   make stamp tag [VERSION=X]      create + push the annotated release tag
+#   make publish [DRAFT=yes]        gh release create + upload dist/release/*
+#   make publish REPLACE=yes        same, replacing the release already there
+#   make unpublish TAG=vX           delete the GitHub release (assets included)
+#   make stamp untag TAG=vX         delete the tag (local + remote)
+#   make stamp line [LINE=X.Y]      cut maintenance branch release/X.Y.x
+#
+# Forward path:  build → release cf github → stamp tag → publish → sweep
+# Rollback:      unpublish → stamp untag   (release first, so the tag
+#                is never orphaned by a half-done rollback)
+#
+# gh authenticates from the environment (GH_TOKEN/GITHUB_TOKEN or a
+# prior `gh auth login`) — credentials never appear on a command line.
+TAG        ?=
+TAG_REMOTE ?= origin
+DRAFT      ?=
+NOTES      ?=
+
+# LINE names the version line this checkout releases — the noun behind
+# concurrent lines (5.0.X maintenance beside 5.1.Y development). It
+# derives from package.json's major.minor, which is per-branch state:
+# develop at 5.1.0-dev is line 5.1, a release/5.0.x branch is line 5.0.
+# TAG_MATCH is the tag-family glob every nearest-tag query filters by —
+# ancestry alone scopes a maintenance branch (5.1 tags are never its
+# ancestors), but the moment a 5.0.X fix back-merges into develop its
+# tag becomes reachable there, and without the filter it could become
+# develop's "nearest tag".
+LINE      ?= $($(_HIDE)SEMVER_MAJOR).$($(_HIDE)SEMVER_MINOR)
+TAG_MATCH ?= v$(LINE).*
+
+# Per-verb tag resolution. stamp tag CREATES the release, so its default
+# derives from the version being released (v + package.json with build
+# metadata stripped — tags are clean semver; package.json carries
+# +build.* locally, tags never do). publish operates on a tag that
+# already EXISTS — deriving from package.json there points one release
+# ahead the moment the post-release bump lands, and publish aborts on
+# --verify-tag having published nothing. So publish defaults to the
+# nearest existing tag, resolved at recipe time (kept lazy) so it also
+# sees a tag created earlier in the same invocation. Deletion verbs
+# (unpublish, stamp untag) never guess: "whatever is newest" as a
+# default is how a typo removes the wrong release — both demand an
+# explicit TAG. TAG= on the command line overrides every verb unchanged.
+$(_HIDE)NEXT_TAG    = v$($(_HIDE)SEMVER_NOMETA)
+$(_HIDE)LAST_TAG    = $(shell git describe --tags --abbrev=0 --match '$(TAG_MATCH)' 2>/dev/null)
+$(_HIDE)CREATE_TAG  = $(or $(TAG),$($(_HIDE)NEXT_TAG))
+$(_HIDE)PUBLISH_TAG = $(or $(TAG),$($(_HIDE)LAST_TAG))
+
+# LATEST controls the repo's Latest-release pointer at publish
+# (auto|yes|no, default auto). gh moves Latest onto any new non-draft,
+# non-prerelease release, so cutting 5.0.5 after 5.1.0 would yank the
+# pointer backwards onto the maintenance patch. auto answers "is this
+# tag the highest that publishes as a full release?" across ALL lines —
+# Latest is a repo-global pointer, so lines compete — and passes the
+# answer explicitly both ways. alpha/beta/rc never qualify; dev.N
+# publish as full releases (keep in sync with publish's PRERELEASE case
+# and release.yml validate-version). The sed dance is semver prerelease
+# ordering under sort -V: '~' sorts before the empty string
+# (5.0.0~dev.9 < 5.0.0) where '-' does not.
+LATEST ?= auto
+$(_HIDE)HIGHEST_FULL_TAG = $(shell git tag -l 'v[0-9]*' | grep -vE 'alpha|beta|rc' | sed 's/-/~/' | sort -V | tail -n 1 | sed 's/~/-/')
+$(_HIDE)LATEST_RESOLVED  = $(if $(filter auto,$(LATEST)),$(if $(filter $($(_HIDE)PUBLISH_TAG),$($(_HIDE)HIGHEST_FULL_TAG)),true,false),$(if $(filter yes,$(LATEST)),true,false))
+
+# Prefix that turns state-changing commands into echoes under DRYRUN=yes
+$(_HIDE)DRY := $(if $(filter yes,$(DRYRUN)),@echo "DRYRUN:" )
+
+define stamp.tag
+	@case "$($(_HIDE)CREATE_TAG)" in v[0-9]*.[0-9]*.[0-9]*) ;; *) echo "ERROR: '$($(_HIDE)CREATE_TAG)' does not look like a release tag (vX.Y.Z[-prerelease])" >&2; exit 1;; esac
+	@case "$($(_HIDE)CREATE_TAG)" in $(TAG_MATCH)) ;; *) echo "ERROR: '$($(_HIDE)CREATE_TAG)' is off the $(LINE) line this checkout releases ($(TAG_MATCH)) — cut it from that line's branch, or pass LINE= if intentional" >&2; exit 1;; esac
+	@chmod +x build/create-git-tag.sh
+	$($(_HIDE)DRY)TAG_MATCH='$(TAG_MATCH)' ./build/create-git-tag.sh "$($(_HIDE)CREATE_TAG)"
+	$($(_HIDE)DRY)git push $(TAG_REMOTE) "refs/tags/$($(_HIDE)CREATE_TAG)"
+endef
+$(call register, stamp, tag)
+
+define stamp.untag
+	@[ -n "$(TAG)" ] || { echo "ERROR: untag deletes a tag — name it: make stamp untag TAG=vX.Y.Z" >&2; exit 1; }
+	@echo "Deleting tag $(TAG) locally and on $(TAG_REMOTE)..."
+	-$($(_HIDE)DRY)git tag -d "$(TAG)"
+	$($(_HIDE)DRY)git push $(TAG_REMOTE) --delete "refs/tags/$(TAG)"
+endef
+$(call register, stamp, untag)
+
+# stamp line cuts a maintenance branch: release/X.Y.x at the line's
+# highest FINAL tag — maintenance starts from a shipped release, so
+# prereleases never qualify as the branch point. LINE defaults to the
+# current line for the moment of need (right after the final is
+# tagged); LINE=X.Y retrofits an older line, e.g. LINE=4.9 branches
+# release/4.9.x at v4.9.4. The new branch carries whatever tooling its
+# tree had at the branch point — releasing an old line with the
+# current machinery means backporting the machinery to that branch
+# first.
+$(_HIDE)LINE_BRANCH = release/$(LINE).x
+$(_HIDE)LINE_BASE   = $(shell git tag -l 'v$(LINE).*' | grep -v -- - | sort -V | tail -n 1)
+
+define stamp.line
+	@[ -n "$(LINE)" ] || { echo "ERROR: no line to cut — set LINE=X.Y (e.g. make stamp line LINE=4.9)" >&2; exit 1; }
+	@[ -n "$($(_HIDE)LINE_BASE)" ] || { echo "ERROR: no final v$(LINE).Z tag to branch from — cut the release first (make stamp tag)" >&2; exit 1; }
+	@! git show-ref --verify --quiet "refs/heads/$($(_HIDE)LINE_BRANCH)" || { echo "ERROR: $($(_HIDE)LINE_BRANCH) already exists" >&2; exit 1; }
+	@! git ls-remote --exit-code --heads $(TAG_REMOTE) "$($(_HIDE)LINE_BRANCH)" >/dev/null 2>&1 || { echo "ERROR: $($(_HIDE)LINE_BRANCH) already exists on $(TAG_REMOTE)" >&2; exit 1; }
+	@echo "Cutting $($(_HIDE)LINE_BRANCH) at $($(_HIDE)LINE_BASE)..."
+	$($(_HIDE)DRY)git branch "$($(_HIDE)LINE_BRANCH)" "$($(_HIDE)LINE_BASE)"
+	$($(_HIDE)DRY)git push $(TAG_REMOTE) "refs/heads/$($(_HIDE)LINE_BRANCH)"
+endef
+$(call register, stamp, line)
+
+# publish/unpublish are plain verbs (no modifiers). Notes source: NOTES=<file>
+# override, else the annotated tag body — `stamp tag` assembles it from the
+# changelog.d fragments (build/release-notes.sh).
+# --prerelease derives from the tag itself: alpha/beta/rc only — dev.N tags
+# CAN be full releases (keep in sync with release.yml validate-version).
+# --latest carries LATEST's answer explicitly both ways; a draft has no
+# Latest semantics, so DRAFT=yes omits the flag.
+# GitHub allows several releases per tag (drafts don't own the tag, and a
+# CI-published release doesn't block `gh release create`), so publish
+# refuses a tag that already has one. The check goes through the API:
+# `gh release view` can't see drafts, which is exactly the duplicate
+# that needs catching.
+# REPLACE=yes is the way past that guard, and the only one: it delegates
+# to unpublish (same target, so the tag→release-id resolution lives in one
+# place) and then creates, as a single invocation. The default still
+# refuses, because a release CI already published is exactly what the
+# guard exists to keep from being overwritten by accident. The case this
+# serves is CI publishing something WRONG — release.yml runs
+# `make publish` itself on a v* tag, so by the time a human could, the
+# guard has already tripped and the recovery is a replacement.
+.PHONY: publish unpublish sweep changelog preview
+publish:
+	@test -f $($(_HIDE)RELEASE_DIR)/SHA256SUMS || { echo "ERROR: no release artifacts in $($(_HIDE)RELEASE_DIR)/ — run 'make release' first" >&2; exit 1; }
+	@TAG="$($(_HIDE)PUBLISH_TAG)"; \
+	if [ -z "$$TAG" ]; then \
+		echo "ERROR: no tag to publish — create one with 'make stamp tag' or pass TAG=vX.Y.Z" >&2; \
+		exit 1; \
+	fi; \
+	EXISTING=$$(gh api --paginate 'repos/{owner}/{repo}/releases' --jq '.[].tag_name' | grep -Fxc "$$TAG" || true); \
+	if [ "$$EXISTING" -gt 0 ]; then \
+		if [ "$(REPLACE)" != "yes" ]; then \
+			echo "ERROR: $$TAG already has $$EXISTING GitHub release(s), drafts included — 'make unpublish TAG=$$TAG' first, or 'make publish REPLACE=yes' to do both" >&2; \
+			exit 1; \
+		fi; \
+		echo "REPLACE=yes: replacing the $$EXISTING existing release(s) on $$TAG"; \
+		$(MAKE) --no-print-directory unpublish TAG="$$TAG" DRYRUN="$(DRYRUN)" || exit 1; \
+	fi; \
+	PRERELEASE=""; case "$$TAG" in *-alpha*|*-beta*|*-rc*) PRERELEASE="--prerelease";; esac; \
+	NOTES_FILE="$(NOTES)"; \
+	if [ -z "$$NOTES_FILE" ]; then \
+		NOTES_FILE=$$(mktemp); \
+		git tag -l --format='%(contents:body)' "$$TAG" > "$$NOTES_FILE"; \
+	fi; \
+	set -- gh release create "$$TAG" --title "Stratos $$TAG" --verify-tag $$PRERELEASE $(if $(filter yes,$(DRAFT)),--draft,--latest=$($(_HIDE)LATEST_RESOLVED)) --notes-file "$$NOTES_FILE" $($(_HIDE)RELEASE_DIR)/*.tar.gz $($(_HIDE)RELEASE_DIR)/*.zip $($(_HIDE)RELEASE_DIR)/SHA256SUMS; \
+	$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@")
+
+# unpublish resolves the tag to release ids through the API: tag-based
+# `gh release view`/`delete` can't see drafts and picks one arbitrarily
+# when a tag has duplicates. Deleting a release never touches the git
+# tag — that stays `stamp untag`'s job.
+unpublish:
+	@[ -n "$(TAG)" ] || { echo "ERROR: unpublish deletes a release — name it: make unpublish TAG=vX.Y.Z" >&2; exit 1; }
+	@ids=$$(gh api --paginate 'repos/{owner}/{repo}/releases' --jq '.[] | select(.tag_name == "$(TAG)") | .id'); \
+	[ -n "$$ids" ] || { echo "ERROR: no GitHub release (draft or published) has tag $(TAG)" >&2; exit 1; }; \
+	echo "Release(s) to delete from GitHub:"; \
+	for id in $$ids; do \
+		gh api "repos/{owner}/{repo}/releases/$$id" \
+			--jq '"  " + .tag_name + "  (" + (.name // "") + ")" + (if .draft then "  [draft]" else "" end), (.assets[] | "    " + .name)'; \
+	done; \
+	for id in $$ids; do \
+		set -- gh api -X DELETE "repos/{owner}/{repo}/releases/$$id"; \
+		$(if $(filter yes,$(DRYRUN)),echo "DRYRUN: $$*",echo "+ $$*"; "$$@") || exit 1; \
+	done
+
+# sweep removes the changelog.d fragments a published release consumed;
+# the removal commit rides the next PR (e.g. the post-release bump).
+sweep:
+	@chmod +x build/release-notes.sh
+	$($(_HIDE)DRY)./build/release-notes.sh sweep
+
+# changelog reports how many dependency bumps have landed since the last
+# release tag — the "is a build due yet?" question, answerable between
+# releases. Read-only, so no DRYRUN guard. `stamp tag` runs the same check
+# before it freezes the notes into the tag body.
+changelog:
+	@chmod +x build/release-notes.sh
+	@TAG_MATCH='$(TAG_MATCH)' ./build/release-notes.sh check
+
+# preview answers "what will the release page show" BEFORE a tag exists,
+# which is the only cheap moment: once a tag is pushed CI publishes from it,
+# and correcting the body afterwards leaves the tag body stale. Titled from
+# the version being released so the page matches the release it previews.
+preview:
+	@chmod +x build/release-notes.sh
+	@PREVIEW_TITLE="Stratos $($(_HIDE)NEXT_TAG)" ./build/release-notes.sh preview
+
+# ── Deploy (documentation website) ───────────────────────────
+# Grammar: make deploy website <destination> — the component says what is
+# deployed, the destination says where. Destinations here are mechanisms
+# with no environment baked in; site-specific values live in site.mk.
+#
+#   make deploy website pages   Push HEAD to your fork's pages-preview
+#                               branch; the Deploy Website workflow builds
+#                               and publishes your fork's Pages site.
+#                               One-time fork setup: see README.
+#   make deploy website cf      cf push the built site to the current
+#                               cf target (cf login / cf target first).
+#   make build deploy website cf    Build locally, then push.
+#
+# App deployment (the zip from `make release cf`) is site-specific —
+# site.mk redefines deploy.cf to add it (see site.mk.example).
+
+# Remote the pages-preview branch is pushed to. `origin` is right when
+# your clone's origin is your fork; override in site.mk otherwise.
+PAGES_REMOTE ?= origin
+
+# Destination words for `deploy website`. site.mk appends custom ones
+# (WEBSITE_DEPLOY_DESTS += mysite) so the usage guard stays accurate.
+WEBSITE_DEPLOY_DESTS := pages cf
+
+# Plain --force: pages-preview is a disposable deploy trigger that never
+# holds work, and --force-with-lease fails without a remote-tracking ref.
+define deploy.pages
+	@git remote get-url $(PAGES_REMOTE) >/dev/null 2>&1 || \
+		{ echo "ERROR: remote '$(PAGES_REMOTE)' not found — set PAGES_REMOTE to your fork remote (site.mk or make line)." >&2; exit 1; }
+	@echo "Pushing HEAD to $(PAGES_REMOTE)/pages-preview (GitHub Pages preview)..."
+	git push --force $(PAGES_REMOTE) HEAD:refs/heads/pages-preview
+	@echo "The fork's 'Deploy Website' workflow now builds and publishes the site."
+endef
+$(call register, deploy, pages)
+
+define deploy.cf
+	@if [ -n "$($(_HIDE)WANT_WEBSITE)" ]; then \
+		echo "Deploying documentation website to CF..."; \
+		cf target 2>/dev/null | grep -qE "org:.+" || \
+			{ echo "ERROR: no CF target / not logged in. Run 'cf login' then 'cf target -o ORG -s SPACE'." >&2; exit 1; }; \
+		[ -d website/build ] || \
+			{ echo "ERROR: website/build not found. Run 'make build website' first." >&2; exit 1; }; \
+		cf push -f website/manifest.yml; \
+	else \
+		$(MAKE) --no-print-directory $(_HIDE)deploy.cf.app; \
+	fi
+endef
+$(call register, deploy, cf)
+
+# App deploys carry site knowledge; site.mk redefines this recipe variable
+# (define deploy.cf.app ... endef) to enable them — see site.mk.example.
+define deploy.cf.app
+	@echo "ERROR: app deployment to CF is site-specific — see site.mk.example." >&2
+	@exit 1
+endef
+$(call register_always, deploy, cf.app)
+
+# Bare `make deploy website` (no destination word) → usage, not a no-op.
+define deploy.website
+	@if [ -z "$(filter $(WEBSITE_DEPLOY_DESTS),$(MAKECMDGOALS))" ]; then \
+		echo "Usage: make deploy website <destination>" >&2; \
+		echo "Destinations: $(WEBSITE_DEPLOY_DESTS)" >&2; \
+		exit 1; \
+	fi
+endef
+$(call register, deploy, website)
+
+# Bare `make deploy` → usage.
+define deploy.usage
+	@echo "Usage: make deploy website <destination>"
+	@echo "Destinations: $(WEBSITE_DEPLOY_DESTS)"
+	@echo "App deployment is site-specific — see site.mk.example."
+endef
+$(call register_always, deploy, usage)
+
+# ══════════════════════════════════════════════════════════════
+# Verb wiring — declare each verb after all objects are registered.
+# ══════════════════════════════════════════════════════════════
+
+# ── FINAL=strip — finalize version, then re-exec without FINAL ──
+# Strips prerelease from package.json and re-invokes Make so all
+# version variables resolve fresh from the updated package.json.
+# Uses MAKEOVERRIDES filter to prevent FINAL from propagating.
+ifeq ($(FINAL),strip)
+.PHONY: $(_HIDE)finalize-and-reexec
+$(_HIDE)finalize-and-reexec:
+	@echo "Finalizing version (stripping prerelease)..."
+	@chmod +x build/version-bump.sh
+	@./build/version-bump.sh bump release
+	@echo "Re-running: $(MAKE) $(MAKECMDGOALS)"
+	@$(MAKE) FINAL= $(MAKECMDGOALS)
+$(filter-out frontend backend cf github dist version e2e actions packages secrets lint gate tests coverage tree history licenses tag untag line,$(MAKECMDGOALS)): $(_HIDE)finalize-and-reexec ; @:
+else ifneq ($(FINAL),)
+$(error Unknown FINAL value '$(FINAL)' — supported: strip)
+endif
+
+# ── Cross-cutting modifier allowances ────────────────────────
+# These modifiers affect build behavior through variables (e.g.,
+# cf forces PLATFORM=linux/amd64) rather than via a registered recipe.
+$(call allow, build, cf)
+$(call allow, build, pages)
+
+$(call declare_verb, build)
+$(call declare_verb, test)
+$(call declare_verb, release)
+$(call declare_verb_default, deploy, $(_HIDE)deploy.usage)
+$(call declare_verb, stamp)
+$(call declare_verb, check)
+$(call declare_verb, audit)
+$(call declare_verb, outdated)
+$(call declare_verb_default, deps, $(_HIDE)deps.dependabot)
+# Skip dev verb declaration when 'dev' is used as a bump modifier
+ifeq ($(filter bump,$(MAKECMDGOALS)),)
+$(call declare_verb, dev)
+else
+.PHONY: dev
+dev: ;@:
+endif
+
+# ── Stamp defaults ────────────────────────────────────────────
+# stamp with no modifier stamps frontend
+ifeq ($($(_HIDE)WANT_FRONTEND)$($(_HIDE)WANT_BACKEND)$($(_HIDE)WANT_TAG)$($(_HIDE)WANT_UNTAG)$($(_HIDE)WANT_LINE),)
+stamp: $(_HIDE)stamp.frontend
+endif
+
+# ── Clean (special behavior) ─────────────────────────────────
+# make clean           — build output + release artifacts
+# make clean frontend  — frontend build only
+# make clean backend   — backend binaries only
+# make clean dist      — above + node_modules
+# make clean repo      — full reset: git clean -fdx (fresh-clone state)
+#                         RM_SITE=yes also sweeps site.mk (kept by default —
+#                         it carries local site config, not build output)
+# make e2e clean        — sweep stratos-e2e-test labeled CF resources
+#                         (defined in the E2E section, above)
+
+define clean.release
+	rm -rf $($(_HIDE)DIST_DIR)/release $($(_HIDE)DIST_DIR)/cf-package $($(_HIDE)DIST_DIR)/install $($(_HIDE)DIST_DIR)/stratos-cf-*.zip
+endef
+
+define clean.dist
+	rm -rf $($(_HIDE)DIST_DIR)/frontend .angular dist-devkit $($(_HIDE)DIST_DIR)/bin
+	cd src/jetstream && rm -f jetstream jetstream.exe jetstream.darwin
+	rm -rf node_modules src/frontend/packages/*/node_modules
+endef
+
+# Everything git clean -fdx removes here already covers clean.release and
+# clean.dist's scope (it's untracked/ignored either way), so no prereq chain
+# is needed. .env/secrets.yaml are local machine state, not build output —
+# always kept. site.mk is kept unless RM_SITE=yes is passed explicitly;
+# it's local site config, not something to drop by default.
+RM_SITE ?=
+define clean.repo
+	git clean -fdx -e .env -e secrets.yaml $(if $(filter yes,$(RM_SITE)),,-e site.mk)
+endef
+
+$(call register_always, clean, release)
+$(call register, clean, dist, $(_HIDE)clean.release)
+$(call register, clean, repo)
+
+$(call declare_verb_default, clean, $(_HIDE)clean.release)
+
+# ── Dump (introspection) ─────────────────────────────────────
+# dump.version recipe is defined in version.mk (shared library)
+$(call register, dump, version)
+
+define dump.actions
+	@echo "Registered verb+modifier pairs:"
+	@for pair in $($(_HIDE)REGISTRY); do \
+		verb=$${pair%%.*}; mod=$${pair#*.}; \
+		printf "  make %-12s %s\n" "$$verb" "$$mod"; \
+	done
+endef
+$(call register, dump, actions)
+
+$(call declare_verb, dump)
+
+# ── Development ports ─────────────────────────────────────────
+BACKEND_PORT  ?= 5443
+FRONTEND_PORT ?= 5440
+
+# The dev frontend is served by ng serve on its own port, so a WebSocket
+# upgrade from it is cross-origin to the backend. jetstream rejects those
+# unless the origin is allow-listed, which otherwise makes cf push fail in
+# the dev stack with "Origin ... is not authorized for Host ...". A packaged
+# console serves the UI from jetstream itself, so this is dev-only. Both
+# host forms are listed because the browser may resolve either.
+ALLOWED_ORIGINS ?= https://localhost:$(FRONTEND_PORT),https://127.0.0.1:$(FRONTEND_PORT)
+
+# ── Simple verbs (no modifiers) ──────────────────────────────
+.PHONY: stage install lint
+
+stage:
+	@chmod +x build/install-local.sh
+	@./build/install-local.sh
+
+install:
+	@echo "Installing dependencies..."
+	bun install
+	@echo "Dependencies installed."
+
+# lint: standalone verb, but no-op when used as check modifier
+ifeq ($(filter check,$(MAKECMDGOALS)),)
+lint:
+	$(check.lint)
+else
+lint: ;@:
+endif
+
+# ── Bump (version management) ─────────────────────────────────
+# bump uses its own modifier set not shared with other verbs,
+# so it is wired manually rather than via register/declare_verb.
+
+$(_HIDE)BUMP_MOD := $(filter major minor patch dev alpha beta rc prerelease,$(MAKECMDGOALS))
+
+.PHONY: bump
+bump:
+	@set -- $($(_HIDE)BUMP_MOD); \
+	if [ $$# -eq 0 ]; then \
+		echo "Usage: make bump <major|minor|patch|dev|alpha|beta|rc|prerelease>" >&2; \
+		exit 1; \
+	elif [ $$# -gt 1 ]; then \
+		echo "Only one bump modifier allowed" >&2; \
+		exit 1; \
+	fi
+	@chmod +x build/version-bump.sh
+	@./build/version-bump.sh bump $($(_HIDE)BUMP_MOD) $(if $(filter yes,$(DRYRUN)),--dry-run)
+
+# ── Help ──────────────────────────────────────────────────────
+.PHONY: help
+help:
+	@echo "Stratos Build System ($($(_HIDE)SEMVER_VERSION) | $($(_HIDE)CURRENT_PLATFORM))"
+	@echo ""
+	@echo "Building:"
+	@echo "  make build                Build frontend + all backend platforms"
+	@echo "  make build frontend       Build frontend only"
+	@echo "  make build backend        Cross-compile all backend platforms"
+	@echo "  make build backend PLATFORM=linux/amd64  Build single platform"
+	@echo ""
+	@echo "Testing:"
+	@echo "  make test                 Run all tests"
+	@echo "  make test frontend        Frontend tests only"
+	@echo "  make test frontend PROJECT=core SCOPE=<path>  Narrowed vitest run"
+	@echo "  make test backend         Backend tests only"
+	@echo "  make test e2e             Run Playwright E2E tests"
+	@echo "  make e2e clean            Sweep stratos-e2e-test labeled CF resources"
+	@echo "  make lint                 Run linters"
+	@echo ""
+	@echo "Quality:"
+	@echo "  make check                Run all quality gates (lint + gate)"
+	@echo "  make check lint           Lint checks only"
+	@echo "  make check gate           Lint + unit tests (gate-check)"
+	@echo "  make check tests          Unit tests only"
+	@echo "  make check coverage       Unit tests with coverage"
+	@echo "  make check e2e            Playwright E2E core tests"
+	@echo ""
+	@echo "Release:"
+	@echo "  make release              Create CF zip + GitHub archives (+ SHA256SUMS)"
+	@echo "  make release cf           CF-pushable zip only"
+	@echo "  make release github       GitHub release archives only"
+	@echo "  make changelog            Warn about dependency bumps missing from changelog.d"
+	@echo "  make preview              Render the assembled release notes as the release page will show them"
+	@echo "  make stamp tag            Create + push the release tag"
+	@echo "  make publish              Create GitHub release + upload dist/release/*"
+	@echo "  make publish REPLACE=yes  Replace the release already on the tag"
+	@echo "  make unpublish TAG=vX     Delete the GitHub release (assets included)"
+	@echo "  make stamp untag TAG=vX   Delete the tag (local + remote)"
+	@echo "  make sweep                Remove the changelog.d fragments the release consumed"
+	@echo ""
+	@echo "Deploy (documentation website):"
+	@echo "  make deploy website pages Push preview to your fork's GitHub Pages"
+	@echo "  make deploy website cf    cf push built website to current CF target"
+	@echo "  make build deploy website cf  Build website, then cf push it"
+	@echo ""
+	@echo "Setup:"
+	@echo "  make install              Install dependencies (bun install)"
+	@echo "  make stage                Stage production build for local testing"
+	@echo ""
+	@echo "Clean:"
+	@echo "  make clean                Remove all build output"
+	@echo "  make clean frontend       Remove frontend build only"
+	@echo "  make clean backend        Remove backend binaries only"
+	@echo "  make clean dist           Remove everything (including node_modules)"
+	@echo "  make clean repo           Full reset: git clean -fdx (fresh-clone state)"
+	@echo "                            RM_SITE=yes also removes site.mk"
+	@echo ""
+	@echo "Security & dependencies:"
+	@echo "  make audit                Run default security scanners"
+	@echo "  make audit frontend       bun audit (npm advisory DB), root workspace"
+	@echo "  make audit website        bun audit (npm advisory DB), website/ workspace"
+	@echo "  make audit backend        gosec + trivy + govulncheck (both Go modules)"
+	@echo "  make audit modrot         modrot archived/deprecated dep scan (needs gh auth)"
+	@echo "  make audit semgrep        semgrep SAST, account policy + SARIF (manual, needs network)"
+	@echo "  make audit codeql         CodeQL SAST, Go+JS/TS (manual, needs codeql CLI)"
+	@echo "  make audit actions        zizmor (ZIZMOR_FLAGS=\"--persona=auditor\" for strict)"
+	@echo "  make audit packages       osv-scanner (all lockfiles + go.mods)"
+	@echo "  make audit secrets        gitleaks (working-tree secret scan)"
+	@echo "  make audit tests          gosec incl. test files + #nosec suppressions"
+	@echo "  make audit tree           trivy full-tree scan (deploy/, helm, manifests)"
+	@echo "  make audit history        gitleaks full git-history scan (slow)"
+	@echo "  make audit licenses       osv-scanner dependency license report"
+	@echo "  make audit sarif          sarif-tools summary across dist/*.sarif (local)"
+	@echo "  make audit upload         Push dist/*.sarif to GitHub (skips codeql-*, CI covers those)"
+	@echo "  make audit summary        High/moderate/low counts only"
+	@echo "  make outdated             List outdated direct deps (frontend + backend)"
+	@echo "  make outdated frontend    bun outdated"
+	@echo "  make outdated backend     go list -m -u all"
+	@echo "  make deps dependabot      List open dependency PRs (gh)"
+	@echo ""
+	@echo "Other:"
+	@echo "  make stamp frontend       Generate build-info.ts with version metadata"
+	@echo "  make dump version         Print version and build metadata"
+	@echo ""
+	@echo "Development:"
+	@echo "  make dev frontend         Start frontend dev server (port $(FRONTEND_PORT))"
+	@echo "  make dev backend          Start backend dev server (port $(BACKEND_PORT))"
+	@echo "  make dev cert             Generate the dev TLS certificate for localhost"
+	@echo "  make dev website          Start documentation site dev server"
+	@echo "  make build website        Build the documentation website"
+	@echo "  make build booklets       Render docs booklets (epub/PDF, needs quarto)"
+	@echo "  Override ports:  make dev backend BACKEND_PORT=5543"
+	@echo "                   make dev frontend FRONTEND_PORT=5540 BACKEND_PORT=5543"
+	@echo ""
+	@echo "Version:"
+	@echo "  make bump major           Next major release (v5.0.0)"
+	@echo "  make bump minor           Next minor release (v4.10.0)"
+	@echo "  make bump patch           Next patch release (v4.9.4)"
+	@echo "  make bump dev             Increment dev prerelease (dev.N)"
+	@echo "  make bump alpha           Set/increment alpha prerelease (alpha.N)"
+	@echo "  make bump beta            Set/increment beta prerelease (beta.N)"
+	@echo "  make bump rc              Set/increment rc prerelease (rc.N)"
+	@echo "  make bump prerelease      Set/increment prerelease (prerelease.N)"
+	@echo ""
+	@echo "Variables:"
+	@echo "  FINAL=strip               Strip prerelease from version (persisted)"
+	@echo "  DRYRUN=yes                Preview actions without executing"
+	@echo "  VERSION=X.Y.Z             Override version (convention: no v — see docs)"
+	@echo "  PLATFORM=os/arch          Override target platform"
+	@echo "  TAG=vX.Y.Z                Tag for publish/unpublish/stamp tag/untag"
+	@echo "  DRAFT=yes                 publish creates a draft release"
+	@echo "  REPLACE=yes               publish deletes the release(s) on the tag first"
+	@echo "  NOTES=<file>              Notes file for publish (default: CHANGELOG section)"
+	@echo "  RM_SITE=yes               make clean repo also removes site.mk"
+	@echo ""
+	@echo "  Examples:"
+	@echo "    make release cf FINAL=strip       Finalize version + package"
+	@echo "    make bump dev DRYRUN=yes          Preview version bump"
+	@echo ""
+	@echo "Registry:"
+	@echo "  make dump actions         List all registered verb+modifier pairs"
+	@if [ -f site.mk ]; then $(MAKE) --no-print-directory $(_HIDE)site-help 2>/dev/null || (echo "" && echo "Site-specific targets available (see site.mk)"); fi
+
+# ── Deprecated target shims ──────────────────────────────────
+include deprecated.mk
+
+# ── Site-specific overrides ──────────────────────────────────
+$(_HIDE)SITE := site
+# $(wildcard) so make 3.81 (macOS) stays silent when the file is absent —
+# bare -include still prints a spurious "No rule to make target" there.
+-include $(wildcard $($(_HIDE)SITE).mk)

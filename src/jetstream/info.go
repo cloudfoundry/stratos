@@ -3,12 +3,12 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 )
 
 // Endpoint - This represents the CNSI endpoint
@@ -20,7 +20,7 @@ type Endpoint struct {
 	CNSIType string             `json:"type"`
 }
 
-func (p *portalProxy) info(c echo.Context) error {
+func (p *portalProxy) info(c *echo.Context) error {
 
 	s, err := p.getInfo(c)
 	if err != nil {
@@ -30,7 +30,7 @@ func (p *portalProxy) info(c echo.Context) error {
 	return c.JSON(http.StatusOK, s)
 }
 
-func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
+func (p *portalProxy) getInfo(c *echo.Context) (*api.Info, error) {
 	// get the version
 	versions, err := p.getVersionsData()
 	if err != nil {
@@ -62,7 +62,17 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 	s.Configuration.ListAllowLoadMaxed = p.Config.UIListAllowLoadMaxed
 	s.Configuration.APIKeysEnabled = string(p.Config.APIKeysEnabled)
 	s.Configuration.HomeViewShowFavoritesOnly = p.Config.HomeViewShowFavoritesOnly
+	s.Configuration.HideNavLogout = p.Config.HideNavLogout
 	s.Configuration.UserEndpointsEnabled = string(p.Config.UserEndpointsEnabled)
+	s.Configuration.EndpointCardConcurrency = p.Config.EndpointCardConcurrency
+	s.Configuration.EndpointRequestConcurrency = p.Config.EndpointRequestConcurrency
+
+	if s.Configuration.EndpointCardConcurrency == 0 {
+		s.Configuration.EndpointCardConcurrency = 2
+	}
+	if s.Configuration.EndpointRequestConcurrency == 0 {
+		s.Configuration.EndpointRequestConcurrency = 3
+	}
 
 	// Only add diagnostics information if the user is an admin
 	if uaaUser.Admin {
@@ -96,6 +106,10 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 		cnsiUser, token, ok := p.GetCNSIUserAndToken(cnsi.GUID, userGUID)
 		if ok {
 			endpoint.User = cnsiUser
+			endpoint.TokenExpiry = token.TokenExpiry
+			// A refresh token means jetstream can mint a fresh session on use,
+			// so an expired access token does not make the endpoint dead.
+			endpoint.TokenRenewable = token.RefreshToken != ""
 			endpoint.TokenMetadata = token.Metadata
 			endpoint.SystemSharedToken = token.SystemShared
 		}
@@ -128,7 +142,7 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 			s.Endpoints[cnsiType][cnsi.GUID] = endpoint
 		} else {
 			// definitions of YAML-defined plugins may be removed
-			log.Warnf("Unknown endpoint type %q encountered in the DB", cnsiType)
+			slog.Warn("unknown endpoint type encountered in the DB", "type", cnsiType, "endpoint", cnsi.GUID)
 		}
 	}
 
@@ -148,7 +162,9 @@ func (p *portalProxy) getInfo(c echo.Context) (*api.Info, error) {
 func marshalEndpointMetadata(metadata string) interface{} {
 	if len(metadata) > 2 && strings.Index(metadata, "{") == 0 {
 		var anyJSON map[string]interface{}
-		json.Unmarshal([]byte(metadata), &anyJSON)
+		if err := json.Unmarshal([]byte(metadata), &anyJSON); err != nil {
+			return metadata
+		}
 		return anyJSON
 	} else {
 		return metadata

@@ -1,20 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy } from '@angular/core';
 
-import { TableCellCustom } from '../../../../../../core/src/shared/components/list/list.types';
+import { FormsModule } from '@angular/forms';
+import { CustomSelectComponent, CustomOptionComponent } from '../../../../../../core/src/shared/components/custom-select/custom-select.component';
+
+import { TableCellCustom } from '../../../../../../core/src/shared/components/signal-list/cell-base';
 import { KubeConfigHelper } from '../../kube-config.helper';
 import { KubeConfigFileCluster } from '../../kube-config.types';
 
 @Component({
-  selector: 'app-kube-config-table-user-select',
+selector: 'app-kube-config-table-user-select',
   templateUrl: './kube-config-table-user-select.component.html',
-  styleUrls: ['./kube-config-table-user-select.component.scss']
+
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    FormsModule,
+    CustomSelectComponent,
+    CustomOptionComponent
+]
 })
 export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConfigFileCluster> implements OnInit {
 
   hasUser = false;
-  selected: string;
+  // strict: assigned in ngOnInit before the template reads it
+  selected!: string;
+  private helper = inject(KubeConfigHelper);
 
-  constructor(private helper: KubeConfigHelper) {
+  constructor() {
     super();
   }
 
@@ -23,7 +35,7 @@ export class KubeConfigTableUserSelectComponent extends TableCellCustom<KubeConf
     this.hasUser = this.row._users.length > 0;
   }
 
-  valueChanged(value) {
+  valueChanged(value: string): void {
     this.row._user = value;
     this.helper.update(this.row);
   }

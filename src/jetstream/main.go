@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha1"
 	"database/sql"
 	"encoding/gob"
@@ -8,6 +9,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -21,22 +23,19 @@ import (
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/custombinder"
-	_ "github.com/cloudfoundry/stratos/src/jetstream/docs"
+	"github.com/cloudfoundry/stratos/src/jetstream/repository/sessionstore"
+	//_ "github.com/cloudfoundry/stratos/src/jetstream/docs"
 
-	"github.com/antonlindstrom/pgstore"
-	"github.com/cf-stratos/mysqlstore"
 	cfenv "github.com/cloudfoundry-community/go-cfenv"
+	"github.com/google/uuid"
 	"github.com/gorilla/sessions"
-	"github.com/govau/cf-common/env"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/nwmac/sqlitestore"
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
-	echoSwagger "github.com/swaggo/echo-swagger"
+	"github.com/labstack/echo/v5"
+	"github.com/labstack/echo/v5/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger/v2"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/api/config"
+	"github.com/cloudfoundry/stratos/src/jetstream/api/env"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/datastore"
 	"github.com/cloudfoundry/stratos/src/jetstream/factory"
@@ -77,9 +76,103 @@ const (
 	LogAPIRequests       = "LOG_API_REQUESTS" // Defaults to true
 	VCapApplication      = "VCAP_APPLICATION"
 	defaultSessionSecret = "wheeee!"
+	// defaultEncryptionKey is the well-known key shipped in config.example and the
+	// packaged config.properties. It is detected at startup so operators are warned
+	// when the token store would be encrypted with a publicly-known value.
+	defaultEncryptionKey = "B374A26A71490437AA024E4FADD5B497FDFF1A8EA6FF12F6FB65AF2720B59CCF"
 )
 
+// defaultCSPPolicy is the Content-Security-Policy applied unless CONSOLE_CSP
+// opts out or supplies its own. It is scoped to what the Stratos SPA needs:
+//
+//   - default/connect from same origin ('self'); same-origin 'self'
+//     also permits the backend log/stream WebSockets (wss:// on the HTTPS page)
+//
+//   - script-src carries the per-response nonce and 'strict-dynamic', which is
+//     the CSP Level 3 mechanism for scripts: the nonce authorises the module
+//     scripts the build appends to index.html (serveIndexHTML stamps them),
+//     and 'strict-dynamic' propagates that trust to what they load — Angular's
+//     lazy route chunks and Monaco's, which arrive by dynamic import() from an
+//     already-trusted module. It carries no 'self' and no host source on
+//     purpose: 'strict-dynamic' makes a browser ignore every one of them, so a
+//     source left beside it reads as a grant that does not hold. That is the
+//     directive's whole point — an injected <script src="/…"> is same-origin
+//     and still refused, because origin no longer confers trust.
+//
+//   - 'report-sample' on both directives that can refuse inline content
+//     (script-src, style-src-elem) — without it a browser reports a blocked
+//     inline script or style as blocked-uri "inline" and nothing else, which
+//     names no file and no content. It grants nothing, so it does not weaken
+//     'strict-dynamic' beside it. style-src does not carry it: 'unsafe-inline'
+//     means nothing ever violates it to sample.
+//
+//   - object-src 'none' — plugin content (<object>, <embed>) is a script
+//     execution path that script-src does not govern. Stated explicitly
+//     because falling back to default-src 'self' would still permit it from
+//     this origin, and the console embeds no plugin content at all.
+//
+//   - style-src-elem carries a per-response nonce, so <style> elements are
+//     enforced without 'unsafe-inline'. serveIndexHTML nonces the ones in
+//     index.html; Angular nonces its own from ngCspNonce; installStyleNonce
+//     (frontend polyfills) nonces the ones Monaco and xterm create, neither of
+//     which accepts a nonce itself. A <style> arriving as markup carries none
+//     and is refused, which is the point.
+//
+//   - style-src keeps 'unsafe-inline', but style-src-elem now overrides it for
+//     elements, so what it still permits is inline style ATTRIBUTES (Monaco's
+//     per-line positioning, xterm's truecolor cells). CSP has no nonce or hash
+//     mechanism for dynamic attributes, so no policy change can tighten this.
+//     It also remains the whole style policy on pre-CSP3 browsers.
+//
+//   - data: images/fonts (inlined icons) and Google Fonts font files
+//
+//   - worker-src 'self' — Monaco's language workers are same-origin module
+//     workers built from `new Worker(new URL(…), {type: 'module'})`, hashed
+//     chunks like the rest of the app (monaco-loader.ts). It granted blob: as
+//     well until the AMD loader went away in #5561; a blob: worker inherits
+//     the creating document's policy, so re-granting it is a way back to
+//     running script the nonce never authorised.
+//
+//   - require-trusted-types-for 'script' closes the sinks script-src cannot
+//     see. A nonce governs how script ARRIVES; it says nothing about a string
+//     assigned to innerHTML by script that is already trusted, which is the
+//     DOM-XSS half of the problem. Under this directive the browser refuses a
+//     plain string at those sinks outright.
+//
+//     No trusted-types allowlist accompanies it, so any policy name is
+//     permitted. Angular creates 'angular' and 'angular#unsafe-bypass', and
+//     Monaco creates nine of its own; naming them would pin this policy to
+//     the internals of two dependencies and break the console on the upgrade
+//     that adds a tenth. The allowlist is what stops an attacker who already
+//     runs script from minting their own policy — which, at that point, is no
+//     longer the boundary that matters.
+//
+//   - frame-ancestors 'self' mirrors the existing X-Frame-Options: SAMEORIGIN
+//
+// Operators can instead set CONSOLE_CSP to a full policy string to use verbatim.
+const defaultCSPPolicy = "default-src 'self'; " +
+	"script-src " + cspNoncePlaceholder + " 'strict-dynamic' " + cspReportSample + "; " +
+	"object-src 'none'; " +
+	"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; " +
+	// style-src-elem overrides style-src for elements wholesale, so it has to
+	// repeat every source style-src grants them or it silently withdraws one.
+	"style-src-elem 'self' " + cspNoncePlaceholder + " " + cspReportSample + " https://fonts.googleapis.com; " +
+	"font-src 'self' data: https://fonts.gstatic.com; " +
+	"img-src 'self' data:; " +
+	// 'self' also covers same-origin WebSocket (wss:// on an HTTPS page), so
+	// the backend log/stream sockets connect without a bare ws:/wss: wildcard
+	// (which scanners flag as overly permissive — it would allow any host).
+	"connect-src 'self'; " +
+	"worker-src 'self'; " +
+	"frame-ancestors 'self'; " +
+	"base-uri 'self'; " +
+	"form-action 'self'; " +
+	"require-trusted-types-for 'script'"
+
 var appVersion string
+var buildDate string
+var gitCommit string
+var gitBranch string
 
 // getEnvironmentLookup return a search path for configuration settings
 func getEnvironmentLookup() *env.VarSet {
@@ -95,7 +188,7 @@ func getEnvironmentLookup() *env.VarSet {
 	// If running in CloudFoundry, fallback to a user provided service (if set)
 	cfApp, err := cfenv.Current()
 	if err == nil {
-		envLookup.AppendSource(env.NewLookupFromUPS(cfApp, os.Getenv("CF_UPS_NAME")))
+		envLookup.AppendSource(upsLookup(cfApp, os.Getenv("CF_UPS_NAME")))
 	}
 
 	// Fallback to a "config.properties" files in our directory
@@ -107,6 +200,60 @@ func getEnvironmentLookup() *env.VarSet {
 	return envLookup
 }
 
+// upsLookup reads settings from the credentials of the bound service called
+// name, typically a user-provided service. Without that binding it finds
+// nothing. Credentials are JSON values, so each is formatted as a string;
+// arrays and objects do not survive that and cannot be used as settings.
+func upsLookup(app *cfenv.App, name string) env.Lookup {
+	if app == nil {
+		return env.NoopLookup
+	}
+	service, err := app.Services.WithName(name)
+	if err != nil {
+		return env.NoopLookup
+	}
+	return func(key string) (string, bool) {
+		val, ok := service.Credentials[key]
+		if !ok {
+			return "", false
+		}
+		return fmt.Sprintf("%v", val), true
+	}
+}
+
+// logLevel backs the installed handler so LOG_LEVEL can be applied after the
+// handler is in place, once the portal config has been read. Its zero value is
+// slog.LevelInfo, which is the level logrus defaulted to.
+var logLevel slog.LevelVar
+
+// setupLogging installs the process-wide slog handler. Everything else in the
+// tree logs through it.
+func setupLogging(envLookup *env.VarSet) {
+	opts := &slog.HandlerOptions{Level: &logLevel}
+	var handler slog.Handler = slog.NewTextHandler(os.Stdout, opts)
+	if logToJSON, ok := envLookup.Lookup(LogToJSON); ok && logToJSON == "true" {
+		handler = slog.NewJSONHandler(os.Stdout, opts)
+	}
+	slog.SetDefault(slog.New(handler))
+}
+
+// parseLogLevel accepts the level names logrus accepted, so an existing
+// LOG_LEVEL keeps working. slog has no trace/fatal/panic, so they fold into
+// the nearest level that exists.
+func parseLogLevel(name string) (slog.Level, error) {
+	switch strings.ToLower(strings.TrimSpace(name)) {
+	case "trace", "debug":
+		return slog.LevelDebug, nil
+	case "info":
+		return slog.LevelInfo, nil
+	case "warn", "warning":
+		return slog.LevelWarn, nil
+	case "error", "fatal", "panic":
+		return slog.LevelError, nil
+	}
+	return slog.LevelInfo, fmt.Errorf("unknown log level %q", name)
+}
+
 func main() {
 
 	// Register time.Time in gob
@@ -115,68 +262,70 @@ func main() {
 	// Create common method for looking up config
 	envLookup := getEnvironmentLookup()
 
-	log.SetFormatter(&log.TextFormatter{ForceColors: true, FullTimestamp: true, TimestampFormat: time.UnixDate})
+	setupLogging(envLookup)
 
-	// Change to JSON logging if configured
-	if logToJSON, ok := envLookup.Lookup(LogToJSON); ok {
-		if logToJSON == "true" {
-			log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.UnixDate})
-		}
-	}
-
-	log.SetOutput(os.Stdout)
-
-	log.Info("========================================")
-	log.Info("=== Stratos Jetstream Backend Server ===")
-	log.Info("========================================")
-	log.Info("")
-	log.Info("Initialization started.")
+	slog.Info("========================================")
+	slog.Info("=== Stratos Jetstream Backend Server ===")
+	slog.Info("========================================")
+	slog.Info("")
+	slog.Info("Initialization started.")
 
 	// Load the portal configuration from env vars
 	var portalConfig api.PortalConfig
 	portalConfig, err := loadPortalConfig(portalConfig, envLookup)
 	if err != nil {
-		log.Fatal(err) // calls os.Exit(1) after logging
+		slog.Error("unable to load the portal configuration", "error", err)
+		os.Exit(1)
 	}
 	if portalConfig.LogLevel != "" {
-		log.Infof("Setting log level to: %s", portalConfig.LogLevel)
-		level, _ := log.ParseLevel(portalConfig.LogLevel)
-		log.SetLevel(level)
+		slog.Info("Setting the log level", "logLevel", portalConfig.LogLevel)
+		level, levelErr := parseLogLevel(portalConfig.LogLevel)
+		if levelErr != nil {
+			// logrus.ParseLevel returned PanicLevel on a bad value and the error
+			// was discarded, so a typo in LOG_LEVEL silenced the whole backend.
+			slog.Warn("keeping the current log level", "error", levelErr)
+		} else {
+			logLevel.Set(level)
+		}
 	}
 
 	// Initially, default state is that DB Migrations can be performed
 	portalConfig.CanMigrateDatabaseSchema = true
 
-	log.Info("Configuration loaded.")
+	slog.Info("Configuration loaded.")
 	isUpgrading := isConsoleUpgrading(envLookup)
 
 	if isUpgrading {
-		log.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
-		start(portalConfig, &portalProxy{env: envLookup}, false, true, envLookup)
+		slog.Info("Upgrade in progress (lock file detected) ... waiting for lock file to be removed ...")
+		if err := start(portalConfig, &portalProxy{env: envLookup}, false, true, envLookup); err != nil {
+			slog.Warn("unable to start the upgrade web server instance", "error", err)
+		}
 	}
 	// Grab the Console Version from the executable
 	portalConfig.ConsoleVersion = appVersion
-	log.Infof("Stratos Version: %s", portalConfig.ConsoleVersion)
+	slog.Info("Stratos version", "version", portalConfig.ConsoleVersion)
 
 	// Initialize an empty config for the console - initially not setup
 	portalConfig.ConsoleConfig = new(api.ConsoleConfig)
 
 	// Initialize the HTTP client
 	initializeHTTPClients(portalConfig.HTTPClientTimeoutInSecs, portalConfig.HTTPClientTimeoutMutatingInSecs, portalConfig.HTTPConnectionTimeoutInSecs)
-	log.Info("HTTP client initialized.")
+	slog.Info("HTTP client initialized.")
 
 	// Get the encryption key we need for tokens in the database
 	portalConfig.EncryptionKeyInBytes, err = getEncryptionKey(portalConfig)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("unable to resolve the encryption key", "error", err)
+		os.Exit(1)
 	}
-	log.Info("Encryption key set.")
+	slog.Info("Encryption key set.")
 
 	// Load database configuration
 	var dc datastore.DatabaseConfig
 	dc, err = loadDatabaseConfig(dc, envLookup)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("unable to load the database configuration", "error", err)
+		os.Exit(1)
 	}
 
 	// Store database provider name for diagnostics
@@ -192,17 +341,18 @@ func main() {
 	// Establish a Postgresql connection pool
 	databaseConnectionPool, err := initConnPool(dc, envLookup)
 	if err != nil {
-		log.Fatal(err.Error())
+		slog.Error("unable to create the database connection pool", "error", err)
+		os.Exit(1)
 	}
 	defer func() {
-		log.Info(`... Closing database connection pool`)
-		databaseConnectionPool.Close()
+		slog.Info(`... Closing database connection pool`)
+		_ = databaseConnectionPool.Close()
 	}()
-	log.Info("Database connection pool created.")
+	slog.Info("Database connection pool created.")
 
 	// Before any changes it, log that we detected a non-default session store secret, so we can tell it has been set from the log
 	if portalConfig.SessionStoreSecret != defaultSessionSecret {
-		log.Info("Session Store Secret detected okay")
+		slog.Info("Session Store Secret detected okay")
 	}
 
 	for _, configPlugin := range api.JetstreamConfigPlugins {
@@ -213,22 +363,26 @@ func main() {
 		// The Session store secret needs to be set for secure cookies to work properly
 		// We should not be using the default value - this indicates that it has not been set by the user
 		// So for saftey, set a random value
-		log.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value")
-		portalConfig.SessionStoreSecret = uuid.NewV4().String()
+		slog.Warn("When running in production, ensure you set SESSION_STORE_SECRET to a secure value")
+		portalConfig.SessionStoreSecret = uuid.New().String()
 	}
 
 	// Config plugins get to determine if we should run migrations on this instance
 	if portalConfig.CanMigrateDatabaseSchema {
+		// The API key hashing migration peppers secrets with the encryption key.
+		datastore.SetAPIKeyHMACKey(portalConfig.EncryptionKeyInBytes)
 		// Create the database schema otherwise wait for the datbase schema
 		err = datastore.ApplyMigrations(databaseConnectionPool)
 		if err != nil {
-			log.Fatal(err)
+			slog.Error("unable to apply the database migrations", "error", err)
+			os.Exit(1)
 		}
 	} else {
-		log.Warn("Waiting for migrations ...")
+		slog.Warn("Waiting for migrations ...")
 		// Wait for Database Schema to be initialized (or exit if this times out)
 		if err = datastore.WaitForMigrations(databaseConnectionPool); err != nil {
-			log.Fatal(err)
+			slog.Error("timed out waiting for the database migrations", "error", err)
+			os.Exit(1)
 		}
 	}
 
@@ -237,41 +391,43 @@ func main() {
 	if err != nil {
 		sessionExpiry = SessionExpiry
 	}
-	log.Infof("Session expiration (minutes): %d", sessionExpiry)
+	slog.Info("Session expiration", "minutes", sessionExpiry)
 	// Convert to seconds
 	sessionExpiry *= 60
 	// Initialize session store for Gorilla sessions
 	sessionStore, sessionStoreOptions, err := initSessionStore(databaseConnectionPool, dc.DatabaseProvider, portalConfig, sessionExpiry, envLookup)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("unable to initialise the session store", "error", err)
+		os.Exit(1)
 	}
 
 	defer func() {
-		log.Info(`... Closing session store`)
+		slog.Info(`... Closing session store`)
 		sessionStore.Close()
 	}()
 
 	// Ensure the cleanup tick starts now (this will delete expired sessions from the DB)
 	quitCleanup, doneCleanup := sessionStore.Cleanup(time.Minute * 3)
 	defer func() {
-		log.Info(`... Cleaning up session store`)
+		slog.Info(`... Cleaning up session store`)
 		sessionStore.StopCleanup(quitCleanup, doneCleanup)
 	}()
-	log.Info("Session store initialized.")
+	slog.Info("Session store initialized.")
 
 	// Create session data store
 	sessionDataStore, err := sessiondata.NewPostgresSessionDataRepository(databaseConnectionPool)
 	if err != nil {
-		log.Fatal(err)
+		slog.Error("unable to initialise the session data store", "error", err)
+		os.Exit(1)
 	}
 
 	// Session Data Store: Ensure the cleanup tick starts now (this will delete expired session data from the DB)
 	dataQuitCleanup, dataDoneCleanup := sessionDataStore.Cleanup(time.Minute * 3)
 	defer func() {
-		log.Info(`... Cleaning up session data store`)
+		slog.Info(`... Cleaning up session data store`)
 		sessionDataStore.StopCleanup(dataQuitCleanup, dataDoneCleanup)
 	}()
-	log.Info("Session data store initialized.")
+	slog.Info("Session data store initialized.")
 
 	// Setup the global interface for the proxy
 	portalProxy := newPortalProxy(portalConfig, databaseConnectionPool, sessionStore, sessionStoreOptions, envLookup)
@@ -280,28 +436,33 @@ func main() {
 	store := factory.NewDefaultStoreFactory(databaseConnectionPool)
 	portalProxy.SetStoreFactory(store)
 
-	log.Info("Initialization complete.")
+	slog.Info("Initialization complete.")
 
+	ctx, cancel := context.WithCancel(context.Background())
+	portalProxy.SetRefreshRoutineContext(ctx, cancel)
 	c := make(chan os.Signal, 2)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	go func() {
 		<-c
 		// Print a newline - if you pressed CTRL+C, the alighment will be slightly out, so start a new line first
 		fmt.Println()
-		log.Info("Attempting to shut down gracefully...")
+		slog.Info("Attempting to shut down gracefully...")
+
+		// Cancel portal proxy context
+		cancel()
 
 		// Database connection pool
-		log.Info(`... Closing database connection pool`)
-		databaseConnectionPool.Close()
+		slog.Info(`... Closing database connection pool`)
+		_ = databaseConnectionPool.Close()
 
 		// Session store
-		log.Info(`... Closing session store`)
+		slog.Info(`... Closing session store`)
 		sessionStore.Close()
-		log.Info(`... Stopping sessionStore cleanup`)
+		slog.Info(`... Stopping sessionStore cleanup`)
 		sessionStore.StopCleanup(quitCleanup, doneCleanup)
 
 		// Session Data Store
-		log.Info(`... Stopping sessiondata store cleanup`)
+		slog.Info(`... Stopping sessiondata store cleanup`)
 		sessionDataStore.StopCleanup(dataQuitCleanup, dataDoneCleanup)
 
 		// Plugin cleanup
@@ -310,25 +471,28 @@ func main() {
 				pCleanup.Destroy()
 			}
 		}
+		// wait for any goroutines to shut down
+		portalProxy.refreshRoutines.wg.Wait()
 
-		log.Info("Graceful shut down complete")
+		slog.Info("Graceful shut down complete")
 		os.Exit(1)
 	}()
 
 	// Initialise configuration
 	err = initialiseConsoleConfiguration(portalProxy)
 	if err != nil {
-		log.Infof("Failed to initialise console config due to: %s", err)
+		slog.Info("failed to initialise the console config", "error", err)
 		return
 	}
 
 	// Init auth service
 	err = portalProxy.InitStratosAuthService(api.AuthEndpointTypes[portalProxy.Config.AuthEndpointType])
 	if err != nil {
-		log.Warnf("Defaulting to UAA authentication: %v", err)
+		slog.Warn("defaulting to UAA authentication", "error", err)
 		err = portalProxy.InitStratosAuthService(api.Remote)
 		if err != nil {
-			log.Fatalf("Could not initialise auth service. %v", err)
+			slog.Error("could not initialise the auth service", "error", err)
+			os.Exit(1)
 		}
 	}
 
@@ -344,13 +508,13 @@ func main() {
 			initedPlugins[name] = plugin
 			portalProxy.PluginsStatus[name] = true
 		} else {
-			log.Infof("Plugin %s is disabled: %s", name, err.Error())
+			slog.Info("Plugin is disabled", "plugin", name, "error", err)
 			portalProxy.PluginsStatus[name] = false
 		}
 	}
 
 	portalProxy.Plugins = initedPlugins
-	log.Info("Plugins initialized")
+	slog.Info("Plugins initialized")
 
 	var needSetupMiddleware bool
 
@@ -358,7 +522,7 @@ func main() {
 	// Check to see if we are setup or not
 	if !portalProxy.Config.ConsoleConfig.IsSetupComplete() {
 		needSetupMiddleware = true
-		log.Info("Console does not have a complete configuration - going to enter setup mode (adding `setup` route and middleware)")
+		slog.Info("Console does not have a complete configuration - going to enter setup mode (adding `setup` route and middleware)")
 	} else {
 		needSetupMiddleware = false
 		showStratosConfig(portalProxy, portalProxy.Config.ConsoleConfig)
@@ -370,9 +534,10 @@ func main() {
 
 	// Start the back-end
 	if err := start(portalProxy.Config, portalProxy, needSetupMiddleware, false, envLookup); err != nil {
-		log.Fatalf("Unable to start: %v", err)
+		slog.Error("unable to start", "error", err)
+		os.Exit(1)
 	}
-	log.Info("Unable to start Stratos JetStream backend")
+	slog.Info("Unable to start Stratos JetStream backend")
 
 }
 
@@ -395,7 +560,7 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 
 	consoleRepo, err := console_config.NewPostgresConsoleConfigRepository(portalProxy.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Unable to initialize Stratos backend config due to: %+v", err)
+		slog.Error("unable to initialize the Stratos backend config", "error", err)
 		return err
 	}
 
@@ -404,20 +569,21 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 	// Migrate data from old setup table to new config table (if needed)
 	err = console_config.MigrateSetupData(portalProxy, consoleRepo)
 	if err != nil {
-		log.Warnf("Unable to initialize config environment provider: %+v", err)
+		slog.Warn("unable to initialize the config environment provider", "error", err)
 	}
 
 	// Load config stored in the database
 	err = console_config.InitializeConfEnvProvider(consoleRepo)
 	if err != nil {
-		log.Warnf("Unable to load configuration from database: %+v", err)
+		slog.Warn("unable to load the configuration from the database", "error", err)
 	}
 
 	// Now that the config DB is an env provider, we can just use the env to fetch the setup values
 	consoleConfig, err := portalProxy.initialiseConsoleConfig(portalProxy.Env())
 	if err != nil {
 		// Could not read config - this should not happen - so abort if it does
-		log.Fatalf("Unable to load console config; %+v", err)
+		slog.Error("unable to load the console config", "error", err)
+		os.Exit(1)
 	}
 
 	if consoleConfig.IsSetupComplete() {
@@ -430,32 +596,40 @@ func initialiseConsoleConfiguration(portalProxy *portalProxy) error {
 }
 
 func showStratosConfig(portalProxy *portalProxy, config *api.ConsoleConfig) {
-	log.Infof("Stratos is initialized with the following setup:")
-	log.Infof("... Auth Endpoint Type      : %s", config.AuthEndpointType)
+	slog.Info("Stratos is initialized with the following setup:")
+	slog.Info(fmt.Sprintf("... Auth Endpoint Type      : %s", config.AuthEndpointType))
 
 	// Ask the auto provider to display their config
 	portalProxy.StratosAuthService.ShowConfig(config)
 
-	log.Infof("... Skip SSL Validation     : %t", config.SkipSSLValidation)
-	log.Infof("... Setup Complete          : %t", config.IsSetupComplete())
+	slog.Info(fmt.Sprintf("... Skip SSL Validation     : %t", config.SkipSSLValidation))
+	slog.Info(fmt.Sprintf("... Setup Complete          : %t", config.IsSetupComplete()))
 }
 
 func showSSOConfig(portalProxy *portalProxy) {
 	// Show SSO Configuration
-	log.Infof("SSO Configuration:")
-	log.Infof("... SSO Enabled             : %t", portalProxy.Config.SSOLogin)
-	log.Infof("... SSO Options             : %s", portalProxy.Config.SSOOptions)
-	log.Infof("... SSO Redirect Allow-list : %s", portalProxy.Config.SSOAllowList)
+	slog.Info("SSO Configuration:")
+	slog.Info(fmt.Sprintf("... SSO Enabled             : %t", portalProxy.Config.SSOLogin))
+	slog.Info(fmt.Sprintf("... SSO Options             : %s", portalProxy.Config.SSOOptions))
+	slog.Info(fmt.Sprintf("... SSO Redirect Allow-list : %s", portalProxy.Config.SSOAllowList))
 }
 
 func getEncryptionKey(pc api.PortalConfig) ([]byte, error) {
-	log.Debug("getEncryptionKey")
+	slog.Debug("getEncryptionKey")
 
 	// If it exists in "EncryptionKey" we must be in compose; use it.
 	if len(pc.EncryptionKey) > 0 {
+		if strings.EqualFold(string(pc.EncryptionKey), defaultEncryptionKey) {
+			slog.Warn("ENCRYPTION_KEY is the well-known default from config.example; " +
+				"the token store is encrypted with a publicly-known key. " +
+				"Generate a unique key with: openssl rand -hex 32. " +
+				"Changing ENCRYPTION_KEY once tokens have been stored makes all " +
+				"existing encrypted data unreadable; affected endpoints must be " +
+				"disconnected and re-connected after the key changes.")
+		}
 		key32bytes, err := hex.DecodeString(string(pc.EncryptionKey))
 		if err != nil {
-			log.Error(err)
+			slog.Error("ENCRYPTION_KEY is not valid hex", "error", err)
 		}
 
 		return key32bytes, nil
@@ -469,7 +643,8 @@ func getEncryptionKey(pc api.PortalConfig) ([]byte, error) {
 	// Read the key from the shared volume
 	key, err := crypto.ReadEncryptionKey(pc.EncryptionKeyVolume, pc.EncryptionKeyFilename)
 	if err != nil {
-		log.Errorf("Unable to read the encryption key from the shared volume: %v", err)
+		slog.Error("unable to read the encryption key from the shared volume",
+			"volume", pc.EncryptionKeyVolume, "file", pc.EncryptionKeyFilename, "error", err)
 		return nil, err
 	}
 
@@ -477,7 +652,7 @@ func getEncryptionKey(pc api.PortalConfig) ([]byte, error) {
 }
 
 func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error) {
-	log.Debug("initConnPool")
+	slog.Debug("initConnPool")
 
 	// initialize the database connection pool
 	pool, err := datastore.GetConnection(dc, env)
@@ -494,7 +669,7 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error)
 		// Ping the database
 		err = datastore.Ping(pool)
 		if err == nil {
-			log.Info("Database appears to now be available.")
+			slog.Info("Database appears to now be available.")
 			break
 		}
 
@@ -504,7 +679,7 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error)
 		}
 
 		// Circle back and try again
-		log.Infof("Waiting for database to be responsive: %+v", err)
+		slog.Info("Waiting for the database to be responsive", "error", err)
 		time.Sleep(time.Second)
 	}
 
@@ -512,9 +687,7 @@ func initConnPool(dc datastore.DatabaseConfig, env *env.VarSet) (*sql.DB, error)
 }
 
 func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, sessionExpiry int, env *env.VarSet) (HttpSessionStore, *sessions.Options, error) {
-	log.Debug("initSessionStore")
-
-	sessionsTable := "sessions"
+	slog.Debug("initSessionStore")
 
 	// Allow the cookie domain to be configured
 	domain := pc.CookieDomain
@@ -522,49 +695,29 @@ func initSessionStore(db *sql.DB, databaseProvider string, pc api.PortalConfig, 
 		domain = ""
 	}
 
-	log.Infof("Session Cookie Domain: %s", domain)
+	slog.Info("Session cookie domain", "domain", domain)
 
-	// Store depends on the DB Type
-	if databaseProvider == datastore.PGSQL {
-		log.Info("Creating Postgres session store")
-		sessionStore, err := pgstore.NewPGStoreFromPool(db, []byte(pc.SessionStoreSecret))
-		// Setup cookie-store options
-		sessionStore.Options.MaxAge = sessionExpiry
-		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = true
-		if len(domain) > 0 {
-			sessionStore.Options.Domain = domain
-		}
-		return sessionStore, sessionStore.Options, err
+	slog.Info("Creating the session store", "provider", databaseProvider)
+	sessionStore, err := sessionstore.New(db, databaseProvider, "/", 3600, []byte(pc.SessionStoreSecret))
+	if err != nil {
+		return nil, nil, err
 	}
-	// Store depends on the DB Type
-	if databaseProvider == datastore.MYSQL {
-		log.Info("Creating MySQL session store")
-		sessionStore, err := mysqlstore.NewMySQLStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
-		// Setup cookie-store options
-		sessionStore.Options.MaxAge = sessionExpiry
-		sessionStore.Options.HttpOnly = true
-		sessionStore.Options.Secure = true
-		if len(domain) > 0 {
-			sessionStore.Options.Domain = domain
-		}
-		return sessionStore, sessionStore.Options, err
-	}
-
-	log.Info("Creating SQLite session store")
-	sessionStore, err := sqlitestore.NewSqliteStoreFromConnection(db, sessionsTable, "/", 3600, []byte(pc.SessionStoreSecret))
 	// Setup cookie-store options
 	sessionStore.Options.MaxAge = sessionExpiry
 	sessionStore.Options.HttpOnly = true
 	sessionStore.Options.Secure = true
+	// Lax (not Strict) so the cookie still rides top-level navigations such as
+	// the SSO login redirect, while withholding it from cross-site subresource
+	// requests (defence-in-depth alongside the XSRF token).
+	sessionStore.Options.SameSite = http.SameSiteLaxMode
 	if len(domain) > 0 {
 		sessionStore.Options.Domain = domain
 	}
-	return sessionStore, sessionStore.Options, err
+	return sessionStore, sessionStore.Options, nil
 }
 
 func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, error) {
-	log.Debug("loadPortalConfig")
+	slog.Debug("loadPortalConfig")
 
 	if err := config.Load(&pc, env.Lookup); err != nil {
 		return pc, fmt.Errorf("unable to load configuration. %v", err)
@@ -592,12 +745,71 @@ func loadPortalConfig(pc api.PortalConfig, env *env.VarSet) (api.PortalConfig, e
 		}
 	}
 
-	log.Debugf("Portal config auth endpoint type initialised to: %v", pc.AuthEndpointType)
+	slog.Debug("Portal config auth endpoint type initialised", "authEndpointType", pc.AuthEndpointType)
+
+	// Content Security Policy. Recognized values:
+	//   - unset / "default" / "on" -> the built-in defaultCSPPolicy (scoped to
+	//     what the Stratos SPA + Monaco editor need)
+	//   - "off" / "none" / "false" / "disabled" -> no header
+	//   - anything else -> treated as a full policy string, used verbatim
+	// The explicit off-values are normalized to "" so a well-meaning
+	// CONSOLE_CSP=off never leaks as a literal Content-Security-Policy value.
+	switch {
+	case pc.CSPPolicy == "",
+		strings.EqualFold(pc.CSPPolicy, "default"),
+		strings.EqualFold(pc.CSPPolicy, "on"):
+		pc.CSPPolicy = defaultCSPPolicy
+	case strings.EqualFold(pc.CSPPolicy, "off"),
+		strings.EqualFold(pc.CSPPolicy, "none"),
+		strings.EqualFold(pc.CSPPolicy, "false"),
+		strings.EqualFold(pc.CSPPolicy, "disabled"):
+		pc.CSPPolicy = ""
+	}
+
+	// Violation reporting. Resolved here rather than per response so that the
+	// policy Jetstream holds is the policy it sends, and a custom policy
+	// carries the directive too — see policyWithReporting for why that is
+	// worth the exception to using a custom policy verbatim.
+	pc.CSPPolicy = policyWithReporting(pc.CSPPolicy)
+
+	// A report-only policy has no built-in value: it exists to carry a
+	// candidate stricter than what is enforced, and Stratos has no opinion on
+	// what an operator wants to trial. Unset means no header. It gets the same
+	// reporting directive, since a policy nothing reports on measures nothing.
+	switch {
+	case strings.EqualFold(pc.CSPReportOnlyPolicy, "off"),
+		strings.EqualFold(pc.CSPReportOnlyPolicy, "none"),
+		strings.EqualFold(pc.CSPReportOnlyPolicy, "false"),
+		strings.EqualFold(pc.CSPReportOnlyPolicy, "disabled"):
+		pc.CSPReportOnlyPolicy = ""
+	}
+	pc.CSPReportOnlyPolicy = policyWithReporting(pc.CSPReportOnlyPolicy)
+
+	// HSTS. The same vocabulary as CONSOLE_CSP above, with the opposite
+	// default: unset means no header.
+	//   - unset / "off" / "none" / "false" / "disabled" -> no header
+	//   - "on" / "default" -> defaultHSTSPolicy
+	//   - anything else -> a full directive string, used verbatim
+	// Off by default because HSTS is a promise about a domain, not about
+	// Stratos: once a browser has seen it, that domain is HTTPS-only for the
+	// max-age whether or not Stratos is still there. Only the operator knows
+	// if that is safe to say, so nothing is asserted on their behalf.
+	switch {
+	case strings.EqualFold(pc.HSTSPolicy, "on"),
+		strings.EqualFold(pc.HSTSPolicy, "default"):
+		pc.HSTSPolicy = defaultHSTSPolicy
+	case strings.EqualFold(pc.HSTSPolicy, "off"),
+		strings.EqualFold(pc.HSTSPolicy, "none"),
+		strings.EqualFold(pc.HSTSPolicy, "false"),
+		strings.EqualFold(pc.HSTSPolicy, "disabled"):
+		pc.HSTSPolicy = ""
+	}
+
 	return pc, nil
 }
 
 func loadDatabaseConfig(dc datastore.DatabaseConfig, env *env.VarSet) (datastore.DatabaseConfig, error) {
-	log.Debug("loadDatabaseConfig")
+	slog.Debug("loadDatabaseConfig")
 
 	parsedDBConfig, err := datastore.ParseCFEnvs(&dc, env)
 	if err != nil {
@@ -605,7 +817,7 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig, env *env.VarSet) (datastore
 	}
 
 	if parsedDBConfig {
-		log.Info("Using Cloud Foundry DB service")
+		slog.Info("Using Cloud Foundry DB service")
 	} else if err := config.Load(&dc, env.Lookup); err != nil {
 		return dc, fmt.Errorf("unable to load database configuration. %v", err)
 	}
@@ -619,7 +831,7 @@ func loadDatabaseConfig(dc datastore.DatabaseConfig, env *env.VarSet) (datastore
 }
 
 func detectTLSCert(pc api.PortalConfig) (string, string, error) {
-	log.Debug("detectTLSCert")
+	slog.Debug("detectTLSCert")
 	certFilename := "pproxy.crt"
 	certKeyFilename := "pproxy.key"
 
@@ -635,7 +847,7 @@ func detectTLSCert(pc api.PortalConfig) (string, string, error) {
 
 	// Check if certificate have been provided as files (as is the case in kubernetes)
 	if pc.TLSCertPath != "" && pc.TLSCertKeyPath != "" {
-		log.Infof("Using TLS cert: %s, %s", pc.TLSCertPath, pc.TLSCertKeyPath)
+		slog.Info("Using TLS cert", "cert", pc.TLSCertPath, "key", pc.TLSCertKeyPath)
 		_, errCertMissing := os.Stat(pc.TLSCertPath)
 		_, errCertKeyMissing := os.Stat(pc.TLSCertKeyPath)
 		if errCertMissing != nil || errCertKeyMissing != nil {
@@ -656,30 +868,50 @@ func detectTLSCert(pc api.PortalConfig) (string, string, error) {
 	return certFilename, certKeyFilename, nil
 }
 
+// tlsKeyPair reads the certificate and key so that Echo is handed their
+// contents rather than their paths. Echo v4 read a path with os.ReadFile, but
+// Echo v5 reads it through an fs.FS rooted at the working directory, and
+// io/fs.ValidPath rejects both absolute paths and any ".." element. The
+// Kubernetes chart mounts the certificate at an absolute path, so every path
+// the chart or the dev config supplies failed there with "invalid argument"
+// and the HTTPS server never started. Echo takes []byte as the material
+// itself, which sidesteps the filesystem entirely.
+func tlsKeyPair(certFile, certKeyFile string) ([]byte, []byte, error) {
+	cert, err := os.ReadFile(certFile)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to read the certificate %s: %w", certFile, err)
+	}
+	certKey, err := os.ReadFile(certKeyFile)
+	if err != nil {
+		return nil, nil, fmt.Errorf("unable to read the certificate key %s: %w", certKeyFile, err)
+	}
+	return cert, certKey, nil
+}
+
 func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessionStoreOptions *sessions.Options, env *env.VarSet) *portalProxy {
-	log.Debug("newPortalProxy")
+	slog.Debug("newPortalProxy")
 
 	// Generate cookie name - avoids issues if the cookie domain is changed
 	cookieName := jetstreamSessionName
 	domain := pc.CookieDomain
 	if len(domain) > 0 && domain != "-" {
 		h := sha1.New()
-		io.WriteString(h, domain)
+		_, _ = io.WriteString(h, domain)
 		hash := fmt.Sprintf("%x", h.Sum(nil))
 		cookieName = fmt.Sprintf("%s-%s", jetstreamSessionName, hash[0:10])
 	}
 
-	log.Infof("Session Cookie name: %s", cookieName)
+	slog.Info("Session cookie name", "name", cookieName)
 
 	// Setting default value for APIKeysEnabled
 	if pc.APIKeysEnabled == "" {
-		log.Info(`APIKeysEnabled not set, setting to "admin_only"`)
+		slog.Info(`APIKeysEnabled not set, setting to "admin_only"`)
 		pc.APIKeysEnabled = config.APIKeysConfigEnum.AdminOnly
 	}
 
 	// Setting default value for UserEndpointsEnabled
 	if pc.UserEndpointsEnabled == "" {
-		log.Info(`UserEndpointsEnabled not set, setting to "disabled"`)
+		slog.Info(`UserEndpointsEnabled not set, setting to "disabled"`)
 		pc.UserEndpointsEnabled = config.UserEndpointsConfigEnum.Disabled
 	}
 
@@ -738,7 +970,7 @@ func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessi
 	})
 
 	var err error
-	pp.APIKeysRepository, err = apikeys.NewPgsqlAPIKeysRepository(pp.DatabaseConnectionPool)
+	pp.APIKeysRepository, err = apikeys.NewPgsqlAPIKeysRepository(pp.DatabaseConnectionPool, pp.Config.EncryptionKeyInBytes)
 	if err != nil {
 		panic(fmt.Errorf("can't initialize APIKeysRepository: %v", err))
 	}
@@ -746,50 +978,72 @@ func newPortalProxy(pc api.PortalConfig, dcp *sql.DB, ss HttpSessionStore, sessi
 	return pp
 }
 
-func echoShouldNotLog(ec echo.Context) bool {
+func echoShouldNotLog(ec *echo.Context) bool {
 	// Don't log readiness probes
 	return ec.Request().RequestURI == "/pp/v1/ping"
 }
 
 func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, isUpgrade bool, envLookup *env.VarSet) error {
-	log.Debug("start")
+	slog.Debug("start")
 	e := echo.New()
-	e.HideBanner = true
-	e.HidePort = true
+	// Echo v5 logs through slog and defaults to JSON on stdout; hand it the
+	// application logger so format and LOG_LEVEL are consistent.
+	e.Logger = slog.Default()
 
 	e.Binder = new(custombinder.CustomBinder)
 
 	// Root level middleware
-	if !isUpgrade {
-		e.Use(sessionCleanupMiddleware)
-	}
-
 	logAPIRequests := "true"
 	if envLogAPIRequests, ok := envLookup.Lookup(LogAPIRequests); ok {
 		logAPIRequests = envLogAPIRequests
 	}
 	if logAPIRequests == "true" {
-		customLoggerConfig := middleware.LoggerConfig{
-			Format: `Request: [${time_rfc3339}] Remote-IP:"${remote_ip}" ` +
-				`Method:"${method}" Path:"${path}" Status:${status} Latency:${latency_human} ` +
-				`Bytes-In:${bytes_in} Bytes-Out:${bytes_out}` + "\n",
-		}
-		customLoggerConfig.Skipper = echoShouldNotLog
-
-		e.Use(middleware.LoggerWithConfig(customLoggerConfig))
+		e.Use(middleware.RequestLoggerWithConfig(middleware.RequestLoggerConfig{
+			Skipper:          echoShouldNotLog,
+			LogRemoteIP:      true,
+			LogMethod:        true,
+			LogURIPath:       true,
+			LogStatus:        true,
+			LogLatency:       true,
+			LogContentLength: true,
+			LogResponseSize:  true,
+			LogValuesFunc: func(c *echo.Context, v middleware.RequestLoggerValues) error {
+				slog.Info("Request",
+					"start", v.StartTime.Format(time.RFC3339), "remoteIP", v.RemoteIP,
+					"method", v.Method, "path", v.URIPath, "status", v.Status,
+					"latency", v.Latency, "bytesIn", v.ContentLength, "bytesOut", v.ResponseSize)
+				return nil
+			},
+		}))
 	} else {
-		log.Warn("Disabled logging of API requests received by Jetstream")
+		slog.Warn("Disabled logging of API requests received by Jetstream")
 	}
 
 	e.Use(middleware.Recover())
+	// WebSocket upgrades honour the same origin allow-list as CORS.
+	api.SetWebSocketAllowedOrigins(config.AllowedOrigins)
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins:     config.AllowedOrigins,
-		AllowMethods:     []string{echo.GET, echo.PUT, echo.POST, echo.DELETE},
+		AllowMethods:     []string{http.MethodGet, http.MethodPut, http.MethodPost, http.MethodDelete},
 		AllowCredentials: true,
 	}))
+	// No ContentSecurityPolicy here: the policy carries a per-response nonce,
+	// and this middleware can only emit one string fixed at startup, which
+	// would stamp the literal placeholder — a publicly known nonce — on every
+	// response. serveIndexHTML sets the header on the one response that needs
+	// it; see loadPortalConfig for how CONSOLE_CSP resolves.
 	e.Use(middleware.SecureWithConfig(middleware.SecureConfig{
 		XFrameOptions: "SAMEORIGIN",
+		// Every response declares its own content type; nosniff stops a
+		// browser second-guessing that and reading, say, a JSON error body as
+		// markup. This is the control for that, not CSP, which now only
+		// accompanies the console document.
+		ContentTypeNosniff: "nosniff",
 	}))
+
+	// The headers Echo's Secure middleware has no setting for, plus HSTS,
+	// which it can only express as a max-age. See security_headers.go.
+	e.Use(p.securityHeaders)
 
 	if !isUpgrade {
 		e.Use(errorLoggingMiddleware)
@@ -800,28 +1054,51 @@ func start(config api.PortalConfig, p *portalProxy, needSetupMiddleware bool, is
 		p.registerRoutes(e, needSetupMiddleware)
 	}
 
+	// The serve context governs server lifetime; the upgrade watcher cancels it.
+	serveContext, shutdown := context.WithCancel(context.Background())
+	defer shutdown()
+
 	if isUpgrade {
-		go stopEchoWhenUpgraded(e, p.Env())
+		go stopEchoWhenUpgraded(shutdown, p.Env())
+	}
+
+	if !isUpgrade {
+		p.reportDeadTokensAtBoot()
+	}
+
+	if p.Config.AutoRefreshCNSITokens {
+		if err := p.startCNSITokenRefreshRoutines(); err != nil {
+			return err
+		}
 	}
 
 	var engineErr error
 	address := config.TLSAddress
+	startConfig := echo.StartConfig{
+		Address:    address,
+		HideBanner: true,
+		HidePort:   true,
+	}
 	if config.HTTPS {
 		certFile, certKeyFile, err := detectTLSCert(config)
 		if err != nil {
 			return err
 		}
-		log.Infof("Starting HTTPS Server at address: %s", address)
-		engineErr = e.StartTLS(address, certFile, certKeyFile)
+		cert, certKey, err := tlsKeyPair(certFile, certKeyFile)
+		if err != nil {
+			return err
+		}
+		slog.Info("Starting the HTTPS server", "address", address)
+		engineErr = startConfig.StartTLS(serveContext, e, cert, certKey)
 	} else {
-		log.Infof("Starting HTTP Server at address: %s", address)
-		engineErr = e.Start(address)
+		slog.Info("Starting the HTTP server", "address", address)
+		engineErr = startConfig.Start(serveContext, e)
 	}
 
 	if engineErr != nil {
 		engineErrStr := fmt.Sprintf("%s", engineErr)
 		if !strings.Contains(engineErrStr, "Server closed") {
-			log.Warnf("Failed to start HTTP/S server: %+v", engineErr)
+			slog.Warn("failed to start the HTTP/S server", "address", address, "error", engineErr)
 		}
 	}
 
@@ -868,8 +1145,8 @@ func (p *portalProxy) GetEndpointTypeSpec(typeName string) (api.EndpointPlugin, 
 // @Failure 401 {object} api.ErrorResponseBody "Error response"
 // @Security ApiKeyAuth
 // @Router /endpoints [post]
-func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
-	log.Debug("pluginRegisterRouter")
+func (p *portalProxy) pluginRegisterRouter(c *echo.Context) error {
+	slog.Debug("pluginRegisterRouter")
 
 	params := new(api.RegisterEndpointParams)
 	err := api.BindOnce(params, c)
@@ -882,7 +1159,7 @@ func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
 	}
 
 	if val, ok := p.PluginRegisterRoutes[params.EndpointType]; ok {
-		log.Debugf("Routing to plugin: %s.Register", params.EndpointType)
+		slog.Debug("Routing to plugin Register", "endpointType", params.EndpointType)
 		return val(c)
 	}
 
@@ -890,7 +1167,7 @@ func (p *portalProxy) pluginRegisterRouter(c echo.Context) error {
 }
 
 func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
-	log.Debug("registerRoutes")
+	slog.Debug("registerRoutes")
 
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
 
@@ -911,10 +1188,39 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	// Verify Session
 	api.GET("/v1/auth/verify", p.verifySession)
 
+	// Retrieve UAA token for the current session (for operator tooling, e.g. cf CLI curl commands)
+	api.GET("/v1/auth/token", p.retrieveToken)
+
 	// Always serve the backend API from /pp
 	pp := e.Group("/pp")
 
 	pp.Use(p.setSecureCacheContentMiddleware)
+
+	// WU 0 — Track 2 wire-transfer optimization. Gzip compresses JSON API
+	// responses (~3-5x on typical tabular payloads). Skipper bypasses:
+	//   - WebSocket upgrades (log-stream / firehose / cfapppush / cfappssh)
+	//   - CF passthrough routes (/pp/v1/proxy/...) — historical issue #2925
+	//     showed gzip on passthrough responses corrupted Content-Type for
+	//     Firefox. Keep gzip scoped to Stratos-shape native endpoints only.
+	// MinLength=1024 skips compression for small polling responses where the
+	// CPU cost would outweigh the byte savings.
+	pp.Use(middleware.GzipWithConfig(middleware.GzipConfig{
+		Skipper:   ppMiddlewareSkipper,
+		Level:     6,
+		MinLength: 1024,
+	}))
+
+	// WU 0 — wire-size instrumentation. Emits X-Stratos-Wire-Sizes on JSON
+	// responses (when DIAGNOSTICS_ENABLED) with raw bytes split into
+	// keys / values / structural plus the resources array length and handler
+	// duration_ms. Feeds empirical measurement for whether further format
+	// optimization (MessagePack, columnar tiers) would help beyond gzip.
+	// Must come AFTER Gzip so it buffers the uncompressed body before gzip
+	// compresses the outbound bytes. Shares the same skipper as gzip —
+	// passthrough responses aren't Stratos-shape so aren't the target of
+	// this instrumentation, and skipping also avoids the extra memory
+	// allocation per passthrough request.
+	pp.Use(p.wireSizeMiddleware)
 
 	// Add middleware to block requests if unconfigured
 	if needSetupMiddleware {
@@ -939,6 +1245,13 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 
 	// Ping - returns version (but is not logged)
 	pp.GET("/v1/ping", p.getVersions)
+
+	// Content-Security-Policy violation reports. Unauthenticated of necessity:
+	// the login page carries the policy too, so a violation has to be
+	// reportable before anyone has signed in. Registered outside sessionGroup,
+	// so it takes neither the session nor the XSRF middleware — a browser
+	// posting a violation report sends no XSRF token and cannot be made to.
+	pp.POST("/v1/csp-report", p.receiveCSPReport, middleware.BodyLimit(cspReportBodyLimit))
 
 	// All routes in the session group need the user to be authenticated
 	sessionGroup := pp.Group("/v1")
@@ -1007,7 +1320,7 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 	adminGroup := sessionGroup
 	adminGroup.Use(p.adminMiddleware)
 
-	p.PluginRegisterRoutes = make(map[string]func(echo.Context) error)
+	p.PluginRegisterRoutes = make(map[string]func(*echo.Context) error)
 
 	for _, plugin := range p.Plugins {
 		endpointPlugin, err := plugin.GetEndpointPlugin()
@@ -1044,16 +1357,35 @@ func (p *portalProxy) registerRoutes(e *echo.Echo, needSetupMiddleware bool) {
 		stableEndpointAdminAPIGroup.DELETE("/endpoints/:id", p.unregisterCluster)
 	}
 
-	// sessionGroup.DELETE("/cnsis", p.removeCluster)
-
 	// Serve up static resources
 	if staticDirErr == nil {
 		e.Use(p.setStaticCacheContentMiddleware)
-		log.Debug("Add URL Check Middleware")
+		slog.Debug("Add URL Check Middleware")
 		e.Use(p.urlCheckMiddleware)
-		e.Group("", middleware.Gzip()).Static("/", staticDir)
-		e.HTTPErrorHandler = getUICustomHTTPErrorHandler(staticDir, e.DefaultHTTPErrorHandler)
-		log.Info("Serving static UI resources")
+		staticGroup := e.Group("", middleware.Gzip())
+		// The SPA document is served by hand so each response can carry its own
+		// CSP nonce; everything else stays on the plain static handler, which
+		// 'self' already covers. A UI folder without an index.html is a
+		// supported state (getStaticFiles only checks the folder), so failing
+		// to read it degrades to the un-nonced static path rather than serving
+		// an empty document.
+		if indexHTML, readErr := os.ReadFile(path.Join(staticDir, "index.html")); readErr == nil {
+			p.indexHTMLTemplate = string(indexHTML)
+			// The script tags are appended by the frontend build, so no test
+			// reading the source index.html can pin their form. If the build
+			// ever emits a shape injectNonce cannot match, those scripts ship
+			// un-nonced and a policy without 'unsafe-inline' blocks the app —
+			// say so at startup rather than let it fail silently in a browser.
+			if scriptNonceGap(p.indexHTMLTemplate) {
+				slog.Warn("index.html carries script tags injectNonce cannot match; they will be served without a CSP nonce")
+			}
+			staticGroup.GET("/", p.serveIndexHTML)
+		} else {
+			slog.Warn("unable to read index.html; serving the UI without a CSP nonce", "error", readErr)
+		}
+		staticGroup.Static("/", staticDir)
+		e.HTTPErrorHandler = p.getUICustomHTTPErrorHandler(staticDir, echo.DefaultHTTPErrorHandler(false))
+		slog.Info("Serving static UI resources")
 	} else {
 		// Not serving UI - use V2 Error compatability error handler
 		e.HTTPErrorHandler = echoV2DefaultHTTPErrorHandler
@@ -1068,7 +1400,7 @@ func (p *portalProxy) AddLoginHook(priority int, function api.LoginHookFunc) err
 	return nil
 }
 
-func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
+func (p *portalProxy) ExecuteLoginHooks(c *echo.Context) error {
 	hooks := p.GetConfig().LoginHooks
 	sort.SliceStable(hooks, func(i, j int) bool {
 		return hooks[i].Priority < hooks[j].Priority
@@ -1079,7 +1411,7 @@ func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
 		err := hook.Function(c)
 		if err != nil {
 			erred = true
-			log.Errorf("Failed to execute log in hook: %v", err)
+			slog.Error("failed to execute a login hook", "priority", hook.Priority, "error", err)
 		}
 	}
 
@@ -1090,55 +1422,73 @@ func (p *portalProxy) ExecuteLoginHooks(c echo.Context) error {
 }
 
 // Custom error handler to let Angular app handle application URLs (catches non-backend 404 errors)
-func getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPErrorHandler) echo.HTTPErrorHandler {
-	return func(err error, c echo.Context) {
-		code := http.StatusInternalServerError
-		if he, ok := err.(*echo.HTTPError); ok {
-			code = he.Code
+func (p *portalProxy) getUICustomHTTPErrorHandler(staticDir string, defaultHandler echo.HTTPErrorHandler) echo.HTTPErrorHandler {
+	return func(c *echo.Context, err error) {
+		// echo.StatusCode handles both *echo.HTTPError and the router's
+		// predefined errors (echo.ErrNotFound and friends), which are no longer
+		// *HTTPError in v5. A plain type assertion would miss them and turn
+		// every deep-link 404 into a 500, breaking SPA routing.
+		code := echo.StatusCode(err)
+		if code == 0 {
+			code = http.StatusInternalServerError
 		}
 
 		// If this was not a back-end request and the error code is 404, serve the app and let it route
 		if strings.Index(c.Request().RequestURI, "/pp") != 0 && code == 404 {
-			c.File(path.Join(staticDir, "index.html"))
+			// Deep links reach the SPA through here, not through GET "/", so
+			// this path needs the same nonce treatment. The header has to be
+			// set before the first write, as the default handler below writes
+			// again.
+			var fileErr error
+			if p.indexHTMLTemplate != "" {
+				fileErr = p.serveIndexHTML(c)
+			} else {
+				fileErr = api.ServeFile(c, path.Join(staticDir, "index.html"))
+			}
+			if fileErr != nil {
+				slog.Warn("unable to serve index.html", "error", fileErr)
+			}
 			// Let the default handler handle it
-			defaultHandler(err, c)
+			defaultHandler(c, err)
 		} else {
 			// Use V2 Error compatability error handler
-			echoV2DefaultHTTPErrorHandler(err, c)
+			echoV2DefaultHTTPErrorHandler(c, err)
 		}
 	}
 }
 
 // EchoV2DefaultHTTPErrorHandler ensures we get V2 error behaviour
 // i.e. no wrapping in 'message' JSON object
-func echoV2DefaultHTTPErrorHandler(err error, c echo.Context) {
+func echoV2DefaultHTTPErrorHandler(c *echo.Context, err error) {
 
-	code := http.StatusInternalServerError
+	// See the note in getUICustomHTTPErrorHandler: v5's predefined router
+	// errors do not satisfy *echo.HTTPError, so ask for the status code.
+	code := echo.StatusCode(err)
+	if code == 0 {
+		code = http.StatusInternalServerError
+	}
 	msg := http.StatusText(code)
-	if he, ok := err.(*echo.HTTPError); ok {
-		code = he.Code
-		if msgStr, ok := he.Message.(string); ok {
-			msg = msgStr
-		} else {
-			msg = he.Error()
-		}
-		if he.Internal != nil {
-			err = fmt.Errorf("%v, %v", err, he.Internal)
-		}
+	if he, ok := err.(*echo.HTTPError); ok && he.Message != "" {
+		msg = he.Message
 	}
 
 	// Send response
-	if !c.Response().Committed {
+	response, unwrapErr := echo.UnwrapResponse(c.Response())
+	if unwrapErr != nil || !response.Committed {
+		var writeErr error
 		if c.Request().Method == http.MethodHead { // Issue #608
-			c.NoContent(code)
+			writeErr = c.NoContent(code)
 		} else {
-			c.String(code, msg)
+			writeErr = c.String(code, msg)
+		}
+		if writeErr != nil {
+			c.Logger().Error("could not write error response", "error", writeErr)
 		}
 	}
 
 	// Always log error
 	if err != nil {
-		c.Logger().Error(err)
+		c.Logger().Error("request failed", "error", err)
 	}
 }
 
@@ -1175,12 +1525,14 @@ func isConsoleUpgrading(env *env.VarSet) bool {
 	return false
 }
 
-func stopEchoWhenUpgraded(e *echo.Echo, env *env.VarSet) {
+func stopEchoWhenUpgraded(shutdown context.CancelFunc, env *env.VarSet) {
 	for isConsoleUpgrading(env) {
 		time.Sleep(1 * time.Second)
 	}
-	log.Info("Upgrade has completed! Shutting down Upgrade web server instance")
-	e.Close()
+	slog.Info("Upgrade has completed! Shutting down Upgrade web server instance")
+	// v5 drives server lifetime from the context handed to StartConfig, so
+	// cancelling it is what shuts the upgrade listener down.
+	shutdown()
 }
 
 // GetStoreFactory gets the store factory
@@ -1193,4 +1545,10 @@ func (portalProxy *portalProxy) SetStoreFactory(f api.StoreFactory) api.StoreFac
 	old := portalProxy.StoreFactory
 	portalProxy.StoreFactory = f
 	return old
+}
+
+// SetContext sets the context
+func (portalProxy *portalProxy) SetRefreshRoutineContext(ctx context.Context, cancel context.CancelFunc) {
+	portalProxy.refreshRoutines.context = ctx
+	portalProxy.refreshRoutines.cancel = cancel
 }

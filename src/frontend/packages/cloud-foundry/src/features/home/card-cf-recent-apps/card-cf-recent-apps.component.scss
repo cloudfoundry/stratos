@@ -1,5 +1,8 @@
+@reference 'tailwindcss';
+
 :host {
-  display: flex;
+  display: block;
+  width: 100%;
 }
 .recent-apps-card {
   display: flex;
@@ -13,22 +16,15 @@
 
   &__content {
     display: flex;
+    flex-direction: column;
+    flex: 1;
     overflow-y: auto;
+    width: 100%;
   }
 
   &__header {
-    display: flex;
-    flex: 1;
-    height: 40px;
-    justify-content: space-between;
-
-    mat-card-title {
-      margin-bottom: 0;
-    }
-
-    app-polling-indicator {
-      margin-right: -10px;
-      margin-top: -10px;
+    .card-title {
+      @apply mb-0;
     }
   }
 
@@ -40,7 +36,6 @@
 }
 
 // Remove box shadow in plain mode
-mat-card.recent-apps-card.mat-card.recent-apps-card__plain {
-  box-shadow: none;
-  padding: 0 1em;
+.card.recent-apps-card.recent-apps-card__plain {
+  @apply shadow-none px-4;
 }

@@ -1,9 +1,36 @@
 <ng-content></ng-content>
-<div *ngIf="(isLoading | async) || (isDeleting | async)" [@leaveLoaderAnimation] class="loading-page">
-  <div class="loading-page__indicator">
-    <div *ngIf="alert" class="loading-page__indicator-alert">{{ alert }}</div>
-    <div>{{ text$ | async }}</div>
-    <mat-progress-bar class="loading-page__indicator-bar" [color]="'primary'" mode="indeterminate">
-    </mat-progress-bar>
+@if (isLoading | async) {
+  <div
+    [@leaveLoaderAnimation]
+    class="loading-page loading-page__overlay">
+    <div class="loading-page__indicator">
+      @if (alert) {
+        <div class="loading-page__alert">
+          {{ alert }}
+        </div>
+      }
+      <div class="loading-page__text">{{ text }}</div>
+      <div class="flex justify-center" data-test="loading-page-indicator">
+        @switch (resolved()) {
+          @case ('logo') {
+            <!-- Breathing brand mark — theme-supplied, so custom brands
+                 pulse their own logo. -->
+            <img class="busy-breathe h-12 w-12" [src]="themeLogo()" alt="" aria-hidden="true" />
+          }
+          @default {
+            <!-- Portal rings: three concentric arcs, different speeds and
+                 directions, all currentColor — dark mode free. -->
+            <span class="relative block h-12 w-12 text-primary" aria-hidden="true">
+              <span class="absolute inset-0 rounded-full border-2 animate-spin"
+                    style="border-color: transparent; border-top-color: currentColor;"></span>
+              <span class="absolute inset-[6px] rounded-full border-2 animate-spin"
+                    style="border-color: transparent; border-right-color: currentColor; animation-duration: 1.6s; animation-direction: reverse;"></span>
+              <span class="absolute inset-[12px] rounded-full border-2 animate-spin"
+                    style="border-color: transparent; border-bottom-color: currentColor; animation-duration: 2.2s;"></span>
+            </span>
+          }
+        }
+      </div>
+    </div>
   </div>
-</div>
+}

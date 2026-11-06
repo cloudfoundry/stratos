@@ -1,0 +1,315 @@
+<div class="flex flex-col gap-4">
+  <div data-test="poc-notice"
+    class="px-3 py-2 text-sm rounded border border-warning-shade-300 bg-warning-shade-100 text-warning-shade-700 dark:border-warning-shade-700 dark:bg-warning-shade-900/30 dark:text-warning-shade-300">
+    Proof of concept &mdash; this page and its metrics are exploratory and may change or be removed.
+  </div>
+
+  <p class="text-sm text-content-muted">
+    Foundational shape computed from data this session has already loaded &mdash; this page issues no
+    Cloud Foundry requests. Each section reads through its endpoint's own connection, so what you see
+    reflects your CF roles there.
+  </p>
+
+  @if (sections().length === 0) {
+    <div class="px-4 py-6 text-sm text-content-muted">
+      No connected Cloud Foundry endpoints.
+    </div>
+  }
+
+  <!-- Selection summary: appears once a comparison is possible -->
+  @if (compare.sideCount() >= 2) {
+    <div class="sticky top-0 z-10 flex items-center gap-3 px-3 py-2 rounded border border-content-border bg-content-secondary/95 backdrop-blur text-sm"
+      data-test="compare-now-strip">
+      <span class="tabular-nums">{{ compare.sideCount() }} sides selected</span>
+      <button type="button" data-test="compare-now"
+        class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+        (click)="scrollToCompare()">
+        Compare now
+      </button>
+    </div>
+  }
+
+  @for (section of sections(); track section.guid) {
+    <div class="border border-content-border rounded-lg overflow-hidden">
+      <!-- Endpoint bar: collapse toggle, compact stats, compare selection -->
+      <div class="bg-content-secondary px-4 py-2.5 flex flex-wrap items-center gap-x-4 gap-y-1"
+        [class.border-b]="!isCollapsed(section.guid)"
+        [class.border-content-border]="!isCollapsed(section.guid)"
+        data-test="section-bar">
+        <button type="button" class="flex items-center gap-2 min-w-0" data-test="section-toggle"
+          (click)="toggleCollapsed(section.guid)">
+          <span class="text-content-muted text-[10px]" aria-hidden="true">@if (isCollapsed(section.guid)) { &#9654; } @else { &#9660; }</span>
+          <span class="text-xs font-semibold uppercase tracking-wider text-content-muted">{{ section.name }}</span>
+        </button>
+        @if (barStats(section); as stats) {
+          <span class="text-xs text-content-muted tabular-nums" data-test="section-bar-stats">
+            @if (stats.apps !== null) { {{ stats.apps | number }} apps }
+            @if (stats.apps !== null && stats.started) { &middot; }
+            @if (stats.started) { {{ stats.started }} }
+          </span>
+        }
+        <label class="ml-auto flex items-center gap-1.5 text-xs cursor-pointer">
+          @if (compare.dotFor(section.guid); as dot) {
+            <span class="inline-block w-2 h-2 rounded-full" [style.background-color]="dot" data-test="compare-select-dot"></span>
+          }
+          <input type="checkbox" data-test="compare-select"
+            [checked]="compare.isSelected(section.guid)" (change)="compare.toggleLive(section.guid)">
+          Compare
+        </label>
+      </div>
+      @if (!isCollapsed(section.guid)) {
+      <div class="py-3">
+      <div class="flex flex-col gap-4 px-4 py-1">
+
+        <!-- Totals strip (fast counts; spaces from the full drain when it has run) -->
+        <div class="flex flex-wrap gap-x-6 gap-y-2" data-test="shape-totals">
+          @for (row of totalsRows(section); track row.label) {
+            <div>
+              @if (row.value !== null) {
+                <span class="text-lg font-semibold tabular-nums">{{ row.value | number }}</span>
+              } @else {
+                <span class="text-lg font-semibold text-content-muted">&mdash;</span>
+              }
+              <span class="text-xs text-content-muted"> {{ row.label }}</span>
+            </div>
+          }
+        </div>
+
+        <!-- Data age stamps -->
+        <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-content-muted" data-test="shape-drain-stamps">
+          <span>orgs drained {{ age(section.drains.orgs) }}</span>
+          <span>spaces drained {{ age(section.drains.spaces) }}</span>
+          <span>apps drained {{ age(section.drains.apps) }}</span>
+          @if (section.drains.orgs.stale || section.drains.spaces.stale || section.drains.apps.stale) {
+            <span class="px-1.5 rounded-full bg-warning-shade-100 text-warning-shade-700 dark:bg-warning-shade-900/30 dark:text-warning-shade-300">stale</span>
+          }
+          @if (section.loading) {
+            <span>loading&hellip;</span>
+          }
+        </div>
+
+        @if (!section.hasDrains) {
+          <div class="px-1 py-4 text-sm text-content-muted">
+            Shape appears once this session has drained orgs, spaces and apps for this endpoint
+            (that load starts automatically and is shared with the other CF pages).
+          </div>
+        } @else {
+
+          <!-- Concentration tiles — always all three, so gaps are visible -->
+          <div class="flex flex-wrap gap-6" data-test="shape-concentration">
+            @for (tile of concentrationTiles(section); track tile.detail) {
+              <div>
+                @if (tile.headline !== null) {
+                  <div class="text-lg font-semibold tabular-nums">{{ tile.headline }}</div>
+                } @else {
+                  <div class="text-lg font-semibold text-content-muted">&mdash;</div>
+                }
+                <div class="text-xs text-content-muted max-w-44">{{ tile.detail }}</div>
+              </div>
+            }
+          </div>
+
+          <!-- Occupancy + state share bars -->
+          <div class="grid gap-4 sm:grid-cols-2">
+            @if (occupancy(section); as occ) {
+              <app-shape-share-bar label="Space occupancy" [parts]="occ" />
+            }
+            @if (appStateParts(section); as st) {
+              <app-shape-share-bar label="App state" [parts]="st" />
+            }
+          </div>
+
+          <!-- Topology histograms -->
+          <div class="grid gap-4 lg:grid-cols-2">
+            @if (section.shape.distributions.spaces_per_org; as d) {
+              <app-shape-dist-card label="Spaces per org" [d]="d" />
+            }
+            @if (section.shape.distributions.apps_per_space; as d) {
+              <app-shape-dist-card label="Apps per space" [d]="d" />
+            }
+            @if (section.shape.distributions.apps_per_org; as d) {
+              <app-shape-dist-card label="Apps per org" [d]="d" />
+            }
+            @if (section.shape.distributions.routes_per_app; as d) {
+              <app-shape-dist-card label="Routes per app" [d]="d" />
+            }
+          </div>
+
+          <!-- App sizing -->
+          <div class="grid gap-4 lg:grid-cols-2">
+            @if (section.shape.composition.web_process_memory_mb; as d) {
+              <app-shape-dist-card label="App memory (MB)" [d]="d" />
+            }
+            @if (section.shape.composition.web_process_disk_mb; as d) {
+              <app-shape-dist-card label="App disk (MB)" [d]="d" />
+            }
+            @if (section.shape.composition.web_process_instances; as d) {
+              <app-shape-dist-card label="App instances" [d]="d" />
+            }
+          </div>
+
+          <!-- Stacks -->
+          @if (stackChips(section).length > 0) {
+            <div class="flex flex-wrap items-center gap-2 text-xs" data-test="shape-stacks">
+              <span class="font-semibold uppercase tracking-wider text-content-muted">Stacks</span>
+              @for (chip of stackChips(section); track chip.label) {
+                <span class="px-2 py-0.5 rounded-full border border-content-border tabular-nums">
+                  {{ chip.label }} &times;{{ chip.count | number }}
+                </span>
+              }
+            </div>
+          }
+        }
+
+        <!-- Measure on demand: dimensions the session never caches, each with
+             its cost stated before it runs -->
+        <div class="flex flex-col gap-3 border-t border-content-border pt-3" data-test="shape-measure-panel">
+          <div class="text-xs font-semibold uppercase tracking-wider text-content-muted">Measure on demand</div>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="text-sm">Ecosystem totals</span>
+            <span class="text-xs text-content-muted">buildpacks · stacks · domains · quotas · security groups · users</span>
+            <span class="text-xs text-content-muted">({{ measure.totalsCost() }})</span>
+            <button data-test="measure-totals" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="measuring(section, 'totals')"
+              (click)="measure.measureTotals(section.guid)">
+              @if (measuring(section, 'totals')) { Measuring&hellip; }
+              @else if (measuredTotals(section)) { Re-measure }
+              @else { Measure }
+            </button>
+            @if (measuredTotals(section); as mt) {
+              <span class="text-xs text-content-muted">measured {{ ageOf(mt.fetchedAt) }}</span>
+            }
+          </div>
+          @if (measuredTotals(section); as mt) {
+            <div class="flex flex-wrap gap-x-6 gap-y-2" data-test="measured-totals">
+              @for (row of measuredTotalsRows(mt); track row.label) {
+                <div>
+                  @if (row.count !== null) {
+                    <span class="text-lg font-semibold tabular-nums">{{ row.count | number }}</span>
+                  } @else {
+                    <span class="text-sm text-content-muted">unavailable</span>
+                  }
+                  <span class="text-xs text-content-muted"> {{ row.label }}</span>
+                </div>
+              }
+            </div>
+          }
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="text-sm">Users &amp; roles</span>
+            <span class="text-xs text-content-muted">org and space grants; named export only</span>
+            <span class="text-xs text-content-muted">({{ measure.rolesCost() }})</span>
+            <button data-test="measure-roles" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="measuring(section, 'roles')"
+              (click)="measure.measureRoles(section.guid)">
+              @if (measuring(section, 'roles')) { Measuring&hellip; }
+              @else if (measuredRoles(section)) { Re-measure }
+              @else { Measure }
+            </button>
+            @if (measuredRoles(section); as roles) {
+              <span class="text-xs text-content-muted" data-test="measured-roles">
+                {{ rolesSummary(roles) }} &mdash; measured {{ ageOf(roles.fetchedAt) }}
+              </span>
+            }
+          </div>
+
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+            <span class="text-sm">Stacks &amp; buildpacks defined</span>
+            <span class="text-xs text-content-muted">full definition lists; enables defined-vs-used</span>
+            <span class="text-xs text-content-muted">({{ measure.ecosystemCost() }})</span>
+            <button data-test="measure-ecosystem" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="measuring(section, 'ecosystem')"
+              (click)="measure.measureEcosystem(section.guid)">
+              @if (measuring(section, 'ecosystem')) { Measuring&hellip; }
+              @else if (measuredEcosystem(section)) { Re-measure }
+              @else { Measure }
+            </button>
+            @if (measuredEcosystem(section); as eco) {
+              <span class="text-xs text-content-muted">measured {{ ageOf(eco.fetchedAt) }}</span>
+            }
+          </div>
+          @if (measuredEcosystem(section); as eco) {
+            <div class="flex flex-col gap-2" data-test="measured-ecosystem">
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="font-semibold uppercase tracking-wider text-content-muted">Stacks defined</span>
+                @for (chip of stackDefinedChips(section, eco); track chip.label) {
+                  <span class="px-2 py-0.5 rounded-full border tabular-nums"
+                    [class]="chip.unused
+                      ? 'border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300'
+                      : 'border-content-border'">
+                    {{ chip.label }}@if (chip.unused) { <span class="text-[10px] uppercase"> unused</span> }
+                  </span>
+                }
+              </div>
+              <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="font-semibold uppercase tracking-wider text-content-muted">Buildpacks defined</span>
+                @for (chip of buildpackDefinedChips(eco); track chip.label) {
+                  <span class="px-2 py-0.5 rounded-full border border-content-border tabular-nums">
+                    {{ chip.label }}@if (chip.count > 1) { &times;{{ chip.count }} }
+                  </span>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Export (#5703): the anonymous projection; CF-admin only -->
+        @if (section.admin) {
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1 border-t border-content-border pt-3" data-test="shape-export">
+            <span class="text-sm">Export anonymous shape</span>
+            <span class="text-xs text-content-muted">identity-stripped projection of what this page has measured</span>
+            <button data-test="export-json" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+              (click)="downloadJson(section)">
+              Download JSON
+            </button>
+            <button data-test="export-xlsx" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+              (click)="downloadXlsx(section)">
+              Download spreadsheet
+            </button>
+            <button data-test="export-markdown" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-content-border hover:bg-content-secondary transition-colors"
+              (click)="copyMarkdown(section)">
+              Copy markdown
+            </button>
+          </div>
+
+          <!-- Export (#5702): the same drains with names kept; confirmed at the click -->
+          <div class="flex flex-wrap items-center gap-x-3 gap-y-1" data-test="shape-export-detail">
+            <span class="text-sm">Export named data</span>
+            <span class="text-xs text-content-muted">orgs, spaces and apps by name and GUID &mdash; plus whatever is measured above</span>
+            <button data-test="export-detail-json" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300 hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="!canExportDetail(section)"
+              (click)="downloadDetailJson(section)">
+              Download detail JSON
+            </button>
+            <button data-test="export-detail-xlsx" type="button"
+              class="px-2.5 py-1 text-xs font-medium rounded border border-warning-shade-300 text-warning-shade-700 dark:border-warning-shade-700 dark:text-warning-shade-300 hover:bg-content-secondary transition-colors disabled:opacity-50"
+              [disabled]="!canExportDetail(section)"
+              (click)="downloadDetailXlsx(section)">
+              Download detail spreadsheet
+            </button>
+            @if (!canExportDetail(section)) {
+              <span class="text-xs text-content-muted">needs the orgs drain first</span>
+            }
+          </div>
+        }
+      </div>
+      </div>
+      }
+    </div>
+  }
+
+  <!-- Promotion verification: diff N shape snapshots (live or imported files) -->
+  <app-info-card title="Compare shapes" id="shape-compare-anchor">
+    <app-shape-compare-card #compare [sections]="sections()" />
+    <hr class="my-3 border-content-border">
+    <app-detail-diff-card [sections]="sections()" [detailPayload]="detailPayloadFn" />
+  </app-info-card>
+</div>

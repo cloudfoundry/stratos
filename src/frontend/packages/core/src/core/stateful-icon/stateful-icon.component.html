@@ -1,9 +1,12 @@
-<div class="stateful-icon" *ngIf="selectedState || stateKey === allStateKeys.BUSY">
-  <mat-icon [inline]="inline"
-    [ngClass]="{'warning': stateKey === allStateKeys.WARNING, 'error': stateKey === allStateKeys.ERROR, 'ok': stateKey === allStateKeys.OK }"
-    *ngIf="stateKey !== allStateKeys.BUSY; else spinner">
-    {{ selectedState.icon }}</mat-icon>
-</div>
-<ng-template #spinner>
-  <mat-spinner diameter="20"></mat-spinner>
-</ng-template>
+@if (selectedState || stateKey === allStateKeys.BUSY) {
+  <div class="flex items-center justify-center leading-6 h-6 w-6">
+    @if (stateKey !== allStateKeys.BUSY) {
+      <app-custom-icon [inline]="inline"
+        [ngClass]="{'warning': stateKey === allStateKeys.WARNING, 'error': stateKey === allStateKeys.ERROR, 'ok': stateKey === allStateKeys.OK }"
+        >
+      {{ selectedStateIcon }}</app-custom-icon>
+    } @else {
+      <app-busy class="text-primary" size="1.25rem" context="stateful-icon"></app-busy>
+    }
+  </div>
+}

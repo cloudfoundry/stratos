@@ -1,53 +1,34 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { GitCommit, gitEntityCatalog, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
-import { combineLatest as observableCombineLatest, Observable, of as observableOf, of } from 'rxjs';
-import { combineLatest, delay, distinct, filter, first, map, mergeMap, startWith, switchMap, tap } from 'rxjs/operators';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit, ChangeDetectionStrategy, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
+import { GitCommit, GitDataService, GitResourceState, GitRepo, GitSCMService, GitSCMType, SCMIcon } from '@stratosui/git';
+import { combineLatest as observableCombineLatest, Observable, of } from 'rxjs';
+import { combineLatest, distinct, map, startWith, switchMap } from 'rxjs/operators';
 
-import { AppMetadataTypes } from '../../../../../../../../cloud-foundry/src/actions/app-metadata.actions';
-import { UpdateExistingApplication } from '../../../../../../../../cloud-foundry/src/actions/application.actions';
-import { CFAppState } from '../../../../../../../../cloud-foundry/src/cf-app-state';
 import {
   CurrentUserPermissionsService,
-} from '../../../../../../../../core/src/core/permissions/current-user-permissions.service';
-import { ConfirmationDialogConfig } from '../../../../../../../../core/src/shared/components/confirmation-dialog.config';
-import { ConfirmationDialogService } from '../../../../../../../../core/src/shared/components/confirmation-dialog.service';
-import { ResetPagination } from '../../../../../../../../store/src/actions/pagination.actions';
-import { getFullEndpointApiUrl } from '../../../../../../../../store/src/endpoint-utils';
-import { ActionState } from '../../../../../../../../store/src/reducers/api-request-reducer/types';
-import { EntityInfo } from '../../../../../../../../store/src/types/api.types';
+  MetadataItemComponent,
+  TileComponent,
+  TileGridComponent,
+  TileGroupComponent,
+  MbToHumanSizePipe,
+  UptimePipe } from '@stratosui/core';
+import { getFullEndpointApiUrl, EntityInfo } from '@stratosui/store';
 import { IAppSummary } from '../../../../../../cf-api.types';
-import { cfEntityCatalog } from '../../../../../../cf-entity-catalog';
 import { CfCurrentUserPermissions } from '../../../../../../user-permissions/cf-user-permissions-checkers';
 import { ApplicationMonitorService } from '../../../../application-monitor.service';
 import { ApplicationData, ApplicationService } from '../../../../application.service';
+import { AppDetailDataService } from '../../../../app-detail-data.service';
+import { AppApplicationActionsService } from '../../../../../../shared/services/application-actions.service';
 import { DEPLOY_TYPES_IDS } from '../../../../deploy-application/deploy-application-steps.types';
+import { CardAppStatusComponent } from '../../../../../../shared/components/cards/card-app-status/card-app-status.component';
+import { CardAppInstancesComponent } from '../../../../../../shared/components/cards/card-app-instances/card-app-instances.component';
+import { CardAppUptimeComponent } from '../../../../../../shared/components/cards/card-app-uptime/card-app-uptime.component';
+import { ViewBuildpackComponent } from './view-buildpack/view-buildpack.component';
+import { InstancesAccordionComponent } from './instances-accordion/instances-accordion.component';
 import { EnvVarStratosProjectSource } from './application-env-vars.service';
 
 const isDockerHubRegEx = /^([a-zA-Z0-9_-]+)\/([a-zA-Z0-9_-]+):([a-zA-Z0-9_.-]+)/g;
-
-// Confirmation dialogs
-const appStopConfirmation = new ConfirmationDialogConfig(
-  'Stop Application',
-  'Are you sure you want to stop this Application?',
-  'Stop'
-);
-const appStartConfirmation = new ConfirmationDialogConfig(
-  'Start Application',
-  'Are you sure you want to start this Application?',
-  'Start'
-);
-const appRestartConfirmation = new ConfirmationDialogConfig(
-  'Restart Application',
-  'Are you sure you want to restart this Application?',
-  'Restart'
-);
-const appRestageConfirmation = new ConfirmationDialogConfig(
-  'Restage Application',
-  'Are you sure you want to restage this Application?',
-  'Restage'
-);
 
 interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   label?: string;
@@ -55,41 +36,81 @@ interface CustomEnvVarStratosProjectSource extends EnvVarStratosProjectSource {
   commitURL?: string;
 }
 
+// The view-model the Build tab's deploy-source pipeline actually emits: a
+// git/docker deploy source, the docker-image variant, or one of the
+// 'loading' / 'not-available' sentinels. All fields the template reads are
+// optional because each variant populates a different subset.
+interface DeploySourceView {
+  type: string;
+  scm?: string;
+  project?: string;
+  branch?: string;
+  commit?: string;
+  url?: string;
+  endpointGuid?: string;
+  timestamp?: number | null;
+  label?: string;
+  icon?: SCMIcon;
+  commitURL?: string;
+  dockerImage?: string;
+  dockerUrl?: string | null;
+}
+
 @Component({
   selector: 'app-build-tab',
   templateUrl: './build-tab.component.html',
-  styleUrls: ['./build-tab.component.scss'],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    RouterModule,
+    TileGridComponent,
+    TileGroupComponent,
+    TileComponent,
+    CardAppStatusComponent,
+    CardAppInstancesComponent,
+    CardAppUptimeComponent,
+    MetadataItemComponent,
+    ViewBuildpackComponent,
+    InstancesAccordionComponent,
+    MbToHumanSizePipe,
+    UptimePipe,
+  ],
   providers: [
     ApplicationMonitorService,
   ]
 })
 export class BuildTabComponent implements OnInit {
-  public isBusyUpdating$: Observable<{ updating: boolean, }>;
-  public manageAppPermission = CfCurrentUserPermissions.APPLICATION_MANAGE;
+  applicationService = inject(ApplicationService);
+  data = inject(AppDetailDataService);
+  // Read inFlight signal from the action service so the status card pulses
+  // while a lifecycle action is in progress — visual feedback right where
+  // the operator is looking, in addition to the bottom-of-page snackbar.
+  actions = inject(AppApplicationActionsService);
+  private scmService = inject(GitSCMService);
+  private gitData = inject(GitDataService);
+  private cups = inject(CurrentUserPermissionsService);
 
-  constructor(
-    public applicationService: ApplicationService,
-    private scmService: GitSCMService,
-    private store: Store<CFAppState>,
-    private route: ActivatedRoute,
-    private router: Router,
-    private confirmDialog: ConfirmationDialogService,
-    private cups: CurrentUserPermissionsService
-  ) { }
-
-  cardTwoFetching$: Observable<boolean>;
+  cardTwoFetching$!: Observable<boolean>;
 
   public async: any;
 
   getFullApiUrl = getFullEndpointApiUrl;
 
-  sshStatus$: Observable<string>;
+  sshStatus$!: Observable<string>;
 
-  deploySource$: Observable<CustomEnvVarStratosProjectSource>;
+  deploySource$!: Observable<DeploySourceView | null>;
 
-  public gitRepo$: Observable<GitRepo>;
+  public gitRepo$!: Observable<GitRepo>;
+  public gitRepo: GitRepo | null = null;
 
   ngOnInit() {
+    // Trigger the service-bindings fetch so the Summary card's Services
+    // count signal is populated when the Build tab loads — without
+    // requiring the user to visit the Services tab first to kick off
+    // the load.
+    void this.data.refresh('serviceBindings');
+
     this.cardTwoFetching$ = this.applicationService.application$.pipe(
       combineLatest(
         this.applicationService.appSummary$
@@ -98,19 +119,10 @@ export class BuildTabComponent implements OnInit {
         return app.fetching || appSummary.entityRequestInfo.fetching;
       }), distinct());
 
-    this.isBusyUpdating$ = this.applicationService.entityService.updatingSection$.pipe(
-      map(updatingSection => {
-        const updating = this.updatingSectionBusy(updatingSection.restaging) ||
-          this.updatingSectionBusy(updatingSection[UpdateExistingApplication.updateKey]);
-        return { updating };
-      }),
-      startWith({ updating: true })
-    );
-
     this.sshStatus$ = this.applicationService.application$.pipe(
       combineLatest(this.applicationService.appSpace$),
       map(([app, space]) => {
-        if (!space.entity.allow_ssh) {
+        if (!space?.allowSsh) {
           return 'Disabled by the space';
         } else {
           return app.app.entity.enable_ssh ? 'Yes' : 'No';
@@ -122,7 +134,7 @@ export class BuildTabComponent implements OnInit {
       switchMap(space => this.cups.can(
         CfCurrentUserPermissions.APPLICATION_VIEW_ENV_VARS,
         this.applicationService.cfGuid,
-        space.metadata.guid)
+        space?.guid)
       )
     );
 
@@ -130,18 +142,20 @@ export class BuildTabComponent implements OnInit {
       map(project => {
         const scmType = project.deploySource.scm || project.deploySource.type;
         const scm = this.scmService.getSCM(scmType as GitSCMType, project.deploySource.endpointGuid);
-        return gitEntityCatalog.repo.store.getRepoInfo.getEntityService({ projectName: project.deploySource.project, scm });
+        // strict: applicationStratProject$ only carries a git deploySource here,
+        // whose project name is always populated (optional on the shared source
+        // type because docker/other deploy kinds omit it).
+        return this.gitData.getRepository(scm, project.deploySource.project!);
       }),
-      switchMap(repoService => repoService.waitForEntity$),
-      map(p => p.entity)
+      switchMap(repoResource => repoResource.waitForValue$)
     );
 
     const deploySource$ = observableCombineLatest(
       this.applicationService.applicationStratProject$,
       this.applicationService.application$
     ).pipe(
-      map(([project, app]) => {
-        if (!!project) {
+      map(([project, app]): DeploySourceView | null => {
+        if (project) {
           const deploySource: CustomEnvVarStratosProjectSource = { ...project.deploySource };
 
           // Legacy
@@ -169,153 +183,43 @@ export class BuildTabComponent implements OnInit {
           return null;
         }
       }),
-      switchMap((deploySource: CustomEnvVarStratosProjectSource) => {
-        const res: Observable<any>[] = [
-          of(deploySource),
-        ];
+      switchMap((deploySource: DeploySourceView | null) => {
+        let commit$: Observable<GitResourceState<GitCommit> | null> = of(null);
         if (deploySource && deploySource.type === 'gitscm') {
           // Add gitscm info... add async info in next section
           const scmType = deploySource.scm as GitSCMType;
-          const scm = this.scmService.getSCM(scmType, deploySource.endpointGuid);
+          // strict: a gitscm deploy source always carries endpointGuid/project/commit.
+          const scm = this.scmService.getSCM(scmType, deploySource.endpointGuid!);
           deploySource.label = scm.getLabel();
           deploySource.icon = scm.getIcon();
-          res.push(gitEntityCatalog.commit.store.getEntityService(null, scm.endpointGuid, {
-            projectName: deploySource.project,
-            scm,
-            commitSha: deploySource.commit
-          }).entityObs$);
-        } else {
-          res.push(of(null));
+          commit$ = this.gitData.getCommit(scm, deploySource.project!, deploySource.commit!).state$;
         }
-        return observableCombineLatest(res);
+        return observableCombineLatest([of(deploySource), commit$]);
       }),
-      map(([deploySource, commit]: [CustomEnvVarStratosProjectSource, EntityInfo<GitCommit>]) => {
+      map(([deploySource, commit]: [DeploySourceView | null, GitResourceState<GitCommit> | null]) => {
         if (deploySource) {
-          deploySource.commitURL = commit?.entity?.html_url;
+          deploySource.commitURL = commit?.value?.html_url;
         }
         return deploySource;
       }),
-      startWith({ type: 'loading' })
+      startWith({ type: 'loading', timestamp: null } as DeploySourceView)
     );
 
     this.deploySource$ = canSeeEnvVars$.pipe(
-      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of(null)),
+      switchMap(canSeeEnvVars => canSeeEnvVars ? deploySource$ : of({ type: 'not-available', timestamp: null } as DeploySourceView)),
     );
   }
 
-  private updatingSectionBusy(section: ActionState) {
-    return section && section.busy;
-  }
-
-  private createDockerImageUrl(dockerImage: string): string {
+  private createDockerImageUrl(dockerImage: string | undefined): string | null {
     // https://docs.cloudfoundry.org/devguide/deploy-apps/push-docker.html
     // Private Registry: MY-PRIVATE-REGISTRY.DOMAIN:PORT/REPO/IMAGE:TAG
     // GCP: docker://MY-REGISTRY-URL/MY-PROJECT/MY-IMAGE-NAME
     // DockerHub: REPO/IMAGE:TAG
+    if (!dockerImage) {
+      return null;
+    }
     isDockerHubRegEx.lastIndex = 0;
     const res = isDockerHubRegEx.exec(dockerImage);
     return res && res.length === 4 ? `https://hub.docker.com/r/${res[1]}/${res[2]}` : null;
   }
-
-  // -----------
-  // App Actions
-  // -----------
-
-  private dispatchAppStats = () => {
-    const { cfGuid, appGuid } = this.applicationService;
-    cfEntityCatalog.appStats.api.getMultiple(appGuid, cfGuid);
-  };
-
-  restartApplication() {
-    this.confirmDialog.open(appRestartConfirmation, () => {
-
-      this.applicationService.application$.pipe(
-        first(),
-        mergeMap(appData => {
-          this.applicationService.updateApplication({ state: 'STOPPED' }, [], appData.app.entity);
-          return observableCombineLatest(
-            observableOf(appData),
-            this.pollEntityService('stopping', 'STOPPED').pipe(first())
-          );
-        }),
-        mergeMap(([appData, updateData]) => {
-          this.applicationService.updateApplication({ state: 'STARTED' }, [], appData.app.entity);
-          return this.pollEntityService('starting', 'STARTED').pipe(first());
-        }),
-      ).subscribe({
-        error: this.dispatchAppStats,
-        complete: this.dispatchAppStats
-      });
-
-    });
-  }
-
-  private confirmAndPollForState(
-    confirmConfig: ConfirmationDialogConfig,
-    onConfirm: (appData: ApplicationData) => void,
-    updateKey: string,
-    requiredAppState: string,
-    onSuccess: () => void) {
-    this.applicationService.application$.pipe(
-      first(),
-      tap(appData => {
-        this.confirmDialog.open(confirmConfig, () => {
-          onConfirm(appData);
-          this.pollEntityService(updateKey, requiredAppState).pipe(
-            first(),
-          ).subscribe(onSuccess);
-        });
-      })
-    ).subscribe();
-  }
-
-  private updateApp(confirmConfig: ConfirmationDialogConfig, updateKey: string, requiredAppState: string, onSuccess: () => void) {
-    this.confirmAndPollForState(
-      confirmConfig,
-      appData => this.applicationService.updateApplication({ state: requiredAppState }, [AppMetadataTypes.STATS], appData.app.entity),
-      updateKey,
-      requiredAppState,
-      onSuccess
-    );
-  }
-
-  stopApplication() {
-    this.updateApp(appStopConfirmation, 'stopping', 'STOPPED', () => {
-      // On app reaching the 'STOPPED' state clear the app's stats pagination section
-      const { cfGuid, appGuid } = this.applicationService;
-      const getAppStatsAction = cfEntityCatalog.appStats.actions.getMultiple(appGuid, cfGuid);
-      this.store.dispatch(new ResetPagination(getAppStatsAction, getAppStatsAction.paginationKey));
-    });
-  }
-
-  restageApplication() {
-    const { cfGuid, appGuid } = this.applicationService;
-    this.confirmAndPollForState(
-      appRestageConfirmation,
-      () => cfEntityCatalog.application.api.restage(appGuid, cfGuid),
-      'starting',
-      'STARTED',
-      () => { }
-    );
-  }
-
-  pollEntityService(state, stateString): Observable<any> {
-    return this.applicationService.entityService
-      .poll(1000, state).pipe(
-        delay(1),
-        filter(({ resource }) => {
-          return resource.entity.state === stateString;
-        }),
-      );
-  }
-
-  startApplication() {
-    this.updateApp(appStartConfirmation, 'starting', 'STARTED', () => { });
-  }
-
-  redirectToDeletePage() {
-    this.router.navigate(['../delete'], { relativeTo: this.route });
-  }
-
-
 }

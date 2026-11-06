@@ -1,4 +1,5 @@
-import { Inject, Injectable } from '@angular/core';
+import { Injectable, Injector, inject } from '@angular/core';
+import { EndpointsDataService } from '@stratosui/store';
 
 import { GITHUB_API_URL } from '../github.helpers';
 import { GitHubSCM } from './github-scm';
@@ -9,20 +10,26 @@ import { GitSCM } from './scm';
 export type GitSCMType = 'github' | 'gitlab';
 
 // Abstracts differences in Git-based SCM services such as GitHub and GitLab
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class GitSCMService {
+  private gitHubURL = inject(GITHUB_API_URL);
+  // W36-B Wave 3: thread EndpointsDataService + Injector through to
+  // each SCM instance so its BaseSCM.getEndpoint() bridge can read
+  // from the signal-native projection. Injector required because
+  // BaseSCM.getEndpoint() calls toObservable() on a signal returned
+  // by EndpointsDataService.
+  private endpointsData = inject(EndpointsDataService);
+  private injector = inject(Injector);
 
-  constructor(
-    @Inject(GITHUB_API_URL) private gitHubURL: string
-  ) {
-  }
 
-  public getSCM(type: GitSCMType, endpointGuid: string): GitSCM {
+  public getSCM(type: GitSCMType, endpointGuid: string, accessToken?: string): GitSCM {
     switch (type) {
       case 'github':
-        return new GitHubSCM(this.gitHubURL, endpointGuid);
+        return new GitHubSCM(this.gitHubURL, endpointGuid, accessToken, this.endpointsData, this.injector);
       case 'gitlab':
-        return new GitLabSCM(endpointGuid);
+        return new GitLabSCM(endpointGuid, accessToken, this.endpointsData, this.injector);
     }
   }
 }

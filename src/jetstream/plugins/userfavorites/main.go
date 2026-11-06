@@ -5,7 +5,7 @@ import (
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Module init will register plugin
@@ -51,7 +51,6 @@ func (uf *UserFavorites) AddSessionGroupRoutes(echoGroup *echo.Group) {
 	echoGroup.GET("/favorites", uf.getAll)
 	echoGroup.DELETE("/favorites/:guid", uf.delete)
 	echoGroup.POST("/favorites", uf.create)
-	echoGroup.POST("/favorites/:guid/metadata", uf.setMetadata)
 }
 
 // Init performs plugin initialization

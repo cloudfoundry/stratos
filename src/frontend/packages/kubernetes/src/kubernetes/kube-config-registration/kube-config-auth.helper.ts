@@ -1,8 +1,9 @@
-import { ComponentFactoryResolver, Injector } from '@angular/core';
-import { UntypedFormBuilder } from '@angular/forms';
+import { createComponent, EnvironmentInjector, Injector } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
 
+import { naturalCompare } from '@stratosui/core';
 import { ConnectEndpointData } from '../../../../core/src/features/endpoints/connect.service';
-import { RowState } from '../../../../core/src/shared/components/list/data-sources-controllers/list-data-source-types';
+import { RowState } from '../../../../core/src/shared/components/signal-list/row-state.types';
 import { EndpointAuthTypeConfig, IAuthForm } from '../../../../store/src/extension-types';
 import { entityCatalog } from '../../../../store/src/public-api';
 import { KUBERNETES_ENDPOINT_TYPE } from '../kubernetes-entity-factory';
@@ -16,7 +17,7 @@ export class KubeConfigAuthHelper {
 
   authTypes: { [name: string]: EndpointAuthTypeConfig, } = {};
 
-  public subTypes = [];
+  public subTypes: Array<{ id: string; name: string }> = [];
 
   constructor() {
     const epTypeInfo = entityCatalog.getAllEndpointTypes(false);
@@ -25,28 +26,46 @@ export class KubeConfigAuthHelper {
       const defn = k8s.definition;
 
       // Collect all of the auth types
-      defn.authTypes.forEach(at => {
-        this.authTypes[at.value] = at;
-      });
+      if (defn.authTypes) {
+        defn.authTypes.forEach(at => {
+          this.authTypes[at.value] = at;
+        });
+      }
 
       this.subTypes.push({ id: '', name: 'Generic' });
 
       // Collect all of the auth types for the sub-types
-      defn.subTypes.forEach(st => {
-        if (st.type !== 'config') {
-          this.subTypes.push({ id: st.type, name: st.labelShort });
-        }
-        st.authTypes.forEach(at => {
-          this.authTypes[at.value] = at;
+      if (defn.subTypes) {
+        defn.subTypes.forEach(st => {
+          if (st.type && st.type !== 'config') {
+            this.subTypes.push({ id: st.type, name: st.labelShort ?? st.type });
+          }
+          if (st.authTypes) {
+            st.authTypes.forEach(at => {
+              this.authTypes[at.value] = at;
+            });
+          }
         });
-      });
+      }
 
       // Sort the subtypes
-      this.subTypes = this.subTypes.sort((a, b) => a.name.localeCompare(b.name));
+      this.subTypes = this.subTypes.sort((a, b) => naturalCompare(a.name, b.name));
     }
   }
 
   // Try and parse the authentication metadata
+  // Match the cluster server against a provider domain by hostname suffix,
+  // rather than a substring anywhere in the URL (which a URL like
+  // https://evil.com/azmk8s.io would spuriously match).
+  private serverHostEndsWith(server: string, domain: string): boolean {
+    try {
+      const host = new URL(server).hostname;
+      return host === domain || host.endsWith('.' + domain);
+    } catch {
+      return false;
+    }
+  }
+
   public parseAuth(cluster: KubeConfigFileCluster, user: KubeConfigFileUser): RowState {
 
     // Default subtype is generic Kubernetes ('') or previously determined/selected sub type
@@ -61,7 +80,7 @@ export class KubeConfigAuthHelper {
       // Default is generic kubernetes
       let subType = '';
       const authType = 'kube-cert-auth';
-      if (cluster.cluster.server.indexOf('azmk8s.io') >= 0) {
+      if (this.serverHostEndsWith(cluster.cluster.server, 'azmk8s.io')) {
         // Probably Azure
         subType = 'aks';
         cluster._subType = 'aks';
@@ -87,7 +106,7 @@ export class KubeConfigAuthHelper {
       };
     }
 
-    const authProvider = user.user['auth-provider'];
+    const authProvider = (user.user as Record<string, { config?: Record<string, string> }>)['auth-provider'];
     if (authProvider && authProvider.config) {
       if (authProvider.config['cmd-path'] && authProvider.config['cmd-path'].indexOf('gcloud') !== -1) {
         // GKE
@@ -102,7 +121,7 @@ export class KubeConfigAuthHelper {
     }
 
     if (
-      cluster.cluster.server.indexOf('eks.amazonaws.com') >= 0 ||
+      this.serverHostEndsWith(cluster.cluster.server, 'eks.amazonaws.com') ||
       (user.user.exec && user.user.exec.command && user.user.exec.command === 'aws-iam-authenticator')
     ) {
       // Probably EKS
@@ -132,7 +151,7 @@ export class KubeConfigAuthHelper {
   }
 
   // Use the auto component to get the data in the correct format for connecting to the endpoint
-  public getAuthDataForConnect(resolver: ComponentFactoryResolver, injector: Injector, fb: UntypedFormBuilder, user: KubeConfigFileUser)
+  public getAuthDataForConnect(environmentInjector: EnvironmentInjector, injector: Injector, fb: FormBuilder, user: KubeConfigFileUser)
     : ConnectEndpointData | null {
 
     let data = null;
@@ -141,9 +160,7 @@ export class KubeConfigAuthHelper {
     if (user && user._authData) {
       const authType = this.authTypes[user._authData.authType];
 
-      const factory = resolver.resolveComponentFactory<IAuthForm>(authType.component);
-
-      const ref = factory.create(injector);
+      const ref = createComponent<IAuthForm>(authType.component, { environmentInjector, elementInjector: injector });
 
       const form = fb.group({
         authType: authType.value,

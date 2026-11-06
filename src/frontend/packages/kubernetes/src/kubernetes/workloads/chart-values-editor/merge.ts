@@ -1,5 +1,5 @@
 
-export function mergeObjects(src: any, ...dest: any): any {
+export function mergeObjects(src: Record<string, unknown>, ...dest: Record<string, unknown>[]): Record<string, unknown> {
   // Copy src
   const data = JSON.parse(JSON.stringify(src));
   // Merge in all of the dest objects
@@ -11,18 +11,22 @@ export function mergeObjects(src: any, ...dest: any): any {
 }
 
 // merge from dest into src
-function doMergeObjects(src: any, dest: any) {
+function doMergeObjects(src: Record<string, unknown>, dest: Record<string, unknown>): void {
   // Go through the keys of dest an update them in src
   if (!dest) {
     return;
   }
 
   Object.keys(dest).forEach(key => {
+    // Guard against prototype pollution from parsed YAML/JSON keys
+    if (key === '__proto__' || key === 'constructor' || key === 'prototype') {
+      return;
+    }
     if (typeof (dest[key]) === 'object' && !Array.isArray(dest)) {
       if (!src[key]) {
         src[key] = {};
       }
-      doMergeObjects(src[key], dest[key]);
+      doMergeObjects(src[key] as Record<string, unknown>, dest[key] as Record<string, unknown>);
     } else {
       src[key] = dest[key];
     }

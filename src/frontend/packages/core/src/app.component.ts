@@ -1,32 +1,49 @@
 import { DOCUMENT } from '@angular/common';
-import { AfterContentInit, Component, HostBinding, Inject, OnDestroy, OnInit } from '@angular/core';
-import { Store } from '@ngrx/store';
-import { AuthOnlyAppState, ThemeService } from '@stratosui/store';
+import { AfterContentInit, ChangeDetectionStrategy, Component, HostBinding, OnDestroy, OnInit, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { RoutingHistoryService } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { create } from 'rxjs-spy';
 
+import { StratosBrandingService } from '../../theme/stratos-branding.service';
+
+import { AuthSignalService } from './core/signals/auth-signal.service';
 import { environment } from './environments/environment';
 import { LoggedInService } from './logged-in.service';
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.scss']
+  host: { class: 'flex flex-col flex-1 h-screen min-h-0' },
+  // eslint-disable-next-line @angular-eslint/prefer-standalone -- declared and bootstrapped in NgModule AppModule (app.module.ts, out of scope); standalone migration tracked separately
+  standalone: false,
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
+  private loggedInService = inject(LoggedInService);
+  // Eagerly instantiated at bootstrap so it starts recording route history
+  // from the first navigation (before any wizard/error route is reached).
+  // Without this providedIn:root would lazily create it on first consumer
+  // inject, missing the navigation that landed the user on that route and
+  // breaking the Cancel/back destination.
+  private routingHistory = inject(RoutingHistoryService);
+  private authSignals = inject(AuthSignalService);
+  branding = inject(StratosBrandingService);
+  private document = inject<Document>(DOCUMENT);
+
 
   @HostBinding('@.disabled')
   public animationsDisabled = false;
-  public userId$: Observable<string>;
+  public userId$: Observable<string | null>;
 
-  constructor(
-    private loggedInService: LoggedInService,
-    store: Store<AuthOnlyAppState>,
-    public themeService: ThemeService,
-    @Inject(DOCUMENT) private document: Document,
-  ) {
+  constructor() {
+    // Trigger initial session verification BEFORE routing starts
+    // This prevents the authGuard from blocking indefinitely waiting for verifying=false
+    this.authSignals.verifySession(true, true);
+
     // We use the username to key the session storage. We could replace this with the users id?
-    this.userId$ = store.select(state => state.auth.sessionData && state.auth.sessionData.user ? state.auth.sessionData.user.name : null);
+    // Sourced from AuthSignalService rather than a direct store.select.
+    this.userId$ = toObservable(computed(() => this.authSignals.sessionData()?.user?.name ?? null));
     if (!environment.production) {
       if (environment.showObsDebug || environment.disablePolling) {
         const spy = create();
@@ -57,16 +74,6 @@ export class AppComponent implements OnInit, OnDestroy, AfterContentInit {
 
   ngOnInit() {
     this.loggedInService.init();
-
-    // Material design defines smaller sizes when on desktop but angular-material uses larger mobile sizes
-    // Add a style to the body if we detect a desktop browser, so we can adjust styling to match the MD Specification
-
-    // Approximation for detecting desktop browser - see: Stack Overflow: https://goo.gl/e1KuJR
-    const isTouchDevice = () => 'ontouchstart' in window || 'onmsgesturechange' in window;
-    const isDesktop = window.screenX !== 0 && !isTouchDevice() ? true : false;
-    if (isDesktop) {
-      this.document.body.classList.add('mat-desktop');
-    }
 
     // Desktop (Electron ?)
     if (environment.desktopMode) {

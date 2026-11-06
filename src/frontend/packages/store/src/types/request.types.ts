@@ -1,19 +1,21 @@
 import { HttpRequest } from '@angular/common/http';
-import { Action } from '@ngrx/store';
+import { Action } from './action.types';
 
 import { ApiActionTypes, RequestTypes } from '../actions/request.actions';
 import { BasePipelineRequestAction } from '../entity-catalog/action-orchestrator/action-orchestrator';
-import { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
-import { EntitySchema } from '../helpers/entity-schema';
-import { ApiRequestTypes } from '../reducers/api-request-reducer/request-helpers';
-import { NormalizedResponse } from './api.types';
-import { PaginatedAction } from './pagination.types';
+import type { EntityCatalogEntityConfig } from '../entity-catalog/entity-catalog.types';
+import type { EntitySchema } from '../helpers/entity-schema';
+import type { NormalizedResponse } from './api.types';
+import type { PaginatedAction } from './pagination.types';
+
+export type ApiRequestTypes = 'fetch' | 'update' | 'create' | 'delete';
 
 export interface SingleEntityAction {
   // For single entity requests
   guid?: string;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- intentional class/interface merge: the abstract RequestAction class (below) is augmented with these optional action fields
 export interface RequestAction extends Action, BasePipelineRequestAction, SingleEntityAction {
   updatingKey?: string;
 }
@@ -83,6 +85,7 @@ export abstract class StartAction implements Action {
   type = ApiActionTypes.API_REQUEST_START;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unsafe-declaration-merging -- intentional class/interface merge: this abstract class carries the same-named interface's optional action fields
 export abstract class RequestAction implements Action {
   type = RequestTypes.START;
 }
@@ -114,7 +117,8 @@ export interface ICFAction extends EntityRequestAction {
 }
 
 export class APISuccessOrFailedAction<T = any> implements Action {
-  constructor(public type: string, public apiAction: EntityRequestAction | PaginatedAction, public response?: T) { }
+  // apiAction is optional: a result derived from a bare string request key has no originating action
+  constructor(public type: string, public apiAction?: EntityRequestAction | PaginatedAction, public response?: T) { }
 }
 
 export class StartRequestAction extends RequestAction {
@@ -144,7 +148,7 @@ export interface InternalEndpointError {
   eventCode?: string;
   message?: string;
   url: string;
-  error?;
+  error?: string;
 }
 export class WrapperRequestActionFailed extends RequestFailedAction implements IFailedRequestAction {
   constructor(

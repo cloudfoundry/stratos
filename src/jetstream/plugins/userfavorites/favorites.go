@@ -3,18 +3,17 @@ package userfavorites
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/plugins/userfavorites/userfavoritesstore"
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
 
-func (uf *UserFavorites) getAll(c echo.Context) error {
+func (uf *UserFavorites) getAll(c *echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
@@ -41,11 +40,11 @@ func (uf *UserFavorites) getAll(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
-func (uf *UserFavorites) delete(c echo.Context) error {
+func (uf *UserFavorites) delete(c *echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
@@ -63,45 +62,11 @@ func (uf *UserFavorites) delete(c echo.Context) error {
 		return err
 	}
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"response\": \"User Favorite deleted okay\"}"))
-	return nil
+	_, err = c.Response().Write([]byte("{\"response\": \"User Favorite deleted okay\"}"))
+	return err
 }
 
-func (uf *UserFavorites) setMetadata(c echo.Context) error {
-
-	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
-	if err != nil {
-		return err
-	}
-
-	favoriteGUID := c.Param("guid")
-	if len(favoriteGUID) == 0 {
-		return errors.New("Invalid favorite GUID")
-	}
-	req := c.Request()
-	body, _ := ioutil.ReadAll(req.Body)
-	userGUID := c.Get("user_id").(string)
-	// Unmarshal
-	var msg map[string]interface{}
-	err = json.Unmarshal(body, &msg)
-	if err != nil {
-		return fmt.Errorf("Unable to un Marshal User Favorite metadata body: %v", err)
-	}
-
-	metadataBytes, err := json.Marshal(msg)
-	if err != nil {
-		return fmt.Errorf("Unable to Marshal User Favorite metadata: %v", err)
-	}
-	err = store.SetMetadata(userGUID, favoriteGUID, string(metadataBytes))
-	if err != nil {
-		return err
-	}
-	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"response\": \"User Favorite metadata updated okay\"}"))
-	return nil
-}
-
-func (uf *UserFavorites) create(c echo.Context) error {
+func (uf *UserFavorites) create(c *echo.Context) error {
 
 	store, err := userfavoritesstore.NewFavoritesDBStore(uf.portalProxy.GetDatabaseConnection())
 	if err != nil {
@@ -114,7 +79,7 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	userGUID := c.Get("user_id").(string)
 
 	req := c.Request()
-	body, _ := ioutil.ReadAll(req.Body)
+	body, _ := io.ReadAll(req.Body)
 
 	favorite := userfavoritesstore.UserFavoriteRecord{}
 	err = json.Unmarshal(body, &favorite)
@@ -155,8 +120,8 @@ func (uf *UserFavorites) create(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 // RemoveEndpointFavorites removes favorites form an endpoint using the given endpoint guid

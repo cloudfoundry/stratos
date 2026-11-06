@@ -1,0 +1,312 @@
+import { RequestHelper, ConsoleUserType } from './request.helper';
+import { SecretsHelper } from './secrets-helpers';
+import { detectAuthType } from './auth.helper';
+
+/**
+ * Endpoint Configuration Interface
+ */
+export interface EndpointConfig {
+  guid?: string;
+  name: string;
+  url: string;
+  cnsi_type?: string;
+  skipSSLValidation?: boolean;
+}
+
+/**
+ * Endpoint Management Helper
+ * Handles endpoint registration, connection, and removal
+ * Migrated from Protractor ResetsHelpers and E2ESetup
+ */
+export class EndpointManagementHelper {
+  private adminRequest: RequestHelper;
+  private userRequest: RequestHelper;
+  private secrets = SecretsHelper.load();
+  private adminSessionCreated = false;
+  private userSessionCreated = false;
+
+  /** Map API endpoint types to secrets keys */
+  private static readonly ENDPOINT_TYPE_MAP: Record<string, string> = {
+    cf: 'cloudFoundry',
+  };
+
+  private baseURL: string;
+
+  constructor(baseURL: string = 'https://127.0.0.1:4200') {
+    this.baseURL = baseURL;
+    this.adminRequest = new RequestHelper(baseURL);
+    this.userRequest = new RequestHelper(baseURL);
+  }
+
+  /**
+   * Ensure admin session exists
+   */
+  private async ensureAdminSession(): Promise<void> {
+    if (!this.adminSessionCreated) {
+      await this.adminRequest.init();
+      await this.adminRequest.createSession(ConsoleUserType.admin);
+      this.adminSessionCreated = true;
+    }
+  }
+
+  /**
+   * Ensure user session exists
+   */
+  private async ensureUserSession(): Promise<void> {
+    if (!this.userSessionCreated) {
+      await this.userRequest.init();
+      await this.userRequest.createSession(ConsoleUserType.user);
+      this.userSessionCreated = true;
+    }
+  }
+
+  /**
+   * Get request helper for user type
+   */
+  private async getRequest(userType: ConsoleUserType): Promise<RequestHelper> {
+    if (userType === ConsoleUserType.admin) {
+      await this.ensureAdminSession();
+      return this.adminRequest;
+    } else {
+      await this.ensureUserSession();
+      return this.userRequest;
+    }
+  }
+
+  /**
+   * Remove all registered endpoints
+   */
+  async clearAllEndpoints(): Promise<void> {
+    await this.ensureAdminSession();
+
+    const endpoints = await this.adminRequest.get('/api/v1/endpoints');
+
+    if (!endpoints || endpoints.length === 0) {
+      return;
+    }
+
+    // Delete all endpoints
+    for (const endpoint of endpoints) {
+      await this.adminRequest.delete(`/api/v1/endpoints/${endpoint.guid}`);
+    }
+  }
+
+  /**
+   * Register the default Cloud Foundry endpoint
+   */
+  async registerDefaultCloudFoundry(): Promise<void> {
+    await this.ensureAdminSession();
+
+    const cfEndpoints = this.secrets.cloudFoundry;
+    if (!cfEndpoints || cfEndpoints.length === 0) {
+      throw new Error('No Cloud Foundry endpoints configured in secrets');
+    }
+
+    const defaultCF = cfEndpoints[0];
+
+    // Check if already registered (idempotent)
+    const existing = await this.adminRequest.get('/api/v1/endpoints');
+    const alreadyRegistered = existing?.some((ep: any) => {
+      const host = ep.api_endpoint?.Host || '';
+      return host && defaultCF.url.includes(host);
+    });
+
+    if (alreadyRegistered) {
+      return;
+    }
+
+    await this.adminRequest.postForm('/api/v1/endpoints?endpoint_type=cf', {
+      api_endpoint: defaultCF.url,
+      cnsi_name: defaultCF.name,
+      skip_ssl_validation: defaultCF.skipSSLValidation ? 'true' : 'false'
+    });
+  }
+
+  /**
+   * Register multiple Cloud Foundry endpoints
+   */
+  async registerMultipleCloudFoundries(): Promise<void> {
+    await this.ensureAdminSession();
+
+    const cfEndpoints = this.secrets.cloudFoundry;
+    if (!cfEndpoints || cfEndpoints.length < 2) {
+      throw new Error('At least 2 Cloud Foundry endpoints must be configured for this test');
+    }
+
+    for (const endpoint of cfEndpoints) {
+      if (!endpoint.skip) {
+        await this.adminRequest.postForm('/api/v1/endpoints?endpoint_type=cf', {
+          api_endpoint: endpoint.url,
+          cnsi_name: endpoint.name,
+          skip_ssl_validation: endpoint.skipSSLValidation ? 'true' : 'false'
+        });
+      }
+    }
+  }
+
+  /**
+   * Connect all registered endpoints
+   */
+  async connectAllEndpoints(userType: ConsoleUserType = ConsoleUserType.admin): Promise<void> {
+    const request = await this.getRequest(userType);
+
+    const endpoints = await request.get('/api/v1/endpoints');
+
+    if (!endpoints || endpoints.length === 0) {
+      return;
+    }
+
+    // SSO deployments auto-connect endpoints during browser login —
+    // the password grant POST to /api/v1/tokens will fail with 401.
+    const authType = await detectAuthType(this.baseURL);
+    if (authType === 'sso') {
+      return;
+    }
+
+    for (const endpoint of endpoints) {
+      // Find credentials in secrets — map API type (e.g. 'cf') to secrets key (e.g. 'cloudFoundry')
+      const endpointType = endpoint.cnsi_type;
+      const secretsKey = EndpointManagementHelper.ENDPOINT_TYPE_MAP[endpointType] || endpointType;
+      const secretEndpoints = this.secrets[secretsKey as keyof typeof this.secrets] as any[];
+
+      if (!secretEndpoints) {
+        console.warn(`No credentials found for endpoint type: ${endpointType} (secrets key: ${secretsKey})`);
+        continue;
+      }
+
+      // Match by URL host
+      const endpointHost = endpoint.api_endpoint?.Host ||
+        (typeof endpoint.api_endpoint === 'string' ? new URL(endpoint.api_endpoint).host : '');
+      const found = secretEndpoints.find((ep: any) =>
+        endpointHost && ep.url.includes(endpointHost)
+      );
+
+      if (found) {
+        let creds;
+        if (userType === ConsoleUserType.admin) {
+          creds = found.creds.admin;
+        } else {
+          // No fallback to admin creds here: minting the "user" identity's
+          // token with admin credentials would make permission-scoped
+          // tests pass vacuously (they'd be exercising admin access under
+          // the user label). Fail loudly instead — see auth.setup.ts,
+          // which catches this and warns, and e2e/fixtures/test-base.ts's
+          // E2E_NO_CF_TOKEN guard, which then fails any test that actually
+          // needs the missing token.
+          if (!found.creds.nonAdmin) {
+            throw new Error(
+              `E2E_NO_NONADMIN_CREDS: profile has no cloudFoundry creds.nonAdmin for endpoint '${found.name}' — refusing to mint the user identity with admin credentials`
+            );
+          }
+          creds = found.creds.nonAdmin;
+        }
+
+        await request.postForm('/api/v1/tokens', {
+          cnsi_guid: endpoint.guid,
+          username: creds.username,
+          password: creds.password
+        });
+      }
+    }
+  }
+
+  /**
+   * Connect every registered CF endpoint for an already-authenticated session
+   * with explicit CF credentials — the role projects' identities, which are
+   * neither the admin nor the nonAdmin console user. Needs password-grant
+   * auth: under SSO the token POST is refused, and that is the right outcome
+   * (a role suite must never fall back to another identity).
+   */
+  async connectAllEndpointsWithCredentials(
+    request: RequestHelper,
+    creds: { username: string; password: string },
+  ): Promise<void> {
+    const endpoints = await request.get('/api/v1/endpoints');
+    for (const endpoint of endpoints || []) {
+      if (endpoint.cnsi_type !== 'cf') continue;
+      await request.postForm('/api/v1/tokens', {
+        cnsi_guid: endpoint.guid,
+        username: creds.username,
+        password: creds.password,
+      });
+    }
+  }
+
+  /**
+   * Connect a specific endpoint by name
+   */
+  async connectEndpoint(endpointName: string, userType: ConsoleUserType = ConsoleUserType.admin): Promise<void> {
+    const request = await this.getRequest(userType);
+
+    const endpoints = await request.get('/api/v1/endpoints');
+
+    if (!endpoints || endpoints.length === 0) {
+      throw new Error('No endpoints registered');
+    }
+
+    for (const endpoint of endpoints) {
+      const endpointType = endpoint.cnsi_type;
+      const secretsKey = EndpointManagementHelper.ENDPOINT_TYPE_MAP[endpointType] || endpointType;
+      const secretEndpoints = this.secrets[secretsKey as keyof typeof this.secrets] as any[];
+
+      if (!secretEndpoints) {
+        continue;
+      }
+
+      const found = secretEndpoints.find((ep: any) => ep.name === endpointName);
+
+      if (found) {
+        const creds = userType === ConsoleUserType.admin
+          ? found.creds.admin
+          : found.creds.nonAdmin || found.creds.admin;
+
+        await request.postForm('/api/v1/tokens', {
+          cnsi_guid: endpoint.guid,
+          username: creds.username,
+          password: creds.password
+        });
+        return;
+      }
+    }
+
+    throw new Error(`Endpoint '${endpointName}' not found`);
+  }
+
+  /**
+   * Get Stratos info from backend
+   */
+  async getInfo(userType: ConsoleUserType = ConsoleUserType.admin): Promise<any> {
+    const request = await this.getRequest(userType);
+    return await request.get('/pp/v1/info');
+  }
+
+  /**
+   * Remove a specific endpoint by name
+   */
+  async removeEndpoint(endpointName: string): Promise<void> {
+    await this.ensureAdminSession();
+
+    const endpoints = await this.adminRequest.get('/api/v1/endpoints');
+
+    if (!endpoints || endpoints.length === 0) {
+      return;
+    }
+
+    for (const endpoint of endpoints) {
+      if (endpoint.name === endpointName) {
+        await this.adminRequest.delete(`/api/v1/endpoints/${endpoint.guid}`);
+        return;
+      }
+    }
+  }
+
+  /**
+   * Clean up request contexts
+   */
+  async dispose(): Promise<void> {
+    await this.adminRequest.dispose();
+    await this.userRequest.dispose();
+    this.adminSessionCreated = false;
+    this.userSessionCreated = false;
+  }
+}

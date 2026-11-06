@@ -1,16 +1,16 @@
 package api
 
 import (
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 type EndpointPlugin interface {
 	Info(apiEndpoint string, skipSSLValidation bool, caCert string) (CNSIRecord, interface{}, error)
 	GetType() string
-	Register(echoContext echo.Context) error
-	Connect(echoContext echo.Context, cnsiRecord CNSIRecord, userId string) (*TokenRecord, bool, error)
+	Register(echoContext *echo.Context) error
+	Connect(echoContext *echo.Context, cnsiRecord CNSIRecord, userId string) (*TokenRecord, bool, error)
 	Validate(userGUID string, cnsiRecord CNSIRecord, tokenRecord TokenRecord) error
-	UpdateMetadata(info *Info, userGUID string, echoContext echo.Context)
+	UpdateMetadata(info *Info, userGUID string, echoContext *echo.Context)
 }
 
 type RoutePlugin interface {

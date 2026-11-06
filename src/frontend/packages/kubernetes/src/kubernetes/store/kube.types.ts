@@ -15,8 +15,8 @@ export interface KubernetesCurrentNamespace {
 }
 
 export interface KubernetesInfo {
-  nodes: {};
-  pods: {};
+  nodes: Record<string, unknown>;
+  pods: Record<string, unknown>;
 }
 
 export const KubernetesDefaultState = {
@@ -27,14 +27,16 @@ export const KubernetesDefaultState = {
 
 export interface BasicKubeAPIResource {
   metadata: Metadata;
-  status: any;
-  spec: any;
+  status?: Record<string, unknown> | any;
+  spec?: Record<string, unknown> | any;
+  kubeGuid?: string; // Kubernetes endpoint GUID
 }
 
 export interface KubeAPIResource extends BasicKubeAPIResource {
   metadata: Metadata;
   status: BaseStatus;
-  spec: any;
+  spec: Record<string, unknown>;
+  kubeGuid?: string; // Kubernetes endpoint GUID
 }
 
 export interface IKubeResourceEntityDefinition extends IStratosEntityDefinition {
@@ -58,9 +60,11 @@ export interface KubeResourceEntityDefinition<
   icon: string;
   iconFont?: string;
   type: string;
-  getKubeCatalogEntity?: (IStratosEntityDefinition) => StratosCatalogEntity<A, B, C>;
+  getKubeCatalogEntity?: (entityDef: IStratosEntityDefinition) => StratosCatalogEntity<A, B, C>;
   getIsValid?: (fav: UserFavorite<A>) => Observable<boolean>;
-  listColumns?: SimpleKubeListColumn[];
+  // Columns are typed against the resource type B so a definition for a specific kube
+  // resource can read that resource's own fields in its column value getters.
+  listColumns?: SimpleKubeListColumn<B>[];
   // Should this entity be hidden in the auto-generated navigation?
   hidden?: boolean;
   // Name fo a list config that can be obtained from the list config service
@@ -83,9 +87,9 @@ export interface KubernetesStatefulSet extends BasicKubeAPIResource {
 
 export interface DeploymentSpec {
   replicas: number;
-  selector?: any;
-  template?: any;
-  strategy?: any;
+  selector?: { matchLabels?: Labels; matchExpressions?: MatchExpression[] };
+  template?: { metadata?: Metadata; spec?: PodSpec };
+  strategy?: { type?: string; rollingUpdate?: { maxUnavailable?: number | string; maxSurge?: number | string } };
   revisionHistoryLimit: number;
   progressDeadlineSeconds: number;
   type?: string;
@@ -253,7 +257,7 @@ export interface KubernetesPod extends BasicKubeAPIResource {
   metadata: Metadata;
   status: PodStatus;
   spec: PodSpec;
-  deletionTimestamp?: any;
+  deletionTimestamp?: string | Date;
   expandedStatus: KubernetesPodExpandedStatus;
 }
 
@@ -294,7 +298,7 @@ export interface PodStatus {
 export interface KubernetesCondition {
   type: ConditionType;
   status: ConditionStatus;
-  lastProbeTime?: any;
+  lastProbeTime?: string | Date;
   lastTransitionTime: Date;
 }
 
@@ -336,7 +340,7 @@ export interface PodSpec {
   hostNetwork?: boolean;
   initContainers: InitContainer[];
   // nodeSelector?: NodeSelector;
-  readinessGates: any[];
+  readinessGates: Array<{ conditionType: string }>;
 }
 
 export interface InitContainer {
@@ -355,10 +359,10 @@ export interface KubernetesConfigMap {
   data: {
     apiVersion: string,
     binaryData: {
-      [key: string]: any,
+      [key: string]: string | ArrayBuffer,
     },
     data: {
-      [key: string]: any,
+      [key: string]: string,
     },
     kind: string;
   };
@@ -437,12 +441,16 @@ export interface Probe {
 export interface Env {
   name: string;
   value: string;
-  valueFrom?: any;
+  valueFrom?: {
+    fieldRef?: { fieldPath: string };
+    configMapKeyRef?: { name: string; key: string };
+    secretKeyRef?: { name: string; key: string };
+  };
 }
 
 export interface HttpGet {
   path: string;
-  port: any;
+  port: number | string;
   scheme: string;
 }
 
@@ -544,7 +552,7 @@ export interface KubeStatus {
   status: string;
   message: string;
   reason: string;
-  details: {};
+  details: Record<string, unknown>;
   code: number;
 }
 
@@ -560,8 +568,9 @@ export interface AnalysisReport {
   read: boolean;
   status: string;
   duration: number;
-  report?: any;
+  report?: Record<string, unknown>;
   title?: string;
+  format?: string;
 }
 
 
@@ -571,7 +580,7 @@ export interface KubernetesConfigMap extends BasicKubeAPIResource {
 
 export type SimpleColumnValueGetter<T> = (row: T) => string | Observable<string>;
 
-export interface SimpleKubeListColumn<T = any> {
+export interface SimpleKubeListColumn<T = BasicKubeAPIResource> {
   field: string | SimpleColumnValueGetter<T>;
   header: string;
   flex?: string;

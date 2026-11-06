@@ -3,11 +3,11 @@ package userinvite
 import (
 	"encoding/json"
 	"errors"
+	"log/slog"
 	"net/http"
 	"strings"
 
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -24,8 +24,8 @@ const cloudControllerAdminScope = "cloud_controller.admin"
 
 // Admin functions for managing User Invite credentials for a given Cloud Foundry
 
-func (invite *UserInvite) status(c echo.Context) error {
-	log.Debug("Invite Status")
+func (invite *UserInvite) status(c *echo.Context) error {
+	slog.Debug("Invite Status")
 	cfGUID := c.Param("id")
 
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
@@ -59,13 +59,13 @@ func (invite *UserInvite) status(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write(jsonString)
-	return nil
+	_, err = c.Response().Write(jsonString)
+	return err
 }
 
 // Configure
-func (invite *UserInvite) configure(c echo.Context) error {
-	log.Debug("Configure Invite token")
+func (invite *UserInvite) configure(c *echo.Context) error {
+	slog.Debug("Configure Invite token")
 	cfGUID := c.Param("id")
 
 	clientID := c.FormValue("client_id")
@@ -96,8 +96,8 @@ func (invite *UserInvite) configure(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"status\": \"ok\"}"))
-	return nil
+	_, err = c.Response().Write([]byte("{\"status\": \"ok\"}"))
+	return err
 }
 
 // arrayContainsString checks the string array to see if it contains the specifed value
@@ -110,8 +110,8 @@ func arrayContainsString(a []string, x string) bool {
 	return false
 }
 
-func (invite *UserInvite) remove(c echo.Context) error {
-	log.Debug("Delete Invite token")
+func (invite *UserInvite) remove(c *echo.Context) error {
+	slog.Debug("Delete Invite token")
 	cfGUID := c.Param("id")
 
 	// Check that there is an endpoint with the specified ID and that it is a Cloud Foundry endpoint
@@ -131,6 +131,6 @@ func (invite *UserInvite) remove(c echo.Context) error {
 	}
 
 	c.Response().Header().Set("Content-Type", "application/json")
-	c.Response().Write([]byte("{\"status\": \"ok\"}"))
-	return nil
+	_, err = c.Response().Write([]byte("{\"status\": \"ok\"}"))
+	return err
 }

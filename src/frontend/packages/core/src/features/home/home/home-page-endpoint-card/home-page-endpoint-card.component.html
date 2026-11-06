@@ -1,53 +1,144 @@
-<mat-card class="home-endpoint-card">
-  <mat-card-header class="home-endpoint-card__header" *ngIf="endpoint && definition">
-    <div class="home-endpoint-card__logo-panel" [routerLink]="link">
-      <img class="home-endpoint-card__logo" *ngIf="definition.logoUrl" [src]="definition.logoUrl" />
-    </div>
-    <div class="home-endpoint-card__header-text-panel" [routerLink]="link">
-      <h2 class="home-endpoint-card__header-text">
-        <div class="home-endpoint-card__panel" *ngIf="endpoint">
-          <app-multiline-title>{{ endpoint.name }}</app-multiline-title>
+<div class="card h-full">
+  @if (endpoint && definition) {
+    <div class="card-header border-b card-header-border">
+      <div class="flex items-center justify-between w-full">
+        <div class="flex items-center space-x-4" [class.cursor-pointer]="!disconnected" [routerLink]="disconnected ? null : link">
+          <div class="shrink-0">
+            @if (definition.logoUrl) {
+              <img class="h-12 w-12 object-contain" [src]="definition.logoUrl" alt="" />
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <h2 class="text-lg font-semibold card-title truncate">
+              @if (endpoint) {
+                <div>
+                  <app-multiline-title>{{ endpoint.name }}</app-multiline-title>
+                </div>
+              }
+            </h2>
+            <div class="text-sm card-subtitle mt-1">{{ definition.label }}</div>
+          </div>
         </div>
-      </h2>
-      <div class="home-endpoint-card__type">{{ definition.label }}</div>
-    </div>
-    <div *ngIf="(status$ | async) as status">
-      <div *ngIf="status === 1">
-        <mat-progress-spinner class="home-endpoint-card__loading" diameter="20" mode="indeterminate"></mat-progress-spinner>
+        <div class="flex items-center space-x-2">
+          @if ((status$ | async); as status) {
+            <div>
+              @if (status === Status.Loading) {
+                <app-busy class="text-primary" size="1.25rem" [context]="endpoint.name"></app-busy>
+              }
+              @if (status === Status.Error) {
+                <div class="text-warning-shade-500" title="Data for this endpoint took too long to load">
+                  <span class="material-icons">warning</span>
+                </div>
+              }
+            </div>
+          }
+          @if (favorite; as fav) {
+            <app-entity-favorite-star [confirmRemoval]="true" [favorite]="fav"></app-entity-favorite-star>
+          }
+        </div>
       </div>
-      <div *ngIf="status === 2" class="home-endpoint-card__error text-warning" matTooltip="Data for this endpoint took too long to load">
-        <mat-icon>warning</mat-icon>
+    </div>
+  }
+  <div class="card-body p-0">
+    @if (disconnected) {
+      <div class="p-6 flex flex-col items-center justify-center text-center space-y-3">
+        <span class="material-icons text-4xl sidebar-muted-text">cloud_off</span>
+        <div class="font-medium">Disconnected</div>
+        <button class="btn btn-primary" (click)="connect()">Connect</button>
       </div>
-    </div>
-    <div class="home-endpoint-card__header-star">
-      <app-entity-favorite-star [confirmRemoval]="true" class="home-endpoint-card__star" [favorite]="favorite"></app-entity-favorite-star>
-    </div>
-  </mat-card-header>
-  <mat-card-content class="home-endpoint-card__content">
-    <div class="home-card">
-      <div class="home-card__left">
+    }
+    <!-- Kept in the DOM (hidden) while disconnected: the #customCard anchor is
+         a static ViewChild, and a reconnect swaps the real card back in.
+         Two layouts, chosen per endpoint via homeCard.linksBelow: the classic
+         right-hand sidebar, or a Favorites/Shortcuts strip below the content
+         (suits content-light cards like kubernetes). -->
+    <div class="flex h-full" [class.hidden]="disconnected" [class.flex-col]="fullView || linksBelow" [class.flex-row]="!fullView && !linksBelow">
+      <div class="flex-1 p-6">
         <div>
-        <ng-template #customCard></ng-template>
-      </div>
-        <div *ngIf="!showShortcutsOnSide" class="home-card__shortcuts-left">
-          <app-home-shortcuts *ngIf="links$ | async as links" [shortcuts]="links.shortcuts"></app-home-shortcuts>
+          <ng-template #customCard></ng-template>
         </div>
+        @if (!linksBelow && !showShortcutsOnSide) {
+          <div class="mt-6">
+            @if (links$ | async; as links) {
+              <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
+            }
+          </div>
+        }
       </div>
-      <div class="home-card__right" *ngIf="!fullView" [ngClass]="{'home-card__right-2': layout && layout.x < 3}">
-        <div *ngIf="links$ | async as links">
-          <div class="home-card__fav-title-panel">
-            <div class="home-card__fav-title">Favorites</div>
-            <div *ngIf="hiddenFavorites > 0" class="home-card__fav-more"><a (click)="showFavoritesPanel()">{{hiddenFavorites}} more ...</a></div>
-          </div>
-          <div class="home-card__fav" *ngIf="links.favs.length > 0">
-            <app-favorites-meta-card *ngFor="let entity of links.favs" class="home-card__fav-card" [favoriteEntity]="entity"></app-favorites-meta-card>
-          </div>
-          <div class="home-card__fav" *ngIf="links.favs.length === 0">
-            <div class="home-card__fav-none">No favorites</div>
-          </div>
-          <app-home-shortcuts *ngIf="showShortcutsOnSide" [shortcuts]="links.shortcuts"></app-home-shortcuts>
+      @if (!fullView && !linksBelow) {
+        <div class="border-l sidebar-panel" [class.w-80]="!layout || layout.x <= 1" [class.w-48]="layout && layout.x === 2" [class.w-64]="layout && layout.x >= 3">
+          @if (links$ | async; as links) {
+            <div class="p-6">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-sm font-medium sidebar-title">Favorites</h3>
+                @if (hiddenFavorites > 0) {
+                  <div class="text-xs cursor-pointer sidebar-link" role="button" tabindex="0"
+                    (click)="showFavoritesPanel()"
+                    (keydown.enter)="showFavoritesPanel()"
+                    (keydown.space)="showFavoritesPanel(); $event.preventDefault()">
+                    {{hiddenFavorites}} more ...
+                  </div>
+                }
+              </div>
+              @if (links.favs.length > 0) {
+                <div class="space-y-3">
+                  @for (entity of links.favs; track entity) {
+                    <app-favorites-meta-card [favoriteEntity]="entity"></app-favorites-meta-card>
+                  }
+                </div>
+              }
+              @if (links.favs.length === 0) {
+                <div class="text-center py-8 sidebar-muted-text">
+                  <div class="text-sm">No favorites</div>
+                </div>
+              }
+              @if (showShortcutsOnSide) {
+                <div class="mt-6">
+                  <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
+                </div>
+              }
+            </div>
+          }
         </div>
-      </div>
+      }
+      @if (!fullView && linksBelow) {
+        <div class="border-t sidebar-panel">
+          @if (links$ | async; as links) {
+            <div class="p-6 pt-2 flex flex-row gap-8">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between mt-5 mb-2.5">
+                  <h3 class="text-sm font-medium sidebar-title">Favorites</h3>
+                  @if (hiddenFavorites > 0) {
+                    <div class="text-xs cursor-pointer sidebar-link" role="button" tabindex="0"
+                      (click)="showFavoritesPanel()"
+                      (keydown.enter)="showFavoritesPanel()"
+                      (keydown.space)="showFavoritesPanel(); $event.preventDefault()">
+                      {{hiddenFavorites}} more ...
+                    </div>
+                  }
+                </div>
+                @if (links.favs.length > 0) {
+                  <div class="space-y-3">
+                    @for (entity of links.favs; track entity) {
+                      <app-favorites-meta-card [favoriteEntity]="entity"></app-favorites-meta-card>
+                    }
+                  </div>
+                }
+                @if (links.favs.length === 0) {
+                  <div class="sidebar-muted-text">
+                    <div class="text-sm">No favorites</div>
+                  </div>
+                }
+              </div>
+              @if (links.shortcuts.length > 0) {
+                <div class="flex-1 min-w-0">
+                  <app-home-shortcuts [shortcuts]="links.shortcuts"></app-home-shortcuts>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
     </div>
-  </mat-card-content>
-</mat-card>
+  </div>
+</div>

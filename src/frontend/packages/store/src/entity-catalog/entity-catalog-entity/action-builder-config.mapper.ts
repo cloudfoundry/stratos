@@ -14,7 +14,7 @@ import {
 
 export class ActionBuilderConfigMapper {
 
-  static actionKeyHttpMethodMapper = {
+  static actionKeyHttpMethodMapper: Record<string, string> = {
     get: 'GET',
     getMultiple: 'GET',
     create: 'POST',
@@ -34,7 +34,7 @@ export class ActionBuilderConfigMapper {
     return Object.keys(builders).reduce((actionBuilders, key) => {
       return {
         ...actionBuilders,
-        [key]: ActionBuilderConfigMapper.getActionBuilder(builders[key], key, endpointType, entityType, schemaGetter)
+        [key]: ActionBuilderConfigMapper.getActionBuilder(builders[key] as any, key, endpointType, entityType, schemaGetter)
       };
     }, {} as OrchestratedActionBuilders);
   }
@@ -86,12 +86,13 @@ export class ActionBuilderConfigMapper {
   }
 
   static addHttpMethodFromActionKey(key: string, config: BaseEntityRequestConfig): BaseEntityRequestConfig {
+    const methodFromKey = ActionBuilderConfigMapper.actionKeyHttpMethodMapper[key] as any;
     return {
       ...config,
       // The passed httpMethod takes precedence when we're mapping the update action.
       // This is because some apis might use POST for updates.
-      httpMethod: key === 'update' ? config.httpMethod || ActionBuilderConfigMapper.actionKeyHttpMethodMapper[key] :
-        ActionBuilderConfigMapper.actionKeyHttpMethodMapper[key] || config.httpMethod,
+      httpMethod: key === 'update' ? config.httpMethod || methodFromKey :
+        methodFromKey || config.httpMethod,
     };
   }
 }

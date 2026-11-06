@@ -2,10 +2,14 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "outDir": "./out-tsc/spec",
-    "module": "commonjs",
     "types": [
-      "jasmine",
       "node"
     ]
-  }
+  },
+  "exclude": [
+    "**/*.config.ts",
+    "**/*.config.mts",
+    "frontend/packages/example-extensions/**",
+    "frontend/packages/desktop-extensions/**"
+  ]
 }

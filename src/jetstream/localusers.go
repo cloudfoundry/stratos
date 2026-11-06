@@ -2,17 +2,17 @@ package main
 
 import (
 	"errors"
+	"log/slog"
 
-	"github.com/labstack/echo/v4"
-	uuid "github.com/satori/go.uuid"
-	log "github.com/sirupsen/logrus"
+	"github.com/google/uuid"
+	"github.com/labstack/echo/v5"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/cloudfoundry/stratos/src/jetstream/crypto"
 	"github.com/cloudfoundry/stratos/src/jetstream/repository/localusers"
 )
 
-func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
+func (p *portalProxy) FindUserGUID(c *echo.Context) (string, error) {
 	username := c.FormValue("username")
 
 	if len(username) == 0 {
@@ -21,21 +21,21 @@ func (p *portalProxy) FindUserGUID(c echo.Context) (string, error) {
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Database error getting repo for local users: %v", err)
+		slog.Error("database error getting the repo for local users", "error", err)
 		return "", err
 	}
 
 	guid, err := localUsersRepo.FindUserGUID(username)
 	if err != nil {
-		log.Errorf("Error finding user GUID %v", err)
+		slog.Error("error finding the user GUID", "username", username, "error", err)
 		return "", err
 	}
 
 	return guid, nil
 }
 
-func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
-	log.Debug("AddLocalUser")
+func (p *portalProxy) AddLocalUser(c *echo.Context) (string, error) {
+	slog.Debug("AddLocalUser")
 
 	username := c.FormValue("username")
 	password := c.FormValue("password")
@@ -47,21 +47,21 @@ func (p *portalProxy) AddLocalUser(c echo.Context) (string, error) {
 	}
 
 	//Generate a user GUID and hash the password
-	userGUID := uuid.NewV4().String()
+	userGUID := uuid.New().String()
 	passwordHash, err := crypto.HashPassword(password)
 	if err != nil {
-		log.Errorf("Error hashing user password: %v", err)
+		slog.Error("error hashing the user password", "username", username, "error", err)
 		return "", err
 	}
 
 	localUsersRepo, err := localusers.NewPgsqlLocalUsersRepository(p.DatabaseConnectionPool)
 	if err != nil {
-		log.Errorf("Database error getting repo for local users: %v", err)
+		slog.Error("database error getting the repo for local users", "error", err)
 	} else {
 		user := api.LocalUser{UserGUID: userGUID, PasswordHash: passwordHash, Username: username, Email: email, Scope: scope}
 		err = localUsersRepo.AddLocalUser(user)
 		if err != nil {
-			log.Errorf("Error adding local user %v", err)
+			slog.Error("error adding the local user", "user", userGUID, "username", username, "error", err)
 			return "", err
 		}
 	}

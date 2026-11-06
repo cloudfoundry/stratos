@@ -1,0 +1,920 @@
+@reference 'tailwindcss';
+
+/* Restore page-title typography on bare <h1> elements.
+ *
+ * `@tailwind base` enables Preflight, which strips browser default
+ * font-size + font-weight from h1/h2/h3 (everything renders at the
+ * body's `1rem`/`400`). Page templates in Stratos use a bare
+ * `<h1>Applications</h1>` etc. inside `<app-page-header>`; before the
+ * Tailwind migration browser defaults gave those a visible title size
+ * and weight. Add a `@layer base` rule so the restored size doesn't
+ * fight Tailwind utility classes (utilities live in a higher layer and
+ * still win on h1s that opt out, e.g. in-card subheadings that set
+ * their own text-lg). */
+@layer base {
+  h1 { @apply text-2xl font-semibold; }
+  h2 { @apply text-xl  font-semibold; }
+  h3 { @apply text-lg  font-semibold; }
+  h4 { @apply text-base font-semibold; }
+}
+
+/* Icon font styles - supports both material-icons and custom icon fonts.
+ * In @layer base so text-size utilities (@layer utilities) can override
+ * the default 24px glyph size; unlayered these rules would beat every
+ * utility regardless of specificity (see docs/tailwind-usage.md). */
+@layer base {
+  .material-icons,
+  .custom-icon,
+  .icon {
+    font-family: 'Material Icons' !important;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -moz-font-feature-settings: 'liga';
+    @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
+    word-wrap: normal;
+    direction: ltr;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .stratos-icons {
+    font-family: 'stratos-icons' !important;
+    font-feature-settings: 'liga';
+    -webkit-font-feature-settings: 'liga';
+    -moz-font-feature-settings: 'liga';
+    @apply font-normal not-italic text-2xl leading-none tracking-normal normal-case inline-block whitespace-nowrap antialiased;
+    word-wrap: normal;
+    direction: ltr;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* CSS Custom Properties for theme customization.
+ * Brand colors (--color-primary etc.) are declared in the @theme block
+ * above and emitted at :root; .dark-theme below overrides them at runtime.
+ * Everything in this :root block is a runtime CSS variable consumed by
+ * non-utility CSS rules (var(--nav-bg) etc.); StratosThemeService writes
+ * here to switch themes. */
+:root {
+  /* Navigation colors - these will be overridden by StratosThemeService */
+  --nav-bg: oklch(27.95% 0.0368 260.03);
+  --nav-text: oklch(100% 0 none);
+  --nav-text-muted: rgba(255, 255, 255, 0.7);
+  --nav-hover: rgba(255, 255, 255, 0.1);
+  --nav-active: rgba(255, 255, 255, 0.15);
+  --nav-border: rgba(255, 255, 255, 0.1);
+  --nav-tooltip: oklch(37.293% 0.0306 259.73);
+
+  /* Layout colors - these will be overridden by StratosThemeService */
+  --app-bg: oklch(98.415% 0.0034 247.86);
+  --body-bg: oklch(96.826% 0.0069 247.9);
+  --app-text: oklch(27.95% 0.0368 260.03);
+  --text-muted: oklch(55.439% 0.0407 257.42);
+  --header-bg: oklch(100% 0 none);
+  --header-text: oklch(27.95% 0.0368 260.03);
+  --header-border: oklch(92.876% 0.0126 255.51);
+  --content-bg: oklch(100% 0 none);
+  --content-secondary: oklch(98.415% 0.0034 247.86);
+  --content-border: oklch(92.876% 0.0126 255.51);
+  --content-text: oklch(27.95% 0.0368 260.03);
+  --content-muted: oklch(55.439% 0.0407 257.42);
+
+  /* Login page */
+  --login-bg: oklch(97.015% 0 none);
+  --login-bg-image: url('/core/assets/login-bg.webp');
+  --login-card-bg: oklch(100% 0 none);
+
+  /* Logo */
+  --logo-bg: oklch(100% 0 none);
+
+  /* Interactive elements - light theme */
+  --input-bg: oklch(100% 0 none);
+  --input-border: oklch(87.168% 0.0093 258.34);
+  --input-text: oklch(27.95% 0.0368 260.03);
+  --input-placeholder: oklch(71.366% 0.0192 261.32);
+  --input-focus-border: var(--color-primary);
+  --input-disabled-bg: oklch(96.696% 0.0029 264.54);
+
+  /* Code block - light theme */
+  --code-block-bg: oklch(96.696% 0.0029 264.54);
+  --code-block-border: oklch(87.168% 0.0093 258.34);
+  --code-block-text: oklch(27.95% 0.0368 260.03);
+
+  /* Card and panel colors */
+  --card-bg: oklch(100% 0 none);
+  --card-border: oklch(92.758% 0.0058 264.53);
+  --card-header-bg: oklch(98.463% 0.0017 247.84);
+  --card-shadow: rgba(0, 0, 0, 0.1);
+
+  /* Table colors */
+  --table-header-bg: oklch(98.463% 0.0017 247.84);
+  --table-header-text: oklch(27.95% 0.0368 260.03);
+  --table-row-hover: oklch(98.463% 0.0017 247.84);
+  --table-border: oklch(92.758% 0.0058 264.53);
+
+  /* Stepper colors - light theme */
+  --step-inactive-bg: oklch(92.758% 0.0058 264.53);
+  --step-inactive-text: oklch(44.611% 0.0263 256.8);
+  --step-skip-bg: oklch(96.696% 0.0029 264.54);
+  --step-skip-text: oklch(71.366% 0.0192 261.32);
+
+  /* Status and state colors */
+  --success-bg: oklch(96.241% 0.0434 156.74);
+  --success-text: oklch(44.792% 0.1083 151.33);
+  --success-border: oklch(87.116% 0.1363 154.45);
+
+  --warning-bg: oklch(96.19% 0.058 95.62);
+  --warning-text: oklch(47.319% 0.1247 46.2);
+  --warning-border: oklch(87.897% 0.1534 91.61);
+
+  --danger-bg: oklch(93.564% 0.0309 17.72);
+  --danger-text: oklch(44.369% 0.1613 26.9);
+  --danger-border: oklch(80.769% 0.1035 19.57);
+
+  --info-bg: oklch(93.192% 0.0316 255.59);
+  --info-text: oklch(42.445% 0.1809 265.64);
+  --info-border: oklch(80.907% 0.0956 251.81);
+
+  /* Shadow system */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Dark Theme - WCAG AA Compliant */
+.dark-theme {
+  /* Brand colors - adjusted for dark theme with higher contrast */
+  --color-primary: oklch(71.374% 0.1434 254.62);
+  --color-secondary: oklch(75.351% 0.139 232.66);
+  --color-accent: oklch(75.351% 0.139 232.66);
+  --color-success: oklch(80.035% 0.1821 151.71);
+  --color-warning: oklch(83.686% 0.1644 84.43);
+  --color-danger: oklch(71.063% 0.1661 22.22);
+  --color-info: oklch(71.374% 0.1434 254.62);
+
+  /* Navigation colors - dark theme */
+  --nav-bg: oklch(20.768% 0.0398 265.75);
+  --nav-text: oklch(96.826% 0.0069 247.9);
+  --nav-text-muted: rgba(241, 245, 249, 0.7);
+  --nav-hover: rgba(241, 245, 249, 0.1);
+  --nav-active: rgba(241, 245, 249, 0.15);
+  --nav-border: rgba(241, 245, 249, 0.1);
+  --nav-tooltip: oklch(27.95% 0.0368 260.03);
+
+  /* Layout colors - dark theme with proper contrast */
+  --app-bg: oklch(20.768% 0.0398 265.75);
+  --body-bg: oklch(12.88% 0.0406 264.7);
+  --app-text: oklch(96.826% 0.0069 247.9);
+  --text-muted: oklch(71.067% 0.0351 256.79);
+  --header-bg: oklch(27.95% 0.0368 260.03);
+  --header-text: oklch(96.826% 0.0069 247.9);
+  --header-border: oklch(37.17% 0.0392 257.29);
+  --content-bg: oklch(27.95% 0.0368 260.03);
+  --content-secondary: oklch(20.768% 0.0398 265.75);
+  --content-border: oklch(37.17% 0.0392 257.29);
+  --content-text: oklch(96.826% 0.0069 247.9);
+  --content-muted: oklch(71.067% 0.0351 256.79);
+
+  /* Login page - dark theme */
+  --login-bg: oklch(20.768% 0.0398 265.75);
+  --login-bg-image: url('/core/assets/login-bg.webp');
+  --login-card-bg: oklch(27.95% 0.0368 260.03);
+
+  /* Logo - dark theme */
+  --logo-bg: oklch(27.95% 0.0368 260.03);
+
+  /* Interactive elements - dark theme */
+  --input-bg: oklch(27.95% 0.0368 260.03);
+  --input-border: oklch(44.553% 0.0374 257.28);
+  --input-text: oklch(96.826% 0.0069 247.9);
+  --input-placeholder: oklch(55.439% 0.0407 257.42);
+  --input-focus-border: var(--color-primary);
+  --input-disabled-bg: oklch(20.768% 0.0398 265.75);
+
+  /* Code block - dark theme */
+  --code-block-bg: oklch(20.768% 0.0398 265.75);
+  --code-block-border: oklch(37.17% 0.0392 257.29);
+  --code-block-text: oklch(92.876% 0.0126 255.51);
+
+  /* Card and panel colors - dark theme */
+  --card-bg: oklch(27.95% 0.0368 260.03);
+  --card-border: oklch(37.17% 0.0392 257.29);
+  --card-header-bg: oklch(20.768% 0.0398 265.75);
+  --card-shadow: rgba(0, 0, 0, 0.3);
+
+  /* Table colors - dark theme */
+  --table-header-bg: oklch(20.768% 0.0398 265.75);
+  --table-header-text: oklch(86.898% 0.0198 252.89);
+  --table-row-hover: oklch(37.17% 0.0392 257.29);
+  --table-border: oklch(37.17% 0.0392 257.29);
+
+  /* Stepper colors - dark theme */
+  --step-inactive-bg: oklch(37.17% 0.0392 257.29);
+  --step-inactive-text: oklch(86.898% 0.0198 252.89);
+  --step-skip-bg: oklch(27.95% 0.0368 260.03);
+  --step-skip-text: oklch(55.439% 0.0407 257.42);
+
+  /* Status and state colors - dark theme with WCAG AA compliance */
+  --success-bg: oklch(39.253% 0.0896 152.54);
+  --success-text: oklch(87.116% 0.1363 154.45);
+  --success-border: oklch(72.275% 0.192 149.58);
+
+  --warning-bg: oklch(41.371% 0.1054 45.9);
+  --warning-text: oklch(87.897% 0.1534 91.61);
+  --warning-border: oklch(76.859% 0.1647 70.08);
+
+  --danger-bg: oklch(39.584% 0.1331 25.72);
+  --danger-text: oklch(80.769% 0.1035 19.57);
+  --danger-border: oklch(63.683% 0.2078 25.33);
+
+  --info-bg: oklch(37.906% 0.1378 265.52);
+  --info-text: oklch(80.907% 0.0956 251.81);
+  --info-border: oklch(62.308% 0.188 259.81);
+
+  /* Shadow system - enhanced for dark theme */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+}
+
+/* Smooth theme transitions */
+html,
+body,
+.card,
+.input,
+.btn,
+.nav-item,
+.table th,
+.table td {
+  @apply transition-colors duration-300 ease-in-out;
+}
+
+/* Reduced Motion Support (WCAG AAA) */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .theme-icon,
+  .spinner,
+  [class*='animate-'],
+  [class*='transition-'] {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Base layout styles */
+* {
+  @apply box-border;
+}
+
+html {
+  @apply h-full;
+  background-color: var(--app-bg);
+  color: var(--app-text);
+}
+
+body {
+  @apply h-full m-0 p-0 font-sans;
+}
+
+/* Router outlet needs to be a flex container to properly pass flex layout to children */
+router-outlet {
+  display: contents;
+}
+
+/* Ensure all routed components can participate in flex layout */
+router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 0%;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Component base styles */
+@layer components {
+  /* Modern Button System */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-3.5 py-2;
+    @apply border border-transparent text-sm font-medium rounded-md;
+    @apply transition-all duration-200 cursor-pointer;
+    @apply focus:outline-none focus:ring-2 focus:ring-offset-2;
+    @apply disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none;
+  }
+
+  /* Primary Button */
+  .btn-primary {
+    @apply text-white shadow-sm;
+    background-color: var(--color-primary);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-primary);
+    }
+  }
+
+  /* Secondary Button — theme-aware text and background */
+  .btn-secondary {
+    @apply shadow-sm;
+    color: var(--content-text);
+    background-color: var(--card-bg);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      @apply shadow;
+      background-color: color-mix(in srgb, var(--card-bg) 95%, black);
+      border-color: var(--content-border);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-primary);
+    }
+  }
+
+  /* Success Button */
+  .btn-success {
+    @apply text-white shadow-sm;
+    background-color: var(--color-success);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-success) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-success);
+    }
+  }
+
+  /* Warning Button */
+  .btn-warning {
+    @apply text-white shadow-sm;
+    background-color: var(--color-warning);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-warning) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-warning);
+    }
+  }
+
+  /* Danger Button */
+  .btn-danger {
+    @apply text-white shadow-sm;
+    background-color: var(--color-danger);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-danger) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-danger);
+    }
+  }
+
+  /* Alert / failure surface — derives the entire surface from one semantic state
+     token so a single brand color re-skins every failure surface that adopts it.
+     Mirror for warning/success/info when those surfaces need branding. */
+  .alert-danger {
+    background-color: color-mix(in srgb, var(--color-danger) 12%, var(--card-bg));
+    border-color: color-mix(in srgb, var(--color-danger) 35%, transparent);
+    color: color-mix(in srgb, var(--color-danger) 75%, var(--content-text));
+  }
+
+  /* Info Button */
+  .btn-info {
+    @apply text-white shadow-sm;
+    background-color: var(--color-info);
+
+    &:hover:not(:disabled) {
+      @apply shadow-md;
+      background-color: color-mix(in srgb, var(--color-info) 90%, black);
+      transform: translateY(-1px);
+    }
+
+    &:focus {
+      --tw-ring-color: var(--color-info);
+    }
+  }
+
+  /* Ghost Button */
+  .btn-ghost {
+    @apply bg-transparent;
+    color: var(--content-text);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+      border-color: var(--content-text);
+    }
+  }
+
+  /* Outline Variants */
+  .btn-outline-primary {
+    @apply bg-transparent border-2 text-gray-700;
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+
+    &:hover:not(:disabled) {
+      background-color: var(--color-primary);
+      @apply text-white shadow-sm;
+    }
+  }
+
+  .btn-outline-secondary {
+    @apply bg-transparent border-2;
+    color: var(--content-text);
+    border-color: var(--content-border);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+      border-color: var(--content-text);
+    }
+  }
+
+  /* Icon Buttons - DRY approach with shared base */
+  %btn-icon-base {
+    @apply rounded-md p-2;
+    @apply inline-flex items-center justify-center;
+  }
+
+  .btn-icon {
+    @extend %btn-icon-base;
+    @apply w-9 h-9 min-w-[36px] min-h-[36px];
+    color: var(--content-text);
+
+    &:hover:not(:disabled) {
+      background-color: color-mix(in srgb, var(--card-bg) 90%, var(--content-text));
+    }
+  }
+
+  .btn-icon-sm {
+    @extend %btn-icon-base;
+    @apply w-8 h-8 min-w-[32px] min-h-[32px];
+  }
+
+  .btn-icon-lg {
+    @extend %btn-icon-base;
+    @apply w-11 h-11 min-w-[44px] min-h-[44px];
+  }
+
+  /* Button Sizes */
+  .btn-sm {
+    @apply px-3 py-1.5 text-xs;
+  }
+
+  .btn-lg {
+    @apply px-6 py-3 text-base;
+  }
+
+  /* Icon sizing within buttons */
+  .btn .material-icons,
+  .btn .icon,
+  .btn-icon .material-icons,
+  .btn-icon .icon {
+    @apply text-[20px] w-5 h-5 leading-5;
+  }
+
+  .btn-sm .material-icons,
+  .btn-sm .icon {
+    @apply text-[18px] w-[18px] h-[18px];
+  }
+
+  .btn-lg .material-icons,
+  .btn-lg .icon {
+    @apply text-2xl w-6 h-6;
+  }
+
+  /* Input styles */
+  .input {
+    @apply block w-full px-3 py-2 border rounded-md shadow-none;
+    @apply focus:outline-none focus:ring-2 focus:border-transparent;
+    --tw-ring-color: var(--color-primary);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--input-text);
+
+    &::placeholder {
+      color: var(--content-muted);
+      opacity: 0.7;
+    }
+
+    &:focus {
+      border-color: var(--input-focus-border);
+      background-color: var(--input-bg);
+    }
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .dark-theme & {
+      background-color: var(--input-bg);
+      border-color: var(--input-border);
+      color: var(--input-text);
+    }
+  }
+
+  /* Form field wrapper */
+  .form-field {
+    @apply mb-4 flex flex-col;
+  }
+
+  /* Label styles */
+  .label {
+    @apply block text-sm font-medium mb-1.5;
+    color: var(--content-text);
+
+    .dark-theme & {
+      color: var(--content-text);
+    }
+  }
+
+  /* Select dropdown styles */
+  .select {
+    @apply block w-full px-3 py-2 border rounded-md shadow-none;
+    @apply focus:outline-none focus:ring-2 focus:border-transparent;
+    @apply disabled:opacity-60 disabled:cursor-not-allowed;
+    --tw-ring-color: var(--color-primary);
+    background-color: var(--input-bg);
+    border-color: var(--input-border);
+    color: var(--input-text);
+
+    &:focus {
+      border-color: var(--input-focus-border);
+    }
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+    }
+
+    .dark-theme & {
+      background-color: var(--input-bg);
+      border-color: var(--input-border);
+      color: var(--input-text);
+    }
+  }
+
+  /* Filter-specific adjustments for inline layout */
+  .filter .form-field {
+    @apply mb-0 flex-row items-center gap-2;
+
+    .label {
+      @apply mb-0 min-w-max;
+    }
+
+    .select {
+      @apply min-w-[120px];
+    }
+  }
+
+  /* Global input theming - ensures all inputs respect theme */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="search"],
+  input[type="tel"],
+  input[type="url"],
+  textarea,
+  select {
+    background-color: var(--input-bg);
+    color: var(--input-text);
+    border-color: var(--input-border);
+
+    &::placeholder {
+      color: var(--input-placeholder);
+    }
+
+    &:focus {
+      background-color: var(--input-bg);
+      border-color: var(--input-focus-border);
+    }
+
+    &:disabled {
+      background-color: var(--input-disabled-bg);
+      opacity: 0.6;
+    }
+  }
+
+  /* Card styles */
+  .card {
+    @apply bg-white rounded-lg border border-gray-200 p-4;
+    background-color: var(--card-bg);
+    border-color: var(--card-border);
+    box-shadow: var(--shadow-sm);
+    color: var(--content-text);
+  }
+
+  .card-header {
+    @apply px-6 py-4 border-b border-gray-200;
+    background-color: var(--card-header-bg);
+  }
+
+  .card-body {
+    @apply px-6 py-4;
+  }
+
+  .card-footer {
+    @apply px-6 py-4 border-t border-gray-200;
+  }
+
+  /* Status indicators */
+  %status-base {
+    @apply text-white px-2 py-1 rounded-full text-xs font-medium;
+  }
+
+  .status-success {
+    @extend %status-base;
+    background-color: var(--color-success);
+  }
+
+  .status-warning {
+    @extend %status-base;
+    background-color: var(--color-warning);
+  }
+
+  .status-danger {
+    @extend %status-base;
+    background-color: var(--color-danger);
+  }
+
+  .status-info {
+    @extend %status-base;
+    background-color: var(--color-info);
+  }
+
+  /* Navigation styles */
+  .nav {
+    background-color: var(--nav-bg);
+    color: var(--nav-text);
+  }
+
+  .nav-item {
+    @apply transition-colors duration-200;
+
+    &:hover {
+      background-color: var(--nav-hover);
+    }
+
+    &.active {
+      background-color: var(--nav-active);
+    }
+  }
+}
+
+/* Header styles */
+.header {
+  background-color: var(--header-bg);
+  color: var(--header-text);
+}
+
+/* Login page styles */
+.login-page {
+  @apply bg-cover bg-center min-h-screen;
+  background-color: var(--login-bg);
+  background-image: var(--login-bg-image);
+}
+
+.login-card {
+  background-color: var(--login-card-bg);
+}
+
+/* Table styles */
+.table {
+  @apply min-w-full divide-y divide-gray-200;
+
+  th {
+    @apply px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider;
+  }
+
+  td {
+    @apply px-6 py-4 whitespace-nowrap text-sm text-gray-900;
+  }
+
+  tbody tr {
+    @apply even:bg-gray-50;
+  }
+}
+
+/* List styles */
+.list-item {
+  @apply border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors duration-150;
+}
+
+/* Progress bar */
+.progress {
+  @apply w-full bg-gray-200 rounded-full h-2;
+}
+
+.progress-bar {
+  @apply relative h-1 w-full overflow-hidden;
+  background-color: color-mix(in srgb, var(--color-primary) 20%, transparent);
+}
+
+.progress-bar-indeterminate {
+  @apply absolute inset-y-0 rounded-full;
+  background-color: var(--color-primary);
+  animation: progress-slide 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes progress-slide {
+  0% {
+    left: -35%;
+    width: 35%;
+  }
+  50% {
+    left: 25%;
+    width: 50%;
+  }
+  100% {
+    left: 100%;
+    width: 35%;
+  }
+}
+
+/* Alert styles */
+.alert {
+  @apply p-4 rounded-md border-l-4;
+}
+
+.alert-success {
+  @apply bg-green-50 border-green-400 text-green-800;
+}
+
+.alert-warning {
+  @apply bg-yellow-50 border-yellow-400 text-yellow-800;
+}
+
+.alert-danger {
+  @apply bg-red-50 border-red-400 text-red-800;
+}
+
+.alert-info {
+  @apply bg-blue-50 border-blue-400 text-blue-800;
+}
+
+/* Modal styles */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/50 z-50;
+}
+
+.modal {
+  @apply fixed inset-0 z-50 overflow-y-auto;
+}
+
+.modal-container {
+  @apply flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0;
+}
+
+.modal-panel {
+  @apply transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg;
+}
+
+/* Tooltip */
+.tooltip {
+  @apply absolute z-10 invisible px-3 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 transition-opacity duration-300;
+
+  &:hover .tooltip-text {
+    @apply visible opacity-100;
+  }
+}
+
+/* Modal body scroll lock */
+body.modal-open {
+  @apply overflow-hidden;
+}
+
+/* Utility classes with CSS variables */
+@layer utilities {
+  /* Color utilities using CSS variables for theme support */
+  .text-primary {
+    color: var(--color-primary);
+  }
+
+  .text-secondary {
+    color: var(--color-secondary);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary);
+  }
+
+  .bg-secondary {
+    background-color: var(--color-secondary);
+  }
+
+  .bg-accent {
+    background-color: var(--color-accent);
+  }
+
+  .border-primary {
+    border-color: var(--color-primary);
+  }
+
+  .border-secondary {
+    border-color: var(--color-secondary);
+  }
+
+  .hover\:bg-primary:hover {
+    background-color: var(--color-primary);
+  }
+
+  .focus\:ring-primary:focus {
+    --tw-ring-color: var(--color-primary);
+  }
+
+  /* Navigation utilities */
+  .bg-nav-bg {
+    background-color: var(--nav-bg);
+  }
+
+  .text-nav-text {
+    color: var(--nav-text);
+  }
+
+  .text-nav-muted {
+    color: var(--nav-text-muted);
+  }
+
+  .bg-nav-hover {
+    background-color: var(--nav-hover);
+  }
+
+  .bg-nav-active {
+    background-color: var(--nav-active);
+  }
+
+  .border-nav-border {
+    border-color: var(--nav-border);
+  }
+
+  .bg-nav-tooltip {
+    background-color: var(--nav-tooltip);
+  }
+
+  /* Hide native scrollbars on containers whose scroll affordance is
+     provided another way (edge fades). Scrolling is unaffected. Not
+     applied under forced colors (Windows High Contrast): that mode
+     strips background gradients, so the fades vanish — without this
+     guard the container would be left with no affordance at all. */
+  @media not (forced-colors: active) {
+    .scrollbar-none {
+      scrollbar-width: none;
+    }
+
+    .scrollbar-none::-webkit-scrollbar {
+      display: none;
+    }
+  }
+
+  /* Always-visible themed scrollbar. macOS overlay scrollbars are 0px wide
+     when idle, leaving scrollable containers with no affordance. */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: var(--content-secondary);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--content-border);
+    border-radius: 3px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: var(--input-border);
+  }
+}

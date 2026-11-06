@@ -7,29 +7,27 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"log/slog"
 	"strconv"
 	"strings"
 
-	"code.cloudfoundry.org/cli/actor/sharedaction"
-	"code.cloudfoundry.org/cli/actor/v7action"
-	"code.cloudfoundry.org/cli/actor/v7pushaction"
-	"code.cloudfoundry.org/cli/api/cloudcontroller/ccversion"
-	"code.cloudfoundry.org/cli/cf/commandregistry"
-	"code.cloudfoundry.org/cli/command"
+	"code.cloudfoundry.org/cli/v8/actor/sharedaction"
+	"code.cloudfoundry.org/cli/v8/actor/v7action"
+	"code.cloudfoundry.org/cli/v8/actor/v7pushaction"
+	"code.cloudfoundry.org/cli/v8/api/cloudcontroller/ccversion"
+	"code.cloudfoundry.org/cli/v8/command"
 	"code.cloudfoundry.org/clock"
 
-	"code.cloudfoundry.org/cli/util/configv3"
-	"code.cloudfoundry.org/cli/util/manifestparser"
-	"code.cloudfoundry.org/cli/util/progressbar"
-	"code.cloudfoundry.org/cli/util/ui"
-	"github.com/gorilla/websocket"
+	"code.cloudfoundry.org/cli/v8/util/configv3"
+	"code.cloudfoundry.org/cli/v8/util/manifestparser"
+	"code.cloudfoundry.org/cli/v8/util/progressbar"
+	"code.cloudfoundry.org/cli/v8/util/ui"
+	"github.com/coder/websocket"
 
-	"code.cloudfoundry.org/cli/cf/flags"
-
-	"code.cloudfoundry.org/cli/command/flag"
-	"code.cloudfoundry.org/cli/command/translatableerror"
-	v7 "code.cloudfoundry.org/cli/command/v7"
-	"code.cloudfoundry.org/cli/command/v7/shared"
+	"code.cloudfoundry.org/cli/v8/command/flag"
+	"code.cloudfoundry.org/cli/v8/command/translatableerror"
+	v7 "code.cloudfoundry.org/cli/v8/command/v7"
+	"code.cloudfoundry.org/cli/v8/command/v7/shared"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 )
@@ -37,8 +35,6 @@ import (
 // CFPushApp abstracts the push functionality form the CLI library
 type CFPushApp struct {
 	pushCommand *v7.PushCommand
-	flagContext flags.FlagContext
-	deps        commandregistry.Dependency
 	config      *CFPushAppConfig
 	portalProxy api.PortalProxy
 }
@@ -107,7 +103,6 @@ type CFPush interface {
 
 // PushError is the return error type from pushing
 type PushError struct {
-	error
 	Type ErrorType
 	Err  error
 }
@@ -119,17 +114,11 @@ func (p *PushError) Error() string {
 // Constructor returns a CFPush based on the supplied config
 func Constructor(config *CFPushAppConfig, portalProxy api.PortalProxy) CFPush {
 	pushCmd := &v7.PushCommand{}
-	cfPush := &CFPushApp{
+	return &CFPushApp{
 		pushCommand: pushCmd,
 		config:      config,
 		portalProxy: portalProxy,
 	}
-	cfPush.init(config)
-	return cfPush
-}
-
-func (c *CFPushApp) init(config *CFPushAppConfig) error {
-	return nil
 }
 
 // Init initializes the push operation with the specified application directory and manifest path
@@ -189,10 +178,10 @@ func (c *CFPushApp) Init(appDir string, manifestPath string, overrides CFPushApp
 	// Random route
 	c.pushCommand.RandomRoute = overrides.RandomRoute
 
-	// Route path
-	if len(overrides.Path) > 0 {
-		c.pushCommand.AppPath = flag.PathWithExistenceCheck(overrides.Path)
-	}
+	// Note: the route path (overrides.Path) is folded into the manifest
+	// `routes:` entry by applyRouteOverride before the push reads the
+	// manifest — it is a route component (host.domain/path), not the app
+	// source path. AppPath is always the fetched source dir (set below).
 
 	// Stack
 	if len(overrides.Stack) > 0 {
@@ -286,7 +275,7 @@ func (c *CFPushApp) Run(msgSender DeployAppMessageSender, clientWebsocket *webso
 
 	// Set to a null progress bar
 	c.pushCommand.ProgressBar = &cfPushProgressBar{}
-	c.pushCommand.DiffDisplayer = shared.NewManifestDiffDisplayer(commandUI)
+	c.pushCommand.DiffDisplayer = &shared.ManifestDiffDisplayer{UI: commandUI}
 
 	// Perform the push
 	args := make([]string, 0)
@@ -382,7 +371,10 @@ func generateTranslationFunc(rawTranslation []byte) (ui.TranslateFunc, error) {
 
 		var buffer bytes.Buffer
 		formattedTemplate := template.Must(template.New("Display Text").Parse(translated))
-		formattedTemplate.Execute(&buffer, keys)
+		if err := formattedTemplate.Execute(&buffer, keys); err != nil {
+			slog.Warn("could not render a display string", "translationID", translationID, "error", err)
+			return translated
+		}
 
 		return buffer.String()
 	}, nil

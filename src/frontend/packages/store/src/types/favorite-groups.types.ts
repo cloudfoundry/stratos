@@ -1,9 +1,5 @@
-import { ActionState } from '../reducers/api-request-reducer/types';
 import { IFavoriteMetadata, UserFavorite } from './user-favorites.types';
 
-export interface IUserFavoritesGroupsState extends ActionState {
-  groups: IUserFavoritesGroups;
-}
 export interface IUserFavoritesGroups {
   [endpointGuid: string]: IUserFavoriteGroup;
 }
@@ -19,11 +15,4 @@ export const getDefaultFavoriteGroup = (): IUserFavoriteGroup => ({
   endpoint: {} as UserFavorite<IFavoriteMetadata>,
   ethereal: true,
   entitiesIds: []
-});
-
-export const getDefaultFavoriteGroupsState = (): IUserFavoritesGroupsState => ({
-  busy: false,
-  error: false,
-  message: '',
-  groups: {}
 });

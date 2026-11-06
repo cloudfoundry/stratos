@@ -1,0 +1,56 @@
+{
+  "company": {
+    "name": "Stratos",
+    "website": "https://stratos.app",
+    "supportEmail": "support@stratos.app"
+  },
+  "logos": {
+    "main": "/core/assets/logo.png",
+    "navigation": "/core/assets/logo.png",
+    "navigationIcon": "/core/assets/logo.png",
+    "favicon": "/favicon.ico",
+    "loginBackground": "/core/assets/login-bg.webp"
+  },
+  "theme": {
+    "primary": "#3b82f6",
+    "secondary": "#60a5fa",
+    "accent": "#60a5fa",
+    "success": "#22c55e",
+    "warning": "#f59e0b",
+    "danger": "#ef4444",
+    "info": "#3b82f6"
+  },
+  "navigation": {
+    "background": "#1e293b",
+    "text": "#ffffff",
+    "hover": "rgba(255, 255, 255, 0.1)",
+    "active": "rgba(255, 255, 255, 0.15)"
+  },
+  "layout": {
+    "background": "#f8fafc",
+    "text": "#1e293b",
+    "headerBackground": "#ffffff",
+    "headerText": "#1e293b"
+  },
+  "login": {
+    "title": "Stratos Console",
+    "subtitle": "Multi-Cloud Management Platform",
+    "showLogo": true,
+    "showTitle": true,
+    "backgroundColor": "#f5f5f5",
+    "cardBackground": "#ffffff"
+  },
+  "footer": {
+    "copyright": "Stratos"
+  },
+  "defaults": {
+    "themeMode": "light",
+    "sidebarOpen": true,
+    "sidebarPinned": true,
+    "pollingEnabled": true,
+    "sessionTimeout": true,
+    "gravatarEnabled": true,
+    "pageSize": 9,
+    "viewMode": "cards"
+  }
+}

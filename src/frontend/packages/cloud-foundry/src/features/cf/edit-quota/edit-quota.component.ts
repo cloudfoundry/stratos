@@ -1,25 +1,36 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
-import { QUOTA_FROM_LIST } from '../../../shared/components/list/list-types/cf-quotas/cf-quotas-list-config.service';
+import { PageHeaderComponent } from '../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../../core/src/shared/components/stepper/step/step.component';
+import { QUOTA_FROM_LIST } from '../quota-definition-base/quota-route-tokens';
 import { ActiveRouteCfOrgSpace } from '../cf-page.types';
 import { getActiveRouteCfOrgSpaceProvider } from '../cf.helpers';
 import { QUOTA_ORG_GUID } from '../quota-definition/quota-definition.component';
+import { EditQuotaStepComponent } from './edit-quota-step/edit-quota-step.component';
 
 @Component({
   selector: 'app-edit-quota',
   templateUrl: './edit-quota.component.html',
-  styleUrls: ['./edit-quota.component.scss'],
   providers: [
     getActiveRouteCfOrgSpaceProvider
+  ],
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    EditQuotaStepComponent
   ]
 })
 export class EditQuotaComponent {
   cfQuotasUrl: string;
-  constructor(
-    activeRouteCfOrgSpace: ActiveRouteCfOrgSpace,
-    activatedRoute: ActivatedRoute
-  ) {
+  constructor() {
+    const activeRouteCfOrgSpace = inject(ActiveRouteCfOrgSpace);
+    const activatedRoute = inject(ActivatedRoute);
+
     const cfId = activeRouteCfOrgSpace.cfGuid;
     const quotaId = activatedRoute.snapshot.params.quotaId;
     const orgGuid = activatedRoute.snapshot.queryParams[QUOTA_ORG_GUID];

@@ -1,86 +1,79 @@
-# Stratos Website
+# Stratos Documentation Website
 
-This website is built using [Docusaurus 2](https://v2.docusaurus.io/), a modern static website generator.
+Docusaurus site that renders the repository's `docs/` tree
+(configured via `docs.path: '../docs'` — the site holds no doc
+content of its own). Styling is Tailwind CSS v4 with shadcn/ui
+components, based on the docusaurus-tailwind-shadcn-template
+scaffold.
 
-> Run the commands below in the `website` folder.
+## Commands
 
-### Installing Dependencies
+Run from the repository root:
 
-```
-$ npm install
-```
-
-### Local Development
-
-```
-$ npm start
-```
-
-This command starts a local development server and open up a browser window. Most changes are reflected live without having to restart the server.
-
-> Note this command will open a web browser on the locally served site (http://localhost:3000)
-
-### Build
-
-```
-$ ./deploy.sh -b
+```bash
+make build website    # production build into website/build/
+make dev website      # dev server with hot reload
+make clean website    # remove build output and node_modules
 ```
 
-This command generates static content into the `build` directory and can be served using any static contents hosting service, or `npm run serve` to see locally.
+Or directly in this directory with bun (`bun install`, `bun run
+build`, `bun run start`).
 
-### Deployment
+## Authoring docs
 
-We use GitHub pages - this command is a convenient way to build the website and push to the `gh-pages` branch.
+Write docs in `docs/` using the GFM subset enforced by
+`scripts/lint-docs.mjs` (`bun run lint:docs` from the repo root) so
+every page renders identically on GitHub and here. GitHub alert
+blockquotes (`> [!NOTE]`) are converted to Docusaurus admonitions by
+`src/plugins/remark-github-alerts.js`; mermaid code blocks render as
+diagrams.
 
-```
-$ ./deploy.sh
-```
+The sidebar is curated in `sidebars.js` — new pages must be added
+there to appear in the site navigation. Landing-page and other
+site-only content lives under `src/pages`, never in `docs/`.
 
+## Deployment
 
-> Note: The website is deployed to the GitHub Repository `cf-stratos/wesbite` which hosts https://stratos.app
+`.github/workflows/website-deploy.yml` publishes the site to GitHub
+Pages on every `develop` push touching `docs/` or `website/`
+(requires Pages to be enabled on the repo with source "GitHub
+Actions"). It builds with `SITE_URL`/`SITE_BASE_URL` set for
+`cloudfoundry.github.io/stratos/`; switch those to
+`https://stratos.cloudfoundry.org` and `/` once the custom domain
+CNAME exists.
 
-### Version
+Deploy targets follow the Makefile's verb + modifier grammar — the
+component says what is deployed, the destination says where:
 
-Versions is handled automatically by `npm run versions` which is called as part of `npm run build`. The `versions` target runs `build-versions.sh` which
-
-> The files is `docs/` will be marked as `next`.
-
-1. clones a local copy of the repo
-1. cleans up any previous run (repo aside)
-1. Loop through each version defined in `internal-versions.json` (latest version is highest)
-  - checkout that version in temp repo
-  - tag that version with it's version label using docusaurus
-  - copy the files docusaurus creates back into the main repo
-  - store the label
-1. remove the local clone
-
-#### Add a new version
-
-1. Open `internal-versions.json`
-1. Add to the top `<label of version to be displayed in website>:<version of repo to checkout that contains required docs>:<show version in versions drop down`. For example `[ "4.0.0:4.0.0:true"]`
-1. Commit, push and merge changes
-
-> Note - the most recent version (first in array) MUST be visible in the drop down. This is the version that is picked by Docusaurus as the default
-
-Everything else should be handled by the CI process (building with all versions in file and publishing)
-
-
-# Updating Docusaurus Version
-If the version of Docusaurus is updated be careful of changes to components that have been 'swizzled`. These are theme components that we have copied using the swizzle command and tweaked locally. 
-
-For example
-
-```
-npm run docusaurus -- swizzle @docusaurus/theme-classic Navbar
+```bash
+make deploy website pages       # preview on your fork's GitHub Pages
+make deploy website cf          # cf push to your current cf target
+make build deploy website cf    # build locally, then push
 ```
 
-Currently these components are in `./website/src/theme`
-- DocsVersionDropdownNavbarItem (trims out versions in drop down, shows link to all versions)
-- DocVersionSuggestions (fixes text shown when not on last released version)
-- NavBar (dynamically hide the versions drop down if not in the docs section)
+`deploy website cf` pushes `website/manifest.yml` as a static app to
+whatever `cf target` points at (log in and target first — no
+environment is baked into the Makefile). Site-specific destinations
+can be added from `site.mk`; see `site.mk.example`.
 
-After Docusaurus is updated these will remain the Stratos version of the old Docusaurus version. Therefore may need to be recreated using swizzle and applying the same changes.
+### Fork previews (`deploy website pages`)
 
-Note, there are also two non-swizzled custom pages that may also need updating. Current these components are in `./website/src/pages/*.js`
-- index.js (home page)
-- versions.js (all versions page)
+`make deploy website pages` force-pushes `HEAD` to the
+`pages-preview` branch of your fork (`PAGES_REMOTE`, default
+`origin`; override in `site.mk` if your fork is a differently named
+remote). The deploy workflow triggers on that branch, builds with
+your fork's Pages URL, and publishes to
+`https://<you>.github.io/stratos/`. The workflow guards this path to
+forks only — the upstream site publishes exclusively from `develop`.
+
+One-time fork setup:
+
+1. Enable Pages with the "GitHub Actions" source:
+   `gh api -X POST repos/<you>/stratos/pages -f build_type=workflow`
+2. The first deploy auto-creates a `github-pages` deployment
+   environment restricted to the default branch. Allow the preview
+   branch:
+   `gh api -X POST repos/<you>/stratos/environments/github-pages/deployment-branch-policies -f name=pages-preview`
+
+The branch is a disposable deploy trigger — it never holds unique
+work and is always force-pushed.

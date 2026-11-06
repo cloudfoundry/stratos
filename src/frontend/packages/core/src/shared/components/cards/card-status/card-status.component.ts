@@ -1,11 +1,15 @@
+import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
 
-import { StratosStatus } from '../../../../../../store/src/types/shared.types';
+import { StratosStatus } from '@stratosui/store';
+
+import { isUnlimited } from '../../../../core/cf-quota.types';
 
 
 export function determineCardStatus(value: number, limit: number): StratosStatus {
-  if ((limit !== 0 && !limit) || limit === -1) {
+  // An unlimited quota has no meaningful usage fraction
+  if ((limit !== 0 && !limit) || isUnlimited(limit)) {
     return StratosStatus.NONE;
   }
 
@@ -22,13 +26,16 @@ export function determineCardStatus(value: number, limit: number): StratosStatus
 @Component({
   selector: 'app-card-status',
   templateUrl: './card-status.component.html',
-  styleUrls: ['./card-status.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  standalone: true,
+  imports: [
+    CommonModule
+  ]
 })
 export class CardStatusComponent {
-  @Input() status$: Observable<StratosStatus>;
+  @Input() status$!: Observable<StratosStatus>;
 
-  private cardStatus = StratosStatus;
+  protected cardStatus = StratosStatus;
 
   constructor() { }
 }

@@ -35,7 +35,7 @@
   &__value {
     font-size: 23px;
     &--unlimited {
-      opacity: .3;
+      opacity: 0.3;
     }
   }
   &__limit {
@@ -50,7 +50,7 @@
   &__alert-badge {
     align-items: center;
     border-radius: 4px;
-    color: #fff;
+    color: oklch(100% 0 none);
     display: flex;
     font-size: 14px;
     margin-bottom: 2px;
@@ -65,10 +65,13 @@
   }
 }
 
-.number-metric-card__plain.mat-card {
+.number-metric-card__plain.card {
   border-radius: 0;
   box-shadow: none;
-  padding: 6px 12px;
+  // No side padding: plain mode draws no card chrome, so horizontal padding
+  // only inflates the metric's min-content width (161px -> 129px without it)
+  // and costs a column when these are tiled in a narrow card.
+  padding: 16px 0;
 
   .number-metric-card__usage-count {
     font-size: 20px;

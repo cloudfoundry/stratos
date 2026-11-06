@@ -7,6 +7,21 @@
 // Extensions
 export * from './core/extension/extension-service';
 
+// Utils
+export { getIdFromRoute, pathGet, safeStringToObj, urlValidationExpression, truthyIncludingZeroString } from './core/utils.service';
+export { CF_QUOTA_UNLIMITED, isUnlimited } from './core/cf-quota.types';
+export {
+  naturalCollator,
+  naturalCompare,
+  detectSortContext,
+  NO_SEPARATOR_PATTERN_THRESHOLD,
+} from './shared/utils/natural-sort';
+export type { NaturalSortContext } from './shared/utils/natural-sort';
+export { GlobalEventService, GlobalEventData, endpointEventKey } from './shared/global-events.service';
+export type { IGlobalEvent, IGlobalEventConfig, GlobalEventTypes } from './shared/global-events.service';
+export { environment } from './environments/environment';
+export { isValidJsonValidator } from './shared/form-validators';
+
 // Customization
 export * from './core/customizations.types';
 
@@ -15,7 +30,259 @@ export * from './core/core.module';
 export * from './core/md.module';
 export * from './shared/shared.module';
 
+// Test Modules
+export { AppTestModule, MetadataCardTestComponents } from './test-framework/core-test.helper';
+
 // LoginPageComponent
 export { LoginPageComponent } from './features/login/login-page/login-page.component';
 
 export { ProfileSettingsTypes } from './shared/components/profile-settings/profile-settings.component';
+
+// Tailwind Material Replacements
+export * from './shared/services/tailwind-material-replacements';
+export * from './shared/services/tailwind-snackbar.service';
+export * from './shared/services/endpoint-auth-state.service';
+export * from './shared/services/tailwind-dialog.service';
+export * from './shared/services/tailwind-sort.service';
+export * from './shared/services/tailwind-paginator.service';
+export * from './shared/services/tailwind-error-state-matcher';
+export { SchemaWidgetRendererComponent } from './shared/components/schema-widget-renderer/schema-widget-renderer.component';
+
+// Tailwind Progress Components
+export { AppBusyComponent, BusyVariant, pickBusyVariant } from './shared/components/busy-indicator/busy-indicator.component';
+export { AppAreaLoaderComponent, AreaLoaderVariant, pickAreaVariant } from './shared/components/area-loader/area-loader.component';
+export { ProgressBarComponent } from './shared/components/progress-bar/progress-bar.component';
+export { AppProgressBarComponent } from './shared/components/progress-bar/app-progress-bar.component';
+
+// Shared Components
+export { InfoCardComponent } from './shared/components/info-card/info-card.component';
+export { PageHeaderComponent } from './shared/components/page-header/page-header.component';
+export { SteppersComponent } from './shared/components/stepper/steppers/steppers.component';
+export { StepComponent, StepOnNextFunction } from './shared/components/stepper/step/step.component';
+export { PageSubNavComponent } from './shared/components/page-sub-nav/page-sub-nav.component';
+export { PageSubNavSectionComponent } from './shared/components/page-sub-nav-section/page-sub-nav-section.component';
+export { ListSubNavComponent, ListSubNavAddAction, ListSubNavAction } from './shared/components/list-sub-nav/list-sub-nav.component';
+export { DuplicateUrlBannerComponent } from './shared/components/duplicate-url-banner/duplicate-url-banner.component';
+export { IPageSideNavTab } from './features/dashboard/page-side-nav/page-side-nav.component';
+
+// Custom Material Replacement Components
+export { CustomIconComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomSpinnerComponent } from './shared/components/custom-material/custom-material.component';
+// AppCustomSpinnerComponent removed - use AppSpinnerComponent from progress-spinner instead
+export { CustomProgressBarComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomProgressBarSelectorComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDialogContentComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDialogActionsComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDialogTitleComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDatepickerComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDatepickerInputComponent } from './shared/components/custom-material/custom-material.component';
+export { CustomDatepickerToggleComponent } from './shared/components/custom-material/custom-material.component';
+export { MatDatepickerDirective } from './shared/components/custom-material/custom-material.component';
+export { CustomTabGroupComponent, CustomTabComponent, MatTabChangeEvent } from './shared/components/custom-tabs/custom-tabs.component';
+
+// Custom Form Field Components
+export {
+  CustomFormFieldComponent,
+  CustomFormFieldIconComponent,
+  CustomIconButtonDirective,
+  CustomButtonDirective,
+  MatInputDirective,
+  AppInputDirective,
+  MatSuffixDirective,
+  MatLabelComponent,
+  AppErrorComponent
+} from './shared/components/custom-form-field/custom-form-field.component';
+
+// Custom Select Components
+export { CustomSelectComponent, CustomOptionComponent } from './shared/components/custom-select/custom-select.component';
+
+// Custom Checkbox Component
+export { CustomCheckboxComponent } from './shared/components/custom-checkbox/custom-checkbox.component';
+
+// Custom Slide Toggle Component
+export { CustomSlideToggleComponent } from './shared/components/custom-slide-toggle/custom-slide-toggle.component';
+
+// Unlimited Input Component
+export { UnlimitedInputComponent } from './shared/components/unlimited-input/unlimited-input.component';
+
+// Stacked Input Actions Component
+export {
+  StackedInputActionsComponent,
+  StackedInputActionsState,
+  StackedInputActionsUpdate
+} from './shared/components/stacked-input-actions/stacked-input-actions.component';
+export {
+  StackedInputActionComponent,
+  StackedInputActionConfig,
+  StackedInputActionResult,
+  StackedInputActionUpdate
+} from './shared/components/stacked-input-actions/stacked-input-action/stacked-input-action.component';
+
+// Monaco Editor Component
+export { MonacoEditorComponent, MonacoEditorModel, MonacoEditorOptions } from './shared/components/monaco-editor/monaco-editor.component';
+
+// Tile Components
+export { TileGridComponent } from './shared/components/tile/tile-grid/tile-grid.component';
+export { TileGroupComponent } from './shared/components/tile/tile-group/tile-group.component';
+export { TileComponent } from './shared/components/tile/tile/tile.component';
+
+// UI Components
+export { LoadingPageComponent } from './shared/components/loading-page/loading-page.component';
+export { StatefulIconComponent } from './core/stateful-icon/stateful-icon.component';
+export { AppChipsComponent, AppChip, IAppChip } from './shared/components/chips/chips.component';
+export {
+  BooleanIndicatorComponent,
+  BooleanIndicatorType,
+  BooleanIndicatorTypeValue,
+} from './shared/components/boolean-indicator/boolean-indicator.component';
+export { CopyToClipboardComponent } from './shared/components/copy-to-clipboard/copy-to-clipboard.component';
+export { NoContentMessageComponent } from './shared/components/no-content-message/no-content-message.component';
+export { UploadProgressIndicatorComponent } from './shared/components/upload-progress-indicator/upload-progress-indicator.component';
+export { EntitySummaryTitleComponent } from './shared/components/entity-summary-title/entity-summary-title.component';
+export { RingChartComponent } from './shared/components/ring-chart/ring-chart.component';
+export { CardProgressOverlayComponent } from './shared/components/card-progress-overlay/card-progress-overlay.component';
+export { PollingIndicatorComponent } from './shared/components/polling-indicator/polling-indicator.component';
+export { ApplicationStateIconComponent } from './shared/components/application-state/application-state-icon/application-state-icon.component';
+export { ApplicationStateIconPipe } from './shared/components/application-state/application-state-icon/application-state-icon.pipe';
+export { ApplicationStateComponent } from './shared/components/application-state/application-state.component';
+export { EntityFavoriteStarComponent } from './core/entity-favorite-star/entity-favorite-star.component';
+export { DotContentComponent } from './core/dot-content/dot-content.component';
+
+// List Components
+export { SignalListComponent, SignalListConfig, SignalListColumn, SignalListDropdown, SignalListDropdownOption, SignalListViewMode, SignalListSort, SignalListPillColor, SignalListCompoundSegment, SignalListFavoriteBinding, SignalListRowAction, SignalListHeaderAction, SignalListBulkAction, SignalListCheckboxBinding, SignalListRadioBinding, SignalListGaugeBinding } from './shared/components/signal-list/signal-list.component';
+export { SignalListCellTemplateDirective } from './shared/components/signal-list/signal-list-cell-template.directive';
+export { ListStateStore, ListStateDefaults, BoundListState, ModeIndexedTuple } from './shared/components/signal-list/list-state-store.service';
+export { ListFilterStore, BoundListFilterState, ListFilterDefaults } from './shared/components/signal-list/list-filter-store.service';
+export { ListSelectionStore, BoundListSelectionState } from './shared/components/signal-list/list-selection-store.service';
+export { MaxedStateSignal, MaxedStateSignalOptions, createMaxedStateSignal, maxedStateActive } from './shared/components/signal-list/maxed-state.signal';
+export { EnumerateComponent } from './shared/components/enumerate/enumerate.component';
+export * from './shared/components/signal-list/page-size.types';
+export * from './shared/components/signal-list/list-action.types';
+export { RowState, RowsState, getDefaultRowState } from './shared/components/signal-list/row-state.types';
+export { TableCellStatusDirective } from './shared/components/signal-list/table-cell-status.directive';
+export { extractActualListEntity } from './shared/components/signal-list/list-entity.helpers';
+export type { ISimpleListConfig } from './shared/components/signal-list/simple-list-config.types';
+export * from './shared/components/signal-list/range-filter';
+
+// Utility Components
+export { MultilineTitleComponent } from './shared/components/multiline-title/multiline-title.component';
+export { MetadataItemComponent } from './shared/components/metadata-item/metadata-item.component';
+export { DialogErrorComponent } from './shared/components/dialog-error/dialog-error.component';
+export { CodeBlockComponent } from './shared/components/code-block/code-block.component';
+export { CardNumberMetricComponent } from './shared/components/cards/card-number-metric/card-number-metric.component';
+
+// Card Components
+export { CardWrapperComponent } from './shared/components/cards/card/card.component';
+export { CardHeaderComponent } from './shared/components/cards/card-header/card-header.component';
+export { CardTitleComponent } from './shared/components/cards/card-title/card-title.component';
+export { CardContentComponent } from './shared/components/cards/card-content/card-content.component';
+export { CardStatusComponent } from './shared/components/cards/card-status/card-status.component';
+
+// Custom Card Components (mat-card replacements)
+export {
+  CustomCardComponent,
+  CustomCardHeaderComponent,
+  CustomCardTitleComponent,
+  CustomCardSubtitleComponent,
+  CustomCardContentComponent,
+  CustomCardActionsComponent,
+  CustomCardFooterComponent
+} from './shared/components/custom-card/custom-card.component';
+
+// Stepper Types
+export * from './shared/components/stepper/step/step.component';
+export * from './shared/components/stepper/stepper.types';
+export * from './shared/components/page-header/page-header.types';
+export * from './shared/components/page-header/page-header.module';
+
+// Pipes
+export { BytesToHumanSize } from './core/byte-formatters.pipe';
+export { MegaBytesToHumanSize } from './core/byte-formatters.pipe';
+export { CapitalizeFirstPipe } from './shared/pipes/capitalizeFirstLetter.pipe';
+export { PercentagePipe } from './shared/pipes/percentage.pipe';
+export { InfinityPipe } from './core/infinity.pipe';
+export { MbToHumanSizePipe } from './shared/pipes/mb-to-human-size.pipe';
+export { UptimePipe } from './shared/pipes/uptime.pipe';
+
+// Directives
+export { BlurDirective } from './shared/components/blur.directive';
+export { ClickStopPropagationDirective } from './core/click-stop-propagation.directive';
+export { CustomTooltipDirective } from './shared/components/custom-tooltip/custom-tooltip.directive';
+export { FocusDirective } from './shared/components/focus.directive';
+
+// Dialog Services and Config
+export { ConfirmationDialogService } from './shared/components/confirmation-dialog.service';
+export { ConfirmationDialogConfig, TypeToConfirm } from './shared/components/confirmation-dialog.config';
+export { SidePanelService } from './shared/services/side-panel.service';
+
+// Core Services
+export { EndpointsService } from './core/endpoints.service';
+export { UtilsService, safeUnsubscribe } from './core/utils.service';
+export { TabNavService } from './tab-nav.service';
+export { CurrentUserPermissionsService, CUSTOM_USER_PERMISSION_CHECKERS } from './core/permissions/current-user-permissions.service';
+export { PermissionConfig, PermissionConfigLink, IPermissionConfigs, PermissionTypes } from './core/permissions/current-user-permissions.config';
+export { BaseCurrentUserPermissionsChecker, ICurrentUserPermissionsChecker, IPermissionCheckCombiner, IConfigGroup, IConfigGroups } from './core/permissions/current-user-permissions.types';
+export { StratosCurrentUserPermissions, StratosScopeStrings } from './core/permissions/stratos-user-permissions.checker';
+export { UserProfileService } from './core/user-profile.service';
+export { SessionService } from './shared/services/session.service';
+
+// Signal-native auth/session/endpoints/user/permissions shims (wave-3, consumers flip later)
+export { AuthSignalService } from './core/signals/auth-signal.service';
+export { SessionSignalService } from './core/signals/session-signal.service';
+export { UserSignalService } from './core/signals/user-signal.service';
+export { EndpointsSignalService } from './core/signals/endpoints-signal.service';
+export { PermissionsSignalService } from './core/signals/permissions-signal.service';
+export { CurrentUserRolesSignalService } from './core/signals/current-user-roles-signal.service';
+
+// Helper Classes
+export { arrayHelper } from './core/helper-classes/array.helper';
+
+// Utils
+export { arraysEqual } from './core/utils.service';
+
+// Entity Tokens
+export { CF_GUID, APP_GUID } from './shared/entity.tokens';
+
+// Tile Selector
+export { TileSelectorComponent } from './shared/components/tile-selector/tile-selector.component';
+export { ITileConfig, ITileData, ITileIconConfig, ITileImgConfig, ITileGraphic } from './shared/components/tile/tile-selector.types';
+
+// Home Types
+export { HomePageCardLayout, HomePageEndpointCard, LinkMetadata } from './features/home/home.types';
+
+// Endpoints
+export * from './features/endpoints/create-endpoint/create-endpoint-helper';
+export { CreateEndpointModule } from './features/endpoints/create-endpoint/create-endpoint.module';
+export { CreateEndpointBaseStepComponent } from './features/endpoints/create-endpoint/create-endpoint-base-step/create-endpoint-base-step.component';
+export { CONNECT_ENDPOINT_DIALOG_OPTIONS, ConnectEndpointDialogComponent } from './features/endpoints/connect-endpoint-dialog/connect-endpoint-dialog.component';
+export { ConnectEndpointConfig } from './features/endpoints/connect.service';
+export { EndpointRowActionsService } from './features/endpoints/endpoint-row-actions.service';
+export { BaseEndpointAuth, EndpointAuthTypeNames } from './core/endpoint-auth';
+
+// List Types and Components
+export { TableCellCustom, CardCell } from './shared/components/signal-list/cell-base';
+export { TableCellEndpointNameComponent } from './shared/components/endpoint-list/table-cell-endpoint-name/table-cell-endpoint-name.component';
+export { EndpointListDetailsComponent } from './shared/components/endpoint-list/endpoint-list.helpers';
+
+// Meta Card Components
+export { MetaCardComponent } from './shared/components/meta-card/meta-card-base/meta-card.component';
+export { MetaCardItemComponent } from './shared/components/meta-card/meta-card-item/meta-card-item.component';
+export { MetaCardTitleComponent } from './shared/components/meta-card/meta-card-title/meta-card-title.component';
+export { MetaCardValueComponent } from './shared/components/meta-card/meta-card-value/meta-card-value.component';
+export { MetaCardKeyComponent } from './shared/components/meta-card/meta-card-key/meta-card-key.component';
+
+// Preview Components
+export * from './shared/previewable-component';
+export { SidepanelPreviewComponent } from './shared/components/sidepanel-preview/sidepanel-preview.component';
+
+// Log Viewer
+export * from './shared/components/log-viewer/ansi-colors';
+export { AnsiColorizer } from './shared/components/log-viewer/ansi-colorizer';
+export { LogViewerComponent } from './shared/components/log-viewer/log-viewer.component';
+
+// Metrics Components
+export { MetricsChartComponent, MetricsConfig } from './shared/components/metrics-chart/metrics-chart.component';
+export { MetricsParentRangeSelectorComponent } from './shared/components/metrics-parent-range-selector/metrics-parent-range-selector.component';
+export { MetricsRangeSelectorComponent } from './shared/components/metrics-range-selector/metrics-range-selector.component';
+export { MetricsLineChartConfig, MetricsChartTypes, IMetricsConfig, IMetricsChartConfig } from './shared/components/metrics-chart/metrics-chart.types';
+export { ChartDataTypes, getMetricsChartConfigBuilder, MetricsChartHelpers } from './shared/components/metrics-chart/metrics.component.helpers';

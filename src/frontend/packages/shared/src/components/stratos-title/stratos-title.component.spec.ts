@@ -1,18 +1,30 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection, Component } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { StratosTitleComponent } from './stratos-title.component';
+
+// Mock ProductNameComponent for testing
+@Component({
+  selector: 'app-product-name',
+  template: 'Stratos',
+  standalone: true
+})
+class MockProductNameComponent {}
 
 describe('StratosTitleComponent', () => {
   let component: StratosTitleComponent;
   let fixture: ComponentFixture<StratosTitleComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-    declarations: [StratosTitleComponent],
-    teardown: { destroyAfterEach: false }
-})
-    .compileComponents();
-  }));
+      providers: [provideZonelessChangeDetection()],
+      declarations: [StratosTitleComponent],
+      imports: [MockProductNameComponent],
+      teardown: { destroyAfterEach: false }
+    })
+      .compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(StratosTitleComponent);

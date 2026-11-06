@@ -1,8 +1,10 @@
 import { HttpClient } from '@angular/common/http';
-import { flattenPagination } from '@stratosui/store';
+import { Injector } from '@angular/core';
+import { EndpointsDataService, flattenPagination } from '@stratosui/store';
 import { Observable } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 
+import { HttpOptions } from '../../../../core/src/core/core.types';
 import { GitBranch, GitCommit, GitRepo } from '../../store/git.public-types';
 import { GitSuggestedRepo } from './../../store/git.public-types';
 import {
@@ -15,11 +17,44 @@ import { GitSCM, SCMIcon } from './scm';
 import { BaseSCM, GitApiRequest } from './scm-base';
 import { GitSCMType } from './scm.service';
 
+// No-op ActionDispatcher: flattenPagination only invokes the dispatcher when a
+// maxCount is supplied, and these call sites never supply one, so the dispatcher
+// is never called. Used in place of the former `null` argument under strict.
+const noopActionDispatcher = () => { /* never called — no maxCount supplied */ };
+
 export class GitHubSCM extends BaseSCM implements GitSCM {
 
-  constructor(gitHubURL: string, endpointGuid: string) {
+  // Optional per-request options carrying an Authorization header when a PAT
+  // has been supplied. Stored on the instance so all downstream API calls
+  // (repos, branches, commits, search) pick it up without threading the token
+  // through every method signature.
+  private options?: HttpOptions;
+
+  constructor(
+    gitHubURL: string,
+    endpointGuid: string,
+    accessToken?: string,
+    endpointsData?: EndpointsDataService,
+    injector?: Injector,
+  ) {
     super(gitHubURL);
     this.endpointGuid = endpointGuid;
+    this.endpointsData = endpointsData;
+    this.injector = injector;
+    if (accessToken && accessToken.trim() !== '') {
+      this.setAccessToken(accessToken);
+    }
+  }
+
+  setAccessToken(token: string) {
+    this.options = new HttpOptions();
+    this.options.headers = { Authorization: `Bearer ${token}` };
+  }
+
+  clearAccessToken() {
+    if (this.options) {
+      this.options.headers = {};
+    }
   }
 
   getType(): GitSCMType {
@@ -38,25 +73,25 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getRepository(httpClient: HttpClient, projectName: string): Observable<GitRepo> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => httpClient.get<GitRepo>(`${api.url}/repos/${projectName}`, api.requestArgs))
     );
   }
 
   getBranch(httpClient: HttpClient, projectName: string, branchName: string): Observable<GitBranch> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => httpClient.get<GitBranch>(`${api.url}/repos/${projectName}/branches/${branchName}`, api.requestArgs))
     );
   }
 
   getBranches(httpClient: HttpClient, projectName: string): Observable<GitBranch[]> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => {
         const url = `${api.url}/repos/${projectName}/branches`;
         const config = new GithubFlattenerForArrayPaginationConfig<GitBranch>(httpClient, url, api.requestArgs);
         const firstRequest = config.fetch(...config.buildFetchParams(1));
         return flattenPagination(
-          null,
+          noopActionDispatcher,
           firstRequest,
           config
         );
@@ -71,7 +106,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getCommitApi(projectName: string, commitSha: string): Observable<GitApiRequest> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       map(api => ({
         ...api,
         url: `${api.url}/repos/${projectName}/commits/${commitSha}`,
@@ -80,7 +115,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getCommits(httpClient: HttpClient, projectName: string, ref: string): Observable<GitCommit[]> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => httpClient.get<GitCommit[]>(
         `${api.url}/repos/${projectName}/commits?sha=${ref}`, {
         ...api.requestArgs,
@@ -98,7 +133,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
   }
 
   getMatchingRepositories(httpClient: HttpClient, projectName: string): Observable<GitSuggestedRepo[]> {
-    return this.getAPI().pipe(
+    return this.getAPI(this.options).pipe(
       switchMap(api => {
         const prjParts = projectName.split('/');
         let url = `${api.url}/search/repositories?q=${projectName}+in:name+fork:true`;
@@ -109,7 +144,7 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
         const config = new GithubFlattenerPaginationConfig<GitRepo>(httpClient, url, api.requestArgs);
         const firstRequest = config.fetch(...config.buildFetchParams(1));
         return flattenPagination(
-          null,
+          noopActionDispatcher,
           firstRequest,
           config
         );
@@ -118,14 +153,15 @@ export class GitHubSCM extends BaseSCM implements GitSCM {
     );
   }
 
-  public convertCommit(commit: any): GitCommit {
-    return commit;
+  public convertCommit(commit: unknown): GitCommit {
+    return commit as GitCommit;
   }
 
-  parseErrorAsString(error: any): string {
+  parseErrorAsString(error: unknown): string {
     const message = super.parseErrorAsString(error);
-    return error.status === 403 && message.startsWith('API rate limit exceeded for') ?
+    const errorResponse = error as { status?: number };
+    return errorResponse.status === 403 && message.startsWith('API rate limit exceeded for') ?
       'Git ' + message.substring(0, message.indexOf('(')) :
-      'Git request failed' + (error.status ? `(${error.status})` : '');
+      'Git request failed' + (errorResponse.status ? `(${errorResponse.status})` : '');
   }
 }

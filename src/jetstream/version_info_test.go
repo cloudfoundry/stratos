@@ -6,7 +6,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 	. "github.com/smartystreets/goconvey/convey"
 	"gopkg.in/DATA-DOG/go-sqlmock.v1"
 )
@@ -22,7 +22,7 @@ func getJSON(res *httptest.ResponseRecorder, outputJSON interface{}) error {
 	return json.Unmarshal(res.Body.Bytes(), &outputJSON)
 }
 
-func versionTestSetup() (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy, error) {
+func versionTestSetup() (*httptest.ResponseRecorder, *echo.Echo, *echo.Context, *portalProxy, error) {
 
 	req := setupMockReq("GET", "", map[string]string{
 		"username": "admin",
@@ -47,7 +47,7 @@ func versionTestSetup() (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *
 	return res, e, ctx, pp, err
 }
 
-func versionTestSetupWithErrorCheck(t *testing.T) (*httptest.ResponseRecorder, *echo.Echo, echo.Context, *portalProxy) {
+func versionTestSetupWithErrorCheck(t *testing.T) (*httptest.ResponseRecorder, *echo.Echo, *echo.Context, *portalProxy) {
 	res, e, ctx, pp, err := versionTestSetup()
 	if err != nil {
 		t.Errorf("getVersions returned an error: %s", err)

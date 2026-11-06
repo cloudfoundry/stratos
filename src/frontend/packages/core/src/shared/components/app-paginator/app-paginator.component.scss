@@ -1,0 +1,50 @@
+.paginator {
+  min-height: 56px;
+
+  &-page-size {
+    label {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    select {
+      min-width: 60px;
+      width: auto;
+    }
+  }
+
+  &-info {
+    flex: 1;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  &-controls {
+    .btn-icon {
+      min-width: 40px;
+      padding: 0.5rem;
+
+      .material-icons {
+        font-size: 20px;
+      }
+    }
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 640px) {
+  .paginator {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: stretch;
+
+    &-page-size,
+    &-controls {
+      justify-content: center;
+    }
+
+    &-info {
+      order: -1;
+    }
+  }
+}

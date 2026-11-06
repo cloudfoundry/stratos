@@ -1,37 +1,33 @@
-import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { Directive, Input, OnDestroy, OnInit, TemplateRef, ViewContainerRef, inject } from '@angular/core';
 import { Observable, of as observableOf, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
-import { CurrentUserPermissionsService } from '../../../../../core/src/core/permissions/current-user-permissions.service';
-import { AppState } from '../../../../../store/src/app-state';
-import { waitForCFPermissions } from '../../../features/cf/cf.helpers';
-import { CfCurrentUserPermissions } from '../../../user-permissions/cf-user-permissions-checkers';
+import { CurrentUserPermissionsService } from '@stratosui/core';
+import { CfCurrentUserPermissions, CfCurrentUserRolesSignalService, waitForCFPermissions } from '@stratosui/cloud-foundry';
 
 @Directive({
-  selector: '[appCfUserPermission]'
+  selector: '[appCfUserPermission]',
+  standalone: true
 })
 export class CfUserPermissionDirective implements OnDestroy, OnInit {
-  @Input()
-  public appCfUserPermission: CfCurrentUserPermissions;
+  private cfRoles = inject(CfCurrentUserRolesSignalService);
+  private templateRef = inject<TemplateRef<any>>(TemplateRef);
+  private viewContainer = inject(ViewContainerRef);
+  private currentUserPermissionsService = inject(CurrentUserPermissionsService);
 
   @Input()
-  public appCfUserPermissionEndpointGuid: string;
+  public appCfUserPermission!: CfCurrentUserPermissions;
 
   @Input()
-  private appCfUserPermissionOrganizationGuid: string;
+  public appCfUserPermissionEndpointGuid!: string;
 
   @Input()
-  private appCfUserPermissionSpaceGuid: string;
+  private appCfUserPermissionOrganizationGuid!: string;
 
-  private canSub: Subscription;
+  @Input()
+  private appCfUserPermissionSpaceGuid!: string;
 
-  constructor(
-    private store: Store<AppState>,
-    private templateRef: TemplateRef<any>,
-    private viewContainer: ViewContainerRef,
-    private currentUserPermissionsService: CurrentUserPermissionsService,
-  ) { }
+  private canSub!: Subscription;
 
   public ngOnInit() {
     this.canSub = this.waitForEndpointPermissions(this.appCfUserPermissionEndpointGuid).pipe(
@@ -53,7 +49,7 @@ export class CfUserPermissionDirective implements OnDestroy, OnInit {
   }
 
   private waitForEndpointPermissions(endpointGuid: string): Observable<any> {
-    return endpointGuid && endpointGuid.length > 0 ? waitForCFPermissions(this.store, endpointGuid) : observableOf(true);
+    return endpointGuid && endpointGuid.length > 0 ? waitForCFPermissions(this.cfRoles, endpointGuid) : observableOf(true);
   }
 
   public ngOnDestroy() {

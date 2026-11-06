@@ -1,19 +1,19 @@
 import { FocusDirective } from './focus.directive';
-import { inject, TestBed, ComponentFixture } from '@angular/core/testing';
-import { Component, DebugElement, ElementRef, Renderer2 } from '@angular/core';
-import { By, BrowserModule } from '@angular/platform-browser';
-import { CoreModule } from '../../core/core.module';
-import { SharedModule } from '../shared.module';
-import { CommonModule } from '@angular/common';
+import { TestBed, ComponentFixture } from '@angular/core/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { Component, DebugElement, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { By } from '@angular/platform-browser';
 
 @Component({
-  template: `<input type="text" autoFocus/>`
+  standalone: true,
+  imports: [FocusDirective],
+  template: `<input type="text" [appFocus]="shouldFocus"/>`
 })
 class TestAutoFocusComponent {
+  shouldFocus = true;
 }
-
-export class MockElementRef { }
-export class MockRenderer { }
 
 describe('FocusDirective', () => {
 
@@ -24,21 +24,13 @@ describe('FocusDirective', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
+      imports: [TestAutoFocusComponent],
       providers: [
-        FocusDirective,
-        { provide: ElementRef, useClass: MockElementRef },
-        { provide: Renderer2, useClass: MockRenderer }
-      ],
-      declarations: [
-        TestAutoFocusComponent,
-      ],
-      imports: [
-        CoreModule,
-        BrowserModule,
-        CommonModule,
-        SharedModule,
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideZonelessChangeDetection(),
       ]
-    }).compileComponents();
+    });
     fixture = TestBed.createComponent(TestAutoFocusComponent);
     component = fixture.componentInstance;
 

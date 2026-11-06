@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"log/slog"
 	"net/http"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	log "github.com/sirupsen/logrus"
-	"gopkg.in/yaml.v2"
+	"go.yaml.in/yaml/v4"
 )
 
 const dashboardInstallYAMLDownloadURL = "https://raw.githubusercontent.com/kubernetes/dashboard/v2.0.3/aio/deploy/recommended.yaml"
@@ -60,7 +60,7 @@ type apiVersionAndKind struct {
 
 // CreateServiceAccount will create a service account for accessing the Kubernetes Dashboard
 func CreateServiceAccount(p api.PortalProxy, endpointGUID, userGUID string) error {
-	log.Debug("CreateServiceAccount")
+	slog.Debug("creating the Kubernetes dashboard service account", "endpoint", endpointGUID, "user", userGUID)
 
 	svc, err := getKubeDashboardServiceInfo(p, endpointGUID, userGUID)
 	if err != nil {
@@ -103,7 +103,7 @@ func replaceNamespace(definition, namespace string) []byte {
 
 // DeleteServiceAccount will delete the service account
 func DeleteServiceAccount(p api.PortalProxy, endpointGUID, userGUID string) error {
-	log.Debug("DeleteServiceAccount")
+	slog.Debug("deleting the Kubernetes dashboard service account", "endpoint", endpointGUID, "user", userGUID)
 
 	svcAccount, err := getKubeDashboardServiceAccount(p, endpointGUID, userGUID, stratosServiceAccountSelector)
 	if err != nil {
@@ -152,7 +152,7 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 		kubeDashboardImage = dashboardInstallYAMLDownloadURL
 	}
 
-	log.Debugf("InstallDashboard: %s", kubeDashboardImage)
+	slog.Debug("installing the Kubernetes dashboard", "endpoint", endpointGUID, "user", userGUID, "url", kubeDashboardImage)
 
 	http := p.GetHttpClient(false, "")
 	resp, err := http.Get(kubeDashboardImage)
@@ -163,18 +163,27 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 		return fmt.Errorf("Could not download YAML to install the dashboard: %s", resp.Status)
 	}
 
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	// Read the entire body
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return fmt.Errorf("Could not read YAML to install the dashboard: %s", err.Error())
 	}
 
-	r := bytes.NewReader(body)
-	dec := yaml.NewDecoder(r)
-	var t interface{}
-	for dec.Decode(&t) == nil {
+	loader, err := yaml.NewLoader(bytes.NewReader(body))
+	if err != nil {
+		return fmt.Errorf("Could not parse YAML during dashboard installation %s", err.Error())
+	}
+	for {
+		var t interface{}
+		if err := loader.Load(&t); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return fmt.Errorf("Could not parse YAML during dashboard installation %s", err.Error())
+		}
+
 		jsonDoc, err := YAMLToJSONWithLabel(t)
 		if err != nil {
 			return fmt.Errorf("Could not convert YAML to JSON during dashboard installation %s", err.Error())
@@ -195,7 +204,7 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 
 		if isClusterAPI(info.Kind) {
 			if info.Kind == "Namespace" {
-				resource = fmt.Sprintf("api/v1/namespaces")
+				resource = "api/v1/namespaces"
 			} else {
 				resource = fmt.Sprintf("%s/%ss", api, strings.ToLower(info.Kind))
 			}
@@ -210,7 +219,7 @@ func InstallDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 
 		if response.StatusCode != 201 {
 			// Don't fail if creation of a cluster-level resoures fails beacuse it already exists
-			if !(response.StatusCode == 409 && isClusterAPI(info.Kind)) {
+			if response.StatusCode != 409 || !isClusterAPI(info.Kind) {
 				return fmt.Errorf("Unable to delete %s - unexpected response from API: %d", info.Kind, response.StatusCode)
 			}
 		}
@@ -225,7 +234,7 @@ func isClusterAPI(api string) bool {
 
 // DeleteDashboard will delete the dashboard from Kubernetes cluster
 func DeleteDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
-	log.Debug("DeleteDashboard")
+	slog.Debug("deleting the Kubernetes dashboard", "endpoint", endpointGUID, "user", userGUID)
 
 	// Delete the service
 	svc, err := getKubeDashboardServiceInfo(p, endpointGUID, userGUID)
@@ -234,11 +243,12 @@ func DeleteDashboard(p api.PortalProxy, endpointGUID, userGUID string) error {
 		// Don't wory if this fails, it will get deleted when the namespace is deleted
 		// We delete it here specifically so we know that it has gone since this is what we use
 		// to determine if the Dashboard is installed
-		p.DoProxySingleRequest(endpointGUID, userGUID, "DELETE", svcTarget, nil, nil)
+		_, _ = p.DoProxySingleRequest(endpointGUID, userGUID, "DELETE", svcTarget, nil, nil)
 	}
 
-	// Delete the service account
-	DeleteServiceAccount(p, endpointGUID, userGUID)
+	// Delete the service account. Best effort, as above: the namespace delete
+	// below removes it anyway.
+	_ = DeleteServiceAccount(p, endpointGUID, userGUID)
 
 	// Delete the namespace 'kubernetes-dashboard'
 	target := "api/v1/namespaces/kubernetes-dashboard?propagationPolicy=Background"

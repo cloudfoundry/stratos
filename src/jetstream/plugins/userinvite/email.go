@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"log/slog"
 	"net/smtp"
 	"strings"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
 	"github.com/domodwyer/mailyak"
-	log "github.com/sirupsen/logrus"
 )
 
 // EmailTemplateParams is the supported params for the email templates
@@ -22,7 +22,7 @@ type EmailTemplateParams struct {
 
 // SendEmail sends an invitation email to a user using the configured templates
 func (invite *UserInvite) SendEmail(emailAddress, inviteLink string, endpoint api.CNSIRecord) error {
-	log.Debugf("User Invite: Sending Email to: %s", emailAddress)
+	slog.Debug("User Invite: sending an email", "to", emailAddress)
 	mailHost := fmt.Sprintf("%s:%d", invite.Config.SMTP.Host, invite.Config.SMTP.Port)
 
 	var auth smtp.Auth
@@ -76,7 +76,7 @@ func (invite *UserInvite) SendEmail(emailAddress, inviteLink string, endpoint ap
 		if err == nil {
 			mail.Subject(subject.String())
 		} else {
-			log.Warnf("User Invite: Failed to render the Subject template: %s", err.Error())
+			slog.Warn("User Invite: failed to render the subject template", "error", err)
 		}
 	}
 

@@ -2,26 +2,26 @@ import { ResourceAlert, ResourceAlertLevel, ResourceAlertMap } from './analysis-
 
 export class KubeScoreReportHelper {
 
-  constructor(public report: any) {}
+  constructor(public report: Record<string, any>) {}
 
-  public map() {
+  public map(): void {
     if (!this.report.report) {
       return;
     }
 
-    const kubescore = this.report.report;
+    const kubescore: any = this.report.report;
     // Go through the report and re-map
     const result = {} as ResourceAlertMap;
 
-    Object.keys(kubescore).forEach(key => {
-      const item = kubescore[key];
+    Object.keys(kubescore).forEach((key: string) => {
+      const item: any = kubescore[key];
       let id = item.TypeMeta.kind.toLowerCase();
       id = `${id}/${item.ObjectMeta.namespace}/${item.ObjectMeta.name}`;
 
-      item.Checks.forEach(check => {
+      item.Checks.forEach((check: any) => {
         if (check.Grade !== 10 && !check.Skipped) {
           // Add an alert for each comment
-          check.Comments.forEach(comment => {
+          check.Comments.forEach((comment: any) => {
             // Include this comment
             const alert = {
               kind: item.TypeMeta.kind.toLowerCase(),

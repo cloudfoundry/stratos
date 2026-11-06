@@ -5,13 +5,10 @@ import { Injectable } from '@angular/core';
  */
 export interface CustomizationsMetadata {
   hasEula?: boolean;
-  copyright?: string;
-  logoText?: string;
-  appName?: string;
   aboutInfoComponent?: any;
   supportInfoComponent?: any;
   noEndpointsComponent?: any;
-  alwaysShowNavForEndpointTypes?: (epType) => boolean;
+  alwaysShowNavForEndpointTypes?: (epType: string) => boolean;
 }
 
 @Injectable({
@@ -23,10 +20,4 @@ export class CustomizationService {
 
   set = (cm: CustomizationsMetadata) => this.customizationMetadata = cm;
   get = () => this.customizationMetadata;
-
-  setAppNameFromTitle() {
-    if (!this.customizationMetadata.appName) {
-      this.customizationMetadata.appName = document.title || 'Stratos';
-    }
-  }
 }

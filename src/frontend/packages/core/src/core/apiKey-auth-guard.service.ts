@@ -1,29 +1,25 @@
-import { Injectable } from '@angular/core';
-import { CanActivate } from '@angular/router';
-import { Store } from '@ngrx/store';
-import { AppState, RouterNav } from '@stratosui/store';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { CurrentUserPermissionsService } from './permissions/current-user-permissions.service';
 import { StratosCurrentUserPermissions } from './permissions/stratos-user-permissions.checker';
 
-@Injectable()
-export class APIKeyAuthGuardService implements CanActivate {
+export const apiKeyAuthGuard: CanActivateFn = (): Observable<boolean> => {
+  const router = inject(Router);
+  const cups = inject(CurrentUserPermissionsService);
 
-  constructor(
-    private store: Store<AppState>,
-    private cups: CurrentUserPermissionsService,
-  ) { }
+  return cups.can(StratosCurrentUserPermissions.API_KEYS).pipe(
+    map(can => {
+      if (!can) {
+        router.navigate(['/']);
+      }
+      return can;
+    })
+  );
+};
 
-  canActivate(): Observable<boolean> {
-    return this.cups.can(StratosCurrentUserPermissions.API_KEYS).pipe(
-      map(can => {
-        if (!can) {
-          this.store.dispatch(new RouterNav({ path: ['/'] }));
-        }
-        return can;
-      })
-    );
-  }
-}
+// Legacy class-based guard for backward compatibility during migration
+// @deprecated Use apiKeyAuthGuard functional guard instead
+export const APIKeyAuthGuardService = apiKeyAuthGuard;

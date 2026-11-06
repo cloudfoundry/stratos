@@ -1,15 +1,17 @@
-import { Component } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
+import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 
-import { CFAppState } from '../../../../../../cloud-foundry/src/cf-app-state';
 import { getIdFromRoute } from '../../../../../../core/src/core/utils.service';
 import { BASE_REDIRECT_QUERY } from '../../../../../../core/src/shared/components/stepper/stepper.types';
+import { AUTO_SELECT_CF_URL_PARAM } from '../../../../features/applications/new-application-base-step/new-application-base-step.component';
 import { TileConfigManager } from '../../../../../../core/src/shared/components/tile/tile-selector.helpers';
 import { ITileConfig, ITileData } from '../../../../../../core/src/shared/components/tile/tile-selector.types';
-import { RouterNav } from '../../../../../../store/src/actions/router.actions';
 import { CSI_CANCEL_URL } from '../csi-mode.service';
 import { SERVICE_INSTANCE_TYPES } from './add-service-instance.types';
+import { PageHeaderComponent } from '../../../../../../core/src/shared/components/page-header/page-header.component';
+import { SteppersComponent } from '../../../../../../core/src/shared/components/stepper/steppers/steppers.component';
+import { StepComponent } from '../../../../../../core/src/shared/components/stepper/step/step.component';
+import { TileSelectorComponent } from '../../../../../../core/src/shared/components/tile-selector/tile-selector.component';
 
 interface ICreateServiceTilesData extends ITileData {
   type: string;
@@ -18,11 +20,21 @@ interface ICreateServiceTilesData extends ITileData {
 @Component({
   selector: 'app-add-service-instance-base-step',
   templateUrl: './add-service-instance-base-step.component.html',
-  styleUrls: ['./add-service-instance-base-step.component.scss']
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    PageHeaderComponent,
+    SteppersComponent,
+    StepComponent,
+    TileSelectorComponent
+  ]
 })
 export class AddServiceInstanceBaseStepComponent {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+
   private tileManager = new TileConfigManager();
-  public serviceType: string;
+  public serviceType?: string;
   public cancelUrl = '/services';
 
   public tileSelectorConfig = [
@@ -38,33 +50,39 @@ export class AddServiceInstanceBaseStepComponent {
     )
   ];
 
-  private pSelectedTile: ITileConfig<ICreateServiceTilesData>;
+  private pSelectedTile: ITileConfig | null = null;
   public bindApp: boolean;
   get selectedTile() {
     return this.pSelectedTile;
   }
-  set selectedTile(tile: ITileConfig<ICreateServiceTilesData>) {
-    this.serviceType = tile ? tile.data.type : null;
+  // The tile-selector emits the base ITileConfig; our tiles carry
+  // ICreateServiceTilesData whose `type` is always a string.
+  set selectedTile(tile: ITileConfig | null) {
+    const type = tile?.data?.type;
+    this.serviceType = typeof type === 'string' ? type : undefined;
     this.pSelectedTile = tile;
     if (tile) {
       const baseUrl = this.createServiceTileUrl();
-      this.store.dispatch(new RouterNav({
-        path: `${baseUrl}/${this.serviceType}`,
-        query: {
-          [BASE_REDIRECT_QUERY]: baseUrl, // 'previous' destination
-          [CSI_CANCEL_URL]: this.cancelUrl // 'cancel' + 'success' destination
-        }
-      }));
+      // Forward the per-CF-tab Add affordance's `?auto-select-endpoint=`
+      // hint to the next step. Per-CF Marketplace / Services tabs include
+      // this when launching the wizard; carrying it through the tile-pick
+      // step lets the actual wizard pre-select the CF in step 1.
+      const autoSelectCf = this.route.snapshot.queryParams[AUTO_SELECT_CF_URL_PARAM];
+      const query: { [key: string]: string } = {
+        [BASE_REDIRECT_QUERY]: baseUrl,
+        [CSI_CANCEL_URL]: this.cancelUrl,
+      };
+      if (autoSelectCf) {
+        query[AUTO_SELECT_CF_URL_PARAM] = autoSelectCf;
+      }
+      this.router.navigate(`${baseUrl}/${this.serviceType}`.split('/'), { queryParams: query });
     }
   }
 
-  private cfId: string;
-  private appId: string;
+  private cfId?: string;
+  private appId?: string;
 
-  constructor(
-    private route: ActivatedRoute,
-    public store: Store<CFAppState>
-  ) {
+  constructor() {
     this.bindApp = !!this.route.snapshot.data.bind;
     if (this.bindApp) {
       this.cfId = getIdFromRoute(this.route, 'endpointId');

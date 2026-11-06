@@ -1,39 +1,44 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideRouter } from '@angular/router';
+import { describe, it, expect, beforeEach } from 'vitest';
 
-import {
-  BooleanIndicatorComponent,
-} from '../../../../../../core/src/shared/components/boolean-indicator/boolean-indicator.component';
-import { AppChipsComponent } from '../../../../../../core/src/shared/components/chips/chips.component';
-import { EntityMonitorFactory } from '../../../../../../store/src/monitors/entity-monitor.factory.service';
-import { MetadataCardTestComponents } from '../../../../../../core/test-framework/core-test.helper';
-import { generateCfBaseTestModulesNoShared } from '../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { ServicesService } from '../../../../features/service-catalog/services.service';
-import { ServicesServiceMock } from '../../../../features/service-catalog/services.service.mock';
-import { ServiceIconComponent } from '../../service-icon/service-icon.component';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { generateCfBaseTestModulesNoShared } from '@test-framework/cf';
+import { StServiceOffering } from '../../../../services/endpoint-data/stratos-types';
 import { ServiceSummaryCardComponent } from './service-summary-card.component';
 
+const offeringFixture: StServiceOffering = {
+  guid: 'svc-1',
+  cnsiGuid: 'cnsi-1',
+  name: 'app-autoscaler',
+  description: 'Shared service for app-autoscaler',
+  tags: ['simple', 'shared'],
+  available: true,
+  shareable: false,
+  documentationUrl: 'https://example.com/docs',
+  createdAt: '2017-11-27T17:07:02Z',
+};
 
 describe('ServiceSummaryCardComponent', () => {
   let component: ServiceSummaryCardComponent;
   let fixture: ComponentFixture<ServiceSummaryCardComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [
-        ServiceSummaryCardComponent,
-        ServiceIconComponent,
-        MetadataCardTestComponents,
-        BooleanIndicatorComponent,
-        AppChipsComponent,
-      ],
-      imports: generateCfBaseTestModulesNoShared(),
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [ServiceSummaryCardComponent],
       providers: [
-        { provide: ServicesService, useClass: ServicesServiceMock },
-        EntityMonitorFactory
-      ]
-    })
-      .compileComponents();
-  }));
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        ...STORE_TEST_PROVIDERS,
+        importProvidersFrom(generateCfBaseTestModulesNoShared()),
+      ],
+    }).compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(ServiceSummaryCardComponent);
@@ -43,5 +48,14 @@ describe('ServiceSummaryCardComponent', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('renders the offering description and tags when an offering is bound', () => {
+    component.offering = offeringFixture;
+    fixture.detectChanges();
+    const host: HTMLElement = fixture.nativeElement;
+    expect(host.textContent).toContain('Shared service for app-autoscaler');
+    expect(host.textContent).toContain('simple');
+    expect(host.textContent).toContain('shared');
   });
 });

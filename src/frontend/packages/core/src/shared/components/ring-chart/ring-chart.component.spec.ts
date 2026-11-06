@@ -1,23 +1,26 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 
 import { RingChartComponent } from './ring-chart.component';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { BaseChartDirective } from 'ng2-charts';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 
 describe('RingChartComponent', () => {
   let component: RingChartComponent;
   let fixture: ComponentFixture<RingChartComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [RingChartComponent],
+      providers: [provideZonelessChangeDetection()],
       imports: [
         NoopAnimationsModule,
-        NgxChartsModule,
+        BaseChartDirective,
+        RingChartComponent,
       ]
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(RingChartComponent);

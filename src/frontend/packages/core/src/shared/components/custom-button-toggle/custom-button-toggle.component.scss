@@ -1,0 +1,52 @@
+@reference 'tailwindcss';
+
+@layer components {
+  .custom-button-toggle-group {
+    @apply inline-flex rounded-md overflow-hidden shadow-sm;
+
+    &.vertical {
+      @apply flex-col;
+    }
+
+    &.disabled {
+      @apply opacity-50 pointer-events-none;
+    }
+  }
+
+  .custom-button-toggle {
+    @apply px-4 py-2 text-sm font-medium transition-all duration-200 cursor-pointer select-none;
+    @apply border first:ml-0 -ml-px first:rounded-l-md last:rounded-r-md;
+    border-color: var(--content-border);
+    background-color: var(--content-bg);
+    color: var(--content-text);
+
+    &:hover:not(.disabled) {
+      background-color: var(--content-secondary);
+      border-color: var(--content-border);
+    }
+
+    &:focus {
+      @apply outline-none ring-2 ring-offset-1;
+      --tw-ring-color: var(--color-primary);
+    }
+
+    &.selected {
+      @apply text-white z-10;
+      background-color: var(--color-primary);
+      border-color: var(--color-primary);
+
+      &:hover:not(.disabled) {
+        background-color: color-mix(in srgb, var(--color-primary) 90%, black);
+      }
+    }
+
+    &.disabled {
+      @apply opacity-50 cursor-not-allowed pointer-events-none;
+    }
+  }
+
+  .custom-button-toggle-group.vertical .custom-button-toggle {
+    @apply ml-0 -mt-px first:mt-0;
+    @apply first:rounded-t-md first:rounded-l-none last:rounded-b-md last:rounded-r-none;
+  }
+}

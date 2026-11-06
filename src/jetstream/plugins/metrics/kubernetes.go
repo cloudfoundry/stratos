@@ -2,15 +2,14 @@ package metrics
 
 import (
 	"errors"
+	"log/slog"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
-
-	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v5"
 )
 
 // Metrics API endpoints - admin - for a Containers
-func (m *MetricsSpecification) getPodMetrics(c echo.Context) error {
+func (m *MetricsSpecification) getPodMetrics(c *echo.Context) error {
 
 	prometheusOp := c.Param("op")
 	// podId := c.Param("podId")
@@ -25,7 +24,7 @@ func (m *MetricsSpecification) getPodMetrics(c echo.Context) error {
 	// For each CNSI, find the metrics endpoint that we need to talk to
 	metrics, err2 := m.getMetricsEndpoints(userGUID, cnsiList)
 	if err2 != nil {
-		log.Error("Error getting metrics", err2)
+		slog.Error("error getting the metrics endpoints", "user", userGUID, "error", err2)
 
 		return errors.New("Can not get metric endpoint metadata")
 	}
@@ -33,5 +32,8 @@ func (m *MetricsSpecification) getPodMetrics(c echo.Context) error {
 	// Construct the metadata for proxying
 	requests := makePrometheusRequestInfos(c, userGUID, metrics, prometheusOp, "", false)
 	responses, err := m.portalProxy.DoProxyRequest(requests)
+	if err != nil {
+		return err
+	}
 	return m.portalProxy.SendProxiedResponse(c, responses)
 }

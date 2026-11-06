@@ -1,5 +1,5 @@
 {
-  "id": "StratosThemeBuilderSchema",
+  "$id": "StratosThemeBuilderSchema",
   "title": "Stratos Theme builder",
   "description": "Timestamp builder options",
   "properties": {

@@ -40,7 +40,7 @@ swag init --parseDependency
 if [ "${ACTION}" == "build" ]; then
   echo "Building backend ..."
   echo "Disk Space ${PWD}"
-  df -h
+  df -h 
 
   echo "Building version: ${VERSION}"
   GOOS=linux GOARCH=amd64 go build -ldflags -X=main.appVersion=${VERSION}

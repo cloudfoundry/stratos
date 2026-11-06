@@ -1,4 +1,5 @@
-import { Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input  } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { UserProfileInfo } from '@stratosui/store';
 
 import { MD5 } from './md5';
@@ -6,27 +7,31 @@ import { MD5 } from './md5';
 @Component({
   selector: 'app-user-avatar',
   templateUrl: './user-avatar.component.html',
-  styleUrls: ['./user-avatar.component.scss']
+  standalone: true,
+  imports: [
+    CommonModule
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class UserAvatarComponent {
 
-  public initials: string;
-  public gravatar: string;
+  public initials: string | null = null;
+  public gravatar: string | null = null;
 
   private canUseGravatar = false;
-  private userInfo = null;
+  private userInfo: UserProfileInfo | null = null;
 
   @Input() size = 'small';
   @Input() color = 'normal';
 
   @Input()
-  set allowGravatar(allowed: boolean) {
-    this.canUseGravatar = allowed;
+  set allowGravatar(allowed: boolean | null) {
+    this.canUseGravatar = !!allowed;
     this.update();
   }
 
-  @Input('user')
-  set user(user: UserProfileInfo) {
+  @Input()
+  set user(user: UserProfileInfo | null) {
     this.userInfo = user;
     this.update();
   }

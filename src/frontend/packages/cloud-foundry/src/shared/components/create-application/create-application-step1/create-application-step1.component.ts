@@ -1,64 +1,142 @@
-import { AfterContentInit, Component, Input, OnInit, ViewChild } from '@angular/core';
-import { NgForm } from '@angular/forms';
+import { CommonModule } from '@angular/common';
+import { AfterContentInit, Component, Input, OnInit, Signal, ViewChild, ChangeDetectionStrategy, computed, inject } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Store } from '@ngrx/store';
 import { asapScheduler, Observable, of } from 'rxjs';
 import { map, observeOn, startWith, switchMap, withLatestFrom } from 'rxjs/operators';
 
-import { StepOnNextFunction } from '../../../../../../core/src/shared/components/stepper/step/step.component';
-import { SetCFDetails } from '../../../../actions/create-applications-page.actions';
+import { AppErrorComponent, CustomFormFieldComponent, CustomSelectComponent, CustomOptionComponent, FocusDirective, StepOnNextFunction } from '@stratosui/core';
 import { ISpace } from '../../../../cf-api.types';
-import { CFAppState } from '../../../../cf-app-state';
-import { getSpacesFromOrgWithRole } from '../../../../store/selectors/cf-current-user-role.selectors';
+import { CfCurrentUserRolesDataService } from '../../../../services/cf-current-user-roles-data.service';
 import { CfPermissionStrings } from '../../../../user-permissions/cf-user-permissions-checkers';
 import { CfOrgSpaceDataService } from '../../../data-services/cf-org-space-service.service';
+import { CreateAppStateService } from '../../../data-services/create-app-state.service';
 
 @Component({
   selector: 'app-create-application-step1',
   templateUrl: './create-application-step1.component.html',
-  styleUrls: ['./create-application-step1.component.scss'],
+  host: { class: 'app-host-flex-1' },
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    CommonModule,
+    FormsModule,
+    CustomFormFieldComponent,
+    AppErrorComponent,
+    CustomSelectComponent,
+    CustomOptionComponent,
+    FocusDirective
+  ]
 })
 export class CreateApplicationStep1Component implements OnInit, AfterContentInit {
+  private cfCurrentUserRoles = inject(CfCurrentUserRolesDataService);
+  private createAppState = inject(CreateAppStateService);
+  cfOrgSpaceService = inject(CfOrgSpaceDataService);
+  route = inject(ActivatedRoute);
+
 
   @Input()
-  isMarketplaceMode: boolean;
-  constructor(
-    private store: Store<CFAppState>,
-    public cfOrgSpaceService: CfOrgSpaceDataService,
-    public route: ActivatedRoute
-  ) { }
+  isMarketplaceMode!: boolean;
 
-  public spaces$: Observable<ISpace[]>;
-  public hasSpaces$: Observable<boolean>;
-  public hasOrgs$: Observable<boolean>;
+  public spaces$!: Observable<ISpace[]>;
+  public hasSpaces$!: Observable<boolean>;
+  // Signal-native — direct computed over the service's org.list signal.
+  // Template reads as `hasOrgs()`.
+  public hasOrgs: Signal<boolean> = computed(() => this.cfOrgSpaceService.org.list().length > 0);
 
   @ViewChild('cfForm', { static: true })
-  cfForm: NgForm;
+  cfForm!: NgForm;
 
   @Input() isRedeploy = false;
 
-  validate: Observable<boolean>;
+  // A deploy scoped to an endpoint arrives with an `endpointGuid` query
+  // param (e.g. from a CF's Applications tab). The CF is fixed for the
+  // whole flow, so we pre-select AND lock the Cloud Foundry dropdown —
+  // org / space stay selectable. Distinct from isRedeploy, which locks
+  // all three.
+  endpointScoped = false;
+
+  validate!: Observable<boolean>;
 
   @Input()
   stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
 
+  /**
+   * Cascade clears: selecting "None" on CF should also clear the Org
+   * and Space selections. The service has an internal cascade, but it
+   * races with org.list$ updates and sometimes leaves the downstream
+   * selection stale, so we handle it explicitly here.
+   *
+   * When the user selects None we also mark the cleared controls as
+   * pristine so the "required" error state does not immediately paint
+   * red; the fields return to their "nothing chosen yet" state and the
+   * Next button stays disabled until the user makes new selections.
+   */
+  /**
+   * Mark a child control pristine AND force it to re-emit statusChanges
+   * so the form-field wrapper re-evaluates isInvalid (which is gated on
+   * `dirty`). markAsPristine alone does not emit statusChanges.
+   */
+  private resetControlPristine(name: string) {
+    const control = this.cfForm?.control?.get(name);
+    if (control) {
+      control.markAsPristine();
+      control.markAsUntouched();
+      control.updateValueAndValidity();
+    }
+  }
+
+  onCfChange(value: any) {
+    this.cfOrgSpaceService.cf.select.set(value);
+    if (value == null) {
+      this.cfOrgSpaceService.org.select.set(null);
+      this.cfOrgSpaceService.space.select.set(null);
+      // Treat None as "back to start" — clear all the dirty/touched
+      // marks on every field so the required-error decoration disappears.
+      setTimeout(() => {
+        this.resetControlPristine('cf');
+        this.resetControlPristine('org');
+        this.resetControlPristine('space');
+      });
+    }
+  }
+
+  onOrgChange(value: any) {
+    this.cfOrgSpaceService.org.select.set(value);
+    if (value == null) {
+      this.cfOrgSpaceService.space.select.set(null);
+      // Mark just the cleared fields pristine; the CF field is still
+      // the user's real choice so leave its dirty state alone.
+      setTimeout(() => {
+        this.resetControlPristine('org');
+        this.resetControlPristine('space');
+      });
+    }
+  }
+
+  onSpaceChange(value: any) {
+    this.cfOrgSpaceService.space.select.set(value);
+    if (value == null) {
+      setTimeout(() => this.resetControlPristine('space'));
+    }
+  }
+
   onNext: StepOnNextFunction = () => {
-    this.store.dispatch(new SetCFDetails({
-      cloudFoundry: this.cfOrgSpaceService.cf.select.getValue(),
-      org: this.cfOrgSpaceService.org.select.getValue(),
-      space: this.cfOrgSpaceService.space.select.getValue()
-    }));
+    this.createAppState.setCFDetails({
+      cloudFoundry: this.cfOrgSpaceService.cf.select(),
+      org: this.cfOrgSpaceService.org.select(),
+      space: this.cfOrgSpaceService.space.select()
+    });
     return of({ success: true });
   };
 
   ngOnInit() {
     if (this.route.root.snapshot.queryParams.endpointGuid) {
-      this.cfOrgSpaceService.cf.select.next(this.route.root.snapshot.queryParams.endpointGuid);
+      this.cfOrgSpaceService.cf.select.set(this.route.root.snapshot.queryParams.endpointGuid);
+      this.endpointScoped = true;
     }
     this.spaces$ = this.getSpacesFromPermissions();
-    this.hasOrgs$ = this.cfOrgSpaceService.org.list$.pipe(
-      map(o => o && o.length > 0)
-    );
     this.hasSpaces$ = this.spaces$.pipe(
       map(spaces => !!spaces.length)
     );
@@ -72,25 +150,37 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   }
 
   ngAfterContentInit() {
-    this.validate = this.cfForm.statusChanges.pipe(
+    // strict: cfForm is a `static: true` ViewChild, so the NgForm and its
+    // statusChanges stream are initialised by the time ngAfterContentInit runs.
+    this.validate = this.cfForm.statusChanges!.pipe(
       startWith(this.cfForm.valid || this.isRedeploy),
       map(() => this.cfForm.valid || this.isRedeploy),
       observeOn(asapScheduler)
     );
   }
 
+  // Signal-bridges captured at field-init time (toObservable requires an
+  // injection context — only ctor / field initializers / explicit
+  // runInInjectionContext satisfy that, not arbitrary methods). The
+  // chain still ends in `store.select(...)` which is ngrx-Observable,
+  // so we keep the rxjs composition here; only the CfOrgSpaceDataService
+  // signal reads are bridged.
+  private orgSelect$ = toObservable(this.cfOrgSpaceService.org.select);
+  private cfSelect$ = toObservable(this.cfOrgSpaceService.cf.select);
+  private spaceList$ = toObservable(this.cfOrgSpaceService.space.list);
+
   private getSpacesFromPermissions() {
-    return this.cfOrgSpaceService.org.select.pipe(
-      withLatestFrom(this.cfOrgSpaceService.cf.select),
+    return this.orgSelect$.pipe(
+      withLatestFrom(this.cfSelect$),
       switchMap(([orgGuid, endpointGuid]) => {
-        return this.store.select(getSpacesFromOrgWithRole(endpointGuid, orgGuid, CfPermissionStrings.SPACE_DEVELOPER));
+        return this.cfCurrentUserRoles.spacesWithRoleInOrg$(endpointGuid!, orgGuid!, CfPermissionStrings.SPACE_DEVELOPER);
       }),
       switchMap((spacesOrAll => {
         if (spacesOrAll === 'all') {
-          return this.cfOrgSpaceService.space.list$;
+          return this.spaceList$;
         }
         const spaceIds = spacesOrAll as string[];
-        return this.cfOrgSpaceService.space.list$.pipe(
+        return this.spaceList$.pipe(
           map(spaces => {
             const filteredSpaces = spaces.filter(space => spaceIds.find(spaceGuid => spaceGuid === space.guid));
             return filteredSpaces;

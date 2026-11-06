@@ -1,31 +1,29 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { RouterTestingModule } from '@angular/router/testing';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { provideRouter } from '@angular/router';
 
-import { CoreModule } from '../../../../../../../core/src/core/core.module';
-import { SharedModule } from '../../../../../../../core/src/shared/shared.module';
-import { generateCfStoreModules } from '../../../../../../test-framework/cloud-foundry-endpoint-service.helper';
-import { DeployApplicationFsComponent } from './deploy-application-fs.component';
+import { generateCfStoreModules } from "@test-framework/cloud-foundry-endpoint-service.helper";
+import { DeployApplicationFsComponent } from "./deploy-application-fs.component";
 
 describe('DeployApplicationFsComponent', () => {
   let component: DeployApplicationFsComponent;
   let fixture: ComponentFixture<DeployApplicationFsComponent>;
 
-  beforeEach(waitForAsync(() => {
-    TestBed.configureTestingModule({
-      declarations: [DeployApplicationFsComponent],
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
       imports: [
+        DeployApplicationFsComponent,
         ...generateCfStoreModules(),
-        CoreModule,
-        SharedModule,
-        RouterTestingModule,
-        NoopAnimationsModule
+      ],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideNoopAnimations(),
+        provideRouter([]),
       ]
-    })
-      .compileComponents();
-  }));
+    }).compileComponents();
 
-  beforeEach(() => {
     fixture = TestBed.createComponent(DeployApplicationFsComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();

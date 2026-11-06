@@ -1,25 +1,27 @@
 <div class="page-container setup">
-  <app-page-header hideMenu="true" [showHistory]="false">
+  <app-page-header [hideMenu]="true" [showHistory]="false">
     <h1>{{title}} Setup</h1>
   </app-page-header>
   <app-show-page-header></app-show-page-header>
-  <div class="setup__container">
-    <app-steppers>
-      <app-step [hideNextButton]="true">
-        <div class="select-step">
+  <div class="p-6">
+    <app-steppers [cancel]="'/setup'" [cancelReload]="true">
+      <app-step [hideNextButton]="true" [signalHandle]="signalHandle">
+        <div class="text-center space-y-8">
           <app-stratos-title></app-stratos-title>
-          <div class="setup__config">
-            <p class="setup__intro">Welcome to <app-product-name></app-product-name></p>
-            <p class="setup__welcome">Before you can login, you need to choose how users will login to <app-product-name></app-product-name> and
-              complete the required configuration for the chosen method of authentication:</p>
-          </div>
-          <div class="setup-tiles">
-            <app-tile-selector-tile *ngFor="let tile of tileSelectorConfig" (tileSelect)="selectionChange(tile)"
+          <div class="space-y-4">
+            <h2 class="text-2xl font-bold text-content-text">Welcome to <app-product-name></app-product-name></h2>
+            <p class="text-lg text-content-text max-w-2xl mx-auto">Before you can login, you need to choose how users will login to <app-product-name></app-product-name> and
+          complete the required configuration for the chosen method of authentication:</p>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-4xl mx-auto">
+          @for (tile of tileSelectorConfig; track tile) {
+            <app-tile-selector-tile (tileSelect)="selectionChange(tile)"
               [tile]="tile" [active]="true">
             </app-tile-selector-tile>
-          </div>
+          }
         </div>
-      </app-step>
-    </app-steppers>
-  </div>
+      </div>
+    </app-step>
+  </app-steppers>
+</div>
 </div>

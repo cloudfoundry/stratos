@@ -4,18 +4,16 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"log/slog"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
 	"github.com/cloudfoundry/stratos/src/jetstream/api"
-	"github.com/labstack/echo/v4"
-	log "github.com/sirupsen/logrus"
+	"github.com/labstack/echo/v5"
 	clientcmdapi "k8s.io/client-go/tools/clientcmd/api"
-
-	"github.com/SermoDigital/jose/jws"
 )
 
 const (
@@ -61,21 +59,16 @@ func (c *GKEKubeAuth) AddAuthInfo(info *clientcmdapi.AuthInfo, tokenRec api.Toke
 }
 
 // FetchToken will create a token for the GKE Authentication using the POSTed data
-func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
-	log.Debug("FetchToken (GKE)")
+func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec *echo.Context) (*api.TokenRecord, *api.CNSIRecord, error) {
+	slog.Debug("FetchToken (GKE)", "endpoint", cnsiRecord.GUID)
 
-	// We should already have the refresh token in the body sent to us
-	req := ec.Request()
-
-	// Need to extract the parameters from the request body
-	defer req.Body.Close()
-	body, err := ioutil.ReadAll(req.Body)
-	if err != nil {
-		return nil, nil, err
+	body := ec.FormValue("gkeconfig")
+	if len(body) == 0 {
+		return nil, nil, errors.New("GKE configuration is required")
 	}
 
 	gkeInfo := &GKEConfig{}
-	err = json.Unmarshal(body, &gkeInfo)
+	err := json.Unmarshal([]byte(body), &gkeInfo)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -90,13 +83,14 @@ func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*a
 		return nil, nil, fmt.Errorf("Could not refresh the GKE token: %v+", err)
 	}
 
-	token, err := jws.ParseJWT([]byte(oauthToken.IDToken))
+	claims, err := jwtClaims([]byte(oauthToken.IDToken))
 	if err != nil {
-		log.Info(err)
-		return nil, nil, errors.New("Can not parse JWT Access token")
+		const msg = "can not parse the GKE JWT access token"
+		slog.Error(msg, "endpoint", cnsiRecord.GUID, "error", err)
+		return nil, nil, fmt.Errorf("%s: %w", msg, err)
 	}
 
-	email := token.Claims().Get("email")
+	email := claims["email"]
 	if emailAddress, ok := email.(string); ok {
 		gkeInfo.Email = emailAddress
 	}
@@ -114,7 +108,7 @@ func (c *GKEKubeAuth) FetchToken(cnsiRecord api.CNSIRecord, ec echo.Context) (*a
 
 // GetUserFromToken gets the username from the GKE Token
 func (c *GKEKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *api.TokenRecord) (*api.ConnectedUser, bool) {
-	log.Debug("GetUserFromToken (GKE)")
+	slog.Debug("GetUserFromToken (GKE)", "endpoint", cnsiGUID, "token", tokenRecord.TokenGUID)
 
 	gkeInfo := &GKEConfig{}
 	err := json.Unmarshal([]byte(tokenRecord.RefreshToken), &gkeInfo)
@@ -129,7 +123,7 @@ func (c *GKEKubeAuth) GetUserFromToken(cnsiGUID string, tokenRecord *api.TokenRe
 }
 
 func (c *GKEKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Request) (*http.Response, error) {
-	log.Debug("doGKEFlowRequest")
+	slog.Debug("doGKEFlowRequest", "endpoint", cnsiRequest.GUID, "user", cnsiRequest.UserGUID)
 
 	authHandler := c.portalProxy.OAuthHandlerFunc(cnsiRequest, req, c.RefreshGKEToken)
 	return c.portalProxy.DoAuthFlowRequest(cnsiRequest, req, authHandler)
@@ -137,7 +131,7 @@ func (c *GKEKubeAuth) DoFlowRequest(cnsiRequest *api.CNSIRequest, req *http.Requ
 
 // RefreshGKEToken will refresh a GKE token
 func (c *GKEKubeAuth) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID, client, clientSecret, tokenEndpoint string) (t api.TokenRecord, err error) {
-	log.Debug("RefreshGKEToken")
+	slog.Debug("RefreshGKEToken", "endpoint", cnsiGUID, "user", userGUID)
 	now := time.Now()
 
 	userToken, ok := c.portalProxy.GetCNSITokenRecordWithDisconnected(cnsiGUID, userGUID)
@@ -167,7 +161,7 @@ func (c *GKEKubeAuth) RefreshGKEToken(skipSSLValidation bool, cnsiGUID, userGUID
 }
 
 func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSecret, refreshToken string) (u api.UAAResponse, err error) {
-	log.Debug("refreshGKEToken")
+	slog.Debug("refreshGKEToken")
 	tokenInfo := api.UAAResponse{}
 
 	// Go and get a new access token
@@ -184,8 +178,8 @@ func (c *GKEKubeAuth) refreshGKEToken(skipSSLValidation bool, clientID, clientSe
 	}
 
 	// Parse the response
-	defer resp.Body.Close()
-	respBody, err := ioutil.ReadAll(resp.Body)
+	defer func() { _ = resp.Body.Close() }()
+	respBody, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return tokenInfo, err
 	}

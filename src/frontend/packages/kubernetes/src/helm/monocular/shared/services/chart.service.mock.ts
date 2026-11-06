@@ -111,4 +111,8 @@ export class MockChartService {
     return null;
   }
 
+  public getChartSummaryRoute(repoName: string, chartName: string, version?: string): string {
+    return `/monocular/charts/${repoName}/${chartName}${version ? `/${version}` : ''}`;
+  }
+
 }

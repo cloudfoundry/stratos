@@ -1,8 +1,10 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
 import { RouterTestingModule } from '@angular/router/testing';
-import { createBasicStoreModule } from '@stratosui/store/testing';
+import { createBasicStoreModule } from "@test-framework/core-test.helper";
 
-import { CoreTestingModule } from '../../../../test-framework/core-test.modules';
+import { CoreTestingModule } from "@test-framework/core-test.modules";
 import { CoreModule } from '../../../core/core.module';
 import { SharedModule } from '../../shared.module';
 import { EndpointsMissingComponent } from './endpoints-missing.component';
@@ -11,18 +13,20 @@ describe('EndpointsMissingComponent', () => {
   let component: EndpointsMissingComponent;
   let fixture: ComponentFixture<EndpointsMissingComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
+      providers: [provideZonelessChangeDetection()],
       imports: [
+        EndpointsMissingComponent,
         CoreModule,
         SharedModule,
         CoreTestingModule,
         createBasicStoreModule(),
-        RouterTestingModule
+        RouterTestingModule,
       ]
-    })
-      .compileComponents();
-  }));
+    });
+      TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(EndpointsMissingComponent);

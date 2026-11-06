@@ -1,4 +1,4 @@
-import { EntityCatalogHelper } from './entity-catalog-entity/entity-catalog.service';
+import type { EntityCatalogHelper } from './entity-catalog-entity/entity-catalog.service';
 
 export abstract class EntityCatalogHelpers {
   static readonly endpointType = 'endpoint';

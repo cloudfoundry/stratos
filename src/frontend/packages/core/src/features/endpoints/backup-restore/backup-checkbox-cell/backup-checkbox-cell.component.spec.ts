@@ -1,7 +1,11 @@
-import { ComponentFixture, TestBed, waitForAsync } from '@angular/core/testing';
-
-import { EndpointModel } from '../../../../../../store/src/types/endpoint.types';
-import { BaseTestModulesNoShared } from '../../../../../test-framework/core-test.helper';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { describe, it, expect, beforeEach, afterEach, beforeAll, afterAll, vi } from 'vitest';
+import { EndpointModel } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { BaseTestModulesNoShared } from '@test-framework/core-test.helper';
 import { BackupEndpointsService } from '../backup-endpoints.service';
 import { BackupEndpointTypes } from '../backup-restore.types';
 import { BackupCheckboxCellComponent } from './backup-checkbox-cell.component';
@@ -10,24 +14,28 @@ describe('BackupCheckboxCellComponent', () => {
   let component: BackupCheckboxCellComponent;
   let fixture: ComponentFixture<BackupCheckboxCellComponent>;
 
-  beforeEach(waitForAsync(() => {
+  beforeEach(() => {
     TestBed.configureTestingModule({
-      declarations: [BackupCheckboxCellComponent],
       imports: [
-        ...BaseTestModulesNoShared
+        ...BaseTestModulesNoShared,
+        BackupCheckboxCellComponent,
       ],
       providers: [
-        BackupEndpointsService
+        ...STORE_TEST_PROVIDERS,
+        BackupEndpointsService,
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
       ]
-    })
-      .compileComponents();
-  }));
+    });
+    TestBed.compileComponents();
+  });
 
   beforeEach(() => {
     fixture = TestBed.createComponent(BackupCheckboxCellComponent);
     component = fixture.componentInstance;
     component.config = {
-      type: BackupEndpointTypes.ENDPOINT
+      type: BackupEndpointTypes.ENDPOINT,
     };
     component.row = {
       guid: 'test',
