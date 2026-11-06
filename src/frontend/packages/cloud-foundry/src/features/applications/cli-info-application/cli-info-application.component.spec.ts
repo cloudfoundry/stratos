@@ -1,46 +1,100 @@
+import { TemplatePortal } from '@angular/cdk/portal';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { importProvidersFrom, provideZonelessChangeDetection } from '@angular/core';
-import { describe, it, expect, beforeEach } from 'vitest';
-import { provideRouter } from '@angular/router';
+import { provideZonelessChangeDetection } from '@angular/core';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { provideRouter, Router, UrlTree } from '@angular/router';
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
-import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { of } from 'rxjs';
 
 import { TabNavService } from '@stratosui/core';
-import { generateTestApplicationServiceProvider, generateCfStoreModules, ApplicationStateService, ApplicationEnvVarsHelper } from '@test-framework/cf';
+import { EndpointModel, EndpointsDataService } from '@stratosui/store';
+import { STORE_TEST_PROVIDERS } from '@stratosui/store/testing';
+import { ApplicationService } from '../application.service';
 import { CliInfoApplicationComponent } from './cli-info-application.component';
 
 describe('CliInfoApplicationComponent', () => {
   let component: CliInfoApplicationComponent;
   let fixture: ComponentFixture<CliInfoApplicationComponent>;
 
-  const appId = '1';
-  const cfId = '2';
+  const endpoint = {
+    guid: 'cf-guid',
+    name: 'Test Endpoint',
+    api_endpoint: { Scheme: 'https', Host: 'api.example.com', Path: '' },
+    user: { name: 'testuser' },
+    skip_ssl_validation: true,
+    sso_allowed: true,
+  };
+
+  // The page header renders through a portal; attach it next to the
+  // header so its buttons are in the fixture's DOM.
+  async function renderHeader(): Promise<void> {
+    const portal = TestBed.inject(TabNavService).pageHeader() as TemplatePortal;
+    portal.viewContainerRef.createEmbeddedView(portal.templateRef, portal.context);
+    await fixture.whenStable();
+  }
+  const text = (): string => (fixture.nativeElement as HTMLElement).textContent ?? '';
+
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [
         CliInfoApplicationComponent,
-        NoopAnimationsModule,
       ],
       providers: [
-        importProvidersFrom(generateCfStoreModules()),
+        ...STORE_TEST_PROVIDERS,
+        {
+          provide: ApplicationService,
+          useValue: {
+            cfGuid: 'cf-guid',
+            appGuid: 'app-guid',
+            application$: of({ app: { entity: { name: 'my app' } } }),
+            appSpace$: of({ name: 'my space' }),
+            appOrg$: of({ name: 'my org' }),
+          }
+        },
+        TabNavService,
         provideRouter([]),
         provideHttpClient(),
         provideHttpClientTesting(),
-        generateTestApplicationServiceProvider(cfId, appId),
-        ApplicationStateService,
-        ApplicationEnvVarsHelper,
-        TabNavService,
         provideZonelessChangeDetection(),
       ]
     }).compileComponents();
 
+    // The real service stays, since the page header reads its endpoint list.
+    vi.spyOn(TestBed.inject(EndpointsDataService), 'waitFor').mockResolvedValue(endpoint as EndpointModel);
+
     fixture = TestBed.createComponent(CliInfoApplicationComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    await fixture.whenStable();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('fills the application name into its commands', () => {
+    expect(text()).toContain('cf restart "my app"');
+  });
+
+  it('scales memory with -m and a unit, without -i', () => {
+    expect(text()).toContain('cf scale "my app" -m [N]M');
+    expect(text()).not.toContain('-i -m');
+  });
+
+  it('passes the endpoint\'s certificate and single sign-on settings to Getting Started', () => {
+    expect(text()).toContain('cf api https://api.example.com --skip-ssl-validation');
+    expect(text()).toContain('cf login --sso');
+  });
+
+  it('has a close button that goes back to the application', async () => {
+    await renderHeader();
+    const router = TestBed.inject(Router);
+    const navigate = vi.spyOn(router, 'navigateByUrl').mockResolvedValue(true);
+
+    const close = (fixture.nativeElement as HTMLElement).querySelector<HTMLButtonElement>('button[aria-label="Back to App"]');
+    close?.click();
+
+    expect(close).toBeTruthy();
+    expect(router.serializeUrl(navigate.mock.calls[0][0] as UrlTree)).toBe('/applications/cf-guid/app-guid');
   });
 });
