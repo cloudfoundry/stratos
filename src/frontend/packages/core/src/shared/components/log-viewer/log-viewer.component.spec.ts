@@ -1,8 +1,8 @@
-import { Component, CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection, ViewChild } from '@angular/core';
+import { Component, CUSTOM_ELEMENTS_SCHEMA, provideZonelessChangeDetection, signal, ViewChild } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { firstValueFrom, from as observableFrom, Subject } from 'rxjs';
+import { firstValueFrom, from as observableFrom, Observable, Subject } from 'rxjs';
 import { filter, take } from 'rxjs/operators';
 import { CoreModule } from '../../../core/core.module';
 import { MDAppModule } from '../../../core/md.module';
@@ -12,12 +12,13 @@ describe('LogViewerComponent', () => {
   @Component({
     standalone: true,
     selector: `app-host-component`,
-    template: `<app-log-viewer></app-log-viewer>`,
+    template: `<app-log-viewer [logStream]="stream()"></app-log-viewer>`,
     imports: [LogViewerComponent]
   })
   class TestHostComponent {
     @ViewChild(LogViewerComponent, { static: true })
     public logViewer!: LogViewerComponent;
+    readonly stream = signal<Observable<string> | undefined>(undefined);
   }
 
   let component: TestHostComponent;
@@ -40,17 +41,22 @@ describe('LogViewerComponent', () => {
       TestBed.compileComponents();
   });
 
-  beforeEach(() => {
+  // Binds a stream and waits for the viewer to switch to it.
+  const show = async (next: Observable<string>) => {
+    component.stream.set(next);
+    await fixture.whenStable();
+  };
+
+  beforeEach(async () => {
     fixture = TestBed.createComponent(TestHostComponent);
     component = fixture.componentInstance;
     contentEl = component.logViewer.content.nativeElement as HTMLDivElement;
     stream = new Subject();
-    component.logViewer.logStream = stream;
-    fixture.detectChanges();
+    await show(stream);
   });
 
-  it('should be created', () => {
-    component.logViewer.logStream = observableFrom('jhgjgh');
+  it('should be created', async () => {
+    await show(observableFrom('jhgjgh'));
     expect(component).toBeTruthy();
   });
 
@@ -65,7 +71,6 @@ describe('LogViewerComponent', () => {
     // Need to wait for sampleTime(500) + buffer processing + DOM update
     await vi.waitFor(
       () => {
-        fixture.detectChanges();
         expect(contentEl.children.length).toEqual(1);
       },
       { timeout: 2000, interval: 50 }
@@ -82,7 +87,7 @@ describe('LogViewerComponent', () => {
       await shown('old');
 
       const next = new Subject<string>();
-      component.logViewer.logStream = next;
+      await show(next);
       expect(contentEl.children.length).toEqual(0);
       next.next('new');
       await shown('new');
@@ -93,7 +98,7 @@ describe('LogViewerComponent', () => {
     it('drops lines of the previous stream it had not shown yet', async () => {
       stream.next('stale');
       const next = new Subject<string>();
-      component.logViewer.logStream = next;
+      await show(next);
       next.next('new');
       await shown('new');
 
@@ -104,7 +109,7 @@ describe('LogViewerComponent', () => {
       stream.next('kept');
       await shown('kept');
 
-      component.logViewer.logStream = stream;
+      await show(stream);
 
       expect(contentEl.textContent).toContain('kept');
     });
@@ -133,7 +138,6 @@ describe('LogViewerComponent', () => {
     // Wait for all buffering and processing to complete
     await vi.waitFor(
       () => {
-        fixture.detectChanges();
         expect(contentEl.children.length).toEqual(component.logViewer.maxLogLines);
       },
       { timeout: 3000, interval: 100 }
