@@ -37,7 +37,7 @@
           syntax="cf space &quot;{{context.spaceName || '[space name]'}}&quot;">
         </app-cli-command>
         <app-cli-command name="Users" msg="List each space role's users:"
-          syntax="cf space-users &quot;{{context.spaceName || '[space name]'}}&quot;">
+          syntax="cf space-users &quot;{{context.orgName || '[organization name]'}}&quot; &quot;{{context.spaceName || '[space name]'}}&quot;">
         </app-cli-command>
       </app-cli-info>
     }
