@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, VERSION, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, VERSION, ViewContainerRef, inject, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Meta } from '@angular/platform-browser';
 import { RouterModule } from '@angular/router';
@@ -43,8 +43,8 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   gitCommitLink?: string;
   gitBranchLink?: string;
 
-  @ViewChild('aboutInfoContainer', { read: ViewContainerRef, static: true }) aboutInfoContainer!: ViewContainerRef;
-  @ViewChild('supportInfoContainer', { read: ViewContainerRef, static: true }) supportInfoContainer!: ViewContainerRef;
+  readonly aboutInfoContainer = viewChild.required('aboutInfoContainer', { read: ViewContainerRef });
+  readonly supportInfoContainer = viewChild.required('supportInfoContainer', { read: ViewContainerRef });
 
   aboutInfoComponentRef!: ComponentRef<any>;
   componentRef!: ComponentRef<any>;
@@ -132,16 +132,16 @@ export class AboutPageComponent implements OnInit, OnDestroy {
   }
 
   addAboutInfoComponent() {
-    this.aboutInfoContainer.clear();
+    this.aboutInfoContainer().clear();
     if (this.customizations.aboutInfoComponent) {
-      this.aboutInfoComponentRef = this.aboutInfoContainer.createComponent(this.customizations.aboutInfoComponent);
+      this.aboutInfoComponentRef = this.aboutInfoContainer().createComponent(this.customizations.aboutInfoComponent);
     }
   }
 
   addSupportInfo() {
-    this.supportInfoContainer.clear();
+    this.supportInfoContainer().clear();
     if (this.customizations.supportInfoComponent) {
-      this.componentRef = this.supportInfoContainer.createComponent(this.customizations.supportInfoComponent);
+      this.componentRef = this.supportInfoContainer().createComponent(this.customizations.supportInfoComponent);
     }
   }
 }

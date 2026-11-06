@@ -1,6 +1,5 @@
-import { Component, OnInit, ViewChild, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef, inject } from '@angular/core';
 
-import { NgModel } from '@angular/forms';
 import { format } from 'date-fns';
 import { BehaviorSubject, EMPTY, NEVER, Observable, Subject, timer } from 'rxjs';
 import makeWebSocketObservable, { GetWebSocketResponses } from 'rxjs-websockets';
@@ -50,9 +49,6 @@ export class LogStreamTabComponent implements OnInit, OnDestroy {
   protected readonly maxRetries = 3;
   private retryDelayMs = 2000;
   private lastError: ConnectionError | null = null;
-
-  // strict: populated by Angular's @ViewChild query after view init.
-  @ViewChild('searchFilter', { static: false }) searchFilter!: NgModel;
 
   filter;
 

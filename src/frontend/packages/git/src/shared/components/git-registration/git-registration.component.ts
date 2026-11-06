@@ -6,10 +6,10 @@ import {
   Component,
   Injector,
   OnDestroy,
-  ViewChild,
   computed,
   inject,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -146,11 +146,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
   // lazily on activation, and the handle computeds below dereference it.
   // A computed whose first evaluation sees an undefined plain field
   // captures zero signal dependencies and never re-evaluates.
-  private _connect = signal<CreateEndpointConnectComponent | undefined>(undefined);
-  @ViewChild('connect', { static: false })
-  set connectRef(v: CreateEndpointConnectComponent | undefined) {
-    this._connect.set(v);
-  }
+  private readonly _connect = viewChild<CreateEndpointConnectComponent>('connect');
   private registerValid = signal<boolean>(false);
 
   // The endpoint step 1 registered. Previous never undoes it; step 1 shows it
@@ -192,7 +188,7 @@ export class GitRegistrationComponent extends CreateEndpointHelperComponent impl
     onEnter: (data) => {
       // Registration result routed from registerStepHandle.submit via the
       // stepper's enterData channel. Delivery is deferred past the
-      // activating render, so the ViewChild is set by now.
+      // activating render, so the query has resolved by now.
       if (data) {
         this._connect()?.onEnter(data as any);
       }

@@ -17,13 +17,13 @@
     <app-card-status [status$]="status$()">
     </app-card-status>
   }
-  @if (title) {
+  @if (title(); as cardTitle) {
     <div class="meta-card__header">
       <div
         [ngClass]="statusIconByTitle() ? 'meta-card__header-container__title--with-icon' : 'meta-card__header-container__title'">
         <div
           [ngClass]="statusIconByTitle() ? 'meta-card__header-container__title__content--with-icon' : 'meta-card__header-container__title__content'">
-          <ng-container *ngTemplateOutlet="title.content"></ng-container>
+          <ng-container *ngTemplateOutlet="cardTitle.content()"></ng-container>
         </div>
         @if (statusIconByTitle()) {
           <div class="meta-card__header-container__title--with-icon__icon">
@@ -77,11 +77,9 @@
   <div class="meta-card__content">
     @for (metaItem of metaItems(); track metaItem) {
       <div>
-        @if (metaItem?.content) {
-          <span>
-            <ng-container *ngTemplateOutlet="metaItem.content"></ng-container>
-          </span>
-        }
+        <span>
+          <ng-container *ngTemplateOutlet="metaItem.content()"></ng-container>
+        </span>
       </div>
     }
   </div>

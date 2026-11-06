@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { AfterContentInit, Component, OnDestroy, OnInit, ViewChild, ChangeDetectionStrategy, inject, signal, input } from '@angular/core';
+import { AfterContentInit, Component, OnDestroy, OnInit, ChangeDetectionStrategy, inject, signal, input, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -191,17 +191,17 @@ export class DeployApplicationStep2Component
   // --------------
 
   // strict: static @ViewChild, resolved by Angular before ngOnInit/ngAfterContentInit run.
-  @ViewChild('sourceSelectionForm', { static: true }) sourceSelectionForm!: NgForm;
+  readonly sourceSelectionForm = viewChild.required<NgForm>('sourceSelectionForm');
 
   // Template-driven controls register in a microtask after their input renders,
   // so the first change-detection pass of a block can look one up before it
   // exists; NgForm.controls' index signature types the lookup as always present.
   sourceControl(name: string): AbstractControl | undefined {
-    return this.sourceSelectionForm.controls[name];
+    return this.sourceSelectionForm().controls[name];
   }
   subscriptions: Array<Subscription> = [];
 
-  @ViewChild('fsChooser') fsChooser: any;
+  readonly fsChooser = viewChild<any>('fsChooser');
 
   ngOnDestroy() {
     this.subscriptions.forEach(p => p.unsubscribe());
@@ -215,7 +215,7 @@ export class DeployApplicationStep2Component
     if (this.sourceType.group === 'gitscm') {
       const branch = this.repositoryBranch;
       const endpointGuid = this.activeEndpointGuid;
-      const data = this.sourceSelectionForm.form.value.fsLocalSource;
+      const data = this.sourceSelectionForm().form.value.fsLocalSource;
       // A gitscm save needs a resolved repo and branch. The endpoint is
       // optional: without one the backend clones the repo URL directly.
       // A redeploy's form is disabled and counts as valid, so a deployed
@@ -265,7 +265,7 @@ export class DeployApplicationStep2Component
         dockerUsername: this.dockerUsername,
       });
     }
-    return observableOf({ success: true, data: this.sourceSelectionForm.form.value.fsLocalSource });
+    return observableOf({ success: true, data: this.sourceSelectionForm().form.value.fsLocalSource });
   };
 
   ngOnInit() {
@@ -333,8 +333,8 @@ export class DeployApplicationStep2Component
   ngAfterContentInit() {
     // strict: NgForm.statusChanges is non-null once the form exists, which is
     // guaranteed by the time ngAfterContentInit runs for the static form.
-    this.validate = this.sourceSelectionForm.statusChanges!.pipe(map(() => {
-      return this.sourceSelectionForm.valid || this.isRedeploy();
+    this.validate = this.sourceSelectionForm().statusChanges!.pipe(map(() => {
+      return this.sourceSelectionForm().valid || this.isRedeploy();
     }));
   }
 
@@ -452,7 +452,7 @@ export class DeployApplicationStep2Component
 
     // strict: NgForm.valueChanges is non-null once the form is initialised,
     // which holds by the time setupForGit runs after ngOnInit.
-    this.suggestedRepos$ = this.sourceSelectionForm.valueChanges!.pipe(
+    this.suggestedRepos$ = this.sourceSelectionForm().valueChanges!.pipe(
       tap(form => {
         this.applyGithubEnterpriseAndToken(form?.githubEnterpriseUrl, form?.githubAccessToken);
       }),

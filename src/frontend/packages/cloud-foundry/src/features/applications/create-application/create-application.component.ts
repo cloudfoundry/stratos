@@ -3,15 +3,16 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
-  OnDestroy,
   OnInit,
-  ViewChild,
   computed,
   inject,
   signal,
+  untracked,
+  viewChild,
+  afterRenderEffect,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { PageHeaderComponent, SignalStepHandle, StepComponent, SteppersComponent } from '@stratosui/core';
 import { RETURN_URL_PARAM } from '../new-application-base-step/new-application-base-step.component';
@@ -37,7 +38,7 @@ import { CreateApplicationStep3Component } from './create-application-step3/crea
     CreateApplicationStep3Component
   ]
 })
-export class CreateApplicationComponent implements OnInit, OnDestroy {
+export class CreateApplicationComponent implements OnInit {
 
   private cdr = inject(ChangeDetectorRef);
   public cfOrgSpaceService = inject(CfOrgSpaceDataService);
@@ -59,71 +60,69 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
   // render, whichever step is active (pinned by the projected step
   // content spec in steppers.component.spec.ts). So all three children
   // exist up front, and navigating between steps does not create or
-  // destroy them. We use ViewChild *setters* so each bridge
-  // subscription is wired as soon as its child exists, without relying
-  // on signal-handle onEnter being routed through the steppers
-  // component.
-  private _step1?: CreateApplicationStep1Component;
-  private _step2?: CreateApplicationStep2Component;
-  private _step3?: CreateApplicationStep3Component;
+  // destroy them. An effect on each view query wires its bridge
+  // subscription as soon as the child exists, without relying on
+  // signal-handle onEnter being routed through the steppers component.
+  private readonly step1 = viewChild<CreateApplicationStep1Component>('step1');
+  private readonly step2 = viewChild<CreateApplicationStep2Component>('step2');
+  private readonly step3 = viewChild<CreateApplicationStep3Component>('step3');
   private step1Valid = signal<boolean>(false);
   private step2Valid = signal<boolean>(false);
   private step3Valid = signal<boolean>(false);
-  private step1Sub?: Subscription;
-  private step2Sub?: Subscription;
-  private step3Sub?: Subscription;
 
-  @ViewChild('step1', { static: false })
-  set step1Ref(v: CreateApplicationStep1Component | undefined) {
-    this._step1 = v;
-    this.step1Sub?.unsubscribe();
-    this.step1Sub = undefined;
-    if (v) {
-      this.step1Sub = v.validate.subscribe(valid => {
+  // The bridges run after render: a step's child creates its streams in
+  // its own init hooks, which run after this component's effects.
+  private readonly step1Bridge = afterRenderEffect(onCleanup => {
+    const step = this.step1();
+    untracked(() => {
+      if (!step) {
+        this.step1Valid.set(false);
+        return;
+      }
+      const sub = step.validate.subscribe(valid => {
         this.step1Valid.set(!!valid);
         this.cdr.markForCheck();
       });
-    } else {
-      this.step1Valid.set(false);
-    }
-  }
+      onCleanup(() => sub.unsubscribe());
+    });
+  });
 
-  @ViewChild('step2', { static: false })
-  set step2Ref(v: CreateApplicationStep2Component | undefined) {
-    this._step2 = v;
-    this.step2Sub?.unsubscribe();
-    this.step2Sub = undefined;
-    if (v) {
+  private readonly step2Bridge = afterRenderEffect(onCleanup => {
+    const step = this.step2();
+    untracked(() => {
+      if (!step) {
+        this.step2Valid.set(false);
+        return;
+      }
       // Replicate the legacy [onEnter]="step2.onEnter" binding — the child
       // re-validates its appName control on entry so the statusChanges
       // stream emits a fresh value into the bridge.
-      v.onEnter();
-      this.step2Sub = v.validate.subscribe(valid => {
+      step.onEnter();
+      const sub = step.validate.subscribe(valid => {
         this.step2Valid.set(!!valid);
         this.cdr.markForCheck();
       });
-    } else {
-      this.step2Valid.set(false);
-    }
-  }
+      onCleanup(() => sub.unsubscribe());
+    });
+  });
 
-  @ViewChild('step3', { static: false })
-  set step3Ref(v: CreateApplicationStep3Component | undefined) {
-    this._step3 = v;
-    this.step3Sub?.unsubscribe();
-    this.step3Sub = undefined;
-    if (v) {
+  private readonly step3Bridge = afterRenderEffect(onCleanup => {
+    const step = this.step3();
+    untracked(() => {
+      if (!step) {
+        this.step3Valid.set(false);
+        return;
+      }
       // step3.validate is a synchronous method over the form. Seed once,
       // then mirror statusChanges → local signal so OnPush re-renders.
-      this.step3Valid.set(v.validate());
-      this.step3Sub = v.setDomainHost.statusChanges.subscribe(() => {
-        this.step3Valid.set(this._step3?.validate() ?? false);
+      this.step3Valid.set(step.validate());
+      const sub = step.setDomainHost.statusChanges.subscribe(() => {
+        this.step3Valid.set(step.validate());
         this.cdr.markForCheck();
       });
-    } else {
-      this.step3Valid.set(false);
-    }
-  }
+      onCleanup(() => sub.unsubscribe());
+    });
+  });
 
   // Mirror the cross-step loading state so step1's handle can drive
   // [blocked] reactively without leaning on async pipes inside the
@@ -135,7 +134,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
     blocked: computed(() => !!this.isLoadingSignal()),
     submit: async () => {
       // step1.onNext stores the CF details via CreateAppStateService and returns of({ success: true }).
-      const result = await firstValueFrom(this._step1!.onNext(0, null as any));
+      const result = await firstValueFrom(this.step1()!.onNext(0, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to save Cloud Foundry details');
       }
@@ -145,7 +144,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
   step2Handle: SignalStepHandle = {
     valid: this.step2Valid.asReadonly(),
     submit: async () => {
-      const result = await firstValueFrom(this._step2!.onNext(1, null as any));
+      const result = await firstValueFrom(this.step2()!.onNext(1, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to save application name');
       }
@@ -159,7 +158,7 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
       // dispatches the navigation RouterNav action on success and maps
       // errors to { success: false, message }. The RouterNav drives
       // navigation, so no explicit Router.navigate replacement is needed.
-      const result = await firstValueFrom(this._step3!.onNext(2, null as any));
+      const result = await firstValueFrom(this.step3()!.onNext(2, null as any));
       if (!result.success) {
         throw new Error(result.message || 'Failed to create application');
       }
@@ -184,10 +183,4 @@ export class CreateApplicationComponent implements OnInit, OnDestroy {
       this.cfOrgSpaceService.space.select.set(space);
     }
   }
-  ngOnDestroy(): void {
-    this.step1Sub?.unsubscribe();
-    this.step2Sub?.unsubscribe();
-    this.step3Sub?.unsubscribe();
-  }
-
 }

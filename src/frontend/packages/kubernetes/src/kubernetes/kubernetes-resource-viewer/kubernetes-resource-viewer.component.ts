@@ -6,10 +6,10 @@ import {
   ComponentRef,
   OnDestroy,
   TemplateRef,
-  ViewChild,
   ViewContainerRef,
   computed,
-  inject, ChangeDetectionStrategy, ChangeDetectorRef, signal, viewChild } from '@angular/core';
+  inject, ChangeDetectionStrategy, ChangeDetectorRef, signal, viewChild
+} from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { formatDistance } from 'date-fns';
 import { Observable, of } from 'rxjs';
@@ -136,7 +136,7 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   public favorite = signal<UserFavorite<IFavoriteMetadata> | undefined>(undefined);
 
   // Custom component
-  @ViewChild('customComponent', { read: ViewContainerRef, static: false }) customComponentContainer: ViewContainerRef | undefined;
+  readonly customComponentContainer = viewChild('customComponent', { read: ViewContainerRef });
   componentRef: ComponentRef<PreviewableComponent> | undefined;
 
   component: any;
@@ -154,8 +154,9 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
   }
 
   removeCustomComponent(): void {
-    if (this.customComponentContainer) {
-      this.customComponentContainer.clear();
+    const customComponentContainer = this.customComponentContainer();
+    if (customComponentContainer) {
+      customComponentContainer.clear();
     }
     if (this.componentRef) {
       this.componentRef.destroy();
@@ -164,8 +165,9 @@ export class KubernetesResourceViewerComponent implements PreviewableComponent, 
 
   createCustomComponent(): void {
     this.removeCustomComponent();
-    if (this.component && this.customComponentContainer) {
-      this.componentRef = this.customComponentContainer.createComponent(this.component);
+    const customComponentContainer = this.customComponentContainer();
+    if (this.component && customComponentContainer) {
+      this.componentRef = customComponentContainer.createComponent(this.component);
       this.componentRef.instance.setProps(this.data);
     }
   }

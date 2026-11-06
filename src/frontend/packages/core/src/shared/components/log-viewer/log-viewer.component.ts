@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild, effect, input, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, effect, input, untracked, viewChild } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -79,9 +79,9 @@ export class LogViewerComponent implements OnInit, OnDestroy {
     });
   }
 
-  @ViewChild('container', { static: true }) container!: ElementRef;
+  readonly container = viewChild.required<ElementRef>('container');
 
-  @ViewChild('content', { static: true }) content!: ElementRef;
+  readonly content = viewChild.required<ElementRef>('content');
 
   private logLinesCount = 0;
   private countAttribute = 'batchLength';
@@ -107,8 +107,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   public connectionErrorInfo$ = new BehaviorSubject<ConnectionErrorInfo | null>(null);
 
   public ngOnInit() {
-    const contentElement = this.content.nativeElement;
-    const containerElement = this.container.nativeElement;
+    const contentElement = this.content().nativeElement;
+    const containerElement = this.container().nativeElement;
 
     const stoppableLogStream$ = observableCombineLatest([
       this.stopped$,
@@ -367,8 +367,8 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   }
 
   public scrollToBottom() {
-    const contentElement = this.content.nativeElement;
-    const containerElement = this.container.nativeElement;
+    const contentElement = this.content().nativeElement;
+    const containerElement = this.container().nativeElement;
     containerElement.scrollTop = contentElement.clientHeight;
   }
 
@@ -379,16 +379,16 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   }
 
   private clear() {
-    this.content.nativeElement.textContent = '';
+    this.content().nativeElement.textContent = '';
     this.logLinesCount = 0;
   }
 
   private binElement() {
-    const toRemove = this.content.nativeElement.firstChild;
+    const toRemove = this.content().nativeElement.firstChild;
     if (!toRemove) {
       return null;
     }
-    const removedEle = this.content.nativeElement.removeChild(toRemove);
+    const removedEle = this.content().nativeElement.removeChild(toRemove);
     this.logLinesCount -= removedEle.getAttribute(this.countAttribute) || 1;
     return removedEle;
   }

@@ -1,5 +1,5 @@
 
-import { Component, ComponentRef, ViewChild, ViewContainerRef, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ComponentRef, ViewContainerRef, ChangeDetectionStrategy, inject, viewChild } from '@angular/core';
 import { BehaviorSubject, combineLatest, Observable, of as observableOf, Subscription } from 'rxjs';
 
 import { StepOnNextFunction } from '@stratosui/core';
@@ -38,8 +38,7 @@ export class DeployApplicationStep21Component {
     return useLatestHead || !!commit;
   }
 
-  @ViewChild('target', { read: ViewContainerRef, static: true })
-  target!: ViewContainerRef;
+  readonly target = viewChild.required('target', { read: ViewContainerRef });
   wrapperRef!: ComponentRef<CommitListWrapperComponent>;
 
   private wrapperSub?: Subscription;
@@ -51,12 +50,12 @@ export class DeployApplicationStep21Component {
     this.useLatestHeadSubject.next(false);
     this.validateSubject.next(false);
     this.wrapperRef.destroy();
-    this.target.clear();
+    this.target().clear();
   };
 
   onEnter = () => {
     // Wrap the list component in another component. This means it's recreated every time to include changes in the github repo
-    this.wrapperRef = this.target.createComponent(CommitListWrapperComponent);
+    this.wrapperRef = this.target().createComponent(CommitListWrapperComponent);
     const wrapper = this.wrapperRef.instance as CommitListWrapperComponent;
     this.wrapperSub?.unsubscribe();
     // Validity is driven by either a pinned commit OR the deploy-latest-HEAD

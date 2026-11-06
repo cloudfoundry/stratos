@@ -1,4 +1,4 @@
-import { Component, HostListener, Signal, WritableSignal, ChangeDetectionStrategy, ContentChild, ContentChildren, QueryList, ElementRef, TemplateRef, ViewChild, signal, DestroyRef, inject, AfterViewInit, Injector, input } from '@angular/core';
+import { Component, HostListener, Signal, WritableSignal, ChangeDetectionStrategy, ElementRef, TemplateRef, signal, DestroyRef, inject, AfterViewInit, Injector, input, contentChild, contentChildren, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { EndpointsDataService } from '@stratosui/store';
@@ -531,16 +531,14 @@ export class SignalListComponent<T> implements AfterViewInit {
   // bypassing the default column-based card layout. Toolbar, pagination,
   // empty/loading states, and overflow handling all stay in signal-list.
   // Used by the helm catalog tab to render <app-chart-item> per row.
-  @ContentChild('cardTemplate', { read: TemplateRef })
-  cardTemplate?: TemplateRef<{ $implicit: T }>;
+  readonly cardTemplate = contentChild<unknown, TemplateRef<{ $implicit: T }>>('cardTemplate', { read: TemplateRef });
 
   // Named cell templates supplied by the host page. Each tagged with
   // `appSignalListCell="<name>"`; columns of `kind: 'template'` reference
   // them by name via SignalListColumn.templateName.
-  @ContentChildren(SignalListCellTemplateDirective)
-  cellTemplates?: QueryList<SignalListCellTemplateDirective<T>>;
+  readonly cellTemplates = contentChildren(SignalListCellTemplateDirective);
 
-  @ViewChild('scrollBody', { static: false }) scrollBody?: ElementRef<HTMLElement>;
+  readonly scrollBody = viewChild<ElementRef<HTMLElement>>('scrollBody');
 
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
@@ -591,12 +589,12 @@ export class SignalListComponent<T> implements AfterViewInit {
     destroyRef.onDestroy(() => {
       this.resizeObserver?.disconnect();
       this.mutationObserver?.disconnect();
-      this.scrollBody?.nativeElement.removeEventListener('scroll', this.onScroll);
+      this.scrollBody()?.nativeElement.removeEventListener('scroll', this.onScroll);
     });
   }
 
   ngAfterViewInit(): void {
-    const el = this.scrollBody?.nativeElement;
+    const el = this.scrollBody()?.nativeElement;
     if (!el) return;
     this.measureOverflow();
 
@@ -620,7 +618,7 @@ export class SignalListComponent<T> implements AfterViewInit {
   }
 
   private measureOverflow(): void {
-    const el = this.scrollBody?.nativeElement;
+    const el = this.scrollBody()?.nativeElement;
     if (!el) {
       this.hasOverflow.set(false);
       this.canScrollRight.set(false);
@@ -1065,8 +1063,9 @@ export class SignalListComponent<T> implements AfterViewInit {
   // Cell-template helpers ----------------------------------------------
 
   cellTemplateFor(col: SignalListColumn<T>): TemplateRef<{ $implicit: T; row: T }> | undefined {
-    if (col.kind !== 'template' || !col.templateName || !this.cellTemplates) return undefined;
-    return this.cellTemplates.find(d => d.name() === col.templateName)?.template;
+    const cellTemplates = this.cellTemplates();
+    if (col.kind !== 'template' || !col.templateName || !cellTemplates) return undefined;
+    return cellTemplates.find(d => d.name() === col.templateName)?.template;
   }
 
   // Per-row state (RowState) -------------------------------------------
@@ -1154,7 +1153,7 @@ export class SignalListComponent<T> implements AfterViewInit {
 
   // The projected `__rowMessage` template, if the host supplied one.
   rowMessageTemplate(): TemplateRef<{ $implicit: T; row: T }> | undefined {
-    return this.cellTemplates?.find(d => d.name() === SignalListComponent.ROW_MESSAGE_TEMPLATE)?.template;
+    return this.cellTemplates()?.find(d => d.name() === SignalListComponent.ROW_MESSAGE_TEMPLATE)?.template;
   }
 
   // Per-segment text classes: bold emphasis + optional tone color.

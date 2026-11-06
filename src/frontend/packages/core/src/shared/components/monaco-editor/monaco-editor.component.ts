@@ -6,9 +6,9 @@ import {
   forwardRef,
   inject,
   OnDestroy,
-  ViewChild,
   input,
-  output
+  output,
+  viewChild
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
@@ -48,7 +48,7 @@ export interface MonacoEditorOptions {
   ]
 })
 export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlValueAccessor {
-  @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef<HTMLDivElement>;
+  readonly editorContainer = viewChild.required<ElementRef<HTMLDivElement>>('editorContainer');
 
   readonly options = input<MonacoEditorOptions>({});
   readonly model = input<MonacoEditorModel>();
@@ -117,7 +117,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
     };
 
     // Create the editor
-    const editor = monaco.editor.create(this.editorContainer.nativeElement, editorOptions);
+    const editor = monaco.editor.create(this.editorContainer().nativeElement, editorOptions);
     this.editor = editor;
 
     // Set model if uri is provided
@@ -169,7 +169,7 @@ export class MonacoEditorComponent implements AfterViewInit, OnDestroy, ControlV
         }
       });
 
-      this.resizeObserver.observe(this.editorContainer.nativeElement);
+      this.resizeObserver.observe(this.editorContainer().nativeElement);
     }
   }
 

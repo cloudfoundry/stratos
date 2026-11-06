@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, OnInit, Signal, ViewChild, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
+import { AfterContentInit, Component, OnInit, Signal, ChangeDetectionStrategy, computed, inject, input, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -44,8 +44,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   // Template reads as `hasOrgs()`.
   public hasOrgs: Signal<boolean> = computed(() => this.cfOrgSpaceService.org.list().length > 0);
 
-  @ViewChild('cfForm', { static: true })
-  cfForm!: NgForm;
+  readonly cfForm = viewChild.required<NgForm>('cfForm');
 
   readonly isRedeploy = input(false);
 
@@ -89,7 +88,7 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
    * `dirty`). markAsPristine alone does not emit statusChanges.
    */
   private resetControlPristine(name: string) {
-    const control = this.cfForm?.control?.get(name);
+    const control = this.cfForm()?.control?.get(name);
     if (control) {
       control.markAsPristine();
       control.markAsUntouched();
@@ -155,9 +154,9 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
   ngAfterContentInit() {
     // strict: cfForm is a `static: true` ViewChild, so the NgForm and its
     // statusChanges stream are initialised by the time ngAfterContentInit runs.
-    this.validate = this.cfForm.statusChanges!.pipe(
-      startWith(this.cfForm.valid || this.isRedeploy()),
-      map(() => this.cfForm.valid || this.isRedeploy()),
+    this.validate = this.cfForm().statusChanges!.pipe(
+      startWith(this.cfForm().valid || this.isRedeploy()),
+      map(() => this.cfForm().valid || this.isRedeploy()),
       observeOn(asapScheduler)
     );
   }

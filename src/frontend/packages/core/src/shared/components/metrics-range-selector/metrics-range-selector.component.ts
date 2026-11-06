@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, OnDestroy, Output, effect, inject, input, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, effect, inject, input, output, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -60,8 +60,7 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
 
   public rangeTypes = MetricQueryType;
 
-  @Output()
-  public request = new EventEmitter<MetricsRequest>();
+  public readonly request = output<MetricsRequest>();
 
   // The request the time windows are applied to, for a host that binds it.
   // The metrics chart has the selector as projected content and calls start()

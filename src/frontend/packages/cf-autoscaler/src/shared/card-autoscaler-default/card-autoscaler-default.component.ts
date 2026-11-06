@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, ElementRef, Injector, OnInit, ViewChild, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Injector, OnInit, computed, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
@@ -36,9 +36,6 @@ export class CardAutoscalerDefaultComponent implements OnInit {
   private policyData = inject(AutoscalerPolicyDataService);
   private injector = inject(Injector);
   private cdr = inject(ChangeDetectorRef);
-
-
-  @ViewChild('instanceField', { static: false }) instanceField!: ElementRef;
 
   appAutoscalerPolicy$!: Observable<AppAutoscalerPolicyLocal | false | null>;
   applicationInstances$!: Observable<number | null | undefined>;

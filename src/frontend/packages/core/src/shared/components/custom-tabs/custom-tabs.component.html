@@ -23,7 +23,7 @@
   <div class="tab-content">
     @for (tab of getTabsArray(); track $index; let i = $index) {
       <div [hidden]="!tab.isActive">
-        <ng-container *ngTemplateOutlet="tab.content"></ng-container>
+        <ng-container *ngTemplateOutlet="tab.content()"></ng-container>
       </div>
     }
   </div>

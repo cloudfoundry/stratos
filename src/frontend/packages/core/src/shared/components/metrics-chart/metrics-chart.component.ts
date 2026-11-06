@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, AfterContentInit, Component, ContentChild, DestroyRef, OnDestroy, OnInit, computed, inject, signal, input } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, AfterContentInit, Component, DestroyRef, OnDestroy, OnInit, computed, inject, signal, input, contentChild } from '@angular/core';
+import { outputToObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { ChartConfiguration } from 'chart.js';
 import {
@@ -55,8 +55,7 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   public readonly chartConfig = input<MetricsLineChartConfig>();
   public readonly title = input<string>();
 
-  @ContentChild(MetricsRangeSelectorComponent, { static: true })
-  public timeRangeSelector?: MetricsRangeSelectorComponent;
+  public readonly timeRangeSelector = contentChild(MetricsRangeSelectorComponent);
 
   public hasMultipleInstances = false;
 
@@ -166,9 +165,10 @@ export class MetricsChartComponent implements OnInit, OnDestroy, AfterContentIni
   }
 
   ngAfterContentInit() {
-    if (this.timeRangeSelector) {
-      this.timeRangeSelector.start(this.metricsConfig().request);
-      this.timeRangeSelector.request.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((req: MetricsRequest) => {
+    const timeRangeSelector = this.timeRangeSelector();
+    if (timeRangeSelector) {
+      timeRangeSelector.start(this.metricsConfig().request);
+      outputToObservable(timeRangeSelector.request).pipe(takeUntilDestroyed(this.destroyRef)).subscribe((req: MetricsRequest) => {
         this.requestSignal.set(req);
       });
     }

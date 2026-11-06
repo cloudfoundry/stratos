@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, TemplateRef, input, viewChild } from '@angular/core';
 
 @Component({
   selector: 'app-meta-card-title',
@@ -13,8 +13,7 @@ import { ChangeDetectionStrategy, Component, TemplateRef, ViewChild, input } fro
 })
 export class MetaCardTitleComponent {
 
-  @ViewChild(TemplateRef, { static: true })
-  content!: TemplateRef<any>;
+  readonly content = viewChild.required(TemplateRef);
 
   readonly noMargin = input<boolean>();
 

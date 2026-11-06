@@ -1,4 +1,4 @@
-import { Component, ElementRef, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy, Injector } from '@angular/core';
+import { Component, ElementRef, OnInit, Renderer2, effect, signal, inject, ChangeDetectionStrategy, Injector, untracked, viewChild } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -46,19 +46,20 @@ import { KubernetesService } from '../services/kubernetes.service';
 })
 export class KubernetesDashboardTabComponent implements OnInit {
 
-  // The @ViewChild setter is never hit in tests, so this can genuinely be unset;
+  // The iframe is not rendered in tests, so this can genuinely be unset;
   // every read guards with `if (this.pKubeDash ...)`.
   private pKubeDash: ElementRef | undefined;
-  @ViewChild('kubeDash', { read: ElementRef, static: false }) set kubeDash(kubeDash: ElementRef) {
-    if (!this.pKubeDash) {
-      this.pKubeDash = kubeDash;
-      // Need to look at this process again. In tests this is never hit, leading to null references to kubeDash
-      this.setupEventListener();
-    }
-  }
-  get kubeDash(): ElementRef | undefined {
-    return this.pKubeDash;
-  }
+  readonly kubeDash = viewChild('kubeDash', { read: ElementRef });
+  // Keeps the first iframe the query finds and wires its listener.
+  private readonly kubeDashLatch = effect(() => {
+    const kubeDash = this.kubeDash();
+    untracked(() => {
+      if (!this.pKubeDash) {
+        this.pKubeDash = kubeDash;
+        this.setupEventListener();
+      }
+    });
+  });
 
   source!: SafeResourceUrl; // strict: assigned in ngOnInit
   href = '';

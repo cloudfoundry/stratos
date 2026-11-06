@@ -1,6 +1,6 @@
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { Portal, PortalModule } from '@angular/cdk/portal';
-import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, signal, ViewChild, ViewContainerRef, inject } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, signal, ViewContainerRef, inject, viewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, ActivatedRouteSnapshot, NavigationEnd, Route, Router, RouterModule } from '@angular/router';
 import { toObservable } from '@angular/core/rxjs-interop';
@@ -76,9 +76,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   sideNavTabs: SideNavItem[] = this.getNavigationRoutes();
   sideNaveMode = 'side';
 
-  @ViewChild('previewPanelContainer', { read: ViewContainerRef, static: false }) previewPanelContainer!: ViewContainerRef;
+  readonly previewPanelContainer = viewChild.required('previewPanelContainer', { read: ViewContainerRef });
 
-  @ViewChild('content', { static: false }) public content!: ElementRef<HTMLElement>;
+  public readonly content = viewChild<ElementRef<HTMLElement>>('content');
 
   showScrollShadow = signal(false);
 
@@ -120,9 +120,9 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
   }
 
   ngAfterViewInit() {
-    this.sidePanelService.setContainer(this.previewPanelContainer);
+    this.sidePanelService.setContainer(this.previewPanelContainer());
 
-    const el = this.content?.nativeElement;
+    const el = this.content()?.nativeElement;
     if (!el) return;
     this.updateScrollShadow(el);
 
@@ -185,7 +185,7 @@ export class DashboardBaseComponent implements OnInit, OnDestroy, AfterViewInit 
 
   private updateScrollShadow(el?: HTMLElement) {
     if (!el) {
-      el = this.content?.nativeElement;
+      el = this.content()?.nativeElement;
     }
     if (!el) return;
     const hasMore = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 4;

@@ -1,6 +1,5 @@
 import {
   Component,
-  ContentChild,
   ElementRef,
   AfterContentInit,
   Directive,
@@ -11,8 +10,10 @@ import {
   ChangeDetectionStrategy,
   forwardRef,
   contentChildren,
-  input
+  input,
+  contentChild
 } from "@angular/core";
+import { outputToObservable } from "@angular/core/rxjs-interop";
 import { FormControl, NgControl } from "@angular/forms";
 
 import { Subject, takeUntil } from "rxjs";
@@ -90,14 +91,11 @@ export class CustomFormFieldComponent
    */
   readonly fitContent = input(false);
 
-  @ContentChild(forwardRef(() => AppInputDirective), {
-    read: ElementRef,
-    static: false,
-  })
-  inputElement!: ElementRef;
-  @ContentChild(CustomSelectComponent, { static: false })
-  selectComponent!: CustomSelectComponent;
-  @ContentChild(NgControl, { static: false }) ngControl!: NgControl;
+  // A field holds an input or a select, with or without a form control, so
+  // none of these is required.
+  readonly inputElement = contentChild(forwardRef(() => AppInputDirective), { read: ElementRef });
+  readonly selectComponent = contentChild(CustomSelectComponent);
+  readonly ngControl = contentChild(NgControl);
 
   /**
    * The `<app-error>` children the form renders right now. Forms wrap each
@@ -121,41 +119,43 @@ export class CustomFormFieldComponent
 
   ngAfterContentInit() {
     // Handle app-select components
-    if (this.selectComponent) {
-      this.placeholder = this.selectComponent.placeholder() || "";
-      this.isRequired = this.selectComponent.required();
+    const selectComponent = this.selectComponent();
+    const inputElement = this.inputElement();
+    if (selectComponent) {
+      this.placeholder = selectComponent.placeholder() || "";
+      this.isRequired = selectComponent.required();
       this.inputId =
-        this.selectComponent.id() ||
-        this.selectComponent.name() ||
+        selectComponent.id() ||
+        selectComponent.name() ||
         `form-field-${Math.random().toString(36).substr(2, 9)}`;
 
       // Set select id if not present
-      if (!this.selectComponent.id()) {
-        this.selectComponent.id.set(this.inputId);
+      if (!selectComponent.id()) {
+        selectComponent.id.set(this.inputId);
       }
 
       // Monitor select value changes
-      this.selectComponent.valueChange
+      outputToObservable(selectComponent.valueChange)
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
           this.hasValue =
-            this.selectComponent.selectedValue != null &&
-            (Array.isArray(this.selectComponent.selectedValue)
-              ? this.selectComponent.selectedValue.length > 0
+            selectComponent.selectedValue != null &&
+            (Array.isArray(selectComponent.selectedValue)
+              ? selectComponent.selectedValue.length > 0
               : true);
           this.cdr.detectChanges();
         });
 
       // Initial value check
       this.hasValue =
-        this.selectComponent.selectedValue != null &&
-        (Array.isArray(this.selectComponent.selectedValue)
-          ? this.selectComponent.selectedValue.length > 0
+        selectComponent.selectedValue != null &&
+        (Array.isArray(selectComponent.selectedValue)
+          ? selectComponent.selectedValue.length > 0
           : true);
     }
     // Handle native input/textarea/select elements
-    else if (this.inputElement) {
-      const input = this.inputElement.nativeElement;
+    else if (inputElement) {
+      const input = inputElement.nativeElement;
       this.placeholder = input.placeholder || "";
       // The placeholder is the label. A bound placeholder can arrive after
       // this read (the Connect dialog's credentials name their fields from
@@ -204,8 +204,9 @@ export class CustomFormFieldComponent
     }
 
     // Listen to form control status changes if available
-    if (this.ngControl && this.ngControl.statusChanges) {
-      this.ngControl.statusChanges
+    const ngControl = this.ngControl();
+    if (ngControl && ngControl.statusChanges) {
+      ngControl.statusChanges
         .pipe(takeUntil(this.destroy$))
         .subscribe(() => {
           this.updateErrorMessage();
@@ -222,8 +223,9 @@ export class CustomFormFieldComponent
     // This ensures all DOM elements and form controls are ready
     if (this.isInitialized) {
       // Re-read required state now that bindings from projected content have been applied
-      if (this.inputElement) {
-        this.isRequired = this.inputElement.nativeElement.required;
+      const inputElement = this.inputElement();
+      if (inputElement) {
+        this.isRequired = inputElement.nativeElement.required;
       }
       this.updateErrorMessage();
       this.updateAriaAttributes();
@@ -246,18 +248,21 @@ export class CustomFormFieldComponent
   }
 
   get isInvalid(): boolean {
-    if (!this.ngControl) return false;
-    return !!(this.ngControl.invalid && this.ngControl.dirty);
+    const ngControl = this.ngControl();
+    if (!ngControl) return false;
+    return !!(ngControl.invalid && ngControl.dirty);
   }
 
   get isValid(): boolean {
-    if (!this.ngControl) return false;
-    return !!(this.ngControl.valid && this.ngControl.dirty);
+    const ngControl = this.ngControl();
+    if (!ngControl) return false;
+    return !!(ngControl.valid && ngControl.dirty);
   }
 
   get isDisabled(): boolean {
-    if (!this.ngControl) return false;
-    return !!this.ngControl.disabled;
+    const ngControl = this.ngControl();
+    if (!ngControl) return false;
+    return !!ngControl.disabled;
   }
 
   get hasPrefix(): boolean {
@@ -332,12 +337,13 @@ export class CustomFormFieldComponent
   }
 
   private updateErrorMessage(): void {
-    if (!this.ngControl || !this.ngControl.errors) {
+    const ngControl = this.ngControl();
+    if (!ngControl || !ngControl.errors) {
       this.errorMessage = "";
       return;
     }
 
-    const errors = this.ngControl.errors;
+    const errors = ngControl.errors;
 
     if (errors["required"]) {
       this.errorMessage = "This field is required";
@@ -363,9 +369,10 @@ export class CustomFormFieldComponent
   private updateAriaAttributes(): void {
     // For now, only update ARIA attributes for native input elements
     // The app-select component manages its own ARIA attributes
-    if (!this.inputElement) return;
+    const inputElement = this.inputElement();
+    if (!inputElement) return;
 
-    const input = this.inputElement.nativeElement;
+    const input = inputElement.nativeElement;
 
     if (this.isInvalid) {
       input.setAttribute("aria-invalid", "true");

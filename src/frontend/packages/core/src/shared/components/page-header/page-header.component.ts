@@ -1,7 +1,7 @@
 import { Portal, TemplatePortal } from '@angular/cdk/portal';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, AfterViewInit, Component, OnDestroy, TemplateRef, ViewChild, ViewContainerRef, computed, effect, inject, input, linkedSignal, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, AfterViewInit, Component, OnDestroy, TemplateRef, ViewContainerRef, computed, effect, inject, input, linkedSignal, signal, untracked, viewChild } from '@angular/core';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { toObservable, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
@@ -129,7 +129,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   public isUserMenuOpen = false;
   public isTokenMenuOpen = false;
 
-  @ViewChild('pageHeaderTmpl', { static: true }) pageHeaderTmpl!: TemplateRef<any>;
+  readonly pageHeaderTmpl = viewChild.required<TemplateRef<any>>('pageHeaderTmpl');
 
   // Our own portal registered in ngAfterViewInit; used to verify ownership
   // before clearing, and to avoid wiping another component's portal.
@@ -375,7 +375,7 @@ export class PageHeaderComponent implements OnDestroy, AfterViewInit {
   ngAfterViewInit() {
     // Remember the current portal so we can hand it back in ngOnDestroy.
     this.previousPortal = this.tabNavService.pageHeader();
-    this.myPortal = new TemplatePortal(this.pageHeaderTmpl, this.viewContainerRef, {});
+    this.myPortal = new TemplatePortal(this.pageHeaderTmpl(), this.viewContainerRef, {});
     this.tabNavService.setPageHeader(this.myPortal);
   }
 

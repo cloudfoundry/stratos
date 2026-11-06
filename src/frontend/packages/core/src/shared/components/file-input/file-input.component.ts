@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild, inject, signal, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, inject, signal, input, output, viewChild } from '@angular/core';
 import { ControlContainer, FormGroupName } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
@@ -19,7 +19,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
   private parent = inject(ControlContainer, { optional: true, host: true, skipSelf: true });
 
 
-  @ViewChild('inputFile', { static: true }) nativeInputFile!: ElementRef;
+  readonly nativeInputFile = viewChild.required<ElementRef>('inputFile');
 
   readonly accept = input<string>();
   readonly placeholder = input('');
@@ -79,7 +79,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
   }
 
   selectFile($event: Event) {
-    this.nativeInputFile.nativeElement.click();
+    this.nativeInputFile().nativeElement.click();
     $event.preventDefault();
     return false;
   }
@@ -88,7 +88,7 @@ export class FileInputComponent implements OnInit, OnDestroy {
     $event.preventDefault();
     this.files = [];
     this.name = '';
-    this.nativeInputFile.nativeElement.value = '';
+    this.nativeInputFile().nativeElement.value = '';
     this.fileControl()?.setValue('');
     this.fileData.emit('');
   }

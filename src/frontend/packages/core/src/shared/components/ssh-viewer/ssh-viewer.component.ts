@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, inject, signal, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, computed, inject, signal, ChangeDetectionStrategy, input, viewChild } from '@angular/core';
 import { Observable, Subject, Subscription, takeUntil } from 'rxjs';
 import { Terminal } from 'xterm';
 import { FitAddon } from 'xterm-addon-fit';
@@ -46,7 +46,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
   // A progress window title from the backend, e.g. while a pod starts.
   public readonly message = signal('');
 
-  @ViewChild('terminal', { static: true }) container!: ElementRef;
+  readonly container = viewChild.required<ElementRef>('terminal');
   private xterm!: Terminal;
 
   private xtermFitAddon = new FitAddon();
@@ -84,7 +84,7 @@ export class SshViewerComponent implements OnInit, OnDestroy {
 
     this.xterm = new Terminal();
     this.xterm.loadAddon(this.xtermFitAddon);
-    this.xterm.open(this.container.nativeElement);
+    this.xterm.open(this.container().nativeElement);
     this.resize();
 
     this.xterm.onKey(e => {
