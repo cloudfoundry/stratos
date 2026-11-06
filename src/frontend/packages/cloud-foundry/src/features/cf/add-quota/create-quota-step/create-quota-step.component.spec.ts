@@ -81,8 +81,9 @@ describe('CreateQuotaStepComponent', () => {
     const page = readFileSync(join(import.meta.dirname, '../../../../../../store/src/testdata/upstream-errors/nginx-502.body'), 'utf8');
     vi.spyOn(TestBed.inject(QuotaDataService), 'createOrgQuota')
       .mockReturnValue(throwError(() => new HttpErrorResponse({ error: page, status: 502, statusText: 'Bad Gateway' })));
-    const step = TestBed.createComponent(StepComponent).componentInstance;
-    step.signalHandle = component.signalHandle;
+    const stepRef = TestBed.createComponent(StepComponent).componentRef;
+    stepRef.setInput('signalHandle', component.signalHandle);
+    const step = stepRef.instance;
 
     const result = await firstValueFrom(step.invokeNext(0));
 

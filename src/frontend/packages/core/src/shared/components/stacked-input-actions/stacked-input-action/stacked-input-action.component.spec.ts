@@ -31,10 +31,10 @@ describe('StackedInputActionComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(StackedInputActionComponent);
     component = fixture.componentInstance;
-    component.stateIn$ = observableOf({
+    fixture.componentRef.setInput('stateIn$', observableOf({
       key: 'string',
       result: StackedInputActionResult.OTHER_VALUES_UPDATED,
-    });
+    }));
     fixture.detectChanges();
   });
 

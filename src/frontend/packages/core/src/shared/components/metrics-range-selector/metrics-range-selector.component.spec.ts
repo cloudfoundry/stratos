@@ -49,7 +49,7 @@ describe('MetricsRangeSelectorComponent', () => {
     expect(trigger!.getAttribute('aria-label')).toBe('Time window');
   });
 
-  // The metrics chart sets baseRequest in code, and that starts the manager:
+  // The metrics chart calls start() in code, and that starts the manager:
   // it picks the time window and begins polling. Options bound in the template
   // have to be in place by then.
   it('applies its options before the base request starts the manager', async () => {
@@ -61,12 +61,12 @@ describe('MetricsRangeSelectorComponent', () => {
     fixture.componentRef.setInput('selectedTimeValue', '30:minute');
     fixture.componentRef.setInput('pollInterval', 5000);
 
-    component.baseRequest = {
+    component.start({
       endpointGuid: 'endpoint',
       url: 'query',
       query: new MetricQueryConfig('metric'),
       queryType: MetricQueryType.QUERY,
-    } as MetricsRequest;
+    } as MetricsRequest);
 
     const manager = component.rangeSelectorManager;
     expect(manager.times).toBe(times);

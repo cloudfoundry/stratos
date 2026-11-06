@@ -23,7 +23,7 @@ describe('AnalysisStatusCellComponent', () => {
     fixture = TestBed.createComponent(AnalysisStatusCellComponent);
     component = fixture.componentInstance;
     // Set required row property (inherited from TableCellCustom),
-    component.row = { status: 'completed' };
+    fixture.componentRef.setInput('row', { status: 'completed' });
     fixture.detectChanges();
   });
 

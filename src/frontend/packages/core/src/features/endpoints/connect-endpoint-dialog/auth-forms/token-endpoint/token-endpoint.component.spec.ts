@@ -26,15 +26,15 @@ describe('TokenEndpointComponent', () => {
     component = fixture.componentInstance;
 
     // Provide FormGroup instance for component with correct structure.
-    // strict: the template binds [formGroup]="formGroup" then formGroupName="authValues"
+    // The template binds [formGroup]="formGroup()" then formGroupName="authValues"
     // / formControlName="token", so the runtime shape is { authValues: { token } }. The
     // component's declared FormGroup<TokenAuthForm> ({ token }) understates that nesting;
-    // the cast keeps the mock faithful to the template the test renders.
-    component.formGroup = new FormGroup({
+    // the mock follows the template the test renders.
+    fixture.componentRef.setInput('formGroup', new FormGroup({
       authValues: new FormGroup({
         token: new FormControl('', { nonNullable: true }),
       }),
-    }) as unknown as typeof component.formGroup;
+    }));
 
     fixture.detectChanges();
   });

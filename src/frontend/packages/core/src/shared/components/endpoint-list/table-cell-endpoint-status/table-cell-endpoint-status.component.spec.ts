@@ -25,11 +25,11 @@ describe('TableCellEndpointStatusComponent', () => {
   beforeEach(async () => {
     fixture = TestBed.createComponent(TableCellEndpointStatusComponent);
     component = fixture.componentInstance;
-    component.row = {
+    fixture.componentRef.setInput('row', {
       guid: 'test-guid',
       cnsi_type: 'metrics',
       name: 'Test Endpoint'
-    } as EndpointModel;
+    } as EndpointModel);
     await fixture.whenStable();
   });
 
@@ -77,10 +77,10 @@ describe('TableCellEndpointStatusComponent', () => {
       type: 'test-no-login', label: 'No login', labelPlural: 'No login', logoUrl: '', authTypes: [], unConnectable: true,
     }));
     const repoFixture = TestBed.createComponent(TableCellEndpointStatusComponent);
-    repoFixture.componentInstance.row = {
+    repoFixture.componentRef.setInput('row', {
       guid: 'repo-1', cnsi_type: 'test-no-login', name: 'repo', connectionStatus: 'disconnected',
       endpoint_metadata: { status: 'Pending' },
-    } as EndpointModel;
+    } as EndpointModel);
     await repoFixture.whenStable();
     const text = (repoFixture.nativeElement as HTMLElement).textContent;
     expect(text).toContain('Sync Pending');
@@ -93,9 +93,9 @@ describe('TableCellEndpointStatusComponent', () => {
       type: 'test-no-login', label: 'No login', labelPlural: 'No login', logoUrl: '', authTypes: [], unConnectable: true,
     }));
     const repoFixture = TestBed.createComponent(TableCellEndpointStatusComponent);
-    repoFixture.componentInstance.row = {
+    repoFixture.componentRef.setInput('row', {
       guid: 'repo-2', cnsi_type: 'test-no-login', name: 'repo', connectionStatus: 'disconnected',
-    } as EndpointModel;
+    } as EndpointModel);
     await repoFixture.whenStable();
     expect((repoFixture.nativeElement as HTMLElement).textContent?.trim()).toBe('—');
   });

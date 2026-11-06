@@ -45,7 +45,7 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(AppAutoscalerMetricChartCardComponent);
     component = fixture.componentInstance;
-    component.row = {
+    fixture.componentRef.setInput('row', {
       entity: {
         upper: [],
         lower: [],
@@ -56,7 +56,7 @@ describe('AppAutoscalerMetricChartCardComponent', () => {
         updated_at: '',
         url: ''
       }
-    };
+    });
     fixture.detectChanges();
   });
 

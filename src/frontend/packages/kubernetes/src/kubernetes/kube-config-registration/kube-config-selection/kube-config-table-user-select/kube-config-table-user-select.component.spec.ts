@@ -35,9 +35,9 @@ describe('KubeConfigTableUserSelectComponent', () => {
     component = fixture.componentInstance;
     // ngOnInit only reads _user and _users; an intentionally partial cluster
     // is enough to drive this creation test.
-    component.row = {
+    fixture.componentRef.setInput('row', {
       _users: []
-    } as Partial<KubeConfigFileCluster> as KubeConfigFileCluster;
+    } as Partial<KubeConfigFileCluster> as KubeConfigFileCluster);
     fixture.detectChanges();
   });
 
@@ -47,9 +47,9 @@ describe('KubeConfigTableUserSelectComponent', () => {
 
   it('names its drop-down "User"', async () => {
     const withUsers = TestBed.createComponent(KubeConfigTableUserSelectComponent);
-    withUsers.componentInstance.row = {
+    withUsers.componentRef.setInput('row', {
       _users: [{ name: 'u1' }],
-    } as Partial<KubeConfigFileCluster> as KubeConfigFileCluster;
+    } as Partial<KubeConfigFileCluster> as KubeConfigFileCluster);
     await withUsers.whenStable();
     const trigger = (withUsers.nativeElement as HTMLElement).querySelector('[role="combobox"]');
     expect(trigger).toBeTruthy();

@@ -66,14 +66,14 @@ describe('EndpointCardComponent', () => {
   beforeEach(async () => {
     fixture = TestBed.createComponent(EndpointCardComponent);
     component = fixture.componentInstance;
-    component.row = {
+    fixture.componentRef.setInput('row', {
       guid: 'test-endpoint-guid',
       cnsi_type: 'metrics',
       name: 'Test Metrics Endpoint',
       connectionStatus: 'connected',
       // Always present on the wire: jetstream fills creator for every endpoint.
       creator: { name: 'System Endpoint', admin: false, system: true },
-    } as EndpointModel;
+    } as EndpointModel);
     await fixture.whenStable();
   });
 
@@ -99,7 +99,7 @@ describe('EndpointCardComponent', () => {
   });
 
   it('shows a plain title when the endpoint has no page to open', async () => {
-    fixture.componentRef.setInput('row', { ...component.row, connectionStatus: 'disconnected' } as EndpointModel);
+    fixture.componentRef.setInput('row', { ...component.row(), connectionStatus: 'disconnected' } as EndpointModel);
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('a.endpoint-card__title-link')).toBeNull();
     expect(fixture.nativeElement.textContent).toContain('Test Metrics Endpoint');
@@ -109,7 +109,7 @@ describe('EndpointCardComponent', () => {
     const picture = (definition: object) => {
       const getEndpoint = vi.spyOn(entityCatalog, 'getEndpoint')
         .mockReturnValue({ definition: { label: 'Test type', unConnectable: true, ...definition } } as never);
-      fixture.componentRef.setInput('row', { ...component.row, cnsi_type: 'test-type' } as EndpointModel);
+      fixture.componentRef.setInput('row', { ...component.row(), cnsi_type: 'test-type' } as EndpointModel);
       return getEndpoint;
     };
     const wrapper = () => fixture.nativeElement.querySelector('.endpoint-card__image-wrapper') as HTMLElement | null;

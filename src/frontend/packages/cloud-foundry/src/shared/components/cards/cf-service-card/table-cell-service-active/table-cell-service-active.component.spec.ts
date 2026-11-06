@@ -21,7 +21,7 @@ describe('TableCellServiceActiveComponent', () => {
 
     fixture = TestBed.createComponent(TableCellServiceActiveComponent);
     component = fixture.componentInstance;
-    component.row = { available: true } as StServiceOffering;
+    fixture.componentRef.setInput('row', { available: true } as StServiceOffering);
     fixture.detectChanges();
   });
 

@@ -24,7 +24,7 @@ describe('SteppersComponent', () => {
   // A step outside any template, with its inputs set the way a binding would.
   const makeStep = (title: string, inputs: Record<string, unknown> = {}) => {
     const ref = TestBed.createComponent(StepComponent).componentRef;
-    ref.instance.title = title;
+    ref.setInput('title', title);
     Object.entries(inputs).forEach(([name, value]) => ref.setInput(name, value));
     return ref;
   };
@@ -94,12 +94,13 @@ describe('SteppersComponent', () => {
   // must happen after the activating render, with the routed enterData.
   it('delivers onEnter after the activating render, not synchronously', async () => {
     const stepA = makeStep('A', { valid: true }).instance;
-    const stepB = makeStep('B').instance;
     const entered: unknown[] = [];
-    stepB.signalHandle = {
-      valid: (() => true) as any,
-      onEnter: (data?: unknown) => { entered.push(data); },
-    };
+    const stepB = makeStep('B', {
+      signalHandle: {
+        valid: (() => true) as any,
+        onEnter: (data?: unknown) => { entered.push(data); },
+      },
+    }).instance;
     (component as any).allSteps = [stepA, stepB];
     (component as any).filterSteps();
     (component as any).enterData = { plan: 'p1' };
@@ -387,7 +388,7 @@ describe('SteppersComponent — signal-handle hidden', () => {
   let host: SignalHiddenHostComponent;
   const steppers = () => hostFixture.debugElement
     .query(By.directive(SteppersComponent)).componentInstance as SteppersComponent;
-  const titles = () => steppers().steps.map(step => step.title);
+  const titles = () => steppers().steps.map(step => step.title());
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
@@ -463,12 +464,12 @@ describe('SteppersComponent — current step across re-filters', () => {
     await hostFixture.whenStable();
     await hostFixture.whenStable();
     expect(host.entered).toEqual(['two']);
-    expect(current().title).toBe('Two');
+    expect(current().title()).toBe('Two');
 
     host.firstHidden.set(false);
     await hostFixture.whenStable();
-    expect(steppers().steps.map(step => step.title)).toEqual(['One', 'Two']);
-    expect(current().title).toBe('Two');
+    expect(steppers().steps.map(step => step.title())).toEqual(['One', 'Two']);
+    expect(current().title()).toBe('Two');
     expect(current().active).toBe(true);
     expect(steppers().steps[0].active).toBe(false);
     // Showing a step is not a transition: no extra onEnter.
@@ -480,12 +481,12 @@ describe('SteppersComponent — current step across re-filters', () => {
     await hostFixture.whenStable();
     steppers().setActive(1);
     await hostFixture.whenStable();
-    expect(current().title).toBe('Two');
+    expect(current().title()).toBe('Two');
 
     host.firstHidden.set(true);
     await hostFixture.whenStable();
-    expect(steppers().steps.map(step => step.title)).toEqual(['Two']);
-    expect(current().title).toBe('Two');
+    expect(steppers().steps.map(step => step.title())).toEqual(['Two']);
+    expect(current().title()).toBe('Two');
     expect(current().active).toBe(true);
   });
 
@@ -499,8 +500,8 @@ describe('SteppersComponent — current step across re-filters', () => {
     host.secondHidden.set(true);
     await hostFixture.whenStable();
     await hostFixture.whenStable();
-    expect(steppers().steps.map(step => step.title)).toEqual(['One']);
-    expect(current().title).toBe('One');
+    expect(steppers().steps.map(step => step.title())).toEqual(['One']);
+    expect(current().title()).toBe('One');
     expect(current().active).toBe(true);
     expect(host.entered).toEqual(['one', 'two', 'one']);
   });
@@ -547,8 +548,8 @@ describe('SteppersComponent — all steps hidden, then shown', () => {
   it('returns to the step the user was on when it reappears, without a second onEnter', async () => {
     host.secondHidden.set(false);
     await settle();
-    expect(steppers().steps.map(step => step.title)).toEqual(['Two']);
-    expect(current().title).toBe('Two');
+    expect(steppers().steps.map(step => step.title())).toEqual(['Two']);
+    expect(current().title()).toBe('Two');
     expect(current().active).toBe(true);
     expect(host.entered).toEqual(['one', 'two']);
   });
@@ -557,7 +558,7 @@ describe('SteppersComponent — all steps hidden, then shown', () => {
     host.firstHidden.set(false);
     host.secondHidden.set(false);
     await settle();
-    expect(current().title).toBe('Two');
+    expect(current().title()).toBe('Two');
     expect(current().active).toBe(true);
     expect(steppers().steps[0].active).toBe(false);
     expect(host.entered).toEqual(['one', 'two']);
@@ -566,8 +567,8 @@ describe('SteppersComponent — all steps hidden, then shown', () => {
   it('enters the first visible step once when the step the user was on stays hidden', async () => {
     host.firstHidden.set(false);
     await settle();
-    expect(steppers().steps.map(step => step.title)).toEqual(['One']);
-    expect(current().title).toBe('One');
+    expect(steppers().steps.map(step => step.title())).toEqual(['One']);
+    expect(current().title()).toBe('One');
     expect(current().active).toBe(true);
     expect(steppers().allSteps[1].active).toBe(false);
     expect(host.entered).toEqual(['one', 'two', 'one']);

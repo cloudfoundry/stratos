@@ -105,8 +105,9 @@ describe('EditSpaceStepComponent', () => {
     { text: '\nnginx/1.28.0', style: 'text' },
   ];
   function stepFor() {
-    const step = TestBed.createComponent(StepComponent).componentInstance;
-    step.signalHandle = component.signalHandle;
+    const stepRef = TestBed.createComponent(StepComponent).componentRef;
+    stepRef.setInput('signalHandle', component.signalHandle);
+    const step = stepRef.instance;
     return step;
   }
 

@@ -32,7 +32,7 @@ describe('KubeConfigTableSubTypeSelectComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(KubeConfigTableSubTypeSelectComponent);
     component = fixture.componentInstance;
-    component.row = {} as KubeConfigFileCluster;
+    fixture.componentRef.setInput('row', {} as KubeConfigFileCluster);
     fixture.detectChanges();
   });
 

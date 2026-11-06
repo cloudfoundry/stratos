@@ -35,6 +35,7 @@ describe('MetricsEndpointDetailsComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(MetricsEndpointDetailsComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('row', { guid: 'metrics-1' });
     fixture.detectChanges();
   });
 

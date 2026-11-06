@@ -22,6 +22,12 @@ describe('KubernetesNodeMetricsChartComponent', () => {
   beforeEach(() => {
     fixture = TestBed.createComponent(KubernetesNodeMetricsChartComponent);
     component = fixture.componentInstance;
+    fixture.componentRef.setInput('nodeName', 'node-1');
+    fixture.componentRef.setInput('endpointGuid', 'kube-1');
+    fixture.componentRef.setInput('yAxisLabel', 'Memory (MB)');
+    fixture.componentRef.setInput('metricName', 'container_memory_usage_bytes');
+    fixture.componentRef.setInput('seriesTranslation', 'mb');
+    fixture.componentRef.setInput('title', 'Memory');
     fixture.detectChanges();
   });
 
