@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectionStrategy, AfterContentInit, Component, DestroyRef, Injector, Input, computed, effect, inject, input, linkedSignal, output, signal, untracked } from '@angular/core';
+import { ChangeDetectionStrategy, AfterContentInit, Component, DestroyRef, Injector, computed, effect, inject, input, linkedSignal, output, signal, untracked } from '@angular/core';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup } from '@angular/forms';
 import { cfEndpointUrlValidator, normalizeUrl } from '../../../../shared/validators';
@@ -140,20 +140,9 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
   registerForm: FormGroup<CreateEndpointForm>;
 
   readonly finalStep = input(false);
-  private pFixedUrl!: string;
-  @Input()
-  get fixedUrl(): string {
-    return this.pFixedUrl;
-  }
-  set fixedUrl(url: string) {
-    this.pFixedUrl = url;
-    this.registerForm.controls.urlField.setValue(this.pFixedUrl);
-    if (this.pFixedUrl) {
-      this.registerForm.controls.urlField.disable();
-    } else {
-      this.registerForm.controls.urlField.enable();
-    }
-  }
+  // An address the host fixes: filled in and locked by the effect in the
+  // constructor.
+  readonly fixedUrl = input<string>();
 
   // strict: assigned in ngAfterContentInit before any template/consumer read.
   validate!: Observable<boolean>;
@@ -259,6 +248,23 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
       this.registerForm.controls.urlField.setValue(linkedUrl);
     }
 
+    // Ahead of the review effect, as the address was set ahead of it before.
+    effect(() => {
+      const url = this.fixedUrl();
+      if (url === undefined) {
+        return;
+      }
+      untracked(() => {
+        const urlField = this.registerForm.controls.urlField;
+        urlField.setValue(url);
+        if (url) {
+          urlField.disable();
+        } else {
+          urlField.enable();
+        }
+      });
+    });
+
     effect(() => {
       const ep = this.reviewEndpoint();
       // A refreshed copy of the same endpoint must not reset edits in progress.
@@ -320,7 +326,7 @@ export class CreateEndpointCfStep1Component extends CreateEndpointHelperComponen
     const form = this.registerForm.controls;
     [form.nameField, form.ssoAllowedField, form.clientIDField, form.clientSecretField,
       form.createSystemEndpointField].forEach(control => control.enable());
-    if (!this.pFixedUrl) {
+    if (!this.fixedUrl()) {
       form.urlField.enable();
     }
     this.review.set(false);

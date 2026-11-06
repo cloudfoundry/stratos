@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
-import {AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, Renderer2, ViewChild, signal, inject, ChangeDetectionStrategy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild, effect, input, signal, inject, untracked, ChangeDetectionStrategy } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import * as yaml from 'js-yaml';
@@ -53,13 +53,21 @@ enum EditorMode {
 })
 export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewInit {
 
-  @Input() set config(config: ChartValuesConfig | undefined) {
-    if (config) {
-      this.schemaUrl = config.schemaUrl;
-      this.valuesUrl = config.valuesUrl;
-      this.releaseValues = config.releaseValues;
-      this.init();
-    }
+  readonly config = input<ChartValuesConfig>();
+
+  constructor() {
+    // Start loading the chart's schema and values for each config given.
+    effect(() => {
+      const config = this.config();
+      if (config) {
+        untracked(() => {
+          this.schemaUrl = config.schemaUrl;
+          this.valuesUrl = config.valuesUrl;
+          this.releaseValues = config.releaseValues;
+          this.init();
+        });
+      }
+    });
   }
 
   schemaUrl: string | null = null;
@@ -111,7 +119,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   public editor: MonacoEditorComponent | undefined;
 
   // Observable - are we still loading resources? Assigned in init() once a
-  // config is provided via the @Input setter.
+  // config is provided via the `config` input.
   public loading$!: Observable<boolean>;
 
   public initing = true;
@@ -119,7 +127,7 @@ export class ChartValuesEditorComponent implements OnInit, OnDestroy, AfterViewI
   // Signal for tracking if the Monaco editor has loaded
   private monacoLoaded = signal<boolean>(false);
   // Built here, in a field initializer, because init() runs from the `config`
-  // input setter - outside any injection context - where toObservable() throws.
+  // effect - outside any injection context - where toObservable() throws.
   private readonly monacoLoaded$ = toObservable(this.monacoLoaded);
 
   private resizeSub?: Subscription;

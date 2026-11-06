@@ -6,23 +6,23 @@
         <div class="nav-top-inner flex items-center justify-between">
           <button
             class="nav-logo flex items-center space-x-3"
-            [class.justify-center]="iconMode"
+            [class.justify-center]="isIconMode()"
             (click)="toggleSidenavMode()"
-            [title]="iconMode ? 'Expand sidebar' : ''"
+            [title]="isIconMode() ? 'Expand sidebar' : ''"
             >
             <img
               class="nav-logo-img h-8 w-8 shrink-0 rounded-lg"
-              [src]="iconMode ? navLogoIcon() : navLogo()"
+              [src]="isIconMode() ? navLogoIcon() : navLogo()"
               [alt]="displayName()"
               >
-            <div class="nav-logo-text text-nav-text font-bold text-lg truncate" [class.hidden]="iconMode">
+            <div class="nav-logo-text text-nav-text font-bold text-lg truncate" [class.hidden]="isIconMode()">
               {{ displayName() }}
             </div>
           </button>
           <button
             class="nav-toggle p-2 text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
             (click)="toggleSidenavMode()"
-            [class.hidden]="iconMode"
+            [class.hidden]="isIconMode()"
             title="Collapse sidebar"
             >
             <span class="material-icons text-lg">
@@ -36,7 +36,7 @@
 
     <!-- Show All Menu Items debug toggle (opt-in via company config, expanded mode only) -->
     @if (showMenuItemsToggle()) {
-      <div class="nav-show-all-toggle border-b border-nav-border p-3" [class.hidden]="iconMode">
+      <div class="nav-show-all-toggle border-b border-nav-border p-3" [class.hidden]="isIconMode()">
         <label class="flex items-center space-x-2 text-nav-text-muted hover:text-nav-text cursor-pointer" for="nav-show-all">
           <input
             id="nav-show-all"
@@ -62,13 +62,13 @@
               [class.text-nav-text]="isActiveRoute(tab.link)"
               [routerLink]="[tab.link]"
               [routerLinkActive]="['router-link-active']"
-              [title]="iconMode ? tab.label : ''"
+              [title]="isIconMode() ? tab.label : ''"
               >
               <span class="nav-item-icon shrink-0 h-6 w-6 flex items-center justify-center ml-4">
                 <span class="text-xl"
                 [ngClass]="tab.matIconFont || 'material-icons'">{{ tab.matIcon || getIconName(tab) }}</span>
               </span>
-              <span class="nav-item-label ml-3 truncate font-medium" [class.hidden]="iconMode">
+              <span class="nav-item-label ml-3 truncate font-medium" [class.hidden]="isIconMode()">
                 {{ tab.label }}
               </span>
               <!-- Active indicator - now touches the left edge -->
@@ -78,7 +78,7 @@
               </div>
               <!-- Hover effect for icon mode -->
               <div class="absolute left-full ml-2 px-2 py-1 bg-nav-tooltip text-nav-text text-sm rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap z-[9999]"
-                [class.hidden]="!iconMode">
+                [class.hidden]="!isIconMode()">
                 {{ tab.label }}
               </div>
             </a>
@@ -90,7 +90,7 @@
     <!-- Company links. Reference-grade, so plain rel="noopener noreferrer"
          external links — unlike the header docs link these are one-shot. -->
     @if (companyWebsite() || supportEmail()) {
-      <div class="nav-company-links border-t border-nav-border p-3 space-y-1" [class.hidden]="iconMode">
+      <div class="nav-company-links border-t border-nav-border p-3 space-y-1" [class.hidden]="isIconMode()">
         @if (companyWebsite(); as website) {
           <a class="nav-company-website flex items-center p-2 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
             [href]="website" target="_blank" rel="noopener noreferrer">
@@ -113,14 +113,14 @@
     <div class="nav-logout border-t border-nav-border p-3">
       <button
         class="logout-button w-full flex items-center p-2 text-nav-text-muted hover:text-nav-text hover:bg-nav-hover rounded-lg transition-all duration-200"
-        [class.justify-center]="iconMode"
+        [class.justify-center]="isIconMode()"
         (click)="signOut()"
-        [title]="iconMode ? 'Sign Out' : ''"
+        [title]="isIconMode() ? 'Sign Out' : ''"
         >
         <span class="material-icons text-xl shrink-0">
           exit_to_app
         </span>
-        <span class="logout-text ml-3 text-sm font-medium" [class.hidden]="iconMode">
+        <span class="logout-text ml-3 text-sm font-medium" [class.hidden]="isIconMode()">
           Sign Out
         </span>
       </button>
@@ -130,7 +130,7 @@
     <!-- Navigation Footer -->
     @if (copyright()) {
       <div class="nav-bottom p-4 border-t border-nav-border">
-        <div class="nav-copyright text-nav-text-muted text-xs text-center" [class.hidden]="iconMode">
+        <div class="nav-copyright text-nav-text-muted text-xs text-center" [class.hidden]="isIconMode()">
           <div class="nav-copyright-icon inline">&copy;</div>
           <div class="nav-copyright-text inline ml-1" [innerHTML]="copyright()"></div>
         </div>

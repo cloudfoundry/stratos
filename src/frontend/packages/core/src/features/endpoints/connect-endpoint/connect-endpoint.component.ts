@@ -1,5 +1,5 @@
 
-import { ChangeDetectionStrategy, Component, ComponentRef, Input, OnDestroy, OnInit, ViewChild, ViewContainerRef, inject, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ComponentRef, OnDestroy, OnInit, ViewChild, ViewContainerRef, effect, inject, input, output, untracked } from '@angular/core';
 import { ReactiveFormsModule, Validators, FormBuilder, FormControl, FormGroup, AbstractControl } from '@angular/forms';
 import { CustomFormFieldComponent } from '../../../shared/components/custom-form-field/custom-form-field.component';
 import { CustomCheckboxComponent } from '../../../shared/components/custom-checkbox/custom-checkbox.component';
@@ -40,13 +40,36 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   private fb = inject(FormBuilder);
   private permissions = inject(EndpointPermissionsService);
 
-  private pDisabled = false;
-  private pConnectService!: ConnectEndpointService;
   // A host may bind this before its own service exists (create-endpoint's
-  // connect step); the setter ignores the unset value and waits for the real one.
+  // connect step); the unset value is ignored and the form waits for the real one.
   // The host makes a new service each time its step is entered; the form
   // outlives it when the step keeps this component (the connect dialog).
-  @Input() set connectService(service: ConnectEndpointService | undefined) {
+  readonly connectService = input<ConnectEndpointService>();
+  // The service the form was last built for or handed to.
+  private pConnectService!: ConnectEndpointService;
+
+  readonly disabled = input(false);
+
+  constructor() {
+    // Declared first: a form built by the effect below reads `disabled`
+    // itself, so this one only has to follow later changes.
+    effect(() => {
+      this.disabled();
+      untracked(() => {
+        if (this.endpointForm) {
+          this.setFormEnabled();
+        }
+      });
+    });
+    // Building the form creates the auth form component and tells the host
+    // about it, so the work stays out of this effect's dependencies.
+    effect(() => {
+      const service = this.connectService();
+      untracked(() => this.useService(service));
+    });
+  }
+
+  private useService(service: ConnectEndpointService | undefined) {
     if (!service || service === this.pConnectService) {
       return;
     }
@@ -62,16 +85,6 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
       this.teardown();
     }
     this.init(service.config);
-  }
-  get connectService(): ConnectEndpointService {
-    return this.pConnectService;
-  }
-
-  @Input() set disabled(disabled: boolean) {
-    this.pDisabled = disabled;
-    if (this.endpointForm) {
-      this.setFormEnabled();
-    }
   }
 
   /**
@@ -233,7 +246,7 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   }
 
   private setFormEnabled() {
-    if (this.pDisabled) {
+    if (this.disabled()) {
       this.endpointForm.disable();
       return;
     }
@@ -277,10 +290,10 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
   }
 
   setData() {
-    if (this.connectService) {
+    if (this.pConnectService) {
       // Push data into service such that it's ready to go on submit. This removes a lot of plumbing of data outside of component to parent
       // and then back in to service
-      this.connectService.setData(this.getData());
+      this.pConnectService.setData(this.getData());
     }
   }
 

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { ChangeDetectionStrategy, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnDestroy, OnInit, ViewChild, effect, input, untracked } from '@angular/core';
 import {
   BehaviorSubject,
   combineLatest as observableCombineLatest,
@@ -63,14 +63,20 @@ export class LogViewerComponent implements OnInit, OnDestroy {
 
   private logStreamSubject = new BehaviorSubject<Observable<any>>(NEVER);
 
-  // A different stream is a new log: what the last one showed goes
-  @Input()
-  set logStream(stream: Observable<any>) {
-    const next = stream || NEVER;
-    if (next !== this.logStreamSubject.value) {
-      this.clear();
-    }
-    this.logStreamSubject.next(next);
+  readonly logStream = input<Observable<any> | null>();
+
+  constructor() {
+    // A different stream is a new log: what the last one showed goes.
+    // Untracked: subscribing to the new stream runs the caller's code.
+    effect(() => {
+      const next = this.logStream() || NEVER;
+      untracked(() => {
+        if (next !== this.logStreamSubject.value) {
+          this.clear();
+        }
+        this.logStreamSubject.next(next);
+      });
+    });
   }
 
   @ViewChild('container', { static: true }) container!: ElementRef;
@@ -373,10 +379,7 @@ export class LogViewerComponent implements OnInit, OnDestroy {
   }
 
   private clear() {
-    // Not there yet when the first stream is set
-    if (this.content) {
-      this.content.nativeElement.textContent = '';
-    }
+    this.content.nativeElement.textContent = '';
     this.logLinesCount = 0;
   }
 

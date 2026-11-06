@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, effect, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CustomFormFieldComponent } from '../custom-form-field/custom-form-field.component';
@@ -47,6 +47,9 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
         this.request.emit(next);
       }
     });
+    // Options that change later. The values at the start are applied by the
+    // baseRequest setter, ahead of the manager's init.
+    effect(() => this.applyOptions());
   }
 
   public rangeTypes = MetricQueryType;
@@ -56,30 +59,39 @@ export class MetricsRangeSelectorComponent implements OnDestroy {
 
   private baseRequestValue!: MetricsRequest;
 
+  // Written in code by the metrics chart once its content is ready, not bound
+  // in a template. Starting the manager is what sends the first request, so
+  // the options below are applied first.
   @Input()
   set baseRequest(req: MetricsRequest) {
     this.baseRequestValue = req;
+    this.applyOptions();
     this.rangeSelectorManager.init(req);
   }
   get baseRequest() {
     return this.baseRequestValue;
   }
 
-  @Input()
-  set times(customTimes: ITimeRange[]) {
-    if (customTimes && customTimes.length > 0) {
-      this.rangeSelectorManager.times = customTimes;
-      this.rangeSelectorManager.metricRangeService.times = customTimes;
+  // The time windows on offer; the manager's own list when empty.
+  readonly times = input<ITimeRange[]>();
+
+  // The `value` of the time window selected at the start.
+  readonly selectedTimeValue = input<string>();
+
+  // Milliseconds between refreshes of a relative time window.
+  readonly pollInterval = input<number>();
+
+  private applyOptions() {
+    const times = this.times();
+    if (times && times.length > 0) {
+      this.rangeSelectorManager.times = times;
+      this.rangeSelectorManager.metricRangeService.times = times;
     }
-  }
-
-  @Input()
-  set selectedTimeValue(timeValue: string) {
-    this.rangeSelectorManager.metricRangeService.defaultTimeValue = timeValue;
-  }
-
-  @Input()
-  set pollInterval(interval: number) {
+    const timeValue = this.selectedTimeValue();
+    if (timeValue !== undefined) {
+      this.rangeSelectorManager.metricRangeService.defaultTimeValue = timeValue;
+    }
+    const interval = this.pollInterval();
     if (interval) {
       this.rangeSelectorManager.pollInterval = interval;
     }

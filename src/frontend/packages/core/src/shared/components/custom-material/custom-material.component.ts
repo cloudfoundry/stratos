@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, Directive, booleanAttribute, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, Directive, booleanAttribute, input, model, output } from '@angular/core';
 
 // Custom Icon Component
 @Component({
@@ -127,7 +127,7 @@ export class CustomDatepickerComponent {
 // Custom Datepicker Input Component
 @Component({
   selector: 'mat-datepicker-input',
-  template: '<input class="custom-datepicker-input" [matDatepicker]="matDatepicker()" [value]="value" (input)="onInput($event)">',
+  template: '<input class="custom-datepicker-input" [matDatepicker]="matDatepicker()" [value]="value()" (input)="onInput($event)">',
   styleUrls: ['./custom-material.component.scss'],
   standalone: true,
   imports: [MatDatepickerDirective],
@@ -135,21 +135,11 @@ export class CustomDatepickerComponent {
 })
 export class CustomDatepickerInputComponent {
   readonly matDatepicker = input<any>();
-  readonly valueChange = output<Date>();
-  private _value!: Date;
-
-  @Input()
-  get value(): Date {
-    return this._value;
-  }
-  set value(val: Date) {
-    this._value = val;
-  }
+  // A model: typing sets it and emits valueChange.
+  readonly value = model<Date>();
 
   onInput(event: any) {
-    const date = new Date(event.target.value);
-    this.value = date;
-    this.valueChange.emit(date);
+    this.value.set(new Date(event.target.value));
   }
 }
 
