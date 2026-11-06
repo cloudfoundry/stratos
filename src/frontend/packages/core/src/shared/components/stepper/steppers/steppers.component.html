@@ -54,12 +54,12 @@
                     'steppers-header-text--inactive': !step.active && !step.complete,
                     'steppers-header-text--skip': step.effectiveSkip
                   }">
-                      {{ step.title }}
+                      {{ step.title() }}
                     </span>
                   </ng-template>
                   @if (step.complete && !steps[currentIndex()].effectiveDisablePrevious && !steps[currentIndex()].hidePrevious) {
                     <button type="button" class="steppers-header-inner flex items-center min-w-0 cursor-pointer"
-                      [attr.aria-label]="step.title + ', completed'" (click)="goTo(i)">
+                      [attr.aria-label]="step.title() + ', completed'" (click)="goTo(i)">
                       <ng-container *ngTemplateOutlet="headerBody"></ng-container>
                     </button>
                   } @else {
@@ -120,7 +120,7 @@
               </button>
             }
             <!-- Next/Submit button -->
-            @if (!steps[currentIndex()].hideNextButton) {
+            @if (!steps[currentIndex()].hideNextButton()) {
               <button id="stepper_next" #nextButton
                 class="steppers-navigation-right-next btn flex items-center space-x-2"
                 [attr.aria-describedby]="stepError() ? 'stepper_error' : null"

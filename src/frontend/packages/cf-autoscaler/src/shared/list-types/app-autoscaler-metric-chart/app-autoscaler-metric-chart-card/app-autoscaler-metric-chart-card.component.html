@@ -3,10 +3,10 @@
     <div class="card">
       <div class="card-header">
         <h3 class="card-title">
-          {{metricType}}
+          {{metricType()}}
           <div class="text-sm text-content-muted font-normal mt-1">
-            {{paramsMetricsStart | date:'medium'}} ~
-            {{paramsMetricsEnd | date:'medium'}}
+            {{paramsMetricsStart() | date:'medium'}} ~
+            {{paramsMetricsEnd() | date:'medium'}}
           </div>
         </h3>
       </div>
@@ -26,8 +26,8 @@
               [customColors]="metricData[0].entity.formated.colorTarget" [results]="metricData[0].entity.formated.target"
               [animations]="true" [lineChart]="metricData[0].entity.markline" [tooltipDisabled]="false"
               [xAxis]="true" [yAxis]="true" [legend]="true"
-              [legendData]="appAutoscalerAppMetricLegend.legendColor" [showGridLines]="true" [showXAxisLabel]="true"
-              [showYAxisLabel]="true" [yAxisLabel]="metricData[0].entity.unit" [metricName]="metricType"
+              [legendData]="appAutoscalerAppMetricLegend().legendColor" [showGridLines]="true" [showXAxisLabel]="true"
+              [showYAxisLabel]="true" [yAxisLabel]="metricData[0].entity.unit" [metricName]="metricType()"
               [yScaleMax]="metricData[0].entity.chartMaxValue">
             </app-autoscaler-combo-chart-component>
           </div>

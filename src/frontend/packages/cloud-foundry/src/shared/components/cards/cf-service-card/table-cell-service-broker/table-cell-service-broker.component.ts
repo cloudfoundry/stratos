@@ -41,7 +41,16 @@ export class TableCellServiceBrokerComponent extends
   private spaceRegistry = inject(SpaceDataRegistry);
   private injector = inject(Injector);
 
-  private readonly _brokerSource = signal<SignalSource<StServiceBroker | null> | null>(null);
+  // The broker lookup for the row's offering; null when the offering names
+  // no broker. The lookup runs untracked: it must depend on the row alone.
+  private readonly _brokerSource = computed<SignalSource<StServiceBroker | null> | null>(() => {
+    const row = this.row();
+    const brokerGuid = row?.broker?.guid;
+    if (!row || !brokerGuid) {
+      return null;
+    }
+    return untracked(() => this.serviceCatalog.serviceBroker(row.cnsiGuid, brokerGuid));
+  });
   // A signal so `spaceLink` re-evaluates when the effect swaps it in.
   private readonly _spaceData = signal<SpaceDataService | null>(null);
 
@@ -74,20 +83,6 @@ export class TableCellServiceBrokerComponent extends
       ],
     };
   });
-
-  set row(row: StServiceOffering) {
-    super.row = row;
-    if (!row || !row.broker?.guid) {
-      this._brokerSource.set(null);
-      return;
-    }
-    this._brokerSource.set(
-      this.serviceCatalog.serviceBroker(row.cnsiGuid, row.broker.guid),
-    );
-  }
-  get row(): StServiceOffering {
-    return super.row;
-  }
 
   ngOnInit(): void {
     // The cleanup ends the space load when the space swaps and when the

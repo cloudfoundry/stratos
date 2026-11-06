@@ -1,4 +1,4 @@
-import { Component, Input, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
+import { Component, OnInit, inject, ChangeDetectionStrategy, input } from '@angular/core';
 import { combineLatest as observableCombineLatest, Observable } from 'rxjs';
 import { delay, map, startWith } from 'rxjs/operators';
 
@@ -29,7 +29,7 @@ export interface EndpointMissingMessageParts {
 })
 export class EndpointsMissingComponent implements OnInit {
 
-  @Input() showToolbarHint = true;
+  readonly showToolbarHint = input(true);
   readonly showDirectToEndpointMessage = input(true);
 
   noContent$!: Observable<EndpointMissingMessageParts | null>;
@@ -59,7 +59,7 @@ export class EndpointsMissingComponent implements OnInit {
     this.haveConnected$ = this.endpointsService.haveConnected$;
   }
   ngOnInit() {
-    if (this.showToolbarHint) {
+    if (this.showToolbarHint()) {
       this.noneRegisteredText.toolbarLink = {
         text: 'Register an endpoint'
       };

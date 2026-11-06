@@ -1,7 +1,7 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnInit, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { Component, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
+import { Observable } from 'rxjs';
 
 import { StratosBrandingService } from '../../../../../theme/stratos-branding.service';
 
@@ -30,13 +30,14 @@ selector: 'app-loading-page',
     )
   ]
 })
-export class LoadingPageComponent implements OnInit {
+export class LoadingPageComponent {
   // Caller supplies a loading stream directly. The ngrx EntityMonitor-driven
   // path (entityId/entitySchema → isFetching/isDeleting) was removed: the
   // detail pages that used it now pass their signal-native isLoading, and the
   // delete flow navigates away rather than painting a "deleting" overlay here.
-  @Input()
-  isLoading!: Observable<boolean>;
+  // Left unbound, nothing is loading: the template's async pipe reads
+  // undefined as "no value".
+  readonly isLoading = input<Observable<boolean>>();
 
   readonly text = input('Retrieving your data');
 
@@ -61,11 +62,5 @@ export class LoadingPageComponent implements OnInit {
       h = (h * 31 + this.text().charCodeAt(i)) | 0;
     }
     return VARIANT_POOL[Math.abs(h) % VARIANT_POOL.length];
-  }
-
-  ngOnInit() {
-    if (!this.isLoading) {
-      this.isLoading = new BehaviorSubject(false);
-    }
   }
 }

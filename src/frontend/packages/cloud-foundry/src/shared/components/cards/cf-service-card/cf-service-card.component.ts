@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, ChangeDetectionStrategy, booleanAttribute, inject, input } from '@angular/core';
+import { Component, ChangeDetectionStrategy, booleanAttribute, computed, inject, input, untracked } from '@angular/core';
 import { Router } from '@angular/router';
 
 import {
@@ -57,11 +57,24 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
   private router = inject(Router);
   private cfRoles = inject(CfCurrentUserRolesSignalService);
 
-  offering!: StServiceOffering;
-  cfOrgSpace!: CfOrgSpaceLabelService;
-  // Cached lookup of providerDisplayName from brokerCatalogMetadata. The
+  // The row under the name the template and the methods below use. It can be
+  // absent: select-service binds its selection before one is made.
+  get offering(): StServiceOffering {
+    return this.row();
+  }
+  // One label service per endpoint; built untracked so that it depends on
+  // the row's endpoint alone.
+  private readonly cnsiGuid = computed(() => this.row()?.cnsiGuid);
+  readonly cfOrgSpace = computed(() => {
+    const cnsiGuid = this.cnsiGuid();
+    return untracked(() => new CfOrgSpaceLabelService(this.endpoints, this.cfRoles, cnsiGuid));
+  });
+  // Lookup of providerDisplayName from brokerCatalogMetadata. The
   // legacy code JSON-parsed entity.extra; the backend now decodes it.
-  providerDisplayName: string | null = null;
+  readonly providerDisplayName = computed<string | null>(() => {
+    const provider = this.row()?.brokerCatalogMetadata?.providerDisplayName;
+    return typeof provider === 'string' ? provider : null;
+  });
   brokerNameConfig: TableCellServiceBrokerComponentConfig = {
     mode: TableCellServiceBrokerComponentMode.NAME
   };
@@ -71,21 +84,6 @@ export class CfServiceCardComponent extends CardCell<StServiceOffering> {
 
   // Attribute form (disableCardClick / disableCardClick="true") coerces to boolean
   readonly disableCardClick = input(false, { transform: booleanAttribute });
-
-  @Input()
-  set row(row: StServiceOffering) {
-    super.row = row;
-    if (row) {
-      this.offering = row;
-      const meta = row.brokerCatalogMetadata;
-      const provider = meta?.providerDisplayName;
-      this.providerDisplayName = typeof provider === 'string' ? provider : null;
-
-      if (!this.cfOrgSpace) {
-        this.cfOrgSpace = new CfOrgSpaceLabelService(this.endpoints, this.cfRoles, row.cnsiGuid);
-      }
-    }
-  }
 
   getDisplayName(): string {
     if (!this.offering) return '';

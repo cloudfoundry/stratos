@@ -1,8 +1,8 @@
-@if (url) {
+@if (url()) {
   <div class="m-4">
-    <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="url">
+    <app-metadata-item icon="link" label="Instance Address" [clipboardValue]="url()">
       <div class="flex min-h-6">
-        <div class="self-center min-w-0 wrap-anywhere">@for (part of url | urlParts; track $index) {{{ part }}<wbr>}</div>
+        <div class="self-center min-w-0 wrap-anywhere">@for (part of url() | urlParts; track $index) {{{ part }}<wbr>}</div>
       </div>
     </app-metadata-item>
   </div>

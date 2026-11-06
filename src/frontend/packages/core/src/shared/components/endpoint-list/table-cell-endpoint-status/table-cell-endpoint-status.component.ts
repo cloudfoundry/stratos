@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject } from '@angular/core';
 
 import {
   EndpointLastErrorService,
@@ -31,13 +31,8 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   private endpointsData = inject(EndpointsDataService);
   private lastErrors = inject(EndpointLastErrorService);
 
-  @Input()
-  get row(): EndpointModel {
-    return super.row;
-  }
-  set row(row: EndpointModel) {
-    super.row = row;
-  }
+  // The label shows unless a host binds [config] with showLabel false.
+  readonly showLabel = computed(() => this.config()?.showLabel ?? true);
 
   // Displayed status = the wire-derived connectionStatus overlaid with the
   // transient 'connecting' / 'disconnecting' while the operation is in
@@ -46,9 +41,9 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   // starts and finishes.
   get status(): endpointConnectionStatus {
     return withConnectingOverlay(
-      this.row?.connectionStatus,
-      this.endpointsData.isConnecting(this.row?.guid ?? ''),
-      this.endpointsData.isDisconnecting(this.row?.guid ?? ''),
+      this.row()?.connectionStatus,
+      this.endpointsData.isConnecting(this.row()?.guid ?? ''),
+      this.endpointsData.isDisconnecting(this.row()?.guid ?? ''),
     );
   }
 
@@ -56,26 +51,20 @@ export class TableCellEndpointStatusComponent extends TableCellCustom<EndpointMo
   readonly noSyncStatus = NO_SYNC_STATUS;
 
   get syncLabel(): string | null {
-    return endpointSyncStatusLabel(this.row);
+    return endpointSyncStatusLabel(this.row());
   }
 
   // Why the last connect failed, for an endpoint left Disconnected or
   // Expired by it (a failed connect stores no token).
   get lastError(): string | null {
     const status = this.status;
-    const message = status === 'disconnected' || status === 'expired' ? this.lastErrors.lastError(this.row?.guid ?? '') : null;
+    const message = status === 'disconnected' || status === 'expired' ? this.lastErrors.lastError(this.row()?.guid ?? '') : null;
     return message ? describeLastConnectError(message) : null;
   }
 
-  constructor() {
-    super();
-    this.config = {
-      showLabel: true,
-    };
-  }
-
   ngOnInit() {
-    const ep = this.row.cnsi_type ? entityCatalog.getEndpoint(this.row.cnsi_type, this.row.sub_type) : null;
+    const row = this.row();
+    const ep = row.cnsi_type ? entityCatalog.getEndpoint(row.cnsi_type, row.sub_type) : null;
     if (ep) {
       this.connectable = !ep.definition.unConnectable;
     }

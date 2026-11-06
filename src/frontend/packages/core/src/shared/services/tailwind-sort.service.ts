@@ -1,4 +1,4 @@
-import { Injectable, Directive, Input, inject, output } from '@angular/core';
+import { Injectable, Injector, Directive, inject, input, model, output, runInInjectionContext } from '@angular/core';
 
 export type TailwindSortDirection = 'asc' | 'desc' | '';
 
@@ -19,39 +19,42 @@ export interface TailwindSortable {
   standalone: true
 })
 export class TailwindSortDirective {
-  @Input('tailwindSort') sortables: { [key: string]: TailwindSortable } = {};
-  @Input() active = '';
-  @Input() direction: TailwindSortDirection = '';
-  @Input() disabled = false;
+  // The alias is the directive's selector, which the lint rule allows.
+  readonly sortables = input<{ [key: string]: TailwindSortable }>({}, { alias: 'tailwindSort' });
+  // Models, not inputs: sort() writes both.
+  readonly active = model('');
+  readonly direction = model<TailwindSortDirection>('');
+  readonly disabled = input(false);
 
   readonly sortChange = output<TailwindSort>();
 
   sort(sortable: TailwindSortable): void {
-    if (this.disabled) {
+    if (this.disabled()) {
       return;
     }
 
     let direction: TailwindSortDirection = sortable.start || 'asc';
 
-    if (this.active === sortable.id) {
-      direction = this.direction === 'asc' ? 'desc' : (this.direction === 'desc' ? '' : 'asc');
+    if (this.active() === sortable.id) {
+      const current = this.direction();
+      direction = current === 'asc' ? 'desc' : (current === 'desc' ? '' : 'asc');
     }
 
     if (direction === '' && sortable.disableClear) {
       direction = 'asc';
     }
 
-    this.active = direction ? sortable.id : '';
-    this.direction = direction;
+    this.active.set(direction ? sortable.id : '');
+    this.direction.set(direction);
 
     this.sortChange.emit({
-      active: this.active,
-      direction: this.direction
+      active: this.active(),
+      direction: this.direction()
     });
   }
 
   getArrowDirection(id: string): TailwindSortDirection {
-    return this.active === id ? this.direction : '';
+    return this.active() === id ? this.direction() : '';
   }
 }
 
@@ -61,32 +64,33 @@ export class TailwindSortDirective {
   standalone: true
 })
 export class TailwindSortHeaderDirective {
-  @Input('tailwindSortHeader') id!: string;
-  @Input() arrowPosition: 'before' | 'after' = 'after';
-  @Input() start: TailwindSortDirection = 'asc';
-  @Input() disabled = false;
-  @Input() disableClear = false;
+  // The alias is the directive's selector, which the lint rule allows.
+  readonly id = input.required<string>({ alias: 'tailwindSortHeader' });
+  readonly arrowPosition = input<'before' | 'after'>('after');
+  readonly start = input<TailwindSortDirection>('asc');
+  readonly disabled = input(false);
+  readonly disableClear = input(false);
 
   private _sort = inject(TailwindSortDirective);
 
   _handleClick(): void {
-    if (this.disabled) {
+    if (this.disabled()) {
       return;
     }
 
     this._sort.sort({
-      id: this.id,
-      start: this.start,
-      disableClear: this.disableClear
+      id: this.id(),
+      start: this.start(),
+      disableClear: this.disableClear()
     });
   }
 
   _getArrowDirectionState(): TailwindSortDirection {
-    return this._sort.getArrowDirection(this.id);
+    return this._sort.getArrowDirection(this.id());
   }
 
   _isSorted(): boolean {
-    return this._sort.active === this.id;
+    return this._sort.active() === this.id();
   }
 }
 
@@ -95,15 +99,10 @@ export class TailwindSortHeaderDirective {
 })
 export class TailwindSortService {
 
-  createSort(): TailwindSortDirective {
-    return new TailwindSortDirective();
-  }
+  private injector = inject(Injector);
 
-  // Note: TailwindSortHeaderDirective should be used declaratively in templates,
-  // not instantiated programmatically, as it uses inject() for dependencies
-  createSortHeader(id: string): TailwindSortHeaderDirective {
-    const header = new TailwindSortHeaderDirective();
-    header.id = id;
-    return header;
+  // Signal inputs can only be created in an injection context.
+  createSort(): TailwindSortDirective {
+    return runInInjectionContext(this.injector, () => new TailwindSortDirective());
   }
 }

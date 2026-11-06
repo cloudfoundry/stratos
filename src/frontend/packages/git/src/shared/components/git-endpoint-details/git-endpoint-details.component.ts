@@ -1,10 +1,9 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed } from '@angular/core';
 
 
 import {
   EndpointListDetailsComponent,
 } from '../../../../../core/src/shared/components/endpoint-list/endpoint-list.helpers';
-import { EndpointModel } from '../../../../../store/src/types/endpoint.types';
 import { GIT_ENDPOINT_SUB_TYPES } from '../../../store/git-entity-factory';
 
 const UNKNOWN_GIT_USER = '**token**';
@@ -19,26 +18,24 @@ const UNKNOWN_GIT_USER = '**token**';
 })
 export class GitEndpointDetailsComponent extends EndpointListDetailsComponent {
 
-  // Signals: set from the `row` setter, outside this view's change detection.
-  readonly name = signal('');
-  readonly avatar = signal<string | undefined>(undefined);
+  // jetstream stores this placeholder as the user name when it cannot
+  // read the token's user; there is no such GitHub user (or avatar).
+  private readonly knownUser = computed(() => {
+    const user = this.row()?.user;
+    return user && user.name !== UNKNOWN_GIT_USER ? user : undefined;
+  });
 
-  set row(row: EndpointModel) {
-    super.row = row;
-    if (row && row.user) {
-      // jetstream stores this placeholder as the user name when it cannot
-      // read the token's user; there is no such GitHub user (or avatar).
-      const known = row.user.name !== UNKNOWN_GIT_USER;
-      this.name.set(known ? row.user.name : 'Unknown');
-      this.avatar.set(known && row.sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
-        `https://avatars.githubusercontent.com/${row.user.name}` :
-        undefined);
-    } else {
-      this.name.set('-');
-      this.avatar.set(undefined);
+  readonly name = computed(() => {
+    if (!this.row()?.user) {
+      return '-';
     }
-  }
-  get row(): EndpointModel {
-    return super.row;
-  }
+    return this.knownUser()?.name ?? 'Unknown';
+  });
+
+  readonly avatar = computed(() => {
+    const user = this.knownUser();
+    return user && this.row().sub_type === GIT_ENDPOINT_SUB_TYPES.GITHUB ?
+      `https://avatars.githubusercontent.com/${user.name}` :
+      undefined;
+  });
 }

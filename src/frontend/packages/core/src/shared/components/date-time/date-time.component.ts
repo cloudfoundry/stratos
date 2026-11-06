@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output  } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy, effect, model, untracked } from '@angular/core';
 
 import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -19,27 +19,33 @@ export class DateTimeComponent implements OnDestroy {
   public date = new FormControl<string | null>(null);
   public time = new FormControl<string | null>(null);
   private sub!: Subscription;
-  private changeSub!: Subscription;
-  // Null until a date is chosen (or when the bound value is cleared)
+  // The date the two fields show. Null until a date is chosen (or when the
+  // bound value is cleared)
   private dateTimeValue: Date | null = null;
 
   private dateObservable: Observable<string>;
   private timeObservable: Observable<string>;
 
-  @Output()
-  public dateTimeChange = new EventEmitter<Date | null | undefined>();
+  // A model: a parent binds it, and a date and time typed into the fields set
+  // it, which emits dateTimeChange.
+  readonly dateTime = model<Date | null | undefined>();
 
-  @Input()
-  get dateTime(): Date | null {
-    return this.dateTimeValue;
-  }
-
-  set dateTime(dateTime: Date | null | undefined) {
+  // Puts a bound date into the fields. A date typed into them is already
+  // there (it equals dateTimeValue), and an invalid date is ignored.
+  private showDateTime(dateTime: Date | null | undefined) {
     const empty = !dateTime && this.dateTimeValue !== dateTime;
     const validDate = dateTime && isValid(dateTime) && (!this.dateTimeValue || !isEqual(dateTime, this.dateTimeValue));
-    if (empty || validDate) {
-      this.dateTimeValue = dateTime ?? null;
-      this.dateTimeChange.emit(this.dateTimeValue);
+    if (!empty && !validDate) {
+      return;
+    }
+    this.dateTimeValue = dateTime ?? null;
+    if (!this.dateTimeValue) {
+      this.emptyDateTime();
+    } else {
+      this.stopInputSub();
+      this.date.setValue(format(this.dateTimeValue, 'yyyy-MM-dd'));
+      this.time.setValue(format(this.dateTimeValue, 'HH:mm'));
+      this.setupInputSub();
     }
   }
 
@@ -69,10 +75,10 @@ export class DateTimeComponent implements OnDestroy {
       tap(([hour, minute, date]: [number, number, Date]) => {
 
         const newDate = setMinutes(setHours(new Date(date), hour), minute);
-        if (this.isDifferentDate(this.dateTime, newDate)) {
-          this.stopChangeSub();
-          this.dateTime = newDate;
-          this.setupChangeSub();
+        // An invalid date (a half-typed field) is not passed on
+        if (isValid(newDate) && this.isDifferentDate(this.dateTimeValue, newDate)) {
+          this.dateTimeValue = newDate;
+          this.dateTime.set(newDate);
         }
       })
     ).subscribe();
@@ -90,28 +96,6 @@ export class DateTimeComponent implements OnDestroy {
     }
   }
 
-  private setupChangeSub() {
-    this.stopChangeSub();
-    this.changeSub = this.dateTimeChange.pipe(
-      tap(dateTime => {
-        if (!dateTime) {
-          this.emptyDateTime();
-        } else {
-          this.stopInputSub();
-          this.date.setValue(format(dateTime, 'yyyy-MM-dd'));
-          this.time.setValue(format(dateTime, 'HH:mm'));
-          this.setupInputSub();
-        }
-      })
-    ).subscribe();
-  }
-
-  private stopChangeSub() {
-    if (this.changeSub) {
-      this.changeSub.unsubscribe();
-    }
-  }
-
   constructor() {
     this.dateObservable = this.replayObservable(
       this.date.valueChanges
@@ -120,8 +104,11 @@ export class DateTimeComponent implements OnDestroy {
       this.time.valueChanges
     );
     this.setupInputSub();
-    this.setupChangeSub();
     this.emptyDateTime();
+    effect(() => {
+      const dateTime = this.dateTime();
+      untracked(() => this.showDateTime(dateTime));
+    });
   }
 
   private emptyDateTime() {
@@ -131,6 +118,5 @@ export class DateTimeComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.stopInputSub();
-    this.changeSub.unsubscribe();
   }
 }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { AfterContentInit, Component, Input, OnInit, Signal, ViewChild, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
+import { AfterContentInit, Component, OnInit, Signal, ViewChild, ChangeDetectionStrategy, computed, inject, input } from '@angular/core';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { FormsModule, NgForm } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -58,8 +58,19 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
 
   validate!: Observable<boolean>;
 
-  @Input()
-  stepperText = 'Select a Cloud Foundry instance, organization and space for the app.';
+  readonly stepperText = input('Select a Cloud Foundry instance, organization and space for the app.');
+
+  // The heading shown. A redeploy and the marketplace flow have their own
+  // text, which replaces the bound one.
+  protected readonly heading = computed(() => {
+    if (this.isMarketplaceMode()) {
+      return 'Select an organization and space for the service instance.';
+    }
+    if (this.isRedeploy()) {
+      return 'Review the Cloud Foundry instance, organization and space for the app.';
+    }
+    return this.stepperText();
+  });
 
   /**
    * Cascade clears: selecting "None" on CF should also clear the Org
@@ -139,13 +150,6 @@ export class CreateApplicationStep1Component implements OnInit, AfterContentInit
     this.hasSpaces$ = this.spaces$.pipe(
       map(spaces => !!spaces.length)
     );
-    if (this.isRedeploy()) {
-      this.stepperText = 'Review the Cloud Foundry instance, organization and space for the app.';
-    }
-
-    if (this.isMarketplaceMode()) {
-      this.stepperText = 'Select an organization and space for the service instance.';
-    }
   }
 
   ngAfterContentInit() {

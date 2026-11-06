@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnChanges, OnInit, ViewEncapsulation, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnChanges, ViewEncapsulation, input } from '@angular/core';
 
 import { ChartConfiguration } from 'chart.js';
 import { BaseChartDirective } from 'ng2-charts';
@@ -14,7 +14,7 @@ import { BaseChartDirective } from 'ng2-charts';
 ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class RingChartComponent implements OnInit, OnChanges {
+export class RingChartComponent implements OnChanges {
 
   domain: any[] = [];
   chartJsData: ChartConfiguration['data'] = { labels: [], datasets: [] };
@@ -29,7 +29,8 @@ export class RingChartComponent implements OnInit, OnChanges {
     }
   };
 
-  @Input() data: any[] = [];
+  // A missing value is read as an empty list
+  readonly data = input<any[], any[] | null | undefined>([], { transform: data => data ?? [] });
   readonly label = input('Total');
   readonly scheme = input<any>('cool');
   readonly customColors = input<any[]>([]);
@@ -41,12 +42,6 @@ export class RingChartComponent implements OnInit, OnChanges {
   readonly nameFormatting = input<(value: string) => any>(label => label);
   readonly percentageFormatting = input<(value: number) => any>(percentage => percentage);
 
-  ngOnInit() {
-    if (!this.data) {
-      this.data = [];
-    }
-  }
-
   ngOnChanges() {
     this.update();
   }
@@ -57,14 +52,11 @@ export class RingChartComponent implements OnInit, OnChanges {
   }
 
   updateChartData(): void {
-    if (!this.data) {
-      return;
-    }
-
+    const data = this.data();
     this.chartJsData = {
-      labels: this.data.map(d => d.name),
+      labels: data.map(d => d.name),
       datasets: [{
-        data: this.data.map(d => d.value),
+        data: data.map(d => d.value),
         backgroundColor: this.getBackgroundColors()
       }]
     };
@@ -77,7 +69,7 @@ export class RingChartComponent implements OnInit, OnChanges {
     }
     // Default color scheme
     const defaultColors = ['#5AA454', '#A10A28', '#C7B42C', '#AAAAAA'];
-    return this.data.map((_, i) => defaultColors[i % defaultColors.length]);
+    return this.data().map((_, i) => defaultColors[i % defaultColors.length]);
   }
 
   getItemColor(index: number): string {
@@ -86,11 +78,11 @@ export class RingChartComponent implements OnInit, OnChanges {
   }
 
   getDomain(): any[] {
-    return this.data.map(d => d.name);
+    return this.data().map(d => d.name);
   }
 
   getTotal(): number {
-    return this.data
+    return this.data()
       .map(d => d.value)
       .reduce((sum, d) => sum + d, 0);
   }

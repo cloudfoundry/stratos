@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input, OnInit, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
 import { Observable, of } from 'rxjs';
 
@@ -18,19 +18,16 @@ import { UrlPartsPipe } from '../../../../shared/pipes/url-parts.pipe';
 ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class DefaultEndpointHomeComponent implements OnInit, HomePageEndpointCard {
-
-  // strict: assigned in ngOnInit before any template read
-  url!: string;
+export class DefaultEndpointHomeComponent implements HomePageEndpointCard {
 
   // The home page sets a layout on every card; this one does not use it.
   readonly layout = input<HomePageCardLayout>();
 
-  @Input() endpoint!: EndpointModel;
+  // Set by the home page card after it creates this component.
+  readonly endpoint = input<EndpointModel>();
 
-  ngOnInit(): void {
-    this.url = getFullEndpointApiUrl(this.endpoint);
-  }
+  // strict: getFullEndpointApiUrl copes with a missing endpoint ('Unknown')
+  readonly url = computed(() => getFullEndpointApiUrl(this.endpoint()!));
 
   load(): Observable<boolean> {
     return of(true);

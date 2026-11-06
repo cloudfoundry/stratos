@@ -6,8 +6,8 @@ import { CustomCheckboxComponent, CustomTooltipDirective } from '@stratosui/core
  *
  * Renders a checked/unchecked/indeterminate checkbox and emits the new
  * explicit boolean on toggle.  Holds NO dependency on CfRolesService or
- * CfUsersRolesDataService — all state flows in via @Input() and events
- * flow out via @Output().
+ * CfUsersRolesDataService — all state flows in through inputs and events
+ * flow out through outputs.
  */
 @Component({
   selector: 'app-role-tristate-checkbox',

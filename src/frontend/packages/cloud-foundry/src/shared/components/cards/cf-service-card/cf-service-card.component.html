@@ -44,13 +44,13 @@
         </app-table-cell-service-references>
       </app-meta-card-value>
     </app-meta-card-item>
-    @if (providerDisplayName) {
+    @if (providerDisplayName()) {
       <app-meta-card-item>
         <app-meta-card-key>Provider</app-meta-card-key>
-        <app-meta-card-value>{{ providerDisplayName }}</app-meta-card-value>
+        <app-meta-card-value>{{ providerDisplayName() }}</app-meta-card-value>
       </app-meta-card-item>
     }
-    @if (cfOrgSpace.multipleConnectedEndpoints$ | async) {
+    @if (cfOrgSpace().multipleConnectedEndpoints$ | async) {
       <app-meta-card-item>
         <app-meta-card-key>CF Endpoint</app-meta-card-key>
         <app-meta-card-value>

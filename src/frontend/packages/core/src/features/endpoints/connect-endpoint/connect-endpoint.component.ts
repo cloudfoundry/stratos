@@ -237,11 +237,14 @@ export class ConnectEndpointComponent implements OnInit, OnDestroy {
     }
 
     this.authFormComponentRef = this.container.createComponent<IAuthForm>(authType.component);
-    this.authFormComponentRef.instance.formGroup = this.endpointForm;
-    // Auth types without a config (e.g. the generic Bearer/Token entries)
-    // must not overwrite the form component's `config = {}` default with
-    // undefined — templates read fields like config.helpText unguarded.
-    this.authFormComponentRef.instance.config = authType.config ?? {};
+    this.authFormComponentRef.setInput('formGroup', this.endpointForm);
+    // Only some auth forms have a `config` input. Auth types without a config
+    // (e.g. the generic Bearer/Token entries) must not replace its `{}`
+    // default with undefined: templates read fields like config().helpText
+    // unguarded.
+    if (this.authFormComponentRef.instance.config) {
+      this.authFormComponentRef.setInput('config', authType.config ?? {});
+    }
     this.setFormEnabled();
   }
 

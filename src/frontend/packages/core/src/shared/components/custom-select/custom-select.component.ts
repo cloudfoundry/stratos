@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute, inject, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, Output, EventEmitter, forwardRef, ViewChild, ElementRef, ContentChildren, QueryList, AfterContentInit, AfterViewInit, HostListener, OnDestroy, booleanAttribute, effect, inject, input, model, output, untracked } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -16,11 +16,11 @@ export interface MatSelectChange {
   selector: 'app-option',
   template: `<div #optionContent
     class="custom-option-content py-2 px-3 cursor-pointer whitespace-nowrap"
-    [class.selected]="selected"
+    [class.selected]="selected()"
     [class.disabled]="disabled()"
     [ngClass]="{
-      'bg-info-50 dark:bg-info-900/40 text-primary': selected,
-      'text-content-text hover:bg-content-secondary': !selected,
+      'bg-info-50 dark:bg-info-900/40 text-primary': selected(),
+      'text-content-text hover:bg-content-secondary': !selected(),
       'opacity-50 cursor-not-allowed hover:bg-transparent': disabled()
     }"
     ><ng-content></ng-content></div>`,
@@ -31,7 +31,7 @@ export interface MatSelectChange {
   // The host is the listbox's child, so it carries the option semantics
   host: {
     role: 'option',
-    '[attr.aria-selected]': 'selected',
+    '[attr.aria-selected]': 'selected()',
     '[attr.aria-disabled]': 'disabled() || null',
   },
 })
@@ -41,7 +41,8 @@ export class CustomOptionComponent implements AfterViewInit {
   readonly value = input<any>();
   readonly label = input<string>();
   readonly disabled = input(false);
-  @Input() selected = false;
+  // A model: the select that owns the option sets it from code.
+  readonly selected = model(false);
 
   @ViewChild('optionContent', { static: true }) optionContent!: ElementRef;
 
@@ -83,7 +84,8 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   private cdr = inject(ChangeDetectorRef);
   private elementRef = inject(ElementRef);
 
-  @Input() disabled = false;
+  // A model: a parent binds it and the form disables the select through it.
+  readonly disabled = model(false);
   readonly placeholder = input('');
   // Name of the combobox trigger, which takes no name from the value it
   // shows. Falls back to the placeholder.
@@ -91,23 +93,38 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   readonly multiple = input(false, { transform: booleanAttribute });
   readonly required = input(false);
   readonly name = input<string>();
-  @Input() id!: string;
+  // A model: the form field that wraps a select gives it an id when it has none.
+  readonly id = model<string>();
   // Keeps list ids unique for selects given neither an id nor a name
   private readonly uid = `${++nextSelectUid}`;
   get listboxId(): string {
-    return `select-listbox-${this.id || this.name() || this.uid}`;
+    return `select-listbox-${this.id() || this.name() || this.uid}`;
   }
   readonly invalid = input(false);
   readonly errorMessage = input('');
   readonly autoSelectSingleOption = input(true); // Auto-select when only one option exists
   readonly loading = input(false, { transform: booleanAttribute });
 
-  @Input()
-  get value(): any {
+  // The value a parent binds. The selection the control holds is in
+  // selectedValues; selectedValue returns it in the shape of this input.
+  readonly value = input<any>();
+  get selectedValue(): any {
     return this.multiple() ? this.selectedValues : this.selectedValues[0];
   }
-  set value(val: any) {
-    this.writeValue(val);
+
+  constructor() {
+    // A bound [value] is written through like a form value. With nothing
+    // bound the input is undefined on the first run, which must not clear a
+    // value the form wrote before it.
+    let first = true;
+    effect(() => {
+      const value = this.value();
+      const unbound = first && value === undefined;
+      first = false;
+      if (!unbound) {
+        untracked(() => this.writeValue(value));
+      }
+    });
   }
 
   readonly selectionChange = output<MatSelectChange>();
@@ -191,7 +208,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   }
 
   toggle() {
-    if (this.disabled) return;
+    if (this.disabled()) return;
 
     if (!this.isOpen) {
       // Calculate position BEFORE opening dropdown to prevent flash at wrong position
@@ -318,9 +335,8 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
     if (this.options) {
       this.options.forEach(option => {
         const isSelected = this.selectedValues.includes(option.value());
-        if (option.selected !== isSelected) {
-          option.selected = isSelected;
-          option['cdr'].markForCheck();
+        if (option.selected() !== isSelected) {
+          option.selected.set(isSelected);
         }
       });
     }
@@ -356,7 +372,7 @@ export class CustomSelectComponent implements ControlValueAccessor, AfterContent
   }
 
   setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
+    this.disabled.set(isDisabled);
   }
 
   // Escape closes the open list and returns focus to the trigger

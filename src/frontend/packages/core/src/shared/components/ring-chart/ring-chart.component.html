@@ -14,7 +14,7 @@
       <div class="total-label">{{ label() }}</div>
     </div>
     <div class="custom-legend">
-      @for (item of data; track item.name || $index; let i = $index) {
+      @for (item of data(); track item.name || $index; let i = $index) {
         <div class="legend-item" role="button" tabindex="0"
           (click)="onClick()(item)"
           (keydown.enter)="onClick()(item)"

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input} from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
 
 import { FileInputComponent } from '../../../../../core/src/shared/components/file-input/file-input.component';
@@ -19,7 +19,8 @@ interface GKEAuthForm {
   ]
 })
 export class KubernetesGKEAuthFormComponent implements IEndpointAuthComponent {
-  @Input() formGroup!: FormGroup<GKEAuthForm>; // strict: required @Input (IAuthForm contract), assigned by the auth-form host
+  // Set by the host that creates the form (IAuthForm contract)
+  readonly formGroup = input.required<FormGroup<GKEAuthForm>>();
 
   public getValues(values: EndpointAuthValues): EndpointAuthValues {
     return { gkeconfig: (values?.gkeconfig as string) ?? '' };

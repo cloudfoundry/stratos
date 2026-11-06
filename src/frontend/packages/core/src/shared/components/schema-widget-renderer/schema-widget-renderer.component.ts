@@ -93,7 +93,7 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     }
   }
 
-  /** Working copy of data — never mutate @Input() data directly. */
+  /** Working copy of data — never mutate the `data` input directly. */
   private readonly _working = signal<any>({});
 
   /**
@@ -143,7 +143,7 @@ export class SchemaWidgetRendererComponent implements OnInit, OnChanges {
     this._seedAndBuild();
   }
 
-  /** Re-seed the working copy from @Input() data and rebuild the field list. */
+  /** Re-seed the working copy from the `data` input and rebuild the field list. */
   private _seedAndBuild(): void {
     // m3: Task 10 reassigns [schema] on the same instance — clear branch state
     // so stale (possibly out-of-range) oneOf/anyOf selections don't carry over.

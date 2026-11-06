@@ -1,5 +1,5 @@
 import { HttpClient, HttpParams, HttpRequest, HttpResponse } from '@angular/common/http';
-import { Directive, forwardRef, Input, OnInit, inject } from '@angular/core';
+import { Directive, forwardRef, input, OnInit, inject } from '@angular/core';
 import { AbstractControl, AsyncValidator, NG_ASYNC_VALIDATORS, ValidationErrors } from '@angular/forms';
 import { Observable, of as observableOf, timer as observableTimer } from 'rxjs';
 import { catchError, filter, map, switchMap, take } from 'rxjs/operators';
@@ -47,56 +47,55 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
   private createAppState = inject(CreateAppStateService);
   private http = inject(HttpClient);
 
-
-  @Input() appApplicationNameUnique!: AppNameUniqueChecking;
-  @Input() appApplicationNameUniqueRequest!: UniqueValidatorRequestBuilder;
-  @Input() appApplicationNameUniqueValidator: NameTaken = (res: HttpResponse<any>) => res.body.totalResults > 0;
+  readonly appApplicationNameUnique = input<AppNameUniqueChecking>();
+  readonly appApplicationNameUniqueRequest = input<UniqueValidatorRequestBuilder>();
+  readonly appApplicationNameUniqueValidator = input<NameTaken>((res: HttpResponse<any>) => res.body.totalResults > 0);
   // Text app-form-field shows for a taken name. Without it the error is
   // { appNameTaken: true } and the field shows its stock "Invalid value".
-  @Input() appApplicationNameUniqueMessage?: string;
+  readonly appApplicationNameUniqueMessage = input<string>();
 
-  constructor() {
-    if (!this.appApplicationNameUnique) {
-      this.appApplicationNameUnique = new AppNameUniqueChecking();
-    }
+  // The state this validator reports to: the bound one, or the directive's
+  // own when none is bound (a directive built in code, as the edit
+  // application form does).
+  private readonly ownChecking = new AppNameUniqueChecking();
+  get checking(): AppNameUniqueChecking {
+    return this.appApplicationNameUnique() || this.ownChecking;
   }
 
   ngOnInit() {
-    if (!this.appApplicationNameUnique) {
-      this.appApplicationNameUnique = new AppNameUniqueChecking();
-    }
-    this.appApplicationNameUnique.set(false);
+    this.checking.set(false);
   }
 
   public validate(control: AbstractControl): Observable<ValidationErrors | null> {
     if (!control.dirty) {
       return observableOf(null);
     }
-    this.appApplicationNameUnique.set(true);
+    this.checking.set(true);
     return observableTimer(500).pipe(
       switchMap(() => this.getCheck(control.value)),
       map(appNameTaken => {
-        this.appApplicationNameUnique.set(false, appNameTaken);
+        this.checking.set(false, appNameTaken);
         if (!appNameTaken) {
           return null;
         }
-        const message = this.appApplicationNameUniqueMessage;
+        const message = this.appApplicationNameUniqueMessage();
         return { appNameTaken: message ? { message } : true };
       }),
       catchError(() => {
         // Fail open: CC enforces name uniqueness at create time, so a
         // failed convenience check must not wedge the form (an erroring
         // async validator leaves the control PENDING forever).
-        this.appApplicationNameUnique.set(false);
+        this.checking.set(false);
         return observableOf(null);
       }));
   }
 
   private getCheck(name: string): Observable<boolean> {
-    if (this.appApplicationNameUniqueRequest) {
+    const buildRequest = this.appApplicationNameUniqueRequest();
+    if (buildRequest) {
       return this.nameTaken(
-        this.appApplicationNameUniqueRequest(name),
-        this.appApplicationNameUniqueValidator
+        buildRequest(name),
+        this.appApplicationNameUniqueValidator()
       );
     }
     return this.getDefaultRequestData(name);
@@ -124,7 +123,7 @@ export class AppNameUniqueDirective implements AsyncValidator, OnInit {
           const request = this.getDefaultRequest(cfGuid, spaceGuid, name);
           return this.nameTaken(
             request,
-            this.appApplicationNameUniqueValidator
+            this.appApplicationNameUniqueValidator()
           );
         }
       )

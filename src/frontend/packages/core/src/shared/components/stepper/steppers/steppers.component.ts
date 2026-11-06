@@ -333,7 +333,7 @@ export class SteppersComponent implements OnInit, AfterContentInit, OnDestroy {
   goNextIfAllowed(): void {
     const index = this.currentIndex();
     const step = this.steps[index];
-    if (step && !step.hideNextButton && !step.busy && !step.effectiveBlocked && this.canGoNext(index)) {
+    if (step && !step.hideNextButton() && !step.busy && !step.effectiveBlocked && this.canGoNext(index)) {
       this.goNext();
     }
   }
