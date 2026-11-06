@@ -122,3 +122,41 @@ describe('CompactAppCardComponent status (#6021)', () => {
     expect(fixture.componentInstance.appStatus()).toBe(StratosStatus.TENTATIVE);
   });
 });
+
+describe('CompactAppCardComponent date (#4166)', () => {
+  let fixture: ComponentFixture<CompactAppCardComponent>;
+
+  beforeEach(() => {
+    const stats = {
+      stats: signal([{ state: 'RUNNING' }]),
+      lastFetched: signal<Date | null>(new Date()),
+      load: vi.fn(() => of(undefined)),
+    };
+    TestBed.configureTestingModule({
+      imports: [CompactAppCardComponent],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideRouter([]),
+        { provide: ActiveRouteCfOrgSpace, useValue: null },
+        { provide: AppStatsDataRegistry, useValue: { acquire: () => stats } },
+      ],
+    });
+    fixture = TestBed.createComponent(CompactAppCardComponent);
+    fixture.componentRef.setInput('endpoint', 'ep-1');
+    fixture.componentRef.setInput('app', {
+      // Mid-year, so the year shown is the same in every time zone.
+      metadata: { guid: 'app-1', updated_at: '2026-06-15T12:00:00Z' },
+      entity: { name: 'one', state: 'STARTED', instances: 1, package_state: 'STAGED' },
+    });
+  });
+
+  // The date is secondary text. It takes the theme's muted text color, which
+  // meets the contrast minimum, and not a color of the card's own.
+  it('shows the date in the muted text color', async () => {
+    fixture.componentRef.setInput('dateMode', 'subtle');
+    await fixture.whenStable();
+    const date: HTMLElement = fixture.nativeElement.querySelector('.compact-app-card__updated');
+    expect(date.textContent).toContain('2026');
+    expect(date.classList).toContain('text-content-muted');
+  });
+});
