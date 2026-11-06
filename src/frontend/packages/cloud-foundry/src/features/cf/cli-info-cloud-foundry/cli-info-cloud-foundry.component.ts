@@ -109,9 +109,9 @@ export class CliInfoCloudFoundryComponent implements OnInit {
     const { cfGuid, orgGuid, spaceGuid } = this.activeRouteCfOrgSpace;
     let backLink = `/cloud-foundry/${cfGuid}`;
     if (orgGuid) {
-      backLink = `${backLink}/${orgGuid}`;
+      backLink = `${backLink}/organizations/${orgGuid}`;
       if (spaceGuid) {
-        backLink = `${backLink}/${spaceGuid}`;
+        backLink = `${backLink}/spaces/${spaceGuid}`;
       }
     }
     return backLink;
