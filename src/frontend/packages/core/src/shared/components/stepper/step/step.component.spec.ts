@@ -32,53 +32,53 @@ describe('StepComponent', () => {
   });
 
   describe('legacy valid/skip path (no signalHandle)', () => {
-    it('valid getter returns the legacy boolean storage', () => {
-      component.valid = true;
-      expect(component.valid).toBe(true);
-      component.valid = false;
-      expect(component.valid).toBe(false);
+    it('effectiveValid returns the [valid] input', () => {
+      fixture.componentRef.setInput('valid', true);
+      expect(component.effectiveValid).toBe(true);
+      fixture.componentRef.setInput('valid', false);
+      expect(component.effectiveValid).toBe(false);
     });
 
-    it('skip getter returns the legacy boolean storage', () => {
-      component.skip = false;
-      expect(component.skip).toBe(false);
-      component.skip = true;
-      expect(component.skip).toBe(true);
+    it('effectiveSkip returns the [skip] input', () => {
+      fixture.componentRef.setInput('skip', false);
+      expect(component.effectiveSkip).toBe(false);
+      fixture.componentRef.setInput('skip', true);
+      expect(component.effectiveSkip).toBe(true);
     });
   });
 
   describe('signal-handle valid', () => {
-    it('valid getter delegates to signalHandle.valid() when set', () => {
+    it('effectiveValid delegates to signalHandle.valid() when set', () => {
       const validSig = signal(false);
       component.signalHandle = { valid: validSig.asReadonly() };
-      expect(component.valid).toBe(false);
+      expect(component.effectiveValid).toBe(false);
       validSig.set(true);
-      expect(component.valid).toBe(true);
+      expect(component.effectiveValid).toBe(true);
     });
 
     it('signal-handle valid takes precedence over the legacy boolean', () => {
-      component.valid = true;            // legacy storage
+      fixture.componentRef.setInput('valid', true);            // the [valid] input
       component.signalHandle = { valid: signal(false).asReadonly() };
-      expect(component.valid).toBe(false); // signal wins
+      expect(component.effectiveValid).toBe(false); // signal wins
     });
   });
 
   describe('signal-handle skipIf', () => {
-    it('skip getter delegates to signalHandle.skipIf() when set', () => {
+    it('effectiveSkip delegates to signalHandle.skipIf() when set', () => {
       const skipSig = signal(false);
       component.signalHandle = {
         valid: signal(true).asReadonly(),
         skipIf: skipSig.asReadonly(),
       };
-      expect(component.skip).toBe(false);
+      expect(component.effectiveSkip).toBe(false);
       skipSig.set(true);
-      expect(component.skip).toBe(true);
+      expect(component.effectiveSkip).toBe(true);
     });
 
     it('falls back to legacy skip when signalHandle has no skipIf', () => {
-      component.skip = true;
+      fixture.componentRef.setInput('skip', true);
       component.signalHandle = { valid: signal(true).asReadonly() }; // no skipIf
-      expect(component.skip).toBe(true);
+      expect(component.effectiveSkip).toBe(true);
     });
   });
 
@@ -177,71 +177,71 @@ describe('StepComponent', () => {
     const baseHandle = () => ({ valid: signal(true).asReadonly() });
 
     it('blocked: signal-handle wins over legacy storage', () => {
-      component.blocked = false;
+      fixture.componentRef.setInput('blocked', false);
       component.signalHandle = { ...baseHandle(), blocked: signal(true).asReadonly() };
-      expect(component.blocked).toBe(true);
+      expect(component.effectiveBlocked).toBe(true);
     });
 
     it('blocked: falls back to legacy when handle has no blocked', () => {
-      component.blocked = true;
+      fixture.componentRef.setInput('blocked', true);
       component.signalHandle = baseHandle();
-      expect(component.blocked).toBe(true);
+      expect(component.effectiveBlocked).toBe(true);
     });
 
     it('hidden: signal-handle wins over legacy storage', () => {
-      component.hidden = false;
+      fixture.componentRef.setInput('hidden', false);
       component.signalHandle = { ...baseHandle(), hidden: signal(true).asReadonly() };
-      expect(component.hidden).toBe(true);
+      expect(component.effectiveHidden).toBe(true);
     });
 
     it('canClose: signal-handle wins over legacy storage', () => {
-      component.canClose = true;
+      fixture.componentRef.setInput('canClose', true);
       component.signalHandle = { ...baseHandle(), canClose: signal(false).asReadonly() };
-      expect(component.canClose).toBe(false);
+      expect(component.effectiveCanClose).toBe(false);
     });
 
     it('disablePrevious: signal-handle wins over legacy storage', () => {
-      component.disablePrevious = false;
+      fixture.componentRef.setInput('disablePrevious', false);
       component.signalHandle = { ...baseHandle(), disablePrevious: signal(true).asReadonly() };
-      expect(component.disablePrevious).toBe(true);
+      expect(component.effectiveDisablePrevious).toBe(true);
     });
 
     it('destructiveStep: signal-handle wins over legacy storage', () => {
-      component.destructiveStep = false;
+      fixture.componentRef.setInput('destructiveStep', false);
       component.signalHandle = { ...baseHandle(), destructiveStep: signal(true).asReadonly() };
-      expect(component.destructiveStep).toBe(true);
+      expect(component.effectiveDestructiveStep).toBe(true);
     });
 
     it('hideCloseButton: signal-handle wins over legacy storage', () => {
-      component.hideCloseButton = false;
+      fixture.componentRef.setInput('hideCloseButton', false);
       component.signalHandle = { ...baseHandle(), hideCloseButton: signal(true).asReadonly() };
-      expect(component.hideCloseButton).toBe(true);
+      expect(component.effectiveHideCloseButton).toBe(true);
     });
 
     it('showBusy: signal-handle wins over legacy storage', () => {
-      component.showBusy = false;
+      fixture.componentRef.setInput('showBusy', false);
       component.signalHandle = { ...baseHandle(), showBusy: signal(true).asReadonly() };
-      expect(component.showBusy).toBe(true);
+      expect(component.effectiveShowBusy).toBe(true);
     });
 
     it('nextButtonText: signal-handle wins over legacy storage', () => {
-      component.nextButtonText = 'Next';
+      fixture.componentRef.setInput('nextButtonText', 'Next');
       component.signalHandle = { ...baseHandle(), nextButtonText: signal('Apply').asReadonly() };
-      expect(component.nextButtonText).toBe('Apply');
+      expect(component.effectiveNextButtonText).toBe('Apply');
     });
 
     it('finishButtonText: signal-handle wins, supports state-driven toggling', () => {
       const txt = signal('Apply');
       component.signalHandle = { ...baseHandle(), finishButtonText: txt.asReadonly() };
-      expect(component.finishButtonText).toBe('Apply');
+      expect(component.effectiveFinishButtonText).toBe('Apply');
       txt.set('Close');
-      expect(component.finishButtonText).toBe('Close');
+      expect(component.effectiveFinishButtonText).toBe('Close');
     });
 
     it('cancelButtonText: signal-handle wins over legacy storage', () => {
-      component.cancelButtonText = 'Cancel';
+      fixture.componentRef.setInput('cancelButtonText', 'Cancel');
       component.signalHandle = { ...baseHandle(), cancelButtonText: signal('Skip').asReadonly() };
-      expect(component.cancelButtonText).toBe('Skip');
+      expect(component.effectiveCancelButtonText).toBe('Skip');
     });
   });
 

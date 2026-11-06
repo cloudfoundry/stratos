@@ -21,6 +21,14 @@ describe('SteppersComponent', () => {
   let component: SteppersComponent;
   let fixture: ComponentFixture<SteppersComponent>;
 
+  // A step outside any template, with its inputs set the way a binding would.
+  const makeStep = (title: string, inputs: Record<string, unknown> = {}) => {
+    const ref = TestBed.createComponent(StepComponent).componentRef;
+    ref.instance.title = title;
+    Object.entries(inputs).forEach(([name, value]) => ref.setInput(name, value));
+    return ref;
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
 
@@ -57,24 +65,22 @@ describe('SteppersComponent', () => {
   // Regression: dev.56 shipped a template change that swapped @if-wrapped
   // steps for [hidden] bindings so the stepper's one-shot @ContentChildren
   // capture sees all steps at ngAfterContentInit. That exposed a second
-  // zoneless-CD bug: hiddenChange → filterSteps reassigns this.steps but
+  // zoneless-CD bug: a [hidden] change → filterSteps reassigns this.steps but
   // without markForCheck the template kept rendering the step list from
   // the initial filter. Routes step would never appear even after routes
   // loaded. This test pins the filter path to mark for check.
   it('re-filters visible steps and marks for check when a step unhides', () => {
-    const stepA = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'A' });
-    const stepB = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'B' });
-    const stepC = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'C' });
-    stepA.hidden = true;
-    stepB.hidden = false;
-    stepC.hidden = false;
+    const refA = makeStep('A', { hidden: true });
+    const stepA = refA.instance;
+    const stepB = makeStep('B', { hidden: false }).instance;
+    const stepC = makeStep('C', { hidden: false }).instance;
     (component as any).allSteps = [stepA, stepB, stepC];
     (component as any).filterSteps();
     expect(component.steps).toEqual([stepB, stepC]);
 
     const cdr = (component as any).cdr as ChangeDetectorRef;
     const markForCheck = vi.spyOn(cdr, 'markForCheck');
-    stepA.hidden = false;
+    refA.setInput('hidden', false);
     (component as any).filterSteps();
     expect(component.steps).toEqual([stepA, stepB, stepC]);
     expect(markForCheck).toHaveBeenCalled();
@@ -87,9 +93,8 @@ describe('SteppersComponent', () => {
   // bind-service wizard's Service Instance step rendered empty. Delivery
   // must happen after the activating render, with the routed enterData.
   it('delivers onEnter after the activating render, not synchronously', async () => {
-    const stepA = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'A' });
-    const stepB = Object.assign(TestBed.runInInjectionContext(() => new StepComponent()), { title: 'B' });
-    stepA.valid = true;
+    const stepA = makeStep('A', { valid: true }).instance;
+    const stepB = makeStep('B').instance;
     const entered: unknown[] = [];
     stepB.signalHandle = {
       valid: (() => true) as any,
@@ -349,8 +354,8 @@ describe('SteppersComponent — first step entry', () => {
 });
 
 // A step can be hidden through its signal handle instead of the legacy
-// [hidden] input. Only the input emits hiddenChange, so the stepper must
-// also follow the handle's hidden signal or its step list goes stale.
+// [hidden] input. The stepper must follow the handle's hidden signal as it
+// follows the input, or its step list goes stale.
 @Component({
   standalone: true,
   imports: [SteppersComponent, StepComponent],
@@ -1006,5 +1011,79 @@ describe('SteppersComponent — a step with no way back', () => {
     await hostFixture.whenStable();
     expect(q('button.steppers-header-inner')).toBeNull();
     expect(q('.steppers-header-text--complete')?.textContent).toContain('One');
+  });
+});
+
+// The legacy step inputs used to announce a change with an event
+// (validChange, canCloseChange, disablePreviousChange) so the stepper
+// re-rendered its buttons. They are signal inputs now, with no event: the
+// buttons must still follow a change made after the first render.
+@Component({
+  standalone: true,
+  imports: [SteppersComponent, StepComponent],
+  template: `
+    <app-steppers cancel="/somewhere" [cancelAction]="cancelAction">
+      <app-step title="One" [valid]="valid()" [canClose]="canClose()" [nextButtonText]="nextText()"></app-step>
+      <app-step title="Two" [disablePrevious]="disablePrevious()"></app-step>
+    </app-steppers>
+  `,
+})
+class LegacyInputsHostComponent {
+  valid = signal(false);
+  canClose = signal(true);
+  nextText = signal('Next');
+  disablePrevious = signal(false);
+  cancelAction = () => { };
+}
+
+describe('SteppersComponent — legacy step inputs', () => {
+  let hostFixture: ComponentFixture<LegacyInputsHostComponent>;
+  let host: LegacyInputsHostComponent;
+  const button = (id: string) => hostFixture.nativeElement.querySelector(`#stepper_${id}`) as HTMLButtonElement;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      imports: [LegacyInputsHostComponent, RouterTestingModule],
+      providers: [
+        provideZonelessChangeDetection(),
+        provideHttpClient(),
+        provideHttpClientTesting(),
+      ],
+    });
+    await TestBed.compileComponents();
+    hostFixture = TestBed.createComponent(LegacyInputsHostComponent);
+    host = hostFixture.componentInstance;
+    await hostFixture.whenStable();
+  });
+
+  it('enables Next when [valid] turns true, and shows a new [nextButtonText]', async () => {
+    expect(button('next').disabled).toBe(true);
+    expect(button('next').textContent).toContain('Next');
+
+    host.valid.set(true);
+    host.nextText.set('Continue');
+    await hostFixture.whenStable();
+    expect(button('next').disabled).toBe(false);
+    expect(button('next').textContent).toContain('Continue');
+  });
+
+  it('disables Cancel when [canClose] turns false', async () => {
+    expect(button('cancel').disabled).toBe(false);
+
+    host.canClose.set(false);
+    await hostFixture.whenStable();
+    expect(button('cancel').disabled).toBe(true);
+  });
+
+  it('disables Previous when [disablePrevious] turns true', async () => {
+    host.valid.set(true);
+    await hostFixture.whenStable();
+    button('next').click();
+    await hostFixture.whenStable();
+    expect(button('previous').disabled).toBe(false);
+
+    host.disablePrevious.set(true);
+    await hostFixture.whenStable();
+    expect(button('previous').disabled).toBe(true);
   });
 });
