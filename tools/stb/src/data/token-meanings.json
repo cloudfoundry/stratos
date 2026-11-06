@@ -20,5 +20,7 @@
 
   "--nav-bg":         { "label": "Navigation background", "description": "Background of the side navigation and app chrome." },
   "--nav-text":       { "label": "Navigation text", "description": "Primary text and icons on the navigation background." },
-  "--nav-text-muted": { "label": "Navigation muted text", "description": "Secondary / inactive labels in the navigation." }
+  "--nav-text-muted": { "label": "Navigation muted text", "description": "Secondary / inactive labels in the navigation." },
+
+  "--content-muted": { "label": "Muted content text", "description": "Secondary text in the page content: dates, captions, hints. Keep it at 4.5:1 or more against the content background." }
 }
