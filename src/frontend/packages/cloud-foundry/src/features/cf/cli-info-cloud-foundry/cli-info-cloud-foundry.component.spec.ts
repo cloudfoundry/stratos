@@ -130,7 +130,8 @@ describe('CliInfoCloudFoundryComponent', () => {
     expect(text).toContain('cf org "my org"');
     expect(text).toContain('cf org-users "my org"');
     expect(text).toContain('cf space "my space"');
-    expect(text).toContain('cf space-users "my space"');
+    // space-users takes the organization as well as the space.
+    expect(text).toContain('cf space-users "my org" "my space"');
   });
 
   it('waits for the organization and space to load before filling in their names', async () => {
